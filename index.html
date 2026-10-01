@@ -37,7 +37,7 @@
     </form>
     <div class="quick-words">
       <span>많이 찾을 만한 것</span>
-      <button type="button" data-search="AAC">AAC</button>
+      
       <button type="button" data-search="보강">보강 확인</button>
       <button type="button" data-search="메모">수업 메모</button>
       <button type="button" data-search="인지">인지게임</button>
@@ -73,7 +73,7 @@
       <h2>지금 바로 써볼 수 있는 것</h2>
       <p>준비 중인 건 아래로 내리고, 실제로 작동하는 것부터 앞에 뒀어요.</p>
     </div>
-    <span class="result-count" id="resultCount">4개</span>
+    <span class="result-count" id="resultCount">3개</span>
   </div>
 
   <div class="tool-grid" id="toolGrid">
@@ -88,16 +88,7 @@
       <a class="card-action" href="https://app-s8g5hg.v2.appdeploy.ai/" target="_blank" rel="noopener">바로 써보기 →</a>
     </article>
 
-    <article class="tool-card" data-tags="AAC 의사소통 아이와 가정연계 말하기 도와주세요 쉬고싶어요">
-      <div class="card-visual aac-preview">
-        <button type="button">물</button><button type="button">도와주세요</button><button type="button">쉬고 싶어요</button><button type="button">그만</button>
-      </div>
-      <div class="card-meta"><span class="badge ready">바로 사용</span><span>아이와 · 가정</span></div>
-      <h3>AAC 빠른판</h3>
-      <p>처음 자주 쓰는 말을 눌러 소리로 들려주는 간단한 의사소통판.</p>
-      <div class="card-info"><span>브라우저에서 바로</span><span>저장 안 함</span></div>
-      <button class="card-action open-tool" type="button" data-tool="aac">바로 써보기 →</button>
-    </article>
+    
 
     <article class="tool-card" data-tags="보강 센터업무 일정 수업시간 계획 실제 제공일시 스케줄">
       <div class="card-visual compare-preview">
@@ -142,8 +133,8 @@
     <div class="problem-grid">
       <button type="button" data-search="메모"><span>01</span><b>수업 끝났는데<br>기록이 밀릴 때</b><small>메모 · 일지 · 보호자 안내</small></button>
       <button type="button" data-search="보강"><span>02</span><b>보강했는지<br>헷갈릴 때</b><small>계획일시 · 실제 제공일시</small></button>
-      <button type="button" data-search="AAC"><span>03</span><b>AAC를<br>처음 시작할 때</b><small>자주 쓰는 말부터</small></button>
-      <button type="button" data-search="인지"><span>04</span><b>바로 할 인지활동이<br>필요할 때</b><small>찾기 · 채우기 · 기다리기</small></button>
+      
+      <button type="button" data-search="인지"><span>03</span><b>바로 할 인지활동이<br>필요할 때</b><small>찾기 · 채우기 · 기다리기</small></button>
     </div>
   </div>
 </section>
@@ -191,24 +182,7 @@
   </div>
 </footer>
 
-<dialog class="tool-dialog" id="aacDialog">
-  <button class="dialog-close" type="button" aria-label="닫기">×</button>
-  <div class="dialog-head"><span>AAC 빠른판</span><h2>눌러서 말해보기</h2><p>처음 자주 쓰는 말부터. 버튼을 누르면 기기에서 소리로 읽어줍니다.</p></div>
-  <div class="aac-board">
-    <button type="button" data-speak="엄마">엄마</button>
-    <button type="button" data-speak="아빠">아빠</button>
-    <button type="button" data-speak="물 주세요">물</button>
-    <button type="button" data-speak="화장실">화장실</button>
-    <button type="button" data-speak="도와주세요">도와주세요</button>
-    <button type="button" data-speak="쉬고 싶어요">쉬고 싶어요</button>
-    <button type="button" data-speak="싫어요">싫어요</button>
-    <button type="button" data-speak="좋아요">좋아요</button>
-    <button type="button" data-speak="더 주세요">더 주세요</button>
-    <button type="button" data-speak="그만할래요">그만할래요</button>
-  </div>
-  <div class="custom-speak"><input id="customSpeak" maxlength="30" placeholder="직접 문장을 입력해도 돼요"><button class="btn dark" id="speakCustom" type="button">말하기</button></div>
-  <p class="privacy-note">입력한 내용은 서버로 보내거나 저장하지 않습니다.</p>
-</dialog>
+
 
 <dialog class="tool-dialog" id="makeupDialog">
   <button class="dialog-close" type="button" aria-label="닫기">×</button>
