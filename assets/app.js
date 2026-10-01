@@ -3,8 +3,8 @@ const $=(s,root=document)=>root.querySelector(s);const $$=(s,root=document)=>[..
 const search=$('#toolSearch');const cards=$$('.tool-card');const count=$('#resultCount');const empty=$('#emptyState');
 function applySearch(raw=''){const q=raw.trim().toLowerCase();let visible=0;cards.forEach(card=>{const hay=(card.textContent+' '+(card.dataset.tags||'')).toLowerCase();const show=!q||hay.includes(q);card.hidden=!show;if(show)visible++});count.textContent=visible+'개';empty.hidden=visible!==0;document.querySelector('#made')?.scrollIntoView({behavior:'smooth',block:'start'})}
 $('#mainSearch')?.addEventListener('submit',e=>{e.preventDefault();applySearch(search.value)});
-$$('[data-search]').forEach(btn=>btn.addEventListener('click',()=>{search.value=btn.dataset.search;applySearch(btn.dataset.search)}));
-search?.addEventListener('input',()=>{if(!search.value)applySearch('')});
+$('[data-search]').forEach(btn=>btn.addEventListener('click',()=>{search.value=btn.dataset.search;$('.filters [data-search]').forEach(x=>x.classList.toggle('active',x===btn));applySearch(btn.dataset.search)}));
+search?.addEventListener('input',()=>{if(!search.value){$('.filters [data-search]').forEach((x,i)=>x.classList.toggle('active',i===0));applySearch('')}});
 
 const dialogs={makeup:$('#makeupDialog'),memo:$('#memoDialog')};
 $$('.open-tool').forEach(btn=>btn.addEventListener('click',()=>dialogs[btn.dataset.tool]?.showModal()));
