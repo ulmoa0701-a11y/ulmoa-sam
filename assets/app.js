@@ -1,7 +1,7 @@
 const $=(s,root=document)=>root.querySelector(s);const $$=(s,root=document)=>[...root.querySelectorAll(s)];
 
 const search=$('#toolSearch');const cards=$$('.tool-card');const count=$('#resultCount');const empty=$('#emptyState');
-function applySearch(raw=''){const q=raw.trim().toLowerCase();let visible=0;cards.forEach(card=>{const hay=(card.textContent+' '+(card.dataset.tags||'')).toLowerCase();const show=!q||hay.includes(q);card.hidden=!show;if(show)visible++});count.textContent=visible+'개';empty.hidden=visible!==0;document.querySelector('#try')?.scrollIntoView({behavior:'smooth',block:'start'})}
+function applySearch(raw=''){const q=raw.trim().toLowerCase();let visible=0;cards.forEach(card=>{const hay=(card.textContent+' '+(card.dataset.tags||'')).toLowerCase();const show=!q||hay.includes(q);card.hidden=!show;if(show)visible++});count.textContent=visible+'개';empty.hidden=visible!==0;document.querySelector('#made')?.scrollIntoView({behavior:'smooth',block:'start'})}
 $('#mainSearch')?.addEventListener('submit',e=>{e.preventDefault();applySearch(search.value)});
 $$('[data-search]').forEach(btn=>btn.addEventListener('click',()=>{search.value=btn.dataset.search;applySearch(btn.dataset.search)}));
 search?.addEventListener('input',()=>{if(!search.value)applySearch('')});
