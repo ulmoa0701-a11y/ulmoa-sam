@@ -365,3 +365,238 @@ img{max-width:100%}
   .about-quote p{font-size:23px}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+
+/* ── fantasy journey v2: bold, memorable, still simple ───────────── */
+.site-header{
+  background:rgba(18,35,27,.93);
+  border-bottom-color:rgba(255,255,255,.08);
+}
+.site-header .brand b{color:#fffdf6}
+.site-header .brand small{color:#aab8ad}
+.site-header .nav nav{color:#c9d3ca}
+.site-header .nav nav a:hover{color:#fff}
+.site-header .brand-mark{background:#dbe8d5;border-color:#a9bba4}
+.hero{
+  min-height:650px;
+  padding-top:86px;
+  padding-bottom:78px;
+  isolation:isolate;
+}
+.hero:before{
+  content:"";
+  position:absolute;
+  z-index:-3;
+  left:50%;
+  top:0;
+  bottom:0;
+  width:100vw;
+  transform:translateX(-50%);
+  border:0;
+  border-radius:0;
+  background:
+    radial-gradient(circle at 18% 16%,rgba(204,232,185,.18),transparent 23%),
+    radial-gradient(circle at 80% 28%,rgba(224,196,118,.16),transparent 19%),
+    radial-gradient(circle at 66% 88%,rgba(93,139,122,.18),transparent 24%),
+    linear-gradient(145deg,#15271f 0%,#213d31 47%,#172b25 100%);
+}
+.hero:after{
+  content:"";
+  position:absolute;
+  z-index:-2;
+  inset:0;
+  width:auto;height:auto;
+  border-radius:0;
+  background:
+    radial-gradient(circle at 8% 24%,rgba(255,242,180,.85) 0 1.2px,transparent 1.8px),
+    radial-gradient(circle at 24% 11%,rgba(255,255,255,.72) 0 1px,transparent 1.6px),
+    radial-gradient(circle at 43% 17%,rgba(212,232,201,.68) 0 1.3px,transparent 1.9px),
+    radial-gradient(circle at 61% 7%,rgba(255,238,175,.62) 0 1px,transparent 1.7px),
+    radial-gradient(circle at 76% 20%,rgba(255,255,255,.7) 0 1.2px,transparent 1.8px),
+    radial-gradient(circle at 92% 12%,rgba(210,231,200,.62) 0 1px,transparent 1.7px),
+    linear-gradient(112deg,transparent 0 46%,rgba(255,255,255,.025) 47%,transparent 48%);
+  box-shadow:none;
+  pointer-events:none;
+}
+.imagination-note{
+  color:#b8c4ba;
+  margin-bottom:18px;
+}
+.imagination-note span{color:#d9c783}
+.imagination-note b{color:#dce4dc}
+.hero .eyebrow{color:#d4ddd4}
+.hero .eyebrow i{
+  width:7px;height:7px;background:#e0c46e;
+  box-shadow:0 0 16px rgba(224,196,110,.8)
+}
+.hero h1{color:#fffdf7;text-shadow:0 3px 18px rgba(0,0,0,.12)}
+.hero h1 mark{color:#fff}
+.hero h1 mark:after{border-bottom-color:#e3cb79;box-shadow:0 7px 18px rgba(221,192,102,.13)}
+.hero .lead{color:#d0d9d0}
+.hero .search{
+  background:#fffef9;
+  border-color:rgba(255,255,255,.22);
+  box-shadow:0 16px 42px rgba(0,0,0,.16)
+}
+.hero .quick-words{color:#97aa9b}
+.hero .quick-words button{color:#d6dfd6;border-color:#61776a}
+.hero .quick-words button:hover{color:#fff;border-color:#d9c47a}
+.hero .story-thread{color:#91a295}
+.hero .story-thread span{color:#cfd9d0}
+.hero .story-thread i{color:#71877a}
+
+/* portal */
+.hero-feature{
+  position:relative;
+  padding:12px;
+  border:1px solid rgba(231,222,181,.46);
+  border-radius:190px 190px 24px 24px;
+  background:
+    linear-gradient(#fdfbf4,#fdfbf4) padding-box,
+    linear-gradient(160deg,rgba(239,217,142,.8),rgba(151,187,145,.45)) border-box;
+  box-shadow:
+    0 28px 90px rgba(0,0,0,.28),
+    0 0 42px rgba(223,202,125,.14);
+}
+.hero-feature:before{
+  content:"";
+  position:absolute;
+  inset:-13px -13px -12px;
+  z-index:-1;
+  border-radius:205px 205px 34px 34px;
+  border:1px solid rgba(220,205,145,.14);
+  box-shadow:0 0 48px rgba(218,196,117,.10);
+}
+.portal-label{
+  position:absolute;
+  z-index:4;
+  top:-18px;
+  left:50%;
+  transform:translateX(-50%);
+  white-space:nowrap;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:7px 11px;
+  border-radius:999px;
+  background:#f8f3df;
+  border:1px solid #dfd0a1;
+  color:#6c644c;
+  font-size:10.5px;
+  font-weight:750;
+  box-shadow:0 8px 24px rgba(0,0,0,.12)
+}
+.portal-label i{font-style:normal;color:#b4943d}
+.hero-feature .feature-shot{
+  border-radius:174px 174px 14px 14px;
+  border-color:#e3dfd0
+}
+.hero-feature .feature-body{
+  position:relative;
+  background:#fffdf8;
+  border-radius:0 0 14px 14px;
+  padding:19px 12px 10px
+}
+
+/* bridge from fantasy world to useful world */
+.trust-strip{
+  position:relative;
+  background:#faf7ef;
+  padding-top:29px
+}
+.trust-title{
+  position:absolute;
+  left:50%;top:0;
+  transform:translate(-50%,-50%);
+  background:#f8f3df;
+  color:#667062;
+  border:1px solid #ddd5bd;
+  padding:7px 12px;
+  border-radius:999px;
+  font-size:10.5px;
+  font-weight:750;
+  letter-spacing:.02em
+}
+.trust-grid div{padding-top:18px;padding-bottom:22px}
+
+/* story chapters */
+.section-kicker{
+  position:relative;
+  padding-left:22px;
+}
+.section-kicker:before{
+  content:"✦";
+  position:absolute;
+  left:0;
+  top:-1px;
+  color:#c3a65a;
+}
+.try-section,.more-section{position:relative}
+.try-section:before,.more-section:before{
+  content:"";
+  position:absolute;
+  left:-28px;
+  top:94px;
+  bottom:42px;
+  width:1px;
+  background:linear-gradient(#c7b77e,rgba(151,172,145,.2));
+  opacity:.55
+}
+.try-section:after,.more-section:after{
+  content:"";
+  position:absolute;
+  left:-32px;
+  top:91px;
+  width:9px;height:9px;
+  border-radius:50%;
+  background:#d4bd72;
+  box-shadow:0 0 0 5px rgba(212,189,114,.11)
+}
+.problem-section{
+  background:
+    radial-gradient(circle at 88% 18%,rgba(234,213,147,.14),transparent 20%),
+    #e9efe6
+}
+.problem-grid button{
+  position:relative;
+  overflow:hidden
+}
+.problem-grid button:after{
+  content:"";
+  position:absolute;
+  width:54px;height:54px;
+  right:-18px;top:-18px;
+  border:1px solid rgba(112,141,105,.12);
+  border-radius:50%
+}
+.work-grid .dream-card{
+  background:
+    radial-gradient(circle at 85% 16%,rgba(229,207,135,.18),transparent 22%),
+    #fbfaf4
+}
+.request-section{
+  background:
+    radial-gradient(circle at 84% 20%,rgba(232,215,151,.12),transparent 18%),
+    radial-gradient(circle at 10% 78%,rgba(127,164,145,.12),transparent 20%),
+    linear-gradient(140deg,#264632,#1e382b)
+}
+.request-section .section-kicker:before{color:#e0c978}
+
+@media(max-width:900px){
+  .hero{min-height:auto;padding-top:64px}
+  .hero-feature{max-width:640px;border-radius:160px 160px 22px 22px}
+  .hero-feature .feature-shot{border-radius:145px 145px 13px 13px}
+  .try-section:before,.try-section:after,.more-section:before,.more-section:after{display:none}
+}
+@media(max-width:620px){
+  .site-header .nav nav a:nth-child(2),.site-header .nav nav a:nth-child(4){display:none}
+  .hero{padding-top:48px;padding-bottom:58px}
+  .hero h1{font-size:44px}
+  .hero-feature{
+    border-radius:110px 110px 20px 20px;
+    margin-top:14px
+  }
+  .hero-feature .feature-shot{border-radius:98px 98px 12px 12px}
+  .portal-label{font-size:9.5px;top:-15px}
+  .trust-strip{padding-top:28px}
+}
