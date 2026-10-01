@@ -195,3 +195,181 @@ body{
   .story-thread span{padding:5px 8px}
   .maker-strip:before{display:none}
 }
+
+
+/* ── fantastical layer: imagination becoming useful ───────── */
+.hero{
+  overflow:visible;
+  isolation:isolate;
+}
+.dream-sky{
+  position:absolute;
+  inset:-35px -60px 0;
+  z-index:-1;
+  pointer-events:none;
+  overflow:hidden;
+}
+.dream-sky:before{
+  content:"";
+  position:absolute;
+  width:540px;height:540px;
+  right:-80px;top:-120px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 35% 36%,rgba(255,247,207,.72) 0 7%,rgba(255,247,207,.18) 26%,transparent 57%),
+    radial-gradient(circle at 68% 54%,rgba(207,229,235,.54),transparent 45%);
+  filter:blur(2px);
+}
+.dream-sky:after{
+  content:"";
+  position:absolute;
+  width:430px;height:300px;
+  left:4%;bottom:20px;
+  border-radius:50%;
+  background:radial-gradient(ellipse,rgba(213,230,197,.34),transparent 68%);
+  filter:blur(12px);
+}
+.dream-star{
+  position:absolute;
+  width:7px;height:7px;
+  transform:rotate(45deg);
+  border:1px solid rgba(180,156,83,.72);
+  background:rgba(255,250,224,.8);
+  box-shadow:0 0 16px rgba(213,185,101,.32);
+}
+.dream-star:after{
+  content:"";
+  position:absolute;
+  width:2px;height:2px;
+  border-radius:50%;
+  background:#d6bb72;
+  left:12px;top:-7px;
+  box-shadow:-18px 18px 0 rgba(141,174,132,.58),28px 12px 0 rgba(197,177,119,.5);
+}
+.dream-star.s1{left:4%;top:22%;transform:rotate(45deg) scale(.8)}
+.dream-star.s2{left:53%;top:8%;transform:rotate(45deg) scale(1.05)}
+.dream-star.s3{right:7%;top:56%;transform:rotate(45deg) scale(.7)}
+.dream-orb{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(.2px);
+  opacity:.48;
+}
+.dream-orb.o1{
+  width:13px;height:13px;
+  left:47%;top:31%;
+  background:#d9e8cf;
+  box-shadow:0 0 22px rgba(119,161,102,.28);
+}
+.dream-orb.o2{
+  width:8px;height:8px;
+  right:24%;top:15%;
+  background:#f2ddb0;
+  box-shadow:0 0 18px rgba(197,162,91,.32);
+}
+.dream-line{
+  position:absolute;
+  width:165px;height:90px;
+  right:5%;top:3%;
+  border-top:1px solid rgba(116,145,107,.22);
+  border-radius:50%;
+  transform:rotate(9deg);
+}
+.dream-line:before,.dream-line:after{
+  content:"";
+  position:absolute;
+  width:4px;height:4px;
+  border-radius:50%;
+  background:rgba(143,172,129,.55);
+}
+.dream-line:before{left:18px;top:-3px}
+.dream-line:after{right:22px;top:7px}
+
+.hero-feature{
+  box-shadow:
+    0 26px 80px rgba(59,76,53,.10),
+    0 0 0 1px rgba(255,255,255,.58) inset,
+    0 0 45px rgba(231,239,214,.32);
+}
+.hero-feature:after{
+  content:"";
+  position:absolute;
+  width:88px;height:88px;
+  right:-24px;bottom:-26px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 48% 48%,rgba(255,248,220,.85) 0 8%,rgba(255,242,188,.30) 28%,transparent 66%);
+  filter:blur(.5px);
+  pointer-events:none;
+}
+.feature-shot{
+  background:
+    linear-gradient(180deg,rgba(230,239,244,.44),rgba(227,237,217,.22)),
+    #dce7d5;
+}
+.story-thread{
+  position:relative;
+}
+.story-thread:after{
+  content:"작은 생각이 현실로 나오는 길";
+  position:absolute;
+  top:calc(100% + 5px);
+  left:4px;
+  font-size:9.5px;
+  color:#a5a08f;
+  letter-spacing:.01em;
+}
+.try-section{
+  position:relative;
+}
+.try-section:before{
+  content:"";
+  position:absolute;
+  top:28px;right:2%;
+  width:110px;height:60px;
+  opacity:.36;
+  background:
+    radial-gradient(circle at 16% 30%,#c8ad62 0 2px,transparent 3px),
+    radial-gradient(circle at 52% 72%,#9db98d 0 2px,transparent 3px),
+    radial-gradient(circle at 86% 28%,#c8ad62 0 1.5px,transparent 2.5px);
+  pointer-events:none;
+}
+.section-head h2{
+  text-wrap:balance;
+}
+.card-visual{
+  position:relative;
+}
+.card-visual:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(125deg,rgba(255,255,255,.20),transparent 28%,transparent 72%,rgba(255,249,222,.18));
+}
+.work-grid article:nth-child(1){transform:rotate(-.35deg)}
+.work-grid article:nth-child(2){transform:rotate(.25deg)}
+.work-grid article:nth-child(3){transform:rotate(-.18deg)}
+.request-section{
+  background:
+    radial-gradient(circle at 82% 24%,rgba(227,236,194,.10),transparent 18%),
+    radial-gradient(circle at 7% 78%,rgba(207,224,230,.08),transparent 20%),
+    var(--green-dark);
+}
+@keyframes dreamFloat{
+  0%,100%{transform:translateY(0) rotate(45deg)}
+  50%{transform:translateY(-7px) rotate(45deg)}
+}
+.dream-star.s1,.dream-star.s3{animation:dreamFloat 5.8s ease-in-out infinite}
+.dream-star.s2{animation:dreamFloat 7s ease-in-out infinite reverse}
+@media(prefers-reduced-motion:reduce){
+  .dream-star{animation:none!important}
+}
+@media(max-width:620px){
+  .dream-sky{inset:-10px -20px 0}
+  .dream-line{display:none}
+  .dream-star.s1{left:2%;top:18%}
+  .dream-star.s2{left:auto;right:6%;top:5%}
+  .dream-star.s3{display:none}
+  .story-thread:after{display:none}
+}
