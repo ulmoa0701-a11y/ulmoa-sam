@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>울모아쌤 — 생각난 걸 만들어보는 곳</title>
-<meta name="description" content="게임도, 도구도, 이름 없는 실험도. 생각난 걸 직접 만들어보고 꺼내놓는 울모아쌤의 창작공간입니다.">
+<title>울모아쌤 — 상상한 걸 만들어봅니다</title>
+<meta name="description" content="게임도, 도구도, 자료도. 재미있거나 필요하면 직접 만들어보는 울모아쌤의 창작공간입니다.">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,164 +16,139 @@
 <body>
 <header class="site-header">
   <div class="wrap nav">
-    <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"><i></i></span><b>울모아쌤</b></a>
+    <a class="brand" href="#top"><span class="brand-mark"><i></i></span><b>울모아쌤</b></a>
     <nav>
       <a href="#made">만든 것</a>
       <a href="#growing">만드는 중</a>
-      <a href="#request">한마디</a>
-      <a href="about/">소개</a>
+      <a href="about/">만든 사람</a>
+      <a class="request-btn" href="#request">앱 요청하기</a>
     </nav>
   </div>
 </header>
 
 <main id="top">
-<section class="hero">
-  <div class="wrap hero-inner">
-    <div class="hero-copy">
-      <p class="overline">생각난 걸 만들어보는 작은 창작공간</p>
-      <h1>작은 생각 하나가<br><em>반짝이면,</em></h1>
-      <p class="hero-answer">그냥 만들어봅니다.</p>
-      <p class="hero-sub">게임도, 도구도, 해보고 싶은 건 뭐든.</p>
-      <div class="hero-actions">
-        <a class="btn primary" href="#made">구경하러 가기</a>
-        <a class="btn soft" href="#growing">요즘 만드는 것</a>
-      </div>
-    </div>
-
-    <div class="storybook-scene" aria-hidden="true">
-      <div class="sky-glow"></div>
-      <i class="twinkle t1"></i><i class="twinkle t2"></i><i class="twinkle t3"></i><i class="twinkle t4"></i>
-      <div class="idea-light"><span>✦</span><i></i></div>
-      <div class="cloud c1"></div><div class="cloud c2"></div>
-      <div class="hill far"></div><div class="hill near"></div>
-      <div class="path"></div>
-      <div class="tiny-workshop">
-        <span class="roof"></span><span class="house"></span><i class="window w1"></i><i class="window w2"></i><b class="chimney"></b>
-      </div>
-      <div class="scene-note">상상 → 만들어봄 → 또 다른 상상</div>
-    </div>
+<section class="intro wrap">
+  <div class="intro-copy">
+    <span class="intro-kicker">ULMOA CREATIVE LAB</span>
+    <h1>상상한 걸,<br><em>만들어봅니다.</em></h1>
+    <p>게임도, 도구도, 자료도. 재미있거나 필요하면 일단 만들어봐요.</p>
   </div>
+  <form class="finder" id="mainSearch">
+    <span>⌕</span>
+    <input id="toolSearch" type="search" placeholder="뭐가 필요하세요? 예: 인지게임, 보강, 메모" autocomplete="off" aria-label="도구 찾기">
+    <button type="submit">찾기</button>
+  </form>
 </section>
 
-<section class="made wrap" id="made">
-  <div class="section-head">
-    <div>
-      <span class="eyebrow">오늘 펼쳐둔 것들</span>
-      <h2>바로 써볼 수 있어요.</h2>
-    </div>
+<section class="filters wrap" aria-label="빠른 분류">
+  <button type="button" data-search="">전체</button>
+  <button type="button" data-search="인지">생각놀이</button>
+  <button type="button" data-search="아이와">아이와</button>
+  <button type="button" data-search="선생님">선생님</button>
+  <button type="button" data-search="센터업무">센터</button>
+</section>
+
+<section class="gallery wrap" id="made">
+  <div class="gallery-head">
+    <div><span>NOW OPEN</span><h2>지금 바로 써볼 수 있어요.</h2></div>
     <span class="result-count" id="resultCount">3개</span>
   </div>
 
-  <form class="finder" id="mainSearch">
-    <span>⌕</span>
-    <input id="toolSearch" type="search" placeholder="인지게임 · 보강 · 메모..." autocomplete="off" aria-label="도구 찾기">
-    <button type="submit">찾기</button>
-  </form>
-  <div class="quick-words">
-    <button type="button" data-search="인지">인지게임</button>
-    <button type="button" data-search="보강">보강 확인</button>
-    <button type="button" data-search="메모">수업 메모</button>
-  </div>
-
   <div class="tool-grid" id="toolGrid">
-    <article class="tool-card game-card" data-tags="인지 아이와 게임 차근차근 같은것찾기 공간채우기 반응억제">
-      <div class="card-scene game-scene">
+    <article class="tool-card" data-tags="인지 아이와 생각놀이 게임 차근차근 유아 초기인지">
+      <a class="scene scene-game" href="https://app-s8g5hg.v2.appdeploy.ai/" target="_blank" rel="noopener">
         <img src="https://appdeployai-v2-qa-screenshots.s3.us-east-1.amazonaws.com/app-s8g5hg/1789199468624/web.png" alt="차근차근 놀이터 실제 화면">
-        <span class="float-star fs1">✦</span><span class="float-star fs2">·</span>
-      </div>
-      <div class="card-body">
-        <span class="card-kicker">아이와</span>
+        <span class="badge">생각놀이</span>
+        <span class="scene-glow g1"></span><span class="scene-glow g2"></span>
+      </a>
+      <div class="card-copy">
+        <div class="card-top"><span>바로 사용</span><time>2026.10.01</time></div>
         <h3>차근차근 놀이터</h3>
-        <p>찾고, 기다리고, 생각하는 놀이.</p>
-        <div class="tags"><span>무료</span><span>로그인 없음</span><span>폰·PC</span></div>
+        <p>찾고 · 기다리고 · 생각하는 유아/초기인지 놀이</p>
         <a class="card-action" href="https://app-s8g5hg.v2.appdeploy.ai/" target="_blank" rel="noopener">바로 놀러가기 <b>→</b></a>
       </div>
     </article>
 
-    <article class="tool-card time-card" data-tags="보강 센터업무 일정 수업시간 계획 실제 제공일시 스케줄">
-      <div class="card-scene time-scene">
-        <span class="sun-disc"></span>
-        <div class="time-orbit"><span>16:00</span><i></i><b>17:00</b></div>
-        <span class="tiny-spark">✦</span>
+    <article class="tool-card" data-tags="보강 센터업무 일정 계획 실제 수업시간">
+      <div class="scene scene-time">
+        <span class="badge">센터</span>
+        <div class="night-orb"></div>
+        <div class="time-chip a"><small>계획</small><b>16:00</b></div>
+        <div class="time-path"></div>
+        <div class="time-chip b"><small>실제</small><b>17:00</b></div>
+        <i class="star s1">✦</i><i class="star s2">✦</i>
       </div>
-      <div class="card-body">
-        <span class="card-kicker">센터업무</span>
+      <div class="card-copy">
+        <div class="card-top"><span>바로 사용</span><time>2026.10.01</time></div>
         <h3>보강 확인</h3>
-        <p>두 시간을 넣고 바로 비교.</p>
-        <div class="tags"><span>저장 안 함</span><span>울모아 기준</span></div>
+        <p>계획과 실제 시간이 다른지 한 번에 확인</p>
         <button class="card-action open-tool" type="button" data-tool="makeup">바로 확인하기 <b>→</b></button>
       </div>
     </article>
 
-    <article class="tool-card memo-card" data-tags="수업 메모 기록 일지 보호자상담 선생님 정리">
-      <div class="card-scene memo-scene">
-        <span class="memo-paper mp1"><i></i></span>
-        <span class="memo-paper mp2"><i></i></span>
-        <span class="memo-paper mp3"><i></i></span>
-        <span class="gold-pencil"></span>
-        <span class="tiny-spark">✦</span>
+    <article class="tool-card" data-tags="수업 메모 기록 일지 선생님">
+      <div class="scene scene-memo">
+        <span class="badge">선생님</span>
+        <span class="paper p1"></span><span class="paper p2"></span><span class="paper p3"></span>
+        <span class="gold-line"></span>
+        <i class="star s3">✦</i>
       </div>
-      <div class="card-body">
-        <span class="card-kicker">선생님</span>
+      <div class="card-copy">
+        <div class="card-top"><span>바로 사용</span><time>2026.10.01</time></div>
         <h3>30초 수업메모</h3>
-        <p>기억날 때 세 가지만.</p>
-        <div class="tags"><span>AI 전송 없음</span><span>브라우저에서만</span></div>
+        <p>기억날 때 활동 · 반응 · 지원만 빠르게</p>
         <button class="card-action open-tool" type="button" data-tool="memo">메모 시작하기 <b>→</b></button>
+      </div>
+    </article>
+
+    <article class="tool-card future-card" data-tags="실험 상상 만드는중">
+      <div class="scene scene-future">
+        <span class="badge muted">상상중</span>
+        <div class="moon"></div>
+        <span class="hill h1"></span><span class="hill h2"></span>
+        <span class="tiny-light"></span>
+        <i class="star f1">✦</i><i class="star f2">·</i>
+      </div>
+      <div class="card-copy">
+        <div class="card-top"><span>아직 만드는 중</span><time>?</time></div>
+        <h3>아직 이름 없는 것</h3>
+        <p>게임일 수도, 자료일 수도, 전혀 다른 무언가일 수도.</p>
+        <a class="card-action" href="#growing">구경하기 <b>→</b></a>
       </div>
     </article>
   </div>
 
   <div class="empty-state" id="emptyState" hidden>
-    <b>아직 그건 없어요.</b>
-    <p>떠오른 걸 남겨주면 만들어볼게요.</p>
-    <a class="btn dark" href="#request">한마디 남기기</a>
-  </div>
-
-  <div class="promise">
-    <span>무료로 시작</span><i></i><span>회원가입 없이</span><i></i><span>민감정보는 최소로</span>
+    <b>아직 딱 맞는 게 없어요.</b>
+    <p>필요한 걸 남겨주면 다음에 만들어볼게요.</p>
+    <a href="#request">앱 요청하기 →</a>
   </div>
 </section>
 
 <section class="growing" id="growing">
-  <div class="wrap growing-inner">
-    <div class="growing-copy">
-      <span>아직 자라는 생각들</span>
-      <h2>완성되기 전도<br>재밌으니까.</h2>
-      <p>만들다가 바뀌기도 하고,<br>전혀 다른 게 되기도 해요.</p>
+  <div class="wrap growing-grid">
+    <div class="growing-title">
+      <span>IN PROGRESS</span>
+      <h2>요즘 만드는 중.</h2>
     </div>
-    <div class="seed-field">
-      <article class="seed-card">
-        <div class="seed-icon"><i></i></div>
-        <span>다듬는 중</span>
-        <h3>보강 한눈에 보기</h3>
-        <p>바뀐 회기만 쏙.</p>
-      </article>
-      <article class="seed-card">
-        <div class="seed-icon two"><i></i></div>
-        <span>테스트 중</span>
-        <h3>현장 메모 → 일지</h3>
-        <p>메모가 기록으로.</p>
-      </article>
-      <article class="seed-card mystery">
-        <div class="seed-icon three"><i></i></div>
-        <span>상상중</span>
-        <h3>아직 이름 없음</h3>
-        <p>뭐가 될지는 아직 몰라요.</p>
-      </article>
+    <div class="progress-list">
+      <article><span>72%</span><div><b>보강·변경 회기 한눈에 보기</b><small>전체 일정에서 바뀐 회기만 찾기</small></div></article>
+      <article><span>58%</span><div><b>현장 메모 → 일지 정리</b><small>짧게 적고, 나중에 덜 힘들게</small></div></article>
+      <article><span>18%</span><div><b>아직 이름 없음</b><small>그냥 궁금해서 만져보는 중</small></div></article>
     </div>
   </div>
 </section>
 
 <section class="request" id="request">
-  <div class="wrap request-inner">
+  <div class="wrap request-grid">
     <div>
-      <span>다음 생각은 어디서 올지 모르니까</span>
-      <h2>“이런 거 있으면 좋겠다.”</h2>
-      <p>한마디만 남겨도 돼요.</p>
+      <span>REQUEST</span>
+      <h2>이런 거 있으면 좋겠다.</h2>
+      <p>불편한 점이나 만들어줬으면 하는 걸 한 줄만 남겨도 돼요.</p>
     </div>
     <div class="request-actions">
-      <a class="btn light big" href="http://pf.kakao.com/_wEGJn" target="_blank" rel="noopener">카카오로 남기기</a>
-      <a class="text-link" href="mailto:ulmoa0701@gmail.com?subject=%EC%9A%B8%EB%AA%A8%EC%95%84%EC%8C%A4%20%EC%95%84%EC%9D%B4%EB%94%94%EC%96%B4">이메일로 남기기 →</a>
+      <a class="request-main" href="http://pf.kakao.com/_wEGJn" target="_blank" rel="noopener">앱 요청하기</a>
+      <a href="mailto:ulmoa0701@gmail.com?subject=%EC%9A%B8%EB%AA%A8%EC%95%84%EC%8C%A4%20%EC%95%B1%20%EC%9A%94%EC%B2%AD">이메일로 남기기 →</a>
     </div>
   </div>
 </section>
