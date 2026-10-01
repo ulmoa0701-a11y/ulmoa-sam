@@ -6,7 +6,7 @@ $('#mainSearch')?.addEventListener('submit',e=>{e.preventDefault();applySearch(s
 $$('[data-search]').forEach(btn=>btn.addEventListener('click',()=>{search.value=btn.dataset.search;applySearch(btn.dataset.search)}));
 search?.addEventListener('input',()=>{if(!search.value)applySearch('')});
 
-const dialogs={aac:$('#aacDialog'),makeup:$('#makeupDialog'),memo:$('#memoDialog')};
+const dialogs={makeup:$('#makeupDialog'),memo:$('#memoDialog')};
 $$('.open-tool').forEach(btn=>btn.addEventListener('click',()=>dialogs[btn.dataset.tool]?.showModal()));
 $$('.dialog-close').forEach(btn=>btn.addEventListener('click',()=>btn.closest('dialog')?.close()));
 $$('dialog').forEach(d=>d.addEventListener('click',e=>{const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close()}));
@@ -14,10 +14,6 @@ $$('dialog').forEach(d=>d.addEventListener('click',e=>{const r=d.getBoundingClie
 const toast=$('#toast');let toastTimer;
 function showToast(msg){toast.textContent=msg;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),1800)}
 
-function speak(text){if(!('speechSynthesis'in window)){showToast('이 기기에서는 음성 재생을 지원하지 않아요');return}window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='ko-KR';u.rate=.88;window.speechSynthesis.speak(u)}
-$$('[data-speak]').forEach(btn=>btn.addEventListener('click',()=>speak(btn.dataset.speak)));
-$('#speakCustom')?.addEventListener('click',()=>{const v=$('#customSpeak').value.trim();if(!v){showToast('말할 문장을 먼저 적어주세요');return}speak(v)});
-$('#customSpeak')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#speakCustom').click()}});
 
 $('#compareTime')?.addEventListener('click',()=>{const p=$('#plannedAt').value;const a=$('#actualAt').value;const out=$('#compareResult');if(!p||!a){showToast('계획일시와 실제 제공일시를 모두 넣어주세요');return}const same=p===a;out.hidden=false;out.classList.toggle('changed',!same);if(same){out.innerHTML='<b>계획일시와 동일해요.</b><span>입력한 두 일시가 같습니다.</span>'}else{const pd=new Date(p),ad=new Date(a);const sameDay=pd.toDateString()===ad.toDateString();const detail=sameDay?'같은 날이지만 시간이 달라요.':'날짜가 달라요.';out.innerHTML='<b>보강·변경 회기 후보예요.</b><span>'+detail+' 울모아 기준에서는 계획일시와 실제 제공일시가 다르면 확인 대상입니다.</span>'}});
 
