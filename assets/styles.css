@@ -373,3 +373,31 @@ body{
   .dream-star.s3{display:none}
   .story-thread:after{display:none}
 }
+
+
+/* ── creative playground accents ───────────────────────── */
+.work-grid .dream-card{
+  background:
+    radial-gradient(circle at 82% 18%,rgba(245,229,171,.32),transparent 18%),
+    radial-gradient(circle at 15% 82%,rgba(205,226,197,.34),transparent 22%),
+    #fffdfa;
+  border-style:dashed;
+}
+.work-grid .dream-card:before{
+  content:"무엇이 될지는 아직 모름";
+  position:absolute;
+  right:14px;
+  top:14px;
+  font-size:9.5px;
+  color:#9e9278;
+  transform:rotate(1.5deg);
+}
+.work-grid .dream-card h3:after{
+  content:" ✦";
+  color:#bfa85f;
+  font-size:14px;
+}
+.story-thread span:last-child{
+  background:linear-gradient(135deg,#fffdf8,#f3f7ec);
+  border-color:#dce5d5;
+}
