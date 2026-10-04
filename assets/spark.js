@@ -1,11 +1,12 @@
-(()=>{
-  const btn=document.querySelector('#shuffleBtn');
+﻿(()=>{
+  const btn=document.querySelector('#randomSpark');
   if(!btn)return;
-  const targets=[...document.querySelectorAll('[data-random-target]')];
-  btn.addEventListener('click',()=>{
-    if(!targets.length)return;
-    const pick=targets[Math.floor(Math.random()*targets.length)];
-    if(pick.matches('a')){pick.click();return;}
-    pick.click();
-  });
+  const picks=[
+    ()=>document.querySelector('.planet-game')?.click(),
+    ()=>document.querySelector('.clock-orbit')?.click(),
+    ()=>document.querySelector('.paper-memo')?.click(),
+    ()=>document.querySelector('#musicPrototype')?.scrollIntoView({behavior:'smooth',block:'center'}),
+    ()=>document.querySelector('.thought-bubble')?.click()
+  ];
+  btn.addEventListener('click',()=>picks[Math.floor(Math.random()*picks.length)]());
 })();
