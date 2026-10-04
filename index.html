@@ -1,12 +1,12 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="favicon.ico">
 <meta name="robots" content="noindex,nofollow">
-<title>울모아쌤 — 상상하다가 바로 만들어봄</title>
-<meta name="description" content="게임, 음악, 수업도구, 이상한 실험까지. 생각나면 일단 만들어보는 울모아쌤의 개인 창작공간입니다.">
+<title>울모아쌤 — 현장에서 떠오른 걸 만들어봅니다</title>
+<meta name="description" content="인지치료·특수교육 현장에서 떠오른 게임, 도구, 수업자료와 그냥 궁금해서 만든 것들을 모아두는 개인 창작공간입니다.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
@@ -27,12 +27,13 @@
 <main id="top">
 <section class="free-hero">
   <div class="hero-copy-v4">
-    <span class="mini-label">상상한 걸, 만들어봅니다</span>
-    <h1>머릿속에<br><em>탭이 너무 많음.</em></h1>
-    <p>게임 만들다가 악보 만지고, 수업도구 고치다가 갑자기 다른 거 시작함.<br>여긴 그걸 굳이 정리하지 않고 그냥 꺼내놓는 곳.</p>
+    <span class="mini-label">인지치료 · 특수교육 현장에서 떠오른 것부터</span>
+    <h1>수업하다 생각난 것,<br><em>그냥 궁금한 것.</em></h1>
+    <p>필요하면 만들고, 재밌으면 더 만져봅니다.<br>인지·주의집중·사회성 활동부터 음악놀이, 작은 웹도구까지.</p>
     <div class="mood-chips" aria-label="작업 성향">
-      <span>⚡ 일단 해봄</span><span>↗ 옆길로 잘 샘</span><span>✦ 갑자기 꽂힘</span><span>↺ 고치다 새로 만듦</span>
+      <span>인지 · 주의집중</span><span>사회성 · 의사소통</span><span>음악활동</span><span>선생님 도구</span>
     </div>
+    <a class="maker-mini" href="about/">인지치료사 · 특수교육 배경 <b>만든 사람 보기 ↗</b></a>
   </div>
 
   <div class="spark-field" aria-label="상상 지도">
@@ -65,8 +66,8 @@
 
     <a class="spark-object thought-bubble" href="request/"><span>💭</span><b>이런 것도<br>만들까?</b><small>생각 던지기</small></a>
 
-    <span class="scribble sc1">다른 거 하다가 시작함 ↗</span>
-    <span class="scribble sc2">이거 재밌겠는데?</span>
+    <span class="scribble sc1">수업하다 생각남 ↗</span>
+    <span class="scribble sc2">이거 있으면 편하겠다</span>
     <span class="scribble sc3">아직 이름 없음</span>
     <span class="tiny-star t1">✦</span><span class="tiny-star t2">✷</span><span class="tiny-star t3">•</span>
   </div>
@@ -110,7 +111,7 @@
 </section>
 
 <section class="chaos-zone" id="growing">
-  <div class="chaos-copy"><span>TOO MANY TABS OPEN</span><h2>동시에 벌여둔 것들</h2><p>한 가지씩 차분히? 잘 안 됨. 대신 여러 개를 조금씩 계속 만지는 중.</p></div>
+  <div class="chaos-copy"><span>MAKING NOW</span><h2>요즘 같이 만지는 것들</h2><p>수업에서 써보고, 고치고, 또 다른 생각이 나면 옆에 하나 더 시작합니다.</p></div>
   <div class="floating-progress">
     <article class="progress-blob lemon"><b>색깔악보 × 붐웨커</b><small>3음·5음·8음 변환 + 낙하형 연주</small><em>조립중</em></article>
     <article class="progress-blob mint"><b>차근차근 놀이터</b><small>실제 진행하면서 계속 수정</small><em>점검중</em></article>
@@ -125,7 +126,7 @@
 </section>
 </main>
 
-<footer class="play-footer"><b>울모아쌤</b><span>생각나면 만들고, 써보고, 또 딴 거 시작하는 곳</span><div><a href="about/">만든 사람</a><a href="request/">아이디어</a></div></footer>
+<footer class="play-footer"><b>울모아쌤</b><span>현장에서 떠오른 걸 만들고, 써보고, 또 바꾸는 곳</span><div><a href="about/">만든 사람</a><a href="request/">아이디어</a></div></footer>
 
 <dialog class="tool-dialog" id="makeupDialog"><button class="dialog-close" type="button" aria-label="닫기">×</button><div class="dialog-head"><span>보강 확인</span><h2>두 시간을 넣어보세요.</h2><p>계획과 실제가 다르면 바로 표시합니다.</p></div><div class="compare-form"><label><span>계획일시</span><input type="datetime-local" id="plannedAt"></label><label><span>실제 제공일시</span><input type="datetime-local" id="actualAt"></label><button class="btn dark big" type="button" id="compareTime">비교하기</button></div><div class="compare-result" id="compareResult" hidden></div><p class="privacy-note">울모아 내부 기록 기준을 빠르게 확인하는 보조도구입니다.</p></dialog>
 <dialog class="tool-dialog" id="memoDialog"><button class="dialog-close" type="button" aria-label="닫기">×</button><div class="dialog-head"><span>30초 수업메모</span><h2>기억날 때 세 가지만.</h2></div><div class="memo-form"><label><span>오늘 한 활동</span><textarea id="memoActivity" placeholder="예: 색 분류, 순서 손바닥 치기"></textarea></label><label><span>아동 반응</span><textarea id="memoResponse" placeholder="예: 3개까지 정확, 4개부터 반복 필요"></textarea></label><label><span>도움·힌트</span><textarea id="memoSupport" placeholder="예: 언어적 힌트 후 재시도"></textarea></label><button class="btn dark big" type="button" id="makeMemo">메모 만들기</button></div><div class="memo-output" id="memoOutput" hidden><pre id="memoText"></pre><button class="btn primary" id="copyMemo" type="button">복사하기</button></div><p class="privacy-note">개인정보는 넣지 않는 걸 권합니다. 입력내용은 서버로 전송하지 않습니다.</p></dialog>
