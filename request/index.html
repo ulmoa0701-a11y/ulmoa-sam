@@ -24,13 +24,13 @@
   <a class="back-link" href="../">← 작업노트로 돌아가기</a>
   <section class="notebook-page request-note">
     <div class="request-intro">
-      <p class="sub-kicker">빈칸 하나 남겨둘게요</p>
-      <h1>이런 거 있으면<br>좋겠는데?</h1>
-      <p>잘 설명하지 않아도 괜찮아요. 수업하다 불편했던 것, 있으면 재밌을 것 같은 것, 그냥 문득 든 생각도 좋아요.</p>
+      <p class="sub-kicker" id="requestKicker">빈칸 하나 남겨둘게요</p>
+      <h1 id="requestHeading">이런 거 있으면<br>좋겠는데?</h1>
+      <p id="requestLead">잘 설명하지 않아도 괜찮아요. 수업하다 불편했던 것, 있으면 재밌을 것 같은 것, 그냥 문득 든 생각도 좋아요.</p>
     </div>
 
     <section class="request-form-note" aria-labelledby="requestTitle">
-      <div class="form-line">
+      <div class="form-line" id="audienceBlock">
         <span id="requestTitle">누가 쓰면 좋을까요?</span>
         <div class="choice-row-note" id="audienceChoices">
           <button type="button" data-value="아이와">아이와</button>
@@ -41,12 +41,12 @@
       </div>
 
       <div class="form-line">
-        <span>한 줄로 적으면?</span>
+        <span id="subjectLabel">한 줄로 적으면?</span>
         <input id="requestSubject" maxlength="50" placeholder="예: 보강한 수업만 한눈에 보고 싶어요">
       </div>
 
       <div class="form-line">
-        <span>조금 더 적어도 돼요.</span>
+        <span id="bodyLabel">조금 더 적어도 돼요.</span>
         <textarea id="requestBody" maxlength="800" placeholder="불편한 점, 만들었으면 하는 것, 재밌을 것 같은 아이디어를 편하게 적어주세요."></textarea>
         <div class="helper">아동 이름·생년월일·검사결과 같은 민감정보는 적지 않아도 됩니다.</div>
       </div>
@@ -79,14 +79,38 @@ const preview=document.querySelector('#requestPreview');
 const email=document.querySelector('#emailRequest');
 const copyKakao=document.querySelector('#copyAndKakao');
 const toast=document.querySelector('#toast');
-let audience='';
-function buildText(){return '[아이디어]\n대상: '+(audience||'아직 선택 안 함')+'\n\n제목: '+subject.value.trim()+'\n\n내용: '+body.value.trim();}
-function sync(){const text=buildText();preview.textContent=text;email.href='mailto:ulmoa0701@gmail.com?subject='+encodeURIComponent('울모아쌤 아이디어 · '+(subject.value.trim()||'메모'))+'&body='+encodeURIComponent(text);localStorage.setItem('ulmoa-request-draft',JSON.stringify({audience,subject:subject.value,body:body.value}));}
+const mode=new URLSearchParams(location.search).get('mode')==='cheer'?'cheer':'idea';
+const storageKey=mode==='cheer'?'ulmoa-cheer-draft':'ulmoa-request-draft';
+let audience=mode==='cheer'?'작업 응원':'';
+
+if(mode==='cheer'){
+  document.title='작업 응원하기 — 울모아쌤';
+  document.querySelector('#requestKicker').textContent='구경하고 가셨다면';
+  document.querySelector('#requestHeading').innerHTML='응원 한 줄,<br>슬쩍 두고 가기.';
+  document.querySelector('#requestLead').textContent='써본 이야기, 다음에도 보고 싶은 것, 그냥 응원 한마디도 좋아요.';
+  document.querySelector('#audienceBlock').hidden=true;
+  document.querySelector('#subjectLabel').textContent='한 줄 남기기';
+  subject.placeholder='예: 차근차근 놀이터 재밌게 써봤어요';
+  document.querySelector('#bodyLabel').textContent='조금 더 적어도 좋아요.';
+  body.placeholder='좋았던 점, 아쉬웠던 점, 다음에 보고 싶은 것, 그냥 응원도 편하게 적어주세요.';
+}
+
+function buildText(){
+  const label=mode==='cheer'?'작업 응원':'아이디어';
+  return '['+label+']\n'+(mode==='cheer'?'':'대상: '+(audience||'아직 선택 안 함')+'\n\n')+'한 줄: '+subject.value.trim()+'\n\n내용: '+body.value.trim();
+}
+function sync(){
+  const text=buildText();
+  preview.textContent=text;
+  const mailTitle=mode==='cheer'?'울모아쌤 작업 응원':'울모아쌤 아이디어';
+  email.href='mailto:ulmoa0701@gmail.com?subject='+encodeURIComponent(mailTitle+' · '+(subject.value.trim()||'메모'))+'&body='+encodeURIComponent(text);
+  localStorage.setItem(storageKey,JSON.stringify({audience,subject:subject.value,body:body.value}));
+}
 function showToast(msg){toast.textContent=msg;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1800);}
 choices.forEach(btn=>btn.addEventListener('click',()=>{audience=btn.dataset.value;choices.forEach(x=>x.classList.toggle('selected',x===btn));sync();}));
 subject.addEventListener('input',sync);body.addEventListener('input',sync);
-copyKakao.addEventListener('click',async()=>{const text=buildText();try{await navigator.clipboard.writeText(text);showToast('메모를 복사했어요');}catch{showToast('복사가 안 되면 미리보기 내용을 직접 복사해주세요');}setTimeout(()=>window.open('http://pf.kakao.com/_wEGJn','_blank','noopener'),180);});
-try{const saved=JSON.parse(localStorage.getItem('ulmoa-request-draft')||'null');if(saved){audience=saved.audience||'';subject.value=saved.subject||'';body.value=saved.body||'';choices.forEach(x=>x.classList.toggle('selected',x.dataset.value===audience));}}catch{}
+copyKakao.addEventListener('click',async()=>{const text=buildText();try{await navigator.clipboard.writeText(text);showToast(mode==='cheer'?'응원 메모를 복사했어요':'메모를 복사했어요');}catch{showToast('복사가 안 되면 미리보기 내용을 직접 복사해주세요');}setTimeout(()=>window.open('http://pf.kakao.com/_wEGJn','_blank','noopener'),180);});
+try{const saved=JSON.parse(localStorage.getItem(storageKey)||'null');if(saved){audience=mode==='cheer'?'작업 응원':(saved.audience||'');subject.value=saved.subject||'';body.value=saved.body||'';choices.forEach(x=>x.classList.toggle('selected',x.dataset.value===audience));}}catch{}
 sync();
 </script>
 </body>
