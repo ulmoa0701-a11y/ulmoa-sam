@@ -5,37 +5,34 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="../favicon.ico">
 <meta name="robots" content="noindex,nofollow">
-<title>앱 요청하기 — 울모아쌤</title>
-<meta name="description" content="이런 게 있으면 좋겠다. 울모아쌤에게 앱·도구·자료 아이디어를 남겨주세요.">
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<title>생각 남기기 — 울모아쌤</title>
+<meta name="description" content="이런 게 있으면 좋겠다 싶은 아이디어를 울모아쌤 작업노트에 남겨주세요.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Gamja+Flower&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link rel="stylesheet" href="../assets/styles.css">
+<link rel="stylesheet" href="../assets/notebook-subpages.css">
 </head>
-<body class="request-page">
-<header class="site-header">
-  <div class="wrap nav">
-    <a class="brand" href="../"><span class="brand-mark" aria-hidden="true"><i></i></span><b>울모아쌤</b></a>
-    <nav><a href="../#made">만든 것</a><a href="../#growing">만드는 중</a><a href="../about/">만든 사람</a><a class="request-btn" href="./">앱 요청하기</a></nav>
-  </div>
+<body class="note-subpage">
+<header class="sub-header">
+  <a class="sub-brand" href="../"><span>✦</span><b>울모아쌤</b></a>
+  <nav class="sub-nav"><a href="../#made">꺼내둔 것</a><a href="../#making">만드는 중</a><a href="../about/">나</a><a class="accent" href="./">생각 남기기</a></nav>
 </header>
 
-<main>
-  <div class="wrap">
-    <a class="request-back" href="../">← 돌아가기</a>
+<main class="sub-main">
+  <a class="back-link" href="../">← 작업노트로 돌아가기</a>
+  <section class="notebook-page request-note">
+    <div class="request-intro">
+      <p class="sub-kicker">빈칸 하나 남겨둘게요</p>
+      <h1>이런 거 있으면<br>좋겠는데?</h1>
+      <p>잘 설명하지 않아도 괜찮아요. 수업하다 불편했던 것, 있으면 재밌을 것 같은 것, 그냥 문득 든 생각도 좋아요.</p>
+    </div>
 
-    <section class="request-hero">
-      <span>REQUEST</span>
-      <h1>이런 거 있으면 좋겠다.</h1>
-      <p>완벽하게 설명하지 않아도 돼요. 한 줄이면 충분해요.</p>
-    </section>
-
-    <section class="request-form" aria-labelledby="requestTitle">
-      <div class="form-block">
+    <section class="request-form-note" aria-labelledby="requestTitle">
+      <div class="form-line">
         <span id="requestTitle">누가 쓰면 좋을까요?</span>
-        <div class="choice-row" id="audienceChoices">
+        <div class="choice-row-note" id="audienceChoices">
           <button type="button" data-value="아이와">아이와</button>
           <button type="button" data-value="선생님">선생님</button>
           <button type="button" data-value="센터·학교">센터·학교</button>
@@ -43,42 +40,36 @@
         </div>
       </div>
 
-      <div class="form-block">
-        <span>한 줄 제목</span>
+      <div class="form-line">
+        <span>한 줄로 적으면?</span>
         <input id="requestSubject" maxlength="50" placeholder="예: 보강한 수업만 한눈에 보고 싶어요">
       </div>
 
-      <div class="form-block">
-        <span>어떤 게 있으면 좋을까요?</span>
+      <div class="form-line">
+        <span>조금 더 적어도 돼요.</span>
         <textarea id="requestBody" maxlength="800" placeholder="불편한 점, 만들었으면 하는 것, 재밌을 것 같은 아이디어를 편하게 적어주세요."></textarea>
         <div class="helper">아동 이름·생년월일·검사결과 같은 민감정보는 적지 않아도 됩니다.</div>
       </div>
 
-      <div class="request-send">
-        <button id="copyAndKakao" type="button">내용 복사하고 카카오 열기</button>
+      <div class="send-row">
+        <button id="copyAndKakao" type="button">복사하고 카카오 열기</button>
         <a id="emailRequest" href="mailto:ulmoa0701@gmail.com">이메일로 보내기</a>
       </div>
     </section>
 
-    <div class="request-preview">
-      <span>보낼 내용 미리보기</span>
-      <pre id="requestPreview">[앱 요청]
+    <div class="preview-note">
+      <span>내가 남길 메모</span>
+      <pre id="requestPreview">[아이디어]
 대상: 아직 선택 안 함
 
 제목: 
 
 내용: </pre>
     </div>
-  </div>
+  </section>
 </main>
 
-<footer>
-  <div class="wrap footer-inner">
-    <div><b>울모아쌤</b><span>생각난 걸 만들어보는 곳</span></div>
-    <div><a href="http://ulmoa.co.kr" target="_blank" rel="noopener">울모아 연구소</a><a href="../about/">만든 사람</a></div>
-  </div>
-</footer>
-
+<footer class="sub-footer"><div><b>울모아쌤</b><span>현장에서 떠오른 걸 만드는 개인 작업노트</span></div><nav><a href="../">홈</a><a href="../about/">만든 사람</a></nav></footer>
 <div class="toast" id="toast" role="status"></div>
 <script>
 const choices=[...document.querySelectorAll('#audienceChoices button')];
@@ -89,42 +80,13 @@ const email=document.querySelector('#emailRequest');
 const copyKakao=document.querySelector('#copyAndKakao');
 const toast=document.querySelector('#toast');
 let audience='';
-
-function buildText(){
-  return '[앱 요청]\n대상: '+(audience||'아직 선택 안 함')+'\n\n제목: '+subject.value.trim()+'\n\n내용: '+body.value.trim();
-}
-function sync(){
-  const text=buildText();
-  preview.textContent=text;
-  email.href='mailto:ulmoa0701@gmail.com?subject='+encodeURIComponent('울모아쌤 앱 요청 · '+(subject.value.trim()||'아이디어'))+'&body='+encodeURIComponent(text);
-  localStorage.setItem('ulmoa-request-draft',JSON.stringify({audience,subject:subject.value,body:body.value}));
-}
-function showToast(msg){
-  toast.textContent=msg;toast.classList.add('show');
-  setTimeout(()=>toast.classList.remove('show'),1800);
-}
-choices.forEach(btn=>btn.addEventListener('click',()=>{
-  audience=btn.dataset.value;
-  choices.forEach(x=>x.classList.toggle('selected',x===btn));
-  sync();
-}));
-subject.addEventListener('input',sync);
-body.addEventListener('input',sync);
-copyKakao.addEventListener('click',async()=>{
-  const text=buildText();
-  try{await navigator.clipboard.writeText(text);showToast('요청 내용을 복사했어요');}
-  catch{showToast('복사가 안 되면 미리보기 내용을 직접 복사해주세요');}
-  setTimeout(()=>window.open('http://pf.kakao.com/_wEGJn','_blank','noopener'),180);
-});
-try{
-  const saved=JSON.parse(localStorage.getItem('ulmoa-request-draft')||'null');
-  if(saved){
-    audience=saved.audience||'';
-    subject.value=saved.subject||'';
-    body.value=saved.body||'';
-    choices.forEach(x=>x.classList.toggle('selected',x.dataset.value===audience));
-  }
-}catch{}
+function buildText(){return '[아이디어]\n대상: '+(audience||'아직 선택 안 함')+'\n\n제목: '+subject.value.trim()+'\n\n내용: '+body.value.trim();}
+function sync(){const text=buildText();preview.textContent=text;email.href='mailto:ulmoa0701@gmail.com?subject='+encodeURIComponent('울모아쌤 아이디어 · '+(subject.value.trim()||'메모'))+'&body='+encodeURIComponent(text);localStorage.setItem('ulmoa-request-draft',JSON.stringify({audience,subject:subject.value,body:body.value}));}
+function showToast(msg){toast.textContent=msg;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1800);}
+choices.forEach(btn=>btn.addEventListener('click',()=>{audience=btn.dataset.value;choices.forEach(x=>x.classList.toggle('selected',x===btn));sync();}));
+subject.addEventListener('input',sync);body.addEventListener('input',sync);
+copyKakao.addEventListener('click',async()=>{const text=buildText();try{await navigator.clipboard.writeText(text);showToast('메모를 복사했어요');}catch{showToast('복사가 안 되면 미리보기 내용을 직접 복사해주세요');}setTimeout(()=>window.open('http://pf.kakao.com/_wEGJn','_blank','noopener'),180);});
+try{const saved=JSON.parse(localStorage.getItem('ulmoa-request-draft')||'null');if(saved){audience=saved.audience||'';subject.value=saved.subject||'';body.value=saved.body||'';choices.forEach(x=>x.classList.toggle('selected',x.dataset.value===audience));}}catch{}
 sync();
 </script>
 </body>
