@@ -13,65 +13,112 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link rel="stylesheet" href="assets/styles.css">
 </head>
-<body>
+<body class="imagination-home">
 <header class="site-header">
   <div class="wrap nav">
     <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"><i></i></span><b>울모아쌤</b></a>
     <nav>
-      <a href="#made">만든 것</a>
-      <a href="#growing">만드는 중</a>
+      <a href="#made">꺼내놓은 것</a>
+      <a href="#growing">작업대</a>
       <a href="about/">만든 사람</a>
-      <a class="request-btn" href="request/">앱 요청하기</a>
+      <a class="request-btn" href="request/">아이디어 놓기</a>
     </nav>
   </div>
 </header>
 
 <main id="top">
-<section class="intro wrap">
-  <div class="intro-copy">
-    <span class="intro-kicker">ULMOA CREATIVE LAB</span>
+<section class="wonder-hero wrap">
+  <div class="wonder-copy">
+    <span class="intro-kicker">ULMOA IMAGINATION WORKSHOP</span>
     <h1>상상한 걸,<br><em>만들어봅니다.</em></h1>
-    <p>게임도, 도구도, 자료도. 재미있거나 필요하면 일단 만들어봐요.</p>
+    <p>생각나면 만들고, 써보고, 또 바꿉니다.<br>게임도 도구도 자료도 — 여기서는 일단 꺼내놓고 만져봐요.</p>
+    <div class="hero-scribbles" aria-label="이곳에서 만드는 것">
+      <span>게임</span><span>작은 도구</span><span>수업자료</span><span>음악놀이</span><span>엉뚱한 실험</span>
+    </div>
+    <a class="hero-jump" href="#made"><span>지금 열어볼 수 있는 것</span><b>아래로 내려가기 ↓</b></a>
   </div>
+
+  <div class="wonder-map" aria-label="작업실 미리보기">
+    <span class="map-orbit orbit-a" aria-hidden="true"></span>
+    <span class="map-orbit orbit-b" aria-hidden="true"></span>
+    <i class="map-star star-a" aria-hidden="true">✦</i>
+    <i class="map-star star-b" aria-hidden="true">✧</i>
+    <i class="map-star star-c" aria-hidden="true">·</i>
+
+    <a class="portal portal-game" href="https://app-s8g5hg.v2.appdeploy.ai/" target="_blank" rel="noopener">
+      <small>열어보기 01</small>
+      <b>차근차근<br>놀이터</b>
+      <span>찾고 · 기다리고 · 생각하기</span>
+      <em>↗</em>
+    </a>
+
+    <button class="portal portal-time open-tool" type="button" data-tool="makeup">
+      <small>작은 도구 02</small>
+      <b>보강<br>확인</b>
+      <span>두 시간을 넣어 비교해요</span>
+      <em>→</em>
+    </button>
+
+    <button class="portal portal-memo open-tool" type="button" data-tool="memo">
+      <small>작은 도구 03</small>
+      <b>30초<br>수업메모</b>
+      <span>생각나기 전에 세 줄만</span>
+      <em>→</em>
+    </button>
+
+    <div class="portal portal-music is-making" aria-label="색깔악보와 붐웨커 도구 만드는 중">
+      <small>조립 중</small>
+      <b>색깔악보<br>× 붐웨커</b>
+      <span>3음 · 5음 · 8음으로 실험 중</span>
+      <em>♪</em>
+    </div>
+
+    <span class="map-note note-one">“이거 있으면<br>편하겠다.”</span>
+    <span class="map-note note-two">생각 → 만들기<br>→ 써보기 ↺</span>
+  </div>
+</section>
+
+<section class="finder-zone wrap" aria-label="제작물 찾기">
+  <div class="finder-note"><span>⌕</span><b>작업실에서 찾기</b><small>이름이 기억 안 나도 괜찮아요.</small></div>
   <form class="finder" id="mainSearch">
     <span aria-hidden="true">⌕</span>
-    <input id="toolSearch" type="search" placeholder="뭐가 필요하세요? 예: 인지게임, 보강, 메모" autocomplete="off" aria-label="도구 찾기">
+    <input id="toolSearch" type="search" placeholder="예: 인지게임, 메모, 보강" autocomplete="off" aria-label="도구 찾기">
     <button type="submit">찾기</button>
   </form>
 </section>
 
 <section class="filters wrap" aria-label="빠른 분류">
   <button class="active" type="button" data-search="">전체</button>
-  <button type="button" data-search="생각놀이">생각놀이</button>
+  <button type="button" data-search="생각놀이">게임·생각놀이</button>
   <button type="button" data-search="아이와">아이와</button>
-  <button type="button" data-search="선생님">선생님</button>
-  <button type="button" data-search="센터업무">센터</button>
+  <button type="button" data-search="선생님">선생님 도구</button>
+  <button type="button" data-search="센터업무">기록·일정</button>
 </section>
 
 <section class="gallery wrap" id="made">
-  <div class="gallery-head">
-    <div><span>MADE HERE</span><h2>꺼내놓은 것들.</h2></div>
+  <div class="gallery-head workshop-heading">
+    <div><span>OUT OF THE DRAWER</span><h2>꺼내놓은 것들.</h2><p>완벽해서 올린 게 아니라, 지금 쓸 수 있어서 올려둔 것들.</p></div>
     <span class="result-count" id="resultCount">3개</span>
   </div>
 
-  <div class="tool-grid" id="toolGrid">
-    <article class="tool-card" data-tags="생각놀이 인지 아이와 게임 차근차근 유아 초기인지">
+  <div class="tool-grid workshop-grid" id="toolGrid">
+    <article class="tool-card card-feature" data-tags="생각놀이 인지 아이와 게임 차근차근 유아 초기인지">
       <a class="scene scene-game" href="https://app-s8g5hg.v2.appdeploy.ai/" target="_blank" rel="noopener">
         <img src="https://appdeployai-v2-qa-screenshots.s3.us-east-1.amazonaws.com/app-s8g5hg/1789199468624/web.png" alt="차근차근 놀이터 실제 화면">
-        <span class="scene-label">생각놀이</span>
+        <span class="scene-label">게임 · 생각놀이</span>
         <span class="scene-glow g1"></span><span class="scene-glow g2"></span>
       </a>
       <div class="card-copy">
         <div class="card-top"><span class="status checking">점검중</span><time>유아 · 초기인지</time></div>
         <h3>차근차근 놀이터</h3>
         <p>찾고 · 기다리고 · 생각하는 기초 놀이</p>
-        <a class="card-action" href="https://app-s8g5hg.v2.appdeploy.ai/" target="_blank" rel="noopener">현재 버전 보기 <b>→</b></a>
+        <a class="card-action" href="https://app-s8g5hg.v2.appdeploy.ai/" target="_blank" rel="noopener">현재 버전 열기 <b>↗</b></a>
       </div>
     </article>
 
-    <article class="tool-card" data-tags="센터업무 보강 일정 계획 실제 수업시간">
+    <article class="tool-card card-time" data-tags="센터업무 보강 일정 계획 실제 수업시간 선생님 도구">
       <button class="scene scene-time open-tool" type="button" data-tool="makeup" aria-label="보강 확인 열기">
-        <span class="scene-label">센터</span>
+        <span class="scene-label">작은 도구</span>
         <span class="night-orb"></span>
         <span class="time-chip a"><small>계획</small><b>16:00</b></span>
         <span class="time-path"></span>
@@ -79,68 +126,79 @@
         <i class="star s1">✦</i><i class="star s2">✦</i>
       </button>
       <div class="card-copy">
-        <div class="card-top"><span class="status live">바로 사용</span><time>센터업무</time></div>
+        <div class="card-top"><span class="status live">바로 사용</span><time>기록 · 일정</time></div>
         <h3>보강 확인</h3>
         <p>계획과 실제 시간이 다른지 한 번에 확인</p>
         <button class="card-action open-tool" type="button" data-tool="makeup">바로 확인하기 <b>→</b></button>
       </div>
     </article>
 
-    <article class="tool-card" data-tags="선생님 수업 메모 기록 일지">
+    <article class="tool-card card-memo" data-tags="선생님 수업 메모 기록 일지 도구">
       <button class="scene scene-memo open-tool" type="button" data-tool="memo" aria-label="30초 수업메모 열기">
-        <span class="scene-label">선생님</span>
+        <span class="scene-label">선생님 도구</span>
         <span class="paper p1"></span><span class="paper p2"></span><span class="paper p3"></span>
         <span class="gold-line"></span>
         <i class="star s3">✦</i>
       </button>
       <div class="card-copy">
-        <div class="card-top"><span class="status live">바로 사용</span><time>선생님</time></div>
+        <div class="card-top"><span class="status live">바로 사용</span><time>메모 · 기록</time></div>
         <h3>30초 수업메모</h3>
         <p>기억날 때 활동 · 반응 · 지원만 빠르게</p>
         <button class="card-action open-tool" type="button" data-tool="memo">메모 시작하기 <b>→</b></button>
       </div>
     </article>
+
+    <aside class="drawer-card" aria-label="만드는 중인 색깔악보와 붐웨커 도구">
+      <span class="tape" aria-hidden="true"></span>
+      <small>아직 서랍 밖으로 다 못 꺼냄</small>
+      <h3>색깔악보<br>× 붐웨커</h3>
+      <p>노래를 넣고 → 3음·5음·8음으로 바꾸고 → 색깔악보와 연주 화면까지.</p>
+      <div class="drawer-progress"><span style="width:58%"></span></div>
+      <b>만드는 중 · prototype</b>
+      <div class="note-dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    </aside>
   </div>
 
   <div class="empty-state" id="emptyState" hidden>
-    <b>아직 딱 맞는 게 없어요.</b>
-    <p>필요한 걸 남겨주면 다음에 만들어볼게요.</p>
-    <a href="request/">앱 요청하기 →</a>
+    <b>그건 아직 서랍에 없어요.</b>
+    <p>필요한 걸 남겨주면 다음 상상이 될 수도 있어요.</p>
+    <a href="request/">아이디어 놓고 가기 →</a>
   </div>
 </section>
 
-<section class="growing" id="growing">
+<section class="growing workshop-bench" id="growing">
   <div class="wrap growing-grid">
     <div class="growing-title">
-      <span>IN PROGRESS</span>
-      <h2>요즘 만드는 중.</h2>
-      <p>완성된 척하지 않고, 지금 상태 그대로.</p>
+      <span>ON THE WORKBENCH</span>
+      <h2>오늘 작업대 위.</h2>
+      <p>완성된 척하지 않고, 지금 만지는 것 그대로.</p>
+      <div class="bench-sketch" aria-hidden="true">↗ 고치고<br>↙ 다시 써보고</div>
     </div>
     <div class="progress-list">
       <article><span class="dot testing"></span><div><b>차근차근 놀이터 점검</b><small>유아/초기인지 버전 실제 진행 확인</small></div><em>점검중</em></article>
-      <article><span class="dot making"></span><div><b>보강·변경 회기 한눈에 보기</b><small>전체 일정에서 바뀐 회기만 찾기</small></div><em>다듬는 중</em></article>
-      <article><span class="dot making"></span><div><b>현장 메모 → 일지 정리</b><small>짧게 적고, 나중에 덜 힘들게</small></div><em>테스트 중</em></article>
+      <article><span class="dot making"></span><div><b>색깔악보 · 붐웨커 스튜디오</b><small>3음·5음·8음 변환과 낙하형 연주 화면</small></div><em>조립중</em></article>
+      <article><span class="dot making"></span><div><b>Godot 작은 세계 실험</b><small>브라우저에서 돌아가는 3D 놀이 테스트</small></div><em>테스트중</em></article>
       <article><span class="dot dream"></span><div><b>아직 이름 없음</b><small>그냥 궁금해서 만져보는 것들</small></div><em>상상중</em></article>
     </div>
   </div>
 </section>
 
-<section class="request-teaser">
+<section class="request-teaser imagination-request">
   <div class="wrap request-grid">
     <div>
-      <span>REQUEST</span>
-      <h2>이런 거 있으면 좋겠다.</h2>
-      <p>그 한마디에서 다음 게 시작될 수도 있어요.</p>
+      <span>LEAVE A THOUGHT</span>
+      <h2>여기 없는 걸<br>상상했다면.</h2>
+      <p>한 줄만 놓고 가도 돼요. 다음에 진짜 만들어질 수도 있으니까.</p>
     </div>
-    <a class="request-main" href="request/">앱 요청하기 <b>→</b></a>
+    <a class="request-main" href="request/"><span>아이디어 놓고 가기</span><b>→</b></a>
   </div>
 </section>
 </main>
 
 <footer>
   <div class="wrap footer-inner">
-    <div><b>울모아쌤</b><span>생각난 걸 만들어보는 곳</span></div>
-    <div><a href="http://ulmoa.co.kr" target="_blank" rel="noopener">울모아 연구소</a><a href="about/">만든 사람</a></div>
+    <div><b>울모아쌤</b><span>생각나면 만들고, 써보고, 또 바꾸는 곳</span></div>
+    <div><a href="about/">만든 사람</a><a href="request/">아이디어 놓기</a></div>
   </div>
 </footer>
 
