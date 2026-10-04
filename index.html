@@ -5,230 +5,152 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="favicon.ico">
 <meta name="robots" content="noindex,nofollow">
-<title>울모아쌤 — 상상한 걸 만들어봅니다</title>
-<meta name="description" content="게임도, 도구도, 자료도. 재미있거나 필요하면 직접 만들어보는 울모아쌤의 창작공간입니다.">
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<title>울모아쌤 — 상상한 걸 바로 만져보는 곳</title>
+<meta name="description" content="생각나면 만들고, 눌러보고, 또 바꾸는 울모아쌤의 개인 창작 놀이터입니다.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Poor+Story&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/dream.css">
 </head>
-<body class="imagination-home">
-<header class="site-header">
-  <div class="wrap nav">
-    <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"><i></i></span><b>울모아쌤</b></a>
-    <nav>
-      <a href="#made">꺼내놓은 것</a>
-      <a href="#growing">작업대</a>
-      <a href="about/">만든 사람</a>
-      <a class="request-btn" href="request/">아이디어 놓기</a>
-    </nav>
+<body class="spark-home">
+<header class="spark-topbar">
+  <a class="spark-brand" href="#top" aria-label="울모아쌤 홈"><span class="spark-dot"></span><b>울모아쌤</b><small>PLAY LAB</small></a>
+  <div class="spark-actions">
+    <button class="shuffle-btn" id="shuffleBtn" type="button">아무거나 열기 ↗</button>
+    <a class="idea-btn" href="request/">+ 생각 던지기</a>
   </div>
 </header>
 
 <main id="top">
-<section class="wonder-hero wrap">
-  <div class="wonder-copy">
-    <span class="intro-kicker">ULMOA IMAGINATION WORKSHOP</span>
-    <h1>상상한 걸,<br><em>만들어봅니다.</em></h1>
-    <p>생각나면 만들고, 써보고, 또 바꿉니다.<br>게임도 도구도 자료도 — 여기서는 일단 꺼내놓고 만져봐요.</p>
-    <div class="hero-scribbles" aria-label="이곳에서 만드는 것">
-      <span>게임</span><span>작은 도구</span><span>수업자료</span><span>음악놀이</span><span>엉뚱한 실험</span>
+<section class="spark-stage" aria-labelledby="sparkTitle">
+  <div class="spark-intro">
+    <span class="spark-sticker hot">오늘도 뭔가 시작함</span>
+    <h1 id="sparkTitle">상상하다가<br><em>시작해버림.</em></h1>
+    <p>하고 싶은 게 생기면 일단 만들어봐요.<br>게임, 음악, 수업도구, 이상한 실험까지 한꺼번에.</p>
+    <div class="spark-chips" aria-label="작업실 분위기">
+      <span>일단 해봄</span><span>또 옆길로 샘</span><span>갑자기 꽂힘</span><span>고치다 새로 만듦</span>
     </div>
-    <a class="hero-jump" href="#made"><span>지금 열어볼 수 있는 것</span><b>아래로 내려가기 ↓</b></a>
   </div>
 
-  <div class="wonder-map" aria-label="작업실 미리보기">
-    <span class="map-orbit orbit-a" aria-hidden="true"></span>
-    <span class="map-orbit orbit-b" aria-hidden="true"></span>
-    <i class="map-star star-a" aria-hidden="true">✦</i>
-    <i class="map-star star-b" aria-hidden="true">✧</i>
-    <i class="map-star star-c" aria-hidden="true">·</i>
+  <div class="spark-world" aria-label="상상 지도">
+    <div class="orbit-line orbit-one" aria-hidden="true"></div>
+    <div class="orbit-line orbit-two" aria-hidden="true"></div>
+    <span class="spark-star s1" aria-hidden="true">✦</span><span class="spark-star s2" aria-hidden="true">✹</span><span class="spark-star s3" aria-hidden="true">✧</span>
 
-    <a class="portal portal-game" href="https://app-s8g5hg.v2.appdeploy.ai/" target="_blank" rel="noopener">
-      <small>열어보기 01</small>
-      <b>차근차근<br>놀이터</b>
-      <span>찾고 · 기다리고 · 생각하기</span>
-      <em>↗</em>
+    <a class="world-node node-game" data-random-target="game" href="https://app-s8g5hg.v2.appdeploy.ai/" target="_blank" rel="noopener">
+      <span class="node-kicker">PLAY 01</span>
+      <div class="node-icon game-icon" aria-hidden="true"><i></i><b></b><em></em></div>
+      <strong>차근차근<br>놀이터</strong>
+      <small>찾고 · 기다리고 · 생각하기</small>
+      <span class="node-go">놀러가기 ↗</span>
     </a>
 
-    <button class="portal portal-time open-tool" type="button" data-tool="makeup">
-      <small>작은 도구 02</small>
-      <b>보강<br>확인</b>
-      <span>두 시간을 넣어 비교해요</span>
-      <em>→</em>
+    <button class="world-node node-time open-tool" data-random-target="makeup" type="button" data-tool="makeup">
+      <span class="node-kicker">TOOL 02</span>
+      <div class="node-icon clock-icon" aria-hidden="true"><i>16</i><span>→</span><i>17</i></div>
+      <strong>보강<br>확인</strong>
+      <small>시간 두 개 넣고 바로 비교</small>
+      <span class="node-go">열어보기 →</span>
     </button>
 
-    <button class="portal portal-memo open-tool" type="button" data-tool="memo">
-      <small>작은 도구 03</small>
-      <b>30초<br>수업메모</b>
-      <span>생각나기 전에 세 줄만</span>
-      <em>→</em>
+    <button class="world-node node-memo open-tool" data-random-target="memo" type="button" data-tool="memo">
+      <span class="node-kicker">TOOL 03</span>
+      <div class="node-icon note-icon" aria-hidden="true"><i></i><i></i><i></i></div>
+      <strong>30초<br>수업메모</strong>
+      <small>까먹기 전에 세 줄</small>
+      <span class="node-go">끄적이기 →</span>
     </button>
 
-    <div class="portal portal-music is-making" aria-label="색깔악보와 붐웨커 도구 만드는 중">
-      <small>조립 중</small>
-      <b>색깔악보<br>× 붐웨커</b>
-      <span>3음 · 5음 · 8음으로 실험 중</span>
-      <em>♪</em>
+    <div class="world-node node-music is-building">
+      <span class="node-kicker">BUILDING 04</span>
+      <div class="node-icon music-icon" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <strong>색깔악보<br>× 붐웨커</strong>
+      <small>3음 · 5음 · 8음으로 조립 중</small>
+      <span class="node-go">아직 만드는 중 ♪</span>
     </div>
 
-    <span class="map-note note-one">“이거 있으면<br>편하겠다.”</span>
-    <span class="map-note note-two">생각 → 만들기<br>→ 써보기 ↺</span>
+    <a class="world-node node-wild" href="request/">
+      <span class="node-kicker">???</span>
+      <div class="wild-mark" aria-hidden="true">?</div>
+      <strong>다음엔<br>뭘 하지?</strong>
+      <small>생각 하나 던져두기</small>
+      <span class="node-go">여기로 →</span>
+    </a>
+
+    <span class="floating-note fn1">“이거 되면 재밌겠다”</span>
+    <span class="floating-note fn2">수정 4번째</span>
+    <span class="floating-note fn3">또 만들고 있음 →</span>
   </div>
 </section>
 
-<section class="finder-zone wrap" aria-label="제작물 찾기">
-  <div class="finder-note"><span>⌕</span><b>작업실에서 찾기</b><small>이름이 기억 안 나도 괜찮아요.</small></div>
+<section class="spark-strip" aria-label="지금 머릿속">
+  <div class="spark-strip-track"><span>게임 만들기</span><b>✦</b><span>색깔악보</span><b>✦</b><span>작은 웹도구</span><b>✦</b><span>수업자료</span><b>✦</b><span>3D 실험</span><b>✦</b><span>갑자기 생각난 것</span><b>✦</b></div>
+</section>
+
+<section class="spark-finder wrap" aria-label="제작물 찾기">
+  <div class="finder-copy"><span>⌕</span><div><b>뭐 만들었더라?</b><small>대충 떠오르는 단어만 적어도 돼요.</small></div></div>
   <form class="finder" id="mainSearch">
-    <span aria-hidden="true">⌕</span>
-    <input id="toolSearch" type="search" placeholder="예: 인지게임, 메모, 보강" autocomplete="off" aria-label="도구 찾기">
-    <button type="submit">찾기</button>
+    <span aria-hidden="true">⌕</span><input id="toolSearch" type="search" placeholder="예: 메모, 게임, 보강" autocomplete="off" aria-label="도구 찾기"><button type="submit">찾기</button>
   </form>
 </section>
 
-<section class="filters wrap" aria-label="빠른 분류">
-  <button class="active" type="button" data-search="">전체</button>
-  <button type="button" data-search="생각놀이">게임·생각놀이</button>
+<section class="spark-filters wrap filters" aria-label="빠른 분류">
+  <button class="active" type="button" data-search="">전부</button>
+  <button type="button" data-search="생각놀이">게임</button>
   <button type="button" data-search="아이와">아이와</button>
   <button type="button" data-search="선생님">선생님 도구</button>
   <button type="button" data-search="센터업무">기록·일정</button>
 </section>
 
-<section class="gallery wrap" id="made">
-  <div class="gallery-head workshop-heading">
-    <div><span>OUT OF THE DRAWER</span><h2>꺼내놓은 것들.</h2><p>완벽해서 올린 게 아니라, 지금 쓸 수 있어서 올려둔 것들.</p></div>
-    <span class="result-count" id="resultCount">3개</span>
-  </div>
-
-  <div class="tool-grid workshop-grid" id="toolGrid">
-    <article class="tool-card card-feature" data-tags="생각놀이 인지 아이와 게임 차근차근 유아 초기인지">
-      <a class="scene scene-game" href="https://app-s8g5hg.v2.appdeploy.ai/" target="_blank" rel="noopener">
-        <img src="https://appdeployai-v2-qa-screenshots.s3.us-east-1.amazonaws.com/app-s8g5hg/1789199468624/web.png" alt="차근차근 놀이터 실제 화면">
-        <span class="scene-label">게임 · 생각놀이</span>
-        <span class="scene-glow g1"></span><span class="scene-glow g2"></span>
-      </a>
-      <div class="card-copy">
-        <div class="card-top"><span class="status checking">점검중</span><time>유아 · 초기인지</time></div>
-        <h3>차근차근 놀이터</h3>
-        <p>찾고 · 기다리고 · 생각하는 기초 놀이</p>
-        <a class="card-action" href="https://app-s8g5hg.v2.appdeploy.ai/" target="_blank" rel="noopener">현재 버전 열기 <b>↗</b></a>
-      </div>
+<section class="spark-shelf wrap" id="made">
+  <div class="shelf-head"><span>OPEN SHELF</span><h2>지금 꺼내 쓸 수 있는 것.</h2><em id="resultCount">3개</em></div>
+  <div class="tool-grid spark-grid" id="toolGrid">
+    <article class="tool-card spark-card card-game" data-tags="생각놀이 인지 아이와 게임 차근차근 유아 초기인지">
+      <a class="spark-card-visual" href="https://app-s8g5hg.v2.appdeploy.ai/" target="_blank" rel="noopener"><img src="https://appdeployai-v2-qa-screenshots.s3.us-east-1.amazonaws.com/app-s8g5hg/1789199468624/web.png" alt="차근차근 놀이터 실제 화면"><span>PLAY</span></a>
+      <div class="spark-card-copy"><div><span class="status checking">점검중</span><small>유아 · 초기인지</small></div><h3>차근차근 놀이터</h3><p>찾고 · 기다리고 · 생각하는 기초 놀이</p><a href="https://app-s8g5hg.v2.appdeploy.ai/" target="_blank" rel="noopener">현재 버전 열기 ↗</a></div>
     </article>
 
-    <article class="tool-card card-time" data-tags="센터업무 보강 일정 계획 실제 수업시간 선생님 도구">
-      <button class="scene scene-time open-tool" type="button" data-tool="makeup" aria-label="보강 확인 열기">
-        <span class="scene-label">작은 도구</span>
-        <span class="night-orb"></span>
-        <span class="time-chip a"><small>계획</small><b>16:00</b></span>
-        <span class="time-path"></span>
-        <span class="time-chip b"><small>실제</small><b>17:00</b></span>
-        <i class="star s1">✦</i><i class="star s2">✦</i>
-      </button>
-      <div class="card-copy">
-        <div class="card-top"><span class="status live">바로 사용</span><time>기록 · 일정</time></div>
-        <h3>보강 확인</h3>
-        <p>계획과 실제 시간이 다른지 한 번에 확인</p>
-        <button class="card-action open-tool" type="button" data-tool="makeup">바로 확인하기 <b>→</b></button>
-      </div>
+    <article class="tool-card spark-card card-time" data-tags="센터업무 보강 일정 계획 실제 수업시간 선생님 도구">
+      <button class="spark-card-visual open-tool" type="button" data-tool="makeup"><div class="big-clock-pair"><i>16:00</i><b>→</b><i>17:00</i></div><span>TOOL</span></button>
+      <div class="spark-card-copy"><div><span class="status live">바로 사용</span><small>기록 · 일정</small></div><h3>보강 확인</h3><p>계획과 실제 시간이 다른지 바로 확인</p><button class="card-action open-tool" type="button" data-tool="makeup">바로 확인하기 →</button></div>
     </article>
 
-    <article class="tool-card card-memo" data-tags="선생님 수업 메모 기록 일지 도구">
-      <button class="scene scene-memo open-tool" type="button" data-tool="memo" aria-label="30초 수업메모 열기">
-        <span class="scene-label">선생님 도구</span>
-        <span class="paper p1"></span><span class="paper p2"></span><span class="paper p3"></span>
-        <span class="gold-line"></span>
-        <i class="star s3">✦</i>
-      </button>
-      <div class="card-copy">
-        <div class="card-top"><span class="status live">바로 사용</span><time>메모 · 기록</time></div>
-        <h3>30초 수업메모</h3>
-        <p>기억날 때 활동 · 반응 · 지원만 빠르게</p>
-        <button class="card-action open-tool" type="button" data-tool="memo">메모 시작하기 <b>→</b></button>
-      </div>
+    <article class="tool-card spark-card card-memo" data-tags="선생님 수업 메모 기록 일지 도구">
+      <button class="spark-card-visual open-tool" type="button" data-tool="memo"><div class="paper-stack"><i></i><i></i><i></i></div><span>NOTE</span></button>
+      <div class="spark-card-copy"><div><span class="status live">바로 사용</span><small>메모 · 기록</small></div><h3>30초 수업메모</h3><p>활동 · 반응 · 지원만 생각날 때 빠르게</p><button class="card-action open-tool" type="button" data-tool="memo">메모 시작하기 →</button></div>
     </article>
-
-    <aside class="drawer-card" aria-label="만드는 중인 색깔악보와 붐웨커 도구">
-      <span class="tape" aria-hidden="true"></span>
-      <small>아직 서랍 밖으로 다 못 꺼냄</small>
-      <h3>색깔악보<br>× 붐웨커</h3>
-      <p>노래를 넣고 → 3음·5음·8음으로 바꾸고 → 색깔악보와 연주 화면까지.</p>
-      <div class="drawer-progress"><span style="width:58%"></span></div>
-      <b>만드는 중 · prototype</b>
-      <div class="note-dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-    </aside>
   </div>
-
-  <div class="empty-state" id="emptyState" hidden>
-    <b>그건 아직 서랍에 없어요.</b>
-    <p>필요한 걸 남겨주면 다음 상상이 될 수도 있어요.</p>
-    <a href="request/">아이디어 놓고 가기 →</a>
-  </div>
+  <div class="empty-state" id="emptyState" hidden><b>그건 아직 없어요.</b><p>그럼 다음에 만들 수도 있죠.</p><a href="request/">생각 던지고 가기 →</a></div>
 </section>
 
-<section class="growing workshop-bench" id="growing">
-  <div class="wrap growing-grid">
-    <div class="growing-title">
-      <span>ON THE WORKBENCH</span>
-      <h2>오늘 작업대 위.</h2>
-      <p>완성된 척하지 않고, 지금 만지는 것 그대로.</p>
-      <div class="bench-sketch" aria-hidden="true">↗ 고치고<br>↙ 다시 써보고</div>
-    </div>
-    <div class="progress-list">
-      <article><span class="dot testing"></span><div><b>차근차근 놀이터 점검</b><small>유아/초기인지 버전 실제 진행 확인</small></div><em>점검중</em></article>
-      <article><span class="dot making"></span><div><b>색깔악보 · 붐웨커 스튜디오</b><small>3음·5음·8음 변환과 낙하형 연주 화면</small></div><em>조립중</em></article>
-      <article><span class="dot making"></span><div><b>Godot 작은 세계 실험</b><small>브라우저에서 돌아가는 3D 놀이 테스트</small></div><em>테스트중</em></article>
-      <article><span class="dot dream"></span><div><b>아직 이름 없음</b><small>그냥 궁금해서 만져보는 것들</small></div><em>상상중</em></article>
+<section class="spark-workbench" id="growing">
+  <div class="wrap workbench-inner">
+    <div class="workbench-title"><span>NOW MESSING WITH</span><h2>지금 벌여놓은 것.</h2><p>하나 끝내고 하나 시작하는 편은 아니라서요.</p></div>
+    <div class="project-race">
+      <article class="race-item lemon"><b>색깔악보 × 붐웨커</b><span>3음·5음·8음 변환</span><em>조립중</em></article>
+      <article class="race-item mint"><b>차근차근 놀이터</b><span>실제 진행 점검</span><em>점검중</em></article>
+      <article class="race-item sky"><b>Godot 작은 세계</b><span>웹 3D 놀이 실험</span><em>테스트중</em></article>
+      <article class="race-item pink"><b>이름 없는 것</b><span>그냥 궁금해서 만지는 중</span><em>상상중</em></article>
     </div>
   </div>
 </section>
 
-<section class="request-teaser imagination-request">
-  <div class="wrap request-grid">
-    <div>
-      <span>LEAVE A THOUGHT</span>
-      <h2>여기 없는 걸<br>상상했다면.</h2>
-      <p>한 줄만 놓고 가도 돼요. 다음에 진짜 만들어질 수도 있으니까.</p>
-    </div>
-    <a class="request-main" href="request/"><span>아이디어 놓고 가기</span><b>→</b></a>
-  </div>
+<section class="spark-exit">
+  <div class="wrap exit-inner"><div><span>ONE MORE THING?</span><h2>없으면 만들면 되지.</h2><p>여기 없는 걸 떠올렸다면 한 줄만 던져두고 가요.</p></div><a href="request/">생각 던지기 <b>→</b></a></div>
 </section>
 </main>
 
-<footer>
-  <div class="wrap footer-inner">
-    <div><b>울모아쌤</b><span>생각나면 만들고, 써보고, 또 바꾸는 곳</span></div>
-    <div><a href="about/">만든 사람</a><a href="request/">아이디어 놓기</a></div>
-  </div>
-</footer>
+<footer class="spark-footer"><div class="wrap"><b>울모아쌤</b><span>생각 → 손부터 움직이는 중</span><div><a href="about/">만든 사람</a><a href="request/">아이디어</a></div></div></footer>
 
 <dialog class="tool-dialog" id="makeupDialog">
-  <button class="dialog-close" type="button" aria-label="닫기">×</button>
-  <div class="dialog-head"><span>보강 확인</span><h2>두 시간을 넣어보세요.</h2><p>계획과 실제가 다르면 바로 표시합니다.</p></div>
-  <div class="compare-form">
-    <label><span>계획일시</span><input type="datetime-local" id="plannedAt"></label>
-    <label><span>실제 제공일시</span><input type="datetime-local" id="actualAt"></label>
-    <button class="btn dark big" type="button" id="compareTime">비교하기</button>
-  </div>
-  <div class="compare-result" id="compareResult" hidden></div>
-  <p class="privacy-note">울모아 내부 기록 기준을 빠르게 확인하는 보조도구입니다.</p>
+  <button class="dialog-close" type="button" aria-label="닫기">×</button><div class="dialog-head"><span>보강 확인</span><h2>두 시간을 넣어보세요.</h2><p>계획과 실제가 다르면 바로 표시합니다.</p></div><div class="compare-form"><label><span>계획일시</span><input type="datetime-local" id="plannedAt"></label><label><span>실제 제공일시</span><input type="datetime-local" id="actualAt"></label><button class="btn dark big" type="button" id="compareTime">비교하기</button></div><div class="compare-result" id="compareResult" hidden></div><p class="privacy-note">울모아 내부 기록 기준을 빠르게 확인하는 보조도구입니다.</p>
 </dialog>
-
 <dialog class="tool-dialog" id="memoDialog">
-  <button class="dialog-close" type="button" aria-label="닫기">×</button>
-  <div class="dialog-head"><span>30초 수업메모</span><h2>기억날 때 세 가지만.</h2></div>
-  <div class="memo-form">
-    <label><span>오늘 한 활동</span><textarea id="memoActivity" placeholder="예: 색 분류, 순서 손바닥 치기"></textarea></label>
-    <label><span>아동 반응</span><textarea id="memoResponse" placeholder="예: 3개까지 정확, 4개부터 반복 필요"></textarea></label>
-    <label><span>도움·힌트</span><textarea id="memoSupport" placeholder="예: 언어적 힌트 후 재시도"></textarea></label>
-    <button class="btn dark big" type="button" id="makeMemo">메모 만들기</button>
-  </div>
-  <div class="memo-output" id="memoOutput" hidden><pre id="memoText"></pre><button class="btn primary" id="copyMemo" type="button">복사하기</button></div>
-  <p class="privacy-note">개인정보는 넣지 않는 걸 권합니다. 입력내용은 서버로 전송하지 않습니다.</p>
+  <button class="dialog-close" type="button" aria-label="닫기">×</button><div class="dialog-head"><span>30초 수업메모</span><h2>기억날 때 세 가지만.</h2></div><div class="memo-form"><label><span>오늘 한 활동</span><textarea id="memoActivity" placeholder="예: 색 분류, 순서 손바닥 치기"></textarea></label><label><span>아동 반응</span><textarea id="memoResponse" placeholder="예: 3개까지 정확, 4개부터 반복 필요"></textarea></label><label><span>도움·힌트</span><textarea id="memoSupport" placeholder="예: 언어적 힌트 후 재시도"></textarea></label><button class="btn dark big" type="button" id="makeMemo">메모 만들기</button></div><div class="memo-output" id="memoOutput" hidden><pre id="memoText"></pre><button class="btn primary" id="copyMemo" type="button">복사하기</button></div><p class="privacy-note">개인정보는 넣지 않는 걸 권합니다. 입력내용은 서버로 전송하지 않습니다.</p>
 </dialog>
-
 <div class="toast" id="toast" role="status"></div>
-<script src="assets/app.js"></script>
+<script src="assets/app.js"></script><script src="assets/spark.js"></script>
 </body>
 </html>
