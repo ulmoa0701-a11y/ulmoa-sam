@@ -5,7 +5,7 @@ Babylon.js standalone next-generation prototype. This branch of the game is kept
 ## Child feedback mapped into NEXT
 - 실제 3D 보스: procedural 3D WOODS / EYE / SMOG
 - 낮/밤 변화: continuous day → sunset → night → dawn cycle
-- 굵고 잘 보이는 글자: high-contrast 800–900 weight HTML UI
+- 굵고 잘 보이는 글자: high-contrast 800–900 weight HTML UI + Noto Sans KR web font
 - 글씨가 너무 빨리 사라짐: dialog stays about 9–12 seconds
 - 조작법: WASD/방향키 + E 말걸기 + Q 함정 + F 베기 + Space 점프 fixed guide
 - SMOG가 너무 빨리 사라짐: persistent boss with repeated observation cycles
@@ -14,8 +14,10 @@ Babylon.js standalone next-generation prototype. This branch of the game is kept
 - 등장인물이 사람처럼: procedural head/body/arms/legs human figures
 - 현실적인 사물: hotel windows/door, pond, trees, bench, path as lightweight 3D objects
 
-## Runtime QA gate
-Chrome mobile 390×844 and desktop 1536×864 must both load the Babylon canvas without console/network errors and automatically complete the first interaction: approach gardener → E talk → stage 1 / WOODS.
+## Runtime QA gates
+1. Chrome mobile 390×844 and desktop 1536×864: canvas load, no overflow, fixed E/Q/F guide, gardener → E talk → stage 1.
+2. Full mobile route: gardener → WOODS traps → pond keeper → EYE chase/slashes → traveler → persistent SMOG three-cycle observation → stage 7, while the visible timer still targets 07:00 and day/night has changed.
+3. Console/page/network errors must remain zero.
 
 ## Still prototype, not final art
 Final sculpted/imported GLB characters, walk/idle animations, and PBR textures will be added only after runtime/performance QA passes.
