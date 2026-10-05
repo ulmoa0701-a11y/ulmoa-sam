@@ -5,16 +5,14 @@ const browser=await puppeteer.launch({headless:true,executablePath:chrome,args:[
 const cases=[['playcanvas','http://127.0.0.1:4173/bench/playcanvas/'],['babylon','http://127.0.0.1:4173/bench/babylon/']];
 const viewports=[['mobile',{width:390,height:844}],['desktop',{width:1536,height:864}]];
 const results=[];
-for(const [engine,url] of cases){for(const [device,viewport] of viewports){for(let run=1;run<=1;run++){
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+for(const [engine,url] of cases){for(const [device,viewport] of viewports){
   const page=await browser.newPage();await page.setViewport(viewport);const cdp=await page.createCDPSession();await cdp.send('Network.enable');await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});
   let bytes=0;const errors=[];const failed=[];cdp.on('Network.loadingFinished',e=>bytes+=e.encodedDataLength||0);page.on('pageerror',e=>errors.push(String(e)));page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});page.on('requestfailed',r=>failed.push(`${r.failure()?.errorText||'failed'} ${r.url()}`));
-  const nav0=Date.now();let navError='';try{await page.goto(url,{waitUntil:'domcontentloaded',timeout:20000});await page.waitForFunction(()=>window.__bench&&window.__bench.fps>0,{timeout:20000});await new Promise(r=>setTimeout(r,5000));}catch(e){navError=String(e)}
+  const nav0=Date.now();let navError='';
+  const work=(async()=>{await page.goto(url,{waitUntil:'domcontentloaded',timeout:10000});await page.waitForFunction(()=>window.__bench&&window.__bench.fps>0,{timeout:10000});await sleep(3500)})();
+  try{await Promise.race([work,new Promise((_,rej)=>setTimeout(()=>rej(new Error('overall 15s timeout')),15000))])}catch(e){navError=String(e)}
   const bench=await page.evaluate(()=>window.__bench||null).catch(()=>null);const metrics=await page.metrics().catch(()=>({}));const mem=await page.evaluate(()=>performance.memory?.usedJSHeapSize||null).catch(()=>null);
-  results.push({engine,device,run,viewport,wallMs:Date.now()-nav0,bytes,bench,jsHeap:mem,metrics:{TaskDuration:metrics.TaskDuration,JSHeapUsedSize:metrics.JSHeapUsedSize},errors,failed,navError});
-  console.log('CASE',engine,device,JSON.stringify(results.at(-1)));
-  await page.close();
-}}}
-await browser.close();
-const summary={generatedAt:new Date().toISOString(),results};
-fs.writeFileSync('bench-results.json',JSON.stringify(summary,null,2));
-console.log('BENCH_RESULTS_START');console.log(JSON.stringify(summary,null,2));console.log('BENCH_RESULTS_END');
+  const row={engine,device,viewport,wallMs:Date.now()-nav0,bytes,bench,jsHeap:mem,metrics:{TaskDuration:metrics.TaskDuration,JSHeapUsedSize:metrics.JSHeapUsedSize},errors,failed,navError};results.push(row);console.log('CASE_RESULT',JSON.stringify(row));await page.close();
+}}
+await browser.close();const summary={generatedAt:new Date().toISOString(),results};fs.writeFileSync('bench-results.json',JSON.stringify(summary,null,2));console.log('BENCH_RESULTS_START');console.log(JSON.stringify(summary,null,2));console.log('BENCH_RESULTS_END');
