@@ -45,10 +45,15 @@
         <input id="requestSubject" maxlength="50" placeholder="예: 보강한 수업만 한눈에 보고 싶어요">
       </div>
 
+      <div class="form-line" id="linkBlock" hidden>
+        <span id="linkLabel">링크가 있으면</span>
+        <input id="requestLink" type="url" maxlength="500" placeholder="https://">
+      </div>
+
       <div class="form-line">
         <span id="bodyLabel">조금 더 적어도 돼요.</span>
         <textarea id="requestBody" maxlength="800" placeholder="불편한 점, 만들었으면 하는 것, 재밌을 것 같은 아이디어를 편하게 적어주세요."></textarea>
-        <div class="helper">아동 이름·생년월일·검사결과 같은 민감정보는 적지 않아도 됩니다.</div>
+        <div class="helper">아동 이름·생년월일·검사결과 같은 개인정보는 적지 말아주세요.</div>
       </div>
 
       <div class="send-row">
@@ -79,9 +84,12 @@ const preview=document.querySelector('#requestPreview');
 const email=document.querySelector('#emailRequest');
 const copyKakao=document.querySelector('#copyAndKakao');
 const toast=document.querySelector('#toast');
-const mode=new URLSearchParams(location.search).get('mode')==='cheer'?'cheer':'idea';
-const storageKey=mode==='cheer'?'ulmoa-cheer-draft':'ulmoa-request-draft';
-let audience=mode==='cheer'?'작업 응원':'';
+const link=document.querySelector('#requestLink');
+const linkBlock=document.querySelector('#linkBlock');
+const modeParam=new URLSearchParams(location.search).get('mode');
+const mode=['cheer','share','build'].includes(modeParam)?modeParam:'idea';
+const storageKey={cheer:'ulmoa-cheer-draft',share:'ulmoa-share-draft',build:'ulmoa-build-draft',idea:'ulmoa-request-draft'}[mode];
+let audience=mode==='cheer'?'작업 응원':mode==='share'?'정보 공유':'';
 
 if(mode==='cheer'){
   document.title='작업 응원하기 — 일단 해봄노트';
@@ -94,23 +102,50 @@ if(mode==='cheer'){
   document.querySelector('#bodyLabel').textContent='조금 더 적어도 좋아요.';
   body.placeholder='좋았던 점, 아쉬웠던 점, 다음에 보고 싶은 것, 그냥 응원도 편하게 적어주세요.';
 }
+if(mode==='share'){
+  document.title='정보 공유 — 일단 해봄노트';
+  document.querySelector('#requestKicker').textContent='정보 공유';
+  document.querySelector('#requestHeading').innerHTML='이거 한번<br>봐요.';
+  document.querySelector('#requestLead').textContent='괜찮은 자료나 사이트 있으면 나도 알려주세요.';
+  document.querySelector('#audienceBlock').hidden=true;
+  document.querySelector('#subjectLabel').textContent='뭐예요?';
+  subject.placeholder='예: 초등 사회성 활동 자료';
+  linkBlock.hidden=false;
+  document.querySelector('#bodyLabel').textContent='왜 추천해요?';
+  body.placeholder='한 줄만 적어도 좋아요.';
+}
+if(mode==='build'){
+  document.title='함께 만들어봐요 — 일단 해봄노트';
+  const buildChoices=[['치료사','치료사'],['특수교사','특수교사'],['학부모','학부모'],['특수교육대상자','특수교육대상자']];
+  choices.forEach((btn,i)=>{btn.textContent=buildChoices[i][0];btn.dataset.value=buildChoices[i][1];});
+  document.querySelector('#requestKicker').textContent='함께 만들어봐요';
+  document.querySelector('#requestTitle').textContent='누구에게 필요해요?';
+  document.querySelector('#requestHeading').innerHTML='이런 거 있으면<br>좋겠어요.';
+  document.querySelector('#requestLead').textContent='필요한 게 있거나 같이 만들어보고 싶은 게 있으면 남겨주세요.';
+  document.querySelector('#subjectLabel').textContent='뭘 만들어볼까요?';
+  subject.placeholder='예: 받아쓰기 싫어하는 아이가 할 수 있는 게임';
+  document.querySelector('#bodyLabel').textContent='어떤 때 필요해요?';
+  body.placeholder='지금 불편한 점이나 있으면 좋겠는 걸 적어주세요.';
+}
 
 function buildText(){
-  const label=mode==='cheer'?'작업 응원':'아이디어';
-  return '['+label+']\n'+(mode==='cheer'?'':'대상: '+(audience||'아직 선택 안 함')+'\n\n')+'한 줄: '+subject.value.trim()+'\n\n내용: '+body.value.trim();
+  const label={cheer:'작업 응원',share:'정보 공유',build:'함께 만들기',idea:'아이디어'}[mode];
+  const audienceLine=(mode==='cheer'||mode==='share')?'':'대상: '+(audience||'아직 선택 안 함')+'\n\n';
+  const linkLine=mode==='share'&&link.value.trim()?'링크: '+link.value.trim()+'\n\n':'';
+  return '['+label+']\n'+audienceLine+'한 줄: '+subject.value.trim()+'\n\n'+linkLine+'내용: '+body.value.trim();
 }
 function sync(){
   const text=buildText();
   preview.textContent=text;
-  const mailTitle=mode==='cheer'?'울모아쌤 작업 응원':'울모아쌤 아이디어';
+  const mailTitle={cheer:'울모아쌤 작업 응원',share:'울모아쌤 정보 공유',build:'울모아쌤 함께 만들기',idea:'울모아쌤 아이디어'}[mode];
   email.href='mailto:ulmoa0701@gmail.com?subject='+encodeURIComponent(mailTitle+' · '+(subject.value.trim()||'메모'))+'&body='+encodeURIComponent(text);
-  localStorage.setItem(storageKey,JSON.stringify({audience,subject:subject.value,body:body.value}));
+  localStorage.setItem(storageKey,JSON.stringify({audience,subject:subject.value,link:link.value,body:body.value}));
 }
 function showToast(msg){toast.textContent=msg;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1800);}
 choices.forEach(btn=>btn.addEventListener('click',()=>{audience=btn.dataset.value;choices.forEach(x=>x.classList.toggle('selected',x===btn));sync();}));
-subject.addEventListener('input',sync);body.addEventListener('input',sync);
-copyKakao.addEventListener('click',async()=>{const text=buildText();try{await navigator.clipboard.writeText(text);showToast(mode==='cheer'?'응원 메모를 복사했어요':'메모를 복사했어요');}catch{showToast('복사가 안 되면 미리보기 내용을 직접 복사해주세요');}setTimeout(()=>window.open('http://pf.kakao.com/_wEGJn','_blank','noopener'),180);});
-try{const saved=JSON.parse(localStorage.getItem(storageKey)||'null');if(saved){audience=mode==='cheer'?'작업 응원':(saved.audience||'');subject.value=saved.subject||'';body.value=saved.body||'';choices.forEach(x=>x.classList.toggle('selected',x.dataset.value===audience));}}catch{}
+subject.addEventListener('input',sync);link.addEventListener('input',sync);body.addEventListener('input',sync);
+copyKakao.addEventListener('click',async()=>{const text=buildText();try{await navigator.clipboard.writeText(text);showToast(mode==='cheer'?'응원 메모를 복사했어요':mode==='share'?'정보를 복사했어요':'메모를 복사했어요');}catch{showToast('복사가 안 되면 미리보기 내용을 직접 복사해주세요');}setTimeout(()=>window.open('http://pf.kakao.com/_wEGJn','_blank','noopener'),180);});
+try{const saved=JSON.parse(localStorage.getItem(storageKey)||'null');if(saved){audience=mode==='cheer'?'작업 응원':mode==='share'?'정보 공유':(saved.audience||'');subject.value=saved.subject||'';link.value=saved.link||'';body.value=saved.body||'';choices.forEach(x=>x.classList.toggle('selected',x.dataset.value===audience));}}catch{}
 sync();
 </script>
 </body>
