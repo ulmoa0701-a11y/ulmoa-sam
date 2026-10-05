@@ -1,0 +1,39 @@
+name: Babylon NEXT smoke
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'lab-babylon/**'
+      - 'bench/smoke-babylon-next.mjs'
+concurrency:
+  group: babylon-next-smoke
+  cancel-in-progress: true
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-audit --no-fund puppeteer-core@latest
+      - name: Find Chrome
+        run: |
+          CHROME_PATH=$(which google-chrome || which google-chrome-stable || which chromium || which chromium-browser)
+          echo "CHROME_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
+      - name: Serve repo
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/next-http.log 2>&1 &
+          sleep 2
+      - name: Run Babylon NEXT smoke
+        run: node bench/smoke-babylon-next.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: babylon-next-smoke-results
+          path: |
+            next-smoke-results.json
+            next-*-start.png
+            next-*-after-talk.png
+          if-no-files-found: warn
