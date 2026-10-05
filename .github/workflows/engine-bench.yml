@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'bench/**'
+      - 'lab-babylon/**'
 concurrency:
   group: engine-bench
   cancel-in-progress: true
@@ -27,11 +28,17 @@ jobs:
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/bench-http.log 2>&1 &
           sleep 2
-      - name: Run same-scene browser benchmark
+      - name: Run same-scene engine benchmark
         run: node bench/run-bench.mjs
+      - name: Smoke test Babylon NEXT
+        run: node bench/smoke-babylon-next.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: engine-benchmark-results
-          path: bench-results.json
+          path: |
+            bench-results.json
+            next-smoke-results.json
+            next-*-start.png
+            next-*-after-talk.png
           if-no-files-found: warn
