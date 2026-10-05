@@ -1,4 +1,14 @@
 (() => {
+  const gameFix = document.createElement('style');
+  gameFix.textContent = `
+    .guide-panel>img{position:static!important;left:auto!important;bottom:auto!important;grid-column:1!important;grid-row:1!important;align-self:center!important;justify-self:center!important}
+    .guide-copy{grid-column:2!important;grid-row:1!important;min-width:0!important;width:auto!important}
+    .guide-copy h3{word-break:keep-all!important;overflow-wrap:normal!important;max-width:none!important}
+    .guide-copy p{word-break:keep-all!important;overflow-wrap:break-word!important;max-width:none!important}
+    @media(max-width:560px){.guide-panel>img{position:static!important}.guide-copy{grid-column:2!important}.guide-panel{min-height:0!important}}
+  `;
+  document.head.appendChild(gameFix);
+
   const previews = {
     rescue: `<div class="cp-mission">큰 · 노란 · 오리를 찾아요</div><div class="cp-choice-row"><span>🐥<small>큰·노란</small></span><span class="is-good">🦆<small>큰·노란</small></span><span>🪿<small>작은·노란</small></span><span>🐶<small>큰·갈색</small></span></div>`,
     memory: `<div class="cp-mission">이 순서대로 기억해요!</div><div class="cp-sequence"><i class="c-red">🌸</i><i class="c-blue">🌼</i><i class="c-yellow">🌻</i><i class="c-purple">🌷</i></div><div class="cp-arrow">▼</div><div class="cp-slots"><i>?</i><i>?</i><i>?</i><i>?</i></div>`,
