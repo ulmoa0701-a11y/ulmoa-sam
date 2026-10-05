@@ -14,5 +14,8 @@ Babylon.js standalone next-generation prototype. This branch of the game is kept
 - 등장인물이 사람처럼: procedural head/body/arms/legs human figures
 - 현실적인 사물: hotel windows/door, pond, trees, bench, path as lightweight 3D objects
 
+## Runtime QA gate
+Chrome mobile 390×844 and desktop 1536×864 must both load the Babylon canvas without console/network errors and automatically complete the first interaction: approach gardener → E talk → stage 1 / WOODS.
+
 ## Still prototype, not final art
 Final sculpted/imported GLB characters, walk/idle animations, and PBR textures will be added only after runtime/performance QA passes.
