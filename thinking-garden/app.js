@@ -1,9 +1,9 @@
 const $=(s)=>document.querySelector(s), $$=(s)=>[...document.querySelectorAll(s)];
-const screens={home:$('#homeScreen'),game:$('#gameScreen'),result:$('#resultScreen')};
+const screens={home:$('#homeScreen'),intro:$('#introScreen'),game:$('#gameScreen'),result:$('#resultScreen')};
 const area=$('#gameArea'),toast=$('#gameToast'),world=$('#gameWorld');
 const missionText=$('#missionText'),missionSub=$('#missionSub'),guide=$('#guideCharacter');
 const STORE={seeds:'moa-garden:seeds',done:'moa-garden:completed',sound:'moa-garden:sound'};
-let state={game:null,round:0,score:0,total:Number(localStorage.getItem(STORE.seeds)||0),sound:localStorage.getItem(STORE.sound)!=='off',lock:false,lastSpeech:'',timers:[]};
+let state={game:null,previewGame:null,round:0,score:0,total:Number(localStorage.getItem(STORE.seeds)||0),sound:localStorage.getItem(STORE.sound)!=='off',lock:false,lastSpeech:'',timers:[]};
 let completed=readCompleted();
 const meta={
  rescue:{title:'딱 맞는 친구 찾기',kicker:'홍의 찾기숲',theme:'find',friend:'assets/friend-hong.png'},
@@ -20,6 +20,34 @@ const meta={
  paint:{title:'정원길 쓱싹 칠하기',kicker:'샘의 색칠길',theme:'spacing',friend:'assets/friend-saem.png'},
  water:{title:'시든 꽃 깨우기',kicker:'홍의 물방울정원',theme:'find',friend:'assets/friend-hong.png'}
 };
+
+const previewExamples={
+ rescue:`<div class="pv-instruction">큰 · 노란 · 오리를 찾아요</div><div class="pv-row"><span class="pv-animal">🐰<small>큰·노란</small></span><span class="pv-animal preview-pulse">🦆<small>큰·노란</small></span><span class="pv-animal">🦆<small>작은·노란</small></span><span class="pv-animal">🐮<small>큰·파란</small></span></div>`,
+ memory:`<div class="pv-instruction">순서를 기억해요</div><div class="pv-sequence"><i class="blue"></i><b>→</b><i class="yellow"></i><b>→</b><i class="green"></i></div><div class="pv-hint">잠시 뒤 가려지면 같은 순서로 눌러요</div>`,
+ spacing:`<div class="pv-instruction">말칸을 순서대로 이어요</div><div class="pv-words"><span>오늘은</span><span>학원이</span><span>적어서</span><span>기뻐요</span></div><div class="pv-bridge">오늘은　|　학원이　|　…</div>`,
+ spelling:`<div class="pv-instruction">고장 난 글자를 고쳐요</div><div class="pv-sign">숙제를 다 <b>?</b></div><div class="pv-options"><span class="preview-pulse">했어요</span><span>햇어요</span></div>`,
+ sameShape:`<div class="pv-instruction">위와 같은 모양은?</div><div class="pv-target">★</div><div class="pv-options shapes"><span>●</span><span class="preview-pulse">★</span><span>▲</span><span>■</span></div>`,
+ flower:`<div class="pv-instruction">꽃만 골라요</div><div class="pv-options emoji"><span class="preview-pulse">🌷</span><span>🍃</span><span class="preview-pulse">🌼</span><span>🪨</span><span>🍄</span></div>`,
+ hide:`<div class="pv-instruction">잎사귀를 열어 숨어 있는 친구를 찾아요</div><div class="pv-options emoji"><span>🍃</span><span class="preview-pulse">🍃<small>🐞</small></span><span>🍃</span><span>🍃</span></div>`,
+ path:`<div class="pv-instruction">반짝이는 곳부터 차례대로</div><div class="pv-path"><span class="ready">🌱</span><b>→</b><span>🌼</span><b>→</b><span>🍃</span><b>→</b><span>🌸</span></div>`,
+ calm:`<div class="pv-instruction">빨간불엔 기다리고 초록불에 톡!</div><div class="pv-lights"><span>🔴<small>기다려요</small></span><b>→</b><span class="preview-pulse">🟢<small>지금!</small></span></div>`,
+ inside:`<div class="pv-instruction">울타리 안에만 별을 심어요</div><div class="pv-field"><div class="pv-fence"><span>⭐</span><span class="preview-pulse">⭐</span></div><i>×</i></div>`,
+ targets:`<div class="pv-instruction">하나씩 빠뜨리지 않고 눌러요</div><div class="pv-dots"><span>🌼</span><span class="preview-pulse">○</span><span>○</span><span>🌼</span><span>○</span></div>`,
+ paint:`<div class="pv-instruction">정해진 길 안을 쓱싹 채워요</div><div class="pv-paint">${'<i></i>'.repeat(18)}</div>`,
+ water:`<div class="pv-instruction">시든 꽃에만 물을 줘요</div><div class="pv-options emoji"><span>🌻<small>✓</small></span><span class="preview-pulse">🥀<small>💧</small></span><span>🌷<small>✓</small></span><span class="preview-pulse">🥀<small>💧</small></span></div>`
+};
+function openPreview(id){
+  const m=meta[id],card=document.querySelector(`[data-open="${id}"]`); if(!m||!card)return;
+  state.previewGame=id;
+  $('#introKicker').textContent=m.kicker;
+  $('#introTitle').textContent=m.title;
+  $('#introDesc').textContent=card.querySelector('p')?.textContent||'게임 방법을 보고 시작해요.';
+  $('#introFriend').src=m.friend;
+  $('#introTags').innerHTML=[...card.querySelectorAll('.skill-tags i')].map(x=>`<span>${x.textContent}</span>`).join('');
+  $('#introPreview').innerHTML=previewExamples[id]||'<div class="pv-instruction">게임 예시를 보고 시작해요.</div>';
+  show('intro');
+}
+
 function readCompleted(){try{return JSON.parse(localStorage.getItem(STORE.done)||'{}')}catch{return{}}}
 function clearTimers(){state.timers.forEach(clearTimeout);state.timers=[]}
 function later(fn,ms){const t=setTimeout(fn,ms);state.timers.push(t);return t}
@@ -87,7 +115,10 @@ const spellRounds=[
 ];
 function renderSpelling(){const q=spellRounds[state.round];missionText.textContent='간판에서 이상한 곳을 고쳐 주세요!';missionSub.textContent=state.round<2?'ㅅ과 ㅆ처럼 비슷한 글자도 천천히 비교해요.':'맞춤법·띄어쓰기·문장부호를 하나씩 고쳐요.';say(`${q.before}${q.right}${q.after||''}. 알맞은 것을 골라 주세요.`);const shop=document.createElement('div');shop.className='repair-shop';const helper=document.createElement('div');helper.className='repair-friend';helper.innerHTML='<img src="assets/friend-ti.png" alt="">';const wrap=document.createElement('div');wrap.className='sign-wrap';const sign=document.createElement('div');sign.className='broken-sign';sign.innerHTML=`${q.before}<b>?</b>${q.after||''}`;const choices=document.createElement('div');choices.className='repair-choices';const tip=document.createElement('div');tip.className='repair-tip';shuffle([q.right,q.wrong]).forEach(w=>{const b=document.createElement('button');b.className='repair-choice';b.textContent=w;b.onclick=()=>{if(state.lock)return;if(w===q.right){state.lock=true;b.classList.add('correct');sign.classList.add('fixed');sign.innerHTML=`${q.before}<b>${q.right}</b>${q.after||''}`;tip.textContent=q.tip;sfx('ok');addSeeds(10);rewardAt(b);flash('간판 수리 완료! ✨');later(()=>nextRound(0),1050)}else{b.classList.add('wrong');sfx('no');tip.textContent='두 모양을 다시 비교해봐요.';flash('조금만 더 살펴봐요.');later(()=>b.classList.remove('wrong'),430)}};choices.appendChild(b)});wrap.append(sign,choices,tip);shop.append(helper,wrap);area.appendChild(shop)}
 
-$$('[data-open]').forEach(b=>b.addEventListener('click',()=>startGame(b.dataset.open)));
+$$('[data-open]').forEach(b=>b.addEventListener('click',()=>openPreview(b.dataset.open)));
+$('#introStart').addEventListener('click',()=>{if(state.previewGame)startGame(state.previewGame)});
+$('#introBack').addEventListener('click',goHome);
+$('#introList').addEventListener('click',goHome);
 $$('[data-go="home"]').forEach(b=>b.addEventListener('click',goHome));
 $('#backHome').addEventListener('click',goHome);$('#retryGame').addEventListener('click',()=>startGame(state.game));
 $('#speakMission').addEventListener('click',()=>say(state.lastSpeech||missionText.textContent));
@@ -96,7 +127,7 @@ $('#soundToggle').addEventListener('click',()=>{state.sound=!state.sound;localSt
 function updateSound(){$('#soundToggle').textContent=state.sound?'🔊':'🔇';$('#soundToggle').setAttribute('aria-label',state.sound?'소리 끄기':'소리 켜기')}
 updateSound();updateHome();
 
-const deepGame=new URLSearchParams(location.search).get('game');if(deepGame&&meta[deepGame])startGame(deepGame);
+const deepGame=new URLSearchParams(location.search).get('game');if(deepGame&&meta[deepGame])openPreview(deepGame);
 
 // V2 library filters
 let currentCategory='all',currentSubtopic='all';
