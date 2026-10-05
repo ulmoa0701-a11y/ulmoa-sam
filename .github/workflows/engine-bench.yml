@@ -4,10 +4,13 @@ on:
   push:
     paths:
       - 'bench/**'
+concurrency:
+  group: engine-bench
+  cancel-in-progress: true
 jobs:
   benchmark:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
