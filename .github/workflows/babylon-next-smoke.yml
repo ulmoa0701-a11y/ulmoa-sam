@@ -5,13 +5,14 @@ on:
     paths:
       - 'lab-babylon/**'
       - 'bench/smoke-babylon-next.mjs'
+      - 'bench/full-babylon-next.mjs'
 concurrency:
   group: babylon-next-smoke
   cancel-in-progress: true
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,12 +29,16 @@ jobs:
           sleep 2
       - name: Run Babylon NEXT smoke
         run: node bench/smoke-babylon-next.mjs
+      - name: Run Babylon NEXT full route
+        run: node bench/full-babylon-next.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: babylon-next-smoke-results
           path: |
             next-smoke-results.json
+            next-full-results.json
             next-*-start.png
             next-*-after-talk.png
+            next-full-*.png
           if-no-files-found: warn
