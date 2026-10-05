@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#182319">
+  <title>호텔 밖 정원 NEXT</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div id="loading" class="loading"><div class="loading-card"><b>호텔 밖 정원 NEXT</b><span>3D 정원을 준비하고 있어요…</span><div class="bar"><i></i></div></div></div>
+  <header class="topbar">
+    <div><strong>호텔 밖 정원 NEXT</strong><small>Babylon.js · 아동 피드백 반영판</small></div>
+    <div class="badges"><span id="timeBadge">☀️ 낮</span><span id="timer">00:00 / 07:00</span></div>
+  </header>
+  <section class="mission-card"><span class="mission-label">🎯 지금 할 일</span><b id="mission">정원사에게 가서 E 말걸기</b><small id="distance">빨간 화살표를 따라가요</small></section>
+  <div id="dialog" class="dialog show">정원사를 찾아가 볼까? 가까이 가면 <b>E 말걸기</b>가 밝아져요.</div>
+  <aside class="guide"><b>간단 조작법</b><span>WASD / 방향키 · 이동</span><span><kbd>E</kbd> 말걸기 · <kbd>Q</kbd> 함정 · <kbd>F</kbd> 베기</span><span><kbd>Space</kbd> 점프</span></aside>
+  <div id="bossHud" class="boss-hud hidden"><b id="bossName">WOODS</b><div class="hp"><i id="bossHp"></i></div><span id="bossTip"></span></div>
+  <div class="mobile-controls">
+    <div class="dpad"><button data-move="up">▲</button><button data-move="left">◀</button><button data-move="down">▼</button><button data-move="right">▶</button></div>
+    <div class="actions"><button id="talkBtn" data-action="talk"><em>E</em> 말걸기</button><button id="jumpBtn" data-action="jump"><em>␣</em> 점프</button><button id="trapBtn" data-action="trap"><em>Q</em> 함정</button><button id="strikeBtn" data-action="strike"><em>F</em> 베기</button></div>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
