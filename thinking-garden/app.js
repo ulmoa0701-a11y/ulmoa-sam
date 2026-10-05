@@ -98,22 +98,28 @@ const memoryColors=[['파랑','#64adff'],['노랑','#ffd04f'],['초록','#67c67d
 function renderMemory(){
  const type=state.round%2===0?'color':'animal',len=state.round<2?3:4,seq=type==='color'?shuffle(memoryColors).slice(0,len):shuffle(animals).slice(0,len);
  missionText.textContent=type==='color'?`${len}개의 색 순서를 기억해요!`:`${len}마리의 순서를 기억해요!`;
- missionSub.textContent='눈으로 보고, 말로 한 번 되뇌어 본 뒤 기억길을 이어요.';say(missionText.textContent);
+ missionSub.textContent='시간 제한은 없어요. 천천히 보고 준비되면 버튼을 눌러요.';say(missionText.textContent);
  const stage=document.createElement('div');stage.className='memory-stage';
  const strip=document.createElement('div');strip.className='memory-strip';
  const visual=x=>type==='color'?`<span class="memory-dot" style="background:${x[1]}"></span>`:`<span class="memory-animal">${x[1]}</span>`;
  seq.forEach((x,i)=>{const d=document.createElement('div');d.className='memory-tile';d.dataset.slot=String(i);d.innerHTML=visual(x);strip.appendChild(d)});
- const path=document.createElement('div');path.className='garden-path';path.innerHTML='<span class="vine"></span><img class="walker" src="assets/moa-default.png" alt="">';stage.append(strip,path);area.appendChild(stage);
- later(()=>{
-  [...strip.children].forEach((d,i)=>{d.classList.add('hidden');d.innerHTML=`<span class="memory-question">${i+1}</span>`});
-  const choices=document.createElement('div');choices.className='memory-choices';const pool=type==='color'?memoryColors:animals;
-  shuffle(pool).forEach(x=>{const b=document.createElement('button');b.className='memory-choice';b.dataset.value=x[0];b.innerHTML=visual(x);choices.appendChild(b)});
-  stage.insertBefore(choices,path);let pos=0;
-  choices.onclick=e=>{const b=e.target.closest('button');if(!b||state.lock||b.classList.contains('used'))return;
-   if(b.dataset.value===seq[pos][0]){const slot=strip.children[pos];slot.classList.remove('hidden');slot.classList.add('recalled');slot.innerHTML=visual(seq[pos]);b.classList.add('used','correct');pos++;sfx('ok');addSeeds(Math.ceil(10/len));path.querySelector('.vine').style.width=`${pos/len*100}%`;path.querySelector('.walker').style.left=`${Math.min(90,pos/len*90)}%`;flash(pos===len?'기억꽃길 완성! 🌿':`${pos}번째 기억 성공!`);if(pos===len)nextRound(900)}
+ const study=document.createElement('div');study.className='memory-study-actions';
+ study.innerHTML='<button class="memory-ready" type="button">준비됐어요 ✓</button><small>충분히 보고 준비되면 눌러요. 자동으로 넘어가지 않아요.</small>';
+ const path=document.createElement('div');path.className='garden-path';path.innerHTML='<span class="vine"></span><img class="walker" src="assets/moa-default.png" alt="">';
+ stage.append(strip,study,path);area.appendChild(stage);
+ let choices=null,pos=0,peekUsed=false,peekTimer=null;
+ const hideUnrecalled=()=>{[...strip.children].forEach((d,i)=>{if(i<pos){d.classList.remove('hidden');d.classList.add('recalled');d.innerHTML=visual(seq[i])}else{d.classList.add('hidden');d.classList.remove('recalled');d.innerHTML=`<span class="memory-question">${i+1}</span>`}})};
+ const revealAll=()=>{[...strip.children].forEach((d,i)=>{d.classList.remove('hidden');d.innerHTML=visual(seq[i])})};
+ const beginRecall=()=>{if(choices)return;hideUnrecalled();study.innerHTML='<button class="memory-peek" type="button">👀 한 번 더 보기</button><small>막히면 한 번만 다시 볼 수 있어요.</small>';
+  choices=document.createElement('div');choices.className='memory-choices';const pool=type==='color'?memoryColors:animals;
+  shuffle(pool).forEach(x=>{const b=document.createElement('button');b.className='memory-choice';b.dataset.value=x[0];b.innerHTML=visual(x);choices.appendChild(b)});stage.insertBefore(choices,path);
+  const peek=study.querySelector('.memory-peek');peek.onclick=()=>{if(peekUsed||state.lock)return;peekUsed=true;peek.disabled=true;peek.textContent='👀 다시 보는 중…';revealAll();choices.classList.add('paused');clearTimeout(peekTimer);peekTimer=setTimeout(()=>{hideUnrecalled();choices.classList.remove('paused');peek.textContent='다시 보기 사용함 ✓'},1600)};
+  choices.onclick=e=>{const b=e.target.closest('button');if(!b||state.lock||choices.classList.contains('paused')||b.classList.contains('used'))return;
+   if(b.dataset.value===seq[pos][0]){const slot=strip.children[pos];slot.classList.remove('hidden');slot.classList.add('recalled');slot.innerHTML=visual(seq[pos]);b.classList.add('used','correct');pos++;sfx('ok');addSeeds(Math.ceil(10/len));path.querySelector('.vine').style.width=`${pos/len*100}%`;path.querySelector('.walker').style.left=`${Math.min(90,pos/len*90)}%`;flash(pos===len?'기억꽃길 완성! 🌿':`${pos}번째 기억 성공!`);if(pos===len)nextRound(1200)}
    else{b.classList.add('wrong');sfx('no');flash('순서를 다시 떠올려봐요.');later(()=>b.classList.remove('wrong'),430)}
   }
- },1750+state.round*180)
+ };
+ study.querySelector('.memory-ready').onclick=beginRecall;
 }
 
 const sentenceRounds=[
