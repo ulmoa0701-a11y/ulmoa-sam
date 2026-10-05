@@ -100,3 +100,15 @@
 .memory-tile.recalled{background:#f5fff0!important;border:3px solid #8fd08c!important;transform:translateY(-4px) scale(1.04)!important;box-shadow:0 10px 20px rgba(70,120,70,.16)!important;animation:memoryRecall .34s ease}
 @keyframes memoryRecall{0%{transform:scale(.72)}70%{transform:scale(1.1)}100%{transform:translateY(-4px) scale(1.04)}}
 @media(max-width:560px){.memory-strip{gap:7px!important;max-width:310px!important}.memory-tile{width:auto!important;height:64px!important;max-width:70px!important;border-radius:16px!important}.memory-dot{width:44px;height:44px}.memory-animal{font-size:34px}.memory-question{font-size:19px!important}.memory-choices{gap:10px!important}.memory-choice{width:72px!important;height:72px!important}.memory-choice .memory-dot{width:48px;height:48px}}
+
+
+/* 2026-10-05: explicit library filtering + self-paced memory */
+.library-card[hidden],.subtopic-tab[hidden],#emptyCategory[hidden],#miniWorld[hidden]{display:none!important}
+.memory-study-actions{display:flex;flex-direction:column;align-items:center;gap:7px;margin-top:-4px}
+.memory-study-actions small{font-size:12px;color:#657166;font-weight:750;text-align:center}
+.memory-ready,.memory-peek{border:0;border-radius:999px;padding:12px 20px;font-size:16px;font-weight:950;cursor:pointer;box-shadow:0 7px 16px rgba(45,70,50,.12)}
+.memory-ready{background:#243328;color:#fff}
+.memory-peek{background:#fff7ce;color:#334037;border:2px solid #efd66a}
+.memory-peek:disabled{opacity:.72;cursor:default}
+.memory-choices.paused{opacity:.35;pointer-events:none}
+@media(max-width:560px){.memory-ready,.memory-peek{font-size:15px;padding:11px 17px}.memory-study-actions small{max-width:270px}}
