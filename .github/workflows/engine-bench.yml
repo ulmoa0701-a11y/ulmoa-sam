@@ -1,0 +1,34 @@
+name: Engine benchmark
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'bench/**'
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install benchmark dependency
+        run: npm install --no-save --no-audit --no-fund puppeteer-core@latest
+      - name: Find Chrome
+        run: |
+          CHROME_PATH=$(which google-chrome || which google-chrome-stable || which chromium || which chromium-browser)
+          echo "CHROME_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
+          "$CHROME_PATH" --version
+      - name: Serve benchmark scenes
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/bench-http.log 2>&1 &
+          sleep 2
+      - name: Run same-scene browser benchmark
+        run: node bench/run-bench.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: engine-benchmark-results
+          path: bench-results.json
+          if-no-files-found: warn
