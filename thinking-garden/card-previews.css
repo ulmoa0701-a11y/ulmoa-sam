@@ -88,3 +88,15 @@
  .cp-choice-row .cp-animal{width:52px!important;height:58px!important;min-width:52px!important;min-height:58px!important}.cp-choice-row .cp-animal.big{font-size:34px!important}.cp-choice-row .cp-animal.small{font-size:17px!important}
  .spacing-scene{padding:14px 2px;gap:18px}.spacing-line{padding:24px 10px}.spacing-char{font-size:28px}.space-gap{width:24px;height:46px;margin:0 -9px}.space-gap.opened{width:30px;margin:0 1px}.spacing-helper{font-size:12px}
 }
+
+
+/* Memory interaction: reflect every correct tap */
+.memory-strip{flex-wrap:nowrap!important;width:100%;max-width:470px!important;gap:11px!important}
+.memory-tile{flex:1 1 0!important;min-width:0!important;max-width:96px!important;position:relative!important;transition:.22s transform,.22s background,.22s box-shadow!important}
+.memory-tile.hidden{background:#fff!important;color:#8b968c!important;border:3px dashed #cbd5ca!important;box-shadow:none!important}
+.memory-question{font-size:23px!important;font-weight:1000!important;color:#93a096!important}
+.memory-dot{display:block;width:58px;height:58px;border-radius:50%;box-shadow:inset 0 0 0 4px rgba(255,255,255,.45)}
+.memory-animal{font-size:45px;line-height:1}
+.memory-tile.recalled{background:#f5fff0!important;border:3px solid #8fd08c!important;transform:translateY(-4px) scale(1.04)!important;box-shadow:0 10px 20px rgba(70,120,70,.16)!important;animation:memoryRecall .34s ease}
+@keyframes memoryRecall{0%{transform:scale(.72)}70%{transform:scale(1.1)}100%{transform:translateY(-4px) scale(1.04)}}
+@media(max-width:560px){.memory-strip{gap:7px!important;max-width:310px!important}.memory-tile{width:auto!important;height:64px!important;max-width:70px!important;border-radius:16px!important}.memory-dot{width:44px;height:44px}.memory-animal{font-size:34px}.memory-question{font-size:19px!important}.memory-choices{gap:10px!important}.memory-choice{width:72px!important;height:72px!important}.memory-choice .memory-dot{width:48px;height:48px}}
