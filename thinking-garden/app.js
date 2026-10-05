@@ -1,0 +1,90 @@
+﻿const $=(s)=>document.querySelector(s), $$=(s)=>[...document.querySelectorAll(s)];
+const screens={home:$('#homeScreen'),game:$('#gameScreen'),result:$('#resultScreen')};
+const area=$('#gameArea'),toast=$('#gameToast'),world=$('#gameWorld');
+const missionText=$('#missionText'),missionSub=$('#missionSub'),guide=$('#guideCharacter');
+const STORE={seeds:'moa-garden:seeds',done:'moa-garden:completed',sound:'moa-garden:sound'};
+let state={game:null,round:0,score:0,total:Number(localStorage.getItem(STORE.seeds)||0),sound:localStorage.getItem(STORE.sound)!=='off',lock:false,lastSpeech:'',timers:[]};
+let completed=readCompleted();
+const meta={
+ rescue:{title:'딱 맞는 친구 찾기',kicker:'홍의 찾기숲',theme:'find',friend:'assets/friend-hong.png'},
+ memory:{title:'기억꽃길 이어가기',kicker:'루의 기억길',theme:'memory',friend:'assets/friend-ru.png'},
+ spacing:{title:'말칸 다리 만들기',kicker:'샘의 말칸공방',theme:'spacing',friend:'assets/friend-saem.png'},
+ spelling:{title:'고장 난 간판 고치기',kicker:'티의 글자수리소',theme:'spelling',friend:'assets/friend-ti.png'}
+};
+function readCompleted(){try{return JSON.parse(localStorage.getItem(STORE.done)||'{}')}catch{return{}}}
+function clearTimers(){state.timers.forEach(clearTimeout);state.timers=[]}
+function later(fn,ms){const t=setTimeout(fn,ms);state.timers.push(t);return t}
+function show(name){Object.values(screens).forEach(x=>x.classList.remove('active'));screens[name].classList.add('active');scrollTo({top:0,behavior:'smooth'})}
+function updateHome(){ $('#seedBank').textContent=`🌱 ${state.total}`;const count=Object.values(completed).filter(Boolean).length;$('#gardenProgress').textContent=`완료한 게임 ${count} / 4`;$$('[data-open]').forEach(b=>b.classList.toggle('completed',!!completed[b.dataset.open])) }
+function goHome(){clearTimers();speechSynthesis?.cancel?.();state.game=null;updateHome();show('home')}
+function addSeeds(n){state.score+=n;state.total+=n;localStorage.setItem(STORE.seeds,state.total);$('#seedBank').textContent=`🌱 ${state.total}`;$('#scoreLabel').textContent=`🌱 ${state.score}`}
+function say(text){state.lastSpeech=text;if(!state.sound||!('speechSynthesis'in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='ko-KR';u.rate=.88;speechSynthesis.speak(u)}
+function sfx(kind='ok'){if(!state.sound)return;try{const C=window.AudioContext||window.webkitAudioContext,c=new C(),o=c.createOscillator(),g=c.createGain();o.type=kind==='ok'?'triangle':'sine';const a=kind==='ok'?640:230,b=kind==='ok'?960:160;o.frequency.setValueAtTime(a,c.currentTime);o.frequency.exponentialRampToValueAtTime(b,c.currentTime+.16);g.gain.setValueAtTime(.07,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.19);o.connect(g).connect(c.destination);o.start();o.stop(c.currentTime+.2)}catch{}}
+function flash(text){toast.textContent=text;toast.classList.add('show');clearTimeout(flash.t);flash.t=setTimeout(()=>toast.classList.remove('show'),1150)}
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function updateProgress(){ $('#stageLabel').textContent=`${Math.min(state.round+1,5)} / 5`;$('#progressBar').style.width=`${state.round/5*100}%` }
+function startGame(id){clearTimers();state.game=id;state.round=0;state.score=0;state.lock=false;const m=meta[id];$('#gameTitle').textContent=m.title;$('#gameKicker').textContent=m.kicker;$('#scoreLabel').textContent='🌱 0';guide.src=m.friend;world.className=`game-world theme-${m.theme}`;show('game');updateProgress();renderRound()}
+function renderRound(){clearTimers();state.lock=false;area.innerHTML='';({rescue:renderFind,memory:renderMemory,spacing:renderSpacing,spelling:renderSpelling}[state.game])()}
+function nextRound(delay=700){state.lock=true;later(()=>{state.round++;if(state.round>=5)return finishGame();updateProgress();renderRound()},delay)}
+function finishGame(){completed[state.game]=true;localStorage.setItem(STORE.done,JSON.stringify(completed));$('#progressBar').style.width='100%';const m=meta[state.game];$('#resultCharacter').src=m.friend;$('#resultTitle').textContent=state.score>=46?'정원이 활짝 깨어났어!':state.score>=34?'정원 한 칸 완성!':'끝까지 길을 만들었어!';$('#resultMessage').textContent=`${m.kicker}의 5개 미션을 모두 지나왔어요.`;$('#resultScore').textContent=`🌱 ${state.score}`;later(()=>show('result'),500)}
+function rewardAt(el){const r=el.getBoundingClientRect(),w=world.getBoundingClientRect(),p=document.createElement('span');p.className='leaf-pop';p.textContent='🌱';p.style.left=`${r.left-w.left+r.width/2}px`;p.style.top=`${r.top-w.top+r.height/2}px`;world.appendChild(p);later(()=>p.remove(),800)}
+
+const animals=[['토끼','🐰'],['돼지','🐷'],['소','🐮'],['오리','🦆']];
+const colors={노란:['#ffd45b','노란'],파란:['#6bb7ff','파란'],초록:['#69c77d','초록'],빨간:['#ff7b76','빨간']};
+const findRounds=[
+ {kind:'single',color:'노란',size:'큰',animal:'오리'},
+ {kind:'single',color:'파란',size:'큰',animal:'토끼'},
+ {kind:'group',color:'파란',size:'큰'},
+ {kind:'group',color:'초록',size:'큰'},
+ {kind:'group',color:'빨간',size:'작은'}
+];
+function animalCard(a,color,size){return{animal:a,color,size}}
+function renderFind(){const q=findRounds[state.round],color=colors[q.color];let found=new Set();missionText.textContent=q.kind==='single'?`${q.color} ${q.size} ${q.animal}를 찾아 주세요!`:`${q.color} ${q.size} 동물을 종류별로 하나씩 찾아 주세요!`;missionSub.textContent=q.kind==='single'?'색 · 크기 · 종류, 세 가지를 모두 보고 골라요.':'토끼 · 돼지 · 소 · 오리를 한 마리씩 모아요.';say(missionText.textContent);let cards=[];
+ if(q.kind==='single'){const ta=animals.find(a=>a[0]===q.animal);cards=[animalCard(ta,q.color,q.size),animalCard(ta,q.color,q.size==='큰'?'작은':'큰'),animalCard(ta,q.color==='노란'?'파란':'노란',q.size),animalCard(animals[(animals.indexOf(ta)+1)%4],q.color,q.size)];while(cards.length<8){const a=animals[Math.floor(Math.random()*4)],c=Object.keys(colors)[Math.floor(Math.random()*4)],s=Math.random()>.5?'큰':'작은';if(!cards.some(x=>x.animal[0]===a[0]&&x.color===c&&x.size===s))cards.push(animalCard(a,c,s))}}
+ else{animals.forEach(a=>cards.push(animalCard(a,q.color,q.size)));cards.push(animalCard(animals[0],q.color,q.size));cards.push(animalCard(animals[1],q.color,q.size==='큰'?'작은':'큰'));cards.push(animalCard(animals[2],q.color==='초록'?'노란':'초록',q.size));cards.push(animalCard(animals[3],q.color==='빨간'?'파란':'빨간',q.size))}
+ const board=document.createElement('div');board.className='find-board';shuffle(cards).forEach(x=>{const b=document.createElement('button');b.className=`find-card ${x.size==='작은'?'small':''}`;b.innerHTML=`<span class="animal-bubble" style="background:${colors[x.color][0]}"><span class="animal">${x.animal[1]}</span></span><span class="label">${x.size} · ${x.color}</span>`;b.onclick=()=>{if(state.lock||b.classList.contains('correct'))return;const basic=x.color===q.color&&x.size===q.size;const ok=q.kind==='single'?basic&&x.animal[0]===q.animal:basic&&!found.has(x.animal[0]);if(ok){found.add(x.animal[0]);b.classList.add('correct');rewardAt(b);sfx('ok');addSeeds(q.kind==='single'?10:3);flash(q.kind==='single'?'찾았다! 🌱':`${x.animal[0]} 찾기 성공!`);if(q.kind==='single'||found.size===4)nextRound(850)}else{b.classList.add('wrong');sfx('no');flash(basic&&q.kind==='group'&&found.has(x.animal[0])?'같은 종류는 이미 찾았어요.':'조건을 한 번 더 살펴봐요.');later(()=>b.classList.remove('wrong'),430)}};board.appendChild(b)});area.appendChild(board)}
+
+const memoryColors=[['파랑','#64adff'],['노랑','#ffd04f'],['초록','#67c67d'],['빨강','#ff7770']];
+function renderMemory(){const type=state.round%2===0?'color':'animal',len=state.round<2?3:4,seq=type==='color'?shuffle(memoryColors).slice(0,len):shuffle(animals).slice(0,len);missionText.textContent=type==='color'?`${len}개의 색 순서를 기억해요!`:`${len}마리의 순서를 기억해요!`;missionSub.textContent='눈으로 보고, 말로 한 번 되뇌어 본 뒤 기억길을 이어요.';say(missionText.textContent);const stage=document.createElement('div');stage.className='memory-stage';const strip=document.createElement('div');strip.className='memory-strip';seq.forEach(x=>{const d=document.createElement('div');d.className='memory-tile';d.innerHTML=type==='color'?`<span style="display:block;width:58px;height:58px;border-radius:50%;background:${x[1]}"></span>`:x[1];strip.appendChild(d)});const path=document.createElement('div');path.className='garden-path';path.innerHTML='<span class="vine"></span><img class="walker" src="assets/moa-default.png" alt="">';stage.append(strip,path);area.appendChild(stage);later(()=>{[...strip.children].forEach(d=>{d.classList.add('hidden');d.textContent='?'});const choices=document.createElement('div');choices.className='memory-choices';const pool=type==='color'?memoryColors:animals;shuffle(pool).forEach(x=>{const b=document.createElement('button');b.className='memory-choice';b.dataset.value=x[0];b.innerHTML=type==='color'?`<span style="display:inline-block;width:58px;height:58px;border-radius:50%;background:${x[1]}"></span>`:x[1];choices.appendChild(b)});stage.insertBefore(choices,path);let pos=0;choices.onclick=e=>{const b=e.target.closest('button');if(!b||state.lock||b.classList.contains('used'))return;if(b.dataset.value===seq[pos][0]){b.classList.add('used','correct');pos++;sfx('ok');addSeeds(Math.ceil(10/len));path.querySelector('.vine').style.width=`${pos/len*100}%`;path.querySelector('.walker').style.left=`${Math.min(90,pos/len*90)}%`;if(pos===len){flash('기억꽃길 완성! 🌿');nextRound(900)}}else{b.classList.add('wrong');sfx('no');flash('순서를 다시 떠올려봐요.');later(()=>b.classList.remove('wrong'),430)}}},1750+state.round*180)}
+
+const sentenceRounds=[
+ ['오늘은','학원이','적어서','기뻐요'],
+ ['어제','놀이공원에','갔어요'],
+ ['책을','15분씩','읽어요'],
+ ['엄마에게','카톡을','보내요'],
+ ['리코더를','20번','연습해요']
+];
+function renderSpacing(){const answer=sentenceRounds[state.round],built=[];missionText.textContent='말칸을 이어 다리를 만들어요!';missionSub.textContent='직접 쓰지 않아도 괜찮아요. 단어가 어디서 나뉘는지 먼저 느껴봐요.';say(`${answer.join(' ')}. 말칸을 순서대로 이어 주세요.`);const scene=document.createElement('div');scene.className='bridge-scene';const river=document.createElement('div');river.className='river';const slots=document.createElement('div');slots.className='bridge-slots';const moa=document.createElement('img');moa.src='assets/moa-default.png';moa.className='crossing-moa';river.append(slots,moa);const pile=document.createElement('div');pile.className='word-pile';let pieces=[...answer];if(state.round>=2)pieces.push(answer[0]+answer[1]);shuffle(pieces).forEach(w=>{const b=document.createElement('button');b.className='word-block';b.dataset.word=w;b.textContent=w;b.onclick=()=>{if(state.lock||b.classList.contains('used'))return;built.push({word:w,el:b});b.classList.add('used');draw();sfx('ok')};pile.appendChild(b)});const actions=document.createElement('div');actions.className='bridge-actions';actions.innerHTML='<button class="undo">↶ 하나 빼기</button><button class="check">다리 확인</button>';actions.querySelector('.undo').onclick=()=>{if(state.lock)return;const x=built.pop();if(x)x.el.classList.remove('used');draw()};actions.querySelector('.check').onclick=()=>{if(state.lock)return;if(built.map(x=>x.word).join('|')===answer.join('|')){state.lock=true;sfx('ok');addSeeds(10);flash('말칸 다리 완성!');moa.classList.add('go');later(()=>nextRound(0),1100)}else{sfx('no');flash('단어 순서와 칸을 다시 살펴봐요.')}};scene.append(river,pile,actions);area.appendChild(scene);draw();function draw(){slots.innerHTML=built.length?built.map(x=>`<span class="bridge-slot">${x.word}</span>`).join(''):'<span class="bridge-empty">여기에 말칸을 이어요</span>'}}
+
+const spellRounds=[
+ {before:'숙제를 다 ',right:'했어요',wrong:'햇어요',tip:'과거형은 ‘했어요’처럼 ㅆ을 써요.'},
+ {before:'책을 다 ',right:'읽었어요',wrong:'읽엇어요',tip:'‘었어요’의 받침은 ㅆ이에요.'},
+ {before:'이제 가도 ',right:'돼요',wrong:'되요',tip:'‘되어요’를 줄이면 ‘돼요’예요.'},
+ {before:'나도 ',right:'할 수',wrong:'할수',after:' 있어요',tip:'‘수’는 앞말과 띄어 써요.'},
+ {before:'어디 가요',right:'?',wrong:'!',tip:'묻는 문장 끝에는 물음표를 붙여요.',punct:true}
+];
+function renderSpelling(){const q=spellRounds[state.round];missionText.textContent='간판에서 이상한 곳을 고쳐 주세요!';missionSub.textContent=state.round<2?'ㅅ과 ㅆ처럼 비슷한 글자도 천천히 비교해요.':'맞춤법·띄어쓰기·문장부호를 하나씩 고쳐요.';say(`${q.before}${q.right}${q.after||''}. 알맞은 것을 골라 주세요.`);const shop=document.createElement('div');shop.className='repair-shop';const helper=document.createElement('div');helper.className='repair-friend';helper.innerHTML='<img src="assets/friend-ti.png" alt="">';const wrap=document.createElement('div');wrap.className='sign-wrap';const sign=document.createElement('div');sign.className='broken-sign';sign.innerHTML=`${q.before}<b>?</b>${q.after||''}`;const choices=document.createElement('div');choices.className='repair-choices';const tip=document.createElement('div');tip.className='repair-tip';shuffle([q.right,q.wrong]).forEach(w=>{const b=document.createElement('button');b.className='repair-choice';b.textContent=w;b.onclick=()=>{if(state.lock)return;if(w===q.right){state.lock=true;b.classList.add('correct');sign.classList.add('fixed');sign.innerHTML=`${q.before}<b>${q.right}</b>${q.after||''}`;tip.textContent=q.tip;sfx('ok');addSeeds(10);rewardAt(b);flash('간판 수리 완료! ✨');later(()=>nextRound(0),1050)}else{b.classList.add('wrong');sfx('no');tip.textContent='두 모양을 다시 비교해봐요.';flash('조금만 더 살펴봐요.');later(()=>b.classList.remove('wrong'),430)}};choices.appendChild(b)});wrap.append(sign,choices,tip);shop.append(helper,wrap);area.appendChild(shop)}
+
+$$('[data-open]').forEach(b=>b.addEventListener('click',()=>startGame(b.dataset.open)));
+$$('[data-go="home"]').forEach(b=>b.addEventListener('click',goHome));
+$('#backHome').addEventListener('click',goHome);$('#retryGame').addEventListener('click',()=>startGame(state.game));
+$('#speakMission').addEventListener('click',()=>say(state.lastSpeech||missionText.textContent));
+$('#scrollToGarden').addEventListener('click',()=>$('#gardenMap').scrollIntoView({behavior:'smooth'}));
+$('#soundToggle').addEventListener('click',()=>{state.sound=!state.sound;localStorage.setItem(STORE.sound,state.sound?'on':'off');if(!state.sound)speechSynthesis?.cancel?.();updateSound();sfx('ok')});
+function updateSound(){$('#soundToggle').textContent=state.sound?'🔊':'🔇';$('#soundToggle').setAttribute('aria-label',state.sound?'소리 끄기':'소리 켜기')}
+updateSound();updateHome();
+
+const deepGame=new URLSearchParams(location.search).get('game');if(deepGame&&meta[deepGame])startGame(deepGame);
+
+// V2 library filters
+let currentCategory='all',currentSubtopic='all';
+const libraryCards=[...document.querySelectorAll('.library-card')];
+const categoryTabs=[...document.querySelectorAll('.category-tab')];
+const subtopicTabs=[...document.querySelectorAll('.subtopic-tab')];
+const subtopicByCategory={all:['all','condition','sequence','spacing','spelling'],visual:['all','condition'],memory:['all','sequence'],literacy:['all','spacing','spelling'],language:['all'],space:['all'],life:['all']};
+function applyLibraryFilters(){const allowed=subtopicByCategory[currentCategory]||['all'];if(!allowed.includes(currentSubtopic))currentSubtopic='all';subtopicTabs.forEach(b=>{const ok=allowed.includes(b.dataset.subtopic);b.hidden=!ok;b.classList.toggle('active',b.dataset.subtopic===currentSubtopic)});let visible=0;libraryCards.forEach(card=>{const cat=currentCategory==='all'||card.dataset.category===currentCategory,sub=currentSubtopic==='all'||card.dataset.subtopic===currentSubtopic,showCard=cat&&sub;card.hidden=!showCard;if(showCard)visible++});const empty=document.getElementById('emptyCategory');if(empty)empty.hidden=visible!==0}
+categoryTabs.forEach(b=>b.addEventListener('click',()=>{currentCategory=b.dataset.category;currentSubtopic='all';categoryTabs.forEach(x=>x.classList.toggle('active',x===b));applyLibraryFilters()}));
+subtopicTabs.forEach(b=>b.addEventListener('click',()=>{currentSubtopic=b.dataset.subtopic;subtopicTabs.forEach(x=>x.classList.toggle('active',x===b));applyLibraryFilters()}));
+const mapToggle=document.getElementById('mapToggle'),miniWorld=document.getElementById('miniWorld');if(mapToggle&&miniWorld)mapToggle.addEventListener('click',()=>{const opening=miniWorld.hidden;miniWorld.hidden=!opening;mapToggle.textContent=opening?'🌿 정원 세계관 접기':'🌿 정원 세계관으로 한눈에 보기'});
+applyLibraryFilters();
+
