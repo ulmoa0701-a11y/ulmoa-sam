@@ -10,9 +10,9 @@
   document.head.appendChild(gameFix);
 
   const previews = {
-    rescue: `<div class="cp-mission">큰 · 노란 · 오리를 찾아요</div><div class="cp-choice-row"><span>🐥<small>큰·노란</small></span><span class="is-good">🦆<small>큰·노란</small></span><span>🪿<small>작은·노란</small></span><span>🐶<small>큰·갈색</small></span></div>`,
+    rescue: `<div class="cp-mission">큰 · 노란 · 오리를 찾아요</div><div class="cp-choice-row cp-size-row"><span class="cp-animal big" style="--animal-bg:#ffd45b">🐥</span><span class="cp-animal big is-good" style="--animal-bg:#ffd45b">🦆</span><span class="cp-animal small" style="--animal-bg:#ffd45b">🦆</span><span class="cp-animal big" style="--animal-bg:#6bb7ff">🐮</span></div>`,
     memory: `<div class="cp-mission">이 순서대로 기억해요!</div><div class="cp-sequence"><i class="c-red">🌸</i><i class="c-blue">🌼</i><i class="c-yellow">🌻</i><i class="c-purple">🌷</i></div><div class="cp-arrow">▼</div><div class="cp-slots"><i>?</i><i>?</i><i>?</i><i>?</i></div>`,
-    spacing: `<div class="cp-mission">단어를 순서대로 놓아 문장을 완성해요</div><div class="cp-bridge"><i>오늘은</i><i>학원이</i><i>적어서</i><i>기뻐요</i></div><div class="cp-word-row"><span>적어서</span><span>학원이</span><span>오늘은</span><span>기뻐요</span></div>`,
+    spacing: `<div class="cp-mission">붙어 있는 문장에서 띄울 곳을 찾아요</div><div class="cp-glued">오늘은학교에가요</div><div class="cp-space-arrow">톡! ↓</div><div class="cp-spaced"><span>오늘은</span><span>학교에</span><span>가요</span></div>`,
     spelling: `<div class="cp-mission">맞는 표현을 골라 간판을 고쳐요</div><div class="cp-sign">숙제를 <b>?</b></div><div class="cp-answer-row"><span class="is-bad">✕ 햇어요</span><span class="is-good">✓ 했어요</span></div>`,
     sameShape: `<div class="cp-mission">위와 같은 모양을 찾아요</div><div class="cp-target-shape">★</div><div class="cp-choice-row shape"><span>●</span><span class="is-good">★</span><span>▲</span><span>◆</span></div>`,
     flower: `<div class="cp-mission">꽃만 쏙쏙 찾아요</div><div class="cp-choice-row"><span class="is-good">🌷</span><span>🍃</span><span class="is-good">🌼</span><span>🪨</span><span class="is-good">🌸</span></div>`,
