@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ko">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -10,22 +10,31 @@
 <section class="screen active" id="homeScreen">
   <div class="library-hero"><div><span class="hero-tag">게임은 각각, 세계관은 하나로</span><h1>오늘 연습할 힘을<br><em>골라서 게임해요.</em></h1><p>영역 → 세부주제 → 게임 순서로 찾고,<br>게임 안에서는 모아와 친구들의 모험이 이어집니다.</p><button class="hero-start" id="scrollToGarden">게임 고르기 ↓</button></div><img src="assets/moa-discovery.png" alt="모아"></div>
   <section class="game-library" id="gardenMap" aria-label="게임 라이브러리">
-    <div class="library-heading"><div><small>영역별 게임</small><h2>게임 골라보기</h2><p>필요한 영역을 먼저 고르고, 세부주제에서 원하는 게임을 찾을 수 있어요.</p></div><div class="garden-progress" id="gardenProgress">완료한 게임 0 / 4</div></div>
+    <div class="library-heading"><div><small>영역별 게임</small><h2>게임 골라보기</h2><p>필요한 영역을 먼저 고르고, 세부주제에서 원하는 게임을 찾을 수 있어요.</p></div><div class="garden-progress" id="gardenProgress">완료한 게임 0 / 13</div></div>
     <div class="category-tabs" role="tablist" aria-label="영역 선택">
-      <button class="category-tab active" data-category="all">전체 <b>4</b></button>
-      <button class="category-tab" data-category="visual">👀 시각·주의 <b>1</b></button>
-      <button class="category-tab" data-category="memory">🧠 기억·집행 <b>1</b></button>
+      <button class="category-tab active" data-category="all">전체 <b>13</b></button>
+      <button class="category-tab" data-category="visual">👀 시각·주의 <b>5</b></button>
+      <button class="category-tab" data-category="memory">🧠 기억·집행 <b>3</b></button>
       <button class="category-tab" data-category="literacy">✍️ 읽기·쓰기 <b>2</b></button>
       <button class="category-tab" data-category="language">💬 언어·추론 <b>0</b></button>
-      <button class="category-tab" data-category="space">🧩 공간·구성 <b>0</b></button>
+      <button class="category-tab" data-category="space">🧩 공간·구성 <b>3</b></button>
       <button class="category-tab" data-category="life">🔢 수·생활학습 <b>0</b></button>
     </div>
-    <div class="subtopic-tabs" id="subtopicTabs"><button class="subtopic-tab active" data-subtopic="all">전체 주제</button><button class="subtopic-tab" data-subtopic="condition">조건찾기</button><button class="subtopic-tab" data-subtopic="sequence">순서기억</button><button class="subtopic-tab" data-subtopic="spacing">띄어쓰기</button><button class="subtopic-tab" data-subtopic="spelling">맞춤법</button></div>
+    <div class="subtopic-tabs" id="subtopicTabs"><button class="subtopic-tab active" data-subtopic="all">전체 주제</button><button class="subtopic-tab" data-subtopic="condition">조건찾기</button><button class="subtopic-tab" data-subtopic="sequence">순서기억</button><button class="subtopic-tab" data-subtopic="spacing">띄어쓰기</button><button class="subtopic-tab" data-subtopic="spelling">맞춤법</button><button class="subtopic-tab" data-subtopic="basicfind">기초찾기</button><button class="subtopic-tab" data-subtopic="focus">주의·억제</button><button class="subtopic-tab" data-subtopic="spacebasic">눈손협응</button></div>
     <div class="library-grid" id="libraryGrid">
       <button class="library-card visual" data-open="rescue" data-category="visual" data-subtopic="condition"><span class="card-category">시각·주의 › 조건찾기</span><img src="assets/friend-hong.png" alt=""><div><h3>딱 맞는 친구 찾기</h3><p>색 · 크기 · 종류 조건을 보고 맞는 동물을 골라요.</p><span class="skill-tags"><i>시각탐색</i><i>선택주의</i><i>조건억제</i></span><strong>5 스테이지 시작 →</strong></div></button>
       <button class="library-card memory" data-open="memory" data-category="memory" data-subtopic="sequence"><span class="card-category">기억·집행 › 순서기억</span><img src="assets/friend-ru.png" alt=""><div><h3>기억꽃길 이어가기</h3><p>색과 동물의 순서를 보고 기억해 길을 이어요.</p><span class="skill-tags"><i>작업기억</i><i>순서화</i><i>언어반복</i></span><strong>5 스테이지 시작 →</strong></div></button>
       <button class="library-card literacy" data-open="spacing" data-category="literacy" data-subtopic="spacing"><span class="card-category">읽기·쓰기 › 띄어쓰기</span><img src="assets/friend-saem.png" alt=""><div><h3>말칸 다리 만들기</h3><p>직접 쓰지 않고 단어 블록으로 문장을 연결해요.</p><span class="skill-tags"><i>어절</i><i>띄어쓰기</i><i>문장순서</i></span><strong>5 스테이지 시작 →</strong></div></button>
       <button class="library-card literacy" data-open="spelling" data-category="literacy" data-subtopic="spelling"><span class="card-category">읽기·쓰기 › 맞춤법</span><img src="assets/friend-ti.png" alt=""><div><h3>고장 난 간판 고치기</h3><p>비슷한 글자와 맞춤법을 비교해 간판을 수리해요.</p><span class="skill-tags"><i>ㅅ/ㅆ</i><i>되/돼</i><i>문장부호</i></span><strong>5 스테이지 시작 →</strong></div></button>
+      <button class="library-card visual" data-open="sameShape" data-category="visual" data-subtopic="basicfind"><span class="card-category">시각·주의 › 기초찾기</span><img src="assets/friend-hong.png" alt=""><div><h3>쌍둥이 모양 찾기</h3><p>위에 나온 모양과 같은 친구를 찾아요.</p><span class="skill-tags"><i>시각변별</i><i>같음</i></span><strong>5 스테이지 시작 →</strong></div></button>
+      <button class="library-card visual" data-open="flower" data-category="visual" data-subtopic="basicfind"><span class="card-category">시각·주의 › 선택주의</span><img src="assets/friend-hong.png" alt=""><div><h3>꽃만 쏙쏙 찾기</h3><p>돌과 잎 사이에서 꽃만 골라 모아요.</p><span class="skill-tags"><i>선택주의</i><i>탐색</i></span><strong>5 스테이지 시작 →</strong></div></button>
+      <button class="library-card visual" data-open="hide" data-category="visual" data-subtopic="basicfind"><span class="card-category">시각·주의 › 탐색</span><img src="assets/friend-hong.png" alt=""><div><h3>잎사귀 숨은친구</h3><p>잎사귀를 열어 숨어 있는 친구를 찾아요.</p><span class="skill-tags"><i>탐색지속</i><i>위치탐색</i></span><strong>5 스테이지 시작 →</strong></div></button>
+      <button class="library-card memory" data-open="path" data-category="memory" data-subtopic="sequence"><span class="card-category">기억·집행 › 순서따르기</span><img src="assets/friend-ru.png" alt=""><div><h3>반짝이 길 따라가기</h3><p>반짝이는 곳을 순서대로 눌러 길을 완성해요.</p><span class="skill-tags"><i>순서</i><i>지속주의</i></span><strong>5 스테이지 시작 →</strong></div></button>
+      <button class="library-card memory" data-open="calm" data-category="memory" data-subtopic="focus"><span class="card-category">기억·집행 › 주의·억제</span><img src="assets/friend-ru.png" alt=""><div><h3>초록불에 톡!</h3><p>빨간불에는 기다리고 초록불이 켜지면 눌러요.</p><span class="skill-tags"><i>반응억제</i><i>신호대기</i></span><strong>5 스테이지 시작 →</strong></div></button>
+      <button class="library-card space" data-open="inside" data-category="space" data-subtopic="spacebasic"><span class="card-category">공간·구성 › 눈손협응</span><img src="assets/friend-saem.png" alt=""><div><h3>정원 안에 별 심기</h3><p>정해진 울타리 안을 눌러 별을 심어요.</p><span class="skill-tags"><i>공간경계</i><i>눈손협응</i></span><strong>5 스테이지 시작 →</strong></div></button>
+      <button class="library-card space" data-open="targets" data-category="space" data-subtopic="spacebasic"><span class="card-category">공간·구성 › 눈손협응</span><img src="assets/friend-saem.png" alt=""><div><h3>하나씩 깨우기</h3><p>여러 동그라미를 빠뜨리지 않고 하나씩 깨워요.</p><span class="skill-tags"><i>눈손협응</i><i>누락방지</i></span><strong>5 스테이지 시작 →</strong></div></button>
+      <button class="library-card space" data-open="paint" data-category="space" data-subtopic="spacebasic"><span class="card-category">공간·구성 › 경계조절</span><img src="assets/friend-saem.png" alt=""><div><h3>정원길 쓱싹 칠하기</h3><p>정해진 영역 안을 움직이며 길을 채워요.</p><span class="skill-tags"><i>경계조절</i><i>손조절</i></span><strong>5 스테이지 시작 →</strong></div></button>
+      <button class="library-card visual" data-open="water" data-category="visual" data-subtopic="focus"><span class="card-category">시각·주의 › 지속주의</span><img src="assets/friend-hong.png" alt=""><div><h3>시든 꽃 깨우기</h3><p>시든 꽃을 하나씩 찾아 눌러 모두 피워요.</p><span class="skill-tags"><i>지속주의</i><i>완료하기</i></span><strong>5 스테이지 시작 →</strong></div></button>
     </div>
     <div class="empty-category" id="emptyCategory" hidden><img src="assets/moa-thinking.png" alt=""><h3>이 영역은 다음 게임을 준비 중이에요.</h3><p>분류는 먼저 만들어 두고, 게임은 하나씩 독립적으로 추가합니다.</p></div>
     <button class="map-toggle" id="mapToggle" type="button">🌿 정원 세계관으로 한눈에 보기</button>
