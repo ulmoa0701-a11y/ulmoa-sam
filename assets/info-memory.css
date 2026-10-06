@@ -96,3 +96,62 @@
 /* handwriting pass 2026-10-06 */
 .info-page,.info-page *{font-family:"Gamja Flower",cursive!important}
 .info-page .study-summary-copy p,.info-page .study-core>p,.info-page .study-example p,.info-page .study-contrast span,.info-page .study-tags span,.info-page .study-more p,.info-page .study-more .study-caution,.info-page .study-more .study-sources,.info-page .study-visual figcaption{letter-spacing:.01em}
+
+
+/* mobile swipe study cards 2026-10-07 */
+.info-page .study-swipe-guide{
+  display:none;
+  margin:0 0 8px;
+  font-size:14px;
+  color:#7b8d91;
+  text-align:right;
+}
+@media(max-width:760px){
+  .info-page .study-swipe-guide{
+    display:block;
+    padding:0 4px;
+  }
+  .info-page .study-note-list{
+    display:flex;
+    gap:10px;
+    overflow-x:auto;
+    overflow-y:visible;
+    scroll-snap-type:x mandatory;
+    scroll-padding-left:0;
+    overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;
+    padding:0 22px 10px 0;
+    margin-right:-22px;
+    align-items:flex-start;
+    scrollbar-width:thin;
+    scrollbar-color:#d7dfdc transparent;
+  }
+  .info-page .study-note-list::-webkit-scrollbar{height:5px}
+  .info-page .study-note-list::-webkit-scrollbar-track{background:transparent}
+  .info-page .study-note-list::-webkit-scrollbar-thumb{
+    background:#d7dfdc;
+    border-radius:999px;
+  }
+  .info-page .study-note{
+    flex:0 0 calc(100% - 28px);
+    min-width:0;
+    scroll-snap-align:start;
+    scroll-snap-stop:always;
+    align-self:flex-start;
+  }
+  .info-page .study-note[open]{
+    flex-basis:calc(100% - 12px);
+  }
+}
+@media(max-width:390px){
+  .info-page .study-note-list{
+    padding-right:16px;
+    margin-right:-16px;
+  }
+  .info-page .study-note{
+    flex-basis:calc(100% - 22px);
+  }
+  .info-page .study-note[open]{
+    flex-basis:calc(100% - 8px);
+  }
+}
