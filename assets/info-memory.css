@@ -1,0 +1,94 @@
+/* compact memory-first cognitive notes */
+.info-page .group-title p{font-size:9px;color:#7d8d91;margin:3px 0 0}
+.info-page .study-note-list{display:grid;gap:10px}
+.info-page .study-note{border:1px solid #dfe8e5;border-radius:14px;background:#fff;overflow:hidden}
+.info-page .study-note>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:11px;padding:14px 16px;min-height:74px}
+.info-page .study-note>summary::-webkit-details-marker,.info-page .study-more>summary::-webkit-details-marker{display:none}
+.info-page .study-note>summary:hover{background:#fcfdf8}
+.info-page .study-index{font-family:"Gamja Flower",cursive;font-size:18px;color:#9aadb1}
+.info-page .study-summary-copy h3{font-family:"Gamja Flower",cursive;font-size:25px;font-weight:400;line-height:1.05;margin:0 0 4px;color:#20343c}
+.info-page .study-summary-copy p{font-size:9.5px;line-height:1.45;color:#718388;margin:0}
+.info-page .study-toggle{font-family:"Gamja Flower",cursive;font-size:15px;white-space:nowrap;border-bottom:2px solid #efd978}
+.info-page .study-toggle i,.info-page .study-toggle em{font-style:normal}
+.info-page .study-toggle em{display:none}
+.info-page .study-note[open] .study-toggle i{display:none}
+.info-page .study-note[open] .study-toggle em{display:inline}
+.info-page .study-note[open]>summary{background:#fffdf3;border-bottom:1px dashed #ddd8bd}
+.info-page .study-paper{position:relative;padding:18px 18px 16px 48px;background-color:#fffef9;background-image:linear-gradient(to right,transparent 0,transparent 31px,rgba(229,136,136,.20) 32px,rgba(229,136,136,.20) 33px,transparent 34px),repeating-linear-gradient(to bottom,transparent 0,transparent 31px,rgba(107,151,169,.10) 32px,rgba(107,151,169,.10) 33px);color:#40555c}
+.info-page .study-paper:before{content:"✎";position:absolute;left:12px;top:16px;font-family:"Gamja Flower",cursive;font-size:20px;color:#c7a953;transform:rotate(-8deg)}
+.info-page .study-core{margin:0 0 10px}
+.info-page .study-core>small{display:inline-block;font-size:8px;font-weight:850;letter-spacing:.04em;color:#789097;background:#eef7f5;border-radius:999px;padding:4px 7px;margin-bottom:7px}
+.info-page .study-core>p{font-size:11px;line-height:1.55;font-weight:650;color:#314951;margin:8px 0 0}
+.info-page .study-core mark{background:linear-gradient(transparent 55%,#ffe98d 55%);color:inherit;padding:0 1px}
+.info-page .study-hook{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.info-page .study-hook b{font-family:"Gamja Flower",cursive;font-size:24px;font-weight:400;line-height:1;background:#fff;border:1px solid #dce7e3;border-radius:10px;padding:8px 11px;box-shadow:0 3px 0 #edf2ef}
+.info-page .study-hook i{font-style:normal;font-size:16px;color:#a8b8ba}
+.info-page .memory-hook b{min-width:100px;text-align:center}
+.info-page .memory-hook b small{display:block;font-family:"Pretendard Variable",Pretendard,sans-serif;font-size:8px;color:#829195;margin-top:4px}
+.info-page .auditory-hook i{font-size:21px;font-weight:850;color:#d0ad34}
+.info-page .visual-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.info-page .visual-pair>div{padding:11px 12px;border:1px solid #dce6e3;border-radius:11px;background:#fff}
+.info-page .visual-pair b{display:block;font-family:"Gamja Flower",cursive;font-size:21px;font-weight:400}
+.info-page .visual-pair strong{display:block;font-size:11px;margin:4px 0 3px;color:#29434c}
+.info-page .visual-pair span{font-size:8.5px;line-height:1.4;color:#72858a}
+.info-page .study-visual{margin:11px 0 13px;padding:9px 9px 7px;background:rgba(255,255,255,.92);border:1px solid #dfe7e4;border-radius:12px;text-align:center}
+.info-page .study-visual a{display:block;width:min(100%,330px);margin:0 auto}
+.info-page .study-visual img{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;border-radius:9px;box-shadow:0 7px 20px rgba(46,68,73,.08)}
+.info-page .study-visual figcaption{margin-top:6px;font-size:8px;font-weight:700;color:#7b8d91}
+.info-page .study-example{display:grid;grid-template-columns:46px 1fr;gap:8px;align-items:start;margin:11px 0;padding:10px 11px;background:rgba(255,255,255,.88);border:1px solid #dfe7e4;border-radius:10px}
+.info-page .study-example>span{font-family:"Gamja Flower",cursive;font-size:17px;background:linear-gradient(transparent 58%,#cceef2 58%);text-align:center}
+.info-page .study-example p{margin:0;font-size:10px;line-height:1.55}
+.info-page .study-contrast{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:9px 0}
+.info-page .study-contrast span{display:flex;align-items:center;min-height:38px;padding:7px 9px;border-radius:9px;font-size:9.5px;font-weight:750;line-height:1.4}
+.info-page .study-contrast .no{background:#f6f5f2;color:#788386}
+.info-page .study-contrast .yes{background:#fff4b8;color:#33484f}
+.info-page .study-tags{display:flex;gap:5px;flex-wrap:wrap;margin:9px 0 4px}
+.info-page .study-tags span{font-size:8px;font-weight:750;color:#60767d;background:#edf6f4;border-radius:999px;padding:5px 8px}
+.info-page .study-more{margin-top:11px;border-top:1px dashed #d6e0dd;padding-top:7px}
+.info-page .study-more>summary{display:inline-block;cursor:pointer;list-style:none;padding:3px 0;font-family:"Gamja Flower",cursive;font-size:15px;color:#61777e;border-bottom:1px solid #d8c85e}
+.info-page .study-more>div{padding:9px 0 0}
+.info-page .study-more p{font-size:9px;line-height:1.6;margin:0 0 8px;color:#61747a}
+.info-page .study-more .study-caution{font-size:8.5px;margin:7px 0;padding-left:10px;border-left:3px solid #c7d9d5}
+.info-page .study-more .study-sources{display:flex;flex-wrap:wrap;align-items:center;gap:5px 8px;margin-top:8px;padding-top:7px;border-top:1px dashed #d7dfdc;font-size:8px;color:#7d8c90}
+.info-page .study-more .study-sources>span{font-family:"Gamja Flower",cursive;font-size:14px;color:#52676e}
+.info-page .study-more .study-sources a{text-decoration:none;color:#60757b;border-bottom:1px solid #d4c86f}
+.info-page .sub-footer .footer-social{position:static;left:auto;bottom:auto;translate:none;box-shadow:none;backdrop-filter:none;background:transparent;border:0;padding:0}
+.info-page .sub-footer .footer-social a{color:#fff!important;padding:0!important;font-size:9px!important}
+.info-page{padding-bottom:0}
+
+@media(max-width:760px){
+  .info-page .study-note>summary{grid-template-columns:24px minmax(0,1fr) auto;gap:8px;padding:13px 12px;min-height:0}
+  .info-page .study-summary-copy h3{font-size:22px}
+  .info-page .study-summary-copy p{font-size:9px;line-height:1.35}
+  .info-page .study-toggle{font-size:12.5px}
+  .info-page .study-paper{padding:14px 11px 14px 34px;background-image:linear-gradient(to right,transparent 0,transparent 22px,rgba(229,136,136,.18) 23px,rgba(229,136,136,.18) 24px,transparent 25px),repeating-linear-gradient(to bottom,transparent 0,transparent 31px,rgba(107,151,169,.09) 32px,rgba(107,151,169,.09) 33px)}
+  .info-page .study-paper:before{left:6px;top:13px;font-size:17px}
+  .info-page .study-hook{gap:5px}
+  .info-page .study-hook b{font-size:20px;padding:7px 8px}
+  .info-page .study-hook i{font-size:13px}
+  .info-page .study-core>p{font-size:10px}
+  .info-page .study-visual{margin:9px 0 11px;padding:7px}
+  .info-page .study-visual a{width:min(100%,290px)}
+  .info-page .study-example{grid-template-columns:40px 1fr;padding:8px 9px}
+  .info-page .study-example p{font-size:9.5px}
+  .info-page .study-contrast{grid-template-columns:1fr;gap:5px}
+  .info-page .study-contrast span{min-height:0;padding:7px 8px;font-size:9px}
+  .info-page .visual-pair>div{padding:8px}
+  .info-page .visual-pair b{font-size:18px}
+  .info-page .visual-pair strong{font-size:10px}
+  .info-page .memory-hook b{min-width:0;flex:1;padding-left:3px;padding-right:3px}
+  .info-page .auditory-hook b{font-size:18px}
+  .info-page .study-more>summary{font-size:14px}
+  .info-page .sub-footer .footer-social{display:flex}
+}
+@media(max-width:390px){
+  .info-page .study-note>summary{grid-template-columns:22px minmax(0,1fr)}
+  .info-page .study-toggle{grid-column:2;justify-self:start;margin-top:2px}
+  .info-page .study-hook b{font-size:19px}
+  .info-page .visual-pair{grid-template-columns:1fr 1fr}
+}
+
+
+/* actual published thread visuals; originals are public Drive files */
+.study-visual a{width:min(100%,340px)}.study-visual-image{display:block;width:100%;aspect-ratio:1/1;border-radius:9px;box-shadow:0 7px 20px rgba(46,68,73,.08);background-repeat:no-repeat;background-size:cover;background-position:center}.sprite-working{background-image:url("https://drive.google.com/thumbnail?id=1RqwwsdM2fP8aEESEYdxuHkxHDtD1r8vx&sz=w1000")}.sprite-speed{background-image:url("https://drive.google.com/thumbnail?id=1AnFakcKnts8RL-IOOy5_kWtSfI4_NFhT&sz=w1000")}.sprite-memory{background-image:url("https://drive.google.com/thumbnail?id=1JfoC9lVtdT4HSF8paMPOFRrDATczs_Td&sz=w1000")}.sprite-visual{background-image:url("https://drive.google.com/thumbnail?id=1R9izSiOYAYcBRZnzYJvY5M-LmA1s0F-E&sz=w1000")}.sprite-auditory{background-image:url("https://drive.google.com/thumbnail?id=17xlSGVXbK3IWfmwQXdcf7fF-OtPde3f-&sz=w1000")}
+@media(max-width:760px){.study-visual a{width:min(100%,290px)}}
