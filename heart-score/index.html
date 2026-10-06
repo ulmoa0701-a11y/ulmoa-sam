@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<title>울모아 하트색깔악보 Studio v6.16</title>
+<title>울모아 하트색깔악보 Studio v6.77</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gaegu:wght@400;700&family=Gamja+Flower&family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
@@ -2791,7 +2791,7 @@ button,input,select,textarea{font:inherit} button{cursor:pointer}
   <aside class="sidebar">
     <div class="brand">
       <div><h1>💗 울모아 하트악보 Studio <span class="betaBadge">BETA</span></h1><small>곡을 넣으면 A4 하트 색깔악보로 바꿔줘요 · 자동 변환 결과는 저장 전에 한 번 확인해 주세요</small></div>
-      <div class="vtag">v6.76 BETA · 샵·플랫 계이름 아래 배치</div>
+      <div class="vtag">v6.77 BETA · 샵·플랫 계이름 아래 배치</div>
     </div>
     <div class="studioSummary"><span>✍️ 감자꽃 손글씨</span><span>💾 자동 저장</span><span>🖼 PNG · PDF</span></div>
     <div class="betaNotice"><strong>공개 BETA</strong><span>자동 변환·이미지 인식 결과는 저장 전 한 번 확인해 주세요.</span></div>
@@ -2847,8 +2847,8 @@ button,input,select,textarea{font:inherit} button{cursor:pointer}
       <div id="pane-image" class="tabPane">
         <div class="imageImportBox">
           <label class="upload" for="imageScoreFile"><strong>🖼 악보 이미지 / PDF 넣기 <span class="betaMini">β</span></strong><p>.jpg .png .webp .pdf · 글자와 위치를 자동 분석하는 시험 기능</p><span class="btn primary small">파일 선택</span><input id="imageScoreFile" type="file" accept="image/*,.pdf,application/pdf"></label>
-          <div id="imageStatus" class="status">β 현재 기능은 <b>일반 오선보를 직접 읽는 전문 악보 인식(OMR)이 아닙니다.</b> 이미지 속 계이름·가사와 위치를 OCR로 분석해 하트악보로 재구성합니다.</div>
-          <div class="importSourceHint"><b>현재 인식 구조에 잘 맞는 자료</b>: 계이름·가사가 크고 선명한 <b>단선율 이미지</b> 또는 <b>울모아 하트악보 캡처본</b>. 일반 오선보·화음이 많은 악보·기울어진 사진·그림자는 정확도가 낮을 수 있으니 변환 후 꼭 확인해 주세요.</div>
+          <div id="imageStatus" class="status">β <b>인쇄된 높은음자리표 단선율 오선보</b>는 오선·음표 위치를 먼저 자동 분석합니다. 계이름/하트악보 이미지는 기존 OCR 방식으로 자동 전환합니다. 모든 분석은 이 기기 안에서 처리됩니다.</div>
+          <div class="importSourceHint"><b>잘 맞는 자료</b>: 정면으로 찍은 선명한 <b>높은음자리표 단선율 오선보</b>, MusicXML/MIDI, 울모아 하트악보 캡처본. <b>임시표·쉼표·붙임줄·겹음·복잡한 반복기호는 β에서 확인이 필요해요.</b>. 일반 오선보·화음이 많은 악보·기울어진 사진·그림자는 정확도가 낮을 수 있으니 변환 후 꼭 확인해 주세요.</div>
           <div id="ocrResultBox" class="ocrResultBox" hidden>
             <div class="ocrResultHead"><strong>분석 미리보기</strong><span id="ocrResultMeta" class="ocrResultMeta"></span></div>
             <div id="ocrPreview" class="ocrPreview"></div>
@@ -3021,7 +3021,7 @@ button,input,select,textarea{font:inherit} button{cursor:pointer}
       </div>
     </div>
 
-    <details class="section future futureMini"><summary>준비 중 기능 · MP3/WAV</summary><div class="futureBody">후속 기능입니다. 공개판에서는 오인식 가능성을 숨기지 않고 “AI 분석 → 확인/수정” 단계로 붙일 예정이에요. 현재 BETA는 MIDI·MusicXML·직접 입력·악보 이미지/PDF 분석, 내 악보 모음, 샘플 악보 12곡, PNG/PDF 저장을 브라우저 안에서 처리합니다. MP3/WAV는 아직 준비 중이고, 이미지/PDF는 오인식할 수 있어 분석 후 마디 편집에서 바로 수정하면 됩니다.</div></details>
+    <details class="section future futureMini"><summary>준비 중 기능 · MP3/WAV</summary><div class="futureBody">후속 기능입니다. 공개판에서는 오인식 가능성을 숨기지 않고 “AI 분석 → 확인/수정” 단계로 붙일 예정이에요. 현재 BETA는 MIDI·MusicXML·직접 입력·악보 이미지/PDF 분석, 내 악보 모음, 샘플 악보 12곡, PNG/PDF 저장을 브라우저 안에서 처리합니다. MP3/WAV는 아직 준비 중입니다. 인쇄된 높은음자리표 단선율은 오선·음표를 먼저 분석하고, 계이름 자료는 OCR로 자동 전환합니다. 임시표·쉼표·붙임줄·복잡한 반복기호는 분석 후 마디 편집에서 확인해 주세요.</div></details>
   </aside>
 
   <main class="previewWrap">
@@ -3659,7 +3659,7 @@ function migrateLoadedBuiltInSample(saved){
   return saved;
 }
 
-// v6.17 — image / PDF score import (OCR + screenshot heuristic)
+// v6.77 — printed staff OMR beta + OCR fallback (client-side)
 const IMPORT_CDN={
   pdfjs:[
     'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js',
@@ -3729,47 +3729,110 @@ function importedMeasureQa(s){
  });
  return {target,bad};
 }
+
+function omrGrayAt(img,x,y){
+ const w=img.width,h=img.height;x=Math.max(0,Math.min(w-1,Math.round(x)));y=Math.max(0,Math.min(h-1,Math.round(y)));
+ const i=(y*w+x)*4,d=img.data;return (d[i]*77+d[i+1]*150+d[i+2]*29)>>8;
+}
+function omrRuns(values,maxGap=1){
+ if(!values.length)return[];const out=[];let a=values[0],b=a;
+ for(let i=1;i<values.length;i++){const v=values[i];if(v-b<=maxGap+1)b=v;else{out.push([a,b]);a=b=v}}out.push([a,b]);return out;
+}
+function omrMedian(a){if(!a.length)return 0;const b=[...a].sort((x,y)=>x-y),m=Math.floor(b.length/2);return b.length%2?b[m]:(b[m-1]+b[m])/2}
+function omrLongestVerticalRun(img,x,y0,y1,thr=210){let best=0,cur=0;for(let y=Math.max(0,Math.round(y0));y<=Math.min(img.height-1,Math.round(y1));y++){if(omrGrayAt(img,x,y)<thr){cur++;best=Math.max(best,cur)}else cur=0}return best}
+function omrStaffLineExtent(img,lines){
+ const w=img.width,counts=new Uint16Array(w);for(const ly of lines){for(let y=Math.max(0,Math.round(ly)-1);y<=Math.min(img.height-1,Math.round(ly)+1);y++)for(let x=0;x<w;x++)if(omrGrayAt(img,x,y)<220)counts[x]++}
+ const xs=[];for(let x=0;x<w;x++)if(counts[x]>=2)xs.push(x);if(!xs.length)return{x0:0,x1:w-1};
+ const runs=omrRuns(xs,3).filter(r=>r[1]-r[0]>w*.16).sort((a,b)=>(b[1]-b[0])-(a[1]-a[0]));const r=runs[0]||[xs[0],xs[xs.length-1]];return{x0:r[0],x1:r[1]};
+}
+function findStaffSystems(canvas){
+ const ctx=canvas.getContext('2d',{willReadFrequently:true}),img=ctx.getImageData(0,0,canvas.width,canvas.height),w=img.width,h=img.height;
+ const xa=Math.floor(w*.04),xb=Math.ceil(w*.96),scan=xb-xa,rows=[];
+ for(let y=0;y<h;y++){let n=0;for(let x=xa;x<xb;x++)if(omrGrayAt(img,x,y)<220)n++;if(n>scan*.54)rows.push(y)}
+ const centers=omrRuns(rows,1).map(r=>(r[0]+r[1])/2),systems=[];
+ for(let i=0;i<=centers.length-5;i++){
+  const five=centers.slice(i,i+5),g=[];for(let k=1;k<5;k++)g.push(five[k]-five[k-1]);const med=omrMedian(g);
+  if(med<5||med>42||g.some(v=>v<med*.63||v>med*1.48))continue;const ext=omrStaffLineExtent(img,five);if(ext.x1-ext.x0<w*.52)continue;
+  systems.push({lines:five,spacing:med,x0:ext.x0,x1:ext.x1,img});i+=4;
+ }
+ return systems;
+}
+function omrConnectedHeads(staff){
+ const img=staff.img,w=img.width,s=staff.spacing,y0=Math.max(0,Math.floor(staff.lines[0]-3*s)),y1=Math.min(img.height-1,Math.ceil(staff.lines[4]+3*s));
+ const x0=Math.max(0,Math.floor(staff.x0)),x1=Math.min(w-1,Math.ceil(staff.x1)),cw=x1-x0+1,ch=y1-y0+1,bin=new Uint8Array(cw*ch),seen=new Uint8Array(cw*ch);
+ for(let yy=0;yy<ch;yy++){const gy=y0+yy;for(let xx=0;xx<cw;xx++){const gx=x0+xx;let on=omrGrayAt(img,gx,gy)<182;if(on&&staff.lines.some(l=>Math.abs(gy-l)<=1.15))on=false;if(on)bin[yy*cw+xx]=1}}
+ const comps=[],qx=[],qy=[];
+ for(let yy=0;yy<ch;yy++)for(let xx=0;xx<cw;xx++){
+  const idx=yy*cw+xx;if(!bin[idx]||seen[idx])continue;qx.length=0;qy.length=0;qx.push(xx);qy.push(yy);seen[idx]=1;let qi=0,area=0,minx=xx,maxx=xx,miny=yy,maxy=yy,sumx=0,sumy=0;
+  while(qi<qx.length){const cx=qx[qi],cy=qy[qi++];area++;sumx+=cx;sumy+=cy;minx=Math.min(minx,cx);maxx=Math.max(maxx,cx);miny=Math.min(miny,cy);maxy=Math.max(maxy,cy);
+   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const nx=cx+dx,ny=cy+dy;if(nx<0||ny<0||nx>=cw||ny>=ch)continue;const ni=ny*cw+nx;if(bin[ni]&&!seen[ni]){seen[ni]=1;qx.push(nx);qy.push(ny)}}}
+  const bw=maxx-minx+1,bh=maxy-miny+1,cx=x0+sumx/area,cy=y0+sumy/area;
+  if(bw>=s*.52&&bw<=s*2.25&&bh>=s*.34&&bh<=s*1.55&&area>=s*s*.22&&cy>staff.lines[0]-s*2.35&&cy<staff.lines[4]+s*2.35)comps.push({x:cx,y:cy,area,bw,bh});
+ }
+ comps.sort((a,b)=>a.x-b.x||b.area-a.area);const merged=[];
+ for(const c of comps){if(c.x<staff.x0+s*3||c.x>staff.x1-s*.5)continue;const last=merged[merged.length-1];if(last&&Math.abs(c.x-last.x)<s*1.55){if(c.area>last.area)merged[merged.length-1]=c}else merged.push(c)}
+ return merged;
+}
+function omrPitchFromY(staff,x,seedY){
+ const img=staff.img,s=staff.spacing,bottom=staff.lines[4];let best=null;
+ for(let k=-4;k<=13;k++){const y=bottom-k*s/2;let score=0,total=0;for(let yy=Math.round(y-s*.55);yy<=Math.round(y+s*.55);yy++)for(let xx=Math.round(x-s*.82);xx<=Math.round(x+s*.82);xx++){if(xx<0||yy<0||xx>=img.width||yy>=img.height)continue;if(staff.lines.some(l=>Math.abs(yy-l)<=1.1))continue;total++;if(omrGrayAt(img,xx,yy)<185)score++}const density=total?score/total:0,seedBonus=seedY?Math.max(0,1-Math.abs(seedY-y)/(s*1.3))*.07:0,val=density+seedBonus;if(!best||val>best.val)best={k,y,val}}
+ const names=['도','레','미','파','솔','라','시'],eIndex=2+best.k,idx=((eIndex%7)+7)%7;let note=names[idx];if(Math.floor(eIndex/7)>=1)note='높은'+note;return{note,y:best.y,k:best.k,score:best.val};
+}
+function omrFindBarlines(staff,heads){
+ const img=staff.img,s=staff.spacing,y0=staff.lines[0]-s*.25,y1=staff.lines[4]+s*.25,need=(y1-y0)*.79,raw=[];
+ for(let x=Math.max(0,Math.floor(staff.x0));x<=Math.min(img.width-1,Math.ceil(staff.x1));x++)if(omrLongestVerticalRun(img,x,y0,y1,215)>=need)raw.push(x);
+ let centers=omrRuns(raw,1).map(r=>(r[0]+r[1])/2).filter(x=>!heads.some(h=>Math.abs(h.x-x)<s*1.35));const first=heads[0]?.x||staff.x0+s*5,last=heads[heads.length-1]?.x||staff.x1-s;
+ const before=centers.filter(x=>x<first-s*1.35),after=centers.filter(x=>x>last+s);let start=before.length?Math.max(...before):staff.x0,end=after.length?Math.max(...after):staff.x1;
+ const interior=centers.filter(x=>x>start+s*4&&x<end-s*2).sort((a,b)=>a-b),bars=[start];for(const x of interior)if(x-bars[bars.length-1]>s*6)bars.push(x);if(end-bars[bars.length-1]>s*5)bars.push(end);else bars[bars.length-1]=end;return bars;
+}
+function omrMeasureDurations(notes,left,right){
+ const n=notes.length;if(!n)return[];if(n===1)return[4];if(n===2)return[2,2];
+ if(n===3){const gaps=[notes[1].x-notes[0].x,notes[2].x-notes[1].x,right-notes[2].x],mi=gaps.indexOf(Math.max(...gaps));return mi===0?[2,1,1]:mi===1?[1,2,1]:[1,1,2]}
+ if(n===4){const gaps=[notes[1].x-notes[0].x,notes[2].x-notes[1].x,notes[3].x-notes[2].x,right-notes[3].x],small=omrMedian([...gaps].sort((a,b)=>a-b).slice(0,2));if(small>0){const long=gaps.map(g=>g>small*1.55);if(long[0]&&long[2])return[1.5,.5,1.5,.5];if(long[1]&&long[3])return[.5,1.5,.5,1.5]}return[1,1,1,1]}
+ const base=n>8?.25:.5,d=Array(n).fill(base);let remain=4-base*n;if(remain<0)return Array(n).fill(nearestDuration(Math.max(.25,4/n)));
+ const gaps=notes.map((v,i)=>(i<n-1?notes[i+1].x-v.x:right-v.x)),order=[...Array(n).keys()].sort((a,b)=>gaps[b]-gaps[a]);let oi=0;while(remain>.001){const i=order[oi%order.length],add=Math.min(.5,remain);d[i]+=add;remain-=add;oi++}return d.map(nearestDuration);
+}
+function parseStaffScoreCanvas(canvas,filename=''){
+ const systems=findStaffSystems(canvas);if(!systems.length)return null;const measures=[],metaSystems=[];let noteTotal=0,barTotal=0,lowPitch=0;
+ for(const staff of systems){
+  const heads=omrConnectedHeads(staff);if(heads.length<2)continue;const notes=heads.map(h=>{const p=omrPitchFromY(staff,h.x,h.y);if(p.score<.055)lowPitch++;return{...h,...p}}).sort((a,b)=>a.x-b.x);noteTotal+=notes.length;
+  const bars=omrFindBarlines(staff,notes);barTotal+=Math.max(0,bars.length-2);const sysEvents=[];
+  if(bars.length>=2){for(let bi=0;bi<bars.length-1;bi++){const left=bars[bi],right=bars[bi+1],mn=notes.filter(n=>n.x>left+staff.spacing*.4&&n.x<right-staff.spacing*.18);if(!mn.length)continue;const ds=omrMeasureDurations(mn,left,right),m=[];mn.forEach((n,i)=>{const e=ev(n.note,ds[i]||1,'');m.push(e);sysEvents.push({x:n.x,y:n.y,event:e})});measures.push(m)}}
+  if(!sysEvents.length){for(let i=0;i<notes.length;i+=4){const mn=notes.slice(i,i+4);if(!mn.length)continue;const ds=omrMeasureDurations(mn,mn[0].x,(mn[mn.length-1]?.x||mn[0].x)+staff.spacing*8),m=[];mn.forEach((n,j)=>{const e=ev(n.note,ds[j]||1,'');m.push(e);sysEvents.push({x:n.x,y:n.y,event:e})});measures.push(m)}}
+  metaSystems.push({staff,notes,events:sysEvents,bars});
+ }
+ if(!measures.length||noteTotal<6)return null;const confidence=Math.max(.35,Math.min(.91,.48+Math.min(.18,metaSystems.length*.035)+Math.min(.17,noteTotal/120)+Math.min(.08,barTotal/35)-Math.min(.12,lowPitch/Math.max(1,noteTotal)*.18)));
+ return{state:{...emptyState(),title:fileBaseName(filename)||'가져온 악보',pageOrientation:'landscape',timeN:4,timeD:4,measures},systems:metaSystems,confidence,noteTotal,barTotal,warnings:['리듬은 음표 간격과 마디선을 함께 추정합니다.','임시표·쉼표·붙임줄·반복기호는 확인이 필요합니다.']};
+}
+function omrOcrWords(data){return(data&&data.words?data.words:[]).map(w=>{const b=w.bbox||{},t=cleanOcrWord(w.text||'');return{text:t,conf:Number(w.confidence||w.conf||0),x0:b.x0||0,x1:b.x1||0,y0:b.y0||0,y1:b.y1||0,cx:((b.x0||0)+(b.x1||0))/2,cy:((b.y0||0)+(b.y1||0))/2}}).filter(v=>v.text)}
+function attachOcrToOmr(omr,data,filename=''){
+ if(!omr||!data)return omr;const title=extractTitleFromOcr(data,filename);if(title)omr.state.title=title;
+ const words=omrOcrWords(data).filter(w=>w.conf>=18&&isHangulWord(w.text)&&!/^(작사|작곡|리코더|로저스|도레미송|울모아|색깔악보)$/.test(w.text)&&!normalizeNoteToken(w.text));
+ for(let si=0;si<omr.systems.length;si++){const sys=omr.systems[si],st=sys.staff,sp=st.spacing,next=omr.systems[si+1]?.staff,yLow=st.lines[4]+sp*.35,yHigh=Math.min(next?next.lines[0]-sp*.8:st.lines[4]+sp*5.8,st.lines[4]+sp*5.8);const row=words.filter(w=>w.cy>yLow&&w.cy<yHigh&&w.cx>st.x0&&w.cx<st.x1).sort((a,b)=>a.cx-b.cx),virtual=[];
+  for(const w of row){const chars=[...w.text].filter(ch=>/[가-힣]/.test(ch));if(chars.length>1&&w.x1-w.x0>sp*1.15)chars.forEach((ch,i)=>virtual.push({text:ch,cx:w.x0+(i+.5)*(w.x1-w.x0)/chars.length}));else virtual.push({text:w.text,cx:w.cx})}
+  const used=new Set();for(const v of virtual){let best=null,bd=1e9;for(const ref of sys.events){if(used.has(ref))continue;const d=Math.abs(ref.x-v.cx);if(d<bd){best=ref;bd=d}}if(best&&bd<sp*2.3){best.event.lyric=v.text;used.add(best)}}
+ }
+ return omr;
+}
+
 async function importScoreFromFile(file){
-  if(!file) return;
-  updateOcrPreview('');
+  if(!file) return;updateOcrPreview('');
   try{
-    const isPdf=/pdf$/i.test(file.type)||/\.pdf$/i.test(file.name||'');
-    let canvases=[];
-    if(isPdf){
-      importStatus('PDF 페이지 준비 중…');
-      canvases=await pdfToCanvases(file,4,1.8);
-    }else{
-      importStatus('이미지 준비 중…');
-      canvases=[await fileToCanvas(file,1800)];
-    }
-    const importedStates=[];
+    const isPdf=/pdf$/i.test(file.type)||/\.pdf$/i.test(file.name||'');let canvases=[];
+    if(isPdf){importStatus('PDF 페이지 준비 중…');canvases=await pdfToCanvases(file,4,1.8)}else{importStatus('이미지 준비 중…');canvases=[await fileToCanvas(file,1800)]}
+    const importedStates=[],omrResults=[];let usedOmr=false,usedFallback=false;
     for(let i=0;i<canvases.length;i++){
-      importStatus(`${isPdf?'PDF':'이미지'} 분석 중… ${i+1}/${canvases.length}`);
-      const data=await ocrCanvas(canvases[i],`${i+1}/${canvases.length} 페이지 OCR`);
-      let parsed=parseHeartScoreFromWords(data,file.name);
-      if(!parsed) parsed=parseStructuredOcrText(data.text||'',file.name);
-      if(parsed) importedStates.push(parsed);
+      const canvas=canvases[i];importStatus(`${isPdf?'PDF':'이미지'} ${i+1}/${canvases.length} · 오선·음표 찾는 중…`);const omr=parseStaffScoreCanvas(canvas,file.name);
+      if(omr&&omr.confidence>=.52&&omr.noteTotal>=6){usedOmr=true;importStatus(`${i+1}/${canvases.length} · 오선 인식됨. 제목·가사 확인 중…`);try{const data=await ocrCanvas(canvas,`${i+1}/${canvases.length} 페이지 글자`);attachOcrToOmr(omr,data,file.name)}catch(e){console.warn('OMR text OCR skipped',e)}importedStates.push(omr.state);omrResults.push(omr);continue}
+      usedFallback=true;importStatus(`${i+1}/${canvases.length} · 오선 인식이 불확실해 계이름 OCR로 다시 분석 중…`);const data=await ocrCanvas(canvas,`${i+1}/${canvases.length} 페이지 OCR`);let parsed=parseHeartScoreFromWords(data,file.name);if(!parsed)parsed=parseStructuredOcrText(data.text||'',file.name);if(parsed)importedStates.push(parsed);
     }
-    const merged=mergeImportedStates(importedStates,file.name);
-    if(!merged) throw new Error('음표/계이름을 충분히 읽지 못했습니다. 울모아 하트악보 캡처본이나 계이름이 또렷한 단선율 악보에서 다시 시도해보세요.');
-    if(!merged.title||merged.title==='가져온 악보') merged.title=fileBaseName(file.name)||merged.title;
-    const qa=importedMeasureQa(merged);
-    resetActiveLibrary();
-    loadState(merged);
-    const qaMeta=qa.bad.length?`${merged.measures.length}마디 자동 생성 · ⚠ 박자 불일치 ${qa.bad.length}마디`:`${merged.measures.length}마디 자동 생성 · 박자 합계 PASS`;
-    updateOcrPreview(summariseImportedState(merged),qaMeta);
-    if(qa.bad.length){
-      const badText=qa.bad.slice(0,6).map(v=>`${v.index}마디 ${fmt(v.sum)}/${qa.target}박`).join(' · ');
-      importStatus(`⚠ 자동 인식 완료 · 박자 불일치 ${qa.bad.length}마디 (${badText}). 저장 전에 꼭 수정해 주세요.`,'warn');
-    }else{
-      importStatus(`완료 · ${merged.measures.length}마디를 불러왔습니다. 박자 합계는 맞지만 계이름·가사는 한 번 확인해 주세요.`,'ok');
-    }
-  }catch(err){
-    console.error(err);
-    importStatus('분석 실패: '+err.message,'warn');
-    updateOcrPreview('');
-    alert('악보 이미지/PDF 분석에 실패했습니다.\n'+err.message+'\n\n권장: 울모아 하트악보 캡처본, 계이름·가사가 선명한 단선율 악보, 또는 PDF 첫 페이지를 사용하세요.');
-  }
+    const merged=mergeImportedStates(importedStates,file.name);if(!merged)throw new Error('음표를 충분히 읽지 못했습니다. 정면의 선명한 단선율 오선보, MusicXML/MIDI 또는 계이름이 또렷한 자료에서 다시 시도해보세요.');if(!merged.title||merged.title==='가져온 악보')merged.title=fileBaseName(file.name)||merged.title;
+    const qa=importedMeasureQa(merged);resetActiveLibrary();loadState(merged);let meta='';
+    if(usedOmr&&omrResults.length){const avg=omrResults.reduce((a,v)=>a+v.confidence,0)/omrResults.length,totalNotes=omrResults.reduce((a,v)=>a+v.noteTotal,0),totalStaff=omrResults.reduce((a,v)=>a+v.systems.length,0);meta=`오선보 자동 분석 β · ${totalStaff}단 · ${merged.measures.length}마디 · 음표 ${totalNotes}개 · 신뢰도 ${Math.round(avg*100)}%`}else meta=`OCR 자동 분석 · ${merged.measures.length}마디`;meta+=qa.bad.length?` · ⚠ 박자 불일치 ${qa.bad.length}마디`:' · 박자 합계 PASS';updateOcrPreview(summariseImportedState(merged),meta);
+    if(usedOmr)importStatus(`✓ 오선보 자동 초안 완료 · ${merged.measures.length}마디. 계이름·가사와 특히 임시표·쉼표·붙임줄은 저장 전에 한 번 확인해 주세요.${usedFallback?' 일부 페이지는 OCR 방식으로 보완했습니다.':''}`,'ok');
+    else if(qa.bad.length){const badText=qa.bad.slice(0,6).map(v=>`${v.index}마디 ${fmt(v.sum)}/${qa.target}박`).join(' · ');importStatus(`⚠ OCR 자동 인식 완료 · 박자 불일치 ${qa.bad.length}마디 (${badText}). 저장 전에 꼭 수정해 주세요.`,'warn')}
+    else importStatus(`완료 · ${merged.measures.length}마디를 불러왔습니다. 계이름·가사는 한 번 확인해 주세요.`,'ok');
+  }catch(err){console.error(err);importStatus('분석 실패: '+err.message,'warn');updateOcrPreview('');alert('악보 이미지/PDF 분석에 실패했습니다.\n'+err.message+'\n\n권장: 정면·고해상도 단선율 오선보, MusicXML/MIDI, 울모아 하트악보 캡처본을 사용하세요.')}
 }
 
 // v6.15 — export with SVG-note font preservation, exact live-label bounds + mobile-safe handoff
