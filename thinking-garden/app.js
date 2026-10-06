@@ -6,7 +6,7 @@ const STORE={seeds:'moa-garden:seeds',done:'moa-garden:completed',sound:'moa-gar
 let state={game:null,previewGame:null,round:0,score:0,total:Number(localStorage.getItem(STORE.seeds)||0),sound:localStorage.getItem(STORE.sound)!=='off',lock:false,lastSpeech:'',timers:[]};
 let completed=readCompleted();
 const meta={
- rescue:{title:'딱 맞는 친구 찾기',kicker:'홍의 찾기숲',theme:'find',friend:'assets/friend-hong.png'},
+ rescue:{title:'모아 구조대!',kicker:'홍의 구조숲',theme:'find',friend:'assets/friend-hong.png'},
  memory:{title:'기억꽃길 이어가기',kicker:'루의 기억길',theme:'memory',friend:'assets/friend-ru.png'},
  spacing:{title:'띄어쓰기 다리 놓기',kicker:'샘의 띄어쓰기길',theme:'spacing',friend:'assets/friend-saem.png'},
  spelling:{title:'고장 난 간판 고치기',kicker:'티의 글자수리소',theme:'spelling',friend:'assets/friend-ti.png'},
@@ -22,7 +22,7 @@ const meta={
 };
 
 const previewExamples={
- rescue:`<div class="pv-instruction">큰 · 노란 · 오리를 찾아요</div><div class="pv-row pv-size-demo"><span class="pv-animal pv-big" style="background:#ffd45b">🐰</span><span class="pv-animal pv-big preview-pulse" style="background:#ffd45b">🦆</span><span class="pv-animal pv-small" style="background:#ffd45b">🦆</span><span class="pv-animal pv-big" style="background:#6bb7ff">🐮</span></div>`,
+ rescue:`<div class="pv-rescue-radio">📡 무전 도착! <b>노란 큰 오리</b></div><div class="pv-rescue-field"><span>🌳</span><span class="duck">🦆</span><span>🌿</span><span>🐷</span><span class="van">🚐</span></div>`,
  memory:`<div class="pv-instruction">순서를 기억해요</div><div class="pv-sequence"><i class="blue"></i><b>→</b><i class="yellow"></i><b>→</b><i class="green"></i></div><div class="pv-hint">충분히 본 뒤 ‘준비됐어요’를 누르면 가려져요</div>`,
  spacing:`<div class="pv-instruction">붙어 있는 문장에서 띄울 곳을 찾아요</div><div class="pv-glued">오늘은학교에가요</div><div class="pv-space-arrow">톡! ↓</div><div class="pv-spaced"><span>오늘은</span><span>학교에</span><span>가요</span></div>`,
  spelling:`<div class="pv-instruction">고장 난 글자를 고쳐요</div><div class="pv-sign">숙제를 다 <b>?</b></div><div class="pv-options"><span class="preview-pulse">했어요</span><span>햇어요</span></div>`,
@@ -95,17 +95,52 @@ const findRounds=[
  {kind:'group',color:'빨간',size:'작은'}
 ];
 function animalCard(a,color,size){return{animal:a,color,size}}
-function renderFind(){const q=findRounds[state.round];let found=new Set(),target=q.kind==='single'?animals.find(a=>a[0]===q.animal):null;missionText.textContent=q.kind==='single'?`${q.color} ${q.size} ${q.animal}를 찾아 구조해요!`:`${q.color} ${q.size} 동물 4종을 모아요!`;missionSub.textContent=q.kind==='single'?'말을 읽지 않아도 색 · 크기 · 동물 그림을 보고 같은 조건을 찾아요.':'색과 크기를 보고 토끼 · 돼지 · 소 · 오리를 한 마리씩 구조소에 모아요.';say(missionText.textContent);let cards=[];
- if(q.kind==='single'){const ta=animals.find(a=>a[0]===q.animal);cards=[animalCard(ta,q.color,q.size),animalCard(ta,q.color,q.size==='큰'?'작은':'큰'),animalCard(ta,q.color==='노란'?'파란':'노란',q.size),animalCard(animals[(animals.indexOf(ta)+1)%4],q.color,q.size)];while(cards.length<8){const a=animals[Math.floor(Math.random()*4)],c=Object.keys(colors)[Math.floor(Math.random()*4)],z=Math.random()>.5?'큰':'작은';if(!cards.some(x=>x.animal[0]===a[0]&&x.color===c&&x.size===z))cards.push(animalCard(a,c,z))}}
- else{animals.forEach(a=>cards.push(animalCard(a,q.color,q.size)));cards.push(animalCard(animals[0],q.color,q.size));cards.push(animalCard(animals[1],q.color,q.size==='큰'?'작은':'큰'));cards.push(animalCard(animals[2],q.color==='초록'?'노란':'초록',q.size));cards.push(animalCard(animals[3],q.color==='빨간'?'파란':'빨간',q.size))}
- const scene=document.createElement('div');scene.className='rescue-scene';
- const hud=document.createElement('div');hud.className='rescue-hud';hud.innerHTML=`<span>🚩 구조 미션</span><b id="rescueCount">0 / ${q.kind==='single'?1:4}</b>`;
- const cues=document.createElement('div');cues.className='rescue-cues';cues.setAttribute('aria-label',`${q.color} ${q.size} ${q.kind==='single'?q.animal:'동물 종류별 하나씩'}`);const sizeAnimal=q.kind==='single'?target[1]:'🐰';cues.innerHTML=`<span class="rescue-cue cue-color" aria-hidden="true"><i style="background:${colors[q.color][0]}"></i></span><span class="rescue-cue cue-size-animal" aria-hidden="true"><b class="size-animal size-large ${q.size==='큰'?'selected':'muted'}">${sizeAnimal}</b><b class="size-animal size-small ${q.size==='작은'?'selected':'muted'}">${sizeAnimal}</b></span><span class="rescue-cue cue-animal" aria-hidden="true">${q.kind==='single'?target[1]:'🐰🐷🐮🦆'}</span>`;
- const camp=document.createElement('div');camp.className='rescue-camp';camp.innerHTML=`<div class="rescue-tent">⛺<small>안전한 구조소</small></div><div class="rescue-slots">${Array.from({length:q.kind==='single'?1:4},(_,i)=>`<span class="rescue-slot" data-slot="${i}">?</span>`).join('')}</div>`;
- const board=document.createElement('div');board.className='find-board rescue-board';
- const fillCamp=x=>{const slots=[...camp.querySelectorAll('.rescue-slot')];const slot=q.kind==='single'?slots[0]:slots[animals.findIndex(a=>a[0]===x.animal[0])];slot.textContent=x.animal[1];slot.classList.add('filled');$('#rescueCount').textContent=`${found.size} / ${q.kind==='single'?1:4}`};
- shuffle(cards).forEach(x=>{const b=document.createElement('button');b.className=`find-card ${x.size==='작은'?'small':''}`;b.innerHTML=`<span class="animal-bubble" style="background:${colors[x.color][0]}"><span class="animal ${x.size==='작은'?'animal-small':'animal-large'}">${x.animal[1]}</span></span><span class="sr-only">${x.size} ${x.color} ${x.animal[0]}</span>`;b.onclick=()=>{if(state.lock||b.classList.contains('correct'))return;const basic=x.color===q.color&&x.size===q.size;const ok=q.kind==='single'?basic&&x.animal[0]===q.animal:basic&&!found.has(x.animal[0]);if(ok){found.add(x.animal[0]);b.classList.add('correct','rescued');fillCamp(x);rewardAt(b);sfx('ok');addSeeds(q.kind==='single'?10:3);flash(q.kind==='single'?'구조 성공! 안전한 곳으로 이동했어요 🌱':`${x.animal[0]} 구조 성공!`);if(q.kind==='single'||found.size===4){scene.classList.add('mission-clear');roundGate(scene,'다음 구조 미션 ▶',650)}}else{b.classList.add('wrong');sfx('no');flash(basic&&q.kind==='group'&&found.has(x.animal[0])?'이미 구조한 친구예요. 다른 종류를 찾아요.':'구조 조건을 한 번 더 살펴봐요.');later(()=>b.classList.remove('wrong'),430)}};board.appendChild(b)});
- scene.append(hud,cues,board,camp);area.appendChild(scene)}
+function animalSvg(type,color){
+ const fur=colors[color]?.[0]||'#ffd45b',ink='#25443a',white='#fff8ef';
+ const common=`viewBox="0 0 100 100" class="animal-svg" aria-hidden="true" style="--fur:${fur};--ink:${ink};--white:${white}"`;
+ if(type==='토끼')return `<svg ${common}><ellipse cx="50" cy="68" rx="29" ry="23" fill="var(--fur)" stroke="var(--ink)" stroke-width="4"/><ellipse cx="35" cy="24" rx="10" ry="23" fill="var(--fur)" stroke="var(--ink)" stroke-width="4"/><ellipse cx="65" cy="24" rx="10" ry="23" fill="var(--fur)" stroke="var(--ink)" stroke-width="4"/><circle cx="50" cy="49" r="25" fill="var(--fur)" stroke="var(--ink)" stroke-width="4"/><circle cx="41" cy="46" r="3.8" fill="var(--ink)"/><circle cx="59" cy="46" r="3.8" fill="var(--ink)"/><path d="M46 56 Q50 61 54 56" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/><circle cx="50" cy="54" r="3" fill="#ff9da8"/></svg>`;
+ if(type==='돼지')return `<svg ${common}><ellipse cx="50" cy="68" rx="31" ry="22" fill="var(--fur)" stroke="var(--ink)" stroke-width="4"/><path d="M27 35 L18 22 L37 27Z M73 35 L82 22 L63 27Z" fill="var(--fur)" stroke="var(--ink)" stroke-width="4"/><circle cx="50" cy="48" r="27" fill="var(--fur)" stroke="var(--ink)" stroke-width="4"/><ellipse cx="50" cy="57" rx="13" ry="9" fill="#ffc2c9" stroke="var(--ink)" stroke-width="3"/><circle cx="45" cy="57" r="2" fill="var(--ink)"/><circle cx="55" cy="57" r="2" fill="var(--ink)"/><circle cx="40" cy="44" r="3.5" fill="var(--ink)"/><circle cx="60" cy="44" r="3.5" fill="var(--ink)"/></svg>`;
+ if(type==='소')return `<svg ${common}><rect x="18" y="50" width="64" height="35" rx="17" fill="var(--fur)" stroke="var(--ink)" stroke-width="4"/><path d="M31 31 L19 21 L23 38 M69 31 L81 21 L77 38" fill="#f1d8a5" stroke="var(--ink)" stroke-width="4"/><circle cx="50" cy="44" r="25" fill="var(--fur)" stroke="var(--ink)" stroke-width="4"/><path d="M31 54 Q39 45 47 54 Q56 44 69 51" fill="var(--white)" opacity=".9"/><ellipse cx="50" cy="58" rx="14" ry="9" fill="#f5c9b2" stroke="var(--ink)" stroke-width="3"/><circle cx="41" cy="43" r="3.5" fill="var(--ink)"/><circle cx="59" cy="43" r="3.5" fill="var(--ink)"/></svg>`;
+ return `<svg ${common}><ellipse cx="48" cy="66" rx="31" ry="22" fill="var(--fur)" stroke="var(--ink)" stroke-width="4"/><circle cx="61" cy="39" r="19" fill="var(--fur)" stroke="var(--ink)" stroke-width="4"/><path d="M76 39 L95 46 L76 51Z" fill="#ffad43" stroke="var(--ink)" stroke-width="3"/><ellipse cx="42" cy="65" rx="16" ry="11" fill="var(--white)" opacity=".55"/><circle cx="66" cy="35" r="3.5" fill="var(--ink)"/><path d="M25 82 Q19 92 16 88 M53 84 Q51 94 46 90" fill="none" stroke="#d58f32" stroke-width="4" stroke-linecap="round"/></svg>`;
+}
+function rescueTargetMarkup(q){
+ const targetAnimals=q.kind==='single'?[animals.find(a=>a[0]===q.animal)]:animals;
+ return targetAnimals.map(a=>`<span class="radio-target ${q.size==='작은'?'small':''}" aria-hidden="true">${animalSvg(a[0],q.color)}</span>`).join('');
+}
+function renderFind(){
+ const q=findRounds[state.round],need=q.kind==='single'?1:4;let found=new Set();
+ world.classList.add('rescue-v6-world');
+ missionText.textContent=q.kind==='single'?`${q.color} ${q.size} ${q.animal}를 찾아줘!`:`${q.color} ${q.size} 동물 네 친구를 찾아줘!`;
+ missionSub.textContent='무전을 듣고 구조 현장에서 같은 친구를 찾아 구조차로 보내요.';say(missionText.textContent);
+ let cards=[];
+ if(q.kind==='single'){
+  const ta=animals.find(a=>a[0]===q.animal);cards=[animalCard(ta,q.color,q.size),animalCard(ta,q.color,q.size==='큰'?'작은':'큰'),animalCard(ta,q.color==='노란'?'파란':'노란',q.size),animalCard(animals[(animals.indexOf(ta)+1)%4],q.color,q.size)];
+  while(cards.length<8){const a=animals[Math.floor(Math.random()*4)],c=Object.keys(colors)[Math.floor(Math.random()*4)],z=Math.random()>.5?'큰':'작은';if(!cards.some(x=>x.animal[0]===a[0]&&x.color===c&&x.size===z))cards.push(animalCard(a,c,z))}
+ }else{
+  animals.forEach(a=>cards.push(animalCard(a,q.color,q.size)));cards.push(animalCard(animals[0],q.color,q.size));cards.push(animalCard(animals[1],q.color,q.size==='큰'?'작은':'큰'));cards.push(animalCard(animals[2],q.color==='초록'?'노란':'초록',q.size));cards.push(animalCard(animals[3],q.color==='빨간'?'파란':'빨간',q.size));
+ }
+ const scene=document.createElement('div');scene.className='rescue-v6';
+ const radio=document.createElement('div');radio.className='rescue-radio';radio.innerHTML=`<div class="radio-wave">📡</div><div class="radio-copy"><small>구조대 무전</small><b>${q.kind==='single'?`${q.color} ${q.size} ${q.animal}`:`${q.color} ${q.size} 동물 4종`}</b><span>${q.kind==='single'?'현장 어딘가에 숨어 있어!':'토끼·돼지·소·오리를 한 마리씩!'}</span></div><div class="radio-targets">${rescueTargetMarkup(q)}</div><button type="button" class="radio-replay" aria-label="무전 다시 듣기">🔊</button>`;
+ radio.querySelector('.radio-replay').onclick=()=>say(missionText.textContent);
+ const field=document.createElement('div');field.className=`rescue-field scene-${['pond','meadow','forest','creek','sunset'][state.round]}`;
+ field.innerHTML=`<span class="field-prop sun">☀️</span><span class="field-prop tree a">🌳</span><span class="field-prop tree b">🌲</span><span class="field-prop bush a">🌿</span><span class="field-prop bush b">🌿</span><span class="field-prop rock">🪨</span><div class="rescue-counter">구조 <b id="rescueCount">0</b>/${need}</div><div class="rescue-van"><div class="van-seats">${Array.from({length:need},(_,i)=>`<span data-seat="${i}">?</span>`).join('')}</div><div class="van-body">🚐<small>모아 구조대</small></div></div>`;
+ const positions=shuffle([{x:14,y:19},{x:49,y:16},{x:81,y:22},{x:23,y:40},{x:65,y:39},{x:12,y:61},{x:47,y:59},{x:82,y:61}]);
+ const shuffled=shuffle(cards);
+ const seats=[...field.querySelectorAll('[data-seat]')],truck=field.querySelector('.rescue-van');
+ const land=x=>{
+  const idx=q.kind==='single'?0:animals.findIndex(a=>a[0]===x.animal[0]),seat=seats[idx];
+  seat.innerHTML=`<span class="seat-animal">${animalSvg(x.animal[0],q.color)}</span>`;seat.classList.add('filled');$('#rescueCount').textContent=String(found.size);
+ };
+ shuffled.forEach((x,i)=>{
+  const pos=positions[i%positions.length],b=document.createElement('button');b.type='button';b.className=`rescue-creature ${x.size==='작은'?'small':'big'}`;b.style.left=`${pos.x}%`;b.style.top=`${pos.y}%`;b.innerHTML=`<span class="creature-art">${animalSvg(x.animal[0],x.color)}</span><span class="sr-only">${x.size} ${x.color} ${x.animal[0]}</span>`;
+  b.onclick=()=>{if(state.lock||b.classList.contains('rescue-fly')||b.classList.contains('rescued-away'))return;const basic=x.color===q.color&&x.size===q.size,ok=q.kind==='single'?basic&&x.animal[0]===q.animal:basic&&!found.has(x.animal[0]);
+   if(!ok){b.classList.add('spooked');sfx('no');flash(basic&&q.kind==='group'&&found.has(x.animal[0])?'이미 구조한 친구야! 다른 친구를 찾아줘.':'무전 속 친구와 달라! 다시 찾아봐.');later(()=>b.classList.remove('spooked'),520);return}
+   found.add(x.animal[0]);const br=b.getBoundingClientRect(),tr=truck.getBoundingClientRect();b.style.setProperty('--fly-x',`${tr.left+tr.width/2-(br.left+br.width/2)}px`);b.style.setProperty('--fly-y',`${tr.top+tr.height/3-(br.top+br.height/2)}px`);b.classList.add('rescue-fly');sfx('ok');flash('찾았다! 구조차로 이동 중! 🚨');
+   later(()=>{b.classList.add('rescued-away');land(x);rewardAt(truck);addSeeds(q.kind==='single'?10:3);const done=q.kind==='single'||found.size===4;if(done){state.lock=true;field.classList.add('all-safe');flash('구조 완료! 모두 안전해요 🎉');roundGate(scene,'다음 구조 현장 ▶',650)}},820)
+  };field.appendChild(b)
+ });
+ scene.append(radio,field);area.appendChild(scene)
+}
 
 const memoryColors=[['파랑','#64adff'],['노랑','#ffd04f'],['초록','#67c67d'],['빨강','#ff7770']];
 function renderMemory(){
