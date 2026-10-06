@@ -31,3 +31,8 @@
 
 /* published work */
 .made-books-intro{margin:8px 0 20px;color:#625b52;line-height:1.7}.made-book-grid{display:grid;gap:18px}.made-book-card{display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:24px;align-items:center;padding:20px;background:#fffdf8;border:1px solid #e8dfd2;border-radius:22px}.made-book-card img{width:100%;display:block;border-radius:10px;box-shadow:0 10px 24px rgba(70,55,35,.12)}.made-book-card small{color:#7b746b}.made-book-card h3{font-family:'Gamja Flower',cursive;font-size:28px;line-height:1.15;margin:7px 0 10px}.made-book-card p{line-height:1.65;margin:0;color:#5f5a53}.made-book-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.made-book-links a{padding:9px 13px;border-radius:999px;background:#f5edcf;color:#39342f;text-decoration:none;font-weight:700}@media(max-width:640px){.made-book-card{grid-template-columns:112px 1fr;gap:14px;padding:14px}.made-book-card h3{font-size:22px}.made-book-card p{font-size:13px}.made-book-links a{font-size:12px;padding:8px 10px}}
+
+/* published work mobile QA */
+.made-book-card>div{min-width:0}
+@media(max-width:640px){.made-book-card{grid-template-columns:96px minmax(0,1fr);gap:12px;padding:12px}.made-book-card h3{overflow-wrap:anywhere}.made-book-links a{max-width:100%;white-space:normal}}
+@media(max-width:480px){.made-book-card{grid-template-columns:1fr;align-items:start}.made-book-card img{width:112px}.made-book-card h3{font-size:21px;line-height:1.18;word-break:keep-all;overflow-wrap:anywhere}.made-book-card p{font-size:12px;word-break:keep-all}.made-book-links{display:grid;grid-template-columns:1fr;gap:8px}.made-book-links a{text-align:center}}

@@ -9,6 +9,10 @@
   const download = document.getElementById('materialDownload');
   const preview = document.getElementById('materialPreview');
   const thread = document.getElementById('materialThread');
+  const records = document.getElementById('materialRecords');
+  const madeNote = document.getElementById('materialMadeNote');
+  const usedNote = document.getElementById('materialUsedNote');
+  const instagram = document.getElementById('materialInstagram');
 
   document.querySelectorAll('.book-button').forEach((button) => {
     button.addEventListener('click', () => {
@@ -29,6 +33,21 @@
       const threadUrl = button.dataset.thread || '';
       thread.hidden = !threadUrl;
       if (threadUrl) thread.href = threadUrl;
+
+      const recordLinks = [
+        [madeNote, button.dataset.madeNote || ''],
+        [usedNote, button.dataset.usedNote || ''],
+        [instagram, button.dataset.instagram || '']
+      ];
+      let hasRecords = false;
+      recordLinks.forEach(([link, url]) => {
+        link.hidden = !url;
+        if (url) {
+          link.href = url;
+          hasRecords = true;
+        }
+      });
+      records.hidden = !hasRecords;
 
       dialog.showModal();
     });
