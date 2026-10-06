@@ -6,7 +6,7 @@
 <title>모아의 생각정원 — 인지 게임</title>
 <link rel="icon" href="favicon.ico">
 <link rel="stylesheet" href="style.css?v=20261005-preview1">
-<link rel="stylesheet" href="card-previews.css?v=20261006-sizecue5">
+<link rel="stylesheet" href="card-previews.css?v=20261006-rescue6">
 </head>
 <body><div id="app">
 <header class="topbar"><button class="brand" data-go="home" aria-label="홈"><span class="leaf-mark">🌱</span><b>모아의 생각정원</b><small>게임</small></button><div class="top-actions"><span class="seed-bank" id="seedBank">🌱 0</span><button class="sound-btn" id="soundToggle" aria-label="소리 끄기">🔊</button></div></header>
@@ -26,7 +26,7 @@
     </div>
     <div class="subtopic-tabs" id="subtopicTabs"><button class="subtopic-tab active" data-subtopic="all">전체 주제</button><button class="subtopic-tab" data-subtopic="condition">조건찾기</button><button class="subtopic-tab" data-subtopic="sequence">순서기억</button><button class="subtopic-tab" data-subtopic="spacing">띄어쓰기</button><button class="subtopic-tab" data-subtopic="spelling">맞춤법</button><button class="subtopic-tab" data-subtopic="basicfind">기초찾기</button><button class="subtopic-tab" data-subtopic="focus">주의·억제</button><button class="subtopic-tab" data-subtopic="spacebasic">눈손협응</button></div>
     <div class="library-grid" id="libraryGrid">
-      <button class="library-card visual" data-open="rescue" data-category="visual" data-subtopic="condition"><span class="card-category">시각·주의 › 조건찾기</span><img src="assets/friend-hong.png" alt=""><div><h3>딱 맞는 친구 찾기</h3><p>색 · 크기 · 종류 조건을 보고 맞는 동물을 찾아 구조해요.</p><span class="skill-tags"><i>시각탐색</i><i>선택주의</i><i>조건억제</i></span><strong>예시 보고 시작 →</strong></div></button>
+      <button class="library-card visual" data-open="rescue" data-category="visual" data-subtopic="condition"><span class="card-category">시각·주의 › 조건찾기</span><img src="assets/friend-hong.png" alt=""><div><h3>모아 구조대!</h3><p>무전을 듣고 숲속에 숨은 친구를 찾아 구조차로 데려와요.</p><span class="skill-tags"><i>시각탐색</i><i>선택주의</i><i>조건억제</i></span><strong>예시 보고 시작 →</strong></div></button>
       <button class="library-card memory" data-open="memory" data-category="memory" data-subtopic="sequence"><span class="card-category">기억·집행 › 순서기억</span><img src="assets/friend-ru.png" alt=""><div><h3>기억꽃길 이어가기</h3><p>주문표의 색과 동물 순서를 기억해 피크닉 바구니에 담아요.</p><span class="skill-tags"><i>작업기억</i><i>순서화</i><i>언어반복</i></span><strong>예시 보고 시작 →</strong></div></button>
       <button class="library-card literacy" data-open="spacing" data-category="literacy" data-subtopic="spacing"><span class="card-category">읽기·쓰기 › 띄어쓰기</span><img src="assets/friend-saem.png" alt=""><div><h3>띄어쓰기 다리 놓기</h3><p>직접 쓰지 않고 붙어 있는 문장에서 띄어야 할 곳을 찾아요.</p><span class="skill-tags"><i>어절</i><i>띄어쓰기</i><i>문장순서</i></span><strong>예시 보고 시작 →</strong></div></button>
       <button class="library-card literacy" data-open="spelling" data-category="literacy" data-subtopic="spelling"><span class="card-category">읽기·쓰기 › 맞춤법</span><img src="assets/friend-ti.png" alt=""><div><h3>고장 난 간판 고치기</h3><p>비슷한 글자와 맞춤법을 비교해 간판을 수리해요.</p><span class="skill-tags"><i>ㅅ/ㅆ</i><i>되/돼</i><i>문장부호</i></span><strong>예시 보고 시작 →</strong></div></button>
@@ -65,6 +65,6 @@
 <section class="screen" id="gameScreen"><div class="game-page"><div class="game-top"><button id="backHome" class="back-btn" aria-label="게임 목록으로 돌아가기">←</button><div class="game-name"><small id="gameKicker">정원</small><h2 id="gameTitle">게임</h2></div><div class="game-status"><span id="stageLabel">1 / 5</span><b id="scoreLabel">🌱 0</b></div></div><div class="game-world" id="gameWorld"><div class="world-sky" aria-hidden="true"><span class="cloud wa"></span><span class="cloud wb"></span><span class="world-sun"></span></div><div class="guide-panel"><img id="guideCharacter" src="assets/moa-default.png" alt=""><div class="guide-copy"><small id="missionBadge">오늘의 미션</small><h3 id="missionText">준비!</h3><p id="missionSub">천천히 보고 시작해요.</p><button id="speakMission" type="button">🔊 다시 듣기</button></div></div><div id="gameArea" class="game-area"></div><div class="game-toast" id="gameToast" role="status"></div><div class="round-track"><span id="progressBar"></span></div></div></div></section>
 <section class="screen" id="resultScreen"><div class="result-garden"><div class="result-glow"></div><img class="result-character" id="resultCharacter" src="assets/moa-cheer.png" alt=""><div class="result-flower"><i></i><i></i><i></i><i></i><i></i><b>🌱</b></div><small>게임 완료!</small><h2 id="resultTitle">잘했어!</h2><p id="resultMessage">오늘의 길을 끝까지 걸었어요.</p><strong id="resultScore">🌱 0</strong><div class="result-actions"><button id="retryGame">한 번 더</button><button data-go="home">게임 목록</button></div></div></section>
 </main></div>
-<script src="app.js?v=20261006-sizecue5"></script>
-<script src="card-previews.js?v=20261005-memory5"></script>
+<script src="app.js?v=20261006-rescue6"></script>
+<script src="card-previews.js?v=20261006-rescue6"></script>
 </body></html>
