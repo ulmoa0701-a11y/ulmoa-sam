@@ -2762,15 +2762,36 @@ button,input,select,textarea{font:inherit} button{cursor:pointer}
     word-break:keep-all!important;
     line-height:1.12!important;
   }
-  .score-page.orientation-landscape.lyric-small .lyricSeg.lyric-half{font-size:10.5px!important}
-  .score-page.orientation-landscape.lyric-normal .lyricSeg.lyric-half{font-size:11.5px!important}
-  .score-page.orientation-landscape.lyric-large .lyricSeg.lyric-half{font-size:12.5px!important}
-  .score-page.orientation-landscape.lyric-xlarge .lyricSeg.lyric-half{font-size:13.5px!important}
-  .score-page.orientation-landscape.lyric-small .lyricSeg.lyric-quarter{font-size:9px!important}
-  .score-page.orientation-landscape.lyric-normal .lyricSeg.lyric-quarter{font-size:9.5px!important}
-  .score-page.orientation-landscape.lyric-large .lyricSeg.lyric-quarter{font-size:10.5px!important}
-  .score-page.orientation-landscape.lyric-xlarge .lyricSeg.lyric-quarter{font-size:11.5px!important}
   .score-page.orientation-landscape .lyricSeg.lyric-narrow{letter-spacing:-.055em!important}
+}
+
+
+/* v6.82 — keep lyric height visually consistent; narrow cells compress only horizontally */
+.score-page.orientation-landscape.lyric-small .lyricSeg{font-size:clamp(15px,1.45vw,24px)!important}
+.score-page.orientation-landscape.lyric-normal .lyricSeg{font-size:clamp(18px,1.72vw,29px)!important}
+.score-page.orientation-landscape.lyric-large .lyricSeg{font-size:clamp(20.5px,1.95vw,32px)!important}
+.score-page.orientation-landscape.lyric-xlarge .lyricSeg{font-size:clamp(22.5px,2.15vw,36px)!important}
+.lyricSeg .lyricText{
+  display:inline-block!important;
+  max-width:none!important;
+  line-height:1!important;
+  transform-origin:center center!important;
+}
+.score-page.orientation-landscape .lyricSeg.lyric-half .lyricText{transform:none!important}
+.score-page.orientation-landscape .lyricSeg.lyric-quarter .lyricText,
+.score-page.orientation-landscape .lyricSeg.lyric-dotted-tail .lyricText{transform:scaleX(.72)!important}
+.score-page.orientation-landscape .lyricSeg.lyric-long .lyricText{transform:scaleX(.82)!important}
+.score-page.orientation-landscape .lyricSeg.lyric-narrow .lyricText{transform:scaleX(.58)!important}
+@media(max-width:600px){
+  .score-page.orientation-landscape.lyric-small .lyricSeg{font-size:11.5px!important}
+  .score-page.orientation-landscape.lyric-normal .lyricSeg{font-size:13px!important}
+  .score-page.orientation-landscape.lyric-large .lyricSeg{font-size:14.5px!important}
+  .score-page.orientation-landscape.lyric-xlarge .lyricSeg{font-size:16px!important}
+  .score-page.orientation-landscape .lyricSeg.lyric-half .lyricText{transform:none!important}
+  .score-page.orientation-landscape .lyricSeg.lyric-quarter .lyricText,
+  .score-page.orientation-landscape .lyricSeg.lyric-dotted-tail .lyricText{transform:scaleX(.72)!important}
+  .score-page.orientation-landscape .lyricSeg.lyric-long .lyricText{transform:scaleX(.82)!important}
+  .score-page.orientation-landscape .lyricSeg.lyric-narrow .lyricText{transform:scaleX(.58)!important}
 }
 
 </style>
@@ -2993,7 +3014,7 @@ button,input,select,textarea{font:inherit} button{cursor:pointer}
     <div class="section">
       <h2>저장 · 출력</h2>
       <div class="actions exportActions"><button id="pngBtn" class="btn primary">🖼️ PNG 저장</button><button id="pdfBtn" class="btn primary">📄 PDF 저장</button></div>
-      <div id="saveStatus" class="status">편집 내용은 이 브라우저에 자동 저장됩니다.</div>
+      <div id="saveStatus" class="status">편집 내용과 내 악보 모음은 이 기기·브라우저에만 자동 저장됩니다. 다른 기기에는 공유되지 않으며, 공용 기기에서는 이전 편집이 남을 수 있어요.</div>
       <details class="saveMore">
         <summary>기타 저장·출력</summary>
         <div class="saveMoreActions">
@@ -3518,7 +3539,7 @@ function lyricHtml(slots,beatIndex){
    html+=`<div class="lyricSeg${lyric?'':' emptyFill'}${lyricFit}${dottedClass}${quarterClass}${halfClass}"
      data-note="${esc(s.event.note)}" data-onset="${s.onset?'1':'0'}"
      style="left:calc(${left}% + ${leftInset}px);width:calc(${width}% - ${leftInset+rightInset}px);--lyric-bg:${bg};--lyric-color:${tc};color:${tc}!important">
-     ${lyric}
+     ${lyric?`<span class="lyricText">${lyric}</span>`:''}
    </div>`;
    q=j;
  }
