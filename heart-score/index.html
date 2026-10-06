@@ -2733,8 +2733,8 @@ button,input,select,textarea{font:inherit} button{cursor:pointer}
 }
 .score-page .lyricSeg.lyric-quarter{
   padding:0!important;
-  margin-left:2px!important;
-  margin-right:2px!important;
+  margin-left:0!important;
+  margin-right:0!important;
   overflow:visible!important;
   white-space:nowrap!important;
   word-break:keep-all!important;
@@ -3514,9 +3514,10 @@ function lyricHtml(slots,beatIndex){
    const dottedClass=isDottedLead?' lyric-dotted-lead':isDottedTail?' lyric-dotted-tail':'';
    const quarterClass=isQuarterSeg?' lyric-quarter':'';
    const halfClass=span===2?' lyric-half':'';
+   const leftInset=q===0?1:.25, rightInset=j===4?1:.25;
    html+=`<div class="lyricSeg${lyric?'':' emptyFill'}${lyricFit}${dottedClass}${quarterClass}${halfClass}"
      data-note="${esc(s.event.note)}" data-onset="${s.onset?'1':'0'}"
-     style="left:calc(${left}% + 1px);width:calc(${width}% - 2px);--lyric-bg:${bg};--lyric-color:${tc};color:${tc}!important">
+     style="left:calc(${left}% + ${leftInset}px);width:calc(${width}% - ${leftInset+rightInset}px);--lyric-bg:${bg};--lyric-color:${tc};color:${tc}!important">
      ${lyric}
    </div>`;
    q=j;
