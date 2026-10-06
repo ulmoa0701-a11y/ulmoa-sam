@@ -12,8 +12,9 @@ jobs:
         with:
           ref: feat/boomwhacker-studio
       - name: Apply minimal Heart Score link patch
-        shell: python
+        shell: bash
         run: |
+          python3 - <<'PY'
           from pathlib import Path
           p=Path('heart-score/index.html')
           s=p.read_text(encoding='utf-8')
@@ -41,6 +42,7 @@ jobs:
               if marker not in s: raise SystemExit('event binding marker not found')
               s=s.replace(marker,bind+marker,1)
           if s!=original:p.write_text(s,encoding='utf-8')
+          PY
       - name: Commit patch when needed
         shell: bash
         run: |
