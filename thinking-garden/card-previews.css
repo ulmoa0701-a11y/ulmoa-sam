@@ -177,3 +177,12 @@ body.playing .basic-game{padding:8px 8px 14px;gap:14px}
 /* immersive v4.1 — remove worksheet-like chrome on mobile */
 body.playing .game-name h2{color:#f8fff9}body.playing .game-name small{color:#9dc3a5}
 @media(max-width:560px){body.playing .guide-panel{min-height:70px;padding:7px 38px 7px 60px}body.playing .guide-panel img{width:46px;height:46px;left:7px;bottom:12px}body.playing .guide-copy small{font-size:8px;padding:2px 6px}body.playing .guide-copy h3{font-size:15.5px;line-height:1.13;margin:2px 0 0}body.playing .guide-copy p{display:none}body.playing .guide-copy button{width:27px;height:27px;right:6px;top:6px}body.playing .guide-copy button:before{font-size:14px}body.playing .game-area{margin-top:0}.memory-ticket small{display:none}.rescue-cues{margin-top:2px}}
+
+/* 2026-10-06 size cue v5 — show size with real animal pictures, not abstract dots */
+.cue-size-animal{gap:4px;padding:4px!important;min-width:104px!important}
+.size-animal{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:13px;line-height:1;transition:.2s;box-sizing:border-box}
+.size-animal.size-large{font-size:34px}
+.size-animal.size-small{font-size:17px}
+.size-animal.selected{background:#eef8e9;box-shadow:inset 0 0 0 3px #72b77b,0 3px 8px rgba(50,90,55,.12);opacity:1;transform:translateY(-1px)}
+.size-animal.muted{opacity:.22;filter:grayscale(.55)}
+@media(max-width:560px){.cue-size-animal{min-width:92px!important;gap:2px;padding:3px!important}.size-animal{width:39px;height:39px}.size-animal.size-large{font-size:31px}.size-animal.size-small{font-size:15px}}
