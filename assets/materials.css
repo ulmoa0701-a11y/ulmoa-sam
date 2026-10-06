@@ -20,3 +20,8 @@
 @media(max-width:560px){.music-heading{display:block!important;padding-right:18px!important}.music-heading>.shelf-title-actions{margin:10px 0 0!important;display:flex!important;align-items:flex-end!important;justify-content:space-between!important;text-align:left!important}.music-heading>.shelf-title-actions h2{font-size:29px!important}.music-heading>.shelf-title-actions>a{margin-top:0!important}}
 
 @media(max-width:560px){.music-heading>.shelf-title-actions{display:block!important;text-align:left!important}.music-heading>.shelf-title-actions>a{display:inline-block!important;margin-top:6px!important}}
+
+/* materials-only QA fixes: keep shared links without covering book content */
+.bookshelf:not(.music-shelf) .shelf-heading>div>span{font-family:"Pretendard Variable",Pretendard,sans-serif;font-size:10px;font-weight:900}
+.materials-page .sub-footer .footer-social{position:static;left:auto;bottom:auto;translate:none;z-index:auto;margin-left:auto}
+@media(max-width:650px){.materials-page .sub-footer .footer-social{margin-left:0}}
