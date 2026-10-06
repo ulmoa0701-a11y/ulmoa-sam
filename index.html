@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link rel="stylesheet" href="assets/styles.css">
 <link rel="stylesheet" href="assets/notebook.css">
-<link rel="stylesheet" href="assets/notebook-v7.css?v=20261005-clean3">
+<link rel="stylesheet" href="assets/notebook-v7.css?v=20261006-launched2">
 </head>
 <body class="notebook-home">
 <header class="note-header">
@@ -37,39 +37,23 @@
       <h1>해보고 싶은 게 많아서,<br><em>이것저것 해봅니다.</em></h1>
       <p class="hero-lead">만들고, 써보고, 고칩니다.</p>
       <div class="field-tags" aria-label="주요 분야">
-        <span>인지 · 주의집중</span><span>사회성 · 의사소통</span><span>음악활동</span><span>선생님 도구</span>
+        <span>인지 · 주의집중</span><span>사회성 · 의사소통</span><span>음악활동</span>
       </div>
       <a class="maker-link" href="about/"><b>만든 사람 →</b></a>
     </div>
 
-    <div class="desk-collage" aria-label="지금 작업 중인 것들">
-      <a class="scrap polaroid-game" href="thinking-garden/">
+    <div class="desk-collage featured-two" aria-label="바로 써볼 수 있는 것들">
+      <a class="scrap polaroid-game feature-card feature-thinking" href="thinking-garden/">
         <span class="clip" aria-hidden="true"></span>
-        <img src="thinking-garden/assets/moa-discovery.png" alt="모아의 생각정원 캐릭터 모아">
+        <img src="thinking-garden/assets/moa-discovery.png" alt="모아의 생각정원 미리보기">
         <b>모아의 생각정원</b><small>인지 · 기억 · 읽기쓰기</small><em>게임 골라보기 →</em>
       </a>
 
-      <button class="scrap schedule-slip open-tool" type="button" data-tool="makeup">
-        <span class="tape tape-yellow" aria-hidden="true"></span>
-        <small>선생님 도구</small>
-        <b>보강인가?</b>
-        <div class="slip-time"><span>16:00</span><i>→</i><span>17:00</span></div>
-        <em>두 시간 비교하기 →</em>
-      </button>
-
-      <button class="scrap memo-stack open-tool" type="button" data-tool="memo">
-        <span class="memo-layer m1"></span><span class="memo-layer m2"></span>
-        <span class="memo-front"><small>수업 끝나기 전에</small><b>30초 메모</b><em>활동 · 반응 · 지원</em></span>
-      </button>
-
-      <div class="scrap music-strip" id="musicPrototype">
+      <a class="scrap polaroid-game feature-card feature-heart" href="heart-score/">
         <span class="tape tape-pink" aria-hidden="true"></span>
-        <div class="boom-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-        <b>색깔악보 × 붐웨커</b><small>3음 · 5음 · 8음으로 조립 중</small>
-      </div>
-
-      <a class="scribble-note idea-note" href="#communityBoard">이런 것도<br>있으면 좋겠다 ✎</a>
-      <span class="scribble-note side-note">생각나서 해봄 ↗</span>
+        <img src="assets/heart-score-preview.jpg" alt="울모아 하트색깔악보 Studio 미리보기">
+        <b>하트색깔악보 Studio</b><small>음악활동 · 계이름 · 리듬</small><em>악보 만들기 →</em>
+      </a>
     </div>
   </div>
 </section>
@@ -79,15 +63,13 @@
     <div class="finder-label"><span>⌕</span><div><b>만든 것 찾기</b></div></div>
     <form class="finder" id="mainSearch">
       <span aria-hidden="true">⌕</span>
-      <input id="toolSearch" type="search" placeholder="예: 메모, 보강, 게임" autocomplete="off" aria-label="도구 찾기">
+      <input id="toolSearch" type="search" placeholder="예: 생각정원, 하트악보" autocomplete="off" aria-label="도구 찾기">
       <button type="submit">찾기</button>
     </form>
     <div class="filters note-filters" aria-label="빠른 분류">
       <button class="active" type="button" data-search="">전부</button>
       <button type="button" data-search="게임">게임</button>
-      <button type="button" data-search="아이와">아이와</button>
-      <button type="button" data-search="선생님">선생님 도구</button>
-      <button type="button" data-search="센터업무">기록·일정</button>
+      <button type="button" data-search="음악">음악</button>
     </div>
   </div>
 </section>
@@ -95,7 +77,7 @@
 <section class="made-section" id="made">
   <div class="section-heading">
     <div><span>도구</span><h2>바로 써보기</h2></div>
-    <em id="resultCount">4개</em>
+    <em id="resultCount">2개</em>
   </div>
 
   <div class="tool-grid scrapbook-grid" id="toolGrid">
@@ -108,25 +90,13 @@
       <div class="entry-copy"><span class="entry-topic">인지 · 읽기쓰기 · 기억 · 주의</span><h3>모아의 생각정원</h3><p>인지 · 기억 · 읽기쓰기 게임</p><a href="thinking-garden/">게임 고르기 →</a></div>
     </article>
 
-    <article class="tool-card scrapbook-entry entry-time" data-tags="센터업무 보강 일정 계획 실제 수업시간 선생님 도구 기록">
+    <article class="tool-card scrapbook-entry entry-game entry-heart" data-tags="음악 색깔악보 하트악보 악보 계이름 리듬 아이와">
       <span class="entry-index">02</span>
-      <button class="entry-visual time-ticket open-tool" type="button" data-tool="makeup"><span>계획 16:00</span><b>→</b><span>실제 17:00</span></button>
-      <div class="entry-copy"><span class="entry-topic">치료사 도구 · 기록 · 일정</span><h3>보강 확인</h3><p>계획 · 실제 시간 비교</p><button class="text-action open-tool" type="button" data-tool="makeup">비교해보기 →</button></div>
-    </article>
-
-    <article class="tool-card scrapbook-entry entry-memo" data-tags="선생님 수업 메모 기록 일지 도구 관찰">
-      <span class="entry-index">03</span>
-      <button class="entry-visual mini-notes open-tool" type="button" data-tool="memo"><i></i><i></i><i></i><strong>활동<br>반응<br>지원</strong></button>
-      <div class="entry-copy"><span class="entry-topic">치료사 도구 · 관찰 · 기록</span><h3>30초 수업메모</h3><p>활동 · 반응 · 지원 메모</p><button class="text-action open-tool" type="button" data-tool="memo">메모하기 →</button></div>
-    </article>
-
-    <article class="tool-card scrapbook-entry entry-game" data-tags="음악 색깔악보 하트악보 악보 계이름 리듬 아이와 선생님 도구">
-      <span class="entry-index">04</span>
-      <a class="entry-visual game-window" href="heart-score/" aria-label="HeartScore Studio open">
-        <span class="window-bar">? ? ?</span>
-        <img src="assets/heart-score-preview.jpg" alt="HeartScore Studio preview">
+      <a class="entry-visual game-window heart-window" href="heart-score/" aria-label="하트색깔악보 Studio 열기">
+        <span class="window-bar">● ● ●</span>
+        <img src="assets/heart-score-preview.jpg" alt="하트색깔악보 Studio 실제 악보 미리보기">
       </a>
-      <div class="entry-copy"><span class="entry-topic">음악활동 · 악보 · 도구</span><h3>하트색깔악보 Studio</h3><p>노래를 하트 색깔악보로 만들기</p><a href="heart-score/">바로 만들기 →</a></div>
+      <div class="entry-copy"><span class="entry-topic">음악활동 · 색깔악보 · 리듬</span><h3>하트색깔악보 Studio</h3><p>노래를 하트 색깔악보로 만들기</p><a href="heart-score/">악보 만들기 →</a></div>
     </article>
   </div>
   <div class="empty-state" id="emptyState" hidden><b>아직 없어요.</b><a href="#communityBoard">제안하기 →</a></div>
@@ -161,17 +131,6 @@
   </div>
 </section>
 
-<section class="making-section" id="making">
-  <div class="making-paper">
-    <div class="section-heading compact"><div><span>작업</span><h2>만드는 중</h2></div></div>
-    <div class="pinboard">
-      <article class="pin pin-yellow"><i></i><b>색깔악보 × 붐웨커</b><span>3·5·8음 변환</span><em>조립중</em></article>
-      <article class="pin pin-mint"><i></i><b>모아의 생각정원</b><span>게임 계속 추가중</span><em>확장중</em></article>
-      <article class="pin pin-blue"><i></i><b>Godot 작은 세계</b><span>3D 놀이 실험</span><em>실험중</em></article>
-      <article class="pin pin-pink"><i></i><b>아직 이름 없음</b><span>새 아이디어</span><em>구상중</em></article>
-    </div>
-  </div>
-</section>
 
 <section class="cheer-note" aria-label="작업 응원하기">
   <div class="cheer-paper">
