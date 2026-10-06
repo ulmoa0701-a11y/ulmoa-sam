@@ -1,4 +1,4 @@
-import{T as e}from"./index-dPJdT6yS.js";import{i as t,n as ee,r as te,t as ne}from"./fogFragment-CwNqitMl.js";import{a as re,i as ie,n as ae,r as oe,t as se}from"./logDepthDeclaration-ChCLF5z8.js";import{t as ce}from"./helperFunctions-_Largc83.js";var n=`objectIdFunctions`,r=`fn encodeObjectId(objectId: f32)->vec4f {
+import{T as e}from"./index-DLHTTR05.js";import{i as t,n as ee,r as te,t as ne}from"./fogFragment-BZeCZlOi.js";import{a as re,i as ie,n as ae,r as oe,t as se}from"./logDepthDeclaration-ByhatBHs.js";import{t as ce}from"./helperFunctions-BO7WioIX.js";var n=`objectIdFunctions`,r=`fn encodeObjectId(objectId: f32)->vec4f {
 #ifdef PREPASS_OBJECT_ID_R8
 return vec4f(objectId/255.0,0.0,0.0,1.0);
 #else
