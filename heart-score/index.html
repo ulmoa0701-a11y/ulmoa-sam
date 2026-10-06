@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<title>울모아 하트색깔악보 Studio v6.77</title>
+<title>울모아 하트색깔악보 Studio v6.78</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gaegu:wght@400;700&family=Gamja+Flower&family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
@@ -2817,7 +2817,7 @@ button,input,select,textarea{font:inherit} button{cursor:pointer}
   <aside class="sidebar">
     <div class="brand">
       <div><h1>💗 울모아 하트악보 Studio <span class="betaBadge">BETA</span></h1><small>곡을 넣으면 A4 하트 색깔악보로 바꿔줘요 · 자동 변환 결과는 저장 전에 한 번 확인해 주세요</small></div>
-      <div class="vtag">v6.77 BETA · 샵·플랫 계이름 아래 배치</div>
+      <div class="vtag">v6.78 BETA · 샵·플랫 계이름 아래 배치</div>
     </div>
     <div class="studioSummary"><span>✍️ 감자꽃 손글씨</span><span>💾 자동 저장</span><span>🖼 PNG · PDF</span></div>
     <div class="betaNotice"><strong>공개 BETA</strong><span>자동 변환·이미지 인식 결과는 저장 전 한 번 확인해 주세요.</span></div>
@@ -3784,7 +3784,7 @@ function findStaffSystems(canvas){
  return systems;
 }
 function omrConnectedHeads(staff){
- const img=staff.img,w=img.width,s=staff.spacing,y0=Math.max(0,Math.floor(staff.lines[0]-3*s)),y1=Math.min(img.height-1,Math.ceil(staff.lines[4]+3*s));
+ const img=staff.img,w=img.width,s=staff.spacing,y0=Math.max(0,Math.floor(staff.lines[0]-1.4*s)),y1=Math.min(img.height-1,Math.ceil(staff.lines[4]+3*s));
  const x0=Math.max(0,Math.floor(staff.x0)),x1=Math.min(w-1,Math.ceil(staff.x1)),cw=x1-x0+1,ch=y1-y0+1,bin=new Uint8Array(cw*ch),seen=new Uint8Array(cw*ch);
  for(let yy=0;yy<ch;yy++){const gy=y0+yy;for(let xx=0;xx<cw;xx++){const gx=x0+xx;let on=omrGrayAt(img,gx,gy)<182;if(on&&staff.lines.some(l=>Math.abs(gy-l)<=1.15))on=false;if(on)bin[yy*cw+xx]=1}}
  const comps=[],qx=[],qy=[];
@@ -3793,15 +3793,18 @@ function omrConnectedHeads(staff){
   while(qi<qx.length){const cx=qx[qi],cy=qy[qi++];area++;sumx+=cx;sumy+=cy;minx=Math.min(minx,cx);maxx=Math.max(maxx,cx);miny=Math.min(miny,cy);maxy=Math.max(maxy,cy);
    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const nx=cx+dx,ny=cy+dy;if(nx<0||ny<0||nx>=cw||ny>=ch)continue;const ni=ny*cw+nx;if(bin[ni]&&!seen[ni]){seen[ni]=1;qx.push(nx);qy.push(ny)}}}
   const bw=maxx-minx+1,bh=maxy-miny+1,cx=x0+sumx/area,cy=y0+sumy/area;
-  if(bw>=s*.52&&bw<=s*2.25&&bh>=s*.34&&bh<=s*1.55&&area>=s*s*.22&&cy>staff.lines[0]-s*2.35&&cy<staff.lines[4]+s*2.35)comps.push({x:cx,y:cy,area,bw,bh});
+  if(bw>=s*.52&&bw<=s*2.25&&bh>=s*.34&&bh<=s*1.55&&area>=s*s*.22&&cy>staff.lines[0]-s*1.25&&cy<staff.lines[4]+s*2.35)comps.push({x:cx,y:cy,area,bw,bh});
  }
- comps.sort((a,b)=>a.x-b.x||b.area-a.area);const merged=[];
- for(const c of comps){if(c.x<staff.x0+s*3||c.x>staff.x1-s*.5)continue;const last=merged[merged.length-1];if(last&&Math.abs(c.x-last.x)<s*1.55){if(c.area>last.area)merged[merged.length-1]=c}else merged.push(c)}
- return merged;
+ comps.sort((a,b)=>a.x-b.x||a.y-b.y);const filtered=[],accidentalXs=[];let fi=0;
+ while(fi<comps.length){let fj=fi+1;while(fj<comps.length&&Math.abs(comps[fj].x-comps[fi].x)<s*.35)fj++;const g=comps.slice(fi,fj),ys=g.map(v=>v.y),ax=g.reduce((a,v)=>a+v.x,0)/g.length,stacked=g.length>=2&&Math.max(...ys)-Math.min(...ys)>s*1.3;if(stacked){if(ax>staff.x0+s*8&&ax<staff.x1-s*4)accidentalXs.push(ax)}else filtered.push(...g);fi=fj}
+ filtered.sort((a,b)=>a.x-b.x||b.area-a.area);const merged=[];
+ for(const c of filtered){if(c.x<staff.x0+s*3||c.x>staff.x1-s*.5)continue;const last=merged[merged.length-1];if(last&&Math.abs(c.x-last.x)<s*1.55){if(c.area>last.area)merged[merged.length-1]=c}else merged.push(c)}
+ for(const ax of accidentalXs){const next=merged.find(c=>c.x>ax&&c.x-ax<s*2.5);if(next)next.accidental='#';else merged.push({x:ax+s*1.25,y:0,area:0,bw:s,bh:s,accidental:'#',synthetic:true})}
+ merged.sort((a,b)=>a.x-b.x);return merged;
 }
 function omrPitchFromY(staff,x,seedY){
  const img=staff.img,s=staff.spacing,bottom=staff.lines[4];let best=null;
- for(let k=-4;k<=13;k++){const y=bottom-k*s/2;let score=0,total=0;for(let yy=Math.round(y-s*.55);yy<=Math.round(y+s*.55);yy++)for(let xx=Math.round(x-s*.82);xx<=Math.round(x+s*.82);xx++){if(xx<0||yy<0||xx>=img.width||yy>=img.height)continue;if(staff.lines.some(l=>Math.abs(yy-l)<=1.1))continue;total++;if(omrGrayAt(img,xx,yy)<185)score++}const density=total?score/total:0,seedBonus=seedY?Math.max(0,1-Math.abs(seedY-y)/(s*1.3))*.07:0,val=density+seedBonus;if(!best||val>best.val)best={k,y,val}}
+ for(let k=-4;k<=13;k++){const y=bottom-k*s/2;let score=0,total=0;for(let yy=Math.round(y-s*.55);yy<=Math.round(y+s*.55);yy++)for(let xx=Math.round(x-s*.82);xx<=Math.round(x+s*.82);xx++){if(xx<0||yy<0||xx>=img.width||yy>=img.height)continue;if(staff.lines.some(l=>Math.abs(yy-l)<=1.1))continue;total++;if(omrGrayAt(img,xx,yy)<185)score++}const density=total?score/total:0,seedBonus=seedY?Math.max(0,1-Math.abs(seedY-y)/(s*1.3))*.18:0,val=density+seedBonus;if(!best||val>best.val)best={k,y,val}}
  const names=['도','레','미','파','솔','라','시'],eIndex=2+best.k,idx=((eIndex%7)+7)%7;let note=names[idx];if(Math.floor(eIndex/7)>=1)note='높은'+note;return{note,y:best.y,k:best.k,score:best.val};
 }
 function omrFindBarlines(staff,heads){
@@ -3821,7 +3824,7 @@ function omrMeasureDurations(notes,left,right){
 function parseStaffScoreCanvas(canvas,filename=''){
  const systems=findStaffSystems(canvas);if(!systems.length)return null;const measures=[],metaSystems=[];let noteTotal=0,barTotal=0,lowPitch=0;
  for(const staff of systems){
-  const heads=omrConnectedHeads(staff);if(heads.length<2)continue;const notes=heads.map(h=>{const p=omrPitchFromY(staff,h.x,h.y);if(p.score<.055)lowPitch++;return{...h,...p}}).sort((a,b)=>a.x-b.x);noteTotal+=notes.length;
+  const heads=omrConnectedHeads(staff);if(heads.length<2)continue;const sharpMap={'도':'도#','레':'레#','파':'파#','솔':'솔#','라':'라#'};const notes=heads.map(h=>{const p=omrPitchFromY(staff,h.x,h.synthetic?null:h.y);if(p.score<.055)lowPitch++;let note=p.note;if(h.accidental==='#'&&sharpMap[note])note=sharpMap[note];return{...h,...p,note}}).sort((a,b)=>a.x-b.x);noteTotal+=notes.length;
   const bars=omrFindBarlines(staff,notes);barTotal+=Math.max(0,bars.length-2);const sysEvents=[];
   if(bars.length>=2){for(let bi=0;bi<bars.length-1;bi++){const left=bars[bi],right=bars[bi+1],mn=notes.filter(n=>n.x>left+staff.spacing*.4&&n.x<right-staff.spacing*.18);if(!mn.length)continue;const ds=omrMeasureDurations(mn,left,right),m=[];mn.forEach((n,i)=>{const e=ev(n.note,ds[i]||1,'');m.push(e);sysEvents.push({x:n.x,y:n.y,event:e})});measures.push(m)}}
   if(!sysEvents.length){for(let i=0;i<notes.length;i+=4){const mn=notes.slice(i,i+4);if(!mn.length)continue;const ds=omrMeasureDurations(mn,mn[0].x,(mn[mn.length-1]?.x||mn[0].x)+staff.spacing*8),m=[];mn.forEach((n,j)=>{const e=ev(n.note,ds[j]||1,'');m.push(e);sysEvents.push({x:n.x,y:n.y,event:e})});measures.push(m)}}
