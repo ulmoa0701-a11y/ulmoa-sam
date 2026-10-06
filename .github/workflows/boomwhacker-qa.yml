@@ -1,0 +1,43 @@
+name: Boomwhacker QA
+on:
+  push:
+    branches: [feat/boomwhacker-studio]
+  pull_request:
+    paths:
+      - 'boomwhacker/**'
+      - '.github/workflows/boomwhacker-qa.yml'
+
+jobs:
+  browser-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright core
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Locate Chrome
+        shell: bash
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Start static server
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/boom-server.log 2>&1 &
+          echo $! > /tmp/boom-server.pid
+          for i in {1..20}; do curl -fsS http://127.0.0.1:8765/boomwhacker/ >/dev/null && exit 0; sleep .25; done
+          cat /tmp/boom-server.log
+          exit 1
+      - name: Run browser QA
+        run: node boomwhacker/qa.mjs
+      - name: Upload QA screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boomwhacker-qa
+          path: boomwhacker/qa-artifacts
+          if-no-files-found: warn
