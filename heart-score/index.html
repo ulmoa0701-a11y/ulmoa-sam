@@ -2753,6 +2753,26 @@ button,input,select,textarea{font:inherit} button{cursor:pointer}
   }
 }
 
+
+/* v6.80 — prevent lyric clipping in narrow mobile rhythm cells */
+@media(max-width:600px){
+  .score-page.orientation-landscape .lyricSeg{
+    overflow:visible!important;
+    white-space:nowrap!important;
+    word-break:keep-all!important;
+    line-height:1.12!important;
+  }
+  .score-page.orientation-landscape.lyric-small .lyricSeg.lyric-half{font-size:10.5px!important}
+  .score-page.orientation-landscape.lyric-normal .lyricSeg.lyric-half{font-size:11.5px!important}
+  .score-page.orientation-landscape.lyric-large .lyricSeg.lyric-half{font-size:12.5px!important}
+  .score-page.orientation-landscape.lyric-xlarge .lyricSeg.lyric-half{font-size:13.5px!important}
+  .score-page.orientation-landscape.lyric-small .lyricSeg.lyric-quarter{font-size:9px!important}
+  .score-page.orientation-landscape.lyric-normal .lyricSeg.lyric-quarter{font-size:9.5px!important}
+  .score-page.orientation-landscape.lyric-large .lyricSeg.lyric-quarter{font-size:10.5px!important}
+  .score-page.orientation-landscape.lyric-xlarge .lyricSeg.lyric-quarter{font-size:11.5px!important}
+  .score-page.orientation-landscape .lyricSeg.lyric-narrow{letter-spacing:-.055em!important}
+}
+
 </style>
 </head>
 <body>
@@ -3493,7 +3513,8 @@ function lyricHtml(slots,beatIndex){
    const lyricFit=(lyric&&width<=50&&lyricLen>=3)?' lyric-narrow':((lyricLen>=5||asciiLong)?' lyric-long':'');
    const dottedClass=isDottedLead?' lyric-dotted-lead':isDottedTail?' lyric-dotted-tail':'';
    const quarterClass=isQuarterSeg?' lyric-quarter':'';
-   html+=`<div class="lyricSeg${lyric?'':' emptyFill'}${lyricFit}${dottedClass}${quarterClass}"
+   const halfClass=span===2?' lyric-half':'';
+   html+=`<div class="lyricSeg${lyric?'':' emptyFill'}${lyricFit}${dottedClass}${quarterClass}${halfClass}"
      data-note="${esc(s.event.note)}" data-onset="${s.onset?'1':'0'}"
      style="left:calc(${left}% + 1px);width:calc(${width}% - 2px);--lyric-bg:${bg};--lyric-color:${tc};color:${tc}!important">
      ${lyric}
