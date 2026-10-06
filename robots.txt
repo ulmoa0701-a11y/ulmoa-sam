@@ -1,4 +1,2 @@
 User-agent: *
-Allow: /
-
-Sitemap: https://ulmoa0701-a11y.github.io/ulmoa-sam/sitemap.xml
+Disallow: /
