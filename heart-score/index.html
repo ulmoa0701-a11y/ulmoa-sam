@@ -3031,6 +3031,7 @@ button,input,select,textarea{font:inherit} button{cursor:pointer}
       <h2>저장 · 출력</h2>
       <div class="actions exportActions"><button id="pngBtn" class="btn primary">🖼️ PNG 저장</button><button id="pdfBtn" class="btn primary">📄 PDF 저장</button></div>
       <div id="saveStatus" class="status">편집 내용과 내 악보 모음은 이 기기·브라우저에만 자동 저장됩니다. 다른 기기에는 공유되지 않으며, 공용 기기에서는 이전 편집이 남을 수 있어요.</div>
+      <button id="boomwhackerBtn" class="btn" style="width:100%;margin-top:10px;background:#eefcf6;border-color:#9bddc2;color:#176b4d;font-weight:900">🥁 붐웨커로 연주하기</button>
       <details class="saveMore">
         <summary>기타 저장·출력</summary>
         <div class="saveMoreActions">
@@ -4023,9 +4024,17 @@ if(loadVerifiedSong)loadVerifiedSong.onclick=()=>loadVerifiedSongByKey(verifiedS
 if(verifiedSongSelect)verifiedSongSelect.addEventListener('change',()=>loadVerifiedSongByKey(verifiedSongSelect.value));
 $('#newScore').onclick=()=>{resetActiveLibrary();loadState(emptyState())};$('#addMeasure').onclick=addMeasure;$('#removeMeasure').onclick=()=>{if(state.measures.length>1)state.measures.pop();renderAll()};
 $$('.orientationBtn').forEach(b=>b.addEventListener('click',()=>{state.pageOrientation=b.dataset.orientation||'portrait';$$('.orientationBtn').forEach(x=>x.classList.toggle('on',x===b));renderPages();}));
+function openBoomwhacker(){
+ try{
+  const payload={title:state.title||'제목 없는 곡',bpm:Number(state.bpm)||96,timeN:Number(state.timeN)||4,timeD:Number(state.timeD)||4,measures:(state.measures||[]).map(m=>m.map(e=>({note:e.note,dur:Number(e.dur)||1,lyric:e.lyric||''})))};
+  localStorage.setItem('ulmoaBoomTransfer',JSON.stringify(payload));
+  window.location.href='../boomwhacker/';
+ }catch(err){alert('붐웨커로 곡을 보내지 못했습니다. 다시 시도해 주세요.');}
+}
 function applyPrintOrientation(){let s=$('#printOrientationStyle');if(!s){s=document.createElement('style');s.id='printOrientationStyle';document.head.appendChild(s)}s.textContent=`@page{size:A4 ${state.pageOrientation==='landscape'?'landscape':'portrait'};margin:0}`;}
 window.addEventListener('beforeprint',applyPrintOrientation);
 $('#saveEvent').onclick=saveEditor;$('#deleteEvent').onclick=deleteEditor;$('#closeEditor').onclick=closeEditor;$('#pngBtn').onclick=exportPng;$('#pdfBtn').onclick=exportPdf;$('#printBtn').onclick=()=>{applyPrintOrientation();window.print()};$('#exportJson').onclick=exportJson;$('#exportReadyBtn').onclick=openPreparedExport;
+const boomwhackerBtn=$('#boomwhackerBtn');if(boomwhackerBtn)boomwhackerBtn.onclick=openBoomwhacker;
 $('#importJson').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;const o=JSON.parse(await f.text());if(!Array.isArray(o.measures))throw new Error('올바른 프로젝트가 아닙니다.');resetActiveLibrary();loadState(o);$('#saveStatus').className='status ok';$('#saveStatus').textContent='프로젝트를 불러왔습니다.'}catch(err){alert(err.message)}e.target.value=''};
 $('#midiFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{$('#midiStatus').textContent='분석 중…';const s=parseMidi(await f.arrayBuffer(),f.name);resetActiveLibrary();loadState(s);$('#midiStatus').className='status ok';$('#midiStatus').textContent=`완료 · ${s.measures.length}마디 · ${s.timeN}/${s.timeD}박자. 가사는 MIDI에 없으면 직접 넣어주세요.`}catch(err){$('#midiStatus').className='status warn';$('#midiStatus').textContent='분석 실패: '+err.message}e.target.value=''};
 $('#xmlFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{$('#xmlStatus').textContent='분석 중…';const s=parseMusicXml(await f.text(),f.name);resetActiveLibrary();loadState(s);$('#xmlStatus').className='status ok';$('#xmlStatus').textContent=`완료 · ${s.measures.length}마디 · ${s.timeN}/${s.timeD}박자. MusicXML 가사가 있으면 함께 반영했습니다.`}catch(err){$('#xmlStatus').className='status warn';$('#xmlStatus').textContent='분석 실패: '+err.message}e.target.value=''};
