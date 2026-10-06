@@ -93,9 +93,44 @@
 .study-visual a{width:min(100%,340px)}.study-visual-image{display:block;width:100%;aspect-ratio:1/1;border-radius:9px;box-shadow:0 7px 20px rgba(46,68,73,.08);background-repeat:no-repeat;background-size:cover;background-position:center}.sprite-working{background-image:url("https://drive.google.com/thumbnail?id=1RqwwsdM2fP8aEESEYdxuHkxHDtD1r8vx&sz=w1000")}.sprite-speed{background-image:url("https://drive.google.com/thumbnail?id=1AnFakcKnts8RL-IOOy5_kWtSfI4_NFhT&sz=w1000")}.sprite-memory{background-image:url("https://drive.google.com/thumbnail?id=1JfoC9lVtdT4HSF8paMPOFRrDATczs_Td&sz=w1000")}.sprite-visual{background-image:url("https://drive.google.com/thumbnail?id=1R9izSiOYAYcBRZnzYJvY5M-LmA1s0F-E&sz=w1000")}.sprite-auditory{background-image:url("https://drive.google.com/thumbnail?id=17xlSGVXbK3IWfmwQXdcf7fF-OtPde3f-&sz=w1000")}
 @media(max-width:760px){.study-visual a{width:min(100%,290px)}}
 
-/* handwriting pass 2026-10-06 */
-.info-page,.info-page *{font-family:"Gamja Flower",cursive!important}
-.info-page .study-summary-copy p,.info-page .study-core>p,.info-page .study-example p,.info-page .study-contrast span,.info-page .study-tags span,.info-page .study-more p,.info-page .study-more .study-caution,.info-page .study-more .study-sources,.info-page .study-visual figcaption{letter-spacing:.01em}
+/* handwriting pass 2026-10-07: natural pen style */
+.info-page,.info-page *{font-family:"Nanum Pen Script","Gamja Flower",cursive!important}
+.info-page .study-summary-copy p,
+.info-page .study-core>p,
+.info-page .study-example p,
+.info-page .study-contrast span,
+.info-page .study-tags span,
+.info-page .study-more p,
+.info-page .study-more .study-caution,
+.info-page .study-more .study-sources,
+.info-page .study-visual figcaption{letter-spacing:.015em}
+.info-page .study-summary-copy h3{font-size:29px}
+.info-page .study-summary-copy p{font-size:13px}
+.info-page .study-core>small{font-size:11px}
+.info-page .study-core>p{font-size:15px;line-height:1.62}
+.info-page .study-hook b{font-size:27px}
+.info-page .study-example>span{font-size:22px}
+.info-page .study-example p{font-size:14px;line-height:1.6}
+.info-page .study-contrast span{font-size:13.5px}
+.info-page .study-tags span{font-size:11.5px}
+.info-page .study-more>summary{font-size:19px}
+.info-page .study-more p{font-size:13px;line-height:1.65}
+.info-page .study-more .study-caution{font-size:12.5px}
+.info-page .study-more .study-sources{font-size:11.5px}
+.info-page .study-visual figcaption{font-size:11.5px}
+.info-page .visual-pair b{font-size:24px}
+.info-page .visual-pair strong{font-size:14px}
+.info-page .visual-pair span{font-size:12px}
+.info-page .memory-hook b small{font-family:"Nanum Pen Script","Gamja Flower",cursive!important;font-size:11px}
+@media(max-width:760px){
+  .info-page .study-summary-copy h3{font-size:28px}
+  .info-page .study-summary-copy p{font-size:12.5px}
+  .info-page .study-core>p{font-size:14.5px}
+  .info-page .study-hook b{font-size:25px}
+  .info-page .study-example p{font-size:13.5px}
+  .info-page .study-contrast span{font-size:13px}
+  .info-page .study-more p{font-size:12.5px}
+}
 
 
 /* mobile swipe study cards 2026-10-07 */
