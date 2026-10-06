@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#16382d">
+  <title>모아 구조대!</title>
+  <link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <button id="backBtn" class="icon-btn" aria-label="생각정원으로 돌아가기">←</button>
+      <div class="brand"><span>🌱</span><b>모아 구조대!</b></div>
+      <button id="soundBtn" class="icon-btn" aria-label="소리 켜기/끄기">🔊</button>
+    </header>
+    <section class="game-frame" aria-label="모아 구조대 게임">
+      <div id="game"></div>
+      <div id="rotateHint" class="rotate-hint" hidden>📱 세로 화면으로 보면 더 좋아요</div>
+    </section>
+  </main>
+  <script src="phaser.min.js"></script>
+  <script src="game.js?v=1"></script>
+</body>
+</html>
