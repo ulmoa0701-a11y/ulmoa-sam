@@ -2,11 +2,6 @@ name: Boomwhacker QA
 on:
   push:
     branches: [feat/boomwhacker-studio]
-  pull_request:
-    paths:
-      - 'boomwhacker/**'
-      - 'heart-score/index.html'
-      - '.github/workflows/boomwhacker-qa.yml'
 permissions:
   contents: write
 jobs:
@@ -17,38 +12,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: feat/boomwhacker-studio
-      - name: Apply minimal Heart Score link patch in workspace
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('heart-score/index.html')
-          s=p.read_text(encoding='utf-8')
-          original=s
-          if 'id="boomwhackerBtn"' not in s:
-              marker='      <details class="saveMore">'
-              button='      <button id="boomwhackerBtn" class="btn" style="width:100%;margin-top:10px;background:#eefcf6;border-color:#9bddc2;color:#176b4d;font-weight:900">🥁 붐웨커로 연주하기</button>\n'
-              if marker not in s: raise SystemExit('save section marker not found')
-              s=s.replace(marker,button+marker,1)
-          if 'function openBoomwhacker()' not in s:
-              marker='function applyPrintOrientation(){'
-              fn="""function openBoomwhacker(){
- try{
-  const payload={title:state.title||'제목 없는 곡',bpm:Number(state.bpm)||96,timeN:Number(state.timeN)||4,timeD:Number(state.timeD)||4,measures:(state.measures||[]).map(m=>m.map(e=>({note:e.note,dur:Number(e.dur)||1,lyric:e.lyric||''})))};
-  localStorage.setItem('ulmoaBoomTransfer',JSON.stringify(payload));
-  window.location.href='../boomwhacker/';
- }catch(err){alert('붐웨커로 곡을 보내지 못했습니다. 다시 시도해 주세요.');}
-}
-"""
-              if marker not in s: raise SystemExit('print function marker not found')
-              s=s.replace(marker,fn+marker,1)
-          if "boomwhackerBtn.onclick=openBoomwhacker" not in s:
-              marker="$('#importJson').onchange="
-              bind="const boomwhackerBtn=$('#boomwhackerBtn');if(boomwhackerBtn)boomwhackerBtn.onclick=openBoomwhacker;\n"
-              if marker not in s: raise SystemExit('event binding marker not found')
-              s=s.replace(marker,bind+marker,1)
-          if s!=original:p.write_text(s,encoding='utf-8')
-          PY
+      - name: Apply Heart Score link in workspace
+        run: python3 boomwhacker/apply-heart-link.py
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -60,7 +25,6 @@ jobs:
       - name: Install Playwright core
         run: npm install --no-save playwright-core@1.56.1
       - name: Locate Chrome
-        shell: bash
         run: |
           CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           test -n "$CHROME_BIN"
@@ -76,8 +40,6 @@ jobs:
       - name: Run browser QA
         run: node boomwhacker/qa.mjs
       - name: Commit verified Heart Score link
-        if: github.event_name == 'push'
-        shell: bash
         run: |
           if git diff --quiet -- heart-score/index.html; then exit 0; fi
           git config user.name 'github-actions[bot]'
