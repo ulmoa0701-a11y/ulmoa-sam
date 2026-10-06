@@ -1,4 +1,4 @@
-import{T as e}from"./index-DLHTTR05.js";var t=`clipPlaneFragmentDeclaration`,n=`#ifdef CLIPPLANE
+import{T as e}from"./index-DxiltY-5.js";var t=`clipPlaneFragmentDeclaration`,n=`#ifdef CLIPPLANE
 varying fClipDistance: f32;
 #endif
 #ifdef CLIPPLANE2
