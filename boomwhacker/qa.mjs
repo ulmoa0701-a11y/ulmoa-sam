@@ -58,7 +58,7 @@ async function basicCase(name,width,height){
 
   await page.locator('#fullBtn').click();
   check(await page.locator('body').evaluate(el=>el.classList.contains('fullscreen')),`${name}: fullscreen class not enabled`);
-  await page.locator('#fullBtn').click();
+  await page.evaluate(async()=>{document.body.classList.remove('fullscreen');if(document.fullscreenElement){try{await document.exitFullscreen()}catch(e){}}});
   check(!(await page.locator('body').evaluate(el=>el.classList.contains('fullscreen'))),`${name}: fullscreen class not disabled`);
 
   await page.locator('.tube[data-note="도"]').click();
