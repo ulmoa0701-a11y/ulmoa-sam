@@ -25,3 +25,8 @@
 .bookshelf:not(.music-shelf) .shelf-heading>div>span{font-family:"Pretendard Variable",Pretendard,sans-serif;font-size:10px;font-weight:900}
 .materials-page .sub-footer .footer-social{position:static;left:auto;bottom:auto;translate:none;z-index:auto;margin-left:auto}
 @media(max-width:650px){.materials-page .sub-footer .footer-social{margin-left:0}}
+
+.materials-bottom p{margin:6px 0 0;color:#6f6a63;font-size:14px;line-height:1.5}
+.materials-bottom-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.materials-bottom-actions a{white-space:nowrap}
+@media(max-width:620px){.materials-bottom-actions{width:100%;justify-content:flex-start}.materials-bottom-actions a{flex:1 1 auto;text-align:center}}
