@@ -92,3 +92,7 @@
 /* actual published thread visuals; originals are public Drive files */
 .study-visual a{width:min(100%,340px)}.study-visual-image{display:block;width:100%;aspect-ratio:1/1;border-radius:9px;box-shadow:0 7px 20px rgba(46,68,73,.08);background-repeat:no-repeat;background-size:cover;background-position:center}.sprite-working{background-image:url("https://drive.google.com/thumbnail?id=1RqwwsdM2fP8aEESEYdxuHkxHDtD1r8vx&sz=w1000")}.sprite-speed{background-image:url("https://drive.google.com/thumbnail?id=1AnFakcKnts8RL-IOOy5_kWtSfI4_NFhT&sz=w1000")}.sprite-memory{background-image:url("https://drive.google.com/thumbnail?id=1JfoC9lVtdT4HSF8paMPOFRrDATczs_Td&sz=w1000")}.sprite-visual{background-image:url("https://drive.google.com/thumbnail?id=1R9izSiOYAYcBRZnzYJvY5M-LmA1s0F-E&sz=w1000")}.sprite-auditory{background-image:url("https://drive.google.com/thumbnail?id=17xlSGVXbK3IWfmwQXdcf7fF-OtPde3f-&sz=w1000")}
 @media(max-width:760px){.study-visual a{width:min(100%,290px)}}
+
+/* handwriting pass 2026-10-06 */
+.info-page,.info-page *{font-family:"Gamja Flower",cursive!important}
+.info-page .study-summary-copy p,.info-page .study-core>p,.info-page .study-example p,.info-page .study-contrast span,.info-page .study-tags span,.info-page .study-more p,.info-page .study-more .study-caution,.info-page .study-more .study-sources,.info-page .study-visual figcaption{letter-spacing:.01em}

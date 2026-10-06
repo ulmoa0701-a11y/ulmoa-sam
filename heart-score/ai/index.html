@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>울모아 하트색깔악보 · AI OMR β</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f6f8fc}
+#app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff}
+#loading{position:fixed;inset:0;display:grid;place-items:center;background:#f7f9fc;color:#243654;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;font-weight:800;z-index:5;text-align:center;padding:24px;box-sizing:border-box}
+#loading small{display:block;margin-top:8px;color:#718096;font-weight:600;text-align:center;line-height:1.55}
+</style>
+</head>
+<body>
+<div id="loading">🎼 AI 악보인식 화면 준비 중…<small>기존 하트악보 편집기는 그대로 두고<br>새 인식기만 격리해서 시험합니다.</small></div>
+<iframe id="app" title="울모아 하트색깔악보" src="../?aiomr=681"></iframe>
+<script>
+const frame=document.getElementById('app');
+const loading=document.getElementById('loading');
+frame.addEventListener('load',()=>{
+  try{
+    const d=frame.contentDocument;
+    if(!d) throw new Error('시험 화면 문서에 접근할 수 없습니다.');
+    const s=d.createElement('script');
+    s.type='module';
+    // IMPORTANT: the script element belongs to the iframe document whose base
+    // URL is /heart-score/. Resolve from the iframe URL itself; using ../ here
+    // incorrectly pointed at /ulmoa-sam/omr-ai-v680.js and produced a 404.
+    s.src=new URL('omr-ai-v680.js?v=681', frame.src).href;
+    s.onload=()=>loading?.remove();
+    s.onerror=()=>{
+      if(loading) loading.innerHTML='AI 악보인식 모듈을 불러오지 못했습니다.<small>모듈 경로 또는 네트워크 상태를 확인한 뒤 다시 시도해 주세요.</small>';
+    };
+    d.body.appendChild(s);
+  }catch(err){
+    console.error(err);
+    if(loading) loading.innerHTML='AI 악보인식 화면 연결에 실패했습니다.<small>'+String(err?.message||err)+'</small>';
+  }
+});
+</script>
+</body>
+</html>
