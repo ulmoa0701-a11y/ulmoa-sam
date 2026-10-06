@@ -2,18 +2,17 @@ name: Boomwhacker QA
 on:
   push:
     branches: [feat/boomwhacker-studio]
-permissions:
-  contents: write
+  pull_request:
+    paths:
+      - 'boomwhacker/**'
+      - 'heart-score/index.html'
+      - '.github/workflows/boomwhacker-qa.yml'
 jobs:
   browser-qa:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: feat/boomwhacker-studio
-      - name: Apply Heart Score link in workspace
-        run: python3 boomwhacker/apply-heart-link.py
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -39,14 +38,6 @@ jobs:
           exit 1
       - name: Run browser QA
         run: node boomwhacker/qa.mjs
-      - name: Commit verified Heart Score link
-        run: |
-          if git diff --quiet -- heart-score/index.html; then exit 0; fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add heart-score/index.html
-          git commit -m 'Connect Heart Score to Boomwhacker [verified]'
-          git push origin HEAD:feat/boomwhacker-studio
       - name: Upload QA screenshots and report
         if: always()
         uses: actions/upload-artifact@v4
