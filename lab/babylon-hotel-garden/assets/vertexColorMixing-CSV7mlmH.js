@@ -1,4 +1,4 @@
-import{T as e}from"./index-DWZE11Mk.js";var t=`bonesDeclaration`,n=`#if NUM_BONE_INFLUENCERS>0
+import{T as e}from"./index-dPJdT6yS.js";var t=`bonesDeclaration`,n=`#if NUM_BONE_INFLUENCERS>0
 #ifndef USE_VERTEX_PULLING
 attribute matricesIndices : vec4f;attribute matricesWeights : vec4f;
 #if NUM_BONE_INFLUENCERS>4

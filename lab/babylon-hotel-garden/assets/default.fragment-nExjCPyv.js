@@ -1,4 +1,4 @@
-import{T as e}from"./index-DWZE11Mk.js";import{i as t,n as ee,r as te,t as ne}from"./fogFragment-CY9sYM1q.js";import{a as re,i as ie,n as ae,r as oe,t as se}from"./logDepthDeclaration-DSM65IVF.js";import{t as ce}from"./helperFunctions-Bl_oGF-l.js";var n=`decalFragmentDeclaration`,r=`#ifdef DECAL
+import{T as e}from"./index-dPJdT6yS.js";import{i as t,n as ee,r as te,t as ne}from"./fogFragment-BN9OYt3a.js";import{a as re,i as ie,n as ae,r as oe,t as se}from"./logDepthDeclaration-DLfug-z4.js";import{t as ce}from"./helperFunctions-DsWpqbQ0.js";var n=`decalFragmentDeclaration`,r=`#ifdef DECAL
 uniform vec4 vDecalInfos;
 #endif
 `;e.IncludesShadersStore[n]||(e.IncludesShadersStore[n]=r);var le={name:n,shader:r},i=`defaultFragmentDeclaration`,a=`uniform vec4 vEyePosition;uniform vec4 vDiffuseColor;uniform vec4 vSpecularColor;uniform vec3 vEmissiveColor;uniform vec3 vAmbientColor;uniform float visibility;
