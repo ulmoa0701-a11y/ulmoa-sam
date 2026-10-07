@@ -1050,3 +1050,71 @@
   .glossary-page .glossary-note-line{margin-top:6px;padding-top:7px}
   .glossary-page .glossary-group{padding-top:13px}
 }
+
+/* evidence-backed visual maps 2026-10-07 */
+.evidence-visual{
+  margin:14px 0 15px;padding:14px 16px;border:1px solid #e1e8e6;border-radius:16px;
+  background:#fffdf8;box-shadow:0 5px 18px rgba(43,67,72,.035)
+}
+.evidence-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.evidence-head>span{
+  display:inline-flex;padding:5px 9px;border-radius:999px;background:#eef6f4;color:#607b82;
+  font-size:9px;font-weight:800;letter-spacing:.02em
+}
+.evidence-head a{color:#74878c;text-decoration:none;font-size:8.5px;font-weight:650}
+.evidence-head a:hover{text-decoration:underline}
+.evidence-body{font-family:"Gamja Flower",cursive;color:#29434c}
+.evidence-caption{margin:10px 0 0;color:#718388;font-size:9.5px;line-height:1.55}
+.evidence-caption strong{color:#536b72}
+.ef-body{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;position:relative;padding-top:38px}
+.ef-center{
+  position:absolute;left:50%;top:0;transform:translateX(-50%);
+  padding:6px 14px;border-radius:999px;background:#fff0ad;border:1px solid #ead77b;font-size:19px
+}
+.ef-node{
+  position:relative;padding:12px 10px 10px;border-radius:13px;background:#fff;border:1px solid #e2e9e7;
+  text-align:center;font-size:18px;line-height:1.1
+}
+.ef-node:before{content:"";position:absolute;left:50%;top:-15px;height:15px;border-left:1px dashed #cfdad7}
+.ef-node small{display:block;margin-top:5px;color:#73878d;font-family:"Pretendard Variable",Pretendard,sans-serif;font-size:8px;line-height:1.35}
+.flow-body{display:grid;grid-template-columns:1fr auto 1.25fr auto 1fr;align-items:center;gap:7px}
+.flow-body>div{padding:12px 9px;border-radius:13px;background:#fff;border:1px solid #e1e8e6;text-align:center;font-size:18px}
+.flow-body>div:nth-of-type(1){background:#eef6f4}.flow-body>div:nth-of-type(2){background:#fff4c8}.flow-body>div:nth-of-type(3){background:#eef0fb}
+.flow-body b{font-size:19px;font-weight:400;color:#91a0a3}
+.flow-body small{display:block;margin-top:4px;color:#74868b;font-family:"Pretendard Variable",Pretendard,sans-serif;font-size:8px}
+.language-body{display:grid;grid-template-columns:2fr auto 1fr auto 1fr;align-items:stretch;gap:7px}
+.lang-group{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;padding:10px;border:1px solid #e1e8e6;border-radius:13px;background:#fff}
+.lang-group strong{width:100%;text-align:center;font-size:18px;font-weight:400}
+.lang-group span{padding:5px 8px;border-radius:999px;background:#f1edf9;font-size:14px}
+.lang-group:nth-of-type(2) span{background:#fff1bd}.lang-group:nth-of-type(3) span{background:#e7f3f0}
+.lang-plus{align-self:center;color:#95a3a6;font-size:20px}
+.strategy-body{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.strategy-body span{
+  display:grid;place-items:center;min-height:50px;padding:7px;border:1px solid #e0e8e5;border-radius:13px;
+  background:#fff;font-size:16px;text-align:center
+}
+.strategy-body span:nth-child(1){background:#fff2bf}.strategy-body span:nth-child(2){background:#e9f3f1}
+.strategy-body span:nth-child(3){background:#edf0fb}.strategy-body span:nth-child(4){background:#f3ebf8}.strategy-body span:nth-child(5){background:#e8f1f8}
+
+@media(max-width:760px){
+  .evidence-visual{margin:10px 0 12px;padding:12px 11px;border-radius:14px}
+  .evidence-head{margin-bottom:9px;align-items:flex-start}
+  .evidence-head a{max-width:52%;text-align:right;font-size:8px;line-height:1.35}
+  .evidence-caption{font-size:9px;line-height:1.5}
+  .ef-body{grid-template-columns:1fr;gap:7px;padding-top:34px}
+  .ef-node{font-size:17px;padding:9px}
+  .ef-node:before{display:none}
+  .ef-center{font-size:18px;padding:5px 12px}
+  .flow-body{grid-template-columns:1fr auto 1.15fr auto 1fr;gap:4px}
+  .flow-body>div{padding:9px 5px;font-size:15px}
+  .flow-body b{font-size:15px}
+  .flow-body small{font-size:7.5px}
+  .language-body{grid-template-columns:1fr;gap:6px}
+  .lang-plus{display:none}
+  .lang-group{padding:8px}
+  .lang-group strong{font-size:17px}
+  .lang-group span{font-size:13px;padding:4px 7px}
+  .strategy-body{display:flex;overflow-x:auto;gap:6px;padding-bottom:3px;scrollbar-width:none}
+  .strategy-body::-webkit-scrollbar{display:none}
+  .strategy-body span{flex:0 0 auto;min-width:74px;min-height:44px;font-size:14px}
+}
