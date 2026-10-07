@@ -152,7 +152,9 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   check(autoBalance.mr.energy>autoBalance.melody.energy*1.2,'mr: automatic MR is still not prominent enough versus melody '+JSON.stringify(autoBalance));
   check(autoBalance.mr.peak>.22,'mr: automatic MR peak is too low '+JSON.stringify(autoBalance));
   check(autoBalance.both.peak<.98,'mr: combined output clips '+JSON.stringify(autoBalance));
-  report.push({name:'autoMrBalance',autoBalance});
+  const halfMr=await page.evaluate(async()=>{const A=window.OfflineAudioContext||window.webkitOfflineAudioContext;const ac=new A(1,44100*3,44100);mrBuffer=null;scheduleBuiltinMr(ac,ac.destination,.05,0,.5);const b=await ac.startRendering(),d=b.getChannelData(0);let peak=0,energy=0;for(const v of d){const a=Math.abs(v);peak=Math.max(peak,a);energy+=a}return{peak,energy}});
+  check(halfMr.peak>.11&&halfMr.energy>autoBalance.melody.energy*.55,'mr: automatic MR should remain clearly audible around 50% '+JSON.stringify({halfMr,autoBalance}));
+  report.push({name:'autoMrBalance',autoBalance,halfMr});
   check(defaultMr.mrReady===true&&defaultMr.mrKind==='auto'&&!defaultMr.mrLoaded,'mr: built-in automatic MR is not ready by default');
   check((await page.locator('#mrStatus').innerText()).includes('기본 자동 MR'),'mr: built-in MR status is not visible');
   await page.locator('#mixModes button[data-mix="both"]').click();
