@@ -1,7 +1,7 @@
 name: Boomwhacker QA
 on:
   push:
-    branches: [feat/boomwhacker-studio, feat/boomwhacker-video-export, feat/boomwhacker-separate-volumes]
+    branches: [feat/boomwhacker-studio, feat/boomwhacker-video-export]
   pull_request:
     paths:
       - 'boomwhacker/**'
