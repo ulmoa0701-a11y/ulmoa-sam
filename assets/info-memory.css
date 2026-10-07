@@ -1025,3 +1025,28 @@
   .confusion-strip>span{font-size:8.5px}.confusion-strip button{font-size:8.5px;padding:6px 8px}
   .glossary-searching .study-note-list{grid-template-columns:1fr!important}
 }
+
+/* glossary mobile compact QA 2026-10-07 */
+@media(max-width:650px){
+  .glossary-page .glossary-hero{padding-top:24px;padding-bottom:15px}
+  .glossary-page .glossary-hero-row{position:relative;display:block;padding-right:52px}
+  .glossary-page .glossary-hero h1{font-size:32px;line-height:1;white-space:nowrap;margin-bottom:6px}
+  .glossary-page .glossary-hero-row p{max-width:100%;font-size:10px;line-height:1.5}
+  .glossary-page .glossary-count{
+    position:absolute;right:0;top:1px;min-width:44px;min-height:44px;padding:5px 6px;border-radius:13px
+  }
+  .glossary-page .glossary-count b{font-size:24px}
+  .glossary-page .glossary-count span{font-size:7px}
+  .glossary-page .glossary-explorer{margin-top:10px;padding:12px 11px}
+  .glossary-page .glossary-searchbox{padding-bottom:10px}
+  .glossary-page .glossary-searchbox h2{font-size:23px}
+  .glossary-page .glossary-search{margin-top:8px;padding:8px 10px}
+  .glossary-page .glossary-map{gap:6px;margin:10px 0 8px}
+  .glossary-page .map-center{padding:5px 10px}
+  .glossary-page .map-node{padding:8px 8px;min-height:43px}
+  .glossary-page .map-node span{display:none}
+  .glossary-page .map-node strong{align-self:center}
+  .glossary-page .confusion-strip{padding-top:1px}
+  .glossary-page .glossary-note-line{margin-top:6px;padding-top:7px}
+  .glossary-page .glossary-group{padding-top:13px}
+}
