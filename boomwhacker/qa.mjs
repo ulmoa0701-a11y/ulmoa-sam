@@ -27,6 +27,14 @@ async function basicCase(name,width,height){
   check(await page.locator('.laneLabel').count()===8,`${name}: expected 8 lanes`);
   check(await page.locator('.beat').count()>0,`${name}: score did not render`);
   check(await page.locator('#sampleSelect option').count()===15,`${name}: sample selector should contain current + 14 samples`);
+  check(await page.locator('#videoBtn').count()===1,`${name}: video export button missing`);
+  check(await page.locator('#watermarkOpt').isChecked(),`${name}: watermark should default on`);
+  check(await page.locator('#creditOpt').isChecked(),`${name}: intro/outro should default on`);
+  const videoInfo=await page.evaluate(()=>({supported:window.__boomVideoQA?.supported(),mime:window.__boomVideoQA?.mime(),brand:window.__boomVideoQA?.brand(),preview:window.__boomVideoQA?.preview()}));
+  check(videoInfo.supported===true,`${name}: browser video export capability missing`);
+  check(String(videoInfo.mime||'').startsWith('video/webm'),`${name}: WebM recorder mime missing`);
+  check(videoInfo.brand?.brand==='울모아쌤'&&videoInfo.brand?.handle==='@ulmoa__sam',`${name}: video brand metadata wrong`);
+  check(videoInfo.preview?.w===1280&&videoInfo.preview?.h===720&&String(videoInfo.preview?.data||'').startsWith('data:image/png'),`${name}: 16:9 video preview render failed`);
   let overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth));
   check(overflow<=1,`${name}: horizontal overflow ${overflow}px`);
 
@@ -117,6 +125,31 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   await context.close();
 }
 
+{
+  const context=await browser.newContext({viewport:{width:1366,height:900}});
+  const page=await context.newPage();
+  const errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(BASE,{waitUntil:'networkidle'});
+  const probe=await page.evaluate(async()=>{
+    const c=document.createElement('canvas');c.width=640;c.height=360;c.id='qaVideoCanvas';c.style.width='640px';c.style.height='360px';document.body.appendChild(c);
+    const x=c.getContext('2d');x.fillStyle='#f7fbff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#17233b';x.font='700 34px sans-serif';x.fillText('울모아쌤 붐웨커 영상 QA',40,100);
+    const stream=c.captureStream(10),mime=window.__boomVideoQA.mime(),chunks=[],rec=new MediaRecorder(stream,{mimeType:mime});
+    rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+    const done=new Promise((resolve,reject)=>{rec.onstop=resolve;rec.onerror=e=>reject(e.error||new Error('recorder error'))});
+    rec.start(50);
+    for(let i=0;i<8;i++){x.fillStyle=i%2?'#38a7e8':'#ef4444';x.fillRect(40+i*60,180,45,80);await new Promise(r=>setTimeout(r,45))}
+    rec.stop();await done;stream.getTracks().forEach(t=>t.stop());
+    return {size:new Blob(chunks,{type:mime}).size,mime,brand:window.__boomVideoQA.brand()};
+  });
+  check(probe.size>1000,'video probe: MediaRecorder produced no usable bytes');
+  check(String(probe.mime).startsWith('video/webm'),'video probe: unexpected mime '+probe.mime);
+  check(probe.brand?.copy?.includes('영상·편집 © 울모아쌤'),'video probe: copyright mark missing');
+  await page.locator('#qaVideoCanvas').screenshot({path:out+'/video-frame-probe.png'});
+  check(errors.length===0,'video probe: page errors '+errors.join(' | '));
+  report.push({name:'videoProbe',bytes:probe.size,mime:probe.mime});
+  await context.close();
+}
 await browser.close();
 fs.writeFileSync(`${out}/report.json`,JSON.stringify({failures,report},null,2));
 console.log(JSON.stringify({failures,report},null,2));
