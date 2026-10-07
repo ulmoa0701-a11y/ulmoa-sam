@@ -1,0 +1,85 @@
+/* 모아모아 나래반 놀이터 V6.2 — PRIVATE DEV VISUAL PATCH
+   Preserve approved character faces; only restage existing sprites and game feedback.
+*/
+.npc{
+  animation:none!important;
+  filter:drop-shadow(0 11px 12px rgba(40,58,43,.17))!important;
+}
+.npc::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-5px;
+  width:68%;
+  height:11px;
+  transform:translateX(-50%);
+  border-radius:50%;
+  background:rgba(61,53,38,.13);
+  filter:blur(5px);
+  pointer-events:none;
+  z-index:-1;
+}
+#npcYeoreum{transform:translate(-50%,-100%) rotate(-1deg)!important}
+#npcGaram::after{width:82%;height:9px;bottom:-1px}
+
+.nuri-search-hint{
+  position:absolute;
+  z-index:87;
+  left:max(12px,env(safe-area-inset-left));
+  top:70px;
+  display:none;
+  align-items:center;
+  gap:9px;
+  max-width:230px;
+  padding:8px 11px 8px 8px;
+  border-radius:18px;
+  background:rgba(255,250,240,.97);
+  color:#284b3f;
+  box-shadow:0 10px 28px rgba(21,53,41,.18);
+  font-size:12px;
+  font-weight:900;
+}
+.nuri-search-hint.show{display:flex}
+.nuri-search-hint img{
+  width:44px;height:44px;object-fit:contain;
+  padding:3px;border-radius:12px;background:#fff;
+}
+.nuri-search-hint b{display:block;font-size:13px;margin-bottom:2px}
+.nuri-search-hint small{display:block;color:#61746a;line-height:1.25}
+
+.nuri-speech{
+  position:absolute;
+  z-index:37;
+  display:none;
+  max-width:205px;
+  padding:9px 12px;
+  border-radius:16px 16px 16px 5px;
+  background:rgba(255,255,255,.96);
+  color:#294b40;
+  box-shadow:0 9px 24px rgba(20,48,38,.17);
+  font-size:13px;
+  font-weight:900;
+  line-height:1.35;
+  pointer-events:none;
+}
+.nuri-speech.show{display:block;animation:nuriSpeechIn .2s ease-out}
+@keyframes nuriSpeechIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.nuri-search-pulse{
+  position:absolute;
+  z-index:21;
+  width:76px;height:28px;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  display:none;
+  border:2px dashed rgba(255,243,174,.7);
+  box-shadow:0 0 24px rgba(255,234,126,.24);
+  pointer-events:none;
+}
+.nuri-search-pulse.show{display:block;animation:nuriSearchPulse 1.15s ease-in-out infinite alternate}
+@keyframes nuriSearchPulse{to{opacity:.35;transform:translate(-50%,-50%) scale(1.12)}}
+
+@media(max-width:560px){
+  .nuri-search-hint{top:113px;max-width:205px}
+  .nuri-search-hint img{width:38px;height:38px}
+}
