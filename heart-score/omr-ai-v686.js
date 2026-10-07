@@ -135,7 +135,7 @@ function visualBars(gray,w,h,line,threshold=.85){
     const modelDist=modelBars.length?Math.min(...modelBars.map(v=>Math.abs(v-x))):9999;if(modelDist<sp*1.8)score+=.62;
     scored.push({x,score});
   }
-  for(const x of modelBars)scored.push({x,score:.82});
+  // Model barlines only boost a visually supported line; they never create a measure boundary by themselves.
   scored.sort((a,b)=>b.score-a.score);
   const picked=[];
   for(const q of scored){if(q.score<.78)continue;if(picked.some(p=>Math.abs(p.x-q.x)<sp*9))continue;picked.push(q);}
