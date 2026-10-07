@@ -6,7 +6,7 @@ async function boot(){
   if(!window.ort)await loadScript(`${ORT_BASE}ort.min.js`);
   if(!window.ort)throw new Error('AI 실행 엔진을 불러오지 못했습니다.');
   if(window.ort.env?.wasm){window.ort.env.wasm.wasmPaths=ORT_BASE;window.ort.env.wasm.numThreads=1;}
-  await import('./omr-ai-v685.js?v=684');
+  await import('./omr-ai-v685.js?v=685');
   console.info('[Ulmoa] AI OMR bootstrap v6.85 ready',{ort:ORT_VERSION});
 }
 boot().catch(err=>{
