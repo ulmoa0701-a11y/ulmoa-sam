@@ -28,8 +28,9 @@ async function basicCase(name,width,height){
   check(await page.locator('.beat').count()>0,`${name}: score did not render`);
   check(await page.locator('#lyricTrack').count()===1,`${name}: lyric track missing`);
   check(await page.locator('.lyricSyllable').count()>5,`${name}: lyric track did not render a continuous line`);
-  const tubeTextColors=await page.locator('.tube').evaluateAll(xs=>[...new Set(xs.map(x=>getComputedStyle(x).color))]);
-  check(tubeTextColors.length===1,`${name}: note-name text colors are inconsistent: ${tubeTextColors.join(',')}`);
+  const tubeLabelColors=await page.locator('.tube').evaluateAll(xs=>xs.map(x=>({note:x.dataset.note,color:getComputedStyle(x.querySelector('.tubeLabel')).color})));
+  const tubeColorMap=Object.fromEntries(tubeLabelColors.map(x=>[x.note,x.color]));
+  check(tubeColorMap['도']==='rgb(235, 36, 39)'&&tubeColorMap['레']==='rgb(246, 133, 31)'&&tubeColorMap['미']==='rgb(251, 237, 27)'&&tubeColorMap['파']==='rgb(115, 200, 74)'&&tubeColorMap['솔']==='rgb(0, 163, 154)'&&tubeColorMap['라']==='rgb(75, 74, 168)'&&tubeColorMap['시']==='rgb(216, 58, 155)',`${name}: pitch-colored note labels are wrong: ${JSON.stringify(tubeColorMap)}`);
   check(await page.locator('#sampleSelect option').count()===15,`${name}: sample selector should contain current + 14 samples`);
   check(await page.locator('#videoBtn').count()===1,`${name}: video export button missing`);
   check(await page.locator('#watermarkOpt').isChecked(),`${name}: watermark should default on`);
@@ -73,8 +74,8 @@ async function basicCase(name,width,height){
 
   await page.evaluate(()=>{elapsed=1350;draw();updateTime();updateLyricTrack(true)});
   check(await page.locator('.lyricSyllable.active').count()===1,`${name}: current lyric syllable is not highlighted`);
-  const activeBg=await page.locator('.lyricSyllable.active').evaluate(el=>getComputedStyle(el).backgroundColor);
-  check(activeBg!=='rgba(0, 0, 0, 0)',`${name}: current lyric highlight has no note color`);
+  const activeBorder=await page.locator('.lyricSyllable.active').evaluate(el=>getComputedStyle(el).borderTopColor);
+  check(activeBorder==='rgb(235, 36, 39)',`${name}: current lyric syllable does not use its Boomwhacker color (${activeBorder})`);
   await page.locator('#startBtn').click();
   await page.waitForTimeout(550);
   const progress=parseFloat((await page.locator('#progressFill').evaluate(el=>getComputedStyle(el).width)))||0;
@@ -93,7 +94,7 @@ async function basicCase(name,width,height){
   check(overflow<=1,`${name}: horizontal overflow after interactions ${overflow}px`);
   await page.screenshot({path:`${out}/${name}.png`,fullPage:true});
   check(errors.length===0,`${name}: JS errors: ${errors.join(' | ')}`);
-  report.push({name,width,height,overflow,errors,beats:await page.locator('.beat').count(),tubeTextColors,lyricSyllables:await page.locator('.lyricSyllable').count()});
+  report.push({name,width,height,overflow,errors,beats:await page.locator('.beat').count(),tubeLabelColors,lyricSyllables:await page.locator('.lyricSyllable').count()});
   await context.close();
 }
 
