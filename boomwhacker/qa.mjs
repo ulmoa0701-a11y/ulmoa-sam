@@ -31,6 +31,8 @@ async function basicCase(name,width,height){
   check(robots==='noindex,nofollow',`${name}: robots guardrail changed (${robots})`);
   check(await page.locator('.tube').count()===8,`${name}: expected 8 tubes`);
   check(await page.locator('.laneLabel').count()===8,`${name}: expected 8 lanes`);
+  const fallSize=await page.locator('.fall').first().evaluate(el=>parseFloat(getComputedStyle(el).width));
+  check(fallSize>=(width<=800?44:56),`${name}: falling note is still too small (${fallSize}px)`);
   check(await page.locator('.beat').count()>0,`${name}: score did not render`);
   check(await page.locator('#lyricTrack').count()===1,`${name}: lyric track missing`);
   check(await page.locator('.lyricSyllable').count()>5,`${name}: lyric track did not render a continuous line`);
@@ -54,11 +56,23 @@ async function basicCase(name,width,height){
   check(videoInfo.brand?.brand==='울모아쌤'&&videoInfo.brand?.handle==='@ulmoa__sam',`${name}: video brand metadata wrong`);
   check(videoInfo.colors?.도==='#EB2427'&&videoInfo.colors?.레==='#F6851F'&&videoInfo.colors?.미==='#FBED1B'&&videoInfo.colors?.파==='#73C84A'&&videoInfo.colors?.솔==='#00A39A'&&videoInfo.colors?.라==='#4B4AA8'&&videoInfo.colors?.시==='#D83A9B',`${name}: Boomwhacker color mapping wrong`);
   check(videoInfo.melody?.mode==='boom'&&Object.keys(videoInfo.melody?.options||{}).length===4,`${name}: melody QA metadata wrong`);
-  check(videoInfo.mix?.mode==='melody'&&Object.keys(videoInfo.mix?.options||{}).length===3&&!videoInfo.mix?.mrLoaded,`${name}: mix QA metadata wrong`);
+  check(videoInfo.mix?.mode==='melody'&&Object.keys(videoInfo.mix?.options||{}).length===3&&videoInfo.mix?.mrReady===true&&videoInfo.mix?.mrKind==='auto'&&!videoInfo.mix?.mrLoaded,`${name}: mix QA metadata wrong`);
   check((videoInfo.lyrics?.items?.length||0)>5,`${name}: continuous lyric window missing`);
   check(videoInfo.preview?.w===1280&&videoInfo.preview?.h===720&&String(videoInfo.preview?.data||'').startsWith('data:image/png'),`${name}: 16:9 video preview render failed`);
   let overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth));
   check(overflow<=1,`${name}: horizontal overflow ${overflow}px`);
+  if(width>=801){
+    const visible=await page.evaluate(()=>{
+      const ids=['startBtn','restartBtn','videoBtn','fullBtn'],out={};
+      for(const id of ids){const el=document.getElementById(id),r=el?.getBoundingClientRect();out[id]=r?{top:r.top,bottom:r.bottom,left:r.left,right:r.right}:null}
+      const controls=document.querySelector('.controls')?.getBoundingClientRect();
+      return {vh:innerHeight,scrollY,controls:controls?{top:controls.top,bottom:controls.bottom,height:controls.height}:null,items:out};
+    });
+    for(const id of ['startBtn','restartBtn','videoBtn','fullBtn']){
+      const r=visible.items[id];check(!!r&&r.top>=0&&r.bottom<=visible.vh,`${name}: ${id} is not visible without page scroll (${JSON.stringify(r)} / vh ${visible.vh})`);
+    }
+    check(visible.controls?.bottom<=visible.vh,`${name}: desktop control panel exceeds viewport (${JSON.stringify(visible.controls)} / vh ${visible.vh})`);
+  }
 
   await page.locator('#levels button[data-level="3"]').click();
   check(await page.locator('.tube:not(.inactive)').count()===3,`${name}: 3-note mode active tube count wrong`);
@@ -120,7 +134,7 @@ async function basicCase(name,width,height){
   await context.close();
 }
 
-for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412',412,915],['tablet768',768,1024],['desktop1366',1366,900]]) await basicCase(name,w,h);
+for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412',412,915],['tablet768',768,1024],['desktop1366short',1366,768],['desktop1600short',1600,800],['desktop1366',1366,900]]) await basicCase(name,w,h);
 
 {
   const context=await browser.newContext({viewport:{width:390,height:844}});
@@ -128,10 +142,19 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(BASE,{waitUntil:'networkidle'});
+  const defaultMr=await page.evaluate(()=>window.__boomVideoQA.mix());
+  check(defaultMr.mrReady===true&&defaultMr.mrKind==='auto'&&!defaultMr.mrLoaded,'mr: built-in automatic MR is not ready by default');
+  check((await page.locator('#mrStatus').innerText()).includes('기본 자동 MR'),'mr: built-in MR status is not visible');
+  await page.locator('#mixModes button[data-mix="both"]').click();
+  await page.locator('#startBtn').click();
+  await page.waitForTimeout(120);
+  check(await page.evaluate(()=>!!mrSource),'mr: built-in automatic MR did not schedule');
+  await page.locator('#playBtn').click();
+  check(await page.evaluate(()=>mrSource===null),'mr: pausing did not stop built-in automatic MR');
   await page.locator('#mrFile').setInputFiles({name:'qa-mr.wav',mimeType:'audio/wav',buffer:makeWav(1.1,176)});
   await page.waitForFunction(()=>window.__boomVideoQA?.mix().mrLoaded===true);
   const loaded=await page.evaluate(()=>window.__boomVideoQA.mix());
-  check(loaded.mrLoaded===true&&loaded.mrName==='qa-mr.wav','mr: file did not decode');
+  check(loaded.mrLoaded===true&&loaded.mrKind==='file'&&loaded.mrName==='qa-mr.wav','mr: file did not decode or did not replace automatic MR');
   check((await page.locator('#mrStatus').innerText()).includes('MR 준비됨'),'mr: ready status missing');
   await page.locator('#mixModes button[data-mix="both"]').click();
   check((await page.evaluate(()=>window.__boomVideoQA.mix().mode))==='both','mr: melody+MR mode failed');
@@ -144,7 +167,7 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   check(await page.evaluate(()=>mrSource===null),'mr: pause did not stop MR source');
   const mixProbe=await page.evaluate(async()=>{
     const A=window.OfflineAudioContext||window.webkitOfflineAudioContext;
-    const render=async(mode)=>{const ac=new A(1,44100*2,44100);mixMode=mode;melodyMode='boom';if(wantsMelody())scheduleMelodyTone(ac,ac.destination,'도',.05,melodyMode);if(wantsMr())scheduleMrBuffer(ac,ac.destination,.05,0,.4);const b=await ac.startRendering(),d=b.getChannelData(0);let energy=0,peak=0;for(const v of d){const a=Math.abs(v);energy+=a;peak=Math.max(peak,a)}return{energy,peak}};
+    const render=async(mode)=>{const ac=new A(1,44100*2,44100);mixMode=mode;melodyMode='boom';if(wantsMelody())scheduleMelodyTone(ac,ac.destination,'도',.05,melodyMode);if(wantsMr())scheduleMrTrack(ac,ac.destination,.05,0,.4);const b=await ac.startRendering(),d=b.getChannelData(0);let energy=0,peak=0;for(const v of d){const a=Math.abs(v);energy+=a;peak=Math.max(peak,a)}return{energy,peak}};
     return{melody:await render('melody'),both:await render('both'),mr:await render('mr')};
   });
   check(mixProbe.melody.energy>10&&mixProbe.mr.energy>10&&mixProbe.both.energy>10,'mr: one or more audio mix modes are silent');
