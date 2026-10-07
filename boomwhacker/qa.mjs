@@ -26,14 +26,21 @@ async function basicCase(name,width,height){
   check(await page.locator('.tube').count()===8,`${name}: expected 8 tubes`);
   check(await page.locator('.laneLabel').count()===8,`${name}: expected 8 lanes`);
   check(await page.locator('.beat').count()>0,`${name}: score did not render`);
+  check(await page.locator('#lyricTrack').count()===1,`${name}: lyric track missing`);
+  check(await page.locator('.lyricSyllable').count()>5,`${name}: lyric track did not render a continuous line`);
+  const tubeLabelColors=await page.locator('.tube').evaluateAll(xs=>xs.map(x=>({note:x.dataset.note,color:getComputedStyle(x.querySelector('.tubeLabel')).color})));
+  const tubeColorMap=Object.fromEntries(tubeLabelColors.map(x=>[x.note,x.color]));
+  check(tubeColorMap['도']==='rgb(235, 36, 39)'&&tubeColorMap['레']==='rgb(246, 133, 31)'&&tubeColorMap['미']==='rgb(251, 237, 27)'&&tubeColorMap['파']==='rgb(115, 200, 74)'&&tubeColorMap['솔']==='rgb(0, 163, 154)'&&tubeColorMap['라']==='rgb(75, 74, 168)'&&tubeColorMap['시']==='rgb(216, 58, 155)',`${name}: pitch-colored note labels are wrong: ${JSON.stringify(tubeColorMap)}`);
   check(await page.locator('#sampleSelect option').count()===15,`${name}: sample selector should contain current + 14 samples`);
   check(await page.locator('#videoBtn').count()===1,`${name}: video export button missing`);
   check(await page.locator('#watermarkOpt').isChecked(),`${name}: watermark should default on`);
   check(await page.locator('#creditOpt').isChecked(),`${name}: intro/outro should default on`);
-  const videoInfo=await page.evaluate(()=>({supported:window.__boomVideoQA?.supported(),mime:window.__boomVideoQA?.mime(),brand:window.__boomVideoQA?.brand(),preview:window.__boomVideoQA?.preview()}));
+  const videoInfo=await page.evaluate(()=>({supported:window.__boomVideoQA?.supported(),mime:window.__boomVideoQA?.mime(),brand:window.__boomVideoQA?.brand(),colors:window.__boomVideoQA?.colors(),lyrics:window.__boomVideoQA?.lyrics(),preview:window.__boomVideoQA?.preview()}));
   check(videoInfo.supported===true,`${name}: browser video export capability missing`);
   check(String(videoInfo.mime||'').startsWith('video/webm'),`${name}: WebM recorder mime missing`);
   check(videoInfo.brand?.brand==='울모아쌤'&&videoInfo.brand?.handle==='@ulmoa__sam',`${name}: video brand metadata wrong`);
+  check(videoInfo.colors?.도==='#EB2427'&&videoInfo.colors?.레==='#F6851F'&&videoInfo.colors?.미==='#FBED1B'&&videoInfo.colors?.파==='#73C84A'&&videoInfo.colors?.솔==='#00A39A'&&videoInfo.colors?.라==='#4B4AA8'&&videoInfo.colors?.시==='#D83A9B',`${name}: Boomwhacker color mapping wrong`);
+  check((videoInfo.lyrics?.items?.length||0)>5,`${name}: continuous lyric window missing`);
   check(videoInfo.preview?.w===1280&&videoInfo.preview?.h===720&&String(videoInfo.preview?.data||'').startsWith('data:image/png'),`${name}: 16:9 video preview render failed`);
   let overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth));
   check(overflow<=1,`${name}: horizontal overflow ${overflow}px`);
@@ -65,6 +72,10 @@ async function basicCase(name,width,height){
   check((await page.locator('#soundBtn').innerText()).includes('🔇'),`${name}: sound toggle failed`);
   await page.locator('#soundBtn').click();
 
+  await page.evaluate(()=>{elapsed=1350;draw();updateTime();updateLyricTrack(true)});
+  check(await page.locator('.lyricSyllable.active').count()===1,`${name}: current lyric syllable is not highlighted`);
+  const activeBorder=await page.locator('.lyricSyllable.active').evaluate(el=>getComputedStyle(el).borderTopColor);
+  check(activeBorder==='rgb(235, 36, 39)',`${name}: current lyric syllable does not use its Boomwhacker color (${activeBorder})`);
   await page.locator('#startBtn').click();
   await page.waitForTimeout(550);
   const progress=parseFloat((await page.locator('#progressFill').evaluate(el=>getComputedStyle(el).width)))||0;
@@ -83,7 +94,7 @@ async function basicCase(name,width,height){
   check(overflow<=1,`${name}: horizontal overflow after interactions ${overflow}px`);
   await page.screenshot({path:`${out}/${name}.png`,fullPage:true});
   check(errors.length===0,`${name}: JS errors: ${errors.join(' | ')}`);
-  report.push({name,width,height,overflow,errors,beats:await page.locator('.beat').count()});
+  report.push({name,width,height,overflow,errors,beats:await page.locator('.beat').count(),tubeLabelColors,lyricSyllables:await page.locator('.lyricSyllable').count()});
   await context.close();
 }
 
