@@ -224,6 +224,11 @@ async function aiImport(file){
   catch(err){console.error(err);const msg=err?.message||String(err);stopped(msg);status('분석 실패: '+msg,'warn');preview('');}
 }
 
+if(new URLSearchParams(location.search).get('aiomr')==='686'){
+  for(const n of document.querySelectorAll('body *')){
+    if(n.children.length===0&&/v6\.78\s*BETA/.test(n.textContent||'')){n.textContent='v6.86 AI OMR BETA · 스캔 악보 보정';break;}
+  }
+}
 const input=el('imageScoreFile');if(input){input.onchange=async e=>{const f=e.target.files?.[0];if(!f)return;await aiImport(f);e.target.value='';};input.dataset.aiOmr='v686';}
 W.importScoreFromFileAI=aiImport;
 const st=el('imageStatus');if(st){st.className='status ok';st.innerHTML='🤖 <b>AI 악보인식 β 준비됨</b> · 모바일용 로컬 인식 모듈을 사용하고, 품질 검증 실패 시 잘못된 악보를 만들지 않고 중단합니다.';}
