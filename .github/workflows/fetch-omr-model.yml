@@ -1,0 +1,18 @@
+name: fetch-omr-model
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download public-domain OMR weights
+        run: |
+          curl -L --fail --retry 3 -o omr_weights.safetensors "https://raw.githubusercontent.com/alexanderalber/satb-line-omr/c60823117a5c92b0c29f921dbca023e94026d279/model-public-domain/weights.safetensors"
+          sha256sum omr_weights.safetensors
+      - name: Upload model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: omr-public-domain-weights
+          path: omr_weights.safetensors
+          retention-days: 1
