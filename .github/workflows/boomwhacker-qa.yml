@@ -17,10 +17,7 @@ jobs:
         with:
           node-version: '22'
       - name: Install Korean fonts
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq fonts-noto-cjk
-          fc-cache -f
+        run: echo "Skip font install for audio-volume QA"
       - name: Install Playwright core
         run: npm install --no-save playwright-core@1.56.1
       - name: Locate Chrome
