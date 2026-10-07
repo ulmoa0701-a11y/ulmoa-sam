@@ -161,7 +161,7 @@ function toStateVisual(lines,filename,gray,w,h,threshold){
       for(let i=0;i<bars.length-1;i++){
         const left=bars[i],right=bars[i+1];
         const mm=musical.filter(v=>v.x>left&&v.x<right).map(v=>v.e);
-        if(mm.length)measures.push(mm);
+        measures.push(mm);
       }
       used=measures.length>before;
     }
@@ -175,7 +175,7 @@ function toStateVisual(lines,filename,gray,w,h,threshold){
     }
     for(const v of musical)refs.push({system:line.system,x:v.x,event:v.e});
   }
-  measures=measures.filter(m=>m?.length);const base=typeof W.fileBaseName==='function'?W.fileBaseName(filename):String(filename||'').replace(/\.[^.]+$/,'');
+  measures=measures.filter(m=>Array.isArray(m));const base=typeof W.fileBaseName==='function'?W.fileBaseName(filename):String(filename||'').replace(/\.[^.]+$/,'');
   return{state:{...W.emptyState(),title:base||'가져온 악보',pageOrientation:'landscape',timeN,timeD,keyLabel,measures},refs,noteCount,avgConfidence:conf.length?conf.reduce((a,b)=>a+b,0)/conf.length:0,segmentation:'visual'};
 }
 function candidateScore(b){
