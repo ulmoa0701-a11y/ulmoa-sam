@@ -487,3 +487,35 @@
 .info-page .study-core mark{
   font-weight:400!important;
 }
+
+/* glossary page 2026-10-07 */
+.glossary-hero{padding-bottom:32px}
+.glossary-finder{
+  margin:0 58px 12px 78px;
+  padding:22px 24px 20px;
+  border:1px solid #e2e9e6;
+  border-radius:16px;
+  background:#fffdf4;
+}
+.glossary-finder-copy small{display:block;margin-bottom:4px;color:#7a9096;font-size:10px;font-weight:800}
+.glossary-finder-copy h2{margin:0 0 5px;font-family:"Gamja Flower",cursive;font-size:31px;font-weight:400}
+.glossary-finder-copy p{margin:0;color:#6b7f85;font-size:11px;line-height:1.6}
+.glossary-term-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.glossary-term-links button{
+  appearance:none;border:1px solid #d9e4e2;border-radius:999px;background:#f4f9f8;color:#304a53;
+  padding:9px 12px;font:700 10px/1.2 "Pretendard Variable",Pretendard,sans-serif;cursor:pointer
+}
+.glossary-term-links button:hover,.glossary-term-links button:focus-visible{background:#fff0a9;border-color:#e6d372;outline:none}
+.glossary-note-line{margin:14px 0 0;padding-top:12px;border-top:1px dashed #d9e2df;color:#7c8c91;font-size:10px;line-height:1.6}
+.glossary-group{padding-top:28px}
+@media(max-width:650px){
+  .glossary-hero{padding-bottom:26px}
+  .glossary-finder{margin:0 14px 6px 43px;padding:17px 15px 16px;border-radius:14px}
+  .glossary-finder-copy h2{font-size:27px}
+  .glossary-finder-copy p{font-size:10.5px}
+  .glossary-term-links{flex-wrap:nowrap;overflow-x:auto;gap:7px;margin:13px -2px 0;padding:0 2px 5px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .glossary-term-links::-webkit-scrollbar{display:none}
+  .glossary-term-links button{flex:0 0 auto;padding:8px 11px;font-size:9.5px}
+  .glossary-note-line{font-size:9.5px}
+  .glossary-group{padding-top:22px}
+}

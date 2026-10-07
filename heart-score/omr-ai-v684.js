@@ -5,7 +5,7 @@
  * Upstream commit c60823117a5c92b0c29f921dbca023e94026d279 — MIT.
  */
 
-import * as omr from './omr-local-v682.js?v=683';
+import * as omr from './omr-local-v682.js?v=684';
 
 const W=window;
 const ORT_VERSION='1.27.0';
