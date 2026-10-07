@@ -1,11 +1,11 @@
 /*
  * Ulmoa Heart Score AI OMR adapter v6.86
- * Local browser runtime: ./omr-local-v682.js
+ * Local browser runtime: ./omr-local-v686.js
  * Model: alexanderalber/satb-line-omr model-public-domain/omr-line.fp16.onnx
  * Upstream commit c60823117a5c92b0c29f921dbca023e94026d279 — MIT.
  */
 
-import * as omr from './omr-local-v682.js?v=685';
+import * as omr from './omr-local-v686.js?v=686';
 
 const W=window;
 const ORT_VERSION='1.27.0';
