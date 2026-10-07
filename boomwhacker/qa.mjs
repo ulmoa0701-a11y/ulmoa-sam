@@ -139,9 +139,9 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
     const stream=c.captureStream(10),mime=window.__boomVideoQA.mime(),chunks=[],rec=new MediaRecorder(stream,{mimeType:mime});
     rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
     const done=new Promise((resolve,reject)=>{rec.onstop=resolve;rec.onerror=e=>reject(e.error||new Error('recorder error'))});
-    rec.start(50);
-    for(let i=0;i<8;i++){x.fillStyle=i%2?'#38a7e8':'#ef4444';x.fillRect(40+i*60,180,45,80);await new Promise(r=>setTimeout(r,45))}
-    rec.stop();await done;stream.getTracks().forEach(t=>t.stop());
+    rec.start(100);
+    for(let i=0;i<24;i++){x.fillStyle=i%2?'#38a7e8':'#ef4444';x.clearRect(0,140,c.width,180);x.fillRect(30+(i%10)*50,180,45,80);await new Promise(r=>setTimeout(r,55))}
+    if(rec.state==='recording')rec.requestData();await new Promise(r=>setTimeout(r,180));rec.stop();await done;stream.getTracks().forEach(t=>t.stop());
     return {size:new Blob(chunks,{type:mime}).size,mime,brand:window.__boomVideoQA.brand()};
   });
   check(probe.size>1000,'video probe: MediaRecorder produced no usable bytes');
