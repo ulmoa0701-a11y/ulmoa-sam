@@ -101,13 +101,10 @@ function visualBars(gray,w,h,line,threshold=.85){
   const b=line.input.box,sp=Number(b.lineSpacing)||10;
   const staffTop=(Number(b.y)||0)+(Number(b.padUp)||0),staffBottom=staffTop+4*sp;
   const x0=Math.max(0,Math.floor(Number(b.x)||0)),x1=Math.min(w-1,Math.ceil((Number(b.x)||0)+(Number(b.w)||0)));
-  const noteXs=line.fragment.filter(v=>v.kind==='note'||v.kind==='rest').map(v=>{const q=v.src?.bbox;return q?q[0]+q[2]/2:null;}).filter(Number.isFinite);
+  const noteBoxes=line.fragment.filter(v=>v.kind==='note'||v.kind==='rest').map(v=>v.src?.bbox).filter(q=>Array.isArray(q)&&q.length>=4);
   const modelBars=line.fragment.filter(v=>v.kind==='barline').map(v=>{const q=v.src?.bbox;return q?q[0]+q[2]/2:null;}).filter(Number.isFinite);
   const baseThr=Number(threshold)||.85;
-  // Measure bars in scanned scores are often much lighter than noteheads/stems.
-  // Use a deliberately higher threshold for barline geometry, while keeping
-  // side-ink scoring stricter so stems and beams are still penalised.
-  const inkThr=Math.max(.90,Math.min(.94,baseThr+.07));
+  const inkThr=baseThr>=.78?.985:Math.max(.92,Math.min(.97,baseThr+.09));
   const sideThr=Math.min(.84,baseThr);
   const raw=[];
   for(let x=x0+2;x<=x1-2;x++){
@@ -122,42 +119,41 @@ function visualBars(gray,w,h,line,threshold=.85){
   const groups=[];if(raw.length){let a=raw[0],z=a;for(let i=1;i<raw.length;i++){const x=raw[i];if(x<=z+1)z=x;else{groups.push([a,z]);a=z=x;}}groups.push([a,z]);}
   const scored=[];
   for(const g of groups){
-    const x=(g[0]+g[1])/2,r=Math.max(5,Math.round(sp*1.4));let coreN=0,coreD=0,sideN=0,sideD=0;
+    const x=(g[0]+g[1])/2,r=Math.max(6,Math.round(sp*1.5));let coreN=0,coreD=0,sideN=0,sideD=0;
     for(let y=Math.round(staffTop);y<=Math.round(staffBottom);y++){
+      let nearStaff=false;for(let k=0;k<5;k++)if(Math.abs(y-(staffTop+k*sp))<=2){nearStaff=true;break;}
+      if(nearStaff)continue;
       for(let dx=-1;dx<=1;dx++){coreD++;if(pxGray(gray,w,h,x+dx,y)<inkThr)coreN++;}
       for(let dx=-r;dx<=r;dx++){if(Math.abs(dx)<=3)continue;sideD++;if(pxGray(gray,w,h,x+dx,y)<sideThr)sideN++;}
     }
     const core=coreD?coreN/coreD:0,side=sideD?sideN/sideD:0;
-    let score=core-2*side;
-    const noteDist=noteXs.length?Math.min(...noteXs.map(v=>Math.abs(v-x))):9999;
+    let score=core-2.2*side;
+    const overlaps=noteBoxes.some(q=>x>=q[0]-sp*.25&&x<=q[0]+q[2]+sp*.25);
+    const nearNote=noteBoxes.some(q=>x>=q[0]-sp*.8&&x<=q[0]+q[2]+sp*.8);
+    if(overlaps)score-=1.05;else if(nearNote)score-=.28;
     const modelDist=modelBars.length?Math.min(...modelBars.map(v=>Math.abs(v-x))):9999;
-    if(noteDist<sp*1.25)score-=.52;
-    if(modelDist<sp*1.8)score+=.42;
-    const edge=Math.min(Math.abs(x-x0),Math.abs(x1-x));
-    if(edge<sp*3)score+=.16;
+    if(modelDist<sp*1.8)score+=.62;
+    if(Math.min(Math.abs(x-x0),Math.abs(x1-x))<sp*2.5)score+=.12;
     scored.push({x,score,source:'visual'});
   }
-  for(const x of modelBars)scored.push({x,score:.52,source:'model'});
+  for(const x of modelBars)scored.push({x,score:.82,source:'model'});
   scored.sort((a,b)=>b.score-a.score);
   const picked=[];
   for(const q of scored){
-    if(q.score<.24)continue;
-    if(picked.some(p=>Math.abs(p.x-q.x)<sp*2.2))continue;
+    if(q.score<.18)continue;
+    if(picked.some(p=>Math.abs(p.x-q.x)<sp*8))continue;
     picked.push(q);
   }
   picked.sort((a,b)=>a.x-b.x);
-  const edges=[];
-  const left=picked.find(q=>q.x<x0+sp*6);
-  const right=[...picked].reverse().find(q=>q.x>x1-sp*6);
-  edges.push(left?.x??x0);
+  const edges=[x0];
   for(const q of picked){
-    if(q===left||q===right)continue;
-    if(q.x<=edges[edges.length-1]+sp*6)continue;
-    if(q.x>=x1-sp*4)continue;
+    if(q.x<=x0+sp*8||q.x>=x1-sp*8)continue;
+    if(q.x-edges[edges.length-1]<sp*10)continue;
+    if(x1-q.x<sp*10)continue;
     edges.push(q.x);
   }
-  if((right?.x??x1)>edges[edges.length-1]+sp*5)edges.push(right?.x??x1);else edges[edges.length-1]=right?.x??x1;
-  return edges.sort((a,b)=>a-b);
+  edges.push(x1);
+  return edges;
 }
 function toStateVisual(lines,filename,gray,w,h,threshold){
   let timeN=4,timeD=4,keyLabel='',measures=[],noteCount=0;const refs=[],conf=[];
