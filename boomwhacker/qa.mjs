@@ -33,13 +33,17 @@ async function basicCase(name,width,height){
   check(tubeColorMap['도']==='rgb(235, 36, 39)'&&tubeColorMap['레']==='rgb(246, 133, 31)'&&tubeColorMap['미']==='rgb(251, 237, 27)'&&tubeColorMap['파']==='rgb(115, 200, 74)'&&tubeColorMap['솔']==='rgb(0, 163, 154)'&&tubeColorMap['라']==='rgb(75, 74, 168)'&&tubeColorMap['시']==='rgb(216, 58, 155)',`${name}: pitch-colored note labels are wrong: ${JSON.stringify(tubeColorMap)}`);
   check(await page.locator('#sampleSelect option').count()===15,`${name}: sample selector should contain current + 14 samples`);
   check(await page.locator('#videoBtn').count()===1,`${name}: video export button missing`);
+  check(await page.locator('#melodySelect').count()===1,`${name}: melody selector missing`);
+  check(await page.locator('#melodySelect option').count()===4,`${name}: melody selector should have 4 choices`);
+  check((await page.locator('#melodySelect').inputValue())==='boom',`${name}: default melody should be Boomwhacker`);
   check(await page.locator('#watermarkOpt').isChecked(),`${name}: watermark should default on`);
   check(await page.locator('#creditOpt').isChecked(),`${name}: intro/outro should default on`);
-  const videoInfo=await page.evaluate(()=>({supported:window.__boomVideoQA?.supported(),mime:window.__boomVideoQA?.mime(),brand:window.__boomVideoQA?.brand(),colors:window.__boomVideoQA?.colors(),lyrics:window.__boomVideoQA?.lyrics(),preview:window.__boomVideoQA?.preview()}));
+  const videoInfo=await page.evaluate(()=>({supported:window.__boomVideoQA?.supported(),mime:window.__boomVideoQA?.mime(),brand:window.__boomVideoQA?.brand(),colors:window.__boomVideoQA?.colors(),melody:window.__boomVideoQA?.melody(),lyrics:window.__boomVideoQA?.lyrics(),preview:window.__boomVideoQA?.preview()}));
   check(videoInfo.supported===true,`${name}: browser video export capability missing`);
   check(String(videoInfo.mime||'').startsWith('video/webm'),`${name}: WebM recorder mime missing`);
   check(videoInfo.brand?.brand==='울모아쌤'&&videoInfo.brand?.handle==='@ulmoa__sam',`${name}: video brand metadata wrong`);
   check(videoInfo.colors?.도==='#EB2427'&&videoInfo.colors?.레==='#F6851F'&&videoInfo.colors?.미==='#FBED1B'&&videoInfo.colors?.파==='#73C84A'&&videoInfo.colors?.솔==='#00A39A'&&videoInfo.colors?.라==='#4B4AA8'&&videoInfo.colors?.시==='#D83A9B',`${name}: Boomwhacker color mapping wrong`);
+  check(videoInfo.melody?.mode==='boom'&&Object.keys(videoInfo.melody?.options||{}).length===4,`${name}: melody QA metadata wrong`);
   check((videoInfo.lyrics?.items?.length||0)>5,`${name}: continuous lyric window missing`);
   check(videoInfo.preview?.w===1280&&videoInfo.preview?.h===720&&String(videoInfo.preview?.data||'').startsWith('data:image/png'),`${name}: 16:9 video preview render failed`);
   let overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth));
@@ -71,6 +75,13 @@ async function basicCase(name,width,height){
   await page.locator('#soundBtn').click();
   check((await page.locator('#soundBtn').innerText()).includes('🔇'),`${name}: sound toggle failed`);
   await page.locator('#soundBtn').click();
+  await page.locator('#melodySelect').selectOption('piano');
+  check((await page.evaluate(()=>window.__boomVideoQA.melody().mode))==='piano',`${name}: piano melody selection failed`);
+  await page.locator('#melodySelect').selectOption('xylophone');
+  check((await page.evaluate(()=>window.__boomVideoQA.melody().mode))==='xylophone',`${name}: xylophone melody selection failed`);
+  await page.locator('#melodySelect').selectOption('none');
+  check((await page.evaluate(()=>window.__boomVideoQA.melody().mode))==='none',`${name}: no-melody selection failed`);
+  await page.locator('#melodySelect').selectOption('boom');
 
   await page.evaluate(()=>{elapsed=1350;draw();updateTime();updateLyricTrack(true)});
   check(await page.locator('.lyricSyllable.active').count()===1,`${name}: current lyric syllable is not highlighted`);
@@ -144,6 +155,15 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   await page.goto(BASE,{waitUntil:'networkidle'});
   await page.evaluate(()=>{const c=videoCanvas();c.id='qaExportFrame';c.style.width='640px';c.style.height='360px';document.body.appendChild(c);videoScene(c.getContext('2d'),2200)});
   await page.locator('#qaExportFrame').screenshot({path:out+'/video-export-frame.png'});
+  const melodyProbe=await page.evaluate(async()=>{
+    const A=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+    const render=async(mode)=>{const ac=new A(1,22050,22050);scheduleMelodyTone(ac,ac.destination,'도',.02,mode);const b=await ac.startRendering(),d=b.getChannelData(0);let energy=0,peak=0;for(const v of d){const a=Math.abs(v);energy+=a;peak=Math.max(peak,a)}return {energy,peak}};
+    return {none:await render('none'),piano:await render('piano'),xylophone:await render('xylophone'),boom:await render('boom')};
+  });
+  check(melodyProbe.none.energy===0,'melody probe: none should be silent');
+  check(melodyProbe.piano.energy>10&&melodyProbe.xylophone.energy>10&&melodyProbe.boom.energy>10,'melody probe: one or more melody voices are silent');
+  check(new Set([Math.round(melodyProbe.piano.energy),Math.round(melodyProbe.xylophone.energy),Math.round(melodyProbe.boom.energy)]).size===3,'melody probe: timbres are not measurably distinct');
+  report.push({name:'melodyProbe',melodyProbe});
   const probe=await page.evaluate(async()=>{
     const c=document.createElement('canvas');c.width=640;c.height=360;c.id='qaVideoCanvas';c.style.width='640px';c.style.height='360px';document.body.appendChild(c);
     const x=c.getContext('2d');x.fillStyle='#f7fbff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#17233b';x.font='700 34px sans-serif';x.fillText('울모아쌤 붐웨커 영상 QA',40,100);

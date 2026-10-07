@@ -20,6 +20,7 @@
 <div class="sec"><div class="label">샘플곡 바로 불러오기</div><select id="sampleSelect" class="sampleSelect" aria-label="샘플곡 선택"></select><div class="hint">하트악보의 샘플곡을 같은 음·리듬·가사로 불러옵니다.</div></div>
 <div class="sec"><div class="label">연습 음 범위</div><div class="seg" id="levels"><button data-level="3">3음</button><button data-level="5">5음</button><button data-level="8" class="on">8음</button></div><div class="hint">3음은 도·미·솔, 5음은 도·레·미·솔·라만 활성화해요.</div><div id="rangeNote" class="rangeNote"></div></div>
 <div class="sec"><div class="label">속도</div><div class="speed"><span>느리게</span><input id="tempo" type="range" min="50" max="160" value="92"><span class="bpm" id="bpmLabel">92 BPM</span></div></div>
+<div class="sec"><div class="label">멜로디 가이드</div><select id="melodySelect" class="sampleSelect" aria-label="멜로디 음색 선택"><option value="none">멜로디 없음</option><option value="piano">🎹 피아노 느낌</option><option value="xylophone">✨ 실로폰 느낌</option><option value="boom" selected>🥁 붐웨커 느낌</option></select><div class="hint">연주할 때와 저장되는 영상에 같은 멜로디 음색이 들어가요.</div></div>
 <div class="sec"><div class="toggles"><button id="repeatBtn" class="toggle on">↻ 반복</button><button id="soundBtn" class="toggle on">🔊 소리</button><button id="lyricBtn" class="toggle on">가사 표시</button><button id="fullBtn" class="toggle">⛶ 전체화면</button></div></div>
 <div class="sec"><button id="startBtn" class="primary">▶ 연주 시작</button><button id="restartBtn" class="ghost">처음부터</button><div class="hint">화면 아래 색 막대를 직접 눌러도 소리가 납니다.</div></div>
 <div class="sec videoSec">
@@ -43,6 +44,7 @@ const TEXT={도:'#17233b',레:'#17233b',미:'#17233b',파:'#17233b',솔:'#17233b
 const ORDER=['도','레','미','파','솔','라','시','높은도'];
 const ALLOWED={3:new Set(['도','미','솔']),5:new Set(['도','레','미','솔','라']),8:new Set(ORDER)};
 const FREQ={도:261.63,레:293.66,미:329.63,파:349.23,솔:392,라:440,시:493.88,'높은도':523.25};
+const MELODY_LABELS={none:'멜로디 없음',piano:'피아노',xylophone:'실로폰',boom:'붐웨커'};
 const E=(note,dur,lyric='')=>({note,dur,lyric});
 const song=(key,title,bpm,timeN,timeD,measures,category='동요')=>({key,title,bpm,timeN,timeD,measures,category});
 const plane=song('plane','비행기',100,4,4,[
@@ -75,6 +77,7 @@ function loadSong(){
  try{const raw=localStorage.getItem('ulmoaBoomLast');if(raw){const x=JSON.parse(raw);if(x&&Array.isArray(x.measures)){currentSampleKey=x.sampleKey||'';return x}}}catch(e){}
  currentSampleKey='twinkle';return clone(twinkle)
 }
+let melodyMode='boom';try{const saved=localStorage.getItem('ulmoaBoomMelody');if(MELODY_LABELS[saved])melodyMode=saved}catch(e){}
 let currentSong=loadSong(),level=8,bpm=Number(currentSong.bpm)||96,repeat=true,sound=true,lyrics=true,playing=false,elapsed=0,lastTs=0,raf=0,audioCtx=null,events=[],totalMs=0,lastLyricKey='';
 function saveLast(){try{localStorage.setItem('ulmoaBoomLast',JSON.stringify({...currentSong,sampleKey:currentSampleKey}))}catch(e){}}
 function canonical(raw){let n=String(raw||'').replace(/\s/g,'').replace(/♯/g,'#');if(!n||n==='쉼')return'쉼';return n}
@@ -90,7 +93,9 @@ function updateRangeInfo(){let outside=outOfBaseCount(),box=$('#rangeNote');box.
 function lyricWindowAt(t=elapsed){const items=events.map((e,i)=>({e,i})).filter(x=>x.e.lyric);if(!items.length)return{items:[],activeIndex:-1,start:0};let activePos=-1;for(let i=0;i<items.length;i++){if(t>=items[i].e.start-90)activePos=i;else break}const anchor=Math.max(0,activePos),size=18,start=Math.floor(anchor/size)*size;return{items:items.slice(start,start+size),activeIndex:activePos>=0?items[activePos].i:-1,start}}
 function updateLyricTrack(force=false){const box=$('#lyricTrack');if(!box)return;if(!lyrics){box.classList.add('hide');box.innerHTML='';lastLyricKey='hidden';return}const view=lyricWindowAt(elapsed),key=view.start+':'+view.activeIndex;if(!force&&key===lastLyricKey)return;lastLyricKey=key;box.classList.remove('hide');box.innerHTML=view.items.map(x=>`<span class="lyricSyllable ${x.i===view.activeIndex?'active':''}" style="--note-color:${noteColor(x.e.note)}">${esc(x.e.lyric)}</span>`).join('')}
 function audio(){if(!audioCtx){const A=window.AudioContext||window.webkitAudioContext;if(A)audioCtx=new A()}if(audioCtx?.state==='suspended')audioCtx.resume()}
-function tone(n,b){if(!sound||!FREQ[n])return;audio();if(!audioCtx)return;let now=audioCtx.currentTime,o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=FREQ[n];o.connect(g);g.connect(audioCtx.destination);g.gain.setValueAtTime(.001,now);g.gain.exponentialRampToValueAtTime(.3,now+.01);g.gain.exponentialRampToValueAtTime(.001,now+.28);o.start(now);o.stop(now+.3);if(b){b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),100)}}
+function voiceOsc(ac,dest,freq,type,amp,when,attack,decay,stop,mult=1,detune=0){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(freq*mult,when);if(detune)o.detune.setValueAtTime(detune,when);o.connect(g);g.connect(dest);g.gain.setValueAtTime(.0001,when);g.gain.exponentialRampToValueAtTime(Math.max(.0002,amp),when+attack);g.gain.exponentialRampToValueAtTime(.0001,when+decay);o.start(when);o.stop(when+stop)}
+function scheduleMelodyTone(ac,dest,n,when,mode=melodyMode){const f=FREQ[n];if(!f||mode==='none')return false;if(mode==='piano'){voiceOsc(ac,dest,f,'triangle',.19,when,.012,.78,.86);voiceOsc(ac,dest,f,'sine',.075,when,.008,.46,.56,2);voiceOsc(ac,dest,f,'sine',.035,when,.006,.28,.36,3);return true}if(mode==='xylophone'){voiceOsc(ac,dest,f,'sine',.23,when,.004,.42,.5);voiceOsc(ac,dest,f,'sine',.075,when,.003,.19,.25,3);voiceOsc(ac,dest,f,'sine',.035,when,.003,.13,.19,6);return true}voiceOsc(ac,dest,f,'sine',.27,when,.006,.31,.38);voiceOsc(ac,dest,f,'triangle',.065,when,.004,.18,.24,2);return true}
+function tone(n,b){if(b){b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),100)}if(!sound||melodyMode==='none'||!FREQ[n])return;audio();if(!audioCtx)return;scheduleMelodyTone(audioCtx,audioCtx.destination,n,audioCtx.currentTime,melodyMode)}
 function draw(){document.querySelectorAll('.fall').forEach(x=>x.remove());let s=$('#stage'),hit=s.clientHeight-68,fall=1500;for(const e of events){if(!e.active)continue;let dt=e.start-elapsed;if(dt>fall||dt< -180)continue;let p=1-dt/fall,i=ORDER.indexOf(e.note);if(i<0)continue;let n=document.createElement('div');n.className='fall';n.style.left=((i+.5)/8*s.clientWidth)+'px';n.style.top=Math.max(44,Math.min(hit,p*hit))+'px';n.style.background=COLORS[e.note];n.innerHTML=`<span class="fallLabel" style="--note-color:${COLORS[e.note]}">${esc(noteLabel(e.note))}</span>`;s.appendChild(n)}}
 function frame(ts){if(!playing)return;if(!lastTs)lastTs=ts;let prev=elapsed;elapsed+=ts-lastTs;lastTs=ts;if(elapsed>=totalMs){if(repeat){elapsed=0;prev=0}else{elapsed=totalMs;playing=false;$('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작'}}for(const e of events)if(e.active&&e.start>prev&&e.start<=elapsed){let b=[...document.querySelectorAll('.tube')].find(x=>x.dataset.note===e.note);tone(e.note,b)}draw();updateTime();updateLyricTrack();if(playing)raf=requestAnimationFrame(frame)}
 function toggle(){if(playing){playing=false;cancelAnimationFrame(raf);$('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 계속'}else{if(elapsed>=totalMs)elapsed=0;playing=true;lastTs=0;$('#playBtn').textContent='Ⅱ';$('#startBtn').textContent='Ⅱ 잠시 멈춤';raf=requestAnimationFrame(frame)}}
@@ -117,7 +122,7 @@ function videoIntro(ctx){
  const g=ctx.createLinearGradient(0,0,VIDEO_W,VIDEO_H);g.addColorStop(0,'#eefaff');g.addColorStop(1,'#f8fbff');ctx.fillStyle=g;ctx.fillRect(0,0,VIDEO_W,VIDEO_H);
  ctx.textAlign='center';ctx.fillStyle='#17233b';ctx.font='800 34px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText('🥁 붐웨커 색깔악보',VIDEO_W/2,250);
  ctx.font='900 64px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(currentSong.title||'제목 없는 곡',VIDEO_W/2,340);
- ctx.fillStyle='#607087';ctx.font='600 22px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(String(currentSong.timeN||4)+'/'+String(currentSong.timeD||4)+' · '+bpm+' BPM · '+level+'음 모드',VIDEO_W/2,390);
+ ctx.fillStyle='#607087';ctx.font='600 22px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(String(currentSong.timeN||4)+'/'+String(currentSong.timeD||4)+' · '+bpm+' BPM · '+level+'음 모드 · '+MELODY_LABELS[melodyMode],VIDEO_W/2,390);
  ctx.fillStyle='#177652';ctx.font='700 24px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText('일단 해봄노트 · 울모아쌤',VIDEO_W/2,475);
  ctx.font='500 18px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(VIDEO_HANDLE,VIDEO_W/2,510)
 }
@@ -138,7 +143,6 @@ function videoScene(ctx,t){
  const fall=1500,travel=hitY-y-56;for(const e of events){if(!e.active)continue;const dt=e.start-t;if(dt>fall||dt< -180)continue;const i=ORDER.indexOf(e.note);if(i<0)continue;const p=1-dt/fall,cx=x+(i+.5)*w/8,cy=Math.max(y+58,Math.min(hitY-10,y+58+p*travel));ctx.beginPath();ctx.arc(cx,cy,29,0,Math.PI*2);ctx.fillStyle=COLORS[e.note];ctx.fill();ctx.strokeStyle='rgba(255,255,255,.94)';ctx.lineWidth=3;ctx.stroke();videoNoteText(ctx,noteLabel(e.note),cx,cy+1,17,COLORS[e.note])}
  videoLyricBar(ctx,t,x+120,hitY-68,w-240,54);videoBrand(ctx)
 }
-function scheduleVideoTone(ac,dest,n,when){if(!FREQ[n])return;const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=FREQ[n];o.connect(g);g.connect(dest);g.gain.setValueAtTime(.001,when);g.gain.exponentialRampToValueAtTime(.28,when+.01);g.gain.exponentialRampToValueAtTime(.001,when+.29);o.start(when);o.stop(when+.3)}
 function safeVideoName(v){return String(v||'붐웨커').replace(/[\\/:*?"<>|]+/g,'_').trim()||'붐웨커'}
 async function exportVideo(){
  if(videoExporting)return;
@@ -146,22 +150,23 @@ async function exportVideo(){
  reset();videoExporting=true;const btn=$('#videoBtn');btn.disabled=true;btn.textContent='🎥 영상 만드는 중…';videoStatus('영상을 처음부터 재생하며 저장하고 있어요. 이 화면을 닫지 마세요.','working');
  const canvas=videoCanvas(),ctx=canvas.getContext('2d'),fps=30,canvasStream=canvas.captureStream(fps),tracks=[...canvasStream.getVideoTracks()];let ac=null,dest=null;
  try{
-  if(sound){const A=window.AudioContext||window.webkitAudioContext;if(A){ac=new A();await ac.resume();dest=ac.createMediaStreamDestination();tracks.push(...dest.stream.getAudioTracks())}}
+  if(sound&&melodyMode!=='none'){const A=window.AudioContext||window.webkitAudioContext;if(A){ac=new A();await ac.resume();dest=ac.createMediaStreamDestination();tracks.push(...dest.stream.getAudioTracks())}}
   const stream=new MediaStream(tracks),mime=videoMime(),rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:6000000}),chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
   const intro=$('#creditOpt')?.checked?1200:0,outro=$('#creditOpt')?.checked?1800:0,duration=totalMs,total=intro+duration+outro,startPerf=performance.now();
-  if(ac&&dest){const base=ac.currentTime+intro/1000;for(const e of events)if(e.active)scheduleVideoTone(ac,dest,e.note,base+e.start/1000)}
+  if(ac&&dest){const base=ac.currentTime+intro/1000;for(const e of events)if(e.active)scheduleMelodyTone(ac,dest,e.note,base+e.start/1000,melodyMode)}
   const done=new Promise((resolve,reject)=>{rec.onerror=e=>reject(e.error||new Error('recording failed'));rec.onstop=()=>resolve()});rec.start(250);
   await new Promise(resolve=>{const tick=()=>{const t=performance.now()-startPerf;if(t<intro)videoIntro(ctx);else if(t<intro+duration)videoScene(ctx,t-intro);else videoOutro(ctx);videoStatus('영상 만드는 중 '+Math.min(100,Math.floor(t/total*100))+'% · 이 화면을 닫지 마세요.','working');if(t>=total){resolve();return}requestAnimationFrame(tick)};tick()});
   rec.stop();await done;const blob=new Blob(chunks,{type:mime||'video/webm'});if(!blob.size)throw new Error('empty video');
   const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=safeVideoName(currentSong.title)+'_붐웨커_울모아쌤.webm';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
-  videoStatus('영상 저장 완료 · '+(blob.size/1024/1024).toFixed(1)+'MB · '+($('#watermarkOpt')?.checked?'워터마크 포함':'워터마크 없음'),'ok')
+  videoStatus('영상 저장 완료 · '+(blob.size/1024/1024).toFixed(1)+'MB · '+(sound&&melodyMode!=='none'?MELODY_LABELS[melodyMode]+' 멜로디':'멜로디 없음')+' · '+($('#watermarkOpt')?.checked?'워터마크 포함':'워터마크 없음'),'ok')
  }catch(err){console.error(err);videoStatus('영상 저장에 실패했어요. 브라우저를 최신 버전으로 업데이트한 뒤 다시 시도해 주세요.','warn')}
  finally{if(ac)try{await ac.close()}catch(e){}canvasStream.getTracks().forEach(t=>t.stop());videoExporting=false;btn.disabled=false;btn.textContent='🎥 붐웨커 영상 저장'}
 }
-window.__boomVideoQA={supported:()=>videoSupported(),mime:()=>videoMime(),brand:()=>({brand:VIDEO_BRAND,handle:VIDEO_HANDLE,copy:VIDEO_COPY}),colors:()=>({...COLORS}),lyrics:()=>lyricWindowAt(Math.min(2600,totalMs/2)),preview:()=>{const c=videoCanvas(),x=c.getContext('2d');videoScene(x,Math.min(1500,totalMs/2));return {w:c.width,h:c.height,data:c.toDataURL('image/png').slice(0,40)}}};
+window.__boomVideoQA={supported:()=>videoSupported(),mime:()=>videoMime(),brand:()=>({brand:VIDEO_BRAND,handle:VIDEO_HANDLE,copy:VIDEO_COPY}),colors:()=>({...COLORS}),melody:()=>({mode:melodyMode,label:MELODY_LABELS[melodyMode],options:{...MELODY_LABELS}}),lyrics:()=>lyricWindowAt(Math.min(2600,totalMs/2)),preview:()=>{const c=videoCanvas(),x=c.getContext('2d');videoScene(x,Math.min(1500,totalMs/2));return {w:c.width,h:c.height,data:c.toDataURL('image/png').slice(0,40)}}};
 
-function init(){syncSongUI()}
+function init(){syncSongUI();$('#melodySelect').value=melodyMode}
 $('#videoBtn').onclick=exportVideo;
+$('#melodySelect').onchange=e=>{const v=e.target.value;melodyMode=MELODY_LABELS[v]?v:'boom';e.target.value=melodyMode;try{localStorage.setItem('ulmoaBoomMelody',melodyMode)}catch(err){};if(melodyMode!=='none'&&sound){audio();tone('도')} };
 $('#sampleSelect').onchange=e=>{if(e.target.value)chooseSample(e.target.value)};
 $('#levels').onclick=e=>{let b=e.target.closest('button');if(!b)return;level=Number(b.dataset.level);document.querySelectorAll('#levels button').forEach(x=>x.classList.toggle('on',x===b));renderLanes();build();reset()};
 $('#tempo').oninput=e=>{bpm=Number(e.target.value);currentSong.bpm=bpm;$('#bpmLabel').textContent=bpm+' BPM';$('#songMeta').textContent=`${currentSong.timeN||4}/${currentSong.timeD||4} · ${bpm} BPM`;build();reset();saveLast()};
