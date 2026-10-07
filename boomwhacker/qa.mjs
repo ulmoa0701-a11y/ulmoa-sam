@@ -59,6 +59,18 @@ async function basicCase(name,width,height){
   check(videoInfo.preview?.w===1280&&videoInfo.preview?.h===720&&String(videoInfo.preview?.data||'').startsWith('data:image/png'),`${name}: 16:9 video preview render failed`);
   let overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth));
   check(overflow<=1,`${name}: horizontal overflow ${overflow}px`);
+  if(width>=801){
+    const visible=await page.evaluate(()=>{
+      const ids=['startBtn','restartBtn','videoBtn','fullBtn'],out={};
+      for(const id of ids){const el=document.getElementById(id),r=el?.getBoundingClientRect();out[id]=r?{top:r.top,bottom:r.bottom,left:r.left,right:r.right}:null}
+      const controls=document.querySelector('.controls')?.getBoundingClientRect();
+      return {vh:innerHeight,scrollY,controls:controls?{top:controls.top,bottom:controls.bottom,height:controls.height}:null,items:out};
+    });
+    for(const id of ['startBtn','restartBtn','videoBtn','fullBtn']){
+      const r=visible.items[id];check(!!r&&r.top>=0&&r.bottom<=visible.vh,`${name}: ${id} is not visible without page scroll (${JSON.stringify(r)} / vh ${visible.vh})`);
+    }
+    check(visible.controls?.bottom<=visible.vh,`${name}: desktop control panel exceeds viewport (${JSON.stringify(visible.controls)} / vh ${visible.vh})`);
+  }
 
   await page.locator('#levels button[data-level="3"]').click();
   check(await page.locator('.tube:not(.inactive)').count()===3,`${name}: 3-note mode active tube count wrong`);
@@ -120,7 +132,7 @@ async function basicCase(name,width,height){
   await context.close();
 }
 
-for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412',412,915],['tablet768',768,1024],['desktop1366',1366,900]]) await basicCase(name,w,h);
+for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412',412,915],['tablet768',768,1024],['desktop1366short',1366,768],['desktop1600short',1600,800],['desktop1366',1366,900]]) await basicCase(name,w,h);
 
 {
   const context=await browser.newContext({viewport:{width:390,height:844}});
