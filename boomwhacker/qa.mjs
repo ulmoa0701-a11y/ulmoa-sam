@@ -10,6 +10,12 @@ fs.mkdirSync(out,{recursive:true});
 const failures=[];
 const report=[];
 const check=(ok,msg)=>{if(!ok)failures.push(msg)};
+function makeWav(seconds=.8,freq=180,sampleRate=22050){
+  const samples=Math.floor(seconds*sampleRate),dataBytes=samples*2,b=Buffer.alloc(44+dataBytes);
+  b.write('RIFF',0);b.writeUInt32LE(36+dataBytes,4);b.write('WAVE',8);b.write('fmt ',12);b.writeUInt32LE(16,16);b.writeUInt16LE(1,20);b.writeUInt16LE(1,22);b.writeUInt32LE(sampleRate,24);b.writeUInt32LE(sampleRate*2,28);b.writeUInt16LE(2,32);b.writeUInt16LE(16,34);b.write('data',36);b.writeUInt32LE(dataBytes,40);
+  for(let i=0;i<samples;i++){const env=Math.min(1,i/(sampleRate*.02))*Math.max(0,1-i/samples),v=Math.sin(2*Math.PI*freq*i/sampleRate)*.32*env;b.writeInt16LE(Math.max(-32767,Math.min(32767,Math.round(v*32767))),44+i*2)}
+  return b;
+}
 const browser=await chromium.launch({headless:true,executablePath:CHROME,args:['--no-sandbox','--autoplay-policy=no-user-gesture-required']});
 
 async function basicCase(name,width,height){
@@ -36,14 +42,19 @@ async function basicCase(name,width,height){
   check(await page.locator('#melodySelect').count()===1,`${name}: melody selector missing`);
   check(await page.locator('#melodySelect option').count()===4,`${name}: melody selector should have 4 choices`);
   check((await page.locator('#melodySelect').inputValue())==='boom',`${name}: default melody should be Boomwhacker`);
+  check(await page.locator('#mixModes button').count()===3,`${name}: mix mode should have 3 choices`);
+  check(await page.locator('#mixModes button.on').getAttribute('data-mix')==='melody',`${name}: default mix mode should be melody only`);
+  check(await page.locator('#mrFile').count()===1,`${name}: MR file input missing`);
+  check(await page.locator('#mrVolume').count()===1,`${name}: MR volume control missing`);
   check(await page.locator('#watermarkOpt').isChecked(),`${name}: watermark should default on`);
   check(await page.locator('#creditOpt').isChecked(),`${name}: intro/outro should default on`);
-  const videoInfo=await page.evaluate(()=>({supported:window.__boomVideoQA?.supported(),mime:window.__boomVideoQA?.mime(),brand:window.__boomVideoQA?.brand(),colors:window.__boomVideoQA?.colors(),melody:window.__boomVideoQA?.melody(),lyrics:window.__boomVideoQA?.lyrics(),preview:window.__boomVideoQA?.preview()}));
+  const videoInfo=await page.evaluate(()=>({supported:window.__boomVideoQA?.supported(),mime:window.__boomVideoQA?.mime(),brand:window.__boomVideoQA?.brand(),colors:window.__boomVideoQA?.colors(),melody:window.__boomVideoQA?.melody(),mix:window.__boomVideoQA?.mix(),lyrics:window.__boomVideoQA?.lyrics(),preview:window.__boomVideoQA?.preview()}));
   check(videoInfo.supported===true,`${name}: browser video export capability missing`);
   check(String(videoInfo.mime||'').startsWith('video/webm'),`${name}: WebM recorder mime missing`);
   check(videoInfo.brand?.brand==='울모아쌤'&&videoInfo.brand?.handle==='@ulmoa__sam',`${name}: video brand metadata wrong`);
   check(videoInfo.colors?.도==='#EB2427'&&videoInfo.colors?.레==='#F6851F'&&videoInfo.colors?.미==='#FBED1B'&&videoInfo.colors?.파==='#73C84A'&&videoInfo.colors?.솔==='#00A39A'&&videoInfo.colors?.라==='#4B4AA8'&&videoInfo.colors?.시==='#D83A9B',`${name}: Boomwhacker color mapping wrong`);
   check(videoInfo.melody?.mode==='boom'&&Object.keys(videoInfo.melody?.options||{}).length===4,`${name}: melody QA metadata wrong`);
+  check(videoInfo.mix?.mode==='melody'&&Object.keys(videoInfo.mix?.options||{}).length===3&&!videoInfo.mix?.mrLoaded,`${name}: mix QA metadata wrong`);
   check((videoInfo.lyrics?.items?.length||0)>5,`${name}: continuous lyric window missing`);
   check(videoInfo.preview?.w===1280&&videoInfo.preview?.h===720&&String(videoInfo.preview?.data||'').startsWith('data:image/png'),`${name}: 16:9 video preview render failed`);
   let overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth));
@@ -110,6 +121,43 @@ async function basicCase(name,width,height){
 }
 
 for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412',412,915],['tablet768',768,1024],['desktop1366',1366,900]]) await basicCase(name,w,h);
+
+{
+  const context=await browser.newContext({viewport:{width:390,height:844}});
+  const page=await context.newPage();
+  const errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(BASE,{waitUntil:'networkidle'});
+  await page.locator('#mrFile').setInputFiles({name:'qa-mr.wav',mimeType:'audio/wav',buffer:makeWav(1.1,176)});
+  await page.waitForFunction(()=>window.__boomVideoQA?.mix().mrLoaded===true);
+  const loaded=await page.evaluate(()=>window.__boomVideoQA.mix());
+  check(loaded.mrLoaded===true&&loaded.mrName==='qa-mr.wav','mr: file did not decode');
+  check((await page.locator('#mrStatus').innerText()).includes('MR 준비됨'),'mr: ready status missing');
+  await page.locator('#mixModes button[data-mix="both"]').click();
+  check((await page.evaluate(()=>window.__boomVideoQA.mix().mode))==='both','mr: melody+MR mode failed');
+  await page.locator('#mrVolume').evaluate(el=>{el.value='40';el.dispatchEvent(new Event('input',{bubbles:true}))});
+  check(Math.abs((await page.evaluate(()=>window.__boomVideoQA.mix().mrVolume))-.4)<.01,'mr: volume control failed');
+  await page.locator('#startBtn').click();
+  await page.waitForTimeout(120);
+  check(await page.evaluate(()=>!!mrSource),'mr: live MR source was not scheduled');
+  await page.locator('#playBtn').click();
+  check(await page.evaluate(()=>mrSource===null),'mr: pause did not stop MR source');
+  const mixProbe=await page.evaluate(async()=>{
+    const A=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+    const render=async(mode)=>{const ac=new A(1,44100*2,44100);mixMode=mode;melodyMode='boom';if(wantsMelody())scheduleMelodyTone(ac,ac.destination,'도',.05,melodyMode);if(wantsMr())scheduleMrBuffer(ac,ac.destination,.05,0,.4);const b=await ac.startRendering(),d=b.getChannelData(0);let energy=0,peak=0;for(const v of d){const a=Math.abs(v);energy+=a;peak=Math.max(peak,a)}return{energy,peak}};
+    return{melody:await render('melody'),both:await render('both'),mr:await render('mr')};
+  });
+  check(mixProbe.melody.energy>10&&mixProbe.mr.energy>10&&mixProbe.both.energy>10,'mr: one or more audio mix modes are silent');
+  check(new Set([Math.round(mixProbe.melody.energy),Math.round(mixProbe.both.energy),Math.round(mixProbe.mr.energy)]).size===3,'mr: mix modes are not measurably distinct');
+  await page.locator('#mixModes button[data-mix="mr"]').click();
+  check((await page.evaluate(()=>window.__boomVideoQA.mix().mode))==='mr','mr: MR-only mode failed');
+  await page.locator('#mixModes button[data-mix="melody"]').click();
+  check((await page.evaluate(()=>window.__boomVideoQA.mix().mode))==='melody','mr: melody-only mode failed');
+  check(errors.length===0,'mr: page errors '+errors.join(' | '));
+  report.push({name:'mrMix',loaded,mixProbe});
+  await page.screenshot({path:out+'/mr-mix390.png',fullPage:true});
+  await context.close();
+}
 
 {
   const context=await browser.newContext({viewport:{width:390,height:844}});
