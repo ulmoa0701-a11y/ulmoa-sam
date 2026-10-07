@@ -67,8 +67,12 @@ function visualBars(gray,w,h,line,threshold=.85){
   const x0=Math.max(0,Math.floor(Number(b.x)||0)),x1=Math.min(w-1,Math.ceil((Number(b.x)||0)+(Number(b.w)||0)));
   const noteXs=line.fragment.filter(v=>v.kind==='note'||v.kind==='rest').map(v=>{const q=v.src?.bbox;return q?q[0]+q[2]/2:null;}).filter(Number.isFinite);
   const modelBars=line.fragment.filter(v=>v.kind==='barline').map(v=>{const q=v.src?.bbox;return q?q[0]+q[2]/2:null;}).filter(Number.isFinite);
-  const inkThr=Math.max(.82,Math.min(.92,Number(threshold)||.85));
-  const sideThr=Math.min(.84,inkThr);
+  const baseThr=Number(threshold)||.85;
+  // Measure bars in scanned scores are often much lighter than noteheads/stems.
+  // Use a deliberately higher threshold for barline geometry, while keeping
+  // side-ink scoring stricter so stems and beams are still penalised.
+  const inkThr=Math.max(.90,Math.min(.94,baseThr+.07));
+  const sideThr=Math.min(.84,baseThr);
   const raw=[];
   for(let x=x0+2;x<=x1-2;x++){
     let cross=0;
