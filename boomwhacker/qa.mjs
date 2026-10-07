@@ -48,7 +48,7 @@ async function basicCase(name,width,height){
   check(await page.locator('#mixModes button.on').getAttribute('data-mix')==='melody',`${name}: default mix mode should be melody only`);
   check(await page.locator('#mrFile').count()===1,`${name}: MR file input missing`);
   check(await page.locator('#mrVolume').count()===1,`${name}: MR volume control missing`);
-  check((await page.locator('#mrVolume').inputValue())==='85',`${name}: default MR volume should be 85%`);
+  check((await page.locator('#mrVolume').inputValue())==='100',`${name}: default MR volume should be 100%`);
   check(await page.locator('#watermarkOpt').isChecked(),`${name}: watermark should default on`);
   check(await page.locator('#creditOpt').isChecked(),`${name}: intro/outro should default on`);
   const videoInfo=await page.evaluate(()=>({supported:window.__boomVideoQA?.supported(),mime:window.__boomVideoQA?.mime(),brand:window.__boomVideoQA?.brand(),colors:window.__boomVideoQA?.colors(),melody:window.__boomVideoQA?.melody(),mix:window.__boomVideoQA?.mix(),lyrics:window.__boomVideoQA?.lyrics(),preview:window.__boomVideoQA?.preview()}));
@@ -146,13 +146,15 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   const defaultMr=await page.evaluate(()=>window.__boomVideoQA.mix());
   const autoBalance=await page.evaluate(async()=>{
     const A=window.OfflineAudioContext||window.webkitOfflineAudioContext;
-    const render=async(kind)=>{const ac=new A(1,44100*3,44100);mrBuffer=null;mrVolume=.85;if(kind==='melody')scheduleMelodyTone(ac,ac.destination,'도',.05,'boom');else if(kind==='mr')scheduleBuiltinMr(ac,ac.destination,.05,0,.85);else{scheduleMelodyTone(ac,ac.destination,'도',.05,'boom');scheduleBuiltinMr(ac,ac.destination,.05,0,.85)}const b=await ac.startRendering(),d=b.getChannelData(0);let energy=0,peak=0;for(const v of d){const a=Math.abs(v);energy+=a;peak=Math.max(peak,a)}return{energy,peak}};
+    const render=async(kind)=>{const ac=new A(1,44100*3,44100);mrBuffer=null;mrVolume=1;if(kind==='melody')scheduleMelodyTone(ac,ac.destination,'도',.05,'boom');else if(kind==='mr')scheduleBuiltinMr(ac,ac.destination,.05,0,1);else{scheduleMelodyTone(ac,ac.destination,'도',.05,'boom');scheduleBuiltinMr(ac,ac.destination,.05,0,1)}const b=await ac.startRendering(),d=b.getChannelData(0);let energy=0,peak=0;for(const v of d){const a=Math.abs(v);energy+=a;peak=Math.max(peak,a)}return{energy,peak}};
     return{melody:await render('melody'),mr:await render('mr'),both:await render('both')};
   });
-  check(autoBalance.mr.energy>autoBalance.melody.energy*.45,'mr: automatic MR is still too quiet versus melody '+JSON.stringify(autoBalance));
-  check(autoBalance.mr.peak>.08,'mr: automatic MR peak is too low '+JSON.stringify(autoBalance));
+  check(autoBalance.mr.energy>autoBalance.melody.energy*1.2,'mr: automatic MR is still not prominent enough versus melody '+JSON.stringify(autoBalance));
+  check(autoBalance.mr.peak>.22,'mr: automatic MR peak is too low '+JSON.stringify(autoBalance));
   check(autoBalance.both.peak<.98,'mr: combined output clips '+JSON.stringify(autoBalance));
-  report.push({name:'autoMrBalance',autoBalance});
+  const halfMr=await page.evaluate(async()=>{const A=window.OfflineAudioContext||window.webkitOfflineAudioContext;const ac=new A(1,44100*3,44100);mrBuffer=null;scheduleBuiltinMr(ac,ac.destination,.05,0,.5);const b=await ac.startRendering(),d=b.getChannelData(0);let peak=0,energy=0;for(const v of d){const a=Math.abs(v);peak=Math.max(peak,a);energy+=a}return{peak,energy}});
+  check(halfMr.peak>.11&&halfMr.energy>autoBalance.melody.energy*.55,'mr: automatic MR should remain clearly audible around 50% '+JSON.stringify({halfMr,autoBalance}));
+  report.push({name:'autoMrBalance',autoBalance,halfMr});
   check(defaultMr.mrReady===true&&defaultMr.mrKind==='auto'&&!defaultMr.mrLoaded,'mr: built-in automatic MR is not ready by default');
   check((await page.locator('#mrStatus').innerText()).includes('기본 자동 MR'),'mr: built-in MR status is not visible');
   await page.locator('#mixModes button[data-mix="both"]').click();
