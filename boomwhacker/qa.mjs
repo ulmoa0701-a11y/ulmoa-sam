@@ -38,7 +38,7 @@ async function basicCase(name,width,height){
   check((await page.locator('#melodySelect').inputValue())==='boom',`${name}: default melody should be Boomwhacker`);
   check(await page.locator('#watermarkOpt').isChecked(),`${name}: watermark should default on`);
   check(await page.locator('#creditOpt').isChecked(),`${name}: intro/outro should default on`);
-  const videoInfo=await page.evaluate(()=>({supported:window.__boomVideoQA?.supported(),mime:window.__boomVideoQA?.mime(),brand:window.__boomVideoQA?.brand(),colors:window.__boomVideoQA?.colors(),lyrics:window.__boomVideoQA?.lyrics(),preview:window.__boomVideoQA?.preview()}));
+  const videoInfo=await page.evaluate(()=>({supported:window.__boomVideoQA?.supported(),mime:window.__boomVideoQA?.mime(),brand:window.__boomVideoQA?.brand(),colors:window.__boomVideoQA?.colors(),melody:window.__boomVideoQA?.melody(),lyrics:window.__boomVideoQA?.lyrics(),preview:window.__boomVideoQA?.preview()}));
   check(videoInfo.supported===true,`${name}: browser video export capability missing`);
   check(String(videoInfo.mime||'').startsWith('video/webm'),`${name}: WebM recorder mime missing`);
   check(videoInfo.brand?.brand==='울모아쌤'&&videoInfo.brand?.handle==='@ulmoa__sam',`${name}: video brand metadata wrong`);
