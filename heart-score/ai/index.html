@@ -13,7 +13,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f6f8fc}
 </head>
 <body>
 <div id="loading">🎼 AI 악보인식 화면 준비 중…<small>모바일에서도 외부 악보 모듈을 다시 받지 않도록<br>인식 코드를 사이트 안에 넣어 시험합니다.</small></div>
-<iframe id="app" title="울모아 하트색깔악보" src="../?aiomr=684"></iframe>
+<iframe id="app" title="울모아 하트색깔악보" src="../?aiomr=685"></iframe>
 <script>
 const frame=document.getElementById('app');
 const loading=document.getElementById('loading');
@@ -23,7 +23,7 @@ frame.addEventListener('load',()=>{
     if(!d) throw new Error('시험 화면 문서에 접근할 수 없습니다.');
     const s=d.createElement('script');
     s.type='module';
-    s.src=new URL('omr-ai-v684-bootstrap.js?v=684',frame.src).href;
+    s.src=new URL('omr-ai-v685-bootstrap.js?v=685',frame.src).href;
     s.onload=()=>loading?.remove();
     s.onerror=()=>{if(loading)loading.innerHTML='AI 악보인식 모듈을 불러오지 못했습니다.<small>새로고침 후 다시 시도해 주세요.</small>';};
     d.body.appendChild(s);
