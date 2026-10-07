@@ -99,59 +99,49 @@ function pxGray(gray,w,h,x,y){
 }
 function visualBars(gray,w,h,line,threshold=.85){
   const b=line.input.box,sp=Number(b.lineSpacing)||10;
-  const staffTop=(Number(b.y)||0)+(Number(b.padUp)||0),staffBottom=staffTop+4*sp;
-  const x0=Math.max(0,Math.floor(Number(b.x)||0)),x1=Math.min(w-1,Math.ceil((Number(b.x)||0)+(Number(b.w)||0)));
+  const x0=Math.max(0,Math.floor(Number(b.x)||0)),x1=Math.min(w,Math.ceil((Number(b.x)||0)+(Number(b.w)||0)));
+  const cw=Math.max(1,x1-x0),ch=Math.max(1,Math.min(h,Math.ceil((Number(b.y)||0)+(Number(b.h)||0)))-Math.max(0,Math.floor(Number(b.y)||0)));
+  const cy0=Math.max(0,Math.floor(Number(b.y)||0)),crop=new Float32Array(cw*ch);
+  for(let y=0;y<ch;y++){const src=(cy0+y)*w+x0,dst=y*cw;for(let x=0;x<cw;x++)crop[dst+x]=gray[src+x];}
+  const enh=enhanceScanCrop(crop,cw,ch),staffTop=Number(b.padUp)||0,staffBottom=staffTop+4*sp;
   const noteBoxes=line.fragment.filter(v=>v.kind==='note'||v.kind==='rest').map(v=>v.src?.bbox).filter(q=>Array.isArray(q)&&q.length>=4);
   const modelBars=line.fragment.filter(v=>v.kind==='barline').map(v=>{const q=v.src?.bbox;return q?q[0]+q[2]/2:null;}).filter(Number.isFinite);
-  const baseThr=Number(threshold)||.85;
-  const inkThr=baseThr>=.78?.985:Math.max(.92,Math.min(.97,baseThr+.09));
-  const sideThr=Math.min(.84,baseThr);
   const raw=[];
-  for(let x=x0+2;x<=x1-2;x++){
+  for(let lx=2;lx<=cw-3;lx++){
     let cross=0;
     for(let k=0;k<4;k++){
-      const y=staffTop+(k+.5)*sp;let hit=false;
-      for(let dy=-2;dy<=2&&!hit;dy++)for(let dx=-1;dx<=1;dx++)if(pxGray(gray,w,h,x+dx,y+dy)<inkThr){hit=true;break;}
+      const yy=Math.round(staffTop+(k+.5)*sp);let hit=false;
+      for(let dy=-2;dy<=2&&!hit;dy++)for(let dx=-1;dx<=1;dx++){
+        const xx=lx+dx,y=yy+dy;if(xx>=0&&xx<cw&&y>=0&&y<ch&&enh[y*cw+xx]<.55){hit=true;break;}
+      }
       if(hit)cross++;
     }
-    if(cross===4)raw.push(x);
+    if(cross===4)raw.push(lx);
   }
   const groups=[];if(raw.length){let a=raw[0],z=a;for(let i=1;i<raw.length;i++){const x=raw[i];if(x<=z+1)z=x;else{groups.push([a,z]);a=z=x;}}groups.push([a,z]);}
   const scored=[];
   for(const g of groups){
-    const x=(g[0]+g[1])/2,r=Math.max(6,Math.round(sp*1.5));let coreN=0,coreD=0,sideN=0,sideD=0;
-    for(let y=Math.round(staffTop);y<=Math.round(staffBottom);y++){
-      let nearStaff=false;for(let k=0;k<5;k++)if(Math.abs(y-(staffTop+k*sp))<=2){nearStaff=true;break;}
-      if(nearStaff)continue;
-      for(let dx=-1;dx<=1;dx++){coreD++;if(pxGray(gray,w,h,x+dx,y)<inkThr)coreN++;}
-      for(let dx=-r;dx<=r;dx++){if(Math.abs(dx)<=3)continue;sideD++;if(pxGray(gray,w,h,x+dx,y)<sideThr)sideN++;}
+    const lx=(g[0]+g[1])/2,x=x0+lx,width=g[1]-g[0]+1,r=Math.max(6,Math.round(sp*1.5));let coreN=0,coreD=0,sideN=0,sideD=0;
+    for(let yy=Math.round(staffTop);yy<=Math.round(staffBottom);yy++){
+      let nearStaff=false;for(let k=0;k<5;k++)if(Math.abs(yy-(staffTop+k*sp))<=2){nearStaff=true;break;}if(nearStaff)continue;
+      for(let dx=-1;dx<=1;dx++){const xx=Math.round(lx)+dx;if(xx>=0&&xx<cw){coreD++;coreN+=1-enh[yy*cw+xx];}}
+      for(let dx=-r;dx<=r;dx++){if(Math.abs(dx)<=3)continue;const xx=Math.round(lx)+dx;if(xx>=0&&xx<cw){sideD++;sideN+=1-enh[yy*cw+xx];}}
     }
     const core=coreD?coreN/coreD:0,side=sideD?sideN/sideD:0;
-    let score=core-2.2*side;
+    let score=core-2.2*side+(width>=3?.12:0);
     const overlaps=noteBoxes.some(q=>x>=q[0]-sp*.25&&x<=q[0]+q[2]+sp*.25);
     const nearNote=noteBoxes.some(q=>x>=q[0]-sp*.8&&x<=q[0]+q[2]+sp*.8);
     if(overlaps)score-=1.05;else if(nearNote)score-=.28;
-    const modelDist=modelBars.length?Math.min(...modelBars.map(v=>Math.abs(v-x))):9999;
-    if(modelDist<sp*1.8)score+=.62;
-    if(Math.min(Math.abs(x-x0),Math.abs(x1-x))<sp*2.5)score+=.12;
-    scored.push({x,score,source:'visual'});
+    const modelDist=modelBars.length?Math.min(...modelBars.map(v=>Math.abs(v-x))):9999;if(modelDist<sp*1.8)score+=.62;
+    scored.push({x,score});
   }
-  for(const x of modelBars)scored.push({x,score:.82,source:'model'});
+  for(const x of modelBars)scored.push({x,score:.82});
   scored.sort((a,b)=>b.score-a.score);
   const picked=[];
-  for(const q of scored){
-    if(q.score<.18)continue;
-    if(picked.some(p=>Math.abs(p.x-q.x)<sp*8))continue;
-    picked.push(q);
-  }
+  for(const q of scored){if(q.score<.78)continue;if(picked.some(p=>Math.abs(p.x-q.x)<sp*9))continue;picked.push(q);}
   picked.sort((a,b)=>a.x-b.x);
   const edges=[x0];
-  for(const q of picked){
-    if(q.x<=x0+sp*8||q.x>=x1-sp*8)continue;
-    if(q.x-edges[edges.length-1]<sp*10)continue;
-    if(x1-q.x<sp*10)continue;
-    edges.push(q.x);
-  }
+  for(const q of picked){if(q.x<=x0+sp*8||q.x>=x1-sp*8)continue;if(q.x-edges[edges.length-1]<sp*10||x1-q.x<sp*10)continue;edges.push(q.x);}
   edges.push(x1);
   return edges;
 }
