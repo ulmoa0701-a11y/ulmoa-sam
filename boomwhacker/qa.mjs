@@ -51,6 +51,8 @@ async function basicCase(name,width,height){
   check(await page.locator('#mrFile').count()===1,`${name}: MR file input missing`);
   check(await page.locator('#mrVolume').count()===1,`${name}: MR volume control missing`);
   check((await page.locator('#mrVolume').inputValue())==='100',`${name}: default MR volume should be 100%`);
+  check((await page.locator('#melodyPct').innerText())==='65%',`${name}: melody volume label should start at 65%`);
+  check((await page.locator('#mrPct').innerText())==='100%',`${name}: MR volume label should start at 100%`);
   check(await page.locator('#watermarkOpt').isChecked(),`${name}: watermark should default on`);
   check(await page.locator('#creditOpt').isChecked(),`${name}: intro/outro should default on`);
   const videoInfo=await page.evaluate(()=>({supported:window.__boomVideoQA?.supported(),mime:window.__boomVideoQA?.mime(),brand:window.__boomVideoQA?.brand(),colors:window.__boomVideoQA?.colors(),melody:window.__boomVideoQA?.melody(),mix:window.__boomVideoQA?.mix(),lyrics:window.__boomVideoQA?.lyrics(),preview:window.__boomVideoQA?.preview()}));
