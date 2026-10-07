@@ -131,6 +131,8 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(BASE,{waitUntil:'networkidle'});
+  await page.evaluate(()=>{const c=videoCanvas();c.id='qaExportFrame';c.style.width='640px';c.style.height='360px';document.body.appendChild(c);videoScene(c.getContext('2d'),2200)});
+  await page.locator('#qaExportFrame').screenshot({path:out+'/video-export-frame.png'});
   const probe=await page.evaluate(async()=>{
     const c=document.createElement('canvas');c.width=640;c.height=360;c.id='qaVideoCanvas';c.style.width='640px';c.style.height='360px';document.body.appendChild(c);
     const x=c.getContext('2d');x.fillStyle='#f7fbff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#17233b';x.font='700 34px sans-serif';x.fillText('울모아쌤 붐웨커 영상 QA',40,100);
