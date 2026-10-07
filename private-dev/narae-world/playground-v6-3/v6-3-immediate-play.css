@@ -1,0 +1,34 @@
+/* 모아모아 나래반 놀이터 V6.3 — IMMEDIATE PLAY
+   PUBLICATION_HOLD: branch-only. Do not link to main / GitHub Pages.
+*/
+#title{display:none!important}
+#game{background:#0d3028}
+.world-welcome{
+  position:absolute;z-index:96;left:50%;
+  top:max(82px,calc(env(safe-area-inset-top) + 70px));
+  transform:translate(-50%,-8px);padding:11px 18px;border-radius:999px;
+  background:rgba(25,67,54,.88);color:#fff;
+  box-shadow:0 9px 28px rgba(8,35,28,.24);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  font-weight:900;font-size:clamp(15px,2.1vw,20px);letter-spacing:-.03em;
+  white-space:nowrap;opacity:0;pointer-events:none;
+  transition:opacity .22s ease,transform .22s ease;
+}
+.world-welcome.show{opacity:1;transform:translate(-50%,0)}
+.world-welcome.hide{opacity:0;transform:translate(-50%,-5px)}
+.nameplate{
+  opacity:0!important;transform:translate(-50%,4px)!important;
+  transition:opacity .16s ease,transform .16s ease!important;
+  pointer-events:none!important;
+}
+.nameplate.v63-near{opacity:1!important;transform:translate(-50%,0)!important}
+.questmark{width:38px!important;height:38px!important;font-size:22px!important;box-shadow:0 7px 16px rgba(94,78,22,.15)!important}
+#questDrawer .qitem small{line-height:1.28}
+#overlay .v63-pause-copy{margin:4px 0 0;color:#65746d;font-weight:700}
+@media(max-width:560px){
+  .world-welcome{
+    top:max(72px,calc(env(safe-area-inset-top) + 58px));
+    max-width:calc(100vw - 28px);font-size:16px;padding:10px 15px;
+  }
+  .questmark{width:36px!important;height:36px!important;font-size:21px!important}
+}
