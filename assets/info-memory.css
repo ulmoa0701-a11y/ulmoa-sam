@@ -455,3 +455,35 @@
   .info-page .study-core>p{font-size:15.5px}
   .info-page .study-visual a{width:min(84%,310px)}
 }
+
+
+/* lighter handwriting pass 2026-10-07 */
+.info-page .study-note-list,
+.info-page .study-note-list *{
+  font-synthesis:none!important;
+}
+.info-page .study-note-list h1,
+.info-page .study-note-list h2,
+.info-page .study-note-list h3,
+.info-page .study-note-list h4,
+.info-page .study-note-list h5,
+.info-page .study-note-list h6,
+.info-page .study-note-list b,
+.info-page .study-note-list strong,
+.info-page .study-note-list summary,
+.info-page .study-note-list span,
+.info-page .study-note-list p,
+.info-page .study-note-list small,
+.info-page .study-note-list a{
+  font-weight:400!important;
+}
+.info-page .study-summary-copy h3,
+.info-page .study-hook b,
+.info-page .study-example>span,
+.info-page .visual-pair b,
+.info-page .study-more>summary{
+  color:#29434c;
+}
+.info-page .study-core mark{
+  font-weight:400!important;
+}
