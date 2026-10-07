@@ -26,7 +26,22 @@ async function basicCase(name,width,height){
   check(await page.locator('.tube').count()===8,`${name}: expected 8 tubes`);
   check(await page.locator('.laneLabel').count()===8,`${name}: expected 8 lanes`);
   check(await page.locator('.beat').count()>0,`${name}: score did not render`);
+  check(await page.locator('#lyricTrack').count()===1,`${name}: lyric track missing`);
+  check(await page.locator('.lyricSyllable').count()>5,`${name}: lyric track did not render a continuous line`);
+  const tubeLabelColors=await page.locator('.tube').evaluateAll(xs=>xs.map(x=>({note:x.dataset.note,color:getComputedStyle(x.querySelector('.tubeLabel')).color})));
+  const tubeColorMap=Object.fromEntries(tubeLabelColors.map(x=>[x.note,x.color]));
+  check(tubeColorMap['도']==='rgb(235, 36, 39)'&&tubeColorMap['레']==='rgb(246, 133, 31)'&&tubeColorMap['미']==='rgb(251, 237, 27)'&&tubeColorMap['파']==='rgb(115, 200, 74)'&&tubeColorMap['솔']==='rgb(0, 163, 154)'&&tubeColorMap['라']==='rgb(75, 74, 168)'&&tubeColorMap['시']==='rgb(216, 58, 155)',`${name}: pitch-colored note labels are wrong: ${JSON.stringify(tubeColorMap)}`);
   check(await page.locator('#sampleSelect option').count()===15,`${name}: sample selector should contain current + 14 samples`);
+  check(await page.locator('#videoBtn').count()===1,`${name}: video export button missing`);
+  check(await page.locator('#watermarkOpt').isChecked(),`${name}: watermark should default on`);
+  check(await page.locator('#creditOpt').isChecked(),`${name}: intro/outro should default on`);
+  const videoInfo=await page.evaluate(()=>({supported:window.__boomVideoQA?.supported(),mime:window.__boomVideoQA?.mime(),brand:window.__boomVideoQA?.brand(),colors:window.__boomVideoQA?.colors(),lyrics:window.__boomVideoQA?.lyrics(),preview:window.__boomVideoQA?.preview()}));
+  check(videoInfo.supported===true,`${name}: browser video export capability missing`);
+  check(String(videoInfo.mime||'').startsWith('video/webm'),`${name}: WebM recorder mime missing`);
+  check(videoInfo.brand?.brand==='울모아쌤'&&videoInfo.brand?.handle==='@ulmoa__sam',`${name}: video brand metadata wrong`);
+  check(videoInfo.colors?.도==='#EB2427'&&videoInfo.colors?.레==='#F6851F'&&videoInfo.colors?.미==='#FBED1B'&&videoInfo.colors?.파==='#73C84A'&&videoInfo.colors?.솔==='#00A39A'&&videoInfo.colors?.라==='#4B4AA8'&&videoInfo.colors?.시==='#D83A9B',`${name}: Boomwhacker color mapping wrong`);
+  check((videoInfo.lyrics?.items?.length||0)>5,`${name}: continuous lyric window missing`);
+  check(videoInfo.preview?.w===1280&&videoInfo.preview?.h===720&&String(videoInfo.preview?.data||'').startsWith('data:image/png'),`${name}: 16:9 video preview render failed`);
   let overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth));
   check(overflow<=1,`${name}: horizontal overflow ${overflow}px`);
 
@@ -57,6 +72,10 @@ async function basicCase(name,width,height){
   check((await page.locator('#soundBtn').innerText()).includes('🔇'),`${name}: sound toggle failed`);
   await page.locator('#soundBtn').click();
 
+  await page.evaluate(()=>{elapsed=1350;draw();updateTime();updateLyricTrack(true)});
+  check(await page.locator('.lyricSyllable.active').count()===1,`${name}: current lyric syllable is not highlighted`);
+  const activeBorder=await page.locator('.lyricSyllable.active').evaluate(el=>getComputedStyle(el).borderTopColor);
+  check(activeBorder==='rgb(235, 36, 39)',`${name}: current lyric syllable does not use its Boomwhacker color (${activeBorder})`);
   await page.locator('#startBtn').click();
   await page.waitForTimeout(550);
   const progress=parseFloat((await page.locator('#progressFill').evaluate(el=>getComputedStyle(el).width)))||0;
@@ -75,7 +94,7 @@ async function basicCase(name,width,height){
   check(overflow<=1,`${name}: horizontal overflow after interactions ${overflow}px`);
   await page.screenshot({path:`${out}/${name}.png`,fullPage:true});
   check(errors.length===0,`${name}: JS errors: ${errors.join(' | ')}`);
-  report.push({name,width,height,overflow,errors,beats:await page.locator('.beat').count()});
+  report.push({name,width,height,overflow,errors,beats:await page.locator('.beat').count(),tubeLabelColors,lyricSyllables:await page.locator('.lyricSyllable').count()});
   await context.close();
 }
 
@@ -117,6 +136,33 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   await context.close();
 }
 
+{
+  const context=await browser.newContext({viewport:{width:1366,height:900}});
+  const page=await context.newPage();
+  const errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(BASE,{waitUntil:'networkidle'});
+  await page.evaluate(()=>{const c=videoCanvas();c.id='qaExportFrame';c.style.width='640px';c.style.height='360px';document.body.appendChild(c);videoScene(c.getContext('2d'),2200)});
+  await page.locator('#qaExportFrame').screenshot({path:out+'/video-export-frame.png'});
+  const probe=await page.evaluate(async()=>{
+    const c=document.createElement('canvas');c.width=640;c.height=360;c.id='qaVideoCanvas';c.style.width='640px';c.style.height='360px';document.body.appendChild(c);
+    const x=c.getContext('2d');x.fillStyle='#f7fbff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#17233b';x.font='700 34px sans-serif';x.fillText('울모아쌤 붐웨커 영상 QA',40,100);
+    const stream=c.captureStream(10),mime=window.__boomVideoQA.mime(),chunks=[],rec=new MediaRecorder(stream,{mimeType:mime});
+    rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+    const done=new Promise((resolve,reject)=>{rec.onstop=resolve;rec.onerror=e=>reject(e.error||new Error('recorder error'))});
+    rec.start(100);
+    for(let i=0;i<24;i++){x.fillStyle=i%2?'#38a7e8':'#ef4444';x.clearRect(0,140,c.width,180);x.fillRect(30+(i%10)*50,180,45,80);await new Promise(r=>setTimeout(r,55))}
+    if(rec.state==='recording')rec.requestData();await new Promise(r=>setTimeout(r,180));rec.stop();await done;stream.getTracks().forEach(t=>t.stop());
+    return {size:new Blob(chunks,{type:mime}).size,mime,brand:window.__boomVideoQA.brand()};
+  });
+  check(probe.size>1000,'video probe: MediaRecorder produced no usable bytes');
+  check(String(probe.mime).startsWith('video/webm'),'video probe: unexpected mime '+probe.mime);
+  check(probe.brand?.copy?.includes('영상·편집 © 울모아쌤'),'video probe: copyright mark missing');
+  await page.locator('#qaVideoCanvas').screenshot({path:out+'/video-frame-probe.png'});
+  check(errors.length===0,'video probe: page errors '+errors.join(' | '));
+  report.push({name:'videoProbe',bytes:probe.size,mime:probe.mime});
+  await context.close();
+}
 await browser.close();
 fs.writeFileSync(`${out}/report.json`,JSON.stringify({failures,report},null,2));
 console.log(JSON.stringify({failures,report},null,2));
