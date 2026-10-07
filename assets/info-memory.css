@@ -1051,76 +1051,70 @@
   .glossary-page .glossary-group{padding-top:13px}
 }
 
-/* habom custom sticker icons 2026-10-07 */
-.habom-svg-sprite{position:absolute!important;width:0!important;height:0!important;overflow:hidden!important}
-.habom-icon{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
-.habom-card-sticker{
-  width:44px;height:44px;display:grid;place-items:center;border-radius:14px;
-  color:#4d6970;background:#fff1b8;border:1px solid rgba(221,198,101,.45);
-  box-shadow:0 4px 0 rgba(60,85,82,.06);transform:rotate(-1.5deg)
+/* evidence-backed visual maps 2026-10-07 */
+.evidence-visual{
+  margin:14px 0 15px;padding:14px 16px;border:1px solid #e1e8e6;border-radius:16px;
+  background:#fffdf8;box-shadow:0 5px 18px rgba(43,67,72,.035)
 }
-.habom-card-sticker .habom-icon{width:29px;height:29px}
-.cat-cognitive .habom-card-sticker{background:#fff1b8}
-.cat-memory-perception .habom-card-sticker{background:#dff3ef}
-.cat-language .habom-card-sticker{background:#eee8fb}
-.cat-intervention .habom-card-sticker{background:#e5f0fa}
-.glossary-page .study-note>summary{
-  grid-template-columns:34px 44px minmax(0,1fr) auto!important;
-  gap:12px!important;
+.evidence-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.evidence-head>span{
+  display:inline-flex;padding:5px 9px;border-radius:999px;background:#eef6f4;color:#607b82;
+  font-size:9px;font-weight:800;letter-spacing:.02em
 }
-.glossary-page .study-note[open] .habom-card-sticker{transform:rotate(1deg) scale(1.03)}
-.glossary-page .study-summary-copy h3{font-size:27px}
-.glossary-page .study-summary-copy p{font-size:11px;line-height:1.45}
-.habom-mini-icon{width:18px;height:18px;flex:0 0 18px;margin-right:5px;vertical-align:-3px;color:#607c82}
-.glossary-page .study-example>span{display:flex;align-items:center}
-.glossary-page .study-more>summary{display:flex;align-items:center;gap:2px}
-.glossary-page .study-more>summary .habom-mini-icon{color:#8a7933}
-.glossary-page .confusion-strip>span,
-.glossary-page .glossary-note-line>span{display:inline-flex;align-items:center}
-.glossary-page .confusion-strip>span .habom-mini-icon,
-.glossary-page .glossary-note-line>span .habom-mini-icon{width:15px;height:15px;flex-basis:15px;margin-right:3px}
-.habom-section-sticker{
-  width:42px;height:42px;display:grid;place-items:center;border-radius:13px;color:#47646c;
-  background:#fff;border:1px solid #e1e9e6;box-shadow:0 4px 12px rgba(46,69,74,.05);transform:rotate(2deg)
+.evidence-head a{color:#74878c;text-decoration:none;font-size:8.5px;font-weight:650}
+.evidence-head a:hover{text-decoration:underline}
+.evidence-body{font-family:"Gamja Flower",cursive;color:#29434c}
+.evidence-caption{margin:10px 0 0;color:#718388;font-size:9.5px;line-height:1.55}
+.evidence-caption strong{color:#536b72}
+.ef-body{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;position:relative;padding-top:38px}
+.ef-center{
+  position:absolute;left:50%;top:0;transform:translateX(-50%);
+  padding:6px 14px;border-radius:999px;background:#fff0ad;border:1px solid #ead77b;font-size:19px
 }
-.habom-section-sticker .habom-icon{width:28px;height:28px}
-.cat-cognitive .habom-section-sticker{background:#fff1b8}
-.cat-memory-perception .habom-section-sticker{background:#dff3ef}
-.cat-language .habom-section-sticker{background:#eee8fb}
-.cat-intervention .habom-section-sticker{background:#e5f0fa}
-.glossary-page .glossary-section-title{grid-template-columns:32px 42px 1fr!important;align-items:center!important;gap:10px!important}
-.glossary-page .map-node i{width:40px!important;height:40px!important;display:grid!important;grid-template-columns:1fr;grid-template-rows:1fr auto;place-items:center;padding:4px 3px 3px!important;border-radius:12px!important}
-.glossary-page .map-node i .habom-icon{width:23px;height:23px}
-.glossary-page .map-node i small{font-family:"Gamja Flower",cursive;font-size:8px;line-height:1;color:#70888e}
-.glossary-page .map-node{grid-template-columns:40px 1fr auto!important}
-.glossary-page .map-node strong{font-size:12px}
-.glossary-page .map-node span{font-size:9px}
-.glossary-page .study-more>summary:after{
-  content:"출처 연결";margin-left:auto;padding:3px 7px;border-radius:999px;
-  background:#f7f4df;color:#83763b;font-family:"Pretendard Variable",Pretendard,sans-serif;
-  font-size:8px;font-weight:700;letter-spacing:0
+.ef-node{
+  position:relative;padding:12px 10px 10px;border-radius:13px;background:#fff;border:1px solid #e2e9e7;
+  text-align:center;font-size:18px;line-height:1.1
 }
+.ef-node:before{content:"";position:absolute;left:50%;top:-15px;height:15px;border-left:1px dashed #cfdad7}
+.ef-node small{display:block;margin-top:5px;color:#73878d;font-family:"Pretendard Variable",Pretendard,sans-serif;font-size:8px;line-height:1.35}
+.flow-body{display:grid;grid-template-columns:1fr auto 1.25fr auto 1fr;align-items:center;gap:7px}
+.flow-body>div{padding:12px 9px;border-radius:13px;background:#fff;border:1px solid #e1e8e6;text-align:center;font-size:18px}
+.flow-body>div:nth-of-type(1){background:#eef6f4}.flow-body>div:nth-of-type(2){background:#fff4c8}.flow-body>div:nth-of-type(3){background:#eef0fb}
+.flow-body b{font-size:19px;font-weight:400;color:#91a0a3}
+.flow-body small{display:block;margin-top:4px;color:#74868b;font-family:"Pretendard Variable",Pretendard,sans-serif;font-size:8px}
+.language-body{display:grid;grid-template-columns:2fr auto 1fr auto 1fr;align-items:stretch;gap:7px}
+.lang-group{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;padding:10px;border:1px solid #e1e8e6;border-radius:13px;background:#fff}
+.lang-group strong{width:100%;text-align:center;font-size:18px;font-weight:400}
+.lang-group span{padding:5px 8px;border-radius:999px;background:#f1edf9;font-size:14px}
+.lang-group:nth-of-type(2) span{background:#fff1bd}.lang-group:nth-of-type(3) span{background:#e7f3f0}
+.lang-plus{align-self:center;color:#95a3a6;font-size:20px}
+.strategy-body{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.strategy-body span{
+  display:grid;place-items:center;min-height:50px;padding:7px;border:1px solid #e0e8e5;border-radius:13px;
+  background:#fff;font-size:16px;text-align:center
+}
+.strategy-body span:nth-child(1){background:#fff2bf}.strategy-body span:nth-child(2){background:#e9f3f1}
+.strategy-body span:nth-child(3){background:#edf0fb}.strategy-body span:nth-child(4){background:#f3ebf8}.strategy-body span:nth-child(5){background:#e8f1f8}
 
 @media(max-width:760px){
-  .glossary-page .study-note>summary{
-    grid-template-columns:22px 38px minmax(0,1fr)!important;
-    gap:8px!important;padding:13px 12px!important
-  }
-  .habom-card-sticker{width:38px;height:38px;border-radius:12px}
-  .habom-card-sticker .habom-icon{width:25px;height:25px}
-  .glossary-page .study-summary-copy h3{font-size:25px}
-  .glossary-page .study-summary-copy p{font-size:11.5px;max-width:none}
-  .glossary-page .study-toggle{grid-column:3;justify-self:start;margin-top:3px}
-  .glossary-page .glossary-section-title{grid-template-columns:28px 36px 1fr!important;gap:8px!important}
-  .habom-section-sticker{width:36px;height:36px;border-radius:11px}
-  .habom-section-sticker .habom-icon{width:24px;height:24px}
-  .glossary-page .map-node{grid-template-columns:34px 1fr!important}
-  .glossary-page .map-node i{width:34px!important;height:34px!important}
-  .glossary-page .map-node i .habom-icon{width:20px;height:20px}
-  .glossary-page .study-more>summary:after{font-size:7.5px;padding:3px 6px}
-}
-@media(max-width:390px){
-  .glossary-page .study-note>summary{grid-template-columns:20px 36px minmax(0,1fr)!important}
-  .habom-card-sticker{width:36px;height:36px}
-  .glossary-page .study-summary-copy h3{font-size:24px}
+  .evidence-visual{margin:10px 0 12px;padding:12px 11px;border-radius:14px}
+  .evidence-head{margin-bottom:9px;align-items:flex-start}
+  .evidence-head a{max-width:52%;text-align:right;font-size:8px;line-height:1.35}
+  .evidence-caption{font-size:9px;line-height:1.5}
+  .ef-body{grid-template-columns:1fr;gap:7px;padding-top:34px}
+  .ef-node{font-size:17px;padding:9px}
+  .ef-node:before{display:none}
+  .ef-center{font-size:18px;padding:5px 12px}
+  .flow-body{grid-template-columns:1fr auto 1.15fr auto 1fr;gap:4px}
+  .flow-body>div{padding:9px 5px;font-size:15px}
+  .flow-body b{font-size:15px}
+  .flow-body small{font-size:7.5px}
+  .language-body{grid-template-columns:1fr;gap:6px}
+  .lang-plus{display:none}
+  .lang-group{padding:8px}
+  .lang-group strong{font-size:17px}
+  .lang-group span{font-size:13px;padding:4px 7px}
+  .strategy-body{display:flex;overflow-x:auto;gap:6px;padding-bottom:3px;scrollbar-width:none}
+  .strategy-body::-webkit-scrollbar{display:none}
+  .strategy-body span{flex:0 0 auto;min-width:74px;min-height:44px;font-size:14px}
 }
