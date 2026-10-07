@@ -10,7 +10,7 @@ import * as omr from './omr-local-v686.js?v=686';
 const W=window;
 const ORT_VERSION='1.27.0';
 const ORT_BASE=`https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`;
-const MODEL_URL='https://raw.githubusercontent.com/alexanderalber/satb-line-omr/c60823117a5c92b0c29f921dbca023e94026d279/model-public-domain/omr-line.int8.onnx';
+const MODEL_URL='https://raw.githubusercontent.com/alexanderalber/satb-line-omr/c60823117a5c92b0c29f921dbca023e94026d279/model-public-domain/omr-line.fp16.onnx';
 const legacyImport=W.importScoreFromFile;
 let runtimePromise=null;
 
