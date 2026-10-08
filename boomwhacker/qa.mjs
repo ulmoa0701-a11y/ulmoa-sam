@@ -123,8 +123,22 @@ async function basicCase(name,width,height){
   await page.locator('#melodyVolume').evaluate(el=>{el.value='65';el.dispatchEvent(new Event('input',{bubbles:true}))});
 
   await page.locator('#displayModeSelect').selectOption('instrument');
-  check((await page.locator('.laneLabel').first().innerText())==='🥁',`${name}: instrument display mode did not update lane`);
-  check((await page.locator('.tube[data-note="도"] .tubeLabel').innerText())==='🥁',`${name}: instrument display mode did not update tube`);
+  check(await page.locator('#displayModal').isVisible(),`${name}: instrument editor did not open`);
+  check(await page.locator('#displayInputs select[data-instrument-index]').count()===8,`${name}: instrument editor should have 8 lane selectors`);
+  check(await page.locator('#addInstrumentBtn').count()===1,`${name}: add-instrument button missing`);
+  await page.locator('#newInstrumentIcon').fill('🪈');
+  await page.locator('#newInstrumentName').fill('리코더');
+  await page.locator('#addInstrumentBtn').click();
+  check(await page.locator('#displayInputs select[data-instrument-index="0"] option').filter({hasText:'🪈 리코더'}).count()===1,`${name}: custom instrument was not added to selector`);
+  const recorderValue=await page.locator('#displayInputs select[data-instrument-index="0"] option').filter({hasText:'🪈 리코더'}).getAttribute('value');
+  await page.locator('#displayInputs select[data-instrument-index="0"]').selectOption(recorderValue);
+  await page.locator('#displayApplyBtn').click();
+  check((await page.locator('.laneLabel').first().innerText())==='🪈',`${name}: selected custom instrument did not update lane`);
+  check((await page.locator('.tube[data-note="도"] .tubeLabel').innerText())==='🪈',`${name}: selected custom instrument did not update tube`);
+  await page.evaluate(()=>{elapsed=1350;draw()});
+  check((await page.locator('.fall .fallLabel').first().innerText())==='🪈',`${name}: selected custom instrument did not update falling note`);
+  const instrumentState=await page.evaluate(()=>window.__boomVideoQA.display());
+  check(instrumentState.mode==='instrument'&&instrumentState.labels[0]==='🪈'&&instrumentState.instrumentLibrary.some(x=>x.name==='리코더'),`${name}: instrument state not propagated to video data`);
   await page.locator('#displayModeSelect').selectOption('name');
   check(await page.locator('#displayModal').isVisible(),`${name}: name editor did not open`);
   await page.locator('#displayInputs input[data-display-index="0"]').fill('민준');
