@@ -41,6 +41,11 @@ async function basicCase(name,width,height){
   check(tubeColorMap['도']==='rgb(235, 36, 39)'&&tubeColorMap['레']==='rgb(246, 133, 31)'&&tubeColorMap['미']==='rgb(251, 237, 27)'&&tubeColorMap['파']==='rgb(115, 200, 74)'&&tubeColorMap['솔']==='rgb(0, 163, 154)'&&tubeColorMap['라']==='rgb(75, 74, 168)'&&tubeColorMap['시']==='rgb(216, 58, 155)',`${name}: pitch-colored note labels are wrong: ${JSON.stringify(tubeColorMap)}`);
   check(await page.locator('#sampleSelect option').count()===15,`${name}: sample selector should contain current + 14 samples`);
   check(await page.locator('#videoBtn').count()===1,`${name}: video export button missing`);
+  check(await page.locator('#stageFsBtn').count()===1,`${name}: stage fullscreen shortcut missing`);
+  check(await page.locator('#stageFsBtn').isVisible(),`${name}: stage fullscreen shortcut is not visible`);
+  check(await page.locator('#displayModeSelect').count()===1,`${name}: display mode selector missing`);
+  check(await page.locator('#displayModeSelect option').count()===4,`${name}: display mode selector should have 4 choices`);
+  check((await page.locator('#displayModeSelect').inputValue())==='note',`${name}: display mode should default to note names`);
   check(await page.locator('#melodySelect').count()===1,`${name}: melody selector missing`);
   check(await page.locator('#melodySelect option').count()===4,`${name}: melody selector should have 4 choices`);
   check((await page.locator('#melodySelect').inputValue())==='boom',`${name}: default melody should be Boomwhacker`);
@@ -55,13 +60,14 @@ async function basicCase(name,width,height){
   check((await page.locator('#mrPct').innerText())==='100%',`${name}: MR volume label should start at 100%`);
   check(await page.locator('#watermarkOpt').isChecked(),`${name}: watermark should default on`);
   check(await page.locator('#creditOpt').isChecked(),`${name}: intro/outro should default on`);
-  const videoInfo=await page.evaluate(()=>({supported:window.__boomVideoQA?.supported(),mime:window.__boomVideoQA?.mime(),brand:window.__boomVideoQA?.brand(),colors:window.__boomVideoQA?.colors(),melody:window.__boomVideoQA?.melody(),mix:window.__boomVideoQA?.mix(),lyrics:window.__boomVideoQA?.lyrics(),preview:window.__boomVideoQA?.preview()}));
+  const videoInfo=await page.evaluate(()=>({supported:window.__boomVideoQA?.supported(),mime:window.__boomVideoQA?.mime(),brand:window.__boomVideoQA?.brand(),colors:window.__boomVideoQA?.colors(),melody:window.__boomVideoQA?.melody(),mix:window.__boomVideoQA?.mix(),display:window.__boomVideoQA?.display(),lyrics:window.__boomVideoQA?.lyrics(),preview:window.__boomVideoQA?.preview()}));
   check(videoInfo.supported===true,`${name}: browser video export capability missing`);
   check(String(videoInfo.mime||'').startsWith('video/webm'),`${name}: WebM recorder mime missing`);
   check(videoInfo.brand?.brand==='울모아쌤'&&videoInfo.brand?.handle==='@ulmoa__sam',`${name}: video brand metadata wrong`);
   check(videoInfo.colors?.도==='#EB2427'&&videoInfo.colors?.레==='#F6851F'&&videoInfo.colors?.미==='#FBED1B'&&videoInfo.colors?.파==='#73C84A'&&videoInfo.colors?.솔==='#00A39A'&&videoInfo.colors?.라==='#4B4AA8'&&videoInfo.colors?.시==='#D83A9B',`${name}: Boomwhacker color mapping wrong`);
   check(videoInfo.melody?.mode==='boom'&&Object.keys(videoInfo.melody?.options||{}).length===4&&Math.abs(videoInfo.melody?.volume-.65)<.001,`${name}: melody QA metadata wrong`);
   check(videoInfo.mix?.mode==='melody'&&Object.keys(videoInfo.mix?.options||{}).length===3&&videoInfo.mix?.mrReady===true&&videoInfo.mix?.mrKind==='auto'&&!videoInfo.mix?.mrLoaded,`${name}: mix QA metadata wrong`);
+  check(videoInfo.display?.mode==='note'&&Object.keys(videoInfo.display?.options||{}).length===4&&videoInfo.display?.labels?.[0]==='도',`${name}: display QA metadata wrong`);
   check((videoInfo.lyrics?.items?.length||0)>5,`${name}: continuous lyric window missing`);
   check(videoInfo.preview?.w===1280&&videoInfo.preview?.h===720&&String(videoInfo.preview?.data||'').startsWith('data:image/png'),`${name}: 16:9 video preview render failed`);
   let overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth));
@@ -116,6 +122,27 @@ async function basicCase(name,width,height){
   check(Math.abs((await page.evaluate(()=>window.__boomVideoQA.melody().volume))-.3)<.001,`${name}: melody volume slider failed`);
   await page.locator('#melodyVolume').evaluate(el=>{el.value='65';el.dispatchEvent(new Event('input',{bubbles:true}))});
 
+  await page.locator('#displayModeSelect').selectOption('instrument');
+  check((await page.locator('.laneLabel').first().innerText())==='🥁',`${name}: instrument display mode did not update lane`);
+  check((await page.locator('.tube[data-note="도"] .tubeLabel').innerText())==='🥁',`${name}: instrument display mode did not update tube`);
+  await page.locator('#displayModeSelect').selectOption('name');
+  check(await page.locator('#displayModal').isVisible(),`${name}: name editor did not open`);
+  await page.locator('#displayInputs input[data-display-index="0"]').fill('민준');
+  await page.locator('#displayInputs input[data-display-index="1"]').fill('서연');
+  await page.locator('#displayApplyBtn').click();
+  check((await page.locator('.laneLabel').first().innerText())==='민준',`${name}: child name did not update lane`);
+  check((await page.locator('.tube[data-note="도"] .tubeLabel').innerText())==='민준',`${name}: child name did not update tube`);
+  await page.evaluate(()=>{elapsed=1350;draw()});
+  check((await page.locator('.fall .fallLabel').first().innerText())==='민준',`${name}: child name did not update falling note`);
+  const displayState=await page.evaluate(()=>window.__boomVideoQA.display());
+  check(displayState.mode==='name'&&displayState.labels[0]==='민준'&&displayState.labels[1]==='서연',`${name}: display state not propagated to video data`);
+  await page.locator('#displayModeSelect').selectOption('custom');
+  await page.locator('#displayInputs input[data-display-index="0"]').fill('손뼉');
+  await page.locator('#displayApplyBtn').click();
+  check((await page.locator('.tube[data-note="도"] .tubeLabel').innerText())==='손뼉',`${name}: custom display did not update tube`);
+  await page.locator('#displayModeSelect').selectOption('note');
+  check((await page.locator('.tube[data-note="도"] .tubeLabel').innerText())==='도',`${name}: note-name display did not restore`);
+
   await page.evaluate(()=>{elapsed=1350;draw();updateTime();updateLyricTrack(true)});
   check(await page.locator('.lyricSyllable.active').count()===1,`${name}: current lyric syllable is not highlighted`);
   const activeBorder=await page.locator('.lyricSyllable.active').evaluate(el=>getComputedStyle(el).borderTopColor);
@@ -131,8 +158,8 @@ async function basicCase(name,width,height){
 
   check((await page.locator('#fullBtn').innerText()).includes('수업 전체화면'),`${name}: classroom fullscreen label missing`);
   check(await page.locator('#fsExitBtn').count()===1,`${name}: fullscreen exit button missing`);
-  await page.locator('#fullBtn').click();
-  check(await page.locator('body').evaluate(el=>el.classList.contains('fullscreen')),`${name}: classroom fullscreen class not enabled`);
+  await page.locator('#stageFsBtn').click();
+  check(await page.locator('body').evaluate(el=>el.classList.contains('fullscreen')),`${name}: stage shortcut did not enable classroom fullscreen`);
   check(await page.locator('#fsExitBtn').isVisible(),`${name}: fullscreen exit button is not visible`);
   const fsGeom=await page.evaluate(()=>({vh:innerHeight,stage:document.querySelector('.stage')?.getBoundingClientRect().height,controls:getComputedStyle(document.querySelector('.controls')).display,score:getComputedStyle(document.querySelector('.score')).display}));
   check(fsGeom.stage>fsGeom.vh*.72,`${name}: fullscreen stage does not fill viewport ${JSON.stringify(fsGeom)}`);
@@ -145,7 +172,7 @@ async function basicCase(name,width,height){
   check(overflow<=1,`${name}: horizontal overflow after interactions ${overflow}px`);
   await page.screenshot({path:`${out}/${name}.png`,fullPage:true});
   check(errors.length===0,`${name}: JS errors: ${errors.join(' | ')}`);
-  report.push({name,width,height,overflow,errors,beats:await page.locator('.beat').count(),tubeLabelColors,lyricSyllables:await page.locator('.lyricSyllable').count()});
+  report.push({name,width,height,overflow,errors,beats:await page.locator('.beat').count(),tubeLabelColors,lyricSyllables:await page.locator('.lyricSyllable').count(),displayMode:await page.locator('#displayModeSelect').inputValue()});
   await context.close();
 }
 
