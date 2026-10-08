@@ -94,7 +94,7 @@ class TitleScene extends Phaser.Scene{
 }
 class MissionScene extends Phaser.Scene{
  constructor(){super('mission');this.round=0;this.found=new Set();this.lock=false;this.actors=[]}
- init(data){this.round=data.round||0;this.found=new Set();this.lock=false;this.actors=[];this.missionChip=null;this.van=null;this.seatLayer=null}
+ init(data){this.round=data.round||0;this.found=new Set();this.lock=false;this.actors=[];this.missionChip=null;this.van=null;this.seatLayer=null;this.completeOverlayShown=false}
  create(){this.m=MISSIONS[this.round];this.cameras.main.setBackgroundColor('#bfe7f5');this.drawWorld();this.drawHud();this.showBriefing()}
  drawWorld(){const g=this.add.graphics();const twilight=this.m.place==='노을숲';g.fillStyle(twilight?0xf7bd86:0xbfe9f7,1);g.fillRect(0,0,W,360);g.fillStyle(twilight?0xf19873:0xf6d96b,.88);g.fillCircle(twilight?565:570,150,78);g.fillStyle(0xffffff,.58);g.fillEllipse(130,130,160,58);g.fillEllipse(185,130,90,42);g.fillEllipse(535,245,145,50);
   g.fillStyle(twilight?0x80965a:0x8dcf72,1);g.fillEllipse(90,390,420,260);g.fillEllipse(620,400,520,280);g.fillStyle(twilight?0x8fad61:0x9dd978,1);g.fillRect(0,350,W,H-350);
