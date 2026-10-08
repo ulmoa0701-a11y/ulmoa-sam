@@ -123,7 +123,7 @@ async function basicCase(name,width,height){
   await page.locator('#melodyVolume').evaluate(el=>{el.value='65';el.dispatchEvent(new Event('input',{bubbles:true}))});
 
   await page.locator('#displayModeSelect').selectOption('instrument');
-  await page.locator('#displayEditBtn').click();
+  check(await page.locator('#displayModal').isVisible(),`${name}: instrument editor did not auto-open`);
   check(await page.locator('#instrumentAddToggle').isVisible(),`${name}: custom instrument toggle missing`);
   check(!(await page.locator('#instrumentAddBox').evaluate(el=>el.classList.contains('open'))),`${name}: custom instrument form should start collapsed`);
   await page.locator('#instrumentAddToggle').click();
