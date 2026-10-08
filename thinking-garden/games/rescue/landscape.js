@@ -43,7 +43,7 @@ function landscapeBackdrop(scene,place='초원'){
 }
 class LandscapeMissionScene extends Phaser.Scene{
  constructor(){super('landmission')}
- init(data){this.round=data.round||0;this.found=new Set();this.lock=true;this.targets=[]}
+ init(data){this.round=data.round||0;this.found=new Set();this.lock=true;this.targets=[];this.completeOverlayShown=false}
  create(){
   this.m=MISSIONS[this.round];landscapeBackdrop(this,this.m.place);
   const panel=roundRect(this,22,22,290,716,30,0xffffff,.96,0xe1ece4,3).setDepth(20);
