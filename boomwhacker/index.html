@@ -177,6 +177,7 @@ function bindInstrumentAdder(){
  btn.onclick=()=>{
   const icon=String($('#newInstrumentIcon')?.value||'').trim().slice(0,8),instName=String($('#newInstrumentName')?.value||'').trim().slice(0,16);
   if(!icon||!instName){$('#displayDialogDesc').textContent='새 악기를 추가하려면 아이콘과 악기 이름을 둘 다 적어주세요.';return}
+  if(instrumentLibrary.some(x=>x.icon===icon&&x.name===instName)){ $('#displayDialogDesc').textContent='이미 같은 악기가 목록에 있어요. 기존 항목을 선택해 주세요.';return }
   document.querySelectorAll('#displayInputs select[data-instrument-index]').forEach(el=>{const i=Number(el.dataset.instrumentIndex);if(Number.isInteger(i))instrumentIds[i]=el.value});
   const id='custom-'+Date.now();instrumentLibrary.push({id,icon,name:instName});renderDisplayEditor();
   $('#displayDialogDesc').textContent='"'+icon+' '+instName+'"을 추가했어요. 원하는 색에서 선택한 뒤 적용을 눌러주세요.';
