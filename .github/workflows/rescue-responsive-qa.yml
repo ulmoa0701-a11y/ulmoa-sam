@@ -37,7 +37,7 @@ jobs:
           path: rescue-qa-screenshots/
           if-no-files-found: ignore
       - name: Verify real public GitHub Pages playback
-        if: github.event_name == 'push'
+        if: github.event_name == 'pull_request'
         env:
           PUBLIC_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/
         run: |
