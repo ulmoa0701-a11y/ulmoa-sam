@@ -32,7 +32,7 @@ async function basicCase(name,width,height){
   check(await page.locator('.tube').count()===8,`${name}: expected 8 tubes`);
   check(await page.locator('.laneLabel').count()===8,`${name}: expected 8 lanes`);
   const fallSize=await page.locator('.fall').first().evaluate(el=>parseFloat(getComputedStyle(el).width));
-  check(fallSize>=(width<=800?44:56),`${name}: falling note is still too small (${fallSize}px)`);
+  check(fallSize>=(width<=800?52:70),`${name}: falling note is still too small (${fallSize}px)`);
   check(await page.locator('.beat').count()>0,`${name}: score did not render`);
   check(await page.locator('#lyricTrack').count()===1,`${name}: lyric track missing`);
   check(await page.locator('.lyricSyllable').count()>5,`${name}: lyric track did not render a continuous line`);
@@ -183,6 +183,9 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   const page=await context.newPage();
   await page.goto(BASE,{waitUntil:'networkidle'});
   await page.locator('#displayModeSelect').selectOption('instrument');
+  await page.evaluate(()=>{elapsed=1350;draw()});
+  const instrumentFall=await page.locator('.fall').first().evaluate(el=>({w:parseFloat(getComputedStyle(el).width),label:getComputedStyle(el.querySelector('.fallLabel')).fontSize}));
+  check(instrumentFall.w>=52,'display screenshot: mobile falling note should stay large in instrument mode');
   await page.screenshot({path:out+'/display-instrument390.png',fullPage:true});
   check((await page.locator('.tube[data-note="라"] .tubeLabel').innerText())==='🎺','display screenshot: instrument icon mapping wrong');
   await page.locator('#displayModeSelect').selectOption('name');
@@ -190,6 +193,8 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   await page.locator('#displayInputs input[data-display-index="1"]').fill('서연');
   await page.locator('#displayInputs input[data-display-index="2"]').fill('지우');
   await page.locator('#displayApplyBtn').click();
+  await page.evaluate(()=>{elapsed=1350;draw()});
+  check(await page.locator('.fall .fallLabel').count()>0,'display screenshot: child-name falling note missing');
   await page.screenshot({path:out+'/display-names390.png',fullPage:true});
   check((await page.locator('.laneLabel').nth(0).innerText())==='민준'&&(await page.locator('.laneLabel').nth(1).innerText())==='서연','display screenshot: child names not visible');
   await context.close();
