@@ -128,7 +128,6 @@ async function basicCase(name,width,height){
   check(!(await page.locator('#instrumentAddBox').evaluate(el=>el.classList.contains('open'))),`${name}: custom instrument form should start collapsed`);
   await page.locator('#instrumentAddToggle').click();
   check(await page.locator('#instrumentAddBox').evaluate(el=>el.classList.contains('open')),`${name}: custom instrument form did not open`);
-  await page.locator('#displayCloseBtn').click();
   check(await page.locator('#displayModal').isVisible(),`${name}: instrument editor did not open`);
   check(await page.locator('#displayInputs select[data-instrument-index]').count()===8,`${name}: instrument editor should have 8 lane selectors`);
   check(await page.locator('#addInstrumentBtn').count()===1,`${name}: add-instrument button missing`);
