@@ -111,6 +111,7 @@ class LandscapeMissionScene extends Phaser.Scene{
   if(this.found.size===this.m.need){this.lock=true;this.time.delayedCall(650,()=>this.completed())}
  }
  completed(){
+  this.completeOverlayShown=true;
   const shade=this.add.rectangle(600,380,LW,LH,0x0c2a21,.55).setDepth(80).setInteractive();
   roundRect(this,375,184,460,408,32,0xfffdf4,1,0xffffff,4).setDepth(81);
   label(this,605,270,'구조 성공! ✨',43,'#18543d','900').setDepth(82);
@@ -118,7 +119,12 @@ class LandscapeMissionScene extends Phaser.Scene{
   label(this,605,414,`${this.found.size}마리 구조했어요`,24,'#547064','800').setDepth(82);
   const last=this.round===4;
   const next=button(this,605,514,333,77,last?'전체 결과 보기':'다음 현장으로 ▶',0x1e684d).setDepth(83);
-  next.on('pointerdown',()=>{tone(true);if(last)this.scene.start('landresult');else this.scene.restart({round:this.round+1})});
+  let advancing=false;
+  const advance=()=>{if(advancing)return;advancing=true;this.input.off('pointerdown',wideClickHandler);tone(true);if(last)this.scene.start('landresult');else this.scene.restart({round:this.round+1})};
+  const wideClickHandler=(pointer)=>{if(pointer.x>=605-166&&pointer.x<=605+166&&pointer.y>=514-39&&pointer.y<=514+39)advance()};
+  next.on('pointerdown',advance);
+  this.input.on('pointerdown',wideClickHandler);
+  this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>this.input.off('pointerdown',wideClickHandler));
  }
 }
 class LandscapeResultScene extends Phaser.Scene{
