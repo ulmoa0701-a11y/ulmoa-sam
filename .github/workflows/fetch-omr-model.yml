@@ -2,17 +2,23 @@ name: fetch-omr-model
 on:
   pull_request:
     branches: [main]
+  push:
+    paths:
+      - '.github/workflows/fetch-omr-model.yml'
+  workflow_dispatch:
 jobs:
   fetch:
     runs-on: ubuntu-latest
+    timeout-minutes: 4
     steps:
-      - name: Download public-domain OMR weights
+      - name: Download public-domain OMR browser model
         run: |
-          curl -L --fail --retry 3 -o omr_weights.safetensors "https://raw.githubusercontent.com/alexanderalber/satb-line-omr/c60823117a5c92b0c29f921dbca023e94026d279/model-public-domain/weights.safetensors"
-          sha256sum omr_weights.safetensors
+          curl -L --fail --retry 3 -o omr-line.fp16.onnx "https://raw.githubusercontent.com/alexanderalber/satb-line-omr/c60823117a5c92b0c29f921dbca023e94026d279/model-public-domain/omr-line.fp16.onnx"
+          sha256sum omr-line.fp16.onnx
+          test "$(stat -c%s omr-line.fp16.onnx)" -gt 6000000
       - name: Upload model artifact
         uses: actions/upload-artifact@v4
         with:
-          name: omr-public-domain-weights
-          path: omr_weights.safetensors
+          name: omr-public-domain-fp16
+          path: omr-line.fp16.onnx
           retention-days: 1
