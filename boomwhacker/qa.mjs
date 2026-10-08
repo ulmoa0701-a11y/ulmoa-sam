@@ -181,6 +181,23 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
 {
   const context=await browser.newContext({viewport:{width:390,height:844}});
   const page=await context.newPage();
+  await page.goto(BASE,{waitUntil:'networkidle'});
+  await page.locator('#displayModeSelect').selectOption('instrument');
+  await page.screenshot({path:out+'/display-instrument390.png',fullPage:true});
+  check((await page.locator('.tube[data-note="라"] .tubeLabel').innerText())==='🎺','display screenshot: instrument icon mapping wrong');
+  await page.locator('#displayModeSelect').selectOption('name');
+  await page.locator('#displayInputs input[data-display-index="0"]').fill('민준');
+  await page.locator('#displayInputs input[data-display-index="1"]').fill('서연');
+  await page.locator('#displayInputs input[data-display-index="2"]').fill('지우');
+  await page.locator('#displayApplyBtn').click();
+  await page.screenshot({path:out+'/display-names390.png',fullPage:true});
+  check((await page.locator('.laneLabel').nth(0).innerText())==='민준'&&(await page.locator('.laneLabel').nth(1).innerText())==='서연','display screenshot: child names not visible');
+  await context.close();
+}
+
+{
+  const context=await browser.newContext({viewport:{width:390,height:844}});
+  const page=await context.newPage();
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(BASE,{waitUntil:'networkidle'});
