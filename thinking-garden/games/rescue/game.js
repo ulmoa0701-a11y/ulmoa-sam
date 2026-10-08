@@ -1,3 +1,4 @@
+const LANDSCAPE_MODE=window.matchMedia('(min-width: 850px) and (orientation: landscape)').matches;
 const W=720,H=1280;
 const COLORS={노란:0xF5C84C,파란:0x59A7EF,초록:0x62BE78,빨간:0xEF6E68};
 const SPECIES=['토끼','돼지','소','오리'];
@@ -74,7 +75,7 @@ function makeTargetPortrait(scene,m){const box=scene.add.container(0,0);const bg
 class BootScene extends Phaser.Scene{
  constructor(){super('boot')}
  preload(){this.load.image('hong','../../assets/friend-hong.png');this.load.image('moaDiscovery','../../assets/moa-discovery.png');this.load.image('moaCheer','../../assets/moa-cheer.png')}
- create(){this.scene.start('title')}
+ create(){this.scene.start(LANDSCAPE_MODE?'landtitle':'title')}
 }
 class TitleScene extends Phaser.Scene{
  constructor(){super('title')}
@@ -138,6 +139,8 @@ class ResultScene extends Phaser.Scene{
  }
  saveProgress(){try{const key='moa-garden:completed',done=JSON.parse(localStorage.getItem(key)||'{}');done.rescue=true;localStorage.setItem(key,JSON.stringify(done));const rewardKey='moa-rescue:rewarded';if(!localStorage.getItem(rewardKey)){const seedKey='moa-garden:seeds',n=Number(localStorage.getItem(seedKey)||0)+50;localStorage.setItem(seedKey,String(n));localStorage.setItem(rewardKey,'1')}}catch{}}
 }
-const game=new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W,height:H,backgroundColor:'#16382d',scene:[BootScene,TitleScene,MissionScene,ResultScene],render:{antialias:true,pixelArt:false,roundPixels:false},scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH,width:W,height:H}});
+const game=new Phaser.Game({type:Phaser.AUTO,parent:'game',width:LANDSCAPE_MODE?LW:W,height:LANDSCAPE_MODE?LH:H,backgroundColor:'#16382d',scene:[BootScene,TitleScene,MissionScene,ResultScene,LandscapeTitleScene,LandscapeMissionScene,LandscapeResultScene],render:{antialias:true,pixelArt:false,roundPixels:false},scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH,width:LANDSCAPE_MODE?LW:W,height:LANDSCAPE_MODE?LH:H}});
 window.moaRescueGame=game;
 window.addEventListener('orientationchange',()=>{document.getElementById('rotateHint').hidden=window.innerHeight>=window.innerWidth});
+
+// A layout change needs a new Phaser world; retain the current round until the user reloads.
