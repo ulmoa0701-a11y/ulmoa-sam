@@ -1051,82 +1051,81 @@
   .glossary-page .glossary-group{padding-top:13px}
 }
 
-/* habom term icon buttons 2026-10-08 */
-.glossary-page .study-note-list{
-  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:12px!important;overflow:visible!important;margin-right:0!important;padding-right:0!important
-}
-.glossary-page .study-note{min-width:0!important;width:auto!important;max-width:none!important;border-radius:16px;box-shadow:0 5px 18px rgba(43,66,72,.04)}
-.glossary-page .study-note>summary{
-  display:grid!important;grid-template-columns:24px 96px minmax(0,1fr)!important;
-  grid-template-areas:"idx art copy" ". art toggle";align-items:center!important;
-  gap:4px 12px!important;min-height:132px!important;padding:14px!important;background:#fff!important
-}
+/* glossary v3 inline vector rebuild 2026-10-08 */
+.hb-symbols{position:absolute!important;width:0!important;height:0!important;overflow:hidden!important}
+.hb-symbols symbol,.hb-symbols path,.hb-symbols rect,.hb-symbols circle,.hb-symbols polygon,.hb-symbols line,.hb-symbols polyline{vector-effect:non-scaling-stroke}
+
+.glossary-page .glossary-explorer-v2{margin:20px 58px 20px 78px;padding:22px;border:1px solid #e2e9e6;border-radius:20px;background:#fffefb}
+.glossary-page .v2-searchbox{display:grid;grid-template-columns:1fr minmax(300px,420px);align-items:end;gap:24px;padding-bottom:18px;border-bottom:1px dashed #dfe7e4}
+.glossary-page .v2-searchbox small{display:block;margin-bottom:3px;color:#829397;font-size:9px;font-weight:800}
+.glossary-page .v2-searchbox h2{margin:0;font-family:"Gamja Flower",cursive;font-size:31px;font-weight:400;line-height:1.05}
+.glossary-page .v2-searchbox p{margin:6px 0 0;color:#7c8b8f;font-size:10px}
+.glossary-page .glossary-search{width:100%;margin:0}
+.glossary-category-nav{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 14px}
+.category-card{display:grid;grid-template-columns:70px 1fr auto;align-items:center;gap:10px;min-height:92px;padding:12px;border:1px solid #e0e8e5;border-radius:16px;background:#fff;text-decoration:none!important;box-shadow:0 5px 16px rgba(43,67,72,.04);transition:.16s ease}
+.category-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(43,67,72,.08)}
+.category-illus{width:70px;height:64px;display:grid;place-items:center;border-radius:15px}
+.category-illus svg{width:60px;height:48px;fill:none;stroke:#314a52;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.cat-btn-cognitive .category-illus{background:#fff2bd}.cat-btn-memory .category-illus{background:#dff3ef}.cat-btn-language .category-illus{background:#eee8fb}.cat-btn-intervention .category-illus{background:#e7f1fb}
+.category-copy{min-width:0}.category-copy small{display:block;color:#93a1a5;font-size:8px}.category-copy strong{display:block;margin:2px 0;font-size:13px;color:#2f474f}.category-copy em{display:block;color:#7c8d91;font-size:8.5px;font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.category-arrow{color:#9cacaf;font-size:18px}
+.v2-confusion{padding-top:2px}.v2-confusion button{background:#fff!important}
+
+.glossary-page .glossary-section-title{display:grid!important;grid-template-columns:34px 1fr!important;align-items:start!important;gap:11px!important}
+.glossary-page .glossary-section-title>span{width:30px;height:30px;display:grid;place-items:center;border-radius:9px!important;font-family:"Gamja Flower",cursive;font-size:15px}
+.glossary-page .glossary-section-title h2{font-size:33px;line-height:1.05}
+.glossary-page .glossary-section-title p{font-size:10px;margin-top:4px}
+.glossary-page .glossary-swipe-guide{display:none!important}
+
+.glossary-page .study-note-list{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important;overflow:visible!important;margin:0!important;padding:0!important}
+.glossary-page .study-note{width:auto!important;max-width:none!important;min-width:0!important;border-radius:18px!important;box-shadow:0 5px 18px rgba(38,62,68,.045)!important;overflow:hidden}
+.glossary-page .study-note>summary{display:grid!important;grid-template-columns:26px 82px minmax(0,1fr)!important;grid-template-areas:"idx icon copy" ". icon toggle"!important;align-items:center!important;gap:3px 11px!important;min-height:128px!important;padding:14px!important;background:#fff!important;cursor:pointer}
 .glossary-page .study-note>summary:hover{background:#fffdf6!important}
-.glossary-page .study-index{grid-area:idx;align-self:start;margin-top:4px;font-size:15px}
-.glossary-page .term-art-wrap{
-  grid-area:art;width:96px;height:72px;display:flex;align-items:center;justify-content:center;gap:3px;
-  padding:5px;border-radius:16px;background:#fffaf0;border:1px solid #eee7d7;overflow:hidden
-}
-.glossary-page .term-art{display:block;width:86px;height:62px;flex:0 0 auto;background-repeat:no-repeat;border-radius:10px}
-.glossary-page .term-vector-wrap{background:#fff8df}
-.glossary-page .term-vector{display:block;width:86px;height:62px}
-.glossary-page .term-vector svg{display:block;width:100%;height:100%}
-.glossary-page .term-art-pair{width:96px;gap:2px;padding:5px 3px}
-.glossary-page .term-art-pair .term-art{width:42px;height:62px}
+.glossary-page .study-index{grid-area:idx;align-self:start;margin-top:5px;color:#91a3a7;font:400 16px/1 "Gamja Flower",cursive}
+.glossary-page .term-icon{grid-area:icon;width:82px;height:68px;display:grid;place-items:center;border-radius:16px;background:#fff6cf;border:1px solid #eee3b6}
+.glossary-page .cat-memory-perception .term-icon{background:#e9f6f3;border-color:#d5ebe6}.glossary-page .cat-language .term-icon{background:#f1ecfb;border-color:#e2d9f3}.glossary-page .cat-intervention .term-icon{background:#ebf3fb;border-color:#dbe9f4}
+.glossary-page .term-icon svg{width:70px;height:54px;fill:none;stroke:#2f4951;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.glossary-page .term-icon-pair{display:flex;gap:0;padding:3px}.glossary-page .term-icon-pair svg{width:38px;height:54px}
 .glossary-page .study-summary-copy{grid-area:copy;min-width:0}
-.glossary-page .study-summary-copy h3{font-size:27px;line-height:1.05;margin-bottom:6px}
-.glossary-page .study-summary-copy p{font-family:"Pretendard Variable",Pretendard,sans-serif!important;font-size:11px;line-height:1.5;color:#667c82;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.glossary-page .study-toggle{grid-area:toggle;justify-self:start;border:0!important;font-size:11px!important;color:#60777e}
-.glossary-page .study-toggle i{padding:4px 9px!important;border-radius:999px!important;background:#f0f6f4!important}
+.glossary-page .study-summary-copy h3{margin:0 0 5px!important;font-size:27px!important;line-height:1!important;font-weight:400!important}
+.glossary-page .study-summary-copy p{margin:0!important;color:#6f8186!important;font-family:"Pretendard Variable",Pretendard,sans-serif!important;font-size:10.5px!important;line-height:1.45!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.glossary-page .study-toggle{grid-area:toggle!important;justify-self:start!important;margin:0!important;border:0!important;background:transparent!important;font-size:10px!important}
+.glossary-page .study-toggle i{display:inline-flex!important;padding:4px 8px!important;border-radius:999px!important;background:#f1f6f4!important;color:#6e8388!important}
 .glossary-page .study-note[open]{grid-column:1/-1!important}
-.glossary-page .study-note[open]>summary{grid-template-columns:28px 104px minmax(0,1fr) auto!important;grid-template-areas:"idx art copy toggle";min-height:110px!important;background:#fffdf3!important}
-.glossary-page .study-note-list.has-open-note{display:grid!important;grid-template-columns:1fr!important}
+.glossary-page .study-note[open]>summary{grid-template-columns:30px 92px minmax(0,1fr) auto!important;grid-template-areas:"idx icon copy toggle"!important;min-height:106px!important;background:#fffdf3!important}
+.glossary-page .study-note[open] .term-icon{width:92px;height:72px}
+.glossary-page .study-note[open] .term-icon svg{width:78px;height:58px}
+.glossary-page .study-note-list.has-open-note{grid-template-columns:1fr!important}
 .glossary-page .study-note-list.has-open-note .study-note:not([open]){display:none!important}
 .glossary-page .study-note-list.has-open-note .study-note[open]{display:block!important;width:100%!important}
 
-/* Crop the approved sheets to the illustration area, not the tiny caption text. */
-.glossary-page .s1{background-image:url("glossary/habom-icons-s1.webp");background-size:400% auto}
-.glossary-page .s1.r0c0{background-position:0% 0%}.glossary-page .s1.r0c1{background-position:33.333% 0%}
-.glossary-page .s1.r0c2{background-position:66.667% 0%}.glossary-page .s1.r0c3{background-position:100% 0%}
-.glossary-page .s1.r1c0{background-position:0% 43.6%}.glossary-page .s1.r1c1{background-position:33.333% 43.6%}
-.glossary-page .s1.r1c2{background-position:66.667% 43.6%}.glossary-page .s1.r1c3{background-position:100% 43.6%}
-.glossary-page .s1.r2c0{background-position:0% 87.2%}.glossary-page .s1.r2c1{background-position:33.333% 87.2%}
-.glossary-page .s1.r2c2{background-position:66.667% 87.2%}.glossary-page .s1.r2c3{background-position:100% 87.2%}
-.glossary-page .s3{background-image:url("glossary/habom-icons-s3.webp");background-size:500% auto}
-.glossary-page .s3.r0c0{background-position:0% 0%}.glossary-page .s3.r0c1{background-position:25% 0%}.glossary-page .s3.r0c2{background-position:50% 0%}
-.glossary-page .s3.r0c3{background-position:75% 0%}.glossary-page .s3.r0c4{background-position:100% 0%}
-.glossary-page .s3.r1c0{background-position:0% 61.8%}.glossary-page .s3.r1c1{background-position:25% 61.8%}.glossary-page .s3.r1c2{background-position:50% 61.8%}
-.glossary-page .s3.r1c3{background-position:75% 61.8%}.glossary-page .s3.r1c4{background-position:100% 61.8%}
-
-/* Make category choices actual visual buttons. */
-.glossary-page .map-node{grid-template-columns:82px 1fr auto!important;min-height:88px;padding:10px 14px!important}
-.glossary-page .map-node i{width:72px!important;height:66px!important;padding:5px!important;border-radius:16px!important;overflow:hidden;background:#fffaf0!important}
-.glossary-page .map-node .map-term-art{width:62px;height:56px;border-radius:10px}
-.glossary-page .map-node .map-term-vector{width:62px;height:56px}
-.glossary-page .map-node .map-term-vector svg{width:100%;height:100%;display:block}
-.glossary-page .map-node strong{font-size:14px!important}
-.glossary-page .map-node span{font-size:10px!important;line-height:1.45}
-.glossary-page .map-node em{font-size:9px!important}
-
 .glossary-searching .study-note-list{grid-template-columns:repeat(3,minmax(0,1fr))!important}
-@media(max-width:760px){
+.glossary-searching .study-note[open]{grid-column:1/-1!important}
+
+@media(max-width:980px){
+  .glossary-category-nav{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:650px){
+  .glossary-page .glossary-explorer-v2{margin:12px 13px 12px 43px;padding:14px 12px;border-radius:15px}
+  .glossary-page .v2-searchbox{grid-template-columns:1fr;gap:10px;padding-bottom:12px}
+  .glossary-page .v2-searchbox h2{font-size:25px}.glossary-page .v2-searchbox p{font-size:9px}
+  .glossary-category-nav{grid-template-columns:repeat(2,1fr);gap:7px;margin:12px 0 10px}
+  .category-card{grid-template-columns:52px 1fr;min-height:72px;padding:8px;gap:7px;border-radius:13px}.category-arrow{display:none}
+  .category-illus{width:52px;height:48px;border-radius:12px}.category-illus svg{width:46px;height:38px}
+  .category-copy strong{font-size:11px}.category-copy em{font-size:7.5px}
+  .glossary-page .glossary-section-title h2{font-size:28px}
   .glossary-page .study-note-list{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
-  .glossary-page .study-note>summary{grid-template-columns:1fr!important;grid-template-areas:"art" "copy" "toggle"!important;justify-items:start;min-height:178px!important;padding:11px!important;gap:7px!important}
-  .glossary-page .study-index{display:none}
-  .glossary-page .term-art-wrap{width:82px;height:64px}
-  .glossary-page .term-art{width:72px;height:54px}
-  .glossary-page .term-vector{width:72px;height:54px}
-  .glossary-page .term-art-pair{width:82px}.glossary-page .term-art-pair .term-art{width:35px;height:54px}
-  .glossary-page .study-summary-copy h3{font-size:24px}.glossary-page .study-summary-copy p{font-size:10.5px!important}
-  .glossary-page .study-note[open]>summary{grid-template-columns:82px minmax(0,1fr)!important;grid-template-areas:"art copy" "art toggle"!important;min-height:100px!important}
-  .glossary-page .map-node{grid-template-columns:58px 1fr!important;min-height:72px;padding:8px!important}
-  .glossary-page .map-node i{width:54px!important;height:50px!important;padding:4px!important}
-  .glossary-page .map-node .map-term-art,.glossary-page .map-node .map-term-vector{width:46px;height:42px}
-  .glossary-page .map-node strong{font-size:11px!important}.glossary-page .map-node span{font-size:8.5px!important}
+  .glossary-page .study-note>summary{grid-template-columns:1fr!important;grid-template-areas:"icon" "copy" "toggle"!important;justify-items:start!important;min-height:172px!important;padding:11px!important;gap:7px!important}
+  .glossary-page .study-index{display:none!important}
+  .glossary-page .term-icon{width:74px;height:58px}.glossary-page .term-icon svg{width:64px;height:48px}
+  .glossary-page .term-icon-pair svg{width:33px;height:48px}
+  .glossary-page .study-summary-copy h3{font-size:23px!important}
+  .glossary-page .study-summary-copy p{font-size:10px!important;line-height:1.4!important}
+  .glossary-page .study-toggle{font-size:9.5px!important}
+  .glossary-page .study-note[open]>summary{grid-template-columns:78px 1fr!important;grid-template-areas:"icon copy" "icon toggle"!important;min-height:95px!important}
+  .glossary-page .study-note[open] .term-icon{width:74px;height:58px}.glossary-page .study-note[open] .term-icon svg{width:64px;height:48px}
   .glossary-searching .study-note-list{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
-@media(max-width:390px){
-  .glossary-page .study-note>summary{min-height:170px!important}
-  .glossary-page .study-summary-copy h3{font-size:22px}
+@media(max-width:380px){
+  .glossary-page .study-note>summary{min-height:165px!important}
+  .glossary-page .study-summary-copy h3{font-size:22px!important}
 }
