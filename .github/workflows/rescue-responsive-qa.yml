@@ -4,6 +4,11 @@ on:
     paths:
       - 'thinking-garden/games/rescue/**'
       - '.github/workflows/rescue-responsive-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'thinking-garden/games/rescue/**'
+      - '.github/workflows/rescue-responsive-qa.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -31,3 +36,21 @@ jobs:
           name: rescue-responsive-screenshots
           path: rescue-qa-screenshots/
           if-no-files-found: ignore
+      - name: Verify real public GitHub Pages playback
+        if: github.event_name == 'push'
+        env:
+          PUBLIC_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/
+        run: |
+          ready=0
+          for i in $(seq 1 30); do
+            if curl --max-time 15 -fsSL "${PUBLIC_URL}landscape.js?v=2" | grep -q 'class LandscapeMissionScene'; then
+              ready=1
+              break
+            fi
+            echo "Waiting for GitHub Pages propagation ($i/30)"
+            sleep 8
+          done
+          test "$ready" = "1"
+          curl --max-time 20 -fsSL "${PUBLIC_URL}game.js?v=2" | grep -q 'LANDSCAPE_MODE'
+          curl --max-time 20 -fsSL "${PUBLIC_URL}" | grep -q 'landscape.js?v=2'
+          RESCUE_URL="$PUBLIC_URL" node thinking-garden/games/rescue/rescue-smoke.cjs
