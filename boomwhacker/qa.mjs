@@ -44,6 +44,8 @@ async function basicCase(name,width,height){
   check(await page.locator('#stageFsBtn').count()===1,`${name}: stage fullscreen shortcut missing`);
   check(await page.locator('#stageFsBtn').isVisible(),`${name}: stage fullscreen shortcut is not visible`);
   check(await page.locator('#displayModeSelect').count()===1,`${name}: display mode selector missing`);
+  const fallSize=await page.locator('.fall').first().evaluate(el=>parseFloat(getComputedStyle(el).width));
+  check(fallSize>=(width<=800?56:76),`${name}: falling note too small after display UI refine (${fallSize}px)`);
   check(await page.locator('#displayModeSelect option').count()===4,`${name}: display mode selector should have 4 choices`);
   check((await page.locator('#displayModeSelect').inputValue())==='note',`${name}: display mode should default to note names`);
   check(await page.locator('#melodySelect').count()===1,`${name}: melody selector missing`);
@@ -123,6 +125,12 @@ async function basicCase(name,width,height){
   await page.locator('#melodyVolume').evaluate(el=>{el.value='65';el.dispatchEvent(new Event('input',{bubbles:true}))});
 
   await page.locator('#displayModeSelect').selectOption('instrument');
+  await page.locator('#displayEditBtn').click();
+  check(await page.locator('#instrumentAddToggle').isVisible(),`${name}: custom instrument toggle missing`);
+  check(!(await page.locator('#instrumentAddBox').evaluate(el=>el.classList.contains('open'))),`${name}: custom instrument form should start collapsed`);
+  await page.locator('#instrumentAddToggle').click();
+  check(await page.locator('#instrumentAddBox').evaluate(el=>el.classList.contains('open')),`${name}: custom instrument form did not open`);
+  await page.locator('#displayCloseBtn').click();
   check(await page.locator('#displayModal').isVisible(),`${name}: instrument editor did not open`);
   check(await page.locator('#displayInputs select[data-instrument-index]').count()===8,`${name}: instrument editor should have 8 lane selectors`);
   check(await page.locator('#addInstrumentBtn').count()===1,`${name}: add-instrument button missing`);
