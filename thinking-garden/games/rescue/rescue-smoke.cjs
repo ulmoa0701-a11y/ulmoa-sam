@@ -34,15 +34,15 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
   await page.waitForFunction(n=>{const sc=window.moaRescueGame.scene.getScene(n);return sc&&sc.lock===false},missionName,{timeout:8000});
   await page.screenshot({path:'rescue-qa-screenshots/'+label+'-gameplay.png'});
   for(let round=0;round<(fullRun?5:1);round++){
-   const scene=await page.evaluate(n=>{const s=window.moaRescueGame.scene.getScene(n);return {round:s.round,need:s.m.need,color:s.m.color,size:s.m.size,animals:(n==='landmission'?s.targets:s.actors).filter(a=>a.active&&a.data&&a.data.get('species')||n==='landmission'&&a.active&&a.data&&a.data.get('item')).map(a=>n==='landmission'?{x:a.x,y:a.y,...a.data.get('item')}:{x:a.x,y:a.y,species:a.data.get('species'),color:a.data.get('color'),size:a.data.get('size')})}},missionName);
+   const scene=await page.evaluate(n=>{const s=window.moaRescueGame.scene.getScene(n);return {round:s.round,need:s.m.need,color:s.m.color,size:s.m.size,targetSpecies:s.m.species,animals:(n==='landmission'?s.targets:s.actors).filter(a=>a.active&&a.data&&a.data.get('species')||n==='landmission'&&a.active&&a.data&&a.data.get('item')).map(a=>n==='landmission'?{x:a.x,y:a.y,...a.data.get('item')}:{x:a.x,y:a.y,species:a.data.get('species'),color:a.data.get('color'),size:a.data.get('size')})}},missionName);
    assert.equal(scene.round,round);
-   const eligible=scene.animals.filter(a=>a.color===scene.color&&a.size===scene.size);
+   const eligible=scene.animals.filter(a=>a.color===scene.color&&a.size===scene.size&&scene.targetSpecies.includes(a.species));
    const seen=new Set();
    const correct=eligible.filter(a=>{if(seen.has(a.species))return false;seen.add(a.species);return true;}).slice(0,scene.need);
    assert.equal(correct.length,scene.need,'Not enough target animal species '+JSON.stringify(scene));
    for(const item of correct){
     await clickAt(item.x,item.y);
-    await page.waitForFunction(([n,count])=>window.moaRescueGame.scene.getScene(n).found.size===count,[missionName,seen.size-correct.length+correct.indexOf(item)+1],{timeout:6000});
+    await page.waitForFunction(([n,count])=>window.moaRescueGame.scene.getScene(n).found.size===count,[missionName,correct.indexOf(item)+1],{timeout:6000});
     await page.waitForTimeout(wide?120:1150);
    }
    await page.waitForTimeout(wide?1050:500);
