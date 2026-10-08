@@ -1,3 +1,4 @@
+const LANDSCAPE_MODE=window.matchMedia('(min-width: 850px) and (orientation: landscape)').matches;
 const W=720,H=1280;
 const COLORS={노란:0xF5C84C,파란:0x59A7EF,초록:0x62BE78,빨간:0xEF6E68};
 const SPECIES=['토끼','돼지','소','오리'];
@@ -19,19 +20,62 @@ function tone(ok=true){if(!soundOn)return;try{const A=window.AudioContext||windo
 function roundRect(scene,x,y,w,h,r,fill,alpha=1,stroke=null,sw=0){const g=scene.add.graphics();g.fillStyle(fill,alpha);g.fillRoundedRect(x,y,w,h,r);if(stroke!==null){g.lineStyle(sw,stroke,1);g.strokeRoundedRect(x,y,w,h,r)}return g}
 function label(scene,x,y,text,size=28,color='#17382f',weight='800',align='center'){return scene.add.text(x,y,text,{fontFamily:FONT,fontSize:`${size}px`,fontStyle:weight==='900'?'bold':'normal',fontWeight:weight,color,align,wordWrap:{width:620}}).setOrigin(.5)}
 function button(scene,x,y,w,h,text,fill=0x17382f){const c=scene.add.container(x,y),bg=scene.add.graphics();bg.fillStyle(fill,1);bg.fillRoundedRect(-w/2,-h/2,w,h,24);bg.lineStyle(3,0xffffff,.25);bg.strokeRoundedRect(-w/2,-h/2,w,h,24);const t=scene.add.text(0,0,text,{fontFamily:FONT,fontSize:'29px',fontStyle:'bold',color:'#fff'}).setOrigin(.5);c.add([bg,t]);c.setSize(w,h).setInteractive({useHandCursor:true});c.on('pointerover',()=>scene.tweens.add({targets:c,scale:1.035,duration:100}));c.on('pointerout',()=>scene.tweens.add({targets:c,scale:1,duration:100}));return c}
-function animal(scene,type,colorHex,size='큰'){const s=size==='큰'?1:.62,c=scene.add.container(0,0).setScale(s),g=scene.add.graphics(),ink=0x234238,fur=colorHex,cream=0xfff7e7,pink=0xf5a2a9;
- g.lineStyle(5,ink,1);g.fillStyle(fur,1);
- if(type==='토끼'){g.fillEllipse(-24,-65,24,64);g.strokeEllipse(-24,-65,24,64);g.fillEllipse(24,-65,24,64);g.strokeEllipse(24,-65,24,64);g.fillEllipse(0,18,92,78);g.strokeEllipse(0,18,92,78);g.fillCircle(0,-18,43);g.strokeCircle(0,-18,43)}
- else if(type==='돼지'){g.fillTriangle(-34,-43,-58,-74,-8,-57);g.strokeTriangle(-34,-43,-58,-74,-8,-57);g.fillTriangle(34,-43,58,-74,8,-57);g.strokeTriangle(34,-43,58,-74,8,-57);g.fillEllipse(0,20,96,72);g.strokeEllipse(0,20,96,72);g.fillCircle(0,-18,44);g.strokeCircle(0,-18,44);g.fillStyle(0xffb8c0,1);g.fillEllipse(0,-3,44,28);g.lineStyle(4,ink,1);g.strokeEllipse(0,-3,44,28)}
- else if(type==='소'){g.fillStyle(0xeed9aa,1);g.fillTriangle(-30,-45,-59,-75,-47,-32);g.strokeTriangle(-30,-45,-59,-75,-47,-32);g.fillTriangle(30,-45,59,-75,47,-32);g.strokeTriangle(30,-45,59,-75,47,-32);g.fillStyle(fur,1);g.fillRoundedRect(-49,-4,98,67,28);g.strokeRoundedRect(-49,-4,98,67,28);g.fillCircle(0,-22,43);g.strokeCircle(0,-22,43);g.fillStyle(0xf4c7af,1);g.fillEllipse(0,-4,44,25);g.strokeEllipse(0,-4,44,25);g.fillStyle(cream,.85);g.fillCircle(-18,-35,13);g.fillCircle(22,-15,16)}
- else {g.fillEllipse(-4,17,100,68);g.strokeEllipse(-4,17,100,68);g.fillCircle(24,-30,35);g.strokeCircle(24,-30,35);g.fillStyle(0xf8aa3b,1);g.fillTriangle(55,-29,88,-15,55,-7);g.strokeTriangle(55,-29,88,-15,55,-7);g.fillStyle(cream,.55);g.fillEllipse(-18,18,49,34)}
- g.fillStyle(ink,1);g.fillCircle(-14,-23,5);g.fillCircle(14,-23,5);if(type==='오리'){g.fillCircle(15,-37,5);g.fillCircle(36,-37,0)}
- const shine=scene.add.graphics();shine.fillStyle(0xffffff,.24);shine.fillEllipse(-24,-40,20,12);c.add([g,shine]);c.setSize(120,130);return c}
+function animal(scene,type,colorHex,size='큰'){
+ const scale=size==='큰'?1:.62;
+ const c=scene.add.container(0,0).setScale(scale),g=scene.add.graphics();
+ const ink=0x34564b,fur=colorHex,cream=0xfff7e8,pink=0xf3b3b9;
+ const fill=(color)=>g.fillStyle(color,1);
+ const oval=(x,y,w,h,color,line=true)=>{fill(color);g.fillEllipse(x,y,w,h);if(line){g.lineStyle(3,ink,.95);g.strokeEllipse(x,y,w,h)}};
+ const circle=(x,y,r,color,line=false)=>{fill(color);g.fillCircle(x,y,r);if(line){g.lineStyle(3,ink,.95);g.strokeCircle(x,y,r)}};
+ const triangle=(a,b,d,e,f,h,color)=>{fill(color);g.fillTriangle(a,b,d,e,f,h);g.lineStyle(3,ink,1);g.strokeTriangle(a,b,d,e,f,h)};
+ // Every animal has its own recognizable silhouette, face and identifying features.
+ if(type==='토끼'){
+   oval(-27,-74,28,94,fur);oval(27,-74,28,94,fur);
+   oval(-27,-75,12,67,pink,false);oval(27,-75,12,67,pink,false);
+   oval(0,29,99,86,fur);circle(39,38,16,cream,true);
+   circle(0,-20,49,fur,true);oval(-25,0,22,17,cream,false);oval(25,0,22,17,cream,false);
+   oval(-18,-26,11,15,ink,false);oval(18,-26,11,15,ink,false);
+   triangle(-7,-8,7,-8,0,1,pink);
+   g.lineStyle(2,ink,.8);g.lineBetween(0,2,-10,10);g.lineBetween(0,2,10,10);
+   g.lineBetween(-15,3,-48,-3);g.lineBetween(-15,10,-49,15);g.lineBetween(15,3,48,-3);g.lineBetween(15,10,49,15);
+   oval(-27,67,35,17,cream);oval(26,67,35,17,cream);
+ }else if(type==='돼지'){
+   triangle(-37,-45,-53,-85,-7,-56,fur);triangle(37,-45,53,-85,7,-56,fur);
+   triangle(-34,-52,-43,-73,-22,-59,pink);triangle(34,-52,43,-73,22,-59,pink);
+   oval(0,28,112,86,fur);circle(0,-20,51,fur,true);
+   oval(-22,-29,11,15,ink,false);oval(22,-29,11,15,ink,false);
+   oval(0,0,65,42,pink,true);oval(-15,0,12,17,0xbd737c,false);oval(15,0,12,17,0xbd737c,false);
+   oval(-32,68,22,22,fur);oval(32,68,22,22,fur);
+   g.lineStyle(5,ink,1);g.beginPath();g.arc(55,25,15,0,Math.PI*1.7,false);g.strokePath();
+ }else if(type==='소'){
+   triangle(-34,-48,-63,-85,-53,-31,0xeee1bc);triangle(34,-48,63,-85,53,-31,0xeee1bc);
+   oval(-43,-48,46,30,fur);oval(43,-48,46,30,fur);
+   oval(-43,-48,24,15,pink,false);oval(43,-48,24,15,pink,false);
+   oval(0,29,111,86,fur);circle(0,-19,50,fur,true);
+   oval(-26,-31,27,30,cream,false);oval(25,-3,25,32,cream,false);
+   oval(-20,-27,10,15,ink,false);oval(20,-27,10,15,ink,false);
+   oval(0,4,73,45,pink,true);oval(-17,4,12,15,0xa96c6e,false);oval(17,4,12,15,0xa96c6e,false);
+   oval(-30,68,24,20,0x806f62);oval(30,68,24,20,0x806f62);
+ }else if(type==='오리'){
+   oval(-18,24,117,80,fur);oval(-42,19,57,41,cream,false);
+   oval(20,-33,81,78,fur);
+   oval(35,-42,11,16,ink,false);
+   triangle(53,-24,94,-13,52,-5,0xf7a342);
+   oval(-42,31,57,37,fur,false);
+   g.lineStyle(4,0xc67a37);g.lineBetween(-17,60,-20,81);g.lineBetween(14,59,17,81);
+   g.lineBetween(-20,81,-38,85);g.lineBetween(-20,81,-6,86);g.lineBetween(17,81,3,85);g.lineBetween(17,81,34,85);
+   circle(10,-15,8,pink);
+ }
+ // Catchlights make faces easy to distinguish even on a small tablet.
+ const eyes=type==='오리'?[[35,-46]]:type==='토끼'?[[-18,-29],[18,-29]]:type==='돼지'?[[-22,-32],[22,-32]]:[[-20,-30],[20,-30]];
+ eyes.forEach(([x,y])=>circle(x-2,y-3,3,0xffffff));
+ c.add(g);c.setSize(150,190);return c;
+}
 function makeTargetPortrait(scene,m){const box=scene.add.container(0,0);const bg=roundRect(scene,-55,-55,110,110,28,0xffffff,.96,0xd8eadf,3);box.add(bg);if(m.species.length===1){const a=animal(scene,m.species[0],COLORS[m.color],m.size).setScale(m.size==='큰'?.6:.45);box.add(a)}else{m.species.forEach((sp,i)=>{const a=animal(scene,sp,COLORS[m.color],m.size).setScale(m.size==='큰'?.3:.22);a.setPosition((i%2)*42-21,Math.floor(i/2)*42-21);box.add(a)})}return box}
 class BootScene extends Phaser.Scene{
  constructor(){super('boot')}
  preload(){this.load.image('hong','../../assets/friend-hong.png');this.load.image('moaDiscovery','../../assets/moa-discovery.png');this.load.image('moaCheer','../../assets/moa-cheer.png')}
- create(){this.scene.start('title')}
+ create(){this.scene.start(LANDSCAPE_MODE?'landtitle':'title')}
 }
 class TitleScene extends Phaser.Scene{
  constructor(){super('title')}
@@ -74,7 +118,7 @@ class MissionScene extends Phaser.Scene{
   const m=this.m,items=[];if(m.need===1){const target=m.species[0];items.push({species:target,color:m.color,size:m.size,good:true});items.push({species:target,color:m.color,size:m.size==='큰'?'작은':'큰'});items.push({species:target,color:m.color==='노란'?'파란':'노란',size:m.size});items.push({species:SPECIES[(SPECIES.indexOf(target)+1)%4],color:m.color,size:m.size});while(items.length<7){const sp=Phaser.Utils.Array.GetRandom(SPECIES),cs=Phaser.Utils.Array.GetRandom(Object.keys(COLORS)),sz=Math.random()>.5?'큰':'작은';if(!items.some(x=>x.species===sp&&x.color===cs&&x.size===sz))items.push({species:sp,color:cs,size:sz})}}
   else{SPECIES.forEach(sp=>items.push({species:sp,color:m.color,size:m.size,good:true}));items.push({species:SPECIES[0],color:m.color,size:m.size});items.push({species:SPECIES[1],color:m.color,size:m.size==='큰'?'작은':'큰'});items.push({species:SPECIES[2],color:m.color==='초록'?'노란':'초록',size:m.size});items.push({species:SPECIES[3],color:m.color==='빨간'?'파란':'빨간',size:m.size})}
   Phaser.Utils.Array.Shuffle(items);const spots=[[110,350],[330,320],[575,365],[180,520],[520,535],[95,720],[350,690],[610,750],[190,900],[530,910]];
-  Phaser.Utils.Array.Shuffle(spots);items.forEach((it,i)=>{const [x,y]=spots[i],a=animal(this,it.species,COLORS[it.color],it.size);a.setPosition(x,y);a.setDepth(i%3===0?20:30);a.setDataEnabled();a.data.set({species:it.species,color:it.color,size:it.size,rescuing:false});a.setInteractive(new Phaser.Geom.Rectangle(-70,-70,140,140),Phaser.Geom.Rectangle.Contains);a.on('pointerover',()=>{if(!this.lock)this.tweens.add({targets:a,scaleX:a.scaleX*1.05,scaleY:a.scaleY*1.05,duration:90})});a.on('pointerout',()=>{if(!a.data.get('rescuing'))this.tweens.add({targets:a,scaleX:it.size==='큰'?1:.62,scaleY:it.size==='큰'?1:.62,duration:90})});a.on('pointerdown',()=>this.pickAnimal(a));this.tweens.add({targets:a,y:y-8,yoyo:true,repeat:-1,duration:900+(i%4)*170,ease:'Sine.easeInOut'});this.actors.push(a)})
+  Phaser.Utils.Array.Shuffle(spots);items.forEach((it,i)=>{const [x,y]=spots[i],a=animal(this,it.species,COLORS[it.color],it.size);a.setPosition(x,y);a.setDepth(i%3===0?20:30);a.setDataEnabled();a.data.set({species:it.species,color:it.color,size:it.size,rescuing:false});a.setInteractive(new Phaser.Geom.Rectangle(-78,-108,156,214),Phaser.Geom.Rectangle.Contains);a.on('pointerover',()=>{if(!this.lock)this.tweens.add({targets:a,scaleX:a.scaleX*1.05,scaleY:a.scaleY*1.05,duration:90})});a.on('pointerout',()=>{if(!a.data.get('rescuing'))this.tweens.add({targets:a,scaleX:it.size==='큰'?1:.62,scaleY:it.size==='큰'?1:.62,duration:90})});a.on('pointerdown',()=>this.pickAnimal(a));this.tweens.add({targets:a,y:y-8,yoyo:true,repeat:-1,duration:900+(i%4)*170,ease:'Sine.easeInOut'});this.actors.push(a)})
  }
  pickAnimal(a){if(this.lock||a.data.get('rescuing'))return;const sp=a.data.get('species'),basic=a.data.get('color')===this.m.color&&a.data.get('size')===this.m.size,good=basic&&this.m.species.includes(sp)&&!this.found.has(sp);if(!good){tone(false);this.cameras.main.shake(80,.0025);const q=this.add.text(a.x,a.y-95,basic&&this.found.has(sp)?'이미 구조했어!':'앗, 다른 친구!',{fontFamily:FONT,fontSize:'19px',fontStyle:'bold',color:'#8b3b37',backgroundColor:'#fff6f1',padding:{x:10,y:6}}).setOrigin(.5).setDepth(70);this.tweens.add({targets:a,x:a.x+18,duration:70,yoyo:true,repeat:3});this.tweens.add({targets:q,y:q.y-25,alpha:0,duration:700,onComplete:()=>q.destroy()});return}
   a.data.set('rescuing',true);this.found.add(sp);tone(true);this.rescueBurst(a.x,a.y);this.showToast(`${sp} 구조 성공!`);this.tweens.killTweensOf(a);this.tweens.add({targets:a,scaleX:a.scaleX*1.15,scaleY:a.scaleY*1.15,duration:130,yoyo:true,onComplete:()=>{this.tweens.add({targets:a,x:W/2,y:1050,scaleX:.22,scaleY:.22,angle:360,duration:850,ease:'Cubic.easeInOut',onComplete:()=>{a.destroy();this.addSeat(sp);this.countText.setText(`${this.found.size}/${this.m.need}`);if(this.found.size>=this.m.need)this.completeMission()}})}})
@@ -95,6 +139,8 @@ class ResultScene extends Phaser.Scene{
  }
  saveProgress(){try{const key='moa-garden:completed',done=JSON.parse(localStorage.getItem(key)||'{}');done.rescue=true;localStorage.setItem(key,JSON.stringify(done));const rewardKey='moa-rescue:rewarded';if(!localStorage.getItem(rewardKey)){const seedKey='moa-garden:seeds',n=Number(localStorage.getItem(seedKey)||0)+50;localStorage.setItem(seedKey,String(n));localStorage.setItem(rewardKey,'1')}}catch{}}
 }
-const game=new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W,height:H,backgroundColor:'#16382d',scene:[BootScene,TitleScene,MissionScene,ResultScene],render:{antialias:true,pixelArt:false,roundPixels:false},scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH,width:W,height:H}});
+const game=new Phaser.Game({type:Phaser.AUTO,parent:'game',width:LANDSCAPE_MODE?LW:W,height:LANDSCAPE_MODE?LH:H,backgroundColor:'#16382d',scene:[BootScene,TitleScene,MissionScene,ResultScene,LandscapeTitleScene,LandscapeMissionScene,LandscapeResultScene],render:{antialias:true,pixelArt:false,roundPixels:false},scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH,width:LANDSCAPE_MODE?LW:W,height:LANDSCAPE_MODE?LH:H}});
 window.moaRescueGame=game;
 window.addEventListener('orientationchange',()=>{document.getElementById('rotateHint').hidden=window.innerHeight>=window.innerWidth});
+
+// A layout change needs a new Phaser world; retain the current round until the user reloads.
