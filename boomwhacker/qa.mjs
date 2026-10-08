@@ -129,10 +129,17 @@ async function basicCase(name,width,height){
   const fillStyle=await page.locator('#progressFill').getAttribute('style')||'';
   check(fillStyle.includes('0%'),`${name}: reset did not return progress to zero`);
 
+  check((await page.locator('#fullBtn').innerText()).includes('수업 전체화면'),`${name}: classroom fullscreen label missing`);
+  check(await page.locator('#fsExitBtn').count()===1,`${name}: fullscreen exit button missing`);
   await page.locator('#fullBtn').click();
-  check(await page.locator('body').evaluate(el=>el.classList.contains('fullscreen')),`${name}: fullscreen class not enabled`);
-  await page.evaluate(async()=>{document.body.classList.remove('fullscreen');if(document.fullscreenElement){try{await document.exitFullscreen()}catch(e){}}});
-  check(!(await page.locator('body').evaluate(el=>el.classList.contains('fullscreen'))),`${name}: fullscreen class not disabled`);
+  check(await page.locator('body').evaluate(el=>el.classList.contains('fullscreen')),`${name}: classroom fullscreen class not enabled`);
+  check(await page.locator('#fsExitBtn').isVisible(),`${name}: fullscreen exit button is not visible`);
+  const fsGeom=await page.evaluate(()=>({vh:innerHeight,stage:document.querySelector('.stage')?.getBoundingClientRect().height,controls:getComputedStyle(document.querySelector('.controls')).display,score:getComputedStyle(document.querySelector('.score')).display}));
+  check(fsGeom.stage>fsGeom.vh*.72,`${name}: fullscreen stage does not fill viewport ${JSON.stringify(fsGeom)}`);
+  check(fsGeom.controls==='none'&&fsGeom.score==='none',`${name}: setup panels still visible in classroom fullscreen`);
+  await page.screenshot({path:`${out}/${name}-class-fullscreen.png`,fullPage:false});
+  await page.locator('#fsExitBtn').click();
+  check(!(await page.locator('body').evaluate(el=>el.classList.contains('fullscreen'))),`${name}: classroom fullscreen exit failed`);
   await page.locator('.tube[data-note="도"]').click();
   overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth));
   check(overflow<=1,`${name}: horizontal overflow after interactions ${overflow}px`);
