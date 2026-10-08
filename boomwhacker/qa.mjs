@@ -10,6 +10,12 @@ fs.mkdirSync(out,{recursive:true});
 const failures=[];
 const report=[];
 const check=(ok,msg)=>{if(!ok)failures.push(msg)};
+function makeWav(seconds=.8,freq=180,sampleRate=22050){
+  const samples=Math.floor(seconds*sampleRate),dataBytes=samples*2,b=Buffer.alloc(44+dataBytes);
+  b.write('RIFF',0);b.writeUInt32LE(36+dataBytes,4);b.write('WAVE',8);b.write('fmt ',12);b.writeUInt32LE(16,16);b.writeUInt16LE(1,20);b.writeUInt16LE(1,22);b.writeUInt32LE(sampleRate,24);b.writeUInt32LE(sampleRate*2,28);b.writeUInt16LE(2,32);b.writeUInt16LE(16,34);b.write('data',36);b.writeUInt32LE(dataBytes,40);
+  for(let i=0;i<samples;i++){const env=Math.min(1,i/(sampleRate*.02))*Math.max(0,1-i/samples),v=Math.sin(2*Math.PI*freq*i/sampleRate)*.32*env;b.writeInt16LE(Math.max(-32767,Math.min(32767,Math.round(v*32767))),44+i*2)}
+  return b;
+}
 const browser=await chromium.launch({headless:true,executablePath:CHROME,args:['--no-sandbox','--autoplay-policy=no-user-gesture-required']});
 
 async function basicCase(name,width,height){
@@ -25,6 +31,8 @@ async function basicCase(name,width,height){
   check(robots==='noindex,nofollow',`${name}: robots guardrail changed (${robots})`);
   check(await page.locator('.tube').count()===8,`${name}: expected 8 tubes`);
   check(await page.locator('.laneLabel').count()===8,`${name}: expected 8 lanes`);
+  const fallSize=await page.locator('.fall').first().evaluate(el=>parseFloat(getComputedStyle(el).width));
+  check(fallSize>=(width<=800?52:70),`${name}: falling note is still too small (${fallSize}px)`);
   check(await page.locator('.beat').count()>0,`${name}: score did not render`);
   check(await page.locator('#lyricTrack').count()===1,`${name}: lyric track missing`);
   check(await page.locator('.lyricSyllable').count()>5,`${name}: lyric track did not render a continuous line`);
@@ -33,17 +41,49 @@ async function basicCase(name,width,height){
   check(tubeColorMap['도']==='rgb(235, 36, 39)'&&tubeColorMap['레']==='rgb(246, 133, 31)'&&tubeColorMap['미']==='rgb(251, 237, 27)'&&tubeColorMap['파']==='rgb(115, 200, 74)'&&tubeColorMap['솔']==='rgb(0, 163, 154)'&&tubeColorMap['라']==='rgb(75, 74, 168)'&&tubeColorMap['시']==='rgb(216, 58, 155)',`${name}: pitch-colored note labels are wrong: ${JSON.stringify(tubeColorMap)}`);
   check(await page.locator('#sampleSelect option').count()===15,`${name}: sample selector should contain current + 14 samples`);
   check(await page.locator('#videoBtn').count()===1,`${name}: video export button missing`);
+  check(await page.locator('#stageFsBtn').count()===1,`${name}: stage fullscreen shortcut missing`);
+  check(await page.locator('#stageFsBtn').isVisible(),`${name}: stage fullscreen shortcut is not visible`);
+  check(await page.locator('#displayModeSelect').count()===1,`${name}: display mode selector missing`);
+  check(await page.locator('#displayModeSelect option').count()===4,`${name}: display mode selector should have 4 choices`);
+  check((await page.locator('#displayModeSelect').inputValue())==='note',`${name}: display mode should default to note names`);
+  check(await page.locator('#melodySelect').count()===1,`${name}: melody selector missing`);
+  check(await page.locator('#melodySelect option').count()===4,`${name}: melody selector should have 4 choices`);
+  check((await page.locator('#melodySelect').inputValue())==='boom',`${name}: default melody should be Boomwhacker`);
+  check(await page.locator('#melodyVolume').count()===1,`${name}: melody volume control missing`);
+  check((await page.locator('#melodyVolume').inputValue())==='65',`${name}: default melody volume should be 65%`);
+  check(await page.locator('#mixModes button').count()===3,`${name}: mix mode should have 3 choices`);
+  check(await page.locator('#mixModes button.on').getAttribute('data-mix')==='melody',`${name}: default mix mode should be melody only`);
+  check(await page.locator('#mrFile').count()===1,`${name}: MR file input missing`);
+  check(await page.locator('#mrVolume').count()===1,`${name}: MR volume control missing`);
+  check((await page.locator('#mrVolume').inputValue())==='100',`${name}: default MR volume should be 100%`);
+  check((await page.locator('#melodyPct').innerText())==='65%',`${name}: melody volume label should start at 65%`);
+  check((await page.locator('#mrPct').innerText())==='100%',`${name}: MR volume label should start at 100%`);
   check(await page.locator('#watermarkOpt').isChecked(),`${name}: watermark should default on`);
   check(await page.locator('#creditOpt').isChecked(),`${name}: intro/outro should default on`);
-  const videoInfo=await page.evaluate(()=>({supported:window.__boomVideoQA?.supported(),mime:window.__boomVideoQA?.mime(),brand:window.__boomVideoQA?.brand(),colors:window.__boomVideoQA?.colors(),lyrics:window.__boomVideoQA?.lyrics(),preview:window.__boomVideoQA?.preview()}));
+  const videoInfo=await page.evaluate(()=>({supported:window.__boomVideoQA?.supported(),mime:window.__boomVideoQA?.mime(),brand:window.__boomVideoQA?.brand(),colors:window.__boomVideoQA?.colors(),melody:window.__boomVideoQA?.melody(),mix:window.__boomVideoQA?.mix(),display:window.__boomVideoQA?.display(),lyrics:window.__boomVideoQA?.lyrics(),preview:window.__boomVideoQA?.preview()}));
   check(videoInfo.supported===true,`${name}: browser video export capability missing`);
   check(String(videoInfo.mime||'').startsWith('video/webm'),`${name}: WebM recorder mime missing`);
   check(videoInfo.brand?.brand==='울모아쌤'&&videoInfo.brand?.handle==='@ulmoa__sam',`${name}: video brand metadata wrong`);
   check(videoInfo.colors?.도==='#EB2427'&&videoInfo.colors?.레==='#F6851F'&&videoInfo.colors?.미==='#FBED1B'&&videoInfo.colors?.파==='#73C84A'&&videoInfo.colors?.솔==='#00A39A'&&videoInfo.colors?.라==='#4B4AA8'&&videoInfo.colors?.시==='#D83A9B',`${name}: Boomwhacker color mapping wrong`);
+  check(videoInfo.melody?.mode==='boom'&&Object.keys(videoInfo.melody?.options||{}).length===4&&Math.abs(videoInfo.melody?.volume-.65)<.001,`${name}: melody QA metadata wrong`);
+  check(videoInfo.mix?.mode==='melody'&&Object.keys(videoInfo.mix?.options||{}).length===3&&videoInfo.mix?.mrReady===true&&videoInfo.mix?.mrKind==='auto'&&!videoInfo.mix?.mrLoaded,`${name}: mix QA metadata wrong`);
+  check(videoInfo.display?.mode==='note'&&Object.keys(videoInfo.display?.options||{}).length===4&&videoInfo.display?.labels?.[0]==='도',`${name}: display QA metadata wrong`);
   check((videoInfo.lyrics?.items?.length||0)>5,`${name}: continuous lyric window missing`);
   check(videoInfo.preview?.w===1280&&videoInfo.preview?.h===720&&String(videoInfo.preview?.data||'').startsWith('data:image/png'),`${name}: 16:9 video preview render failed`);
   let overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth));
   check(overflow<=1,`${name}: horizontal overflow ${overflow}px`);
+  if(width>=801){
+    const visible=await page.evaluate(()=>{
+      const ids=['startBtn','restartBtn','videoBtn','fullBtn'],out={};
+      for(const id of ids){const el=document.getElementById(id),r=el?.getBoundingClientRect();out[id]=r?{top:r.top,bottom:r.bottom,left:r.left,right:r.right}:null}
+      const controls=document.querySelector('.controls')?.getBoundingClientRect();
+      return {vh:innerHeight,scrollY,controls:controls?{top:controls.top,bottom:controls.bottom,height:controls.height}:null,items:out};
+    });
+    for(const id of ['startBtn','restartBtn','videoBtn','fullBtn']){
+      const r=visible.items[id];check(!!r&&r.top>=0&&r.bottom<=visible.vh,`${name}: ${id} is not visible without page scroll (${JSON.stringify(r)} / vh ${visible.vh})`);
+    }
+    check(visible.controls?.bottom<=visible.vh,`${name}: desktop control panel exceeds viewport (${JSON.stringify(visible.controls)} / vh ${visible.vh})`);
+  }
 
   await page.locator('#levels button[data-level="3"]').click();
   check(await page.locator('.tube:not(.inactive)').count()===3,`${name}: 3-note mode active tube count wrong`);
@@ -71,6 +111,51 @@ async function basicCase(name,width,height){
   await page.locator('#soundBtn').click();
   check((await page.locator('#soundBtn').innerText()).includes('🔇'),`${name}: sound toggle failed`);
   await page.locator('#soundBtn').click();
+  await page.locator('#melodySelect').selectOption('piano');
+  check((await page.evaluate(()=>window.__boomVideoQA.melody().mode))==='piano',`${name}: piano melody selection failed`);
+  await page.locator('#melodySelect').selectOption('xylophone');
+  check((await page.evaluate(()=>window.__boomVideoQA.melody().mode))==='xylophone',`${name}: xylophone melody selection failed`);
+  await page.locator('#melodySelect').selectOption('none');
+  check((await page.evaluate(()=>window.__boomVideoQA.melody().mode))==='none',`${name}: no-melody selection failed`);
+  await page.locator('#melodySelect').selectOption('boom');
+  await page.locator('#melodyVolume').evaluate(el=>{el.value='30';el.dispatchEvent(new Event('input',{bubbles:true}))});
+  check(Math.abs((await page.evaluate(()=>window.__boomVideoQA.melody().volume))-.3)<.001,`${name}: melody volume slider failed`);
+  await page.locator('#melodyVolume').evaluate(el=>{el.value='65';el.dispatchEvent(new Event('input',{bubbles:true}))});
+
+  await page.locator('#displayModeSelect').selectOption('instrument');
+  check(await page.locator('#displayModal').isVisible(),`${name}: instrument editor did not open`);
+  check(await page.locator('#displayInputs select[data-instrument-index]').count()===8,`${name}: instrument editor should have 8 lane selectors`);
+  check(await page.locator('#addInstrumentBtn').count()===1,`${name}: add-instrument button missing`);
+  await page.locator('#newInstrumentIcon').fill('🛎️');
+  await page.locator('#newInstrumentName').fill('차임');
+  await page.locator('#addInstrumentBtn').click();
+  check(await page.locator('#displayInputs select[data-instrument-index="0"] option').filter({hasText:'🛎️ 차임'}).count()===1,`${name}: custom instrument was not added to selector`);
+  const recorderValue=await page.locator('#displayInputs select[data-instrument-index="0"] option').filter({hasText:'🛎️ 차임'}).getAttribute('value');
+  await page.locator('#displayInputs select[data-instrument-index="0"]').selectOption(recorderValue);
+  await page.locator('#displayApplyBtn').click();
+  check((await page.locator('.laneLabel').first().innerText())==='🛎️',`${name}: selected custom instrument did not update lane`);
+  check((await page.locator('.tube[data-note="도"] .tubeLabel').innerText())==='🛎️',`${name}: selected custom instrument did not update tube`);
+  await page.evaluate(()=>{elapsed=1350;draw()});
+  check((await page.locator('.fall .fallLabel').first().innerText())==='🛎️',`${name}: selected custom instrument did not update falling note`);
+  const instrumentState=await page.evaluate(()=>window.__boomVideoQA.display());
+  check(instrumentState.mode==='instrument'&&instrumentState.labels[0]==='🛎️'&&instrumentState.instrumentLibrary.some(x=>x.name==='차임'),`${name}: instrument state not propagated to video data`);
+  await page.locator('#displayModeSelect').selectOption('name');
+  check(await page.locator('#displayModal').isVisible(),`${name}: name editor did not open`);
+  await page.locator('#displayInputs input[data-display-index="0"]').fill('민준');
+  await page.locator('#displayInputs input[data-display-index="1"]').fill('서연');
+  await page.locator('#displayApplyBtn').click();
+  check((await page.locator('.laneLabel').first().innerText())==='민준',`${name}: child name did not update lane`);
+  check((await page.locator('.tube[data-note="도"] .tubeLabel').innerText())==='민준',`${name}: child name did not update tube`);
+  await page.evaluate(()=>{elapsed=1350;draw()});
+  check((await page.locator('.fall .fallLabel').first().innerText())==='민준',`${name}: child name did not update falling note`);
+  const displayState=await page.evaluate(()=>window.__boomVideoQA.display());
+  check(displayState.mode==='name'&&displayState.labels[0]==='민준'&&displayState.labels[1]==='서연',`${name}: display state not propagated to video data`);
+  await page.locator('#displayModeSelect').selectOption('custom');
+  await page.locator('#displayInputs input[data-display-index="0"]').fill('손뼉');
+  await page.locator('#displayApplyBtn').click();
+  check((await page.locator('.tube[data-note="도"] .tubeLabel').innerText())==='손뼉',`${name}: custom display did not update tube`);
+  await page.locator('#displayModeSelect').selectOption('note');
+  check((await page.locator('.tube[data-note="도"] .tubeLabel').innerText())==='도',`${name}: note-name display did not restore`);
 
   await page.evaluate(()=>{elapsed=1350;draw();updateTime();updateLyricTrack(true)});
   check(await page.locator('.lyricSyllable.active').count()===1,`${name}: current lyric syllable is not highlighted`);
@@ -85,20 +170,106 @@ async function basicCase(name,width,height){
   const fillStyle=await page.locator('#progressFill').getAttribute('style')||'';
   check(fillStyle.includes('0%'),`${name}: reset did not return progress to zero`);
 
-  await page.locator('#fullBtn').click();
-  check(await page.locator('body').evaluate(el=>el.classList.contains('fullscreen')),`${name}: fullscreen class not enabled`);
-  await page.evaluate(async()=>{document.body.classList.remove('fullscreen');if(document.fullscreenElement){try{await document.exitFullscreen()}catch(e){}}});
-  check(!(await page.locator('body').evaluate(el=>el.classList.contains('fullscreen'))),`${name}: fullscreen class not disabled`);
+  check((await page.locator('#fullBtn').innerText()).includes('수업 전체화면'),`${name}: classroom fullscreen label missing`);
+  check(await page.locator('#fsExitBtn').count()===1,`${name}: fullscreen exit button missing`);
+  await page.locator('#stageFsBtn').click();
+  check(await page.locator('body').evaluate(el=>el.classList.contains('fullscreen')),`${name}: stage shortcut did not enable classroom fullscreen`);
+  check(await page.locator('#fsExitBtn').isVisible(),`${name}: fullscreen exit button is not visible`);
+  const fsGeom=await page.evaluate(()=>({vh:innerHeight,stage:document.querySelector('.stage')?.getBoundingClientRect().height,controls:getComputedStyle(document.querySelector('.controls')).display,score:getComputedStyle(document.querySelector('.score')).display}));
+  check(fsGeom.stage>fsGeom.vh*.72,`${name}: fullscreen stage does not fill viewport ${JSON.stringify(fsGeom)}`);
+  check(fsGeom.controls==='none'&&fsGeom.score==='none',`${name}: setup panels still visible in classroom fullscreen`);
+  await page.screenshot({path:`${out}/${name}-class-fullscreen.png`,fullPage:false});
+  await page.locator('#fsExitBtn').click();
+  check(!(await page.locator('body').evaluate(el=>el.classList.contains('fullscreen'))),`${name}: classroom fullscreen exit failed`);
   await page.locator('.tube[data-note="도"]').click();
   overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth));
   check(overflow<=1,`${name}: horizontal overflow after interactions ${overflow}px`);
   await page.screenshot({path:`${out}/${name}.png`,fullPage:true});
   check(errors.length===0,`${name}: JS errors: ${errors.join(' | ')}`);
-  report.push({name,width,height,overflow,errors,beats:await page.locator('.beat').count(),tubeLabelColors,lyricSyllables:await page.locator('.lyricSyllable').count()});
+  report.push({name,width,height,overflow,errors,beats:await page.locator('.beat').count(),tubeLabelColors,lyricSyllables:await page.locator('.lyricSyllable').count(),displayMode:await page.locator('#displayModeSelect').inputValue()});
   await context.close();
 }
 
-for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412',412,915],['tablet768',768,1024],['desktop1366',1366,900]]) await basicCase(name,w,h);
+for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412',412,915],['tablet768',768,1024],['desktop1366short',1366,768],['desktop1600short',1600,800],['desktop1366',1366,900]]) await basicCase(name,w,h);
+
+{
+  const context=await browser.newContext({viewport:{width:390,height:844}});
+  const page=await context.newPage();
+  await page.goto(BASE,{waitUntil:'networkidle'});
+  await page.locator('#displayModeSelect').selectOption('instrument');
+  await page.evaluate(()=>{elapsed=1350;draw()});
+  const instrumentFall=await page.locator('.fall').first().evaluate(el=>({w:parseFloat(getComputedStyle(el).width),label:getComputedStyle(el.querySelector('.fallLabel')).fontSize}));
+  check(instrumentFall.w>=52,'display screenshot: mobile falling note should stay large in instrument mode');
+  await page.screenshot({path:out+'/display-instrument390.png',fullPage:true});
+  check((await page.locator('.tube[data-note="라"] .tubeLabel').innerText())==='🎺','display screenshot: instrument icon mapping wrong');
+  await page.locator('#displayModeSelect').selectOption('name');
+  await page.locator('#displayInputs input[data-display-index="0"]').fill('민준');
+  await page.locator('#displayInputs input[data-display-index="1"]').fill('서연');
+  await page.locator('#displayInputs input[data-display-index="2"]').fill('지우');
+  await page.locator('#displayApplyBtn').click();
+  await page.evaluate(()=>{elapsed=1350;draw()});
+  check(await page.locator('.fall .fallLabel').count()>0,'display screenshot: child-name falling note missing');
+  await page.screenshot({path:out+'/display-names390.png',fullPage:true});
+  check((await page.locator('.laneLabel').nth(0).innerText())==='민준'&&(await page.locator('.laneLabel').nth(1).innerText())==='서연','display screenshot: child names not visible');
+  await context.close();
+}
+
+{
+  const context=await browser.newContext({viewport:{width:390,height:844}});
+  const page=await context.newPage();
+  const errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(BASE,{waitUntil:'networkidle'});
+  const defaultMr=await page.evaluate(()=>window.__boomVideoQA.mix());
+  const autoBalance=await page.evaluate(async()=>{
+    const A=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+    const render=async(kind)=>{const ac=new A(1,44100*3,44100);mrBuffer=null;mrVolume=1;if(kind==='melody')scheduleMelodyTone(ac,ac.destination,'도',.05,'boom');else if(kind==='mr')scheduleBuiltinMr(ac,ac.destination,.05,0,1);else{scheduleMelodyTone(ac,ac.destination,'도',.05,'boom');scheduleBuiltinMr(ac,ac.destination,.05,0,1)}const b=await ac.startRendering(),d=b.getChannelData(0);let energy=0,peak=0;for(const v of d){const a=Math.abs(v);energy+=a;peak=Math.max(peak,a)}return{energy,peak}};
+    return{melody:await render('melody'),mr:await render('mr'),both:await render('both')};
+  });
+  check(autoBalance.mr.energy>autoBalance.melody.energy*1.2,'mr: automatic MR is still not prominent enough versus melody '+JSON.stringify(autoBalance));
+  check(autoBalance.mr.peak>.22,'mr: automatic MR peak is too low '+JSON.stringify(autoBalance));
+  check(autoBalance.both.peak<.98,'mr: combined output clips '+JSON.stringify(autoBalance));
+  const halfMr=await page.evaluate(async()=>{const A=window.OfflineAudioContext||window.webkitOfflineAudioContext;const ac=new A(1,44100*3,44100);mrBuffer=null;scheduleBuiltinMr(ac,ac.destination,.05,0,.5);const b=await ac.startRendering(),d=b.getChannelData(0);let peak=0,energy=0;for(const v of d){const a=Math.abs(v);peak=Math.max(peak,a);energy+=a}return{peak,energy}});
+  check(halfMr.peak>.11&&halfMr.energy>autoBalance.melody.energy*.55,'mr: automatic MR should remain clearly audible around 50% '+JSON.stringify({halfMr,autoBalance}));
+  report.push({name:'autoMrBalance',autoBalance,halfMr});
+  check(defaultMr.mrReady===true&&defaultMr.mrKind==='auto'&&!defaultMr.mrLoaded,'mr: built-in automatic MR is not ready by default');
+  check((await page.locator('#mrStatus').innerText()).includes('기본 자동 MR'),'mr: built-in MR status is not visible');
+  await page.locator('#mixModes button[data-mix="both"]').click();
+  await page.locator('#startBtn').click();
+  await page.waitForTimeout(120);
+  check(await page.evaluate(()=>!!mrSource),'mr: built-in automatic MR did not schedule');
+  await page.locator('#playBtn').click();
+  check(await page.evaluate(()=>mrSource===null),'mr: pausing did not stop built-in automatic MR');
+  await page.locator('#mrFile').setInputFiles({name:'qa-mr.wav',mimeType:'audio/wav',buffer:makeWav(1.1,176)});
+  await page.waitForFunction(()=>window.__boomVideoQA?.mix().mrLoaded===true);
+  const loaded=await page.evaluate(()=>window.__boomVideoQA.mix());
+  check(loaded.mrLoaded===true&&loaded.mrKind==='file'&&loaded.mrName==='qa-mr.wav','mr: file did not decode or did not replace automatic MR');
+  check((await page.locator('#mrStatus').innerText()).includes('MR 준비됨'),'mr: ready status missing');
+  await page.locator('#mixModes button[data-mix="both"]').click();
+  check((await page.evaluate(()=>window.__boomVideoQA.mix().mode))==='both','mr: melody+MR mode failed');
+  await page.locator('#mrVolume').evaluate(el=>{el.value='40';el.dispatchEvent(new Event('input',{bubbles:true}))});
+  check(Math.abs((await page.evaluate(()=>window.__boomVideoQA.mix().mrVolume))-.4)<.01,'mr: volume control failed');
+  await page.locator('#startBtn').click();
+  await page.waitForTimeout(120);
+  check(await page.evaluate(()=>!!mrSource),'mr: live MR source was not scheduled');
+  await page.locator('#playBtn').click();
+  check(await page.evaluate(()=>mrSource===null),'mr: pause did not stop MR source');
+  const mixProbe=await page.evaluate(async()=>{
+    const A=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+    const render=async(mode)=>{const ac=new A(1,44100*2,44100);mixMode=mode;melodyMode='boom';if(wantsMelody())scheduleMelodyTone(ac,ac.destination,'도',.05,melodyMode);if(wantsMr())scheduleMrTrack(ac,ac.destination,.05,0,.4);const b=await ac.startRendering(),d=b.getChannelData(0);let energy=0,peak=0;for(const v of d){const a=Math.abs(v);energy+=a;peak=Math.max(peak,a)}return{energy,peak}};
+    return{melody:await render('melody'),both:await render('both'),mr:await render('mr')};
+  });
+  check(mixProbe.melody.energy>10&&mixProbe.mr.energy>10&&mixProbe.both.energy>10,'mr: one or more audio mix modes are silent');
+  check(new Set([Math.round(mixProbe.melody.energy),Math.round(mixProbe.both.energy),Math.round(mixProbe.mr.energy)]).size===3,'mr: mix modes are not measurably distinct');
+  await page.locator('#mixModes button[data-mix="mr"]').click();
+  check((await page.evaluate(()=>window.__boomVideoQA.mix().mode))==='mr','mr: MR-only mode failed');
+  await page.locator('#mixModes button[data-mix="melody"]').click();
+  check((await page.evaluate(()=>window.__boomVideoQA.mix().mode))==='melody','mr: melody-only mode failed');
+  check(errors.length===0,'mr: page errors '+errors.join(' | '));
+  report.push({name:'mrMix',loaded,mixProbe});
+  await page.screenshot({path:out+'/mr-mix390.png',fullPage:true});
+  await context.close();
+}
 
 {
   const context=await browser.newContext({viewport:{width:390,height:844}});
@@ -144,6 +315,16 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   await page.goto(BASE,{waitUntil:'networkidle'});
   await page.evaluate(()=>{const c=videoCanvas();c.id='qaExportFrame';c.style.width='640px';c.style.height='360px';document.body.appendChild(c);videoScene(c.getContext('2d'),2200)});
   await page.locator('#qaExportFrame').screenshot({path:out+'/video-export-frame.png'});
+  const melodyProbe=await page.evaluate(async()=>{
+    const A=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+    const render=async(mode,volume=.65)=>{const ac=new A(1,22050,22050);scheduleMelodyTone(ac,ac.destination,'도',.02,mode,volume);const b=await ac.startRendering(),d=b.getChannelData(0);let energy=0,peak=0;for(const v of d){const a=Math.abs(v);energy+=a;peak=Math.max(peak,a)}return {energy,peak}};
+    return {none:await render('none'),piano:await render('piano'),xylophone:await render('xylophone'),boom:await render('boom'),boomLow:await render('boom',.2),boomHigh:await render('boom',1)};
+  });
+  check(melodyProbe.none.energy===0,'melody probe: none should be silent');
+  check(melodyProbe.piano.energy>10&&melodyProbe.xylophone.energy>10&&melodyProbe.boom.energy>10,'melody probe: one or more melody voices are silent');
+  check(new Set([Math.round(melodyProbe.piano.energy),Math.round(melodyProbe.xylophone.energy),Math.round(melodyProbe.boom.energy)]).size===3,'melody probe: timbres are not measurably distinct');
+  check(melodyProbe.boomHigh.energy>melodyProbe.boomLow.energy*3.5,'melody probe: volume control does not materially change output');
+  report.push({name:'melodyProbe',melodyProbe});
   const probe=await page.evaluate(async()=>{
     const c=document.createElement('canvas');c.width=640;c.height=360;c.id='qaVideoCanvas';c.style.width='640px';c.style.height='360px';document.body.appendChild(c);
     const x=c.getContext('2d');x.fillStyle='#f7fbff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#17233b';x.font='700 34px sans-serif';x.fillText('울모아쌤 붐웨커 영상 QA',40,100);
