@@ -32,7 +32,7 @@ async function basicCase(name,width,height){
   check(await page.locator('.tube').count()===8,`${name}: expected 8 tubes`);
   check(await page.locator('.laneLabel').count()===8,`${name}: expected 8 lanes`);
   const fallSize=await page.locator('.fall').first().evaluate(el=>parseFloat(getComputedStyle(el).width));
-  check(fallSize>=(width<=800?52:70),`${name}: falling note is still too small (${fallSize}px)`);
+  check(fallSize>=(width<=800?56:76),`${name}: falling note is still too small (${fallSize}px)`);
   check(await page.locator('.beat').count()>0,`${name}: score did not render`);
   check(await page.locator('#lyricTrack').count()===1,`${name}: lyric track missing`);
   check(await page.locator('.lyricSyllable').count()>5,`${name}: lyric track did not render a continuous line`);
@@ -44,8 +44,6 @@ async function basicCase(name,width,height){
   check(await page.locator('#stageFsBtn').count()===1,`${name}: stage fullscreen shortcut missing`);
   check(await page.locator('#stageFsBtn').isVisible(),`${name}: stage fullscreen shortcut is not visible`);
   check(await page.locator('#displayModeSelect').count()===1,`${name}: display mode selector missing`);
-  const fallSize=await page.locator('.fall').first().evaluate(el=>parseFloat(getComputedStyle(el).width));
-  check(fallSize>=(width<=800?56:76),`${name}: falling note too small after display UI refine (${fallSize}px)`);
   check(await page.locator('#displayModeSelect option').count()===4,`${name}: display mode selector should have 4 choices`);
   check((await page.locator('#displayModeSelect').inputValue())==='note',`${name}: display mode should default to note names`);
   check(await page.locator('#melodySelect').count()===1,`${name}: melody selector missing`);
