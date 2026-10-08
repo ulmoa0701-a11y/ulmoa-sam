@@ -45,7 +45,8 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
     await page.waitForFunction(([n,count])=>window.moaRescueGame.scene.getScene(n).found.size===count,[missionName,correct.indexOf(item)+1],{timeout:6000});
     await page.waitForTimeout(wide?120:1150);
    }
-   await page.waitForTimeout(wide?1050:500);
+   await page.waitForFunction(n=>window.moaRescueGame.scene.getScene(n).completeOverlayShown===true,missionName,{timeout:8000});
+   await page.waitForTimeout(200);
    await page.screenshot({path:'rescue-qa-screenshots/'+label+'-round'+(round+1)+'-complete.png'});
    if(wide)await clickAt(605,514);
    else await clickAt(360,775);
