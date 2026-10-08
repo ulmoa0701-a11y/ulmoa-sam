@@ -13,7 +13,7 @@
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet"/>
 <link href="../assets/notebook-subpages.css?v=20261005-clean3" rel="stylesheet"/>
 <link href="../assets/info.css?v=20261006-study1" rel="stylesheet"/>
-<link href="../assets/info-memory.css?v=20261008-iconbuttons1" rel="stylesheet"/>
+<link href="../assets/info-memory.css?v=20261008-iconfix2" rel="stylesheet"/>
 </head>
 <body class="note-subpage info-page glossary-page"><header class="sub-header">
 <a class="sub-brand" href="../"><span>✦</span><b>일단 해봄노트</b></a>
@@ -370,13 +370,32 @@ document.addEventListener("DOMContentLoaded",function(){
     "memo-processing-speed":["s1","r0c2"],"memo-attention":["s1","r0c3"],
     "memo-memory":["s1","r1c0"],"memo-visual":["s1","r1c1"],"memo-auditory":["s1","r1c2"],
     "memo-aac":["s1","r2c1"],"memo-prompting":["s1","r2c2"],"memo-reinforcement":["s1","r2c3"],
-    "memo-attention-types":["s2","r0c0"],"memo-executive":["s2","r0c1"],"memo-inhibition":["s2","r0c2"],
-    "memo-flexibility":["s2","r1c0"],"memo-self-regulation":["s2","r1c1"],"memo-encoding":["s2","r1c2"],
-    "memo-consolidation":["s2","r2c0"],"memo-retrieval":["s2","r2c1"],"memo-joint-attention":["s2","r2c2"],
     "memo-semantics":["s3","r0c0"],"memo-morphosyntax":["s3","r0c1"],"memo-pragmatics":["s3","r0c2"],
     "memo-articulation-phonology":["s3","r0c3"],"memo-phonological-awareness":["s3","r0c4"],
     "memo-generalization":["s3","r1c0"],"memo-time-delay":["s3","r1c1"],"memo-task-analysis":["s3","r1c2"],
     "memo-visual-supports":["s3","r1c3"],"memo-modeling":["s3","r1c4"]
+  };
+  var svgArt={
+    "memo-attention-types":"attention",
+    "memo-executive":"executive",
+    "memo-inhibition":"inhibition",
+    "memo-flexibility":"flexibility",
+    "memo-self-regulation":"regulation",
+    "memo-encoding":"encoding",
+    "memo-consolidation":"consolidation",
+    "memo-retrieval":"retrieval",
+    "memo-joint-attention":"joint"
+  };
+  var svgMarkup={
+    attention:'<svg viewBox="0 0 96 72"><circle cx="38" cy="34" r="19" fill="#fff2a8" stroke="#2f4148" stroke-width="3"/><path d="M27 34h22M38 23v22" stroke="#2f4148" stroke-width="3" stroke-linecap="round"/><circle cx="70" cy="20" r="8" fill="#dbeaf8"/><path d="M70 15v6l4 3" stroke="#2f4148" stroke-width="2.5" stroke-linecap="round"/></svg>',
+    executive:'<svg viewBox="0 0 96 72"><rect x="17" y="15" width="35" height="43" rx="7" fill="#fff3c5" stroke="#2f4148" stroke-width="3"/><path d="M26 28l4 4 7-8M26 42l4 4 7-8" fill="none" stroke="#4d9b78" stroke-width="3" stroke-linecap="round"/><path d="M60 22h20v18H60z" fill="#dcecff" stroke="#2f4148" stroke-width="3"/><path d="M58 54c10-2 17-8 21-15" fill="none" stroke="#f4a928" stroke-width="4" stroke-linecap="round"/></svg>',
+    inhibition:'<svg viewBox="0 0 96 72"><path d="M31 56V28c0-4 6-4 6 0v12-20c0-4 6-4 6 0v20-16c0-4 6-4 6 0v17-12c0-4 6-4 6 0v14c6-5 12 1 8 7-6 9-12 13-20 13-6 0-9-2-12-7Z" fill="#ffd4bd" stroke="#2f4148" stroke-width="3"/><circle cx="73" cy="22" r="12" fill="#ffe2e2" stroke="#d65f5f" stroke-width="3"/><path d="M66 15l14 14" stroke="#d65f5f" stroke-width="4"/></svg>',
+    flexibility:'<svg viewBox="0 0 96 72"><rect x="14" y="24" width="23" height="23" rx="6" fill="#ffc8bd" stroke="#2f4148" stroke-width="3"/><path d="M65 20l14 25H51Z" fill="#b9dff7" stroke="#2f4148" stroke-width="3"/><path d="M39 19c10-8 21-8 29-2M68 17l-3-8M68 17l8 1M55 54c-10 7-21 6-29 0M26 54l3 8M26 54l-8-1" fill="none" stroke="#f0a62c" stroke-width="3.5" stroke-linecap="round"/></svg>',
+    regulation:'<svg viewBox="0 0 96 72"><circle cx="46" cy="35" r="22" fill="#ffd7bd" stroke="#2f4148" stroke-width="3"/><path d="M37 33c2-2 4-2 6 0M50 33c2-2 4-2 6 0M39 44c5 4 10 4 15 0" fill="none" stroke="#2f4148" stroke-width="2.5" stroke-linecap="round"/><path d="M18 31c-7 4-7 13 0 17M73 23c8 5 9 15 2 22" fill="none" stroke="#74b8d8" stroke-width="4" stroke-linecap="round"/><path d="M72 16c4-5 11-1 8 4l-8 8-8-8c-3-5 4-9 8-4Z" fill="#ffb6c4"/></svg>',
+    encoding:'<svg viewBox="0 0 96 72"><rect x="13" y="18" width="29" height="37" rx="5" fill="#fff6cf" stroke="#2f4148" stroke-width="3"/><path d="M20 28h15M20 36h12M20 44h14" stroke="#7d8c90" stroke-width="2.5"/><path d="M45 36h17" stroke="#4d9b78" stroke-width="4" stroke-linecap="round"/><path d="M58 30l8 6-8 6" fill="none" stroke="#4d9b78" stroke-width="4"/><path d="M74 25c9 0 13 7 9 13 5 4 2 12-4 12-2 7-13 7-15 0-6 0-9-8-4-12-4-7 1-13 8-13" fill="#ffc9cf" stroke="#2f4148" stroke-width="3"/></svg>',
+    consolidation:'<svg viewBox="0 0 96 72"><path d="M21 32l27-20 27 20v25H21Z" fill="#e6f0d8" stroke="#2f4148" stroke-width="3"/><path d="M37 39c-4-7 1-14 8-13 4-6 13-3 13 4 7 1 8 10 2 13 2 7-8 11-13 6-6 5-15-1-11-8-4-1-4-6 1-2Z" fill="#ffc8cf" stroke="#2f4148" stroke-width="2.5"/><path d="M65 18v10" stroke="#f0a62c" stroke-width="4" stroke-linecap="round"/></svg>',
+    retrieval:'<svg viewBox="0 0 96 72"><path d="M18 26c0-8 7-13 14-10 5-7 15-3 14 5 7 2 8 11 2 14 1 7-9 10-13 5-6 5-15-1-11-8-4-1-4-5-1-7" fill="#ffc8cf" stroke="#2f4148" stroke-width="3"/><path d="M49 34h18" stroke="#4d9b78" stroke-width="4" stroke-linecap="round"/><path d="M63 28l8 6-8 6" fill="none" stroke="#4d9b78" stroke-width="4"/><rect x="70" y="21" width="15" height="25" rx="4" fill="#fff4bd" stroke="#2f4148" stroke-width="3"/><path d="M74 29h7M74 35h6" stroke="#7d8c90" stroke-width="2"/></svg>',
+    joint:'<svg viewBox="0 0 96 72"><circle cx="26" cy="38" r="12" fill="#ffd4bd" stroke="#2f4148" stroke-width="3"/><circle cx="70" cy="38" r="12" fill="#ffd4bd" stroke="#2f4148" stroke-width="3"/><path d="M36 35l10-8M60 35l-10-8" stroke="#2f4148" stroke-width="2.5" stroke-dasharray="3 4"/><path d="m48 12 4 8 9 1-7 6 2 9-8-4-8 4 2-9-7-6 9-1 4-8Z" fill="#ffe471" stroke="#2f4148" stroke-width="2.5"/></svg>'
   };
   function tile(spec,extra){
     var s=document.createElement("span");
@@ -384,12 +403,18 @@ document.addEventListener("DOMContentLoaded",function(){
     s.setAttribute("aria-hidden","true");
     return s;
   }
+  function vector(name,extra){
+    var s=document.createElement("span");
+    s.className="term-vector "+(extra||"");
+    s.setAttribute("aria-hidden","true");
+    s.innerHTML=svgMarkup[name]||svgMarkup.executive;
+    return s;
+  }
   document.querySelectorAll(".study-note").forEach(function(note){
     var summary=note.querySelector(":scope > summary");
     if(!summary||summary.querySelector(".term-art-wrap"))return;
     var wrap=document.createElement("span");
     wrap.className="term-art-wrap";
-
     if(note.id==="memo-receptive-expressive"){
       wrap.classList.add("term-art-pair");
       wrap.appendChild(tile(["s1","r1c3"]));
@@ -398,25 +423,30 @@ document.addEventListener("DOMContentLoaded",function(){
       wrap.classList.add("term-art-pair");
       wrap.appendChild(tile(["s1","r0c3"]));
       wrap.appendChild(tile(["s1","r1c1"]));
+    }else if(svgArt[note.id]){
+      wrap.classList.add("term-vector-wrap");
+      wrap.appendChild(vector(svgArt[note.id]));
     }else{
-      var spec=art[note.id]||["s1","r0c0"];
-      wrap.appendChild(tile(spec));
+      wrap.appendChild(tile(art[note.id]||["s1","r0c0"]));
     }
     var index=summary.querySelector(".study-index");
     if(index)index.after(wrap); else summary.prepend(wrap);
   });
 
   var mapArt=[
-    [".node-cognitive",["s2","r0c1"]],
-    [".node-memory",["s1","r1c0"]],
-    [".node-language",["s3","r0c2"]],
-    [".node-intervention",["s3","r1c2"]]
+    [".node-cognitive","vector","executive"],
+    [".node-memory","tile",["s1","r1c0"]],
+    [".node-language","tile",["s3","r0c2"]],
+    [".node-intervention","tile",["s3","r1c2"]]
   ];
   mapArt.forEach(function(item){
     var node=document.querySelector(item[0]);
-    if(!node||node.querySelector(".map-term-art"))return;
+    if(!node||node.querySelector(".map-term-art")||node.querySelector(".map-term-vector"))return;
     var box=node.querySelector("i");
-    if(box){box.textContent="";box.appendChild(tile(item[1],"map-term-art"));}
+    if(!box)return;
+    box.textContent="";
+    if(item[1]==="vector")box.appendChild(vector(item[2],"map-term-vector"));
+    else box.appendChild(tile(item[2],"map-term-art"));
   });
 });
 </script>
