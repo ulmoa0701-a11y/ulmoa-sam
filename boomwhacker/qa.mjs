@@ -137,6 +137,7 @@ async function basicCase(name,width,height){
   const fsGeom=await page.evaluate(()=>({vh:innerHeight,stage:document.querySelector('.stage')?.getBoundingClientRect().height,controls:getComputedStyle(document.querySelector('.controls')).display,score:getComputedStyle(document.querySelector('.score')).display}));
   check(fsGeom.stage>fsGeom.vh*.72,`${name}: fullscreen stage does not fill viewport ${JSON.stringify(fsGeom)}`);
   check(fsGeom.controls==='none'&&fsGeom.score==='none',`${name}: setup panels still visible in classroom fullscreen`);
+  await page.screenshot({path:`${out}/${name}-class-fullscreen.png`,fullPage:false});
   await page.locator('#fsExitBtn').click();
   check(!(await page.locator('body').evaluate(el=>el.classList.contains('fullscreen'))),`${name}: classroom fullscreen exit failed`);
   await page.locator('.tube[data-note="도"]').click();
