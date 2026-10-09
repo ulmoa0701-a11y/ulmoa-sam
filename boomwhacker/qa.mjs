@@ -72,6 +72,15 @@ async function basicCase(name,width,height){
   check(videoInfo.preview?.w===1280&&videoInfo.preview?.h===720&&String(videoInfo.preview?.data||'').startsWith('data:image/png'),`${name}: 16:9 video preview render failed`);
   let overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth));
   check(overflow<=1,`${name}: horizontal overflow ${overflow}px`);
+  if(width<=412){
+    const mobileFold=await page.evaluate(()=>({
+      stageTop:document.querySelector('.stagePanel')?.getBoundingClientRect().top,
+      controlsHeight:document.querySelector('.controls')?.getBoundingClientRect().height,
+      headerHeight:document.querySelector('.top')?.getBoundingClientRect().height
+    }));
+    check(mobileFold.stageTop<780,`${name}: mobile settings still require too much scrolling before play area ${JSON.stringify(mobileFold)}`);
+    check(mobileFold.controlsHeight<690,`${name}: mobile controls are still too tall ${JSON.stringify(mobileFold)}`);
+  }
   if(width>=1180){
     const oneScreen=await page.evaluate(()=>({
       viewport:innerHeight,
