@@ -26,7 +26,7 @@ function animal(scene,type,colorHex,size='큰'){
   const color=Object.entries(COLORS).find(([,code])=>code===colorHex)?.[0]||'노란';
   const hue={노란:'yellow',파란:'blue',초록:'green',빨간:'red'}[color];
   const c=scene.add.container(0,0).setScale(size==='큰'?1:.62);
-  const picture=scene.add.image(0,0,`sprite-${kind}-${hue}`).setDisplaySize(200,200);
+  const picture=scene.add.image(0,0,`raster-${kind}-${hue}`).setDisplaySize(200,200);
   c.add(picture);
   c.setSize(150,194);
   return c;
@@ -39,7 +39,7 @@ class BootScene extends Phaser.Scene{
   this.load.image('moaDiscovery','../../assets/moa-discovery.png');
   this.load.image('moaCheer','../../assets/moa-cheer.png');
   const animals=['rabbit','pig','cow','duck'],colors=['yellow','blue','green','red'];
-  animals.forEach(a=>colors.forEach(c=>this.load.svg(`sprite-${a}-${c}`,`art/${a}-${c}.svg`,{width:360,height:360})));
+  animals.forEach(a=>colors.forEach(c=>this.load.image(`raster-${a}-${c}`,`art/animals/${a}-${c}.webp`)));
   for(let i=0;i<5;i++){
     this.load.svg(`world-wide-${i}`,`art/world-wide-${i}.svg`,{width:1200,height:760});
     this.load.svg(`world-tall-${i}`,`art/world-tall-${i}.svg`,{width:720,height:1280});
@@ -91,14 +91,26 @@ class MissionScene extends Phaser.Scene{
  spawnAnimals(){
   const m=this.m,items=[];if(m.need===1){const target=m.species[0];items.push({species:target,color:m.color,size:m.size,good:true});items.push({species:target,color:m.color,size:m.size==='큰'?'작은':'큰'});items.push({species:target,color:m.color==='노란'?'파란':'노란',size:m.size});items.push({species:SPECIES[(SPECIES.indexOf(target)+1)%4],color:m.color,size:m.size});while(items.length<7){const sp=Phaser.Utils.Array.GetRandom(SPECIES),cs=Phaser.Utils.Array.GetRandom(Object.keys(COLORS)),sz=Math.random()>.5?'큰':'작은';if(!items.some(x=>x.species===sp&&x.color===cs&&x.size===sz))items.push({species:sp,color:cs,size:sz})}}
   else{SPECIES.forEach(sp=>items.push({species:sp,color:m.color,size:m.size,good:true}));items.push({species:SPECIES[0],color:m.color,size:m.size});items.push({species:SPECIES[1],color:m.color,size:m.size==='큰'?'작은':'큰'});items.push({species:SPECIES[2],color:m.color==='초록'?'노란':'초록',size:m.size});items.push({species:SPECIES[3],color:m.color==='빨간'?'파란':'빨간',size:m.size})}
-  Phaser.Utils.Array.Shuffle(items);const spots=[[110,350],[330,320],[575,365],[180,520],[520,535],[95,720],[350,690],[610,750],[190,900],[530,910]];
-  Phaser.Utils.Array.Shuffle(spots);items.forEach((it,i)=>{const [x,y]=spots[i],a=animal(this,it.species,COLORS[it.color],it.size);a.setPosition(x,y);a.setDepth(i%3===0?20:30);a.setDataEnabled();a.data.set({species:it.species,color:it.color,size:it.size,rescuing:false});a.setInteractive(new Phaser.Geom.Rectangle(-108,-124,216,248),Phaser.Geom.Rectangle.Contains);a.on('pointerover',()=>{if(!this.lock)this.tweens.add({targets:a,scaleX:a.scaleX*1.05,scaleY:a.scaleY*1.05,duration:90})});a.on('pointerout',()=>{if(!a.data.get('rescuing'))this.tweens.add({targets:a,scaleX:it.size==='큰'?1:.62,scaleY:it.size==='큰'?1:.62,duration:90})});a.on('pointerdown',()=>this.pickAnimal(a));this.tweens.add({targets:a,y:y-8,yoyo:true,repeat:-1,duration:900+(i%4)*170,ease:'Sine.easeInOut'});this.actors.push(a)})
+  Phaser.Utils.Array.Shuffle(items);
+  // Place grounded animals on grassy banks and ducks in water in the pond/creek scenes.
+  // Never scatter interactive sprites in empty sky simply to fill a grid.
+  const waterScene=this.round===0||this.round===2;
+  const landSlots=[[105,696],[334,679],[575,708],[195,823],[518,832],[96,927],[609,936],[354,746]];
+  const waterSlots=[[191,997],[354,994],[515,993],[311,1094]];
+  const meadowSlots=[[115,700],[350,683],[585,716],[187,840],[540,829],[105,964],[602,959],[349,1050]];
+  Phaser.Utils.Array.Shuffle(landSlots);Phaser.Utils.Array.Shuffle(waterSlots);Phaser.Utils.Array.Shuffle(meadowSlots);
+  const used=[];
+  items.forEach((it,i)=>{let spot;if(waterScene&&it.species==='오리'&&waterSlots.length)spot=waterSlots.pop();
+    else if(waterScene&&landSlots.length)spot=landSlots.pop();
+    else spot=meadowSlots.find(p=>!used.some(q=>Math.hypot(p[0]-q[0],p[1]-q[1])<125))||meadowSlots[i%meadowSlots.length];
+    used.push(spot);
+    const [x,y]=spot,a=animal(this,it.species,COLORS[it.color],it.size);a.setPosition(x,y);a.setDepth(i%3===0?20:30);a.setDataEnabled();a.data.set({species:it.species,color:it.color,size:it.size,rescuing:false});a.setInteractive(new Phaser.Geom.Rectangle(-108,-124,216,248),Phaser.Geom.Rectangle.Contains);a.on('pointerover',()=>{if(!this.lock)this.tweens.add({targets:a,scaleX:a.scaleX*1.05,scaleY:a.scaleY*1.05,duration:90})});a.on('pointerout',()=>{if(!a.data.get('rescuing'))this.tweens.add({targets:a,scaleX:it.size==='큰'?1:.62,scaleY:it.size==='큰'?1:.62,duration:90})});/* Nearest-center scene tap handler owns the selection; overlapping sprites cannot hijack it. */this.tweens.add({targets:a,y:y-8,yoyo:true,repeat:-1,duration:900+(i%4)*170,ease:'Sine.easeInOut'});this.actors.push(a)})
  }
  installTouchAssist(){
   const onTap=(pointer,currentlyOver)=>{
     if(this.lock)return;
     const choices=this.actors.filter(a=>a&&a.active&&a.data?.get('species')&&!a.data.get('rescuing'));
-    if((currentlyOver||[]).some(o=>choices.includes(o)))return;
+    // Always resolve the closest target, even when Phaser reports overlapping sprites.
     let nearest=null,smallest=Infinity;
     for(const a of choices){
       const dx=pointer.x-a.x,dy=pointer.y-a.y;

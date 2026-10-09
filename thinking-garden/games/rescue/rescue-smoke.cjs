@@ -18,12 +18,12 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
   const initial=await page.evaluate(()=>({width:window.moaRescueGame.config.width,height:window.moaRescueGame.config.height,canvasWidth:document.querySelector('canvas').getBoundingClientRect().width,canvasHeight:document.querySelector('canvas').getBoundingClientRect().height}));
   const textures=await page.evaluate(()=>{
     const textures=window.moaRescueGame.textures,animals=['rabbit','pig','cow','duck'],colors=['yellow','blue','green','red'];
-    const expected=animals.flatMap(a=>colors.map(c=>'sprite-'+a+'-'+c)).concat(
+    const expected=animals.flatMap(a=>colors.map(c=>'raster-'+a+'-'+c)).concat(
       Array.from({length:5},(_,i)=>'world-tall-'+i),Array.from({length:5},(_,i)=>'world-wide-'+i)
     );
     return {missing:expected.filter(k=>!textures.exists(k)),loaded:expected.length};
   });
-  assert.deepEqual(textures.missing,[],'Missing illustrated SVG textures');
+  assert.deepEqual(textures.missing,[],'Missing independent raster and landscape textures');
   assert.equal(textures.loaded,26);
   assert.equal(initial.width,wide?1200:720);
   assert.equal(initial.height,wide?760:1280);
@@ -84,6 +84,6 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
 (async()=>{
  await test('desktop-1440x900',{width:1440,height:900},true,false,true);
  await test('tablet-1024x768',{width:1024,height:768},true,true,false);
- await test('mobile-390x844',{width:390,height:844},false,true,false);
+ await test('mobile-390x844',{width:390,height:844},false,true,true);
  await test('portrait-tablet-768x1024',{width:768,height:1024},false,true,false);
 })().catch(e=>{console.error(e);process.exitCode=1});

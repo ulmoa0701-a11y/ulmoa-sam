@@ -68,11 +68,18 @@ class LandscapeMissionScene extends Phaser.Scene{
    items.push({species:'오리',color:m.color==='빨간'?'노란':'빨간',size:m.size});
   }
   Phaser.Utils.Array.Shuffle(items);
-  const positions=[[432,239],[645,239],[858,239],[1070,239],[432,493],[645,493],[858,493],[1070,493]];
+  // A spacious 4x2 layout avoids pointer overlap across devices.
+  // Grounded species on the pond get grassy bank footholds rather than floating.
+  const watery=this.round===0||this.round===2;
+  const positions=[[429,336],[643,336],[857,336],[1071,336],[429,562],[643,562],[857,562],[1071,562]];
   items.forEach((it,i)=>{
    const [x,y]=positions[i],a=animal(this,it.species,COLORS[it.color],it.size);
+   if(watery&&i>=4&&it.species!=='오리'){
+     const bank=this.add.ellipse(x,y+77,151,36,0x9ccc78,.94).setStrokeStyle(3,0xd0e7ad,.93).setDepth(4);
+     this.add.ellipse(x,y+83,102,12,0x4b996c,.22).setDepth(5);
+   }
    a.setPosition(x,y).setDepth(8);a.setDataEnabled();a.data.set('item',it);
-   a.setInteractive(new Phaser.Geom.Rectangle(-105,-122,210,244),Phaser.Geom.Rectangle.Contains);
+   a.setInteractive(new Phaser.Geom.Rectangle(-77,-108,154,216),Phaser.Geom.Rectangle.Contains);
    a.on('pointerdown',()=>this.pick(a));
    a.on('pointerover',()=>{if(!this.lock)this.tweens.add({targets:a,scaleX:(it.size==='큰'?1:.62)*1.07,scaleY:(it.size==='큰'?1:.62)*1.07,duration:110})});
    a.on('pointerout',()=>{if(a.active)this.tweens.add({targets:a,scaleX:it.size==='큰'?1:.62,scaleY:it.size==='큰'?1:.62,duration:110})});
