@@ -40,6 +40,7 @@ jobs:
               (root/(species+'.png')).write_bytes(data)
               print('downloaded',species,len(data),flush=True)
           PY
+          # Tight-crop subject alpha mask; preserve eyes, highlights, and texture.
           python thinking-garden/games/rescue/build_illustrated.py
       - name: Commit only raster output (never expire-bearing image URLs)
         run: |
@@ -47,5 +48,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git add thinking-garden/games/rescue/art/illustrated
           git diff --cached --check
-          git commit -m 'Stage 16 independent raster sprites from generated character originals'
+          git commit -m 'Refine framing of the 16 illustrated raster sprites'
           git push origin HEAD:feat/rescue-raster-art-20261009
