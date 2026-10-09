@@ -1,0 +1,35 @@
+name: Rescue asset resolution probe
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/rescue-asset-probe.yml'
+permissions: {contents: read}
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Inspect actual source image sizes
+        env:
+          RABBIT: "https://media.canva.com/v2/image-resize/format:PNG/height:194/quality:100/uri:ifs%3A%2F%2FM%2F022ce80b-e009-435f-8d33-ecdc92ac2e84/watermark:F/width:200?csig=AAAAAAAAAAAAAAAAAAAAAKqjYsSG3STrdJKzG7EUXSDHeAOvmRNByftBhNw9XsWQ&exp=1791551577&osig=AAAAAAAAAAAAAAAAAAAAAJXy23TXthFMzcfUhaL8tbo8Q2VKSJx_4soM7ovVQlNb&signer=media-rpc&token=AAIAAU0AJDAyMmNlODBiLWUwMDktNDM1Zi04ZDMzLWVjZGM5MmFjMmU4NAAAAAABoSDLm6ilvu34Z_bn6bkUef97C2ZZkA8YsjSKkIou92oBquVDOw&x-canva-quality=thumbnail"
+          POND: "https://media.canva.com/v2/image-resize/format:PNG/height:112/quality:100/uri:ifs%3A%2F%2FM%2F9a33431b-70b5-41e5-bab7-2b269a63d381/watermark:F/width:200?csig=AAAAAAAAAAAAAAAAAAAAAOZzPiauIO15Z6keja-YOdWW628K_iDxFb2m_Xl2kmQq&exp=1791553835&osig=AAAAAAAAAAAAAAAAAAAAAIXgTSR0qNTDjrWY8gKUNmqh4VG0M_k3GnLNNka2EFVZ&signer=media-rpc&token=AAIAAU0AJDlhMzM0MzFiLTcwYjUtNDFlNS1iYWI3LTJiMjY5YTYzZDM4MQAAAAABoSDuD_j8pKlO0F3HKFWHEVKOvDgXQLQFK7Wajl6FFlK02lPcSg&x-canva-quality=thumbnail"
+        run: |
+          python3 - <<'PY'
+          import os,re,urllib.request,io,struct
+          for name in ('RABBIT','POND'):
+            url=os.environ[name]
+            candidates={'thumbnail':url}
+            for size in (768,1600):
+              candidates['request_'+str(size)]=re.sub(r'/width:\\d+', '/width:'+str(size),re.sub(r'/height:\\d+', '/height:'+str(round(size*.75)),url))
+            for key,u in candidates.items():
+              try:
+                req=urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0'})
+                with urllib.request.urlopen(req,timeout=18) as f:
+                  b=f.read(12000000); ct=f.headers.get('Content-Type')
+                if b[:8]==b'\\x89PNG\\r\\n\\x1a\\n':
+                  wh=struct.unpack('>II',b[16:24])
+                else: wh='unknown'
+                print('ASSET',name,key,'status=200','type='+str(ct),'bytes='+str(len(b)),'size='+str(wh))
+              except Exception as e:
+                print('ASSET',name,key,'ERROR',str(e)[:220])
+          PY
