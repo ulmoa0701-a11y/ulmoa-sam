@@ -8,9 +8,10 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
  const context=await browser.newContext({viewport,isMobile:touch,hasTouch:touch,deviceScaleFactor:1});
  const page=await context.newPage();
  const errors=[];
+ const webpResponses=[];
  page.on('pageerror',e=>errors.push('pageerror: '+e.message));
  page.on('console',m=>{if(m.type()==='error')errors.push('console: '+m.text())});
- page.on('response',r=>{if(r.status()>=400&&r.url().includes('/rescue/'))errors.push('HTTP '+r.status()+' '+r.url())});
+ page.on('response',r=>{if(r.url().includes('/art/illustrated/')&&r.url().includes('.webp'))webpResponses.push({url:r.url(),status:r.status(),type:r.headers()['content-type']});if(r.status()>=400&&r.url().includes('/rescue/'))errors.push('HTTP '+r.status()+' '+r.url())});
  try{
   const response=await page.goto(BASE,{waitUntil:'load',timeout:40000});
   assert.equal(response.status(),200);
@@ -24,14 +25,16 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
     return {
       missing:expected.filter(k=>!textures.exists(k)),
       loaded:expected.length,
-      wrongSpriteFormat:animals.flatMap(a=>colors.map(c=>'sprite-'+a+'-'+c)).filter(k=>{
-        const texture=textures.get(k),source=texture?.getSourceImage?.();
-        return !source?.src?.includes('/art/illustrated/') || !source?.src?.endsWith('.webp');
+      sourceSamples:animals.slice(0,2).map(a=>{
+        const k='sprite-'+a+'-yellow',texture=textures.get(k);
+        return {key:k,images:texture?.source?.map(x=>({src:x.image?.src,sourceType:x.image?.constructor?.name}))};
       })
     };
   });
   assert.deepEqual(textures.missing,[],'Missing required game textures');
-  assert.deepEqual(textures.wrongSpriteFormat,[],'Character textures must be independent raster WebP, not old SVG');
+  assert.equal(webpResponses.length,16,'Browser must request exactly 16 separate illustrated raster WebP assets, '+JSON.stringify({webpResponses,textures}));
+  assert.ok(webpResponses.every(x=>x.status===200),'All raster textures must respond HTTP 200');
+  console.log('ILLUSTRATED WEBP SOURCES',JSON.stringify(textures.sourceSamples));
   assert.equal(textures.loaded,26);
   assert.equal(initial.width,wide?1200:720);
   assert.equal(initial.height,wide?760:1280);
