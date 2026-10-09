@@ -26,7 +26,7 @@ function animal(scene,type,colorHex,size='큰'){
   const color=Object.entries(COLORS).find(([,code])=>code===colorHex)?.[0]||'노란';
   const hue={노란:'yellow',파란:'blue',초록:'green',빨간:'red'}[color];
   const c=scene.add.container(0,0).setScale(size==='큰'?1:.62);
-  const picture=scene.add.image(0,0,`sprite-${kind}-${hue}`).setDisplaySize(200,200);
+  const picture=scene.add.image(0,0,`raster-${kind}-${hue}`).setDisplaySize(200,200);
   c.add(picture);
   c.setSize(150,194);
   return c;
@@ -39,7 +39,7 @@ class BootScene extends Phaser.Scene{
   this.load.image('moaDiscovery','../../assets/moa-discovery.png');
   this.load.image('moaCheer','../../assets/moa-cheer.png');
   const animals=['rabbit','pig','cow','duck'],colors=['yellow','blue','green','red'];
-  animals.forEach(a=>colors.forEach(c=>this.load.svg(`sprite-${a}-${c}`,`art/${a}-${c}.svg`,{width:360,height:360})));
+  animals.forEach(a=>colors.forEach(c=>this.load.image(`raster-${a}-${c}`,`art/animals/${a}-${c}.webp`)));
   for(let i=0;i<5;i++){
     this.load.svg(`world-wide-${i}`,`art/world-wide-${i}.svg`,{width:1200,height:760});
     this.load.svg(`world-tall-${i}`,`art/world-tall-${i}.svg`,{width:720,height:1280});
