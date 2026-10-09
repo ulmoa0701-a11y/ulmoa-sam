@@ -78,7 +78,7 @@ class LandscapeMissionScene extends Phaser.Scene{
    const pos=watery?(it.species==='오리'&&waterPositions.length?waterPositions.pop():bankPositions.pop()||meadowPositions.pop()):meadowPositions[i];
    const [x,y]=pos,a=animal(this,it.species,COLORS[it.color],it.size);
    a.setPosition(x,y).setDepth(8);a.setDataEnabled();a.data.set('item',it);
-   a.setInteractive(new Phaser.Geom.Rectangle(-105,-122,210,244),Phaser.Geom.Rectangle.Contains);
+   a.setInteractive(new Phaser.Geom.Rectangle(-68,-99,136,198),Phaser.Geom.Rectangle.Contains);
    a.on('pointerdown',()=>this.pick(a));
    a.on('pointerover',()=>{if(!this.lock)this.tweens.add({targets:a,scaleX:(it.size==='큰'?1:.62)*1.07,scaleY:(it.size==='큰'?1:.62)*1.07,duration:110})});
    a.on('pointerout',()=>{if(a.active)this.tweens.add({targets:a,scaleX:it.size==='큰'?1:.62,scaleY:it.size==='큰'?1:.62,duration:110})});
