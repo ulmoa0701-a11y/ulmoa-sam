@@ -21,7 +21,7 @@ const target = 'https://ulmoa0701-a11y.github.io/ulmoa-sam/heart-score/ai/?v=702
       await page.goto(target,{waitUntil:'domcontentloaded',timeout:90000});
       const iframe=page.locator('#app');await iframe.waitFor({state:'attached'});
       const frame=await iframe.contentFrame();
-      await frame.waitForFunction(()=>document.querySelector('#imageScoreFile')?.dataset?.aiOmr==='v702',{},{timeout:90000});
+      await page.waitForFunction(()=>document.getElementById('app')?.contentDocument?.querySelector('#imageScoreFile')?.dataset?.aiOmr==='v702',{},{timeout:90000});
       result.ready=true;
       result.initialStatus=await frame.locator('#imageStatus').innerText().catch(()=>'(no imageStatus)');
       result.loadingText=await page.locator('#loading').innerText().catch(()=>'removed');
@@ -44,7 +44,7 @@ const target = 'https://ulmoa0701-a11y.github.io/ulmoa-sam/heart-score/ai/?v=702
         return canvas.toDataURL('image/png').split(',')[1];
       });
       await frame.locator('#imageScoreFile').setInputFiles({name:'synthetic-staff-mobile-smoke.png',mimeType:'image/png',buffer:Buffer.from(b64,'base64')});
-      await frame.waitForFunction(()=>/초안 완료|결과 검증|분석 실패|자동 변환|오선보가 아니라|불러오지 못|본체 연결 실패/.test(document.querySelector('#imageStatus')?.textContent||'')||!!document.querySelector('#pages')?.innerText?.includes('자동 변환을 중단'),{},{timeout:180000}).catch(e=>{result.waitError=String(e)});
+      await page.waitForFunction(()=>{const d=document.getElementById('app')?.contentDocument;return /초안 완료|결과 검증|분석 실패|자동 변환|오선보가 아니라|불러오지 못|본체 연결 실패/.test(d?.querySelector('#imageStatus')?.textContent||'')||!!d?.querySelector('#pages')?.innerText?.includes('자동 변환을 중단')},{},{timeout:180000}).catch(e=>{result.waitError=String(e)});
       const state=await frame.evaluate(()=>({
         status:document.querySelector('#imageStatus')?.textContent||'',
         pageInfo:document.querySelector('#pageInfo')?.textContent||'',
