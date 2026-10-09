@@ -1,0 +1,161 @@
+/* 해봄노트 용어노트: 승인 이미지 12장 = 독립 버튼 12개.
+   콜라주/이미지 분할/가로 강제 스크롤 금지. */
+.glossary-page .glossary-hero{display:none!important}
+.glossary-page .glossary-approved-section{
+  max-width:1140px;
+  margin:10px auto 28px;
+  padding:25px clamp(13px,2.4vw,30px) 17px;
+  border:1px solid #eee6da;
+  border-radius:21px;
+  background:#fffcf7;
+}
+.glossary-page .glossary-approved-heading{
+  margin:0 0 23px;
+  text-align:center;
+}
+.glossary-page .glossary-approved-kicker{
+  display:inline-block;
+  padding:4px 11px;
+  margin-bottom:9px;
+  border-radius:40px;
+  background:#e9f3df;
+  color:#665848;
+  font:600 12px/1.35 "Pretendard Variable",Pretendard,sans-serif;
+}
+.glossary-page .glossary-approved-heading h1{
+  margin:0!important;
+  color:#433026;
+  font:400 clamp(30px,4.7vw,44px)/1.13 "Gamja Flower",cursive!important;
+}
+.glossary-page .glossary-approved-heading p{
+  margin:8px 0 0;
+  color:#6f655d;
+  font:500 14px/1.5 "Pretendard Variable",Pretendard,sans-serif;
+}
+.glossary-page .glossary-approved-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:15px;
+  width:100%;
+  max-width:100%;
+  overflow:visible;
+}
+.glossary-page .glossary-approved-card{
+  position:relative;
+  display:block;
+  min-width:0;
+  width:100%;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+  border:2px solid #f0e7db;
+  border-radius:19px;
+  background:#fffdf9;
+  box-shadow:0 4px 16px rgba(81,61,43,.045);
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+}
+.glossary-page .glossary-approved-card img{
+  display:block;
+  width:100%;
+  height:auto;
+  aspect-ratio:1122/1402;
+  object-fit:contain;
+  border:0;
+  pointer-events:none;
+}
+.glossary-page .glossary-approved-card:hover{
+  transform:translateY(-3px);
+  border-color:#ddc5ab;
+  box-shadow:0 10px 26px rgba(81,61,43,.10);
+}
+.glossary-page .glossary-approved-card:active{
+  transform:translateY(0);
+  background:#fdf4e9;
+}
+.glossary-page .glossary-approved-card:focus-visible{
+  outline:3px solid #507eb1;
+  outline-offset:3px;
+}
+.glossary-page .glossary-approved-footnote{
+  margin:15px 0 0;
+  text-align:center;
+  color:#8e8176;
+  font:500 12px/1.4 "Pretendard Variable",Pretendard,sans-serif;
+}
+/* 전체 30개 용어도 읽기 좋은 텍스트 선택 카드 유지. */
+.glossary-page .glossary-explorer-v2{margin-top:16px!important}
+.glossary-page .glossary-explorer-v2 .category-illus,
+.glossary-page .glossary-explorer-v2 .category-arrow{display:none!important}
+.glossary-page .glossary-explorer-v2 .category-card{
+  grid-template-columns:1fr!important;
+  min-height:69px!important;
+  gap:0!important;
+}
+.glossary-page .study-note-list .term-icon,
+.glossary-page .study-note-list .glossary-illustration,
+.glossary-page .study-note-list .study-index{display:none!important}
+.glossary-page .study-note-list .study-note>summary,
+.glossary-page .study-note-list .study-note[open]>summary{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+  gap:8px!important;
+  grid-template-columns:none!important;
+  grid-template-areas:none!important;
+  min-height:108px!important;
+  padding:15px!important;
+  text-align:left!important;
+}
+.glossary-page .study-note-list .study-summary-copy{width:100%;min-width:0}
+.glossary-page .study-note-list .study-summary-copy h3{
+  margin:0!important;
+  font-size:26px!important;
+  line-height:1.1!important;
+}
+.glossary-page .study-note-list .study-summary-copy p{
+  display:block!important;
+  margin:6px 0 0!important;
+  color:#657881!important;
+  font:500 12px/1.5 "Pretendard Variable",Pretendard,sans-serif!important;
+  -webkit-line-clamp:unset!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+.glossary-page .study-note-list .study-toggle{
+  display:block!important;
+  margin:0!important;
+  align-self:flex-start!important;
+}
+@media (max-width:1099px){
+  .glossary-page .glossary-approved-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+}
+@media (max-width:799px){
+  .glossary-page .glossary-approved-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+}
+@media (max-width:559px){
+  .glossary-page .glossary-approved-section{
+    margin:6px 0 20px;
+    padding:18px 12px 12px;
+    border-radius:17px;
+  }
+  .glossary-page .glossary-approved-heading{margin-bottom:14px}
+  .glossary-page .glossary-approved-heading h1{font-size:32px!important}
+  .glossary-page .glossary-approved-heading p{font-size:12px!important}
+  .glossary-page .glossary-approved-grid{
+    grid-template-columns:minmax(0,1fr);
+    gap:13px;
+    max-width:365px;
+    margin:0 auto;
+  }
+  .glossary-page .glossary-approved-card{border-radius:18px}
+  .glossary-page .glossary-approved-footnote{font-size:11px}
+  .glossary-page .study-note-list .study-note>summary{min-height:102px!important}
+  .glossary-page .study-note-list .study-summary-copy h3{font-size:24px!important}
+  .glossary-page .study-note-list .study-summary-copy p{font-size:12px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .glossary-page .glossary-approved-card{transition:none!important}
+}
