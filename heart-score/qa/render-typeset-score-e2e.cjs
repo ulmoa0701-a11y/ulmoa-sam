@@ -12,7 +12,7 @@ const truth=require('./doremi-ground-truth.json');
  try{
   const page=await browser.newPage({viewport:{width:1940,height:1600}});
   await page.setContent('<html><body><canvas id="score"></canvas></body></html>');
-  await page.addScriptTag({path:require.resolve('vexflow/build/cjs/vexflow.js')});
+  await page.addScriptTag({path:path.join(__dirname,'node_modules/vexflow/build/cjs/vexflow.js')});
   const pictures=await page.evaluate(async truth=>{
    const VF=window.Vex?.Flow||window.VexFlow?.Flow||window.VexFlow;
    if(!VF?.Renderer)throw Error('VexFlow renderer unavailable');
