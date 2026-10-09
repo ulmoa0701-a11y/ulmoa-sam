@@ -1,0 +1,32 @@
+name: Heart Score Mobile Live Smoke
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'heart-score/qa/mobile-live-smoke.cjs'
+      - '.github/workflows/heart-score-mobile-live-smoke.yml'
+  workflow_dispatch:
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test dependencies
+        run: |
+          npm ci --prefix heart-score/qa --ignore-scripts --no-audit --no-fund
+          npx --prefix heart-score/qa playwright install chromium
+      - name: Exercise live GitHub Pages from Android Chrome mobile viewports
+        working-directory: heart-score/qa
+        run: node mobile-live-smoke.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-live-smoke-results
+          path: |
+            heart-score/qa/mobile-live-result.json
+            heart-score/qa/mobile-*.png
+          if-no-files-found: warn
