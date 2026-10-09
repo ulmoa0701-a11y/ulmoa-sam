@@ -21,9 +21,17 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
     const expected=animals.flatMap(a=>colors.map(c=>'sprite-'+a+'-'+c)).concat(
       Array.from({length:5},(_,i)=>'world-tall-'+i),Array.from({length:5},(_,i)=>'world-wide-'+i)
     );
-    return {missing:expected.filter(k=>!textures.exists(k)),loaded:expected.length};
+    return {
+      missing:expected.filter(k=>!textures.exists(k)),
+      loaded:expected.length,
+      wrongSpriteFormat:animals.flatMap(a=>colors.map(c=>'sprite-'+a+'-'+c)).filter(k=>{
+        const texture=textures.get(k),source=texture?.getSourceImage?.();
+        return !source?.src?.includes('/art/illustrated/') || !source?.src?.endsWith('.webp');
+      })
+    };
   });
-  assert.deepEqual(textures.missing,[],'Missing illustrated SVG textures');
+  assert.deepEqual(textures.missing,[],'Missing required game textures');
+  assert.deepEqual(textures.wrongSpriteFormat,[],'Character textures must be independent raster WebP, not old SVG');
   assert.equal(textures.loaded,26);
   assert.equal(initial.width,wide?1200:720);
   assert.equal(initial.height,wide?760:1280);
