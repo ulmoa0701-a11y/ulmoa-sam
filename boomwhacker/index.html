@@ -214,6 +214,39 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
  .score:before{display:none}
 }
 
+
+/* compact desktop keeps every class control in one viewport */
+@media(min-width:801px){
+ .top{padding:3px 8px 4px;margin-bottom:5px;min-height:0}
+ .top:before{height:10px;top:-5px;width:52px}
+ .brand h1{font-size:29px;margin:0}
+ .brand p{display:none}
+ .back{padding:6px 9px;font-size:11px}
+ .controls{padding:6px 8px}
+ .controls .sec+.sec{margin-top:4px;padding-top:4px}
+ .controls .label{font-size:9.5px;padding:1px 5px;margin-bottom:2px;line-height:1.25}
+ .controls .songTitle{font-size:17px}
+ .controls .meta{font-size:9.5px;margin-top:1px}
+ .controls .sampleSelect{padding:5px 7px;border-radius:9px;font-size:11px}
+ .controls .seg button,.controls .toggle{padding:5px 3px;border-radius:9px;font-size:10.5px}
+ .controls #fullBtn{font-size:9.5px}
+ .controls .speed{gap:4px}
+ .controls .speed>span:first-child{font-size:10px}
+ .controls .bpm{font-size:10.5px;min-width:49px}
+ .controls .mrVol{margin-top:3px;gap:4px;grid-template-columns:auto 1fr 34px}
+ .controls .mrVol .label{padding:0;background:transparent;transform:none;margin:0;font-size:9px}
+ .controls .mrPct{font-size:9.5px}
+ .controls .mrFile{padding:3px 4px;font-size:9.5px}
+ .controls .mrFile::file-selector-button{padding:4px 5px;margin-right:4px;font-size:9.5px}
+ .controls .mrStatus{font-size:9px;line-height:1.15;margin-top:2px}
+ .controls .playSec .primary,.controls .playSec .ghost{padding:7px 5px;font-size:11.5px}
+ .controls .videoSec .videoBtn{padding:7px 6px;font-size:11.5px}
+ .controls .videoOptions{margin-top:3px;gap:3px}
+ .controls .videoOption{padding:3px 4px;font-size:9px}
+ .controls .videoStatus{font-size:8.8px;margin-top:2px;line-height:1.15}
+ .rangeNote.show{padding:4px 5px;margin-top:3px;font-size:9px;line-height:1.15}
+}
+
 </style>
 </head>
 <body>
