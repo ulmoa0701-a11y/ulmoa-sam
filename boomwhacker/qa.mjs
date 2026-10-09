@@ -159,9 +159,10 @@ async function basicCase(name,width,height){
   await page.locator('#newInstrumentIcon').fill('🛎️');
   await page.locator('#newInstrumentName').fill('차임');
   await page.locator('#addInstrumentBtn').click();
-  check(await page.locator('#displayInputs select[data-instrument-index="0"] option').filter({hasText:'🛎️ 차임'}).count()===1,`${name}: custom instrument was not added to selector`);
-  const recorderValue=await page.locator('#displayInputs select[data-instrument-index="0"] option').filter({hasText:'🛎️ 차임'}).getAttribute('value');
-  await page.locator('#displayInputs select[data-instrument-index="0"]').selectOption(recorderValue);
+  const addedInstrument=await page.evaluate(()=>window.__boomVideoQA.display().instrumentLibrary.find(x=>x.name==='차임'));
+  check(!!addedInstrument?.id,`${name}: custom instrument was not added to library`);
+  check(await page.locator('#displayInputs select[data-instrument-index="0"] option[value="'+addedInstrument.id+'"]').count()===1,`${name}: custom instrument option was not rebuilt`);
+  await page.locator('#displayInputs select[data-instrument-index="0"]').selectOption(addedInstrument.id);
   await page.locator('#displayApplyBtn').click();
   check((await page.locator('.laneLabel').first().innerText())==='🛎️',`${name}: selected custom instrument did not update lane`);
   check((await page.locator('.tube[data-note="도"] .tubeLabel').innerText())==='🛎️',`${name}: selected custom instrument did not update tube`);
