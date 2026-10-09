@@ -247,6 +247,69 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
  .rangeNote.show{padding:4px 5px;margin-top:3px;font-size:9px;line-height:1.15}
 }
 
+
+/* === one-screen desktop classroom dashboard === */
+@media(min-width:1180px){
+ html,body{height:100%;overflow:hidden}
+ body{min-height:0}
+ .app{
+  width:min(1600px,100vw);height:100dvh;margin:0 auto;padding:6px 8px 8px;
+  display:grid;grid-template-columns:310px minmax(0,1fr) 270px;
+  grid-template-rows:auto minmax(0,1fr);gap:8px;
+ }
+ .top{grid-column:1/-1;grid-row:1;margin:0;min-width:0}
+ .layout{display:contents}
+ .controls{
+  grid-column:1;grid-row:2;position:relative;top:auto;height:100%;min-height:0;
+  overflow:hidden;align-self:stretch;padding:6px 7px
+ }
+ .stagePanel{
+  grid-column:2;grid-row:2;height:100%;min-height:0;padding:6px;
+  display:grid;grid-template-rows:auto minmax(0,1fr) auto
+ }
+ .stageHead{margin-bottom:5px;padding:2px 4px 5px;min-height:34px}
+ .stage{height:auto;min-height:0;border-radius:18px}
+ .playbar{margin-top:5px;padding:4px 7px;grid-template-columns:44px 1fr 44px;gap:7px}
+ .round{width:44px;height:44px;font-size:18px}
+ .score{
+  grid-column:3;grid-row:2;margin:0;min-width:0;min-height:0;height:100%;
+  padding:11px 10px;display:flex;flex-direction:column;overflow:hidden
+ }
+ .score h2{font-size:15px;padding-right:70px}
+ .scoreSub{font-size:10px;margin:3px 0 7px}
+ .score:before{right:10px;top:9px;font-size:8px;padding:4px 6px}
+ .scoreRows{
+  flex:1;min-height:0;overflow:auto;align-content:flex-start;gap:4px;
+  scrollbar-width:thin;scrollbar-color:#cbd6da transparent
+ }
+ .scoreRows::-webkit-scrollbar{width:6px}.scoreRows::-webkit-scrollbar-thumb{background:#cbd6da;border-radius:999px}
+ .beat{min-width:42px;flex:1 1 46px;max-width:62px;border-radius:10px}
+ .note{height:34px;font-size:11px}.lyric{height:24px;font-size:10px}
+ .legend{flex:0 0 auto;margin-top:6px;gap:4px}
+ .chip{padding:4px 6px;font-size:9px}
+ .controls .sec+.sec{margin-top:3px;padding-top:3px}
+ .controls .label{font-size:9px;padding:1px 5px;margin-bottom:2px}
+ .controls .songTitle{font-size:16px}
+ .controls .meta{font-size:9px;margin-top:0}
+ .controls .sampleSelect{padding:4px 6px;font-size:10.5px}
+ .controls .seg button,.controls .toggle{padding:4px 2px;font-size:10px}
+ .controls .speed>span:first-child{font-size:9.5px}
+ .controls .bpm{font-size:10px;min-width:46px}
+ .controls .mrVol{margin-top:2px;grid-template-columns:auto 1fr 32px;gap:3px}
+ .controls .mrVol .label{font-size:8.5px}
+ .controls .mrPct{font-size:9px}
+ .controls .mrFile{padding:2px 3px;font-size:9px}
+ .controls .mrFile::file-selector-button{padding:3px 4px;font-size:9px}
+ .controls .mrStatus{font-size:8.5px;line-height:1.05;margin-top:1px}
+ .controls .playSec{grid-template-columns:1.2fr .8fr;gap:4px}
+ .controls .playSec .primary,.controls .playSec .ghost{padding:6px 4px;font-size:11px}
+ .controls .videoSec .videoBtn{padding:6px 5px;font-size:11px}
+ .controls .videoOptions{margin-top:2px;gap:2px}
+ .controls .videoOption{padding:2px 3px;font-size:8.5px}
+ .controls .videoStatus{font-size:8.2px;margin-top:1px}
+ .rangeNote.show{padding:3px 4px;margin-top:2px;font-size:8.5px;line-height:1.05}
+}
+
 </style>
 </head>
 <body>

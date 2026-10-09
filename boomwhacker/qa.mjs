@@ -72,6 +72,22 @@ async function basicCase(name,width,height){
   check(videoInfo.preview?.w===1280&&videoInfo.preview?.h===720&&String(videoInfo.preview?.data||'').startsWith('data:image/png'),`${name}: 16:9 video preview render failed`);
   let overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth));
   check(overflow<=1,`${name}: horizontal overflow ${overflow}px`);
+  if(width>=1180){
+    const oneScreen=await page.evaluate(()=>({
+      viewport:innerHeight,
+      scrollHeight:document.documentElement.scrollHeight,
+      bodyScrollHeight:document.body.scrollHeight,
+      controls:document.querySelector('.controls')?.getBoundingClientRect(),
+      stage:document.querySelector('.stagePanel')?.getBoundingClientRect(),
+      score:document.querySelector('.score')?.getBoundingClientRect(),
+      video:document.querySelector('#videoBtn')?.getBoundingClientRect(),
+      start:document.querySelector('#startBtn')?.getBoundingClientRect()
+    }));
+    check(oneScreen.scrollHeight<=oneScreen.viewport+1&&oneScreen.bodyScrollHeight<=oneScreen.viewport+1,`${name}: desktop page still needs vertical scrolling ${JSON.stringify(oneScreen)}`);
+    for(const [key,r] of Object.entries({controls:oneScreen.controls,stage:oneScreen.stage,score:oneScreen.score,video:oneScreen.video,start:oneScreen.start})){
+      check(!!r&&r.top>=0&&r.bottom<=oneScreen.viewport+1,`${name}: ${key} is outside one-screen viewport ${JSON.stringify(r)}`);
+    }
+  }
   if(width>=801){
     const visible=await page.evaluate(()=>{
       const ids=['startBtn','restartBtn','videoBtn','fullBtn'],out={};
