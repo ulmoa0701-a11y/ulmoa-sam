@@ -1,0 +1,58 @@
+name: Rescue illustrated live QA
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/rescue-live-art-probe.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+      - name: Wait for public illustrated game to become live
+        run: |
+          ROOT='https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/'
+          ready=0
+          for i in $(seq 1 36); do
+            if curl -fsSL --max-time 12 "${ROOT}game.js?v=3" | grep -q 'sprite-'; then
+              if curl -fsSL --max-time 12 "${ROOT}index.html" | grep -q 'game.js?v=3'; then
+                if curl -fsSL --max-time 12 "${ROOT}art/duck-yellow.svg" | grep -q '<svg'; then
+                  ready=1
+                  break
+                fi
+              fi
+            fi
+            sleep 10
+          done
+          test "$ready" = "1"
+          for species in rabbit pig cow duck; do
+            for color in yellow blue green red; do
+              curl -fsSL --max-time 18 "${ROOT}art/${species}-${color}.svg" | grep -q '<svg'
+            done
+          done
+          for format in wide tall; do
+            for i in 0 1 2 3 4; do
+              curl -fsSL --max-time 18 "${ROOT}art/world-${format}-${i}.svg" | grep -q '<svg'
+            done
+          done
+          echo 'PASS: all 26 illustrated assets and new v3 scripts are live'
+      - name: Play entire public site in real Chromium
+        env:
+          RESCUE_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/
+        run: node thinking-garden/games/rescue/rescue-smoke.cjs
+      - name: Preserve test screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rescue-live-qa-screenshots
+          path: rescue-qa-screenshots/
+          if-no-files-found: ignore
