@@ -1,0 +1,128 @@
+/* 해봄노트: 사용자가 지정한 원본 디자인 1:1 표시. 이미지 크롭·분할·재그림 없음. */
+.glossary-page .glossary-hero{display:none!important}
+.glossary-page .glossary-original-section{
+  margin:12px 0 30px;
+  background:#fffefb;
+  border:1px solid #efe8db;
+  border-radius:18px;
+  box-shadow:0 7px 24px rgba(86,63,47,.035);
+  padding:0;
+  overflow:hidden;
+}
+.glossary-page .glossary-original-scroll{
+  width:100%;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scrollbar-width:thin;
+  scrollbar-color:#d9c8a6 transparent;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.glossary-page .glossary-original-board{
+  position:relative;
+  width:100%;
+  aspect-ratio:1448/1086;
+  margin:auto;
+  background:#fffcf6;
+}
+.glossary-page .glossary-original-board img{
+  display:block;
+  width:100%;
+  height:auto;
+  margin:0;
+  user-select:none;
+  -webkit-user-drag:none;
+  pointer-events:none;
+}
+.glossary-page .glossary-board-hotspots{
+  position:absolute;
+  inset:9.15% 1.6% 4.75% 1.6%;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-template-rows:repeat(3,minmax(0,1fr));
+  column-gap:.62%;
+  row-gap:.98%;
+}
+.glossary-page .glossary-board-hotspots button{
+  display:block;
+  border:2px solid transparent;
+  border-radius:17px;
+  padding:0;
+  width:100%;
+  min-width:0;
+  height:100%;
+  background:transparent;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.glossary-page .glossary-board-hotspots button:hover{
+  background:rgba(255,224,150,.08);
+  border-color:rgba(112,83,64,.48);
+}
+.glossary-page .glossary-board-hotspots button:focus-visible{
+  outline:4px solid #437fc3;
+  outline-offset:-4px;
+  background:rgba(255,249,215,.1);
+}
+.glossary-page .glossary-original-notice{
+  display:none;
+  padding:11px 12px 9px;
+  margin:0;
+  color:#6d594d;
+  text-align:center;
+  font:600 12px/1.6 "Pretendard Variable",Pretendard,sans-serif;
+}
+.glossary-page .glossary-original-caption{
+  display:block;
+  padding:10px 20px 14px;
+  background:#fffdf8;
+  color:#847a68;
+  font:500 12px/1.6 "Pretendard Variable",Pretendard,sans-serif;
+}
+.glossary-page .glossary-explorer-v2{margin-top:12px!important}
+.glossary-page .glossary-explorer-v2 .category-illus{display:none!important}
+.glossary-page .glossary-explorer-v2 .category-card{
+  grid-template-columns:minmax(0,1fr)!important;
+  min-height:68px!important;
+  gap:0!important;
+}
+.glossary-page .glossary-explorer-v2 .category-arrow{display:none!important}
+.glossary-page .study-note-list .term-icon,
+.glossary-page .study-note-list .glossary-illustration{display:none!important}
+.glossary-page .study-note-list .study-note>summary{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  min-height:110px!important;
+  justify-content:center!important;
+  gap:5px!important;
+  padding:13px!important;
+}
+.glossary-page .study-note-list .study-index{display:none!important}
+.glossary-page .study-note-list .study-toggle{display:none!important}
+.glossary-page .study-note-list .study-summary-copy{width:100%;min-width:0}
+.glossary-page .study-note-list .study-summary-copy h3{font-size:26px!important}
+.glossary-page .study-note-list .study-summary-copy p{
+  display:block!important;
+  font-size:12px!important;
+  line-height:1.5!important;
+  max-width:100%;
+  -webkit-line-clamp:unset!important;
+}
+.glossary-page .study-note-list .study-note[open]>summary{
+  display:block!important;
+  min-height:80px!important;
+}
+@media(max-width:760px){
+  .glossary-page .glossary-original-section{margin:8px 0 20px}
+  .glossary-page .glossary-original-board{width:900px;min-width:900px}
+  .glossary-page .glossary-original-notice{display:block}
+  .glossary-page .glossary-original-caption{font-size:11px;padding:9px 12px}
+  .glossary-page .glossary-explorer-v2 .category-card{min-height:62px!important}
+  .glossary-page .study-note-list .study-note>summary{min-height:110px!important;display:block!important}
+  .glossary-page .study-note-list .study-summary-copy h3{font-size:23px!important}
+  .glossary-page .study-note-list .study-summary-copy p{font-size:11px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .glossary-page .glossary-original-board button{transition:none}
+}
