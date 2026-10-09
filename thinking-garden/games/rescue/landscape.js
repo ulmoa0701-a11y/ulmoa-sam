@@ -68,9 +68,15 @@ class LandscapeMissionScene extends Phaser.Scene{
    items.push({species:'오리',color:m.color==='빨간'?'노란':'빨간',size:m.size});
   }
   Phaser.Utils.Array.Shuffle(items);
-  const positions=[[432,239],[645,239],[858,239],[1070,239],[432,493],[645,493],[858,493],[1070,493]];
+  // Species-aware world positions: mammals stay on ground, ducks may enter water.
+  const watery=this.round===0||this.round===2;
+  const bankPositions=[[391,338],[533,328],[674,337],[815,328],[958,336],[1096,330]];
+  const waterPositions=[[478,552],[673,560],[868,550],[1075,568]];
+  const meadowPositions=[[430,335],[640,335],[850,335],[1060,335],[430,572],[640,572],[850,572],[1060,572]];
+  Phaser.Utils.Array.Shuffle(bankPositions);Phaser.Utils.Array.Shuffle(waterPositions);Phaser.Utils.Array.Shuffle(meadowPositions);
   items.forEach((it,i)=>{
-   const [x,y]=positions[i],a=animal(this,it.species,COLORS[it.color],it.size);
+   const pos=watery?(it.species==='오리'&&waterPositions.length?waterPositions.pop():bankPositions.pop()||meadowPositions.pop()):meadowPositions[i];
+   const [x,y]=pos,a=animal(this,it.species,COLORS[it.color],it.size);
    a.setPosition(x,y).setDepth(8);a.setDataEnabled();a.data.set('item',it);
    a.setInteractive(new Phaser.Geom.Rectangle(-105,-122,210,244),Phaser.Geom.Rectangle.Contains);
    a.on('pointerdown',()=>this.pick(a));
