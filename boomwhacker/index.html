@@ -350,12 +350,20 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
 }
 
 </style>
+<link rel="stylesheet" href="./mobile-layout.css?v=20261009" />
 </head>
 <body>
 <div class="app">
 <header class="top"><div class="brand"><small>일단 해봄노트 · 울모아쌤</small><h1>🥁 붐웨커 Studio</h1><p>색을 보고 치고, 떨어지는 노트를 따라 연주해요.</p></div><a class="back" href="../heart-score/">← 하트악보</a></header>
+<div class="mobileActions" aria-label="모바일 빠른 조작">
+  <div class="mobileSongWrap"><select id="mobileSongSelect" class="mobileSongSelect" aria-label="연주할 곡 선택"><option value="">현재 곡</option></select></div>
+  <button id="mobileScoreBtn" class="mobileActionBtn" type="button" aria-controls="mobileScoreSheet" aria-expanded="false">🎼 악보</button>
+  <button id="mobileSettingsBtn" class="mobileActionBtn" type="button" aria-controls="mobileSettingsSheet" aria-expanded="false">⚙ 설정</button>
+</div>
+<div id="mobileBackdrop" class="mobileBackdrop" aria-hidden="true"></div>
 <main class="layout">
-<aside class="panel controls">
+<aside id="mobileSettingsSheet" class="panel controls">
+<div class="mobileSheetHeader"><strong>연주 설정</strong><button id="mobileSettingsClose" class="mobileSheetClose" type="button" aria-label="설정 닫기">닫기 ✕</button></div>
 <div class="sec"><div class="label">현재 곡</div><div class="songTitle" id="songTitle">작은별</div><div class="meta" id="songMeta">2/4 · 92 BPM</div></div>
 <div class="sec"><div class="label">샘플곡 바로 불러오기</div><select id="sampleSelect" class="sampleSelect" aria-label="샘플곡 선택"></select><div class="hint">하트악보의 샘플곡을 같은 음·리듬·가사로 불러옵니다.</div></div>
 <div class="sec"><div class="label">연습 음 범위</div><div class="seg" id="levels"><button data-level="3">3음</button><button data-level="5">5음</button><button data-level="8" class="on">8음</button></div><div class="hint">3음은 도·미·솔, 5음은 도·레·미·솔·라만 활성화해요.</div><div id="rangeNote" class="rangeNote"></div></div>
@@ -376,7 +384,7 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
 </aside>
 <section class="panel stagePanel"><div class="stageHead"><strong id="stageTitle">작은별</strong><div class="stageHeadRight"><select id="displayModeSelect" class="stageDisplaySelect" aria-label="연주 화면 표시 방식"><option value="note">계이름</option><option value="name">아이 이름</option><option value="instrument">악기</option><option value="custom">직접 표시</option></select><button id="displayEditBtn" class="displayEditBtn" type="button" aria-label="표시 내용 설정">설정</button><span id="stageStatus">준비</span><button id="stageFsBtn" class="stageFsBtn" type="button" aria-label="수업 전체화면" title="수업 전체화면">⛶</button><button id="fsExitBtn" class="fsExitBtn" type="button">전체화면 나가기</button></div></div><div id="stage" class="stage"><div id="lanes" class="lanes"></div><div class="hitLine"></div><div id="lyricTrack" class="lyricTrack" aria-live="polite"></div><div id="tubes" class="tubes"></div></div><div class="playbar"><button id="playBtn" class="round" aria-label="재생 또는 일시정지">▶</button><div><div id="progress" class="progress"><div id="progressFill" class="fill"></div></div><div id="timeLabel" class="time">0:00 / 0:00</div></div><button id="resetBtn" class="round" aria-label="처음부터">↺</button></div></section>
 </main>
-<section class="panel score"><h2>붐웨커 색깔악보</h2><div id="scoreSub" class="scoreSub">연주 순서를 한눈에 봐요.</div><div id="scoreRows" class="scoreRows"></div><div id="legend" class="legend"></div></section>
+<section id="mobileScoreSheet" class="panel score"><div class="mobileSheetHeader"><strong>색깔악보</strong><button id="mobileScoreClose" class="mobileSheetClose" type="button" aria-label="악보 닫기">닫기 ✕</button></div><h2>붐웨커 색깔악보</h2><div id="scoreSub" class="scoreSub">연주 순서를 한눈에 봐요.</div><div id="scoreRows" class="scoreRows"></div><div id="legend" class="legend"></div></section>
 </div>
 <div id="displayModal" class="displayModal" role="dialog" aria-modal="true" aria-labelledby="displayDialogTitle">
  <div class="displayDialog">
@@ -493,7 +501,7 @@ function applyDisplayMode(){document.body.dataset.displayMode=displayMode;$('#di
 function noteColor(n){return COLORS[n]||'#e2e8f0'}function noteText(n){return TEXT[n]||'#526071'}function beatMs(){return 60000/Math.max(40,bpm)}
 function outOfBaseCount(){return events.filter(e=>e.note!=='쉼'&&!ALLOWED[8].has(e.note)).length}
 function build(){events=[];let t=1200,u=beatMs(),eventIndex=0;for(const [mi,m] of (currentSong.measures||[]).entries())for(const e of m){let d=Math.max(.125,Number(e.dur)||1),n=canonical(e.note);events.push({note:n,lyric:e.lyric||'',start:t,dur:d*u,active:n!=='쉼'&&ALLOWED[level].has(n),supported:n==='쉼'||ALLOWED[8].has(n),measure:mi,index:eventIndex++});t+=d*u}totalMs=t+u*1.5;lastLyricKey='';renderScore();updateTime();updateLyricTrack(true);updateRangeInfo()}
-function buildSampleSelect(){const s=$('#sampleSelect');s.innerHTML='<option value="">현재/가져온 곡</option>';for(const group of ['동요','수업용']){const g=document.createElement('optgroup');g.label=group;for(const x of SAMPLES.filter(v=>v.category===group)){const o=document.createElement('option');o.value=x.key;o.textContent=x.title;g.appendChild(o)}s.appendChild(g)}s.value=currentSampleKey||''}
+function buildSampleSelect(){const s=$('#sampleSelect');s.innerHTML='<option value="">현재/가져온 곡</option>';for(const group of ['동요','수업용']){const g=document.createElement('optgroup');g.label=group;for(const x of SAMPLES.filter(v=>v.category===group)){const o=document.createElement('option');o.value=x.key;o.textContent=x.title;g.appendChild(o)}s.appendChild(g)}s.value=currentSampleKey||'';const mobile=$('#mobileSongSelect');if(mobile){mobile.innerHTML=s.innerHTML;mobile.value=s.value}}
 function renderLanes(){let l=$('#lanes'),t=$('#tubes');l.innerHTML=t.innerHTML='';ORDER.forEach(n=>{const label=displayLabel(n),title=displayTitle(n);let a=document.createElement('div');a.className='lane';a.innerHTML=`<div class="laneLabel" title="${esc(title)}">${esc(label)}</div>`;l.appendChild(a);let b=document.createElement('button');b.className='tube'+(ALLOWED[level].has(n)?'':' inactive');b.dataset.note=n;b.style.background=COLORS[n];b.setAttribute('aria-label',title+' 연주');b.title=title;b.innerHTML=`<span class="tubeLabel" style="--note-color:${COLORS[n]}">${esc(label)}</span>`;b.onclick=()=>tone(n,b);t.appendChild(b)})}
 function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function renderScore(){let w=$('#scoreRows');w.innerHTML='';for(const e of events){let d=document.createElement('div'),off=e.note!=='쉼'&&!ALLOWED[level].has(e.note),unsupported=!e.supported;d.className='beat'+(e.note==='쉼'?' rest':'')+(off?' off':'')+(unsupported?' unsupported':'');d.innerHTML=e.note==='쉼'?'<div class="note">쉼</div><div class="lyric"></div>':`<div class="note" style="background:${noteColor(e.note)}"><span class="noteLabelText" style="--note-color:${noteColor(e.note)}">${esc(displayLabel(e.note))}</span></div><div class="lyric">${lyrics?esc(e.lyric):''}</div>`;w.appendChild(d)}let outside=outOfBaseCount(),sub=$('#scoreSub');sub.classList.toggle('warn',outside>0);sub.textContent=`${level}음 모드 · ${events.filter(e=>e.active).length}개 연주음 · ${bpm} BPM${outside?` · 기본 8음 범위 밖 ${outside}개`:''}`;let g=$('#legend');g.innerHTML='';ORDER.forEach(n=>{let c=document.createElement('div');c.className='chip';c.style.opacity=ALLOWED[level].has(n)?1:.28;c.innerHTML=`<span class="dot" style="background:${COLORS[n]}"></span>${esc(displayLabel(n))}`;g.appendChild(c)})}
@@ -608,6 +616,41 @@ $('#stageFsBtn').onclick=()=>setClassFullscreen(true);
 $('#fsExitBtn').onclick=()=>setClassFullscreen(false);
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&document.body.classList.contains('fullscreen')){document.body.classList.remove('fullscreen');on($('#fullBtn'),false);$('#fullBtn').textContent='수업 전체화면';setTimeout(draw,80)}});
 $('#startBtn').onclick=$('#playBtn').onclick=toggle;$('#restartBtn').onclick=$('#resetBtn').onclick=reset;$('#progress').onclick=e=>{let r=e.currentTarget.getBoundingClientRect();elapsed=Math.max(0,Math.min(totalMs,(e.clientX-r.left)/r.width*totalMs));lastTs=0;draw();updateTime();updateLyricTrack(true);if(playing)syncLiveMr()};window.addEventListener('resize',draw);init();
+// Keep the mobile play surface visible; show optional controls and sheet music in accessible sheets.
+function closeMobileSheets(){
+  $('#mobileSettingsSheet').classList.remove('mobileOpen');
+  $('#mobileScoreSheet').classList.remove('mobileOpen');
+  $('#mobileBackdrop').classList.remove('open');
+  document.body.classList.remove('mobileSheetOpen');
+  $('#mobileSettingsBtn').setAttribute('aria-expanded','false');
+  $('#mobileScoreBtn').setAttribute('aria-expanded','false');
+}
+function openMobileSheet(which){
+  const id=which==='score'?'#mobileScoreSheet':'#mobileSettingsSheet';
+  const button=which==='score'?'#mobileScoreBtn':'#mobileSettingsBtn';
+  const closeButton=which==='score'?'#mobileScoreClose':'#mobileSettingsClose';
+  const alreadyOpen=$(id).classList.contains('mobileOpen');
+  closeMobileSheets();
+  if(alreadyOpen)return;
+  $(id).classList.add('mobileOpen');
+  $('#mobileBackdrop').classList.add('open');
+  document.body.classList.add('mobileSheetOpen');
+  $(button).setAttribute('aria-expanded','true');
+  $(closeButton).focus({preventScroll:true});
+}
+$('#mobileSongSelect').onchange=e=>{if(e.target.value)chooseSample(e.target.value)};
+$('#mobileSettingsBtn').onclick=()=>openMobileSheet('settings');
+$('#mobileScoreBtn').onclick=()=>openMobileSheet('score');
+$('#mobileSettingsClose').onclick=()=>{closeMobileSheets();$('#mobileSettingsBtn').focus({preventScroll:true})};
+$('#mobileScoreClose').onclick=()=>{closeMobileSheets();$('#mobileScoreBtn').focus({preventScroll:true})};
+$('#mobileBackdrop').onclick=closeMobileSheets;
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&document.body.classList.contains('mobileSheetOpen'))closeMobileSheets();
+});
+window.addEventListener('resize',()=>{
+  if(window.innerWidth>800&&document.body.classList.contains('mobileSheetOpen'))closeMobileSheets();
+});
+
 </script>
 </body>
 </html>

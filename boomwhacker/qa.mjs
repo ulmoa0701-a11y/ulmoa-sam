@@ -110,6 +110,28 @@ async function basicCase(name,width,height){
     check(visible.controls?.bottom<=visible.vh,`${name}: desktop control panel exceeds viewport (${JSON.stringify(visible.controls)} / vh ${visible.vh})`);
   }
 
+  if(width<=800){
+    const mobile=await page.evaluate(()=>({
+      top:document.querySelector('.stagePanel').getBoundingClientRect().top,
+      bottom:document.querySelector('.playbar').getBoundingClientRect().bottom,
+      vh:innerHeight,scrollHeight:document.documentElement.scrollHeight
+    }));
+    check(mobile.top<180,`${name}: the play area must start near top on mobile ${JSON.stringify(mobile)}`);
+    check(mobile.bottom<=mobile.vh+1,`${name}: playback controls below mobile viewport ${JSON.stringify(mobile)}`);
+    check(mobile.scrollHeight<=mobile.vh+2,`${name}: mobile should not require page scrolling ${JSON.stringify(mobile)}`);
+    check(await page.locator('#mobileSongSelect').isVisible(),`${name}: quick song selector missing`);
+    await page.locator('#mobileSongSelect').selectOption('bear');
+    check((await page.locator('#stageTitle').innerText())==='곰 세 마리',`${name}: quick song selector did not load bear`);
+    check((await page.locator('#sampleSelect').inputValue())==='bear',`${name}: quick song and settings song out of sync`);
+    await page.locator('#mobileSongSelect').selectOption('twinkle');
+    await page.locator('#mobileScoreBtn').click();
+    check(await page.locator('#mobileScoreSheet').isVisible(),`${name}: score sheet did not open`);
+    check(await page.locator('.score .beat').count()>0,`${name}: score sheet is empty`);
+    await page.locator('#mobileScoreClose').click();
+    check(!(await page.locator('#mobileScoreSheet').isVisible()),`${name}: score sheet did not close`);
+    await page.locator('#mobileSettingsBtn').click();
+    check(await page.locator('#mobileSettingsSheet').isVisible(),`${name}: settings sheet did not open`);
+  }
   await page.locator('#levels button[data-level="3"]').click();
   check(await page.locator('.tube:not(.inactive)').count()===3,`${name}: 3-note mode active tube count wrong`);
   await page.locator('#levels button[data-level="5"]').click();
@@ -146,6 +168,7 @@ async function basicCase(name,width,height){
   await page.locator('#melodyVolume').evaluate(el=>{el.value='30';el.dispatchEvent(new Event('input',{bubbles:true}))});
   check(Math.abs((await page.evaluate(()=>window.__boomVideoQA.melody().volume))-.3)<.001,`${name}: melody volume slider failed`);
   await page.locator('#melodyVolume').evaluate(el=>{el.value='65';el.dispatchEvent(new Event('input',{bubbles:true}))});
+  if(width<=800)await page.locator('#mobileSettingsClose').click();
 
   await page.locator('#displayModeSelect').selectOption('instrument');
   check(await page.locator('#displayModal').isVisible(),`${name}: instrument editor did not auto-open`);
@@ -192,7 +215,7 @@ async function basicCase(name,width,height){
   check(await page.locator('.lyricSyllable.active').count()===1,`${name}: current lyric syllable is not highlighted`);
   const activeBorder=await page.locator('.lyricSyllable.active').evaluate(el=>getComputedStyle(el).borderTopColor);
   check(activeBorder==='rgb(235, 36, 39)',`${name}: current lyric syllable does not use its Boomwhacker color (${activeBorder})`);
-  await page.locator('#startBtn').click();
+  await page.locator(width<=800?'#playBtn':'#startBtn').click();
   await page.waitForTimeout(550);
   const progress=parseFloat((await page.locator('#progressFill').evaluate(el=>getComputedStyle(el).width)))||0;
   check(progress>0,`${name}: playback progress did not advance`);
@@ -253,6 +276,7 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(BASE,{waitUntil:'networkidle'});
+  await page.locator('#mobileSettingsBtn').click();
   const defaultMr=await page.evaluate(()=>window.__boomVideoQA.mix());
   const autoBalance=await page.evaluate(async()=>{
     const A=window.OfflineAudioContext||window.webkitOfflineAudioContext;
@@ -271,7 +295,7 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   await page.locator('#startBtn').click();
   await page.waitForTimeout(120);
   check(await page.evaluate(()=>!!mrSource),'mr: built-in automatic MR did not schedule');
-  await page.locator('#playBtn').click();
+  await page.locator('#startBtn').click();
   check(await page.evaluate(()=>mrSource===null),'mr: pausing did not stop built-in automatic MR');
   await page.locator('#mrFile').setInputFiles({name:'qa-mr.wav',mimeType:'audio/wav',buffer:makeWav(1.1,176)});
   await page.waitForFunction(()=>window.__boomVideoQA?.mix().mrLoaded===true);
@@ -285,7 +309,7 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   await page.locator('#startBtn').click();
   await page.waitForTimeout(120);
   check(await page.evaluate(()=>!!mrSource),'mr: live MR source was not scheduled');
-  await page.locator('#playBtn').click();
+  await page.locator('#startBtn').click();
   check(await page.evaluate(()=>mrSource===null),'mr: pause did not stop MR source');
   const mixProbe=await page.evaluate(async()=>{
     const A=window.OfflineAudioContext||window.webkitOfflineAudioContext;

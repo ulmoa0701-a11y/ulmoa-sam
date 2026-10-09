@@ -1,0 +1,118 @@
+/* Mobile classroom layout: play first, settings and sheet music on demand. */
+.mobileActions,.mobileBackdrop,.mobileSheetHeader{display:none}
+@media(max-width:800px){
+  body:not(.fullscreen) .app{
+    display:flex;flex-direction:column;height:100dvh;min-height:0;overflow:hidden;
+    padding:4px 5px max(6px,env(safe-area-inset-bottom));
+  }
+  body:not(.fullscreen) .top{flex:0 0 auto;min-height:0;margin-bottom:5px;padding:6px 8px}
+  body:not(.fullscreen) .brand h1{font-size:clamp(21px,6.2vw,27px);line-height:1.05}
+  body:not(.fullscreen) .mobileActions{
+    display:grid;grid-template-columns:minmax(0,1fr) 62px 70px;align-items:center;
+    gap:5px;flex:0 0 auto;margin-bottom:5px;
+  }
+  .mobileSongWrap{min-width:0}
+  .mobileSongSelect{
+    display:block;width:100%;height:44px;min-width:0;padding:0 9px;
+    border:1px solid #cadadf;border-radius:12px;background:#fffdf7;
+    color:#223554;font-size:13px;font-weight:850;
+  }
+  .mobileActionBtn{
+    min-width:0;min-height:44px;padding:0 4px;border:1px solid #d5dfe1;border-radius:12px;
+    background:#f5f9e3;color:#30435d;font-size:12px;font-weight:900;
+    box-shadow:1px 2px 0 rgba(184,203,214,.42);
+  }
+  .mobileActionBtn[aria-expanded="true"]{background:#e5f5ff;border-color:#80b5d8}
+  body:not(.fullscreen) .layout{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;gap:0}
+  body:not(.fullscreen) .stagePanel{
+    order:-1;display:flex;flex-direction:column;flex:1 1 auto;
+    width:100%;min-width:0;min-height:0;margin:0;padding:5px;border-radius:17px;
+  }
+  body:not(.fullscreen) .stageHead{
+    flex:0 0 auto;min-height:34px;margin:0 0 5px;padding:0 2px;
+  }
+  body:not(.fullscreen) .stageHead>strong{
+    min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;
+  }
+  body:not(.fullscreen) .stageHeadRight{flex:0 0 auto}
+  body:not(.fullscreen) .stageDisplaySelect{max-width:86px}
+  body:not(.fullscreen) .stage{
+    flex:1 1 auto;height:auto;min-height:0;border-radius:14px;
+  }
+  body:not(.fullscreen) .playbar{
+    flex:0 0 auto;grid-template-columns:48px minmax(0,1fr) 48px;
+    gap:8px;margin-top:5px;padding:1px 3px;
+  }
+  body:not(.fullscreen) .round{width:48px;height:48px;font-size:21px}
+  body:not(.fullscreen) .time{margin-top:4px;font-size:11px}
+  body:not(.fullscreen) .tubes{height:66px}
+  body:not(.fullscreen) .hitLine{bottom:66px}
+  body:not(.fullscreen) .lyricTrack{bottom:72px}
+  body:not(.fullscreen) .laneLabel{font-size:10px;max-width:94%;padding:3px 2px}
+  body:not(.fullscreen) .tubeLabel{min-width:0;max-width:95%;padding:3px 1px;font-size:11px}
+  body:not(.fullscreen) .controls,body:not(.fullscreen) .score{display:none}
+  body:not(.fullscreen) .controls.mobileOpen,
+  body:not(.fullscreen) .score.mobileOpen{
+    display:block;position:fixed;top:auto;left:5px;right:5px;bottom:0;
+    z-index:1201;width:auto;height:auto;max-height:min(83dvh,720px);
+    margin:0;padding:12px 13px max(18px,env(safe-area-inset-bottom));
+    overflow-y:auto;overscroll-behavior:contain;border-radius:20px 20px 0 0;
+    background:#fffdf7;box-shadow:0 -12px 50px rgba(29,43,61,.20);
+  }
+  body:not(.fullscreen) .controls.mobileOpen{align-self:auto}
+  body:not(.fullscreen) .score.mobileOpen{display:flex;flex-direction:column}
+  body:not(.fullscreen) .score.mobileOpen .scoreRows{
+    overflow:visible;flex:0 0 auto;min-height:0;align-content:flex-start;
+  }
+  body:not(.fullscreen) .score.mobileOpen h2{margin:6px 0 0}
+  body:not(.fullscreen) .score.mobileOpen:before{display:none}
+  body:not(.fullscreen) .mobileBackdrop.open{
+    display:block;position:fixed;inset:0;z-index:1200;
+    background:rgba(26,42,65,.48);
+  }
+  body:not(.fullscreen) .mobileSheetHeader{
+    position:sticky;top:-12px;z-index:2;display:flex;justify-content:space-between;
+    gap:12px;align-items:center;margin:-12px -13px 10px;padding:10px 13px;
+    border-bottom:1px solid #e5e9e5;background:#fffdf7;
+  }
+  .mobileSheetHeader strong{font-size:16px;font-weight:950}
+  .mobileSheetClose{
+    min-width:44px;min-height:44px;border:1px solid #d6e0e1;border-radius:12px;
+    background:#f1f6f7;color:#213651;font-size:13px;font-weight:900;
+  }
+  body:not(.fullscreen) .controls .sec+.sec{margin-top:10px;padding-top:10px}
+  body:not(.fullscreen) .controls .label{font-size:12px;margin-bottom:6px;padding:2px 7px}
+  body:not(.fullscreen) .controls .songTitle{font-size:19px}
+  body:not(.fullscreen) .controls .meta{font-size:12px}
+  body:not(.fullscreen) .controls .sampleSelect{font-size:13px;padding:10px}
+  body:not(.fullscreen) .controls .seg button,
+  body:not(.fullscreen) .controls .toggle{min-height:42px;font-size:12px;padding:8px 5px}
+  body:not(.fullscreen) .controls .speed{gap:8px}
+  body:not(.fullscreen) .controls .bpm{font-size:13px;min-width:66px}
+  body:not(.fullscreen) .controls input[type="range"]{height:28px;accent-color:#3c83cf}
+  body:not(.fullscreen) .controls .mrVol{grid-template-columns:76px minmax(0,1fr) 46px;gap:6px;margin-top:7px}
+  body:not(.fullscreen) .controls .mrVol .label{font-size:11px;padding:0}
+  body:not(.fullscreen) .controls .mrPct{font-size:12px}
+  body:not(.fullscreen) .controls .mrFile{padding:8px;font-size:12px}
+  body:not(.fullscreen) .controls .mrFile::file-selector-button{padding:7px;font-size:11px}
+  body:not(.fullscreen) .controls .mrStatus{font-size:11px;line-height:1.4;white-space:normal;margin-top:5px}
+  body:not(.fullscreen) .controls .playSec .primary,
+  body:not(.fullscreen) .controls .playSec .ghost,
+  body:not(.fullscreen) .controls .videoSec .videoBtn{min-height:42px;font-size:13px}
+  body:not(.fullscreen) .controls .videoOptions{display:flex;flex-wrap:wrap}
+  body:not(.fullscreen) .controls .videoOption{font-size:11px;padding:8px}
+  body:not(.fullscreen) .controls .videoStatus{font-size:11px;line-height:1.4;white-space:normal}
+  body:not(.fullscreen) .rangeNote.show{font-size:11px;line-height:1.4;padding:9px}
+  body:not(.fullscreen) .controls .hint:not(.mrStatus):not(.videoStatus){display:none}
+  .fullscreen .mobileActions,.fullscreen .mobileBackdrop{display:none!important}
+}
+@media(max-width:800px) and (max-height:610px){
+  body:not(.fullscreen) .brand small{display:none}
+  body:not(.fullscreen) .top{padding:4px 8px}
+  body:not(.fullscreen) .mobileActions{margin-bottom:3px}
+  body:not(.fullscreen) .stageHead{min-height:30px;margin-bottom:3px}
+  body:not(.fullscreen) .playbar{margin-top:3px}
+}
+@media(min-width:801px){
+  .mobileActions,.mobileBackdrop,.mobileSheetHeader{display:none!important}
+}
