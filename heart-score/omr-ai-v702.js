@@ -8,6 +8,7 @@
 import * as omr from './omr-local-v686.js?v=702';
 import {scanConnectedHeads,scanPitchFromY,scanRhythm} from './omr-scan-evidence-v1.mjs';
 import {planBarRows} from './omr-bar-consensus-v1.mjs?v=1';
+import {recoverFaintBarlines} from './omr-bar-rescue-v1.mjs?v=1';
 
 const W=window;
 const ORT_VERSION='1.27.0';
@@ -160,7 +161,15 @@ function visualBarCandidates(gray,w,h,line){
 }
 function visualBarPlan(gray,w,h,lines){
   const rows=lines.map(line=>{
-    const c=visualBarCandidates(gray,w,h,line),sp=Number(line.input.box?.lineSpacing)||10,b=line.input.box||{},x0=Math.max(0,Number(b.x)||0),x1=Math.min(w-1,(Number(b.x)||0)+(Number(b.w)||0));
+    const b=line.input.box||{},sp=Number(b.lineSpacing)||10,x0=Math.max(0,Number(b.x)||0),x1=Math.min(w-1,(Number(b.x)||0)+(Number(b.w)||0));
+    let c=visualBarCandidates(gray,w,h,line);
+    const found=c.filter(q=>q.x>x0+sp*6&&q.x<x1-sp*4&&q.side<=.12);
+    // The old detector sometimes returned zero interior lines for a complete score.
+    // Recover only from continuous ink in *all four* staff spaces; no equal-width guesses.
+    if(found.length<2){
+      const recovered=recoverFaintBarlines(gray,w,h,b);
+      for(const q of recovered)if(!c.some(v=>Math.abs(v.x-q.x)<sp*.85))c.push(q);
+    }
     const internal=c.filter(q=>q.x>x0+sp*6&&q.x<x1-sp*4);
     const strong=internal.filter(q=>q.side<=.04),moderate=internal.filter(q=>q.side<=.12),extended=internal.filter(q=>q.side<=.18);
     return{line,c,sp,x0,x1,strong,moderate,extended};
@@ -309,7 +318,10 @@ async function recognizeCanvas(canvas,filename,pageIndex){
   const lines=[];for(let i=0;i<inputs.length;i++){const input=inputs[i];status(`AI 악보 인식 ${i+1}/${inputs.length}줄 · 원본 판독 중…`);const raw=await decodeInput(input,input,i);if(!raw)continue;let chosenLine=raw,rawScore=lineDecodeScore(raw.fragment);if(scanLike&&rawScore<11){status(`AI 악보 인식 ${i+1}/${inputs.length}줄 · 스캔 보정 재판독 중…`);const enh=await decodeInput(input,enhancedInput(rt.prep,gray,canvas.width,canvas.height,input),i);if(enh){const enhScore=lineDecodeScore(enh.fragment),rawNotes=musicalEvents(raw.fragment).filter(v=>v.ir.kind==='note').length,enhNotes=musicalEvents(enh.fragment).filter(v=>v.ir.kind==='note').length;if(enhScore>rawScore+2.5&&enhNotes>=Math.max(3,rawNotes*.88))chosenLine=enh;}}lines.push(chosenLine);}
   if(!lines.length)return{staffDetected:true,ok:false,reason:'오선은 찾았지만 음표를 읽어내지 못했습니다.'};
   const cvStaffs=W.findStaffSystems(canvas);const geometryLines=cvStaffs.length===lines.length?lines.map((line,i)=>({...line,input:{...line.input,box:{...line.input.box,x:cvStaffs[i].x0,w:cvStaffs[i].x1-cvStaffs[i].x0,y:cvStaffs[i].lines[0],padUp:0,lineSpacing:cvStaffs[i].spacing}}})):lines;
-  const barPlan=visualBarPlan(gray,canvas.width,canvas.height,geometryLines),modelBuilt=toStateModel(lines,filename),visualBuilt=toStateVisual(lines,filename,gray,canvas.width,canvas.height,threshold),beatBuilt=toStateBeat(lines,filename),hybridBuilt=buildCvHybrid(canvas,filename,lines,barPlan),g=visualBuilt.barGeometry||{},geometryStrong=g.lines===lines.length&&g.modalInternalBars>=2&&g.support>=2&&g.measures>=lines.length*2,built=hybridBuilt||(geometryStrong?visualBuilt:[modelBuilt,visualBuilt,beatBuilt].sort((a,b)=>candidateScore(b)-candidateScore(a))[0]),q=measureQa(built.state),staves=lines.length,suspiciousShort=staves>=3&&built.state.measures.length<=4,enough=built.noteCount>=Math.max(6,staves*3)&&built.state.measures.length>=Math.max(2,Math.floor(staves*.8)),rhythmOk=built.segmentation==='cv-hybrid'?(q.over===0&&q.exactRatio>=.99):built.segmentation==='visual-fit'?(q.over===0&&q.exactRatio>=.95&&built.correctionAvg<=1.25):(q.over===0&&(q.exactRatio>=.45||built.state.measures.length<=2)),confOk=built.avgConfidence>=.45,shapeOk=!built.shapeEvidence||built.shapeEvidence.every(row=>row.every(e=>Number.isFinite(e.rhythm.dur)&&e.rhythm.dur>0));
+  const barPlan=visualBarPlan(gray,canvas.width,canvas.height,geometryLines),modelBuilt=toStateModel(lines,filename),visualBuilt=toStateVisual(lines,filename,gray,canvas.width,canvas.height,threshold),beatBuilt=toStateBeat(lines,filename),hybridBuilt=buildCvHybrid(canvas,filename,lines,barPlan),g=visualBuilt.barGeometry||{},geometryStrong=g.lines===lines.length&&g.modalInternalBars>=2&&g.support>=2&&g.measures>=lines.length*2,built=hybridBuilt||(geometryStrong?visualBuilt:[modelBuilt,visualBuilt,beatBuilt].sort((a,b)=>{
+    const rank=c=>candidateScore(c)-(c.segmentation==='visual-fit'&&c.state.measures.length<=lines.length*1.2&&c.noteCount>lines.length*6?150:0);
+    return rank(b)-rank(a);
+  })[0]),q=measureQa(built.state),staves=lines.length,suspiciousShort=staves>=3&&built.state.measures.length<=4,enough=built.noteCount>=Math.max(6,staves*3)&&built.state.measures.length>=Math.max(2,Math.floor(staves*.8)),rhythmOk=built.segmentation==='cv-hybrid'?(q.over===0&&q.exactRatio>=.99):built.segmentation==='visual-fit'?(q.over===0&&q.exactRatio>=.95&&built.correctionAvg<=1.25):(q.over===0&&(q.exactRatio>=.45||built.state.measures.length<=2)),confOk=built.avgConfidence>=.45,shapeOk=!built.shapeEvidence||built.shapeEvidence.every(row=>row.every(e=>Number.isFinite(e.rhythm.dur)&&e.rhythm.dur>0));
   W.dispatchEvent(new CustomEvent('ulmoa:omr-analysis',{detail:{version:'702',staves,threshold,boxes:lines.map(l=>l.input.box),state:built.state,noteCount:built.noteCount,restCount:built.restCount||0,barGeometry:built.barGeometry,quality:q,shapeEvidence:built.shapeEvidence,segmentation:built.segmentation,accepted:!suspiciousShort&&enough&&rhythmOk&&confOk&&shapeOk}}));
   if(suspiciousShort||!enough||!rhythmOk||!confOk||!shapeOk)return{staffDetected:true,ok:false,reason:`AI가 ${staves}개 악보 줄을 찾았지만 결과 검증을 통과하지 못했습니다. (${built.state.measures.length}마디 · 음표 ${built.noteCount}개 · 박자일치 ${Math.round(q.exactRatio*100)}% · 신뢰도 ${Math.round(built.avgConfidence*100)}%${built.segmentation==='visual-fit'?` · 마디 ${built.barGeometry?.perLine?.join('·')||'?'} · 원판독 ${Math.round((built.rawExactRatio||0)*100)}% · 평균리듬보정 ${(built.correctionAvg||0).toFixed(2)}박`:''} · ${built.segmentation==='cv-hybrid'?'오선기하+AI 쉼표':built.segmentation==='visual-fit'?'인쇄 마디선+4/4 보정':built.segmentation==='beat-dp'?'4/4 박자 재구성':'AI 마디선'} 기준)`};
   if(typeof W.ocrCanvas==='function'&&typeof W.attachOcrToOmr==='function'){try{status('음표 인식 완료 · 제목과 가사 위치 확인 중…');const data=await W.ocrCanvas(canvas,'제목·가사 OCR');const safeText={...data,lines:scanTitleCandidates(data,canvas),words:(data.words||[]).filter(w=>Number(w.confidence)>=75)};W.attachOcrToOmr(built.cvSystems?{state:built.state,systems:built.cvSystems}:lyricAdapter(lines,built),safeText,filename);}catch(err){console.warn('AI OMR lyric OCR skipped',err);}}
