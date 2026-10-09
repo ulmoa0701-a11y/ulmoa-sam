@@ -16,6 +16,15 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
   assert.equal(response.status(),200);
   await page.waitForFunction(()=>window.moaRescueGame?.scene?.isActive(window.moaRescueGame.config.width>720?'landtitle':'title'),{timeout:20000});
   const initial=await page.evaluate(()=>({width:window.moaRescueGame.config.width,height:window.moaRescueGame.config.height,canvasWidth:document.querySelector('canvas').getBoundingClientRect().width,canvasHeight:document.querySelector('canvas').getBoundingClientRect().height}));
+  const textures=await page.evaluate(()=>{
+    const textures=window.moaRescueGame.textures,animals=['rabbit','pig','cow','duck'],colors=['yellow','blue','green','red'];
+    const expected=animals.flatMap(a=>colors.map(c=>'sprite-'+a+'-'+c)).concat(
+      Array.from({length:5},(_,i)=>'world-tall-'+i),Array.from({length:5},(_,i)=>'world-wide-'+i)
+    );
+    return {missing:expected.filter(k=>!textures.exists(k)),loaded:expected.length};
+  });
+  assert.deepEqual(textures.missing,[],'Missing illustrated SVG textures');
+  assert.equal(textures.loaded,26);
   assert.equal(initial.width,wide?1200:720);
   assert.equal(initial.height,wide?760:1280);
   assert.ok(initial.canvasWidth>= (wide?760:280),JSON.stringify(initial));
