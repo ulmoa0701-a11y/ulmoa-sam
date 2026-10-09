@@ -205,6 +205,45 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
 .fullscreen .stage{border-radius:0;box-shadow:none}
 .fullscreen .hitLine:after{right:16px}
 @media(max-width:800px){
+ .app{padding:4px 4px 20px}
+ .top{padding:5px 7px 6px;margin-bottom:5px;border-radius:16px}
+ .top:before{height:9px;top:-4px}
+ .brand small{font-size:9px}
+ .brand h1{font-size:23px;margin:0;line-height:1.05}
+ .brand p{display:none}
+ .back{padding:6px 8px;font-size:10px;border-radius:14px}
+ .controls{padding:6px 7px;margin-bottom:5px;border-radius:16px}
+ .controls .sec+.sec{margin-top:3px;padding-top:3px}
+ .controls .label{font-size:9px;padding:1px 5px;margin-bottom:2px;line-height:1.2}
+ .controls .songTitle{display:inline-block;font-size:17px;line-height:1;margin-right:6px}
+ .controls .meta{display:inline-block;font-size:9.5px;margin:0}
+ .controls .hint:not(.mrStatus):not(.videoStatus){display:none}
+ .controls .sampleSelect{padding:5px 7px;border-radius:9px;font-size:11px}
+ .controls .seg{gap:3px}
+ .controls .seg button,.controls .toggle{padding:5px 3px;border-radius:9px;font-size:10.5px}
+ .controls .speed{gap:4px}
+ .controls .speed>span:first-child{font-size:9.5px}
+ .controls .bpm{font-size:10.5px;min-width:48px}
+ .controls input[type="range"]{height:18px}
+ .controls .mrVol{margin-top:2px;grid-template-columns:auto 1fr 32px;gap:3px}
+ .controls .mrVol .label{padding:0;background:transparent;transform:none;margin:0;font-size:8.5px;white-space:nowrap}
+ .controls .mrPct{font-size:9px}
+ .controls .mrFile{padding:2px 3px;font-size:8.5px;border-radius:9px}
+ .controls .mrFile::file-selector-button{padding:3px 5px;margin-right:3px;font-size:8.5px;border-radius:7px}
+ .controls .mrStatus{font-size:8.5px;line-height:1.05;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .controls .toggles{grid-template-columns:repeat(4,1fr);gap:3px}
+ .controls #fullBtn{font-size:9px;white-space:nowrap;letter-spacing:-.4px}
+ .controls .playSec{display:grid;grid-template-columns:1.25fr .75fr;gap:4px}
+ .controls .playSec .primary,.controls .playSec .ghost{margin:0;padding:6px 4px;font-size:11px;border-radius:10px}
+ .controls .videoSec{display:grid;grid-template-columns:1fr;gap:3px}
+ .controls .videoSec>.label{margin:0}
+ .controls .videoSec .videoBtn{padding:6px 5px;font-size:10.5px;border-radius:10px}
+ .controls .videoOptions{display:none}
+ .controls .videoStatus{font-size:8px;line-height:1;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .rangeNote.show{padding:3px 4px;margin-top:2px;font-size:8px;line-height:1.05}
+ .stagePanel{margin-top:0}
+}
+@media(max-width:800px){
  .top{padding:7px 8px 8px}.top:before{left:22px;width:52px}
  .brand h1{font-size:27px}.brand p{font-size:11px}
  .fall{width:64px;height:64px;border-width:4px}

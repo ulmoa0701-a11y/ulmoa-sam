@@ -72,6 +72,15 @@ async function basicCase(name,width,height){
   check(videoInfo.preview?.w===1280&&videoInfo.preview?.h===720&&String(videoInfo.preview?.data||'').startsWith('data:image/png'),`${name}: 16:9 video preview render failed`);
   let overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth));
   check(overflow<=1,`${name}: horizontal overflow ${overflow}px`);
+  if(width<=412){
+    const mobileFold=await page.evaluate(()=>({
+      stageTop:document.querySelector('.stagePanel')?.getBoundingClientRect().top,
+      controlsHeight:document.querySelector('.controls')?.getBoundingClientRect().height,
+      headerHeight:document.querySelector('.top')?.getBoundingClientRect().height
+    }));
+    check(mobileFold.stageTop<780,`${name}: mobile settings still require too much scrolling before play area ${JSON.stringify(mobileFold)}`);
+    check(mobileFold.controlsHeight<690,`${name}: mobile controls are still too tall ${JSON.stringify(mobileFold)}`);
+  }
   if(width>=1180){
     const oneScreen=await page.evaluate(()=>({
       viewport:innerHeight,
@@ -150,9 +159,10 @@ async function basicCase(name,width,height){
   await page.locator('#newInstrumentIcon').fill('🛎️');
   await page.locator('#newInstrumentName').fill('차임');
   await page.locator('#addInstrumentBtn').click();
-  check(await page.locator('#displayInputs select[data-instrument-index="0"] option').filter({hasText:'🛎️ 차임'}).count()===1,`${name}: custom instrument was not added to selector`);
-  const recorderValue=await page.locator('#displayInputs select[data-instrument-index="0"] option').filter({hasText:'🛎️ 차임'}).getAttribute('value');
-  await page.locator('#displayInputs select[data-instrument-index="0"]').selectOption(recorderValue);
+  const addedInstrument=await page.evaluate(()=>window.__boomVideoQA.display().instrumentLibrary.find(x=>x.name==='차임'));
+  check(!!addedInstrument?.id,`${name}: custom instrument was not added to library`);
+  check(await page.locator('#displayInputs select[data-instrument-index="0"] option[value="'+addedInstrument.id+'"]').count()===1,`${name}: custom instrument option was not rebuilt`);
+  await page.locator('#displayInputs select[data-instrument-index="0"]').selectOption(addedInstrument.id);
   await page.locator('#displayApplyBtn').click();
   check((await page.locator('.laneLabel').first().innerText())==='🛎️',`${name}: selected custom instrument did not update lane`);
   check((await page.locator('.tube[data-note="도"] .tubeLabel').innerText())==='🛎️',`${name}: selected custom instrument did not update tube`);
@@ -223,11 +233,13 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   check(instrumentFall.w>=52,'display screenshot: mobile falling note should stay large in instrument mode');
   await page.screenshot({path:out+'/display-instrument390.png',fullPage:true});
   check((await page.locator('.tube[data-note="라"] .tubeLabel').innerText())==='🎺','display screenshot: instrument icon mapping wrong');
+  await page.locator('#displayCloseBtn').click();
   await page.locator('#displayModeSelect').selectOption('name');
   await page.locator('#displayInputs input[data-display-index="0"]').fill('민준');
   await page.locator('#displayInputs input[data-display-index="1"]').fill('서연');
   await page.locator('#displayInputs input[data-display-index="2"]').fill('지우');
   await page.locator('#displayApplyBtn').click();
+  await page.waitForFunction(()=>document.querySelector('.laneLabel')?.textContent==='민준');
   await page.evaluate(()=>{elapsed=1350;draw()});
   check(await page.locator('.fall .fallLabel').count()>0,'display screenshot: child-name falling note missing');
   await page.screenshot({path:out+'/display-names390.png',fullPage:true});
