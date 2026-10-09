@@ -2,17 +2,41 @@ name: fetch-omr-model
 on:
   pull_request:
     branches: [main]
+  push:
+    paths:
+      - '.github/workflows/fetch-omr-model.yml'
+  workflow_dispatch:
 jobs:
   fetch:
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     steps:
-      - name: Download public-domain OMR weights
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Download public-domain OMR browser model
         run: |
-          curl -L --fail --retry 3 -o omr_weights.safetensors "https://raw.githubusercontent.com/alexanderalber/satb-line-omr/c60823117a5c92b0c29f921dbca023e94026d279/model-public-domain/weights.safetensors"
-          sha256sum omr_weights.safetensors
-      - name: Upload model artifact
+          mkdir -p qa-bundle/heart-score qa-bundle/ort
+          curl -L --fail --retry 3 -o qa-bundle/omr-line.fp16.onnx "https://raw.githubusercontent.com/alexanderalber/satb-line-omr/c60823117a5c92b0c29f921dbca023e94026d279/model-public-domain/omr-line.fp16.onnx"
+          sha256sum qa-bundle/omr-line.fp16.onnx
+          test "$(stat -c%s qa-bundle/omr-line.fp16.onnx)" -gt 6000000
+      - name: Fetch ONNX Runtime Web
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-audit --no-fund onnxruntime-web@1.27.0
+          cp -a node_modules/onnxruntime-web/dist/. qa-bundle/ort/
+          test -f qa-bundle/ort/ort.min.js
+      - name: Copy current Heart Score OMR sources
+        run: |
+          cp heart-score/index.html qa-bundle/heart-score/index.html
+          cp heart-score/omr-local-v686.js qa-bundle/heart-score/
+          cp heart-score/omr-bar-consensus-v1.mjs qa-bundle/heart-score/
+          cp heart-score/omr-ai-v692.js qa-bundle/heart-score/
+          cp heart-score/omr-ai-v692-bootstrap.js qa-bundle/heart-score/
+      - name: Upload local E2E bundle
         uses: actions/upload-artifact@v4
         with:
-          name: omr-public-domain-weights
-          path: omr_weights.safetensors
+          name: heart-score-omr-e2e-bundle
+          path: qa-bundle
           retention-days: 1

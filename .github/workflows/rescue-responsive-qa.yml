@@ -1,0 +1,56 @@
+name: Rescue Game Responsive QA
+on:
+  pull_request:
+    paths:
+      - 'thinking-garden/games/rescue/**'
+      - '.github/workflows/rescue-responsive-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'thinking-garden/games/rescue/**'
+      - '.github/workflows/rescue-responsive-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser tests
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+      - name: Start site and test
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/rescue-http.log 2>&1 &
+          node thinking-garden/games/rescue/rescue-smoke.cjs
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rescue-responsive-screenshots
+          path: rescue-qa-screenshots/
+          if-no-files-found: ignore
+      - name: Verify real public GitHub Pages playback
+        if: github.event_name == 'push'
+        env:
+          PUBLIC_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/
+        run: |
+          ready=0
+          for i in $(seq 1 30); do
+            if curl --max-time 15 -fsSL "${PUBLIC_URL}landscape.js?v=2" | grep -q 'class LandscapeMissionScene'; then
+              ready=1
+              break
+            fi
+            echo "Waiting for GitHub Pages propagation ($i/30)"
+            sleep 8
+          done
+          test "$ready" = "1"
+          curl --max-time 20 -fsSL "${PUBLIC_URL}game.js?v=2" | grep -q 'LANDSCAPE_MODE'
+          curl --max-time 20 -fsSL "${PUBLIC_URL}" | grep -q 'landscape.js?v=2'
+          RESCUE_URL="$PUBLIC_URL" node thinking-garden/games/rescue/rescue-smoke.cjs

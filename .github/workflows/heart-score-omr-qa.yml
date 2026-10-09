@@ -1,0 +1,20 @@
+name: Heart Score OMR QA
+on:
+  push:
+    paths:
+      - 'heart-score/omr-ai-v*.js'
+      - 'heart-score/omr-bar-consensus-v1.mjs'
+      - 'heart-score/qa/**'
+      - '.github/workflows/heart-score-omr-qa.yml'
+  workflow_dispatch:
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run OMR measure regression
+        run: node heart-score/qa/omr-bar-consensus-regression.mjs

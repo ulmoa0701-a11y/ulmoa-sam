@@ -32,7 +32,7 @@ async function basicCase(name,width,height){
   check(await page.locator('.tube').count()===8,`${name}: expected 8 tubes`);
   check(await page.locator('.laneLabel').count()===8,`${name}: expected 8 lanes`);
   const fallSize=await page.locator('.fall').first().evaluate(el=>parseFloat(getComputedStyle(el).width));
-  check(fallSize>=(width<=800?52:70),`${name}: falling note is still too small (${fallSize}px)`);
+  check(fallSize>=(width<=800?56:76),`${name}: falling note is still too small (${fallSize}px)`);
   check(await page.locator('.beat').count()>0,`${name}: score did not render`);
   check(await page.locator('#lyricTrack').count()===1,`${name}: lyric track missing`);
   check(await page.locator('.lyricSyllable').count()>5,`${name}: lyric track did not render a continuous line`);
@@ -123,6 +123,11 @@ async function basicCase(name,width,height){
   await page.locator('#melodyVolume').evaluate(el=>{el.value='65';el.dispatchEvent(new Event('input',{bubbles:true}))});
 
   await page.locator('#displayModeSelect').selectOption('instrument');
+  check(await page.locator('#displayModal').isVisible(),`${name}: instrument editor did not auto-open`);
+  check(await page.locator('#instrumentAddToggle').isVisible(),`${name}: custom instrument toggle missing`);
+  check(!(await page.locator('#instrumentAddBox').evaluate(el=>el.classList.contains('open'))),`${name}: custom instrument form should start collapsed`);
+  await page.locator('#instrumentAddToggle').click();
+  check(await page.locator('#instrumentAddBox').evaluate(el=>el.classList.contains('open')),`${name}: custom instrument form did not open`);
   check(await page.locator('#displayModal').isVisible(),`${name}: instrument editor did not open`);
   check(await page.locator('#displayInputs select[data-instrument-index]').count()===8,`${name}: instrument editor should have 8 lane selectors`);
   check(await page.locator('#addInstrumentBtn').count()===1,`${name}: add-instrument button missing`);
