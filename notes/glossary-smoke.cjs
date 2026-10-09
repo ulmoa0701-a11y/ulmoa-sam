@@ -20,6 +20,8 @@ const path=require('node:path');
       const errors=[];
       page.on('pageerror',error=>errors.push(String(error)));
       await page.goto(base,{waitUntil:'networkidle',timeout:90000});
+      await page.locator('.glossary-approved-card img').evaluateAll(els=>els.forEach(el=>{el.loading='eager'}));
+      await page.waitForFunction(()=>Array.from(document.querySelectorAll('.glossary-approved-card img')).every(el=>el.complete&&el.naturalWidth>0),{timeout:30000});
       const cards=page.locator('.glossary-approved-card');
       assert.equal(await cards.count(),12,profile.name+' must contain 12 independent images');
       assert.equal(await page.locator('.glossary-original-board').count(),0,'old giant horizontally scrolling image must be gone');
