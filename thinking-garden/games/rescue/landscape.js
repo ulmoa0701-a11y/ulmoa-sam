@@ -68,17 +68,18 @@ class LandscapeMissionScene extends Phaser.Scene{
    items.push({species:'오리',color:m.color==='빨간'?'노란':'빨간',size:m.size});
   }
   Phaser.Utils.Array.Shuffle(items);
-  // Species-aware world positions: mammals stay on ground, ducks may enter water.
+  // A spacious 4x2 layout avoids pointer overlap across devices.
+  // Grounded species on the pond get grassy bank footholds rather than floating.
   const watery=this.round===0||this.round===2;
-  const bankPositions=[[391,338],[533,328],[674,337],[815,328],[958,336],[1096,330]];
-  const waterPositions=[[478,552],[673,560],[868,550],[1075,568]];
-  const meadowPositions=[[430,335],[640,335],[850,335],[1060,335],[430,572],[640,572],[850,572],[1060,572]];
-  Phaser.Utils.Array.Shuffle(bankPositions);Phaser.Utils.Array.Shuffle(waterPositions);Phaser.Utils.Array.Shuffle(meadowPositions);
+  const positions=[[429,336],[643,336],[857,336],[1071,336],[429,562],[643,562],[857,562],[1071,562]];
   items.forEach((it,i)=>{
-   const pos=watery?(it.species==='오리'&&waterPositions.length?waterPositions.pop():bankPositions.pop()||meadowPositions.pop()):meadowPositions[i];
-   const [x,y]=pos,a=animal(this,it.species,COLORS[it.color],it.size);
+   const [x,y]=positions[i],a=animal(this,it.species,COLORS[it.color],it.size);
+   if(watery&&i>=4&&it.species!=='오리'){
+     const bank=this.add.ellipse(x,y+77,151,36,0x9ccc78,.94).setStrokeStyle(3,0xd0e7ad,.93).setDepth(4);
+     this.add.ellipse(x,y+83,102,12,0x4b996c,.22).setDepth(5);
+   }
    a.setPosition(x,y).setDepth(8);a.setDataEnabled();a.data.set('item',it);
-   a.setInteractive(new Phaser.Geom.Rectangle(-68,-99,136,198),Phaser.Geom.Rectangle.Contains);
+   a.setInteractive(new Phaser.Geom.Rectangle(-77,-108,154,216),Phaser.Geom.Rectangle.Contains);
    a.on('pointerdown',()=>this.pick(a));
    a.on('pointerover',()=>{if(!this.lock)this.tweens.add({targets:a,scaleX:(it.size==='큰'?1:.62)*1.07,scaleY:(it.size==='큰'?1:.62)*1.07,duration:110})});
    a.on('pointerout',()=>{if(a.active)this.tweens.add({targets:a,scaleX:it.size==='큰'?1:.62,scaleY:it.size==='큰'?1:.62,duration:110})});
