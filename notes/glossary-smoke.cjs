@@ -86,15 +86,15 @@ const path=require("node:path");
       await page.locator("#gcatNext").click();
       const textTile=page.locator('.gcat-album-text[data-id="memo-inhibition"]');
       // cognitive items contain nine originals and text-only terms on second page.
-      assert(await cards.locator(".gcat-album-text").count()>0);
-      await cards.locator(".gcat-album-text").first().click();
+      assert(await page.locator("#gcatList .gcat-album-text").count()>0);
+      await page.locator("#gcatList .gcat-album-text").first().click();
       assert.equal(await dialog.evaluate(el=>el.open),true,"nonillustrated concepts still open");
       await page.locator("#gcatDialogClose").click();
 
       const search=page.locator("#gcatSearch");
       await search.fill("AAC");
       assert.equal(await cards.count(),1,"search across all modes and categories");
-      assert.equal(await cards.locator(".gcat-album-art").count(),1,"search result uses original approved picture");
+      assert.equal(await page.locator("#gcatList .gcat-album-art").count(),1,"search result uses original approved picture");
       await cards.first().click();
       assert.equal((await page.locator("#gcatDialogTitle").textContent()).trim(),"AAC");
       const related=page.locator(".gcat-related-items button");
@@ -105,7 +105,7 @@ const path=require("node:path");
 
       await search.fill("억제통제");
       assert.equal(await cards.count(),1,"find terminology without approved art");
-      assert.equal(await cards.locator(".gcat-album-text").count(),1,"no fake picture for terms without art");
+      assert.equal(await page.locator("#gcatList .gcat-album-text").count(),1,"no fake picture for terms without art");
       await search.fill("글자없음zzzz");
       assert.equal(await cards.count(),0);assert.equal(await page.locator("#gcatEmpty").isVisible(),true);
       await page.locator("#gcatClear").click();
