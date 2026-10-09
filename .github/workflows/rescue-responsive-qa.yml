@@ -43,7 +43,7 @@ jobs:
         run: |
           ready=0
           for i in $(seq 1 30); do
-            if curl --max-time 15 -fsSL "${PUBLIC_URL}landscape.js?v=2" | grep -q 'class LandscapeMissionScene'; then
+            if curl --max-time 15 -fsSL "${PUBLIC_URL}" | grep -q 'game.js?v=5'; then
               ready=1
               break
             fi
@@ -51,6 +51,12 @@ jobs:
             sleep 8
           done
           test "$ready" = "1"
-          curl --max-time 20 -fsSL "${PUBLIC_URL}game.js?v=2" | grep -q 'LANDSCAPE_MODE'
-          curl --max-time 20 -fsSL "${PUBLIC_URL}" | grep -q 'landscape.js?v=2'
+          curl --max-time 20 -fsSL "${PUBLIC_URL}game.js?v=5" | grep -q 'raster-'
+          curl --max-time 20 -fsSL "${PUBLIC_URL}" | grep -q 'landscape.js?v=4'
+          for species in rabbit pig cow duck; do
+            for color in yellow blue green red; do
+              curl --max-time 20 -fsSL "${PUBLIC_URL}art/animals/${species}-${color}.webp" -o /tmp/moa-live-animal.webp
+              file /tmp/moa-live-animal.webp | grep -q 'Web/P'
+            done
+          done
           RESCUE_URL="$PUBLIC_URL" node thinking-garden/games/rescue/rescue-smoke.cjs
