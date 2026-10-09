@@ -95,6 +95,6 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
 (async()=>{
  await test('desktop-1440x900',{width:1440,height:900},true,false,true);
  await test('tablet-1024x768',{width:1024,height:768},true,true,false);
- await test('mobile-390x844',{width:390,height:844},false,true,false);
+ await test('mobile-390x844',{width:390,height:844},false,true,true);
  await test('portrait-tablet-768x1024',{width:768,height:1024},false,true,false);
 })().catch(e=>{console.error(e);process.exitCode=1});
