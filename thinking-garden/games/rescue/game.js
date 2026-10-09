@@ -21,60 +21,31 @@ function roundRect(scene,x,y,w,h,r,fill,alpha=1,stroke=null,sw=0){const g=scene.
 function label(scene,x,y,text,size=28,color='#17382f',weight='800',align='center'){return scene.add.text(x,y,text,{fontFamily:FONT,fontSize:`${size}px`,fontStyle:weight==='900'?'bold':'normal',fontWeight:weight,color,align,wordWrap:{width:620}}).setOrigin(.5)}
 function button(scene,x,y,w,h,text,fill=0x17382f){const c=scene.add.container(x,y),bg=scene.add.graphics();bg.fillStyle(fill,1);bg.fillRoundedRect(-w/2,-h/2,w,h,24);bg.lineStyle(3,0xffffff,.25);bg.strokeRoundedRect(-w/2,-h/2,w,h,24);const t=scene.add.text(0,0,text,{fontFamily:FONT,fontSize:'29px',fontStyle:'bold',color:'#fff'}).setOrigin(.5);c.add([bg,t]);c.setSize(w,h).setInteractive({useHandCursor:true});c.on('pointerover',()=>scene.tweens.add({targets:c,scale:1.035,duration:100}));c.on('pointerout',()=>scene.tweens.add({targets:c,scale:1,duration:100}));return c}
 function animal(scene,type,colorHex,size='큰'){
- const scale=size==='큰'?1:.62;
- const c=scene.add.container(0,0).setScale(scale),g=scene.add.graphics();
- const ink=0x34564b,fur=colorHex,cream=0xfff7e8,pink=0xf3b3b9;
- const fill=(color)=>g.fillStyle(color,1);
- const oval=(x,y,w,h,color,line=true)=>{fill(color);g.fillEllipse(x,y,w,h);if(line){g.lineStyle(3,ink,.95);g.strokeEllipse(x,y,w,h)}};
- const circle=(x,y,r,color,line=false)=>{fill(color);g.fillCircle(x,y,r);if(line){g.lineStyle(3,ink,.95);g.strokeCircle(x,y,r)}};
- const triangle=(a,b,d,e,f,h,color)=>{fill(color);g.fillTriangle(a,b,d,e,f,h);g.lineStyle(3,ink,1);g.strokeTriangle(a,b,d,e,f,h)};
- // Every animal has its own recognizable silhouette, face and identifying features.
- if(type==='토끼'){
-   oval(-27,-74,28,94,fur);oval(27,-74,28,94,fur);
-   oval(-27,-75,12,67,pink,false);oval(27,-75,12,67,pink,false);
-   oval(0,29,99,86,fur);circle(39,38,16,cream,true);
-   circle(0,-20,49,fur,true);oval(-25,0,22,17,cream,false);oval(25,0,22,17,cream,false);
-   oval(-18,-26,11,15,ink,false);oval(18,-26,11,15,ink,false);
-   triangle(-7,-8,7,-8,0,1,pink);
-   g.lineStyle(2,ink,.8);g.lineBetween(0,2,-10,10);g.lineBetween(0,2,10,10);
-   g.lineBetween(-15,3,-48,-3);g.lineBetween(-15,10,-49,15);g.lineBetween(15,3,48,-3);g.lineBetween(15,10,49,15);
-   oval(-27,67,35,17,cream);oval(26,67,35,17,cream);
- }else if(type==='돼지'){
-   triangle(-37,-45,-53,-85,-7,-56,fur);triangle(37,-45,53,-85,7,-56,fur);
-   triangle(-34,-52,-43,-73,-22,-59,pink);triangle(34,-52,43,-73,22,-59,pink);
-   oval(0,28,112,86,fur);circle(0,-20,51,fur,true);
-   oval(-22,-29,11,15,ink,false);oval(22,-29,11,15,ink,false);
-   oval(0,0,65,42,pink,true);oval(-15,0,12,17,0xbd737c,false);oval(15,0,12,17,0xbd737c,false);
-   oval(-32,68,22,22,fur);oval(32,68,22,22,fur);
-   g.lineStyle(5,ink,1);g.beginPath();g.arc(55,25,15,0,Math.PI*1.7,false);g.strokePath();
- }else if(type==='소'){
-   triangle(-34,-48,-63,-85,-53,-31,0xeee1bc);triangle(34,-48,63,-85,53,-31,0xeee1bc);
-   oval(-43,-48,46,30,fur);oval(43,-48,46,30,fur);
-   oval(-43,-48,24,15,pink,false);oval(43,-48,24,15,pink,false);
-   oval(0,29,111,86,fur);circle(0,-19,50,fur,true);
-   oval(-26,-31,27,30,cream,false);oval(25,-3,25,32,cream,false);
-   oval(-20,-27,10,15,ink,false);oval(20,-27,10,15,ink,false);
-   oval(0,4,73,45,pink,true);oval(-17,4,12,15,0xa96c6e,false);oval(17,4,12,15,0xa96c6e,false);
-   oval(-30,68,24,20,0x806f62);oval(30,68,24,20,0x806f62);
- }else if(type==='오리'){
-   oval(-18,24,117,80,fur);oval(-42,19,57,41,cream,false);
-   oval(20,-33,81,78,fur);
-   oval(35,-42,11,16,ink,false);
-   triangle(53,-24,94,-13,52,-5,0xf7a342);
-   oval(-42,31,57,37,fur,false);
-   g.lineStyle(4,0xc67a37);g.lineBetween(-17,60,-20,81);g.lineBetween(14,59,17,81);
-   g.lineBetween(-20,81,-38,85);g.lineBetween(-20,81,-6,86);g.lineBetween(17,81,3,85);g.lineBetween(17,81,34,85);
-   circle(10,-15,8,pink);
- }
- // Catchlights make faces easy to distinguish even on a small tablet.
- const eyes=type==='오리'?[[35,-46]]:type==='토끼'?[[-18,-29],[18,-29]]:type==='돼지'?[[-22,-32],[22,-32]]:[[-20,-30],[20,-30]];
- eyes.forEach(([x,y])=>circle(x-2,y-3,3,0xffffff));
- c.add(g);c.setSize(150,190);return c;
+  // Sprites are original illustration assets, not Phaser circle/ellipse drawings.
+  const kind={토끼:'rabbit',돼지:'pig',소:'cow',오리:'duck'}[type];
+  const color=Object.entries(COLORS).find(([,code])=>code===colorHex)?.[0]||'노란';
+  const hue={노란:'yellow',파란:'blue',초록:'green',빨간:'red'}[color];
+  const c=scene.add.container(0,0).setScale(size==='큰'?1:.62);
+  const picture=scene.add.image(0,0,`sprite-${kind}-${hue}`).setDisplaySize(200,200);
+  c.add(picture);
+  c.setSize(150,194);
+  return c;
 }
 function makeTargetPortrait(scene,m){const box=scene.add.container(0,0);const bg=roundRect(scene,-55,-55,110,110,28,0xffffff,.96,0xd8eadf,3);box.add(bg);if(m.species.length===1){const a=animal(scene,m.species[0],COLORS[m.color],m.size).setScale(m.size==='큰'?.6:.45);box.add(a)}else{m.species.forEach((sp,i)=>{const a=animal(scene,sp,COLORS[m.color],m.size).setScale(m.size==='큰'?.3:.22);a.setPosition((i%2)*42-21,Math.floor(i/2)*42-21);box.add(a)})}return box}
 class BootScene extends Phaser.Scene{
  constructor(){super('boot')}
- preload(){this.load.image('hong','../../assets/friend-hong.png');this.load.image('moaDiscovery','../../assets/moa-discovery.png');this.load.image('moaCheer','../../assets/moa-cheer.png')}
+ preload(){
+  this.load.image('hong','../../assets/friend-hong.png');
+  this.load.image('moaDiscovery','../../assets/moa-discovery.png');
+  this.load.image('moaCheer','../../assets/moa-cheer.png');
+  const animals=['rabbit','pig','cow','duck'],colors=['yellow','blue','green','red'];
+  animals.forEach(a=>colors.forEach(c=>this.load.svg(`sprite-${a}-${c}`,`art/${a}-${c}.svg`,{width:360,height:360})));
+  for(let i=0;i<5;i++){
+    this.load.svg(`world-wide-${i}`,`art/world-wide-${i}.svg`,{width:1200,height:760});
+    this.load.svg(`world-tall-${i}`,`art/world-tall-${i}.svg`,{width:720,height:1280});
+  }
+  this.load.on('loaderror',file=>console.error('Rescue asset failed:',file.key,file.src));
+}
  create(){this.scene.start(LANDSCAPE_MODE?'landtitle':'title')}
 }
 class TitleScene extends Phaser.Scene{
@@ -89,19 +60,22 @@ class TitleScene extends Phaser.Scene{
   label(this,W/2,1110,'시간 제한 없이 천천히 찾아도 괜찮아요',20,'#cfe6da','800');
   this.add.text(W/2,1215,'ULMOA · MOA GARDEN',{fontFamily:FONT,fontSize:'15px',fontStyle:'bold',color:'#8fb5a2',letterSpacing:2}).setOrigin(.5);
  }
- drawBackdrop(){const g=this.add.graphics();g.fillStyle(0x234f40,1);g.fillRect(0,0,W,500);g.fillStyle(0x315f45,1);g.fillEllipse(120,470,420,260);g.fillEllipse(590,470,520,280);g.fillStyle(0x214934,1);g.fillRect(0,470,W,810);for(let i=0;i<9;i++){const x=40+i*86+(i%2)*18,y=580+(i%3)*170;g.fillStyle(0x173d2e,1);g.fillRect(x-10,y,20,90);g.fillStyle(i%2?0x2f6a45:0x35744d,1);g.fillCircle(x,y-15,52);g.fillCircle(x-28,y+10,35);g.fillCircle(x+28,y+10,35)}for(let i=0;i<26;i++){g.fillStyle(0xf4d66b,.18+.1*(i%3));g.fillCircle((i*83)%W,90+(i*137)%500,2+(i%3))}}
+ drawBackdrop(){
+  this.add.image(W/2,H/2,'world-tall-0').setDisplaySize(W,H).setDepth(-20);
+  this.add.rectangle(W/2,H/2,W,H,0x11382f,.44).setDepth(-19);
+ }
  makeVan(x,y,scale=1){const c=this.add.container(x,y).setScale(scale),g=this.add.graphics();g.fillStyle(0xf6f2d8,1);g.fillRoundedRect(-105,-48,210,88,22);g.fillStyle(0x4aa36d,1);g.fillRoundedRect(-105,-48,210,38,22);g.fillRect(-105,-25,210,20);g.fillStyle(0x2d5f52,1);g.fillRoundedRect(-80,-22,55,34,10);g.fillRoundedRect(10,-22,55,34,10);g.fillStyle(0x233f39,1);g.fillCircle(-65,44,22);g.fillCircle(66,44,22);g.fillStyle(0xd9efe3,1);g.fillCircle(-65,44,9);g.fillCircle(66,44,9);c.add(g);c.add(label(this,0,8,'모아 구조대',18,'#1e4e3d','900'));return c}
 }
 class MissionScene extends Phaser.Scene{
  constructor(){super('mission');this.round=0;this.found=new Set();this.lock=false;this.actors=[]}
  init(data){this.round=data.round||0;this.found=new Set();this.lock=false;this.actors=[];this.missionChip=null;this.van=null;this.seatLayer=null;this.completeOverlayShown=false}
  create(){this.m=MISSIONS[this.round];this.cameras.main.setBackgroundColor('#bfe7f5');this.drawWorld();this.drawHud();this.showBriefing()}
- drawWorld(){const g=this.add.graphics();const twilight=this.m.place==='노을숲';g.fillStyle(twilight?0xf7bd86:0xbfe9f7,1);g.fillRect(0,0,W,360);g.fillStyle(twilight?0xf19873:0xf6d96b,.88);g.fillCircle(twilight?565:570,150,78);g.fillStyle(0xffffff,.58);g.fillEllipse(130,130,160,58);g.fillEllipse(185,130,90,42);g.fillEllipse(535,245,145,50);
-  g.fillStyle(twilight?0x80965a:0x8dcf72,1);g.fillEllipse(90,390,420,260);g.fillEllipse(620,400,520,280);g.fillStyle(twilight?0x8fad61:0x9dd978,1);g.fillRect(0,350,W,H-350);
-  if(this.m.place==='연못'){g.fillStyle(0x55b7df,1);g.fillEllipse(W/2,685,500,255);g.fillStyle(0x8adcf0,.55);g.fillEllipse(W/2-70,650,250,80)}
-  if(this.m.place==='개울'){g.fillStyle(0x64bfe2,1);g.beginPath();g.moveTo(0,720);g.lineTo(180,650);g.lineTo(380,760);g.lineTo(720,650);g.lineTo(720,880);g.lineTo(500,930);g.lineTo(260,840);g.lineTo(0,940);g.closePath();g.fillPath()}
-  if(this.m.place==='숲길'||twilight){g.fillStyle(0xcdbb7d,1);g.beginPath();g.moveTo(315,1280);g.lineTo(260,500);g.lineTo(460,500);g.lineTo(420,1280);g.closePath();g.fillPath()}
-  this.addWorldProps();this.addClouds();this.van=this.makeVan(W/2,1148,.95);this.van.setDepth(40);this.seatLayer=this.add.container(W/2,1090).setDepth(45);this.rescuer=this.add.image(610,1040,'moaDiscovery').setDisplaySize(125,125).setDepth(42);this.tweens.add({targets:this.rescuer,y:1028,yoyo:true,repeat:-1,duration:950,ease:'Sine.easeInOut'});
+ drawWorld(){
+  this.add.image(W/2,H/2,`world-tall-${this.round}`).setDisplaySize(W,H).setDepth(-50);
+  this.van=this.makeVan(W/2,1148,.95);this.van.setDepth(40);
+  this.seatLayer=this.add.container(W/2,1090).setDepth(45);
+  this.rescuer=this.add.image(610,1040,'moaDiscovery').setDisplaySize(125,125).setDepth(42);
+  this.tweens.add({targets:this.rescuer,y:1028,yoyo:true,repeat:-1,duration:950,ease:'Sine.easeInOut'});
  }
  addWorldProps(){for(let i=0;i<8;i++){const x=55+(i%4)*205+(i%2)*26,y=470+Math.floor(i/4)*390;const tree=this.add.container(x,y);const g=this.add.graphics();g.fillStyle(0x6e5230,1);g.fillRoundedRect(-12,16,24,90,10);g.fillStyle(i%2?0x3e8e52:0x347b49,1);g.fillCircle(0,0,52);g.fillCircle(-34,18,35);g.fillCircle(35,18,36);tree.add(g);tree.setDepth(18);this.tweens.add({targets:tree,angle:{from:-1,to:1},yoyo:true,repeat:-1,duration:1600+i*120,ease:'Sine.easeInOut'})}
   for(let i=0;i<10;i++){const x=55+(i*79)%620,y=535+(i*131)%430;const bush=this.add.container(x,y);const g=this.add.graphics();g.fillStyle(i%3?0x4ea85d:0x5cb469,1);g.fillCircle(-20,12,29);g.fillCircle(0,0,35);g.fillCircle(24,13,27);g.fillStyle(0x89cf70,.6);g.fillCircle(-8,-9,12);bush.add(g);bush.setDepth(26);this.actors.push({bush,x,y})}

@@ -23,23 +23,8 @@ class LandscapeTitleScene extends Phaser.Scene{
  }
 }
 function landscapeBackdrop(scene,place='초원'){
- const g=scene.add.graphics().setDepth(-20);
- const twilight=place==='노을숲',lake=place==='연못'||place==='개울';
- g.fillStyle(twilight?0xf6c6a8:0xccebf7,1);g.fillRect(0,0,LW,LH);
- g.fillStyle(twilight?0xf39b72:0xffdc70,.9);g.fillCircle(1037,115,59);
- g.fillStyle(0xffffff,.68);
- [[165,113],[540,82],[850,176]].forEach(([x,y])=>{g.fillEllipse(x,y,151,48);g.fillCircle(x-40,y-14,29);g.fillCircle(x+26,y-18,33)});
- g.fillStyle(0x9acd80,1);g.fillEllipse(210,390,660,310);g.fillEllipse(870,383,850,350);
- g.fillStyle(0x88c676,1);g.fillRect(0,335,LW,LH-335);
- g.fillStyle(0x74b968,1);g.fillEllipse(620,730,1450,410);
- if(lake){g.fillStyle(0x64c5de,1);g.fillEllipse(795,553,720,225);g.fillStyle(0xa3e6ee,.55);g.fillEllipse(795,516,490,72)}
- else if(place==='숲길'||twilight){g.fillStyle(0xdac18d,1);g.fillEllipse(760,754,560,390)}
- const treeXs=[55,220,372,1095,1170];treeXs.forEach((x,i)=>{
-  let y=i%2?330:397;
-  g.fillStyle(0x7b5a3e,1);g.fillRoundedRect(x-14,y-11,28,122,12);
-  g.fillStyle(i%2?0x478f55:0x377b4a,1);g.fillCircle(x,y-42,60);g.fillCircle(x-40,y-13,40);g.fillCircle(x+38,y-10,43);
- });
- for(let i=0;i<25;i++){const x=(i*197+65)%LW,y=415+(i*103)%300;g.fillStyle(i%2?0xf4eaa1:0xffffff,.8);g.fillCircle(x,y,3+(i%3))}
+ const idx=Math.max(0,MISSIONS.findIndex(m=>m.place===place));
+ scene.add.image(LW/2,LH/2,`world-wide-${idx}`).setDisplaySize(LW,LH).setDepth(-20);
 }
 class LandscapeMissionScene extends Phaser.Scene{
  constructor(){super('landmission')}
