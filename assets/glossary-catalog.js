@@ -246,8 +246,76 @@ function boot(){
       tabs.appendChild(btn);
     });
   }
+  // 30개 용어 전부: 이미지 대신 네 갈래의 텍스트 용어 지도.
+  // 여기서는 페이지를 나누거나 그림 타일을 사용하지 않는다.
+  const MAP_NOTE={
+    cognitive:"생각하고 조절하기",
+    "memory-perception":"기억하고 받아들이기",
+    language:"이해하고 표현하기",
+    intervention:"수업과 중재의 도움"
+  };
+  function mapTerm(entry){
+    const button=node("button","gcat-map-term",entry.title);
+    button.type="button";
+    button.dataset.id=entry.id;
+    button.setAttribute("aria-label",entry.title+" 설명 보기");
+    button.addEventListener("click",()=>openTerm(entry.id,button));
+    return button;
+  }
+  function renderTextOverview(q){
+    const compact=q.replace(/\s+/g,"");
+    const matches=entry=>entry.search.includes(q)||entry.search.replace(/\s+/g,"").includes(compact);
+    const titleHit=entry=>[entry.title,...entry.covers.map(cover=>cover[0])]
+      .some(title=>title.toLocaleLowerCase("ko").replace(/\s+/g,"").includes(compact));
+    let visible=entries.filter(entry=>active==="featured"||entry.category===active);
+    if(q){
+      const exact=visible.filter(titleHit);
+      visible=exact.length?exact:visible.filter(matches);
+    }
+    list.replaceChildren();
+    if(visible.length){
+      const layout=node("div","gcat-map-layout");
+      layout.setAttribute("aria-label","네 분야 용어 지도");
+      const hub=node("div","gcat-map-hub");
+      hub.setAttribute("aria-hidden","true");
+      hub.appendChild(node("span",null,"용어"));
+      hub.appendChild(node("strong",null,"한눈에 보기"));
+      layout.appendChild(hub);
+      const groups=node("div","gcat-map-groups");
+      CATEGORY.filter(c=>c.id!=="featured").forEach((category,i)=>{
+        const items=visible.filter(entry=>entry.category===category.id);
+        if(!items.length)return;
+        const group=node("section","gcat-map-group gcat-map-"+category.id);
+        group.style.setProperty("--branch-color",TINT[category.id]);
+        group.setAttribute("aria-label",category.label+" "+items.length+"개");
+        const header=node("div","gcat-map-group-head");
+        const head=node("h3",null,category.label);
+        header.appendChild(head);
+        header.appendChild(node("span","gcat-map-group-count",items.length+"개"));
+        group.appendChild(header);
+        group.appendChild(node("p","gcat-map-group-note",MAP_NOTE[category.id]));
+        const terms=node("div","gcat-map-terms");
+        items.forEach(entry=>terms.appendChild(mapTerm(entry)));
+        group.appendChild(terms);
+        groups.appendChild(group);
+      });
+      layout.appendChild(groups);
+      list.appendChild(layout);
+    }
+    resultsTitle.textContent=q?"용어 검색 결과":"분야별 용어 지도";
+    count.textContent=visible.length+"개"+(q?" 찾음":"");
+    noResults.hidden=visible.length>0;
+    pages.hidden=true;
+    shell.classList.remove("gcat-album-active","gcat-text-active");
+    shell.classList.add("gcat-map-active");
+    modeAlbum.setAttribute("aria-pressed","false");
+    modeAll.setAttribute("aria-pressed","true");
+    renderTabs();
+  }
   function render(){
     const q=search.value.trim().toLocaleLowerCase("ko");
+    if(mode==="all"){clear.hidden=!q;renderTextOverview(q);return;}
+    shell.classList.remove("gcat-map-active");
     const qCompact=q.replace(/\s+/g,"");
     clear.hidden=!q;
     let visible=[];
@@ -292,6 +360,7 @@ function boot(){
   }
   function setMode(nextMode){
     mode=nextMode;
+    active="featured";
     currentPage=0;
     render();
   }
