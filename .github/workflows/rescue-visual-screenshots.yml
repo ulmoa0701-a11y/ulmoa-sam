@@ -1,0 +1,31 @@
+name: Rescue raster visual screenshots
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/rescue-visual-screenshots.yml'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          persist-credentials: true
+      - name: Retrieve tested screenshots and save desktop/mobile previews
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/moa-qa
+          gh run download 37909495429 -R ulmoa0701-a11y/ulmoa-sam -n rescue-responsive-screenshots -D /tmp/moa-qa
+          mkdir -p thinking-garden/games/rescue/qa-previews
+          cp /tmp/moa-qa/desktop-1440x900-gameplay.png thinking-garden/games/rescue/qa-previews/desktop.png
+          cp /tmp/moa-qa/mobile-390x844-gameplay.png thinking-garden/games/rescue/qa-previews/mobile.png
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add thinking-garden/games/rescue/qa-previews/
+          git commit -m 'Add temporary desktop and mobile visual QA snapshots'
+          git push origin HEAD:${{ github.head_ref }}
