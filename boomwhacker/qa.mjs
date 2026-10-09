@@ -146,10 +146,13 @@ async function basicCase(name,width,height){
   const instrumentState=await page.evaluate(()=>window.__boomVideoQA.display());
   check(instrumentState.mode==='instrument'&&instrumentState.labels[0]==='🛎️'&&instrumentState.instrumentLibrary.some(x=>x.name==='차임'),`${name}: instrument state not propagated to video data`);
   await page.locator('#displayModeSelect').selectOption('name');
+  await page.waitForFunction(()=>document.querySelector('#displayModal')?.classList.contains('open')&&document.querySelectorAll('#displayInputs input[data-display-index]').length===8);
   check(await page.locator('#displayModal').isVisible(),`${name}: name editor did not open`);
   await page.locator('#displayInputs input[data-display-index="0"]').fill('민준');
   await page.locator('#displayInputs input[data-display-index="1"]').fill('서연');
+  check((await page.locator('#displayInputs input[data-display-index="0"]').inputValue())==='민준'&&(await page.locator('#displayInputs input[data-display-index="1"]').inputValue())==='서연',`${name}: child name fields did not retain input`);
   await page.locator('#displayApplyBtn').click();
+  await page.waitForFunction(()=>!document.querySelector('#displayModal')?.classList.contains('open')&&window.__boomVideoQA?.display().mode==='name'&&window.__boomVideoQA?.display().labels?.[0]==='민준');
   check((await page.locator('.laneLabel').first().innerText())==='민준',`${name}: child name did not update lane`);
   check((await page.locator('.tube[data-note="도"] .tubeLabel').innerText())==='민준',`${name}: child name did not update tube`);
   await page.evaluate(()=>{elapsed=1350;draw()});
