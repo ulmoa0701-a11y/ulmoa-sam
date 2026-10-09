@@ -104,13 +104,13 @@ class MissionScene extends Phaser.Scene{
     else if(waterScene&&landSlots.length)spot=landSlots.pop();
     else spot=meadowSlots.find(p=>!used.some(q=>Math.hypot(p[0]-q[0],p[1]-q[1])<125))||meadowSlots[i%meadowSlots.length];
     used.push(spot);
-    const [x,y]=spot,a=animal(this,it.species,COLORS[it.color],it.size);a.setPosition(x,y);a.setDepth(i%3===0?20:30);a.setDataEnabled();a.data.set({species:it.species,color:it.color,size:it.size,rescuing:false});a.setInteractive(new Phaser.Geom.Rectangle(-108,-124,216,248),Phaser.Geom.Rectangle.Contains);a.on('pointerover',()=>{if(!this.lock)this.tweens.add({targets:a,scaleX:a.scaleX*1.05,scaleY:a.scaleY*1.05,duration:90})});a.on('pointerout',()=>{if(!a.data.get('rescuing'))this.tweens.add({targets:a,scaleX:it.size==='큰'?1:.62,scaleY:it.size==='큰'?1:.62,duration:90})});a.on('pointerdown',()=>this.pickAnimal(a));this.tweens.add({targets:a,y:y-8,yoyo:true,repeat:-1,duration:900+(i%4)*170,ease:'Sine.easeInOut'});this.actors.push(a)})
+    const [x,y]=spot,a=animal(this,it.species,COLORS[it.color],it.size);a.setPosition(x,y);a.setDepth(i%3===0?20:30);a.setDataEnabled();a.data.set({species:it.species,color:it.color,size:it.size,rescuing:false});a.setInteractive(new Phaser.Geom.Rectangle(-108,-124,216,248),Phaser.Geom.Rectangle.Contains);a.on('pointerover',()=>{if(!this.lock)this.tweens.add({targets:a,scaleX:a.scaleX*1.05,scaleY:a.scaleY*1.05,duration:90})});a.on('pointerout',()=>{if(!a.data.get('rescuing'))this.tweens.add({targets:a,scaleX:it.size==='큰'?1:.62,scaleY:it.size==='큰'?1:.62,duration:90})});// A single scene-wide nearest-center tap handler prevents overlapping animals from hijacking selection.this.tweens.add({targets:a,y:y-8,yoyo:true,repeat:-1,duration:900+(i%4)*170,ease:'Sine.easeInOut'});this.actors.push(a)})
  }
  installTouchAssist(){
   const onTap=(pointer,currentlyOver)=>{
     if(this.lock)return;
     const choices=this.actors.filter(a=>a&&a.active&&a.data?.get('species')&&!a.data.get('rescuing'));
-    if((currentlyOver||[]).some(o=>choices.includes(o)))return;
+    // Always resolve the closest target, even when Phaser reports overlapping sprites.
     let nearest=null,smallest=Infinity;
     for(const a of choices){
       const dx=pointer.x-a.x,dy=pointer.y-a.y;
