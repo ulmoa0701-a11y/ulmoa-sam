@@ -1,6 +1,6 @@
 /* 해봄노트 30개 용어 통합 탐색기
  * 원래 용어노트 설명/사례/출처는 DOM 원문에서 읽기만 한다.
- * 이미지 12장 자르기/재생성/잘라 확대 없음.
+ * 승인 이미지 22장 자르기/재생성/잘라 확대 없음.
  */
 (function(){
 "use strict";
@@ -16,10 +16,19 @@ const COVERS={
   "memo-short-term-memory":[["단기기억","short-term-memory"]],
   "memo-processing-speed":[["처리속도","processing-speed"]],
   "memo-attention":[["주의","attention"]],
+  "memo-executive":[["실행기능","executive-function"]],
+  "memo-inhibition":[["억제통제","inhibitory-control"]],
+  "memo-flexibility":[["인지유연성","cognitive-flexibility"]],
+  "memo-self-regulation":[["자기조절","self-regulation"]],
   "memo-memory":[["기억","memory"]],
-  "memo-visual":[["시지각","visual-perception"]],
+  "memo-encoding":[["부호화","encoding"]],
+  "memo-consolidation":[["기억공고화","consolidation"]],
+  "memo-retrieval":[["인출","retrieval"]],
+  "memo-visual":[["시지각","visual-perception"],["시각주의","visual-attention"]],
   "memo-auditory":[["청각처리","auditory-processing"]],
   "memo-receptive-expressive":[["수용언어","receptive-language"],["표현언어","expressive-language"]],
+  "memo-pragmatics":[["화용언어","pragmatic-language"]],
+  "memo-semantics":[["의미이해","semantic-understanding"]],
   "memo-aac":[["AAC","aac"]],
   "memo-prompting":[["촉구","prompting"]],
   "memo-reinforcement":[["강화","reinforcement"]]
@@ -104,9 +113,13 @@ function boot(){
   let active="featured";
   let mode="album";
   let currentPage=0;
-  // 12 approved independent drawings, including separate receptive / expressive cards.
+  // 22 approved independent drawings. Paired concepts retain two independently clickable art cards.
   const albumItems=entries.flatMap(entry=>entry.covers.map((cover,index)=>({entry,cover,index})));
-  if(albumItems.length!==12)console.warn("그림앨범 등록 갯수 확인:",albumItems.length);
+  // Data-driven counter: avoid stale numbers when a new illustration is added.
+  const illustrationCount=albumItems.length;
+  modeAlbum.querySelector("span").textContent=String(illustrationCount);
+  modeAll.querySelector("span").textContent=String(entries.length);
+  if(albumItems.length!==22)console.warn("그림 등록 갯수 확인:",albumItems.length);
   let recentIds=storageGet().filter(id=>byId.has(id));
   let lastOpener=null;
 
