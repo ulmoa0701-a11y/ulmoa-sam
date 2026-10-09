@@ -39,7 +39,7 @@ class BootScene extends Phaser.Scene{
   this.load.image('moaDiscovery','../../assets/moa-discovery.png');
   this.load.image('moaCheer','../../assets/moa-cheer.png');
   const animals=['rabbit','pig','cow','duck'],colors=['yellow','blue','green','red'];
-  animals.forEach(a=>colors.forEach(c=>this.load.svg(`sprite-${a}-${c}`,`art/${a}-${c}.svg`,{width:360,height:360})));
+  animals.forEach(a=>colors.forEach(c=>this.load.image(`sprite-${a}-${c}`,`art/illustrated/${a}-${c}.webp`)));
   for(let i=0;i<5;i++){
     this.load.svg(`world-wide-${i}`,`art/world-wide-${i}.svg`,{width:1200,height:760});
     this.load.svg(`world-tall-${i}`,`art/world-tall-${i}.svg`,{width:720,height:1280});
