@@ -17,7 +17,7 @@ for species in ("rabbit","pig","cow","duck"):
     file=SOURCES/f"{species}.png"
     if not file.exists(): raise RuntimeError(f"missing source {file}")
     original=Image.open(file).convert("RGBA")
-    bbox=original.getchannel('A').getbbox()
+    bbox=original.getchannel('A').point(lambda p: 255 if p>=38 else 0).getbbox()
     if bbox is None: raise RuntimeError(f"transparent image source {file}")
     im=original.crop(bbox)
     # Preserve clear silhouette and margins; avoid object-cropping from combined backgrounds.
