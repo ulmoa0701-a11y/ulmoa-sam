@@ -10,7 +10,8 @@ const path=require('node:path');
   fs.mkdirSync(screens,{recursive:true});
   const targets=['memo-working-memory','memo-short-term-memory','memo-processing-speed','memo-attention','memo-memory','memo-visual','memo-auditory','memo-receptive-expressive','memo-receptive-expressive','memo-aac','memo-prompting','memo-reinforcement'];
   const profiles=[
-    {name:'mobile',width:390,height:844,columns:1},
+    {name:'mobile-small',width:360,height:780,columns:2},
+    {name:'mobile',width:390,height:844,columns:2},
     {name:'tablet',width:768,height:1024,columns:2},
     {name:'desktop',width:1440,height:900,columns:4}
   ];
@@ -41,24 +42,44 @@ const path=require('node:path');
         assert(card.loaded,'loaded image '+i);
         assert(card.x>=0&&card.x+card.w<=profile.width+2,'card must not exceed viewport '+i);
       }
-      const firstRow=data.filter(x=>Math.abs(x.x-data[0].x)<3);
-      if(profile.columns===1){assert.equal(firstRow.length,12,'mobile one column to preserve readable image text');assert(data[0].imageWidth>=270,'mobile card image must be large enough');}
-      else{assert.equal(new Set(data.map(x=>Math.round(x.x))).size,profile.columns,profile.name+' columns');}
+      assert.equal(new Set(data.map(x=>Math.round(x.x))).size,profile.columns,profile.name+' columns');
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,profile.name+' must have no horizontal page scroll');
+      if(profile.name.startsWith('mobile')){
+        assert(data[0].imageWidth>=120,'compact mobile card retains adequate tap surface');
+        const availableHeight=await page.locator('.glossary-approved-grid').evaluate(n=>n.getBoundingClientRect().height);
+        assert(availableHeight<1700,'compact mobile grid should not require excessive scrolling');
+      }
       assert.equal(await page.locator('.study-note').count(),30,'all original 30 detailed entries must remain');
       await page.screenshot({path:path.join(screens,profile.name+'-cards.png'),fullPage:false});
+      const dialog=page.locator('#glossaryCardDialog');
       for(let i=0;i<12;i++){
         await cards.nth(i).click();
-        await page.waitForTimeout(130);
-        assert.equal(await page.locator('#'+targets[i]).evaluate(n=>n.open),true,profile.name+' click target '+i);
+        assert.equal(await dialog.evaluate(n=>n.open),true,profile.name+' dialog must open from image card '+i);
+        assert((await page.locator('#glossaryDialogTitle').textContent()).trim().length>0,'dialog title must be readable');
+        assert((await page.locator('#glossaryDialogBody').textContent()).trim().length>70,'dialog should show the real explanation and examples');
+        assert.equal(await page.locator('#'+targets[i]).evaluate(n=>n.open),false,'original note must not scroll open');
+        await page.locator('#glossaryDialogClose').click();
+        assert.equal(await dialog.evaluate(n=>n.open),false,'dialog close should work');
       }
       if(profile.name==='mobile'){
         await page.locator('#glossarySearch').fill('작업기억');
         await cards.nth(9).click();
-        assert.equal(await page.locator('#glossarySearch').inputValue(),'','card click must reset filters');
-        assert.equal(await page.locator('#memo-aac').evaluate(n=>n.open),true,'AAC opens even after searching another term');
+        assert.equal(await dialog.evaluate(n=>n.open),true,'AAC dialog must work after search');
+        assert.equal(await page.locator('#glossarySearch').inputValue(),'작업기억','image dialog must preserve search query');
+        await page.keyboard.press('Escape');
+        assert.equal(await dialog.evaluate(n=>n.open),false,'Escape should close image dialog');
+        const toggle=page.locator('#glossaryViewSwitch');
+        await toggle.click();
+        assert.equal(await page.locator('#glossaryApprovedGrid').evaluate(n=>n.classList.contains('is-large')),true,'one-column optional large view');
+        assert.equal(await page.locator('.glossary-approved-card').first().evaluate(n=>n.getBoundingClientRect().width>=250),true,'large view card');
+        await toggle.click();
+        assert.equal(await page.locator('#glossaryApprovedGrid').evaluate(n=>n.classList.contains('is-large')),false,'restore compact default view');
       }
+      // Non-image text entries still expand as original accordion.
+      await page.locator('#memo-executive > summary').click();
+      assert.equal(await page.locator('#memo-executive').evaluate(n=>n.open),true,'remaining glossary entries still expand');
       assert.deepEqual(errors,[],profile.name+' uncaught JS errors');
-      console.log(profile.name+': PASS 12 images, '+profile.columns+' grid columns, clickable details, 30 preserved entries');
+      console.log(profile.name+': PASS 12 images, '+profile.columns+' columns, dialogs + closing, original 30 entries');
       await page.close();
     }
   } finally {await browser.close();}
