@@ -46,7 +46,7 @@ const truth=require('./doremi-ground-truth.json');
        if(dur.endsWith('d'))VF.Dot.buildAndAttach([note],{all:true});
        return note;
       });
-      const voice=new VF.Voice({num_beats:4,beat_value:4});
+      const voice=new VF.Voice({num_beats:4,beat_value:4}).setMode(VF.Voice.Mode.SOFT);
       voice.addTickables(n);
       const space=stave.getNoteEndX()-stave.getNoteStartX()-14;
       new VF.Formatter().joinVoices([voice]).format([voice],Math.max(110,space));
