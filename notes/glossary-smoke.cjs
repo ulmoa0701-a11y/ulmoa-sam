@@ -75,6 +75,7 @@ const path=require('node:path');
         await toggle.click();
         assert.equal(await page.locator('#glossaryApprovedGrid').evaluate(n=>n.classList.contains('is-large')),false,'restore compact default view');
       }
+      if(profile.name==='mobile') await page.locator('#glossarySearch').fill('');
       // Non-image text entries still expand as original accordion.
       await page.locator('#memo-executive > summary').click();
       assert.equal(await page.locator('#memo-executive').evaluate(n=>n.open),true,'remaining glossary entries still expand');
