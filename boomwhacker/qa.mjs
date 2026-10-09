@@ -233,11 +233,13 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   check(instrumentFall.w>=52,'display screenshot: mobile falling note should stay large in instrument mode');
   await page.screenshot({path:out+'/display-instrument390.png',fullPage:true});
   check((await page.locator('.tube[data-note="라"] .tubeLabel').innerText())==='🎺','display screenshot: instrument icon mapping wrong');
+  await page.locator('#displayCloseBtn').click();
   await page.locator('#displayModeSelect').selectOption('name');
   await page.locator('#displayInputs input[data-display-index="0"]').fill('민준');
   await page.locator('#displayInputs input[data-display-index="1"]').fill('서연');
   await page.locator('#displayInputs input[data-display-index="2"]').fill('지우');
   await page.locator('#displayApplyBtn').click();
+  await page.waitForFunction(()=>document.querySelector('.laneLabel')?.textContent==='민준');
   await page.evaluate(()=>{elapsed=1350;draw()});
   check(await page.locator('.fall .fallLabel').count()>0,'display screenshot: child-name falling note missing');
   await page.screenshot({path:out+'/display-names390.png',fullPage:true});
