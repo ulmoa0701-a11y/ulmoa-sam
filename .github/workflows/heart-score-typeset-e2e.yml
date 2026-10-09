@@ -20,7 +20,7 @@ jobs:
       - name: Install free local score renderer and browser QA
         run: |
           npm ci --prefix heart-score/qa --ignore-scripts --no-audit --no-fund
-          npm install --prefix heart-score/qa --no-save --ignore-scripts --no-audit --no-fund vexflow@4.2.6
+          npm install --prefix heart-score/qa --no-save --ignore-scripts --no-audit --no-fund vexflow@4.2.5
           npx --prefix heart-score/qa playwright install chromium
       - name: Prepare pinned ONNX model and browser runtime
         run: node heart-score/qa/prepare-runtime.cjs
