@@ -48,6 +48,9 @@ async function basicCase(name,width,height){
   check(await page.locator('#displayModeSelect').count()===1,`${name}: display mode selector missing`);
   check(await page.locator('#displayModeSelect option').count()===4,`${name}: display mode selector should have 4 choices`);
   check((await page.locator('#displayModeSelect').inputValue())==='note',`${name}: display mode should default to note names`);
+  check(await page.locator('#introMode').count()===1,`${name}: intro mode setting missing`);
+  check(await page.locator('#introMode').inputValue()==='music',`${name}: musical intro must default on`);
+  check(await page.locator('#introOverlay').count()===1,`${name}: readiness overlay missing`);
   check(await page.locator('#melodySelect').count()===1,`${name}: melody selector missing`);
   check(await page.locator('#melodySelect option').count()===4,`${name}: melody selector should have 4 choices`);
   check((await page.locator('#melodySelect').inputValue())==='boom',`${name}: default melody should be Boomwhacker`);
@@ -221,12 +224,36 @@ async function basicCase(name,width,height){
   }
   const activeBorder=await page.locator('.lyricSyllable.active').evaluate(el=>getComputedStyle(el).borderTopColor);
   check(activeBorder==='rgb(235, 36, 39)',`${name}: current lyric syllable does not use its Boomwhacker color (${activeBorder})`);
-  await page.locator(width<=800?'#playBtn':'#startBtn').click();
-  await page.waitForTimeout(550);
-  const progress=parseFloat((await page.locator('#progressFill').evaluate(el=>getComputedStyle(el).width)))||0;
-  check(progress>0,`${name}: playback progress did not advance`);
-  await page.locator('#playBtn').click();
   await page.locator('#resetBtn').click();
+  await page.locator(width<=800?'#playBtn':'#startBtn').click();
+  const introStart=await page.evaluate(()=>window.__boomVideoQA.intro());
+  check(introStart.mode==='music'&&introStart.active&&!introStart.started&&introStart.beats>=3,`${name}: musical intro did not start before song ${JSON.stringify(introStart)}`);
+  check(await page.locator('#introOverlay').isVisible(),`${name}: preparation overlay must be visible during intro`);
+  check(await page.locator('#introHeading').innerText()==='준비 간주',`${name}: musical readiness text missing`);
+  await page.screenshot({path:`${out}/${name}-musical-intro.png`,fullPage:false});
+  await page.evaluate(()=>{introStartPerf-=introDurationMs+12;introFrame(performance.now())});
+  await page.waitForTimeout(550);
+  const songStart=await page.evaluate(()=>window.__boomVideoQA.intro());
+  check(!songStart.active&&songStart.started,`${name}: intro did not hand off to song playback`);
+  const progress=parseFloat((await page.locator('#progressFill').evaluate(el=>getComputedStyle(el).width)))||0;
+  check(progress>0,`${name}: playback progress did not advance after intro`);
+  await page.locator('#playBtn').click();
+  const paused=await page.evaluate(()=>({elapsed,playing,introActive}));
+  await page.locator('#playBtn').click();
+  check(await page.evaluate(()=>playing&&!introActive),`${name}: pause/resume incorrectly retriggered intro`);
+  await page.locator('#resetBtn').click();
+  await page.locator('#introMode').evaluate(el=>{el.value='count';el.dispatchEvent(new Event('change',{bubbles:true}))});
+  await page.locator(width<=800?'#playBtn':'#startBtn').click();
+  const countStart=await page.evaluate(()=>window.__boomVideoQA.intro());
+  check(countStart.mode==='count'&&countStart.active&&countStart.beats===3&&countStart.durationMs===3000,`${name}: 3-second count mode broken ${JSON.stringify(countStart)}`);
+  check((await page.locator('#introPulse').innerText())==='3',`${name}: count should start at 3`);
+  await page.locator('#resetBtn').click();
+  check(!(await page.locator('#introOverlay').isVisible())&&!await page.evaluate(()=>introActive),`${name}: reset should cancel countdown`);
+  await page.locator('#introMode').evaluate(el=>{el.value='instant';el.dispatchEvent(new Event('change',{bubbles:true}))});
+  await page.locator(width<=800?'#playBtn':'#startBtn').click();
+  check(await page.evaluate(()=>playing&&!introActive),`${name}: immediate start option failed`);
+  await page.locator('#resetBtn').click();
+  await page.locator('#introMode').evaluate(el=>{el.value='music';el.dispatchEvent(new Event('change',{bubbles:true}))});
   const fillStyle=await page.locator('#progressFill').getAttribute('style')||'';
   check(fillStyle.includes('0%'),`${name}: reset did not return progress to zero`);
 
@@ -283,6 +310,7 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(BASE,{waitUntil:'networkidle'});
   await page.locator('#mobileSettingsBtn').click();
+  await page.locator('#introMode').evaluate(el=>{el.value='instant';el.dispatchEvent(new Event('change',{bubbles:true}))});
   const defaultMr=await page.evaluate(()=>window.__boomVideoQA.mix());
   const autoBalance=await page.evaluate(async()=>{
     const A=window.OfflineAudioContext||window.webkitOfflineAudioContext;
