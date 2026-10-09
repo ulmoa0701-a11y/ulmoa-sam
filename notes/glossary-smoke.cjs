@@ -92,10 +92,18 @@ const path=require("node:path");
       assert.equal(await page.locator("#gcatEmpty").isVisible(),false,"clear restores category list");
       await page.locator('.gcat-tab[data-tab="featured"]').click();
       assert.equal(await cards.count(),6,"return to featured quick browse");
-      await page.evaluate(()=>window.scrollTo(0,320));
-      await page.waitForTimeout(100);
-      const searchTop=await page.locator("#gcatSearch").evaluate(el=>el.getBoundingClientRect().top);
-      assert(searchTop>=-1&&searchTop<150,"search stays sticky when browsing down");
+      await page.locator('.gcat-tab[data-tab="cognitive"]').click();
+      await page.evaluate(()=>window.scrollTo(0,280));
+      await page.waitForTimeout(160);
+      const stickyInfo=await page.locator(".gcat-search-rail").evaluate(el=>({
+        top:el.getBoundingClientRect().top,
+        pos:getComputedStyle(el).position,
+        scrollY:window.scrollY,
+        maxScroll:document.documentElement.scrollHeight-innerHeight
+      }));
+      assert(stickyInfo.scrollY>100,"longer category is scrollable");
+      assert(stickyInfo.pos==="sticky","search panel uses sticky positioning");
+      assert(stickyInfo.top>=-1&&stickyInfo.top<140,"search stays sticky in long category "+JSON.stringify(stickyInfo));
       assert.deepEqual(errors,[],"no uncaught javascript errors");
       console.log(profile.name+": PASS - compact list, 30 notes, filters, search, sticky field, dialog, original artwork, related terms");
       await page.close();
