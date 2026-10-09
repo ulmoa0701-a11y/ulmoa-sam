@@ -242,18 +242,18 @@ async function basicCase(name,width,height){
   await page.locator('#playBtn').click();
   check(await page.evaluate(()=>playing&&!introActive),`${name}: pause/resume incorrectly retriggered intro`);
   await page.locator('#resetBtn').click();
-  await page.locator('#introMode').selectOption('count');
+  await page.locator('#introMode').evaluate(el=>{el.value='count';el.dispatchEvent(new Event('change',{bubbles:true}))});
   await page.locator(width<=800?'#playBtn':'#startBtn').click();
   const countStart=await page.evaluate(()=>window.__boomVideoQA.intro());
   check(countStart.mode==='count'&&countStart.active&&countStart.beats===3&&countStart.durationMs===3000,`${name}: 3-second count mode broken ${JSON.stringify(countStart)}`);
   check((await page.locator('#introPulse').innerText())==='3',`${name}: count should start at 3`);
   await page.locator('#resetBtn').click();
   check(!(await page.locator('#introOverlay').isVisible())&&!await page.evaluate(()=>introActive),`${name}: reset should cancel countdown`);
-  await page.locator('#introMode').selectOption('instant');
+  await page.locator('#introMode').evaluate(el=>{el.value='instant';el.dispatchEvent(new Event('change',{bubbles:true}))});
   await page.locator(width<=800?'#playBtn':'#startBtn').click();
   check(await page.evaluate(()=>playing&&!introActive),`${name}: immediate start option failed`);
   await page.locator('#resetBtn').click();
-  await page.locator('#introMode').selectOption('music');
+  await page.locator('#introMode').evaluate(el=>{el.value='music';el.dispatchEvent(new Event('change',{bubbles:true}))});
   const fillStyle=await page.locator('#progressFill').getAttribute('style')||'';
   check(fillStyle.includes('0%'),`${name}: reset did not return progress to zero`);
 
@@ -310,7 +310,7 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(BASE,{waitUntil:'networkidle'});
   await page.locator('#mobileSettingsBtn').click();
-  await page.locator('#introMode').selectOption('instant');
+  await page.locator('#introMode').evaluate(el=>{el.value='instant';el.dispatchEvent(new Event('change',{bubbles:true}))});
   const defaultMr=await page.evaluate(()=>window.__boomVideoQA.mix());
   const autoBalance=await page.evaluate(async()=>{
     const A=window.OfflineAudioContext||window.webkitOfflineAudioContext;
