@@ -227,9 +227,17 @@ async function basicCase(name,width,height){
   await page.locator('#resetBtn').click();
   await page.locator(width<=800?'#playBtn':'#startBtn').click();
   const introStart=await page.evaluate(()=>window.__boomVideoQA.intro());
-  check(introStart.mode==='music'&&introStart.active&&!introStart.started&&introStart.beats>=3,`${name}: musical intro did not start before song ${JSON.stringify(introStart)}`);
+  check(introStart.mode==='music'&&introStart.active&&!introStart.started&&introStart.beats>=8&&introStart.durationMs>=5200&&introStart.previewBeats>=4,`${name}: musical intro did not start before song ${JSON.stringify(introStart)}`);
   check(await page.locator('#introOverlay').isVisible(),`${name}: preparation overlay must be visible during intro`);
-  check(await page.locator('#introHeading').innerText()==='준비 간주',`${name}: musical readiness text missing`);
+  check((await page.locator('#introHeading').innerText()).includes('박자 먼저 들어요'),`${name}: preparatory beat text missing`);
+  const introStartGeometry=await page.evaluate(()=>({tempo:beatMs(),meter:introMeter,count: introCountBeats, preview: introPreviewBeats,total: introDurationMs}));
+  check(introStartGeometry.meter===2&&introStartGeometry.count===4,`${name}: 2/4 musical preparation beat grouping is wrong ${JSON.stringify(introStartGeometry)}`);
+  await page.evaluate(()=>{introStartPerf=performance.now()-(introPreviewBeats*beatMs()+20);introFrame(performance.now())});
+  check((await page.locator('#introHeading').innerText()).includes('박자 맞춰 시작해요'),`${name}: final visual count is not explicit`);
+  check((await page.locator('#introPulse').innerText())==='1',`${name}: first preview count should show beat 1`);
+  check(await page.locator('#introOverlay').evaluate(el=>el.classList.contains('finalCount')),`${name}: final count should move above falling notes`);
+  await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs-400);introFrame(performance.now())});
+  check(await page.locator('.fall').count()>0,`${name}: first note must already be falling before the first audible note`);
   await page.screenshot({path:`${out}/${name}-musical-intro.png`,fullPage:false});
   await page.evaluate(()=>{introStartPerf-=introDurationMs+12;introFrame(performance.now())});
   await page.waitForTimeout(550);
@@ -254,6 +262,15 @@ async function basicCase(name,width,height){
   check(await page.evaluate(()=>playing&&!introActive),`${name}: immediate start option failed`);
   await page.locator('#resetBtn').click();
   await page.locator('#introMode').evaluate(el=>{el.value='music';el.dispatchEvent(new Event('change',{bubbles:true}))});
+  if(name==='mobile390'){
+    // A 3/4 song gets a complete musical count-in with correct meter.
+    await page.locator('#mobileSongSelect').selectOption('same');
+    await page.locator('#playBtn').click();
+    const triple=await page.evaluate(()=>window.__boomVideoQA.intro());
+    check(triple.meter===3&&triple.countBeats===3&&triple.beats%3===0&&triple.durationMs>=5200,`${name}: triple meter count-in should align to bar lines ${JSON.stringify(triple)}`);
+    await page.locator('#resetBtn').click();
+    await page.locator('#mobileSongSelect').selectOption('twinkle');
+  }
   const fillStyle=await page.locator('#progressFill').getAttribute('style')||'';
   check(fillStyle.includes('0%'),`${name}: reset did not return progress to zero`);
 
