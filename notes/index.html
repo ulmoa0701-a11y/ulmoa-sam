@@ -14,7 +14,7 @@
 <link href="../assets/notebook-subpages.css?v=20261005-clean3" rel="stylesheet"/>
 <link href="../assets/info.css?v=20261006-study1" rel="stylesheet"/>
 <link href="../assets/info-memory.css?v=20261008-v3vector" rel="stylesheet"/>
-<link href="../assets/glossary-approved-cards.css?v=20261009-img2" rel="stylesheet"/>
+<link href="../assets/glossary-approved-cards.css?v=20261009-compact3" rel="stylesheet"/>
 
 </head>
 <body class="note-subpage info-page glossary-page">
@@ -64,7 +64,10 @@
     <h1 id="glossaryCardTitle">그림으로 만나는 용어</h1>
     <p>그림을 누르면 자세한 설명과 예시가 펼쳐져요.</p>
   </header>
-  <div class="glossary-approved-grid" role="group" aria-label="그림 용어 버튼 12개">
+  <div class="glossary-approved-toolbar">
+    <button class="glossary-view-switch" id="glossaryViewSwitch" type="button" aria-controls="glossaryApprovedGrid" aria-pressed="false">한 장 크게 보기</button>
+  </div>
+  <div class="glossary-approved-grid" id="glossaryApprovedGrid" role="group" aria-label="그림 용어 버튼 12개">
     <button class="glossary-approved-card" type="button" data-target="memo-working-memory" aria-label="작업기억 설명 열기" title="작업기억"><img src="../assets/glossary/cards/working-memory.webp" width="1122" height="1402" loading="eager" decoding="async" alt="작업기억 손그림 카드"/></button>
     <button class="glossary-approved-card" type="button" data-target="memo-short-term-memory" aria-label="단기기억 설명 열기" title="단기기억"><img src="../assets/glossary/cards/short-term-memory.webp" width="1122" height="1402" loading="eager" decoding="async" alt="단기기억 손그림 카드"/></button>
     <button class="glossary-approved-card" type="button" data-target="memo-processing-speed" aria-label="처리속도 설명 열기" title="처리속도"><img src="../assets/glossary/cards/processing-speed.webp" width="1122" height="1402" loading="lazy" decoding="async" alt="처리속도 손그림 카드"/></button>
@@ -79,6 +82,14 @@
     <button class="glossary-approved-card" type="button" data-target="memo-reinforcement" aria-label="강화 설명 열기" title="강화"><img src="../assets/glossary/cards/reinforcement.webp" width="1122" height="1402" loading="lazy" decoding="async" alt="강화 손그림 카드"/></button>
   </div>
   <p class="glossary-approved-footnote">그림 카드 12개 · 전체 용어 설명 30개</p>
+  <dialog class="glossary-card-dialog" id="glossaryCardDialog" aria-labelledby="glossaryDialogTitle">
+    <div class="glossary-dialog-header">
+      <div><h2 id="glossaryDialogTitle"></h2><p id="glossaryDialogSubtitle"></p></div>
+      <button class="glossary-dialog-close" type="button" aria-label="설명 창 닫기" id="glossaryDialogClose">×</button>
+    </div>
+    <div class="glossary-dialog-body" id="glossaryDialogBody"></div>
+  </dialog>
+
 </section>
 <div class="sub-hero info-hero glossary-hero">
 <span aria-hidden="true" class="sub-tape"></span>
@@ -468,8 +479,41 @@ document.addEventListener("DOMContentLoaded",function(){
     });
   });
 
+  var imageGrid=document.getElementById("glossaryApprovedGrid");
+  var viewSwitch=document.getElementById("glossaryViewSwitch");
+  if(imageGrid&&viewSwitch){
+    viewSwitch.addEventListener("click",function(){
+      var large=imageGrid.classList.toggle("is-large");
+      viewSwitch.setAttribute("aria-pressed",String(large));
+      viewSwitch.textContent=large?"두 장씩 모아보기":"한 장 크게 보기";
+    });
+  }
+  var glossaryDialog=document.getElementById("glossaryCardDialog");
+  var dialogTitle=document.getElementById("glossaryDialogTitle");
+  var dialogSubtitle=document.getElementById("glossaryDialogSubtitle");
+  var dialogBody=document.getElementById("glossaryDialogBody");
+  var dialogClose=document.getElementById("glossaryDialogClose");
+  if(glossaryDialog&&dialogClose){
+    dialogClose.addEventListener("click",function(){glossaryDialog.close();});
+    glossaryDialog.addEventListener("click",function(event){if(event.target===glossaryDialog)glossaryDialog.close();});
+  }
   document.querySelectorAll("[data-target]").forEach(function(button){
-    button.addEventListener("click",function(){if(search && search.value){search.value="";applySearch();}openNote(document.getElementById(button.dataset.target),true);});
+    button.addEventListener("click",function(){
+      var note=document.getElementById(button.dataset.target);
+      if(button.classList.contains("glossary-approved-card")&&note&&glossaryDialog&&typeof glossaryDialog.showModal==="function"){
+        var summary=note.querySelector(".study-summary-copy");
+        var content=note.querySelector(".study-paper");
+        if(summary&&content){
+          dialogTitle.textContent=button.getAttribute("title")||summary.querySelector("h3").textContent;
+          dialogSubtitle.textContent=summary.querySelector("p")?.textContent||"";
+          dialogBody.replaceChildren(content.cloneNode(true));
+          glossaryDialog.showModal();
+          return;
+        }
+      }
+      if(search && search.value){search.value="";applySearch();}
+      openNote(note,true);
+    });
   });
   document.querySelectorAll("[data-open]").forEach(function(button){
     button.addEventListener("click",function(){
