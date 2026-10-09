@@ -43,7 +43,7 @@ const target = 'https://ulmoa0701-a11y.github.io/ulmoa-sam/heart-score/ai/?v=702
         }
         return canvas.toDataURL('image/png').split(',')[1];
       });
-      const uploadStarted=Date.now(); await frame.locator('#imageScoreFile').setInputFiles({name:'synthetic-staff-mobile-smoke.png',mimeType:'image/png',buffer:Buffer.from(b64,'base64')});
+      const uploadStarted=Date.now(); await frame.locator('button.tab[data-tab="image"]').tap(); const chooserPromise=page.waitForEvent('filechooser',{timeout:15000}); await frame.locator('label[for="imageScoreFile"] .btn').tap(); const chooser=await chooserPromise; result.fileChooserViaTap=true; await chooser.setFiles({name:'synthetic-staff-mobile-smoke.png',mimeType:'image/png',buffer:Buffer.from(b64,'base64')});
       await page.waitForFunction(()=>{const d=document.getElementById('app')?.contentDocument;return /초안 완료|결과 검증|분석 실패|자동 변환|오선보가 아니라|불러오지 못|본체 연결 실패/.test(d?.querySelector('#imageStatus')?.textContent||'')||!!d?.querySelector('#pages')?.innerText?.includes('자동 변환을 중단')},{},{timeout:115000}).catch(e=>{result.waitError=String(e)});
       const state=await page.evaluate(()=>{const w=document.getElementById('app').contentWindow,d=w.document;return {
         status:d.querySelector('#imageStatus')?.textContent||'',
