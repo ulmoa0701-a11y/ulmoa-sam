@@ -14,7 +14,8 @@
 <link href="../assets/notebook-subpages.css?v=20261005-clean3" rel="stylesheet"/>
 <link href="../assets/info.css?v=20261006-study1" rel="stylesheet"/>
 <link href="../assets/info-memory.css?v=20261008-v3vector" rel="stylesheet"/>
-<link href="../assets/glossary-approved-cards.css?v=20261009-compact3" rel="stylesheet"/>
+<link href="../assets/glossary-catalog.css?v=20261009-v1" rel="stylesheet"/>
+<script src="../assets/glossary-catalog.js?v=20261009-v1" defer></script>
 
 </head>
 <body class="note-subpage info-page glossary-page">
@@ -58,38 +59,28 @@
 <main class="sub-main">
 <a class="back-link" href="../">← 해봄노트로 돌아가기</a>
 <section class="notebook-page info-note glossary-note">
-<section class="glossary-approved-section" aria-labelledby="glossaryCardTitle">
-  <header class="glossary-approved-heading">
-    <span class="glossary-approved-kicker">해봄노트 · 용어노트</span>
-    <h1 id="glossaryCardTitle">그림으로 만나는 용어</h1>
-    <p>그림을 누르면 자세한 설명과 예시가 펼쳐져요.</p>
+<section class="gcat" id="glossaryCatalog" aria-labelledby="gcatTitle">
+  <header class="gcat-head">
+    <span class="gcat-eyebrow">해봄노트 · 용어노트</span>
+    <h1 id="gcatTitle">궁금한 용어, 바로 찾기</h1>
+    <p>분야를 선택하거나 검색해요. 카드 하나를 누르면 설명과 예시가 열립니다.</p>
   </header>
-  <div class="glossary-approved-toolbar">
-    <button class="glossary-view-switch" id="glossaryViewSwitch" type="button" aria-controls="glossaryApprovedGrid" aria-pressed="false">한 장 크게 보기</button>
+  <div class="gcat-search-rail">
+    <label class="gcat-search-wrap" for="gcatSearch">
+      <span class="gcat-search-icon" aria-hidden="true">⌕</span>
+      <input class="gcat-search" id="gcatSearch" type="search" placeholder="용어 검색 · 작업기억, AAC, 촉구" autocomplete="off" aria-label="전체 용어 검색"/>
+      <button class="gcat-clear" type="button" id="gcatClear" aria-label="검색어 지우기" hidden>×</button>
+    </label>
   </div>
-  <div class="glossary-approved-grid" id="glossaryApprovedGrid" role="group" aria-label="그림 용어 버튼 12개">
-    <button class="glossary-approved-card" type="button" data-target="memo-working-memory" aria-label="작업기억 설명 열기" title="작업기억"><img src="../assets/glossary/cards/working-memory.webp" width="1122" height="1402" loading="eager" decoding="async" alt="작업기억 손그림 카드"/></button>
-    <button class="glossary-approved-card" type="button" data-target="memo-short-term-memory" aria-label="단기기억 설명 열기" title="단기기억"><img src="../assets/glossary/cards/short-term-memory.webp" width="1122" height="1402" loading="eager" decoding="async" alt="단기기억 손그림 카드"/></button>
-    <button class="glossary-approved-card" type="button" data-target="memo-processing-speed" aria-label="처리속도 설명 열기" title="처리속도"><img src="../assets/glossary/cards/processing-speed.webp" width="1122" height="1402" loading="lazy" decoding="async" alt="처리속도 손그림 카드"/></button>
-    <button class="glossary-approved-card" type="button" data-target="memo-attention" aria-label="주의 설명 열기" title="주의"><img src="../assets/glossary/cards/attention.webp" width="1122" height="1402" loading="lazy" decoding="async" alt="주의 손그림 카드"/></button>
-    <button class="glossary-approved-card" type="button" data-target="memo-memory" aria-label="기억 설명 열기" title="기억"><img src="../assets/glossary/cards/memory.webp" width="1122" height="1402" loading="lazy" decoding="async" alt="기억 손그림 카드"/></button>
-    <button class="glossary-approved-card" type="button" data-target="memo-visual" aria-label="시지각 설명 열기" title="시지각"><img src="../assets/glossary/cards/visual-perception.webp" width="1122" height="1402" loading="lazy" decoding="async" alt="시지각 손그림 카드"/></button>
-    <button class="glossary-approved-card" type="button" data-target="memo-auditory" aria-label="청각처리 설명 열기" title="청각처리"><img src="../assets/glossary/cards/auditory-processing.webp" width="1122" height="1402" loading="lazy" decoding="async" alt="청각처리 손그림 카드"/></button>
-    <button class="glossary-approved-card" type="button" data-target="memo-receptive-expressive" aria-label="수용언어 설명 열기" title="수용언어"><img src="../assets/glossary/cards/receptive-language.webp" width="1122" height="1402" loading="lazy" decoding="async" alt="수용언어 손그림 카드"/></button>
-    <button class="glossary-approved-card" type="button" data-target="memo-receptive-expressive" aria-label="표현언어 설명 열기" title="표현언어"><img src="../assets/glossary/cards/expressive-language.webp" width="1122" height="1402" loading="lazy" decoding="async" alt="표현언어 손그림 카드"/></button>
-    <button class="glossary-approved-card" type="button" data-target="memo-aac" aria-label="AAC 설명 열기" title="AAC"><img src="../assets/glossary/cards/aac.webp" width="1122" height="1402" loading="lazy" decoding="async" alt="AAC 손그림 카드"/></button>
-    <button class="glossary-approved-card" type="button" data-target="memo-prompting" aria-label="촉구 설명 열기" title="촉구"><img src="../assets/glossary/cards/prompting.webp" width="1122" height="1402" loading="lazy" decoding="async" alt="촉구 손그림 카드"/></button>
-    <button class="glossary-approved-card" type="button" data-target="memo-reinforcement" aria-label="강화 설명 열기" title="강화"><img src="../assets/glossary/cards/reinforcement.webp" width="1122" height="1402" loading="lazy" decoding="async" alt="강화 손그림 카드"/></button>
-  </div>
-  <p class="glossary-approved-footnote">그림 카드 12개 · 전체 용어 설명 30개</p>
-  <dialog class="glossary-card-dialog" id="glossaryCardDialog" aria-labelledby="glossaryDialogTitle">
-    <div class="glossary-dialog-header">
-      <div><h2 id="glossaryDialogTitle"></h2><p id="glossaryDialogSubtitle"></p></div>
-      <button class="glossary-dialog-close" type="button" aria-label="설명 창 닫기" id="glossaryDialogClose">×</button>
-    </div>
-    <div class="glossary-dialog-body" id="glossaryDialogBody"></div>
+  <nav class="gcat-tabs" id="gcatTabs" aria-label="용어 분야 선택"></nav>
+  <div class="gcat-recent" id="gcatRecent" hidden aria-label="최근 본 용어"></div>
+  <div class="gcat-results-head"><h2 id="gcatResultsTitle">먼저 볼 용어</h2><span class="gcat-count" id="gcatCount"></span></div>
+  <div class="gcat-list" id="gcatList" aria-live="polite" aria-relevant="additions removals"></div>
+  <p class="gcat-no-results" id="gcatEmpty" hidden>해당 용어가 없어요. 다른 말로 검색하거나 분야를 선택해 보세요.</p>
+  <dialog class="gcat-dialog" id="gcatDialog" aria-labelledby="gcatDialogTitle">
+    <div class="gcat-dialog-top"><h2 id="gcatDialogTitle"></h2><button class="gcat-dialog-close" id="gcatDialogClose" type="button" aria-label="설명 닫기">×</button></div>
+    <div class="gcat-dialog-body" id="gcatDialogBody"></div>
   </dialog>
-
 </section>
 <div class="sub-hero info-hero glossary-hero">
 <span aria-hidden="true" class="sub-tape"></span>
@@ -430,102 +421,5 @@
 </section>
 </section>
 </main>
-<footer class="sub-footer"><div><b>일단 해봄노트</b><span>울모아쌤</span></div><nav class="footer-social"><a href="http://ulmoa.co.kr" rel="noopener" target="_blank">울모아</a><a href="https://www.instagram.com/ulmoa__sam/" rel="noopener" target="_blank">인스타그램</a><a href="https://blog.naver.com/ulmoa" rel="noopener" target="_blank">블로그</a><a href="https://www.threads.com/@ulmoa_sam" rel="noopener" target="_blank">스레드</a></nav></footer><script id="study-open-note-controller">
-document.addEventListener("DOMContentLoaded",function(){
-  var lists=Array.prototype.slice.call(document.querySelectorAll(".study-note-list"));
-  var notes=Array.prototype.slice.call(document.querySelectorAll(".study-note"));
-  var groups=Array.prototype.slice.call(document.querySelectorAll(".glossary-category"));
-  var search=document.getElementById("glossarySearch");
-  var clear=document.getElementById("glossarySearchClear");
-  if(!lists.length||!notes.length)return;
-
-  function sync(){
-    lists.forEach(function(list){
-      var opened=Array.prototype.some.call(list.querySelectorAll(".study-note"),function(note){return note.open;});
-      list.classList.toggle("has-open-note",opened);
-      var group=list.closest(".info-group");
-      if(group)group.classList.toggle("has-open-note",opened);
-    });
-  }
-  function openNote(note,scroll){
-    if(!note)return;
-    notes.forEach(function(other){if(other!==note&&other.open)other.open=false;});
-    note.open=true; sync();
-    if(scroll)setTimeout(function(){note.scrollIntoView({behavior:"smooth",block:"start"});},50);
-  }
-  function searchable(note){
-    return (note.textContent+" "+(note.getAttribute("data-search")||"")).toLowerCase().replace(/\s+/g," ");
-  }
-  function applySearch(){
-    var q=(search&&search.value||"").trim().toLowerCase();
-    notes.forEach(function(note){
-      var hit=!q||searchable(note).indexOf(q)>-1;
-      note.hidden=!hit;
-      if(!hit&&note.open)note.open=false;
-    });
-    groups.forEach(function(group){
-      var visible=Array.prototype.some.call(group.querySelectorAll(".study-note"),function(note){return !note.hidden;});
-      group.hidden=!visible;
-    });
-    document.body.classList.toggle("glossary-searching",!!q);
-    if(clear)clear.hidden=!q;
-    sync();
-  }
-
-  notes.forEach(function(note){
-    note.addEventListener("toggle",function(){
-      if(note.open)notes.forEach(function(other){if(other!==note&&other.open)other.open=false;});
-      sync();
-    });
-  });
-
-  var imageGrid=document.getElementById("glossaryApprovedGrid");
-  var viewSwitch=document.getElementById("glossaryViewSwitch");
-  if(imageGrid&&viewSwitch){
-    viewSwitch.addEventListener("click",function(){
-      var large=imageGrid.classList.toggle("is-large");
-      viewSwitch.setAttribute("aria-pressed",String(large));
-      viewSwitch.textContent=large?"두 장씩 모아보기":"한 장 크게 보기";
-    });
-  }
-  var glossaryDialog=document.getElementById("glossaryCardDialog");
-  var dialogTitle=document.getElementById("glossaryDialogTitle");
-  var dialogSubtitle=document.getElementById("glossaryDialogSubtitle");
-  var dialogBody=document.getElementById("glossaryDialogBody");
-  var dialogClose=document.getElementById("glossaryDialogClose");
-  if(glossaryDialog&&dialogClose){
-    dialogClose.addEventListener("click",function(){glossaryDialog.close();});
-    glossaryDialog.addEventListener("click",function(event){if(event.target===glossaryDialog)glossaryDialog.close();});
-  }
-  document.querySelectorAll("[data-target]").forEach(function(button){
-    button.addEventListener("click",function(){
-      var note=document.getElementById(button.dataset.target);
-      if(button.classList.contains("glossary-approved-card")&&note&&glossaryDialog&&typeof glossaryDialog.showModal==="function"){
-        var summary=note.querySelector(".study-summary-copy");
-        var content=note.querySelector(".study-paper");
-        if(summary&&content){
-          dialogTitle.textContent=button.getAttribute("title")||summary.querySelector("h3").textContent;
-          dialogSubtitle.textContent=summary.querySelector("p")?.textContent||"";
-          dialogBody.replaceChildren(content.cloneNode(true));
-          glossaryDialog.showModal();
-          return;
-        }
-      }
-      if(search && search.value){search.value="";applySearch();}
-      openNote(note,true);
-    });
-  });
-  document.querySelectorAll("[data-open]").forEach(function(button){
-    button.addEventListener("click",function(){
-      var ids=button.dataset.open.split(",");
-      var target=document.getElementById(ids[0]);
-      openNote(target,true);
-    });
-  });
-  if(search)search.addEventListener("input",applySearch);
-  if(clear)clear.addEventListener("click",function(){search.value="";applySearch();search.focus();});
-  if(location.hash){try{openNote(document.querySelector(location.hash),false);}catch(e){}}
-  applySearch(); sync();
-});
-</script></body>
+<footer class="sub-footer"><div><b>일단 해봄노트</b><span>울모아쌤</span></div><nav class="footer-social"><a href="http://ulmoa.co.kr" rel="noopener" target="_blank">울모아</a><a href="https://www.instagram.com/ulmoa__sam/" rel="noopener" target="_blank">인스타그램</a><a href="https://blog.naver.com/ulmoa" rel="noopener" target="_blank">블로그</a><a href="https://www.threads.com/@ulmoa_sam" rel="noopener" target="_blank">스레드</a></nav></footer></body>
 </html>
