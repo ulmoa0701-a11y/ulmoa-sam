@@ -1,0 +1,266 @@
+/* sticky 검색창을 막던 기존 .glossary-note overflow:hidden 해제 */
+.glossary-page .glossary-note{overflow:visible!important}
+
+/* 해봄노트 용어노트 - 검색/카테고리 중심 통합 목록 2026-10-09
+   승인 그림 원본 보존, 검색과 개별 설명 접근성 우선. */
+.glossary-page .glossary-hero,
+.glossary-page .glossary-explorer,
+.glossary-page .glossary-group{display:none!important}
+.glossary-page .gcat{
+  --gink:#3d3029;
+  --gmuted:#716960;
+  --gline:#e9dfd2;
+  max-width:1140px;
+  margin:10px auto 36px;
+  padding:clamp(14px,2.2vw,26px);
+  background:#fffdf8;
+  border:1px solid #ece3d5;
+  border-radius:24px;
+  color:var(--gink);
+  box-shadow:0 8px 28px rgba(75,55,39,.035);
+}
+.glossary-page .gcat-head{margin:0 0 18px}
+.glossary-page .gcat-eyebrow{
+  display:inline-flex;
+  border-radius:999px;
+  padding:5px 12px;
+  color:#5b5a43;
+  background:#ecf3de;
+  font:650 12px/1.25 "Pretendard Variable",Pretendard,sans-serif;
+}
+.glossary-page .gcat-head h1{
+  margin:9px 0 5px!important;
+  font:400 clamp(30px,4.5vw,44px)/1.12 "Gamja Flower",cursive!important;
+  letter-spacing:-.02em;
+  color:var(--gink);
+}
+.glossary-page .gcat-head p{margin:0;font:500 13px/1.55 "Pretendard Variable",Pretendard,sans-serif;color:var(--gmuted)}
+.glossary-page .gcat-search-rail{
+  position:sticky;
+  top:0;
+  z-index:12;
+  padding:8px 0 10px;
+  background:linear-gradient(180deg,#fffdf8 92%,rgba(255,253,248,.96));
+}
+.glossary-page .gcat-search-wrap{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  border:1.5px solid #dcdedb;
+  background:#fbfcfa;
+  border-radius:15px;
+  min-height:49px;
+  padding:0 12px;
+}
+.glossary-page .gcat-search-wrap:focus-within{border-color:#8cae9b;box-shadow:0 0 0 3px rgba(158,206,171,.23)}
+.glossary-page .gcat-search-icon{font-size:21px;color:#6b8e84;line-height:1}
+.glossary-page .gcat-search{
+  min-width:0;flex:1 1 auto;
+  padding:12px 0;
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  color:var(--gink);
+  font:500 15px/1.35 "Pretendard Variable",Pretendard,sans-serif;
+}
+.glossary-page .gcat-search::placeholder{color:#8d9694;opacity:1}
+.glossary-page .gcat-clear{
+  border:0;background:#eaece8;color:#596562;
+  width:30px;height:30px;flex:0 0 30px;
+  display:grid;place-items:center;
+  border-radius:50%;font-size:19px;cursor:pointer;
+}
+.glossary-page .gcat-clear[hidden]{display:none}
+.glossary-page .gcat-tabs{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:9px;
+  margin:5px 0 18px;
+}
+.glossary-page .gcat-tab{
+  min-width:0;
+  min-height:44px;
+  border:1.5px solid #e5ddd0;
+  border-radius:13px;
+  background:#fffaf0;
+  color:#55493f;
+  padding:9px 7px;
+  cursor:pointer;
+  font:700 14px/1.25 "Pretendard Variable",Pretendard,sans-serif;
+  transition:background .15s ease,border-color .15s ease;
+}
+.glossary-page .gcat-tab[aria-pressed=true]{
+  background:#fbe8b3;
+  border-color:#e3c56f;
+  box-shadow:0 2px 7px rgba(107,78,31,.08);
+  color:#3b2d1c;
+}
+.glossary-page .gcat-tab:focus-visible,
+.glossary-page .gcat-card:focus-visible,
+.glossary-page .gcat-recent button:focus-visible,
+.glossary-page .gcat-dialog button:focus-visible{
+  outline:3px solid #397caa;outline-offset:2px;
+}
+.glossary-page .gcat-recent{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:-1px 0 14px}
+.glossary-page .gcat-recent[hidden]{display:none}
+.glossary-page .gcat-recent-label{color:#82756b;font:700 12px/1.45 "Pretendard Variable",Pretendard,sans-serif}
+.glossary-page .gcat-recent button{
+  background:#f2f6ea;border:1px solid #d8e5d0;border-radius:999px;
+  padding:6px 10px;cursor:pointer;color:#516651;font:650 12px/1.35 "Pretendard Variable",Pretendard,sans-serif;
+}
+.glossary-page .gcat-results-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 9px}
+.glossary-page .gcat-results-head h2{margin:0!important;font:400 25px/1.1 "Gamja Flower",cursive!important;color:#493a2c}
+.glossary-page .gcat-count{white-space:nowrap;color:#958579;font:650 12px/1.25 "Pretendard Variable",Pretendard,sans-serif}
+.glossary-page .gcat-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.glossary-page .gcat-card{
+  --tint:#fce7d9;
+  display:flex;
+  align-items:center;
+  text-align:left;
+  gap:12px;
+  width:100%;
+  min-width:0;
+  min-height:85px;
+  padding:9px 11px;
+  border:1.5px solid #e9e4da;
+  border-radius:15px;
+  background:#fff;
+  cursor:pointer;
+  color:var(--gink);
+  box-shadow:0 2px 7px rgba(89,67,46,.025);
+  transition:background .15s ease,transform .15s ease;
+}
+.glossary-page .gcat-card:hover{background:#fffbf3;transform:translateY(-1px);border-color:#d8c6b3}
+.glossary-page .gcat-card:active{background:#f5ecdf;transform:translateY(0)}
+.glossary-page .gcat-thumb{
+  position:relative;display:flex;align-items:center;justify-content:center;
+  flex:0 0 67px;width:67px;height:67px;
+  border-radius:12px;background:var(--tint);overflow:hidden;
+}
+.glossary-page .gcat-thumb img{
+  display:block;
+  width:100%;height:100%;
+  object-fit:contain; /* 승인 원본 전체 유지, 자르지 않음 */
+  pointer-events:none;
+}
+.glossary-page .gcat-thumb-letter{
+  font:400 36px/1 "Gamja Flower",cursive;color:#6b584e;
+}
+.glossary-page .gcat-card-copy{display:flex;flex:1 1 auto;flex-direction:column;justify-content:center;min-width:0;gap:4px}
+.glossary-page .gcat-card-title{
+  font:700 17px/1.28 "Pretendard Variable",Pretendard,sans-serif;
+  color:#352d27;
+  white-space:normal;
+  overflow-wrap:break-word;
+  word-break:keep-all;
+}
+.glossary-page .gcat-card-sub{
+  display:-webkit-box;
+  overflow:hidden;
+  -webkit-line-clamp:2;-webkit-box-orient:vertical;
+  color:#736c65;font:500 12.5px/1.45 "Pretendard Variable",Pretendard,sans-serif;
+  word-break:keep-all;
+}
+.glossary-page .gcat-chevron{flex:0 0 auto;color:#aa9689;font-size:21px}
+.glossary-page .gcat-no-results{
+  padding:26px 16px;
+  background:#faf7ef;border:1px dashed #dfd0b9;border-radius:14px;
+  text-align:center;color:#65564a;font:500 14px/1.6 "Pretendard Variable",Pretendard,sans-serif;
+}
+.glossary-page .gcat-no-results[hidden]{display:none}
+.glossary-page .gcat-dialog{
+  position:fixed;inset:0;
+  margin:auto;display:block;
+  border:1px solid #e1d3c2;
+  border-radius:22px;
+  width:min(600px,calc(100vw - 24px));
+  max-width:calc(100vw - 24px);
+  max-height:min(88dvh,870px);
+  padding:0;overflow:auto;
+  overscroll-behavior:contain;
+  background:#fffdf8;
+  color:#392e29;
+  box-shadow:0 22px 75px rgba(32,25,21,.22);
+}
+.glossary-page .gcat-dialog:not([open]){display:none}
+.glossary-page .gcat-dialog::backdrop{background:rgba(34,27,23,.52)}
+.glossary-page .gcat-dialog-top{
+  position:sticky;top:0;z-index:1;
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:13px 16px;background:#fff9ed;border-bottom:1px solid #e9dcc9;
+}
+.glossary-page .gcat-dialog-top h2{margin:0!important;font:400 30px/1.2 "Gamja Flower",cursive!important;color:#3d2e21}
+.glossary-page .gcat-dialog-close{
+  display:grid;place-items:center;
+  flex:0 0 44px;width:44px;height:44px;
+  border-radius:50%;border:1px solid #e3d8c9;background:#fff;
+  color:#493a31;font:400 28px/1 sans-serif;cursor:pointer;
+}
+.glossary-page .gcat-dialog-body{padding:15px 17px 18px}
+.glossary-page .gcat-dialog-lead{margin:0 0 14px;color:#625a51;font:550 14px/1.55 "Pretendard Variable",Pretendard,sans-serif}
+.glossary-page .gcat-dialog-body .study-paper{
+  display:block!important;
+  margin:0!important;
+  padding:13px 13px 16px 33px!important;
+  background-color:#fffef9;
+  border:1px solid #f1e9db;border-radius:13px;
+}
+.glossary-page .gcat-dialog-body .study-paper p{font-size:15px!important;line-height:1.7!important}
+.glossary-page .gcat-dialog-body .study-sources a,
+.glossary-page .gcat-dialog-body .study-sources{font-size:12px!important;line-height:1.6!important}
+.glossary-page .gcat-art-disclosure{
+  margin:13px 0 0;
+  border:1px solid #ece4d7;border-radius:14px;overflow:hidden;background:#fff;
+}
+.glossary-page .gcat-art-disclosure>summary{
+  display:flex;justify-content:space-between;gap:8px;align-items:center;
+  padding:12px 13px;cursor:pointer;color:#57483c;
+  font:750 13px/1.4 "Pretendard Variable",Pretendard,sans-serif;
+}
+.glossary-page .gcat-art-panel{padding:0 11px 12px;text-align:center}
+.glossary-page .gcat-art-panel img{
+  display:block;
+  width:min(100%,310px);
+  height:auto;
+  margin:8px auto 0;
+  object-fit:contain;
+  border-radius:11px;border:1px solid #f0e9dc;
+}
+.glossary-page .gcat-art-choices{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
+.glossary-page .gcat-art-choices button{
+  padding:7px 12px;border-radius:999px;
+  border:1px solid #e2d7c5;background:#f9f7f1;color:#51463b;
+  font:700 12px/1.25 "Pretendard Variable",Pretendard,sans-serif;cursor:pointer;
+}
+.glossary-page .gcat-art-choices button[aria-pressed=true]{background:#fbe7b1;border-color:#dfbd70}
+.glossary-page .gcat-related{margin-top:16px;padding-top:12px;border-top:1px solid #ede3d7}
+.glossary-page .gcat-related strong{display:block;font:750 13px/1.4 "Pretendard Variable",Pretendard,sans-serif;margin-bottom:8px}
+.glossary-page .gcat-related-items{display:flex;gap:7px;flex-wrap:wrap}
+.glossary-page .gcat-related-items button{
+  border:1px solid #d9e5d8;background:#f1f8ef;border-radius:999px;
+  padding:8px 10px;color:#466451;cursor:pointer;
+  font:650 12px/1.35 "Pretendard Variable",Pretendard,sans-serif;
+}
+@media(max-width:799px){.glossary-page .gcat-list{grid-template-columns:1fr}}
+@media(max-width:600px){
+  .glossary-page .gcat{margin:4px 0 26px;padding:14px 11px 19px;border-radius:17px}
+  .glossary-page .gcat-head{margin-bottom:9px}
+  .glossary-page .gcat-eyebrow{font-size:11px;padding:4px 9px}
+  .glossary-page .gcat-head h1{font-size:31px!important;margin-top:6px!important}
+  .glossary-page .gcat-head p{font-size:12px}
+  .glossary-page .gcat-search-rail{padding:5px 0 8px}
+  .glossary-page .gcat-tabs{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:2px 0 13px}
+  .glossary-page .gcat-tab{min-height:40px;font-size:12px;border-radius:11px;padding:6px 2px}
+  .glossary-page .gcat-list{gap:7px}
+  .glossary-page .gcat-card{min-height:78px;gap:10px;padding:7px 9px;border-radius:13px}
+  .glossary-page .gcat-thumb{width:61px;height:61px;flex-basis:61px;border-radius:10px}
+  .glossary-page .gcat-card-title{font-size:16.5px}
+  .glossary-page .gcat-card-sub{font-size:12px}
+  .glossary-page .gcat-results-head h2{font-size:23px!important}
+  .glossary-page .gcat-dialog-body{padding:12px 11px 17px}
+  .glossary-page .gcat-dialog-top{padding:10px 11px}
+  .glossary-page .gcat-dialog-top h2{font-size:27px!important}
+  .glossary-page .gcat-dialog-body .study-paper p{font-size:14px!important}
+}
+@media(prefers-reduced-motion:reduce){.glossary-page .gcat-card{transition:none}}
