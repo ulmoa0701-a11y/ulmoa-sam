@@ -72,7 +72,7 @@ class LandscapeMissionScene extends Phaser.Scene{
   items.forEach((it,i)=>{
    const [x,y]=positions[i],a=animal(this,it.species,COLORS[it.color],it.size);
    a.setPosition(x,y).setDepth(8);a.setDataEnabled();a.data.set('item',it);
-   a.setInteractive(new Phaser.Geom.Rectangle(-78,-108,156,214),Phaser.Geom.Rectangle.Contains);
+   a.setInteractive(new Phaser.Geom.Rectangle(-105,-122,210,244),Phaser.Geom.Rectangle.Contains);
    a.on('pointerdown',()=>this.pick(a));
    a.on('pointerover',()=>{if(!this.lock)this.tweens.add({targets:a,scaleX:(it.size==='큰'?1:.62)*1.07,scaleY:(it.size==='큰'?1:.62)*1.07,duration:110})});
    a.on('pointerout',()=>{if(a.active)this.tweens.add({targets:a,scaleX:it.size==='큰'?1:.62,scaleY:it.size==='큰'?1:.62,duration:110})});
