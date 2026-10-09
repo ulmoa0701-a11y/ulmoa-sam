@@ -352,6 +352,10 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
 /* Soft musical preparation cue, independent of the scrolling layout. */
 .introOverlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:12;pointer-events:none;background:rgba(240,249,255,.58);backdrop-filter:blur(3px)}
 .introOverlay.show{display:flex}
+.introOverlay.starting{background:transparent;backdrop-filter:none;align-items:flex-start}
+.introOverlay.starting .introCard{min-width:0;margin-top:42px;padding:7px 17px;border-radius:14px;box-shadow:0 4px 16px rgba(20,35,60,.11)}
+.introOverlay.starting .introHeading{font-size:17px}
+.introOverlay.starting .introPulse,.introOverlay.starting .introDots{display:none}
 .introCard{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-width:184px;max-width:min(88%,360px);padding:23px 25px;border:2px solid rgba(255,255,255,.9);border-radius:26px;background:rgba(255,253,247,.96);box-shadow:0 16px 48px rgba(30,56,82,.16);text-align:center}
 .introHeading{font-size:clamp(18px,4.5vw,27px);line-height:1.25;font-weight:950;color:#223554}
 .introPulse{font-size:clamp(48px,13vw,78px);line-height:1.1;font-weight:950;color:#3c83cf;min-height:1em}
@@ -547,7 +551,7 @@ function stopIntro(){
   clearTimeout(introHideTimer);introHideTimer=0;
   if(introGain&&audioCtx){try{introGain.gain.cancelScheduledValues(audioCtx.currentTime);introGain.gain.setValueAtTime(0,audioCtx.currentTime)}catch(e){}}
   introGain=null;
-  $('#introOverlay').classList.remove('show');
+  $('#introOverlay').classList.remove('show','starting');
 }
 function introSound(beats,intervalMs){
   if(!sound)return;
@@ -589,12 +593,12 @@ function introFrame(now){
     stopIntro();
     // A brief lead makes the backing track and the first colored note land together.
     elapsed=Math.max(0,firstNoteMs()-65);
-    $('#introOverlay').classList.add('show');
+    $('#introOverlay').classList.add('show','starting');
     $('#introHeading').textContent='시작!';
     $('#introPulse').textContent='♪';
     $('#introDots').innerHTML='';
     beginPlayback();
-    introHideTimer=setTimeout(()=>{$('#introOverlay').classList.remove('show');introHideTimer=0},420);
+    introHideTimer=setTimeout(()=>{$('#introOverlay').classList.remove('show','starting');introHideTimer=0},420);
   }else introRaf=requestAnimationFrame(introFrame);
 }
 function startIntro(){
@@ -708,7 +712,7 @@ $('#sampleSelect').onchange=e=>{if(e.target.value)chooseSample(e.target.value)};
 $('#levels').onclick=e=>{let b=e.target.closest('button');if(!b)return;level=Number(b.dataset.level);document.querySelectorAll('#levels button').forEach(x=>x.classList.toggle('on',x===b));renderLanes();build();reset()};
 $('#introMode').onchange=e=>{introMode=['music','count','instant'].includes(e.target.value)?e.target.value:'music';try{localStorage.setItem('ulmoaBoomIntroMode',introMode)}catch(err){};reset()};
 $('#tempo').oninput=e=>{bpm=Number(e.target.value);currentSong.bpm=bpm;$('#bpmLabel').textContent=bpm+' BPM';$('#songMeta').textContent=`${currentSong.timeN||4}/${currentSong.timeD||4} · ${bpm} BPM`;build();reset();saveLast()};
-$('#repeatBtn').onclick=()=>{repeat=!repeat;on($('#repeatBtn'),repeat)};$('#soundBtn').onclick=()=>{sound=!sound;on($('#soundBtn'),sound);$('#soundBtn').textContent=sound?'🔊 소리':'🔇 소리';if(!sound)stopMr();else if(playing)syncLiveMr()};$('#lyricBtn').onclick=()=>{lyrics=!lyrics;on($('#lyricBtn'),lyrics);renderScore();updateLyricTrack(true)};
+$('#repeatBtn').onclick=()=>{repeat=!repeat;on($('#repeatBtn'),repeat)};$('#soundBtn').onclick=()=>{sound=!sound;on($('#soundBtn'),sound);$('#soundBtn').textContent=sound?'🔊 소리':'🔇 소리';if(!sound&&introGain&&audioCtx)introGain.gain.setValueAtTime(0,audioCtx.currentTime);if(!sound)stopMr();else if(playing)syncLiveMr()};$('#lyricBtn').onclick=()=>{lyrics=!lyrics;on($('#lyricBtn'),lyrics);renderScore();updateLyricTrack(true)};
 async function setClassFullscreen(enable){document.body.classList.toggle('fullscreen',!!enable);on($('#fullBtn'),!!enable);$('#fullBtn').textContent=enable?'수업 전체화면 중':'수업 전체화면';try{if(enable&&document.documentElement.requestFullscreen&&!document.fullscreenElement)await document.documentElement.requestFullscreen();else if(!enable&&document.fullscreenElement)await document.exitFullscreen()}catch(e){}setTimeout(()=>{draw();updateLyricTrack(true)},100)};
 $('#fullBtn').onclick=()=>setClassFullscreen(!document.body.classList.contains('fullscreen'));
 $('#stageFsBtn').onclick=()=>setClassFullscreen(true);
