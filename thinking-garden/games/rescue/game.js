@@ -91,8 +91,20 @@ class MissionScene extends Phaser.Scene{
  spawnAnimals(){
   const m=this.m,items=[];if(m.need===1){const target=m.species[0];items.push({species:target,color:m.color,size:m.size,good:true});items.push({species:target,color:m.color,size:m.size==='큰'?'작은':'큰'});items.push({species:target,color:m.color==='노란'?'파란':'노란',size:m.size});items.push({species:SPECIES[(SPECIES.indexOf(target)+1)%4],color:m.color,size:m.size});while(items.length<7){const sp=Phaser.Utils.Array.GetRandom(SPECIES),cs=Phaser.Utils.Array.GetRandom(Object.keys(COLORS)),sz=Math.random()>.5?'큰':'작은';if(!items.some(x=>x.species===sp&&x.color===cs&&x.size===sz))items.push({species:sp,color:cs,size:sz})}}
   else{SPECIES.forEach(sp=>items.push({species:sp,color:m.color,size:m.size,good:true}));items.push({species:SPECIES[0],color:m.color,size:m.size});items.push({species:SPECIES[1],color:m.color,size:m.size==='큰'?'작은':'큰'});items.push({species:SPECIES[2],color:m.color==='초록'?'노란':'초록',size:m.size});items.push({species:SPECIES[3],color:m.color==='빨간'?'파란':'빨간',size:m.size})}
-  Phaser.Utils.Array.Shuffle(items);const spots=[[110,350],[330,320],[575,365],[180,520],[520,535],[95,720],[350,690],[610,750],[190,900],[530,910]];
-  Phaser.Utils.Array.Shuffle(spots);items.forEach((it,i)=>{const [x,y]=spots[i],a=animal(this,it.species,COLORS[it.color],it.size);a.setPosition(x,y);a.setDepth(i%3===0?20:30);a.setDataEnabled();a.data.set({species:it.species,color:it.color,size:it.size,rescuing:false});a.setInteractive(new Phaser.Geom.Rectangle(-108,-124,216,248),Phaser.Geom.Rectangle.Contains);a.on('pointerover',()=>{if(!this.lock)this.tweens.add({targets:a,scaleX:a.scaleX*1.05,scaleY:a.scaleY*1.05,duration:90})});a.on('pointerout',()=>{if(!a.data.get('rescuing'))this.tweens.add({targets:a,scaleX:it.size==='큰'?1:.62,scaleY:it.size==='큰'?1:.62,duration:90})});a.on('pointerdown',()=>this.pickAnimal(a));this.tweens.add({targets:a,y:y-8,yoyo:true,repeat:-1,duration:900+(i%4)*170,ease:'Sine.easeInOut'});this.actors.push(a)})
+  Phaser.Utils.Array.Shuffle(items);
+  // Place grounded animals on grassy banks and ducks in water in the pond/creek scenes.
+  // Never scatter interactive sprites in empty sky simply to fill a grid.
+  const waterScene=this.round===0||this.round===2;
+  const landSlots=[[105,696],[334,679],[575,708],[195,823],[518,832],[96,927],[609,936],[354,746]];
+  const waterSlots=[[191,997],[354,994],[515,993],[311,1094]];
+  const meadowSlots=[[115,700],[350,683],[585,716],[187,840],[540,829],[105,964],[602,959],[349,1050]];
+  Phaser.Utils.Array.Shuffle(landSlots);Phaser.Utils.Array.Shuffle(waterSlots);Phaser.Utils.Array.Shuffle(meadowSlots);
+  const used=[];
+  items.forEach((it,i)=>{let spot;if(waterScene&&it.species==='오리'&&waterSlots.length)spot=waterSlots.pop();
+    else if(waterScene&&landSlots.length)spot=landSlots.pop();
+    else spot=meadowSlots.find(p=>!used.some(q=>Math.hypot(p[0]-q[0],p[1]-q[1])<125))||meadowSlots[i%meadowSlots.length];
+    used.push(spot);
+    const [x,y]=spot,a=animal(this,it.species,COLORS[it.color],it.size);a.setPosition(x,y);a.setDepth(i%3===0?20:30);a.setDataEnabled();a.data.set({species:it.species,color:it.color,size:it.size,rescuing:false});a.setInteractive(new Phaser.Geom.Rectangle(-108,-124,216,248),Phaser.Geom.Rectangle.Contains);a.on('pointerover',()=>{if(!this.lock)this.tweens.add({targets:a,scaleX:a.scaleX*1.05,scaleY:a.scaleY*1.05,duration:90})});a.on('pointerout',()=>{if(!a.data.get('rescuing'))this.tweens.add({targets:a,scaleX:it.size==='큰'?1:.62,scaleY:it.size==='큰'?1:.62,duration:90})});a.on('pointerdown',()=>this.pickAnimal(a));this.tweens.add({targets:a,y:y-8,yoyo:true,repeat:-1,duration:900+(i%4)*170,ease:'Sine.easeInOut'});this.actors.push(a)})
  }
  installTouchAssist(){
   const onTap=(pointer,currentlyOver)=>{
