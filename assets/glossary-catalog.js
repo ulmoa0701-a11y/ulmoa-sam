@@ -241,13 +241,17 @@ function boot(){
     if(q){
       const matches=entry=>entry.search.includes(q)||entry.search.replace(/\s+/g,"").includes(qCompact);
       // Searches always cover every original glossary entry, even entries without artwork.
+      // Favor the actual term/illustration title; search full explanations only if no title matches.
+      const titleHit=entry=>[entry.title,...entry.covers.map(cover=>cover[0])].some(title=>title.toLocaleLowerCase("ko").replace(/\s+/g,"").includes(qCompact));
+      const hitsByName=entries.filter(titleHit);
+      const eligible=new Set((hitsByName.length?hitsByName:entries.filter(matches)).map(entry=>entry.id));
       const matchesFromAlbum=albumItems.filter(({entry,cover})=>{
-        if(!matches(entry))return false;
+        if(!eligible.has(entry.id))return false;
         if(entry.covers.length<2)return true;
-        return cover[0].toLocaleLowerCase("ko").includes(q)||(!entry.title.toLocaleLowerCase("ko").includes(q)&&entry.search.includes(q));
+        return cover[0].toLocaleLowerCase("ko").includes(q)||!hitsByName.length;
       });
       const drawnIds=new Set(matchesFromAlbum.map(item=>item.entry.id));
-      const textMatches=entries.filter(entry=>matches(entry)&&!drawnIds.has(entry.id)).map(entry=>({entry,cover:null,index:0}));
+      const textMatches=entries.filter(entry=>eligible.has(entry.id)&&!drawnIds.has(entry.id)).map(entry=>({entry,cover:null,index:0}));
       visible=matchesFromAlbum.concat(textMatches);
       resultsTitle.textContent="검색 결과";
     }else if(mode==="album"){
