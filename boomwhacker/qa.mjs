@@ -36,6 +36,7 @@ async function basicCase(name,width,height){
   check(await page.locator('.beat').count()>0,`${name}: score did not render`);
   check(await page.locator('#lyricTrack').count()===1,`${name}: lyric track missing`);
   check(await page.locator('.lyricSyllable').count()>5,`${name}: lyric track did not render a continuous line`);
+  if(width<=800)check(await page.locator('.lyricSyllable').count()<=9,`${name}: mobile lyric line is overcrowded`);
   const tubeLabelColors=await page.locator('.tube').evaluateAll(xs=>xs.map(x=>({note:x.dataset.note,color:getComputedStyle(x.querySelector('.tubeLabel')).color})));
   const tubeColorMap=Object.fromEntries(tubeLabelColors.map(x=>[x.note,x.color]));
   check(tubeColorMap['도']==='rgb(235, 36, 39)'&&tubeColorMap['레']==='rgb(246, 133, 31)'&&tubeColorMap['미']==='rgb(251, 237, 27)'&&tubeColorMap['파']==='rgb(115, 200, 74)'&&tubeColorMap['솔']==='rgb(0, 163, 154)'&&tubeColorMap['라']==='rgb(75, 74, 168)'&&tubeColorMap['시']==='rgb(216, 58, 155)',`${name}: pitch-colored note labels are wrong: ${JSON.stringify(tubeColorMap)}`);
@@ -43,6 +44,7 @@ async function basicCase(name,width,height){
   check(await page.locator('#videoBtn').count()===1,`${name}: video export button missing`);
   check(await page.locator('#stageFsBtn').count()===1,`${name}: stage fullscreen shortcut missing`);
   check(await page.locator('#stageFsBtn').isVisible(),`${name}: stage fullscreen shortcut is not visible`);
+  check(await page.locator('#stageFsBtn svg path').count()===1,`${name}: fullscreen icon SVG is missing`);
   check(await page.locator('#displayModeSelect').count()===1,`${name}: display mode selector missing`);
   check(await page.locator('#displayModeSelect option').count()===4,`${name}: display mode selector should have 4 choices`);
   check((await page.locator('#displayModeSelect').inputValue())==='note',`${name}: display mode should default to note names`);
@@ -213,6 +215,10 @@ async function basicCase(name,width,height){
 
   await page.evaluate(()=>{elapsed=1350;draw();updateTime();updateLyricTrack(true)});
   check(await page.locator('.lyricSyllable.active').count()===1,`${name}: current lyric syllable is not highlighted`);
+  if(width<=800){
+    const noteEdge=await page.locator('.fall').first().evaluate(el=>({note:el.getBoundingClientRect().toJSON(),stage:el.parentElement.getBoundingClientRect().toJSON()}));
+    check(noteEdge.note.left>=noteEdge.stage.left-1&&noteEdge.note.right<=noteEdge.stage.right+1,`${name}: falling note clipped at stage edge ${JSON.stringify(noteEdge)}`);
+  }
   const activeBorder=await page.locator('.lyricSyllable.active').evaluate(el=>getComputedStyle(el).borderTopColor);
   check(activeBorder==='rgb(235, 36, 39)',`${name}: current lyric syllable does not use its Boomwhacker color (${activeBorder})`);
   await page.locator(width<=800?'#playBtn':'#startBtn').click();
