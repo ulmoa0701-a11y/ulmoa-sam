@@ -27,12 +27,13 @@ async function basicCase(name,width,height){
   const response=await page.goto(BASE,{waitUntil:'networkidle'});
   check(response?.ok(),`${name}: HTTP response not OK`);
   check((await page.title()).includes('붐웨커 Studio'),`${name}: wrong title`);
+  check((await page.locator('body').getAttribute('data-theme'))==='ulmoa-ripple-v1',`${name}: Ulmoa visual identity theme missing`);
   const robots=await page.locator('meta[name=robots]').getAttribute('content');
   check(robots==='noindex,nofollow',`${name}: robots guardrail changed (${robots})`);
   check(await page.locator('.tube').count()===8,`${name}: expected 8 tubes`);
   check(await page.locator('.laneLabel').count()===8,`${name}: expected 8 lanes`);
   const fallSize=await page.locator('.fall').first().evaluate(el=>parseFloat(getComputedStyle(el).width));
-  check(fallSize>=(width<=800?56:76),`${name}: falling note is still too small (${fallSize}px)`);
+  check(fallSize>=(width<=800?68:90),`${name}: Ulmoa rhythm ball size is too small (${fallSize}px)`);
   check(await page.locator('.beat').count()>0,`${name}: score did not render`);
   check(await page.locator('#lyricTrack').count()===1,`${name}: lyric track missing`);
   check(await page.locator('.lyricSyllable').count()>5,`${name}: lyric track did not render a continuous line`);
