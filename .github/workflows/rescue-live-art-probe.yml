@@ -23,8 +23,8 @@ jobs:
           ROOT='https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/'
           ready=0
           for i in $(seq 1 36); do
-            if curl -fsSL --max-time 12 "${ROOT}game.js?v=3" | grep -q 'sprite-'; then
-              if curl -fsSL --max-time 12 "${ROOT}index.html" | grep -q 'game.js?v=3'; then
+            if curl -fsSL --max-time 12 "${ROOT}game.js?v=4" | grep -q 'sprite-'; then
+              if curl -fsSL --max-time 12 "${ROOT}index.html" | grep -q 'game.js?v=4'; then
                 if curl -fsSL --max-time 12 "${ROOT}art/duck-yellow.svg" | grep -q '<svg'; then
                   ready=1
                   break
