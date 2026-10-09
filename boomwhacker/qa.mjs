@@ -51,6 +51,12 @@ async function basicCase(name,width,height){
   check(await page.locator('#introMode').count()===1,`${name}: intro mode setting missing`);
   check(await page.locator('#introMode').inputValue()==='music',`${name}: musical intro must default on`);
   check(await page.locator('#introOverlay').count()===1,`${name}: readiness overlay missing`);
+  const initialTempo=await page.evaluate(()=>window.__boomVideoQA.tempo());
+  check(initialTempo.bpm===Math.round(initialTempo.sourceBpm*.72),`${name}: default playback tempo should be gentle ${JSON.stringify(initialTempo)}`);
+  check(initialTempo.bpm<=75&&initialTempo.min===35&&initialTempo.max===140,`${name}: playback speed default/range is too fast ${JSON.stringify(initialTempo)}`);
+  check((await page.locator('#bpmLabel').innerText())===initialTempo.bpm+' BPM',`${name}: tempo slider label out of sync with actual beat`);
+  check((await page.locator('#tempo').inputValue())===String(initialTempo.bpm),`${name}: speed slider is not at effective playback BPM`);
+  check(await page.locator('#introMode option[value="music"]').innerText()==='🥁 박자 예고',`${name}: introductory beat label is unclear`);
   check(await page.locator('#melodySelect').count()===1,`${name}: melody selector missing`);
   check(await page.locator('#melodySelect option').count()===4,`${name}: melody selector should have 4 choices`);
   check((await page.locator('#melodySelect').inputValue())==='boom',`${name}: default melody should be Boomwhacker`);
@@ -155,6 +161,12 @@ async function basicCase(name,width,height){
 
   await page.locator('#tempo').evaluate((el)=>{el.value='80';el.dispatchEvent(new Event('input',{bubbles:true}))});
   check((await page.locator('#bpmLabel').innerText()).includes('80 BPM'),`${name}: BPM control failed`);
+  check(await page.evaluate(()=>currentSong.bpm===92),`${name}: adjusting practice speed must not overwrite source song tempo`);
+  await page.locator('#sampleSelect').selectOption('bear');
+  const bearTempo=await page.evaluate(()=>window.__boomVideoQA.tempo());
+  check(bearTempo.bpm===75,`${name}: changing song should apply a calm default without resetting to fast source tempo ${JSON.stringify(bearTempo)}`);
+  await page.locator('#sampleSelect').selectOption('twinkle');
+  check(await page.evaluate(()=>window.__boomVideoQA.tempo().bpm===80),`${name}: manual song tempo must be restored after switching songs`);
   const lyricBefore=(await page.locator('.lyric').allInnerTexts()).join('').trim();
   await page.locator('#lyricBtn').click();
   const lyricAfter=(await page.locator('.lyric').allInnerTexts()).join('').trim();
@@ -229,11 +241,14 @@ async function basicCase(name,width,height){
   const introStart=await page.evaluate(()=>window.__boomVideoQA.intro());
   check(introStart.mode==='music'&&introStart.active&&!introStart.started&&introStart.beats>=8&&introStart.durationMs>=5200&&introStart.previewBeats>=4,`${name}: musical intro did not start before song ${JSON.stringify(introStart)}`);
   check(await page.locator('#introOverlay').isVisible(),`${name}: preparation overlay must be visible during intro`);
-  check((await page.locator('#introHeading').innerText()).includes('박자 먼저 들어요'),`${name}: preparatory beat text missing`);
+  check((await page.locator('#introHeading').innerText())==='박자 먼저 들어요',`${name}: preparatory beat text missing or contains distracting fractions`);
+  check((await page.locator('#introPulse').innerText())==='1',`${name}: first beat must be clearly numbered from the start`);
+  const introCardText=await page.locator('#introOverlay').innerText();
+  check(!introCardText.includes('/'),`${name}: intro contains a confusing fractional bar count ${introCardText}`);
   const introStartGeometry=await page.evaluate(()=>({tempo:beatMs(),meter:introMeter,count: introCountBeats, preview: introPreviewBeats,total: introDurationMs}));
   check(introStartGeometry.meter===2&&introStartGeometry.count===4,`${name}: 2/4 musical preparation beat grouping is wrong ${JSON.stringify(introStartGeometry)}`);
   await page.evaluate(()=>{introStartPerf=performance.now()-(introPreviewBeats*beatMs()+20);introFrame(performance.now())});
-  check((await page.locator('#introHeading').innerText()).includes('박자 맞춰 시작해요'),`${name}: final visual count is not explicit`);
+  check((await page.locator('#introHeading').innerText())==='곧 시작!',`${name}: final visual count is not explicit`);
   check((await page.locator('#introPulse').innerText())==='1',`${name}: first preview count should show beat 1`);
   check(await page.locator('#introOverlay').evaluate(el=>el.classList.contains('finalCount')),`${name}: final count should move above falling notes`);
   await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs-400);introFrame(performance.now())});
