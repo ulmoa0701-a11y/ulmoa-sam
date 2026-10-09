@@ -31,8 +31,16 @@ async function basicCase(name,width,height){
   check(robots==='noindex,nofollow',`${name}: robots guardrail changed (${robots})`);
   check(await page.locator('.tube').count()===8,`${name}: expected 8 tubes`);
   check(await page.locator('.laneLabel').count()===8,`${name}: expected 8 lanes`);
+  // A new song should open with a clear, completely empty falling-note area.
+  check(await page.locator('.fall').count()===0,`${name}: a note appeared before pressing play`);
+  const fallConfig=await page.evaluate(()=>window.__boomVideoQA.fall());
+  check(fallConfig.leadMs>=5500&&fallConfig.travelMs>=3400&&fallConfig.spawnDelayMs>=1800,
+    `${name}: the first note still enters too quickly ${JSON.stringify(fallConfig)}`);
+  await page.evaluate(()=>{elapsed=firstNoteMs()-FALL_TRAVEL_MS+950;draw()});
   const fallSize=await page.locator('.fall').first().evaluate(el=>parseFloat(getComputedStyle(el).width));
   check(fallSize>=(width<=800?56:76),`${name}: falling note is still too small (${fallSize}px)`);
+  await page.evaluate(()=>{elapsed=0;draw()});
+  check(await page.locator('.fall').count()===0,`${name}: notes must be invisible again after reset`);
   check(await page.locator('.beat').count()>0,`${name}: score did not render`);
   check(await page.locator('#lyricTrack').count()===1,`${name}: lyric track missing`);
   check(await page.locator('.lyricSyllable').count()>5,`${name}: lyric track did not render a continuous line`);
@@ -206,7 +214,7 @@ async function basicCase(name,width,height){
   await page.locator('#displayApplyBtn').click();
   check((await page.locator('.laneLabel').first().innerText())==='🛎️',`${name}: selected custom instrument did not update lane`);
   check((await page.locator('.tube[data-note="도"] .tubeLabel').innerText())==='🛎️',`${name}: selected custom instrument did not update tube`);
-  await page.evaluate(()=>{elapsed=1350;draw()});
+  await page.evaluate(()=>{elapsed=firstNoteMs()-FALL_TRAVEL_MS+950;draw()});
   check((await page.locator('.fall .fallLabel').first().innerText())==='🛎️',`${name}: selected custom instrument did not update falling note`);
   const instrumentState=await page.evaluate(()=>window.__boomVideoQA.display());
   check(instrumentState.mode==='instrument'&&instrumentState.labels[0]==='🛎️'&&instrumentState.instrumentLibrary.some(x=>x.name==='차임'),`${name}: instrument state not propagated to video data`);
@@ -217,7 +225,7 @@ async function basicCase(name,width,height){
   await page.locator('#displayApplyBtn').click();
   check((await page.locator('.laneLabel').first().innerText())==='민준',`${name}: child name did not update lane`);
   check((await page.locator('.tube[data-note="도"] .tubeLabel').innerText())==='민준',`${name}: child name did not update tube`);
-  await page.evaluate(()=>{elapsed=1350;draw()});
+  await page.evaluate(()=>{elapsed=firstNoteMs()-FALL_TRAVEL_MS+950;draw()});
   check((await page.locator('.fall .fallLabel').first().innerText())==='민준',`${name}: child name did not update falling note`);
   const displayState=await page.evaluate(()=>window.__boomVideoQA.display());
   check(displayState.mode==='name'&&displayState.labels[0]==='민준'&&displayState.labels[1]==='서연',`${name}: display state not propagated to video data`);
@@ -228,7 +236,7 @@ async function basicCase(name,width,height){
   await page.locator('#displayModeSelect').selectOption('note');
   check((await page.locator('.tube[data-note="도"] .tubeLabel').innerText())==='도',`${name}: note-name display did not restore`);
 
-  await page.evaluate(()=>{elapsed=1350;draw();updateTime();updateLyricTrack(true)});
+  await page.evaluate(()=>{elapsed=firstNoteMs()+100;draw();updateTime();updateLyricTrack(true)});
   check(await page.locator('.lyricSyllable.active').count()===1,`${name}: current lyric syllable is not highlighted`);
   if(width<=800){
     const noteEdge=await page.locator('.fall').first().evaluate(el=>({note:el.getBoundingClientRect().toJSON(),stage:el.parentElement.getBoundingClientRect().toJSON()}));
@@ -252,12 +260,28 @@ async function basicCase(name,width,height){
   check((await page.locator('#introPulse').innerText())==='1',`${name}: first preview count should show beat 1`);
   check(await page.locator('#introOverlay').evaluate(el=>el.classList.contains('finalCount')),`${name}: final count should move above falling notes`);
   await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs-400);introFrame(performance.now())});
-  check(await page.locator('.fall').count()>0,`${name}: first note must already be falling before the first audible note`);
+  check(await page.locator('.fall').count()===0,`${name}: notes must stay invisible throughout the preparatory count-in`);
   await page.screenshot({path:`${out}/${name}-musical-intro.png`,fullPage:false});
   await page.evaluate(()=>{introStartPerf-=introDurationMs+12;introFrame(performance.now())});
   await page.waitForTimeout(550);
   const songStart=await page.evaluate(()=>window.__boomVideoQA.intro());
   check(!songStart.active&&songStart.started,`${name}: intro did not hand off to song playback`);
+  const handoff=await page.evaluate(()=>({t:elapsed,first:firstNoteMs(),travel:FALL_TRAVEL_MS,playing}));
+  check(handoff.t<1000&&handoff.first-handoff.travel>=1800&&handoff.playing,
+    `${name}: the song jumps ahead after 'start' instead of allowing time to prepare ${JSON.stringify(handoff)}`);
+  check(await page.locator('.fall').count()===0,`${name}: notes appeared immediately after 'start' cue`);
+  await page.evaluate(()=>{playing=false;cancelAnimationFrame(raf);elapsed=firstNoteMs()-FALL_TRAVEL_MS;draw()});
+  const offscreen=await page.locator('.fall').first().evaluate(el=>({note:el.getBoundingClientRect().toJSON(),stage:el.parentElement.getBoundingClientRect().toJSON()}));
+  check(offscreen.note.bottom<=offscreen.stage.top,`${name}: note must originate fully above the stage ${JSON.stringify(offscreen)}`);
+  await page.evaluate(()=>{elapsed=firstNoteMs()-FALL_TRAVEL_MS+1100;draw()});
+  const emerging=await page.locator('.fall').first().evaluate(el=>({note:el.getBoundingClientRect().toJSON(),stage:el.parentElement.getBoundingClientRect().toJSON()}));
+  check(emerging.note.bottom>emerging.stage.top&&emerging.note.top<emerging.stage.top+emerging.stage.height*.55,
+    `${name}: note should enter from top gradually ${JSON.stringify(emerging)}`);
+  await page.screenshot({path:`${out}/${name}-slow-top-entry.png`,fullPage:false});
+  await page.evaluate(()=>{elapsed=firstNoteMs()-100;draw()});
+  const nearHit=await page.locator('.fall').first().evaluate(el=>({note:el.getBoundingClientRect().toJSON(),stage:el.parentElement.getBoundingClientRect().toJSON()}));
+  check(nearHit.note.top>emerging.note.top+50,`${name}: note did not travel gradually down toward the hit line`);
+  await page.evaluate(()=>{playing=true;lastTs=0;raf=requestAnimationFrame(frame)});
   const progress=parseFloat((await page.locator('#progressFill').evaluate(el=>getComputedStyle(el).width)))||0;
   check(progress>0,`${name}: playback progress did not advance after intro`);
   await page.locator('#playBtn').click();
@@ -316,7 +340,7 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   const page=await context.newPage();
   await page.goto(BASE,{waitUntil:'networkidle'});
   await page.locator('#displayModeSelect').selectOption('instrument');
-  await page.evaluate(()=>{elapsed=1350;draw()});
+  await page.evaluate(()=>{elapsed=firstNoteMs()-FALL_TRAVEL_MS+950;draw()});
   const instrumentFall=await page.locator('.fall').first().evaluate(el=>({w:parseFloat(getComputedStyle(el).width),label:getComputedStyle(el.querySelector('.fallLabel')).fontSize}));
   check(instrumentFall.w>=52,'display screenshot: mobile falling note should stay large in instrument mode');
   await page.screenshot({path:out+'/display-instrument390.png',fullPage:true});
@@ -328,7 +352,7 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   await page.locator('#displayInputs input[data-display-index="2"]').fill('지우');
   await page.locator('#displayApplyBtn').click();
   await page.waitForFunction(()=>document.querySelector('.laneLabel')?.textContent==='민준');
-  await page.evaluate(()=>{elapsed=1350;draw()});
+  await page.evaluate(()=>{elapsed=firstNoteMs()-FALL_TRAVEL_MS+950;draw()});
   check(await page.locator('.fall .fallLabel').count()>0,'display screenshot: child-name falling note missing');
   await page.screenshot({path:out+'/display-names390.png',fullPage:true});
   check((await page.locator('.laneLabel').nth(0).innerText())==='민준'&&(await page.locator('.laneLabel').nth(1).innerText())==='서연','display screenshot: child names not visible');
