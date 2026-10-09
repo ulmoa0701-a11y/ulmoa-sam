@@ -20,13 +20,13 @@ jobs:
             url=os.environ[name]
             candidates={'thumbnail':url}
             for size in (768,1600):
-              candidates['request_'+str(size)]=re.sub(r'/width:\\d+', '/width:'+str(size),re.sub(r'/height:\\d+', '/height:'+str(round(size*.75)),url))
+              candidates['request_'+str(size)]=re.sub(r'/width:\d+', '/width:'+str(size),re.sub(r'/height:\d+', '/height:'+str(round(size*.75)),url))
             for key,u in candidates.items():
               try:
                 req=urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0'})
                 with urllib.request.urlopen(req,timeout=18) as f:
                   b=f.read(12000000); ct=f.headers.get('Content-Type')
-                if b[:8]==b'\\x89PNG\\r\\n\\x1a\\n':
+                if b[:4].hex()=='89504e47':
                   wh=struct.unpack('>II',b[16:24])
                 else: wh='unknown'
                 print('ASSET',name,key,'status=200','type='+str(ct),'bytes='+str(len(b)),'size='+str(wh))
