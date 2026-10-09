@@ -159,3 +159,117 @@
 @media(prefers-reduced-motion:reduce){
   .glossary-page .glossary-approved-card{transition:none!important}
 }
+/* 2026-10-09: 모바일 모아보기 기본 2열, 원본 그림 전체 표시 */
+.glossary-page .glossary-approved-toolbar{
+  display:none;
+  margin:-4px 0 12px;
+  justify-content:flex-end;
+}
+.glossary-page .glossary-view-switch{
+  appearance:none;
+  border:1px solid #dacbbb;
+  background:#fffdf7;
+  color:#5b4638;
+  border-radius:999px;
+  padding:7px 12px;
+  font:700 12px/1.35 "Pretendard Variable",Pretendard,sans-serif;
+  cursor:pointer;
+  min-height:35px;
+}
+.glossary-page .glossary-view-switch:focus-visible{outline:3px solid #477dba;outline-offset:2px}
+.glossary-page .glossary-card-dialog{
+  position:fixed;
+  inset:0;
+  margin:auto;
+  padding:0;
+  width:min(640px,calc(100vw - 28px));
+  max-width:calc(100vw - 28px);
+  max-height:min(85dvh,800px);
+  border:1px solid #eadccc;
+  border-radius:20px;
+  background:#fffdf8;
+  color:#49392f;
+  box-shadow:0 24px 80px rgba(42,30,21,.22);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+.glossary-page .glossary-card-dialog::backdrop{background:rgba(35,31,29,.52)}
+.glossary-page .glossary-card-dialog:not([open]){display:none}
+.glossary-page .glossary-dialog-header{
+  position:sticky;
+  top:0;
+  z-index:1;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  padding:17px 18px 13px;
+  background:#fff9ed;
+  border-bottom:1px solid #ede0cc;
+}
+.glossary-page .glossary-dialog-header h2{
+  margin:0!important;
+  font:400 32px/1.15 "Gamja Flower",cursive!important;
+}
+.glossary-page .glossary-dialog-header p{margin:5px 0 0;font:500 13px/1.45 "Pretendard Variable",Pretendard,sans-serif;color:#756d61}
+.glossary-page .glossary-dialog-close{
+  flex:0 0 43px;
+  width:43px;height:43px;
+  display:grid;place-items:center;
+  border:1px solid #e3d6c5;
+  background:#fffdf9;
+  border-radius:50%;
+  color:#543f33;
+  font-size:25px;
+  cursor:pointer;
+}
+.glossary-page .glossary-dialog-close:focus-visible{outline:3px solid #477dba}
+.glossary-page .glossary-dialog-body{padding:0 0 8px;}
+.glossary-page .glossary-dialog-body .study-paper{
+  display:block!important;
+  margin:0;
+  background-color:#fffefa;
+  padding:19px 18px 20px 39px!important;
+}
+.glossary-page .glossary-dialog-body .study-core>p,
+.glossary-page .glossary-dialog-body .study-example p,
+.glossary-page .glossary-dialog-body .study-more p{
+  font-size:15px!important;
+  line-height:1.7!important;
+}
+.glossary-page .glossary-dialog-body .study-sources,
+.glossary-page .glossary-dialog-body .study-sources a{font-size:12px!important;line-height:1.65}
+@media(max-width:559px){
+  .glossary-page .glossary-approved-section{
+    padding:12px 9px 13px!important;
+    margin-top:4px!important;
+  }
+  .glossary-page .glossary-approved-heading{margin-bottom:12px!important}
+  .glossary-page .glossary-approved-kicker{margin-bottom:5px;padding:3px 9px;font-size:10px}
+  .glossary-page .glossary-approved-heading h1{font-size:28px!important}
+  .glossary-page .glossary-approved-heading p{margin-top:4px;font-size:12px!important}
+  .glossary-page .glossary-approved-toolbar{display:flex}
+  .glossary-page .glossary-approved-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    max-width:none!important;
+    gap:8px!important;
+    margin:0 auto;
+  }
+  .glossary-page .glossary-approved-card{
+    border-width:1px;
+    border-radius:12px!important;
+    box-shadow:0 2px 9px rgba(81,61,43,.035);
+    align-self:start;
+  }
+  .glossary-page .glossary-approved-grid.is-large{
+    grid-template-columns:minmax(0,1fr)!important;
+    max-width:365px!important;
+  }
+  .glossary-page .glossary-dialog-header{padding:12px 13px}
+  .glossary-page .glossary-dialog-header h2{font-size:28px!important}
+  .glossary-page .glossary-dialog-close{width:42px;height:42px;flex-basis:42px}
+  .glossary-page .glossary-dialog-body .study-paper{padding:13px 11px 16px 32px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .glossary-page .glossary-view-switch{transition:none}
+}
