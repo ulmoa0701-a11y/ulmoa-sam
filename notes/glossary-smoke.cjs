@@ -72,12 +72,15 @@ const path=require("node:path");
       }
       assert.deepEqual([...discovered].sort(),imageFiles.slice().sort(),"all twenty-two art tiles reachable without scrolling");
       assert.equal(await page.locator("#gcatPageCount").textContent(),"4 / 4");
+      await search.fill("표현언어");
       const expressive=page.locator('.gcat-card[data-album-cover="expressive-language"]');
+      assert.equal(await expressive.count(),1,"art is reachable through an exact search on every page");
       await expressive.click();
       assert.equal(await dialog.evaluate(x=>x.open),true);
       await page.locator(".gcat-art-disclosure > summary").click();
       assert((await page.locator(".gcat-art-panel img").getAttribute("src")).endsWith("expressive-language.webp"),"matching language art in popup");
       await page.locator("#gcatDialogClose").click();
+      await search.fill("");
 
       for(const [cat,count] of Object.entries(categories)){
         await page.locator('.gcat-tab[data-tab="'+cat+'"]').click();
