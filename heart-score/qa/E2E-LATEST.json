@@ -1,0 +1,96 @@
+{
+  "version": "702",
+  "testedDate": "2026-10-09",
+  "baselineCommit": "eaaea1a54448feb2570628848e7f8c1a6d590dc6",
+  "scope": "Real image/PDF upload with Chromium + pinned ONNX WASM model; exact musical notation assertions; full OCR enabled except rejection case. Mobile is browser emulation.",
+  "originalFailure": {
+    "version": "701",
+    "staves": 5,
+    "perLine": [
+      4,
+      2,
+      1,
+      1,
+      1
+    ],
+    "measures": 9,
+    "notes": 70,
+    "status": "rejected"
+  },
+  "tests": [
+    {
+      "ok": true,
+      "variant": "original",
+      "mobile": false,
+      "coreOnly": false,
+      "elapsedMs": 8472,
+      "fixtureSha256": "36353b39d164efb34070f26faa24e7fbededb2d2f7355c24b1dd90601888511d",
+      "measures": 19,
+      "notes": 70,
+      "rests": 4,
+      "errors": []
+    },
+    {
+      "ok": true,
+      "variant": "original",
+      "mobile": true,
+      "coreOnly": false,
+      "elapsedMs": 9182,
+      "fixtureSha256": "36353b39d164efb34070f26faa24e7fbededb2d2f7355c24b1dd90601888511d",
+      "measures": 19,
+      "notes": 70,
+      "rests": 4,
+      "errors": []
+    },
+    {
+      "ok": true,
+      "variant": "pdf-a4",
+      "mobile": false,
+      "coreOnly": false,
+      "elapsedMs": 9095,
+      "fixtureSha256": "036a92175921f99d0bc8f4f128507f3d5d27c02ade1e21c2d0c0b8522b556c15",
+      "measures": 19,
+      "notes": 70,
+      "rests": 4,
+      "errors": []
+    },
+    {
+      "ok": true,
+      "variant": "pdf-a4",
+      "mobile": true,
+      "coreOnly": false,
+      "elapsedMs": 8310,
+      "fixtureSha256": "036a92175921f99d0bc8f4f128507f3d5d27c02ade1e21c2d0c0b8522b556c15",
+      "measures": 19,
+      "notes": 70,
+      "rests": 4,
+      "errors": []
+    },
+    {
+      "ok": true,
+      "variant": "missing-dot",
+      "mobile": false,
+      "coreOnly": true,
+      "elapsedMs": 3724,
+      "fixtureSha256": "aeb8cd1450b04da4a6351306291f4891bf5ba3757ca2b52948f95464c99b7612",
+      "measures": 19,
+      "notes": 70,
+      "rests": 4,
+      "errors": []
+    }
+  ],
+  "sourceSha256": {
+    "heart-score/ai/index.html": "8b6f5b3ccf00d23d0a8c70f49c73ca16c89fccc74cf3a5261bcd9d7b753c7531",
+    "heart-score/omr-ai-v702.js": "f0ea6ab4e476500ffc76102db4206d0bb79b1dcfd5610b854c549eefe2d914cc",
+    "heart-score/omr-ai-v702-bootstrap.js": "141c48ebc798106505dc41374019c1ed151e00000f4291f3768e935b4c3feb6f",
+    "heart-score/omr-scan-evidence-v1.mjs": "ec60665b439b76f13628351648728a650ce5a783a74d9f9c3ba9ee7c155f88e0",
+    "heart-score/omr-local-v686.js": "35d7650f697222e3c1d22b72db123e890a798a9dbd2b7462b4d8c15dc8313d2b",
+    "heart-score/index.html": "f79c9eb0500bc745af22f5c15aa374b5c87b7d410b557f1aed1e96f7d98a91c9"
+  },
+  "limitations": [
+    "One supplied 4/4 treble single-melody scan; not general OMR accuracy",
+    "Lyrics have conservative confidence filtering but are not ground-truth validated",
+    "Remote Google Fonts unavailable in runner; Korean system fallback used for screenshots",
+    "GitHub unit workflow success is not E2E evidence; this file records actual local E2E runs"
+  ]
+}

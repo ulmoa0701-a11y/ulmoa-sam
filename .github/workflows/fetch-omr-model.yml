@@ -23,17 +23,24 @@ jobs:
           test "$(stat -c%s qa-bundle/omr-line.fp16.onnx)" -gt 6000000
       - name: Fetch ONNX Runtime Web
         run: |
-          npm init -y >/dev/null 2>&1
-          npm install --no-audit --no-fund onnxruntime-web@1.27.0
-          cp -a node_modules/onnxruntime-web/dist/. qa-bundle/ort/
+          npm ci --prefix heart-score/qa --ignore-scripts --no-audit --no-fund
+          cp -a heart-score/qa/node_modules/onnxruntime-web/dist/. qa-bundle/ort/
+          mkdir -p qa-bundle/node_modules/pdfjs-dist qa-bundle/node_modules/tesseract.js qa-bundle/node_modules/tesseract.js-core qa-bundle/node_modules/@tesseract.js-data
+          cp -a heart-score/qa/node_modules/pdfjs-dist/build qa-bundle/node_modules/pdfjs-dist/
+          cp -a heart-score/qa/node_modules/tesseract.js/dist qa-bundle/node_modules/tesseract.js/
+          cp heart-score/qa/node_modules/tesseract.js-core/tesseract-core* qa-bundle/node_modules/tesseract.js-core/
+          cp -a heart-score/qa/node_modules/@tesseract.js-data/eng heart-score/qa/node_modules/@tesseract.js-data/kor qa-bundle/node_modules/@tesseract.js-data/
           test -f qa-bundle/ort/ort.min.js
       - name: Copy current Heart Score OMR sources
         run: |
           cp heart-score/index.html qa-bundle/heart-score/index.html
-          cp heart-score/omr-local-v686.js qa-bundle/heart-score/
-          cp heart-score/omr-bar-consensus-v1.mjs qa-bundle/heart-score/
-          cp heart-score/omr-ai-v692.js qa-bundle/heart-score/
-          cp heart-score/omr-ai-v692-bootstrap.js qa-bundle/heart-score/
+          mkdir -p qa-bundle/heart-score/ai qa-bundle/heart-score/qa
+          cp heart-score/ai/index.html qa-bundle/heart-score/ai/
+          cp heart-score/omr-local-v686.js heart-score/omr-bar-consensus-v1.mjs heart-score/omr-scan-evidence-v1.mjs qa-bundle/heart-score/
+          version=$(node -e "const fs=require('fs');const s=fs.readFileSync('heart-score/ai/index.html','utf8');const m=s.match(/aiomr=(\d+)/);if(!m)process.exit(1);process.stdout.write(m[1]);")
+          cp "heart-score/omr-ai-v${version}.js" "heart-score/omr-ai-v${version}-bootstrap.js" qa-bundle/heart-score/
+          cp heart-score/qa/*.mjs heart-score/qa/*.cjs heart-score/qa/*.json heart-score/qa/*.md qa-bundle/heart-score/qa/
+          echo "Bundled AI OMR version ${version} at ${GITHUB_SHA}"
       - name: Upload local E2E bundle
         uses: actions/upload-artifact@v4
         with:

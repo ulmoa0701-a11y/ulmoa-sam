@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {compareNotation} from './omr-exact-validator.mjs';
+const truth=JSON.parse(fs.readFileSync(new URL('./doremi-ground-truth.json',import.meta.url)));
+const analysis={accepted:true,staves:5,barGeometry:{perLine:truth.perLine}};
+const fresh=()=>({timeN:4,timeD:4,measures:structuredClone(truth.measures)});
+assert.equal(compareNotation(analysis,fresh(),truth).ok,true);
+let bad=fresh();bad.measures[0][0].note='레';assert.equal(compareNotation(analysis,bad,truth).ok,false);
+bad=fresh();bad.measures[0][0].dur=1;bad.measures[0][1].dur=1;assert.equal(compareNotation(analysis,bad,truth).ok,false,'19 bars, 70 notes, 100% meter must not hide wrong rhythm');
+bad=fresh();bad.measures[13][2].note='시';assert.equal(compareNotation(analysis,bad,truth).ok,false);
+bad=fresh();bad.measures[5][3].note='라';assert.equal(compareNotation(analysis,bad,truth).ok,false);
+assert.equal(compareNotation({...analysis,accepted:false},fresh(),truth).ok,false);
+assert.equal(compareNotation({...analysis,staves:6},fresh(),truth).ok,false);
+console.log(JSON.stringify({ok:true,assertions:7,kind:'validator-unit-only; not image E2E'}));
