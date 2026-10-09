@@ -35,7 +35,7 @@ export function recoverFaintBarlines(gray,w,h,box){
   }
   groups.push(group);
   return groups.filter(g=>g.length<=Math.max(3,sp*.58)).map(g=>{
-    const best=g.reduce((a,b)=>a.contrast>b.contrast?a:b);
-    return {x:best.x,side:0.09,width:g.length,sp,source:'interline-contrast'};
+    const center=(g[0].x+g.at(-1).x)/2;
+    return {x:center,side:0.09,width:g.length,sp,source:'interline-contrast'};
   });
 }
