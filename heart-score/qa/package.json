@@ -1,0 +1,17 @@
+{
+  "name": "ulmoa-heart-score-omr-qa",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "unit": "node omr-bar-consensus-regression.mjs && node omr-exact-validator-regression.mjs",
+    "e2e": "node omr-image-e2e.cjs"
+  },
+  "dependencies": {
+    "@tesseract.js-data/eng": "1.0.0",
+    "@tesseract.js-data/kor": "1.0.0",
+    "onnxruntime-web": "1.27.0",
+    "pdfjs-dist": "3.11.174",
+    "playwright": "1.62.1",
+    "tesseract.js": "5.1.1"
+  }
+}
