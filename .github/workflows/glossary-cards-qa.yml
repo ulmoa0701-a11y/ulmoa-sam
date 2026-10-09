@@ -1,0 +1,60 @@
+name: Glossary Approved Cards QA
+on:
+  pull_request:
+    paths:
+      - 'notes/**'
+      - 'assets/glossary/cards/**'
+      - 'assets/glossary-approved-cards.css'
+      - '.github/workflows/glossary-cards-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'notes/**'
+      - 'assets/glossary/cards/**'
+      - 'assets/glossary-approved-cards.css'
+      - '.github/workflows/glossary-cards-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  glossary-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install free browser QA dependencies
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+      - name: Test local mobile tablet desktop render and button interactions
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/glossary-http.log 2>&1 &
+          node notes/glossary-smoke.cjs
+      - name: Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: glossary-approved-card-qa
+          path: glossary-qa-screenshots/
+          if-no-files-found: ignore
+      - name: Verify public GitHub Pages after successful publish
+        if: github.event_name == 'push'
+        env:
+          PUBLIC_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam/notes/
+        run: |
+          ready=0
+          for n in $(seq 1 36); do
+            if curl --max-time 15 -fsSL "$PUBLIC_URL" | grep -q 'assets/glossary/cards/working-memory.webp'; then
+              ready=1
+              break
+            fi
+            echo "Waiting for live Pages update ($n/36)"
+            sleep 10
+          done
+          test "$ready" = "1"
+          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary/cards/working-memory.webp" -o /tmp/glossary-live.webp
+          head -c 4 /tmp/glossary-live.webp | grep -q 'RIFF'
+          GLOSSARY_QA_URL="$PUBLIC_URL" node notes/glossary-smoke.cjs
