@@ -5,108 +5,125 @@ const path=require("node:path");
 (async()=>{
   const browser=await chromium.launch({headless:true});
   const base=process.env.GLOSSARY_QA_URL||"http://127.0.0.1:8765/notes/";
-  const screens=path.resolve("glossary-qa-screenshots");
-  fs.mkdirSync(screens,{recursive:true});
+  const folder=path.resolve("glossary-qa-screenshots");
+  fs.mkdirSync(folder,{recursive:true});
   const profiles=[
-    {name:"mobile-small",width:360,height:780,columns:1},
-    {name:"mobile",width:390,height:844,columns:1},
-    {name:"tablet",width:768,height:1024,columns:1},
-    {name:"desktop",width:1440,height:900,columns:2}
+    {name:"mobile-small",width:360,height:780,columns:2},
+    {name:"mobile",width:390,height:844,columns:2},
+    {name:"tablet",width:768,height:1024,columns:3},
+    {name:"desktop",width:1440,height:900,columns:4}
   ];
-  const counts={"cognitive":9,"memory-perception":6,"language":8,"intervention":7};
-  const names=["working-memory","short-term-memory","processing-speed","attention","memory","visual-perception","auditory-processing","receptive-language","expressive-language","aac","prompting","reinforcement"];
+  const categories={"cognitive":4,"memory-perception":3,"language":3,"intervention":2};
+  const imageFiles=["working-memory","short-term-memory","processing-speed","attention","memory","visual-perception","auditory-processing","receptive-language","expressive-language","aac","prompting","reinforcement"];
   try{
     if(!process.env.GLOSSARY_QA_URL){
-      const files=fs.readdirSync(path.resolve("assets/glossary/cards")).filter(x=>x.endsWith(".webp")).sort();
-      assert.deepEqual(files,names.map(x=>x+".webp").sort(),"12 approved original cards remain available as separate image files");
+      const files=fs.readdirSync(path.resolve("assets/glossary/cards")).filter(s=>s.endsWith(".webp")).sort();
+      assert.deepEqual(files,imageFiles.map(s=>s+".webp").sort(),"12 distinct approved pictures");
     }
-    for(const profile of profiles){
-      const page=await browser.newPage({viewport:{width:profile.width,height:profile.height},deviceScaleFactor:1});
-      const errors=[];
-      page.on("pageerror",e=>errors.push(String(e)));
+    for(const p of profiles){
+      const page=await browser.newPage({viewport:{width:p.width,height:p.height},deviceScaleFactor:1});
+      const errors=[];page.on("pageerror",e=>errors.push(String(e)));
       await page.goto(base,{waitUntil:"networkidle",timeout:90000});
-      const catalog=page.locator("#glossaryCatalog");
-      assert.equal(await catalog.count(),1,"only one unified catalog");
-      assert.equal(await page.locator("#glossaryApprovedGrid").count(),0,"remove long illustration gallery");
-      assert.equal(await page.locator(".study-note").count(),30,"preserve existing thirty referenced notes");
-      assert.equal(await page.locator(".study-sources").count(),30,"preserve thirty source groups");
-      assert.equal(await page.locator(".glossary-explorer").evaluate(e=>getComputedStyle(e).display),"none","hide duplicated old explorer");
-      const cards=page.locator("#gcatList .gcat-card");
-      await cards.first().waitFor();
-      assert.equal(await cards.count(),6,"curated home displays six choices, not thirty");
-      assert.equal(await page.locator(".gcat-tab").count(),5,"five easy-to-discover categories");
-      const x=await cards.evaluateAll(els=>els.map(el=>({x:el.getBoundingClientRect().x,width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height})));
-      assert.equal(new Set(x.map(o=>Math.round(o.x))).size,profile.columns,"expected category list column count");
-      assert(x.every(o=>o.height<=123),"compact single-row cards (may have wrapped title)");
-      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,"no sideways page scroll");
-      if(profile.name.startsWith("mobile")){
-        assert(x.every(o=>o.width>=230),"horizontal cards readable on phones");
-        const listHeight=await page.locator("#gcatList").evaluate(el=>el.getBoundingClientRect().height);
-        assert(listHeight<710,"six featured terms fit in a compact list");
-      }
-      await page.screenshot({path:path.join(screens,profile.name+"-catalog.png")});
-      const noteOpener=cards.first();
-      await noteOpener.click();
+      const tabs=page.locator("#gcatTabs .gcat-tab"),cards=page.locator("#gcatList .gcat-card");
+      const modeAlbum=page.locator("#gcatModeAlbum"),modeAll=page.locator("#gcatModeAll");
+      const paged=page.locator("#gcatPages");
+      assert.equal(await page.locator(".study-note").count(),30,"30 source notes remain");
+      assert.equal(await page.locator(".study-sources").count(),30,"30 source citations remain");
+      assert.equal(await page.locator("#glossaryApprovedGrid").count(),0,"old long image board removed");
+      assert.equal(await tabs.count(),5,"five quick topic filters");
+      assert.equal(await modeAlbum.getAttribute("aria-pressed"),"true","picture album is default");
+      assert.equal(await cards.count(),6,"six album covers per page");
+      assert.equal(await paged.isVisible(),true,"album has page navigation");
+      assert.equal(await page.locator("#gcatCount").textContent(),"12개","12 approved covers in album");
+      assert.equal(await page.locator("#gcatPageCount").textContent(),"1 / 2");
+      assert.equal(await page.locator("#gcatList .gcat-card-copy").count(),0,"no repeated title or description beside illustrations");
+      const locs=await cards.evaluateAll(els=>els.map(el=>({x:Math.round(el.getBoundingClientRect().left),width:el.getBoundingClientRect().width,ratio:el.getBoundingClientRect().height/el.getBoundingClientRect().width,img:el.querySelector("img")?.src,ownText:el.innerText.trim()})));
+      assert.equal(new Set(locs.map(x=>x.x)).size,p.columns,p.name+" has correct album columns");
+      for(const x of locs){assert(!x.ownText,"album image has no duplicate overlay text");assert(x.ratio>1.18&&x.ratio<1.35,"original image proportions preserved");}
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,"no horizontal scroll");
+      await page.screenshot({path:path.join(folder,p.name+"-album.png")});
+      const first=cards.first();
+      await first.click();
       const dialog=page.locator("#gcatDialog");
-      assert.equal(await dialog.evaluate(el=>el.open),true,"tap opens the local dialog instead of scrolling");
-      assert((await page.locator("#gcatDialogBody .study-paper").textContent()).length>80,"show original core and examples");
+      assert.equal(await dialog.evaluate(el=>el.open),true,"album button opens detail dialog");
+      assert((await page.locator("#gcatDialogBody .study-paper").textContent()).length>80,"full original detail available");
       await page.locator(".gcat-art-disclosure > summary").click();
-      await page.locator(".gcat-art-panel img").waitFor({state:"visible"});
-      await page.waitForFunction(()=>{const x=document.querySelector(".gcat-art-panel img");return x&&x.complete&&x.naturalWidth===1122});
-      if(profile.name==="mobile")await page.screenshot({path:path.join(screens,"mobile-dialog.png")});
-      await page.locator("#gcatDialogClose").click();
-      assert.equal(await dialog.evaluate(el=>el.open),false,"close button works");
-      assert.equal(await page.locator("#gcatRecent button").count(),1,"recently viewed term recorded");
-
-      // Category switching must render only matching items, not make users scroll through other topics.
-      for(const [category,n] of Object.entries(counts)){
-        await page.locator('.gcat-tab[data-tab="'+category+'"]').click();
-        assert.equal(await cards.count(),n,"category "+category+" correct item count");
-      }
-      await page.locator('.gcat-tab[data-tab="language"]').click();
-      await page.locator(".gcat-card[data-id='memo-receptive-expressive']").click();
-      await page.locator(".gcat-art-disclosure > summary").click();
-      const coverTabs=page.locator(".gcat-art-choices button");
-      assert.equal(await coverTabs.count(),2,"both approved speech illustrations retained");
-      await coverTabs.nth(1).click();
-      assert((await page.locator(".gcat-art-panel img").getAttribute("src")).endsWith("expressive-language.webp"));
+      const big=page.locator(".gcat-art-panel img");
+      await page.waitForFunction(()=>{const img=document.querySelector(".gcat-art-panel img");return img&&img.complete&&img.naturalWidth===1122&&img.naturalHeight===1402});
+      if(p.name==="mobile")await page.screenshot({path:path.join(folder,"mobile-detail.png")});
       await page.keyboard.press("Escape");
-      assert.equal(await dialog.evaluate(el=>el.open),false,"Escape closes detail");
+      assert.equal(await dialog.evaluate(el=>el.open),false,"Escape closes dialog");
+
+      await page.locator("#gcatNext").click();
+      assert.equal(await cards.count(),6,"album second page has 6 pictures");
+      assert.equal(await page.locator("#gcatPageCount").textContent(),"2 / 2");
+      const pageTwoImages=await cards.locator("img").evaluateAll(els=>els.map(x=>x.src.split("/").at(-1)));
+      assert(pageTwoImages.includes("expressive-language.webp"),"approved expressive picture exists as its own cover");
+      await page.locator('#gcatList .gcat-card[data-album-cover="expressive-language"]'); // non-binding selector creation safe
+      const expression=page.locator('.gcat-card[data-album-cover="expressive-language"]');
+      await expression.click();
+      assert.equal(await dialog.evaluate(el=>el.open),true);
+      await page.locator(".gcat-art-disclosure > summary").click();
+      assert((await big.getAttribute("src")).endsWith("expressive-language.webp"),"tapped art opens matching picture inside combined language detail");
+      await page.locator("#gcatDialogClose").click();
+      await page.locator("#gcatPrev").click();
+      assert.equal(await page.locator("#gcatPageCount").textContent(),"1 / 2");
+
+      for(const [cat,count] of Object.entries(categories)){
+        await page.locator('.gcat-tab[data-tab="'+cat+'"]').click();
+        assert.equal(await page.locator("#gcatCount").textContent(),count+"개",cat+" has the right number of illustrated covers");
+        assert.equal(await cards.count(),count,"a category shows all its pictures without long scroll");
+        assert.equal(await paged.isVisible(),false,"small categories do not have pagination");
+      }
+      await modeAll.click();
+      assert.equal(await modeAll.getAttribute("aria-pressed"),"true","text-inclusive mode toggles correctly");
+      await page.locator('.gcat-tab[data-tab="featured"]').click();
+      assert.equal(await page.locator("#gcatCount").textContent(),"30개","all thirty original glossary entries discoverable");
+      assert.equal(await cards.count(),6,"thirty entries are paginated, no 30-tile scroll");
+      assert.equal(await page.locator("#gcatPageCount").textContent(),"1 / 5");
+      await page.locator('.gcat-tab[data-tab="cognitive"]').click();
+      assert.equal(await page.locator("#gcatCount").textContent(),"9개");
+      await page.locator("#gcatNext").click();
+      const textTile=page.locator('.gcat-album-text[data-id="memo-inhibition"]');
+      // cognitive items contain nine originals and text-only terms on second page.
+      assert(await page.locator("#gcatList .gcat-album-text").count()>0);
+      await page.locator("#gcatList .gcat-album-text").first().click();
+      assert.equal(await dialog.evaluate(el=>el.open),true,"nonillustrated concepts still open");
+      await page.locator("#gcatDialogClose").click();
+
       const search=page.locator("#gcatSearch");
       await search.fill("AAC");
-      assert(await cards.count()>=1,"search whole glossary, regardless of selected category");
-      assert.equal(await page.locator('.gcat-card[data-id="memo-aac"]').count(),1,"find AAC");
-      await page.locator('.gcat-card[data-id="memo-aac"]').click();
-      assert.equal(await dialog.evaluate(el=>el.open),true,"searched card opens detail");
+      assert.equal(await cards.count(),1,"search across all modes and categories");
+      assert.equal(await page.locator("#gcatList .gcat-album-art").count(),1,"search result uses original approved picture");
+      await cards.first().click();
       assert.equal((await page.locator("#gcatDialogTitle").textContent()).trim(),"AAC");
       const related=page.locator(".gcat-related-items button");
-      assert(await related.count()>=1,"related concepts are reachable");
+      assert(await related.count()>=1,"related terms retained");
       await related.first().click();
-      assert.notEqual((await page.locator("#gcatDialogTitle").textContent()).trim(),"AAC","related term opens within dialog");
+      assert.notEqual((await page.locator("#gcatDialogTitle").textContent()).trim(),"AAC","related terms open inside dialog");
       await page.locator("#gcatDialogClose").click();
-      await search.fill("없는용어zzzz");
-      assert.equal(await cards.count(),0,"no match empty state");
-      assert.equal(await page.locator("#gcatEmpty").isVisible(),true,"empty search feedback");
+
+      await search.fill("억제통제");
+      assert.equal(await cards.count(),1,"find terminology without approved art");
+      assert.equal(await page.locator("#gcatList .gcat-album-text").count(),1,"no fake picture for terms without art");
+      await search.fill("글자없음zzzz");
+      assert.equal(await cards.count(),0);assert.equal(await page.locator("#gcatEmpty").isVisible(),true);
       await page.locator("#gcatClear").click();
-      assert.equal(await search.inputValue(),"","clear search works");
-      assert.equal(await page.locator("#gcatEmpty").isVisible(),false,"clear restores category list");
+      assert.equal(await search.inputValue(),"");
+      await modeAlbum.click();
       await page.locator('.gcat-tab[data-tab="featured"]').click();
-      assert.equal(await cards.count(),6,"return to featured quick browse");
+      assert.equal(await page.locator("#gcatCount").textContent(),"12개");
+      // Verify sticky input while browsing longer category - inherited overflow issue.
+      await modeAll.click();
       await page.locator('.gcat-tab[data-tab="cognitive"]').click();
-      await page.evaluate(()=>window.scrollTo(0,280));
-      await page.waitForTimeout(160);
-      const stickyInfo=await page.locator(".gcat-search-rail").evaluate(el=>({
-        top:el.getBoundingClientRect().top,
-        pos:getComputedStyle(el).position,
-        scrollY:window.scrollY,
-        maxScroll:document.documentElement.scrollHeight-innerHeight
-      }));
-      assert(stickyInfo.scrollY>100,"longer category is scrollable");
-      assert(stickyInfo.pos==="sticky","search panel uses sticky positioning");
-      assert(stickyInfo.top>=-1&&stickyInfo.top<140,"search stays sticky in long category "+JSON.stringify(stickyInfo));
-      assert.deepEqual(errors,[],"no uncaught javascript errors");
-      console.log(profile.name+": PASS - compact list, 30 notes, filters, search, sticky field, dialog, original artwork, related terms");
+      await page.evaluate(()=>scrollTo(0,280));
+      await page.waitForTimeout(120);
+      const sticky=await page.locator(".gcat-search-rail").evaluate(el=>({top:el.getBoundingClientRect().top,position:getComputedStyle(el).position,scroll:scrollY}));
+      assert.equal(sticky.position,"sticky");
+      assert(sticky.scroll>100&&sticky.top>=-1&&sticky.top<140,"sticky search persists "+JSON.stringify(sticky));
+      assert.deepEqual(errors,[],p.name+" no uncaught errors");
+      console.log(p.name+": PASS album 12 images / 6 per page, clickable modal + original art, full 30, 5 categories, global search, sticky field");
       await page.close();
     }
   }finally{await browser.close();}
-})().catch(e=>{console.error(e);process.exit(1);});
+})().catch(error=>{console.error(error);process.exit(1);});

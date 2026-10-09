@@ -5,7 +5,7 @@
 (function(){
 "use strict";
 const CATEGORY=[
-  {id:"featured",label:"먼저 보기"},
+  {id:"featured",label:"전체"},
   {id:"cognitive",label:"인지·실행"},
   {id:"memory-perception",label:"기억·지각"},
   {id:"language",label:"언어·소통"},
@@ -24,7 +24,7 @@ const COVERS={
   "memo-prompting":[["촉구","prompting"]],
   "memo-reinforcement":[["강화","reinforcement"]]
 };
-const FEATURED=["memo-working-memory","memo-short-term-memory","memo-attention","memo-receptive-expressive","memo-aac","memo-reinforcement"];
+const PAGE_SIZE=6;
 const RELATED={
   "memo-working-memory":["memo-short-term-memory","memo-executive","memo-memory"],
   "memo-short-term-memory":["memo-working-memory","memo-memory"],
@@ -83,6 +83,12 @@ function boot(){
   }).filter(Boolean);
   const byId=new Map(entries.map(entry=>[entry.id,entry]));
   const tabs=document.getElementById("gcatTabs");
+  const modeAlbum=document.getElementById("gcatModeAlbum");
+  const modeAll=document.getElementById("gcatModeAll");
+  const pages=document.getElementById("gcatPages");
+  const prev=document.getElementById("gcatPrev");
+  const next=document.getElementById("gcatNext");
+  const pageCount=document.getElementById("gcatPageCount");
   const search=document.getElementById("gcatSearch");
   const clear=document.getElementById("gcatClear");
   const count=document.getElementById("gcatCount");
@@ -96,10 +102,15 @@ function boot(){
   const close=document.getElementById("gcatDialogClose");
   if(!tabs||!search||!list||!dialog)return;
   let active="featured";
+  let mode="album";
+  let currentPage=0;
+  // 12 approved independent drawings, including separate receptive / expressive cards.
+  const albumItems=entries.flatMap(entry=>entry.covers.map((cover,index)=>({entry,cover,index})));
+  if(albumItems.length!==12)console.warn("그림앨범 등록 갯수 확인:",albumItems.length);
   let recentIds=storageGet().filter(id=>byId.has(id));
   let lastOpener=null;
 
-  function openTerm(id,opener){
+  function openTerm(id,opener,chosenCover){
     const entry=byId.get(id);
     if(!entry)return;
     if(opener)lastOpener=opener;
@@ -138,7 +149,7 @@ function boot(){
       artPanel.appendChild(art);
       details.appendChild(artPanel);
       dialogBody.appendChild(details);
-      choose(0);
+      choose(chosenCover||0);
     }
     const suggestions=(RELATED[id]||entries.filter(x=>x.category===entry.category&&x.id!==id).slice(0,2).map(x=>x.id))
       .filter(key=>key!==id&&byId.has(key)).slice(0,3);
@@ -162,33 +173,35 @@ function boot(){
       else dialog.setAttribute("open","");
     }
   }
-  function makeCard(entry){
-    const button=node("button","gcat-card");
+  function makeCard(item){
+    const entry=item.entry;
+    const hasArt=!!item.cover;
+    const button=node("button","gcat-card "+(hasArt?"gcat-album-art":"gcat-album-text"));
     button.type="button";
-    button.setAttribute("aria-label",entry.title+" 자세히 보기");
+    const accessibleName=hasArt?item.cover[0]:entry.title;
+    button.setAttribute("aria-label",accessibleName+" 자세히 보기");
     button.dataset.id=entry.id;
+    button.dataset.albumCover=hasArt?item.cover[1]:"";
     button.style.setProperty("--tint",TINT[entry.category]||"#fff0dd");
-    const thumb=node("span","gcat-thumb");
-    thumb.setAttribute("aria-hidden","true");
-    if(entry.covers.length){
-      const img=node("img");
-      img.src="../assets/glossary/cards/"+entry.covers[0][1]+".webp";
-      img.alt="";
+    if(hasArt){
+      const img=node("img","gcat-album-image");
+      img.src="../assets/glossary/cards/"+item.cover[1]+".webp";
+      img.alt=""; // The original drawing already contains the name and brief explanation.
       img.width=1122;
       img.height=1402;
       img.loading="lazy";
       img.decoding="async";
-      thumb.appendChild(img);
+      button.appendChild(img);
     }else{
-      thumb.appendChild(node("span","gcat-thumb-letter",entry.title.charAt(0)));
+      const initial=node("span","gcat-album-symbol",entry.title.charAt(0));
+      initial.setAttribute("aria-hidden","true");
+      button.appendChild(initial);
+      button.appendChild(node("span","gcat-album-title",entry.title));
+      const decoration=node("span","gcat-album-text-note");
+      decoration.setAttribute("aria-hidden","true");
+      button.appendChild(decoration);
     }
-    const copy=node("span","gcat-card-copy");
-    copy.appendChild(node("span","gcat-card-title",entry.title));
-    copy.appendChild(node("span","gcat-card-sub",entry.subtitle));
-    const chevron=node("span","gcat-chevron","›");
-    chevron.setAttribute("aria-hidden","true");
-    button.append(thumb,copy,chevron);
-    button.addEventListener("click",()=>openTerm(entry.id,button));
+    button.addEventListener("click",()=>openTerm(entry.id,button,item.index||0));
     return button;
   }
   function renderRecent(){
@@ -214,6 +227,7 @@ function boot(){
       btn.addEventListener("click",()=>{
         active=category.id;
         if(search.value)search.value="";
+        currentPage=0;
         render();
       });
       tabs.appendChild(btn);
@@ -223,30 +237,63 @@ function boot(){
     const q=search.value.trim().toLocaleLowerCase("ko");
     const qCompact=q.replace(/\s+/g,"");
     clear.hidden=!q;
-    let visible;
+    let visible=[];
     if(q){
-      visible=entries.filter(entry=>entry.search.includes(q)||entry.search.replace(/\s+/g,"").includes(qCompact));
+      const matches=entry=>entry.search.includes(q)||entry.search.replace(/\s+/g,"").includes(qCompact);
+      // Searches always cover every original glossary entry, even entries without artwork.
+      // Favor the actual term/illustration title; search full explanations only if no title matches.
+      const titleHit=entry=>[entry.title,...entry.covers.map(cover=>cover[0])].some(title=>title.toLocaleLowerCase("ko").replace(/\s+/g,"").includes(qCompact));
+      const hitsByName=entries.filter(titleHit);
+      const eligible=new Set((hitsByName.length?hitsByName:entries.filter(matches)).map(entry=>entry.id));
+      const matchesFromAlbum=albumItems.filter(({entry,cover})=>{
+        if(!eligible.has(entry.id))return false;
+        if(entry.covers.length<2)return true;
+        return cover[0].toLocaleLowerCase("ko").includes(q)||!hitsByName.length;
+      });
+      const drawnIds=new Set(matchesFromAlbum.map(item=>item.entry.id));
+      const textMatches=entries.filter(entry=>eligible.has(entry.id)&&!drawnIds.has(entry.id)).map(entry=>({entry,cover:null,index:0}));
+      visible=matchesFromAlbum.concat(textMatches);
       resultsTitle.textContent="검색 결과";
-    }else if(active==="featured"){
-      visible=FEATURED.map(id=>byId.get(id)).filter(Boolean);
-      resultsTitle.textContent="먼저 볼 용어";
+    }else if(mode==="album"){
+      visible=albumItems.filter(item=>active==="featured"||item.entry.category===active);
+      resultsTitle.textContent=active==="featured"?"그림 전체":CATEGORY.find(category=>category.id===active).label;
     }else{
-      visible=entries.filter(entry=>entry.category===active);
-      resultsTitle.textContent=CATEGORY.find(category=>category.id===active).label;
+      visible=entries.filter(entry=>active==="featured"||entry.category===active).map(entry=>({entry,cover:entry.covers[0]||null,index:0}));
+      resultsTitle.textContent=active==="featured"?"전체 용어":CATEGORY.find(category=>category.id===active).label;
     }
+    const pageMax=Math.max(1,Math.ceil(visible.length/PAGE_SIZE));
+    currentPage=Math.max(0,Math.min(currentPage,pageMax-1));
+    const pageItems=visible.slice(currentPage*PAGE_SIZE,(currentPage+1)*PAGE_SIZE);
+    shell.classList.toggle("gcat-album-active",mode==="album"&&!q);
+    shell.classList.toggle("gcat-text-active",mode==="all"||!!q);
+    modeAlbum.setAttribute("aria-pressed",String(mode==="album"));
+    modeAll.setAttribute("aria-pressed",String(mode==="all"));
     count.textContent=visible.length+"개"+(q?" 찾음":"");
-    list.replaceChildren(...visible.map(makeCard));
+    list.replaceChildren(...pageItems.map(makeCard));
     noResults.hidden=visible.length!==0;
+    pages.hidden=pageMax<=1;
+    prev.disabled=currentPage===0;
+    next.disabled=currentPage>=pageMax-1;
+    pageCount.textContent=(currentPage+1)+" / "+pageMax;
     renderTabs();
   }
-  search.addEventListener("input",render);
+  function setMode(nextMode){
+    mode=nextMode;
+    currentPage=0;
+    render();
+  }
+  modeAlbum.addEventListener("click",()=>setMode("album"));
+  modeAll.addEventListener("click",()=>setMode("all"));
+  prev.addEventListener("click",()=>{if(currentPage>0){currentPage--;render();resultsTitle.scrollIntoView({block:"nearest"});}});
+  next.addEventListener("click",()=>{currentPage++;render();resultsTitle.scrollIntoView({block:"nearest"});});
+  search.addEventListener("input",()=>{currentPage=0;render();});
   search.addEventListener("keydown",event=>{
     if(event.key==="Enter"){
       const first=list.querySelector(".gcat-card");
       if(first){event.preventDefault();first.click();}
     }
   });
-  clear.addEventListener("click",()=>{search.value="";render();search.focus();});
+  clear.addEventListener("click",()=>{search.value="";currentPage=0;render();search.focus();});
   close.addEventListener("click",()=>dialog.close());
   dialog.addEventListener("click",event=>{if(event.target===dialog)dialog.close();});
   dialog.addEventListener("close",()=>{if(lastOpener&&lastOpener.isConnected)lastOpener.focus({preventScroll:true});lastOpener=null;});
