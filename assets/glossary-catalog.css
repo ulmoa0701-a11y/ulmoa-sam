@@ -412,3 +412,144 @@
   .glossary-page .gcat .gcat-album-title{font-size:14px}
   .glossary-page .gcat .gcat-view-mode{font-size:13px}
 }
+
+
+/* 전체 용어: 이미지 타일이 아닌 4분야 텍스트 지도. 30개 모두 한 화면 구조로 탐색 */
+.glossary-page .gcat.gcat-map-active .gcat-tabs{
+  display:none!important;
+}
+.glossary-page .gcat.gcat-map-active .gcat-list{
+  display:block!important;
+  width:100%;
+  max-width:none;
+  margin:0;
+  padding:0;
+}
+.glossary-page .gcat.gcat-map-active .gcat-results-head{
+  margin:2px 0 12px;
+}
+.glossary-page .gcat-map-layout{
+  position:relative;
+  width:100%;
+}
+.glossary-page .gcat-map-hub{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  width:max-content;
+  min-width:164px;
+  min-height:69px;
+  padding:11px 20px;
+  margin:0 auto 20px;
+  background:#fff0b9;
+  border:2px solid #e8d6aa;
+  border-radius:46% 54% 48% 52% / 55% 42% 58% 45%;
+  color:#44362b;
+  position:relative;
+  z-index:1;
+}
+.glossary-page .gcat-map-hub span{
+  font:600 11px/1.2 "Pretendard Variable",Pretendard,sans-serif;
+  color:#8d7956;
+}
+.glossary-page .gcat-map-hub strong{
+  font:400 28px/1.1 "Gamja Flower",cursive;
+}
+.glossary-page .gcat-map-hub:after{
+  content:"";
+  position:absolute;
+  width:2px;height:21px;
+  top:100%;left:50%;
+  background:#dbc5a5;
+}
+.glossary-page .gcat-map-groups{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+.glossary-page .gcat-map-group{
+  border:1.5px solid #e7ded1;
+  border-top:5px solid var(--branch-color,#fff1d9);
+  border-radius:17px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--branch-color,#fff1d9) 45%,white),#fffdfa 42%);
+  min-width:0;
+  padding:14px 14px 16px;
+}
+.glossary-page .gcat-map-group-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:9px;
+}
+.glossary-page .gcat-map-group-head h3{
+  margin:0!important;
+  font:700 19px/1.3 "Pretendard Variable",Pretendard,sans-serif!important;
+  color:#3f352c;
+  letter-spacing:-.03em;
+}
+.glossary-page .gcat-map-group-count{
+  background:#fff;
+  border:1px solid #e9dfd5;
+  padding:4px 8px;
+  flex:0 0 auto;
+  border-radius:999px;
+  color:#776858;
+  font:650 11px/1.2 "Pretendard Variable",Pretendard,sans-serif;
+}
+.glossary-page .gcat-map-group-note{
+  margin:2px 0 11px;
+  color:#857569;
+  font:500 12px/1.3 "Pretendard Variable",Pretendard,sans-serif;
+}
+.glossary-page .gcat-map-terms{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+}
+.glossary-page .gcat-map-term{
+  appearance:none;
+  width:100%;
+  min-width:0;
+  min-height:39px;
+  padding:8px 7px;
+  border:1px solid #e8dfd5;
+  border-radius:10px;
+  background:#fff;
+  color:#3e3832;
+  cursor:pointer;
+  text-align:center;
+  font:650 13.5px/1.35 "Pretendard Variable",Pretendard,sans-serif;
+  word-break:keep-all;
+  overflow-wrap:anywhere;
+}
+.glossary-page .gcat-map-term:hover{
+  border-color:#c7ac82;
+  background:#fff8e9;
+}
+.glossary-page .gcat-map-term:active{background:#f5e8d2}
+.glossary-page .gcat-map-term:focus-visible{
+  outline:3px solid #437eaa;
+  outline-offset:2px;
+}
+@media(min-width:780px){
+  .glossary-page .gcat-map-layout{
+    max-width:1060px;
+    margin:auto;
+  }
+}
+@media(max-width:770px){
+  .glossary-page .gcat-map-groups{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  .glossary-page .gcat-map-hub{display:none}
+  .glossary-page .gcat-map-group{padding:10px 10px 12px;border-radius:13px}
+  .glossary-page .gcat-map-group-head h3{font-size:16px!important}
+  .glossary-page .gcat-map-group-note{font-size:11px;margin:2px 0 8px}
+  .glossary-page .gcat-map-terms{gap:5px}
+  .glossary-page .gcat-map-term{min-height:37px;font-size:12.5px;padding:7px 6px}
+}
+@media(max-width:360px){
+  .glossary-page .gcat-map-term{font-size:12px;padding:6px 4px}
+}
