@@ -43,7 +43,7 @@ const truth=require('./doremi-ground-truth.json');
        const dur=duration(item.dur),rest=item.note==='쉼',p=pitchKey(item.note);
        const note=new VF.StaveNote({clef:'treble',keys:[p.key],duration:dur+(rest?'r':'')});
        if(p.acc)note.addAccidental(0,new VF.Accidental(p.acc));
-       if(dur.endsWith('d'))note.addDotToAll();
+       if(dur.endsWith('d'))VF.Dot.buildAndAttach([note],{all:true});
        return note;
       });
       const voice=new VF.Voice({num_beats:4,beat_value:4});
