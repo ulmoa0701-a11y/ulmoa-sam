@@ -244,7 +244,7 @@ async function basicCase(name,width,height){
   check((await page.locator('#introHeading').innerText())==='박자 먼저 들어요',`${name}: preparatory beat text missing or contains distracting fractions`);
   check((await page.locator('#introPulse').innerText())==='1',`${name}: first beat must be clearly numbered from the start`);
   const introCardText=await page.locator('#introOverlay').innerText();
-  check(!/\\d+\\s*\\/\\s*\\d+/.test(introCardText),`${name}: intro contains a confusing fractional bar count ${introCardText}`);
+  check(!introCardText.includes('/'),`${name}: intro contains a confusing fractional bar count ${introCardText}`);
   const introStartGeometry=await page.evaluate(()=>({tempo:beatMs(),meter:introMeter,count: introCountBeats, preview: introPreviewBeats,total: introDurationMs}));
   check(introStartGeometry.meter===2&&introStartGeometry.count===4,`${name}: 2/4 musical preparation beat grouping is wrong ${JSON.stringify(introStartGeometry)}`);
   await page.evaluate(()=>{introStartPerf=performance.now()-(introPreviewBeats*beatMs()+20);introFrame(performance.now())});
