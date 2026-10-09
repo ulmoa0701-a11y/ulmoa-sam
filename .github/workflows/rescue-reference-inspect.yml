@@ -27,7 +27,7 @@ jobs:
           print('MEDIA_REFERENCES', [v for v in links if re.search(r'\.(png|jpe?g|webp|avif|svg|gif)(?:\?|$)',v,re.I)][:60])
           print('STATIC_COUNTER',collections.Counter(re.findall(r'\.(png|jpe?g|webp|avif|svg|gif)(?:\?|&|[\"\'])',src,re.I)))
           candidates=[x for x in links if x.startswith('/games/') and not x.endswith(('.jpg','.png','.svg','.webp')) and len(x.split('/'))>2]
-          routes=list(dict.fromkeys(candidates))[:5]
+          routes=list(dict.fromkeys(['/games/race','/games/brain','/games/memory']+candidates))[:5]
           for path in routes:
             try:
               status,url,ct,content=get(path)
