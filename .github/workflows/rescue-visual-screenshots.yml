@@ -22,8 +22,16 @@ jobs:
           mkdir -p /tmp/moa-qa
           gh run download 37909495429 -R ulmoa0701-a11y/ulmoa-sam -n rescue-responsive-screenshots -D /tmp/moa-qa
           mkdir -p thinking-garden/games/rescue/qa-previews
-          cp /tmp/moa-qa/desktop-1440x900-gameplay.png thinking-garden/games/rescue/qa-previews/desktop.png
-          cp /tmp/moa-qa/mobile-390x844-gameplay.png thinking-garden/games/rescue/qa-previews/mobile.png
+          python3 -m pip install --quiet Pillow
+          python3 - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          d=Path('thinking-garden/games/rescue/qa-previews')
+          for name,src in (('desktop','desktop-1440x900-gameplay.png'),('mobile','mobile-390x844-gameplay.png')):
+            im=Image.open('/tmp/moa-qa/'+src).convert('RGB')
+            im.save(d/(name+'.webp'),quality=64,method=6)
+            print(name,im.size,(d/(name+'.webp')).stat().st_size)
+          PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add thinking-garden/games/rescue/qa-previews/
