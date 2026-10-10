@@ -56,6 +56,23 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
   for(let round=0;round<(fullRun?5:1);round++){
    const scene=await page.evaluate(n=>{const s=window.moaRescueGame.scene.getScene(n);return {round:s.round,need:s.m.need,color:s.m.color,size:s.m.size,targetSpecies:s.m.species,animals:(n==='landmission'?s.targets:s.actors).filter(a=>a.active&&a.data&&a.data.get('species')||n==='landmission'&&a.active&&a.data&&a.data.get('item')).map(a=>n==='landmission'?{x:a.x,y:a.y,...a.data.get('item')}:{x:a.x,y:a.y,species:a.data.get('species'),color:a.data.get('color'),size:a.data.get('size')})}},missionName);
    assert.equal(scene.round,round);
+   assert.equal(scene.need,[1,1,2,3,4][round],'Difficulty must increase 1,1,2,3,4');
+   assert.equal(scene.animals.length,4+round,'Candidate count must increase gently');
+   assert.equal(new Set(scene.animals.map(a=>[a.species,a.color,a.size].join('|'))).size,scene.animals.length,'No two visually identical animals may have contradictory answers');
+   assert.equal(scene.animals.filter(a=>a.color===scene.color&&a.size===scene.size&&scene.targetSpecies.includes(a.species)).length,scene.need,'Exactly one instance of each target');
+   if(!wide) {
+    const banner=await page.evaluate(n=>{const x=window.moaRescueGame.scene.getScene(n).missionChip;return {exists:!!x,copy:x?.list.filter(k=>typeof k.text==='string').map(k=>k.text).join(' | ')||'',audio:x?.list.some(k=>k.type==='Container'&&k.list.some(z=>z.text?.includes('다시'))) }},missionName);
+    assert.ok(banner.exists && banner.copy.includes(scene.color+'색') && banner.copy.includes(scene.size),'Missing persistent child-readable mission prompt '+JSON.stringify(banner));
+    assert.ok(banner.audio,'Missing repeat-audio button');
+   }
+   // An obvious wrong candidate must not silently become a valid answer.
+   const wrong=scene.animals.find(a=>!(a.color===scene.color&&a.size===scene.size&&scene.targetSpecies.includes(a.species)));
+   if(wrong) {
+    await clickAt(wrong.x,wrong.y);
+    await page.waitForTimeout(180);
+    const count=await page.evaluate(n=>window.moaRescueGame.scene.getScene(n).found.size,missionName);
+    assert.equal(count,0,'Wrong animal must never count as rescued');
+   }
    const eligible=scene.animals.filter(a=>a.color===scene.color&&a.size===scene.size&&scene.targetSpecies.includes(a.species));
    const seen=new Set();
    const correct=eligible.filter(a=>{if(seen.has(a.species))return false;seen.add(a.species);return true;}).slice(0,scene.need);

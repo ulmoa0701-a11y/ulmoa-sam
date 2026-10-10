@@ -42,15 +42,19 @@ jobs:
           PUBLIC_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/
         run: |
           ready=0
-          for i in $(seq 1 30); do
-            if curl --max-time 15 -fsSL "${PUBLIC_URL}landscape.js?v=2" | grep -q 'class LandscapeMissionScene'; then
+          for i in $(seq 1 36); do
+            curl --max-time 15 -fsSL "${PUBLIC_URL}" -o /tmp/rescue-live-page.html || true
+            curl --max-time 15 -fsSL "${PUBLIC_URL}game.js?v=6" -o /tmp/rescue-live-game.js || true
+            curl --max-time 15 -fsSL "${PUBLIC_URL}landscape.js?v=5" -o /tmp/rescue-live-landscape.js || true
+            if grep -q 'game.js?v=6' /tmp/rescue-live-page.html &&
+               grep -q 'landscape.js?v=5' /tmp/rescue-live-page.html &&
+               grep -q 'function makeChoices' /tmp/rescue-live-game.js &&
+               grep -q 'closest' /tmp/rescue-live-landscape.js; then
               ready=1
               break
             fi
-            echo "Waiting for GitHub Pages propagation ($i/30)"
+            echo "Waiting for current GitHub Pages deployment ($i/36)"
             sleep 8
           done
           test "$ready" = "1"
-          curl --max-time 20 -fsSL "${PUBLIC_URL}game.js?v=2" | grep -q 'LANDSCAPE_MODE'
-          curl --max-time 20 -fsSL "${PUBLIC_URL}" | grep -q 'landscape.js?v=2'
           RESCUE_URL="$PUBLIC_URL" node thinking-garden/games/rescue/rescue-smoke.cjs
