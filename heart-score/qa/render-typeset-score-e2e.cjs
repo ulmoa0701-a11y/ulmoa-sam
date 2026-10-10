@@ -150,6 +150,24 @@ const truth=require('./doremi-ground-truth.json');
   const first=path.join(out,'typeset-normal-19.png'),second=path.join(out,'typeset-faint-19.png');
   fs.writeFileSync(first,Buffer.from(pictures.normal,'base64'));
   fs.writeFileSync(second,Buffer.from(pictures.faint,'base64'));
+  // More realistic acquisition conditions than clean rendered PNG:
+  // native-resolution compression/downscale and slight handheld-camera tilt.
+  // Generated from the same independent score, NOT reconstructed from OMR output.
+  const disturbed=await page.evaluate(async base64=>{
+    const img=new Image();img.src='data:image/png;base64,'+base64;await img.decode();
+    const smaller=document.createElement('canvas');smaller.width=1150;smaller.height=946;
+    const low=smaller.getContext('2d');low.fillStyle='#fff';low.fillRect(0,0,1150,946);low.imageSmoothingEnabled=true;low.imageSmoothingQuality='high';low.drawImage(img,0,0,1150,946);
+    const tilted=document.createElement('canvas');tilted.width=1760;tilted.height=1480;
+    const ctx=tilted.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,1760,1480);
+    ctx.translate(880,740);ctx.rotate(Math.PI*1.3/180);
+    ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+    ctx.drawImage(img,-850,-700,1700,1400);
+    return{lowres:smaller.toDataURL('image/jpeg',.68).split(',')[1],tilted:tilted.toDataURL('image/jpeg',.74).split(',')[1]};
+  },pictures.normal);
+  const lowresPath=path.join(out,'typeset-lowres-19.jpg'),tiltedPath=path.join(out,'typeset-tilted-19.jpg');
+  fs.writeFileSync(lowresPath,Buffer.from(disturbed.lowres,'base64'));
+  fs.writeFileSync(tiltedPath,Buffer.from(disturbed.tilted,'base64'));
+  console.log('DISTURBED_FIXTURE '+JSON.stringify({lowres:lowresPath,tilted:tiltedPath,source:'independent typeset score'}));
   console.log(JSON.stringify({generated:true,fullNotation:{measures:truth.measures.length,notes:truth.noteCount,rests:truth.restCount,perLine:truth.perLine},drawn:{measures:pictures.count,internalBarlines:pictures.bars},files:[first,second],size:[pictures.width,pictures.height]}));
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1;});
