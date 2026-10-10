@@ -1,0 +1,56 @@
+name: Temporary optimize glossary generated art
+on:
+  push:
+    branches:
+      - feat/glossary-generated-art-10-20261010
+    paths:
+      - 'assets/glossary/cards/_incoming/**'
+      - '.github/workflows/glossary-art-once.yml'
+permissions:
+  contents: write
+jobs:
+  webp-conversion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/glossary-generated-art-10-20261010
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Convert incoming approved cards into individually optimized WebP assets
+        run: |
+          python -m pip install Pillow
+          python - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          src=Path('assets/glossary/cards/_incoming')
+          items=sorted(src.glob('*.png'))
+          expected={
+              "metacognition","planning-organization","performance-monitoring",
+              "phonological-working-memory","visuospatial-working-memory",
+              "narrative-discourse","inferential-comprehension","reading-fluency",
+              "functional-behavior-assessment","abc-observation"
+          }
+          if not items:
+              print('No incoming cards: conversion already completed')
+              raise SystemExit(0)
+          actual={p.stem for p in items}
+          assert actual==expected, (actual,expected)
+          for inp in items:
+              im=Image.open(inp).convert('RGB')
+              assert im.size==(1122,1402), (inp,im.size)
+              dest=src.parent/(inp.stem+'.webp')
+              im.save(dest,format='WEBP',quality=83,method=6)
+              assert dest.stat().st_size<350000,(dest,dest.stat().st_size)
+              print(f"{inp.name} -> {dest.name} : {dest.stat().st_size} bytes")
+          PY
+      - name: Save individual cards and remove temporary PNGs from branch
+        run: |
+          git add -A assets/glossary/cards/
+          if ! git diff --cached --quiet; then
+            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Optimize ten glossary card images to WebP"
+            git push origin "HEAD:feat/glossary-generated-art-10-20261010"
+          fi
