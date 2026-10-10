@@ -169,6 +169,38 @@ function visualBarCandidates(gray,w,h,line){
   }
   return out;
 }
+function printedAccidentalProbe(gray,w,h,staff,x,note){
+  if(!staff)return null;
+  const base=String(note||'').replace(/^높은/,'').replace(/[#♭]/g,'');
+  const degree={도:-2,레:-1,미:0,파:1,솔:2,라:3,시:4}[base];
+  if(!Number.isFinite(degree))return null;
+  const sp=staff.spacing,dy=degree+(String(note||'').startsWith('높은')?7:0),cy=staff.lines[4]-dy*sp/2;
+  const pixel=(xx,yy)=>gray[Math.max(0,Math.min(h-1,yy))*w+Math.max(0,Math.min(w-1,xx))];
+  const staffLine=yy=>staff.lines.some(l=>Math.abs(yy-l)<=1);
+  let headX=null,headScore=-1;
+  for(let cx=Math.round(x-5.7*sp);cx<=Math.round(x-.55*sp);cx++){
+    if(cx<=3||cx>=w-4)continue;
+    let score=0;
+    for(let yy=Math.round(cy-sp*.38);yy<=Math.round(cy+sp*.38);yy++){
+      if(yy<0||yy>=h||staffLine(yy))continue;
+      for(let xx=cx-Math.round(sp*.48);xx<=cx+Math.round(sp*.48);xx++)if(pixel(xx,yy)<.70)score++;
+    }
+    if(score>headScore){headScore=score;headX=cx;}
+  }
+  if(headX===null)return null;
+  const start=Math.max(0,Math.round(headX-3.5*sp)),end=Math.min(w-1,Math.round(headX-.85*sp)),counts=[];
+  for(let xx=start;xx<=end;xx++){
+    let ink=0;
+    for(let yy=Math.round(cy-2.2*sp);yy<=Math.round(cy+2.2*sp);yy++){
+      if(yy<0||yy>=h||staffLine(yy))continue;
+      if(pixel(xx,yy)<.70)ink++;
+    }
+    counts.push({x:xx,n:ink});
+  }
+  const vertical=counts.filter(v=>v.n>=Math.max(6,sp*.85)),groups=[];
+  for(const v of vertical){const last=groups.at(-1);if(!last||v.x-last.at(-1).x>1)groups.push([v]);else last.push(v);}
+  return{headX,headScore,span:[start,end],total:counts.reduce((a,b)=>a+b.n,0),max:Math.max(0,...counts.map(v=>v.n)),groups:groups.map(g=>({from:g[0].x-headX,to:g.at(-1).x-headX,max:Math.max(...g.map(v=>v.n))}))};
+}
 function visualPitchProposals(staff,fragment){
   if(!staff)return[];
   const heads=scanConnectedHeads(staff);
@@ -457,7 +489,10 @@ async function recognizeCanvas(canvas,filename,pageIndex){
       qa:measureQa(v.state).exactRatio,perLine:v.barGeometry?.perLine||null,
       rank:candidateScore(v)
     })),
-    rawBarGeometry:{visualOpticalDebug:visualBuilt.opticalDebug,perLine:barPlan.perLine,support:barPlan.support,modalInternalBars:barPlan.modalInternalBars,threshold,passDiagnostics,openTailEvidence,scanRows:geometryLines.map((line,i)=>({box:line.input.box,cvStaff:cvStaffs[i]?{x0:cvStaffs[i].x0,x1:cvStaffs[i].x1,spacing:cvStaffs[i].spacing,lines:cvStaffs[i].lines}:null,heads:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).length:null,headXs:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).map(h=>Math.round(h.x)):null,hollowHeads:cvStaffs[i]?scanHollowHeads(cvStaffs[i]).map(h=>({x:h.x,k:h.k,ring:h.ring})).slice(0,40):null,modelNoteXs:musicalEvents(lines[i].fragment).filter(v=>v.ir.kind==='note').map(v=>Math.round(v.x)),modelShapes:modelNoteShapeDiagnostics(cvStaffs[i],lines[i].fragment),pitchProposals:visualPitchProposals(cvStaffs[i],lines[i].fragment),modelRestXs:musicalEvents(lines[i].fragment).filter(v=>v.ir.kind==='rest').map(v=>Math.round(v.x)),strict:visualBarCandidates(gray,canvas.width,canvas.height,line).filter(v=>v.side<=.12).map(v=>({x:Math.round(v.x),side:+v.side.toFixed(2)})).slice(0,20),rescue:recoverFaintBarlines(gray,canvas.width,canvas.height,line.input.box).map(v=>Math.round(v.x)).slice(0,20)}))}
+    rawBarGeometry:{visualOpticalDebug:visualBuilt.opticalDebug,accidentalProbes:lines.map((line,i)=>{
+      const staff=cvStaffs[i];if(!staff)return[];
+      return musicalEvents(line.fragment).filter(v=>v.ir.kind==='note').map(v=>({x:Math.round(v.x),note:v.e.note,conf:+(Number(v.ir.confidence)||0).toFixed(2),feature:printedAccidentalProbe(gray,canvas.width,canvas.height,staff,v.x,v.e.note)})).filter(v=>/[파시]|[#♭]/.test(v.note));
+    }),perLine:barPlan.perLine,support:barPlan.support,modalInternalBars:barPlan.modalInternalBars,threshold,passDiagnostics,openTailEvidence,scanRows:geometryLines.map((line,i)=>({box:line.input.box,cvStaff:cvStaffs[i]?{x0:cvStaffs[i].x0,x1:cvStaffs[i].x1,spacing:cvStaffs[i].spacing,lines:cvStaffs[i].lines}:null,heads:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).length:null,headXs:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).map(h=>Math.round(h.x)):null,hollowHeads:cvStaffs[i]?scanHollowHeads(cvStaffs[i]).map(h=>({x:h.x,k:h.k,ring:h.ring})).slice(0,40):null,modelNoteXs:musicalEvents(lines[i].fragment).filter(v=>v.ir.kind==='note').map(v=>Math.round(v.x)),modelShapes:modelNoteShapeDiagnostics(cvStaffs[i],lines[i].fragment),pitchProposals:visualPitchProposals(cvStaffs[i],lines[i].fragment),modelRestXs:musicalEvents(lines[i].fragment).filter(v=>v.ir.kind==='rest').map(v=>Math.round(v.x)),strict:visualBarCandidates(gray,canvas.width,canvas.height,line).filter(v=>v.side<=.12).map(v=>({x:Math.round(v.x),side:+v.side.toFixed(2)})).slice(0,20),rescue:recoverFaintBarlines(gray,canvas.width,canvas.height,line.input.box).map(v=>Math.round(v.x)).slice(0,20)}))}
   }}));
   if(suspiciousShort||!enough||!rhythmOk||!confOk||!shapeOk)return{staffDetected:true,ok:false,reason:`AI가 ${staves}개 악보 줄을 찾았지만 결과 검증을 통과하지 못했습니다. (${built.state.measures.length}마디 · 음표 ${built.noteCount}개 · 박자일치 ${Math.round(q.exactRatio*100)}% · 신뢰도 ${Math.round(built.avgConfidence*100)}%${built.segmentation==='visual-fit'?` · 마디 ${built.barGeometry?.perLine?.join('·')||'?'} · 원판독 ${Math.round((built.rawExactRatio||0)*100)}% · 평균리듬보정 ${(built.correctionAvg||0).toFixed(2)}박`:''} · ${built.segmentation==='cv-hybrid'?'오선기하+AI 쉼표':built.segmentation==='visual-fit'?'인쇄 마디선+4/4 보정':built.segmentation==='beat-dp'?'4/4 박자 재구성':'AI 마디선'} 기준)`};
   if(typeof W.ocrCanvas==='function'&&typeof W.attachOcrToOmr==='function'){try{status('음표 인식 완료 · 제목과 가사 위치 확인 중…');const data=await W.ocrCanvas(canvas,'제목·가사 OCR');const safeText={...data,lines:scanTitleCandidates(data,canvas),words:(data.words||[]).filter(w=>Number(w.confidence)>=75)};W.attachOcrToOmr(built.cvSystems?{state:built.state,systems:built.cvSystems}:lyricAdapter(lines,built),safeText,filename);}catch(err){console.warn('AI OMR lyric OCR skipped',err);}}
