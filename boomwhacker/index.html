@@ -585,15 +585,23 @@ function applyDisplayMode(){document.body.dataset.displayMode=displayMode;$('#di
 const FIRST_NOTE_LEAD_MS=3100,FALL_TRAVEL_MS=3100;
 function noteColor(n){return COLORS[n]||'#e2e8f0'}function noteText(n){return TEXT[n]||'#526071'}function beatMs(){return 60000/Math.max(MIN_TEMPO,bpm)}
 let playView='fall',scorePaintIndex=-999;
+// The score mode has no falling-note runway; play from the first written beat.
 try{const saved=localStorage.getItem('ulmoaBoomPlayView');if(saved==='score')playView='score'}catch(e){}
+function scoreStartMs(){return events[0]?.start??FIRST_NOTE_LEAD_MS}
+function scoreViewOrigin(){return playView==='score'?scoreStartMs():0}
 function choosePlayView(view){
   playView=view==='score'?'score':'fall';
   $('#playViewSelect').value=playView;
   $('#stage').classList.toggle('scoreMode',playView==='score');
   $('#scoreStage').setAttribute('aria-hidden',playView==='score'?'false':'true');
   try{localStorage.setItem('ulmoaBoomPlayView',playView)}catch(e){}
+  // Switching views mid-song should not restart it. If still in the falling-note
+  // approach time, skip that runway for the score view and resync accompaniment.
+  if(playView==='score'&&playing&&elapsed<scoreStartMs()){
+    elapsed=scoreStartMs()-.5;lastTs=0;syncLiveMr();
+  }
   scorePaintIndex=-999;
-  draw();
+  draw();updateTime();updateLyricTrack(true);
 }
 function activeScoreIndex(t){
   if(t<0)return -1;
@@ -774,7 +782,7 @@ function draw(){
   stage.appendChild(note);
  }
 }
-function frame(ts){if(!playing)return;if(!lastTs)lastTs=ts;let prev=elapsed;elapsed+=ts-lastTs;lastTs=ts;if(elapsed>=totalMs){if(repeat){elapsed=0;prev=0;syncLiveMr()}else{elapsed=totalMs;playing=false;hasStartedSong=false;stopMr();$('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작'}}for(const e of events)if(e.active&&e.start>prev&&e.start<=elapsed){let b=[...document.querySelectorAll('.tube')].find(x=>x.dataset.note===e.note);tone(e.note,b)}draw();updateTime();updateLyricTrack();if(playing)raf=requestAnimationFrame(frame)}
+function frame(ts){if(!playing)return;if(!lastTs)lastTs=ts;let prev=elapsed;elapsed+=ts-lastTs;lastTs=ts;if(elapsed>=totalMs){if(repeat){elapsed=playView==='score'?scoreStartMs()-.5:0;prev=elapsed;syncLiveMr()}else{elapsed=totalMs;playing=false;hasStartedSong=false;stopMr();$('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작'}}for(const e of events)if(e.active&&e.start>prev&&e.start<=elapsed){let b=[...document.querySelectorAll('.tube')].find(x=>x.dataset.note===e.note);tone(e.note,b)}draw();updateTime();updateLyricTrack();if(playing)raf=requestAnimationFrame(frame)}
 function stopIntro(){
   introActive=false;
   cancelAnimationFrame(introRaf);introRaf=0;
@@ -816,6 +824,9 @@ function introVisual(index){
   $('#introDots').innerHTML=Array.from({length},(_,i)=>'<i class="'+(i===dotIndex?'active':i<dotIndex?'done':'')+'"></i>').join('');
 }
 function beginPlayback(){
+  // Exactly at the end of "작", the score's first tile may play on the next
+  // animation frame (within ~16ms). The fall view keeps its 3.1s descent.
+  if(!hasStartedSong&&playView==='score'&&elapsed<scoreStartMs())elapsed=scoreStartMs()-.5;
   hasStartedSong=true;playing=true;lastTs=0;
   syncLiveMr();
   $('#playBtn').textContent='Ⅱ';$('#startBtn').textContent='Ⅱ 잠시 멈춤';
@@ -834,7 +845,7 @@ function introFrame(now){
     stopIntro();
     elapsed=0;
     beginPlayback();
-    draw(); // At t=0 the first note is just above the top edge and already moving.
+    draw(); // Fall mode: offscreen entry; score mode: first written tile immediately.
   }else introRaf=requestAnimationFrame(introFrame);
 }
 function startIntro(){
@@ -875,7 +886,13 @@ function reset(){
   elapsed=0;lastTs=0;draw();updateTime();updateLyricTrack(true);
   $('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작';
 }
-function updateTime(){let f=m=>`${Math.floor(m/60000)}:${String(Math.floor(m/1000)%60).padStart(2,'0')}`;$('#timeLabel').textContent=`${f(elapsed)} / ${f(totalMs)}`;$('#progressFill').style.width=(totalMs?Math.min(100,elapsed/totalMs*100):0)+'%'}
+function updateTime(){
+ const f=m=>`${Math.floor(Math.max(0,m)/60000)}:${String(Math.floor(Math.max(0,m)/1000)%60).padStart(2,'0')}`;
+ const origin=scoreViewOrigin(),duration=Math.max(1,totalMs-origin);
+ const passed=Math.max(0,elapsed-origin);
+ $('#timeLabel').textContent=`${f(passed)} / ${f(duration)}`;
+ $('#progressFill').style.width=Math.max(0,Math.min(100,passed/duration*100))+'%';
+}
 function on(btn,v){btn.classList.toggle('on',v)}
 function syncSongUI(){bpm=selectedTempo(currentSong);$('#songTitle').textContent=$('#stageTitle').textContent=currentSong.title||'제목 없는 곡';$('#songMeta').textContent=`${currentSong.timeN||4}/${currentSong.timeD||4} · ${bpm} BPM`;$('#tempo').value=bpm;$('#bpmLabel').textContent=bpm+' BPM';buildSampleSelect();renderLanes();build();reset();saveLast()}
 function chooseSample(key){const s=findSample(key);if(!s)return;loadedFromTransfer=false;currentSampleKey=s.key;currentSong=clone(s);syncSongUI()}
@@ -949,7 +966,7 @@ async function exportVideo(){
  }catch(err){console.error(err);videoStatus('영상 저장에 실패했어요. 브라우저를 최신 버전으로 업데이트한 뒤 다시 시도해 주세요.','warn')}
  finally{if(ac)try{await ac.close()}catch(e){}canvasStream.getTracks().forEach(t=>t.stop());videoExporting=false;btn.disabled=false;btn.textContent='🎥 붐웨커 영상 저장'}
 }
-window.__boomVideoQA={print:()=>({pngCanvas:scoreSheetCanvas().width+'x'+scoreSheetCanvas().height,pdfPageCount:Math.max(1,Math.ceil(events.length/PRINT_PAGE_NOTES)),pdfBytes:scorePdfBytes([scoreSheetCanvas(0,Math.min(events.length,PRINT_PAGE_NOTES),true)]).size}),view:()=>({mode:playView,active:activeScoreIndex(elapsed),scoreTiles:$('#scoreStageGrid').children.length,sideTiles:$('#scoreRows').children.length,elapsed}),supported:()=>videoSupported(),mime:()=>videoMime(),brand:()=>({brand:VIDEO_BRAND,handle:VIDEO_HANDLE,copy:VIDEO_COPY}),colors:()=>({...COLORS}),melody:()=>({mode:melodyMode,label:MELODY_LABELS[melodyMode],options:{...MELODY_LABELS},volume:melodyVolume}),fall:()=>({leadMs:FIRST_NOTE_LEAD_MS,travelMs:FALL_TRAVEL_MS,firstNoteMs:firstNoteMs(),spawnDelayMs:firstNoteMs()-FALL_TRAVEL_MS,elapsed,playing}),tempo:()=>({bpm,sourceBpm:currentSong.bpm,min:MIN_TEMPO,max:MAX_TEMPO,comfortable:comfortableTempo(currentSong),custom:tempoPrefs[tempoKey(currentSong)]??null,beatMs:beatMs()}),intro:()=>({mode:introMode,active:introActive,started:hasStartedSong,durationMs:introDurationMs,beats:introBeats,meter:introMeter,previewBeats:introPreviewBeats,countBeats:introCountBeats,lastBeat:introLastBeat,progressMs:introActive?Math.max(0,performance.now()-introStartPerf):0}),mix:()=>({mode:mixMode,label:MIX_LABELS[mixMode],options:{...MIX_LABELS},mrReady:true,mrKind:mrBuffer?'file':'auto',mrLoaded:!!mrBuffer,mrName,mrVolume,melodyVolume}),display:()=>({mode:displayMode,label:DISPLAY_LABELS[displayMode],options:{...DISPLAY_LABELS},labels:ORDER.map(displayLabel),names:[...childLabels],custom:[...customLabels],instruments:[...instrumentIds],instrumentLibrary:instrumentLibrary.map(x=>({...x}))}),lyrics:()=>lyricWindowAt(Math.min(2600,totalMs/2)),preview:()=>{const c=videoCanvas(),x=c.getContext('2d');videoScene(x,Math.min(1500,totalMs/2));return {w:c.width,h:c.height,data:c.toDataURL('image/png').slice(0,40)}}};
+window.__boomVideoQA={scoreTiming:()=>({view:playView,firstScoreBeatMs:scoreStartMs(),elapsed,playing,introActive,firstEvent:events[0]?{note:events[0].note,start:events[0].start,duration:events[0].dur}:null,secondEvent:events[1]?{note:events[1].note,start:events[1].start,duration:events[1].dur}:null,visibleTime:$('#timeLabel').textContent}),print:()=>({pngCanvas:scoreSheetCanvas().width+'x'+scoreSheetCanvas().height,pdfPageCount:Math.max(1,Math.ceil(events.length/PRINT_PAGE_NOTES)),pdfBytes:scorePdfBytes([scoreSheetCanvas(0,Math.min(events.length,PRINT_PAGE_NOTES),true)]).size}),view:()=>({mode:playView,active:activeScoreIndex(elapsed),scoreTiles:$('#scoreStageGrid').children.length,sideTiles:$('#scoreRows').children.length,elapsed}),supported:()=>videoSupported(),mime:()=>videoMime(),brand:()=>({brand:VIDEO_BRAND,handle:VIDEO_HANDLE,copy:VIDEO_COPY}),colors:()=>({...COLORS}),melody:()=>({mode:melodyMode,label:MELODY_LABELS[melodyMode],options:{...MELODY_LABELS},volume:melodyVolume}),fall:()=>({leadMs:FIRST_NOTE_LEAD_MS,travelMs:FALL_TRAVEL_MS,firstNoteMs:firstNoteMs(),spawnDelayMs:firstNoteMs()-FALL_TRAVEL_MS,elapsed,playing}),tempo:()=>({bpm,sourceBpm:currentSong.bpm,min:MIN_TEMPO,max:MAX_TEMPO,comfortable:comfortableTempo(currentSong),custom:tempoPrefs[tempoKey(currentSong)]??null,beatMs:beatMs()}),intro:()=>({mode:introMode,active:introActive,started:hasStartedSong,durationMs:introDurationMs,beats:introBeats,meter:introMeter,previewBeats:introPreviewBeats,countBeats:introCountBeats,lastBeat:introLastBeat,progressMs:introActive?Math.max(0,performance.now()-introStartPerf):0}),mix:()=>({mode:mixMode,label:MIX_LABELS[mixMode],options:{...MIX_LABELS},mrReady:true,mrKind:mrBuffer?'file':'auto',mrLoaded:!!mrBuffer,mrName,mrVolume,melodyVolume}),display:()=>({mode:displayMode,label:DISPLAY_LABELS[displayMode],options:{...DISPLAY_LABELS},labels:ORDER.map(displayLabel),names:[...childLabels],custom:[...customLabels],instruments:[...instrumentIds],instrumentLibrary:instrumentLibrary.map(x=>({...x}))}),lyrics:()=>lyricWindowAt(Math.min(2600,totalMs/2)),preview:()=>{const c=videoCanvas(),x=c.getContext('2d');videoScene(x,Math.min(1500,totalMs/2));return {w:c.width,h:c.height,data:c.toDataURL('image/png').slice(0,40)}}};
 
 function init(){document.body.dataset.displayMode=displayMode;syncSongUI();choosePlayView(playView);$('#melodySelect').value=melodyMode;$('#introMode').value=introMode;$('#displayModeSelect').value=displayMode;$('#displayEditBtn').classList.toggle('show',displayMode==='name'||displayMode==='custom'||displayMode==='instrument');$('#displayEditBtn').textContent=displayMode==='name'?'✎ 이름':displayMode==='instrument'?'✎ 악기':'✎ 설정'}
 $('#playViewSelect').onchange=e=>choosePlayView(e.target.value);
@@ -977,7 +994,7 @@ $('#fullBtn').onclick=()=>setClassFullscreen(!document.body.classList.contains('
 $('#stageFsBtn').onclick=()=>setClassFullscreen(true);
 $('#fsExitBtn').onclick=()=>setClassFullscreen(false);
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&document.body.classList.contains('fullscreen')){document.body.classList.remove('fullscreen');on($('#fullBtn'),false);$('#fullBtn').textContent='수업 전체화면';setTimeout(draw,80)}});
-$('#startBtn').onclick=$('#playBtn').onclick=toggle;$('#restartBtn').onclick=$('#resetBtn').onclick=reset;$('#progress').onclick=e=>{let r=e.currentTarget.getBoundingClientRect();elapsed=Math.max(0,Math.min(totalMs,(e.clientX-r.left)/r.width*totalMs));lastTs=0;draw();updateTime();updateLyricTrack(true);if(playing)syncLiveMr()};window.addEventListener('resize',()=>{draw();updateLyricTrack(true)});init();
+$('#startBtn').onclick=$('#playBtn').onclick=toggle;$('#restartBtn').onclick=$('#resetBtn').onclick=reset;$('#progress').onclick=e=>{let r=e.currentTarget.getBoundingClientRect();const origin=scoreViewOrigin();elapsed=Math.max(origin,Math.min(totalMs,origin+(e.clientX-r.left)/r.width*(totalMs-origin)));lastTs=0;draw();updateTime();updateLyricTrack(true);if(playing)syncLiveMr()};window.addEventListener('resize',()=>{draw();updateLyricTrack(true)});init();
 // Keep the mobile play surface visible; show optional controls and sheet music in accessible sheets.
 function closeMobileSheets(){
   $('#mobileSettingsSheet').classList.remove('mobileOpen');
