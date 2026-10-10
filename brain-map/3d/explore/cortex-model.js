@@ -26,25 +26,37 @@ function regionFor(x, y, z) {
   return 'parietal';
 }
 
+// Hand-sculpted rounded gyri sit INSIDE the single continuous hemisphere surface.
+// No separate sphere, eye-like knob, floating tube, or deep anatomical sulcus.
+const SOFT_LOBES=Object.freeze([
+  // front: gentle, wide mounds that blend into each other
+  [.43,.76,.36,.32,.085],[-.10,.74,.34,.30,.085],[-.37,.58,.29,.28,.065],
+  // top and middle: wide cloud-like fold silhouettes
+  [.67,.28,.30,.34,.075],[.28,.21,.32,.32,.074],
+  [.58,-.29,.28,.29,.078],[.12,-.40,.32,.30,.070],
+  // lower middle and rear: just enough relief to read as a brain
+  [-.35,.25,.32,.35,.070],[-.43,-.18,.30,.35,.065],
+  [.25,-.75,.35,.29,.058],[-.13,-.75,.33,.30,.055]
+]);
 function cortexPoint(x,y,z,side){
-  // One continuous, softly scalloped hemisphere, rather than spheres glued onto an oval.
-  // The deliberately shallow forms resemble a familiar children's foam brain model.
-  const longitude=Math.atan2(z,x);
-  const latitude=Math.asin(Math.max(-1,Math.min(1,y)));
-  const envelope=Math.pow(Math.max(0,Math.cos(latitude)),.72);
-  const swept=longitude*5.1+.55*Math.sin(latitude*2.6)+.3*Math.sin(longitude*2.2);
-  const cushion=.5+.5*Math.cos(swept);
-  const secondary=.5+.5*Math.cos(latitude*4.1+longitude*.9);
-  const broad=.68*cushion+.32*secondary;
-  const creasePhase=longitude*3.3 + .65*Math.sin(latitude*3.2);
-  const crease=Math.pow(Math.max(0,1-Math.abs(Math.sin(creasePhase))/.22),2)*envelope;
-  // Shallow sculpted folds—no deep anatomical furrows and no attached bubble geometry.
-  const radius=1 + .052*(broad-.3)*envelope - .016*crease;
-  const xx=side*(.545+x*.522*radius*(1-.03*Math.max(0,-z)));
-  const zz=z*1.27*radius;
-  const temporalBulge=Math.exp(-Math.pow((z-.10)/.74,2))*Math.max(0,-y);
-  const yy=.10+y*.75*radius-.057*temporalBulge;
-  return [xx,yy,zz,1-.045*crease];
+  const lon=Math.atan2(z,x),lat=Math.asin(Math.max(-1,Math.min(1,y)));
+  const envelope=Math.pow(Math.max(0,Math.cos(lat)),.53);
+  let relief=0;
+  for(const [cy,cz,wy,wz,height] of SOFT_LOBES){
+    const py=(y-cy)/wy,pz=(z-cz)/wz;
+    relief+=height*Math.exp(-1.65*(py*py+pz*pz));
+  }
+  // Four broad scallops define the silhouette; a subtle embossed curl is painted, not cut.
+  const outline=.024*Math.cos(lon*5.0+.48*Math.sin(lat*2.5))*envelope;
+  const radius=1 + Math.min(.14,relief)*envelope + outline;
+  const xx=side*(.545+x*.527*radius*(1-.035*Math.max(0,-z)));
+  const zz=z*1.25*radius;
+  const lower=Math.exp(-Math.pow((z-.06)/.70,2))*Math.max(0,-y);
+  const yy=.09+y*.75*radius-.055*lower;
+  // Very faint curving cartoon relief; never sculpt a dark groove into the model.
+  const curl=.5+.5*Math.sin(lon*4.1+.65*Math.sin(lat*2.9));
+  const shade=.988+.012*curl;
+  return [xx,yy,zz,shade];
 }
 function smoothstep(a,b,x){const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)}
 function corticalRGB(x,y,z,shade){
