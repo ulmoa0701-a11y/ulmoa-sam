@@ -83,3 +83,10 @@
  .hb-shortcut-arrow{display:none}
 }
 @media(max-width:380px){.hb-shortcut-card{flex-direction:column;gap:7px}.hb-nav .hb-mobile-toggle{font-size:11px;padding:9px 7px}}
+
+/* Existing subpage mobile CSS hides all non-accent links; restore the new menu links. */
+@media(max-width:1199px){
+ .sub-nav.hb-nav .hb-nav-links > .hb-nav-link{display:flex!important}
+ .sub-nav.hb-nav .hb-dropdown a{display:grid!important}
+ .sub-nav.hb-nav .hb-nav-links .hb-menu{display:block}
+}
