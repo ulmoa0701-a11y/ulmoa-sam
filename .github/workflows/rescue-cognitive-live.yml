@@ -1,0 +1,55 @@
+name: Verify live rescue cognitive game v7
+on:
+  pull_request:
+    paths: ['.github/workflows/rescue-cognitive-live.yml']
+permissions:
+  contents: read
+jobs:
+  public-assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Wait for published v7 and calibrated game logic
+        run: |
+          BASE='https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/'
+          ready=0
+          for n in $(seq 1 40); do
+            curl -fsSL --max-time 12 "$BASE" -o /tmp/rescue-live.html || true
+            curl -fsSL --max-time 12 "${BASE}game.js?v=7" -o /tmp/rescue-v7.js || true
+            curl -fsSL --max-time 12 "${BASE}landscape.js?v=6" -o /tmp/rescue-wide-v6.js || true
+            if grep -q 'game.js?v=7' /tmp/rescue-live.html &&
+               grep -q 'landscape.js?v=6' /tmp/rescue-live.html &&
+               grep -q 'BODY_PIXELS_BIG=165' /tmp/rescue-v7.js &&
+               grep -q "focus:'size'" /tmp/rescue-v7.js &&
+               grep -q 'rescue platforms' /tmp/rescue-v7.js &&
+               grep -q 'closest' /tmp/rescue-wide-v6.js; then
+               ready=1; break
+            fi
+            echo "Waiting for public deployment: $n/40"
+            sleep 8
+          done
+          test "$ready" = "1"
+          echo "LIVE RESCUE V7 DEPLOYED"
+  public-play:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: public-assets
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+      - name: Validate all five missions on all four real-site form factors
+        env:
+          RESCUE_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/
+        run: node thinking-garden/games/rescue/rescue-smoke.cjs
+      - name: Upload live QA screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rescue-cognitive-v7-live
+          path: rescue-qa-screenshots/
+          if-no-files-found: ignore
