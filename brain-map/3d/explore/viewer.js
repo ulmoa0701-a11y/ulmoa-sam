@@ -101,7 +101,8 @@ function init() {
  scene=new THREE.Scene();
  camera=new THREE.PerspectiveCamera(38,1,.1,100);
  brainGroup=new THREE.Group();scene.add(brainGroup);
- scene.add(new THREE.HemisphereLight(0xffffff,0xedf4ed,1.25));
+ scene.add(new THREE.HemisphereLight(0xffffff,0xedf4ed,1.35));
+ scene.add(new THREE.AmbientLight(0xffffff,.32));
  const light=new THREE.DirectionalLight(0xffffff,.9);light.position.set(-3,5,7);scene.add(light);
  const back=new THREE.DirectionalLight(0xf3f8ff,.38);back.position.set(4,2,-5);scene.add(back);
  const under=new THREE.DirectionalLight(0xfff9f2,.20);under.position.set(0,-3,3);scene.add(under);
