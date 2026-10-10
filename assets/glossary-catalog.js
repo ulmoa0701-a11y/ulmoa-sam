@@ -144,6 +144,13 @@ function boot(){
       if(coreText){
         coreText.classList.add("gcat-definition-explanation");
         definition.appendChild(coreText);
+      }else{
+        // 두 개념을 비교하는 용어는 문장 대신 원본 비교 설명을 핵심 뜻에 배치.
+        const comparison=core.querySelector(":scope > .visual-pair");
+        if(comparison){
+          comparison.classList.add("gcat-definition-pair");
+          definition.appendChild(comparison);
+        }
       }
     }
     reading.appendChild(definition);
