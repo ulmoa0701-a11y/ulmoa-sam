@@ -1,0 +1,27 @@
+name: Heart Score Color Consistency QA
+on:
+  pull_request:
+    paths:
+      - 'heart-score/index.html'
+      - 'boomwhacker/index.html'
+      - 'heart-score/qa/palette-same-as-boomwhacker.cjs'
+      - '.github/workflows/heart-score-color-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'heart-score/index.html'
+      - 'boomwhacker/index.html'
+      - 'heart-score/qa/palette-same-as-boomwhacker.cjs'
+      - '.github/workflows/heart-score-color-qa.yml'
+  workflow_dispatch:
+jobs:
+  color-consistency:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check the Heart Score and Boomwhacker palette
+        run: node heart-score/qa/palette-same-as-boomwhacker.cjs
