@@ -78,7 +78,7 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
    mode:state.keyOrder,cls:document.querySelector('#keys').className,
    notes:[...document.querySelectorAll('#keys .key')].map(x=>({note:x.dataset.note,y:x.getBoundingClientRect().y,height:x.getBoundingClientRect().height}))
  }));
- check(xylophone.cls.includes('xylophoneKeys')&&xylophone.notes.every((n,i)=>n.note===NOTES[i])&&
+ check(xylophone.cls.includes('xylophoneKeys')&&xylophone.notes.map(n=>n.note).join(',')==='도,레,미,파,솔,라,시,높은도'&&
    xylophone.notes.every(n=>n.height>=40),
    name+': xylophone keys should follow do-re-mi in one row '+JSON.stringify(xylophone));
  await page.screenshot({path:out+'/'+name+'-xylophone.png',fullPage:false});
