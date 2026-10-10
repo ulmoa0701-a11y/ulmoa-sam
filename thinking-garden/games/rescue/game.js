@@ -190,7 +190,9 @@ class MissionScene extends Phaser.Scene{
       [[120,405],[360,405],[600,405],[120,630],[360,630],[600,630],[120,855],[360,855],[600,855]];
   if(this.m.focus!=='size')Phaser.Utils.Array.Shuffle(spots);
   items.forEach((it,i)=>{
-   const [x,y]=spots[i],a=animal(this,it.species,COLORS[it.color],it.size);
+   const [x,baseY]=spots[i],a=animal(this,it.species,COLORS[it.color],it.size);
+   // Compare big/small animals with their feet on the same ground line.
+   const y=this.m.focus==='size'?baseY-(it.size==='큰'?BODY_PIXELS_BIG:BODY_PIXELS_SMALL)/2:baseY;
    a.setPosition(x,y).setDepth(20+i);
    a.setDataEnabled();a.data.set({species:it.species,color:it.color,size:it.size,rescuing:false});
    a.setInteractive(new Phaser.Geom.Rectangle(-111,-111,222,222),Phaser.Geom.Rectangle.Contains);
