@@ -48,7 +48,7 @@ function cortexPoint(x,y,z,side){
     relief+=height*Math.exp(-1.9*(dy*dy+dz*dz));
   }
   const edge=Math.pow(Math.max(0,Math.cos(lat)),.65);
-  const radius=1+relief*edge+.014*Math.cos(5*lon+.4*Math.sin(2.6*lat))*edge;
+  const radius=1+.58*relief*edge+.009*Math.cos(5*lon+.4*Math.sin(2.6*lat))*edge;
   const xx=side*(.545+x*.527*radius*(1-.035*Math.max(0,-z)));
   const zz=z*1.25*radius;
   const lower=Math.exp(-Math.pow((z-.06)/.70,2))*Math.max(0,-y);
@@ -58,7 +58,43 @@ function cortexPoint(x,y,z,side){
   return [xx,yy,zz,shade];
 }
 function smoothstep(a,b,x){const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)}
-function corticalRGB(x,y,z,shade){
+// Gentle cartoon brain curls follow the mesh as vertex shading.
+// A few smooth mint/lavender swirls read as "brain" without biological grooves.
+const CURLS=[
+ [[.57,.74],[.37,.51],[.54,.32]],
+ [[.10,.78],[-.06,.55],[.17,.32]],
+ [[-.34,.65],[-.18,.42],[-.36,.20]],
+ [[.64,.17],[.39,.12],[.55,-.12]],
+ [[.15,.08],[.34,-.16],[.13,-.32]],
+ [[-.38,.08],[-.19,-.20],[-.42,-.46]],
+ [[.58,-.42],[.36,-.60],[.15,-.44]],
+ [[.16,-.73],[-.05,-.54],[-.22,-.73]]
+];
+const CURL_SEGMENTS=CURLS.map(([a,b,c])=>{
+ const points=[];
+ for(let i=0;i<=12;i++){
+  const t=i/12,u=1-t;
+  points.push([u*u*a[0]+2*u*t*b[0]+t*t*c[0],u*u*a[1]+2*u*t*b[1]+t*t*c[1]]);
+ }
+ return points;
+});
+function curlInk(y,z,x){
+ // Only faintly on the outward sides; end-on views stay uncluttered.
+ const fade=smoothstep(.32,.59,Math.abs(x));
+ if(fade<=0)return 0;
+ let min=9;
+ for(const points of CURL_SEGMENTS){
+  for(let i=0;i<points.length-1;i++){
+   const a=points[i],b=points[i+1],dy=b[0]-a[0],dz=b[1]-a[1];
+   const u=Math.max(0,Math.min(1,((y-a[0])*dy+(z-a[1])*dz)/(dy*dy+dz*dz+1e-10)));
+   const py=a[0]+dy*u,pz=a[1]+dz*u;
+   const dd=(y-py)*(y-py)+(z-pz)*(z-pz);
+   if(dd<min)min=dd;
+  }
+ }
+ return fade*Math.exp(-min/.0016);
+}
+function corticalRGB(x,y,z,shade,sourceX,sourceY,sourceZ){
   // 같은 그림체의 또렷한 파스텔 컬러 블록. 경계는 짧은 폭으로만 부드럽게 연결합니다.
   const occ=smoothstep(.72,.83,-z);
   const temporal=(1-occ)*(1-smoothstep(-.19,-.09,y))
@@ -72,7 +108,8 @@ function corticalRGB(x,y,z,shade){
     const color=RGB[key];
     red+=w*color.r;green+=w*color.g;blue+=w*color.b;
   }
-  return [red*shade,green*shade,blue*shade];
+  const softOutline=1-.135*curlInk(sourceY,sourceZ,sourceX);
+  return [red*shade*softOutline,green*shade*softOutline,blue*shade*softOutline];
 }
 
 function oneHemisphere(side) {
@@ -82,7 +119,7 @@ function oneHemisphere(side) {
   for(let i=0;i<pos.count;i++){
     const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i);
     const v=cortexPoint(x,y,z,side);
-    pos.setXYZ(i,v[0],v[1],v[2]);shade.push(v[3]);blended.push(corticalRGB(v[0],v[1],v[2],v[3]));
+    pos.setXYZ(i,v[0],v[1],v[2]);shade.push(v[3]);blended.push(corticalRGB(v[0],v[1],v[2],v[3],x,y,z));
   }
   pos.needsUpdate=true;
   sphere.computeVertexNormals();
