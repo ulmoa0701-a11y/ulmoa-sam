@@ -534,9 +534,9 @@ function renderDisplayEditor(){
 function openDisplayEditor(){if(displayMode!=='name'&&displayMode!=='custom'&&displayMode!=='instrument')return;renderDisplayEditor();$('#displayModal').classList.add('open');setTimeout(()=>$('#displayInputs input,#displayInputs select')?.focus(),30)}
 function closeDisplayEditor(){$('#displayModal').classList.remove('open')}
 function applyDisplayMode(){document.body.dataset.displayMode=displayMode;$('#displayModeSelect').value=displayMode;const editable=displayMode==='name'||displayMode==='custom'||displayMode==='instrument';$('#displayEditBtn').classList.toggle('show',editable);$('#displayEditBtn').textContent=displayMode==='name'?'이름 설정':displayMode==='instrument'?'악기 설정':'표시 설정';renderLanes();renderScore();draw();saveDisplaySettings()}
-// Keep the first note offscreen for two seconds after the starting cue, then
-// let it enter naturally from above and travel at a classroom-friendly pace.
-const FIRST_NOTE_LEAD_MS=5600,FALL_TRAVEL_MS=3600;
+// Give a brief 1.4-second pause after the cue before the first note emerges
+// offscreen, then let it fall gently for 3.1 seconds before it sounds.
+const FIRST_NOTE_LEAD_MS=4500,FALL_TRAVEL_MS=3100;
 function noteColor(n){return COLORS[n]||'#e2e8f0'}function noteText(n){return TEXT[n]||'#526071'}function beatMs(){return 60000/Math.max(MIN_TEMPO,bpm)}
 function outOfBaseCount(){return events.filter(e=>e.note!=='쉼'&&!ALLOWED[8].has(e.note)).length}
 function build(){events=[];let t=FIRST_NOTE_LEAD_MS,u=beatMs(),eventIndex=0;for(const [mi,m] of (currentSong.measures||[]).entries())for(const e of m){let d=Math.max(.125,Number(e.dur)||1),n=canonical(e.note);events.push({note:n,lyric:e.lyric||'',start:t,dur:d*u,active:n!=='쉼'&&ALLOWED[level].has(n),supported:n==='쉼'||ALLOWED[8].has(n),measure:mi,index:eventIndex++});t+=d*u}totalMs=t+u*1.5;lastLyricKey='';renderScore();updateTime();updateLyricTrack(true);updateRangeInfo()}
@@ -659,8 +659,8 @@ function startIntro(){
   if(introMode==='count'){
     introBeats=3;introCountBeats=3;introPreviewBeats=0;
   }else{
-    // At least 5.2 seconds of preparation, in complete bars at the song's actual tempo.
-    introBeats=Math.ceil(Math.max(8,Math.ceil(5200/step))/introMeter)*introMeter;
+    // A shorter musical lead-in of at least 4.4 seconds, still on complete bars.
+    introBeats=Math.ceil(Math.max(6,Math.ceil(4400/step))/introMeter)*introMeter;
     introCountBeats=introMeter===2?4:introMeter;
     introPreviewBeats=introBeats-introCountBeats;
   }
