@@ -22,6 +22,20 @@ async function checkPage(page,name){
  await page.locator('#brainCanvas').waitFor({state:'visible'});
  await page.waitForTimeout(500);
  const starting=await page.locator('#brainCanvas').screenshot({path:`${OUT}/${name}-initial.png`});
+ await page.screenshot({path:`${OUT}/${name}-full-page.png`,fullPage:true});
+ if(name==='mobile'){
+   const controlLayout=await page.locator('.view-buttons button').evaluateAll(buttons=>
+     buttons.map(b=>{const r=b.getBoundingClientRect();return {
+       name:b.textContent.trim(),left:r.left,right:r.right,width:r.width,
+       inViewport:r.left>=0 && r.right<=document.documentElement.clientWidth
+     }}));
+   assert.equal(controlLayout.length,6,'There must be six visible view/rotate buttons on mobile');
+   assert.ok(controlLayout.every(b=>b.inViewport && b.width>65),
+     'Mobile rotate buttons are clipped or too narrow: '+JSON.stringify(controlLayout));
+   const buttonsGrid=await page.locator('.view-buttons').evaluate(e=>getComputedStyle(e).gridTemplateColumns);
+   assert.equal(buttonsGrid.split(' ').length,3,'Mobile control layout must be a 3-column, 2-row grid');
+ }
+
  assert.ok(starting.length>3000,'3D canvas screenshot is blank/too small');
  if(name==='mobile'){
    const edgeSamples=await page.evaluate(async b64=>{
