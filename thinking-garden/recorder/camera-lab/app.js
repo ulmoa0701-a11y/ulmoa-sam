@@ -22,7 +22,7 @@ function markStep(){
  $('fingerProgress').style.width=Math.round(S.progress*100)+'%';
 }
 function setPhase(phase){
- S.phase=phase;$('idleActions').hidden=phase!=='idle';
+ S.phase=phase;if(['idle','calibrate','play'].includes(phase))$('winOverlay').hidden=true;$('idleActions').hidden=phase!=='idle';
  $('setupPanel').hidden=phase!=='calibrate';
  $('playPanel').hidden=!(phase==='play'||phase==='won');
  $('finishPanel').hidden=phase!=='completed';
