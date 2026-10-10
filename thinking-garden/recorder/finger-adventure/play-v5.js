@@ -8,7 +8,7 @@ const fingers=[{name:'검지',icon:'☝️',tip:8,flower:'🌼',say:'검지를 �
 {name:'중지',icon:'✌️',tip:12,flower:'🌷',say:'이번에는 중지야. 바로 아래 구멍으로 움직여 보자.'},
 {name:'약지',icon:'🖐️',tip:16,flower:'🌸',say:'마지막은 약지야. 아래 구멍으로 움직여 보자.'}];
 const VIRTUAL=[{x:.53,y:.38},{x:.53,y:.51},{x:.53,y:.64}];
-const S={phase:'intro',stage:0,step:0,mode:'none',facing:'user',cam:null,model:null,hand:null,points:[],lastFrame:-1,requestId:0,raf:0,dwell:0,progress:0,demoMoving:false,demoTip:{x:.15,y:.45},mute:false,successes:[0,0,0],inputKind:'none',modelLoading:false,resumeReal:false,resumeSong:false,songKind:'touch',songIndex:0,songActive:false,songArmed:false,songHold:0,songLast:0,songDelayUntil:0,songPlayCount:0,songMicToken:0,songMicHold:0,songMicFrames:0,songMicRearm:true,songMicLastMismatch:0,demoPressed:false,winTimer:null,nearLast:0,hintState:'far',armed:false,ready:false,lastCameraScored:-1,lastLandmarksAt:0,wrongFinger:false,mic:null,audio:null,analyser:null,fft:null,micFrames:0,micDwell:0,lastWarning:'',camModelReady:false};
+const S={phase:'intro',stage:0,step:0,mode:'none',facing:'user',cam:null,model:null,hand:null,points:[],lastFrame:-1,requestId:0,raf:0,dwell:0,progress:0,demoMoving:false,demoTip:{x:.15,y:.45},mute:false,successes:[0,0,0],inputKind:'none',modelLoading:false,resumeReal:false,resumeSong:false,songKind:'touch',songIndex:0,songActive:false,songArmed:false,songHold:0,songLast:0,songDelayUntil:0,songPlayCount:0,songProofs:[],songMicToken:0,songMicHold:0,songMicFrames:0,songMicRearm:true,songMicLastMismatch:0,demoPressed:false,winTimer:null,nearLast:0,hintState:'far',armed:false,ready:false,lastCameraScored:-1,lastLandmarksAt:0,wrongFinger:false,mic:null,audio:null,analyser:null,fft:null,micFrames:0,micDwell:0,lastWarning:'',camModelReady:false};
 const vid=$('vid'),cv=$('view'),g=cv.getContext('2d',{alpha:false});cv.width=W;cv.height=H;
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),mix=(a,b,t)=>a+(b-a)*t;
 const setText=(id,txt)=>{$(id).textContent=txt};
@@ -332,7 +332,7 @@ function songPrepare(kind){
  // Enter with camera already running for kind=camera; for others close media.
  if(kind!=='camera')closeAll();
  S.songKind=kind;S.stage=3;S.phase='song';S.mode=kind==='touch'?'demo':kind==='camera'?'camera':'none';
- S.songIndex=0;S.songActive=false;S.songArmed=false;S.songHold=0;S.songLast=0;S.songDelayUntil=0;S.songPlayCount=0;
+ S.songIndex=0;S.songActive=false;S.songProofs=[];S.songArmed=false;S.songHold=0;S.songLast=0;S.songDelayUntil=0;S.songPlayCount=0;
  S.songMicHold=0;S.songMicFrames=0;S.songMicRearm=true;S.songMicLastMismatch=0;
  S.demoTip=null;S.demoPressed=false;S.progress=0;S.step=0;
  $('songChoices').hidden=true;$('songWin').hidden=true;$('songPlay').hidden=false;
@@ -402,7 +402,7 @@ function songAccept(via,now=performance.now()){
  if(S.phase!=='song'||!S.songActive||S.songIndex>=melody.length)return;
  const note=melody[S.songIndex];
  if(via==='finger')songSampleSound(note.pitch);
- S.songPlayCount++;S.songIndex++;S.songHold=0;S.songArmed=false;S.songDelayUntil=now+360;
+ S.songProofs.push(via);S.songPlayCount++;S.songIndex++;S.songHold=0;S.songArmed=false;S.songDelayUntil=now+360;
  S.progress=0;S.songMicHold=0;S.songMicFrames=0;S.songMicRearm=false;
  $('songGauge').style.width='0%';
  if(S.songIndex>=melody.length){songWin(via);return}
@@ -414,7 +414,11 @@ function songWin(via){
  S.songActive=false;if(S.songKind==='mic')stopMic();
  $('songPlay').hidden=true;$('songWin').hidden=false;
  setText('songWinTitle','작은 연주 완성!');
- setText('songWinSub',S.songKind==='mic'?'🎤 실제 연주 음높이 5개를 순서대로 확인했어. 손가락 운지는 별도 확인이 필요해.':S.songKind==='camera'?'📷 카메라가 손가락 움직임을 5번 인식했고, 전자음으로 연주했어.':'👆 화면을 움직여 5개 전자음을 연주했어.');
+ const micCount=S.songProofs.filter(x=>x==='microphone').length;
+ setText('songWinSub',S.songKind==='mic'?
+  (micCount===5?'🎤 마이크로 목표 음높이 5개를 차례대로 감지했어. 운지 정확도는 별도 확인해요.':
+    '🎤 마이크 '+micCount+'개 + 선생님 확인 '+(5-micCount)+'개. 실제 운지는 별도 확인해요.'):
+    S.songKind==='camera'?'📷 손가락의 위치 접근을 5번 인식해 전자음으로 연주했어.':'👆 손으로 구멍 위치를 5번 맞춰 전자음으로 연주했어.');
  setText('camHint','🎵 시 · 라 · 솔 · 라 · 시');
  speak('우와, 작은 노래를 끝까지 연주했네!');
 }
@@ -469,7 +473,11 @@ $('songCamera').addEventListener('click',()=>{S.resumeSong=true;startCamera()});
 $('songReal').addEventListener('click',()=>songPrepare('mic'));
 $('songBegin').addEventListener('click',songStart);
 $('songMicBegin').addEventListener('click',songMicStart);
-$('songHear').addEventListener('click',()=>{if(S.phase==='song'&&S.songIndex<melody.length)songSampleSound(melody[S.songIndex].pitch)});
+$('songHear').addEventListener('click',()=>{
+ if(S.phase!=='song'||S.songIndex>=melody.length)return;
+ if(S.songKind==='mic'&&S.mic){setText('songHint','🎧 마이크를 끄고 목표 음을 들어봐.');return}
+ songSampleSound(melody[S.songIndex].pitch);
+});
 $('songBack').addEventListener('click',songChoose);
 $('songAgain').addEventListener('click',songChoose);
 $('songExit').addEventListener('click',home);
