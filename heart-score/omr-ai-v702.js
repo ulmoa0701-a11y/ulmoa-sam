@@ -323,10 +323,12 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
             opticalDebug.push({line:li,bar:i,x:Math.round(unflagged[0].x),reason:'isolated-eighth-without-flag-and-half-beat-deficit'});
           }
         }
-        // Independently inspect the space immediately before a notehead for
-        // printed accidentals. Only apply in explicit C-major/C-key context;
-        // retain carried flats from earlier in the same measure.
-        if(keyLabel==='C'&&cvStaffs[li]){
+        // Independently inspect printed accidental symbols before a notehead.
+        // A no-sharps/no-flats key signature often emits no key attribute at all;
+        // treat an absent key label as visually unconfirmed, rather than disabling
+        // all explicit accidental corrections. Skip only a positively detected
+        // non-C key until its key signature is independently parsed.
+        if((keyLabel===''||keyLabel==='C')&&cvStaffs[li]){
           let priorFlat=false;
           for(const v of items){
             if(v.ir.kind!=='note')continue;
