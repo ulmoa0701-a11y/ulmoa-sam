@@ -85,7 +85,7 @@ function renderTrack(){
  const track=$('#noteTrack');track.innerHTML='';
  track.scrollTop=0;
  state.events.forEach(e=>{
-  const el=document.createElement('div');el.className='noteTile';el.dataset.i=String(e.i);
+  const el=document.createElement('div');el.className='noteTile';el.dataset.i=String(e.i);el.dataset.note=e.note;
   el.style.setProperty('--score-note-color',COLORS[e.note]);
   el.style.setProperty('--score-note-ink',e.note==='높은도'?'#ffffff':'#111827');
   el.setAttribute('aria-label',(e.i+1)+'번째 '+e.note+' · '+e.lyric);
