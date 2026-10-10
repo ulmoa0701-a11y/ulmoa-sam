@@ -56,8 +56,45 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
    keyVsSheet.pressedLabel.includes('건반'),
    name+': score and instrument still look identical or lack key affordance '+JSON.stringify(keyVsSheet));
  check(keyVsSheet.key.height>keyVsSheet.scoreNote.height*1.12&&
-   keyVsSheet.keyGridCols===(w<=700?4:8),
+   keyVsSheet.keyGridCols===(w<=350?4:8),
    name+': finger targets are too small or grid wrong '+JSON.stringify(keyVsSheet));
+ check(await page.locator('#keyLayoutSelect').inputValue()==='piano',name+': default must be ordered piano keys');
+ const ink=await page.evaluate(()=>({
+   normal:getComputedStyle(document.querySelector('.key[data-note="도"]>span:first-child')).color,
+   yellow:getComputedStyle(document.querySelector('.key[data-note="미"]>span:first-child')).color,
+   high:getComputedStyle(document.querySelector('.key[data-note="높은도"]>span:first-child')).color,
+   sheet:getComputedStyle(document.querySelector('.scoreNoteBubble')).color
+ }));
+ check(ink.normal==='rgb(21, 25, 30)'&&ink.yellow==='rgb(21, 25, 30)'&&
+   ink.high==='rgb(255, 255, 255)'&&ink.sheet==='rgb(21, 25, 30)',
+   name+': ordinary pitch labels must be black and high C white '+JSON.stringify(ink));
+ // Changing the instrument is a presentation setting, not a different scoring engine.
+ await page.locator('#keyLayoutSelect').selectOption('xylophone');
+ const xyl=await page.evaluate(()=>({mode:state.keyLayout,
+   cols:getComputedStyle(document.querySelector('#keys')).gridTemplateColumns.split(' ').length,
+   notes:[...document.querySelectorAll('.key')].map(e=>e.dataset.note)}));
+ check(xyl.mode==='xylophone'&&xyl.cols===(w<=350?4:8)&&xyl.notes.length===8,
+   name+': one-row xylophone controls are missing '+JSON.stringify(xyl));
+ if(name==='mobile390'||name==='desktop1366')
+   await page.screenshot({path:out+'/'+name+'-xylophone.png',fullPage:false});
+ await page.locator('#keyLayoutSelect').selectOption('shuffle');
+ const shuffled=await page.evaluate(()=>({
+   mode:state.keyLayout,
+   positions:[...document.querySelectorAll('.key')].map(k=>Number(k.style.order)),
+   cols:getComputedStyle(document.querySelector('#keys')).gridTemplateColumns.split(' ').length
+ }));
+ check(shuffled.mode==='shuffle'&&
+   shuffled.positions.slice().sort((a,b)=>a-b).join(',')==='0,1,2,3,4,5,6,7'&&
+   shuffled.positions.some((p,i)=>p!==i)&&shuffled.cols===(w<=700?4:8),
+   name+': random mode did not shuffle the playable pitches once '+JSON.stringify(shuffled));
+ if(name==='mobile390'||name==='desktop1366')
+   await page.screenshot({path:out+'/'+name+'-random.png',fullPage:false});
+ await page.locator('#keyLayoutSelect').selectOption('piano');
+ check(await page.locator('#keys.pianoKeys .key').count()===8,name+': return to ordered piano failed');
+ // A challenge arrangement must be fixed for a whole round and re-shuffle next round.
+ await page.locator('#keyLayoutSelect').selectOption('shuffle');
+ const beforeCount=await page.evaluate(()=>window.__rhythmQA.state().keyOrders.map(x=>x.position).join(','));
+ await page.locator('#keyLayoutSelect').selectOption('piano');
  check(await page.locator('.mainStage .noteTile button').count()===0,
    name+': read-only score unexpectedly contains clickable buttons');
 
@@ -156,12 +193,59 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  await page.locator('#songSelect').selectOption('twinkle');
  await page.locator('#startBtn').click();
  const count=await page.evaluate(()=>window.__rhythmQA.state());
- check(count.phase==='count'&&count.countLen===6,name+': six-beat 1-2-1-2-시-작 count-in missing');
- await page.evaluate(()=>{
-   state.countStart=performance.now()-state.countLen*state.beat-35;
-   state.origin=performance.now()-35;
+ check(count.phase==='intro'&&count.introBeats===2&&count.countLen===6&&
+   Math.abs(count.origin-count.introStart-(count.introBeats+count.countLen)*60000/count.bpm)<5,
+   name+': melodic preview + fixed 1-2-1-2-시-작 count-in timing broken '+JSON.stringify(count));
+ check((await page.locator('#countInfo').textContent()).includes('간주'),
+   name+': intro has no audible-melody preparation label');
+ check(await page.locator('#keyLayoutSelect').isDisabled(),
+   name+': layout must not move while preview/countdown is playing');
+ await page.locator('.key').first().click();
+ check((await page.evaluate(()=>window.__rhythmQA.state())).score===0,
+   name+': children must not score accidental early taps during prelude');
+ const introSound=await page.evaluate(()=>{
+   clearGameFrame();state.introStart=performance.now()-state.beat*1.15;
+   state.countStart=state.introStart+state.introBeats*state.beat;
+   state.origin=state.countStart+state.countLen*state.beat;
+   tick(performance.now());
+   return {phase:state.phase,previewIndex:state.lastPreview};
  });
- await page.waitForTimeout(95);
+ check(introSound.phase==='intro'&&introSound.previewIndex>=1,
+   name+': real song opening melody was not played during the preview '+JSON.stringify(introSound));
+ // Pause and resume preserve BOTH clocks rather than starting the song too early.
+ await page.locator('#pauseBtn').click();
+ const paused=await page.evaluate(()=>({phase:state.phase,intro:state.introStart}));
+ await page.locator('#pauseBtn').click();
+ const resumed=await page.evaluate(()=>({phase:state.phase,intro:state.introStart}));
+ check(paused.phase==='paused'&&resumed.phase==='intro'&&resumed.intro>=paused.intro,
+   name+': preview pause/resume shifted the start unexpectedly');
+ const firstCount=await page.evaluate(()=>{
+   clearGameFrame();const n=performance.now();state.countStart=n-30;
+   state.introStart=state.countStart-state.introBeats*state.beat;
+   state.origin=state.countStart+state.countLen*state.beat;
+   tick(n);
+   return {phase:state.phase,text:document.querySelector('#countNumber').textContent,
+     heading:document.querySelector('#countInfo').textContent};
+ });
+ check(firstCount.phase==='count'&&firstCount.text==='1'&&firstCount.heading.includes('박자'),
+   name+': countdown did not follow melody preview cleanly '+JSON.stringify(firstCount));
+ const lastCount=await page.evaluate(()=>{
+   clearGameFrame();const n=performance.now();state.countStart=n-state.beat*(state.countLen-.5);
+   state.introStart=state.countStart-state.introBeats*state.beat;
+   state.origin=state.countStart+state.countLen*state.beat;
+   tick(n);
+   return {phase:state.phase,text:document.querySelector('#countNumber').textContent,
+     active:document.querySelector('#countNumber .countChar.active')?.textContent};
+ });
+ check(lastCount.phase==='count'&&lastCount.text==='시작'&&lastCount.active==='작',
+   name+': final 작 must be obvious just before the first note '+JSON.stringify(lastCount));
+ await page.evaluate(()=>{
+   clearGameFrame();const n=performance.now();
+   state.origin=n-35;state.countStart=state.origin-state.countLen*state.beat;
+   state.introStart=state.countStart-state.introBeats*state.beat;
+   tick(n);
+ });
+ await page.waitForTimeout(85);
  const playing=await page.evaluate(()=>window.__rhythmQA.state());
  const firstTile=await page.evaluate(()=>({active:[...document.querySelectorAll('#noteTrack .noteTile.active')].map(e=>Number(e.dataset.i)),
    next:[...document.querySelectorAll('#noteTrack .noteTile.next')].map(e=>Number(e.dataset.i)),
