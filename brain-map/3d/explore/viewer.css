@@ -211,3 +211,19 @@ body.brain3d-page{background:#f8f9f1}
 .brain-callout{gap:4px;padding:5px}
 .brain-callout b{font-size:13px}.brain-callout small{font-size:9px}
 }
+
+/* 메인 뇌지도에 iframe으로 통합: 같은 화면 안에서 실제 WebGL 드래그 */
+html.brain-embedded,html.brain-embedded body{margin:0!important;width:100%;height:100%;overflow:hidden;background:transparent}
+.brain-embedded .sub-header,.brain-embedded .viewer-crumb,.brain-embedded .viewer-head,
+.brain-embedded .viewer-toolbar,.brain-embedded .separation-panel,.brain-embedded .brain3d-aside,
+.brain-embedded .follow-read,.brain-embedded .viewer-footer,.brain-embedded .everyday-section,
+.brain-embedded .leader-lines,.brain-embedded .brain-callouts{display:none!important}
+.brain-embedded .viewer-main{width:100%;height:100%;padding:0;margin:0;max-width:none}
+.brain-embedded .workspace{display:block;width:100%;height:100%}
+.brain-embedded .brain-panel{width:100%;height:100%;border:0;padding:0;box-shadow:none;border-radius:0}
+.brain-embedded .stage-shell{width:100%;height:100%;min-height:0;max-height:none;aspect-ratio:auto;border:0;border-radius:0;background:radial-gradient(ellipse at center,#fffcf7 0%,#e7f4e8 100%)}
+.brain-embedded #brainCanvas{width:100%!important;height:100%!important;inset:0!important;bottom:0!important;display:block}
+.brain-embedded .reset-view{top:12px;right:12px;bottom:auto;font-size:12px;padding:10px 12px;z-index:4}
+.brain-embedded .orientation{top:12px;left:12px;max-width:68%;font-size:12px;z-index:4}
+.brain-embedded .stage-hint{bottom:12px;left:12px;font-size:11px;z-index:4}
+@media(max-width:620px){.brain-embedded .stage-shell{min-height:0;height:100%}.brain-embedded #brainCanvas{height:100%!important}.brain-embedded .stage-hint{font-size:10px}.brain-embedded .orientation{font-size:10px}}
