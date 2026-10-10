@@ -58,3 +58,41 @@ export function scanRhythm(staff,item){
   return{dur:base===null?null:base*(dot?1.5:1),kind:'note',fill,hollow,dot,stem,beam,flag};
 }
 
+
+/* Hollow noteheads: ink-ring + white-center verification at staff pitch levels.
+ * This is genuine pixel evidence and must not be used to invent event counts.
+ */
+export function scanHollowHeads(staff){
+ const img=staff.img,w=img.width,s=staff.spacing,bottom=staff.lines[4],out=[];
+ const raw=(x,y)=>W.omrGrayAt(img,Math.max(0,Math.min(w-1,Math.round(x))),Math.max(0,Math.min(img.height-1,Math.round(y))));
+ const dark=(x,y)=>{
+   let best=255;
+   for(let oy=-1;oy<=1;oy++)for(let ox=-1;ox<=1;ox++)best=Math.min(best,raw(x+ox,y+oy));
+   return best<160;
+ };
+ const angles=[0,Math.PI/4,Math.PI/2,3*Math.PI/4,Math.PI,5*Math.PI/4,3*Math.PI/2,7*Math.PI/4],tilt=-.25;
+ const ct=Math.cos(tilt),st=Math.sin(tilt);
+ for(let k=-3;k<=13;k++){
+   const cy=bottom-k*s/2;
+   if(cy<4||cy>=img.height-4)continue;
+   for(let x=Math.round(staff.x0+3*s);x<staff.x1-2*s;x+=2){
+     if(raw(x,cy)<198)continue; // ink-filled noteheads are not hollow
+     let ring=0;
+     for(const a of angles){
+       const dx=s*.66*Math.cos(a),dy=s*.46*Math.sin(a);
+       if(dark(x+dx*ct-dy*st,cy+dx*st+dy*ct))ring++;
+     }
+     if(ring<7)continue;
+     const whites=[[0,0],[-2,0],[2,0],[0,-1],[0,1]].filter(([dx,dy])=>raw(x+dx,cy+dy)>184).length;
+     if(whites<4)continue;
+     out.push({x,y:cy,k,ring,confidence:Math.min(.97,.6+.045*ring)});
+   }
+ }
+ out.sort((a,b)=>b.ring-a.ring);
+ const merged=[];
+ for(const h of out){
+   if(merged.some(v=>Math.abs(v.x-h.x)<s*.85&&Math.abs(v.y-h.y)<s*.65))continue;
+   merged.push(h);
+ }
+ return merged.sort((a,b)=>a.x-b.x||a.y-b.y);
+}

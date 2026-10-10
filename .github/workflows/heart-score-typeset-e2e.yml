@@ -1,0 +1,51 @@
+name: Heart Score Typeset Image E2E (PR only)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'heart-score/omr-ai-v702.js'
+      - 'heart-score/omr-bar-rescue-v1.mjs'
+      - 'heart-score/qa/render-typeset-score-e2e.cjs'
+      - '.github/workflows/heart-score-typeset-e2e.yml'
+  workflow_dispatch:
+jobs:
+  typeset-image-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install free local score renderer and browser QA
+        run: |
+          npm ci --prefix heart-score/qa --ignore-scripts --no-audit --no-fund
+          npm install --prefix heart-score/qa --no-save --ignore-scripts --no-audit --no-fund vexflow@5.0.0 @vexflow-fonts/bravura@1.0.2 @vexflow-fonts/academico@1.0.1
+          npx --prefix heart-score/qa playwright install chromium
+      - name: Prepare pinned ONNX model and browser runtime
+        run: node heart-score/qa/prepare-runtime.cjs
+      - name: Generate actual rendered 19-measure notation images
+        run: node heart-score/qa/render-typeset-score-e2e.cjs heart-score/qa/.qa-generated
+      - name: Upload each generated image to AI v702 in real Chromium and compare all notation
+        shell: bash
+        run: |
+          set +e
+          node heart-score/qa/omr-image-e2e.cjs --fixture heart-score/qa/.qa-generated/typeset-normal-19.png --variant typeset-normal --runtime heart-score/qa/.runtime --output heart-score/qa/.qa-generated/normal-result
+          STATUS1=$?
+          node heart-score/qa/omr-image-e2e.cjs --fixture heart-score/qa/.qa-generated/typeset-faint-19.png --variant typeset-faint --runtime heart-score/qa/.runtime --output heart-score/qa/.qa-generated/faint-result
+          STATUS2=$?
+          node heart-score/qa/omr-image-e2e.cjs --mobile --fixture heart-score/qa/.qa-generated/typeset-normal-19.png --variant typeset-normal-mobile --runtime heart-score/qa/.runtime --output heart-score/qa/.qa-generated/normal-mobile-result
+          STATUS3=$?
+          node heart-score/qa/omr-image-e2e.cjs --mobile --fixture heart-score/qa/.qa-generated/typeset-faint-19.png --variant typeset-faint-mobile --runtime heart-score/qa/.runtime --output heart-score/qa/.qa-generated/faint-mobile-result
+          STATUS4=$?
+          echo "NORMAL_E2E_EXIT=$STATUS1 FAINT_E2E_EXIT=$STATUS2 MOBILE_NORMAL=$STATUS3 MOBILE_FAINT=$STATUS4"
+          if [[ $STATUS1 -ne 0 || $STATUS2 -ne 0 || $STATUS3 -ne 0 || $STATUS4 -ne 0 ]]; then exit 1; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: heart-score-typeset-e2e-results
+          path: |
+            heart-score/qa/.qa-generated/**/*.json
+            heart-score/qa/.qa-generated/**/*.png
+            heart-score/qa/.qa-generated/typeset-*.png
+          if-no-files-found: warn
