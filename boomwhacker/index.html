@@ -416,6 +416,69 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
   #scoreStageGrid .beat{height:100px;min-height:100px}
   #scoreStageGrid .beat .note{height:69px}
 }
+
+/* Fullscreen must escape the 3-column desktop dashboard. Otherwise the layout
+   element occupies only grid column one (310px), leaving a blank stage. */
+.fullscreen .app{
+ display:block!important;width:100%!important;max-width:none!important;
+ height:100dvh!important;min-width:0;margin:0!important;padding:0!important;
+}
+.fullscreen .layout{
+ display:block!important;width:100%!important;max-width:none!important;
+ height:100dvh!important;min-width:0;margin:0!important;
+}
+.fullscreen .stagePanel{
+ display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+ grid-template-rows:46px minmax(0,1fr) 58px!important;
+ grid-column:auto!important;grid-row:auto!important;
+ width:100%!important;max-width:none!important;height:100dvh!important;
+ min-width:0!important;min-height:0!important;overflow:hidden!important;
+ padding:0!important;margin:0!important;border:0!important;border-radius:0!important;
+}
+.fullscreen .stageHead{
+ display:flex!important;grid-row:1;grid-column:1;min-width:0;min-height:0;
+ margin:0!important;height:auto!important;
+}
+.fullscreen .stage{
+ grid-row:2;grid-column:1;min-height:0!important;height:auto!important;
+ width:100%!important;max-width:none!important;overflow:hidden;
+}
+.fullscreen .playbar{
+ grid-row:3;grid-column:1;min-width:0;height:auto!important;margin:0!important;
+}
+.fullscreen .scoreStage{padding:16px clamp(12px,2vw,34px) 20px;gap:10px}
+.fullscreen .scoreStageHead{min-height:38px}
+.fullscreen .scoreStageHead strong{font-size:clamp(19px,2vw,27px)}
+.fullscreen .scoreStageHead span{font-size:clamp(12px,1vw,16px)}
+.fullscreen #scoreStageGrid{
+ width:100%;max-width:none;
+ grid-template-columns:repeat(auto-fit,minmax(clamp(115px,11vw,180px),1fr));
+ grid-auto-rows:clamp(122px,15vh,170px);
+ gap:clamp(8px,1vw,16px);
+ align-content:start;
+ overflow-y:auto;overflow-x:hidden;
+ padding:9px 7px 22px;min-height:0;
+}
+.fullscreen #scoreStageGrid .beat{
+ height:calc(clamp(122px,15vh,170px) - 5px);min-height:0;max-height:none;
+}
+.fullscreen #scoreStageGrid .beat .note{height:calc(clamp(122px,15vh,170px) - 44px);font-size:clamp(18px,2vw,25px)}
+.fullscreen #scoreStageGrid .beat .lyric{height:38px;font-size:clamp(17px,1.8vw,24px)}
+.fullscreen #scoreStageGrid .beat .noteLabelText{font-size:clamp(19px,2.3vw,32px);min-width:46px;min-height:37px}
+@media(max-width:800px){
+ .fullscreen .stagePanel{grid-template-rows:44px minmax(0,1fr) 56px!important}
+ .fullscreen .scoreStage{padding:9px 7px 12px}
+ .fullscreen #scoreStageGrid{grid-template-columns:repeat(auto-fit,minmax(100px,1fr));grid-auto-rows:118px;gap:7px}
+ .fullscreen #scoreStageGrid .beat{height:113px;min-height:0}
+ .fullscreen #scoreStageGrid .beat .note{height:79px}
+ .fullscreen #scoreStageGrid .beat .lyric{height:32px;font-size:15px}
+ .fullscreen #scoreStageGrid .beat .noteLabelText{font-size:18px}
+}
+@media(max-width:430px){
+ .fullscreen #scoreStageGrid{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:115px;gap:6px}
+ .fullscreen #scoreStageGrid .beat{height:110px}
+ .fullscreen #scoreStageGrid .beat .note{height:76px}
+}
 </style>
 <link rel="stylesheet" href="./mobile-layout.css?v=20261009" />
 </head>

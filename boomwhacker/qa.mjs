@@ -393,7 +393,40 @@ async function basicCase(name,width,height){
   const fsGeom=await page.evaluate(()=>({vh:innerHeight,stage:document.querySelector('.stage')?.getBoundingClientRect().height,controls:getComputedStyle(document.querySelector('.controls')).display,score:getComputedStyle(document.querySelector('.score')).display}));
   check(fsGeom.stage>fsGeom.vh*.72,`${name}: fullscreen stage does not fill viewport ${JSON.stringify(fsGeom)}`);
   check(fsGeom.controls==='none'&&fsGeom.score==='none',`${name}: setup panels still visible in classroom fullscreen`);
+  // Regression for a 1600px browser: dashboard's 310px left grid column
+  // must never constrain the fullscreen performance area.
+  const fallFullGeom=await page.evaluate(()=>({
+    viewport:innerWidth,app:document.querySelector('.app').getBoundingClientRect().toJSON(),
+    panel:document.querySelector('.stagePanel').getBoundingClientRect().toJSON(),
+    stage:document.querySelector('#stage').getBoundingClientRect().toJSON()
+  }));
+  check(fallFullGeom.panel.width>fallFullGeom.viewport*.92&&fallFullGeom.stage.width>fallFullGeom.viewport*.92,
+    `${name}: fall fullscreen still trapped in first dashboard column ${JSON.stringify(fallFullGeom)}`);
   await page.screenshot({path:`${out}/${name}-class-fullscreen.png`,fullPage:false});
+  await page.locator('#playViewSelect').selectOption('score');
+  const scoreFs=await page.evaluate(()=>{
+    const rect=sel=>document.querySelector(sel).getBoundingClientRect().toJSON(),
+      grid=document.querySelector('#scoreStageGrid'),
+      cards=[...grid.querySelectorAll('.beat')];
+    const first=cards[0]?.getBoundingClientRect().toJSON();
+    const lastInFirstRow=cards.findLast?.(el=>el.getBoundingClientRect().top===first?.top);
+    return {viewport:innerWidth,viewportH:innerHeight,app:rect('.app'),layout:rect('.layout'),
+      panel:rect('.stagePanel'),stage:rect('#stage'),score:rect('#scoreStage'),
+      grid:rect('#scoreStageGrid'),first,columns:getComputedStyle(grid).gridTemplateColumns.split(' ').length,
+      cardWidth:first?.width,cardHeight:first?.height,scrollable:grid.scrollHeight>grid.clientHeight,
+      overflowX:Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth)};
+  });
+  check(scoreFs.app.width>scoreFs.viewport*.94&&scoreFs.panel.width>scoreFs.viewport*.92&&
+    scoreFs.stage.width>scoreFs.viewport*.92&&scoreFs.grid.width>scoreFs.viewport*.86,
+    `${name}: score fullscreen does not fill viewport ${JSON.stringify(scoreFs)}`);
+  check(scoreFs.first&&scoreFs.first.width>=65&&scoreFs.first.height>=95&&scoreFs.columns>=3&&
+    scoreFs.first.right<=scoreFs.viewport+1&&scoreFs.overflowX<=1,
+    `${name}: score fullscreen cards are clipped or squashed ${JSON.stringify(scoreFs)}`);
+  check(scoreFs.scrollable,`${name}: long score must scroll internally in fullscreen ${JSON.stringify(scoreFs)}`);
+  if(name==='desktop1366'||name==='mobile390'||name==='desktop1600short')
+    await page.screenshot({path:`${out}/${name}-score-fullscreen.png`,fullPage:false});
+  // Restore mode before checking legacy fall behavior.
+  await page.locator('#playViewSelect').selectOption('fall');
   await page.locator('#fsExitBtn').click();
   check(!(await page.locator('body').evaluate(el=>el.classList.contains('fullscreen'))),`${name}: classroom fullscreen exit failed`);
   await page.locator('.tube[data-note="도"]').click();
