@@ -189,6 +189,10 @@ class MissionScene extends Phaser.Scene{
   const spots=this.m.focus==='size'?[[190,495],[440,495],[190,790],[440,790]]:
       [[120,405],[360,405],[600,405],[120,630],[360,630],[600,630],[120,855],[360,855],[600,855]];
   if(this.m.focus!=='size')Phaser.Utils.Array.Shuffle(spots);
+  if(this.m.focus==='size'){
+   // Equal, neutral rescue platforms keep each size pair grounded and comparable.
+   [495,790].forEach(base=>roundRect(this,54,base-4,590,38,18,0xf5eed9,.94,0xb9c9a8,2).setDepth(12));
+  }
   items.forEach((it,i)=>{
    const [x,baseY]=spots[i],a=animal(this,it.species,COLORS[it.color],it.size);
    // Compare big/small animals with their feet on the same ground line.
