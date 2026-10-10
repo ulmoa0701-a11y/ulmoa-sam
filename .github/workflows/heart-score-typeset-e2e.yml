@@ -34,8 +34,12 @@ jobs:
           STATUS1=$?
           node heart-score/qa/omr-image-e2e.cjs --fixture heart-score/qa/.qa-generated/typeset-faint-19.png --variant typeset-faint --runtime heart-score/qa/.runtime --output heart-score/qa/.qa-generated/faint-result
           STATUS2=$?
-          echo "NORMAL_E2E_EXIT=$STATUS1 FAINT_E2E_EXIT=$STATUS2"
-          if [[ $STATUS1 -ne 0 || $STATUS2 -ne 0 ]]; then exit 1; fi
+          node heart-score/qa/omr-image-e2e.cjs --mobile --fixture heart-score/qa/.qa-generated/typeset-normal-19.png --variant typeset-normal-mobile --runtime heart-score/qa/.runtime --output heart-score/qa/.qa-generated/normal-mobile-result
+          STATUS3=$?
+          node heart-score/qa/omr-image-e2e.cjs --mobile --fixture heart-score/qa/.qa-generated/typeset-faint-19.png --variant typeset-faint-mobile --runtime heart-score/qa/.runtime --output heart-score/qa/.qa-generated/faint-mobile-result
+          STATUS4=$?
+          echo "NORMAL_E2E_EXIT=$STATUS1 FAINT_E2E_EXIT=$STATUS2 MOBILE_NORMAL=$STATUS3 MOBILE_FAINT=$STATUS4"
+          if [[ $STATUS1 -ne 0 || $STATUS2 -ne 0 || $STATUS3 -ne 0 || $STATUS4 -ne 0 ]]; then exit 1; fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
