@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {makeBrainSurfaces} from './cortex-model.js';
 
 const canvas = document.getElementById('brainCanvas');
 const holder = document.getElementById('stageShell');
@@ -44,19 +45,6 @@ const info = {
   summary:'호흡·심장박동·각성 상태 같은 기본적인 생명 유지 기능에 관여합니다.',
   example:'우리가 의식적으로 생각하지 않아도 숨을 쉬고 몸의 기본 상태를 유지할 때.'}
 };
-const parts = [
- {key:'frontal',side:'left',p:[ .62,.21,.80],s:[.56,.61,.73],color:0xba9ae9,seed:1},
- {key:'parietal',side:'left',p:[ .62,.49,-.21],s:[.56,.62,.73],color:0xf4d47c,seed:2},
- {key:'temporal',side:'left',p:[ .69,-.42,.21],s:[.53,.37,.66],color:0xa6dcb2,seed:3},
- {key:'occipital',side:'left',p:[ .60,.06,-1.09],s:[.49,.54,.51],color:0xf0ad91,seed:4},
- {key:'frontal',side:'right',p:[-.62,.21,.80],s:[.56,.61,.73],color:0xba9ae9,seed:5},
- {key:'parietal',side:'right',p:[-.62,.49,-.21],s:[.56,.62,.73],color:0xf4d47c,seed:6},
- {key:'temporal',side:'right',p:[-.69,-.42,.21],s:[.53,.37,.66],color:0xa6dcb2,seed:7},
- {key:'occipital',side:'right',p:[-.60,.06,-1.09],s:[.49,.54,.51],color:0xf0ad91,seed:8},
- {key:'cerebellum',side:'left',p:[ .39,-.80,-.98],s:[.40,.34,.46],color:0x95c5ee,seed:9},
- {key:'cerebellum',side:'right',p:[-.39,-.80,-.98],s:[.40,.34,.46],color:0x95c5ee,seed:10},
- {key:'brainstem',side:'center',p:[0,-1.13,-.39],s:[.24,.56,.27],color:0xb5adc7,seed:11}
-];
 let renderer,scene,camera,brainGroup,raycaster;
 const meshes=[];
 let selected = 'frontal';
@@ -87,7 +75,7 @@ const activityDetails={
 };
 let splitMode = 'together';
 let splitAmount = 0;
-let yaw = .7, pitch = .25, distance = 5.8;
+let yaw = Math.PI/2, pitch = .18, distance = 5.45;
 let targetYaw = yaw, targetPitch = pitch;
 let currentView='free';
 let activePointer = new Map(), moved=0, pinchLast=null;
@@ -102,67 +90,26 @@ function setNotice(str){
  fallback.hidden=false;
  fallback.querySelector('strong').textContent=str;
 }
-function makeFoldedGeometry(scale, seed){
- const geometry=new THREE.SphereGeometry(1,38,27);
- const pos=geometry.getAttribute('position');
- const point=new THREE.Vector3();
- for(let i=0;i<pos.count;i++){
-  point.fromBufferAttribute(pos,i);
-  const longitude=Math.atan2(point.z,point.x);
-  const lat=point.y;
-  const fold=Math.sin(longitude*13.0 + Math.sin(lat*7+seed)*2.0 + seed*1.11);
-  const ridge=Math.sin(lat*13 + longitude*2.5 + seed*.8);
-  const wrinkle=Math.sin(longitude*21-lat*10+seed);
-  // 동글동글한 장난감 같은 인상: 주름 변형을 줄여 징그러운 질감을 피합니다.
-  const amount=1 + fold*ridge*.009 + wrinkle*.003;
-  pos.setXYZ(i,point.x*amount*scale[0],point.y*amount*scale[1],point.z*amount*scale[2]);
- }
- pos.needsUpdate=true;
- geometry.computeVertexNormals();
- return geometry;
-}
 function init() {
  try {
   renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'default'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.8));
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.33;
+  renderer.toneMappingExposure=1.07;
  }catch(error){setNotice('이 기기에서 3D 그래픽을 시작하지 못했습니다.');return false;}
  scene=new THREE.Scene();
  camera=new THREE.PerspectiveCamera(38,1,.1,100);
  brainGroup=new THREE.Group();scene.add(brainGroup);
- scene.add(new THREE.HemisphereLight(0xfff5de,0x71918a,2.2));
- const light=new THREE.DirectionalLight(0xfff9ed,3.1);light.position.set(-3,5,7);scene.add(light);
- const back=new THREE.DirectionalLight(0xaac9dc,1.8);back.position.set(4,2,-5);scene.add(back);
- const under=new THREE.DirectionalLight(0xe3ddfa,.8);under.position.set(0,-3,3);scene.add(under);
- // Each model part is a simplified, independently selectable educational region.
- for(const data of parts){
-   const material=new THREE.MeshStandardMaterial({
-    color:data.color,roughness:.91,metalness:0,flatShading:false,
-    emissive:0x000000,emissiveIntensity:.22
-   });
-   const mesh=new THREE.Mesh(makeFoldedGeometry(data.s,data.seed),material);
-   mesh.position.set(...data.p);
-   mesh.userData={key:data.key,side:data.side,base:new THREE.Vector3(...data.p)};
-   // 하나의 뇌 부위가 부드러운 작은 곡면들로 연결된 파스텔 장난감처럼 보이게 표현
-   // 자식 메시는 부모와 색상·선택 상태를 공유하므로 분리 기능에 영향이 없습니다.
-   if(data.key!=='brainstem'){
-     const sign=data.side==='left'?1:-1;
-     const puffPositions=[
-      [-.17,.25,.33,.41],[.15,.28,.30,.36],[.30,-.02,.25,.38],
-      [-.27,-.10,.26,.36],[.04,-.25,.37,.40],
-      [-.18,.23,-.30,.38],[.22,.13,-.31,.36],
-      [-.12,-.19,-.35,.38],[.24,-.26,-.25,.35]
-     ];
-     for(const [xx,yy,zz,rr] of puffPositions){
-       const puff=new THREE.Mesh(new THREE.SphereGeometry(1,24,17),material);
-       puff.position.set(xx*data.s[0]*sign,yy*data.s[1],zz*data.s[2]);
-       puff.scale.set(rr*data.s[0]*1.25,rr*data.s[1]*1.22,rr*data.s[2]*.9);
-       mesh.add(puff);
-     }
-   }
-   brainGroup.add(mesh);meshes.push(mesh);
+ scene.add(new THREE.HemisphereLight(0xfff5de,0x71918a,1.5));
+ const light=new THREE.DirectionalLight(0xfff9ed,2.15);light.position.set(-3,5,7);scene.add(light);
+ const back=new THREE.DirectionalLight(0xaac9dc,1.05);back.position.set(4,2,-5);scene.add(back);
+ const under=new THREE.DirectionalLight(0xe3ddfa,.45);under.position.set(0,-3,3);scene.add(under);
+ // All visible cortical lobes share one folded surface per hemisphere.
+ // The old detached ellipsoids are intentionally no longer constructed.
+ for(const mesh of makeBrainSurfaces()){
+  brainGroup.add(mesh);
+  meshes.push(mesh);
  }
  // Subtle ground disk anchors the 3D model visually without hiding anatomy.
  const shadow=new THREE.Mesh(new THREE.CircleGeometry(1.65,72),new THREE.MeshBasicMaterial({color:0x74887c,transparent:true,opacity:.09,depthWrite:false}));
@@ -177,7 +124,7 @@ function init() {
  refreshSelection();
  updateCalloutMode();
  fallback.hidden=true;
- setView('free',true);
+ setView('left',true);
  requestAnimationFrame(renderFrame);
  canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();setNotice('3D 연결이 끊겼습니다. 페이지를 새로고침해 주세요.');});
  return true;
@@ -326,7 +273,7 @@ function drawLeaders(){
   const key=button.dataset.callout;
   const mesh=meshes.find(m=>m.userData.key===key&&(m.userData.side==='left'||key==='brainstem'));
   if(!mesh)continue;
-  const projected=mesh.getWorldPosition(new THREE.Vector3()).project(camera);
+  const projected=mesh.localToWorld(mesh.userData.anchor.clone()).project(camera);
   const x=view.left-stage.left+(projected.x+1)*view.width/2;
   const y=view.top-stage.top+(1-projected.y)*view.height/2;
   if(x<0||y<0||x>stage.width||y>stage.height)continue;
@@ -355,7 +302,7 @@ function bindEvents(){
  });
  partButtons.forEach(button=>button.addEventListener('click',()=>mapMode==='functions'&&functionDetails[button.dataset.part]?setFunction(button.dataset.part):setSelected(button.dataset.part)));
  document.getElementById('clearSelection').addEventListener('click',()=>setSelected(null));
- document.getElementById('resetCamera').addEventListener('click',()=>{distance=5.8;setView('free');});
+ document.getElementById('resetCamera').addEventListener('click',()=>{distance=5.45;setView('left',true);});
  canvas.addEventListener('wheel',event=>{event.preventDefault();distance=THREE.MathUtils.clamp(distance+event.deltaY*.005,3.0,9.0);needsRender=true;},{passive:false});
  canvas.addEventListener('pointerdown',event=>{
   canvas.setPointerCapture(event.pointerId);
