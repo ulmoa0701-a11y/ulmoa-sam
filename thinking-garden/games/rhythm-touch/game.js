@@ -11,7 +11,7 @@ const SONGS=[
  song('bear','곰 세 마리',75,4,[['도',1,'곰'],['도',.5,'세'],['도',.5,'마'],['도',1,'리'],['도',1,'가'],['미',1,'한'],['솔',.5,'집'],['솔',.5,'에'],['미',1,'있'],['도',1,'어'],['솔',.5,'아'],['솔',.5,'빠'],['미',1,'곰'],['솔',.5,'엄'],['솔',.5,'마'],['미',1,'곰']])
 ];
 const $=s=>document.querySelector(s);
-const state={song:SONGS[0],ratio:1,beat:60000/66,events:[],phase:'idle',origin:0,countStart:0,countLen:6,lastCount:-1,lastSound:-1,lastUi:-1,raf:0,pausedAt:0,played:0,earned:0,extra:0,stats:{great:0,good:0,okay:0,miss:0,wrong:0},melody:true,audio:null,score:0};
+const state={song:SONGS[0],ratio:1,beat:60000/66,events:[],phase:'idle',origin:0,introStart:0,introBeats:2,lastPreview:-1,countStart:0,countLen:6,lastCount:-1,keyLayout:'piano',lastSound:-1,lastUi:-1,raf:0,pausedAt:0,played:0,earned:0,extra:0,stats:{great:0,good:0,okay:0,miss:0,wrong:0},melody:true,audio:null,score:0};
 function mkEvents(){
  state.beat=60000/(state.song.bpm*state.ratio);
  let time=0;
@@ -26,7 +26,7 @@ function mkEvents(){
  state.stats={great:0,good:0,okay:0,miss:0,wrong:0};
 }
 function clearGameFrame(){if(state.raf)cancelAnimationFrame(state.raf);state.raf=0}
-function setSettings(){const locked=['count','play','paused'].includes(state.phase);$('#songSelect').disabled=locked;$('#speedSelect').disabled=locked;$('#startBtn').disabled=locked}
+function setSettings(){const locked=['intro','count','play','paused'].includes(state.phase);$('#songSelect').disabled=locked;$('#speedSelect').disabled=locked;$('#keyLayoutSelect').disabled=locked;$('#startBtn').disabled=locked;$('#keys').classList.toggle('waiting',state.phase==='intro'||state.phase==='count')}
 function selectSong(){
  if(state.phase!=='idle'&&state.phase!=='done')return;
  state.song=SONGS.find(s=>s.id===$('#songSelect').value)||SONGS[0];
@@ -52,11 +52,31 @@ function renderKeys(){
  NOTES.forEach((note,i)=>{
   const b=document.createElement('button');b.className='key';b.type='button';b.dataset.note=note;
   b.style.setProperty('--key-color',COLORS[note]);
-  b.style.setProperty('--key-ink',['미','파'].includes(note)?'#26384a':'#ffffff');
+  b.style.setProperty('--key-ink',note==='높은도'?'#ffffff':'#15191e');
+  b.style.setProperty('--label-back',note==='높은도'?'#354355':'rgba(255,255,255,.93)');
   b.setAttribute('aria-label',note+' 건반 누르기');
   b.innerHTML='<span>'+(note==='높은도'?'도↑':note)+'</span><span class="hotkey">'+(i+1)+'</span>';
   b.addEventListener('click',()=>tap(note,b));$('#keys').appendChild(b);
  });
+}
+// Three distinct instruments: the stable piano scale is the default. Random
+// position is optional and is shuffled only BEFORE a song, never during play.
+function setKeyLayout(mode,shuffle=false){
+  if(!['piano','xylophone','shuffle'].includes(mode))mode='piano';
+  state.keyLayout=mode;
+  const keys=$('#keys'),buttons=[...keys.querySelectorAll('.key')];
+  keys.className='keys '+({piano:'pianoKeys',xylophone:'xylophoneKeys',shuffle:'randomKeys'}[mode]);
+  let positions=buttons.map((_,i)=>i);
+  if(mode==='shuffle'){
+    for(let i=positions.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [positions[i],positions[j]]=[positions[j],positions[i]];
+    }
+    if(positions.every((p,i)=>p===i))positions.reverse();
+  }
+  buttons.forEach((button,i)=>{button.style.order=mode==='shuffle'?positions[i]:i;button.dataset.position=String(mode==='shuffle'?positions[i]:i);});
+  keys.setAttribute('aria-label',mode==='piano'?'계이름 순서대로 놓인 피아노 건반 8개':mode==='xylophone'?'계이름 순서대로 놓인 실로폰 건반 8개':'연주가 끝날 때까지 자리가 고정되는 섞인 계이름 버튼 8개');
+  $('#keyLayoutSelect').value=mode;
 }
 function renderTrack(){
  const track=$('#noteTrack');track.innerHTML='';
@@ -64,7 +84,8 @@ function renderTrack(){
  state.events.forEach(e=>{
   const el=document.createElement('div');el.className='noteTile';el.dataset.i=String(e.i);
   el.style.setProperty('--score-note-color',COLORS[e.note]);
-  el.style.setProperty('--score-note-ink',['미','파'].includes(e.note)?'#273b47':'#ffffff');
+  el.style.setProperty('--score-note-ink',e.note==='높은도'?'#ffffff':'#14181c');
+  el.dataset.note=e.note;
   el.setAttribute('aria-label',(e.i+1)+'번째 '+e.note+' · '+e.lyric);
   const display=e.note==='높은도'?'도↑':e.note;
   const long=e.dur/state.beat>=1.75?'<span class="longNote">길게</span>':'';
@@ -97,8 +118,13 @@ function judge(i,grade,point){
 }
 function tap(note,button){
  if(button){button.classList.add('hit');setTimeout(()=>button.classList.remove('hit'),110)}
+ if(state.phase!=='play'){
+   if(state.phase==='intro')setFeedback('먼저 간주를 들어요 ♪');
+   else if(state.phase==='count')setFeedback('시·작 다음부터 눌러요!');
+   else if(state.melody)tone(note,.30,.21);
+   return;
+ }
  if(state.melody)tone(note,.34,.24);
- if(state.phase!=='play'){if(state.phase==='count')setFeedback('숫자가 끝나면 시작해요!');return}
  judgeTap(note,performance.now()-state.origin);
 }
 function judgeTap(note,relativeMs){
@@ -147,6 +173,26 @@ function countWord(i){
  return '<span class="countChar '+(i===state.countLen-2?'active':'')+'">시</span><span class="countChar '+(i===state.countLen-1?'active':'')+'">작</span>';
 }
 function tick(now){
+ if(state.phase==='intro'){
+  const played=now-state.introStart,limit=state.introBeats*state.beat;
+  // Preview the selected song's actual opening melody (not a generic beep).
+  for(let i=0;i<state.events.length&&state.events[i].ms<limit;i++){
+    const e=state.events[i];
+    if(i>state.lastPreview&&played>=e.ms){
+      state.lastPreview=i;
+      tone(e.note,.18,Math.min(.36,e.dur/1300));
+    }
+  }
+  const symbol=Math.floor(Math.max(0,played)/state.beat)%2===0?'♫':'♪';
+  if($('#countNumber').textContent!==symbol){
+    $('#countNumber').classList.remove('syllables');
+    $('#countNumber').textContent=symbol;
+  }
+  if(now>=state.countStart){
+    state.phase='count';state.lastCount=-1;
+    $('#countInfo').textContent='이제 박자를 맞춰요';
+  }
+ }
  if(state.phase==='count'){
   const i=Math.min(state.countLen-1,Math.floor((now-state.countStart)/state.beat));
   if(i!==state.lastCount&&i>=0){
@@ -157,7 +203,8 @@ function tick(now){
   }
   if(now>=state.origin){
    state.phase='play';$('#countOverlay').hidden=true;state.lastUi=-1;
-   setFeedback('첫 음부터 박자를 맞춰요!');
+   $('#keys').classList.remove('waiting');
+   setFeedback('🎹 지금부터 눌러요!');
   }
  }
  if(state.phase==='play'){
@@ -170,14 +217,16 @@ function tick(now){
   changeCue(current);
   if(t>=state.duration+Math.max(400,state.beat*.5)){finish();return}
  }
- if(state.phase==='count'||state.phase==='play')state.raf=requestAnimationFrame(tick);
+ if(state.phase==='intro'||state.phase==='count'||state.phase==='play')state.raf=requestAnimationFrame(tick);
 }
 function start(){
- clearGameFrame();state.phase='count';selectSongAfterStart();state.lastCount=-1;
+ clearGameFrame();state.phase='intro';selectSongAfterStart();state.lastCount=-1;state.lastPreview=-1;
+ if(state.keyLayout==='shuffle')setKeyLayout('shuffle',true);
  // The compact single-screen layout keeps the score and keys visible already.
  // Do not scroll the page when playback starts.
- const now=performance.now();state.countStart=now;state.origin=now+state.countLen*state.beat;
- $('#countOverlay').hidden=false;$('#countNumber').textContent='1';
+ const now=performance.now();state.introStart=now;state.countStart=now+state.introBeats*state.beat;state.origin=state.countStart+state.countLen*state.beat;
+ $('#countOverlay').hidden=false;$('#countInfo').textContent='♪ 짧은 간주를 들어요';$('#countNumber').classList.remove('syllables');$('#countNumber').textContent='♫';
+ setFeedback('멜로디를 듣고 시·작 다음부터 눌러요');
  $('#pauseBtn').hidden=false;$('#pauseBtn').textContent='⏸ 잠깐 쉬기';
  $('#results').hidden=true;setSettings();
  if(state.melody){try{state.audio=new(window.AudioContext||window.webkitAudioContext)();state.audio.resume().catch(()=>{})}catch{}}
@@ -189,11 +238,11 @@ function selectSongAfterStart(){
  $('#noteTrack').scrollTop=0;$('#noteTrack').firstElementChild?.classList.add('ready');
 }
 function pause(){
- if(state.phase==='count'||state.phase==='play'){
+ if(state.phase==='intro'||state.phase==='count'||state.phase==='play'){
   state.beforePause=state.phase;state.phase='paused';state.pausedAt=performance.now();
   clearGameFrame();$('#pauseBtn').textContent='▶ 계속하기';setFeedback('잠깐 쉬어요. 준비되면 계속!');
  }else if(state.phase==='paused'){
-  const d=performance.now()-state.pausedAt;state.countStart+=d;state.origin+=d;
+  const d=performance.now()-state.pausedAt;state.introStart+=d;state.countStart+=d;state.origin+=d;
   state.phase=state.beforePause;$('#pauseBtn').textContent='⏸ 잠깐 쉬기';
   state.raf=requestAnimationFrame(tick);
  }
@@ -214,22 +263,23 @@ function finish(){
  }catch{}
  // Results open above the game as a fixed overlay (no page scroll).
 }
-function newGame(){if(state.phase==='count'||state.phase==='play'||state.phase==='paused'){clearGameFrame();state.phase='idle'}selectSong()}
+function newGame(){if(state.phase==='intro'||state.phase==='count'||state.phase==='play'||state.phase==='paused'){clearGameFrame();state.phase='idle'}selectSong()}
 function soundToggle(){state.melody=!state.melody;$('#soundBtn').textContent=state.melody?'🔊 노래 소리 켜짐':'🔇 노래 소리 꺼짐';$('#soundBtn').setAttribute('aria-pressed',String(state.melody))}
 $('#songSelect').onchange=selectSong;$('#speedSelect').onchange=selectSong;
 $('#startBtn').onclick=start;$('#pauseBtn').onclick=pause;$('#againBtn').onclick=()=>{state.phase='idle';selectSong();start()};
 $('#soundBtn').onclick=soundToggle;
+$('#keyLayoutSelect').onchange=e=>{if(!['intro','count','play','paused'].includes(state.phase))setKeyLayout(e.target.value)};
 document.addEventListener('keydown',e=>{
  if(e.repeat||e.altKey||e.ctrlKey||e.metaKey||/SELECT|INPUT|TEXTAREA/.test(document.activeElement?.tagName||''))return;
  const i=Number(e.key)-1;if(i>=0&&i<8){e.preventDefault();tap(NOTES[i],$('#keys [data-note="'+NOTES[i]+'"]'));}
- if(e.key===' '&&['play','count','paused'].includes(state.phase)){e.preventDefault();pause()}
+ if(e.key===' '&&['intro','play','count','paused'].includes(state.phase)){e.preventDefault();pause()}
 });
-renderKeys();selectSong();
+renderKeys();setKeyLayout('piano');selectSong();
 // Public, deterministic browser QA helpers. No health/identity data and no score submission.
 window.__rhythmQA={
  songs:()=>SONGS.map(s=>({id:s.id,count:s.parts.length,bpm:s.bpm,meter:s.meter})),
- state:()=>({phase:state.phase,song:state.song.id,bpm:60000/state.beat,events:state.events.map(e=>({note:e.note,ms:e.ms,dur:e.dur,grade:e.grade})),score:state.score,earned:state.earned,extra:state.extra,stats:{...state.stats},countLen:state.countLen,origin:state.origin}),
- simulateStart:()=>{clearGameFrame();state.phase='play';mkEvents();renderTrack();state.origin=performance.now();$('#countOverlay').hidden=true;return true},
+ state:()=>({phase:state.phase,song:state.song.id,bpm:60000/state.beat,events:state.events.map(e=>({note:e.note,ms:e.ms,dur:e.dur,grade:e.grade})),score:state.score,earned:state.earned,extra:state.extra,stats:{...state.stats},countLen:state.countLen,introBeats:state.introBeats,introStart:state.introStart,countStart:state.countStart,lastPreview:state.lastPreview,keyLayout:state.keyLayout,keyOrders:[...document.querySelectorAll('.key')].map(x=>({note:x.dataset.note,position:Number(x.dataset.position)})),origin:state.origin}),
+ simulateStart:()=>{clearGameFrame();state.phase='play';mkEvents();renderTrack();state.origin=performance.now();$('#countOverlay').hidden=true;$('#keys').classList.remove('waiting');return true},
  tapAt:(note,timeMs)=>judgeTap(note,timeMs),
  expire:(i)=>{judge(i,'miss',0);return state.score},
  finish:()=>{finish();return state.score},
