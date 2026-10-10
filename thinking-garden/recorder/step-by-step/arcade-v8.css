@@ -84,6 +84,6 @@ header{display:flex;align-items:center;justify-content:space-between;min-height:
 .flower-head .open .face .smile{position:absolute;top:38px;left:25px;width:16px;height:9px;border-bottom:3px solid #8a5d3b;border-radius:0 0 90% 90%}
 .plant.bloom .open{animation:flower-burst .75s cubic-bezier(.2,1.6,.4,1)}
 @keyframes flower-burst{0%{opacity:0;scale:.4}65%{opacity:1;scale:1.12}100%{scale:1}}
-@media(max-width:850px){.flower-head{transform:scale(.74)}}
-@media(max-width:520px){.flower-head{transform:scale(.51)}.flower-head .bud{filter:drop-shadow(0 6px 3px #52835e38)}}
+@media(max-width:850px){.flower-head{transform:translateX(-50%) scale(.74)}}
+@media(max-width:520px){.flower-head{transform:translateX(-50%) scale(.51)}.flower-head .bud{filter:drop-shadow(0 6px 3px #52835e38)}}
 @media(prefers-reduced-motion:reduce){.plant.bloom .open{animation:none}}
