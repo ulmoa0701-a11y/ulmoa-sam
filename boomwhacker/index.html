@@ -402,6 +402,20 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
 @media(max-width:800px){.playViewSelect{max-width:98px;min-width:82px;padding:5px 3px;font-size:10px}.scoreStage{padding:9px 6px 13px}.scoreStageGrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.scoreStageGrid .beat .note{height:72px}.scoreStageGrid .beat .lyric{height:29px;font-size:12px}.scoreActions button{min-height:32px}.scoreToolbar{gap:6px}}
 @media(max-width:420px){.scoreStageHead span{display:none}.scoreStageGrid{gap:5px}.scoreStageGrid .beat .note{height:66px}.scoreStageGrid .beat .noteLabelText{font-size:17px}}
 @media(prefers-reduced-motion:reduce){.beat,.beat.scoreActive,.scoreStageGrid .beat.scoreActive{animation:none;transition:none;transform:none!important}}
+/* Fixed track sizing prevents CSS grid's implicit rows from compressing on phones. */
+#scoreStageGrid{grid-auto-rows:136px;align-content:start}
+#scoreStageGrid .beat{height:132px;min-height:132px;max-height:none}
+@media(max-width:800px){
+  #scoreStageGrid{grid-auto-rows:108px;align-content:start}
+  #scoreStageGrid .beat{height:103px;min-height:103px}
+  #scoreStageGrid .beat .note{height:72px}
+  #scoreStageGrid .beat .lyric{height:29px}
+}
+@media(max-width:420px){
+  #scoreStageGrid{grid-auto-rows:104px}
+  #scoreStageGrid .beat{height:100px;min-height:100px}
+  #scoreStageGrid .beat .note{height:69px}
+}
 </style>
 <link rel="stylesheet" href="./mobile-layout.css?v=20261009" />
 </head>
