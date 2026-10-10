@@ -227,3 +227,105 @@ main{max-width:1190px;padding-top:36px}
 .w-copy small,.sidebar-label,.sidebar-version,.workspace-footer{color:#526b62}
 .editor-status,.lab-sub{color:#486d5b}
 .editor-dots{color:#718b7d}
+
+
+.previewbar{position:sticky;top:0;z-index:200;background:#fff6d8;border-bottom:1px solid #eac979;padding:10px max(14px,calc((100vw - 1080px)/2));font-size:13px;color:#694809;line-height:1.6}
+.previewbar strong{font-weight:900}.preview-switch{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:7px}
+.preview-switch button{font-size:13px;font-weight:800;border:1px solid #beaa6a;border-radius:9px;background:#fff;padding:6px 10px;color:#62481c;min-height:36px}
+.preview-switch button.active{background:#685326;color:white}
+@media(max-width:500px){.previewbar{position:relative;font-size:12px}.preview-switch button{flex:1;white-space:nowrap}}
+
+/* Programming Workspace v3: obvious role selector and readable light-code IDE */
+:root{--canvas:#f3f5fa;--ink:#202d40;--ink-soft:#435366;--muted:#516073;--line:#d8deea;--primary:#285bd4;--primary-hover:#1c49b3;--accent:#edf2ff;--violet:#7551c0;--orange:#a05721}
+body{background:#f4f6fb;color:var(--ink)}
+header{background:#fff;border-bottom-color:#e1e5f0}
+.topwrap{max-width:1260px}
+.brand{font-size:23px;letter-spacing:-1.2px}
+.brand span{color:#325fcb}.brand-code{color:#4e5fc6;font:800 23px ui-monospace,monospace;letter-spacing:-3px;align-self:center;margin-right:10px}
+main{max-width:1260px}
+.hero .eyebrow{color:#5260a2;font-family:ui-monospace,Consolas,monospace}
+.hero h1{font-weight:900}
+.login-page{max-width:1150px;margin:0 auto}
+.login-heading{margin:7px 0 24px}
+.login-heading .eyebrow{font:800 12px ui-monospace,Consolas,monospace;color:#536ab3;letter-spacing:.03em}
+.terminal-cursor{color:#426ef2;animation:blink 1.2s step-end infinite}
+@keyframes blink{50%{opacity:.15}}
+.login-heading h1{font-size:clamp(35px,5vw,54px);line-height:1.17;letter-spacing:-2px;margin:10px 0 12px}
+.login-heading em{font-style:normal;color:#315cc8}
+.code-period{color:#d08b3e}
+.login-heading p{margin:0;color:#526177;font-size:16px}
+.login-layout{display:grid;grid-template-columns:minmax(0,1.07fr) minmax(280px,.93fr);align-items:start;gap:22px}
+.login-window,.login-code-preview{background:#fff;border:1px solid #cfd8e8;border-radius:17px;overflow:hidden;box-shadow:0 13px 34px #1b3a7320}
+.ide-titlebar{min-height:43px;padding:0 15px;display:flex;align-items:center;gap:10px;background:#eef2f9;border-bottom:1px solid #d7deed;font:700 12px ui-monospace,Consolas,monospace;color:#3f5579}
+.ide-dots{display:inline-flex;gap:5px;align-items:center;flex-shrink:0}
+.ide-dots i{display:block;width:9px;height:9px;border-radius:50%;background:#d9928d}.ide-dots i:nth-child(2){background:#e6c176}.ide-dots i:nth-child(3){background:#76bb9b}
+.ide-filename{background:#fff;border-top:2px solid #688af0;align-self:stretch;display:flex;align-items:center;padding:0 18px;margin-left:6px;margin-bottom:-1px;border-right:1px solid #e1e5f0;border-left:1px solid #e1e5f0;color:#2b4972}
+.ide-language{margin-left:auto;font-size:10px;font-weight:800;color:#667a92;letter-spacing:.11em}
+.login-body{padding:25px 28px 22px}
+.login-step{display:flex;align-items:flex-start;gap:12px}
+.login-step h2{margin:0 0 4px;font-size:19px;letter-spacing:-.6px;line-height:1.45}
+.login-step p{margin:0;font-size:13px;color:#526177;line-height:1.5}
+.step-no{font:800 12px ui-monospace,Consolas,monospace;display:flex;align-items:center;justify-content:center;flex:none;background:#e9efff;color:#315bb4;border-radius:7px;width:32px;height:32px}
+.role-picker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0 27px}
+.role-choice{appearance:none;border:1.5px solid #d6deea;background:#fff;padding:17px 7px 13px;border-radius:13px;display:flex;align-items:center;flex-direction:column;gap:3px;color:#374963;min-height:119px;text-align:center;position:relative;transition:border-color .12s,background .12s,box-shadow .12s}
+.role-choice:hover{border-color:#7693d6;background:#f7f9ff}
+.role-choice.active{border:2px solid #3868d7;background:#eff4ff;box-shadow:0 0 0 3px #4774dc1c;color:#213e87}
+.role-choice.active:after{content:'✓';position:absolute;right:10px;top:8px;color:#2d61cd;font-size:13px;font-weight:900}
+.role-glyph{width:41px;height:38px;display:grid;place-items:center;background:#edf0fa;color:#5267a9;border-radius:10px;font:900 17px ui-monospace,Consolas,monospace;letter-spacing:-1px;margin-bottom:2px}
+.role-choice.active .role-glyph{background:#dce8ff;color:#2854b9}
+.role-choice strong{font-size:16px;font-weight:900}
+.role-choice small{font-size:12px;color:#586a81}
+.step-two{margin-bottom:16px}
+.login-cta{background:#285bd4;border:1px solid #285bd4;border-radius:11px;color:#fff;display:flex;align-items:center;justify-content:center;gap:11px;width:100%;min-height:55px;padding:11px 15px;font-weight:900;font-size:17px;box-shadow:0 5px 12px #2d5fca2b}
+.login-cta:hover{background:#214bb1}.login-cta:disabled{background:#80899a;border-color:#80899a;box-shadow:none}
+.cta-play{font-size:13px;background:#ffffff24;display:grid;place-items:center;width:29px;height:29px;border-radius:7px}
+.login-cta>span:last-child{margin-left:auto}
+.signup-options{margin:19px 0 0;border:0;border-top:1px solid #e0e6f0;border-radius:0;background:#fff;padding:5px 0 0}
+.signup-options summary{padding:13px 4px;color:#355a9f;font-size:14px;font-weight:800}
+.signup-options[open] summary{margin-bottom:16px}
+.signup-options .seg button{border-color:#b9c7e2}
+.signup-options .seg button.on{background:#e5eeff;color:#2954ac;border-color:#6289df}
+.signup-options>.form{margin-top:17px}
+.login-privacy{font-size:12px;color:#4d5e77;line-height:1.6;margin-top:16px;display:flex;gap:8px;align-items:start}
+.ide-statusbar{height:28px;background:#315ac0;color:white;font:700 10px ui-monospace,Consolas,monospace;display:flex;align-items:center;justify-content:space-between;padding:0 13px;gap:10px}
+.live-dot{display:inline-block;width:7px;height:7px;background:#a4ecc4;border-radius:50%;margin-right:5px}
+.login-code-preview{min-height:390px}
+.code-lines{padding:39px 17px 46px;background:#fbfcff;font:14px/2.35 ui-monospace,'Cascadia Code',Consolas,monospace;color:#243854;white-space:nowrap;overflow:auto}
+.code-lines .ln{display:inline-block;width:35px;user-select:none;color:#7e91aa}
+.syntax-purple{color:#6d3fbd;font-weight:800}.syntax-blue{color:#0e67ad;font-weight:700}.syntax-orange{color:#a84c18}.syntax-gray{color:#63815f}
+.ide-terminal{border-top:1px solid #d5dfec;background:#f1f6fb;padding:0 16px 18px;font:12px/2 ui-monospace,Consolas,monospace;color:#40526b}
+.terminal-header{color:#48628a;display:flex;align-items:center;gap:7px;border-bottom:1px solid #dce3f0;font-size:10px;font-weight:900;letter-spacing:.06em;margin-bottom:10px;height:38px}
+.terminal-ready{margin-left:auto;color:#227655;font-size:10px}.prompt{color:#2972c1;margin-right:8px;font-weight:900}
+/* Make the entire application feel like a light IDE: explorer/sidebar, tabs, syntax and statusbar */
+.workspace-sidebar{border-radius:13px;background:#fafdff;border-color:#d2ddec;box-shadow:0 8px 22px #17357a12}
+.sidebar-label{font-family:ui-monospace,Consolas,monospace;color:#526382}
+.workspace-link{border-radius:8px}
+.workspace-link.selected{background:#e8efff;border-color:#a9bdee;color:#214bb0;box-shadow:inset 3px 0 0 #3b68d2}
+.workspace-link.selected .w-icon{color:#345dc2;background:#dce8ff}
+.w-icon{font:800 14px ui-monospace,Consolas,monospace;background:#edf1fb;color:#5265a0}
+.workspace-section{border-radius:13px;border-color:#cfdced;box-shadow:0 12px 28px #27448117}
+.editor-bar{background:#e9eef9;border-bottom-color:#d0dced;color:#374d7a;height:47px;padding:0 18px;font-size:12px}
+.editor-bar>span:nth-child(2){background:white;align-self:stretch;border-top:2px solid #4b74d8;border-left:1px solid #d8e2f0;border-right:1px solid #d8e2f0;padding:0 17px;display:flex;align-items:center;margin-bottom:-1px}
+.editor-status{font:800 10px ui-monospace,Consolas,monospace;color:#3659a6}
+.editor-paper{background:linear-gradient(to right,#f6f8fe 0px,#f6f8fe 44px,#fff 44px,#fff 100%);padding-left:75px}
+.editor-paper>.tag{font-family:ui-monospace,Consolas,monospace;color:#5267ac}
+.editor-paper h2{color:#202f4d}
+.editor-paper .button{background:#285bd4}.editor-paper .button:hover{background:#214cb5}
+.editor-paper textarea,.editor-paper input,.editor-paper select{border-color:#aabbd7;background:#fff}
+.editor-paper .optional-fields{background:#fbfcff;border-color:#d4e0f5}
+.editor-paper .checkbox{background:#f4f7ff;border-color:#d5e0f5}
+.editor-paper .panel{background:transparent}
+.lab-shell{border-color:#d1dff0}.lab-tabbar{background:#eaf0fd;color:#3555a6}.lab-editor{background:#fff}
+.lab-result{background:#eff5ff;border-color:#d4e3ff;color:#274a90}
+.therapist-shell .panel[data-workspace-view="inbox"]{background:#fff;border-color:#c8d6ee}
+.therapist-shell .panel{border-color:#d7e0ef}
+.panel.highlight{border-color:#88a6e5}
+.button{background:#2c60d0}.button:hover{background:#224eb1}
+.button-ghost{border-color:#adc3e5;color:#2552a3}
+.role-chip{background:#e7eeff!important;color:#355cb2!important}
+.field-note,.sidebar-note{color:#4a5e77}
+.previewbar{background:#fff8e9;color:#74511c;border-bottom-color:#e7d6a0}
+@media(max-width:900px){.login-layout{grid-template-columns:1fr}.login-code-preview{display:none}.login-page{max-width:600px}.login-heading h1{font-size:clamp(35px,6vw,45px)}}
+@media(max-width:740px){.editor-paper{background:#fff;padding-left:20px}.login-body{padding:21px 19px 19px}.login-heading{margin-bottom:20px}.login-heading h1{font-size:36px}.login-window{border-radius:14px}.role-choice{min-height:105px;padding:14px 4px 10px}.role-glyph{width:35px;height:32px;font-size:14px}.role-choice strong{font-size:15px}.role-choice small{font-size:11px}.login-privacy{font-size:12px}.ide-statusbar>span:last-child{font-size:9px}.editor-bar{padding:0 12px}.editor-bar>span:nth-child(2){padding:0 9px}.workspace-sidebar{padding:10px}.workspace-link.selected{box-shadow:inset 0 -3px 0 #3b68d2}}
+@media(max-width:370px){.role-picker{gap:6px}.role-choice{padding-left:1px;padding-right:1px}.role-choice strong{font-size:14px}.role-choice small{font-size:10px}.login-heading h1{font-size:33px}.login-body{padding:18px 13px}.editor-paper{padding-left:14px}}
+@media(prefers-reduced-motion:reduce){.terminal-cursor{animation:none}}
