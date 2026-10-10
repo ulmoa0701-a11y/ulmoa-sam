@@ -381,7 +381,7 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
 .scoreDownloadStatus:empty{display:none}
 .score:before{display:none!important}
 .beat{position:relative;transition:opacity .15s,filter .15s,transform .15s}
-.beat.scorePlayed{opacity:.43}
+.beat.scorePlayed{opacity:.72}
 .beat.scoreNext{outline:2px dashed #7eaad0;outline-offset:-2px}
 .beat.scoreActive{opacity:1!important;z-index:2;outline:4px solid #244d7c;outline-offset:-3px;box-shadow:0 0 0 3px rgba(255,210,74,.83),0 5px 13px rgba(37,62,94,.22);animation:scoreHitPulse .42s ease-out both}
 .beat.scoreActive .note{filter:brightness(1.12)}
@@ -756,6 +756,8 @@ function draw(){
  const stage=$('#stage'),hitY=stage.clientHeight-68;
  const noteRadius=window.innerWidth<=800?29:43,spawnY=-noteRadius-8;
  stage.querySelectorAll('.fall').forEach(x=>x.remove());
+ // Score mode paints note cards directly; skip hidden falling-note DOM work every frame.
+ if(playView==='score')return;
  if(!hasStartedSong&&!introActive&&elapsed<=0)return;
  for(const e of events){
   if(!e.active)continue;
