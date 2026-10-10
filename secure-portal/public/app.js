@@ -94,13 +94,64 @@ function activateWorkspace(next){
 }
 function bindWorkspace(){
  document.querySelectorAll('[data-workspace-target]').forEach(b=>b.addEventListener('click',()=>{
-  activateWorkspace(b.dataset.workspaceTarget);paintSketches();
+  activateWorkspace(b.dataset.workspaceTarget);paintSketches();if(me?.role==='parent'&&activeView==='calendar')renderParentCalendar();
   if(window.innerWidth<741)document.querySelector('.workspace-content')?.scrollIntoView({behavior:'smooth',block:'start'});
  }));
  activateWorkspace(activeView);
 }
 const NOTE_LABELS={note:'자유 기록',mood:'오늘의 상태',energy:'컨디션',thought:'떠오른 생각',body:'몸의 느낌',action:'해본 일',sketch:'그림',observation:'관찰한 사실',response:'보호자의 대응',impact:'생활에서 달라진 점',message:'전달사항',event:'있었던 일',next:'다음 시도',date:'관찰 날짜',time:'관찰 시간',context:'직전 상황',origin:'정보 출처'};
 function todayLocal(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
+/* Parent calendar v8: event date, not the entry creation timestamp. */
+let parentCalendarMode='month',parentCalendarDate=todayLocal();
+function isoDay(d){const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
+function parseIsoDay(s){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(s||'')))return null;const [y,m,d]=s.split('-').map(Number),v=new Date(y,m-1,d,12);return v.getFullYear()===y&&v.getMonth()===m-1&&v.getDate()===d?v:null;}
+function dayShift(date,amount){const d=parseIsoDay(date)||new Date();d.setDate(d.getDate()+amount);return isoDay(d);}
+function monthShift(date,amount){const d=parseIsoDay(date)||new Date();const orig=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+amount);const max=new Date(d.getFullYear(),d.getMonth()+1,0,12).getDate();d.setDate(Math.min(orig,max));return isoDay(d);}
+function parentRecordDay(record){const day=record.entry?.date;if(parseIsoDay(day))return day;const created=new Date(record.createdAt);return Number.isNaN(created.valueOf())?todayLocal():isoDay(created);}
+function parentCalendarHTML(){return `<div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>calendar / my-notes</span><span class="editor-status">PRIVATE</span></div>
+ <div class="editor-paper parent-calendar-wrap"><span class="tag">MY RECORDS</span><h2>생활 기록 달력</h2><p class="parent-calendar-caption">일이 있었던 날을 기준으로 보여요. 기록이 없는 날은 그대로 비워둬요.</p>
+ <div class="calendar-toolbar"><div class="calendar-modes" role="group" aria-label="달력 보기 방식"><button type="button" data-cal-mode="month">월</button><button type="button" data-cal-mode="week">주</button><button type="button" data-cal-mode="day">일</button></div><div class="calendar-date-nav"><button type="button" data-cal-prev aria-label="이전 기간">‹</button><strong id="calendarPeriod" aria-live="polite"></strong><button type="button" data-cal-next aria-label="다음 기간">›</button><button type="button" class="calendar-today" data-cal-today>오늘</button></div></div>
+ <div id="calendarOverview" aria-label="기록 달력"></div><div id="calendarDayDetails" class="calendar-details"></div></div>`;}
+function renderParentCalendar(){
+ const root=$('parentCalendar');if(!root||me?.role!=='parent')return;
+ if(!parseIsoDay(parentCalendarDate))parentCalendarDate=todayLocal();
+ const selected=parseIsoDay(parentCalendarDate),ym=selected.getFullYear(),mm=selected.getMonth(),index=new Map();
+ records.filter(r=>r.kind==='parent').forEach(r=>{const date=parentRecordDay(r);if(!index.has(date))index.set(date,[]);index.get(date).push(r)});
+ root.querySelectorAll('[data-cal-mode]').forEach(b=>{const on=b.dataset.calMode===parentCalendarMode;b.classList.toggle('current',on);b.setAttribute('aria-pressed',String(on))});
+ const period=$('calendarPeriod'),overview=$('calendarOverview'),detail=$('calendarDayDetails'),weekdays=['월','화','수','목','금','토','일'];
+ const monday=new Date(selected);monday.setDate(selected.getDate()-(selected.getDay()+6)%7);
+ const weekEnd=new Date(monday);weekEnd.setDate(monday.getDate()+6);
+ const dateLabel=d=>`${d.getMonth()+1}월 ${d.getDate()}일`;
+ if(parentCalendarMode==='month')period.textContent=`${ym}년 ${mm+1}월`;
+ else if(parentCalendarMode==='week')period.textContent=`${dateLabel(monday)} – ${dateLabel(weekEnd)}`;
+ else period.textContent=`${ym}년 ${dateLabel(selected)}`;
+ const weekday=(d)=>weekdays[(d.getDay()+6)%7];
+ const dayButton=(d,isMonth)=>{const iso=isoDay(d),n=index.get(iso)?.length||0,selectedDay=iso===parentCalendarDate,otherMonth=isMonth&&d.getMonth()!==mm;
+  return `<button type="button" class="calendar-day${selectedDay?' is-selected':''}${otherMonth?' is-outside':''}${iso===todayLocal()?' is-today':''}" data-cal-date="${iso}" aria-pressed="${selectedDay}" aria-label="${iso}, 메모 ${n}건"><span class="calendar-day-num">${d.getDate()}</span>${n?`<span class="calendar-day-count">${n}건</span>`:''}</button>`;};
+ if(parentCalendarMode==='month'){
+  const first=new Date(ym,mm,1,12),firstWeek=(first.getDay()+6)%7,last=new Date(ym,mm+1,0,12),slots=Math.ceil((firstWeek+last.getDate())/7)*7,start=new Date(ym,mm,1-firstWeek,12);
+  const days=Array.from({length:slots},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return dayButton(d,true)}).join('');
+  overview.innerHTML=`<div class="calendar-weekdays">${weekdays.map(d=>`<span>${d}</span>`).join('')}</div><div class="calendar-month-grid">${days}</div>`;
+ }else if(parentCalendarMode==='week'){
+  const days=Array.from({length:7},(_,i)=>{const d=new Date(monday);d.setDate(monday.getDate()+i);return `<div class="calendar-week-col"><span class="calendar-weekday">${weekday(d)}</span>${dayButton(d,false)}</div>`}).join('');
+  overview.innerHTML=`<div class="calendar-week-grid">${days}</div>`;
+ }else{
+  overview.innerHTML=`<div class="calendar-day-overview"><span class="calendar-day-title">${dateLabel(selected)} (${weekday(selected)})</span><span class="calendar-day-summary">메모 ${index.get(parentCalendarDate)?.length||0}건</span></div>`;
+ }
+ const list=(index.get(parentCalendarDate)||[]).slice().sort((a,b)=>String(a.entry?.time||'99:99').localeCompare(String(b.entry?.time||'99:99')));
+ const items=list.map(r=>{
+  const entry=r.entry||{},time=entry.time?`${sanitize(entry.time)} · `:'',text=String(entry.observation||entry.message||entry.response||entry.impact||entry.context||'관찰 메모'),ex=text.length>105?text.slice(0,105)+'…':text,legacy=!parseIsoDay(entry.date);
+  return `<details class="calendar-record"><summary><span class="calendar-record-copy"><span class="calendar-record-snippet">${time}${sanitize(ex)}</span><span class="calendar-record-meta">${r.shared?'담당 치료사에게 일부 공유':'나만 보기'}${legacy?' · 작성일 기준(관찰일 미지정)':''}</span></span><span class="calendar-open">열어보기</span></summary><div class="calendar-record-full">${prettyRecordEntry(entry)}<p class="calendar-created">작성: ${sanitize(new Date(r.createdAt).toLocaleString('ko-KR'))}</p></div></details>`;
+ }).join('');
+ detail.innerHTML=`<div class="calendar-details-heading"><strong>${ym}년 ${dateLabel(selected)} · 메모 ${list.length}건</strong><button type="button" data-cal-new ${parentCalendarDate>todayLocal()?'disabled aria-label="미래 날짜는 기록할 수 없습니다"':''}>+ 이 날짜에 메모하기</button></div>${items||'<p class="calendar-empty">이 날짜에 남긴 기록이 없어요. 꼭 기록하지 않아도 괜찮아요.</p>'}`;
+ root.querySelectorAll('[data-cal-date]').forEach(b=>b.onclick=()=>{parentCalendarDate=b.dataset.calDate;renderParentCalendar();if(window.innerWidth<=740)document.querySelector('.calendar-details')?.scrollIntoView({block:'nearest',behavior:'smooth'})});
+ root.querySelectorAll('[data-cal-mode]').forEach(b=>b.onclick=()=>{parentCalendarMode=b.dataset.calMode;renderParentCalendar()});
+ root.querySelector('[data-cal-prev]').onclick=()=>{parentCalendarDate=parentCalendarMode==='month'?monthShift(parentCalendarDate,-1):dayShift(parentCalendarDate,parentCalendarMode==='week'?-7:-1);renderParentCalendar()};
+ root.querySelector('[data-cal-next]').onclick=()=>{parentCalendarDate=parentCalendarMode==='month'?monthShift(parentCalendarDate,1):dayShift(parentCalendarDate,parentCalendarMode==='week'?7:1);renderParentCalendar()};
+ root.querySelector('[data-cal-today]').onclick=()=>{parentCalendarDate=todayLocal();renderParentCalendar()};
+ root.querySelector('[data-cal-new]').onclick=()=>{if(parentCalendarDate>todayLocal())return;activateWorkspace('write');const dt=$('entryForm')?.elements?.date;if(dt){dt.value=parentCalendarDate;dt.focus()}};
+}
+
 function dataForm(role){
  if(role==='parent')return `<form class="form entry-v5 parent-easy-form" id="entryForm">
  <div class="parent-when"><label class="parent-date-field">언제 있었던 일인가요? <input name="date" type="date" value="${todayLocal()}" max="${todayLocal()}" required aria-describedby="parentDateInfo"></label><label class="parent-time-field">몇 시쯤? <small>(선택)</small><input name="time" type="time"></label></div>
@@ -161,7 +212,7 @@ function wireEntryForm(isParent){
  if(isParent&&share.checked&&sharedFields.length){sharedFields.push('date');if(entry.time)sharedFields.push('time');}
  if(share.checked&&!sharedFields.length){toast('공유할 항목을 하나 이상 골라줘.');return;}
  if(share.checked&&!confirm('선택한 항목만 담당 치료사에게 전달할까요? 공유한 내용은 드라이브에 별도 백업될 수도 있어요.'))return;
- loading(button,async()=>{await api('records',{method:'POST',body:{entry,share:share.checked,sharedFields}});activeView='history';toast('내 기록에 저장했어.');await dashboard()});};
+ loading(button,async()=>{await api('records',{method:'POST',body:{entry,share:share.checked,sharedFields}});if(isParent){parentCalendarDate=entry.date;parentCalendarMode='day';activeView='calendar'}else activeView='history';toast('내 기록에 저장했어.');await dashboard()});};
 }
 function prettyRecordEntry(entry){return Object.entries(entry??{}).map(([k,v])=> k==='sketch'?`<div class="sketch-record" data-sketch="${sanitize(v)}"><div class="sketch-mini-label">그림 메모</div><canvas width="760" height="380"></canvas></div>`:`<p><b>${sanitize(NOTE_LABELS[k]||k)}</b><br>${sanitize(v)}</p>`).join('');}
 function paintSketches(){document.querySelectorAll('[data-sketch]').forEach(el=>{try{const arr=JSON.parse(el.dataset.sketch);if(!Array.isArray(arr)||arr.length>250)return;const ctx=el.querySelector('canvas').getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,760,380);ctx.strokeStyle='#5362cc';ctx.lineWidth=3.5;ctx.lineCap='round';ctx.lineJoin='round';arr.forEach(stroke=>{if(!Array.isArray(stroke)||!stroke.length)return;ctx.beginPath();stroke.slice(0,240).forEach((p,i)=>{if(!Array.isArray(p)||p.length!==2||!Number.isFinite(p[0])||!Number.isFinite(p[1]))return;const x=Math.max(0,Math.min(760,p[0])),y=Math.max(0,Math.min(380,p[1]));i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke()});}catch(_){}})}
@@ -250,17 +301,18 @@ function attachCoding(){
 function studentHome(){
  const isParent=me.role==='parent';
  const items=isParent?[
-  ['write','✎','1분 생활 메모','필요할 때만'],['history','▤','내 기록','내가 쓴 내용']
+  ['write','✎','1분 생활 메모','필요할 때만'],['calendar','▦','기록 달력','월·주·일'],['history','▤','내 기록','내가 쓴 내용']
  ]:[
   ['write','✎','기록하기','한 장이면 충분해'],['history','▤','내 기록','지난 기록 확인'],['coding','⌘','코딩 실험실','원하면 탐색하기']
  ];
  app.innerHTML=hero(isParent?'필요할 때만 짧게 남겨요.':'내가 남기고 싶은 한 페이지.',isParent?'모든 변화를 적을 필요는 없어요. 기억에 남은 한 가지면 충분해요.':'매일 써야 하는 숙제는 아니야. 기록한 내용은 기본적으로 나만 볼 수 있어.')+
  `<div class="workspace-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">01</span></div>${workspaceNav(items,activeView)}<div class="sidebar-note"><span class="privacy-dot" aria-hidden="true"></span>공유는 내가 선택해요.<br><small>혼자만 볼 수도 있어요.</small></div></aside><div class="workspace-content">
  <section data-workspace-view="write" class="workspace-section"><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>${isParent?'observation.note':'my-note.md'}</span><span class="editor-status">NEW NOTE</span></div><div class="editor-paper"><span class="tag">01 / WRITE</span><h2>${isParent?'간단한 생활 메모':'새 페이지'}</h2><p>${isParent?'한 가지를 짧게 적어도 충분해요. 치료사에게 전달하지 않아도 돼요.':'글이나 그림으로 남겨도 되고, 그냥 둘러봐도 돼.'}</p>${dataForm(me.role)}</div></section>
+ ${isParent?`<section data-workspace-view="calendar" id="parentCalendar" class="workspace-section" hidden>${parentCalendarHTML()}</section>`:''}
  <section data-workspace-view="history" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>my-notes.json</span></div><div class="editor-paper"><span class="tag">02 / ARCHIVE</span><h2>${isParent?'내 생활 메모':'내 서랍'}</h2><p>${isParent?'내가 남긴 메모만 보여요.':'내가 남긴 페이지들을 모아두는 곳이야.'}</p><div id="recordsHere">${recordCards()}</div></div></section>
  ${isParent?'':`<section data-workspace-view="coding" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>studio / playground</span></div><div class="editor-paper"><span class="tag">OPTIONAL / PLAY</span><h2>코딩 실험실</h2><p>조건을 바꿔 결과를 확인하는 작은 실험 공간이야. 기록하지 않고 그냥 놀아도 돼.</p>${codingMarkup()}<details class="optional-fields"><summary>간단한 선택 예시 살펴보기 <small>선택</small></summary><div class="optional-wrap">${situationMarkup()}</div></details></div></section>`}
  </div></div><p class="workspace-footer">일단써봄은 원하는 방식으로 경험을 남기는 개인 작업공간이야. 사용하고 싶은 때에만 열어도 돼.</p>`;
- wireEntryForm(isParent);attachShares();bindWorkspace();paintSketches();
+ wireEntryForm(isParent);attachShares();bindWorkspace();paintSketches();if(isParent)renderParentCalendar();
  if(!isParent){attachSituation();attachCoding();}
 
 }
