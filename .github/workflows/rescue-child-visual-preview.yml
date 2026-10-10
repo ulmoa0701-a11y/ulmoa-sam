@@ -1,0 +1,33 @@
+name: Check Rescue Child UX Frames
+on:
+  pull_request:
+    paths: ['.github/workflows/rescue-child-visual-preview.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Inspect child-UX screenshots from tested revision
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -fsSL --max-time 30 -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/ulmoa0701-a11y/ulmoa-sam/actions/artifacts/11656789841/zip" -o /tmp/rescue-qa.zip
+          unzip -oq /tmp/rescue-qa.zip -d /tmp/qa-images
+          python3 -m pip -q install Pillow
+          python3 - <<'PY'
+          import pathlib,base64,io
+          from PIL import Image
+          path=pathlib.Path('/tmp/qa-images')
+          names=['desktop-1440x900-gameplay','mobile-390x844-gameplay','mobile-390x844-briefing','mobile-390x844-round3-complete','tablet-1024x768-gameplay']
+          for name in names:
+            matches=list(path.rglob(name+'.png'))
+            if not matches:
+              print('MISSING',name);continue
+            im=Image.open(matches[0]).convert('RGB')
+            im.thumbnail((880,1000))
+            output=io.BytesIO();im.save(output,'JPEG',quality=60,optimize=True)
+            print('AUDIT_IMAGE_BEGIN',name,base64.b64encode(output.getvalue()).decode(),'AUDIT_IMAGE_END',flush=True)
+          PY
