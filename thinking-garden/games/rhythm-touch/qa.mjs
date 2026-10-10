@@ -25,6 +25,8 @@ for(const [name,w,h] of [['desktop1366',1366,900],['mobile390',390,844]]){
  await page.waitForURL('**/thinking-garden/games/rhythm-touch/');
  check((await page.title()).includes('박자꽃 톡톡'),name+': game page wrong');
  check(await page.locator('.key').count()===8,name+': 8 large touch note keys required');
+ check((await page.locator('.key[data-note="높은도"]').innerText()).includes('도↑'),
+    name+': mobile high C button should be compact and readable');
  check(await page.locator('.noteTile').count()===14,name+': first song note sequence mismatch');
  const initial=await page.evaluate(()=>window.__rhythmQA.state());
  check(initial.song==='twinkle'&&initial.events[0].note==='도'&&initial.events[1].note==='도',name+': incorrect two opening notes');
