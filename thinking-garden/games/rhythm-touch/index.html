@@ -5,7 +5,7 @@
 <meta name="robots" content="noindex,nofollow">
 <title>박자꽃 톡톡! | 모아의 생각정원</title>
 <meta name="description" content="붐웨커 색깔악보에 맞춰 정확한 계이름을 박자에 맞게 누르는 리듬 연습 게임입니다.">
-<link rel="stylesheet" href="style.css?v=1">
+<link rel="stylesheet" href="style.css?v=20261010-grid2">
 </head>
 <body>
 <div class="app">
@@ -33,18 +33,13 @@
    <div class="scoreBox"><small>나의 연주 점수</small><strong><span id="scoreLabel">0</span><small> / 100</small></strong></div>
  </div>
  <div id="mainStage" class="mainStage">
-   <div class="nowHead"><span>지금 이 음표!</span><span id="feedback" class="feedback" role="status" aria-live="polite">준비되면 시작해요 🌼</span></div>
-   <div class="cueGroup">
-     <div class="cueWrap"><div id="currentCue" class="cue muted">♪</div><small id="currentLyric">연습 준비</small></div>
-     <div class="nextWrap"><span>다음 음표</span><div id="nextCue" class="nextCue">♪</div></div>
-   </div>
+   <div class="nowHead"><span>🎼 빛나는 칸을 보고, 아래 계이름을 톡!</span><span id="feedback" class="feedback" role="status" aria-live="polite">준비되면 시작해요 🌼</span></div>
+   <div id="noteTrack" class="noteTrack" aria-label="박자에 맞춰 한 칸씩 강조되는 색깔악보"></div>
    <div class="countOverlay" id="countOverlay" hidden aria-live="polite" aria-label="시작 박자">
      <span class="countInfo">같이 박자 맞춰요</span><div id="countNumber">1</div>
    </div>
  </div>
- <div class="sheetHead"><strong>🎼 색깔악보</strong><span>움직이는 음표를 보며 누르기</span></div>
- <div id="noteTrack" class="noteTrack" aria-label="노래 색깔악보"></div>
- <div class="keyHead"><strong>색깔 붐웨커를 톡!</strong><small>터치 · 마우스 클릭 · 키보드 1~8</small></div>
+ <div class="keyHead"><strong>👇 지금 빛나는 칸의 계이름을 눌러요!</strong><small>터치 · 클릭 · 키보드 1~8</small></div>
  <div id="keys" class="keys" role="group" aria-label="계이름 연주 버튼"></div>
  <p class="disclaimer">연습용 박자 점수예요. 기기·터치 반응 속도에 따라 차이가 날 수 있으며, 평가나 진단 점수는 아닙니다.</p>
 </section>
@@ -58,6 +53,6 @@
 </main>
 <footer>일단 해봄 · 울모아쌤 | 학습용 시범 게임</footer>
 </div>
-<script src="game.js?v=1"></script>
+<script src="game.js?v=20261010-grid2"></script>
 </body>
 </html>

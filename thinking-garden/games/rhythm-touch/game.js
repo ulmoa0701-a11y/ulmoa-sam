@@ -58,11 +58,16 @@ function renderKeys(){
 }
 function renderTrack(){
  const track=$('#noteTrack');track.innerHTML='';
+ track.scrollTop=0;
  state.events.forEach(e=>{
   const el=document.createElement('div');el.className='noteTile';el.dataset.i=String(e.i);
-  el.innerHTML='<div class="tileNote" style="background:'+COLORS[e.note]+'">'+e.note+'</div><div class="tileLyric">'+e.lyric+'</div>';
+  el.setAttribute('aria-label',(e.i+1)+'번째 '+e.note+' · '+e.lyric);
+  const display=e.note==='높은도'?'도↑':e.note;
+  const long=e.dur/state.beat>=1.75?'<span class="longNote">길게</span>':'';
+  el.innerHTML='<div class="tileNote" style="background:'+COLORS[e.note]+'"><span class="scoreNoteBubble">'+display+'</span>'+long+'</div><div class="tileLyric">'+e.lyric+'</div>';
   track.appendChild(el);
  });
+ track.firstElementChild?.classList.add('ready');
 }
 function setFeedback(txt){$('#feedback').textContent=txt}
 function refreshScore(){
@@ -111,25 +116,32 @@ function judgeTap(note,relativeMs){
  return {grade,index:i,offsetMs:Math.round(offset)};
 }
 function resetView(){
- $('#currentCue').className='cue muted';$('#currentCue').textContent='♪';
- $('#currentCue').style.background='';$('#currentLyric').textContent='연습 준비';
- $('#nextCue').textContent='♪';$('#nextCue').style.background='';
+ $('#noteTrack').scrollTop=0;
+ $('#noteTrack').querySelectorAll('.noteTile').forEach((tile,i)=>{
+   tile.classList.remove('active','next','correct','missed','wrong');
+   tile.classList.toggle('ready',i===0);
+ });
  $('#countOverlay').hidden=true;$('#results').hidden=true;
  $('#pauseBtn').hidden=true;$('#startBtn').disabled=false;$('#startBtn').textContent='▶ 시작하기';
- $('#noteTrack').scrollLeft=0;setFeedback('준비되면 시작해요 🌼');refreshScore();setSettings();
+ setFeedback('준비되면 시작해요 🌼');refreshScore();setSettings();
 }
 function changeCue(index){
  if(index===state.lastUi)return;
  state.lastUi=index;
- const e=state.events[Math.max(0,Math.min(index,state.events.length-1))],next=state.events[index+1];
- const cue=$('#currentCue');cue.classList.remove('muted','beatGlow');void cue.offsetWidth;
- cue.classList.add('beatGlow');cue.textContent=e.note;cue.style.background=COLORS[e.note];
- $('#currentLyric').textContent=e.lyric?e.lyric:'이 음을 톡!';
- $('#nextCue').textContent=next?next.note:'완료';
- $('#nextCue').style.background=next?COLORS[next.note]:'#e7eee9';
- document.querySelectorAll('.noteTile').forEach((el,i)=>el.classList.toggle('active',i===index));
- const target=$('#noteTrack [data-i="'+index+'"]');
- if(target&&typeof target.scrollIntoView==='function')target.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+ const track=$('#noteTrack'),tiles=track.children;
+ for(let i=0;i<tiles.length;i++){
+   tiles[i].classList.toggle('active',i===index);
+   tiles[i].classList.toggle('next',i===index+1);
+   tiles[i].classList.remove('ready');
+   if(i===index){tiles[i].classList.remove('pulse');void tiles[i].offsetWidth;tiles[i].classList.add('pulse')}
+ }
+ const active=tiles[index];
+ if(active){
+   // Scroll ONLY the music score, never the entire browser page or the touch keys.
+   const trackRect=track.getBoundingClientRect(),tileRect=active.getBoundingClientRect();
+   if(tileRect.top<trackRect.top+14||tileRect.bottom>trackRect.bottom-14)
+     track.scrollTop+=tileRect.top-(trackRect.top+Math.min(20,trackRect.height*.12));
+ }
 }
 function countWord(i){
  if(i<state.countLen-2)return String(i%state.song.meter+1);
@@ -163,6 +175,15 @@ function tick(now){
 }
 function start(){
  clearGameFrame();state.phase='count';selectSongAfterStart();state.lastCount=-1;
+ // Keep the score and the actual instrument buttons together on a small phone.
+ // Do this before the musical count-in, never during note-by-note playback.
+ {
+   const stage=$('#mainStage'),keys=$('#keys');
+   const bottom=keys.getBoundingClientRect().bottom,view=innerHeight-12;
+   const targetTop=innerWidth<=700?115:76;
+   if(bottom>view||stage.getBoundingClientRect().top<0)
+     window.scrollTo({top:Math.max(0,window.scrollY+stage.getBoundingClientRect().top-targetTop),behavior:'instant'});
+ }
  const now=performance.now();state.countStart=now;state.origin=now+state.countLen*state.beat;
  $('#countOverlay').hidden=false;$('#countNumber').textContent='1';
  $('#pauseBtn').hidden=false;$('#pauseBtn').textContent='⏸ 잠깐 쉬기';
@@ -173,7 +194,7 @@ function start(){
 function selectSongAfterStart(){
  // start() is invoked only after the selection UI has already rebuilt the events.
  mkEvents();renderTrack();refreshScore();state.lastUi=-1;state.lastCount=-1;
- $('#currentCue').className='cue muted';$('#currentCue').textContent='♪';$('#currentLyric').textContent='연습 준비';
+ $('#noteTrack').scrollTop=0;$('#noteTrack').firstElementChild?.classList.add('ready');
 }
 function pause(){
  if(state.phase==='count'||state.phase==='play'){

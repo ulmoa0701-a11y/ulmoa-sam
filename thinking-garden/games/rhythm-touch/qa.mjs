@@ -13,6 +13,9 @@ for(const [name,w,h] of [['desktop1366',1366,900],['mobile390',390,844]]){
  const context=await browser.newContext({viewport:{width:w,height:h},isMobile:w<=700,hasTouch:w<=700});
  const page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push('pageerror '+e.message));
+ const testPage=await page.goto(base+'/test/',{waitUntil:'networkidle'});
+ check(testPage.ok()&&await page.locator('a[href="../boomwhacker/"]').count()===1,
+   name+': Boomwhacker Studio is not listed in website Test category');
  const home=await page.goto(base+'/thinking-garden/',{waitUntil:'networkidle'});
  check(home.ok(),name+': garden home HTTP failure');
  check(await page.locator('.library-card').count()===15,name+': game library count mismatch');
@@ -28,6 +31,36 @@ for(const [name,w,h] of [['desktop1366',1366,900],['mobile390',390,844]]){
  check((await page.locator('.key[data-note="높은도"]').innerText()).includes('도↑'),
     name+': mobile high C button should be compact and readable');
  check(await page.locator('.noteTile').count()===14,name+': first song note sequence mismatch');
+ check(await page.locator('#noteTrack').count()===1&&await page.locator('#currentCue').count()===0&&
+   await page.locator('#nextCue').count()===0&&await page.locator('.sheetHead').count()===0,
+   name+': duplicate top circular cue or second score is still stealing attention');
+ const scoreLayout=await page.evaluate(()=>{
+   const stage=document.querySelector('#mainStage'),track=document.querySelector('#noteTrack'),
+     first=track.firstElementChild,grid=getComputedStyle(track);
+   const full=x=>{const r=x.getBoundingClientRect();return {width:r.width,height:r.height,left:r.left,top:r.top,right:r.right,bottom:r.bottom}};
+   const note=first.querySelector('.scoreNoteBubble'),lyric=first.querySelector('.tileLyric');
+   return {stage:full(stage),grid:full(track),first:full(first),note:full(note),lyric:full(lyric),
+     cols:grid.gridTemplateColumns.split(' ').length,overflowY:grid.overflowY,
+     scrollHeight:track.scrollHeight,clientHeight:track.clientHeight};
+ });
+ check(scoreLayout.cols===(w<=700?4:7)&&scoreLayout.grid.width>scoreLayout.stage.width*.92&&
+   scoreLayout.first.width>=(w<=700?65:110)&&scoreLayout.note.width>=(w<=700?42:55),
+   name+': score grid is too narrow or notes too small '+JSON.stringify(scoreLayout));
+ if(w<=700)check(scoreLayout.scrollHeight>scoreLayout.clientHeight,
+   name+': long mobile score must scroll inside its own grid '+JSON.stringify(scoreLayout));
+ const scrolling=await page.evaluate(()=>{
+   const grid=document.querySelector('#noteTrack');
+   const before=window.scrollY;
+   changeCue(state.events.length-1);
+   return {after:window.scrollY,before,scroll: grid.scrollTop,
+     active:[...grid.querySelectorAll('.noteTile.active')].map(x=>Number(x.dataset.i)),
+     next:grid.querySelectorAll('.noteTile.next').length};
+ });
+ check(scrolling.active.join(',')==='13'&&scrolling.next===0&&
+   (w>700||scrolling.scroll>5)&&Math.abs(scrolling.after-scrolling.before)<=1,
+   name+': score must follow current note without scrolling page '+JSON.stringify(scrolling));
+ await page.evaluate(()=>{state.lastUi=-1;changeCue(0);document.querySelector('#noteTrack').scrollTop=0});
+ await page.screenshot({path:out+'/'+name+'-score-ready.png',fullPage:false});
  const initial=await page.evaluate(()=>window.__rhythmQA.state());
  check(initial.song==='twinkle'&&initial.events[0].note==='도'&&initial.events[1].note==='도',name+': incorrect two opening notes');
  check(Math.abs(initial.bpm-66)<.1,name+': song tempo must be 66 BPM');
@@ -73,8 +106,19 @@ for(const [name,w,h] of [['desktop1366',1366,900],['mobile390',390,844]]){
  });
  await page.waitForTimeout(95);
  const playing=await page.evaluate(()=>window.__rhythmQA.state());
- check(playing.phase==='play'&&await page.locator('#currentCue').innerText()==='도'&&
-   await page.locator('#countOverlay').isHidden(),name+': first 도 did not start immediately after 작');
+ const firstTile=await page.evaluate(()=>({active:[...document.querySelectorAll('#noteTrack .noteTile.active')].map(e=>Number(e.dataset.i)),
+   next:[...document.querySelectorAll('#noteTrack .noteTile.next')].map(e=>Number(e.dataset.i)),
+   first:document.querySelector('#noteTrack .noteTile.active .scoreNoteBubble')?.textContent}));
+ check(playing.phase==='play'&&firstTile.first==='도'&&firstTile.active.join(',')==='0'&&
+   firstTile.next.join(',')==='1'&&await page.locator('#countOverlay').isHidden(),
+   name+': first 도 must glow directly on the sole score after 작 '+JSON.stringify(firstTile));
+ const visibleTogether=await page.evaluate(()=>{
+   const score=document.querySelector('#noteTrack').getBoundingClientRect(),
+     key=document.querySelector('.key').getBoundingClientRect();
+   return {scoreTop:score.top,scoreBottom:score.bottom,keyTop:key.top,keyBottom:key.bottom,viewH:innerHeight,pageY:scrollY};
+ });
+ check(visibleTogether.scoreTop>=-2&&visibleTogether.keyBottom<visibleTogether.viewH+3,
+   name+': score and all instrument buttons must be visible together at playback '+JSON.stringify(visibleTogether));
  check(await page.locator('.key').first().isVisible(),name+': click/touch targets hidden');
  if(w<=700)await page.locator('.key').first().tap();else await page.locator('.key').first().click();
  check((await page.locator('#scoreLabel').innerText())!=='0',
