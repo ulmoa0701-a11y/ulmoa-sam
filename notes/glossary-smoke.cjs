@@ -82,12 +82,19 @@ const path=require("node:path");
       await page.locator("#gcatDialogClose").click();
       await search.fill("");
 
+      assert.equal(await page.locator("#gcatTopicLead").isVisible(),true,"clear picture category heading");
+      assert.equal((await page.locator("#gcatTabs .gcat-tab-count").allTextContents()).join(","),"22,8,7,5,2","accurate illustration counts on topic tabs");
+      assert.equal((await page.locator('.gcat-tab[data-tab="featured"]').textContent()).replace(/\\s+/g," ").trim().includes("전체 그림"),true,"clear all-images tab label");
       for(const [cat,count] of Object.entries(categories)){
         await page.locator('.gcat-tab[data-tab="'+cat+'"]').click();
         assert.equal(await page.locator("#gcatCount").textContent(),count+"개",cat+" artwork count");
         assert.equal(await cards.count(),Math.min(6,count),"topic pagination");
+        assert.equal(await page.locator('.gcat-tab[data-tab="'+cat+'"]').getAttribute("aria-pressed"),"true","selected topic state");
         assert.equal(await paged.isVisible(),count>6,"page navigation for longer groups");
       }
+      await page.locator('.gcat-tab[data-tab="featured"]').click();
+      assert.equal(await page.locator("#gcatCount").textContent(),"22개","all pictures restored without hiding any");
+      assert.equal(await page.locator("#gcatPageCount").textContent(),"1 / 4","category switching resets album pagination");
       await modeAll.click();
       assert.equal(await modeAll.getAttribute("aria-pressed"),"true","whole glossary text-map view selected");
       assert.equal(await page.locator("#gcatCount").textContent(),"30개","30 glossary entries on one map");
@@ -97,6 +104,7 @@ const path=require("node:path");
       assert.equal(await page.locator("#gcatList .gcat-map-group").count(),4,"four topic branches");
       assert.equal(await page.locator("#gcatList .gcat-map-term").count(),30,"all thirty terms visible as text buttons");
       assert.equal(await page.locator("#gcatTabs").isVisible(),false,"redundant filters hidden in overview");
+      assert.equal(await page.locator("#gcatTopicLead").isVisible(),false,"image topic heading hidden in text mind map");
       for(const [cat,num] of Object.entries({"cognitive":9,"memory-perception":6,"language":8,"intervention":7})){
         assert.equal(await page.locator(".gcat-map-"+cat+" .gcat-map-term").count(),num,"complete "+cat+" branch");
       }
