@@ -125,6 +125,7 @@ function init() {
  if('ResizeObserver' in window)new ResizeObserver(resize).observe(holder);
  else window.addEventListener('resize',resize);
  bindEvents();
+ applyMode('together');
  applySplit(true);
  refreshSelection();
  fallback.hidden=true;
@@ -182,6 +183,7 @@ function setView(which,instant=false){
  if(!target)return;
  currentView=which;
  targetYaw=target[0];targetPitch=target[1];
+ if(which==='top') instant=true;
  if(instant){yaw=targetYaw;pitch=targetPitch;}
  orient.textContent=viewHeading(which);
  viewButtons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===which)));
@@ -190,8 +192,7 @@ function setView(which,instant=false){
 function updateCamera(){
  // A near-vertical top view requires a stable explicit screen-up direction.
  const isTop=currentView==='top' && Math.abs(pitch-1.53)<.02;
- camera.up.set(0,0,isTop?1:0);
- if(!isTop)camera.up.set(0,1,0);
+ camera.up.set(0,isTop?0:1,isTop?1:0);
  camera.position.set(
   distance*Math.sin(yaw)*Math.cos(pitch),
   distance*Math.sin(pitch),
