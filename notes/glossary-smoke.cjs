@@ -13,14 +13,18 @@ const path=require("node:path");
     {name:"tablet",width:768,height:1024,columns:3},
     {name:"desktop",width:1440,height:900,columns:4}
   ];
-  const categories={"cognitive":8,"memory-perception":7,"language":5,"intervention":2};
+  const categories={"cognitive":11,"memory-perception":9,"language":8,"intervention":4};
   const newArt=["executive-function","inhibitory-control","cognitive-flexibility","self-regulation","visual-attention","encoding","consolidation","retrieval","pragmatic-language","semantic-understanding"];
   const originalArt=["working-memory","short-term-memory","processing-speed","attention","memory","visual-perception","auditory-processing","receptive-language","expressive-language","aac","prompting","reinforcement"];
-  const imageFiles=[...originalArt,...newArt];
+  const imageFiles=[...originalArt,...newArt].map(x=>x+".webp");
+  const moreArt=["metacognition","planning-organization","performance-monitoring","phonological-working-memory","visuospatial-working-memory","narrative-discourse","inferential-comprehension","reading-fluency","functional-behavior-assessment","abc-observation"].map(x=>x+".png");
+  const allImages=[...imageFiles,...moreArt];
   try{
     if(!process.env.GLOSSARY_QA_URL){
       const files=fs.readdirSync(path.resolve("assets/glossary/cards")).filter(s=>s.endsWith(".webp")).sort();
-      assert.deepEqual(files,imageFiles.map(s=>s+".webp").sort(),"all 12 original + 10 new art files exist");
+      assert.deepEqual(files,imageFiles.slice().sort(),"existing twenty-two WebP drawings untouched");
+      const pngs=fs.readdirSync(path.resolve("assets/glossary/cards")).filter(s=>s.endsWith(".png")).sort();
+      assert.deepEqual(pngs,moreArt.slice().sort(),"all ten newly-created PNG drawings are present");
     }
     for(const p of profiles){
       const page=await browser.newPage({viewport:{width:p.width,height:p.height},deviceScaleFactor:1});
@@ -40,8 +44,8 @@ const path=require("node:path");
       assert.equal(await modeAlbum.getAttribute("aria-pressed"),"true","art view is default");
       assert.equal(await cards.count(),6,"six album pictures on each page");
       assert.equal(await paged.isVisible(),true);
-      assert.equal(await page.locator("#gcatCount").textContent(),"22개","new count must appear on page");
-      assert.equal(await page.locator("#gcatPageCount").textContent(),"1 / 4","22 images = four pages");
+      assert.equal(await page.locator("#gcatCount").textContent(),"32개","new count must appear on page");
+      assert.equal(await page.locator("#gcatPageCount").textContent(),"1 / 6","32 images = six pages");
       assert.equal(await page.locator("#gcatList .gcat-card-copy").count(),0,"no redundant text beside paintings");
       const locs=await cards.evaluateAll(els=>els.map(el=>({x:Math.round(el.getBoundingClientRect().left),w:el.getBoundingClientRect().width,ratio:el.getBoundingClientRect().height/el.getBoundingClientRect().width,text:el.innerText.trim()})));
       assert.equal(new Set(locs.map(x=>x.x)).size,p.columns,"correct album columns");
@@ -49,10 +53,10 @@ const path=require("node:path");
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,"no horizontal scrolling");
       await page.screenshot({path:path.join(folder,p.name+"-album.png")});
       if(p.name==="mobile"){
-        for(const file of imageFiles){
-          const response=await page.request.get(new URL("../assets/glossary/cards/"+file+".webp",base).href);
+        for(const file of allImages){
+          const response=await page.request.get(new URL("../assets/glossary/cards/"+file,base).href);
           assert.equal(response.status(),200,"art file must resolve "+file);
-          assert(response.headers()["content-type"].includes("image/webp"),"valid WebP "+file);
+          assert(response.headers()["content-type"].includes(file.endsWith(".png")?"image/png":"image/webp"),"valid image format "+file);
         }
       }
       await cards.first().click();
@@ -101,12 +105,12 @@ const path=require("node:path");
 
       // Every original + new picture is reachable via next/previous pages.
       const discovered=new Set();
-      for(let idx=1;idx<=4;idx++){
-        for(const slug of await cards.locator("img").evaluateAll(els=>els.map(x=>x.src.split("/").at(-1).replace(".webp",""))))discovered.add(slug);
-        if(idx<4)await page.locator("#gcatNext").click();
+      for(let idx=1;idx<=6;idx++){
+        for(const filename of await cards.locator("img").evaluateAll(els=>els.map(x=>x.src.split("/").at(-1))))discovered.add(filename);
+        if(idx<6)await page.locator("#gcatNext").click();
       }
-      assert.deepEqual([...discovered].sort(),imageFiles.slice().sort(),"all twenty-two art tiles reachable without scrolling");
-      assert.equal(await page.locator("#gcatPageCount").textContent(),"4 / 4");
+      assert.deepEqual([...discovered].sort(),allImages.slice().sort(),"all thirty-two art tiles reachable across pages");
+      assert.equal(await page.locator("#gcatPageCount").textContent(),"6 / 6");
       await search.fill("표현언어");
       const expressive=page.locator('.gcat-card[data-album-cover="expressive-language"]');
       assert.equal(await expressive.count(),1,"art is reachable through an exact search on every page");
@@ -117,8 +121,36 @@ const path=require("node:path");
       await page.locator("#gcatDialogClose").click();
       await search.fill("");
 
+      if(p.name==="mobile"||p.name==="desktop"){
+        const newMappings=[
+          ["memo-metacognition","metacognition.png"],
+          ["memo-planning-organization","planning-organization.png"],
+          ["memo-performance-monitoring","performance-monitoring.png"],
+          ["memo-phonological-working-memory","phonological-working-memory.png"],
+          ["memo-visuospatial-working-memory","visuospatial-working-memory.png"],
+          ["memo-narrative-discourse","narrative-discourse.png"],
+          ["memo-inferential-comprehension","inferential-comprehension.png"],
+          ["memo-reading-fluency","reading-fluency.png"],
+          ["memo-fba","functional-behavior-assessment.png"],
+          ["memo-abc-observation","abc-observation.png"]
+        ];
+        for(const [id,file] of newMappings){
+          const title=(await page.locator('.glossary-category .study-note#'+id+' summary h3').textContent()).trim();
+          await search.fill(title);
+          const tile=page.locator('#gcatList .gcat-card[data-id="'+id+'"]');
+          assert.equal(await tile.count(),1,"new image has its own tile "+id);
+          assert((await tile.locator("img").getAttribute("src")).endsWith(file),"image tile links to original "+id);
+          await tile.click();
+          assert.equal((await page.locator("#gcatDialogTitle").textContent()).trim(),title,"new illustration opens correct term "+id);
+          await page.locator(".gcat-art-disclosure > summary").click();
+          assert((await page.locator(".gcat-art-panel img").getAttribute("src")).endsWith(file),"popup shows matching art "+id);
+          await page.locator("#gcatDialogClose").click();
+        }
+        await search.fill("");
+      }
+
       assert.equal(await page.locator("#gcatTopicLead").isVisible(),true,"clear picture category heading");
-      assert.equal((await page.locator("#gcatTabs .gcat-tab-count").allTextContents()).join(","),"22,8,7,5,2","accurate illustration counts on topic tabs");
+      assert.equal((await page.locator("#gcatTabs .gcat-tab-count").allTextContents()).join(","),"32,11,9,8,4","accurate illustration counts on topic tabs");
       assert.equal((await page.locator('.gcat-tab[data-tab="featured"]').textContent()).replace(/\\s+/g," ").trim().includes("전체 그림"),true,"clear all-images tab label");
       for(const [cat,count] of Object.entries(categories)){
         await page.locator('.gcat-tab[data-tab="'+cat+'"]').click();
@@ -128,8 +160,8 @@ const path=require("node:path");
         assert.equal(await paged.isVisible(),count>6,"page navigation for longer groups");
       }
       await page.locator('.gcat-tab[data-tab="featured"]').click();
-      assert.equal(await page.locator("#gcatCount").textContent(),"22개","all pictures restored without hiding any");
-      assert.equal(await page.locator("#gcatPageCount").textContent(),"1 / 4","category switching resets album pagination");
+      assert.equal(await page.locator("#gcatCount").textContent(),"32개","all pictures restored without hiding any");
+      assert.equal(await page.locator("#gcatPageCount").textContent(),"1 / 6","category switching resets album pagination");
       await modeAll.click();
       assert.equal(await modeAll.getAttribute("aria-pressed"),"true","whole glossary text-map view selected");
       assert.equal(await page.locator("#gcatCount").textContent(),"42개","42 glossary entries on one map");
@@ -211,7 +243,7 @@ const path=require("node:path");
       assert.equal(await page.locator("#gcatList .gcat-map-term").count(),42,"clear restores full map");
 
       await modeAlbum.click();
-      assert.equal(await page.locator("#gcatCount").textContent(),"22개","picture view still preserved");
+      assert.equal(await page.locator("#gcatCount").textContent(),"32개","picture view preserved + new illustration cards");
       assert.equal(await cards.count(),6,"original album still uses six images per page");
       assert.equal(await paged.isVisible(),true,"album pagination still works");
       await page.locator('.gcat-tab[data-tab="cognitive"]').click();
@@ -221,7 +253,7 @@ const path=require("node:path");
       assert.equal(sticky.position,"sticky");
       if(sticky.scroll>100)assert(sticky.top>=-1&&sticky.top<140,"sticky search "+JSON.stringify(sticky));
       assert.deepEqual(errors,[],p.name+" has no JS errors");
-      console.log(p.name+": PASS 22 images + 42-text-map, four branch counts, no art in all view, search, dialogs, responsive");
+      console.log(p.name+": PASS 32 images + 42-text-map, four branch counts, no art in all view, search, dialogs, responsive");
       await page.close();
     }
   }finally{await browser.close();}
