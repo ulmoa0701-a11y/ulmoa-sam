@@ -316,3 +316,12 @@ footer{display:none!important}
 @media(prefers-reduced-motion:reduce){
  .mainStage .noteTile.active.pulse{animation:none;transform:none}
 }
+
+/* Tablet widths need fewer, larger columns for readable pitch circles. */
+@media(min-width:701px) and (max-width:1080px){
+ .mainStage .noteTrack{grid-template-columns:repeat(6,minmax(0,1fr))}
+ .mainStage .noteTile .scoreNoteBubble{
+  width:clamp(55px,7.4vw,70px);height:clamp(55px,7.4vw,70px);
+  font-size:clamp(24px,2.8vw,31px);
+ }
+}
