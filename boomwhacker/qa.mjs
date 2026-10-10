@@ -239,7 +239,7 @@ async function basicCase(name,width,height){
   await page.evaluate(()=>{elapsed=firstNoteMs()+100;draw();updateTime();updateLyricTrack(true)});
   check(await page.locator('.lyricSyllable.active').count()===1,`${name}: current lyric syllable is not highlighted`);
   if(width<=800){
-    const noteEdge=await page.locator('.fall').first().evaluate(el=>({note:el.getBoundingClientRect().toJSON(),stage:el.parentElement.getBoundingClientRect().toJSON()}));
+    const noteEdge=await page.evaluate(()=>{const e=document.querySelector('.fall'),st=document.querySelector('#stage');return e&&st?{note:e.getBoundingClientRect().toJSON(),stage:st.getBoundingClientRect().toJSON()}:null});
     check(noteEdge.note.left>=noteEdge.stage.left-1&&noteEdge.note.right<=noteEdge.stage.right+1,`${name}: falling note clipped at stage edge ${JSON.stringify(noteEdge)}`);
   }
   const activeBorder=await page.locator('.lyricSyllable.active').evaluate(el=>getComputedStyle(el).borderTopColor);
@@ -280,19 +280,19 @@ async function basicCase(name,width,height){
   const handoff=await page.evaluate(()=>({t:elapsed,first:firstNoteMs(),travel:FALL_TRAVEL_MS,playing}));
   check(handoff.t<850&&handoff.first===handoff.travel&&handoff.playing,
     `${name}: playback must fall from offscreen at count-in completion, with no dead time ${JSON.stringify(handoff)}`);
-  const justEntered=await page.locator('.fall').first().evaluate(el=>({note:el.getBoundingClientRect().toJSON(),stage:el.parentElement.getBoundingClientRect().toJSON()}));
+  const justEntered=await page.evaluate(()=>{const e=document.querySelector('.fall'),st=document.querySelector('#stage');return e&&st?{note:e.getBoundingClientRect().toJSON(),stage:st.getBoundingClientRect().toJSON()}:null});
   check(justEntered.note.bottom>justEntered.stage.top,
     `${name}: note not emerging from the top immediately after count-in ${JSON.stringify(justEntered)}`);
     await page.evaluate(()=>{playing=false;cancelAnimationFrame(raf);elapsed=firstNoteMs()-FALL_TRAVEL_MS;draw()});
-  const offscreen=await page.locator('.fall').first().evaluate(el=>({note:el.getBoundingClientRect().toJSON(),stage:el.parentElement.getBoundingClientRect().toJSON()}));
+  const offscreen=await page.evaluate(()=>{const e=document.querySelector('.fall'),st=document.querySelector('#stage');return e&&st?{note:e.getBoundingClientRect().toJSON(),stage:st.getBoundingClientRect().toJSON()}:null});
   check(offscreen.note.bottom<=offscreen.stage.top,`${name}: note must originate fully above the stage ${JSON.stringify(offscreen)}`);
   await page.evaluate(()=>{elapsed=firstNoteMs()-FALL_TRAVEL_MS+1100;draw()});
-  const emerging=await page.locator('.fall').first().evaluate(el=>({note:el.getBoundingClientRect().toJSON(),stage:el.parentElement.getBoundingClientRect().toJSON()}));
+  const emerging=await page.evaluate(()=>{const e=document.querySelector('.fall'),st=document.querySelector('#stage');return e&&st?{note:e.getBoundingClientRect().toJSON(),stage:st.getBoundingClientRect().toJSON()}:null});
   check(emerging.note.bottom>emerging.stage.top&&emerging.note.top<emerging.stage.top+emerging.stage.height*.55,
     `${name}: note should enter from top gradually ${JSON.stringify(emerging)}`);
   await page.screenshot({path:`${out}/${name}-slow-top-entry.png`,fullPage:false});
   await page.evaluate(()=>{elapsed=firstNoteMs()-100;draw()});
-  const nearHit=await page.locator('.fall').first().evaluate(el=>({note:el.getBoundingClientRect().toJSON(),stage:el.parentElement.getBoundingClientRect().toJSON()}));
+  const nearHit=await page.evaluate(()=>{const e=document.querySelector('.fall'),st=document.querySelector('#stage');return e&&st?{note:e.getBoundingClientRect().toJSON(),stage:st.getBoundingClientRect().toJSON()}:null});
   check(nearHit.note.top>emerging.note.top+50,`${name}: note did not travel gradually down toward the hit line`);
   await page.evaluate(()=>{playing=true;lastTs=0;raf=requestAnimationFrame(frame)});
   const progress=parseFloat((await page.locator('#progressFill').evaluate(el=>getComputedStyle(el).width)))||0;
