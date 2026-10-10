@@ -112,6 +112,13 @@ for(const [name,w,h] of [['desktop1366',1366,900],['mobile390',390,844]]){
  check(playing.phase==='play'&&firstTile.first==='도'&&firstTile.active.join(',')==='0'&&
    firstTile.next.join(',')==='1'&&await page.locator('#countOverlay').isHidden(),
    name+': first 도 must glow directly on the sole score after 작 '+JSON.stringify(firstTile));
+ const visibleTogether=await page.evaluate(()=>{
+   const score=document.querySelector('#noteTrack').getBoundingClientRect(),
+     key=document.querySelector('.key').getBoundingClientRect();
+   return {scoreTop:score.top,scoreBottom:score.bottom,keyTop:key.top,keyBottom:key.bottom,viewH:innerHeight,pageY:scrollY};
+ });
+ if(w<=700)check(visibleTogether.scoreTop>=-2&&visibleTogether.keyBottom<visibleTogether.viewH+3,
+   name+': mobile score and note buttons are not visible together at playback '+JSON.stringify(visibleTogether));
  check(await page.locator('.key').first().isVisible(),name+': click/touch targets hidden');
  if(w<=700)await page.locator('.key').first().tap();else await page.locator('.key').first().click();
  check((await page.locator('#scoreLabel').innerText())!=='0',
