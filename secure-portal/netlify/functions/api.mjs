@@ -85,6 +85,7 @@ try{
     const invite=(await db.query('SELECT * FROM portal_invites WHERE code_hash=$1 AND used_by IS NULL AND expires_at>NOW()',[digest(code)])).rows[0];
     if(!invite)return fail('초대코드가 만료되었거나 이미 사용되었습니다.',403);
     role=invite.role;nick=nickname(b.nickname);inviteHash=digest(code);
+    if(b.selectedRole&&String(b.selectedRole)!==role)return fail('선택한 사용자 유형과 초대코드가 일치하지 않습니다.',403);
     if(role!=='therapist'){
      selected=String(b.selectedTherapistId??'');
      if(selected!==String(invite.therapist_id))return fail('선택한 담당 치료사와 초대코드가 일치하지 않습니다.',403);
