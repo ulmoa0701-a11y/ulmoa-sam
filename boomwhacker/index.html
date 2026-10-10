@@ -599,16 +599,20 @@ function introSound(beats,intervalMs){
     voiceOsc(ac,master,strong?784:659.25,'sine',strong?.16:.11,when,.005,.15,.19);
   }
 }
-function introVisual(index,launch=false){
-  const key=index+':'+launch;
-  if(key===introLastBeat)return;
-  introLastBeat=key;
-  const countMode=introMode==='count',beatNumber=index%introMeter+1;
-  $('#introOverlay').classList.toggle('launchCue',launch);
+function introVisual(index){
+  if(index===introLastBeat)return;
+  introLastBeat=index;
+  const countMode=introMode==='count';
+  const syllable=!countMode&&index>=introBeats-2;
+  const beatNumber=index%introMeter+1;
+  // Keep a single card and give "시" and "작" one full beat each.
+  $('#introOverlay').classList.toggle('launchCue',syllable);
   $('#introHeading').textContent=countMode?'함께 준비해요':'함께 박자 맞춰요';
-  $('#introPulse').textContent=launch?'시작!':countMode?String(Math.max(1,3-index)):String(beatNumber);
-  const length=countMode?3:introMeter;
-  $('#introDots').innerHTML=Array.from({length},(_,i)=>'<i class="'+(i===index%length?'active':i<index%length?'done':'')+'"></i>').join('');
+  $('#introPulse').textContent=countMode?String(Math.max(1,3-index)):
+    syllable?(index===introBeats-2?'시':'작'):String(beatNumber);
+  const length=countMode?3:syllable?2:introMeter;
+  const dotIndex=syllable?index-(introBeats-2):index%length;
+  $('#introDots').innerHTML=Array.from({length},(_,i)=>'<i class="'+(i===dotIndex?'active':i<dotIndex?'done':'')+'"></i>').join('');
 }
 function beginPlayback(){
   hasStartedSong=true;playing=true;lastTs=0;
@@ -620,9 +624,8 @@ function introFrame(now){
   if(!introActive)return;
   const progress=Math.max(0,Math.min(introDurationMs,now-introStartPerf));
   const step=introMode==='count'?1000:beatMs();
-  // Announce the launch during the final fraction of the last beat, in the same card.
-  const launch=progress>=introDurationMs-Math.min(280,step*.28);
-  introVisual(Math.min(introBeats-1,Math.floor(progress/step)),launch);
+  // 1 → 2 → 1 → 2 → 시 → 작: every cue occupies its own complete beat.
+  introVisual(Math.min(introBeats-1,Math.floor(progress/step)));
   // No falling notes until counting is finished.
   elapsed=-Math.max(0,introDurationMs-progress);
   draw();
@@ -641,8 +644,9 @@ function startIntro(){
   if(introMode==='count'){
     introBeats=3;introCountBeats=3;introPreviewBeats=0;
   }else{
-    // One single count-in: 2/4 -> 1 2 1 2; 3/4 -> 1 2 3; 4/4 -> 1 2 3 4.
-    introBeats=introMeter===2?4:introMeter;
+    // One continuous count-in at the real song tempo.
+    // 2/4: 1 2 1 2 시 작; 3/4: 1 2 3 시 작; 4/4: 1 2 3 4 시 작.
+    introBeats=introMeter===2?6:introMeter+2;
     introCountBeats=introBeats;introPreviewBeats=0;
   }
   introDurationMs=introBeats*step;
