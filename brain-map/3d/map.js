@@ -60,6 +60,43 @@ const quick=[...document.querySelectorAll('[data-quick]')];
 const callouts=[...document.querySelectorAll('.map-callout')];
 const examples=[...document.querySelectorAll('[data-activity]')];
 const modeBtns=[...document.querySelectorAll('[data-mode]')];
+const viewBtns=[...document.querySelectorAll('[data-view]')];
+const frame=document.getElementById('brainViewerFrame');
+const viewerLayer=document.getElementById('inline3D');
+const loading=document.getElementById('inlineLoading');
+let liveView='side',viewerReady=false;
+function sendViewer(type,extras={}){
+ if(frame?.contentWindow&&viewerReady)frame.contentWindow.postMessage({type,...extras},location.origin);
+}
+function changeView(view){
+ if(!['side','front','back','top','free'].includes(view))return;
+ liveView=view;
+ viewBtns.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===view)));
+ const show3D=view!=='side';
+ viewerLayer.hidden=!show3D;
+ $('mapStage').classList.toggle('show-3d',show3D);
+ $('mapStage').dataset.view=view;
+ if(show3D){
+  if(!frame.src){
+   loading.hidden=false;
+   frame.src=frame.dataset.src;
+  }
+  sendViewer('brain-view',{view});
+  if(current)sendViewer('brain-part',{part:current});
+ }
+}
+window.addEventListener('message',event=>{
+ if(event.origin!==location.origin||event.source!==frame.contentWindow)return;
+ if(event.data?.type==='brain-3d-ready'){
+  viewerReady=true;
+  loading.hidden=true;
+  sendViewer('brain-view',{view:liveView==='side'?'left':liveView});
+ }else if(event.data?.type==='brain-3d-selected'&&regions[event.data.part]){
+  choose(event.data.part);
+ }
+});
+viewBtns.forEach(b=>b.addEventListener('click',()=>changeView(b.dataset.view)));
+
 const $=id=>document.getElementById(id);
 function showData(d){
  $('detailName').textContent=d.name;
@@ -73,6 +110,7 @@ function choose(key){
  if(!regions[key])return;
  current=key;activity=null;
  draw();
+ sendViewer("brain-part",{part:key});
 }
 function draw(){
  const selected=activity?activities[activity]:mode==='function'?functions[current]:regions[current];
@@ -117,4 +155,5 @@ modeBtns.forEach(b=>b.addEventListener('click',()=>{
  draw();
 }));
 draw();
+changeView('side');
 })();
