@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f0f5ec">
+<meta name="description" content="실제 리코더처럼 생긴 큰 그림에서 입구, 앞구멍, 뒷구멍, 왼손 손가락 자리를 보고 실제 리코더로 따라 해봐요.">
+<title>손가락 자리 익히기 | 모아의 리코더 놀이터</title>
+<link rel="stylesheet" href="visual-v4.css?v=20261010-d">
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <a class="brand" href="../"><span class="brand-icon" aria-hidden="true">🎵</span><span>모아의 리코더 놀이터 <span class="muted">/ 천천히 손가락 연습</span></span></a>
+  <a class="back" href="../">← 게임 목록</a>
+</header>
+<main class="frame">
+  <div class="heading">
+    <div><h1>손가락 톡톡! 리코더 탐험</h1><p>리코더 전체 보기 → 구멍 확대해서 보기 → 실제 악기에서 찾아보기</p></div>
+    <span class="tag" id="stageLabel">먼저 악기 모양부터 확인해요</span>
+  </div>
+  <nav class="progress" aria-label="연습 진행 단계">
+    <span class="stepbar active" id="barExplore">① 리코더 보기</span>
+    <span class="stepbar" id="barObserve">② 손가락 따라 하기</span>
+    <span class="stepbar" id="barActual">③ 진짜로 해보기</span>
+    <span class="stepbar" id="barFinish">④ 성공!</span>
+  </nav>
+  <div class="workarea">
+    <section class="visual" aria-label="리코더 그림과 손가락 시범">
+      <div class="visual-header">
+        <span class="side-view" id="faceName">리코더 앞면</span>
+        <span class="orientation">↑ 입구는 언제나 위!</span>
+      </div>
+      <div class="scene" id="scene" aria-live="polite"></div>
+      <div class="caption" id="visualHint">맨 위 구멍 = 왼손 검지가 닿는 자리</div>
+    </section>
+    <section class="sidepanel" aria-label="학습 단계별 설명과 선택">
+      <div class="lesson-card">
+        <div id="panelExplore">
+          <p class="eyebrow">👀 큰 그림 보고 실제 악기와 비교하기</p>
+          <h2 class="task" id="exploreTitle">맨 위 1번은 검지 자리!</h2>
+          <p class="desc" id="exploreDescription">왼쪽에서 리코더 전체를 보고, 오른쪽 확대 그림으로 손가락 자리를 확인해요.</p>
+          <div class="face-toggle" id="faceGroup" role="group" aria-label="리코더 앞뒷면 선택">
+            <button type="button" id="frontButton" aria-pressed="true">👀 앞면 보기</button>
+            <button type="button" id="backButton" aria-pressed="false">👀 뒷면 보기</button>
+          </div>
+          <div class="cue" id="exploreCue">입구 → 맨 위 구멍(1번) → 그 아래(2번)</div>
+          <div class="actions"><button type="button" id="startBtn" class="btn primary">손가락 놓는 연습 시작하기 →</button></div>
+          <div class="panel-mini">💡 화면 그림을 누를 필요는 없어요. 내 리코더의 같은 자리를 찾아보는 활동이에요.</div>
+        </div>
+        <div id="panelObserve" hidden>
+          <p class="eyebrow">왼손 손가락 하나씩 · 시범 보기</p>
+          <h2 class="task" id="observeTitle">엄지는 리코더 뒤쪽에!</h2>
+          <p class="desc" id="observeDescription"></p>
+          <div class="cue" id="observeCue"></div>
+          <div class="actions"><button type="button" class="btn sun" id="observeFinger">손가락 놓는 자리 보기</button></div>
+          <div class="answer" id="observeTip">그림의 입구·구멍 위치를 먼저 살펴봐요.</div>
+          <div class="actions"><button type="button" class="btn primary" id="observeReal">이제 진짜 리코더로 해보기 →</button></div>
+          <div class="panel-mini">확대 그림의 표시를 보고 실제 리코더에서 같은 구멍을 찾는 연습이에요. 실제로 잘 막혔는지는 선생님이 확인해요.</div>
+        </div>
+        <div id="panelReal" hidden>
+          <p class="eyebrow">화면에서 진짜 악기로 연결</p>
+          <h2 class="task" id="realTitle">진짜 리코더에도 있을까?</h2>
+          <p class="desc" id="realDescription"></p>
+          <div class="cue" id="realCue"></div>
+          <div class="panel-mini">① 리코더를 똑같은 방향으로 들고, ② 구멍을 눈으로 찾고, ③ 손가락을 올려봐요. 지금은 소리를 내지 않아도 돼요.</div>
+          <div class="actions">
+            <button type="button" class="btn primary" id="realYes">🙌 실제로 해봤어요</button>
+            <button type="button" class="btn ghost" id="realLater">아직 어려워요</button>
+          </div>
+          <div class="panel-mini">실제 수행 여부는 아동이나 선생님이 확인해 주세요. 화면은 손가락이 정확히 구멍을 막았는지 자동으로 판별하지 않아요.</div>
+        </div>
+        <div id="panelReward" hidden>
+          <p class="eyebrow">다음 손가락으로 가기 전</p>
+          <div class="celebrate">
+            <div class="confetti" id="rewardEmoji" aria-hidden="true">🌱</div>
+            <h2 id="rewardTitle">한 번 해봤어!</h2>
+            <p id="rewardSub">작은 성공을 쌓아 가요.</p>
+          </div>
+          <h2 class="task" id="rewardHeading" hidden></h2>
+          <p class="desc" id="rewardDescription" hidden></p>
+          <div class="actions">
+            <button type="button" class="btn primary" id="rewardNext">다음 손가락 →</button>
+            <button type="button" class="btn ghost" id="rewardRepeat">같은 자리 한 번 더</button>
+          </div>
+          <div class="panel-mini">정확히 수행하지 못했을 때도 벌점은 없어요. 필요하면 같은 손가락부터 다시 시도해요.</div>
+        </div>
+        <div id="panelDone" hidden>
+          <p class="eyebrow">오늘의 손가락 탐험 완료</p>
+          <div class="celebrate"><div class="confetti" aria-hidden="true">🌷</div><h2>진짜 리코더에 한 발짝!</h2><p id="doneNumbers"></p><p id="doneAttempts"></p></div>
+          <div class="cue">시 음은 뒤 엄지 구멍과 앞 1번(검지)을 막아서 시작해요.</div>
+          <div class="actions">
+            <a class="btn primary" href="../?mode=real">🎵 진짜 시 소리 내보기 →</a>
+            <button class="btn ghost" id="startAgain" type="button">처음부터 다시</button>
+          </div>
+          <div class="panel-mini">운지의 정확도와 실제 소리 성공은 별도로 확인해야 해요. 다음 단계가 어렵다면 오늘 배운 손가락만 반복해도 좋아요.</div>
+        </div>
+      </div>
+      <div class="game-goal"><img src="../../assets/moa-default.png" alt="" loading="lazy"><p><b>모아의 작은 미션</b>오늘은 손가락 하나를 내 리코더에 올려봐!</p></div>
+      <div class="actions">
+        <button class="btn small" id="readGuide" type="button">🔊 설명 듣기</button>
+        <button class="btn small" id="voiceToggle" type="button">🔊 읽어주기 켜짐</button>
+      </div>
+    </section>
+  </div>
+  <div class="footerline"><span>색 이름 구별·시간 제한·틀린 횟수 평가 없음</span><span>소프라노 리코더 · 왼손 엄지·검지·중지·약지 기초</span></div>
+</main>
+</div>
+<script src="visual-v4.js?v=20261010-d"></script>
+</body></html>
