@@ -1,0 +1,98 @@
+name: Ulmoa Cloud Windows Connectivity QA
+
+# Cloud-only: DOES NOT connect to the owner's PC, load credentials,
+# alter GitHub Pages, or publish content.
+on:
+  push:
+    branches: [chore/cloud-windows-qa-20261011]
+    paths:
+      - '.github/workflows/ulmoa-cloud-windows-connectivity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-windows-cloud:
+    runs-on: windows-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout existing public project without modifying it
+        uses: actions/checkout@v4
+
+      - name: Prepare Python HTTP server
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify project files and Windows environment
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = @(
+            'index.html',
+            'heart-score/ai/index.html',
+            'boomwhacker/index.html',
+            'brain-map/3d/explore/index.html'
+          )
+          foreach ($file in $expected) {
+            if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
+              throw "Missing existing project file: $file"
+            }
+            Write-Host "FILE PASS: $file"
+          }
+          python --version
+          Write-Host "OS: $([System.Environment]::OSVersion.VersionString)"
+          Write-Host 'No secrets, deployment, Naver access, or local-PC commands are used.'
+
+      - name: Verify real Windows local HTTP responses
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $server = Start-Process -FilePath (Get-Command python).Source -ArgumentList @('-m', 'http.server', '8765', '--bind', '127.0.0.1') -NoNewWindow -PassThru
+          $targets = @(
+            'http://127.0.0.1:8765/',
+            'http://127.0.0.1:8765/heart-score/ai/',
+            'http://127.0.0.1:8765/boomwhacker/',
+            'http://127.0.0.1:8765/brain-map/3d/explore/'
+          )
+          $results = @()
+          try {
+            foreach ($url in $targets) {
+              $lastError = ''
+              $ok = $false
+              for ($i = 0; $i -lt 20; $i++) {
+                try {
+                  $response = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 5
+                  if ($response.StatusCode -eq 200 -and $response.Content -match '(?i)<!doctype html|<html') {
+                    $ok = $true
+                    break
+                  }
+                  $lastError = "HTTP $($response.StatusCode), response missing HTML"
+                }
+                catch {
+                  $lastError = $_.Exception.Message
+                }
+                Start-Sleep -Milliseconds 500
+              }
+              if (-not $ok) { throw "HTTP FAIL: $url; $lastError" }
+              Write-Host "HTTP PASS: $url"
+              $results += @{ url = $url; status = 'PASS' }
+            }
+            New-Item -ItemType Directory -Force -Path 'qa-artifacts' | Out-Null
+            $results | ConvertTo-Json -Depth 4 | Set-Content -Path 'qa-artifacts/cloud-windows-http.json' -Encoding utf8
+            Write-Host 'Windows cloud runtime and 4 local website routes verified.'
+          }
+          finally {
+            if ($null -ne $server -and -not $server.HasExited) {
+              Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue
+            }
+          }
+
+      - name: Preserve bounded QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ulmoa-cloud-windows-connectivity
+          path: qa-artifacts/cloud-windows-http.json
+          if-no-files-found: warn
