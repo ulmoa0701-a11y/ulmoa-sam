@@ -133,7 +133,10 @@ function init() {
 function resize(){
  if(!renderer||!camera)return;
  const w=Math.max(1,canvas.clientWidth||holder.clientWidth),h=Math.max(1,canvas.clientHeight||holder.clientHeight);
- renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();needsRender=true;
+ renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+ // Portrait phones have a narrower horizontal field of view; fit the whole brain.
+ if(w/h<1.25 && w<680) distance=Math.max(distance,5.65);
+ needsRender=true;
 }
 function partOffset(mesh){
  const id=mesh.userData,base=id.base;
@@ -303,7 +306,7 @@ function bindEvents(){
  });
  partButtons.forEach(button=>button.addEventListener('click',()=>mapMode==='functions'&&functionDetails[button.dataset.part]?setFunction(button.dataset.part):setSelected(button.dataset.part)));
  document.getElementById('clearSelection').addEventListener('click',()=>setSelected(null));
- document.getElementById('resetCamera').addEventListener('click',()=>{distance=4.45;setView('left',true);});
+ document.getElementById('resetCamera').addEventListener('click',()=>{distance=holder.clientWidth/Math.max(1,holder.clientHeight)<1.25 && holder.clientWidth<680?5.65:4.45;setView('left',true);});
  canvas.addEventListener('wheel',event=>{event.preventDefault();distance=THREE.MathUtils.clamp(distance+event.deltaY*.005,3.0,9.0);needsRender=true;},{passive:false});
  canvas.addEventListener('pointerdown',event=>{
   canvas.setPointerCapture(event.pointerId);
