@@ -1,0 +1,16 @@
+/* Site masthead mascot and title only; tools and games unaffected */
+.note-brand{display:flex;align-items:center;gap:7px;min-width:0;white-space:nowrap}
+.note-brand .brand-mascot{display:block;width:47px;height:44px;object-fit:contain;flex:none}
+.note-brand .brand-letters{display:flex;flex-direction:column;justify-content:center;line-height:1;gap:1px}
+.note-brand .brand-letters small{display:block;order:-1;font-size:9px;font-family:"Pretendard Variable",sans-serif;font-weight:700;color:#6f8483;margin:0}
+.note-brand .brand-letters b{font-family:"Gamja Flower",cursive;font-size:29px;font-weight:600;letter-spacing:-.03em;color:#253039}
+.sub-brand{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.sub-brand .brand-mascot{display:block;width:42px;height:40px;object-fit:contain;flex:none}
+.sub-brand b{font-family:"Gamja Flower",cursive;font-size:29px;line-height:1;font-weight:600;color:#253039}
+@media(max-width:650px){
+.note-brand .brand-mascot{width:39px;height:38px}
+.note-brand .brand-letters b{font-size:25px}
+.note-brand .brand-letters small{display:block;font-size:8px}
+.sub-brand .brand-mascot{width:36px;height:34px}
+.sub-brand b{font-size:24px}
+}
