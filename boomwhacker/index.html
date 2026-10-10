@@ -659,8 +659,8 @@ function startIntro(){
   if(introMode==='count'){
     introBeats=3;introCountBeats=3;introPreviewBeats=0;
   }else{
-    // A shorter musical lead-in of at least 4.6 seconds, still on complete bars.
-    introBeats=Math.ceil(Math.max(6,Math.ceil(4600/step))/introMeter)*introMeter;
+    // A shorter musical lead-in of at least 4.4 seconds, still on complete bars.
+    introBeats=Math.ceil(Math.max(6,Math.ceil(4400/step))/introMeter)*introMeter;
     introCountBeats=introMeter===2?4:introMeter;
     introPreviewBeats=introBeats-introCountBeats;
   }
