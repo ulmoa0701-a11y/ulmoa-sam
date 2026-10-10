@@ -1,4 +1,4 @@
-/* 해봄노트 30개 용어 통합 탐색기
+/* 해봄노트 42개 용어 통합 탐색기
  * 원래 용어노트 설명/사례/출처는 DOM 원문에서 읽기만 한다.
  * 승인 이미지 22장 자르기/재생성/잘라 확대 없음.
  */
@@ -47,7 +47,19 @@ const RELATED={
   "memo-prompting":["memo-time-delay","memo-modeling","memo-reinforcement"],
   "memo-reinforcement":["memo-prompting","memo-generalization"],
   "memo-executive":["memo-working-memory","memo-inhibition","memo-flexibility"],
-  "memo-phonological-awareness":["memo-articulation-phonology","memo-auditory"]
+  "memo-phonological-awareness":["memo-articulation-phonology","memo-auditory"],
+  "memo-metacognition":["memo-performance-monitoring","memo-self-regulation","memo-executive"],
+  "memo-planning-organization":["memo-executive","memo-task-analysis","memo-performance-monitoring"],
+  "memo-performance-monitoring":["memo-metacognition","memo-planning-organization","memo-self-regulation"],
+  "memo-phonological-working-memory":["memo-working-memory","memo-phonological-awareness","memo-short-term-memory"],
+  "memo-visuospatial-working-memory":["memo-working-memory","memo-visual","memo-short-term-memory"],
+  "memo-narrative-discourse":["memo-inferential-comprehension","memo-receptive-expressive","memo-pragmatics"],
+  "memo-inferential-comprehension":["memo-narrative-discourse","memo-semantics","memo-reading-fluency"],
+  "memo-reading-fluency":["memo-phonological-awareness","memo-inferential-comprehension","memo-narrative-discourse"],
+  "memo-fba":["memo-abc-observation","memo-replacement-behavior","memo-reinforcement"],
+  "memo-abc-observation":["memo-fba","memo-replacement-behavior","memo-reinforcement"],
+  "memo-replacement-behavior":["memo-fba","memo-abc-observation","memo-aac"],
+  "memo-udl":["memo-visual-supports","memo-task-analysis","memo-modeling"]
 };
 const TINT={
   "cognitive":"#ffeedb",
@@ -336,7 +348,7 @@ function boot(){
       tabs.appendChild(btn);
     });
   }
-  // 30개 용어 전부: 이미지 대신 네 갈래의 텍스트 용어 지도.
+  // 42개 용어 전부: 이미지 대신 네 갈래의 텍스트 용어 지도.
   // 여기서는 페이지를 나누거나 그림 타일을 사용하지 않는다.
   const MAP_NOTE={
     cognitive:"생각하고 조절하기",

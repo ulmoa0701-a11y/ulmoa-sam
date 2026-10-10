@@ -30,8 +30,8 @@ const path=require("node:path");
       const modeAlbum=page.locator("#gcatModeAlbum"),modeAll=page.locator("#gcatModeAll");
       const paged=page.locator("#gcatPages"),dialog=page.locator("#gcatDialog");
       const search=page.locator("#gcatSearch");
-      assert.equal(await page.locator(".study-note").count(),30,"all thirty source notes remain");
-      assert.equal(await page.locator(".study-sources").count(),30,"all thirty source citations remain");
+      assert.equal(await page.locator(".study-note").count(),42,"all forty-two source notes remain");
+      assert.equal(await page.locator(".study-sources").count(),42,"all forty-two source citations remain");
       assert.equal(await page.locator("#glossaryApprovedGrid").count(),0,"old giant board removed");
       assert.equal(await tabs.count(),5,"all topic categories");
       assert.equal((await page.locator("#gcatTitle").textContent()).trim(),"한눈에 보는 용어");
@@ -132,15 +132,15 @@ const path=require("node:path");
       assert.equal(await page.locator("#gcatPageCount").textContent(),"1 / 4","category switching resets album pagination");
       await modeAll.click();
       assert.equal(await modeAll.getAttribute("aria-pressed"),"true","whole glossary text-map view selected");
-      assert.equal(await page.locator("#gcatCount").textContent(),"30개","30 glossary entries on one map");
-      assert.equal(await paged.isVisible(),false,"do not page through 30 terms in overview");
+      assert.equal(await page.locator("#gcatCount").textContent(),"42개","42 glossary entries on one map");
+      assert.equal(await paged.isVisible(),false,"do not page through 42 terms in overview");
       assert.equal(await page.locator("#gcatList img").count(),0,"overview contains no image or picture tiles");
       assert.equal(await page.locator("#gcatList .gcat-card").count(),0,"no tall album cards in all view");
       assert.equal(await page.locator("#gcatList .gcat-map-group").count(),4,"four topic branches");
-      assert.equal(await page.locator("#gcatList .gcat-map-term").count(),30,"all thirty terms visible as text buttons");
+      assert.equal(await page.locator("#gcatList .gcat-map-term").count(),42,"all forty-two terms visible as text buttons");
       assert.equal(await page.locator("#gcatTabs").isVisible(),false,"redundant filters hidden in overview");
       assert.equal(await page.locator("#gcatTopicLead").isVisible(),false,"image topic heading hidden in text mind map");
-      for(const [cat,num] of Object.entries({"cognitive":9,"memory-perception":6,"language":8,"intervention":7})){
+      for(const [cat,num] of Object.entries({"cognitive":12,"memory-perception":8,"language":11,"intervention":11})){
         assert.equal(await page.locator(".gcat-map-"+cat+" .gcat-map-term").count(),num,"complete "+cat+" branch");
       }
       const textTiles=page.locator("#gcatList .gcat-map-term");
@@ -154,9 +154,9 @@ const path=require("node:path");
       assert((await page.locator("#gcatDialogBody .study-paper").textContent()).trim().length>80,"original sourced notes remain");
       await page.locator("#gcatDialogClose").click();
       if(p.name==="desktop"){
-        // All thirty notes must preserve their original explanations and examples.
+        // All forty-two notes must preserve their original explanations and examples.
         const ids=await page.locator(".gcat-map-term").evaluateAll(els=>els.map(el=>el.dataset.id));
-        assert.equal(ids.length,30);
+        assert.equal(ids.length,42);
         for(const id of ids){
           const selector='.gcat-map-term[data-id="'+id+'"]';
           await page.locator(selector).click();
@@ -168,6 +168,24 @@ const path=require("node:path");
           }));
           assert(content.hasDefinition&&content.hasExample&&content.hiddenLargeArt&&content.refs>0,id+" retains a clear definition, example and references");
           await page.locator("#gcatDialogClose").click();
+        }
+      }
+      if(p.name==="desktop"){
+        const newIds=["memo-metacognition","memo-planning-organization","memo-performance-monitoring","memo-phonological-working-memory","memo-visuospatial-working-memory","memo-narrative-discourse","memo-inferential-comprehension","memo-reading-fluency","memo-fba","memo-abc-observation","memo-replacement-behavior","memo-udl"];
+        assert.equal(new Set(newIds).size,12);
+        for(const id of newIds){
+          const entry=page.locator('.gcat-map-term[data-id="'+id+'"]');
+          assert.equal(await entry.count(),1,"new glossary term is present in map: "+id);
+          const title=await entry.textContent();
+          await search.fill(title);
+          assert.equal(await page.locator('.gcat-map-term[data-id="'+id+'"]').count(),1,"new term is searchable by title: "+title);
+          await page.locator('.gcat-map-term[data-id="'+id+'"]').click();
+          assert.equal(await dialog.evaluate(el=>el.open),true);
+          assert.equal((await page.locator("#gcatDialogTitle").textContent()).trim(),title.trim());
+          assert((await page.locator("#gcatDialogBody .gcat-definition-section").textContent()).length>40,"new definition meaningful");
+          assert((await page.locator("#gcatDialogBody .gcat-example-section").textContent()).length>30,"new example meaningful");
+          await page.locator("#gcatDialogClose").click();
+          await search.fill("");
         }
       }
       await search.fill("AAC");
@@ -190,7 +208,7 @@ const path=require("node:path");
       assert.equal(await page.locator("#gcatEmpty").isVisible(),true,"missing term message");
       await page.locator("#gcatClear").click();
       assert.equal(await search.inputValue(),"");
-      assert.equal(await page.locator("#gcatList .gcat-map-term").count(),30,"clear restores full map");
+      assert.equal(await page.locator("#gcatList .gcat-map-term").count(),42,"clear restores full map");
 
       await modeAlbum.click();
       assert.equal(await page.locator("#gcatCount").textContent(),"22개","picture view still preserved");
@@ -203,7 +221,7 @@ const path=require("node:path");
       assert.equal(sticky.position,"sticky");
       if(sticky.scroll>100)assert(sticky.top>=-1&&sticky.top<140,"sticky search "+JSON.stringify(sticky));
       assert.deepEqual(errors,[],p.name+" has no JS errors");
-      console.log(p.name+": PASS 22 images + 30-text-map, four branch counts, no art in all view, search, dialogs, responsive");
+      console.log(p.name+": PASS 22 images + 42-text-map, four branch counts, no art in all view, search, dialogs, responsive");
       await page.close();
     }
   }finally{await browser.close();}
