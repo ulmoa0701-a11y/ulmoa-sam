@@ -135,13 +135,8 @@ function changeCue(index){
    tiles[i].classList.remove('ready');
    if(i===index){tiles[i].classList.remove('pulse');void tiles[i].offsetWidth;tiles[i].classList.add('pulse')}
  }
- const active=tiles[index];
- if(active){
-   // Scroll ONLY the music score, never the entire browser page or the touch keys.
-   const trackRect=track.getBoundingClientRect(),tileRect=active.getBoundingClientRect();
-   if(tileRect.top<trackRect.top+14||tileRect.bottom>trackRect.bottom-14)
-     track.scrollTop+=tileRect.top-(trackRect.top+Math.min(20,trackRect.height*.12));
- }
+ // The full score and every instrument button remain in the viewport.
+ // No automatic page movement is needed between notes.
 }
 function countWord(i){
  if(i<state.countLen-2)return String(i%state.song.meter+1);
@@ -175,15 +170,8 @@ function tick(now){
 }
 function start(){
  clearGameFrame();state.phase='count';selectSongAfterStart();state.lastCount=-1;
- // Keep the score and the actual instrument buttons together on a small phone.
- // Do this before the musical count-in, never during note-by-note playback.
- {
-   const stage=$('#mainStage'),keys=$('#keys');
-   const bottom=keys.getBoundingClientRect().bottom,view=innerHeight-12;
-   const targetTop=innerWidth<=700?115:76;
-   if(bottom>view||stage.getBoundingClientRect().top<0)
-     window.scrollTo({top:Math.max(0,window.scrollY+stage.getBoundingClientRect().top-targetTop),behavior:'instant'});
- }
+ // The compact single-screen layout keeps the score and keys visible already.
+ // Do not scroll the page when playback starts.
  const now=performance.now();state.countStart=now;state.origin=now+state.countLen*state.beat;
  $('#countOverlay').hidden=false;$('#countNumber').textContent='1';
  $('#pauseBtn').hidden=false;$('#pauseBtn').textContent='⏸ 잠깐 쉬기';
@@ -220,7 +208,7 @@ function finish(){
   const key='moa-rhythm-best:'+state.song.id;
   const old=Number(localStorage.getItem(key))||0;if(score>old)localStorage.setItem(key,String(score));
  }catch{}
- $('#results').scrollIntoView({behavior:'smooth',block:'nearest'});
+ // Results open above the game as a fixed overlay (no page scroll).
 }
 function newGame(){if(state.phase==='count'||state.phase==='play'||state.phase==='paused'){clearGameFrame();state.phase='idle'}selectSong()}
 function soundToggle(){state.melody=!state.melody;$('#soundBtn').textContent=state.melody?'🔊 노래 소리 켜짐':'🔇 노래 소리 꺼짐';$('#soundBtn').setAttribute('aria-pressed',String(state.melody))}
