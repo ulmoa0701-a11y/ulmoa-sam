@@ -215,6 +215,11 @@ function fitMeasureToBeat(items,left,right,targetQ=4){
       let cost=log*log*2.6+space*space*.75+Math.abs(d-ro)*.12;
       if(Math.abs(d-ro)<.01)cost-=.32;
       if(d===4&&n>1)cost+=4;
+      // The notation decoder's dotted-quarter (1.5 beats) is stronger evidence
+      // than a horizontal-space fit; preserving its dot prevents false quartering.
+      if(Math.abs(ro-1.5)<.01&&d<1.5)cost+=2.8;
+      // Three-quarter-beat durations need direct decoded support, not spacing alone.
+      if(Math.abs(d-.75)<.01&&Math.abs(ro-.75)>.01)cost+=1.0;
 
       const nv=dp[i][u]+cost;if(nv<dp[i+1][nu]){dp[i+1][nu]=nv;prev[i+1][nu]=[u,d];}
     }
