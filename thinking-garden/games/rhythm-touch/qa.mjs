@@ -117,8 +117,8 @@ for(const [name,w,h] of [['desktop1366',1366,900],['mobile390',390,844]]){
      key=document.querySelector('.key').getBoundingClientRect();
    return {scoreTop:score.top,scoreBottom:score.bottom,keyTop:key.top,keyBottom:key.bottom,viewH:innerHeight,pageY:scrollY};
  });
- if(w<=700)check(visibleTogether.scoreTop>=-2&&visibleTogether.keyBottom<visibleTogether.viewH+3,
-   name+': mobile score and note buttons are not visible together at playback '+JSON.stringify(visibleTogether));
+ check(visibleTogether.scoreTop>=-2&&visibleTogether.keyBottom<visibleTogether.viewH+3,
+   name+': score and all instrument buttons must be visible together at playback '+JSON.stringify(visibleTogether));
  check(await page.locator('.key').first().isVisible(),name+': click/touch targets hidden');
  if(w<=700)await page.locator('.key').first().tap();else await page.locator('.key').first().click();
  check((await page.locator('#scoreLabel').innerText())!=='0',
