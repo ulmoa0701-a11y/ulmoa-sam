@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {makeBrainSurfaces} from './cortex-model.js';
+import {makeBrainSurfaces} from './cortex-model.js?v=20261010-cute3';
 
 const canvas = document.getElementById('brainCanvas');
 const holder = document.getElementById('stageShell');
@@ -75,7 +75,7 @@ const activityDetails={
 };
 let splitMode = 'together';
 let splitAmount = 0;
-let yaw = Math.PI/2, pitch = .18, distance = 5.45;
+let yaw = Math.PI/2, pitch = .18, distance = 4.65;
 let targetYaw = yaw, targetPitch = pitch;
 let currentView='free';
 let activePointer = new Map(), moved=0, pinchLast=null;
@@ -96,15 +96,15 @@ function init() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.8));
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.07;
+  renderer.toneMappingExposure=1.16;
  }catch(error){setNotice('이 기기에서 3D 그래픽을 시작하지 못했습니다.');return false;}
  scene=new THREE.Scene();
  camera=new THREE.PerspectiveCamera(38,1,.1,100);
  brainGroup=new THREE.Group();scene.add(brainGroup);
- scene.add(new THREE.HemisphereLight(0xfff5de,0x71918a,1.5));
- const light=new THREE.DirectionalLight(0xfff9ed,2.15);light.position.set(-3,5,7);scene.add(light);
- const back=new THREE.DirectionalLight(0xaac9dc,1.05);back.position.set(4,2,-5);scene.add(back);
- const under=new THREE.DirectionalLight(0xe3ddfa,.45);under.position.set(0,-3,3);scene.add(under);
+ scene.add(new THREE.HemisphereLight(0xffffff,0xc6dacc,2.0));
+ const light=new THREE.DirectionalLight(0xffffff,1.45);light.position.set(-3,5,7);scene.add(light);
+ const back=new THREE.DirectionalLight(0xeef8ff,.77);back.position.set(4,2,-5);scene.add(back);
+ const under=new THREE.DirectionalLight(0xfff9f2,.35);under.position.set(0,-3,3);scene.add(under);
  // All visible cortical lobes share one folded surface per hemisphere.
  // The old detached ellipsoids are intentionally no longer constructed.
  for(const mesh of makeBrainSurfaces()){
@@ -218,8 +218,8 @@ function refreshSelection(){
   mesh.material.transparent=false;
   mesh.material.opacity=1;
   mesh.material.depthWrite=true;
-  mesh.material.emissive.setHex((selected||activeFunction||activeActivity)&&match?0x2c322a:0);
-  mesh.material.emissiveIntensity=(selected||activeFunction||activeActivity)&&match?.12:0;
+  mesh.material.emissive.setHex((selected||activeFunction||activeActivity)&&match?0xffffff:0);
+  mesh.material.emissiveIntensity=(selected||activeFunction||activeActivity)&&match?.055:0;
  }
  const item=activeActivity?activityDetails[activeActivity]:
   activeFunction?functionDetails[activeFunction]:selected?info[selected]:null;
@@ -302,7 +302,7 @@ function bindEvents(){
  });
  partButtons.forEach(button=>button.addEventListener('click',()=>mapMode==='functions'&&functionDetails[button.dataset.part]?setFunction(button.dataset.part):setSelected(button.dataset.part)));
  document.getElementById('clearSelection').addEventListener('click',()=>setSelected(null));
- document.getElementById('resetCamera').addEventListener('click',()=>{distance=5.45;setView('left',true);});
+ document.getElementById('resetCamera').addEventListener('click',()=>{distance=4.65;setView('left',true);});
  canvas.addEventListener('wheel',event=>{event.preventDefault();distance=THREE.MathUtils.clamp(distance+event.deltaY*.005,3.0,9.0);needsRender=true;},{passive:false});
  canvas.addEventListener('pointerdown',event=>{
   canvas.setPointerCapture(event.pointerId);
