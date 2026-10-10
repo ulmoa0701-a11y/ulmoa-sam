@@ -43,4 +43,5 @@ jobs:
             heart-score/qa/.scan-debug/**/*.json
             heart-score/qa/.scan-debug/**/*.png
             heart-score/qa/.scan-debug/typeset-*.jpg
-          if-no-files-found: warn
+          include-hidden-files: true
+          if-no-files-found: error
