@@ -1,0 +1,90 @@
+name: Habom Browser Smoke QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/habom-browser-smoke.yml'
+      - 'assets/habom-navigation.js'
+      - 'assets/habom-navigation.css'
+      - 'index.html'
+      - 'parents/index.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  desktop-and-mobile-navigation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare headless Chrome smoke page
+        shell: bash
+        run: |
+          cat > hb-nav-smoke.html <<'HTML'
+          <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+          <link rel="stylesheet" href="assets/notebook.css">
+          <link rel="stylesheet" href="assets/notebook-v7.css">
+          <link rel="stylesheet" href="assets/notebook-subpages.css">
+          <link rel="stylesheet" href="assets/habom-navigation.css"></head><body>
+          <div id="mount"></div>
+          <script>
+          const isSub=new URLSearchParams(location.search).has('sub');
+          if(isSub)document.body.classList.add('note-subpage');
+          document.querySelector('#mount').innerHTML=isSub?
+          '<header class="sub-header"><a href="../" class="sub-brand">일단 해봄</a><nav class="sub-nav"></nav></header>':
+          '<header class="note-header"><a href="#" class="note-brand">일단 해봄</a><nav class="note-nav"></nav></header>';
+          </script>
+          <script src="assets/habom-navigation.js"></script>
+          <script>
+          window.addEventListener('load',()=>{
+            setTimeout(()=>{
+              let issues=[];
+              const nav=document.querySelector('.hb-nav');
+              const menu=document.querySelector('.hb-mobile-toggle');
+              if(!nav||!menu)issues.push('no shared menu');
+              if(menu && getComputedStyle(menu).display==='none')issues.push('mobile toggle not visible');
+              if(!nav.querySelector('a[href$="notes/"]'))issues.push('glossary link missing');
+              if(!nav.querySelector('a[href$="brain-map/"]'))issues.push('brain link missing');
+              if(!nav.textContent.includes('부모님 자료'))issues.push('parent menu missing');
+              menu?.click();
+              if(!nav.classList.contains('hb-mobile-open')||menu.getAttribute('aria-expanded')!=='true')issues.push('mobile panel did not open');
+              const first=nav.querySelector('details.hb-menu summary');
+              first?.click();
+              if(!nav.querySelector('details.hb-menu[open]'))issues.push('category dropdown did not open');
+              if(isSub){
+                const link=nav.querySelector('.hb-dropdown a');
+                if(link&&getComputedStyle(link).display==='none')issues.push('subpage mobile links hidden');
+              }
+              nav.querySelector('.hb-quick-search')?.click();
+              const dialog=document.querySelector('.hb-find-dialog');
+              if(!dialog?.open)issues.push('search dialog did not open');
+              const input=dialog?.querySelector('input');
+              if(input){
+                input.value='용어사전';
+                input.dispatchEvent(new Event('input',{bubbles:true}));
+                if(!dialog.textContent.includes('용어사전'))issues.push('search item missing');
+              }
+              document.documentElement.setAttribute('data-habom-smoke',issues.length?'FAIL '+issues.join(','):'PASS');
+            },100);
+          });
+          </script></body></html>
+          HTML
+      - name: Run real Chrome viewport and interaction smoke
+        shell: bash
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$CHROME" ]; then echo 'Chrome binary unavailable'; exit 1; fi
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/habom-server.log 2>&1 &
+          sleep 2
+          for URL in 'http://127.0.0.1:8765/hb-nav-smoke.html' 'http://127.0.0.1:8765/hb-nav-smoke.html?sub=1'; do
+            "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=390,844 --virtual-time-budget=2500 --dump-dom "$URL" > /tmp/habom-result.html 2>/tmp/habom-browser.log
+            if ! grep -q 'data-habom-smoke="PASS"' /tmp/habom-result.html; then
+              grep -o 'data-habom-smoke="[^"]*"' /tmp/habom-result.html || true
+              tail -n 15 /tmp/habom-browser.log || true
+              exit 1
+            fi
+            echo "PASS: $URL"
+          done
+          "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1440,900 --virtual-time-budget=2500 --dump-dom 'http://127.0.0.1:8765/index.html' > /tmp/habom-home.html 2>/tmp/habom-browser.log
+          grep -q 'hb-nav-links' /tmp/habom-home.html
+          grep -q '부모님 도움자료' /tmp/habom-home.html
+          echo 'PASS: desktop homepage renders menu and shortcut text'
