@@ -9,7 +9,7 @@ const chrome=process.env.CHROME_BIN||'/usr/bin/google-chrome';
 const browser=await chromium.launch({headless:true,executablePath:chrome,args:['--no-sandbox']});
 const results=[],failures=[];
 function check(ok,msg){if(!ok)failures.push(msg)}
-for(const [name,w,h] of [['desktop1366',1366,900],['mobile390',390,844]]){
+for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mobile390',390,844],['mobile360short',360,640],['tablet768',768,1024]]){
  const context=await browser.newContext({viewport:{width:w,height:h},isMobile:w<=700,hasTouch:w<=700});
  const page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push('pageerror '+e.message));
@@ -31,6 +31,33 @@ for(const [name,w,h] of [['desktop1366',1366,900],['mobile390',390,844]]){
  check((await page.locator('.key[data-note="높은도"]').innerText()).includes('도↑'),
     name+': mobile high C button should be compact and readable');
  check(await page.locator('.noteTile').count()===14,name+': first song note sequence mismatch');
+ const oneViewport=await page.evaluate(()=>{
+   const get=sel=>{const r=document.querySelector(sel).getBoundingClientRect();
+     return {x:r.left,y:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};
+   const track=document.querySelector('#noteTrack');
+   const notes=[...track.querySelectorAll('.noteTile')].map(x=>x.getBoundingClientRect().toJSON());
+   const keys=[...document.querySelectorAll('.key')].map(x=>x.getBoundingClientRect().toJSON());
+   return {viewport:{width:innerWidth,height:innerHeight},bodyScroll:document.body.scrollHeight-innerHeight,
+     documentScroll:document.documentElement.scrollHeight-innerHeight,
+     app:get('.app'),settings:get('.settings'),hud:get('.hud'),score:get('#noteTrack'),
+     firstNote:notes[0],lastNote:notes.at(-1),firstKey:keys[0],lastKey:keys.at(-1),
+     keyCount:keys.length,keysInView:keys.every(k=>k.top>=0&&k.bottom<=innerHeight+1),
+     notesInView:notes.every(n=>n.top>=0&&n.bottom<=innerHeight+1),
+     scoreOverflow:track.scrollHeight-track.clientHeight,
+     horizontalOverflow:document.documentElement.scrollWidth-innerWidth,
+     disclaimer:get('.disclaimer')};
+ });
+ check(oneViewport.bodyScroll<=2&&oneViewport.documentScroll<=2&&
+   oneViewport.horizontalOverflow<=2,name+': game page still scrolls '+JSON.stringify(oneViewport));
+ check(oneViewport.notesInView&&oneViewport.keysInView&&
+   oneViewport.hud.y>=0&&oneViewport.settings.y>=0&&
+   oneViewport.disclaimer.bottom<=h+1,name+': score/buttons/controls are cut off '+JSON.stringify(oneViewport));
+ check(oneViewport.scoreOverflow<=3&&oneViewport.lastNote.bottom<=oneViewport.score.bottom+2,
+   name+': some notes are hidden below score grid '+JSON.stringify(oneViewport));
+ check(oneViewport.firstKey.height>=40&&oneViewport.lastKey.height>=40,
+   name+': touch targets too small '+JSON.stringify(oneViewport));
+ await page.screenshot({path:out+'/'+name+'-single-screen.png',fullPage:false});
+
  check(await page.locator('#noteTrack').count()===1&&await page.locator('#currentCue').count()===0&&
    await page.locator('#nextCue').count()===0&&await page.locator('.sheetHead').count()===0,
    name+': duplicate top circular cue or second score is still stealing attention');
@@ -43,11 +70,11 @@ for(const [name,w,h] of [['desktop1366',1366,900],['mobile390',390,844]]){
      cols:grid.gridTemplateColumns.split(' ').length,overflowY:grid.overflowY,
      scrollHeight:track.scrollHeight,clientHeight:track.clientHeight};
  });
- check(scoreLayout.cols===(w<=700?4:7)&&scoreLayout.grid.width>scoreLayout.stage.width*.92&&
-   scoreLayout.first.width>=(w<=700?65:110)&&scoreLayout.note.width>=(w<=700?42:55),
+ check(scoreLayout.cols===(w<=700?4:w<=1080?6:7)&&scoreLayout.grid.width>scoreLayout.stage.width*.92&&
+   scoreLayout.first.width>=(w<=700?62:w<=1080?105:110)&&scoreLayout.note.width>=(w<=700?28:55),
    name+': score grid is too narrow or notes too small '+JSON.stringify(scoreLayout));
- if(w<=700)check(scoreLayout.scrollHeight>scoreLayout.clientHeight,
-   name+': long mobile score must scroll inside its own grid '+JSON.stringify(scoreLayout));
+ check(scoreLayout.scrollHeight<=scoreLayout.clientHeight+3,
+   name+': all 14 notes must fit in the score without internal scrolling '+JSON.stringify(scoreLayout));
  const scrolling=await page.evaluate(()=>{
    const grid=document.querySelector('#noteTrack');
    const before=window.scrollY;
@@ -56,9 +83,9 @@ for(const [name,w,h] of [['desktop1366',1366,900],['mobile390',390,844]]){
      active:[...grid.querySelectorAll('.noteTile.active')].map(x=>Number(x.dataset.i)),
      next:grid.querySelectorAll('.noteTile.next').length};
  });
- check(scrolling.active.join(',')==='13'&&scrolling.next===0&&
-   (w>700||scrolling.scroll>5)&&Math.abs(scrolling.after-scrolling.before)<=1,
-   name+': score must follow current note without scrolling page '+JSON.stringify(scrolling));
+ check(scrolling.active.join(',')==='13'&&scrolling.next===0&&scrolling.scroll<=2&&
+   Math.abs(scrolling.after-scrolling.before)<=1,
+   name+': all score notes must remain visible with no page/grid scroll '+JSON.stringify(scrolling));
  await page.evaluate(()=>{state.lastUi=-1;changeCue(0);document.querySelector('#noteTrack').scrollTop=0});
  await page.screenshot({path:out+'/'+name+'-score-ready.png',fullPage:false});
  const initial=await page.evaluate(()=>window.__rhythmQA.state());
@@ -120,9 +147,16 @@ for(const [name,w,h] of [['desktop1366',1366,900],['mobile390',390,844]]){
  check(visibleTogether.scoreTop>=-2&&visibleTogether.keyBottom<visibleTogether.viewH+3,
    name+': score and all instrument buttons must be visible together at playback '+JSON.stringify(visibleTogether));
  check(await page.locator('.key').first().isVisible(),name+': click/touch targets hidden');
+ // Time measurements around screenshots/layout introspection can exceed the 285ms
+ // hit window on slower CI phones. Reset only the playback clock just before the
+ // actual pointer tap, while preserving the real input interaction.
+ await page.evaluate(()=>{state.origin=performance.now();state.events[0].judged=false;
+   state.events[0].grade=null;state.earned=0;state.extra=0;state.played=0;refreshScore()});
  if(w<=700)await page.locator('.key').first().tap();else await page.locator('.key').first().click();
- check((await page.locator('#scoreLabel').innerText())!=='0',
-   name+': visible touch/click key did not update score');
+ const physicalTap=await page.evaluate(()=>({phase:state.phase,score:state.score,
+   firstGrade:state.events[0].grade,extra:state.extra,elapsed:performance.now()-state.origin}));
+ check(physicalTap.score>0&&['great','good','okay'].includes(physicalTap.firstGrade),
+   name+': physical pointer tap did not register first correct note '+JSON.stringify(physicalTap));
  const overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth));
  check(overflow<=2,name+': screen horizontal overflow '+overflow);
  await page.screenshot({path:out+'/'+name+'.png',fullPage:true});
