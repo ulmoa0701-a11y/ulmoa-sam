@@ -20,9 +20,9 @@ const RGB = Object.fromEntries(Object.entries(PALETTE).map(([key,value])=>[key,n
 
 function regionFor(x, y, z) {
   // Approximate cortical boundaries for parent education, not anatomical atlas.
-  if (z < -0.79 || (z < -.55 && y < -.12)) return 'occipital';
-  if (y < -.32 && z > -.70) return 'temporal';
-  if (z > .40 || (z > .08 && y < .18)) return 'frontal';
+  if (z < -.82 || (z < -.66 && y < -.12)) return 'occipital';
+  if (y < -.16 && z > -.82 && z < .85) return 'temporal';
+  if (z > .36) return 'frontal';
   return 'parietal';
 }
 
@@ -37,23 +37,24 @@ function cortexPoint(x, y, z, side) {
   const pillow = .5 + .5*Math.sin(sweep + .4*Math.cos(cross));
   const furrow = Math.pow(Math.max(0,-flowing),1.5);
   // 이전 모델의 깊은 절개형 요철(.125)을 없애고 낮고 둥근 굴곡으로 만듭니다.
-  const radius = 1.0 + .032*pillow - .024*furrow;
+  const radius = 1.0 + .063*pillow - .018*furrow;
   const zz = z*1.36*radius;
   const taper = 1-.07*Math.max(0,-z);
   const xx = side * (.545 + x*.533*radius*taper);
   const temporalBulge = Math.exp(-Math.pow((z-.06)/.69,2)) * Math.max(0,-y);
   const yy = .055 + .78*y*radius -.13*temporalBulge;
   // Smoothly flatten the lower-back surface above the cerebellum.
-  return [xx,yy,zz,Math.max(.95,1-.045*furrow)];
+  return [xx,yy,zz,Math.max(.965,1-.035*furrow)];
 }
 
 function smoothstep(a,b,x){const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)}
 function corticalRGB(x,y,z,shade){
- const ocBorder=.79-.23*(1-smoothstep(-.18,-.06,y));
- const occ=smoothstep(ocBorder-.075,ocBorder+.075,-z);
- const frontBorder=.08+.32*smoothstep(.13,.30,y);
- const front=(1-occ)*smoothstep(frontBorder-.09,frontBorder+.09,z);
- const temporal=(1-occ)*(1-front)*(1-smoothstep(-.41,-.24,y));
+ // 부위별 파스텔 영역이 실제로 잘 보이게: 아래 측두엽(민트),
+ // 위 두정엽(노랑), 앞 전두엽(라벤더), 뒤 후두엽(살구) 순서입니다.
+ const occ=smoothstep(.78,.94,-z);
+ const temporal=(1-occ)*(1-smoothstep(-.24,-.035,y))
+   *smoothstep(-.92,-.70,z)*(1-smoothstep(.67,.95,z));
+ const front=(1-occ)*(1-temporal)*smoothstep(.02,.31,z);
  const parietal=Math.max(0,1-occ-front-temporal);
  const weights=[
   ['frontal',front],['parietal',parietal],
