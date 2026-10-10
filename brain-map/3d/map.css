@@ -141,3 +141,10 @@ body.approved-brain-page{background:#f8faf3;color:#253b31;font-family:Pretendard
 .quick-grid b{font-size:14px}
 }
 @media(prefers-reduced-motion:reduce){.map-wrap *{transition:none!important}}
+
+/* 승인 이미지 자체를 배경으로 사용합니다. 중복 연결선은 숨기고 인터랙션만 얹습니다. */
+.map-connectors{display:none}
+.map-callout{background:#fffefc;z-index:5}
+.map-callout.is-related{filter:drop-shadow(0 1px 1px color-mix(in srgb,var(--stroke) 45%,transparent))}
+@media(min-width:721px){.map-callout.temporal{width:20%}.map-callout.cerebellum{width:18.4%}}
+@media(max-width:720px){.map-stage .approved-brain-art{image-rendering:auto}.map-callout{background:#fff}}
