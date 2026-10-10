@@ -162,11 +162,18 @@ const truth=require('./doremi-ground-truth.json');
     ctx.translate(880,740);ctx.rotate(Math.PI*1.3/180);
     ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
     ctx.drawImage(img,-850,-700,1700,1400);
-    return{lowres:smaller.toDataURL('image/jpeg',.68).split(',')[1],tilted:tilted.toDataURL('image/jpeg',.74).split(',')[1]};
+    // Exercise resize on already-compressed JPEG, not pristine vector PNG.
+    const compressed=new Image();compressed.src=smaller.toDataURL('image/jpeg',.68);await compressed.decode();
+    const restored=document.createElement('canvas');restored.width=1800;restored.height=1480;
+    const rc=restored.getContext('2d');rc.fillStyle='#fff';rc.fillRect(0,0,1800,1480);rc.imageSmoothingEnabled=true;rc.imageSmoothingQuality='high';
+    rc.drawImage(compressed,0,0,1800,1480);
+    return{lowres:smaller.toDataURL('image/jpeg',.68).split(',')[1],tilted:tilted.toDataURL('image/jpeg',.74).split(',')[1],upscaled:restored.toDataURL('image/png').split(',')[1]};
   },pictures.normal);
   const lowresPath=path.join(out,'typeset-lowres-19.jpg'),tiltedPath=path.join(out,'typeset-tilted-19.jpg');
   fs.writeFileSync(lowresPath,Buffer.from(disturbed.lowres,'base64'));
   fs.writeFileSync(tiltedPath,Buffer.from(disturbed.tilted,'base64'));
+  const restoredPath=path.join(out,'typeset-jpeg-upscaled-19.png');
+  fs.writeFileSync(restoredPath,Buffer.from(disturbed.upscaled,'base64'));
   console.log('DISTURBED_FIXTURE '+JSON.stringify({lowres:lowresPath,tilted:tiltedPath,source:'independent typeset score'}));
   console.log(JSON.stringify({generated:true,fullNotation:{measures:truth.measures.length,notes:truth.noteCount,rests:truth.restCount,perLine:truth.perLine},drawn:{measures:pictures.count,internalBarlines:pictures.bars},files:[first,second],size:[pictures.width,pictures.height]}));
  }finally{await browser.close()}
