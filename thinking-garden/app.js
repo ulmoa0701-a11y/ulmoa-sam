@@ -39,11 +39,24 @@ function choosePracticeRounds(game,level,count){
  try{localStorage.setItem(storageKey,JSON.stringify(newUsed.size===bank.length?result.map(q=>practiceKey(game,q)): [...newUsed]))}catch{}
  return result;
 }
+const literacyLevelPreviews={
+ spacing:{
+  easy:'<div class="pv-instruction">띄어야 할 곳을 찾아요</div><div class="pv-glued">학교에가요</div><div class="pv-space-arrow">톡! ↓</div><div class="pv-spaced"><span>학교에</span><span>가요</span></div>',
+  normal:'<div class="pv-instruction">말 덩어리가 세 개예요</div><div class="pv-glued">나는학교에서공부해요</div><div class="pv-space-arrow">톡! ↓</div><div class="pv-spaced"><span>나는</span><span>학교에서</span><span>공부해요</span></div>',
+  hard:'<div class="pv-instruction">문장이 길어져도 천천히 찾아요</div><div class="pv-glued">비가많이와서우산을썼어요</div><div class="pv-space-arrow">톡! ↓</div><div class="pv-spaced"><span>비가</span><span>많이</span><span>와서</span><span>우산을</span><span>썼어요</span></div>'
+ },
+ spelling:{
+  easy:'<div class="pv-instruction">비슷한 글자를 구별해요</div><div class="pv-sign">숙제를 다 <b>?</b></div><div class="pv-options"><span class="preview-pulse">했어요</span><span>햇어요</span></div>',
+  normal:'<div class="pv-instruction">헷갈리는 표현을 비교해요</div><div class="pv-sign">이제 가도 <b>?</b></div><div class="pv-options"><span class="preview-pulse">돼요</span><span>되요</span></div>',
+  hard:'<div class="pv-instruction">문장 뜻을 생각하고 골라요</div><div class="pv-sign">오늘은 <b>?</b> 기분이 좋아요</div><div class="pv-options"><span class="preview-pulse">왠지</span><span>웬지</span></div>'
+ }
+};
 function updatePracticeControls(){
  $('#literacyPracticeControls [data-level]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.level===state.practiceLevel)));
  $('#literacyPracticeControls [data-count]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.count)===state.practiceCount)));
  $('#practiceNotice').textContent=`${LEVEL_NAMES[state.practiceLevel]} · ${state.practiceCount}문제 · 같은 회기 안에서 중복 없이 연습해요.`;
  $('#previewRoundInfo').textContent=`선택한 ${state.practiceCount}문제를 풀어요.`;
+ if(LITERACY_GAMES.has(state.previewGame))$('#introPreview').innerHTML=literacyLevelPreviews[state.previewGame][state.practiceLevel];
 }
 
 const previewExamples={
