@@ -227,3 +227,16 @@ html.brain-embedded,html.brain-embedded body{margin:0!important;width:100%;heigh
 .brain-embedded .orientation{top:12px;left:12px;max-width:68%;font-size:12px;z-index:4}
 .brain-embedded .stage-hint{bottom:12px;left:12px;font-size:11px;z-index:4}
 @media(max-width:620px){.brain-embedded .stage-shell{min-height:0;height:100%}.brain-embedded #brainCanvas{height:100%!important}.brain-embedded .stage-hint{font-size:10px}.brain-embedded .orientation{font-size:10px}}
+
+
+/* 구름 같은 파스텔 교구 3D와 조화를 이루는 밝은 뇌지도 */
+.stage-shell{background:radial-gradient(ellipse at 50% 43%,#fffefb 0%,#f7fbf3 57%,#eaf7ed 100%)}
+.callout-frontal{--color:#b991ed}
+.callout-parietal{--color:#ebc65b}
+.callout-temporal{--color:#7cc895}
+.callout-occipital{--color:#ee9e81}
+.callout-cerebellum{--color:#87b7ee}
+.callout-brainstem{--color:#ab9dc5}
+.brain-callout{background:#fffffffa;border-radius:18px}
+.brain-callout[aria-pressed="true"]{box-shadow:0 0 0 3px color-mix(in srgb,var(--color) 19%,transparent),0 5px 12px #39513f12}
+.brain-embedded .stage-shell{background:radial-gradient(ellipse at 50% 45%,#fffefb,#eef8ed)}
