@@ -255,6 +255,18 @@ async function basicCase(name,width,height){
   check(scoreView.mode==='score'&&scoreView.scoreTiles===scoreView.sideTiles&&scoreView.scoreTiles>10,
     `${name}: score view does not render the same notes as the side score ${JSON.stringify(scoreView)}`);
   check(await page.locator('#scoreStage').isVisible(),`${name}: animated score stage is hidden`);
+  const cardGeom=await page.evaluate(()=>{
+    const grid=document.querySelector('#scoreStageGrid'),card=grid.querySelector('.beat'),
+      note=card.querySelector('.note'),lyric=card.querySelector('.lyric'),
+      box=x=>x.getBoundingClientRect();
+    return {cardH:box(card).height,noteH:box(note).height,lyricH:box(lyric).height,
+      cardBottom:box(card).bottom,lyricBottom:box(lyric).bottom,gridH:grid.clientHeight,scrollH:grid.scrollHeight,
+      lyricText:lyric.textContent};
+  });
+  check(cardGeom.cardH>=cardGeom.noteH+cardGeom.lyricH-3&&cardGeom.lyricBottom<=cardGeom.cardBottom+1,
+    `${name}: animated score cards clip their note or lyric ${JSON.stringify(cardGeom)}`);
+  if(width<=800)check(cardGeom.scrollH>cardGeom.gridH&&cardGeom.lyricText==='반',
+    `${name}: mobile score should scroll and show readable lyrics ${JSON.stringify(cardGeom)}`);
   const highlighted=await page.evaluate(()=>{elapsed=events[5].start+55;draw();return {on:[...document.querySelectorAll('#scoreStageGrid .scoreActive')].map(e=>Number(e.dataset.eventIndex)),
     side:[...document.querySelectorAll('#scoreRows .scoreActive')].map(e=>[...e.parentElement.children].indexOf(e)),
     next:[...document.querySelectorAll('#scoreStageGrid .scoreNext')].map(e=>Number(e.dataset.eventIndex))}});
