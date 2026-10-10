@@ -185,7 +185,7 @@ function setRealLink(confirmed){
  $('realHint').textContent=confirmed?'🎵 이제 연주하러 가자!':'선생님과 실제 리코더를 잡아본 다음 열려요.';
 }
 function guidedStart(){
- reset();S.route='guided';S.part='touch';S.lessonPos=0;lessonTask();
+ reset();$('teacherSettings').open=false;S.route='guided';S.part='touch';S.lessonPos=0;lessonTask();
  beginDemo();status('첫 번째 놀이! 큰 동그라미를 찾아보자.');
 }
 function bridgeStartCamera(){
@@ -251,7 +251,7 @@ function demoTap(e){
  const px=(e.clientX-rect.left-mx)/scale/W,py=(e.clientY-rect.top-my)/scale/H;
  const t=task(),closest=t.goal.map((p,i)=>({i,d:Math.hypot((p.x-px)*W,(p.y-py)*H)/H})).sort((a,b)=>a.d-b.d)[0];
  if(!closest||closest.d>.095)return;
- S.taps.add(closest.i);beep(450+closest.i*90);
+ S.taps.add(closest.i);beep(450+closest.i*90);draw();
  $('playHint').textContent='✨ '+S.taps.size+' / '+t.goal.length+' 터치했어!';
  S.progress=S.taps.size/t.goal.length;$('playMeter').style.width=Math.round(S.progress*100)+'%';
  if(S.taps.size===t.goal.length)reward();
