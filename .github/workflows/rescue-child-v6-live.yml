@@ -1,0 +1,58 @@
+name: Verify public child-friendly rescue v6
+on:
+  pull_request:
+    paths: ['.github/workflows/rescue-child-v6-live.yml']
+permissions:
+  contents: read
+jobs:
+  deployed-assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Wait for v6 page, scripts and animal assets
+        run: |
+          BASE='https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/'
+          ready=0
+          for attempt in $(seq 1 40); do
+            curl -fsSL --max-time 15 "$BASE" -o /tmp/game-index.html || true
+            curl -fsSL --max-time 15 "${BASE}game.js?v=6" -o /tmp/game.js || true
+            curl -fsSL --max-time 15 "${BASE}landscape.js?v=5" -o /tmp/landscape.js || true
+            if grep -q 'game.js?v=6' /tmp/game-index.html &&
+               grep -q 'landscape.js?v=5' /tmp/game-index.html &&
+               grep -q 'function makeChoices' /tmp/game.js &&
+               grep -q 'closest' /tmp/landscape.js; then
+              ready=1; break
+            fi
+            echo "Waiting for actual site update: $attempt"
+            sleep 8
+          done
+          test "$ready" = "1"
+          for animal in rabbit pig cow duck; do
+            for color in yellow blue green red; do
+              curl -fsSL --max-time 20 -o "/tmp/$animal-$color.webp" "${BASE}art/illustrated/$animal-$color.webp"
+              head -c 4 "/tmp/$animal-$color.webp" | grep -q RIFF
+            done
+          done
+          echo 'LIVE ASSETS V6 PASS'
+  real-browser-play:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: deployed-assets
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+      - name: Full live site play including deliberately wrong choices
+        env:
+          RESCUE_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/
+        run: node thinking-garden/games/rescue/rescue-smoke.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rescue-child-live-v6-captures
+          path: rescue-qa-screenshots/
+          if-no-files-found: ignore
