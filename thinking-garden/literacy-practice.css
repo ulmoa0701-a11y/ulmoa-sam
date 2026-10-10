@@ -28,3 +28,7 @@
  .practice-notice{font-size:12px!important}
 }
 @media(prefers-reduced-motion:reduce){.practice-options button{transition:none}}
+
+/* 긴 난이도 예시도 태블릿·휴대폰에서 영역 밖으로 튀어나오지 않게 조절 */
+#introPreview .pv-glued{max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all;font-size:clamp(16px,3vw,20px)}
+#introPreview .pv-sign{max-width:100%;overflow-wrap:anywhere;word-break:keep-all}
