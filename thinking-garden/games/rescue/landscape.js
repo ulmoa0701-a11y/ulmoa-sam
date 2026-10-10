@@ -36,27 +36,31 @@ class LandscapeMissionScene extends Phaser.Scene{
   label(this,166,128,this.m.place,43,'#173f32','900').setDepth(21);
   this.portrait=makeTargetPortrait(this,this.m).setPosition(166,265).setScale(1.32).setDepth(21);
   this.targetText=targetLabel(this.m);
-  label(this,166,383,this.m.need===1?this.targetText:`${this.m.color}색 ${this.m.size} 동물`,27,'#173f32','900').setDepth(21);
-  label(this,166,426,this.m.need===1?'찾아서 눌러요!':`${this.m.need}마리 · ${this.m.species.join('·')}`,21,'#567567','800').setDepth(21);
+  label(this,166,383,targetHeadline(this.m),27,'#173f32','900').setDepth(21);
+  label(this,166,426,this.m.focus==='size'?'큰 토끼 · 큰 돼지':this.m.need===1?'한 마리를 찾아요':`${this.m.need}마리 · ${this.m.species.join('·')}`,21,'#567567','800').setDepth(21);
   this.count=label(this,166,500,`구조 0 / ${this.m.need}`,29,'#1b6a4b','900').setDepth(21);
-  const instruction=this.m.need===1?'같은 종류 · 같은 색깔 · 같은 크기':'화면의 동물을 한 마리씩 찾아요';
+  const instruction=this.m.focus==='species'?'모두 같은 색깔이에요':this.m.focus==='color'?'모두 토끼예요 · 색깔을 봐요':this.m.focus==='size'?'같은 종류끼리 크기를 비교해요':this.m.focus==='color-species'?'색깔과 동물 종류를 봐요':'색깔 · 크기를 모두 살펴요';
   this.add.text(166,578,instruction,{fontFamily:FONT,fontSize:'21px',fontStyle:'bold',color:'#436958',align:'center',lineSpacing:10,wordWrap:{width:247}}).setOrigin(.5).setDepth(21);
   const back=button(this,166,680,215,58,'처음으로',0x526e60).setDepth(22);
   back.on('pointerdown',()=>this.scene.start('landtitle'));
   roundRect(this,329,18,849,78,24,0x153d32,.9).setDepth(14);
   label(this,689,56,'조건에 맞는 동물을 찾아요',27,'#ffffff','900').setDepth(15);
   const replay=button(this,1094,57,142,60,'🔊 다시',0x2a7858).setDepth(18);
-  replay.on('pointerdown',()=>speak(`${this.targetText}를 찾아줘`));
+  replay.on('pointerdown',()=>speak(this.targetText));
   const start=button(this,750,356,370,88,'출동! 🚨',0x226c50).setDepth(55);
   const shade=this.add.rectangle(754,413,875,630,0x0a291e,.42).setDepth(50);
-  start.on('pointerdown',()=>{tone(true);speak(`${this.targetText}를 찾아줘`);shade.destroy();start.destroy();this.lock=false;this.spawn()});
+  start.on('pointerdown',()=>{tone(true);speak(this.targetText);shade.destroy();start.destroy();this.lock=false;this.spawn()});
  }
  spawn(){
   const items=makeChoices(this.round),top=Math.ceil(items.length/2),bottom=items.length-top;
+  if(this.m.focus==='size'){
+   [320,595].forEach(base=>roundRect(this,442,base-4,485,38,18,0xf5eed9,.94,0xb9c9a8,2).setDepth(5));
+  }
   const xAt=(index,count)=>750+(index-(count-1)/2)*218;
   items.forEach((it,i)=>{
    const row=i<top?0:1,j=row===0?i:i-top,n=row===0?top:bottom;
-   const x=xAt(j,n),y=row===0?248:509;
+   const x=this.m.focus==='size'?(j===0?525:810):xAt(j,n),baseY=row===0?320:595;
+   const y=this.m.focus==='size'?baseY-(it.size==='큰'?BODY_PIXELS_BIG:BODY_PIXELS_SMALL)/2:row===0?248:509;
    const a=animal(this,it.species,COLORS[it.color],it.size);
    a.setPosition(x,y).setDepth(8);
    a.setDataEnabled();a.data.set('item',it);
@@ -68,7 +72,8 @@ class LandscapeMissionScene extends Phaser.Scene{
     let closest=null,score=Infinity;
     for(const a of this.targets){
       if(!a.active||a.data?.get('rescuing'))continue;
-      const x=(pointer.x-a.x)/(a.scaleX<.85?96:125),y=(pointer.y-a.y)/(a.scaleY<.85?98:123);
+      const small=a.data.get('item').size==='작은';
+      const x=(pointer.x-a.x)/(small?90:119),y=(pointer.y-a.y)/(small?90:115);
       const d=x*x+y*y;
       if(d<score){score=d;closest=a}
     }
@@ -82,7 +87,7 @@ class LandscapeMissionScene extends Phaser.Scene{
   if(this.lock||!a.active)return;
   const it=a.data.get('item'),good=it.color===this.m.color&&it.size===this.m.size&&this.m.species.includes(it.species)&&!this.found.has(it.species);
   if(!good){
-   const reason=it.color!==this.m.color?'색깔을 다시 볼까?':it.size!==this.m.size?'크기를 다시 볼까?':'다른 종류의 동물이야';
+   const reason=wrongReason(this.m,it);
    tone(false);
    const t=this.add.text(a.x,a.y-126,reason,{fontFamily:FONT,fontSize:'24px',fontStyle:'bold',color:'#6c4531',backgroundColor:'#fff9ef',padding:{x:12,y:8}}).setOrigin(.5).setDepth(40);
    this.tweens.add({targets:t,y:t.y-20,alpha:0,duration:1150,onComplete:()=>t.destroy()});

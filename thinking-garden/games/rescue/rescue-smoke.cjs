@@ -54,24 +54,46 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
   await page.waitForFunction(n=>{const sc=window.moaRescueGame.scene.getScene(n);return sc&&sc.lock===false},missionName,{timeout:8000});
   await page.screenshot({path:'rescue-qa-screenshots/'+label+'-gameplay.png'});
   for(let round=0;round<(fullRun?5:1);round++){
-   const scene=await page.evaluate(n=>{const s=window.moaRescueGame.scene.getScene(n);return {round:s.round,need:s.m.need,color:s.m.color,size:s.m.size,targetSpecies:s.m.species,animals:(n==='landmission'?s.targets:s.actors).filter(a=>a.active&&a.data&&a.data.get('species')||n==='landmission'&&a.active&&a.data&&a.data.get('item')).map(a=>n==='landmission'?{x:a.x,y:a.y,...a.data.get('item')}:{x:a.x,y:a.y,species:a.data.get('species'),color:a.data.get('color'),size:a.data.get('size')})}},missionName);
+   const scene=await page.evaluate(n=>{const s=window.moaRescueGame.scene.getScene(n);return {round:s.round,need:s.m.need,focus:s.m.focus,color:s.m.color,size:s.m.size,targetSpecies:s.m.species,animals:(n==='landmission'?s.targets:s.actors).filter(a=>a.active&&a.data&&a.data.get('species')||n==='landmission'&&a.active&&a.data&&a.data.get('item')).map(a=>n==='landmission'?{x:a.x,y:a.y,visualBodyHeight:a.data.get('visualBodyHeight'),...a.data.get('item')}:{x:a.x,y:a.y,visualBodyHeight:a.data.get('visualBodyHeight'),species:a.data.get('species'),color:a.data.get('color'),size:a.data.get('size')})}},missionName);
    assert.equal(scene.round,round);
    assert.equal(scene.need,[1,1,2,3,4][round],'Difficulty must increase 1,1,2,3,4');
-   assert.equal(scene.animals.length,4+round,'Candidate count must increase gently');
+   assert.equal(scene.animals.length,[4,4,4,7,8][round],'Candidate count follows discriminative skill, not just rising visual clutter');
+   assert.equal(scene.focus,['species','color','size','color-species','combined'][round]);
+   assert.ok(scene.animals.every(a=>a.visualBodyHeight===(a.size==='큰'?165:96)),'Rendered characters must use measured silhouette height calibration');
+   if(scene.focus==='species'){
+     assert.equal(new Set(scene.animals.map(a=>a.color)).size,1,'Species recognition must not be solvable by color');
+     assert.equal(new Set(scene.animals.map(a=>a.size)).size,1,'Species recognition must not be solvable by size');
+     assert.equal(new Set(scene.animals.map(a=>a.species)).size,4);
+   }
+   if(scene.focus==='color'){
+     assert.equal(new Set(scene.animals.map(a=>a.species)).size,1,'Color recognition must keep the species fixed');
+     assert.equal(new Set(scene.animals.map(a=>a.size)).size,1,'Color recognition must keep size fixed');
+     assert.equal(new Set(scene.animals.map(a=>a.color)).size,4);
+   }
+   if(scene.focus==='size'){
+     assert.equal(new Set(scene.animals.map(a=>a.color)).size,1,'Size comparison must keep color fixed');
+     for(const sp of scene.targetSpecies){
+       assert.deepEqual(scene.animals.filter(a=>a.species===sp).map(a=>a.size).sort(),['작은','큰'],'Each same-species pair must contain one large and one small');
+       const large=scene.animals.find(a=>a.species===sp&&a.size==='큰'),small=scene.animals.find(a=>a.species===sp&&a.size==='작은');
+       assert.ok(large.visualBodyHeight/small.visualBodyHeight>=1.7,'Visible size ratio must be unambiguous');
+       assert.ok(Math.abs((large.y+large.visualBodyHeight/2)-(small.y+small.visualBodyHeight/2))<=2 && Math.abs(large.x-small.x)<=300,'Compare same-species pairs with their visible feet on one baseline');
+     }
+   }
+   await page.screenshot({path:'rescue-qa-screenshots/'+label+'-round'+(round+1)+'-gameplay.png'});
    assert.equal(new Set(scene.animals.map(a=>[a.species,a.color,a.size].join('|'))).size,scene.animals.length,'No two visually identical animals may have contradictory answers');
    assert.equal(scene.animals.filter(a=>a.color===scene.color&&a.size===scene.size&&scene.targetSpecies.includes(a.species)).length,scene.need,'Exactly one instance of each target');
    if(!wide) {
     const banner=await page.evaluate(n=>{const x=window.moaRescueGame.scene.getScene(n).missionChip;return {exists:!!x,copy:x?.list.filter(k=>typeof k.text==='string').map(k=>k.text).join(' | ')||'',audio:x?.list.some(k=>k.type==='Container'&&k.list.some(z=>z.text?.includes('다시'))) }},missionName);
-    assert.ok(banner.exists && banner.copy.includes(scene.color+'색') && banner.copy.includes(scene.size),'Missing persistent child-readable mission prompt '+JSON.stringify(banner));
+    const words={species:['오리'],color:['파란색','토끼'],size:['큰','토끼','돼지'],['color-species']:['초록색','동물'],combined:['빨간색','작은']}[scene.focus];
+    assert.ok(banner.exists && words.every(w=>banner.copy.includes(w)),'Missing persistent, focus-specific child-readable mission prompt '+JSON.stringify({focus:scene.focus,banner}));
     assert.ok(banner.audio,'Missing repeat-audio button');
    }
-   // An obvious wrong candidate must not silently become a valid answer.
-   const wrong=scene.animals.find(a=>!(a.color===scene.color&&a.size===scene.size&&scene.targetSpecies.includes(a.species)));
-   if(wrong) {
+   // Negative tests: every distractor must stay wrong, including same-species size pairs.
+   for(const wrong of scene.animals.filter(a=>!(a.color===scene.color&&a.size===scene.size&&scene.targetSpecies.includes(a.species)))){
     await clickAt(wrong.x,wrong.y);
-    await page.waitForTimeout(180);
+    await page.waitForTimeout(85);
     const count=await page.evaluate(n=>window.moaRescueGame.scene.getScene(n).found.size,missionName);
-    assert.equal(count,0,'Wrong animal must never count as rescued');
+    assert.equal(count,0,'Wrong animal must never be rescued: '+JSON.stringify({wrong,scene:scene.focus}));
    }
    const eligible=scene.animals.filter(a=>a.color===scene.color&&a.size===scene.size&&scene.targetSpecies.includes(a.species));
    const seen=new Set();
@@ -111,7 +133,7 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
 }
 (async()=>{
  await test('desktop-1440x900',{width:1440,height:900},true,false,true);
- await test('tablet-1024x768',{width:1024,height:768},true,true,false);
+ await test('tablet-1024x768',{width:1024,height:768},true,true,true);
  await test('mobile-390x844',{width:390,height:844},false,true,true);
- await test('portrait-tablet-768x1024',{width:768,height:1024},false,true,false);
+ await test('portrait-tablet-768x1024',{width:768,height:1024},false,true,true);
 })().catch(e=>{console.error(e);process.exitCode=1});
