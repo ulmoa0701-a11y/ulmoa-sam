@@ -70,13 +70,29 @@ const path=require("node:path");
         };
       });
       assert.equal(paperLook.backgroundImage,"none","dialog definition is no longer ruled notebook paper");
-      assert.equal(paperLook.backgroundColor,"rgb(255, 253, 250)","soft, solid, readable paper background");
+      assert.equal(paperLook.backgroundColor,"rgba(0, 0, 0, 0)","reading sheet itself is uncolored");
       assert.equal(paperLook.before,"none","margin pencil decoration removed inside dialog");
       assert.equal(paperLook.after,"none","no decorative pseudo-element in dialog");
-      assert(paperLook.paddingLeft>=16&&paperLook.paddingLeft<=20,"usable text padding without giant left gutter");
+      assert.equal(paperLook.paddingLeft,0,"reading layout is not offset by notebook gutter");
+      assert.equal(await page.locator("#gcatDialogBody .gcat-definition-section").count(),1,"single clear definition section");
+      assert.equal(await page.locator("#gcatDialogBody .gcat-example-section").count(),1,"real-life example follows definition");
+      assert.equal(await page.locator("#gcatDialogBody .gcat-hints-section").count(),1,"optional distinction and keywords retained");
+      const infoOrder=await page.locator("#gcatDialogBody .gcat-reading-sheet").evaluate(sheet=>[...sheet.children].map(x=>x.className));
+      assert.equal(infoOrder[0],"gcat-definition-section","definition first");
+      assert.equal(infoOrder[1],"gcat-example-section","example second");
+      assert.equal(infoOrder[2],"gcat-hints-section","supporting notes third");
+      const mainDefinition=await page.locator("#gcatDialogBody .gcat-definition-section").evaluate(el=>({bg:getComputedStyle(el).backgroundColor,size:parseFloat(getComputedStyle(el.querySelector(".gcat-definition-headline")).fontSize)}));
+      assert.equal(mainDefinition.bg,"rgb(255, 249, 237)","one softly highlighted definition focus");
+      assert(mainDefinition.size>=18,"definition headline legible");
+      assert.equal(await page.locator(".gcat-reference-disclosure").count(),2,"large picture and references folded separately");
+      assert.equal(await page.locator(".gcat-reference-disclosure[open]").count(),0,"optional details closed by default");
+      assert.equal(await page.locator(".gcat-reference-disclosure .study-visual").isVisible(),false,"large source visual does not dominate initial view");
+      const sourceRefs=await page.locator('.glossary-category #memo-working-memory .study-sources a').count();
+      await page.locator(".gcat-reference-disclosure").last().locator("summary").click();
+      assert.equal(await page.locator("#gcatDialogBody .study-sources a").count(),sourceRefs,"all original reference links available");
       const originalPaperImage=await page.locator(".glossary-category .study-paper").first().evaluate(el=>getComputedStyle(el).backgroundImage);
       assert.notEqual(originalPaperImage,"none","original non-popup study layout remains unchanged");
-      if(p.name==="mobile"||p.name==="desktop")await page.screenshot({path:path.join(folder,p.name+"-dialog-clean.png")});
+      if(p.name==="mobile"||p.name==="desktop")await page.screenshot({path:path.join(folder,p.name+"-reading-flow.png")});
       await page.locator(".gcat-art-disclosure > summary").click();
       await page.waitForFunction(()=>{const x=document.querySelector(".gcat-art-panel img");return x&&x.complete&&x.naturalWidth===1122&&x.naturalHeight===1402});
       if(p.name==="mobile")await page.screenshot({path:path.join(folder,"mobile-detail.png")});
@@ -137,6 +153,23 @@ const path=require("node:path");
       assert.equal((await page.locator("#gcatDialogTitle").textContent()).trim(),"실행기능");
       assert((await page.locator("#gcatDialogBody .study-paper").textContent()).trim().length>80,"original sourced notes remain");
       await page.locator("#gcatDialogClose").click();
+      if(p.name==="desktop"){
+        // All thirty notes must preserve their original explanations and examples.
+        const ids=await page.locator(".gcat-map-term").evaluateAll(els=>els.map(el=>el.dataset.id));
+        assert.equal(ids.length,30);
+        for(const id of ids){
+          const selector='.gcat-map-term[data-id="'+id+'"]';
+          await page.locator(selector).click();
+          const content=await page.locator("#gcatDialogBody .gcat-reading-sheet").evaluate(el=>({
+            hasDefinition:!!el.querySelector(".gcat-definition-section .gcat-definition-explanation, .gcat-definition-section .gcat-definition-pair"),
+            hasExample:!!el.querySelector(".gcat-example-section .study-example"),
+            hiddenLargeArt:!el.querySelector(".gcat-reference-disclosure[open]"),
+            refs:el.querySelectorAll(".study-sources a").length
+          }));
+          assert(content.hasDefinition&&content.hasExample&&content.hiddenLargeArt&&content.refs>0,id+" retains a clear definition, example and references");
+          await page.locator("#gcatDialogClose").click();
+        }
+      }
       await search.fill("AAC");
       assert.equal(await page.locator("#gcatList img").count(),0,"searched overview still has no art");
       assert.equal(await page.locator("#gcatList .gcat-map-term").count(),1,"title-match search gives one text result");

@@ -123,6 +123,90 @@ function boot(){
   let recentIds=storageGet().filter(id=>byId.has(id));
   let lastOpener=null;
 
+  // 원문을 변경하지 않고 팝업에만 읽기 순서가 있는 새 화면을 구성한다.
+  // 30개 원본의 정보·예시·이미지·출처를 보존하고 참고 자료만 기본 접힘으로 둔다.
+  function makeDisclosure(label,className,content){
+    const details=node("details",className);
+    details.appendChild(node("summary",null,label));
+    details.appendChild(content);
+    return details;
+  }
+  function buildReadingSheet(entry){
+    const original=entry.content.cloneNode(true);
+    const reading=node("div","study-paper gcat-reading-sheet");
+
+    const definition=node("section","gcat-definition-section");
+    definition.appendChild(node("span","gcat-section-kicker","핵심 뜻"));
+    definition.appendChild(node("h3","gcat-definition-headline",entry.subtitle));
+    const core=original.querySelector(":scope > .study-core");
+    if(core){
+      const coreText=core.querySelector(":scope > p");
+      if(coreText){
+        coreText.classList.add("gcat-definition-explanation");
+        definition.appendChild(coreText);
+      }else{
+        // 두 개념을 비교하는 용어는 문장 대신 원본 비교 설명을 핵심 뜻에 배치.
+        const comparison=core.querySelector(":scope > .visual-pair");
+        if(comparison){
+          comparison.classList.add("gcat-definition-pair");
+          definition.appendChild(comparison);
+        }
+      }
+    }
+    reading.appendChild(definition);
+
+    const example=original.querySelector(":scope > .study-example");
+    if(example){
+      const section=node("section","gcat-example-section");
+      section.appendChild(node("h3","gcat-section-heading","이렇게 생각하면 쉬워요"));
+      section.appendChild(example);
+      reading.appendChild(section);
+    }
+    const hints=node("section","gcat-hints-section");
+    let hasHints=false;
+    const contrast=original.querySelector(":scope > .study-contrast");
+    if(contrast){hints.appendChild(contrast);hasHints=true;}
+    if(core){
+      const label=core.querySelector(":scope > small");
+      if(label)label.remove(); // 기존 장식형 머리말은 새로운 단계 제목과 중복
+      if(core.children.length){
+        core.classList.add("gcat-structure-note");
+        hints.appendChild(core);
+        hasHints=true;
+      }
+    }
+    const tags=original.querySelector(":scope > .study-tags");
+    if(tags){hints.appendChild(tags);hasHints=true;}
+    if(hasHints){
+      hints.insertBefore(node("h3","gcat-section-heading","함께 알아둘 점"),hints.firstChild);
+      reading.appendChild(hints);
+    }
+
+    const visual=original.querySelector(":scope > .study-visual");
+    if(visual){
+      const holder=node("div","gcat-reference-image");
+      holder.appendChild(visual);
+      reading.appendChild(makeDisclosure("참고 그림 보기","gcat-reference-disclosure",holder));
+    }
+    const more=original.querySelector(":scope > .study-more");
+    if(more){
+      const holder=node("div","gcat-reference-content");
+      const extra=more.querySelector(":scope > div");
+      if(extra)holder.append(...Array.from(extra.childNodes));
+      else holder.append(...Array.from(more.childNodes).filter(el=>el.nodeType!==1||el.tagName!=="SUMMARY"));
+      reading.appendChild(makeDisclosure("더 알아보기 · 근거","gcat-reference-disclosure",holder));
+    }
+
+    // 예상하지 못한 원문 요소도 누락하지 않는다.
+    const leftovers=Array.from(original.children).filter(el=>el!==core&&el!==example&&el!==contrast&&el!==tags&&el!==visual&&el!==more);
+    if(leftovers.length){
+      const extra=node("div","gcat-preserved-content");
+      extra.append(...leftovers);
+      reading.appendChild(extra);
+    }
+    return reading;
+  }
+
   function openTerm(id,opener,chosenCover){
     const entry=byId.get(id);
     if(!entry)return;
@@ -132,8 +216,7 @@ function boot(){
     renderRecent();
     dialogTitle.textContent=entry.title;
     dialogBody.replaceChildren();
-    dialogBody.appendChild(node("p","gcat-dialog-lead",entry.subtitle));
-    dialogBody.appendChild(entry.content.cloneNode(true));
+    dialogBody.appendChild(buildReadingSheet(entry));
     if(entry.covers.length){
       const details=node("details","gcat-art-disclosure");
       const summary=node("summary",null,entry.covers.length>1?"승인한 손그림 2장 크게 보기 ▾":"손그림 크게 보기 ▾");
