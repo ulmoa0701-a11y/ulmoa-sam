@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {makeBrainSurfaces} from './cortex-model.js?v=20261010-toy4';
+import {makeBrainSurfaces} from './cortex-model.js?v=20261010-friendly5';
 
 const canvas = document.getElementById('brainCanvas');
 const holder = document.getElementById('stageShell');
