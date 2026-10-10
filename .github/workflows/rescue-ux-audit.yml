@@ -24,7 +24,7 @@ jobs:
           p=pathlib.Path('/tmp/qa-images')
           files=list(p.rglob('*.png'))
           print("SCREENSHOT_NAMES",[f.name for f in files],flush=True)
-          for key in ['desktop-1440x900-gameplay','mobile-390x844-gameplay','portrait-tablet-768x1024-gameplay','mobile-390x844-round5-complete']:
+          for key in ['mobile-390x844-briefing','mobile-390x844-round3-complete','mobile-390x844-round4-complete','mobile-390x844-round5-complete','desktop-1440x900-round3-complete']:
             matches=[f for f in files if key in f.name]
             if not matches: continue
             im=Image.open(matches[0]).convert('RGB')
