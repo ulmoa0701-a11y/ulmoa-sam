@@ -24,8 +24,9 @@ function markStep(){
 function setPhase(phase){
  S.phase=phase;$('idleActions').hidden=phase!=='idle';
  $('setupPanel').hidden=phase!=='calibrate';
- $('playPanel').hidden=!(phase==='play'||phase==='won'||phase==='completed');
+ $('playPanel').hidden=!(phase==='play'||phase==='won');
  $('finishPanel').hidden=phase!=='completed';
+ $('demoApproach').hidden=!(S.mode==='demo'&&phase==='play');
  $('liveNotice').hidden=!(S.mode==='camera'&&phase!=='idle');
  $('demoNotice').hidden=!(S.mode==='demo'&&phase!=='idle');
  $('stopBtn').hidden=phase==='idle';
