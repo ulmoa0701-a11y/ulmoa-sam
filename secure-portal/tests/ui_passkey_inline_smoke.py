@@ -47,7 +47,7 @@ with sync_playwright() as p:
    pg.close()
  pg=b.new_page();errs=[];pg.on('pageerror',lambda e:errs.append(str(e)))
  pg.goto('about:blank');pg.evaluate("() => {"+mock+";}");pg.set_content(html,wait_until='load')
- pg.wait_for_selector('#registerForm');pg.locator('#newAccount').click();pg.locator('[name=selectedTherapistId]').select_option('teacher01');pg.locator('[name=invite]').fill('a'*32);pg.locator('[name=nickname]').fill('테스트닉네임');pg.locator('#registerForm button').click();pg.wait_for_selector('#entryForm',timeout=3500)
+ pg.get_by_text('처음 사용하거나 기기를 바꿨나요?').click();pg.locator('#newAccount').click();pg.locator('[name=selectedTherapistId]').select_option('teacher01');pg.locator('[name=invite]').fill('a'*32);pg.locator('#registerForm [name=nickname]').fill('테스트닉네임');pg.locator('#registerForm button').click();pg.wait_for_selector('#entryForm',timeout=3500)
  assert not errs,errs;passed.append('registration')
  print(json.dumps({'passed':len(passed),'cases':passed},ensure_ascii=False))
  b.close()
