@@ -96,15 +96,15 @@ function init() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.8));
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.33;
+  renderer.toneMappingExposure=1.07;
  }catch(error){setNotice('이 기기에서 3D 그래픽을 시작하지 못했습니다.');return false;}
  scene=new THREE.Scene();
  camera=new THREE.PerspectiveCamera(38,1,.1,100);
  brainGroup=new THREE.Group();scene.add(brainGroup);
- scene.add(new THREE.HemisphereLight(0xfff5de,0x71918a,2.2));
- const light=new THREE.DirectionalLight(0xfff9ed,3.1);light.position.set(-3,5,7);scene.add(light);
- const back=new THREE.DirectionalLight(0xaac9dc,1.8);back.position.set(4,2,-5);scene.add(back);
- const under=new THREE.DirectionalLight(0xe3ddfa,.8);under.position.set(0,-3,3);scene.add(under);
+ scene.add(new THREE.HemisphereLight(0xfff5de,0x71918a,1.5));
+ const light=new THREE.DirectionalLight(0xfff9ed,2.15);light.position.set(-3,5,7);scene.add(light);
+ const back=new THREE.DirectionalLight(0xaac9dc,1.05);back.position.set(4,2,-5);scene.add(back);
+ const under=new THREE.DirectionalLight(0xe3ddfa,.45);under.position.set(0,-3,3);scene.add(under);
  // All visible cortical lobes share one folded surface per hemisphere.
  // The old detached ellipsoids are intentionally no longer constructed.
  for(const mesh of makeBrainSurfaces()){
