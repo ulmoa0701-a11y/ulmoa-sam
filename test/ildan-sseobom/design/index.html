@@ -404,6 +404,56 @@ body:has(.login-page) .previewbar{padding-top:6px;padding-bottom:6px;font-size:1
 .login-privacy{font-size:12px}
 @media(max-width:740px){.login-step h2{font-size:16px}.login-step p{font-size:12px}.role-choice{min-height:85px}.role-choice strong{font-size:15px}.role-choice small{font-size:11px}.login-privacy{font-size:11px}}
 @media(max-width:370px){.login-heading h1{font-size:27px}.role-choice{min-height:79px}.login-body{padding:10px 10px 6px}}
+
+/* Choice lab: low-pressure, light programming playground (no mental-health logging) */
+.choice-lab{border:1px solid #dce4ee;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 11px 32px #3146640b;margin-top:12px}
+.choice-top{height:38px;padding:0 18px;background:#f7f9fd;border-bottom:1px solid #e6ebf2;display:flex;align-items:center;justify-content:space-between;gap:8px;font:800 10px ui-monospace,'Cascadia Code',monospace;color:#617398;letter-spacing:.06em}
+.choice-top-label{display:flex;align-items:center;gap:8px}.choice-top-label span{color:#3cae8c}
+.choice-count{font:800 10px ui-monospace,monospace;color:#9aa8bb}
+.choice-tabs{display:flex;gap:7px;padding:12px 16px 2px;background:#fff}
+.choice-tabs button{border:1px solid #e2e8f2;background:#fafbfe;border-radius:10px;padding:9px 14px;font:750 13px inherit;color:#62708d;min-height:42px;flex:1;white-space:nowrap}
+.choice-tabs button.selected{background:#ecf2ff;border-color:#9caeea;color:#344fac;box-shadow:inset 0 -2px 0 #5675db}
+.choice-tabs button:hover{border-color:#9fb4df}
+.choice-scene{margin:13px 16px 0;border-radius:15px;min-height:133px;display:flex;align-items:center;gap:19px;padding:19px 24px;position:relative;overflow:hidden}
+.choice-mint{background:linear-gradient(120deg,#e9f8f1,#f2faf8);color:#235e50}
+.choice-lavender{background:linear-gradient(120deg,#eeeefa,#f6f6ff);color:#464a91}
+.choice-peach{background:linear-gradient(120deg,#fff0e7,#fff7ed);color:#915238}
+.choice-scene-art{position:relative;flex:0 0 100px;height:77px;display:flex;align-items:center;justify-content:center}
+.choice-art-chip{background:#fff;border:2px solid currentColor;box-shadow:0 4px 0 #0000000c;color:inherit;border-radius:12px;font:900 19px ui-monospace,monospace;padding:12px 15px;transform:rotate(-7deg);z-index:2}
+.choice-art-route{position:absolute;width:65px;height:2px;background:currentColor;opacity:.28;transform:rotate(32deg);left:53px;top:46px}
+.choice-art-node{position:absolute;right:-5px;bottom:0;background:#ffffffbe;border:1px solid #ffffffdc;border-radius:50%;width:28px;height:28px;display:grid;place-items:center;font:800 15px ui-monospace,monospace}
+.choice-scene-text{position:relative;z-index:1;min-width:0}
+.choice-kicker{font:800 10px ui-monospace,monospace;letter-spacing:.12em;opacity:.75}
+.choice-scene-text h3{font-size:clamp(22px,2.5vw,27px)!important;line-height:1.35;margin:6px 0 5px!important;letter-spacing:-.8px}
+.choice-scene-text p{font-size:14px!important;line-height:1.5!important;color:inherit!important;margin:0!important;opacity:.86}
+.choice-columns{display:grid;grid-template-columns:minmax(0,1.06fr) minmax(0,.94fr);gap:13px;padding:14px 16px 11px}
+.choice-actions{min-width:0}.choice-section-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:0 2px 11px}
+.choice-section-head strong{font-size:16px}.choice-section-head span{font-size:11px;color:#78879b}
+.choice-options{display:grid;gap:8px}
+.choice-option{width:100%;border-radius:11px;border:1.5px solid #e1e7ed;background:#fff;min-height:51px;display:flex;align-items:center;gap:12px;text-align:left;color:#273b50;padding:7px 14px;transition:background .13s,border-color .13s}
+.choice-option:hover{background:#f7faff;border-color:#a5b9ea}.choice-option:focus-visible{outline:3px solid #4968ce;outline-offset:2px}
+.choice-option.picked{background:#f1f5ff;border-color:#5c77dc}
+.choice-option-icon{display:grid;place-items:center;flex:0 0 32px;height:32px;border-radius:9px;background:#f0f3f8;color:#5266a2;font-size:17px}
+.choice-option.picked .choice-option-icon{background:#dbe5ff;color:#344aa6}
+.choice-option strong{font-size:14px;font-weight:770;line-height:1.35}.choice-arrow{margin-left:auto;font-size:14px;color:#8394ac}
+.choice-result{border:1px solid #e1e6f0;border-radius:13px;overflow:hidden;background:#fafbff;min-height:186px;display:flex;flex-direction:column}
+.choice-console-top{height:35px;background:#f1f4fa;border-bottom:1px solid #e0e5f0;display:flex;align-items:center;gap:9px;padding:0 12px;font:700 11px ui-monospace,monospace;color:#5a6c89}
+.choice-console-top>span:first-child{color:#b6c3d3;font-size:10px;letter-spacing:2px}
+.choice-console-status{margin-left:auto;color:#39856b;font-size:10px}
+.choice-console-content{display:flex;align-items:center;gap:9px;padding:17px 15px;min-height:73px;line-height:1.55;font-size:14px;color:#2a4264;font-weight:700;overflow-wrap:anywhere}
+.choice-cursor{font:900 19px ui-monospace,monospace;color:#5076cf}
+.choice-code{margin-top:auto;white-space:pre-wrap;overflow-wrap:anywhere;border-top:1px solid #e4eaf2;padding:11px 15px 13px;color:#63738f;font:550 11.5px/1.8 ui-monospace,'Cascadia Code',monospace}
+.choice-ln{color:#b2bccc}.choice-keyword{color:#7658b5;font-weight:800}
+.choice-bottom{padding:5px 17px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;color:#82909d;font-size:11px}
+.choice-reset{border:0;background:transparent;color:#5267a8;font-size:12px;font-weight:800;padding:7px 9px;min-height:36px}
+.choice-reset:hover{text-decoration:underline}
+.editor-paper:has(.choice-lab){padding:19px 21px 18px}
+.editor-paper:has(.choice-lab)>p{margin-bottom:10px;font-size:13px}
+.editor-paper:has(.choice-lab)>h2{font-size:22px;margin-bottom:3px}
+.editor-paper #situation.choice-lab{background:#fff}
+@media(max-width:920px){.choice-columns{grid-template-columns:1fr}.choice-options{grid-template-columns:repeat(3,minmax(0,1fr))}.choice-option{padding:9px 8px;flex-direction:column;min-height:92px;gap:5px;align-items:center;text-align:center}.choice-arrow{display:none}}
+@media(max-width:590px){.choice-lab{border-radius:13px;margin-top:10px}.choice-top{padding:0 12px;height:32px}.choice-tabs{padding:9px 10px 0;gap:5px}.choice-tabs button{padding:7px 4px;min-height:40px;font-size:11px}.choice-scene{margin:9px 10px 0;padding:13px 13px;gap:8px;min-height:110px;border-radius:12px}.choice-scene-art{flex-basis:52px;transform:scale(.7);transform-origin:center}.choice-art-node{right:-24px}.choice-scene-text h3{font-size:18px!important;margin:3px 0!important}.choice-scene-text p{font-size:12px!important}.choice-kicker{font-size:9px}.choice-columns{padding:11px 10px 8px;gap:10px}.choice-section-head{margin-bottom:7px}.choice-section-head strong{font-size:14px}.choice-options{gap:5px}.choice-option{min-height:86px;padding:8px 2px}.choice-option strong{font-size:11px}.choice-option-icon{flex-basis:28px;height:28px;font-size:15px}.choice-result{min-height:120px}.choice-console-content{min-height:60px;padding:11px 13px;font-size:13px}.choice-code{padding:8px 13px;font-size:10px}.choice-bottom{padding:0 10px 6px;font-size:10px}.editor-paper:has(.choice-lab){padding:15px 12px}.editor-paper:has(.choice-lab)>h2{font-size:21px}.editor-paper:has(.choice-lab)>p{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.choice-option{transition:none}}
 </style></head><body><div class="previewbar" id="previewInfo"><strong>🧪 디자인 체험판</strong> · 가상 데이터 전용 · 실제 로그인/Google 저장 미연결 · 실명·상담 내용 입력 금지
 </div>
 <header><div class="topwrap"><a class="brand" href="#" aria-label="일단써봄 홈"><span class="brand-code">&lt;/&gt;</span> 일단<span>써봄</span><small>work • think • play</small></a><div id="account" class="account"></div></div></header>
@@ -536,8 +586,46 @@ function dataForm(role){if(role==='parent')return `<form class="form" id="entryF
 return `<form class="form" id="entryForm"><label>있었던 일<textarea name="event" maxlength="1200" placeholder="기억에 남는 일이 있으면 한 줄만 적어도 돼요." required></textarea></label><details class="optional-fields"><summary>생각이나 다음 행동도 적기 <small>선택</small></summary><div class="optional-wrap"><label>그때 떠오른 생각<textarea name="thought" maxlength="1200" placeholder="없으면 비워 둬도 괜찮아요."></textarea></label><label>다음에 해보고 싶은 것<textarea name="next" maxlength="1200" placeholder="답을 찾거나 꼭 실천할 필요는 없어요."></textarea></label></div></details><label class="checkbox"><input type="checkbox" name="share"><span>이 기록을 담당 치료사와 공유하기<br><small>체크하지 않으면 나만 볼 수 있어요.</small></span></label><button class="button" id="saveEntry">🔒 나만 보기로 저장</button></form>`;}
 function recordCards(list=records){if(!list.length)return '<p>아직 작성된 기록이 없습니다.</p>';return list.map(r=>`<article class="record"><div class="meta">${sanitize(new Date(r.createdAt).toLocaleString('ko-KR'))} · ${r.kind==='student'?'학생':'학부모'} · ${r.shared?'담당 치료사에게 공유됨':'비공개'}${r.driveSynced?' · 드라이브 백업됨':''}</div>${r.entry?Object.entries(r.entry).map(([k,v])=>`<p><b>${({event:'있었던 일',thought:'떠오른 생각',next:'해보고 싶은 것',observation:'관찰 상황',message:'전달 사항',note:'메모',date:'날짜'})[k]||sanitize(k)}:</b> ${sanitize(v)}</p>`).join(''):'<p>기록 내용을 표시할 수 없습니다.</p>'}${(me.role==='student'||me.role==='parent')&&!r.shared?`<div class="buttons"><button class="button-ghost" data-share="${sanitize(r.id)}">담당 치료사에게 공유하기</button></div>`:''}${me.role==='therapist'?`<div class="muted">학생: ${sanitize(r.student)} · 작성자: ${sanitize(r.author)}</div>`:''}</article>`).join('');}
 function attachShares(){document.querySelectorAll('[data-share]').forEach(b=>b.onclick=()=>{if(!confirm('이 기록을 담당 치료사에게 공유할까요? 이미 드라이브에 백업된 내용은 철회해도 자동 삭제되지 않습니다.'))return;loading(b,async()=>{await api('share',{method:'POST',body:{recordId:b.dataset.share}});toast('담당 치료사에게 공유되었어요.');await dashboard()})})}
-function situationMarkup(){return `<div class="panel full" id="situation"><div class="tag">선택 활동 / 짧은 상황 연습</div><h3>메시지를 보냈는데 답장이 없어요.</h3><p>실제로 확인된 사실과, 아직 확인되지 않은 해석을 구분해 볼까요? 정답 맞히기보다는 여러 가능성을 생각하는 연습입니다.</p><div class="seg"><button type="button" data-scenario="fact">확인된 사실</button><button type="button" data-scenario="guess">가능한 해석</button><button type="button" data-scenario="next">다음에 할 일</button></div><div id="situationOutput" class="callout">원하는 버튼을 눌러 보세요.</div></div>`;}
-function attachSituation(){document.querySelectorAll('[data-scenario]').forEach(btn=>btn.onclick=()=>{const s={fact:'메시지를 보냈고, 아직 답장이 없다는 사실만 알고 있어요.',guess:'바쁠 수도 있고, 메시지를 확인하지 못했을 수도 있어요. 지금은 이유를 알 수 없어요.',next:'나에게 중요한 일을 계속할 수도 있고, 나중에 필요한 연락을 다시 할 수도 있어요.'};$('situationOutput').textContent=s[btn.dataset.scenario];document.querySelectorAll('[data-scenario]').forEach(b=>{const selected=b===btn;b.classList.toggle('on',selected);b.setAttribute('aria-pressed',selected?'true':'false');});})}
+const CHOICE_LAB_SCENES=[
+ {id:'time',icon:'✦',tab:'여유 시간',accent:'mint',title:'갑자기 20분이 생겼어.',desc:'예정보다 일찍 끝났어. 무엇을 해볼까?',options:[
+  {label:'음악 한 곡',glyph:'♫',line:'음악을 켰어. 잠깐 다른 분위기로 전환!',code:'listen_to_music()',out:'음악 한 곡을 듣는 방법을 골랐어.'},
+  {label:'게임 한 판',glyph:'▣',line:'가벼운 게임을 골라봤어.',code:'play_a_round()',out:'게임 한 판을 즐기는 방법을 골랐어.'},
+  {label:'잠깐 쉬기',glyph:'☁',line:'아무것도 하지 않고 시간을 보내도 돼.',code:'take_a_break()',out:'잠깐 쉬어 가는 방법을 골랐어.'}]},
+ {id:'team',icon:'◈',tab:'팀 활동',accent:'lavender',title:'새 프로젝트를 시작해.',desc:'함께 무언가를 만들기로 했어. 어떤 역할이 끌려?',options:[
+  {label:'아이디어 내기',glyph:'✳',line:'아이디어를 하나 꺼내서 이야기해 봤어.',code:'share_an_idea()',out:'새로운 생각으로 시작했어.'},
+  {label:'순서 정리',glyph:'☷',line:'어디부터 할지 간단히 정했어.',code:'make_a_plan()',out:'순서를 정하는 방식으로 시작했어.'},
+  {label:'먼저 둘러보기',glyph:'◎',line:'다른 사람이 하는 걸 보고 방향을 잡았어.',code:'explore_first()',out:'천천히 살펴보는 방식으로 시작했어.'}]},
+ {id:'game',icon:'⌘',tab:'새 게임',accent:'peach',title:'처음 보는 게임을 발견했어.',desc:'어떻게 시작해 보고 싶어?',options:[
+  {label:'일단 플레이',glyph:'▶',line:'직접 움직여 보면서 알아봤어.',code:'start_playing()',out:'직접 해보는 방법을 골랐어.'},
+  {label:'규칙 살펴보기',glyph:'≡',line:'규칙을 읽고 흐름을 알아봤어.',code:'read_the_rules()',out:'정보를 먼저 살펴보는 방법을 골랐어.'},
+  {label:'다음에 하기',glyph:'↷',line:'지금은 지나가고 다음을 기약했어.',code:'save_for_later()',out:'다음 기회를 선택했어.'}]}
+];
+let choiceLabScene=0,choiceLabOption=-1;
+function situationMarkup(){return `<div class="choice-lab" id="situation">
+ <div class="choice-top"><span class="choice-top-label"><span aria-hidden="true">●</span> PLAYGROUND / IF · ELSE</span><span class="choice-count" id="choiceCount">01 / 03</span></div>
+ <div class="choice-tabs" role="group" aria-label="장면 고르기">${CHOICE_LAB_SCENES.map((s,i)=>`<button type="button" data-choice-scene="${i}" aria-pressed="${i===choiceLabScene?'true':'false'}"><span aria-hidden="true">${s.icon}</span> ${s.tab}</button>`).join('')}</div>
+ <div class="choice-scene choice-mint" id="choiceScene"><div class="choice-scene-art" aria-hidden="true"><span class="choice-art-chip">IF</span><span class="choice-art-route"></span><span class="choice-art-node">?</span></div><div class="choice-scene-text"><span class="choice-kicker">SCENE 01</span><h3 id="choiceTitle"></h3><p id="choiceDescription"></p></div></div>
+ <div class="choice-columns"><div class="choice-actions"><div class="choice-section-head"><strong>이렇게 해볼래?</strong><span>하나만 골라봐</span></div><div class="choice-options" id="choiceOptions"></div></div>
+ <div class="choice-result"><div class="choice-console-top"><span aria-hidden="true">● ● ●</span><span>output.log</span><span class="choice-console-status" id="choiceStatus">READY</span></div><div class="choice-console-content" aria-live="polite" aria-atomic="true" id="choiceOutput"><span class="choice-cursor">›</span><span>선택하면 결과가 나타나.</span></div><div class="choice-code" id="choiceCode"><span class="choice-ln">01</span> <span class="choice-keyword">if</span> (selected) {<br><span class="choice-ln">02</span> &nbsp; run(selected);<br><span class="choice-ln">03</span> }</div></div></div>
+ <div class="choice-bottom"><span>정답 · 점수 · 기록 저장 없음</span><button type="button" id="choiceReset" class="choice-reset">↻ 다시 선택</button></div>
+ </div>`;}
+function attachSituation(){
+ const root=document.querySelector('#situation');if(!root)return;
+ const count=root.querySelector('#choiceCount'),title=root.querySelector('#choiceTitle'),desc=root.querySelector('#choiceDescription'),scene=root.querySelector('#choiceScene'),options=root.querySelector('#choiceOptions'),output=root.querySelector('#choiceOutput'),status=root.querySelector('#choiceStatus'),code=root.querySelector('#choiceCode');
+ const draw=()=>{
+  const s=CHOICE_LAB_SCENES[choiceLabScene];count.textContent=String(choiceLabScene+1).padStart(2,'0')+' / 03';title.textContent=s.title;desc.textContent=s.desc;
+  scene.className='choice-scene choice-'+s.accent;
+  root.querySelector('.choice-kicker').textContent='SCENE '+String(choiceLabScene+1).padStart(2,'0');
+  root.querySelectorAll('[data-choice-scene]').forEach((b,i)=>{const on=i===choiceLabScene;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',String(on));});
+  options.innerHTML=s.options.map((o,i)=>`<button type="button" class="choice-option${i===choiceLabOption?' picked':''}" data-choice-option="${i}" aria-pressed="${i===choiceLabOption?'true':'false'}"><span class="choice-option-icon" aria-hidden="true">${o.glyph}</span><strong>${o.label}</strong><span aria-hidden="true" class="choice-arrow">↗</span></button>`).join('');
+  if(choiceLabOption<0){status.textContent='READY';output.innerHTML='<span class="choice-cursor" aria-hidden="true">›</span><span>선택하면 결과가 나타나.</span>';code.innerHTML='<span class="choice-ln">01</span> <span class="choice-keyword">if</span> (selected) {<br><span class="choice-ln">02</span> &nbsp; run(selected);<br><span class="choice-ln">03</span> }';}
+  else{const o=s.options[choiceLabOption];status.textContent='DONE';output.textContent=o.out;code.textContent='> '+o.code+'\n'+o.line;}
+  options.querySelectorAll('[data-choice-option]').forEach(b=>b.onclick=()=>{choiceLabOption=Number(b.dataset.choiceOption);draw();});
+ };
+ root.querySelectorAll('[data-choice-scene]').forEach(b=>b.onclick=()=>{choiceLabScene=Number(b.dataset.choiceScene);choiceLabOption=-1;draw();});
+ root.querySelector('#choiceReset').onclick=()=>{choiceLabOption=-1;draw();};
+ draw();
+}
 function codingMarkup(){return `<div class="lab-shell">
   <div class="lab-tabbar"><span class="lab-dot" aria-hidden="true"></span><span>condition_lab.js</span><span class="lab-sub">로직 살펴보기 · 선택 활동</span></div>
   <div class="lab-layout">
@@ -569,13 +657,13 @@ function studentHome(){
  const items=isParent?[
   ['write','✎','기록 남기기','관찰·전달사항'],['history','▤','내 기록','내가 쓴 내용']
  ]:[
-  ['write','✎','기록하기','한 장이면 충분해'],['history','▤','내 기록','지난 기록 확인'],['situation','◇','상황 연습','다른 관점 보기'],['coding','⌘','코딩 실험실','선택해서 즐기기']
+  ['write','✎','기록하기','한 장이면 충분해'],['history','▤','내 기록','지난 기록 확인'],['situation','◇','선택 실험실','if / else 놀이'],['coding','⌘','코딩 실험실','선택해서 즐기기']
  ];
  app.innerHTML=hero(isParent?'관찰한 내용을 전해요':'필요할 때, 한 장만.','매일 작성할 필요는 없어요. 내 기록은 나만 보고, 공유할 내용은 직접 정할 수 있어요.')+
  `<div class="workspace-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">01</span></div>${workspaceNav(items,activeView)}<div class="sidebar-note"><span class="privacy-dot" aria-hidden="true"></span>공유는 내가 선택해요.<br><small>혼자만 볼 수도 있어요.</small></div></aside><div class="workspace-content">
  <section data-workspace-view="write" class="workspace-section"><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>${isParent?'observation.note':'my-note.md'}</span><span class="editor-status">NEW NOTE</span></div><div class="editor-paper"><span class="tag">01 / WRITE</span><h2>${isParent?'생활 관찰·전달사항':'어떤 일이 있었어?'}</h2><p>${isParent?'관찰한 상황을 간단히 적거나 치료사에게 전하고 싶은 말을 남길 수 있어요.':'기억에 남는 일이 있을 때만 적어도 돼. 한 줄이어도 충분해.'}</p>${dataForm(me.role)}</div></section>
  <section data-workspace-view="history" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>my-notes.json</span></div><div class="editor-paper"><span class="tag">02 / ARCHIVE</span><h2>내가 남긴 기록</h2><p>이 계정에서 내가 작성한 내용만 보여요.</p><div id="recordsHere">${recordCards()}</div></div></section>
- ${isParent?'':`<section data-workspace-view="situation" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>practice / perspectives</span></div><div class="editor-paper"><span class="tag">OPTIONAL / PRACTICE</span><h2>상황 연습</h2><p>어떤 일이 생겼을 때 여러 가능성을 가볍게 살펴볼 수 있어. 정답도 점수도 없어.</p>${situationMarkup()}</div></section>
+ ${isParent?'':`<section data-workspace-view="situation" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>branch-lab.js</span><span class="editor-status">PLAY MODE</span></div><div class="editor-paper"><span class="tag">OPTIONAL / IF · ELSE</span><h2>선택 실험실</h2><p>가벼운 장면을 고르고, 선택에 따라 달라지는 결과를 구경해 봐.</p>${situationMarkup()}</div></section>
  <section data-workspace-view="coding" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>studio / playground</span></div><div class="editor-paper"><span class="tag">OPTIONAL / PLAY</span><h2>코딩 실험실</h2><p>조건을 바꿔 결과를 확인하는 작은 실험 공간이야. 기록하지 않고 그냥 놀아도 돼.</p>${codingMarkup()}</div></section>`}
  </div></div><p class="workspace-footer">일단써봄은 생각을 이해하고 선택을 연습하기 위한 보조도구예요. 매일 쓰거나 불안을 반복해서 확인할 필요는 없어요.</p>`;
  $('entryForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;const entry=isParent?{observation:formValue(f,'observation'),message:formValue(f,'message')}:{event:formValue(f,'event'),thought:formValue(f,'thought'),next:formValue(f,'next')};const share=f.elements.share.checked;if(share&&!confirm('담당 치료사에게 이 기록을 공유할까요? 치료사가 드라이브에 복사한 기록은 공유 취소로 자동 삭제되지 않습니다.'))return;loading(f.querySelector('button'),async()=>{await api('records',{method:'POST',body:{entry,share}});activeView='history';toast('기록을 저장했어요.');await dashboard()})};
