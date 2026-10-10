@@ -26,36 +26,35 @@ function regionFor(x, y, z) {
   return 'parietal';
 }
 
-// Hand-sculpted rounded gyri sit INSIDE the single continuous hemisphere surface.
-// No separate sphere, eye-like knob, floating tube, or deep anatomical sulcus.
-const SOFT_LOBES=Object.freeze([
-  // front: gentle, wide mounds that blend into each other
-  [.43,.76,.36,.32,.085],[-.10,.74,.34,.30,.085],[-.37,.58,.29,.28,.065],
-  // top and middle: wide cloud-like fold silhouettes
-  [.67,.28,.30,.34,.075],[.28,.21,.32,.32,.074],
-  [.58,-.29,.28,.29,.078],[.12,-.40,.32,.30,.070],
-  // lower middle and rear: just enough relief to read as a brain
-  [-.35,.25,.32,.35,.070],[-.43,-.18,.30,.35,.065],
-  [.25,-.75,.35,.29,.058],[-.13,-.75,.33,.30,.055]
+// Each raised fold is part of the SAME cortex geometry. This sculpts a cheerful,
+// softly scalloped brain silhouette rather than layering separate blob objects.
+const TOY_FOLDS=Object.freeze([
+  // upper rim
+  [.56,.66,.20,.21,.172],[.60,.22,.20,.23,.17],
+  [.57,-.22,.20,.22,.17],[.54,-.60,.20,.22,.16],
+  // middle band; staggered so each curl has an organic S-like rhythm
+  [.15,.83,.20,.19,.17],[.14,.42,.20,.21,.17],
+  [.10,.00,.20,.22,.17],[.12,-.43,.20,.21,.17],
+  [.08,-.82,.20,.19,.13],
+  // lower edge of the lateral side
+  [-.28,.64,.21,.19,.16],[-.30,.24,.20,.21,.16],
+  [-.29,-.18,.20,.21,.16],[-.25,-.57,.22,.20,.14]
 ]);
 function cortexPoint(x,y,z,side){
   const lon=Math.atan2(z,x),lat=Math.asin(Math.max(-1,Math.min(1,y)));
-  const envelope=Math.pow(Math.max(0,Math.cos(lat)),.53);
   let relief=0;
-  for(const [cy,cz,wy,wz,height] of SOFT_LOBES){
-    const py=(y-cy)/wy,pz=(z-cz)/wz;
-    relief+=height*Math.exp(-1.65*(py*py+pz*pz));
+  for(const [cy,cz,wy,wz,height] of TOY_FOLDS){
+    const dy=(y-cy)/wy,dz=(z-cz)/wz;
+    relief+=height*Math.exp(-1.9*(dy*dy+dz*dz));
   }
-  // Four broad scallops define the silhouette; a subtle embossed curl is painted, not cut.
-  const outline=.024*Math.cos(lon*5.0+.48*Math.sin(lat*2.5))*envelope;
-  const radius=1 + Math.min(.14,relief)*envelope + outline;
+  const edge=Math.pow(Math.max(0,Math.cos(lat)),.65);
+  const radius=1+relief*edge+.014*Math.cos(5*lon+.4*Math.sin(2.6*lat))*edge;
   const xx=side*(.545+x*.527*radius*(1-.035*Math.max(0,-z)));
   const zz=z*1.25*radius;
   const lower=Math.exp(-Math.pow((z-.06)/.70,2))*Math.max(0,-y);
   const yy=.09+y*.75*radius-.055*lower;
-  // Very faint curving cartoon relief; never sculpt a dark groove into the model.
-  const curl=.5+.5*Math.sin(lon*4.1+.65*Math.sin(lat*2.9));
-  const shade=.988+.012*curl;
+  // Gentle shaded seams around the molded curls (not cut grooves).
+  const shade=1-.022*Math.max(0,1-relief/.145);
   return [xx,yy,zz,shade];
 }
 function smoothstep(a,b,x){const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)}
