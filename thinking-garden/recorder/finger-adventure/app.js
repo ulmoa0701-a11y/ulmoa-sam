@@ -66,7 +66,7 @@ function drawFrame(){
  if(S.phase==='intro'&&S.mode==='none'){g.font='900 35px system-ui';g.textAlign='center';g.fillStyle='#2d6c52';g.fillText('☝️  +  🎶  =  🌼',W/2,H*.9)}
 }
 function updateNav(){for(let i=0;i<4;i++){const el=$('nav'+i);el.classList.toggle('done',i<S.stage);el.classList.toggle('now',i===S.stage);}}
-function choosePanel(id){S.currentPanel=id;show(id);updateNav()}
+function choosePanel(id){S.currentPanel=id;show(id);updateNav();$('switchCam').disabled=S.mode!=='camera';$('calAgain').disabled=S.mode!=='camera'||S.stage!==2;}
 function setStep(){
  S.progress=0;S.dwell=0;S.demoMoving=false;S.demoTip={x:.15,y:.72};
  const f=fingers[S.step];setText('fingerIcon',f.icon);setText('fingerLabel',f.name);setText('stepNum',(S.step+1)+' / 3');
@@ -203,13 +203,13 @@ function soundSuccess(source){if(S.phase!=='audio')return;stopMic();S.phase='com
 }
 function finish(){stopMic();S.phase='completed';S.stage=3;setText('stageTag','완료');choosePanel('finishPanel');speak('멋져! 오늘도 리코더에 도전했어.')}
 function home(){closeAll();S.mode='none';S.phase='intro';S.stage=0;S.step=0;S.points=[];S.dwell=0;S.progress=0;S.successes=[0,0,0];S.resumeReal=false;setText('status','카메라로 손가락을 따라 움직여 봐요.');$('cameraStart').disabled=false;$('micStart').textContent='🎤 시작';choosePanel('introPanel');drawFrame()}
-function flip(){S.resumeReal=S.mode==='camera'&&S.stage===2;S.facing=S.facing==='user'?'environment':'user';startCamera()}
+function flip(){if(S.mode!=='camera')return;S.resumeReal=S.mode==='camera'&&S.stage===2;S.facing=S.facing==='user'?'environment':'user';startCamera()}
 $('cameraStart').addEventListener('click',startCamera);
 $('demoStart').addEventListener('click',startDemo);
 $('demoMove').addEventListener('click',()=>{if(S.mode==='demo')S.demoMoving=true});
 $('next').addEventListener('click',next);
 $('beginReal').addEventListener('click',()=>{if(S.points.length===3)startPlay(2)});
-$('calAgain').addEventListener('click',startCalibration);
+$('calAgain').addEventListener('click',()=>{if(S.mode==='camera'&&S.stage===2)startCalibration()});
 $('view').addEventListener('pointerdown',pointerMark);
 $('switchCam').addEventListener('click',flip);
 $('stopCam').addEventListener('click',home);
