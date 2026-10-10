@@ -8,7 +8,7 @@ const fingers=[{name:'검지',icon:'☝️',tip:8,flower:'🌼',say:'검지를 �
 {name:'중지',icon:'✌️',tip:12,flower:'🌷',say:'이번에는 중지야. 바로 아래 구멍으로 움직여 보자.'},
 {name:'약지',icon:'🖐️',tip:16,flower:'🌸',say:'마지막은 약지야. 아래 구멍으로 움직여 보자.'}];
 const VIRTUAL=[{x:.53,y:.38},{x:.53,y:.51},{x:.53,y:.64}];
-const S={phase:'intro',stage:0,step:0,mode:'none',facing:'user',cam:null,model:null,hand:null,points:[],lastFrame:-1,requestId:0,raf:0,dwell:0,progress:0,demoMoving:false,demoTip:{x:.15,y:.45},mute:false,successes:[0,0,0],inputKind:'none',modelLoading:false,mic:null,audio:null,analyser:null,fft:null,micFrames:0,micDwell:0,lastWarning:'',camModelReady:false};
+const S={phase:'intro',stage:0,step:0,mode:'none',facing:'user',cam:null,model:null,hand:null,points:[],lastFrame:-1,requestId:0,raf:0,dwell:0,progress:0,demoMoving:false,demoTip:{x:.15,y:.45},mute:false,successes:[0,0,0],inputKind:'none',modelLoading:false,resumeReal:false,mic:null,audio:null,analyser:null,fft:null,micFrames:0,micDwell:0,lastWarning:'',camModelReady:false};
 const vid=$('vid'),cv=$('view'),g=cv.getContext('2d',{alpha:false});cv.width=W;cv.height=H;
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),mix=(a,b,t)=>a+(b-a)*t;
 const setText=(id,txt)=>{$(id).textContent=txt};
@@ -17,7 +17,7 @@ function tone(freq=725){if(S.mute)return;try{let A=window.AudioContext||window.w
 const stageName=['그림에 톡!','하나씩 톡!','내 리코더','소리 도전'];
 function show(id){for(const n of ['introPanel','gamePanel','winPanel','calPanel','soundPanel','finishPanel'])$(n).hidden=n!==id;}
 function stopFrames(){if(S.raf)cancelAnimationFrame(S.raf);S.raf=0}
-function stopMic(){if(S.mic){S.mic.getTracks().forEach(t=>t.stop());S.mic=null}if(S.audio){S.audio.close().catch(()=>{});S.audio=null}S.analyser=null;S.fft=null;S.micFrames=0;S.micDwell=0;$('micStart').disabled=false}
+function stopMic(){if(S.mic){S.mic.getTracks().forEach(t=>t.stop());S.mic=null}if(S.audio){S.audio.close().catch(()=>{});S.audio=null}S.analyser=null;S.fft=null;S.micFrames=0;S.micDwell=0;$('micStart').disabled=false;$('micStart').textContent='🎤 시작';}
 function stopCamera(){S.requestId++;stopFrames();if(S.cam){S.cam.getTracks().forEach(t=>t.stop());S.cam=null}vid.srcObject=null;S.hand=null;S.lastFrame=-1;if(S.model){try{S.model.close()}catch(e){}S.model=null}S.camModelReady=false}
 function closeAll(){stopCamera();stopMic()}
 function drawBg(){let grad=g.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#b4e0fa');grad.addColorStop(1,'#ebf8e9');g.fillStyle=grad;g.fillRect(0,0,W,H);g.fillStyle='#fff7bb';g.beginPath();g.arc(W*.87,H*.15,44,0,7);g.fill();g.fillStyle='#93c995';g.beginPath();g.ellipse(W*.5,H*1.10,W*.8,H*.43,0,0,Math.PI*2);g.fill()}
@@ -61,7 +61,7 @@ function fingertip(){
 function drawFrame(){
  drawVideo();
  if(S.phase==='virtual'||S.phase==='sequence'||(S.phase==='intro'&&S.mode==='none'))virtualRecorder();
- if(S.phase==='real'||S.phase==='calibrate')for(let i=0;i<S.points.length;i++){const p=S.points[i];g.strokeStyle='#1a7857';g.lineWidth=5;g.beginPath();g.arc(p.x*W,p.y*H,22,0,7);g.stroke();g.fillStyle='#fff';g.font='900 21px system-ui';g.textAlign='center';g.fillText(i+1,p.x*W,p.y*H+7)}
+ if(S.phase==='real'||S.phase==='calibrate')for(let i=0;i<S.points.length;i++){if(S.phase==='real'&&i!==S.step)continue;const p=S.points[i];g.strokeStyle='#1a7857';g.lineWidth=5;g.beginPath();g.arc(p.x*W,p.y*H,22,0,7);g.stroke();g.fillStyle='#fff';g.font='900 21px system-ui';g.textAlign='center';g.fillText(i+1,p.x*W,p.y*H+7)}
  drawAim();drawHandTip();
  if(S.phase==='intro'&&S.mode==='none'){g.font='900 35px system-ui';g.textAlign='center';g.fillStyle='#2d6c52';g.fillText('☝️  +  🎶  =  🌼',W/2,H*.9)}
 }
@@ -71,7 +71,7 @@ function setStep(){
  S.progress=0;S.dwell=0;S.demoMoving=false;S.demoTip={x:.15,y:.72};
  const f=fingers[S.step];setText('fingerIcon',f.icon);setText('fingerLabel',f.name);setText('stepNum',(S.step+1)+' / 3');
  setText('message',S.stage===0?'여기!':S.stage===1?'하나 더!':'내 리코더!');
- setText('stageTag',stageName[S.stage]);
+ setText('stageTag',stageName[S.stage]);setText('sceneTag',S.mode==='demo'?'🧪 체험 화면':S.stage===2?'🎼 내 진짜 리코더':'🌱 리코더 그림');
  setText('camTitle',S.stage===2?'📷 진짜 리코더':'📷 그림 속 리코더');
  setText('camHint',S.stage===2?'실제 악기를 움직이지 않고 손가락을 가까이':'손가락 끝의 흰 점을 동그라미 안으로');
  $('bar').style.width='0%';$('demoMove').hidden=S.mode!=='demo';
@@ -138,7 +138,7 @@ async function startCamera(){
   // MediaPipe tracks 21 points locally, but downloading its files requires internet.
   S.model=await makeModel();
   if(token!==S.requestId){S.model?.close();return}
-  $('cameraStart').disabled=false;setText('status','손가락을 동그라미로 가져가 봐요.');startPlay(0);runLoop();
+  $('cameraStart').disabled=false;setText('status','손가락을 동그라미로 가져가 봐요.');if(S.resumeReal){S.resumeReal=false;startCalibration()}else startPlay(0);runLoop();
  }catch(e){
   closeAll();S.mode='none';S.phase='intro';choosePanel('introPanel');$('cameraStart').disabled=false;
   setText('status',e?.name==='NotAllowedError'?'카메라 권한이 필요해요.':e?.name==='NotFoundError'?'카메라를 찾을 수 없어요.':'카메라 또는 손 인식 모델 연결에 실패했어요.');
@@ -147,7 +147,7 @@ async function startCamera(){
 }
 function startDemo(){closeAll();S.mode='demo';S.facing='user';S.points=[];setText('status','체험 모드: 카메라 인식이 아니에요.');startPlay(0);runLoop()}
 function startCalibration(){
- S.phase='calibrate';S.stage=2;S.step=0;S.points=[];S.dwell=0;S.progress=0;
+ S.phase='calibrate';S.stage=2;S.step=0;S.points=[];S.dwell=0;S.progress=0;$('beginReal').disabled=true;setText('stageTag','내 리코더');setText('camTitle','🎼 진짜 내 리코더');setText('sceneTag','👩‍🏫 구멍 표시');
  if(S.mode==='demo')S.points=[...VIRTUAL.map(v=>({...v}))];
  if(S.mode==='demo'){startPlay(2);return}
  setText('calCount','0 / 3');setText('calInstruction','1번 구멍!');
@@ -166,7 +166,7 @@ function pointerMark(event){
  if(S.points.length===3){$('beginReal').disabled=false;setText('status','준비 완료. 실제 리코더를 고정한 상태로 연습해요.')}
 }
 function enterAudio(){
- stopCamera();S.mode='none';S.phase='audio';S.stage=3;setText('audioNote','시');setText('audioStatus','🎤 리코더 소리를 들어볼까?');
+ stopCamera();S.mode='none';S.phase='audio';S.stage=3;setText('stageTag','소리 도전');setText('sceneTag','🎵 소리 듣기');setText('camTitle','🎵 진짜 리코더 소리');setText('audioNote','시');setText('audioStatus','🎤 리코더 소리를 들어볼까?');
  choosePanel('soundPanel');drawFrame();speak('내 리코더로 시 소리를 내 볼까?');
 }
 async function startMicrophone(){
@@ -198,12 +198,12 @@ function pitch(b,sr){let e=0;for(let i=0;i<b.length;i++)e+=b[i]*b[i];if(Math.sqr
  for(let n=Math.floor(sr/1080);n<=Math.ceil(sr/760);n++){let dot=0,aa=0,bb=0;for(let i=0;i<b.length-n;i+=2){let a=b[i],d=b[i+n];dot+=a*d;aa+=a*a;bb+=d*d}let k=dot/Math.sqrt(aa*bb+1e-12);if(k>quality){quality=k;lag=n}}
  return quality>.82&&lag>0?sr/lag:null;
 }
-function soundSuccess(source){stopMic();S.phase='completed';setText('finishEmoji',source==='mic'?'🌼🌷🌸':'🌷🌼🌸');setText('finishTitle','소리꽃 성공!');setText('finishDetail',source==='mic'?'마이크가 시 음을 감지했어요. 실제 운지 정확도는 선생님이 확인해 주세요.':'선생님이 실제 시 음을 확인했어요.');
+function soundSuccess(source){if(S.phase!=='audio')return;stopMic();S.phase='completed';setText('finishEmoji',source==='mic'?'🌼🌷🌸':'🌷🌼🌸');setText('finishTitle','소리꽃 성공!');setText('finishDetail',source==='mic'?'마이크가 시 음을 감지했어요. 실제 운지 정확도는 선생님이 확인해 주세요.':'선생님이 실제 시 음을 확인했어요.');
  finish();
 }
 function finish(){stopMic();S.phase='completed';S.stage=3;setText('stageTag','완료');choosePanel('finishPanel');speak('멋져! 오늘도 리코더에 도전했어.')}
-function home(){closeAll();S.mode='none';S.phase='intro';S.stage=0;S.step=0;S.points=[];S.dwell=0;S.progress=0;S.successes=[0,0,0];setText('status','카메라로 손가락을 따라 움직여 봐요.');$('cameraStart').disabled=false;$('micStart').textContent='🎤 시작';choosePanel('introPanel');drawFrame()}
-function flip(){S.facing=S.facing==='user'?'environment':'user';startCamera()}
+function home(){closeAll();S.mode='none';S.phase='intro';S.stage=0;S.step=0;S.points=[];S.dwell=0;S.progress=0;S.successes=[0,0,0];S.resumeReal=false;setText('status','카메라로 손가락을 따라 움직여 봐요.');$('cameraStart').disabled=false;$('micStart').textContent='🎤 시작';choosePanel('introPanel');drawFrame()}
+function flip(){S.resumeReal=S.mode==='camera'&&S.stage===2;S.facing=S.facing==='user'?'environment':'user';startCamera()}
 $('cameraStart').addEventListener('click',startCamera);
 $('demoStart').addEventListener('click',startDemo);
 $('demoMove').addEventListener('click',()=>{if(S.mode==='demo')S.demoMoving=true});
