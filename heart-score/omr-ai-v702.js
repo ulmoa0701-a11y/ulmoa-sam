@@ -254,7 +254,7 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
     // A thick barline can be misread as a rest. A rest is a symbol within a
     // measure, never coincident with a confidently identified printed barline.
     const sp=Number(line.input.box?.lineSpacing)||10;
-    const votes=visualPitchProposals(cvStaffs[li],line.fragment);let noteIndex=0;
+    const votes=visualPitchProposals(cvStaffs[li],line.fragment);const hollow= cvStaffs[li]?scanHollowHeads(cvStaffs[li]):[];let noteIndex=0;
     const musical=line.fragment.filter(ir=>ir.kind==='note'||ir.kind==='rest').map(ir=>{
       const e=eventFromIr(ir),q=ir.src?.bbox;
       if(e&&ir.kind==='note'){
@@ -271,7 +271,20 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
     noteCount+=musical.filter(v=>v.ir.kind==='note').length;
     if(bars.length>=2){
       for(let i=0;i<bars.length-1;i++){
-        const left=bars[i],right=bars[i+1],items=musical.filter(v=>v.x>left&&v.x<right),fit=fitMeasureToBeat(items,left,right,targetQ);
+        const left=bars[i],right=bars[i+1],items=musical.filter(v=>v.x>left&&v.x<right);
+        const longNotes=items.filter(v=>v.ir.kind==='note'&&v.e.dur>=2);
+        const firstNote=items.find(v=>v.ir.kind==='note');
+        if(longNotes.length===1&&longNotes[0]===firstNote){
+          const candidates=hollow.filter(h=>h.x>left+sp*.6&&h.x<right-sp*.8);
+          const strong=candidates.filter(h=>h.ring>=8);
+          const matched=strong.length===1?strong[0]:(items.length===1&&strong.length===0&&candidates.length===1?candidates[0]:null);
+          if(matched){
+            const index=2+matched.k,steps=['C','D','E','F','G','A','B'],degree=((index%7)+7)%7;
+            const octave=4+Math.floor(index/7),visual=pitchName({step:steps[degree],octave,alter:0});
+            if(visual)longNotes[0].e.note=visual;
+          }
+        }
+        const fit=fitMeasureToBeat(items,left,right,targetQ);
         measures.push(fit.events);if(fit.rawExact)rawExact++;if(fit.ok){fitCount++;correctionSum+=fit.correction;}
       }
     }else measures.push(musical.map(v=>v.e));
