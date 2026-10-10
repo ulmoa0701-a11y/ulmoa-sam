@@ -1,5 +1,14 @@
 name: Heart Score Typeset Image E2E (PR only)
 on:
+  push:
+    branches: [fix/heart-score-ai-barline-recovery-20261009]
+    paths:
+      - 'heart-score/omr-ai-v702.js'
+      - 'heart-score/omr-bar-rescue-v1.mjs'
+      - 'heart-score/qa/omr-image-e2e.cjs'
+      - 'heart-score/qa/omr-exact-validator.mjs'
+      - 'heart-score/qa/render-typeset-score-e2e.cjs'
+      - '.github/workflows/heart-score-typeset-e2e.yml'
   pull_request:
     branches: [main]
     paths:
