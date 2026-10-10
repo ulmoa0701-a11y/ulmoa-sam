@@ -48,16 +48,17 @@ function toolSvg(){
  '<path d="M206 625 Q249 633 300 625" fill="none" stroke="#97714e" stroke-width="3"/>'+
  '</g>';
 }
-function holesSvg(face){
+function holesSvg(face,focus){
+ var practicing=typeof focus==='number';
  if(face==='back'){
   return hole(255,270,17,0,false,false)+
    '<path d="M253 326 L253 592" stroke="#fff1d0" stroke-opacity=".3" stroke-width="4"/>';
  }
  var out='';
- for(var i=1;i<=5;i++){out+=hole(254,holeYs[i],i===1?17:15,i,false,false)}
+ for(var i=1;i<=5;i++){out+=hole(254,holeYs[i],i===1?17:15,i,false,practicing&&i>=4)}
  // On soprano recorders the bottom two finger locations comprise paired small holes.
  for(var j=6;j<=7;j++){
-  out+=hole(245,holeYs[j],9,j,false,false)+hole(266,holeYs[j]+2,7,j,false,false);
+  out+='<g opacity="'+(practicing?'.3':'1')+'">'+hole(245,holeYs[j],9,j,false,false)+hole(266,holeYs[j]+2,7,j,false,false)+'</g>';
  }
  return out;
 }
@@ -72,10 +73,10 @@ function labelsSvg(face,focus){
  }else{
   items+='<text x="351" y="202" font-size="12" font-weight="800" fill="#456d58">위에서 아래로</text>'+
   '<path d="M353 213 L353 357" stroke="#8da99a" stroke-width="3" stroke-linecap="round" marker-end="url(#tipArrow)"/>';
-  for(var i=1;i<=5;i++){
+  for(var i=1;i<=(typeof focus==='number'?3:5);i++){
    items+='<text x="296" y="'+(holeYs[i]+5)+'" font-size="15" font-weight="'+(i<=3?'900':'650')+'" fill="'+(i<=3?'#345c43':'#809486')+'">'+i+'번</text>';
   }
-  items+='<text x="296" y="536" font-size="14" fill="#809486">6번</text><text x="296" y="579" font-size="14" fill="#809486">7번</text>';
+  if(typeof focus!=='number')items+='<text x="296" y="536" font-size="14" fill="#809486">6번</text><text x="296" y="579" font-size="14" fill="#809486">7번</text>';
  }
  if(focus==='mouth'){
   items+='<circle cx="249" cy="83" r="45" fill="none" stroke="#e5aa59" stroke-width="7" stroke-dasharray="13 8"/>';
@@ -112,7 +113,7 @@ function glow(target,face){
 function scene(face,focus,showHand){
  var chosen=(typeof focus==='number')?focus:null;
  var art='<svg viewBox="0 0 500 680" role="img" aria-label="'+(face==='front'?'실제 소프라노 리코더 앞면과 구멍 순서':'실제 소프라노 리코더 뒷면과 엄지 구멍')+'" xmlns="http://www.w3.org/2000/svg">'+
- toolSvg()+holesSvg(face)+labelsSvg(face,focus)+glow(chosen,face)+(showHand?fingerImage(chosen,face):'')+
+ toolSvg()+holesSvg(face,focus)+labelsSvg(face,focus)+glow(chosen,face)+(showHand?fingerImage(chosen,face):'')+
  '<text x="253" y="662" text-anchor="middle" font-size="13" font-weight="800" fill="#728e79">소프라노 리코더 · 세로 방향</text></svg>';
  byId('scene').innerHTML=art;
  byId('scene').classList.remove('demonstrating');
