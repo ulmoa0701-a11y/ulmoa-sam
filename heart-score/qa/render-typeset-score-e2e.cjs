@@ -112,6 +112,20 @@ const truth=require('./doremi-ground-truth.json');
     }
    }
    if(index!==19)throw Error('Expected 19 real measures, got '+index);
+   const cropDefs=[
+     {id:'bar11-sharp',x:1050,y:633,w:160,h:103},
+     {id:'bar13-natural',x:400,y:887,w:130,h:108},
+     {id:'bar14-flat',x:795,y:887,w:130,h:108},
+     {id:'bar15-natural',x:1065,y:887,w:150,h:108},
+     {id:'bar9-natural',x:400,y:633,w:130,h:108}
+   ];
+   const cropImages=cropDefs.map(d=>{
+     const t=document.createElement('canvas');t.width=d.w*3;t.height=d.h*3;
+     const tc=t.getContext('2d');tc.imageSmoothingEnabled=false;
+     tc.fillStyle='#fff';tc.fillRect(0,0,t.width,t.height);
+     tc.drawImage(c,d.x,d.y,d.w,d.h,0,0,t.width,t.height);
+     return{id:d.id,base64:t.toDataURL('image/png').split(',')[1]};
+   });
    const normal=c.toDataURL('image/png').split(',')[1];
    const thumb=document.createElement('canvas');thumb.width=900;thumb.height=740;
    thumb.getContext('2d').drawImage(c,0,0,900,740);
@@ -129,9 +143,10 @@ const truth=require('./doremi-ground-truth.json');
      ic.beginPath();ic.moveTo(x,b.y);ic.lineTo(x,b.bottom);ic.stroke();
    }
    const faint=c.toDataURL('image/png').split(',')[1];
-   return {normal,faint,thumbnail,count:index,width:w,height:h,bars:barPositions.length};
+   return {normal,faint,thumbnail,cropImages,count:index,width:w,height:h,bars:barPositions.length};
   },truth);
   console.log('SCORE_THUMBNAIL_BASE64='+pictures.thumbnail);
+  for(const c of pictures.cropImages)console.log('SCORE_CROP_BASE64 '+c.id+' '+c.base64);
   const first=path.join(out,'typeset-normal-19.png'),second=path.join(out,'typeset-faint-19.png');
   fs.writeFileSync(first,Buffer.from(pictures.normal,'base64'));
   fs.writeFileSync(second,Buffer.from(pictures.faint,'base64'));
