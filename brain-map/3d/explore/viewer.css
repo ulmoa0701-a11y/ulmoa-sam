@@ -1,0 +1,213 @@
+/* 독립 3D 뇌지도 — 따뜻한 노트 톤, 터치 우선 */
+*{box-sizing:border-box}
+body.brain3d-page{background:linear-gradient(145deg,#f4f8f0,#f8f7ed 60%,#f4f8f4);color:#263a2f}
+.viewer-main{width:min(1420px,calc(100% - 28px));margin:auto;padding:20px 0 80px}
+.viewer-main button,.viewer-main input{font:inherit}
+.viewer-main button{cursor:pointer;touch-action:manipulation}
+.viewer-main button:focus-visible,.viewer-main a:focus-visible,.viewer-main input:focus-visible{outline:3px solid #277050;outline-offset:3px}
+.viewer-crumb{display:flex;align-items:center;gap:9px;font-size:12px;color:#64806d;margin:0 0 13px}
+.viewer-crumb a{color:#436a50;font-weight:800;text-decoration:underline;text-underline-offset:4px}
+.viewer-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin:0 0 19px}
+.eyebrow{display:block;color:#537b63;font-size:13px;font-weight:850;margin-bottom:9px}
+.viewer-head h1{font-size:clamp(34px,4vw,52px);font-weight:900;line-height:1.12;letter-spacing:-.055em;margin:0 0 11px}
+.viewer-head h1 em{font-style:normal;color:#558669}
+.viewer-head p{margin:0;color:#637469;font-size:15px;line-height:1.6}
+.viewer-status-badge{white-space:nowrap;color:#587764;background:#e5efdf;border:1px solid #d6e6d2;border-radius:999px;padding:10px 15px;font-size:12px;font-weight:850}
+.workspace{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,.67fr);align-items:start;gap:18px}
+.brain-panel,.details-card,.parts-card{border-radius:25px;background:#fff;border:1px solid #dde7d9;box-shadow:0 11px 30px #304a3b0d}
+.brain-panel{padding:17px;min-width:0}
+.viewer-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:3px 2px 12px}
+.viewer-toolbar>span{font-weight:900;color:#3c5845;font-size:14px}
+.view-buttons{display:flex;flex-wrap:wrap;gap:5px}
+.view-buttons button{padding:9px 12px;border:1.5px solid #dce7da;border-radius:999px;background:#f8faf6;font-size:12px;font-weight:850;color:#4b6352}
+.view-buttons button[aria-pressed=true]{background:#3d7654;color:white;border-color:#3d7654}
+.stage-shell{position:relative;overflow:hidden;border:1px solid #dbe7d9;border-radius:22px;background:radial-gradient(ellipse at 46% 38%,#fffef7 0%,#edf6e9 52%,#e1eee5 100%);min-height:480px;aspect-ratio:1.54;touch-action:none}
+#brainCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;outline-offset:-5px}
+#brainCanvas:active{cursor:grabbing}
+.stage-fallback{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;padding:36px;color:#536956;font-size:14px;pointer-events:none}
+.stage-fallback a{pointer-events:auto;color:#346c49;text-decoration:underline}
+.stage-fallback[hidden]{display:none!important}
+.stage-fallback strong{font-size:21px}
+.stage-hint{position:absolute;left:16px;bottom:14px;max-width:70%;padding:8px 12px;border-radius:999px;font-size:11px;font-weight:800;color:#4d6755;background:#fffffff0;pointer-events:none}
+.orientation{position:absolute;left:15px;top:13px;padding:7px 10px;border-radius:9px;background:#ffffffc9;font-size:12px;font-weight:800;color:#47624e;pointer-events:none}
+.reset-view{position:absolute;right:14px;bottom:14px;padding:10px 12px;border:1px solid #ccdfcc;border-radius:12px;background:#fffdf6;font-size:12px;font-weight:850;color:#41614b}
+.separation-panel{padding:16px 5px 2px}
+.split-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;font-size:16px;color:#354f3d}
+.split-heading span{font-size:13px;font-weight:800;color:#64846a}
+.split-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.split-modes button{min-height:52px;padding:10px 6px;border-radius:13px;border:2px solid #dfe9dc;background:#f7faf4;font-size:12px;font-weight:850;line-height:1.4;color:#506455}
+.split-modes button[aria-pressed=true]{background:#e4f1dc;border-color:#75aa78;color:#304f38}
+.split-slider{display:flex;gap:15px;align-items:center;margin:14px 0;font-size:13px;font-weight:850;color:#526653}
+.split-slider input{flex:1;accent-color:#478b5c;min-width:0;height:34px;touch-action:pan-y}
+.split-slider output{min-width:40px;text-align:right;font-variant-numeric:tabular-nums}
+.split-slider input:disabled{opacity:.45}
+.split-warning{font-size:12px;line-height:1.65;color:#788478;margin:0 0 2px}
+.brain3d-aside{display:grid;gap:13px;min-width:0}
+.details-card,.parts-card{padding:22px}
+.details-card>small{color:#648873;font-weight:850;font-size:12px}
+.details-card h2{font-size:25px;letter-spacing:-.045em;line-height:1.2;margin:10px 0 13px;color:#2a4836}
+.details-card>p{color:#526858;font-size:15px;line-height:1.78;margin:0}
+.example-box{margin-top:17px;border-radius:15px;padding:15px;background:#f3f7ed}
+.example-box b{font-size:13px;color:#54755d}
+.example-box p{font-size:14px;line-height:1.7;color:#57675b;margin:7px 0 0}
+.parts-card h2{font-size:18px;margin:0 0 14px;font-weight:900;color:#344f3d}
+.hemisphere-picks,.region-picks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.region-picks{margin-top:8px}
+.hemisphere-picks button,.region-picks button{border:1.5px solid #dfe7dc;padding:12px 9px;border-radius:12px;background:#fff;text-align:left;font-size:14px;font-weight:850;min-height:48px;display:flex;align-items:center;gap:9px}
+.hemisphere-picks button[aria-pressed=true],.region-picks button[aria-pressed=true]{background:#edf6e7;border-color:#75ac7b}
+.hemisphere-picks i,.region-picks i{display:inline-block;width:17px;height:17px;flex:0 0 17px;border-radius:6px;background:var(--part-color,#abcdb1)}
+.left-swatch{background:#a7d7b2!important}.right-swatch{background:#f0b598!important}
+.clear-selection{display:block;width:100%;margin-top:12px;border:1px solid #e1e8de;border-radius:10px;padding:11px;background:#fafbf8;color:#6c7b6d;font-size:12px;font-weight:800}
+.reader-notice{background:#fff9e9;border:1px solid #eee0b5;border-radius:17px;padding:16px 17px;font-size:12px;color:#6b664f;line-height:1.8}
+.reader-notice strong{display:block;font-size:14px;color:#645937;margin-bottom:4px}
+.follow-read{margin:24px 0 0;padding:24px 27px;border-radius:20px;background:#fff;border:1px solid #e0e9dc}
+.follow-read h2{font-size:20px;margin:0 0 8px}.follow-read p{font-size:14px;line-height:1.6;margin:0 0 12px;color:#6c7a6d}
+.follow-read a{display:inline-block;border-radius:12px;background:#eaf4e7;color:#376749;padding:12px 17px;font-size:13px;font-weight:900;text-decoration:none}
+.viewer-footer{display:flex;justify-content:space-between;gap:10px;padding:23px 3px;font-size:11px;color:#849083}
+.viewer-footer a{color:#51775a}
+@media(max-width:1100px){.workspace{grid-template-columns:minmax(0,1fr)}.brain3d-aside{grid-template-columns:1fr 1fr}.reader-notice{grid-column:1/-1}.stage-shell{aspect-ratio:1.6}}
+@media(max-width:620px){
+.viewer-main{width:calc(100% - 14px);padding:13px 0 65px}
+.viewer-head{gap:8px;align-items:start;flex-direction:column}
+.viewer-head h1{font-size:33px}.viewer-head p{font-size:13px}
+.viewer-status-badge{font-size:10px;padding:6px 10px}
+.workspace{gap:9px}
+.brain-panel{padding:9px;border-radius:18px}
+.viewer-toolbar{gap:7px}
+.viewer-toolbar>span{font-size:12px}
+.view-buttons{gap:5px}
+.view-buttons button{font-size:11px;padding:10px 9px}
+.stage-shell{min-height:305px;aspect-ratio:1.05;border-radius:14px}
+.stage-hint{bottom:9px;left:7px;padding:7px 9px;font-size:9px;max-width:67%;border-radius:8px}
+.orientation{top:8px;left:8px;font-size:10px}
+.reset-view{right:7px;bottom:7px;font-size:10px;padding:8px 9px}
+.separation-panel{padding:12px 4px 0}
+.split-modes button{font-size:11px;min-height:48px}
+.split-slider{font-size:12px}
+.brain3d-aside{grid-template-columns:1fr}
+.details-card,.parts-card{padding:18px;border-radius:17px}
+.details-card h2{font-size:23px}
+.details-card>p{font-size:14px}
+.viewer-footer{flex-direction:column}
+.follow-read{padding:18px}
+}
+@media(prefers-reduced-motion:reduce){.viewer-main *{scroll-behavior:auto!important;transition:none!important}}
+
+/* 학부모용 뇌기능 지도 v2: 승인한 파스텔 시안의 정보 위계 */
+body.brain3d-page{background:#f8f9f1}
+.viewer-main{padding-top:12px;width:min(1500px,calc(100% - 24px))}
+.viewer-crumb{margin-bottom:8px}
+.viewer-head{margin:0 0 15px}
+.viewer-head h1{font-size:clamp(29px,3.2vw,42px);line-height:1.12}
+.viewer-head p{font-size:14px}
+.workspace{grid-template-columns:minmax(0,1.78fr) minmax(315px,.77fr);gap:15px}
+.brain-panel,.details-card,.parts-card{box-shadow:0 7px 23px #304a3b0b}
+.brain-panel{padding:14px}
+.viewer-toolbar{justify-content:flex-end;gap:8px;padding:2px 1px 13px}
+.map-mode-buttons{display:flex;gap:5px;margin-right:auto}
+.map-mode-buttons button{white-space:nowrap;border-radius:99px;padding:11px 14px;background:#f8faf4;color:#536858;border:1.5px solid #d9e5d6;font-size:13px;font-weight:900}
+.map-mode-buttons button[aria-pressed="true"]{background:#3f7858;color:#fff;border-color:#3f7858}
+.toolbar-view-title{font-size:12px!important;color:#6b7d6b!important}
+.view-buttons button{font-size:12px}
+.stage-shell{min-height:490px;aspect-ratio:1.7;background:radial-gradient(ellipse at 52% 47%,#fffef9 0%,#f1f8ed 55%,#e5f2e6 100%)}
+.leader-lines{position:absolute;inset:0;z-index:2;width:100%;height:100%;overflow:visible;pointer-events:none}
+.leader-lines line{stroke-width:2.8;stroke-linecap:round;stroke-dasharray:none}
+.leader-lines circle{stroke:#fff;stroke-width:2.8}
+.brain-callouts{position:absolute;inset:0;z-index:3;pointer-events:none}
+.brain-callout{position:absolute;pointer-events:auto;display:flex;align-items:center;gap:7px;min-height:66px;width:178px;padding:9px 10px;border:2px solid var(--color);border-radius:17px;background:rgba(255,255,255,.96);box-shadow:0 5px 12px #39513f17;text-align:left;line-height:1.32;transition:filter .16s,transform .16s}
+.brain-callout:hover{filter:brightness(.98);transform:translateY(-2px)}
+.brain-callout[aria-pressed="true"]{box-shadow:0 0 0 3px color-mix(in srgb,var(--color) 25%,transparent),0 5px 12px #39513f17}
+.brain-callout b{display:block;font-size:18px;white-space:nowrap;color:#21392c;font-weight:950}
+.brain-callout small{display:block;font-size:11px;font-weight:850;color:#556b5b;white-space:nowrap}
+.callout-icon{font-size:22px;flex:0 0 auto}
+.callout-frontal{--color:#b79bed;top:13%;left:2%}
+.callout-parietal{--color:#e8c365;top:10%;right:2%}
+.callout-temporal{--color:#7bbe92;top:58%;left:2%}
+.callout-occipital{--color:#efab8c;top:42%;right:2%}
+.callout-cerebellum{--color:#8bbbe8;top:71%;right:3%}
+.callout-brainstem{--color:#aaa0ba;top:79%;left:25%}
+.stage-hint{font-size:10px}
+.orientation{font-size:11px;max-width:52%;white-space:normal}
+.separation-panel{border-top:1px solid #eef0e9;margin-top:10px;padding-top:14px}
+.split-heading{margin-bottom:7px;font-size:14px}
+.split-modes button{min-height:42px}
+.split-slider{margin:8px 0}
+.split-warning{font-size:11px}
+.details-card,.parts-card{padding:20px}
+.details-card{border-radius:23px}
+.details-card>small{font-size:13px;font-weight:900}
+.selected-heading{display:flex;gap:12px;align-items:center;background:#f3ebfd;border-radius:17px;margin:12px 0 15px;padding:17px 15px}
+.selected-symbol{flex:0 0 52px;width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:#ffffffc8;font-size:27px}
+.selected-heading h2{margin:0 0 6px;font-size:29px;color:#2d3b35}
+.selected-skills{font-size:14px;color:#607262;font-weight:850}
+.details-card>p{font-size:16px;line-height:1.7}
+.example-box{background:#f3f7ec;margin-top:17px}
+.example-box b{font-size:14px}
+.parts-card h2{font-size:18px}
+.region-picks{gap:7px;margin-top:12px}
+.region-picks button{min-height:64px;padding:9px 8px}
+.region-picks button span{display:block;min-width:0}
+.region-picks button span small{display:block;margin-top:5px;font-size:11px;line-height:1.27;font-weight:650;color:#778477;letter-spacing:-.045em;white-space:normal}
+.hemisphere-picks button{min-height:40px}
+.parts-card .clear-selection{min-height:40px}
+.everyday-section{margin-top:15px;border:1px solid #e0e9d9;border-radius:19px;background:#fbfdf9;padding:15px 13px}
+.everyday-heading{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.everyday-heading h2{font-size:20px;font-weight:900;letter-spacing:-.04em;margin:0;color:#2d503a}
+.everyday-heading p{font-size:12px;color:#6a7a6e;margin:0}
+.everyday-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.everyday-cards button{display:flex;align-items:center;gap:9px;text-align:left;min-height:74px;padding:10px 9px;border:1.5px solid #e1e9dd;background:#fff;border-radius:14px}
+.everyday-cards button[aria-pressed="true"]{background:#e7f4e4;border-color:#82b486}
+.everyday-cards .activity-emoji{font-size:27px;flex:0 0 auto}
+.everyday-cards b{display:block;font-size:14px;font-weight:900;color:#344a3b;line-height:1.2}
+.everyday-cards small{display:block;font-size:10px;color:#708373;line-height:1.45;margin-top:4px;word-break:keep-all}
+@media(max-width:1240px){
+.workspace{grid-template-columns:minmax(0,1.5fr) minmax(280px,.75fr)}
+.viewer-toolbar{flex-wrap:wrap}.map-mode-buttons{margin-right:0}.toolbar-view-title{display:none}
+.brain-callout{width:151px;min-height:61px;padding:7px;font-size:12px}
+.brain-callout b{font-size:16px}.brain-callout small{font-size:10px}
+.brain-callout .callout-icon{font-size:18px}
+.everyday-cards button{gap:5px}.everyday-cards .activity-emoji{font-size:24px}
+}
+@media(max-width:1050px){
+.workspace{grid-template-columns:1fr}
+.brain3d-aside{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.reader-notice{grid-column:1/-1}
+.stage-shell{aspect-ratio:1.7}
+.brain-callout{width:178px}.brain-callout b{font-size:18px}
+}
+@media(max-width:680px){
+.viewer-main{width:calc(100% - 12px);padding-top:8px}
+.viewer-head h1{font-size:29px}
+.viewer-status-badge{display:none}
+.brain-panel{padding:8px}
+.viewer-toolbar{justify-content:flex-start;gap:7px}
+.map-mode-buttons{width:100%;display:grid;grid-template-columns:1fr 1fr}
+.map-mode-buttons button{font-size:13px;padding:10px}
+.view-buttons{flex-wrap:nowrap;overflow-x:auto;max-width:100%;width:100%;padding-bottom:3px;-webkit-overflow-scrolling:touch}
+.view-buttons button{flex-shrink:0;min-height:40px;font-size:11px;padding:8px 10px}
+.stage-shell{min-height:0;height:580px;aspect-ratio:auto;overflow:hidden;border-radius:16px}
+#brainCanvas{height:346px!important;bottom:auto}
+.leader-lines{display:none}
+.brain-callouts{top:auto;bottom:43px;height:177px;left:7px;right:7px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.brain-callout,.callout-frontal,.callout-parietal,.callout-temporal,.callout-occipital,.callout-cerebellum,.callout-brainstem{position:static;width:100%;min-height:53px;padding:6px 8px;border-radius:12px;transform:none!important}
+.brain-callout b{font-size:14px}
+.brain-callout small{font-size:10px;white-space:normal}
+.brain-callout .callout-icon{font-size:17px}
+.orientation{top:8px;left:8px;max-width:68%;font-size:10px}
+.stage-hint{left:7px;bottom:7px;font-size:9px;max-width:63%}
+.reset-view{bottom:7px;right:6px}
+.separation-panel{padding:13px 4px 0}
+.split-modes button{font-size:11px;padding:8px 3px}
+.everyday-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+.everyday-cards button{min-height:65px}.everyday-heading h2{font-size:18px}
+.brain3d-aside{grid-template-columns:1fr;gap:9px}
+.details-card,.parts-card{padding:16px;border-radius:17px}
+.details-card>p{font-size:15px}
+.selected-heading{padding:13px}
+.selected-heading h2{font-size:24px}
+}
+@media(max-width:370px){
+.brain-callouts{height:185px}
+.brain-callout{gap:4px;padding:5px}
+.brain-callout b{font-size:13px}.brain-callout small{font-size:9px}
+}
