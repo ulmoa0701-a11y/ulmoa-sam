@@ -226,6 +226,13 @@ function viewHeading(key){
  top:'위에서: 화면 왼쪽이 아이의 좌뇌',free:'드래그하면 원하는 방향으로 돌릴 수 있어요'}[key]||'';
 }
 function setView(which,instant=false){
+ if(which==='free'){
+  // 자유 회전 선택은 현재 각도를 유지합니다. 버튼을 누를 때 시점이 튀지 않습니다.
+  currentView='free';targetYaw=yaw;targetPitch=pitch;
+  orient.textContent=viewHeading('free');
+  viewButtons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view==='free')));
+  needsRender=true;return;
+ }
  const target={front:[0,.10],back:[Math.PI,.10],left:[Math.PI/2,.18],
   right:[-Math.PI/2,.18],top:[0,1.53],free:[.7,.25]}[which];
  if(!target)return;
