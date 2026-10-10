@@ -16,6 +16,8 @@ const PALETTE = Object.freeze({
   brainstem: 0xb0a8bd,
 });
 
+const RGB = Object.fromEntries(Object.entries(PALETTE).map(([key,value])=>[key,new THREE.Color(value)]));
+
 function regionFor(x, y, z) {
   // Approximate cortical boundaries for parent education, not anatomical atlas.
   if (z < -0.79 || (z < -.55 && y < -.12)) return 'occipital';
@@ -58,21 +60,11 @@ function corticalRGB(x,y,z,shade){
  ];
  let red=0,green=0,blue=0;
  for(const [key,w] of weights){
-  const col=new THREE.Color(PALETTE[key]);
+  const col=RGB[key];
   red+=w*col.r;green+=w*col.g;blue+=w*col.b;
  }
  return [red*shade,green*shade,blue*shade];
 }
-function appendFace(group,vertices,normals,colors,a,b,c,base) {
-  for(const index of [a,b,c]){
-    const vi=index*3;
-    group.p.push(vertices[vi],vertices[vi+1],vertices[vi+2]);
-    group.n.push(normals[vi],normals[vi+1],normals[vi+2]);
-    const shade=base[index];
-    group.c.push(shade,shade,shade);
-  }
-}
-
 function oneHemisphere(side) {
   const sphere = new THREE.SphereGeometry(1,150,104);
   const pos = sphere.getAttribute('position');
