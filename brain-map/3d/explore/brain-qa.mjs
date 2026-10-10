@@ -23,6 +23,26 @@ async function checkPage(page,name){
  await page.waitForTimeout(500);
  const starting=await page.locator('#brainCanvas').screenshot({path:`${OUT}/${name}-initial.png`});
  assert.ok(starting.length>3000,'3D canvas screenshot is blank/too small');
+ if(name==='mobile'){
+   const edgeSamples=await page.evaluate(async b64=>{
+     const img=new Image();
+     img.src='data:image/png;base64,'+b64;
+     await img.decode();
+     const off=document.createElement('canvas');off.width=img.width;off.height=img.height;
+     const ctx=off.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0);
+     const data=ctx.getImageData(0,0,img.width,img.height).data;
+     let hits=0;
+     for(let y=Math.floor(img.height*.24);y<Math.floor(img.height*.80);y+=3){
+       for(let x=0;x<=4;x+=2){
+         const p=(y*img.width+x)*4,r=data[p],g=data[p+1],b=data[p+2];
+         // The model colors are saturated; pale stage background is not.
+         if(r<220 && (Math.abs(r-b)>25||Math.abs(g-b)>25))hits++;
+       }
+     }
+     return hits;
+   },starting.toString('base64'));
+   assert.ok(edgeSamples<9,'mobile brain is clipped by the left canvas edge (samples='+edgeSamples+')');
+ }
  await page.getByRole('button',{name:'앞에서'}).click();
  await page.waitForTimeout(500);
  assert.equal(await page.locator('[data-view="front"]').getAttribute('aria-pressed'),'true');
