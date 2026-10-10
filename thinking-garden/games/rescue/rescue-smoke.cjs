@@ -68,12 +68,10 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
    // An obvious wrong candidate must not silently become a valid answer.
    const wrong=scene.animals.find(a=>!(a.color===scene.color&&a.size===scene.size&&scene.targetSpecies.includes(a.species)));
    if(wrong) {
-    await page.evaluate(n=>{const sc=window.moaRescueGame.scene.getScene(n);sc.__pickLog=[];const k=n==='landmission'?'pick':'pickAnimal',original=sc[k];sc[k]=function(obj){sc.__pickLog.push({x:obj.x,y:obj.y,species:obj.data.get('item')?.species||obj.data.get('species'),color:obj.data.get('item')?.color||obj.data.get('color'),size:obj.data.get('item')?.size||obj.data.get('size')});return original.call(this,obj)}},missionName);
     await clickAt(wrong.x,wrong.y);
     await page.waitForTimeout(180);
-    const feedback=await page.evaluate(n=>{const sc=window.moaRescueGame.scene.getScene(n);return {found:sc.found.size,picks:sc.__pickLog}},missionName);
-    console.log('WRONG ANSWER PROBE',label,round,JSON.stringify({wrong,feedback,scene}));
-    assert.equal(feedback.found,0,'Wrong animal must never count as rescued');
+    const count=await page.evaluate(n=>window.moaRescueGame.scene.getScene(n).found.size,missionName);
+    assert.equal(count,0,'Wrong animal must never count as rescued');
    }
    const eligible=scene.animals.filter(a=>a.color===scene.color&&a.size===scene.size&&scene.targetSpecies.includes(a.species));
    const seen=new Set();
