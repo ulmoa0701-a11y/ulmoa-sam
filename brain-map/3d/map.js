@@ -74,7 +74,7 @@ function sendDrag(dx,dy){
 function wireStageDrag(){
  const stage=$('mapStage');
  stage.addEventListener('pointerdown',event=>{
-  if(liveView!=='side'||event.button>0||event.target.closest('button'))return;
+  if(liveView!=='side'||event.button>0||event.target.closest('.map-callout'))return;
   stagePointer={id:event.pointerId,x:event.clientX,y:event.clientY,dragged:false};
   stage.setPointerCapture?.(event.pointerId);
  });
