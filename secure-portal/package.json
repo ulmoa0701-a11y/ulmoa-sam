@@ -1,0 +1,14 @@
+{
+  "name": "ildan-sseobom-secure-portal",
+  "version": "0.8.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check netlify/functions/api.mjs && node --check lib/security.mjs"
+  },
+  "dependencies": {
+    "@netlify/database": "latest"
+  },
+  "engines": {"node": ">=20.12.2"}
+}
