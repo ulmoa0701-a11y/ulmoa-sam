@@ -636,3 +636,243 @@
   .glossary-page .gcat .gcat-tab-title{font-size:11.5px;letter-spacing:-.5px}
   .glossary-page .gcat .gcat-tab-count{font-size:10px;min-height:18px;min-width:19px;padding:1px 4px}
 }
+
+
+/* 상세 팝업 읽기 흐름: 뜻 → 일상 예시 → 구분·활용 → 선택적 자료.
+ * 원본 학습지와 그림 앨범에는 적용하지 않는다. */
+.glossary-page .gcat-dialog-top{
+  padding:12px 17px;
+  background:#fffdf9;
+  border-bottom:1px solid #ece7dd;
+}
+.glossary-page .gcat-dialog-body{padding:15px 19px 21px}
+.glossary-page .gcat-dialog-body .gcat-reading-sheet{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:13px;
+  padding:0!important;
+  margin:0!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+.glossary-page .gcat-dialog-body .gcat-reading-sheet::before,
+.glossary-page .gcat-dialog-body .gcat-reading-sheet::after{
+  content:none!important;
+  display:none!important;
+}
+.glossary-page .gcat-definition-section{
+  padding:17px 17px 18px;
+  border:1px solid #efe3c9;
+  border-left:4px solid #d8b56a;
+  border-radius:16px;
+  background:#fff9ed;
+}
+.glossary-page .gcat-section-kicker{
+  display:inline-block;
+  margin-bottom:7px;
+  font:750 12px/1.35 "Pretendard Variable",Pretendard,sans-serif;
+  color:#846234;
+  letter-spacing:-.02em;
+}
+.glossary-page .gcat-definition-headline{
+  margin:0 0 8px!important;
+  font:750 clamp(18px,2.8vw,22px)/1.4 "Pretendard Variable",Pretendard,sans-serif!important;
+  color:#342d27!important;
+  letter-spacing:-.04em;
+  word-break:keep-all;
+}
+.glossary-page .gcat-dialog-body .gcat-definition-explanation{
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  color:#554940!important;
+  font:500 15px/1.75 "Pretendard Variable",Pretendard,sans-serif!important;
+  word-break:keep-all;
+}
+.glossary-page .gcat-definition-explanation mark{
+  padding:1px 2px;
+  border-radius:3px;
+  background:#fff0a4;
+  color:inherit;
+}
+.glossary-page .gcat-example-section{
+  padding:3px 0 2px;
+}
+.glossary-page .gcat-section-heading{
+  margin:0 0 9px!important;
+  color:#453931!important;
+  font:750 15px/1.4 "Pretendard Variable",Pretendard,sans-serif!important;
+  letter-spacing:-.03em;
+}
+.glossary-page .gcat-example-section .study-example{
+  display:block!important;
+  margin:0!important;
+  padding:15px 17px!important;
+  border:1px solid #dbe7dc!important;
+  border-radius:14px!important;
+  background:#f6faf6!important;
+  box-shadow:none!important;
+}
+.glossary-page .gcat-example-section .study-example>span{
+  display:none!important;
+}
+.glossary-page .gcat-example-section .study-example p{
+  margin:0!important;
+  font:500 15px/1.65 "Pretendard Variable",Pretendard,sans-serif!important;
+  color:#3f4940!important;
+  word-break:keep-all;
+}
+.glossary-page .gcat-example-section .study-example b,
+.glossary-page .gcat-example-section .study-example strong{
+  font-weight:750;
+  color:#324b3d;
+}
+.glossary-page .gcat-hints-section{
+  padding:4px 0 2px;
+}
+.glossary-page .gcat-hints-section .study-contrast{
+  margin:0 0 8px!important;
+  gap:6px;
+}
+.glossary-page .gcat-hints-section .study-contrast span{
+  padding:9px 10px!important;
+  font-size:12px!important;
+  line-height:1.5!important;
+  border-radius:10px;
+  word-break:keep-all;
+}
+.glossary-page .gcat-hints-section .gcat-structure-note{
+  margin:5px 0 8px!important;
+  padding:0!important;
+}
+.glossary-page .gcat-hints-section .study-hook{
+  margin:0!important;
+  padding:9px 11px!important;
+  justify-content:flex-start;
+  align-items:center;
+  gap:7px!important;
+  flex-wrap:wrap!important;
+  border-radius:12px;
+  background:#f7f5f0!important;
+}
+.glossary-page .gcat-hints-section .study-hook b{
+  padding:4px 7px!important;
+  font-size:13px!important;
+  line-height:1.4!important;
+  font-weight:750;
+  min-width:0;
+}
+.glossary-page .gcat-hints-section .study-hook i{
+  font-size:12px!important;
+  line-height:1.3!important;
+}
+.glossary-page .gcat-hints-section .study-tags{
+  gap:5px!important;
+  margin:7px 0 0!important;
+}
+.glossary-page .gcat-hints-section .study-tags span{
+  padding:4px 8px!important;
+  background:#f5f5f3!important;
+  color:#69706d!important;
+  border-radius:999px!important;
+  font-size:11px!important;
+  line-height:1.4!important;
+}
+.glossary-page .gcat-hints-section .visual-pair{
+  gap:8px;
+  margin:0 0 8px!important;
+}
+.glossary-page .gcat-hints-section .visual-pair>div{
+  padding:12px!important;
+  background:#faf9f6!important;
+}
+.glossary-page .gcat-reference-disclosure{
+  margin:0!important;
+  border:1px solid #e9e5dc;
+  border-radius:12px;
+  background:#fffdfa;
+  overflow:hidden;
+}
+.glossary-page .gcat-reference-disclosure>summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  min-height:45px;
+  padding:12px 15px;
+  cursor:pointer;
+  color:#67594e;
+  background:transparent;
+  font:650 13px/1.4 "Pretendard Variable",Pretendard,sans-serif;
+  list-style:none;
+}
+.glossary-page .gcat-reference-disclosure>summary::-webkit-details-marker{display:none}
+.glossary-page .gcat-reference-disclosure>summary::after{
+  content:"⌄";
+  margin-left:12px;
+  color:#8a8479;
+  font-size:19px;
+  line-height:1;
+}
+.glossary-page .gcat-reference-disclosure[open]>summary::after{content:"⌃"}
+.glossary-page .gcat-reference-disclosure[open]>summary{
+  border-bottom:1px solid #eee9de;
+}
+.glossary-page .gcat-reference-content,
+.glossary-page .gcat-reference-image{
+  padding:12px 15px 16px;
+  font-size:13px;
+  line-height:1.7;
+  overflow-wrap:anywhere;
+}
+.glossary-page .gcat-reference-content>p:first-child{margin-top:0}
+.glossary-page .gcat-reference-content .study-sources{
+  gap:7px;
+}
+.glossary-page .gcat-reference-image .study-visual{
+  margin:0!important;
+  padding:0!important;
+}
+.glossary-page .gcat-reference-image .study-visual a{margin:auto}
+.glossary-page .gcat-art-disclosure{
+  margin:0!important;
+  border:1px solid #e9e5dc;
+  border-radius:12px;
+  background:#fffdfa;
+}
+.glossary-page .gcat-art-disclosure>summary{
+  min-height:45px;
+  padding:12px 15px;
+  color:#67594e;
+  font-weight:650;
+}
+.glossary-page .gcat-related{
+  margin-top:17px;
+  padding-top:16px;
+  border-top:1px solid #edeae4;
+}
+.glossary-page .gcat-related strong{
+  color:#6d6259;
+  font-weight:650;
+  font-size:12px;
+}
+.glossary-page .gcat-related-items button{
+  border:1px solid #e2e9e0;
+  background:#f8faf7;
+  padding:7px 10px;
+  font-size:12px;
+}
+@media(max-width:600px){
+  .glossary-page .gcat-dialog-body{padding:12px 13px 18px}
+  .glossary-page .gcat-dialog-body .gcat-reading-sheet{gap:11px}
+  .glossary-page .gcat-definition-section{padding:14px 13px 15px}
+  .glossary-page .gcat-definition-headline{font-size:18px!important}
+  .glossary-page .gcat-dialog-body .gcat-definition-explanation{font-size:14px!important;line-height:1.7!important}
+  .glossary-page .gcat-example-section .study-example{padding:13px!important}
+  .glossary-page .gcat-example-section .study-example p{font-size:14px!important}
+  .glossary-page .gcat-hints-section .study-contrast span{font-size:11.5px!important}
+  .glossary-page .gcat-reference-content,
+  .glossary-page .gcat-reference-image{padding:11px 12px 14px}
+}
