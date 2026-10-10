@@ -60,6 +60,74 @@ const quick=[...document.querySelectorAll('[data-quick]')];
 const callouts=[...document.querySelectorAll('.map-callout')];
 const examples=[...document.querySelectorAll('[data-activity]')];
 const modeBtns=[...document.querySelectorAll('[data-mode]')];
+const viewBtns=[...document.querySelectorAll('[data-view]')];
+const frame=document.getElementById('brainViewerFrame');
+const viewerLayer=document.getElementById('inline3D');
+const loading=document.getElementById('inlineLoading');
+let liveView='side',viewerReady=false;
+let pendingDrag={dx:0,dy:0};
+let stagePointer=null;
+function sendDrag(dx,dy){
+ if(viewerReady)sendViewer('brain-drag',{dx,dy});
+ else {pendingDrag.dx+=dx;pendingDrag.dy+=dy;}
+}
+function wireStageDrag(){
+ const stage=$('mapStage');
+ stage.addEventListener('pointerdown',event=>{
+  if(liveView!=='side'||event.button>0||event.target.closest('button'))return;
+  stagePointer={id:event.pointerId,x:event.clientX,y:event.clientY,dragged:false};
+  stage.setPointerCapture?.(event.pointerId);
+ });
+ stage.addEventListener('pointermove',event=>{
+  if(!stagePointer||stagePointer.id!==event.pointerId)return;
+  const dx=event.clientX-stagePointer.x,dy=event.clientY-stagePointer.y;
+  stagePointer.x=event.clientX;stagePointer.y=event.clientY;
+  if(Math.abs(dx)+Math.abs(dy)>3){
+    if(!stagePointer.dragged){stagePointer.dragged=true;changeView('free');}
+    sendDrag(dx,dy);
+  }
+ });
+ const finish=event=>{if(stagePointer?.id===event.pointerId)stagePointer=null;};
+ stage.addEventListener('pointerup',finish);
+ stage.addEventListener('pointercancel',finish);
+}
+
+function sendViewer(type,extras={}){
+ if(frame?.contentWindow&&viewerReady)frame.contentWindow.postMessage({type,...extras},location.origin);
+}
+function changeView(view){
+ if(!['side','front','back','top','free'].includes(view))return;
+ liveView=view;
+ viewBtns.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===view)));
+ const show3D=view!=='side';
+ viewerLayer.hidden=!show3D;
+ $('mapStage').classList.toggle('show-3d',show3D);
+ $('mapStage').dataset.view=view;
+ if(show3D){
+  if(!frame.src){
+   loading.hidden=false;
+   frame.src=frame.dataset.src;
+  }
+  sendViewer('brain-view',{view});
+  if(current)sendViewer('brain-part',{part:current});
+ }
+}
+window.addEventListener('message',event=>{
+ if(event.origin!==location.origin||event.source!==frame.contentWindow)return;
+ if(event.data?.type==='brain-3d-ready'){
+  viewerReady=true;
+  loading.hidden=true;
+  sendViewer('brain-view',{view:liveView==='side'?'left':liveView});
+  if(pendingDrag.dx||pendingDrag.dy){sendDrag(pendingDrag.dx,pendingDrag.dy);pendingDrag={dx:0,dy:0};}
+ }else if(event.data?.type==='brain-3d-error'){
+  loading.hidden=false;
+  loading.textContent='3D 그래픽을 사용할 수 없어요. 옆에서 보기로 돌아가 주세요.';
+ }else if(event.data?.type==='brain-3d-selected'&&regions[event.data.part]){
+  choose(event.data.part);
+ }
+});
+viewBtns.forEach(b=>b.addEventListener('click',()=>changeView(b.dataset.view)));
+
 const $=id=>document.getElementById(id);
 function showData(d){
  $('detailName').textContent=d.name;
@@ -73,6 +141,7 @@ function choose(key){
  if(!regions[key])return;
  current=key;activity=null;
  draw();
+ sendViewer("brain-part",{part:key});
 }
 function draw(){
  const selected=activity?activities[activity]:mode==='function'?functions[current]:regions[current];
@@ -117,4 +186,6 @@ modeBtns.forEach(b=>b.addEventListener('click',()=>{
  draw();
 }));
 draw();
+changeView('side');
+wireStageDrag();
 })();

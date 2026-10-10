@@ -5,8 +5,8 @@
 <title>뇌지도로 한눈에 보기 — 일단 해봄노트</title>
 <link rel="icon" href="../../favicon.ico">
 <link rel="stylesheet" href="../../assets/notebook-subpages.css?v=20261005-clean3">
-<link rel="stylesheet" href="map.css?v=20261010-approved3">
-<script defer src="map.js?v=20261010-approved3"></script>
+<link rel="stylesheet" href="map.css?v=20261010-controls1">
+<script defer src="map.js?v=20261010-controls1"></script>
 </head>
 <body class="note-subpage approved-brain-page">
 <header class="sub-header"><a class="sub-brand" href="../../"><span aria-hidden="true">✦</span><b>일단 해봄노트</b></a>
@@ -20,12 +20,17 @@
   <div class="map-switches">
    <div class="map-mode" role="group" aria-label="학습 보기"><button type="button" data-mode="region" aria-pressed="true">부위별 보기</button><button type="button" data-mode="function" aria-pressed="false">기능별 보기</button></div>
    <div class="map-views" role="group" aria-label="보는 방향">
-    <a href="explore/?view=front">앞에서</a><button type="button" class="selected-view" aria-current="true">옆에서</button><a href="explore/?view=top">위에서</a>
+    <button type="button" data-view="front" aria-pressed="false">앞에서</button><button type="button" data-view="side" aria-pressed="true">옆에서</button><button type="button" data-view="back" aria-pressed="false">뒤에서</button><button type="button" data-view="top" aria-pressed="false">위에서</button><button type="button" data-view="free" aria-pressed="false">자유회전</button>
    </div>
   </div>
  </div>
- <div class="map-stage" id="mapStage" aria-label="각 부위별 역할이 표시된 뇌 그림">
+ <div class="map-stage" id="mapStage" data-view="side" aria-label="각 부위별 역할이 표시된 뇌 그림">
    <img class="approved-brain-art" src="approved-reference.webp?v=20261010-approved2" alt="승인된 파스텔 뇌 그림과 전두엽·두정엽·측두엽·후두엽·소뇌·뇌줄기 역할 표시" width="950" height="420">
+   <div class="inline-3d-layer" id="inline3D" hidden aria-label="3D 뇌를 돌려 보는 화면">
+     <iframe id="brainViewerFrame" title="드래그로 회전하는 뇌 지도" data-src="explore/?embedded=1" loading="lazy"></iframe>
+     <div class="inline-loading" id="inlineLoading" role="status">3D 뇌지도를 불러오는 중이에요…</div>
+     <div class="inline-guide">↔ 그림을 드래그해 회전 · 휠/두 손가락으로 확대</div>
+   </div>
    <svg class="map-connectors" viewBox="0 0 1085 480" preserveAspectRatio="none" aria-hidden="true">
     <path d="M327 81 Q349 96 382 135" class="stroke-frontal"/><circle cx="382" cy="135" r="10" class="dot-frontal"/>
     <path d="M705 65 Q668 66 635 100" class="stroke-parietal"/><circle cx="635" cy="100" r="10" class="dot-parietal"/>
@@ -58,7 +63,7 @@
     <button type="button" class="activity-card" data-activity="memory" aria-pressed="false"><span class="illustration ill-memory" aria-hidden="true">💭</span><span class="activity-text"><b>기억하기</b><span class="chip-row"><i class="chip green">측두엽</i><i class="chip purple">전두엽</i></span><small>경험을 기억하고 나중에 떠올려요.</small></span></button>
   </div>
  </section>
- <div class="secondary-links"><a href="explore/" class="three-d-link">🔄 뇌를 360° 돌리거나 구조 분리해 보기</a><a href="../#hemispheres">좌뇌·우뇌 위치 설명 보기 →</a></div>
+ <div class="secondary-links"><a href="explore/" class="three-d-link">🧩 3D 모형을 분리해 보기</a><a href="../#hemispheres">좌뇌·우뇌 위치 설명 보기 →</a></div>
 </section>
 <aside class="map-sidebar">
  <section class="region-detail" aria-live="polite" aria-atomic="true">

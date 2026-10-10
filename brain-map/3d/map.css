@@ -166,3 +166,27 @@ body.approved-brain-page{background:#f8faf3;color:#253b31;font-family:Pretendard
 @media(max-width:1320px){.activity-card .illustration{width:57px;flex-basis:57px;height:74px}}
 @media(max-width:720px){.activity-card .illustration{width:62px;flex-basis:62px;height:80px}}
 @media(max-width:355px){.activity-card .illustration{width:50px;flex-basis:50px;height:67px}}
+
+/* 3D 모드가 메인 지도 안에서 열리도록: 링크 이동 없이 보기 전환 */
+.map-views button[data-view]{border:1.5px solid #d9e4d7;background:#fffef9;color:#384c3e;border-radius:999px;min-height:41px;padding:9px 12px;font-size:13px;font-weight:850;white-space:nowrap}
+.map-views button[data-view][aria-pressed="true"]{background:#477f5c;border-color:#477f5c;color:#fff}
+.map-views button[data-view]:focus-visible{outline:3px solid #31734c;outline-offset:3px}
+.map-views{flex-wrap:wrap;justify-content:flex-end}
+.inline-3d-layer[hidden]{display:none!important}
+.inline-3d-layer{position:absolute;inset:0;z-index:10;background:radial-gradient(ellipse at center,#fffef9,#eaf6e8);overflow:hidden;border-radius:inherit}
+.inline-3d-layer iframe{display:block;width:100%;height:100%;border:0;background:transparent}
+.inline-loading{position:absolute;inset:0;display:grid;place-items:center;background:#ecf6e9ee;color:#486b54;font-size:16px;font-weight:800;pointer-events:none}
+.inline-loading[hidden]{display:none!important}
+.inline-guide{position:absolute;bottom:10px;left:10px;border-radius:14px;padding:8px 12px;background:#fffefaeb;font-size:12px;font-weight:800;color:#4d7658;pointer-events:none}
+.map-stage.show-3d{min-height:400px}
+.map-stage.show-3d .approved-brain-art,.map-stage.show-3d .map-connectors,
+.map-stage.show-3d .callout-grid,.map-stage.show-3d .map-brain-hotspot{visibility:hidden;pointer-events:none}
+.map-stage:not(.show-3d) .approved-brain-art{filter:contrast(1.035) saturate(1.09);object-fit:contain}
+@media(max-width:1320px){.map-views{justify-content:flex-start}}
+@media(max-width:720px){
+ .map-views{display:flex;overflow-x:auto;flex-wrap:nowrap;max-width:100%;justify-content:flex-start;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+ .map-views button[data-view]{flex-shrink:0;font-size:12px;padding:9px 12px}
+ .map-stage.show-3d{height:385px;min-height:385px;overflow:hidden;padding:0}
+ .map-stage.show-3d .callout-grid{display:none}
+ .inline-guide{font-size:10px;bottom:8px;left:7px}
+}

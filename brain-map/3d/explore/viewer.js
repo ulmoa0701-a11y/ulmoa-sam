@@ -226,6 +226,13 @@ function viewHeading(key){
  top:'위에서: 화면 왼쪽이 아이의 좌뇌',free:'드래그하면 원하는 방향으로 돌릴 수 있어요'}[key]||'';
 }
 function setView(which,instant=false){
+ if(which==='free'){
+  // 자유 회전 선택은 현재 각도를 유지합니다. 버튼을 누를 때 시점이 튀지 않습니다.
+  currentView='free';targetYaw=yaw;targetPitch=pitch;
+  orient.textContent=viewHeading('free');
+  viewButtons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view==='free')));
+  needsRender=true;return;
+ }
  const target={front:[0,.10],back:[Math.PI,.10],left:[Math.PI/2,.18],
   right:[-Math.PI/2,.18],top:[0,1.53],free:[.7,.25]}[which];
  if(!target)return;
@@ -259,11 +266,13 @@ function refreshSelection(){
  for(const mesh of meshes){
   const match=regionKeys?regionKeys.includes(mesh.userData.key):
    !selected||(selected.startsWith('hemisphere-')?mesh.userData.side===selected.split('-')[1]:mesh.userData.key===selected);
-  mesh.material.transparent=Boolean((selected||activeFunction||activeActivity)&&!match);
-  mesh.material.opacity=match?1:.25;
-  mesh.material.depthWrite=match;
-  mesh.material.emissive.setHex((selected||activeFunction||activeActivity)&&match?0x162b1b:0);
-  mesh.material.emissiveIntensity=match?.12:0;
+  // 선택하지 않은 부위를 투명하게 만들면 기괴한 빈 덩어리처럼 보이므로
+  // 모든 부위는 선명하게 유지하고 선택 부위만 은은하게 강조합니다.
+  mesh.material.transparent=false;
+  mesh.material.opacity=1;
+  mesh.material.depthWrite=true;
+  mesh.material.emissive.setHex((selected||activeFunction||activeActivity)&&match?0x2c322a:0);
+  mesh.material.emissiveIntensity=(selected||activeFunction||activeActivity)&&match?.12:0;
  }
  const item=activeActivity?activityDetails[activeActivity]:
   activeFunction?functionDetails[activeFunction]:selected?info[selected]:null;
@@ -282,7 +291,12 @@ function refreshSelection(){
  activityButtons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.activity===activeActivity)));
  needsRender=true;
 }
-function setSelected(key){selected=info[key]?key:null;activeFunction=null;activeActivity=null;refreshSelection();}
+function setSelected(key){
+ selected=info[key]?key:null;activeFunction=null;activeActivity=null;refreshSelection();
+ if(window.parent!==window && selected && ['frontal','parietal','temporal','occipital','cerebellum','brainstem'].includes(selected)){
+  window.parent.postMessage({type:'brain-3d-selected',part:selected},location.origin);
+ }
+}
 function setFunction(key){if(!functionDetails[key])return;activeFunction=key;selected=null;activeActivity=null;refreshSelection();}
 function setActivity(key){if(!activityDetails[key])return;activeActivity=key;activeFunction=null;selected=null;refreshSelection();}
 function updateCalloutMode(){
@@ -419,8 +433,28 @@ function renderFrame(){
  if(dirty){updateCamera();renderer.render(scene,camera);drawLeaders();needsRender=false;}
 }
 const started=init();
-if(!started)console.warn('3D brain fallback active');
+if(!started){
+ console.warn('3D brain fallback active');
+ if(window.parent!==window)window.parent.postMessage({type:'brain-3d-error'},location.origin);
+}
 else {
  const queryView=new URLSearchParams(window.location.search).get('view');
  if(['front','back','left','right','top','free'].includes(queryView))setView(queryView,true);
+ window.addEventListener('message',event=>{
+  if(event.origin!==location.origin || event.source!==window.parent)return;
+  const data=event.data||{};
+  if(data.type==='brain-view'&&['front','back','left','right','top','free'].includes(data.view)){
+    setView(data.view,true);
+  }else if(data.type==='brain-part'&&info[data.part]){
+    selected=data.part;activeActivity=null;activeFunction=null;refreshSelection();
+  }else if(data.type==='brain-drag'&&Number.isFinite(data.dx)&&Number.isFinite(data.dy)){
+    currentView='free';
+    yaw-=data.dx/Math.max(holder.clientWidth,320)*Math.PI*2;
+    pitch=THREE.MathUtils.clamp(pitch+data.dy/Math.max(holder.clientHeight,250)*Math.PI*1.1,-1.27,1.48);
+    targetYaw=yaw;targetPitch=pitch;
+    orient.textContent=viewHeading('free');
+    needsRender=true;
+  }
+ });
+ if(new URLSearchParams(location.search).has('embedded'))window.parent.postMessage({type:'brain-3d-ready'},location.origin);
 }
