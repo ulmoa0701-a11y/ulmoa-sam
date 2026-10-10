@@ -333,7 +333,12 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
           for(const v of items){
             if(v.ir.kind!=='note')continue;
             const probe=printedAccidentalProbe(gray,w,h,cvStaffs[li],v.x,v.e.note);
-            if(v.e.note==='시♭'){
+            if(v.e.note.endsWith('♭')&&probe?.total>=35&&probe.max<=9&&
+               probe.groups.length===0&&['도','레','파','솔','라'].includes(v.e.note.replace('♭',''))){
+              const corrected=v.e.note.replace('♭','#');
+              opticalDebug.push({line:li,bar:i,x:Math.round(v.x),reason:'printed-sharp-instead-of-model-flat',from:v.e.note,to:corrected,total:probe.total,max:probe.max});
+              v.e.note=corrected;
+            }else if(v.e.note==='시♭'){
               if((!probe||probe.groups.length===0||probe.total<9)&&!priorFlat){
                 opticalDebug.push({line:li,bar:i,x:Math.round(v.x),reason:'unprinted-B-flat',total:probe.total});
                 v.e.note='시';
@@ -457,6 +462,29 @@ async function recognizeCanvas(canvas,filename,pageIndex){
   const decodeInput=async(input,modelInput,i)=>{const tensor=new W.ort.Tensor('float32',modelInput.data,[1,1,modelInput.height,modelInput.width]),res=await rt.session.run({input:tensor}),logits=res.logits;if(!logits?.data)return null;const dims=logits.dims||[],T=dims[dims.length-2],C=dims[dims.length-1];if(!T||!C)return null;const tokens=rt.dec.decodeLine(logits.data,T,C,rt.i2w),b=input.box,staff={page:pageIndex,system:i,staffIndex:0,bbox:[b.x,b.y,b.w,b.h],lineSpacingPx:b.lineSpacing,normSpacing:10},fragment=rt.dec.lineFragment(tokens,staff);return{system:i,input,fragment,tokens};};
   const lines=[],passDiagnostics=[];for(let i=0;i<inputs.length;i++){const input=inputs[i];status(`AI 악보 인식 ${i+1}/${inputs.length}줄 · 원본 판독 중…`);const raw=await decodeInput(input,input,i);if(!raw)continue;let chosenLine=raw,rawScore=lineDecodeScore(raw.fragment),enhancedLine=null;if(scanLike){status(`AI 악보 인식 ${i+1}/${inputs.length}줄 · 스캔 보정 재판독 중…`);const enh=await decodeInput(input,enhancedInput(rt.prep,gray,canvas.width,canvas.height,input),i);if(enh){enhancedLine=enh;const enhScore=lineDecodeScore(enh.fragment),rawNotes=musicalEvents(raw.fragment).filter(v=>v.ir.kind==='note').length,enhNotes=musicalEvents(enh.fragment).filter(v=>v.ir.kind==='note').length;if(enhScore>rawScore+2.5&&enhNotes>=Math.max(3,rawNotes*.88))chosenLine=enh;}}
     const consensusCorrections=[];
+    // A low-confidence rest in the raw pass can be a real printed note.
+    // Require agreement with a note at the same source position in the
+    // independently enhanced pass. Only use this if the full staff exhibits
+    // at least two such paired disagreements (systematic decoder error).
+    const restToNoteCorrections=[];
+    if(enhancedLine&&chosenLine===raw){
+      const pairs=[];
+      const altNotes=enhancedLine.fragment.filter(ir=>ir.kind==='note'&&ir.src?.bbox);
+      for(const ir of raw.fragment.filter(v=>v.kind==='rest'&&v.src?.bbox)){
+        const center=ir.src.bbox[0]+ir.src.bbox[2]/2;
+        const matches=altNotes.filter(v=>Math.abs((v.src.bbox[0]+v.src.bbox[2]/2)-center)<=Math.max(8,input.box.lineSpacing*1.6));
+        if(matches.length!==1)continue;
+        const other=matches[0];
+        if((Number(ir.confidence)||0)>.65||(Number(other.confidence)||0)<.50)continue;
+        pairs.push({ir,other,x:center});
+      }
+      if(pairs.length>=2){
+        for(const {ir,other,x} of pairs){
+          ir.kind='note';ir.pitch={...other.pitch};ir.duration={...other.duration};ir.confidence=other.confidence;
+          restToNoteCorrections.push({x:Math.round(x),note:pitchName(other.pitch),confidence:+(Number(other.confidence)||0).toFixed(2)});
+        }
+      }
+    }
     if(enhancedLine){
       const other=chosenLine===raw?enhancedLine:raw;
       const myNotes=chosenLine.fragment.filter(ir=>ir.kind==='note'&&ir.src?.bbox);
@@ -476,7 +504,7 @@ async function recognizeCanvas(canvas,filename,pageIndex){
     if(input.width>1400){const edge=rightEdgeModelInput(input),tail=await decodeInput(edge.shifted,edge.model,i);
       if(tail){const notes=musicalEvents(tail.fragment).filter(v=>v.ir.kind==='note');tailDiag={start:edge.start,notes:notes.length,xs:notes.map(v=>Math.round(v.x)),rests:musicalEvents(tail.fragment).filter(v=>v.ir.kind==='rest').map(v=>Math.round(v.x))};}}
     const symbolList=fragment=>musicalEvents(fragment||[]).map(v=>({x:Math.round(v.x),kind:v.ir.kind,p:pitchName(v.ir.pitch),dur:v.e.dur,conf:+(Number(v.ir.confidence)||0).toFixed(2)}));
-    passDiagnostics.push({tailDiag,system:i,consensusCorrections,rawSymbols:symbolList(raw.fragment),enhancedSymbols:enhancedLine?symbolList(enhancedLine.fragment):null,rawNotes:musicalEvents(raw.fragment).filter(v=>v.ir.kind==='note').length,rawRests:raw.fragment.filter(v=>v.kind==='rest').length,rawScore,chosenNotes:musicalEvents(chosenLine.fragment).filter(v=>v.ir.kind==='note').length,chosenRests:chosenLine.fragment.filter(v=>v.kind==='rest').length,chosenChanged:chosenLine!==raw});lines.push(chosenLine);}
+    passDiagnostics.push({tailDiag,system:i,consensusCorrections,restToNoteCorrections,rawSymbols:symbolList(raw.fragment),enhancedSymbols:enhancedLine?symbolList(enhancedLine.fragment):null,rawNotes:musicalEvents(raw.fragment).filter(v=>v.ir.kind==='note').length,rawRests:raw.fragment.filter(v=>v.kind==='rest').length,rawScore,chosenNotes:musicalEvents(chosenLine.fragment).filter(v=>v.ir.kind==='note').length,chosenRests:chosenLine.fragment.filter(v=>v.kind==='rest').length,chosenChanged:chosenLine!==raw});lines.push(chosenLine);}
   if(!lines.length)return{staffDetected:true,ok:false,reason:'오선은 찾았지만 음표를 읽어내지 못했습니다.'};
   const cvStaffs=W.findStaffSystems(canvas);
   // A long-staff decoder can lose a final half/whole note. Only add when a
