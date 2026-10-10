@@ -71,7 +71,7 @@ function drawCalibration(){
 function beginDemo(){stop();S.kind='demo';S.phase='play';S.taps.clear();$('modeBadge').textContent='👆 터치 체험';startMission();status('터치 체험: 동그라미를 하나씩 눌러 모두 켜 보세요. 실제 손 인식이 아니에요.');}
 function startMission(){
  S.phase='play';S.armed=false;S.ready=false;S.hold=0;S.progress=0;S.taps.clear();
- const t=task();$('playEmoji').textContent=t.icon;$('playTitle').textContent=t.title;
+ const t=task();$('playEmoji').textContent=t.side==='L'?'🫲 '+t.icon:t.side==='R'?'🫱 '+t.icon:t.icon;$('playTitle').textContent=t.title;
  $('playInstruction').textContent=t.goal.length===1?'한 손가락을 반짝이는 곳으로!':(S.kind==='demo'?'동그라미를 하나씩 찾아봐!':'손가락들을 동시에 보여줘!');
  $('missionPosition').textContent=S.route==='guided'?
   (S.part==='touch'?'👆 그림에서 ':'📷 실제 손 ')+(S.lessonPos+1)+' / '+lessonSteps().length:
@@ -153,6 +153,8 @@ function scoring(now,fresh){
 function reward(){
  if(S.phase!=='play')return;
  S.phase='reward';S.ready=false;S.hold=0;S.progress=0;
+const rewards=S.route==='guided'?(S.part==='touch'?['🌱','🌼','🌈']:['🌱','🌼','🦋','🌈','🎶']):['🌱','🌼','🐣','🦋','🌈','🎶'];
+$('rewardArt').textContent=rewards[S.route==='guided'?S.lessonPos:S.taskIndex];
  $('rewardTitle').textContent=S.kind==='demo'?'잘 찾았어!':'손가락 위치 찾았어!';
  $('rewardSubtitle').textContent=S.kind==='demo'?'그림 속 위치를 하나씩 찾아봤어. 실제 동시 사용은 아직 확인하지 않았어.':'카메라에서 목표 손가락 끝이 같은 순간 위치에 가까웠어. 실제 운지는 별도 확인해요.';
  $('nextMission').textContent=S.route==='guided'?
