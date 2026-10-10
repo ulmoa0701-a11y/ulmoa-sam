@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#e8f4e7">
+<title>모아의 리코더 꽃놀이 | 모아의 생각정원</title>
+<meta name="description" content="글을 읽지 않아도 음성과 큰 그림으로 시작하는 리코더 꽃놀이. 시·라·솔을 실제 리코더로 연주해 꽃을 피워요.">
+<link rel="stylesheet" href="arcade-v8.css?v=20261010-h"></head>
+<body><div class="app">
+<header><a href="../" class="brand"><span class="brand-icon">🌱</span>모아의 생각정원 <span style="font-weight:750;color:#8baa99;font-size:12px">/ 리코더</span></a>
+<div class="tools"><button id="micToggle" class="tool" type="button" aria-label="안내 음성 켜고 끄기">🔊</button><button id="home" class="tool" type="button" aria-label="처음으로 돌아가기">⌂</button></div>
+</header>
+<main class="play" id="game">
+<nav class="progress" aria-label="꽃 세 송이 진행"><span id="progress-0" class="active" aria-label="첫 번째 꽃">🌷</span><span id="progress-1" aria-label="두 번째 꽃">🌱</span><span id="progress-2" aria-label="세 번째 꽃">🌱</span></nav>
+<div class="arena">
+<section class="landscape" aria-label="리코더 소리에 따라 꽃이 피는 정원">
+<div class="sun"></div><div class="cloud"></div><div class="cloud c2"></div><div class="hills"></div>
+<div class="speech" id="speech" aria-live="polite">🌱 꽃이 자고 있어!</div><span class="music-magic" aria-hidden="true">♫</span>
+<div class="garden-bed" aria-label="꽃밭">
+<div class="plant" id="plant-0"><span class="leaf"></span><span class="leaf right"></span><span class="flower-head"><span class="bud">🌱</span><span class="open">🌼</span><span class="sparkle">✨</span></span></div>
+<div class="plant" id="plant-1"><span class="leaf"></span><span class="leaf right"></span><span class="flower-head"><span class="bud">🌱</span><span class="open">🌷</span><span class="sparkle">✨</span></span></div>
+<div class="plant" id="plant-2"><span class="leaf"></span><span class="leaf right"></span><span class="flower-head"><span class="bud">🌱</span><span class="open">🌸</span><span class="sparkle">✨</span></span></div>
+</div>
+<img class="moa" src="../../assets/moa-default.png" alt="모아 친구" onerror="this.hidden=true" loading="eager"><span class="moa-alt" aria-hidden="true">🌼</span>
+<div class="landscape-footer"><span id="sceneNote">🌱 잠든 꽃 친구들</span><span id="gardenCount">꽃 0 / 3</span></div>
+</section>
+<div class="controller">
+<section class="panel" id="screen-welcome">
+<div class="symbol" aria-hidden="true">🎶🌱</div>
+<h1>꽃을 깨워줘!</h1>
+<button class="main-btn gold" id="start" type="button" aria-label="리코더 꽃놀이 시작하기"><span class="huge">▶</span> 시작!</button>
+<button class="alt-btn" id="introAudio" type="button" aria-label="놀이 안내 음성 듣기">🔊 듣기</button>
+</section>
+<section class="panel" id="screen-finger" hidden>
+<span class="tiny">👆 손가락 미션</span>
+<h2 id="fingerTitle">엄지!</h2>
+<div class="poster">
+<div class="recorder-card"><span class="recorder-side" id="recorderSide">뒤쪽</span>
+<div class="recorder" aria-label="실제 소프라노 리코더의 위쪽 운지를 간단히 표시한 모형">
+<div class="mouthpiece"></div>
+<div class="tube">
+<div id="front-holes" hidden><span id="hole-1" class="hole h1"></span><span id="hole-2" class="hole h2"></span><span id="hole-3" class="hole h3"></span></div>
+<span id="back-hole" class="hole thumb-hole focus"></span>
+</div></div></div>
+<div class="poster-hint">
+<span class="finger-emoji" id="fingerEmoji" aria-hidden="true">👍</span>
+<strong id="fingerName">엄지</strong>
+<small id="fingerSmall">뒤쪽 구멍</small>
+</div></div>
+<button id="fingerGo" type="button" class="main-btn" aria-label="다음 손가락 또는 실제 리코더 소리 도전"><span class="huge">▶</span> 다음!</button>
+<div class="alt-actions"><button class="alt-btn" id="repeat" type="button">🔊 다시 듣기</button><button class="alt-btn" id="preview" type="button">🎵 음 듣기</button></div>
+</section>
+<section class="panel" id="screen-sound" hidden>
+<span class="tiny">🎵 진짜 리코더 미션</span><div class="symbol" aria-hidden="true">🎤🌷</div>
+<h2><span id="soundNote">시</span> 소리!</h2>
+<div id="soundStatus" class="pitchstatus" role="status" aria-live="polite">🎤 준비됐어?</div>
+<button id="listen" type="button" class="main-btn" aria-label="마이크를 켜서 실제 리코더 소리를 듣기"><span class="huge">🎤</span> 시작!</button>
+<button id="playTarget" type="button" class="alt-btn" aria-label="목표 리코더 소리 미리 듣기">🔊 먼저 듣기</button>
+</section>
+<section class="panel" id="screen-reward" hidden>
+<div class="symbol success" id="rewardFlower" aria-hidden="true">🌼</div>
+<h2 id="rewardTitle">꽃이 피었어!</h2><div id="rewardNote" class="tiny">🎶 소리가 들렸어!</div>
+<button id="rewardGo" type="button" class="main-btn gold" aria-label="다음 단계">▶ 다음!</button>
+</section>
+<section class="panel" id="screen-finish" hidden>
+<div class="symbol success" id="finishEmoji" aria-hidden="true">🌼🌷🌸</div>
+<h2 id="finishTitle">꽃이 활짝!</h2>
+<button id="again" type="button" class="main-btn gold" aria-label="다시 처음부터 놀기"><span class="huge">▶</span> 또 놀기!</button>
+</section>
+<details class="teacher" id="teacherPanel">
+<summary>⚙️ 선생님 도구</summary>
+<div class="teacher-body">
+<button id="teacherConfirm" type="button" aria-label="선생님이 실제 목표 음을 확인했어요">👩‍🏫 실제 음 확인</button>
+<button id="practiceSkip" type="button" aria-label="목표 음 연주 없이 손가락 연습만 하고 계속하기">🌱 손가락만 연습</button>
+<label for="levelChoose" style="font-size:13px;font-weight:850">음 선택</label>
+<select id="levelChoose"><option value="0">시</option><option value="1">라</option><option value="2">솔</option></select>
+<button id="jump" type="button">이동</button>
+<p>마이크는 음높이만 분석하며 손가락 위치는 확인하지 않습니다. 실제로 음을 확인한 경우에만 ‘실제 음 확인’을 선택해 주세요. 손가락만 연습한 경우 꽃은 피지 않으며, 실제 녹음은 저장하거나 전송하지 않습니다.</p>
+</div></details>
+</div></div>
+</main>
+<div class="foot">모아의 생각정원 · 손가락 그림은 운지 모형 · 실제 악기에서 위치를 확인해 주세요 · 비용 0원</div>
+</div>
+<script src="arcade-v8.js?v=20261010-h"></script>
+</body></html>
