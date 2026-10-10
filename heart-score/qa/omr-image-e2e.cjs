@@ -36,6 +36,37 @@ const variant=arg('variant','original'),coreOnly=process.argv.includes('--core-o
   if(process.argv.includes('--expect-reject')){if(analyses.at(-1)?.accepted!==false||/초안 완료/.test(actual.status)||!actual.visible.includes('자동 변환을 중단'))comparison.errors.push('Invalid notation was not visibly rejected');}else if(!/초안 완료/.test(actual.status))comparison.errors.push('No UI success state');
   if(logs.some(l=>l.type==='pageerror'))comparison.errors.push('Unhandled browser error');
   comparison.ok=comparison.errors.length===0;
+  // Emit a spatial diagnostic only for synthetic QA fixtures. Do not write
+  // real uploaded user photographs into public CI artifacts.
+  if(process.argv.includes('--overlay-bars')&&fixture.includes(path.join('heart-score','qa','.scan-debug'))){
+    const geometry=analyses.at(-1)?.rawBarGeometry;
+    if(geometry?.chosenBarXs?.length&&geometry?.scanRows?.length){
+      const source='data:image/'+(fixture.toLowerCase().endsWith('.png')?'png':'jpeg')+';base64,'+fs.readFileSync(fixture).toString('base64');
+      const overlay=await page.evaluate(async({source,geometry})=>{
+        const img=new Image();img.src=source;await img.decode();
+        const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;
+        const x=c.getContext('2d');x.drawImage(img,0,0);
+        for(let i=0;i<geometry.scanRows.length;i++){
+          const row=geometry.scanRows[i],b=row.box||{},sp=Number(b.lineSpacing)||8;
+          const top=(Number(b.y)||0)+(Number(b.padUp)||0),bottom=top+4*sp;
+          const picks=geometry.chosenBarXs[i]||[];
+          x.save();x.lineWidth=2;
+          for(const v of row.strict||[]){
+            x.strokeStyle='rgba(225,135,18,.40)';x.beginPath();x.moveTo(v.x,top);x.lineTo(v.x,bottom);x.stroke();
+          }
+          for(const v of picks){
+            x.lineWidth=3;x.strokeStyle='rgba(1,145,65,.98)';x.beginPath();x.moveTo(v.x,top-8);x.lineTo(v.x,bottom+8);x.stroke();
+            x.fillStyle='#073';x.font='bold 12px Arial';x.fillText(String(v.x),v.x+4,top-7);
+          }
+          x.fillStyle='rgba(255,255,255,.90)';x.fillRect((Number(b.x)||0),top-27,235,18);
+          x.fillStyle='#273';x.font='bold 14px Arial';x.fillText('row '+(i+1)+' / '+(picks.length+1)+' measures',Number(b.x)||0,top-13);
+          x.restore();
+        }
+        return c.toDataURL('image/png').split(',')[1];
+      },{source,geometry});
+      fs.writeFileSync(path.join(out,'barline-overlay.png'),Buffer.from(overlay,'base64'));
+    }
+  }
   const report={...comparison,draftComparison,variant,mobile,coreOnly,optionalTitleLyricsOcr:coreOnly?'excluded':'enabled',elapsedMs:Date.now()-start,fixtureSha256:hash,url,actual,analysis:analyses.at(-1),logs,requests};
   fs.writeFileSync(path.join(out,'result.json'),JSON.stringify(report,null,2));await page.screenshot({path:path.join(out,'screen.png'),fullPage:true});console.log(JSON.stringify({ok:report.ok,variant,mobile,coreOnly,elapsedMs:report.elapsedMs,measures:report.measures,notes:report.notes,rests:report.rests,errors:report.errors.slice(0,12),errorCount:report.errors.length,status:actual.status,draftOnly:{ok:report.draftComparison?.ok,measures:report.draftComparison?.measures,notes:report.draftComparison?.notes,rests:report.draftComparison?.rests,errors:report.draftComparison?.errors?.slice(0,24),totalErrors:report.draftComparison?.errors?.length},keyLabel:report.analysis?.state?.keyLabel,candidates:report.analysis?.candidateDiagnostics,rawBarGeometry:report.analysis?.rawBarGeometry}));process.exitCode=report.ok?0:1;
  }catch(error){fs.writeFileSync(path.join(out,'failure.json'),JSON.stringify({ok:false,error:String(error),logs,requests,analyses},null,2));throw error;}finally{await browser?.close();await new Promise(resolve=>server?server.close(resolve):resolve());}
