@@ -60,12 +60,22 @@ class LandscapeMissionScene extends Phaser.Scene{
    const a=animal(this,it.species,COLORS[it.color],it.size);
    a.setPosition(x,y).setDepth(8);
    a.setDataEnabled();a.data.set('item',it);
-   a.setInteractive(new Phaser.Geom.Rectangle(-116,-116,232,232),Phaser.Geom.Rectangle.Contains);
-   a.on('pointerdown',()=>this.pick(a));
-   a.on('pointerover',()=>{if(!this.lock)this.tweens.add({targets:a,scaleX:(it.size==='큰'?1:.68)*1.04,scaleY:(it.size==='큰'?1:.68)*1.04,duration:100})});
-   a.on('pointerout',()=>{if(a.active)this.tweens.add({targets:a,scaleX:it.size==='큰'?1:.68,scaleY:it.size==='큰'?1:.68,duration:100})});
+   // Use scene coordinates instead of overlapping Phaser Container hit areas.
    this.targets.push(a);
   });
+  const onTap=pointer=>{
+    if(this.lock)return;
+    let closest=null,score=Infinity;
+    for(const a of this.targets){
+      if(!a.active||!a.inputEnabled&&a.alpha===0)continue;
+      const x=(pointer.x-a.x)/(a.scaleX<.85?96:125),y=(pointer.y-a.y)/(a.scaleY<.85?98:123);
+      const d=x*x+y*y;
+      if(d<score){score=d;closest=a}
+    }
+    if(closest&&score<=1.06)this.pick(closest);
+  };
+  this.input.on('pointerdown',onTap);
+  this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>this.input.off('pointerdown',onTap));
  }
  pick(a){
   if(this.lock||!a.active)return;
