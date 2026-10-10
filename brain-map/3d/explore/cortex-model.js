@@ -20,9 +20,9 @@ const RGB = Object.fromEntries(Object.entries(PALETTE).map(([key,value])=>[key,n
 
 function regionFor(x, y, z) {
   // Approximate cortical boundaries for parent education, not anatomical atlas.
-  if (z < -.82 || (z < -.66 && y < -.12)) return 'occipital';
-  if (y < -.16 && z > -.82 && z < .85) return 'temporal';
-  if (z > .36) return 'frontal';
+  if (z < -.77) return 'occipital';
+  if (y < -.14 && z > -.76 && z < .79) return 'temporal';
+  if (z > .24) return 'frontal';
   return 'parietal';
 }
 
@@ -35,7 +35,7 @@ function cortexPoint(x, y, z, side) {
   const broad=.5+.5*Math.sin(lon*4.2+.75*Math.sin(lat*1.8));
   const secondary=.5+.5*Math.sin(lat*4.6+.60*Math.sin(lon*1.5));
   const cushion=.75*broad+.25*secondary;
-  const radius=1+.029*cushion*taperAtPoles;
+  const radius=1+.070*cushion*taperAtPoles;
   const taper=1-.035*Math.max(0,-z);
   const xx=side*(.54+x*.52*radius*taper);
   const zz=z*1.22*radius;
