@@ -177,7 +177,7 @@ function visualPitchProposals(staff,fragment){
     const chosen=nearby[0];
     if(!chosen)return {x:Math.round(v.x),model:pitchName(v.ir.pitch),found:false};
     const p=scanPitchFromY(staff,chosen.h.x,chosen.h.y);
-    return {x:Math.round(v.x),model:pitchName(v.ir.pitch),proposal:p.note,cvX:Math.round(chosen.h.x),cvY:Math.round(chosen.h.y),delta:+chosen.delta.toFixed(1),gap:nearby[1]?+(nearby[1].delta-chosen.delta).toFixed(1):null,area:Math.round(chosen.h.area||0)};
+    const rhythm=scanRhythm(staff,{x:chosen.h.x,y:chosen.h.y});return {x:Math.round(v.x),model:pitchName(v.ir.pitch),proposal:p.note,cvX:Math.round(chosen.h.x),cvY:Math.round(chosen.h.y),delta:+chosen.delta.toFixed(1),gap:nearby[1]?+(nearby[1].delta-chosen.delta).toFixed(1):null,area:Math.round(chosen.h.area||0),rhythm:{dur:rhythm.dur,dot:rhythm.dot,flag:rhythm.flag,beam:+rhythm.beam.toFixed(1),hollow:rhythm.hollow}};
   });
 }
 function modelNoteShapeDiagnostics(staff,fragment){
