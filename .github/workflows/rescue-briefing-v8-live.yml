@@ -1,0 +1,53 @@
+name: Verify published rescue dispatch briefing v8
+on:
+  pull_request:
+    paths: ['.github/workflows/rescue-briefing-v8-live.yml']
+permissions:
+  contents: read
+jobs:
+  public-assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Confirm actual published scripts and mission title code
+        run: |
+          BASE='https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/'
+          ready=0
+          for attempt in $(seq 1 45); do
+            curl -fsSL --max-time 12 "$BASE" -o /tmp/rescue-live.html || true
+            curl -fsSL --max-time 12 "${BASE}game.js?v=8" -o /tmp/rescue-v8.js || true
+            curl -fsSL --max-time 12 "${BASE}landscape.js?v=7" -o /tmp/rescue-wide-v7.js || true
+            if grep -q 'game.js?v=8' /tmp/rescue-live.html &&
+               grep -q 'landscape.js?v=7' /tmp/rescue-live.html &&
+               grep -q 'this.briefingTargetText=t' /tmp/rescue-v8.js &&
+               grep -q 'this.briefingTargetText=title' /tmp/rescue-wide-v7.js &&
+               grep -q 'this.briefingStartButton=start' /tmp/rescue-wide-v7.js; then
+              ready=1; break
+            fi
+            echo "Waiting for actual GitHub Pages deploy $attempt"
+            sleep 8
+          done
+          test "$ready" = "1"
+          echo "LIVE BRIEFING V8 ASSETS PASS"
+  public-play:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: public-assets
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+      - name: Verify live site mission title above dispatch button, all levels/screens
+        env:
+          RESCUE_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/
+        run: node thinking-garden/games/rescue/rescue-smoke.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rescue-briefing-v8-live-screens
+          path: rescue-qa-screenshots/
+          if-no-files-found: ignore
