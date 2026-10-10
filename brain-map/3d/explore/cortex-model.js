@@ -48,7 +48,7 @@ function cortexPoint(x,y,z,side){
     relief+=height*Math.exp(-1.9*(dy*dy+dz*dz));
   }
   const edge=Math.pow(Math.max(0,Math.cos(lat)),.65);
-  const radius=1+.58*relief*edge+.009*Math.cos(5*lon+.4*Math.sin(2.6*lat))*edge;
+  const radius=1+.50*relief*edge+.009*Math.cos(5*lon+.4*Math.sin(2.6*lat))*edge;
   const xx=side*(.545+x*.527*radius*(1-.035*Math.max(0,-z)));
   const zz=z*1.25*radius;
   const lower=Math.exp(-Math.pow((z-.06)/.70,2))*Math.max(0,-y);
@@ -108,7 +108,7 @@ function corticalRGB(x,y,z,shade,sourceX,sourceY,sourceZ){
     const color=RGB[key];
     red+=w*color.r;green+=w*color.g;blue+=w*color.b;
   }
-  const softOutline=1-.135*curlInk(sourceY,sourceZ,sourceX);
+  const softOutline=1-.080*curlInk(sourceY,sourceZ,sourceX);
   return [red*shade*softOutline,green*shade*softOutline,blue*shade*softOutline];
 }
 
