@@ -418,4 +418,9 @@ function renderFrame(){
  }
  if(dirty){updateCamera();renderer.render(scene,camera);drawLeaders();needsRender=false;}
 }
-if(!init()) console.warn('3D brain fallback active');
+const started=init();
+if(!started)console.warn('3D brain fallback active');
+else {
+ const queryView=new URLSearchParams(window.location.search).get('view');
+ if(['front','back','left','right','top','free'].includes(queryView))setView(queryView,true);
+}
