@@ -56,10 +56,53 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
    keyVsSheet.pressedLabel.includes('건반'),
    name+': score and instrument still look identical or lack key affordance '+JSON.stringify(keyVsSheet));
  check(keyVsSheet.key.height>keyVsSheet.scoreNote.height*1.12&&
-   keyVsSheet.keyGridCols===(w<=700?4:8),
+   keyVsSheet.keyGridCols===8,
    name+': finger targets are too small or grid wrong '+JSON.stringify(keyVsSheet));
  check(await page.locator('.mainStage .noteTile button').count()===0,
    name+': read-only score unexpectedly contains clickable buttons');
+ const keyboard=await page.evaluate(()=>{
+  const keys=[...document.querySelectorAll('#keys .key')],frame=document.querySelector('#keys').getBoundingClientRect();
+  return {keys:keys.map(b=>{
+     const r=b.getBoundingClientRect(),c=getComputedStyle(b.querySelector('span:first-child'));
+     return {note:b.dataset.note,x:r.x,y:r.y,width:r.width,height:r.height,ink:c.color,display:b.textContent};
+    }),frame:{x:frame.x,right:frame.right},mode:document.querySelector('#keyModeSelect').value};
+ });
+ check(keyboard.mode==='piano'&&keyboard.keys.length===8&&
+   keyboard.keys.every((k,i)=>i===0||Math.abs(k.y-keyboard.keys[0].y)<=2)&&
+   keyboard.keys.every(k=>k.width>=30)&&keyboard.keys.at(-1).x+keyboard.keys.at(-1).width<=keyboard.frame.right+2,
+   name+': all eight piano keys must be in ONE row '+JSON.stringify(keyboard));
+ check(keyboard.keys.every(k=>k.ink===(k.note==='높은도'?'rgb(255, 255, 255)':'rgb(17, 24, 39)')),
+   name+': every note name must be BLACK except upper C WHITE '+JSON.stringify(keyboard));
+ await page.locator('#keyModeSelect').selectOption('xylophone');
+ const xylophone=await page.evaluate(()=>({
+   mode:state.keyOrder,cls:document.querySelector('#keys').className,
+   notes:[...document.querySelectorAll('#keys .key')].map(x=>({note:x.dataset.note,y:x.getBoundingClientRect().y,height:x.getBoundingClientRect().height}))
+ }));
+ check(xylophone.cls.includes('xylophoneKeys')&&xylophone.notes.map(n=>n.note).join(',')==='도,레,미,파,솔,라,시,높은도'&&
+   xylophone.notes.every(n=>n.height>=40),
+   name+': xylophone keys should follow do-re-mi in one row '+JSON.stringify(xylophone));
+ await page.screenshot({path:out+'/'+name+'-xylophone.png',fullPage:false});
+ await page.locator('#keyModeSelect').selectOption('shuffle');
+ const shuffled=await page.evaluate(()=>window.__rhythmQA.state());
+ check(shuffled.keyMode==='shuffle'&&shuffled.keyOrder.join(',')!==['도','레','미','파','솔','라','시','높은도'].join(',')&&
+    new Set(shuffled.keyOrder).size===8,
+    name+': shuffle mode did not rearrange all eight keys '+JSON.stringify(shuffled));
+ // Positions must remain fixed throughout a song, not move on each beat.
+ await page.locator('#startBtn').click();
+ const shuffleStarted=await page.evaluate(()=>window.__rhythmQA.state());
+ check(shuffleStarted.phase==='count'&&await page.locator('#keyModeSelect').isDisabled()&&
+   (await page.locator('#keys .key').count())===8,
+   name+': shuffled keys can change unexpectedly during a round');
+ await page.waitForTimeout(70);
+ const shuffleSteady=await page.evaluate(()=>window.__rhythmQA.state());
+ check(shuffleStarted.keyOrder.join(',')===shuffleSteady.keyOrder.join(','),
+   name+': randomized keys changed position mid-count');
+ await page.evaluate(()=>{clearGameFrame();state.phase='idle';selectSong()});
+ await page.locator('#keyModeSelect').selectOption('piano');
+ check(await page.locator('#keys .key').count()===8&&
+    (await page.locator('#keyModeSelect').inputValue())==='piano',
+    name+': cannot restore the fixed piano key order');
+
 
  const oneViewport=await page.evaluate(()=>{
    const get=sel=>{const r=document.querySelector(sel).getBoundingClientRect();
@@ -157,6 +200,34 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  await page.locator('#startBtn').click();
  const count=await page.evaluate(()=>window.__rhythmQA.state());
  check(count.phase==='count'&&count.countLen===6,name+': six-beat 1-2-1-2-시-작 count-in missing');
+ // Intro melody is four beats of the CURRENT SONG, not another fake delay or tune.
+ await page.evaluate(()=>{
+   const now=performance.now();state.countStart=now-state.beat*3.5;
+   state.origin=state.countStart+state.countLen*state.beat;
+ });
+ await page.waitForTimeout(90);
+ const preview=await page.evaluate(()=>({
+   state:window.__rhythmQA.state(),label:document.querySelector('#countInfo').textContent,
+   text:document.querySelector('#countNumber').textContent
+ }));
+ check(preview.state.phase==='count'&&preview.state.preview.map(x=>x.note).join(',')==='도,도,솔,솔'&&
+   preview.state.played===undefined&&preview.state.score===0&&preview.label.includes('멜로디'),
+   name+': four song opening notes did not play in the preparatory beats '+JSON.stringify(preview));
+ await page.locator('#keys [data-note="도"]').click();
+ check((await page.locator('#scoreLabel').innerText())==='0',
+   name+': tapping during melody preview must NOT earn points');
+ await page.evaluate(()=>{
+   state.countStart=performance.now()-state.beat*5.2;
+   state.origin=state.countStart+state.countLen*state.beat;
+ });
+ await page.waitForTimeout(90);
+ const beforeStart=await page.evaluate(()=>({
+   phase:state.phase,count:document.querySelector('#countNumber').textContent,
+   preview:state.introPreview.length,label:document.querySelector('#countInfo').textContent
+ }));
+ check(beforeStart.phase==='count'&&beforeStart.count==='시작'&&beforeStart.preview===4&&
+   beforeStart.label.includes('건반'),
+   name+': distinct 시/작 preparation is unclear '+JSON.stringify(beforeStart));
  await page.evaluate(()=>{
    state.countStart=performance.now()-state.countLen*state.beat-35;
    state.origin=performance.now()-35;

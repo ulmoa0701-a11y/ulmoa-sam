@@ -5,7 +5,7 @@
 <meta name="robots" content="noindex,nofollow">
 <title>박자꽃 톡톡! | 모아의 생각정원</title>
 <meta name="description" content="색깔악보를 읽으며 알맞은 박자에 색깔 피아노 건반을 누르는 리듬·타이밍 게임입니다.">
-<link rel="stylesheet" href="style.css?v=20261010-piano">
+<link rel="stylesheet" href="style.css?v=20261010-introkeys2">
 </head>
 <body>
 <div class="app">
@@ -36,11 +36,11 @@
    <div class="nowHead"><span>👀 위 악보를 읽고 아래 건반을 눌러요</span><span id="feedback" class="feedback" role="status" aria-live="polite">준비되면 시작해요 🌼</span></div>
    <div id="noteTrack" class="noteTrack" aria-label="박자에 맞춰 한 칸씩 강조되는 색깔악보"></div>
    <div class="countOverlay" id="countOverlay" hidden aria-live="polite" aria-label="시작 박자">
-     <span class="countInfo">같이 박자 맞춰요</span><div id="countNumber">1</div>
+     <span class="countInfo" id="countInfo">먼저 짧은 멜로디를 들어요 🎵</span><div id="countNumber">1</div>
    </div>
  </div>
- <div class="keyHead"><strong>🎹 손으로 연주하는 색깔 피아노</strong><small>계이름을 보고 박자에 맞춰 눌러요</small></div>
- <div id="keys" class="keys pianoKeys" role="group" aria-label="색깔 피아노 건반 8개"></div>
+ <div class="keyHead"><strong id="instrumentHeading">🎹 색깔 피아노 건반</strong><label class="keyLayoutPicker">건반 모양 <select id="keyModeSelect" aria-label="연주 건반 모양과 위치"><option value="piano">🎹 피아노 · 순서대로</option><option value="xylophone">🎶 실로폰 · 순서대로</option><option value="shuffle">🔀 위치 섞기</option></select></label></div>
+ <div id="keys" class="keys pianoKeys" role="group" aria-label="한 줄로 나열된 색깔 피아노 건반 8개"></div>
  <p class="disclaimer">리듬·타이밍과 눈–손 협응을 연습하는 게임이에요. 점수는 터치 시점과 기기에 따라 달라지며 치료·진단 평가가 아닙니다.</p>
 </section>
 <section class="results" id="results" hidden aria-live="polite">
@@ -53,6 +53,6 @@
 </main>
 <footer>일단 해봄 · 울모아쌤 | 학습용 시범 게임</footer>
 </div>
-<script src="game.js?v=20261010-piano"></script>
+<script src="game.js?v=20261010-introkeys2"></script>
 </body>
 </html>
