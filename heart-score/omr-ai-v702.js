@@ -173,7 +173,7 @@ function visualPitchProposals(staff,fragment){
   if(!staff)return[];
   const heads=scanConnectedHeads(staff);
   return musicalEvents(fragment).filter(v=>v.ir.kind==='note').map(v=>{
-    const nearby=heads.map(h=>({h,delta:Math.abs(h.x-v.x)})).filter(o=>o.delta<staff.spacing*4.5).sort((a,b)=>a.delta-b.delta);
+    const nearby=heads.map(h=>({h,delta:Math.abs(h.x-v.x)})).filter(o=>o.delta<staff.spacing*6).sort((a,b)=>a.delta-b.delta);
     const chosen=nearby[0];
     if(!chosen)return {x:Math.round(v.x),model:pitchName(v.ir.pitch),found:false};
     const p=scanPitchFromY(staff,chosen.h.x,chosen.h.y);
@@ -262,7 +262,7 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
         // An independent notehead at treble C5 can disambiguate C4/C5 if the
         // decoded letter agrees; do not overwrite altered or different notes.
         if(vote?.proposal?.startsWith('높은')&&!e.note.startsWith('높은')&&vote.proposal.slice(2)===e.note&&
-           vote.delta<=sp*4.5&&(vote.gap===null||vote.gap>=sp*.65))e.note=vote.proposal;
+           vote.delta<=sp*6&&vote.cvX<vote.x&&(vote.gap===null||vote.gap>=sp*.65))e.note=vote.proposal;
       }
       return e&&q?{ir,e,x:q[0]+q[2]/2}:null;
     })
