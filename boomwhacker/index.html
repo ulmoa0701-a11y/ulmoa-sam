@@ -560,8 +560,9 @@ async function loadMrFile(file){stopMr();mrBuffer=null;mrName='';const status=$(
 function tone(n,b){if(b){b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),100)}if(!sound||!wantsMelody()||melodyMode==='none'||!FREQ[n])return;audio();if(!audioCtx)return;scheduleMelodyTone(audioCtx,audioCtx.destination,n,audioCtx.currentTime,melodyMode)}
 function draw(){
  const stage=$('#stage'),hitY=stage.clientHeight-68;
- const noteRadius=window.innerWidth<=800?29:43,spawnY=-noteRadius-38;
+ const noteRadius=window.innerWidth<=800?29:43,spawnY=-noteRadius-8;
  stage.querySelectorAll('.fall').forEach(x=>x.remove());
+ if(!hasStartedSong&&!introActive&&elapsed<=0)return;
  for(const e of events){
   if(!e.active)continue;
   const remaining=e.start-elapsed;
@@ -710,7 +711,7 @@ function videoScene(ctx,t){
  ctx.beginPath();ctx.moveTo(x,hitY);ctx.lineTo(x+w,hitY);ctx.strokeStyle='rgba(23,35,59,.72)';ctx.lineWidth=4;ctx.stroke();
  for(let i=0;i<8;i++){const n=ORDER[i],tx=x+i*w/8+5,tw=w/8-10;rr(ctx,tx,hitY+12,tw,tubeH-22,12);ctx.fillStyle=COLORS[n];ctx.globalAlpha=ALLOWED[level].has(n)?1:.2;ctx.fill();ctx.globalAlpha=1;videoNoteText(ctx,displayLabel(n),tx+tw/2,hitY+43,displayMode==='instrument'?23:(displayMode==='name'||displayMode==='custom'?14:18),COLORS[n])}
  ctx.save();ctx.beginPath();rr(ctx,x,y,w,h,22);ctx.clip();
- const videoSpawnY=y-45-38;
+ const videoSpawnY=y-45-8;
  for(const e of events){
   if(!e.active)continue;
   const remaining=e.start-t;
