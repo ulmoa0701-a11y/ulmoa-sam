@@ -49,7 +49,7 @@ jobs:
         run: |
           ready=0
           for n in $(seq 1 36); do
-            if curl --max-time 15 -fsSL "$PUBLIC_URL" | grep -q 'glossary-catalog.js?v=20261010-cleanpaper1'; then
+            if curl --max-time 15 -fsSL "$PUBLIC_URL" | grep -q 'glossary-catalog.js?v=20261010-readingflow1'; then
               ready=1
               break
             fi
@@ -59,6 +59,6 @@ jobs:
           test "$ready" = "1"
           curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary/cards/working-memory.webp" -o /tmp/glossary-live.webp
           head -c 4 /tmp/glossary-live.webp | grep -q 'RIFF'
-          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.js?v=20261010-cleanpaper1" | grep -q 'RELATED='
-          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.css?v=20261010-cleanpaper1" | grep -q '.gcat-search-rail'
+          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.js?v=20261010-readingflow1" | grep -q 'RELATED='
+          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.css?v=20261010-readingflow1" | grep -q '.gcat-search-rail'
           GLOSSARY_QA_URL="$PUBLIC_URL" node notes/glossary-smoke.cjs
