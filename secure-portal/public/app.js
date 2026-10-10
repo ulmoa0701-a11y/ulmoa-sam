@@ -103,8 +103,46 @@ function dataForm(role){if(role==='parent')return `<form class="form" id="entryF
 return `<form class="form" id="entryForm"><label>있었던 일<textarea name="event" maxlength="1200" placeholder="기억에 남는 일이 있으면 한 줄만 적어도 돼요." required></textarea></label><details class="optional-fields"><summary>생각이나 다음 행동도 적기 <small>선택</small></summary><div class="optional-wrap"><label>그때 떠오른 생각<textarea name="thought" maxlength="1200" placeholder="없으면 비워 둬도 괜찮아요."></textarea></label><label>다음에 해보고 싶은 것<textarea name="next" maxlength="1200" placeholder="답을 찾거나 꼭 실천할 필요는 없어요."></textarea></label></div></details><label class="checkbox"><input type="checkbox" name="share"><span>이 기록을 담당 치료사와 공유하기<br><small>체크하지 않으면 나만 볼 수 있어요.</small></span></label><button class="button" id="saveEntry">🔒 나만 보기로 저장</button></form>`;}
 function recordCards(list=records){if(!list.length)return '<p>아직 작성된 기록이 없습니다.</p>';return list.map(r=>`<article class="record"><div class="meta">${sanitize(new Date(r.createdAt).toLocaleString('ko-KR'))} · ${r.kind==='student'?'학생':'학부모'} · ${r.shared?'담당 치료사에게 공유됨':'비공개'}${r.driveSynced?' · 드라이브 백업됨':''}</div>${r.entry?Object.entries(r.entry).map(([k,v])=>`<p><b>${({event:'있었던 일',thought:'떠오른 생각',next:'해보고 싶은 것',observation:'관찰 상황',message:'전달 사항',note:'메모',date:'날짜'})[k]||sanitize(k)}:</b> ${sanitize(v)}</p>`).join(''):'<p>기록 내용을 표시할 수 없습니다.</p>'}${(me.role==='student'||me.role==='parent')&&!r.shared?`<div class="buttons"><button class="button-ghost" data-share="${sanitize(r.id)}">담당 치료사에게 공유하기</button></div>`:''}${me.role==='therapist'?`<div class="muted">학생: ${sanitize(r.student)} · 작성자: ${sanitize(r.author)}</div>`:''}</article>`).join('');}
 function attachShares(){document.querySelectorAll('[data-share]').forEach(b=>b.onclick=()=>{if(!confirm('이 기록을 담당 치료사에게 공유할까요? 이미 드라이브에 백업된 내용은 철회해도 자동 삭제되지 않습니다.'))return;loading(b,async()=>{await api('share',{method:'POST',body:{recordId:b.dataset.share}});toast('담당 치료사에게 공유되었어요.');await dashboard()})})}
-function situationMarkup(){return `<div class="panel full" id="situation"><div class="tag">선택 활동 / 짧은 상황 연습</div><h3>메시지를 보냈는데 답장이 없어요.</h3><p>실제로 확인된 사실과, 아직 확인되지 않은 해석을 구분해 볼까요? 정답 맞히기보다는 여러 가능성을 생각하는 연습입니다.</p><div class="seg"><button type="button" data-scenario="fact">확인된 사실</button><button type="button" data-scenario="guess">가능한 해석</button><button type="button" data-scenario="next">다음에 할 일</button></div><div id="situationOutput" class="callout">원하는 버튼을 눌러 보세요.</div></div>`;}
-function attachSituation(){document.querySelectorAll('[data-scenario]').forEach(btn=>btn.onclick=()=>{const s={fact:'메시지를 보냈고, 아직 답장이 없다는 사실만 알고 있어요.',guess:'바쁠 수도 있고, 메시지를 확인하지 못했을 수도 있어요. 지금은 이유를 알 수 없어요.',next:'나에게 중요한 일을 계속할 수도 있고, 나중에 필요한 연락을 다시 할 수도 있어요.'};$('situationOutput').textContent=s[btn.dataset.scenario];document.querySelectorAll('[data-scenario]').forEach(b=>{const selected=b===btn;b.classList.toggle('on',selected);b.setAttribute('aria-pressed',selected?'true':'false');});})}
+const CHOICE_LAB_SCENES=[
+ {id:'time',icon:'✦',tab:'여유 시간',accent:'mint',title:'갑자기 20분이 생겼어.',desc:'예정보다 일찍 끝났어. 무엇을 해볼까?',options:[
+  {label:'음악 한 곡',glyph:'♫',line:'음악을 켰어. 잠깐 다른 분위기로 전환!',code:'listen_to_music()',out:'음악 한 곡을 듣는 방법을 골랐어.'},
+  {label:'게임 한 판',glyph:'▣',line:'가벼운 게임을 골라봤어.',code:'play_a_round()',out:'게임 한 판을 즐기는 방법을 골랐어.'},
+  {label:'잠깐 쉬기',glyph:'☁',line:'아무것도 하지 않고 시간을 보내도 돼.',code:'take_a_break()',out:'잠깐 쉬어 가는 방법을 골랐어.'}]},
+ {id:'team',icon:'◈',tab:'팀 활동',accent:'lavender',title:'새 프로젝트를 시작해.',desc:'함께 무언가를 만들기로 했어. 어떤 역할이 끌려?',options:[
+  {label:'아이디어 내기',glyph:'✳',line:'아이디어를 하나 꺼내서 이야기해 봤어.',code:'share_an_idea()',out:'새로운 생각으로 시작했어.'},
+  {label:'순서 정리',glyph:'☷',line:'어디부터 할지 간단히 정했어.',code:'make_a_plan()',out:'순서를 정하는 방식으로 시작했어.'},
+  {label:'먼저 둘러보기',glyph:'◎',line:'다른 사람이 하는 걸 보고 방향을 잡았어.',code:'explore_first()',out:'천천히 살펴보는 방식으로 시작했어.'}]},
+ {id:'game',icon:'⌘',tab:'새 게임',accent:'peach',title:'처음 보는 게임을 발견했어.',desc:'어떻게 시작해 보고 싶어?',options:[
+  {label:'일단 플레이',glyph:'▶',line:'직접 움직여 보면서 알아봤어.',code:'start_playing()',out:'직접 해보는 방법을 골랐어.'},
+  {label:'규칙 살펴보기',glyph:'≡',line:'규칙을 읽고 흐름을 알아봤어.',code:'read_the_rules()',out:'정보를 먼저 살펴보는 방법을 골랐어.'},
+  {label:'다음에 하기',glyph:'↷',line:'지금은 지나가고 다음을 기약했어.',code:'save_for_later()',out:'다음 기회를 선택했어.'}]}
+];
+let choiceLabScene=0,choiceLabOption=-1;
+function situationMarkup(){return `<div class="choice-lab" id="situation">
+ <div class="choice-top"><span class="choice-top-label"><span aria-hidden="true">●</span> PLAYGROUND / IF · ELSE</span><span class="choice-count" id="choiceCount">01 / 03</span></div>
+ <div class="choice-tabs" role="group" aria-label="장면 고르기">${CHOICE_LAB_SCENES.map((s,i)=>`<button type="button" data-choice-scene="${i}" aria-pressed="${i===choiceLabScene?'true':'false'}"><span aria-hidden="true">${s.icon}</span> ${s.tab}</button>`).join('')}</div>
+ <div class="choice-scene choice-mint" id="choiceScene"><div class="choice-scene-art" aria-hidden="true"><span class="choice-art-chip">IF</span><span class="choice-art-route"></span><span class="choice-art-node">?</span></div><div class="choice-scene-text"><span class="choice-kicker">SCENE 01</span><h3 id="choiceTitle"></h3><p id="choiceDescription"></p></div></div>
+ <div class="choice-columns"><div class="choice-actions"><div class="choice-section-head"><strong>이렇게 해볼래?</strong><span>하나만 골라봐</span></div><div class="choice-options" id="choiceOptions"></div></div>
+ <div class="choice-result"><div class="choice-console-top"><span aria-hidden="true">● ● ●</span><span>output.log</span><span class="choice-console-status" id="choiceStatus">READY</span></div><div class="choice-console-content" aria-live="polite" aria-atomic="true" id="choiceOutput"><span class="choice-cursor">›</span><span>선택하면 결과가 나타나.</span></div><div class="choice-code" id="choiceCode"><span class="choice-ln">01</span> <span class="choice-keyword">if</span> (selected) {<br><span class="choice-ln">02</span> &nbsp; run(selected);<br><span class="choice-ln">03</span> }</div></div></div>
+ <div class="choice-bottom"><span>정답 · 점수 · 기록 저장 없음</span><button type="button" id="choiceReset" class="choice-reset">↻ 다시 선택</button></div>
+ </div>`;}
+function attachSituation(){
+ const root=document.querySelector('#situation');if(!root)return;
+ const count=root.querySelector('#choiceCount'),title=root.querySelector('#choiceTitle'),desc=root.querySelector('#choiceDescription'),scene=root.querySelector('#choiceScene'),options=root.querySelector('#choiceOptions'),output=root.querySelector('#choiceOutput'),status=root.querySelector('#choiceStatus'),code=root.querySelector('#choiceCode');
+ const draw=()=>{
+  const s=CHOICE_LAB_SCENES[choiceLabScene];count.textContent=String(choiceLabScene+1).padStart(2,'0')+' / 03';title.textContent=s.title;desc.textContent=s.desc;
+  scene.className='choice-scene choice-'+s.accent;
+  root.querySelector('.choice-kicker').textContent='SCENE '+String(choiceLabScene+1).padStart(2,'0');
+  root.querySelectorAll('[data-choice-scene]').forEach((b,i)=>{const on=i===choiceLabScene;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',String(on));});
+  options.innerHTML=s.options.map((o,i)=>`<button type="button" class="choice-option${i===choiceLabOption?' picked':''}" data-choice-option="${i}" aria-pressed="${i===choiceLabOption?'true':'false'}"><span class="choice-option-icon" aria-hidden="true">${o.glyph}</span><strong>${o.label}</strong><span aria-hidden="true" class="choice-arrow">↗</span></button>`).join('');
+  if(choiceLabOption<0){status.textContent='READY';output.innerHTML='<span class="choice-cursor" aria-hidden="true">›</span><span>선택하면 결과가 나타나.</span>';code.innerHTML='<span class="choice-ln">01</span> <span class="choice-keyword">if</span> (selected) {<br><span class="choice-ln">02</span> &nbsp; run(selected);<br><span class="choice-ln">03</span> }';}
+  else{const o=s.options[choiceLabOption];status.textContent='DONE';output.textContent=o.out;code.textContent='> '+o.code+'\n'+o.line;}
+  options.querySelectorAll('[data-choice-option]').forEach(b=>b.onclick=()=>{choiceLabOption=Number(b.dataset.choiceOption);draw();});
+ };
+ root.querySelectorAll('[data-choice-scene]').forEach(b=>b.onclick=()=>{choiceLabScene=Number(b.dataset.choiceScene);choiceLabOption=-1;draw();});
+ root.querySelector('#choiceReset').onclick=()=>{choiceLabOption=-1;draw();};
+ draw();
+}
 function codingMarkup(){return `<div class="lab-shell">
   <div class="lab-tabbar"><span class="lab-dot" aria-hidden="true"></span><span>condition_lab.js</span><span class="lab-sub">로직 살펴보기 · 선택 활동</span></div>
   <div class="lab-layout">
@@ -136,13 +174,13 @@ function studentHome(){
  const items=isParent?[
   ['write','✎','기록 남기기','관찰·전달사항'],['history','▤','내 기록','내가 쓴 내용']
  ]:[
-  ['write','✎','기록하기','한 장이면 충분해'],['history','▤','내 기록','지난 기록 확인'],['situation','◇','상황 연습','다른 관점 보기'],['coding','⌘','코딩 실험실','선택해서 즐기기']
+  ['write','✎','기록하기','한 장이면 충분해'],['history','▤','내 기록','지난 기록 확인'],['situation','◇','선택 실험실','if / else 놀이'],['coding','⌘','코딩 실험실','선택해서 즐기기']
  ];
  app.innerHTML=hero(isParent?'관찰한 내용을 전해요':'필요할 때, 한 장만.','매일 작성할 필요는 없어요. 내 기록은 나만 보고, 공유할 내용은 직접 정할 수 있어요.')+
  `<div class="workspace-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">01</span></div>${workspaceNav(items,activeView)}<div class="sidebar-note"><span class="privacy-dot" aria-hidden="true"></span>공유는 내가 선택해요.<br><small>혼자만 볼 수도 있어요.</small></div></aside><div class="workspace-content">
  <section data-workspace-view="write" class="workspace-section"><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>${isParent?'observation.note':'my-note.md'}</span><span class="editor-status">NEW NOTE</span></div><div class="editor-paper"><span class="tag">01 / WRITE</span><h2>${isParent?'생활 관찰·전달사항':'어떤 일이 있었어?'}</h2><p>${isParent?'관찰한 상황을 간단히 적거나 치료사에게 전하고 싶은 말을 남길 수 있어요.':'기억에 남는 일이 있을 때만 적어도 돼. 한 줄이어도 충분해.'}</p>${dataForm(me.role)}</div></section>
  <section data-workspace-view="history" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>my-notes.json</span></div><div class="editor-paper"><span class="tag">02 / ARCHIVE</span><h2>내가 남긴 기록</h2><p>이 계정에서 내가 작성한 내용만 보여요.</p><div id="recordsHere">${recordCards()}</div></div></section>
- ${isParent?'':`<section data-workspace-view="situation" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>practice / perspectives</span></div><div class="editor-paper"><span class="tag">OPTIONAL / PRACTICE</span><h2>상황 연습</h2><p>어떤 일이 생겼을 때 여러 가능성을 가볍게 살펴볼 수 있어. 정답도 점수도 없어.</p>${situationMarkup()}</div></section>
+ ${isParent?'':`<section data-workspace-view="situation" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>branch-lab.js</span><span class="editor-status">PLAY MODE</span></div><div class="editor-paper"><span class="tag">OPTIONAL / IF · ELSE</span><h2>선택 실험실</h2><p>가벼운 장면을 고르고, 선택에 따라 달라지는 결과를 구경해 봐.</p>${situationMarkup()}</div></section>
  <section data-workspace-view="coding" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>studio / playground</span></div><div class="editor-paper"><span class="tag">OPTIONAL / PLAY</span><h2>코딩 실험실</h2><p>조건을 바꿔 결과를 확인하는 작은 실험 공간이야. 기록하지 않고 그냥 놀아도 돼.</p>${codingMarkup()}</div></section>`}
  </div></div><p class="workspace-footer">일단써봄은 생각을 이해하고 선택을 연습하기 위한 보조도구예요. 매일 쓰거나 불안을 반복해서 확인할 필요는 없어요.</p>`;
  $('entryForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;const entry=isParent?{observation:formValue(f,'observation'),message:formValue(f,'message')}:{event:formValue(f,'event'),thought:formValue(f,'thought'),next:formValue(f,'next')};const share=f.elements.share.checked;if(share&&!confirm('담당 치료사에게 이 기록을 공유할까요? 치료사가 드라이브에 복사한 기록은 공유 취소로 자동 삭제되지 않습니다.'))return;loading(f.querySelector('button'),async()=>{await api('records',{method:'POST',body:{entry,share}});activeView='history';toast('기록을 저장했어요.');await dashboard()})};
