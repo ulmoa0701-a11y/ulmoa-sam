@@ -143,6 +143,47 @@ function stemGeometry(){
   return {key:'brainstem',side:'center',geometry,anchor:geometry.boundingBox.getCenter(new THREE.Vector3())};
 }
 
+// 귀여운 파스텔 교구의 '말랑한 뇌이랑': 구체를 따로 띄우지 않고
+// 기존 대뇌 표면 안에 깊이 묻어 넣은 낮고 둥근 쿠션처럼 표현합니다.
+// 각 쿠션은 실제 부위 메시의 자식이어서 선택·자유회전·분리 시 함께 움직입니다.
+function addCorticalCushions(mesh,d){
+  const points={
+    frontal:[
+      [.43,.72,.27,.21,.27], [.23,.88,.28,.23,.28],
+      [.59,.40,.26,.22,.28], [-.06,.71,.27,.21,.26], [-.14,.46,.27,.21,.25]
+    ],
+    parietal:[
+      [.71,.05,.25,.21,.28], [.56,-.22,.27,.22,.27],
+      [.40,-.48,.26,.23,.29], [.25,.09,.29,.23,.28], [.55,-.55,.23,.21,.24]
+    ],
+    temporal:[
+      [-.38,.34,.27,.24,.27],[-.50,.03,.28,.23,.27],
+      [-.39,-.34,.27,.22,.27],[-.21,-.04,.25,.20,.25]
+    ],
+    occipital:[
+      [.31,-.81,.25,.24,.24],[.04,-.91,.24,.25,.25],
+      [-.24,-.81,.24,.22,.23]
+    ]
+  };
+  if(!points[d.key])return;
+  const side=d.side==='left'?1:-1;
+  const commonMaterial=new THREE.MeshStandardMaterial({
+    color:PALETTE[d.key],roughness:1,metalness:0
+  });
+  const geometry=new THREE.SphereGeometry(1,28,18);
+  for(const [y,z,rx,ry,rz] of points[d.key]){
+    const unitX=Math.sqrt(Math.max(.04,1-y*y-z*z));
+    const [surfaceX,surfaceY,surfaceZ]=cortexPoint(unitX,y,z,side);
+    const puff=new THREE.Mesh(geometry,commonMaterial);
+    // Surface-normal inward placement prevents any detached balloon appearance.
+    puff.position.set(surfaceX-side*.115,surfaceY,surfaceZ);
+    puff.scale.set(rx,ry,rz);
+    puff.rotation.z=side*(z>.1?.10:-.07);
+    puff.userData.decorative=true;
+    mesh.add(puff);
+  }
+}
+
 export function makeBrainSurfaces(){
   const descriptors=[
     ...oneHemisphere(1),
@@ -158,6 +199,7 @@ export function makeBrainSurfaces(){
     });
     const mesh=new THREE.Mesh(d.geometry,material);
     mesh.userData={key:d.key,side:d.side,base:new THREE.Vector3(),anchor:d.anchor};
+    addCorticalCushions(mesh,d);
     mesh.castShadow=false;
     return mesh;
   });
