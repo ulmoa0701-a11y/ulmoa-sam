@@ -1,0 +1,62 @@
+name: Habom Navigation QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'assets/habom-navigation.js'
+      - 'assets/habom-navigation.css'
+      - 'assets/habom-parents.css'
+      - 'parents/**'
+      - 'index.html'
+      - 'notes/index.html'
+      - 'thinking-garden/app.js'
+      - '.github/workflows/habom-navigation-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  navigation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: JavaScript syntax
+        run: |
+          node --check assets/habom-navigation.js
+          node --check thinking-garden/app.js
+      - name: Real destinations and navigation contract
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from urllib.parse import urlparse
+          from html.parser import HTMLParser
+          import re
+          base=Path('.')
+          js=(base/'assets/habom-navigation.js').read_text(encoding='utf-8')
+          css=(base/'assets/habom-navigation.css').read_text(encoding='utf-8')
+          assert "name:'용어사전'" in js
+          assert "name:'3D 뇌지도'" in js
+          assert "name:'부모님 자료'" in js
+          assert 'hb-mobile-toggle' in js and 'hb-find-dialog' in js
+          assert 'display:grid!important' in css and '1199px' in css
+          destinations=set(re.findall(r"U\('([^']+)'\)",js))
+          for href in destinations:
+              local=href.split('?')[0].split('#')[0]
+              dest=base/local
+              assert dest.exists(),f'missing navigation destination: {href}'
+              if dest.is_dir(): assert (dest/'index.html').exists(),f'missing index: {href}'
+          pages=['index.html','about/index.html','notes/index.html','materials/index.html','info/index.html','brain-map/index.html','request/index.html','parents/index.html']
+          for filename in pages:
+              page=(base/filename).read_text(encoding='utf-8')
+              assert 'habom-navigation.css' in page,filename
+              assert 'habom-navigation.js' in page,filename
+          home=(base/'index.html').read_text(encoding='utf-8')
+          for label in ['바로 찾기','용어사전','3D 뇌지도','부모님 도움자료']:
+              assert label in home,label
+          glossary=(base/'notes/index.html').read_text(encoding='utf-8')
+          assert '<title>용어사전' in glossary
+          parents=(base/'parents/index.html').read_text(encoding='utf-8')
+          for name in ['speech','attention','emotion','social','daily','school','observation']:
+              assert 'id="'+name+'"' in parents,name
+          assert 'window.print()' in parents
+          print(f'PASS: {len(pages)} pages, {len(destinations)} menu destinations, mobile navigation and search')
+          PY
