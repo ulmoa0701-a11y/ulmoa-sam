@@ -1,11 +1,12 @@
 import { getDatabase } from '@netlify/database';
 import { randomUUID, timingSafeEqual } from 'node:crypto';
-import { nickname, passwordAllowed, hashPassword, verifyPassword, randomToken, digest, encryptionKey, seal, open, canSeeRecord, escapeCSV, isSafeOrigin } from '../../lib/security.mjs';
+import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from '@simplewebauthn/server';
+import { nickname, randomToken, digest, encryptionKey, seal, open, canSeeRecord, escapeCSV, isSafeOrigin } from '../../lib/security.mjs';
 
 const env=(name)=>typeof Netlify!=='undefined'?Netlify.env.get(name):process.env[name];
 const json=(data,status=200,headers={})=>Response.json(data,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...headers}});
 const fail=(msg,status=400)=>json({error:msg},status);
-const LIMIT=9000;
+const LIMIT=24000;
 const clean=(s,max=2500)=>String(s??'').trim().slice(0,max);
 const safeBody=async(req)=>{const type=req.headers.get('content-type')??'';if(!type.startsWith('application/json'))throw new Error('JSON 요청만 지원합니다.');if(Number(req.headers.get('content-length')||0)>LIMIT)throw new Error('기록이 너무 깁니다.');const raw=await req.text();if(raw.length>LIMIT)throw new Error('기록이 너무 깁니다.');const obj=JSON.parse(raw);if(!obj||Array.isArray(obj)||typeof obj!=='object')throw new Error('잘못된 요청입니다.');return obj;};
 const dbConn=()=>getDatabase().pool;
@@ -25,6 +26,15 @@ async function listRecords(db,u,key){let rows=[];
  } else return [];
  return rows.filter(r=>canSeeRecord(u,r,u.role==='therapist')).map(r=>{try{return {id:r.id,kind:r.kind,author:r.writer,student:r.student,shared:!!r.shared_at,createdAt:r.created_at,driveSynced:!!r.drive_file_id,entry:JSON.parse(open(r,key))};}catch(e){return {id:r.id,error:'복호화 실패',createdAt:r.created_at};}});
 }
+
+function challengeFromCredential(credential){
+ const raw=credential?.response?.clientDataJSON;
+ if(typeof raw!=='string'||raw.length>8000||!/^[a-zA-Z0-9_-]+$/.test(raw))throw new Error('잘못된 패스키 인증 자료입니다.');
+ const decoded=JSON.parse(Buffer.from(raw,'base64url').toString('utf8'));
+ if(typeof decoded.challenge!=='string'||decoded.challenge.length>512||!/^[a-zA-Z0-9_-]+$/.test(decoded.challenge))throw new Error('잘못된 패스키 인증 자료입니다.');
+ return decoded.challenge;
+}
+
 function safeGoogleConfig(){return !!(env('GOOGLE_CLIENT_ID')&&env('GOOGLE_CLIENT_SECRET')&&env('APP_ORIGIN')?.startsWith('https://'));}
 async function googleAccess(refresh){const body=new URLSearchParams({client_id:env('GOOGLE_CLIENT_ID'),client_secret:env('GOOGLE_CLIENT_SECRET'),refresh_token:refresh,grant_type:'refresh_token'});const resp=await fetch('https://oauth2.googleapis.com/token',{method:'POST',body});const data=await resp.json();if(!resp.ok||!data.access_token)throw new Error('구글 계정 재인증이 필요합니다.');return data.access_token;}
 async function folderFor(access){const resp=await fetch('https://www.googleapis.com/drive/v3/files?fields=id,name,webViewLink',{method:'POST',headers:{Authorization:`Bearer ${access}`,'Content-Type':'application/json'},body:JSON.stringify({name:'일단써봄_담당기록',mimeType:'application/vnd.google-apps.folder',description:'학생/학부모가 담당 치료사에게 공유한 기록만 저장됩니다.'})});const data=await resp.json();if(!resp.ok||!data.id)throw new Error('구글 드라이브 폴더 생성 실패');return data.id;}
@@ -45,31 +55,103 @@ async function autoBackup(db,recordId,therapistId,key){
 export default async function handler(req){const path=new URL(req.url).pathname.replace(/^\/api\/?/,'');if(!new URL(req.url).pathname.startsWith('/api/'))return fail('경로 오류',404);
 if(!['GET','POST'].includes(req.method))return fail('허용되지 않은 방식',405);
 if(req.method==='POST'&&!isSafeOrigin(req))return fail('요청 출처 확인 실패',403);
-let db;try{db=dbConn();encryptionKey(env('RECORD_ENCRYPTION_KEY'));if(!env('AUTH_PEPPER')||env('AUTH_PEPPER').length<24)throw Error('인증 설정 누락');}catch(e){return fail('서버 초기 설정이 아직 완료되지 않았습니다.',503);}
-const key=encryptionKey(env('RECORD_ENCRYPTION_KEY')),pepper=env('AUTH_PEPPER');
+let db;try{db=dbConn();encryptionKey(env('RECORD_ENCRYPTION_KEY'));}catch(e){return fail('서버 초기 설정이 아직 완료되지 않았습니다.',503);}
+const key=encryptionKey(env('RECORD_ENCRYPTION_KEY'));
 try{
  if(path==='health'&&req.method==='GET')return json({ready:true,driveIntegrationConfigured:safeGoogleConfig()});
  if(path==='therapists'&&req.method==='GET'){const result=await db.query("SELECT id,display_name FROM portal_users WHERE role='therapist' ORDER BY display_name LIMIT 100");return json({therapists:result.rows});}
- if(path==='setup'&&req.method==='POST'){
-  const body=await safeBody(req);if(!env('INITIAL_ADMIN_SETUP_TOKEN')||!eq(env('INITIAL_ADMIN_SETUP_TOKEN'),String(body.setupToken??'')))return fail('초기 관리자 설정 코드가 올바르지 않습니다.',403);
-  if(!passwordAllowed(body.password,'admin'))return fail('관리자 비밀번호는 12자리 이상이어야 합니다.');const nick=nickname(body.nickname);
-  const client=await db.connect();try{await client.query('BEGIN');await client.query('SELECT pg_advisory_xact_lock(77122026)');const {rows}=await client.query("SELECT 1 FROM portal_users WHERE role='admin' LIMIT 1");if(rows.length){await client.query('ROLLBACK');return fail('관리자는 이미 등록되어 있습니다.',403);}const pw=await hashPassword(body.password,undefined,pepper);const result=await client.query("INSERT INTO portal_users(nickname,display_name,role,pass_salt,pass_hash) VALUES ($1,$2,'admin',$3,$4) RETURNING *",[nick,clean(body.displayName,40)||'관리자',pw.salt,pw.hash]);await client.query('COMMIT');return await newSession(db,result.rows[0],req);}catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}
- }
- if(path==='register'&&req.method==='POST'){
-  const body=await safeBody(req),code=clean(body.invite,100);if(!code||code.length<20)return fail('유효한 초대코드가 필요합니다.');const nick=nickname(body.nickname);
-  const client=await db.connect();try{await client.query('BEGIN');const {rows}=await client.query(`SELECT * FROM portal_invites WHERE code_hash=$1 AND used_by IS NULL AND expires_at>NOW() FOR UPDATE`,[digest(code)]);const invitation=rows[0];if(!invitation){await client.query('ROLLBACK');return fail('초대코드가 만료되었거나 이미 사용되었습니다.',403);}if(invitation.role!=='therapist'&&String(body.selectedTherapistId??'')!==String(invitation.therapist_id)){await client.query('ROLLBACK');return fail('선택한 담당 치료사와 초대코드가 일치하지 않습니다.',403);}
- if(!passwordAllowed(body.password,invitation.role)){await client.query('ROLLBACK');return fail(invitation.role==='therapist'?'치료사는 12자리 이상으로 설정하세요.':'비밀번호는 8자리 이상으로 설정하세요.');}
- const pw=await hashPassword(body.password,undefined,pepper);
- const result=await client.query('INSERT INTO portal_users(nickname,display_name,role,pass_salt,pass_hash,therapist_id,student_id) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *',[nick,clean(body.displayName,40)||nick,invitation.role,pw.salt,pw.hash,invitation.role==='therapist'?null:invitation.therapist_id,invitation.role==='parent'?invitation.student_id:null]);
- await client.query('UPDATE portal_invites SET used_by=$1 WHERE code_hash=$2',[result.rows[0].id,digest(code)]);await client.query('COMMIT');return await newSession(db,result.rows[0],req);
- }catch(e){await client.query('ROLLBACK');if(e.code==='23505')return fail('이미 사용 중인 닉네임입니다.',409);throw e;}finally{client.release();}
- }
- if(path==='reset/apply'&&req.method==='POST'){
-  const b=await safeBody(req),token=String(b.code??'');if(token.length<30)return fail('재설정 코드가 올바르지 않습니다.',403);
-  const client=await db.connect();try{await client.query('BEGIN');const x=(await client.query('SELECT * FROM portal_password_resets WHERE code_hash=$1 AND used_at IS NULL AND expires_at>NOW() FOR UPDATE',[digest(token)])).rows[0];if(!x){await client.query('ROLLBACK');return fail('재설정 코드가 만료되었거나 이미 사용되었습니다.',403);}const u=(await client.query('SELECT * FROM portal_users WHERE id=$1',[x.user_id])).rows[0];if(!u||!passwordAllowed(b.password,u.role)){await client.query('ROLLBACK');return fail('비밀번호 길이를 확인해 주세요.');}const pw=await hashPassword(b.password,undefined,pepper);await client.query('UPDATE portal_users SET pass_salt=$1,pass_hash=$2,failures=0,lock_until=NULL WHERE id=$3',[pw.salt,pw.hash,u.id]);await client.query('DELETE FROM portal_sessions WHERE user_id=$1',[u.id]);await client.query('UPDATE portal_password_resets SET used_at=NOW() WHERE code_hash=$1',[digest(token)]);await client.query('COMMIT');return json({ok:true});}catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}
- }
- if(path==='login'&&req.method==='POST'){
-  const body=await safeBody(req),nick=nickname(body.nickname),password=String(body.password??'');const client=await db.connect();try{await client.query('BEGIN');const {rows}=await client.query('SELECT * FROM portal_users WHERE nickname=$1 FOR UPDATE',[nick]);const u=rows[0];if(!u){await hashPassword(password||'invalid',randomToken(20),pepper);await client.query('ROLLBACK');return fail('로그인 정보가 일치하지 않습니다.',401);}if(u.lock_until&&new Date(u.lock_until)>new Date()){await client.query('ROLLBACK');return fail('로그인 시도가 많아 잠시 잠겼습니다. 15분 후 시도하세요.',429);}const ok=await verifyPassword(password,u.pass_salt,u.pass_hash,pepper);if(!ok){await client.query("UPDATE portal_users SET failures=failures+1,lock_until=CASE WHEN failures>=4 THEN NOW()+INTERVAL '15 minutes' ELSE NULL END WHERE id=$1",[u.id]);await client.query('COMMIT');return fail('로그인 정보가 일치하지 않습니다.',401);}await client.query('UPDATE portal_users SET failures=0,lock_until=NULL WHERE id=$1',[u.id]);await client.query('COMMIT');return await newSession(db,u,req);}catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}
+
+ // Common passkey authentication for every role. Passkeys never expose biometric data to this service.
+ if(path.startsWith('passkeys/')&&req.method==='POST'){
+  if(!env('APP_ORIGIN')||!/^https:\/\//.test(env('APP_ORIGIN')))return fail('패스키 서버 주소 설정이 필요합니다.',503);
+  const origin=new URL(env('APP_ORIGIN')).origin;
+  if(new URL(req.url).origin!==origin)return fail('패스키 인증 주소가 일치하지 않습니다.',403);
+  const rpID=new URL(origin).hostname;
+  const b=await safeBody(req);
+  if(path==='passkeys/enroll/options'){
+   const code=String(b.invite??'').trim(),reset=String(b.resetCode??'').trim(),setup=String(b.setupToken??'').trim();
+   if([!!code,!!reset,!!setup].filter(Boolean).length!==1)return fail('초대코드, 재등록 코드 또는 관리자 설정코드가 필요합니다.',400);
+   let userId=randomUUID(),role=null,nick='',inviteHash=null,resetHash=null,selected=null,kind='invite';
+   if(reset){
+    const row=(await db.query(`SELECT u.* FROM portal_password_resets r JOIN portal_users u ON u.id=r.user_id WHERE r.code_hash=$1 AND r.used_at IS NULL AND r.expires_at>NOW()`,[digest(reset)])).rows[0];
+    if(!row)return fail('재등록 코드가 만료되었거나 사용되었습니다.',403);
+    userId=row.id;role=row.role;nick=row.nickname;resetHash=digest(reset);kind='recovery';
+   }else if(setup){
+    if(!env('INITIAL_ADMIN_SETUP_TOKEN')||!eq(env('INITIAL_ADMIN_SETUP_TOKEN'),setup))return fail('관리자 설정코드가 일치하지 않습니다.',403);
+    if((await db.query("SELECT 1 FROM portal_users WHERE role='admin' LIMIT 1")).rows.length)return fail('관리자가 이미 등록되어 있습니다.',403);
+    nick=nickname(b.nickname);role='admin';kind='setup';
+   }else{
+    if(code.length<20)return fail('초대코드를 확인해 주세요.',403);
+    const invite=(await db.query('SELECT * FROM portal_invites WHERE code_hash=$1 AND used_by IS NULL AND expires_at>NOW()',[digest(code)])).rows[0];
+    if(!invite)return fail('초대코드가 만료되었거나 이미 사용되었습니다.',403);
+    role=invite.role;nick=nickname(b.nickname);inviteHash=digest(code);
+    if(role!=='therapist'){
+     selected=String(b.selectedTherapistId??'');
+     if(selected!==String(invite.therapist_id))return fail('선택한 담당 치료사와 초대코드가 일치하지 않습니다.',403);
+    }
+   }
+   if(kind!=='recovery'&&(await db.query('SELECT 1 FROM portal_users WHERE nickname=$1',[nick])).rows.length)return fail('이미 사용 중인 닉네임입니다.',409);
+   const options=await generateRegistrationOptions({rpName:'일단써봄',rpID,userID:new Uint8Array(Buffer.from(userId.replaceAll('-',''),'hex')),userName:nick,userDisplayName:nick,attestationType:'none',authenticatorSelection:{residentKey:'required',userVerification:'required'},timeout:120000});
+   await db.query(`INSERT INTO portal_passkey_challenges(challenge_hash,kind,user_id,nickname,role,invite_hash,reset_hash,selected_therapist_id,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,NOW()+INTERVAL '5 minutes')`,[digest(options.challenge),kind,userId,nick,role,inviteHash,resetHash,selected]);
+   return json({options});
+  }
+  if(path==='passkeys/enroll/verify'){
+   const credential=b.credential;if(!credential||credential.type!=='public-key')return fail('패스키 응답이 없습니다.',400);
+   const challenge=challengeFromCredential(credential);
+   const client=await db.connect();try{
+    await client.query('BEGIN');
+    const r=(await client.query("SELECT * FROM portal_passkey_challenges WHERE challenge_hash=$1 AND kind IN ('invite','setup','recovery') AND expires_at>NOW() FOR UPDATE",[digest(challenge)])).rows[0];
+    if(!r){await client.query('ROLLBACK');return fail('패스키 등록 시간이 만료되었습니다. 다시 시작해 주세요.',403);}
+    const result=await verifyRegistrationResponse({response:credential,expectedChallenge:challenge,expectedOrigin:origin,expectedRPID:rpID,requireUserVerification:true});
+    if(!result.verified||!result.registrationInfo){await client.query('ROLLBACK');return fail('기기 본인 확인이 완료되지 않았습니다.',403);}
+    const info=result.registrationInfo,passkey=info.credential;
+    let user=null;
+    if(r.kind==='recovery'){
+     const reset=(await client.query(`SELECT * FROM portal_password_resets WHERE code_hash=$1 AND user_id=$2 AND used_at IS NULL AND expires_at>NOW() FOR UPDATE`,[r.reset_hash,r.user_id])).rows[0];
+     if(!reset){await client.query('ROLLBACK');return fail('재등록 코드가 이미 사용되었습니다.',403);}
+     user=(await client.query('SELECT * FROM portal_users WHERE id=$1 FOR UPDATE',[r.user_id])).rows[0];
+     if(!user){await client.query('ROLLBACK');return fail('해당 계정을 찾을 수 없습니다.',404);}
+     await client.query('DELETE FROM portal_passkeys WHERE user_id=$1',[user.id]);
+     await client.query('DELETE FROM portal_sessions WHERE user_id=$1',[user.id]);
+     await client.query('UPDATE portal_password_resets SET used_at=NOW() WHERE code_hash=$1',[r.reset_hash]);
+    }else if(r.kind==='setup'){
+     await client.query('SELECT pg_advisory_xact_lock(77122026)');
+     if((await client.query("SELECT 1 FROM portal_users WHERE role='admin' LIMIT 1")).rows.length){await client.query('ROLLBACK');return fail('관리자가 이미 등록되어 있습니다.',403);}
+     user=(await client.query("INSERT INTO portal_users(id,nickname,display_name,role) VALUES($1,$2,$3,'admin') RETURNING *",[r.user_id,r.nickname,'관리자'])).rows[0];
+    }else{
+     const inv=(await client.query(`SELECT * FROM portal_invites WHERE code_hash=$1 AND used_by IS NULL AND expires_at>NOW() FOR UPDATE`,[r.invite_hash])).rows[0];
+     if(!inv||inv.role!==r.role||(inv.role!=='therapist'&&String(inv.therapist_id)!==String(r.selected_therapist_id))){await client.query('ROLLBACK');return fail('초대코드가 유효하지 않습니다.',403);}
+     user=(await client.query('INSERT INTO portal_users(id,nickname,display_name,role,therapist_id,student_id) VALUES($1,$2,$3,$4,$5,$6) RETURNING *',[r.user_id,r.nickname,r.nickname,inv.role,inv.role==='therapist'?null:inv.therapist_id,inv.role==='parent'?inv.student_id:null])).rows[0];
+     await client.query('UPDATE portal_invites SET used_by=$1 WHERE code_hash=$2',[user.id,r.invite_hash]);
+    }
+    await client.query(`INSERT INTO portal_passkeys(credential_id,user_id,public_key,counter,transports) VALUES($1,$2,$3,$4,$5)`,[passkey.id,user.id,Buffer.from(passkey.publicKey).toString('base64'),passkey.counter,JSON.stringify(passkey.transports??[])]);
+    await client.query('DELETE FROM portal_passkey_challenges WHERE challenge_hash=$1',[digest(challenge)]);
+    await client.query('COMMIT');return await newSession(db,user,req);
+   }catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}
+  }
+  if(path==='passkeys/login/options'){
+   const options=await generateAuthenticationOptions({rpID,userVerification:'required',allowCredentials:[],timeout:120000});
+   await db.query("INSERT INTO portal_passkey_challenges(challenge_hash,kind,expires_at) VALUES($1,'login',NOW()+INTERVAL '5 minutes')",[digest(options.challenge)]);
+   return json({options});
+  }
+  if(path==='passkeys/login/verify'){
+   const credential=b.credential;if(!credential||credential.type!=='public-key'||typeof credential.id!=='string')return fail('패스키 확인 응답이 없습니다.');
+   const challenge=challengeFromCredential(credential);
+   const client=await db.connect();try{
+    await client.query('BEGIN');
+    const c=(await client.query("SELECT * FROM portal_passkey_challenges WHERE challenge_hash=$1 AND kind='login' AND expires_at>NOW() FOR UPDATE",[digest(challenge)])).rows[0];
+    if(!c){await client.query('ROLLBACK');return fail('로그인 시간이 만료되었습니다.',403);}
+    const pass=(await client.query('SELECT * FROM portal_passkeys WHERE credential_id=$1 FOR UPDATE',[credential.id])).rows[0];
+    if(!pass){await client.query('ROLLBACK');return fail('등록되지 않은 패스키입니다.',403);}
+    const res=await verifyAuthenticationResponse({response:credential,expectedChallenge:challenge,expectedOrigin:origin,expectedRPID:rpID,requireUserVerification:true,credential:{id:pass.credential_id,publicKey:new Uint8Array(Buffer.from(pass.public_key,'base64')),counter:Number(pass.counter),transports:JSON.parse(pass.transports??'[]')}});
+    if(!res.verified){await client.query('ROLLBACK');return fail('본인 확인에 실패했습니다.',403);}
+    const user=(await client.query('SELECT * FROM portal_users WHERE id=$1',[pass.user_id])).rows[0];if(!user){await client.query('ROLLBACK');return fail('계정을 찾지 못했습니다.',403);}
+    await client.query('UPDATE portal_passkeys SET counter=$1,last_used_at=NOW() WHERE credential_id=$2',[res.authenticationInfo.newCounter,pass.credential_id]);
+    await client.query('DELETE FROM portal_passkey_challenges WHERE challenge_hash=$1',[digest(challenge)]);
+    await client.query('COMMIT');return await newSession(db,user,req);
+   }catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}
+  }
+  return fail('지원되지 않는 인증 기능입니다.',404);
  }
  const u=await identity(db,req);if(!u)return fail('로그인이 필요합니다.',401);
  if(path==='me'&&req.method==='GET')return json({user:publicUser(u)});
