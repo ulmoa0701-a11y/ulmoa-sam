@@ -204,6 +204,9 @@ function fitMeasureToBeat(items,left,right,targetQ=4){
       let cost=log*log*2.6+space*space*.75+Math.abs(d-ro)*.12;
       if(Math.abs(d-ro)<.01)cost-=.32;
       if(d===4&&n>1)cost+=4;
+      // Avoid spurious dotted-eighth values when the model reads quarter/eighth/half note glyphs.
+      // Keep genuine dotted eighths possible if the decoder itself explicitly supplied 0.75.
+      if(d===.75&&Math.abs(ro-.75)>.02)cost+=1.35;
       const nv=dp[i][u]+cost;if(nv<dp[i+1][nu]){dp[i+1][nu]=nv;prev[i+1][nu]=[u,d];}
     }
   }
