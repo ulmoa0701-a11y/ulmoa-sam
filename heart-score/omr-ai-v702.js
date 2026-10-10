@@ -258,9 +258,9 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
     const sp=Number(line.input.box?.lineSpacing)||10;
     const votes=visualPitchProposals(cvStaffs[li],line.fragment);const hollow= cvStaffs[li]?scanHollowHeads(cvStaffs[li]):[];let noteIndex=0;
     const musical=line.fragment.filter(ir=>ir.kind==='note'||ir.kind==='rest').map(ir=>{
-      const e=eventFromIr(ir),q=ir.src?.bbox;let opticalDur=null;
+      const e=eventFromIr(ir),q=ir.src?.bbox;let opticalDur=null,visualEvidence=null;
       if(e&&ir.kind==='note'){
-        const vote=votes[noteIndex++];
+        const vote=votes[noteIndex++];visualEvidence=vote;
         // When the model claims a dotted quarter but the matching physical
         // notehead has an undotted quarter stem, retain optical rhythm evidence.
         if(Math.abs(e.dur-1.5)<.01&&vote?.rhythm?.dot===false&&
@@ -272,7 +272,7 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
         if(vote?.proposal?.startsWith('높은')&&!e.note.startsWith('높은')&&vote.proposal.slice(2)===e.note&&
            vote.delta<=sp*6&&vote.cvX<vote.x&&(vote.gap===null||vote.gap>=sp*.65))e.note=vote.proposal;
       }
-      return e&&q?{ir,e,x:q[0]+q[2]/2,opticalDur}:null;
+      return e&&q?{ir,e,x:q[0]+q[2]/2,opticalDur,visualEvidence}:null;
     })
       .filter(v=>v&&(v.ir.kind!=='rest'||!bars.slice(1,-1).some(x=>Math.abs(x-v.x)<=sp*.85)))
       .sort((a,b)=>a.x-b.x);
@@ -280,6 +280,17 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
     if(bars.length>=2){
       for(let i=0;i<bars.length-1;i++){
         const left=bars[i],right=bars[i+1],items=musical.filter(v=>v.x>left&&v.x<right);
+        const rawBeat=items.reduce((sum,v)=>sum+v.e.dur,0);
+        if(items.length>=3&&Math.abs(targetQ-rawBeat-.5)<.08){
+          const unflagged=items.filter(v=>Math.abs(v.e.dur-.5)<.01&&
+            v.visualEvidence?.rhythm?.flag===0&&v.visualEvidence.rhythm.beam<=3&&
+            v.visualEvidence.delta<=sp*4.5&&v.visualEvidence.cvX<v.x&&
+            (v.visualEvidence.gap===null||v.visualEvidence.gap>=sp*.65));
+          if(unflagged.length===1){
+            unflagged[0].e.dur=1;unflagged[0].opticalDur=1;
+            opticalDebug.push({line:li,bar:i,x:Math.round(unflagged[0].x),reason:'isolated-eighth-without-flag-and-half-beat-deficit'});
+          }
+        }
         const longNotes=items.filter(v=>v.ir.kind==='note'&&v.e.dur>=2);
         const firstNote=items.find(v=>v.ir.kind==='note');
         if(longNotes.length===1&&longNotes[0]===firstNote){
