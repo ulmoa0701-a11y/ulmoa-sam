@@ -52,7 +52,7 @@ function renderKeys(){
  NOTES.forEach((note,i)=>{
   const b=document.createElement('button');b.className='key';b.type='button';b.dataset.note=note;
   b.style.background=COLORS[note];b.setAttribute('aria-label',note+' 소리 내기');
-  b.innerHTML='<span>'+note+'</span><span class="hotkey">'+(i+1)+'</span>';
+  b.innerHTML='<span>'+(note==='높은도'?'도↑':note)+'</span><span class="hotkey">'+(i+1)+'</span>';
   b.addEventListener('click',()=>tap(note,b));$('#keys').appendChild(b);
  });
 }
