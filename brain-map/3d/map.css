@@ -1,0 +1,143 @@
+/* 뇌지도 부모안내: 승인 화면 배치에 맞춘 독립 스타일 */
+*{box-sizing:border-box}
+body.approved-brain-page{background:#f8faf3;color:#253b31;font-family:Pretendard,system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif}
+.map-wrap{width:min(1560px,calc(100% - 34px));margin:0 auto;padding:12px 0 46px}
+.map-wrap button{font:inherit;cursor:pointer;touch-action:manipulation}
+.map-wrap a{color:inherit}
+.map-wrap button:focus-visible,.map-wrap a:focus-visible{outline:3px solid #336d4b;outline-offset:3px}
+.map-breadcrumb{font-size:11px;color:#729079;display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.map-breadcrumb a{font-weight:800;text-decoration:none}
+.map-layout{display:grid;grid-template-columns:minmax(0,2.38fr) minmax(355px,.98fr);gap:16px;align-items:start}
+.map-main,.region-detail,.quick-parts{border-radius:24px;border:1px solid #e1e9df;box-shadow:0 7px 26px #425d4410;background:#fff}
+.map-main{padding:19px;min-width:0}
+.map-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:15px}
+.map-titles{min-width:0}
+.map-titles h1{font-size:clamp(27px,2.8vw,41px);line-height:1.2;letter-spacing:-.06em;color:#263e32;font-weight:950;margin:0 0 9px;white-space:normal}
+.map-titles h1 span{font-size:.8em;color:#f0be50}
+.map-titles p{margin:0;font-size:14px;line-height:1.65;color:#516d5d;word-break:keep-all}
+.map-switches{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap;flex:0 0 auto}
+.map-mode,.map-views{display:flex;align-items:center;gap:4px}
+.map-mode button,.map-views a,.map-views button{border:1.5px solid #d9e4d7;color:#384c3e;background:#fffef9;border-radius:999px;min-height:41px;padding:9px 13px;text-align:center;text-decoration:none;font-size:13px;font-weight:850;white-space:nowrap}
+.map-mode button[aria-pressed="true"]{background:#4d8460;border-color:#4d8460;color:white}
+.map-views .selected-view{background:#eef5eb;border-color:#a6c4a3}
+.map-stage{position:relative;width:100%;aspect-ratio:1085/480;overflow:hidden;border-radius:19px;background:#eaf6e8;isolation:isolate}
+.approved-brain-art{display:block;width:100%;height:100%;object-fit:fill;user-select:none;pointer-events:none}
+.map-connectors{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+.map-connectors path{stroke-width:3.5;fill:none;stroke-linecap:round}
+.map-connectors circle{stroke:#fff;stroke-width:4}
+.stroke-frontal{stroke:#a876e8}.stroke-parietal{stroke:#e9b93e}.stroke-temporal{stroke:#4bbf76}.stroke-occipital{stroke:#ef886b}.stroke-cerebellum{stroke:#64a8e4}.stroke-brainstem{stroke:#9e91b4}
+.dot-frontal{fill:#a876e8}.dot-parietal{fill:#f3c43c}.dot-temporal{fill:#50c37b}.dot-occipital{fill:#ef886b}.dot-cerebellum{fill:#64a8e4}.dot-brainstem{fill:#9e91b4}
+.callout-grid{position:absolute;inset:0;pointer-events:none;z-index:4}
+.map-callout{position:absolute;display:flex;align-items:center;gap:9px;min-width:0;width:19%;height:17%;border:2px solid var(--stroke);background:#ffffffed;border-radius:18px;padding:6px 9px;pointer-events:auto;box-shadow:0 5px 10px #57725f18;text-align:left;transition:box-shadow .18s,background .18s;line-height:1.32}
+.map-callout:hover{background:#fff}
+.map-callout[aria-pressed="true"]{box-shadow:0 0 0 3px color-mix(in srgb,var(--stroke) 20%,transparent),0 6px 14px #42554220}
+.map-callout .callout-emoji{font-size:23px;flex:0 0 auto}
+.map-callout span:last-child{min-width:0}
+.map-callout strong{display:block;font-weight:950;font-size:clamp(12px,1.26vw,20px);letter-spacing:-.045em;color:#20362a}
+.map-callout small{display:block;margin-top:3px;font-size:clamp(9px,.85vw,13px);font-weight:750;color:#526457;white-space:nowrap;letter-spacing:-.03em}
+.map-callout.frontal{--stroke:#b58be9;top:8%;left:11.7%}
+.map-callout.parietal{--stroke:#edc550;top:2%;left:65%}
+.map-callout.temporal{--stroke:#70c48c;top:59%;left:10%}
+.map-callout.occipital{--stroke:#f09e80;top:37%;right:1.6%}
+.map-callout.cerebellum{--stroke:#80b5ea;top:67%;right:4.3%}
+.map-callout.brainstem{--stroke:#aca0c0;top:79%;left:30.2%}
+.map-brain-hotspot{position:absolute;z-index:3;width:11%;height:17%;border:0;background:transparent;border-radius:50%;padding:0}
+.map-brain-hotspot:focus-visible{background:#fff4;outline:3px solid #396e4a}
+.hotspot-frontal{left:30%;top:30%}.hotspot-parietal{left:52%;top:19%}
+.hotspot-temporal{left:47%;top:62%}.hotspot-occipital{left:72%;top:43%}
+.hotspot-cerebellum{left:67%;top:71%}.hotspot-brainstem{left:53%;top:80%;width:6%;height:12%}
+.map-stage[data-viewmode="function"] .map-brain-hotspot{box-shadow:none}
+.everyday{padding:16px 12px 11px;border-radius:20px;border:1px solid #e1e8e0;margin-top:15px;background:#fdfefd}
+.everyday-title{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 11px}
+.everyday-title h2{margin:0;font-weight:950;font-size:21px;white-space:nowrap;color:#244338}
+.everyday-title p{margin:0;font-size:12px;color:#667769}
+.activity-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.activity-card{display:flex;align-items:center;gap:9px;text-align:left;background:#fff;border:1.5px solid #e4e8e0;border-radius:16px;min-height:115px;padding:10px 7px;box-shadow:0 2px 7px #4d654809}
+.activity-card:hover{background:#f9fcf7}
+.activity-card[aria-pressed="true"]{border-color:#73aa7c;background:#eff8e8}
+.activity-card .illustration{flex:0 0 57px;width:57px;height:76px;display:grid;place-items:center;font-size:35px;background:radial-gradient(circle at 50% 37%,#fff,#f6f0e8 72%);border-radius:32px}
+.ill-read{background:#e9f6e8!important}.ill-list{background:#fff3dc!important}.ill-ball{background:#e7f3ff!important}.ill-memory{background:#faeaf7!important}
+.activity-text{min-width:0;display:block}
+.activity-text b{font-size:15px;font-weight:900;display:block;white-space:nowrap;color:#293b30}
+.chip-row{display:flex;gap:4px;flex-wrap:wrap;margin:5px 0}
+.chip{font-style:normal;display:inline-block;border-radius:99px;padding:3px 5px;font-size:10px;font-weight:800;white-space:nowrap}
+.chip.green{background:#e3f5e7;color:#40865a}.chip.coral{background:#ffede6;color:#b86c59}.chip.purple{background:#f1e6fc;color:#8058b4}.chip.blue{background:#e6f3fd;color:#548cbb}.chip.yellow{background:#fff5db;color:#98772f}
+.activity-text small{display:block;font-size:11px;color:#526559;line-height:1.45;word-break:keep-all}
+.secondary-links{display:flex;align-items:center;gap:15px;justify-content:center;flex-wrap:wrap;margin:18px auto 1px}
+.secondary-links a{font-weight:850;color:#426f52;text-decoration:none;padding:9px 12px;font-size:13px}
+.secondary-links .three-d-link{background:#e8f3e5;border-radius:999px}
+.map-sidebar{display:grid;gap:15px;min-width:0}
+.region-detail,.quick-parts{padding:23px}
+.map-sidebar h2{margin:0 0 16px;font-size:21px;font-weight:950;color:#284136;letter-spacing:-.04em}
+.detail-banner{display:flex;gap:14px;align-items:center;border-radius:18px;background:#f0e6fc;padding:18px 15px;margin-bottom:15px}
+.detail-icon{width:52px;height:52px;display:grid;place-items:center;font-size:27px;background:#ffffffc7;border-radius:15px;flex:0 0 auto}
+.detail-banner h3{font-size:29px;margin:0 0 7px;letter-spacing:-.05em;font-weight:950;color:#252d36}
+.detail-banner p{font-size:14px;margin:0;color:#415d4b;font-weight:800}
+.detail-summary{margin:0;color:#3c5144;font-size:16px;line-height:1.78;word-break:keep-all;min-height:90px}
+.detail-example{background:#f3f7ed;border-radius:18px;padding:17px 15px;margin-top:18px}
+.detail-example strong{display:block;font-size:15px;font-weight:950;color:#3a5541}
+.detail-example p{font-size:14px;line-height:1.76;color:#4e6151;margin:10px 0 0;word-break:keep-all}
+.quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.quick-grid button{display:flex;align-items:center;gap:10px;text-align:left;border:1.6px solid #dce8db;background:#fff;border-radius:14px;min-height:74px;padding:12px}
+.quick-grid button[aria-pressed="true"]{border-color:#75a982;background:#f0f7ee}
+.swatch{display:block;flex:0 0 32px;width:32px;height:32px;border-radius:50%}
+.swatch.purple{background:#c59dec}.swatch.yellow{background:#ffde79}.swatch.green{background:#a4dcb1}.swatch.coral{background:#f6b49e}.swatch.blue{background:#95c7ee}.swatch.grey{background:#b9b2c8}
+.quick-grid b{display:block;font-size:16px;font-weight:950;line-height:1.2;color:#233a2e}
+.quick-grid small{display:block;font-size:11px;margin-top:5px;color:#50685a;line-height:1.3;word-break:keep-all}
+.parent-note{padding:14px 17px;background:#fff9e9;border:1px solid #eee2bf;border-radius:17px;font-size:12px;line-height:1.8;color:#6b6b56;margin:0}
+.parent-note strong{color:#5b5d40}
+.brain-foot{display:flex;justify-content:space-between;gap:8px;padding:26px 3px 10px;font-weight:800;font-size:12px;color:#647b6b}
+.brain-foot a{text-decoration:underline;text-underline-offset:3px}
+@media(max-width:1320px){
+.map-layout{grid-template-columns:minmax(0,1.7fr) minmax(310px,.83fr)}
+.map-top{flex-wrap:wrap}
+.map-switches{justify-content:flex-start;width:100%}
+.map-callout .callout-emoji{font-size:18px}.map-callout{gap:4px;padding:6px}
+.activity-card{min-height:110px}.activity-card .illustration{width:45px;flex-basis:45px;font-size:29px}
+.activity-text small{font-size:10px}
+}
+@media(max-width:1000px){
+.map-layout{grid-template-columns:minmax(0,1fr)}
+.map-sidebar{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.parent-note{grid-column:1/-1}
+.map-top{flex-direction:column}.map-switches{justify-content:flex-start}
+.map-callout strong{font-size:clamp(13px,2vw,19px)}.map-callout small{font-size:clamp(10px,1.1vw,13px)}
+}
+@media(max-width:720px){
+.map-wrap{width:calc(100% - 14px);padding:10px 0 30px}
+.map-main,.region-detail,.quick-parts{border-radius:18px}
+.map-main{padding:11px}
+.map-top{gap:9px}.map-titles h1{font-size:28px}.map-titles p{font-size:13px}
+.map-switches{width:100%;gap:7px}
+.map-mode{width:100%;display:grid;grid-template-columns:1fr 1fr}
+.map-mode button,.map-views a,.map-views button{font-size:12px;min-height:41px}
+.map-views{width:100%;justify-content:flex-start;overflow-x:auto}
+.map-stage{aspect-ratio:auto;display:flex;flex-direction:column;overflow:visible;border:1px solid #e1eada;background:#ecf6e9;min-height:0;padding:5px}
+.approved-brain-art{width:100%;height:auto;aspect-ratio:1085/480;border-radius:14px;object-fit:contain}
+.map-connectors{display:none}
+.callout-grid{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:9px 5px 5px}
+.map-callout,.map-callout.frontal,.map-callout.parietal,.map-callout.temporal,.map-callout.occipital,.map-callout.cerebellum,.map-callout.brainstem{position:static;width:100%;height:auto;min-height:59px;border-radius:12px}
+.map-callout strong{font-size:15px}.map-callout small{font-size:11px;white-space:normal}
+.map-brain-hotspot{display:none}
+.everyday{margin-top:11px;padding:12px 8px}
+.activity-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.activity-card{min-height:91px}.activity-card .illustration{width:43px;flex-basis:43px;height:63px}
+.activity-text b{font-size:14px}
+.map-sidebar{grid-template-columns:1fr;gap:10px}
+.parent-note{grid-column:auto}
+.region-detail,.quick-parts{padding:17px}
+.detail-summary{min-height:0}
+.detail-banner h3{font-size:25px}
+.quick-grid button{min-height:67px}
+.secondary-links{gap:4px}
+}
+@media(max-width:355px){
+.map-callout{gap:4px;padding:5px!important}
+.map-callout small{font-size:10px}
+.activity-card{gap:4px;padding:8px 5px}
+.activity-text b{font-size:13px}
+.chip{font-size:9px}
+.quick-grid button{gap:5px;padding:8px}
+.quick-grid b{font-size:14px}
+}
+@media(prefers-reduced-motion:reduce){.map-wrap *{transition:none!important}}
