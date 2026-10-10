@@ -163,7 +163,7 @@ function drawLoop(now){
 function drawIdle(message='📷 카메라 시작을 눌러요'){canvas.width=640;canvas.height=480;picture();ctx.font='900 30px system-ui';ctx.textAlign='center';ctx.fillStyle='#2a6447';ctx.fillText(message,canvas.width/2,canvas.height*.72)}
 canvas.addEventListener('pointerdown',e=>{
  if(S.mode!=='camera'||S.phase!=='calibrate'||S.targets.length>=3)return;
- const r=canvas.getBoundingClientRect();const x=clamp((e.clientX-r.left)/r.width,0,1),y=clamp((e.clientY-r.top)/r.height,0,1);
+ const r=canvas.getBoundingClientRect();const ratio=canvas.width/canvas.height;const contentW=Math.min(r.width,r.height*ratio),contentH=contentW/ratio;const offX=(r.width-contentW)/2,offY=(r.height-contentH)/2;const x=clamp((e.clientX-r.left-offX)/contentW,0,1),y=clamp((e.clientY-r.top-offY)/contentH,0,1);
  S.targets.push({x,y});ding(S.targets.length);refreshSetup();
  if(S.targets.length===3)label('세 구멍 위치가 지정됐어요. 놀이를 시작할 수 있어요.');
 });
