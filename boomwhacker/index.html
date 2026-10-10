@@ -617,6 +617,106 @@ function buildSampleSelect(){const s=$('#sampleSelect');s.innerHTML='<option val
 function renderLanes(){let l=$('#lanes'),t=$('#tubes');l.innerHTML=t.innerHTML='';ORDER.forEach(n=>{const label=displayLabel(n),title=displayTitle(n);let a=document.createElement('div');a.className='lane';a.innerHTML=`<div class="laneLabel" title="${esc(title)}">${esc(label)}</div>`;l.appendChild(a);let b=document.createElement('button');b.className='tube'+(ALLOWED[level].has(n)?'':' inactive');b.dataset.note=n;b.style.background=COLORS[n];b.setAttribute('aria-label',title+' 연주');b.title=title;b.innerHTML=`<span class="tubeLabel" style="--note-color:${COLORS[n]}">${esc(label)}</span>`;b.onclick=()=>tone(n,b);t.appendChild(b)})}
 function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function renderScore(){let w=$('#scoreRows');w.innerHTML='';for(const e of events){let d=document.createElement('div'),off=e.note!=='쉼'&&!ALLOWED[level].has(e.note),unsupported=!e.supported;d.className='beat'+(e.note==='쉼'?' rest':'')+(off?' off':'')+(unsupported?' unsupported':'');d.innerHTML=e.note==='쉼'?'<div class="note">쉼</div><div class="lyric"></div>':`<div class="note" style="background:${noteColor(e.note)}"><span class="noteLabelText" style="--note-color:${noteColor(e.note)}">${esc(displayLabel(e.note))}</span></div><div class="lyric">${lyrics?esc(e.lyric):''}</div>`;w.appendChild(d)}let s=$('#scoreStageGrid');s.innerHTML='';for(const [i,e] of events.entries()){const tile=w.children[i].cloneNode(true);tile.dataset.eventIndex=i;tile.title='연주 순서 '+(i+1)+(e.note==='쉼'?' · 쉼':' · '+e.note);if(e.active)tile.addEventListener('click',()=>tone(e.note));s.appendChild(tile)}scorePaintIndex=-999;updateScoreMotion();let outside=outOfBaseCount(),sub=$('#scoreSub');sub.classList.toggle('warn',outside>0);sub.textContent=`${level}음 모드 · ${events.filter(e=>e.active).length}개 연주음 · ${bpm} BPM${outside?` · 기본 8음 범위 밖 ${outside}개`:''}`;let g=$('#legend');g.innerHTML='';ORDER.forEach(n=>{let c=document.createElement('div');c.className='chip';c.style.opacity=ALLOWED[level].has(n)?1:.28;c.innerHTML=`<span class="dot" style="background:${COLORS[n]}"></span>${esc(displayLabel(n))}`;g.appendChild(c)})}
+// Print from score event data instead of screenshotting the narrow sidebar.
+// This preserves all notes and lyrics even when the sidebar is scrolled or hidden.
+const PRINT_COLS=4,PRINT_PAGE_NOTES=48,PRINT_W=1240,PRINT_PAGE_H=1754,PRINT_TOP=170,PRINT_ROW_STEP=120;
+function scoreSheetCanvas(start=0,count=events.length,paged=false){
+  const items=events.slice(start,start+count);
+  const rows=Math.max(1,Math.ceil(items.length/PRINT_COLS));
+  const canvas=document.createElement('canvas');canvas.width=PRINT_W;
+  canvas.height=paged?PRINT_PAGE_H:Math.max(430,PRINT_TOP+rows*PRINT_ROW_STEP+90);
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#fcfdff';ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#203650';ctx.font='900 39px "Noto Sans KR","Malgun Gothic",sans-serif';
+  ctx.fillText('붐웨커 색깔악보',62,65,1100);
+  ctx.fillStyle='#48627a';ctx.font='800 26px "Noto Sans KR","Malgun Gothic",sans-serif';
+  ctx.fillText(String(currentSong.title||'제목 없는 곡'),62,110,1090);
+  ctx.fillStyle='#73869b';ctx.font='600 19px "Noto Sans KR","Malgun Gothic",sans-serif';
+  ctx.fillText(level+'음 모드  ·  '+bpm+' BPM  ·  '+String(currentSong.timeN||4)+'/'+String(currentSong.timeD||4)+'박자',62,145);
+  const gap=14,outer=62,cellW=(PRINT_W-outer*2-gap*3)/4;
+  for(let i=0;i<items.length;i++){
+    const e=items[i],col=i%PRINT_COLS,row=Math.floor(i/PRINT_COLS),
+      x=outer+col*(cellW+gap),y=PRINT_TOP+row*PRINT_ROW_STEP,
+      isRest=e.note==='쉼',out=!e.supported||!ALLOWED[level].has(e.note),color=isRest?'#e4eaf0':out?'#b8c1cd':noteColor(e.note);
+    rr(ctx,x,y,cellW,107,13);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='#d7e3ed';ctx.lineWidth=2;ctx.stroke();
+    ctx.save();rr(ctx,x,y,cellW,72,13);ctx.clip();ctx.fillStyle=color;ctx.fillRect(x,y,cellW,80);ctx.restore();
+    ctx.fillStyle=isRest?'#526071':'#fff';ctx.font='900 26px "Noto Sans KR","Malgun Gothic",sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    const name=isRest?'쉼':displayLabel(e.note);
+    rr(ctx,x+cellW/2-53,y+12,106,47,22);ctx.fillStyle='rgba(255,255,255,.93)';ctx.fill();
+    ctx.fillStyle=isRest?'#637185':out?'#6b7280':noteText(e.note);
+    ctx.fillText(String(name),x+cellW/2,y+35,95);
+    ctx.textAlign='left';ctx.font='800 14px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillStyle='rgba(35,52,70,.72)';
+    ctx.fillText(String(start+i+1),x+10,y+12,35);
+    ctx.textAlign='center';ctx.fillStyle='#334963';ctx.font='800 19px "Noto Sans KR","Malgun Gothic",sans-serif';
+    ctx.fillText(lyrics?String(e.lyric||''):'' ,x+cellW/2,y+89,cellW-14);
+  }
+  ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillStyle='#7d8ba0';
+  ctx.font='600 18px "Noto Sans KR","Malgun Gothic",sans-serif';
+  ctx.fillText('울모아쌤  ·  붐웨커 Studio',62,canvas.height-33);
+  ctx.textAlign='right';ctx.fillText('총 '+events.length+'개 음표',PRINT_W-62,canvas.height-33);
+  return canvas;
+}
+function scoreFileName(ext){return safeVideoName(currentSong.title)+'_붐웨커_색깔악보.'+ext}
+function saveBlob(blob,name){
+  const url=URL.createObjectURL(blob),link=document.createElement('a');
+  link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),20000);
+}
+async function scorePngDownload(){
+  const canvas=scoreSheetCanvas();
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+  if(!blob||!blob.size)throw Error('PNG canvas empty');
+  saveBlob(blob,scoreFileName('png'));
+  return {bytes:blob.size,width:canvas.width,height:canvas.height};
+}
+// Dependency-free, fully self-contained A4 PDF with one JPEG-backed page per 48 notes.
+function scorePdfBytes(canvases){
+  const enc=new TextEncoder(),parts=[];const offsets=[0];let cursor=0;
+  const putBytes=b=>{parts.push(b);cursor+=b.length};
+  const put=t=>putBytes(enc.encode(t));
+  const object=(id,body)=>{offsets[id]=cursor;put(id+' 0 obj\n'+body+'\nendobj\n')};
+  const ids=canvases.map((_,i)=>({page:3+i*3,content:4+i*3,image:5+i*3}));
+  put('%PDF-1.4\n% Boomwhacker printable score\n');
+  object(1,'<< /Type /Catalog /Pages 2 0 R >>');
+  object(2,'<< /Type /Pages /Kids ['+ids.map(x=>x.page+' 0 R').join(' ')+'] /Count '+ids.length+' >>');
+  for(let i=0;i<canvases.length;i++){
+    const {page,content,image}=ids[i],canvas=canvases[i];
+    const b64=canvas.toDataURL('image/jpeg',.91).split(',')[1],binary=atob(b64),jpg=new Uint8Array(binary.length);
+    for(let j=0;j<binary.length;j++)jpg[j]=binary.charCodeAt(j);
+    object(page,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im0 '+image+' 0 R >> >> /Contents '+content+' 0 R >>');
+    const commands='q 595.28 0 0 841.89 0 0 cm /Im0 Do Q\n';
+    object(content,'<< /Length '+enc.encode(commands).length+' >>\nstream\n'+commands+'endstream');
+    offsets[image]=cursor;
+    put(image+' 0 obj\n<< /Type /XObject /Subtype /Image /Width '+canvas.width+' /Height '+canvas.height+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpg.length+' >>\nstream\n');
+    putBytes(jpg);put('\nendstream\nendobj\n');
+  }
+  const xref=cursor,numObjects=2+canvases.length*3;
+  put('xref\n0 '+(numObjects+1)+'\n0000000000 65535 f \n');
+  for(let id=1;id<=numObjects;id++)put(String(offsets[id]).padStart(10,'0')+' 00000 n \n');
+  put('trailer\n<< /Size '+(numObjects+1)+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF\n');
+  return new Blob(parts,{type:'application/pdf'});
+}
+async function scorePdfDownload(){
+  const pages=[];for(let i=0;i<events.length;i+=PRINT_PAGE_NOTES)pages.push(scoreSheetCanvas(i,PRINT_PAGE_NOTES,true));
+  if(!pages.length)pages.push(scoreSheetCanvas(0,0,true));
+  const pdf=scorePdfBytes(pages);if(!pdf.size)throw Error('Empty PDF');
+  saveBlob(pdf,scoreFileName('pdf'));return {pages:pages.length,bytes:pdf.size};
+}
+let scoreDownloadBusy=false;
+async function downloadScore(kind){
+  if(scoreDownloadBusy)return;
+  scoreDownloadBusy=true;
+  const png=$('#scorePngBtn'),pdf=$('#scorePdfBtn'),msg=$('#scoreDownloadStatus');
+  png.disabled=pdf.disabled=true;msg.textContent='악보 파일을 만들고 있어요…';
+  try{
+    const result=kind==='pdf'?await scorePdfDownload():await scorePngDownload();
+    msg.textContent=(kind==='pdf'?'PDF':'PNG')+' 다운로드 시작 · '+(kind==='pdf'?result.pages+'쪽 · ':'')+Math.ceil(result.bytes/1024)+'KB';
+  }catch(err){
+    console.error('Score export failed',err);msg.textContent='악보 저장에 실패했어요. 다시 시도해 주세요.';
+  }finally{png.disabled=pdf.disabled=false;scoreDownloadBusy=false}
+}
+
 function updateRangeInfo(){let outside=outOfBaseCount(),box=$('#rangeNote');box.classList.toggle('show',outside>0);box.textContent=outside?`이 곡에는 기본 8음 붐웨커(C~높은 C) 밖의 음이 ${outside}개 있어요. 다른 음으로 바꾸지 않고 회색으로 표시하며 재생에서 제외합니다.`:'';if(outside)$('#stageStatus').textContent=`범위 밖 음 ${outside}개`;else if(loadedFromTransfer)$('#stageStatus').textContent='하트악보에서 가져옴';else $('#stageStatus').textContent='준비'}
 function lyricWindowAt(t=elapsed,size=18){const items=events.map((e,i)=>({e,i})).filter(x=>x.e.lyric);if(!items.length)return{items:[],activeIndex:-1,start:0};let activePos=-1;for(let i=0;i<items.length;i++){if(t>=items[i].e.start-90)activePos=i;else break}const anchor=Math.max(0,activePos),start=Math.floor(anchor/size)*size;return{items:items.slice(start,start+size),activeIndex:activePos>=0?items[activePos].i:-1,start}}
 function updateLyricTrack(force=false){const box=$('#lyricTrack');if(!box)return;if(!lyrics){box.classList.add('hide');box.innerHTML='';lastLyricKey='hidden';return}const view=lyricWindowAt(elapsed,window.innerWidth<=800?9:18),key=view.start+':'+view.activeIndex;if(!force&&key===lastLyricKey)return;lastLyricKey=key;box.classList.remove('hide');box.innerHTML=view.items.map(x=>`<span class="lyricSyllable ${x.i===view.activeIndex?'active':''}" style="--note-color:${noteColor(x.e.note)}">${esc(x.e.lyric)}</span>`).join('')}
@@ -833,10 +933,12 @@ async function exportVideo(){
  }catch(err){console.error(err);videoStatus('영상 저장에 실패했어요. 브라우저를 최신 버전으로 업데이트한 뒤 다시 시도해 주세요.','warn')}
  finally{if(ac)try{await ac.close()}catch(e){}canvasStream.getTracks().forEach(t=>t.stop());videoExporting=false;btn.disabled=false;btn.textContent='🎥 붐웨커 영상 저장'}
 }
-window.__boomVideoQA={view:()=>({mode:playView,active:activeScoreIndex(elapsed),scoreTiles:$('#scoreStageGrid').children.length,sideTiles:$('#scoreRows').children.length,elapsed}),supported:()=>videoSupported(),mime:()=>videoMime(),brand:()=>({brand:VIDEO_BRAND,handle:VIDEO_HANDLE,copy:VIDEO_COPY}),colors:()=>({...COLORS}),melody:()=>({mode:melodyMode,label:MELODY_LABELS[melodyMode],options:{...MELODY_LABELS},volume:melodyVolume}),fall:()=>({leadMs:FIRST_NOTE_LEAD_MS,travelMs:FALL_TRAVEL_MS,firstNoteMs:firstNoteMs(),spawnDelayMs:firstNoteMs()-FALL_TRAVEL_MS,elapsed,playing}),tempo:()=>({bpm,sourceBpm:currentSong.bpm,min:MIN_TEMPO,max:MAX_TEMPO,comfortable:comfortableTempo(currentSong),custom:tempoPrefs[tempoKey(currentSong)]??null,beatMs:beatMs()}),intro:()=>({mode:introMode,active:introActive,started:hasStartedSong,durationMs:introDurationMs,beats:introBeats,meter:introMeter,previewBeats:introPreviewBeats,countBeats:introCountBeats,lastBeat:introLastBeat,progressMs:introActive?Math.max(0,performance.now()-introStartPerf):0}),mix:()=>({mode:mixMode,label:MIX_LABELS[mixMode],options:{...MIX_LABELS},mrReady:true,mrKind:mrBuffer?'file':'auto',mrLoaded:!!mrBuffer,mrName,mrVolume,melodyVolume}),display:()=>({mode:displayMode,label:DISPLAY_LABELS[displayMode],options:{...DISPLAY_LABELS},labels:ORDER.map(displayLabel),names:[...childLabels],custom:[...customLabels],instruments:[...instrumentIds],instrumentLibrary:instrumentLibrary.map(x=>({...x}))}),lyrics:()=>lyricWindowAt(Math.min(2600,totalMs/2)),preview:()=>{const c=videoCanvas(),x=c.getContext('2d');videoScene(x,Math.min(1500,totalMs/2));return {w:c.width,h:c.height,data:c.toDataURL('image/png').slice(0,40)}}};
+window.__boomVideoQA={print:()=>({pngCanvas:scoreSheetCanvas().width+'x'+scoreSheetCanvas().height,pdfPageCount:Math.max(1,Math.ceil(events.length/PRINT_PAGE_NOTES)),pdfBytes:scorePdfBytes([scoreSheetCanvas(0,Math.min(events.length,PRINT_PAGE_NOTES),true)]).size}),view:()=>({mode:playView,active:activeScoreIndex(elapsed),scoreTiles:$('#scoreStageGrid').children.length,sideTiles:$('#scoreRows').children.length,elapsed}),supported:()=>videoSupported(),mime:()=>videoMime(),brand:()=>({brand:VIDEO_BRAND,handle:VIDEO_HANDLE,copy:VIDEO_COPY}),colors:()=>({...COLORS}),melody:()=>({mode:melodyMode,label:MELODY_LABELS[melodyMode],options:{...MELODY_LABELS},volume:melodyVolume}),fall:()=>({leadMs:FIRST_NOTE_LEAD_MS,travelMs:FALL_TRAVEL_MS,firstNoteMs:firstNoteMs(),spawnDelayMs:firstNoteMs()-FALL_TRAVEL_MS,elapsed,playing}),tempo:()=>({bpm,sourceBpm:currentSong.bpm,min:MIN_TEMPO,max:MAX_TEMPO,comfortable:comfortableTempo(currentSong),custom:tempoPrefs[tempoKey(currentSong)]??null,beatMs:beatMs()}),intro:()=>({mode:introMode,active:introActive,started:hasStartedSong,durationMs:introDurationMs,beats:introBeats,meter:introMeter,previewBeats:introPreviewBeats,countBeats:introCountBeats,lastBeat:introLastBeat,progressMs:introActive?Math.max(0,performance.now()-introStartPerf):0}),mix:()=>({mode:mixMode,label:MIX_LABELS[mixMode],options:{...MIX_LABELS},mrReady:true,mrKind:mrBuffer?'file':'auto',mrLoaded:!!mrBuffer,mrName,mrVolume,melodyVolume}),display:()=>({mode:displayMode,label:DISPLAY_LABELS[displayMode],options:{...DISPLAY_LABELS},labels:ORDER.map(displayLabel),names:[...childLabels],custom:[...customLabels],instruments:[...instrumentIds],instrumentLibrary:instrumentLibrary.map(x=>({...x}))}),lyrics:()=>lyricWindowAt(Math.min(2600,totalMs/2)),preview:()=>{const c=videoCanvas(),x=c.getContext('2d');videoScene(x,Math.min(1500,totalMs/2));return {w:c.width,h:c.height,data:c.toDataURL('image/png').slice(0,40)}}};
 
 function init(){document.body.dataset.displayMode=displayMode;syncSongUI();choosePlayView(playView);$('#melodySelect').value=melodyMode;$('#introMode').value=introMode;$('#displayModeSelect').value=displayMode;$('#displayEditBtn').classList.toggle('show',displayMode==='name'||displayMode==='custom'||displayMode==='instrument');$('#displayEditBtn').textContent=displayMode==='name'?'✎ 이름':displayMode==='instrument'?'✎ 악기':'✎ 설정'}
 $('#playViewSelect').onchange=e=>choosePlayView(e.target.value);
+$('#scorePngBtn').onclick=()=>downloadScore('png');
+$('#scorePdfBtn').onclick=()=>downloadScore('pdf');
 $('#videoBtn').onclick=exportVideo;
 $('#melodySelect').onchange=e=>{const v=e.target.value;melodyMode=MELODY_LABELS[v]?v:'boom';e.target.value=melodyMode;try{localStorage.setItem('ulmoaBoomMelody',melodyMode)}catch(err){};if(melodyMode!=='none'&&sound&&wantsMelody()){audio();tone('도')} };
 $('#melodyVolume').oninput=e=>{melodyVolume=Math.max(0,Math.min(1,Number(e.target.value)/100));$('#melodyPct').textContent=Math.round(melodyVolume*100)+'%'};
