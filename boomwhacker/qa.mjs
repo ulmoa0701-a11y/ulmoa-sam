@@ -47,6 +47,13 @@ async function basicCase(name,width,height){
   check(await page.locator('#scorePngBtn').count()===1&&await page.locator('#scorePdfBtn').count()===1,`${name}: PNG or PDF score export missing`);
   check((await page.locator('#playViewSelect').inputValue())==='fall',`${name}: initial playing view should remain the familiar falling-notes mode`);
   check(await page.locator('#lyricTrack').count()===1,`${name}: lyric track missing`);
+  const words=await page.evaluate(()=>{
+    const source=lyricWordBreakIndices(),track=document.querySelector('#lyricTrack');
+    return {label:track.getAttribute('aria-label'),gaps:track.querySelectorAll('.lyricWordSpace').length,
+      breaks:[...source],sample:currentSong.key};
+  });
+  check(words.sample==='twinkle'&&words.label.includes('반짝반짝 작은 별')&&
+    words.gaps>=2, `${name}: little star lyrics still run together ${JSON.stringify(words)}`);
   check(await page.locator('.lyricSyllable').count()>5,`${name}: lyric track did not render a continuous line`);
   if(width<=800)check(await page.locator('.lyricSyllable').count()<=9,`${name}: mobile lyric line is overcrowded`);
   const tubeLabelColors=await page.locator('.tube').evaluateAll(xs=>xs.map(x=>({note:x.dataset.note,color:getComputedStyle(x.querySelector('.tubeLabel')).color})));
@@ -402,6 +409,21 @@ async function basicCase(name,width,height){
   }));
   check(fallFullGeom.panel.width>fallFullGeom.viewport*.92&&fallFullGeom.stage.width>fallFullGeom.viewport*.92,
     `${name}: fall fullscreen still trapped in first dashboard column ${JSON.stringify(fallFullGeom)}`);
+  const fallReadability=await page.evaluate(()=>{
+    elapsed=firstNoteMs()-FALL_TRAVEL_MS+900;draw();
+    const note=document.querySelector('.fall'),style=el=>el?getComputedStyle(el):null;
+    return {full:document.body.classList.contains('fullscreen'),circle:parseFloat(style(note)?.width||'0'),
+      noteText:parseFloat(style(note?.querySelector('.fallLabel'))?.fontSize||'0'),
+      lane:parseFloat(style(document.querySelector('.laneLabel'))?.fontSize||'0'),
+      tube:parseFloat(style(document.querySelector('.tubeLabel'))?.fontSize||'0'),
+      lyric:parseFloat(style(document.querySelector('.lyricSyllable'))?.fontSize||'0'),
+      spaces:document.querySelector('#lyricTrack')?.querySelectorAll('.lyricWordSpace').length};
+  });
+  if(width>=801)check(fallReadability.circle>=104&&fallReadability.noteText>=22&&
+    fallReadability.lane>=16&&fallReadability.tube>=16&&fallReadability.lyric>=25,
+    `${name}: PC fullscreen still has tiny falling notes or text ${JSON.stringify(fallReadability)}`);
+  if(name==='desktop1366')await page.screenshot({path:`${out}/${name}-enlarged-falling-lyrics.png`,fullPage:false});
+  await page.evaluate(()=>{elapsed=0;draw()});
   await page.screenshot({path:`${out}/${name}-class-fullscreen.png`,fullPage:false});
   await page.locator('#playViewSelect').selectOption('score');
   const scoreFs=await page.evaluate(()=>{
