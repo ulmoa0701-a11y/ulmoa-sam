@@ -325,3 +325,120 @@ footer{display:none!important}
   font-size:clamp(24px,2.8vw,31px);
  }
 }
+
+
+/* Rhythm game visual hierarchy: sheet to READ, piano keyboard to PLAY. */
+/* Read-only sheet cards are white, flat and noticeably smaller in emphasis. */
+.mainStage{background:radial-gradient(circle at 1px 1px,#c5d8d84d 1px,transparent 1.25px) 0 0/25px 25px,linear-gradient(160deg,#f7fbfc,#fffcf4);border-color:#cfdfdf}
+.mainStage .noteTrack{gap:clamp(5px,.8vw,11px)}
+.mainStage .noteTile{
+ border:1.5px solid #dce4e7!important;
+ background:#fff!important;
+ box-shadow:0 2px 5px rgba(42,74,96,.08);
+ border-radius:10px;
+}
+.mainStage .noteTile .tileNote,
+.mainStage .noteTile.active .tileNote{
+ background:#f7f9fb!important;
+ flex:1 1 0!important;min-height:0;
+}
+.mainStage .noteTile .scoreNoteBubble{
+ background:var(--score-note-color)!important;
+ color:var(--score-note-ink)!important;
+ width:clamp(32px,3.65vw,51px);
+ height:clamp(32px,3.65vw,51px);
+ max-width:92%;max-height:86%;
+ font-size:clamp(18px,1.95vw,28px);
+ border:2px solid rgba(255,255,255,.93);
+ box-shadow:0 1px 4px rgba(36,57,76,.11);
+}
+.mainStage .noteTile .tileLyric{background:#fff!important;font-weight:850}
+.mainStage .noteTile.active{
+ border:3px solid #2e7490!important;
+ outline:2px solid #f4c858;outline-offset:0;
+ box-shadow:0 3px 10px #28567a28;
+ transform:scale(1.014);
+}
+.mainStage .noteTile.active.pulse{animation:scoreReadPulse .4s ease-out}
+@keyframes scoreReadPulse{0%{transform:scale(.99)}52%{transform:scale(1.04)}100%{transform:scale(1.014)}}
+.mainStage .noteTile.next{border:2px dashed #9cbbcf!important}
+.mainStage .noteTile .longNote{background:#e3e8ed;color:#415567}
+.mainStage .noteTile.ready{border:2px dashed #8eaec2!important}
+.keyHead{padding:0 2px}
+.keyHead strong{color:#244c66;font-weight:950}
+/* A connected, substantial instrument looks different from the written score. */
+.keys.pianoKeys{
+ display:grid;
+ grid-template-columns:repeat(8,minmax(0,1fr));
+ gap:3px;
+ padding:8px 7px 11px;
+ background:linear-gradient(160deg,#354b60,#1b3246);
+ border:2px solid #23394a;
+ border-radius:15px;
+ box-shadow:0 4px 0 #1b3140,0 7px 13px #25405d23;
+ min-height:0;
+}
+.keys.pianoKeys .key{
+ min-width:0;
+ height:clamp(70px,12.5vh,115px);
+ min-height:0!important;
+ border:1px solid #324251;
+ border-top:4px solid rgba(255,255,255,.68);
+ border-bottom:8px solid rgba(22,35,48,.46);
+ border-radius:5px 5px 11px 11px;
+ padding:7px 4px 12px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ text-shadow:none;
+ color:var(--key-ink)!important;
+ background:linear-gradient(90deg,rgba(255,255,255,.23),transparent 28%,transparent 76%,rgba(0,0,0,.14)),var(--key-color)!important;
+ box-shadow:inset 2px 1px 0 rgba(255,255,255,.4),inset -3px 0 0 rgba(7,26,43,.14),0 3px 0 rgba(9,28,44,.5);
+ font-size:clamp(23px,2.6vw,37px);
+ font-weight:950;
+ transform-origin:center top;
+ transition:transform .075s,box-shadow .075s,filter .075s;
+}
+.keys.pianoKeys .key:before{width:20%;height:6%;left:13%;top:10%}
+.keys.pianoKeys .key:hover{filter:brightness(1.05)}
+.keys.pianoKeys .key:focus-visible{outline:4px solid #ffe496;outline-offset:2px}
+.keys.pianoKeys .key:active,.keys.pianoKeys .key.hit{
+ transform:translateY(5px) scaleY(.965);
+ border-bottom-width:3px;
+ filter:brightness(1.09);
+ box-shadow:inset 2px 3px 8px #1d36464d,0 1px 0 #22364c;
+}
+.keys.pianoKeys .key .hotkey{bottom:4px;right:6px;color:var(--key-ink);opacity:.67;font-size:11px}
+.keys.pianoKeys .key[data-note="높은도"]>span:first-child{white-space:nowrap;font-size:clamp(21px,2.3vw,32px)}
+/* Preserve larger physical targets on phones: four keys per row, two rows. */
+@media(max-width:700px){
+ .mainStage .noteTile .scoreNoteBubble{width:clamp(23px,7vw,35px);height:clamp(23px,7vw,35px);
+   font-size:clamp(15px,4.7vw,21px)}
+ .mainStage .noteTile.active{transform:scale(1.006)}
+ .mainStage .noteTile.active.pulse{animation:none}
+ .keys.pianoKeys{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:4px 3px;padding:5px 4px 6px;border-radius:12px;border-width:1.5px;
+  box-shadow:0 2px 0 #1b3140,0 4px 7px #25405d1d;
+ }
+ .keys.pianoKeys .key{
+  height:clamp(45px,8.25vh,72px);min-height:0!important;
+  font-size:clamp(20px,6vw,26px);
+  padding:3px 3px 6px;border-top-width:3px;border-bottom-width:5px;
+  border-radius:4px 4px 9px 9px;
+ }
+ .keys.pianoKeys .key[data-note="높은도"]>span:first-child{font-size:clamp(18px,5.5vw,24px)}
+ .keys.pianoKeys .key .hotkey{font-size:9px;bottom:2px;right:4px}
+ .keyHead strong{font-size:11px}
+}
+@media(min-width:701px) and (max-width:1080px){
+ .mainStage .noteTile .scoreNoteBubble{width:clamp(36px,4.7vw,51px);height:clamp(36px,4.7vw,51px)}
+}
+@media(max-width:700px) and (max-height:710px){
+ .keys.pianoKeys{padding:4px 3px 5px;gap:3px}
+ .keys.pianoKeys .key{height:clamp(41px,7.6vh,57px)}
+}
+@media(prefers-reduced-motion:reduce){
+ .mainStage .noteTile.active.pulse{animation:none;transform:none}
+ .keys.pianoKeys .key{transition:none}
+}
