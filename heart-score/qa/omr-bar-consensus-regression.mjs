@@ -30,3 +30,24 @@ const faded=planBarRows(fadedRows);
 assert.deepEqual(faded.perLine,[4,4,4,4,3],'Repeated faint barlines, not isolated stem-like distractors, must define measures');
 assert.deepEqual(faded.plans[4].chosen.map(q=>q.x),[631,1168],'Last staff must prefer well-supported spacing without inventing an extra bar');
 console.log(JSON.stringify({ok:true,fadedPerLine:faded.perLine,fadedBars:faded.plans.map(p=>p.chosen.map(q=>q.x)),support:faded.support}));
+
+/* A low-resolution JPEG fixture produced three true printed bars per complete
+   system but added equally-dark false vertical strokes inside the notes.
+   The final system has two true bars and one stem-like false candidate. */
+const scanRows=[
+  {moderate:[[228,.03],[317,0],[335,.03],[460,.05],[574,0],[642,.07],[767,.05],[831,0]]},
+  {moderate:[[117,0],[290,.05],[317,0],[394,0],[574,0],[831,0]]},
+  {moderate:[[317,0],[574,0],[684,.05],[831,0]]},
+  {moderate:[[317,0],[574,0],[651,.07],[831,0]]},
+  {moderate:[[403,0],[550,.025],[745,0]]}
+].map((r,i)=>({
+  x0:61,x1:1089,sp:6,
+  moderate:r.moderate.map(([x,side])=>mk(x,side)),
+  strong:r.moderate.filter(([x,side])=>side<=.04).map(([x,side])=>mk(x,side)),
+  extended:r.moderate.map(([x,side])=>mk(x,side))
+}));
+const scan=planBarRows(scanRows);
+assert.deepEqual(scan.perLine,[4,4,4,4,3],'JPEG stem-like vertical strokes must not cause 20 measures');
+assert.deepEqual(scan.plans[1].chosen.map(p=>p.x),[317,574,831],'Do not prefer equally-dark note stems at x117 and x394');
+assert.deepEqual(scan.plans[4].chosen.map(p=>p.x),[403,745],'Do not promote x550 false stem into a fifth-row measure');
+console.log(JSON.stringify({ok:true,fixture:'lowres JPEG vertical-stem distractors',bars:scan.plans.map(p=>p.chosen.map(x=>x.x)),perLine:scan.perLine}));

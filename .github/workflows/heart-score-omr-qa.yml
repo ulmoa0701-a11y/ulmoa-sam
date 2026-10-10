@@ -28,9 +28,11 @@ jobs:
           node --check heart-score/omr-ai-v702.js
           node --check heart-score/omr-scan-evidence-v1.mjs
           node --check heart-score/omr-bar-rescue-v1.mjs
+          node --check heart-score/omr-deskew-v1.mjs
       - name: Test independent pitch and rhythm validator
         run: node heart-score/qa/omr-exact-validator-regression.mjs
       - name: Run OMR measure regression (unit only, not image E2E)
         run: |
           node heart-score/qa/omr-bar-consensus-regression.mjs
           node heart-score/qa/omr-bar-rescue-regression.mjs
+          node heart-score/qa/omr-deskew-regression.mjs

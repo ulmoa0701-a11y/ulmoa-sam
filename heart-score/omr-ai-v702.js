@@ -9,6 +9,7 @@ import * as omr from './omr-local-v686.js?v=702';
 import {scanConnectedHeads,scanPitchFromY,scanRhythm,scanHollowHeads} from './omr-scan-evidence-v1.mjs?v=703';
 import {planBarRows} from './omr-bar-consensus-v1.mjs?v=703';
 import {recoverFaintBarlines} from './omr-bar-rescue-v1.mjs?v=703';
+import {deskewScoreCanvas} from './omr-deskew-v1.mjs?v=1';
 
 const W=window;
 const ORT_VERSION='1.27.0';
@@ -288,7 +289,7 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
     // A thick barline can be misread as a rest. A rest is a symbol within a
     // measure, never coincident with a confidently identified printed barline.
     const sp=Number(line.input.box?.lineSpacing)||10;
-    const votes=visualPitchProposals(cvStaffs[li],line.fragment);const hollow= cvStaffs[li]?scanHollowHeads(cvStaffs[li]):[];let noteIndex=0;
+    const votes=visualPitchProposals(cvStaffs[li],line.fragment);const hollow= cvStaffs[li]?scanHollowHeads(cvStaffs[li]):[];const physicalHeads=cvStaffs[li]?scanConnectedHeads(cvStaffs[li]):[];let noteIndex=0;
     const musical=line.fragment.filter(ir=>ir.kind==='note'||ir.kind==='rest').map(ir=>{
       const e=eventFromIr(ir),q=ir.src?.bbox;let opticalDur=null,visualEvidence=null;
       if(e&&ir.kind==='note'){
@@ -308,10 +309,58 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
     })
       .filter(v=>v&&(v.ir.kind!=='rest'||!bars.slice(1,-1).some(x=>Math.abs(x-v.x)<=sp*.85)))
       .sort((a,b)=>a.x-b.x);
-    noteCount+=musical.filter(v=>v.ir.kind==='note').length;
     if(bars.length>=2){
       for(let i=0;i<bars.length-1;i++){
         const left=bars[i],right=bars[i+1],items=musical.filter(v=>v.x>left&&v.x<right);
+        // Independent whole-note/rest disambiguation on a one-symbol measure.
+        // Never insert an extra event based on expected song length. A printed
+        // white-centered, fully closed notehead is required.
+        if(items.length===1&&items[0].ir.kind==='rest'&&items[0].e.dur>=3.5&&hollow.length){
+          const candidates=hollow.filter(q=>q.ring>=8&&
+            q.x>left+sp*6&&q.x<right-sp*3);
+          const dedup=[];
+          for(const q of candidates.sort((a,b)=>b.ring-a.ring)){
+            if(!dedup.some(v=>Math.abs(v.x-q.x)<sp*1.25))dedup.push(q);
+          }
+          if(dedup.length===1){
+            const head=dedup[0],index=2+head.k,steps=['C','D','E','F','G','A','B'],degree=((index%7)+7)%7;
+            const note=pitchName({step:steps[degree],octave:4+Math.floor(index/7),alter:0});
+            if(note){
+              opticalDebug.push({line:li,bar:i,reason:'independent-whole-note-ring-vs-model-whole-rest',
+                x:Math.round(head.x),k:head.k,ring:head.ring});
+              items[0].e.note=note;
+              items[0].ir={...items[0].ir,kind:'note'};
+              items[0].x=head.x;
+            }
+          }
+        }
+        // A low-resolution decoder sometimes labels a real note as a rest
+        // and places its token center several staff spacings to the right.
+        // Reclassify only with a strong, unclaimed physical notehead, and
+        // exactly one plausible model rest in the same printed measure.
+        if(cvStaffs[li]){
+          const rests=items.filter(v=>v.ir.kind==='rest'&&v.e.dur<=1);
+          const mapped=items.filter(v=>v.ir.kind==='note');
+          for(const rest of rests){
+            const candidates=physicalHeads.filter(head=>head.area>=sp*sp*.60&&
+              head.x>left+sp*2&&head.x<right-sp*2&&
+              rest.x-head.x>sp*1.8&&rest.x-head.x<sp*7&&
+              !mapped.some(v=>Math.abs(v.x-head.x)<sp*3.1));
+            if(candidates.length!==1)continue;
+            const head=candidates[0],optical=scanPitchFromY(cvStaffs[li],head.x,head.y),rhythm=scanRhythm(cvStaffs[li],head);
+            // Reject unknown shapes; do not fill in pitches or beats from
+            // expected measure length or any particular score fixture.
+            if(!optical?.note||!Number.isFinite(rhythm?.dur)||rhythm.dur<.5||rhythm.dur>2)continue;
+            opticalDebug.push({line:li,bar:i,reason:'unmatched-physical-notehead-vs-short-model-rest',
+              modelX:Math.round(rest.x),headX:Math.round(head.x),area:Math.round(head.area),from:'쉼',to:optical.note,
+              beats:rhythm.dur});
+            rest.ir={...rest.ir,kind:'note'};
+            rest.e.note=optical.note;
+            rest.e.dur=rhythm.dur;
+            rest.x=head.x;
+            mapped.push(rest);
+          }
+        }
         const rawBeat=items.reduce((sum,v)=>sum+v.e.dur,0);
         if(items.length>=3&&Math.abs(targetQ-rawBeat-.5)<.08){
           const unflagged=items.filter(v=>Math.abs(v.e.dur-.5)<.01&&
@@ -366,6 +415,7 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
         measures.push(fit.events);if(fit.rawExact)rawExact++;if(fit.ok){fitCount++;correctionSum+=fit.correction;}
       }
     }else measures.push(musical.map(v=>v.e));
+    noteCount+=musical.filter(v=>v.ir.kind==='note').length;
     for(const v of musical)refs.push({system:line.system,x:v.x,event:v.e});
   }
   const base=typeof W.fileBaseName==='function'?W.fileBaseName(filename):String(filename||'').replace(/\.[^.]+$/,'');
@@ -455,12 +505,22 @@ function scanTitleCandidates(data,canvas){
   return candidates;
 }
 async function recognizeCanvas(canvas,filename,pageIndex){
-  const rt=await ensureRuntime(),gray=canvasGray(canvas),chosen=choosePreprocess(rt,gray,canvas.width,canvas.height);if(!chosen)return{staffDetected:false};
+  const sourceGray=canvasGray(canvas),deskew=deskewScoreCanvas(canvas,sourceGray);
+  canvas=deskew.canvas;
+  const rt=await ensureRuntime(),gray=deskew.applied?canvasGray(canvas):sourceGray,chosen=choosePreprocess(rt,gray,canvas.width,canvas.height);if(!chosen)return{staffDetected:false};
   const {pre,inputs,threshold}=chosen;if(!(pre.inputs||[]).length)return{staffDetected:false};if(!inputs.length)return{staffDetected:true,ok:false,reason:'오선은 찾았지만 본문 악보 줄을 안정적으로 분리하지 못했습니다.'};
   const scanLike=threshold>=.78;
   status(`본문 악보 ${inputs.length}줄 감지 · 원본+스캔보정 이중 판독 · 음표 읽는 중…`);
   const decodeInput=async(input,modelInput,i)=>{const tensor=new W.ort.Tensor('float32',modelInput.data,[1,1,modelInput.height,modelInput.width]),res=await rt.session.run({input:tensor}),logits=res.logits;if(!logits?.data)return null;const dims=logits.dims||[],T=dims[dims.length-2],C=dims[dims.length-1];if(!T||!C)return null;const tokens=rt.dec.decodeLine(logits.data,T,C,rt.i2w),b=input.box,staff={page:pageIndex,system:i,staffIndex:0,bbox:[b.x,b.y,b.w,b.h],lineSpacingPx:b.lineSpacing,normSpacing:10},fragment=rt.dec.lineFragment(tokens,staff);return{system:i,input,fragment,tokens};};
-  const lines=[],passDiagnostics=[];for(let i=0;i<inputs.length;i++){const input=inputs[i];status(`AI 악보 인식 ${i+1}/${inputs.length}줄 · 원본 판독 중…`);const raw=await decodeInput(input,input,i);if(!raw)continue;let chosenLine=raw,rawScore=lineDecodeScore(raw.fragment),enhancedLine=null;if(scanLike){status(`AI 악보 인식 ${i+1}/${inputs.length}줄 · 스캔 보정 재판독 중…`);const enh=await decodeInput(input,enhancedInput(rt.prep,gray,canvas.width,canvas.height,input),i);if(enh){enhancedLine=enh;const enhScore=lineDecodeScore(enh.fragment),rawNotes=musicalEvents(raw.fragment).filter(v=>v.ir.kind==='note').length,enhNotes=musicalEvents(enh.fragment).filter(v=>v.ir.kind==='note').length;if(enhScore>rawScore+2.5&&enhNotes>=Math.max(3,rawNotes*.88))chosenLine=enh;}}
+  const lines=[],passDiagnostics=[];for(let i=0;i<inputs.length;i++){const input=inputs[i];status(`AI 악보 인식 ${i+1}/${inputs.length}줄 · 원본 판독 중…`);const raw=await decodeInput(input,input,i);if(!raw)continue;let chosenLine=raw,rawScore=lineDecodeScore(raw.fragment),enhancedLine=null,enhancedRejectedForCollapse=false;if(scanLike){status(`AI 악보 인식 ${i+1}/${inputs.length}줄 · 스캔 보정 재판독 중…`);const enh=await decodeInput(input,enhancedInput(rt.prep,gray,canvas.width,canvas.height,input),i);if(enh){enhancedLine=enh;const enhScore=lineDecodeScore(enh.fragment),rawNotes=musicalEvents(raw.fragment).filter(v=>v.ir.kind==='note').length,enhNotes=musicalEvents(enh.fragment).filter(v=>v.ir.kind==='note').length;// Some noisy JPEG enhanced passes collapse almost every note duration
+      // to a sixteenth (0.25 beats) despite clear mixed values in the raw
+      // pass. Such a pass is not reliable evidence, regardless of DP score.
+      const rawMus=musicalEvents(raw.fragment).filter(v=>v.ir.kind==='note');
+      const enhMus=musicalEvents(enh.fragment).filter(v=>v.ir.kind==='note');
+      const rawTiny=rawMus.filter(v=>v.e.dur<=.25).length/Math.max(1,rawMus.length);
+      const enhTiny=enhMus.filter(v=>v.e.dur<=.25).length/Math.max(1,enhMus.length);
+      enhancedRejectedForCollapse=enhNotes>=8&&enhTiny>.70&&rawTiny<.20;
+      if(!enhancedRejectedForCollapse&&enhScore>rawScore+2.5&&enhNotes>=Math.max(3,rawNotes*.88))chosenLine=enh;}}
     const consensusCorrections=[];
     // A low-confidence rest in the raw pass can be a real printed note.
     // Require agreement with a note at the same source position in the
@@ -504,7 +564,7 @@ async function recognizeCanvas(canvas,filename,pageIndex){
     if(input.width>1400){const edge=rightEdgeModelInput(input),tail=await decodeInput(edge.shifted,edge.model,i);
       if(tail){const notes=musicalEvents(tail.fragment).filter(v=>v.ir.kind==='note');tailDiag={start:edge.start,notes:notes.length,xs:notes.map(v=>Math.round(v.x)),rests:musicalEvents(tail.fragment).filter(v=>v.ir.kind==='rest').map(v=>Math.round(v.x))};}}
     const symbolList=fragment=>musicalEvents(fragment||[]).map(v=>({x:Math.round(v.x),kind:v.ir.kind,p:pitchName(v.ir.pitch),dur:v.e.dur,conf:+(Number(v.ir.confidence)||0).toFixed(2)}));
-    passDiagnostics.push({tailDiag,system:i,consensusCorrections,restToNoteCorrections,rawSymbols:symbolList(raw.fragment),enhancedSymbols:enhancedLine?symbolList(enhancedLine.fragment):null,rawNotes:musicalEvents(raw.fragment).filter(v=>v.ir.kind==='note').length,rawRests:raw.fragment.filter(v=>v.kind==='rest').length,rawScore,chosenNotes:musicalEvents(chosenLine.fragment).filter(v=>v.ir.kind==='note').length,chosenRests:chosenLine.fragment.filter(v=>v.kind==='rest').length,chosenChanged:chosenLine!==raw});lines.push(chosenLine);}
+    passDiagnostics.push({tailDiag,system:i,consensusCorrections,restToNoteCorrections,enhancedRejectedForCollapse,rawSymbols:symbolList(raw.fragment),enhancedSymbols:enhancedLine?symbolList(enhancedLine.fragment):null,rawNotes:musicalEvents(raw.fragment).filter(v=>v.ir.kind==='note').length,rawRests:raw.fragment.filter(v=>v.kind==='rest').length,rawScore,chosenNotes:musicalEvents(chosenLine.fragment).filter(v=>v.ir.kind==='note').length,chosenRests:chosenLine.fragment.filter(v=>v.kind==='rest').length,chosenChanged:chosenLine!==raw});lines.push(chosenLine);}
   if(!lines.length)return{staffDetected:true,ok:false,reason:'오선은 찾았지만 음표를 읽어내지 못했습니다.'};
   const cvStaffs=W.findStaffSystems(canvas);
   // A long-staff decoder can lose a final half/whole note. Only add when a
@@ -538,10 +598,11 @@ async function recognizeCanvas(canvas,filename,pageIndex){
       qa:measureQa(v.state).exactRatio,perLine:v.barGeometry?.perLine||null,
       rank:candidateScore(v)
     })),
+    deskew:deskew.estimate,deskewApplied:deskew.applied,
     rawBarGeometry:{visualOpticalDebug:visualBuilt.opticalDebug,accidentalProbes:lines.map((line,i)=>{
       const staff=cvStaffs[i];if(!staff)return[];
       return musicalEvents(line.fragment).filter(v=>v.ir.kind==='note').map(v=>({x:Math.round(v.x),note:v.e.note,conf:+(Number(v.ir.confidence)||0).toFixed(2),feature:printedAccidentalProbe(gray,canvas.width,canvas.height,staff,v.x,v.e.note)})).filter(v=>/[파시]|[#♭]/.test(v.note));
-    }),perLine:barPlan.perLine,support:barPlan.support,modalInternalBars:barPlan.modalInternalBars,threshold,passDiagnostics,openTailEvidence,scanRows:geometryLines.map((line,i)=>({box:line.input.box,cvStaff:cvStaffs[i]?{x0:cvStaffs[i].x0,x1:cvStaffs[i].x1,spacing:cvStaffs[i].spacing,lines:cvStaffs[i].lines}:null,heads:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).length:null,headXs:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).map(h=>Math.round(h.x)):null,hollowHeads:cvStaffs[i]?scanHollowHeads(cvStaffs[i]).map(h=>({x:h.x,k:h.k,ring:h.ring})).slice(0,40):null,modelNoteXs:musicalEvents(lines[i].fragment).filter(v=>v.ir.kind==='note').map(v=>Math.round(v.x)),modelShapes:modelNoteShapeDiagnostics(cvStaffs[i],lines[i].fragment),pitchProposals:visualPitchProposals(cvStaffs[i],lines[i].fragment),modelRestXs:musicalEvents(lines[i].fragment).filter(v=>v.ir.kind==='rest').map(v=>Math.round(v.x)),strict:visualBarCandidates(gray,canvas.width,canvas.height,line).filter(v=>v.side<=.12).map(v=>({x:Math.round(v.x),side:+v.side.toFixed(2)})).slice(0,20),rescue:recoverFaintBarlines(gray,canvas.width,canvas.height,line.input.box).map(v=>Math.round(v.x)).slice(0,20)}))}
+    }),perLine:barPlan.perLine,support:barPlan.support,modalInternalBars:barPlan.modalInternalBars,chosenBarXs:barPlan.plans.map(p=>p.chosen.map(v=>({x:Math.round(v.x),side:Number(v.side),source:v.source||'long-vertical'}))),threshold,passDiagnostics,openTailEvidence,scanRows:geometryLines.map((line,i)=>({box:line.input.box,cvStaff:cvStaffs[i]?{x0:cvStaffs[i].x0,x1:cvStaffs[i].x1,spacing:cvStaffs[i].spacing,lines:cvStaffs[i].lines}:null,heads:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).length:null,headXs:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).map(h=>Math.round(h.x)):null,hollowHeads:cvStaffs[i]?scanHollowHeads(cvStaffs[i]).map(h=>({x:h.x,k:h.k,ring:h.ring})).slice(0,40):null,modelNoteXs:musicalEvents(lines[i].fragment).filter(v=>v.ir.kind==='note').map(v=>Math.round(v.x)),modelShapes:modelNoteShapeDiagnostics(cvStaffs[i],lines[i].fragment),pitchProposals:visualPitchProposals(cvStaffs[i],lines[i].fragment),modelRestXs:musicalEvents(lines[i].fragment).filter(v=>v.ir.kind==='rest').map(v=>Math.round(v.x)),connectedHeads:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).map(q=>({x:Math.round(q.x),y:Math.round(q.y),area:q.area,synthetic:!!q.synthetic})).slice(0,45):[],strict:visualBarCandidates(gray,canvas.width,canvas.height,line).filter(v=>v.side<=.12).map(v=>({x:Math.round(v.x),side:+v.side.toFixed(2)})).slice(0,20),rescue:recoverFaintBarlines(gray,canvas.width,canvas.height,line.input.box).map(v=>Math.round(v.x)).slice(0,20)}))}
   }}));
   if(suspiciousShort||!enough||!rhythmOk||!confOk||!shapeOk)return{staffDetected:true,ok:false,reason:`AI가 ${staves}개 악보 줄을 찾았지만 결과 검증을 통과하지 못했습니다. (${built.state.measures.length}마디 · 음표 ${built.noteCount}개 · 박자일치 ${Math.round(q.exactRatio*100)}% · 신뢰도 ${Math.round(built.avgConfidence*100)}%${built.segmentation==='visual-fit'?` · 마디 ${built.barGeometry?.perLine?.join('·')||'?'} · 원판독 ${Math.round((built.rawExactRatio||0)*100)}% · 평균리듬보정 ${(built.correctionAvg||0).toFixed(2)}박`:''} · ${built.segmentation==='cv-hybrid'?'오선기하+AI 쉼표':built.segmentation==='visual-fit'?'인쇄 마디선+4/4 보정':built.segmentation==='beat-dp'?'4/4 박자 재구성':'AI 마디선'} 기준)`};
   if(typeof W.ocrCanvas==='function'&&typeof W.attachOcrToOmr==='function'){try{status('음표 인식 완료 · 제목과 가사 위치 확인 중…');const data=await W.ocrCanvas(canvas,'제목·가사 OCR');const safeText={...data,lines:scanTitleCandidates(data,canvas),words:(data.words||[]).filter(w=>Number(w.confidence)>=75)};W.attachOcrToOmr(built.cvSystems?{state:built.state,systems:built.cvSystems}:lyricAdapter(lines,built),safeText,filename);}catch(err){console.warn('AI OMR lyric OCR skipped',err);}}
