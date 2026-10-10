@@ -44,7 +44,7 @@ function animal(scene,type,colorHex,size='큰'){
   const color=Object.entries(COLORS).find(([,code])=>code===colorHex)?.[0]||'노란';
   const hue={노란:'yellow',파란:'blue',초록:'green',빨간:'red'}[color];
   const c=scene.add.container(0,0).setScale(size==='큰'?1:.68);
-  const backing=scene.add.ellipse(0,0,222,222,0xfffdf6,.23).setStrokeStyle(3,0xffffff,.55);
+  const backing=scene.add.ellipse(0,0,196,196,0xfffdf6,.11);
   const picture=scene.add.image(0,0,`sprite-${kind}-${hue}`).setDisplaySize(248,248);
   c.add(backing);
   c.add(picture);
@@ -103,8 +103,8 @@ class MissionScene extends Phaser.Scene{
   this.add.image(W/2,H/2,`world-tall-${this.round}`).setDisplaySize(W,H).setDepth(-50);
   this.van=this.makeVan(W/2,1148,.95);this.van.setDepth(40);
   this.seatLayer=this.add.container(W/2,1090).setDepth(45);
-  this.rescuer=this.add.image(610,1040,'moaDiscovery').setDisplaySize(125,125).setDepth(42);
-  this.tweens.add({targets:this.rescuer,y:1028,yoyo:true,repeat:-1,duration:950,ease:'Sine.easeInOut'});
+  this.rescuer=this.add.image(620,1090,'moaDiscovery').setDisplaySize(96,96).setDepth(42);
+  this.tweens.add({targets:this.rescuer,y:1084,yoyo:true,repeat:-1,duration:950,ease:'Sine.easeInOut'});
  }
  addWorldProps(){for(let i=0;i<8;i++){const x=55+(i%4)*205+(i%2)*26,y=470+Math.floor(i/4)*390;const tree=this.add.container(x,y);const g=this.add.graphics();g.fillStyle(0x6e5230,1);g.fillRoundedRect(-12,16,24,90,10);g.fillStyle(i%2?0x3e8e52:0x347b49,1);g.fillCircle(0,0,52);g.fillCircle(-34,18,35);g.fillCircle(35,18,36);tree.add(g);tree.setDepth(18);this.tweens.add({targets:tree,angle:{from:-1,to:1},yoyo:true,repeat:-1,duration:1600+i*120,ease:'Sine.easeInOut'})}
   for(let i=0;i<10;i++){const x=55+(i*79)%620,y=535+(i*131)%430;const bush=this.add.container(x,y);const g=this.add.graphics();g.fillStyle(i%3?0x4ea85d:0x5cb469,1);g.fillCircle(-20,12,29);g.fillCircle(0,0,35);g.fillCircle(24,13,27);g.fillStyle(0x89cf70,.6);g.fillCircle(-8,-9,12);bush.add(g);bush.setDepth(26);this.actors.push({bush,x,y})}
@@ -172,7 +172,7 @@ class MissionScene extends Phaser.Scene{
  rescueBurst(x,y){const ring=this.add.circle(x,y,54,0xffffff,0).setStrokeStyle(6,0xffef9a,1).setDepth(65);this.tweens.add({targets:ring,scale:1.8,alpha:0,duration:520,onComplete:()=>ring.destroy()});for(let i=0;i<10;i++){const p=this.add.circle(x,y,5+(i%3)*2,i%2?0xffdc68:0xffffff,1).setDepth(66),ang=Math.PI*2*i/10,dist=55+Math.random()*40;this.tweens.add({targets:p,x:x+Math.cos(ang)*dist,y:y+Math.sin(ang)*dist,alpha:0,scale:.2,duration:500+Math.random()*250,onComplete:()=>p.destroy()})}}
  addSeat(sp){const i=SPECIES.indexOf(sp),slots=this.m.need===1?[0]:[0,1,2,3],idx=this.m.need===1?0:slots[i],x=(idx-(this.m.need===1?0:1.5))*52;const mini=animal(this,sp,COLORS[this.m.color],this.m.size).setScale(.25).setPosition(x,0);const badge=this.add.circle(x,0,27,0xf8fff9,1).setStrokeStyle(3,0x5fba78,1);this.seatLayer.add([badge,mini]);mini.setDepth(2);this.tweens.add({targets:[badge,mini],scale:'+=.15',duration:120,yoyo:true})}
  showToast(text){const c=this.add.container(W/2,1010).setDepth(75);const bg=roundRect(this,-170,-34,340,68,22,0x133e32,.94);const t=label(this,0,0,`✨ ${text}`,22,'#ffffff','900');c.add([bg,t]);this.tweens.add({targets:c,y:970,duration:180,ease:'Back.easeOut'});this.time.delayedCall(850,()=>this.tweens.add({targets:c,alpha:0,y:940,duration:220,onComplete:()=>c.destroy()}))}
- completeMission(){this.lock=true;this.completeOverlayShown=true;this.missionChip?.destroy();const shade=this.add.rectangle(W/2,H/2,W,H,0x0d2d24,.45).setDepth(79).setInteractive();const card=this.add.container(W/2,640).setDepth(82);const bg=roundRect(this,-290,-210,580,420,34,0xfffdf4,1,0xffffff,4);card.add(bg);card.add(label(this,0,-145,'구조 성공! ✨',43,'#194c3a','900'));card.add(label(this,0,-88,`${this.m.place}의 친구들이 안전해졌어요`,23,'#547064','800'));const row=this.add.container(0,0);this.m.species.slice(0,this.m.need).forEach((sp,i)=>{const a=animal(this,sp,COLORS[this.m.color],this.m.size).setScale(this.m.size==='큰'?.36:.28);a.setPosition((i-(this.m.need-1)/2)*88,0);row.add(a)});card.add(row);const last=this.round===4;const next=button(this,0,135,340,76,last?'구조 완료 보기 🏕️':'다음 현장으로 ▶',0x1e664d);card.add(next);let advancing=false;const advance=()=>{if(advancing)return;advancing=true;this.input.off('pointerdown',tapHandler);tone(true);if(last)this.scene.start('result');else this.scene.restart({round:this.round+1})};
+ completeMission(){this.lock=true;this.completeOverlayShown=true;this.missionChip?.destroy();const shade=this.add.rectangle(W/2,H/2,W,H,0x0d2d24,.45).setDepth(79).setInteractive();const card=this.add.container(W/2,640).setDepth(82);const bg=roundRect(this,-290,-210,580,420,34,0xfffdf4,1,0xffffff,4);card.add(bg);card.add(label(this,0,-145,'구조 성공! ✨',43,'#194c3a','900'));card.add(label(this,0,-88,`${this.m.place}의 친구들이 안전해졌어요`,23,'#547064','800'));const row=this.add.container(0,0);this.m.species.slice(0,this.m.need).forEach((sp,i)=>{const a=animal(this,sp,COLORS[this.m.color],this.m.size).setScale(this.m.size==='큰'?.47:.39);a.setPosition((i-(this.m.need-1)/2)*122,0);row.add(a)});card.add(row);const last=this.round===4;const next=button(this,0,135,340,76,last?'구조 완료 보기 🏕️':'다음 현장으로 ▶',0x1e664d);card.add(next);let advancing=false;const advance=()=>{if(advancing)return;advancing=true;this.input.off('pointerdown',tapHandler);tone(true);if(last)this.scene.start('result');else this.scene.restart({round:this.round+1})};
  const tapHandler=(p)=>{if(p.x>=190&&p.x<=530&&p.y>=737&&p.y<=813)advance()};
  next.on('pointerdown',advance);
  this.input.on('pointerdown',tapHandler);
