@@ -5,15 +5,29 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#16382d">
   <title>모아 구조대!</title>
-  <link rel="stylesheet" href="style.css?v=1">
+  <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar">
       <button id="backBtn" class="icon-btn" aria-label="생각정원으로 돌아가기">←</button>
       <div class="brand"><span>🌱</span><b>모아 구조대!</b></div>
-      <button id="soundBtn" class="icon-btn" aria-label="소리 켜기/끄기">🔊</button>
+      <div class="audio-tools">
+        <button id="voiceBtn" class="icon-btn" aria-label="목소리 선택" aria-controls="voicePanel" aria-expanded="false" title="목소리 선택">🎙️</button>
+        <button id="soundBtn" class="icon-btn" aria-label="소리 켜기/끄기">🔊</button>
+      </div>
     </header>
+    <section id="voicePanel" class="voice-panel" hidden aria-label="목소리 선택">
+      <label for="voiceSelect">아이에게 들려줄 목소리</label>
+      <select id="voiceSelect" aria-label="한국어 음성 선택">
+        <option value="auto">자동 선택 · 추천</option>
+      </select>
+      <p id="voiceNote">기기에서 사용할 수 있는 한국어 목소리를 확인하고 있어요.</p>
+      <div class="voice-actions">
+        <button id="voicePreview" type="button">▶ 들어보기</button>
+        <button id="voiceClose" type="button">닫기</button>
+      </div>
+    </section>
     <section class="game-frame" aria-label="모아 구조대 게임">
       <div id="game"></div>
       <div id="rotateHint" class="rotate-hint" hidden>📱 세로 화면으로 보면 더 좋아요</div>
@@ -21,6 +35,6 @@
   </main>
   <script src="phaser.min.js"></script>
   <script src="landscape.js?v=7"></script>
-  <script src="game.js?v=8"></script>
+  <script src="game.js?v=9"></script>
 </body>
 </html>
