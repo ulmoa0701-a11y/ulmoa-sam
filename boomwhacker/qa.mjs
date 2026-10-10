@@ -261,17 +261,43 @@ async function basicCase(name,width,height){
   const geometry=await page.evaluate(()=>({beatMs:beatMs(),count:introCountBeats,beats:introBeats,preview:introPreviewBeats,meter:introMeter,duration:introDurationMs}));
   check(geometry.meter===2&&geometry.beats===6&&geometry.count===6&&geometry.preview===0,
     `${name}: 2/4 should count 1-2-1-2-시-작 at the same tempo ${JSON.stringify(geometry)}`);
-  for(const [beat,value] of [[1,'2'],[2,'1'],[3,'2'],[4,'시'],[5,'작']]){
+  for(const [beat,value] of [[1,'2'],[2,'1'],[3,'2']]){
     await page.evaluate(i=>{introStartPerf=performance.now()-(beatMs()*i+20);introFrame(performance.now())},beat);
     check((await page.locator('#introPulse').innerText())===value,`${name}: expected full-beat '${value}' at beat ${beat+1}`);
     check(await page.locator('#introOverlay .introCard').count()===1,`${name}: unexpected second readiness card at beat ${beat+1}`);
   }
-  // Both syllables last an entire beat, not a final 280ms flash.
+  // The word stays visible as a pair during BOTH beats; only its moving half changes.
+  async function pairedBeat(beat,activeSyllable){
+    await page.evaluate(i=>{introStartPerf=performance.now()-(beatMs()*i+20);introFrame(performance.now())},beat);
+    const state=await page.evaluate(()=>{
+      const pulse=document.querySelector('#introPulse');
+      const children=[...pulse.querySelectorAll('.introSyllable')];
+      return {text:pulse.textContent,paired:pulse.classList.contains('syllablePair'),syllables:children.map(e=>e.textContent),
+        active:children.filter(e=>e.classList.contains('active')).map(e=>e.textContent),
+        animation:children.find(e=>e.classList.contains('active'))?getComputedStyle(children.find(e=>e.classList.contains('active'))).animationName:null,
+        width:pulse.getBoundingClientRect().width};
+    });
+    check(state.text==='시작'&&state.paired&&state.syllables.join('')==='시작'&&state.active.join('')===activeSyllable,
+      `${name}: show the whole '시작' at once while highlighting only '${activeSyllable}' ${JSON.stringify(state)}`);
+    check(state.animation==='syllableBeat',
+      `${name}: active '${activeSyllable}' must actually bounce, not simply replace the letters ${JSON.stringify(state)}`);
+    check(await page.locator('#introOverlay .introCard').count()===1,`${name}: extra readiness card appeared during '${activeSyllable}'`);
+    return state;
+  }
+  const si=await pairedBeat(4,'시');
+  const jak=await pairedBeat(5,'작');
+  check(Math.abs(si.width-jak.width)<1,`${name}: the entire word must not jump horizontally when emphasis moves`);
+  // Neither character should disappear midway through its full beat.
   await page.evaluate(()=>{introStartPerf=performance.now()-(beatMs()*4.6);introFrame(performance.now())});
-  check((await page.locator('#introPulse').innerText())==='시',`${name}: '시' must remain visible through its full beat`);
+  check((await page.locator('#introPulse').textContent())==='시작'&&
+    (await page.locator('#introPulse .introSyllable.active').textContent())==='시',
+    `${name}: keep the complete word visible on the '시' beat`);
   await page.evaluate(()=>{introStartPerf=performance.now()-(beatMs()*5.6);introFrame(performance.now())});
-  check((await page.locator('#introPulse').innerText())==='작',`${name}: '작' must remain visible through its full beat`);
-  check(await page.locator('#introOverlay').evaluate(el=>el.classList.contains('launchCue')),`${name}: same card must display both syllables`);
+  check((await page.locator('#introPulse').textContent())==='시작'&&
+    (await page.locator('#introPulse .introSyllable.active').textContent())==='작',
+    `${name}: keep the complete word visible on the '작' beat`);
+  check(await page.locator('#introOverlay').evaluate(el=>el.classList.contains('launchCue')),
+    `${name}: the same card must display both syllables`);
   check(await page.locator('.fall').count()===0,`${name}: notes must stay hidden until '작' completes`);
     await page.screenshot({path:`${out}/${name}-musical-intro.png`,fullPage:false});
   await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+12);introFrame(performance.now())});
