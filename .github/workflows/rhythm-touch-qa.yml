@@ -1,0 +1,48 @@
+name: Thinking Garden Rhythm Touch QA
+on:
+  pull_request:
+    paths:
+      - "thinking-garden/**"
+      - ".github/workflows/rhythm-touch-qa.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "thinking-garden/games/rhythm-touch/**"
+      - ".github/workflows/rhythm-touch-qa.yml"
+jobs:
+  rhythm-browser-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Korean fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk
+          fc-cache -f
+      - name: Install browser automation
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Detect Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Serve site
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/garden-rhythm-server.log 2>&1 &
+          for i in {1..30}; do curl -fsS http://127.0.0.1:8765/thinking-garden/ >/dev/null && exit 0; sleep 0.25; done
+          cat /tmp/garden-rhythm-server.log
+          exit 1
+      - name: Browser gameplay and scoring QA
+        run: node thinking-garden/games/rhythm-touch/qa.mjs
+      - name: Upload browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rhythm-touch-qa
+          path: thinking-garden/games/rhythm-touch/qa-artifacts
+          if-no-files-found: warn

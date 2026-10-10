@@ -94,7 +94,7 @@ function readCompleted(){try{return JSON.parse(localStorage.getItem(STORE.done)|
 function clearTimers(){state.timers.forEach(clearTimeout);state.timers=[]}
 function later(fn,ms){const t=setTimeout(fn,ms);state.timers.push(t);return t}
 function show(name){Object.values(screens).forEach(x=>x.classList.remove('active'));screens[name].classList.add('active');document.body.classList.toggle('playing',name==='game');document.body.classList.toggle('game-result',name==='result');scrollTo({top:0,behavior:'smooth'})}
-function updateHome(){ $('#seedBank').textContent=`🌱 ${state.total}`;const count=Object.keys(meta).filter(id=>completed[id]).length+(completed.recorder?1:0);$('#gardenProgress').textContent=`완료한 게임 ${count} / ${document.querySelectorAll('.library-card').length}`;
+function updateHome(){ $('#seedBank').textContent=`🌱 ${state.total}`;const count=Object.keys(meta).filter(id=>completed[id]).length+(completed.recorder?1:0)+(completed.rhythmTouch?1:0);$('#gardenProgress').textContent=`완료한 게임 ${count} / ${document.querySelectorAll('.library-card').length}`;
 
 $$('[data-open]').forEach(b=>b.classList.toggle('completed',!!completed[b.dataset.open])) }
 const basicShapes=[['●','#ff7b76'],['■','#6bb7ff'],['▲','#69c77d'],['★','#ffd45b'],['◆','#9b83e8'],['♥','#ff8db2']];
@@ -218,6 +218,7 @@ function renderSpelling(){const q=state.practiceRounds[state.round],shops=[['모
 $$('[data-open]').forEach(b=>b.addEventListener('click',()=>{
  if(b.dataset.open==='rescue'){location.href='games/rescue/';return}
  if(b.dataset.open==='recorder'){location.href='recorder/';return}
+ if(b.dataset.open==='rhythmTouch'){location.href='games/rhythm-touch/';return}
  openPreview(b.dataset.open)
 }));
 $$('#literacyPracticeControls [data-level]').forEach(b=>b.addEventListener('click',()=>{
@@ -244,7 +245,7 @@ let currentCategory='all',currentSubtopic='all';
 const libraryCards=[...document.querySelectorAll('.library-card')];
 const categoryTabs=[...document.querySelectorAll('.category-tab')];
 const subtopicTabs=[...document.querySelectorAll('.subtopic-tab')];
-const subtopicByCategory={all:['all','condition','sequence','spacing','spelling','basicfind','focus','spacebasic','fingering'],visual:['all','condition','basicfind','focus'],memory:['all','sequence','focus'],literacy:['all','spacing','spelling'],language:['all'],space:['all','spacebasic'],music:['all','fingering'],life:['all']};
+const subtopicByCategory={all:['all','condition','sequence','spacing','spelling','basicfind','focus','spacebasic','fingering','rhythm'],visual:['all','condition','basicfind','focus'],memory:['all','sequence','focus'],literacy:['all','spacing','spelling'],language:['all'],space:['all','spacebasic'],music:['all','fingering','rhythm'],life:['all']};
 function applyLibraryFilters(){const allowed=subtopicByCategory[currentCategory]||['all'];if(!allowed.includes(currentSubtopic))currentSubtopic='all';subtopicTabs.forEach(b=>{const ok=allowed.includes(b.dataset.subtopic);b.hidden=!ok;b.classList.toggle('active',b.dataset.subtopic===currentSubtopic)});let visible=0;libraryCards.forEach(card=>{const cat=currentCategory==='all'||card.dataset.category===currentCategory,sub=currentSubtopic==='all'||card.dataset.subtopic===currentSubtopic,showCard=cat&&sub;card.hidden=!showCard;if(showCard)visible++});const empty=document.getElementById('emptyCategory');if(empty)empty.hidden=visible!==0}
 categoryTabs.forEach(b=>b.addEventListener('click',()=>{currentCategory=b.dataset.category;currentSubtopic='all';categoryTabs.forEach(x=>x.classList.toggle('active',x===b));applyLibraryFilters()}));
 subtopicTabs.forEach(b=>b.addEventListener('click',()=>{currentSubtopic=b.dataset.subtopic;subtopicTabs.forEach(x=>x.classList.toggle('active',x===b));applyLibraryFilters()}));
