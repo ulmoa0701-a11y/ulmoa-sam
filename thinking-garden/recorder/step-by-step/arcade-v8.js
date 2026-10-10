@@ -79,7 +79,7 @@ function stopMic(){
  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
  if(audioCtx){audioCtx.close().catch(()=>{});audioCtx=null}
  analyser=null;buffer=null;stableFrom=0;firstMatch=0;state.micEnabled=false;
- $('listen').disabled=false;
+ $('listen').disabled=false;$('listen').innerHTML='<span class="huge">🎤</span><span>시작!</span>';
 }
 function estimatePitch(buf,sr){
  let pow=0;for(let i=0;i<buf.length;i++){pow+=buf[i]*buf[i]}
@@ -90,11 +90,13 @@ function estimatePitch(buf,sr){
 }
 async function beginMic(){
  if(state.phase!=='sound')return;
+ if(state.micEnabled){stopMic();$('soundStatus').className='pitchstatus';$('soundStatus').textContent='🎤 다시 시작할 수 있어!';return;}
  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){problem('🎤 마이크 지원이 안 돼요');return}
  stopMic();state.micEnabled=true;
  const token=micToken;
  $('soundStatus').className='pitchstatus listening';$('soundStatus').textContent='🎤 듣고 있어요…';
- $('listen').disabled=true;
+ $('listen').disabled=false;$('listen').innerHTML='<span class="huge">■</span><span>그만!</span>';
+ if(window.speechSynthesis)window.speechSynthesis.cancel();
  try{
   stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false});
   if(token!==micToken||state.phase!=='sound'){stopMic();return}
