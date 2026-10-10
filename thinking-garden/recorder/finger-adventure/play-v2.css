@@ -25,3 +25,21 @@
 #introPanel h1{font-size:27px;margin:8px 0!important}
 .track span{font-weight:900;font-size:16px}
 @media(max-width:520px){.step-picks{gap:6px;margin:7px auto 10px}.step-pick{min-height:82px;padding:5px;border-radius:14px}.step-pick span{font-size:29px}.step-pick strong{font-size:14px}.step-pick small{font-size:10px}#introPanel .hero{font-size:39px;padding:4px}#introPanel h1{font-size:23px;margin:5px 0!important}.track span{font-size:12px}#introPanel .primary{min-height:56px;font-size:18px}}
+
+/* First-run mobile: selection comes before camera to avoid hiding all 4 modes below fold.
+   During actual play the camera is back on top. */
+@media(max-width:850px){
+ .field{display:flex;flex-direction:column}
+ .field:has(#introPanel:not([hidden])) .panel{order:0}
+ .field:has(#introPanel:not([hidden])) .cam-column{order:1}
+ .field:not(:has(#introPanel:not([hidden]))) .cam-column{order:0}
+ .field:not(:has(#introPanel:not([hidden]))) .panel{order:1}
+ .field:has(#introPanel:not([hidden])) .view{height:180px;min-height:150px}
+}
+@media(max-width:520px){
+ .field:has(#introPanel:not([hidden])) .view{height:125px;min-height:115px}
+ .field:has(#introPanel:not([hidden])) .cam-column{padding:5px}
+ .field:has(#introPanel:not([hidden])) .camera-tools{display:none}
+ .field:has(#introPanel:not([hidden])) .panel{min-height:0}
+ .field:has(#introPanel:not([hidden])) .privacy{display:none}
+}
