@@ -443,6 +443,63 @@ async function basicCase(name,width,height){
   await context.close();
 }
 
+// The score version must START ON its first note the instant '작' ends.
+// Falling notes retain their 3.1-second descent, so test the two independently.
+for(const [label,w,h] of [['mobile-score-immediate',390,844],['desktop-score-immediate',1366,900]]){
+  const context=await browser.newContext({viewport:{width:w,height:h}});
+  const page=await context.newPage(),errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(BASE,{waitUntil:'networkidle'});
+  await page.locator('#playViewSelect').selectOption('score');
+  const original=await page.evaluate(()=>window.__boomVideoQA.scoreTiming());
+  check(original.firstEvent?.note==='도'&&original.secondEvent?.note==='도',
+    label+': the first two test notes should be 도, 도 '+JSON.stringify(original));
+  check(original.firstScoreBeatMs>=3000,label+': fall runway was lost in score event data');
+  await page.locator(w<=800?'#playBtn':'#startBtn').click();
+  let started=await page.evaluate(()=>window.__boomVideoQA.intro());
+  check(started.active&&started.beats===6,label+': familiar musical count-in missing');
+  await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs-beatMs()*.6);introFrame(performance.now())});
+  check((await page.locator('#introPulse').textContent())==='시작'&&
+    (await page.locator('#introPulse .introSyllable.active').textContent())==='작',
+    label+': both syllables should appear together with 작 moving just before the first note');
+  await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+2);introFrame(performance.now())});
+  await page.waitForTimeout(130);
+  const first=await page.evaluate(()=>({
+    timing:window.__boomVideoQA.scoreTiming(),active:[...document.querySelectorAll('#scoreStageGrid .scoreActive')].map(e=>Number(e.dataset.eventIndex)),
+    side:[...document.querySelectorAll('#scoreRows .scoreActive')].map(e=>[...e.parentElement.children].indexOf(e)),
+    volume:Number(document.querySelector('#progressFill').style.width.replace('%',''))
+  }));
+  check(first.active.join(',')==='0'&&first.side.join(',')==='0'&&
+    first.timing.elapsed>=first.timing.firstScoreBeatMs&&first.timing.elapsed<first.timing.secondEvent.start,
+    label+': the very first 도 must pulse immediately after 작 '+JSON.stringify(first));
+  check(first.timing.visibleTime.startsWith('0:00')&&first.volume<5,
+    label+': score mode should show 0:00, not a 3.1s fake lead '+JSON.stringify(first));
+  await page.waitForTimeout(Math.max(0,Math.ceil(await page.evaluate(()=>events[1].start-elapsed))+60));
+  const second=await page.evaluate(()=>({active:[...document.querySelectorAll('#scoreStageGrid .scoreActive')].map(e=>Number(e.dataset.eventIndex)),
+    side:[...document.querySelectorAll('#scoreRows .scoreActive')].map(e=>[...e.parentElement.children].indexOf(e)),
+    elapsed,time:document.querySelector('#timeLabel').textContent}));
+  check(second.active.join(',')==='1'&&second.side.join(',')==='1',
+    label+': the second 도 must pulse on the next actual beat '+JSON.stringify(second));
+  await page.screenshot({path:`${out}/${label}.png`,fullPage:false});
+  await page.locator('#resetBtn').click();
+  await page.locator('#introMode').evaluate(el=>{el.value='instant';el.dispatchEvent(new Event('change',{bubbles:true}))});
+  await page.locator(w<=800?'#playBtn':'#startBtn').click();
+  await page.waitForTimeout(95);
+  const instant=await page.evaluate(()=>window.__boomVideoQA.scoreTiming());
+  check(instant.elapsed>=instant.firstScoreBeatMs&&!instant.introActive,
+    label+': immediate-start setting in score mode still waits 3.1s '+JSON.stringify(instant));
+  await page.locator('#resetBtn').click();
+  await page.locator('#playViewSelect').selectOption('fall');
+  await page.locator(w<=800?'#playBtn':'#startBtn').click();
+  await page.waitForTimeout(100);
+  const fall=await page.evaluate(()=>window.__boomVideoQA.scoreTiming());
+  check(fall.elapsed<350&&fall.elapsed<fall.firstScoreBeatMs-2000,
+    label+': falling mode must keep its original descent time '+JSON.stringify(fall));
+  check(errors.length===0,label+': runtime errors '+errors.join('; '));
+  report.push({name:label,first,second,instant,fall});
+  await context.close();
+}
+
 for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412',412,915],['tablet768',768,1024],['desktop1366short',1366,768],['desktop1600short',1600,800],['desktop1366',1366,900]]) await basicCase(name,w,h);
 
 {
