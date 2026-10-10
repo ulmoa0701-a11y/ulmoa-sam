@@ -247,30 +247,32 @@ async function basicCase(name,width,height){
   await page.locator('#resetBtn').click();
   await page.locator(width<=800?'#playBtn':'#startBtn').click();
   const introStart=await page.evaluate(()=>window.__boomVideoQA.intro());
-  check(introStart.mode==='music'&&introStart.active&&!introStart.started&&introStart.beats===4&&introStart.previewBeats===0&&introStart.countBeats===4&&introStart.durationMs<=4000,`${name}: musical intro did not start before song ${JSON.stringify(introStart)}`);
-  if(name==='mobile390')check(introStart.durationMs<4000,`${name}: preparation has become unnecessarily long ${JSON.stringify(introStart)}`);
+  check(introStart.mode==='music'&&introStart.active&&!introStart.started&&introStart.beats===6&&introStart.previewBeats===0&&introStart.countBeats===6&&introStart.durationMs<=6000,`${name}: musical intro did not start before song ${JSON.stringify(introStart)}`);
+  if(name==='mobile390')check(introStart.durationMs<6000,`${name}: preparation has become unnecessarily long ${JSON.stringify(introStart)}`);
   check(await page.locator('#introOverlay').isVisible(),`${name}: preparation overlay must be visible during intro`);
   check((await page.locator('#introHeading').innerText())==='함께 박자 맞춰요',`${name}: preparatory beat text missing or contains distracting fractions`);
   check((await page.locator('#introPulse').innerText())==='1',`${name}: first beat must be clearly numbered from the start`);
   const introCardText=await page.locator('#introOverlay').innerText();
   check(!introCardText.includes('/'),`${name}: intro contains a confusing fractional bar count ${introCardText}`);
   const introStartGeometry=await page.evaluate(()=>({tempo:beatMs(),meter:introMeter,count: introCountBeats, preview: introPreviewBeats,total: introDurationMs}));
-  check(introStartGeometry.meter===2&&introStartGeometry.count===4,`${name}: 2/4 musical preparation beat grouping is wrong ${JSON.stringify(introStartGeometry)}`);
-  // Only one preparation card: 1-2-1-2, with '시작' shown in the same card.
-  check(await page.locator('#introOverlay .introCard').count()===1,`${name}: there must be exactly one readiness card`);
+  check(introStartGeometry.meter===2&&introStartGeometry.count===6,`${name}: 2/4 musical preparation beat grouping is wrong ${JSON.stringify(introStartGeometry)}`);
+  // One uninterrupted six-beat card: 1 → 2 → 1 → 2 → 시 → 작.
+  check(await page.locator('#introOverlay .introCard').count()===1,`${name}: only one readiness card is allowed`);
   const geometry=await page.evaluate(()=>({beatMs:beatMs(),count:introCountBeats,beats:introBeats,preview:introPreviewBeats,meter:introMeter,duration:introDurationMs}));
-  check(geometry.meter===2&&geometry.beats===4&&geometry.count===4&&geometry.preview===0,
-    `${name}: default 2/4 should use exactly 1-2-1-2 ${JSON.stringify(geometry)}`);
-  await page.evaluate(()=>{introStartPerf=performance.now()-(beatMs()+20);introFrame(performance.now())});
-  check((await page.locator('#introPulse').innerText())==='2',`${name}: count beat two is not shown`);
-  await page.evaluate(()=>{introStartPerf=performance.now()-(beatMs()*2+20);introFrame(performance.now())});
-  check((await page.locator('#introPulse').innerText())==='1',`${name}: count did not repeat 1-2`);
-  await page.evaluate(()=>{introStartPerf=performance.now()-(beatMs()*3+20);introFrame(performance.now())});
-  check((await page.locator('#introPulse').innerText())==='2',`${name}: final 2 was skipped`);
-  await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs-130);introFrame(performance.now())});
-  check((await page.locator('#introPulse').innerText())==='시작!',`${name}: launch cue not shown on same card`);
-  check(await page.locator('#introOverlay').evaluate(el=>el.classList.contains('launchCue')),`${name}: launch cue must reuse single card`);
-  check(await page.locator('.fall').count()===0,`${name}: falling notes must remain hidden while counting`);
+  check(geometry.meter===2&&geometry.beats===6&&geometry.count===6&&geometry.preview===0,
+    `${name}: 2/4 should count 1-2-1-2-시-작 at the same tempo ${JSON.stringify(geometry)}`);
+  for(const [beat,value] of [[1,'2'],[2,'1'],[3,'2'],[4,'시'],[5,'작']]){
+    await page.evaluate(i=>{introStartPerf=performance.now()-(beatMs()*i+20);introFrame(performance.now())},beat);
+    check((await page.locator('#introPulse').innerText())===value,`${name}: expected full-beat '${value}' at beat ${beat+1}`);
+    check(await page.locator('#introOverlay .introCard').count()===1,`${name}: unexpected second readiness card at beat ${beat+1}`);
+  }
+  // Both syllables last an entire beat, not a final 280ms flash.
+  await page.evaluate(()=>{introStartPerf=performance.now()-(beatMs()*4.6);introFrame(performance.now())});
+  check((await page.locator('#introPulse').innerText())==='시',`${name}: '시' must remain visible through its full beat`);
+  await page.evaluate(()=>{introStartPerf=performance.now()-(beatMs()*5.6);introFrame(performance.now())});
+  check((await page.locator('#introPulse').innerText())==='작',`${name}: '작' must remain visible through its full beat`);
+  check(await page.locator('#introOverlay').evaluate(el=>el.classList.contains('launchCue')),`${name}: same card must display both syllables`);
+  check(await page.locator('.fall').count()===0,`${name}: notes must stay hidden until '작' completes`);
     await page.screenshot({path:`${out}/${name}-musical-intro.png`,fullPage:false});
   await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+12);introFrame(performance.now())});
   await page.waitForTimeout(420);
@@ -319,7 +321,7 @@ async function basicCase(name,width,height){
     await page.locator('#mobileSongSelect').selectOption('same');
     await page.locator('#playBtn').click();
     const triple=await page.evaluate(()=>window.__boomVideoQA.intro());
-    check(triple.meter===3&&triple.countBeats===3&&triple.beats===3&&triple.durationMs>0,`${name}: triple meter count-in should align to bar lines ${JSON.stringify(triple)}`);
+    check(triple.meter===3&&triple.countBeats===5&&triple.beats===5&&triple.durationMs>0,`${name}: triple meter count-in should align to bar lines ${JSON.stringify(triple)}`);
     await page.locator('#resetBtn').click();
     await page.locator('#mobileSongSelect').selectOption('twinkle');
   }
