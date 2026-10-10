@@ -31,11 +31,21 @@ function drawVideo(){
 }
 function roundRect(x,y,w,h,r,fill,stroke,lw=3){g.beginPath();g.roundRect(x,y,w,h,r);if(fill){g.fillStyle=fill;g.fill()}if(stroke){g.lineWidth=lw;g.strokeStyle=stroke;g.stroke()}}
 function virtualRecorder(){
- // A simple semi-transparent overlay for targeting, not a photograph of a particular recorder.
- const cx=VIRTUAL[0].x*W,top=H*.14;
- g.save();g.globalAlpha=.5;roundRect(cx-52,top,104,94,21,'#fae6c5','#947856',4);roundRect(cx-28,top+29,57,12,6,'#6b573e',null);
- roundRect(cx-43,top+85,86,H*.69,20,'#faead0','#9a7e59',5);roundRect(cx-37,top+92,73,H*.66,16,'#f5e2bf',null);
- for(let i=0;i<3;i++){const p=VIRTUAL[i];g.beginPath();g.arc(p.x*W,p.y*H,21,0,Math.PI*2);g.fillStyle='#40392e';g.fill();g.strokeStyle='#e5d1a4';g.lineWidth=5;g.stroke()}
+ // Simplified soprano recorder guide; fixed full-length shape so the end is not cut off.
+ // It is a target diagram, not evidence of a correct real-world grip.
+ const cx=VIRTUAL[0].x*W,top=H*.11;
+ g.save();g.globalAlpha=.54;
+ roundRect(cx-37,top+71,74,H*.71,11,'#f2e1c3','#9e845e',4);
+ roundRect(cx-33,top+75,65,H*.69,8,'#fff2d8',null);
+ roundRect(cx-53,top,106,89,20,'#f7e5c5','#a38c67',4);
+ roundRect(cx-32,top+31,64,14,6,'#695640',null);
+ roundRect(cx-42,top+82,83,13,5,'#c3a478','#a38a6b',2);
+ for(const p of VIRTUAL){g.beginPath();g.arc(p.x*W,p.y*H,19,0,Math.PI*2);g.fillStyle='#494033';g.fill();g.strokeStyle='#e8d5b1';g.lineWidth=4;g.stroke()}
+ for(const y of [.74,.79]){g.beginPath();g.arc(cx,y*H,12,0,Math.PI*2);g.fillStyle='#494033';g.fill()}
+ for(const y of [.85,.905]){
+  for(const x of [-11,12]){g.beginPath();g.arc(cx+x,y*H,7,0,Math.PI*2);g.fillStyle='#494033';g.fill()}
+ }
+ roundRect(cx-45,H*.95,90,18,10,'#e6d2ac','#998466',3);
  g.restore();
 }
 function targets(){return S.stage===2?S.points:VIRTUAL}
