@@ -70,7 +70,7 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
      cols:grid.gridTemplateColumns.split(' ').length,overflowY:grid.overflowY,
      scrollHeight:track.scrollHeight,clientHeight:track.clientHeight};
  });
- check(scoreLayout.cols===(w<=700?4:7)&&scoreLayout.grid.width>scoreLayout.stage.width*.92&&
+ check(scoreLayout.cols===(w<=700?4:w<=1080?6:7)&&scoreLayout.grid.width>scoreLayout.stage.width*.92&&
    scoreLayout.first.width>=(w<=700?62:110)&&scoreLayout.note.width>=(w<=700?28:55),
    name+': score grid is too narrow or notes too small '+JSON.stringify(scoreLayout));
  check(scoreLayout.scrollHeight<=scoreLayout.clientHeight+3,
