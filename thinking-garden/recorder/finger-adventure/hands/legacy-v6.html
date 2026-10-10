@@ -1,0 +1,73 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#eef6e9"><title>두 손가락, 두 손 모험 | 모아의 리코더 놀이터</title><meta name="description" content="왼손 오른손 구별, 검지와 중지를 함께 움직이는 카메라 손가락 놀이. 실제 리코더의 운지 정확성은 교사가 확인합니다."><link rel="stylesheet" href="style.css?v=6"></head>
+<body><div class="app">
+<header><a href="../?v=5" class="brand"><span>🌱</span> 모아의 리코더 놀이터</a><button type="button" id="voice" class="head-btn" aria-label="안내 소리 켜기 또는 끄기">🔊</button><button type="button" id="exit" class="head-btn" aria-label="처음으로">⌂</button></header>
+<main>
+<div class="headline"><h1>👐 두 손 모험!</h1><p>한 손부터 · 두 손 함께 · 내 리코더로</p></div>
+<div class="main-layout">
+<section class="viewer">
+<div class="view-top"><strong id="viewTitle">👀 손가락을 보여줘!</strong><span id="modeBadge">그림 연습</span></div>
+<div class="canvas-wrap">
+<video id="video" muted playsinline autoplay aria-hidden="true"></video>
+<canvas id="stage" width="720" height="540" role="img" aria-label="카메라 또는 손가락 목표 위치"></canvas>
+<div id="cover" class="camera-cover"><span id="coverEmoji">👐</span><strong id="coverTitle">어느 손부터 해볼까?</strong><small id="coverDesc">왼손 · 오른손 · 양손</small></div>
+</div>
+<div class="status" role="status" aria-live="polite" id="status">원하는 놀이를 선택해 봐!</div>
+<div class="viewer-tools"><button id="flip" type="button" disabled>↻ 카메라 방향</button><button id="recalibrate" type="button" disabled>◎ 손 다시 확인</button><span>🔒 촬영·저장·업로드 없음</span></div>
+</section>
+<section class="control">
+<div id="choosePanel">
+<div class="intro-art" aria-hidden="true">☝️ ✌️ 👐</div>
+<h2>손가락 놀이!</h2>
+<div id="missionGrid" class="mission-grid">
+<button type="button" class="mission" data-mission="L1"><span>☝️</span><b>왼손 검지</b><small>하나!</small></button>
+<button type="button" class="mission" data-mission="L2"><span>✌️</span><b>왼손 두 개</b><small>검지 + 중지</small></button>
+<button type="button" class="mission" data-mission="R1"><span>☝️</span><b>오른손 검지</b><small>하나!</small></button>
+<button type="button" class="mission" data-mission="R2"><span>✌️</span><b>오른손 두 개</b><small>검지 + 중지</small></button>
+<button type="button" class="mission" data-mission="B1"><span>👐</span><b>두 손 검지</b><small>동시에!</small></button>
+<button type="button" class="mission" data-mission="B2"><span>🙌</span><b>양손 두 개씩</b><small>동시에!</small></button>
+</div>
+<div class="button-row"><button id="beginCamera" type="button" class="button primary">📷 카메라 연습</button><button id="beginDemo" type="button" class="button secondary">👆 터치 체험</button></div>
+<p class="small-note">양손 협응 놀이로, 실제 리코더의 구멍 밀착 여부를 판정하지 않아요.</p>
+</div>
+<div id="calibrationPanel" hidden>
+<span class="progress-label" id="calStage">손 확인 · 1/2</span>
+<div class="huge-icon" id="calIcon" aria-hidden="true">✋</div>
+<h2 id="calTitle">왼손만 보여줘!</h2>
+<p id="calText">선생님과 함께 왼손만 카메라에 보여줘.</p>
+<div class="meter"><span id="calMeter"></span></div>
+<button id="calSkip" type="button" class="button secondary">↻ 다시 시작</button>
+<p class="small-note">한 번에 한 손만 보이고, 각 손을 별도로 확인합니다. 좌우 판정이 겹치면 다시 시도해요.</p>
+</div>
+<div id="playPanel" hidden>
+<span id="missionPosition" class="progress-label">손가락 연습 · 1/6</span>
+<div class="big-hand" id="playEmoji" aria-hidden="true">☝️</div>
+<h2 id="playTitle">왼손 검지!</h2>
+<p id="playInstruction">반짝이는 동그라미에 손가락을!</p>
+<div class="meter"><span id="playMeter"></span></div>
+<button id="ready" type="button" class="button primary">▶ 해볼래!</button>
+<div class="button-row"><button type="button" id="hear" class="button secondary">🔊 듣기</button><button type="button" id="retry" class="button secondary">↻ 다시</button></div>
+<div class="tiny-hint" id="playHint">처음에는 그림을 보고 천천히 시작해요.</div>
+</div>
+<div id="rewardPanel" hidden>
+<div class="celebrate" aria-hidden="true">🌟🌼🌟</div><h2 id="rewardTitle">두 손가락 성공!</h2>
+<p id="rewardSubtitle">같은 순간에 목표 위치를 찾았어!</p>
+<button id="nextMission" type="button" class="button primary">▶ 다음 미션!</button>
+<button id="otherMission" type="button" class="button secondary">⌂ 다른 놀이</button>
+</div>
+<div id="transferPanel" hidden>
+<div class="celebrate" aria-hidden="true">🎼</div>
+<h2>이제 내 리코더!</h2>
+<div class="recorder-teacher">
+<div class="tube" aria-hidden="true"><span>입구 ↑</span><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i></div>
+<div><b>왼손 위쪽 1·2·3</b><p>엄지 구멍은 뒤쪽!</p><b>오른손 아래 4·5·6</b><p>선생님과 실제 악기에 손을 올려 봐요.</p></div>
+</div>
+<label class="teacher-check"><input id="realCheck" type="checkbox"> 실제 악기에서 선생님과 손 위치 찾아봄</label>
+<a class="button primary link" id="playReal" href="../?v=5">🎵 실제 연주하러 가기</a>
+<button id="transferBack" type="button" class="button secondary">⌂ 다른 연습</button>
+<p class="small-note">이 과정은 교사가 직접 확인합니다. 카메라 성공은 실제 운지 성공이 아니에요.</p>
+</div>
+</section>
+</div>
+</main>
+<footer>V6 손가락 협응 실험판 · 이용자가 허가한 카메라만 사용 · 외부 MediaPipe 라이브러리/모델 다운로드 · 영상 저장 없음</footer>
+</div><script src="app.js?v=6"></script></body></html>
