@@ -250,4 +250,11 @@ function applyLibraryFilters(){const allowed=subtopicByCategory[currentCategory]
 categoryTabs.forEach(b=>b.addEventListener('click',()=>{currentCategory=b.dataset.category;currentSubtopic='all';categoryTabs.forEach(x=>x.classList.toggle('active',x===b));applyLibraryFilters()}));
 subtopicTabs.forEach(b=>b.addEventListener('click',()=>{currentSubtopic=b.dataset.subtopic;subtopicTabs.forEach(x=>x.classList.toggle('active',x===b));applyLibraryFilters()}));
 const mapToggle=document.getElementById('mapToggle'),miniWorld=document.getElementById('miniWorld');if(mapToggle&&miniWorld)mapToggle.addEventListener('click',()=>{const opening=miniWorld.hidden;miniWorld.hidden=!opening;mapToggle.textContent=opening?'🌿 정원 세계관 접기':'🌿 정원 세계관으로 한눈에 보기'});
+
 applyLibraryFilters();
+// Top-navigation category links: select the existing category without changing game logic.
+const routeCategory=new URLSearchParams(location.search).get('category');
+if(routeCategory && Object.prototype.hasOwnProperty.call(subtopicByCategory,routeCategory)){
+  const routeTab=categoryTabs.find(tab=>tab.dataset.category===routeCategory);
+  if(routeTab)routeTab.click();
+}
