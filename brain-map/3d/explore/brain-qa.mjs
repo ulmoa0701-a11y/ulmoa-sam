@@ -17,11 +17,25 @@ const sha=b=>createHash('sha256').update(b).digest('hex');
 async function checkPage(page,name){
  const errors=[];
  page.on('pageerror',e=>errors.push(String(e)));
- await page.goto(BASE+'brain-map/3d/explore/?v=20261010-toy4',{waitUntil:'domcontentloaded',timeout:30000});
+ await page.goto(BASE+'brain-map/3d/explore/?v=20261010-friendly5',{waitUntil:'domcontentloaded',timeout:30000});
  await page.waitForFunction(()=>document.getElementById('viewerFallback')?.hidden===true,{timeout:25000});
  await page.locator('#brainCanvas').waitFor({state:'visible'});
  await page.waitForTimeout(500);
  const starting=await page.locator('#brainCanvas').screenshot({path:`${OUT}/${name}-initial.png`});
+ await page.screenshot({path:`${OUT}/${name}-full-page.png`,fullPage:true});
+ if(name==='mobile'){
+   const controlLayout=await page.locator('.view-buttons button').evaluateAll(buttons=>
+     buttons.map(b=>{const r=b.getBoundingClientRect();return {
+       name:b.textContent.trim(),left:r.left,right:r.right,width:r.width,
+       inViewport:r.left>=0 && r.right<=document.documentElement.clientWidth
+     }}));
+   assert.equal(controlLayout.length,6,'There must be six visible view/rotate buttons on mobile');
+   assert.ok(controlLayout.every(b=>b.inViewport && b.width>65),
+     'Mobile rotate buttons are clipped or too narrow: '+JSON.stringify(controlLayout));
+   const buttonsGrid=await page.locator('.view-buttons').evaluate(e=>getComputedStyle(e).gridTemplateColumns);
+   assert.equal(buttonsGrid.split(' ').length,3,'Mobile control layout must be a 3-column, 2-row grid');
+ }
+
  assert.ok(starting.length>3000,'3D canvas screenshot is blank/too small');
  if(name==='mobile'){
    const edgeSamples=await page.evaluate(async b64=>{
@@ -88,7 +102,7 @@ try{
  await checkPage(mobile,'mobile');
  await mobile.close();
  const parent=await browser.newPage({viewport:{width:1280,height:820}});
- await parent.goto(BASE+'brain-map/3d/?v=20261010-toy4',{waitUntil:'domcontentloaded',timeout:30000});
+ await parent.goto(BASE+'brain-map/3d/?v=20261010-friendly5',{waitUntil:'domcontentloaded',timeout:30000});
  await parent.locator('[data-view="front"]').click();
  const inner=parent.frameLocator('#brainViewerFrame');
  await inner.locator('#brainCanvas').waitFor({state:'visible',timeout:30000});
