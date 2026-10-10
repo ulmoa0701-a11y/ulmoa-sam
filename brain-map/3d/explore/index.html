@@ -7,9 +7,9 @@
 <meta name="description" content="뇌를 돌리거나 부위를 눌러 전두엽·두정엽·측두엽·후두엽·소뇌·뇌줄기의 주요 기능을 한눈에 알아보는 학부모용 뇌지도.">
 <link rel="icon" href="../../../favicon.ico">
 <link rel="stylesheet" href="../../../assets/notebook-subpages.css?v=20261005-clean3">
-<link rel="stylesheet" href="viewer.css?v=20261010-friendly5">
+<link rel="stylesheet" href="viewer.css?v=20261011-hemi1">
 <script type="importmap">{"imports":{"three":"../vendor/three.module.js"}}</script>
-<script type="module" src="viewer.js?v=20261010-friendly5"></script>
+<script type="module" src="viewer.js?v=20261011-hemi1"></script>
 </head>
 <body class="note-subpage brain3d-page">
 <header class="sub-header"><a class="sub-brand" href="../../../"><span>✦</span><b>일단 해봄노트</b></a>
@@ -63,6 +63,23 @@
    <label class="split-slider">분리 정도 <input type="range" id="separation" min="0" max="100" step="5" value="0" aria-label="뇌 구조 분리 정도"><output id="separationOutput" for="separation">0%</output></label>
    <p class="split-warning">분리는 <strong>위치 관계를 이해하기 위한 가상 이동</strong>입니다. 실제 뇌 조직을 잘라내거나 떼어낼 수 있다는 뜻이 아닙니다.</p>
   </div>
+ <section class="hemisphere-learning" id="hemisphereLearning" aria-labelledby="hemisphereTitle">
+  <div class="hemisphere-heading">
+   <div><span class="hemi-eyebrow">🧠 좌뇌·우뇌 이해하기</span><h2 id="hemisphereTitle">각각 어떤 역할을 할까요?</h2></div>
+   <p>두 반구는 서로 다른 강점을 보이기도 하고, 대부분의 활동에서는 협력해요.</p>
+  </div>
+  <div class="hemisphere-tabs" role="group" aria-label="좌뇌 우뇌 기능 설명">
+   <button type="button" data-hemisphere="left" aria-pressed="false">좌뇌 <small>말·언어</small></button>
+   <button type="button" data-hemisphere="right" aria-pressed="false">우뇌 <small>공간·억양</small></button>
+   <button type="button" data-hemisphere="both" aria-pressed="false">함께하는 일 <small>읽기·대화</small></button>
+  </div>
+  <div class="hemisphere-explainer" aria-live="polite" aria-atomic="true">
+   <strong id="hemisphereHeading">함께 일하는 두 반구</strong>
+   <p id="hemisphereDescription">같은 활동에도 두 반구의 여러 뇌 영역이 협력해요. 위의 좌뇌·우뇌를 누르면 역할의 차이를 볼 수 있어요.</p>
+   <div class="hemi-example"><b>🌱 생활 속 예시</b><p id="hemisphereExample">책을 읽으면서 글자를 알아보고, 문장 뜻을 이해하고, 읽는 흐름을 유지할 때</p></div>
+  </div>
+  <p class="hemi-reality">좌뇌형·우뇌형 성격이나 지능으로 아이를 나눌 수 없어요. 기능의 좌우 차이는 사람·발달 단계에 따라 달라집니다. 이 뇌 그림은 학습용 개념도예요.</p>
+ </section>
  <section class="everyday-section" aria-labelledby="everydayTitle">
   <div class="everyday-heading"><h2 id="everydayTitle">🌱 생활 속 예시</h2><p>아이의 하루에서 여러 뇌 기능이 함께 일하는 모습을 알아봐요.</p></div>
   <div class="everyday-cards">
@@ -82,7 +99,7 @@
  </section>
  <section class="parts-card" aria-label="살펴볼 뇌 부위">
   <h2>뇌 부위 빠르게 보기</h2>
-  <div class="hemisphere-picks"><button type="button" data-part="hemisphere-left"><i class="left-swatch"></i>좌뇌</button><button type="button" data-part="hemisphere-right"><i class="right-swatch"></i>우뇌</button></div>
+  <div class="hemisphere-picks"><button type="button" data-part="hemisphere-left" aria-pressed="false"><i class="left-swatch"></i>좌뇌</button><button type="button" data-part="hemisphere-right" aria-pressed="false"><i class="right-swatch"></i>우뇌</button><button type="button" data-part="hemisphere-both" aria-pressed="false"><i class="both-swatch"></i>함께하는 일</button></div>
   <div class="region-picks" id="regionPicks">
    <button type="button" data-part="frontal"><i style="--part-color:#ba9ae9"></i><span>전두엽<small>계획 · 집중 · 조절</small></span></button>
    <button type="button" data-part="parietal"><i style="--part-color:#f4d47c"></i><span>두정엽<small>공간 · 감각 · 수 개념</small></span></button>
@@ -97,6 +114,7 @@
 </aside>
 </div>
 <section class="follow-read"><h2>뇌 기능을 조금 더 자세히 알고 싶나요?</h2><p>정확한 좌우 방향 설명, 뇌 부위별 일상 예시와 신경과학 참고자료는 기본 뇌지도에 있습니다.</p><a href="../">평면 뇌지도와 부모 안내 보기 →</a></section>
+<div class="hemisphere-sources" aria-label="뇌 기능 참고자료">참고: <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0071275" target="_blank" rel="noopener noreferrer">뇌 기능 편측화 연구(PLOS ONE)</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/17056277/" target="_blank" rel="noopener noreferrer">아동 언어 억양 처리 연구(PubMed)</a></div>
 <footer class="viewer-footer"><span>3D 표현: Three.js (MIT) · 자체 제작 학습용 뇌 개념 모형 · 실제 해부학적 경계와 다를 수 있음</span><a target="_blank" rel="noopener" href="../vendor/THREE-LICENSE.txt">MIT 라이선스 ↗</a></footer>
 </main>
 <script>window.addEventListener('error',()=>{const x=document.getElementById('viewerFallback');if(x){x.querySelector('strong').textContent='3D 모형을 불러오지 못했습니다.';}});</script>
