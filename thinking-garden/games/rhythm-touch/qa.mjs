@@ -91,9 +91,19 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
    await page.screenshot({path:out+'/'+name+'-random.png',fullPage:false});
  await page.locator('#keyLayoutSelect').selectOption('piano');
  check(await page.locator('#keys.pianoKeys .key').count()===8,name+': return to ordered piano failed');
- // A challenge arrangement must be fixed for a whole round and re-shuffle next round.
+ // A challenge layout gets a shuffled order when play is pressed and NEVER moves mid-song.
  await page.locator('#keyLayoutSelect').selectOption('shuffle');
- const beforeCount=await page.evaluate(()=>window.__rhythmQA.state().keyOrders.map(x=>x.position).join(','));
+ await page.locator('#startBtn').click();
+ const lockedLayout=await page.evaluate(()=>({
+   phase:state.phase,locked:document.querySelector('#keyLayoutSelect').disabled,
+   order:window.__rhythmQA.state().keyOrders.map(x=>x.position).join(',')
+ }));
+ await page.waitForTimeout(85);
+ const stableLayout=await page.evaluate(()=>window.__rhythmQA.state().keyOrders.map(x=>x.position).join(','));
+ check(lockedLayout.phase==='intro'&&lockedLayout.locked&&
+   lockedLayout.order===stableLayout&&lockedLayout.order.split(',').length===8,
+   name+': shuffled keys moved during a song or layout selector remained enabled '+JSON.stringify(lockedLayout));
+ await page.evaluate(()=>window.__rhythmQA.reset());
  await page.locator('#keyLayoutSelect').selectOption('piano');
  check(await page.locator('.mainStage .noteTile button').count()===0,
    name+': read-only score unexpectedly contains clickable buttons');
