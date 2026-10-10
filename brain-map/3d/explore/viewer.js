@@ -435,6 +435,13 @@ else {
     setView(data.view,true);
   }else if(data.type==='brain-part'&&info[data.part]){
     selected=data.part;activeActivity=null;activeFunction=null;refreshSelection();
+  }else if(data.type==='brain-drag'&&Number.isFinite(data.dx)&&Number.isFinite(data.dy)){
+    currentView='free';
+    yaw-=data.dx/Math.max(holder.clientWidth,320)*Math.PI*2;
+    pitch=THREE.MathUtils.clamp(pitch+data.dy/Math.max(holder.clientHeight,250)*Math.PI*1.1,-1.27,1.48);
+    targetYaw=yaw;targetPitch=pitch;
+    orient.textContent=viewHeading('free');
+    needsRender=true;
   }
  });
  if(new URLSearchParams(location.search).has('embedded'))window.parent.postMessage({type:'brain-3d-ready'},location.origin);
