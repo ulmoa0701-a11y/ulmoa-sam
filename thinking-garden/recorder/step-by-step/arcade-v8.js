@@ -23,7 +23,7 @@ function updateProgress(){
   dot.classList.toggle('bloomed',state.blooms[i]);
   dot.textContent=state.blooms[i]?'🌸':state.practices[i]?'🌱':i===state.index?'🌷':'🌱';
   plant.classList.toggle('bloom',state.blooms[i]);
-  plant.classList.toggle('practice',state.practices[i]&&!state.blooms[i]);
+  plant.classList.toggle('practice',state.practices[i]&&!state.blooms[i]);plant.setAttribute('aria-label',state.blooms[i]?'피어난 꽃':state.practices[i]?'연습한 꽃봉오리':'잠든 꽃');
  }
  const bloomCount=state.blooms.filter(Boolean).length;
  $('gardenCount').textContent='꽃 '+bloomCount+' / 3';
