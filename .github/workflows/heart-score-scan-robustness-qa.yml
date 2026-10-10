@@ -35,8 +35,12 @@ jobs:
           STATUS2=$?
           node heart-score/qa/omr-image-e2e.cjs --mobile --overlay-bars --fixture heart-score/qa/.scan-debug/typeset-jpeg-upscaled-19.png --variant scan-upscaled-mobile --runtime heart-score/qa/.runtime --output heart-score/qa/.scan-debug/upscaled-mobile-result
           STATUS3=$?
-          echo "SCAN_LOWRES=$STATUS1 SCAN_TILTED=$STATUS2 SCAN_UPSCALED=$STATUS3"
-          if [[ $STATUS1 -ne 0 || $STATUS2 -ne 0 || $STATUS3 -ne 0 ]]; then exit 1; fi
+          node heart-score/qa/omr-image-e2e.cjs --mobile --overlay-bars --fixture heart-score/qa/.scan-debug/typeset-jpeg-binary-19.png --variant scan-binary-mobile --runtime heart-score/qa/.runtime --output heart-score/qa/.scan-debug/binary-mobile-result
+          STATUS4=$?
+          node heart-score/qa/omr-image-e2e.cjs --mobile --overlay-bars --fixture heart-score/qa/.scan-debug/typeset-jpeg-contrast-19.png --variant scan-contrast-mobile --runtime heart-score/qa/.runtime --output heart-score/qa/.scan-debug/contrast-mobile-result
+          STATUS5=$?
+          echo "SCAN_LOWRES=$STATUS1 SCAN_TILTED=$STATUS2 SCAN_UPSCALED=$STATUS3 SCAN_BINARY=$STATUS4 SCAN_CONTRAST=$STATUS5"
+          if [[ $STATUS1 -ne 0 || $STATUS2 -ne 0 || $STATUS3 -ne 0 || $STATUS4 -ne 0 || $STATUS5 -ne 0 ]]; then exit 1; fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
