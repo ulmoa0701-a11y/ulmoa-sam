@@ -59,3 +59,31 @@ header{display:flex;align-items:center;justify-content:space-between;min-height:
 .controller>.teacher[open]{z-index:9}
 @media(min-width:851px){.controller>.panel{min-height:0}}
 @media(max-width:850px){.controller>.panel{flex:none;min-height:220px}}
+
+/* Independent storybook flower characters: no emoji dependency for main game art */
+#plant-0{--flower-outer:#ffe3a1;--flower-inner:#fff6cc;--flower-edge:#efa84d}
+#plant-1{--flower-outer:#ffb3c8;--flower-inner:#ffe0e6;--flower-edge:#ed7ca2}
+#plant-2{--flower-outer:#c6b3f7;--flower-inner:#eae0ff;--flower-edge:#9774da}
+.flower-head{width:150px;height:151px;display:flex;align-items:center;justify-content:center}
+.flower-head .bud{position:relative;width:118px;height:123px;display:block;filter:drop-shadow(0 8px 4px #52835e38)}
+.flower-head .bud:before{content:"";position:absolute;top:7%;left:26%;width:60px;height:82px;border-radius:48% 48% 50% 50%;background:radial-gradient(circle at 34% 28%,#d9f4c6 1%,#96d79c 43%,#4eac70 100%);border:3px solid #76bf87;transform:rotate(-3deg)}
+.flower-head .bud:after{content:"";position:absolute;top:55%;left:7%;width:58px;height:49px;border-radius:5% 80% 13% 80%;background:linear-gradient(135deg,#8ed093,#2c935c);transform:rotate(-25deg)}
+.flower-head .budcap{position:absolute;z-index:2;top:58%;left:46%;width:65px;height:46px;border-radius:85% 8% 82% 11%;background:linear-gradient(165deg,#c0ecc1,#388e5c);transform:rotate(22deg)}
+.flower-head .open{position:relative;width:150px;height:150px;display:none!important;filter:drop-shadow(0 9px 6px #56775b39);transform-origin:center bottom}
+.plant.bloom .open{display:block!important}
+.flower-head .open .petal{position:absolute;width:59px;height:85px;border-radius:50% 50% 44% 44%;background:radial-gradient(ellipse at 32% 17%,var(--flower-inner) 0,var(--flower-outer) 51%,var(--flower-edge) 100%);border:2px solid #ffffffa0;transform-origin:center 80%;box-shadow:inset -5px -7px 9px #c4827c1a}
+.flower-head .open .petal.p1{left:45px;top:0;transform:rotate(0deg)}
+.flower-head .open .petal.p2{left:67px;top:9px;transform:rotate(55deg)}
+.flower-head .open .petal.p3{left:66px;top:48px;transform:rotate(112deg)}
+.flower-head .open .petal.p4{left:38px;top:57px;transform:rotate(179deg)}
+.flower-head .open .petal.p5{left:18px;top:42px;transform:rotate(240deg)}
+.flower-head .open .petal.p6{left:20px;top:10px;transform:rotate(304deg)}
+.flower-head .open .face{position:absolute;left:43px;top:43px;width:67px;height:67px;border-radius:50%;background:radial-gradient(circle at 32% 21%,#fff9e7,#ffe3a6 68%,#f6b96d);border:3px solid #f8d597;box-shadow:0 5px 8px #b67d4a38;z-index:2}
+.flower-head .open .face:before,.flower-head .open .face:after{content:"";position:absolute;top:22px;width:8px;height:12px;background:#473a2a;border-radius:50%}
+.flower-head .open .face:before{left:15px}.flower-head .open .face:after{right:15px}
+.flower-head .open .face .smile{position:absolute;top:38px;left:25px;width:16px;height:9px;border-bottom:3px solid #8a5d3b;border-radius:0 0 90% 90%}
+.plant.bloom .open{animation:flower-burst .75s cubic-bezier(.2,1.6,.4,1)}
+@keyframes flower-burst{0%{opacity:0;scale:.4}65%{opacity:1;scale:1.12}100%{scale:1}}
+@media(max-width:850px){.flower-head{transform:scale(.74)}}
+@media(max-width:520px){.flower-head{transform:scale(.51)}.flower-head .bud{filter:drop-shadow(0 6px 3px #52835e38)}}
+@media(prefers-reduced-motion:reduce){.plant.bloom .open{animation:none}}
