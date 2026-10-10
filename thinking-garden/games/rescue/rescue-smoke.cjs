@@ -49,8 +49,26 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
   await clickAt(wide?600:360,wide?619:1030);
   const missionName=wide?'landmission':'mission';
   await page.waitForFunction(n=>window.moaRescueGame.scene.isActive(n),missionName,{timeout:8000});
+  async function verifyBriefing(round){
+    const details=await page.evaluate(n=>{
+      const scene=window.moaRescueGame.scene.getScene(n),title=scene.briefingTargetText,button=scene.briefingStartButton;
+      return {round:scene.round,expected:targetLabel(scene.m),actual:title?.text,
+       titleX:title?.x,titleY:title?.y,titleWidth:title?.width,titleHeight:title?.height,
+       buttonX:button?.x,buttonY:button?.y,buttonActive:button?.active,
+       header:scene.missionBarText?.text,locked:scene.lock};
+    },missionName);
+    assert.equal(details.round,round,'Wrong briefing mission');
+    assert.equal(details.actual,details.expected,'Briefing must show exact mission, not generic instructions');
+    assert.ok(details.buttonActive && details.locked,'Dispatch button must exist before gameplay');
+    assert.ok(Math.abs(details.titleX-details.buttonX)<5,'Dispatch button must be centered under target title');
+    assert.ok(details.titleY+details.titleHeight/2 < details.buttonY-42,'Mission title must fit ABOVE the dispatch button');
+    assert.ok(details.titleWidth <= (wide?662:522),'Mission title must wrap inside briefing card');
+    if(wide)assert.equal(details.header,details.expected,'Persistent header should reflect the current mission');
+    console.log('BRIEFING ORDER PASS',label,round,JSON.stringify(details));
+  }
+  await verifyBriefing(0);
   await page.screenshot({path:'rescue-qa-screenshots/'+label+'-briefing.png'});
-  await clickAt(wide?750:360,wide?356:825);
+  await clickAt(wide?754:360,wide?498:827);
   await page.waitForFunction(n=>{const sc=window.moaRescueGame.scene.getScene(n);return sc&&sc.lock===false},missionName,{timeout:8000});
   await page.screenshot({path:'rescue-qa-screenshots/'+label+'-gameplay.png'});
   for(let round=0;round<(fullRun?5:1);round++){
@@ -113,8 +131,10 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
    console.log('AFTER NEXT',label,'round',round,JSON.stringify(await page.evaluate(n=>{const sc=window.moaRescueGame.scene.getScene(n);return {round:sc.round,lock:sc.lock,found:sc.found?.size,active:window.moaRescueGame.scene.isActive(n)}} ,missionName)));
    if(round<4&&fullRun){
     await page.waitForFunction(([n,r])=>{const s=window.moaRescueGame.scene.getScene(n);return s.round===r && s.lock===true},[missionName,round+1],{timeout:8000});
-    if(!wide){await clickAt(360,825);await page.waitForFunction(n=>window.moaRescueGame.scene.getScene(n).lock===false,missionName,{timeout:8000});}
-    else{await clickAt(750,356);await page.waitForFunction(n=>window.moaRescueGame.scene.getScene(n).lock===false,missionName,{timeout:8000});}
+    await verifyBriefing(round+1);
+    await page.screenshot({path:'rescue-qa-screenshots/'+label+'-round'+(round+2)+'-briefing.png'});
+    await clickAt(wide?754:360,wide?498:827);
+    await page.waitForFunction(n=>window.moaRescueGame.scene.getScene(n).lock===false,missionName,{timeout:8000});
    }
   }
   if(fullRun){
