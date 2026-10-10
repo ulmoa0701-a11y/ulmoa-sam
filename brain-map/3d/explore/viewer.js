@@ -75,7 +75,7 @@ const activityDetails={
 };
 let splitMode = 'together';
 let splitAmount = 0;
-let yaw = .7, pitch = .25, distance = 5.8;
+let yaw = Math.PI/2, pitch = .18, distance = 5.45;
 let targetYaw = yaw, targetPitch = pitch;
 let currentView='free';
 let activePointer = new Map(), moved=0, pinchLast=null;
@@ -124,7 +124,7 @@ function init() {
  refreshSelection();
  updateCalloutMode();
  fallback.hidden=true;
- setView('free',true);
+ setView('left',true);
  requestAnimationFrame(renderFrame);
  canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();setNotice('3D 연결이 끊겼습니다. 페이지를 새로고침해 주세요.');});
  return true;
@@ -302,7 +302,7 @@ function bindEvents(){
  });
  partButtons.forEach(button=>button.addEventListener('click',()=>mapMode==='functions'&&functionDetails[button.dataset.part]?setFunction(button.dataset.part):setSelected(button.dataset.part)));
  document.getElementById('clearSelection').addEventListener('click',()=>setSelected(null));
- document.getElementById('resetCamera').addEventListener('click',()=>{distance=5.8;setView('free');});
+ document.getElementById('resetCamera').addEventListener('click',()=>{distance=5.45;setView('left',true);});
  canvas.addEventListener('wheel',event=>{event.preventDefault();distance=THREE.MathUtils.clamp(distance+event.deltaY*.005,3.0,9.0);needsRender=true;},{passive:false});
  canvas.addEventListener('pointerdown',event=>{
   canvas.setPointerCapture(event.pointerId);
