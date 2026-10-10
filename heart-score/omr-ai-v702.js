@@ -82,9 +82,11 @@ function enhancedInput(prep,gray,pageW,pageH,input){
   const b=input.box,crop=new Float32Array(b.w*b.h);
   for(let y=0;y<b.h;y++){const src=(b.y+y)*pageW+b.x,dst=y*b.w;for(let x=0;x<b.w;x++)crop[dst+x]=gray[src+x];}
   const crisp=enhanceScanCrop(crop,b.w,b.h),norm=prep.normalizeStaff(crisp,b.w,b.h,b.lineSpacing,b.padUp,10,128);
-  let ww=norm.width,truncated=false;if(ww>1800){ww=1800;truncated=true;}
+  const sourceW=Math.min(norm.width,1800),truncated=norm.width>1800;
+  // White trailing context avoids losing final notes at the inference boundary.
+  const ww=Math.min(1800,sourceW+(sourceW>1400?128:0));
   const data=new Float32Array(norm.height*ww);
-  for(let y=0;y<norm.height;y++){const src=y*norm.width,dst=y*ww;for(let x=0;x<ww;x++)data[dst+x]=1-norm.data[src+x];}
+  for(let y=0;y<norm.height;y++){const src=y*norm.width,dst=y*ww;for(let x=0;x<sourceW;x++)data[dst+x]=1-norm.data[src+x];}
   return{...input,data,width:ww,height:norm.height,truncated};
 }
 function pitchName(p){if(!p?.step)return'';const ko={C:'도',D:'레',E:'미',F:'파',G:'솔',A:'라',B:'시'},flat={C:'도♭',D:'레♭',E:'미♭',F:'파♭',G:'솔♭',A:'라♭',B:'시♭'};let n=ko[p.step]||'';if(!n)return'';if(Number(p.alter)===1)n+='#';else if(Number(p.alter)===-1)n=flat[p.step]||n;if(Number(p.octave)>=5)n='높은'+n;return n;}
