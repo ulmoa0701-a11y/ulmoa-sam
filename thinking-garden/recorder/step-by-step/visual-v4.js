@@ -132,13 +132,13 @@ function update(){
  byId('panelReward').hidden=!(p==='reward');
  byId('panelDone').hidden=!isDone;
  byId('stageLabel').textContent=isExplore?'먼저 악기 모양부터 확인해요':isDone?'오늘의 연습 완료':(state.step+1)+' / '+lessons.length+' · '+L.finger;
- var focus=isExplore?(face==='front'?1:0):L.hole,drawHand=isExplore||(p==='real'||p==='reward'||state.demo||p==='done');
+ var focus=isExplore?(face==='front'?1:0):L.hole,drawHand=!isExplore&&(p==='real'||p==='reward'||state.demo||p==='done');
  scene(face,focus,drawHand);
  if(isExplore){
    byId('exploreTitle').textContent=face==='front'?'맨 위 1번은 검지 자리!':'뒷구멍은 엄지 자리!';
-   byId('exploreDescription').textContent=face==='front'?'입구 아래 첫 구멍이 왼손 검지 자리예요. 화면 속 손가락을 따라 실제 리코더에서도 찾아보자!':'실제 리코더를 돌려 뒷면을 보면 엄지손가락을 놓는 구멍이 하나 있어요.';
+   byId('exploreDescription').textContent=face==='front'?'왼쪽 전체 리코더에서 맨 위 구멍을 보고, 오른쪽 확대 그림에서 검지 자리를 찾아봐요.':'리코더를 돌리면 뒤쪽에 엄지가 닿는 구멍이 한 개 있어요. 오른쪽 확대 그림에서 확인해요.';
    byId('exploreCue').textContent=face==='front'?'입구 아래 맨 위 = 왼손 검지':'리코더 뒤의 구멍 1개 = 왼손 엄지';
-   byId('startBtn').textContent='진짜 손가락 연습 시작! →';
+   byId('startBtn').textContent='실제 리코더에 손가락 놓아보기 →';
  }else if(!isDone){
    for(var id of ['observe','real','reward']){
     byId(id+'Title').textContent=L.title;
@@ -146,8 +146,8 @@ function update(){
    }
    byId('observeCue').textContent=L.cue;
    byId('realCue').textContent='실제 리코더를 입구가 위로 오도록 놓고 '+L.finger+'를 같은 자리에 놓아봐요.';
-   byId('observeFinger').textContent=L.finger+' 움직임 보기';
-   byId('observeTip').textContent=state.demo?'실제 리코더에서도 해볼 차례예요.':'그림의 입구·구멍 위치를 먼저 살펴봐요.';
+   byId('observeFinger').textContent=L.finger+' 놓는 자리 표시';
+   byId('observeTip').textContent=state.demo?'여기에 손가락을 놓아요. 이제 실제 리코더에서도 찾아봐요.':'확대 그림에서 어느 구멍인지 먼저 찾아봐요.';
    byId('rewardEmoji').textContent=L.emoji;
    byId('rewardSub').textContent=state.realStatus[state.step]==='yes'?'화면만 본 게 아니라 실제 리코더에도 손가락을 올려봤네!':'오늘은 위치를 살펴봤어. 실제 악기는 다음에 해도 괜찮아.';
    byId('rewardNext').textContent=state.step===3?'연습 마치기 →':'다음 손가락 →';
