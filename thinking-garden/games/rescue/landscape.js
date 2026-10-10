@@ -46,10 +46,10 @@ class LandscapeMissionScene extends Phaser.Scene{
   roundRect(this,329,18,849,78,24,0x153d32,.9).setDepth(14);
   label(this,689,56,'조건에 맞는 동물을 찾아요',27,'#ffffff','900').setDepth(15);
   const replay=button(this,1094,57,142,60,'🔊 다시',0x2a7858).setDepth(18);
-  replay.on('pointerdown',()=>speak(`${this.targetText}를 찾아줘`));
+  replay.on('pointerdown',()=>speak(this.targetText));
   const start=button(this,750,356,370,88,'출동! 🚨',0x226c50).setDepth(55);
   const shade=this.add.rectangle(754,413,875,630,0x0a291e,.42).setDepth(50);
-  start.on('pointerdown',()=>{tone(true);speak(`${this.targetText}를 찾아줘`);shade.destroy();start.destroy();this.lock=false;this.spawn()});
+  start.on('pointerdown',()=>{tone(true);speak(this.targetText);shade.destroy();start.destroy();this.lock=false;this.spawn()});
  }
  spawn(){
   const items=makeChoices(this.round),top=Math.ceil(items.length/2),bottom=items.length-top;
