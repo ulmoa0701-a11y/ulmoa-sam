@@ -115,7 +115,7 @@ function cerebellumGeometry(side){
     const x=position.getX(i),y=position.getY(i),z=position.getZ(i);
     // 소뇌도 하늘색 찹쌀떡 형태로: 의학적인 잔주름을 완전히 제거합니다.
     const depth=1;
-    position.setXYZ(i,side*.28+x*.38*depth,-.46+y*.31*depth,-.47+z*.40*depth);
+    position.setXYZ(i,side*.32+x*.39*depth,-.63+y*.30*depth,-.76+z*.42*depth);
     color.push(.995);
   }
   position.needsUpdate=true;shape.computeVertexNormals();
