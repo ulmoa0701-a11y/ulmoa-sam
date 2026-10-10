@@ -34,7 +34,7 @@ async function basicCase(name,width,height){
   // A new song should open with a clear, completely empty falling-note area.
   check(await page.locator('.fall').count()===0,`${name}: a note appeared before pressing play`);
   const fallConfig=await page.evaluate(()=>window.__boomVideoQA.fall());
-  check(fallConfig.leadMs>=5500&&fallConfig.travelMs>=3400&&fallConfig.spawnDelayMs>=1800,
+  check(fallConfig.leadMs===4500&&fallConfig.travelMs===3100&&fallConfig.spawnDelayMs===1400,
     `${name}: the first note still enters too quickly ${JSON.stringify(fallConfig)}`);
   await page.evaluate(()=>{elapsed=firstNoteMs()-FALL_TRAVEL_MS+950;draw()});
   const fallSize=await page.locator('.fall').first().evaluate(el=>parseFloat(getComputedStyle(el).width));
@@ -247,7 +247,8 @@ async function basicCase(name,width,height){
   await page.locator('#resetBtn').click();
   await page.locator(width<=800?'#playBtn':'#startBtn').click();
   const introStart=await page.evaluate(()=>window.__boomVideoQA.intro());
-  check(introStart.mode==='music'&&introStart.active&&!introStart.started&&introStart.beats>=8&&introStart.durationMs>=5200&&introStart.previewBeats>=4,`${name}: musical intro did not start before song ${JSON.stringify(introStart)}`);
+  check(introStart.mode==='music'&&introStart.active&&!introStart.started&&introStart.beats>=6&&introStart.durationMs>=4600&&introStart.previewBeats>=2,`${name}: musical intro did not start before song ${JSON.stringify(introStart)}`);
+  if(name==='mobile390')check(introStart.durationMs<6000,`${name}: preparation has become unnecessarily long ${JSON.stringify(introStart)}`);
   check(await page.locator('#introOverlay').isVisible(),`${name}: preparation overlay must be visible during intro`);
   check((await page.locator('#introHeading').innerText())==='박자 먼저 들어요',`${name}: preparatory beat text missing or contains distracting fractions`);
   check((await page.locator('#introPulse').innerText())==='1',`${name}: first beat must be clearly numbered from the start`);
@@ -267,7 +268,7 @@ async function basicCase(name,width,height){
   const songStart=await page.evaluate(()=>window.__boomVideoQA.intro());
   check(!songStart.active&&songStart.started,`${name}: intro did not hand off to song playback`);
   const handoff=await page.evaluate(()=>({t:elapsed,first:firstNoteMs(),travel:FALL_TRAVEL_MS,playing}));
-  check(handoff.t<1000&&handoff.first-handoff.travel>=1800&&handoff.playing,
+  check(handoff.t<1000&&handoff.first-handoff.travel>=1300&&handoff.playing,
     `${name}: the song jumps ahead after 'start' instead of allowing time to prepare ${JSON.stringify(handoff)}`);
   check(await page.locator('.fall').count()===0,`${name}: notes appeared immediately after 'start' cue`);
   await page.evaluate(()=>{playing=false;cancelAnimationFrame(raf);elapsed=firstNoteMs()-FALL_TRAVEL_MS;draw()});
@@ -306,7 +307,7 @@ async function basicCase(name,width,height){
     await page.locator('#mobileSongSelect').selectOption('same');
     await page.locator('#playBtn').click();
     const triple=await page.evaluate(()=>window.__boomVideoQA.intro());
-    check(triple.meter===3&&triple.countBeats===3&&triple.beats%3===0&&triple.durationMs>=5200,`${name}: triple meter count-in should align to bar lines ${JSON.stringify(triple)}`);
+    check(triple.meter===3&&triple.countBeats===3&&triple.beats%3===0&&triple.durationMs>=4600,`${name}: triple meter count-in should align to bar lines ${JSON.stringify(triple)}`);
     await page.locator('#resetBtn').click();
     await page.locator('#mobileSongSelect').selectOption('twinkle');
   }
