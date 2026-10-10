@@ -14,14 +14,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          curl -fsSL --max-time 30 -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/ulmoa0701-a11y/ulmoa-sam/actions/artifacts/11656789841/zip" -o /tmp/rescue-qa.zip
+          curl -fsSL --max-time 30 -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/ulmoa0701-a11y/ulmoa-sam/actions/artifacts/11657738052/zip" -o /tmp/rescue-qa.zip
           unzip -oq /tmp/rescue-qa.zip -d /tmp/qa-images
           python3 -m pip -q install Pillow
           python3 - <<'PY'
           import pathlib,base64,io
           from PIL import Image
           path=pathlib.Path('/tmp/qa-images')
-          names=['desktop-1440x900-gameplay','mobile-390x844-gameplay','mobile-390x844-briefing','mobile-390x844-round3-complete','tablet-1024x768-gameplay']
+          names=['desktop-1440x900-gameplay','mobile-390x844-gameplay','mobile-390x844-briefing','mobile-390x844-round5-complete','tablet-1024x768-gameplay']
           for name in names:
             matches=list(path.rglob(name+'.png'))
             if not matches:
