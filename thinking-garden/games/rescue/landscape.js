@@ -67,14 +67,15 @@ class LandscapeMissionScene extends Phaser.Scene{
     if(this.lock)return;
     let closest=null,score=Infinity;
     for(const a of this.targets){
-      if(!a.active||!a.inputEnabled&&a.alpha===0)continue;
+      if(!a.active||a.data?.get('rescuing'))continue;
       const x=(pointer.x-a.x)/(a.scaleX<.85?96:125),y=(pointer.y-a.y)/(a.scaleY<.85?98:123);
       const d=x*x+y*y;
       if(d<score){score=d;closest=a}
     }
     if(closest&&score<=1.06)this.pick(closest);
   };
-  this.input.on('pointerdown',onTap);
+  // Do not interpret the same click that dismissed the briefing as an animal tap.
+  this.input.once('pointerup',()=>this.input.on('pointerdown',onTap));
   this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>this.input.off('pointerdown',onTap));
  }
  pick(a){
@@ -87,7 +88,7 @@ class LandscapeMissionScene extends Phaser.Scene{
    this.tweens.add({targets:t,y:t.y-20,alpha:0,duration:1150,onComplete:()=>t.destroy()});
    return;
   }
-  this.found.add(it.species);a.disableInteractive();tone(true);
+  this.found.add(it.species);a.data.set('rescuing',true);a.disableInteractive();tone(true);
   const x=a.x,y=a.y;
   this.tweens.add({targets:a,y:y-33,alpha:0,scale:.25,duration:450,onComplete:()=>a.destroy()});
   const success=label(this,x,y,'구조 성공! ✨',23,'#125b3d','900').setDepth(40);
