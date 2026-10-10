@@ -41,7 +41,10 @@ function cortexPoint(x, y, z, side) {
   const zz=z*1.22*radius;
   const temporalBulge=Math.exp(-Math.pow((z-.12)/.70,2))*Math.max(0,-y);
   const yy=.085+y*.74*radius-.045*temporalBulge;
-  return [xx,yy,zz,.995];
+  // 색만 살짝 다른 부드러운 곡선 3~5개. 메시 밖으로 튀어나오는 선은 사용하지 않습니다.
+  const seamPhase=lon*4.4+.78*Math.sin(lat*2.0);
+  const seam=Math.pow(.5-.5*Math.cos(seamPhase),8)*Math.pow(Math.max(0,Math.cos(lat)),2);
+  return [xx,yy,zz,1-.052*seam];
 }
 function smoothstep(a,b,x){const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)}
 function corticalRGB(x,y,z,shade){
@@ -112,7 +115,7 @@ function cerebellumGeometry(side){
     const x=position.getX(i),y=position.getY(i),z=position.getZ(i);
     // 소뇌도 하늘색 찹쌀떡 형태로: 의학적인 잔주름을 완전히 제거합니다.
     const depth=1;
-    position.setXYZ(i,baseX+x*.36*depth,-.62+y*.26*depth,-.89+z*.35*depth);
+    position.setXYZ(i,side*.28+x*.38*depth,-.46+y*.31*depth,-.47+z*.40*depth);
     color.push(.995);
   }
   position.needsUpdate=true;shape.computeVertexNormals();
@@ -126,8 +129,8 @@ function cerebellumGeometry(side){
 function stemGeometry(){
   // Continuous tapered stem with a slight forward curve, not a dangling ellipse.
   const contour=[
-    [0.00,-1.32],[.13,-1.27],[.17,-1.15],[.18,-1.00],
-    [.17,-.85],[.12,-.73],[0,-.72]
+    [0.00,-1.21],[.13,-1.13],[.17,-.99],[.20,-.84],
+    [.19,-.67],[.16,-.41],[0,-.36]
   ].map(([r,y])=>new THREE.Vector2(r,y));
   const geometry=new THREE.LatheGeometry(contour,56,0,Math.PI*2);
   const pos=geometry.getAttribute('position');
@@ -138,48 +141,6 @@ function stemGeometry(){
   pos.needsUpdate=true;geometry.computeVertexNormals();
   geometry.computeBoundingBox();
   return {key:'brainstem',side:'center',geometry,anchor:geometry.boundingBox.getCenter(new THREE.Vector3())};
-}
-
-// 승인된 그림체처럼 굵고 둥근 뇌 이랑을 몇 가닥만 살짝 그립니다.
-// 진짜 해부학적 고랑을 깊이 파지 않고, 회전·부위 이동에 함께 붙는 3D 곡선입니다.
-function makeFriendlyRidges(mesh,d){
-  if(!['frontal','parietal','temporal','occipital'].includes(d.key))return;
-  const tracks={
-    frontal:[
-      [[.75,.24],[.66,.35],[.54,.38],[.42,.31]],
-      [[.69,-.16],[.59,-.06],[.46,.00],[.36,-.09]]
-    ],
-    parietal:[
-      [[.17,.64],[.06,.66],[-.12,.59],[-.28,.57]],
-      [[.15,.23],[.02,.32],[-.18,.27],[-.34,.35]]
-    ],
-    temporal:[
-      [[.36,-.35],[.18,-.44],[.00,-.42],[-.20,-.40]],
-      [[.29,-.54],[.12,-.57],[-.09,-.54],[-.23,-.49]]
-    ],
-    occipital:[
-      [[-.51,.40],[-.60,.34],[-.66,.22],[-.71,.12]]
-    ]
-  };
-  const lineColors={
-    frontal:0xab82dc,parietal:0xdbb652,temporal:0x70bd85,occipital:0xe49e84
-  };
-  const side=d.side==='left'?1:-1;
-  const material=new THREE.MeshBasicMaterial({
-    color:lineColors[d.key],transparent:true,opacity:.34,depthWrite:false
-  });
-  for(const line of tracks[d.key]){
-    const points=line.map(([z,y])=>{
-      const x=Math.sqrt(Math.max(.02,1-y*y-z*z));
-      const [X,Y,Z]=cortexPoint(x,y,z,side);
-      return new THREE.Vector3(X+side*.021,Y,Z);
-    });
-    const path=new THREE.CatmullRomCurve3(points);
-    const tube=new THREE.Mesh(new THREE.TubeGeometry(path,28,.012,6,false),material);
-    tube.userData.decorative=true;
-    tube.renderOrder=1;
-    mesh.add(tube);
-  }
 }
 
 export function makeBrainSurfaces(){
@@ -197,7 +158,6 @@ export function makeBrainSurfaces(){
     });
     const mesh=new THREE.Mesh(d.geometry,material);
     mesh.userData={key:d.key,side:d.side,base:new THREE.Vector3(),anchor:d.anchor};
-    makeFriendlyRidges(mesh,d);
     mesh.castShadow=false;
     return mesh;
   });
