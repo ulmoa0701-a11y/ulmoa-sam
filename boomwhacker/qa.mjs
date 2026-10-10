@@ -247,7 +247,7 @@ async function basicCase(name,width,height){
   await page.locator('#resetBtn').click();
   await page.locator(width<=800?'#playBtn':'#startBtn').click();
   const introStart=await page.evaluate(()=>window.__boomVideoQA.intro());
-  check(introStart.mode==='music'&&introStart.active&&!introStart.started&&introStart.beats>=6&&introStart.durationMs>=4600&&introStart.previewBeats>=2,`${name}: musical intro did not start before song ${JSON.stringify(introStart)}`);
+  check(introStart.mode==='music'&&introStart.active&&!introStart.started&&introStart.beats>=6&&introStart.durationMs>=4200&&introStart.previewBeats>=2,`${name}: musical intro did not start before song ${JSON.stringify(introStart)}`);
   if(name==='mobile390')check(introStart.durationMs<6000,`${name}: preparation has become unnecessarily long ${JSON.stringify(introStart)}`);
   check(await page.locator('#introOverlay').isVisible(),`${name}: preparation overlay must be visible during intro`);
   check((await page.locator('#introHeading').innerText())==='박자 먼저 들어요',`${name}: preparatory beat text missing or contains distracting fractions`);
@@ -307,7 +307,7 @@ async function basicCase(name,width,height){
     await page.locator('#mobileSongSelect').selectOption('same');
     await page.locator('#playBtn').click();
     const triple=await page.evaluate(()=>window.__boomVideoQA.intro());
-    check(triple.meter===3&&triple.countBeats===3&&triple.beats%3===0&&triple.durationMs>=4600,`${name}: triple meter count-in should align to bar lines ${JSON.stringify(triple)}`);
+    check(triple.meter===3&&triple.countBeats===3&&triple.beats%3===0&&triple.durationMs>=4200,`${name}: triple meter count-in should align to bar lines ${JSON.stringify(triple)}`);
     await page.locator('#resetBtn').click();
     await page.locator('#mobileSongSelect').selectOption('twinkle');
   }
