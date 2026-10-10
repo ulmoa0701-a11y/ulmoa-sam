@@ -96,15 +96,15 @@ function init() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.8));
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.07;
+  renderer.toneMappingExposure=1.16;
  }catch(error){setNotice('이 기기에서 3D 그래픽을 시작하지 못했습니다.');return false;}
  scene=new THREE.Scene();
  camera=new THREE.PerspectiveCamera(38,1,.1,100);
  brainGroup=new THREE.Group();scene.add(brainGroup);
- scene.add(new THREE.HemisphereLight(0xfff5de,0x71918a,1.5));
- const light=new THREE.DirectionalLight(0xfff9ed,2.15);light.position.set(-3,5,7);scene.add(light);
- const back=new THREE.DirectionalLight(0xaac9dc,1.05);back.position.set(4,2,-5);scene.add(back);
- const under=new THREE.DirectionalLight(0xe3ddfa,.45);under.position.set(0,-3,3);scene.add(under);
+ scene.add(new THREE.HemisphereLight(0xffffff,0xc6dacc,2.0));
+ const light=new THREE.DirectionalLight(0xffffff,1.45);light.position.set(-3,5,7);scene.add(light);
+ const back=new THREE.DirectionalLight(0xeef8ff,.77);back.position.set(4,2,-5);scene.add(back);
+ const under=new THREE.DirectionalLight(0xfff9f2,.35);under.position.set(0,-3,3);scene.add(under);
  // All visible cortical lobes share one folded surface per hemisphere.
  // The old detached ellipsoids are intentionally no longer constructed.
  for(const mesh of makeBrainSurfaces()){
@@ -218,8 +218,8 @@ function refreshSelection(){
   mesh.material.transparent=false;
   mesh.material.opacity=1;
   mesh.material.depthWrite=true;
-  mesh.material.emissive.setHex((selected||activeFunction||activeActivity)&&match?0x2c322a:0);
-  mesh.material.emissiveIntensity=(selected||activeFunction||activeActivity)&&match?.12:0;
+  mesh.material.emissive.setHex((selected||activeFunction||activeActivity)&&match?0xffffff:0);
+  mesh.material.emissiveIntensity=(selected||activeFunction||activeActivity)&&match?.055:0;
  }
  const item=activeActivity?activityDetails[activeActivity]:
   activeFunction?functionDetails[activeFunction]:selected?info[selected]:null;
