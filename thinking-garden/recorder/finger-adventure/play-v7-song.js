@@ -498,7 +498,7 @@ $('songTeacher').addEventListener('click',songTeacherConfirm);
 window.addEventListener('pagehide',closeAll);
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&S.cam)home()});
 home();
-if(window.location?.search&&new URLSearchParams(window.location.search).get('mode')==='real'){
+if(window.location?.search&&/(?:\?|&)mode=real(?:&|$)/.test(window.location.search)){
   songPrepare('mic');
 }
 })();
