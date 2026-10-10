@@ -370,6 +370,38 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
 .introDots>i.active{background:#ffabc1;border-color:#ed8cac;transform:scale(1.2)}
 .introModeSelect{width:76px;min-width:76px;max-width:76px;border:1px solid #cadadd;border-radius:9px;background:#fffefa;padding:5px 2px;font-size:11px;font-weight:900;color:#30435d}
 @media(max-width:800px){.introModeSelect{width:70px;min-width:70px;max-width:70px;min-height:30px;font-size:11px}.introCard{padding:19px 22px;border-radius:22px}}
+/* Two classroom views use the same events/beat clock, never independent timers. */
+.playViewSelect{min-width:100px;max-width:130px;border:1px solid #9cb6cb;background:#f1faff;color:#244c6d;border-radius:10px;padding:6px 7px;font-size:12px;font-weight:900}
+.scoreToolbar{display:flex;align-items:center;justify-content:space-between;gap:5px;flex-wrap:wrap;margin-bottom:3px}
+.scoreToolbar h2{margin:0!important;padding-right:0!important;font-size:15px}
+.scoreActions{display:flex;gap:4px;flex:none}
+.scoreActions button{border:1px solid #a9ccdf;background:#eff8fd;color:#264e76;border-radius:9px;padding:6px 7px;white-space:nowrap;font-size:11px;font-weight:900}
+.scoreActions button:active{transform:translateY(1px)}
+.scoreDownloadStatus{color:#275c76;font-size:10px;line-height:1.4;min-height:0}
+.scoreDownloadStatus:empty{display:none}
+.score:before{display:none!important}
+.beat{position:relative;transition:opacity .15s,filter .15s,transform .15s}
+.beat.scorePlayed{opacity:.43}
+.beat.scoreNext{outline:2px dashed #7eaad0;outline-offset:-2px}
+.beat.scoreActive{opacity:1!important;z-index:2;outline:4px solid #244d7c;outline-offset:-3px;box-shadow:0 0 0 3px rgba(255,210,74,.83),0 5px 13px rgba(37,62,94,.22);animation:scoreHitPulse .42s ease-out both}
+.beat.scoreActive .note{filter:brightness(1.12)}
+@keyframes scoreHitPulse{0%{transform:scale(1)}42%{transform:scale(1.10)}100%{transform:scale(1.035)}}
+.scoreStage{position:absolute;inset:0;z-index:3;display:none;flex-direction:column;gap:8px;padding:12px 15px 18px;background:linear-gradient(180deg,#f4fbff,#fffaf2);overflow:hidden}
+.stage.scoreMode .scoreStage{display:flex}
+.stage.scoreMode .lanes,.stage.scoreMode .hitLine,.stage.scoreMode .tubes,.stage.scoreMode .lyricTrack{display:none!important}
+.stage.scoreMode .fall{display:none}
+.scoreStageHead{display:flex;justify-content:space-between;flex-wrap:wrap;align-items:center;gap:5px;border-bottom:1px solid #dae5ed;padding-bottom:8px;color:#31486a}
+.scoreStageHead strong{font-size:clamp(14px,2vw,19px)}
+.scoreStageHead span{font-size:11px;color:#6b7990}
+.scoreStageGrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;align-content:start;overflow:auto;scrollbar-width:thin;scroll-padding-block:65px;padding:7px 5px 24px;min-height:0;flex:1}
+.scoreStageGrid .beat{min-width:0;max-width:none;width:100%;flex:auto;box-shadow:0 2px 5px rgba(37,70,93,.09)}
+.scoreStageGrid .beat .note{height:clamp(60px,8vh,94px);font-size:19px}
+.scoreStageGrid .beat .lyric{height:35px;font-size:clamp(13px,2vw,19px)}
+.scoreStageGrid .beat .noteLabelText{font-size:clamp(16px,2vw,26px);min-width:36px;min-height:32px}
+.scoreStageGrid .beat.scoreActive{animation:scoreHitPulse .42s ease-out both}
+@media(max-width:800px){.playViewSelect{max-width:98px;min-width:82px;padding:5px 3px;font-size:10px}.scoreStage{padding:9px 6px 13px}.scoreStageGrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.scoreStageGrid .beat .note{height:72px}.scoreStageGrid .beat .lyric{height:29px;font-size:12px}.scoreActions button{min-height:32px}.scoreToolbar{gap:6px}}
+@media(max-width:420px){.scoreStageHead span{display:none}.scoreStageGrid{gap:5px}.scoreStageGrid .beat .note{height:66px}.scoreStageGrid .beat .noteLabelText{font-size:17px}}
+@media(prefers-reduced-motion:reduce){.beat,.beat.scoreActive,.scoreStageGrid .beat.scoreActive{animation:none;transition:none;transform:none!important}}
 </style>
 <link rel="stylesheet" href="./mobile-layout.css?v=20261009" />
 </head>
@@ -403,9 +435,9 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
   <div id="videoStatus" class="hint videoStatus">16:9 WebM · 영상·편집 출처 표시 포함</div>
 </div>
 </aside>
-<section class="panel stagePanel"><div class="stageHead"><strong id="stageTitle">작은별</strong><div class="stageHeadRight"><select id="displayModeSelect" class="stageDisplaySelect" aria-label="연주 화면 표시 방식"><option value="note">계이름</option><option value="name">아이 이름</option><option value="instrument">악기</option><option value="custom">직접 표시</option></select><button id="displayEditBtn" class="displayEditBtn" type="button" aria-label="표시 내용 설정">설정</button><span id="stageStatus">준비</span><button id="stageFsBtn" class="stageFsBtn" type="button" aria-label="수업 전체화면" title="수업 전체화면"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5"/></svg></button><button id="fsExitBtn" class="fsExitBtn" type="button">전체화면 나가기</button></div></div><div id="stage" class="stage"><div id="lanes" class="lanes"></div><div class="hitLine"></div><div id="introOverlay" class="introOverlay" role="status" aria-live="polite" aria-atomic="true"><div class="introCard"><div id="introHeading" class="introHeading">함께 박자 맞춰요</div><div id="introPulse" class="introPulse">♪</div><div id="introDots" class="introDots"></div></div></div><div id="lyricTrack" class="lyricTrack" aria-live="polite"></div><div id="tubes" class="tubes"></div></div><div class="playbar"><button id="playBtn" class="round" aria-label="재생 또는 일시정지">▶</button><div><div id="progress" class="progress"><div id="progressFill" class="fill"></div></div><div id="timeLabel" class="time">0:00 / 0:00</div></div><button id="resetBtn" class="round" aria-label="처음부터">↺</button></div></section>
+<section class="panel stagePanel"><div class="stageHead"><strong id="stageTitle">작은별</strong><div class="stageHeadRight"><select id="displayModeSelect" class="stageDisplaySelect" aria-label="연주 화면 표시 방식"><option value="note">계이름</option><option value="name">아이 이름</option><option value="instrument">악기</option><option value="custom">직접 표시</option></select><button id="displayEditBtn" class="displayEditBtn" type="button" aria-label="표시 내용 설정">설정</button><select id="playViewSelect" class="playViewSelect" aria-label="연주 화면 방식" title="낙하 연주 또는 움직이는 색깔악보"><option value="fall">⬇️ 낙하 연주</option><option value="score">✨ 움직이는 악보</option></select><span id="stageStatus">준비</span><button id="stageFsBtn" class="stageFsBtn" type="button" aria-label="수업 전체화면" title="수업 전체화면"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5"/></svg></button><button id="fsExitBtn" class="fsExitBtn" type="button">전체화면 나가기</button></div></div><div id="stage" class="stage"><div id="scoreStage" class="scoreStage" aria-label="박자에 맞춰 움직이는 색깔악보"><div class="scoreStageHead"><strong>🎼 색깔악보 따라치기</strong><span>커지는 칸을 따라 연주해요</span></div><div id="scoreStageGrid" class="scoreStageGrid"></div></div><div id="lanes" class="lanes"></div><div class="hitLine"></div><div id="introOverlay" class="introOverlay" role="status" aria-live="polite" aria-atomic="true"><div class="introCard"><div id="introHeading" class="introHeading">함께 박자 맞춰요</div><div id="introPulse" class="introPulse">♪</div><div id="introDots" class="introDots"></div></div></div><div id="lyricTrack" class="lyricTrack" aria-live="polite"></div><div id="tubes" class="tubes"></div></div><div class="playbar"><button id="playBtn" class="round" aria-label="재생 또는 일시정지">▶</button><div><div id="progress" class="progress"><div id="progressFill" class="fill"></div></div><div id="timeLabel" class="time">0:00 / 0:00</div></div><button id="resetBtn" class="round" aria-label="처음부터">↺</button></div></section>
 </main>
-<section id="mobileScoreSheet" class="panel score"><div class="mobileSheetHeader"><strong>색깔악보</strong><button id="mobileScoreClose" class="mobileSheetClose" type="button" aria-label="악보 닫기">닫기 ✕</button></div><h2>붐웨커 색깔악보</h2><div id="scoreSub" class="scoreSub">연주 순서를 한눈에 봐요.</div><div id="scoreRows" class="scoreRows"></div><div id="legend" class="legend"></div></section>
+<section id="mobileScoreSheet" class="panel score"><div class="mobileSheetHeader"><strong>색깔악보</strong><button id="mobileScoreClose" class="mobileSheetClose" type="button" aria-label="악보 닫기">닫기 ✕</button></div><div class="scoreToolbar"><h2>붐웨커 색깔악보</h2><div class="scoreActions"><button id="scorePngBtn" type="button" aria-label="전체 색깔악보 PNG 이미지 다운로드">↓ PNG</button><button id="scorePdfBtn" type="button" aria-label="전체 색깔악보 PDF 다운로드">↓ PDF</button></div></div><div id="scoreDownloadStatus" class="scoreDownloadStatus" role="status" aria-live="polite"></div><div id="scoreSub" class="scoreSub">연주 순서를 한눈에 봐요.</div><div id="scoreRows" class="scoreRows"></div><div id="legend" class="legend"></div></section>
 </div>
 <div id="displayModal" class="displayModal" role="dialog" aria-modal="true" aria-labelledby="displayDialogTitle">
  <div class="displayDialog">
