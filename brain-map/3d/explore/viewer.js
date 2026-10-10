@@ -75,7 +75,7 @@ const activityDetails={
 };
 let splitMode = 'together';
 let splitAmount = 0;
-let yaw = Math.PI/2, pitch = .18, distance = 5.45;
+let yaw = Math.PI/2, pitch = .18, distance = 4.65;
 let targetYaw = yaw, targetPitch = pitch;
 let currentView='free';
 let activePointer = new Map(), moved=0, pinchLast=null;
@@ -302,7 +302,7 @@ function bindEvents(){
  });
  partButtons.forEach(button=>button.addEventListener('click',()=>mapMode==='functions'&&functionDetails[button.dataset.part]?setFunction(button.dataset.part):setSelected(button.dataset.part)));
  document.getElementById('clearSelection').addEventListener('click',()=>setSelected(null));
- document.getElementById('resetCamera').addEventListener('click',()=>{distance=5.45;setView('left',true);});
+ document.getElementById('resetCamera').addEventListener('click',()=>{distance=4.65;setView('left',true);});
  canvas.addEventListener('wheel',event=>{event.preventDefault();distance=THREE.MathUtils.clamp(distance+event.deltaY*.005,3.0,9.0);needsRender=true;},{passive:false});
  canvas.addEventListener('pointerdown',event=>{
   canvas.setPointerCapture(event.pointerId);
