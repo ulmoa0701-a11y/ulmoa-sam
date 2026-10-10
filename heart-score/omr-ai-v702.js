@@ -323,6 +323,25 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
             opticalDebug.push({line:li,bar:i,x:Math.round(unflagged[0].x),reason:'isolated-eighth-without-flag-and-half-beat-deficit'});
           }
         }
+        // Independently inspect the space immediately before a notehead for
+        // printed accidentals. Only apply in explicit C-major/C-key context;
+        // retain carried flats from earlier in the same measure.
+        if(keyLabel==='C'&&cvStaffs[li]){
+          let priorFlat=false;
+          for(const v of items){
+            if(v.ir.kind!=='note')continue;
+            const probe=printedAccidentalProbe(gray,w,h,cvStaffs[li],v.x,v.e.note);
+            if(v.e.note==='시♭'){
+              if(probe?.total<9&&!priorFlat){
+                opticalDebug.push({line:li,bar:i,x:Math.round(v.x),reason:'unprinted-B-flat',total:probe.total});
+                v.e.note='시';
+              }else priorFlat=true;
+            }else if(v.e.note==='파'&&probe?.total>=35&&probe.max<=9){
+              opticalDebug.push({line:li,bar:i,x:Math.round(v.x),reason:'printed-sharp-before-F',total:probe.total,max:probe.max});
+              v.e.note='파#';
+            }
+          }
+        }
         const longNotes=items.filter(v=>v.ir.kind==='note'&&v.e.dur>=2);
         const firstNote=items.find(v=>v.ir.kind==='note');
         if(longNotes.length===1&&longNotes[0]===firstNote){
