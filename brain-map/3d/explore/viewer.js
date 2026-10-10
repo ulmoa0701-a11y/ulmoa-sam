@@ -113,7 +113,7 @@ function init() {
   meshes.push(mesh);
  }
  // Subtle ground disk anchors the 3D model visually without hiding anatomy.
- const shadow=new THREE.Mesh(new THREE.CircleGeometry(1.65,72),new THREE.MeshBasicMaterial({color:0x74887c,transparent:true,opacity:.09,depthWrite:false}));
+ const shadow=new THREE.Mesh(new THREE.CircleGeometry(1.38,72),new THREE.MeshBasicMaterial({color:0x74887c,transparent:true,opacity:.045,depthWrite:false}));
  shadow.rotation.x=-Math.PI/2;shadow.position.set(0,-1.76,0);scene.add(shadow);
  raycaster=new THREE.Raycaster();
  resize();
