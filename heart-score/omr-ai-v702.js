@@ -177,7 +177,7 @@ function visualPitchProposals(staff,fragment){
     const chosen=nearby[0];
     if(!chosen)return {x:Math.round(v.x),model:pitchName(v.ir.pitch),found:false};
     const p=scanPitchFromY(staff,chosen.h.x,chosen.h.y);
-    const rhythm=scanRhythm(staff,{x:chosen.h.x,y:chosen.h.y});return {x:Math.round(v.x),model:pitchName(v.ir.pitch),proposal:p.note,cvX:Math.round(chosen.h.x),cvY:Math.round(chosen.h.y),delta:+chosen.delta.toFixed(1),gap:nearby[1]?+(nearby[1].delta-chosen.delta).toFixed(1):null,area:Math.round(chosen.h.area||0),rhythm:{dur:rhythm.dur,dot:rhythm.dot,flag:rhythm.flag,beam:+rhythm.beam.toFixed(1),hollow:rhythm.hollow}};
+    const rhythm=scanRhythm(staff,{x:chosen.h.x,y:chosen.h.y});return {x:Math.round(v.x),model:pitchName(v.ir.pitch),proposal:p.note,cvX:Math.round(chosen.h.x),cvY:Math.round(chosen.h.y),delta:+chosen.delta.toFixed(1),gap:nearby[1]?+(nearby[1].delta-chosen.delta).toFixed(1):null,area:Math.round(chosen.h.area||0),cvAccidental:chosen.h.accidental||null,rhythm:{dur:rhythm.dur,dot:rhythm.dot,flag:rhythm.flag,beam:+rhythm.beam.toFixed(1),hollow:rhythm.hollow}};
   });
 }
 function modelNoteShapeDiagnostics(staff,fragment){
@@ -226,6 +226,7 @@ function fitMeasureToBeat(items,left,right,targetQ=4){
       let cost=log*log*2.6+space*space*.75+Math.abs(d-ro)*.12;
       if(Math.abs(d-ro)<.01)cost-=.32;
       if(d===4&&n>1)cost+=4;
+      if(Number.isFinite(items[i].opticalDur)&&Math.abs(d-items[i].opticalDur)>.01)cost+=8;
       // The notation decoder's dotted-quarter (1.5 beats) is stronger evidence
       // than a horizontal-space fit; preserving its dot prevents false quartering.
       if(Math.abs(ro-1.5)<.01&&d<1.5)cost+=2.8;
@@ -256,7 +257,7 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
     const sp=Number(line.input.box?.lineSpacing)||10;
     const votes=visualPitchProposals(cvStaffs[li],line.fragment);const hollow= cvStaffs[li]?scanHollowHeads(cvStaffs[li]):[];let noteIndex=0;
     const musical=line.fragment.filter(ir=>ir.kind==='note'||ir.kind==='rest').map(ir=>{
-      const e=eventFromIr(ir),q=ir.src?.bbox;
+      const e=eventFromIr(ir),q=ir.src?.bbox;let opticalDur=null;
       if(e&&ir.kind==='note'){
         const vote=votes[noteIndex++];
         // When the model claims a dotted quarter but the matching physical
@@ -264,13 +265,13 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
         if(Math.abs(e.dur-1.5)<.01&&vote?.rhythm?.dot===false&&
            vote.rhythm.dur===1&&vote.proposal===e.note&&
            vote.cvX<vote.x&&vote.delta<=sp*4.5&&
-           (vote.gap===null||vote.gap>=sp*.65))e.dur=1;
+           (vote.gap===null||vote.gap>=sp*.65)){e.dur=1;opticalDur=1;}
         // An independent notehead at treble C5 can disambiguate C4/C5 if the
         // decoded letter agrees; do not overwrite altered or different notes.
         if(vote?.proposal?.startsWith('높은')&&!e.note.startsWith('높은')&&vote.proposal.slice(2)===e.note&&
            vote.delta<=sp*6&&vote.cvX<vote.x&&(vote.gap===null||vote.gap>=sp*.65))e.note=vote.proposal;
       }
-      return e&&q?{ir,e,x:q[0]+q[2]/2}:null;
+      return e&&q?{ir,e,x:q[0]+q[2]/2,opticalDur}:null;
     })
       .filter(v=>v&&(v.ir.kind!=='rest'||!bars.slice(1,-1).some(x=>Math.abs(x-v.x)<=sp*.85)))
       .sort((a,b)=>a.x-b.x);
