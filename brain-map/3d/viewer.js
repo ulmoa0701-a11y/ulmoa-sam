@@ -151,7 +151,9 @@ function init() {
      const sign=data.side==='left'?1:-1;
      const puffPositions=[
       [-.17,.25,.33,.41],[.15,.28,.30,.36],[.30,-.02,.25,.38],
-      [-.27,-.10,.26,.36],[.04,-.25,.37,.40]
+      [-.27,-.10,.26,.36],[.04,-.25,.37,.40],
+      [-.18,.23,-.30,.38],[.22,.13,-.31,.36],
+      [-.12,-.19,-.35,.38],[.24,-.26,-.25,.35]
      ];
      for(const [xx,yy,zz,rr] of puffPositions){
        const puff=new THREE.Mesh(new THREE.SphereGeometry(1,24,17),material);
