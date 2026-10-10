@@ -53,11 +53,55 @@
   nav.setAttribute('aria-label','사이트 주요 메뉴');
   nav.innerHTML='<button class="hb-mobile-toggle" type="button" aria-expanded="false" aria-controls="hb-nav-links"><span aria-hidden="true">☰</span> 전체메뉴</button><div class="hb-nav-links" id="hb-nav-links">'+groups.map(item).join('')+'</div><button class="hb-quick-search" type="button" aria-label="바로 찾기 열기"><span aria-hidden="true">⌕</span><span class="hb-search-text">찾기</span></button>';
   const links=nav.querySelector('.hb-nav-links'),toggle=nav.querySelector('.hb-mobile-toggle');
+  // Compact mobile navigation: swap the 2-column category grid for the chosen category's buttons.
+  const mobileCategory=document.createElement('section');
+  mobileCategory.className='hb-mobile-category';
+  mobileCategory.hidden=true;
+  mobileCategory.setAttribute('aria-label','선택한 카테고리');
+  mobileCategory.innerHTML='<div class="hb-mobile-category-head"><button type="button" class="hb-mobile-back">← 전체 카테고리</button><strong class="hb-mobile-category-name"></strong></div><div class="hb-mobile-subgrid"></div>';
+  links.appendChild(mobileCategory);
+  const mobileBack=mobileCategory.querySelector('.hb-mobile-back');
+  const mobileSubgrid=mobileCategory.querySelector('.hb-mobile-subgrid');
+  const compactView=()=>window.matchMedia('(max-width:1199px)').matches;
+  function resetMobileCategory(){
+    links.classList.remove('hb-show-subcategory');
+    mobileCategory.hidden=true;
+    mobileSubgrid.replaceChildren();
+  }
+  mobileBack.addEventListener('click',()=>{
+    resetMobileCategory();
+    const categoryButton=links.querySelector('.hb-menu summary');
+    categoryButton?.focus();
+  });
+  nav.querySelectorAll('.hb-menu > summary').forEach(summary=>{
+    summary.addEventListener('click',event=>{
+      if(!compactView()||!nav.classList.contains('hb-mobile-open'))return;
+      event.preventDefault(); // No native details expansion on compact screens.
+      const menu=summary.parentElement;
+      const label=menu.querySelector('.hb-nav-emoji')?.nextSibling?.textContent?.trim()||summary.textContent.replace('⌄','').trim();
+      mobileCategory.querySelector('.hb-mobile-category-name').textContent=label;
+      mobileSubgrid.replaceChildren();
+      menu.querySelectorAll('.hb-dropdown a').forEach(link=>{
+        const tile=document.createElement('a');
+        tile.className='hb-mobile-subtile';
+        tile.href=link.getAttribute('href');
+        const title=document.createElement('b');
+        title.textContent=link.querySelector('b')?.textContent||link.textContent.trim();
+        const description=document.createElement('small');
+        description.textContent=link.querySelector('span')?.textContent||'바로가기';
+        tile.append(title,description);
+        mobileSubgrid.appendChild(tile);
+      });
+      links.classList.add('hb-show-subcategory');
+      mobileCategory.hidden=false;
+      mobileBack.focus({preventScroll:true});
+    });
+  });
   const closeMenus=(except)=>nav.querySelectorAll('details[open]').forEach(d=>{if(d!==except)d.open=false});
-  const closeMobile=()=>{nav.classList.remove('hb-mobile-open');toggle.setAttribute('aria-expanded','false')};
-  toggle.addEventListener('click',()=>{const opened=nav.classList.toggle('hb-mobile-open');toggle.setAttribute('aria-expanded',String(opened));if(!opened)closeMenus()});
+  const closeMobile=()=>{resetMobileCategory();nav.classList.remove('hb-mobile-open');toggle.setAttribute('aria-expanded','false')};
+  toggle.addEventListener('click',()=>{const opened=nav.classList.toggle('hb-mobile-open');toggle.setAttribute('aria-expanded',String(opened));if(!opened){resetMobileCategory();closeMenus()}});
   nav.querySelectorAll('.hb-menu').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)closeMenus(d)}));
-  links.addEventListener('click',(e)=>{if(e.target.closest('a'))closeMobile()});
+  links.addEventListener('click',(e)=>{if(e.target.closest('a')){closeMobile();closeMenus()}});
   document.addEventListener('click',(e)=>{if(!nav.contains(e.target)){closeMenus();closeMobile()}});
   document.addEventListener('keydown',(e)=>{if(e.key==='Escape'){closeMenus();closeMobile()}});
   const known=[

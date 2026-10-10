@@ -38,6 +38,8 @@ jobs:
           assert "name:'부모님 자료'" in js
           assert 'hb-mobile-toggle' in js and 'hb-find-dialog' in js
           assert 'display:grid!important' in css and '1199px' in css
+          assert 'hb-mobile-subgrid' in js and 'hb-show-subcategory' in js
+          assert 'grid-template-columns:repeat(2,minmax(0,1fr))' in css
           destinations=set(re.findall(r"U\('([^']+)'\)",js))
           for href in destinations:
               local=href.split('?')[0].split('#')[0]

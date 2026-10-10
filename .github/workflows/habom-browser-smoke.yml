@@ -47,12 +47,25 @@ jobs:
               if(!nav.textContent.includes('부모님 자료'))issues.push('parent menu missing');
               menu?.click();
               if(!nav.classList.contains('hb-mobile-open')||menu.getAttribute('aria-expanded')!=='true')issues.push('mobile panel did not open');
+              const wrapper=nav.querySelector('.hb-nav-links');
+              const columns=getComputedStyle(wrapper).gridTemplateColumns.split(' ').filter(Boolean);
+              if(columns.length!==2)issues.push('category tiles are not 2 columns: '+columns.length);
               const first=nav.querySelector('details.hb-menu summary');
               first?.click();
-              if(!nav.querySelector('details.hb-menu[open]'))issues.push('category dropdown did not open');
+              if(!wrapper.classList.contains('hb-show-subcategory'))issues.push('category panel did not open');
+              if(nav.querySelector('details.hb-menu[open]'))issues.push('native details expanded on mobile');
+              const firstTile=nav.querySelector('.hb-mobile-subtile');
+              if(!firstTile||getComputedStyle(firstTile).display==='none')issues.push('category subtiles not visible');
+              const menuTile=nav.querySelector('.hb-nav-links > .hb-menu');
+              if(menuTile&&getComputedStyle(menuTile).display!=='none')issues.push('grid remains visible behind subcategory');
+              const back=nav.querySelector('.hb-mobile-back');
+              back?.click();
+              if(wrapper.classList.contains('hb-show-subcategory'))issues.push('return to categories failed');
+              if(menuTile&&getComputedStyle(menuTile).display==='none')issues.push('category grid did not return');
+              first?.click();
               if(isSub){
-                const link=nav.querySelector('.hb-dropdown a');
-                if(link&&getComputedStyle(link).display==='none')issues.push('subpage mobile links hidden');
+                const subTile=nav.querySelector('.hb-mobile-subtile');
+                if(!subTile||getComputedStyle(subTile).display==='none')issues.push('subpage tile hidden');
               }
               nav.querySelector('.hb-quick-search')?.click();
               const dialog=document.querySelector('.hb-find-dialog');
