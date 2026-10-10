@@ -11,22 +11,23 @@ export function recoverFaintBarlines(gray,w,h,box){
   const sideRad=Math.max(5,Math.round(sp*1.15)),raw=[];
   if(x1<=x0)return[];
   for(let x=x0;x<=x1;x++){
-    let validGaps=0,inkN=0,sideInk=0,darkness=0,contrast=0;
+    let validGaps=0,inkN=0,sideInk=0,darkness=0,contrast=0,leftContrast=0,rightContrast=0;
     for(let gap=0;gap<4;gap++){
       let gapHits=0;
       for(const off of [.2,.4,.6,.8]){
         const y=Math.round(top+(gap+off)*sp);
         if(y<0||y>=h)continue;
         const mid=Math.min(gray[y*w+Math.max(0,x-1)],gray[y*w+x],gray[y*w+Math.min(w-1,x+1)]);
-        const side=(gray[y*w+Math.max(0,x-sideRad)]+gray[y*w+Math.min(w-1,x+sideRad)])/2;
+        const left=gray[y*w+Math.max(0,x-sideRad)],right=gray[y*w+Math.min(w-1,x+sideRad)];
+        const side=(left+right)/2;
         if(mid<.982){gapHits++;inkN++}
         if(side<.87)sideInk++;
-        darkness+=mid;contrast+=side-mid;
+        darkness+=mid;contrast+=side-mid;leftContrast+=left-mid;rightContrast+=right-mid;
       }
       if(gapHits>=3)validGaps++;
     }
     const inkContrast=contrast/16;
-    if(validGaps===4&&inkN>=12&&inkContrast>=.035&&sideInk<=10)raw.push({x,contrast:inkContrast});
+    if(validGaps===4&&inkN>=12&&inkContrast>=.035&&leftContrast/16>=.035&&rightContrast/16>=.035&&sideInk<=10)raw.push({x,contrast:inkContrast});
   }
   if(!raw.length)return[];
   const groups=[];let group=[raw[0]];
