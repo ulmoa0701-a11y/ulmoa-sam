@@ -29,9 +29,9 @@ jobs:
         shell: bash
         run: |
           set +e
-          node heart-score/qa/omr-image-e2e.cjs --mobile --fixture heart-score/qa/.scan-debug/typeset-lowres-19.jpg --variant scan-lowres-mobile --runtime heart-score/qa/.runtime --output heart-score/qa/.scan-debug/lowres-mobile-result
+          node heart-score/qa/omr-image-e2e.cjs --mobile --overlay-bars --fixture heart-score/qa/.scan-debug/typeset-lowres-19.jpg --variant scan-lowres-mobile --runtime heart-score/qa/.runtime --output heart-score/qa/.scan-debug/lowres-mobile-result
           STATUS1=$?
-          node heart-score/qa/omr-image-e2e.cjs --mobile --fixture heart-score/qa/.scan-debug/typeset-tilted-19.jpg --variant scan-tilted-mobile --runtime heart-score/qa/.runtime --output heart-score/qa/.scan-debug/tilted-mobile-result
+          node heart-score/qa/omr-image-e2e.cjs --mobile --overlay-bars --fixture heart-score/qa/.scan-debug/typeset-tilted-19.jpg --variant scan-tilted-mobile --runtime heart-score/qa/.runtime --output heart-score/qa/.scan-debug/tilted-mobile-result
           STATUS2=$?
           echo "SCAN_LOWRES=$STATUS1 SCAN_TILTED=$STATUS2"
           if [[ $STATUS1 -ne 0 || $STATUS2 -ne 0 ]]; then exit 1; fi
