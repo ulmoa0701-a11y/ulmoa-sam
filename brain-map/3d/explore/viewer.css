@@ -266,3 +266,37 @@ html.brain-embedded,html.brain-embedded body{margin:0!important;width:100%;heigh
   }
   .stage-shell{background:radial-gradient(ellipse at 50% 36%,#fffefb 0%,#f6f9f4 63%,#edf7f0 100%)}
 }
+
+/* 학부모용 좌뇌·우뇌 협력 학습: 기존 부위별 기능 화면과 독립된 교육 카드 */
+.hemisphere-learning{margin:14px 0 4px;padding:17px 16px 15px;border-radius:19px;background:linear-gradient(135deg,#f5faf3,#fffdf6);border:1px solid #e0ebdc}
+.hemisphere-heading{display:flex;align-items:end;gap:14px;justify-content:space-between;flex-wrap:wrap;margin-bottom:13px}
+.hemisphere-heading h2{font-size:20px;font-weight:900;color:#304e3b;margin:3px 0 0;letter-spacing:-.035em}
+.hemi-eyebrow{font-size:12px;font-weight:850;color:#5d886b}
+.hemisphere-heading p{margin:0;max-width:350px;font-size:12px;line-height:1.55;color:#617564;word-break:keep-all}
+.hemisphere-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.hemisphere-tabs button{min-width:0;min-height:58px;padding:10px 5px;border:1.5px solid #d6e3d3;border-radius:14px;background:#fff;text-align:center;color:#3e5947;font-size:15px;font-weight:900}
+.hemisphere-tabs button small{display:block;margin-top:3px;font-size:11px;color:#738272;font-weight:700}
+.hemisphere-tabs button[aria-pressed=true]{background:#e4f3e6;border-color:#70aa80;color:#315842;box-shadow:0 2px 9px #416b4a12}
+.hemisphere-tabs button[data-hemisphere=right][aria-pressed=true]{background:#fff0e8;border-color:#d9a48e}
+.hemisphere-tabs button[data-hemisphere=both][aria-pressed=true]{background:#f3eef9;border-color:#a693c2}
+.hemisphere-explainer{margin-top:10px;padding:15px;border-radius:14px;border:1px solid #e2e9dc;background:#fff}
+.hemisphere-explainer>strong{display:block;font-size:16px;font-weight:900;color:#345944}
+.hemisphere-explainer>p{font-size:13px;line-height:1.7;margin:8px 0 0;color:#536758;word-break:keep-all}
+.hemi-example{margin-top:11px;padding:10px 12px;background:#f4f8f0;border-radius:12px}
+.hemi-example b{display:block;color:#557360;font-size:12px}
+.hemi-example p{margin:5px 0 0;color:#4f6858;font-size:12px;line-height:1.65;word-break:keep-all}
+.hemi-reality{font-size:11px;line-height:1.7;margin:10px 3px 0;color:#6a786b;word-break:keep-all}
+.hemisphere-picks button[data-part="hemisphere-both"]{grid-column:1/-1;justify-content:center}
+.both-swatch{background:linear-gradient(100deg,#a7d7b2 50%,#f0b598 50%)!important}
+.hemisphere-sources{font-size:11px;line-height:1.5;padding:10px 5px 0;color:#728477}
+.hemisphere-sources a{color:#4d785a;text-underline-offset:2px}
+.brain-embedded .hemisphere-learning,.brain-embedded .hemisphere-sources{display:none!important}
+@media(max-width:620px){
+ .hemisphere-learning{margin-top:10px;padding:13px 11px;border-radius:15px}
+ .hemisphere-heading h2{font-size:18px}
+ .hemisphere-tabs{gap:5px}
+ .hemisphere-tabs button{font-size:13px;min-height:55px;padding:8px 3px}
+ .hemisphere-tabs button small{font-size:10px}
+ .hemisphere-explainer{padding:12px}
+ .hemisphere-sources{padding:12px 8px 0}
+}
