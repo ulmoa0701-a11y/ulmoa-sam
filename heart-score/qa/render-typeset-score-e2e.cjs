@@ -167,13 +167,26 @@ const truth=require('./doremi-ground-truth.json');
     const restored=document.createElement('canvas');restored.width=1800;restored.height=1480;
     const rc=restored.getContext('2d');rc.fillStyle='#fff';rc.fillRect(0,0,1800,1480);rc.imageSmoothingEnabled=true;rc.imageSmoothingQuality='high';
     rc.drawImage(compressed,0,0,1800,1480);
-    return{lowres:smaller.toDataURL('image/jpeg',.68).split(',')[1],tilted:tilted.toDataURL('image/jpeg',.74).split(',')[1],upscaled:restored.toDataURL('image/png').split(',')[1]};
+    function pixVariant(contrast){
+      const variant=document.createElement('canvas');variant.width=1800;variant.height=1480;
+      const vc=variant.getContext('2d',{willReadFrequently:true});vc.drawImage(restored,0,0);
+      const im=vc.getImageData(0,0,1800,1480),px=im.data;
+      for(let k=0;k<px.length;k+=4){
+        const v=.299*px[k]+.587*px[k+1]+.114*px[k+2],z=contrast==='binary'?(v<185?5:255):Math.max(0,Math.min(255,((v/255)-.87)*255*3.3+223));
+        px[k]=px[k+1]=px[k+2]=z;
+      }
+      vc.putImageData(im,0,0);
+      return variant.toDataURL('image/png').split(',')[1];
+    }
+    return{lowres:smaller.toDataURL('image/jpeg',.68).split(',')[1],tilted:tilted.toDataURL('image/jpeg',.74).split(',')[1],upscaled:restored.toDataURL('image/png').split(',')[1],binary:pixVariant('binary'),contrast:pixVariant('contrast')};
   },pictures.normal);
   const lowresPath=path.join(out,'typeset-lowres-19.jpg'),tiltedPath=path.join(out,'typeset-tilted-19.jpg');
   fs.writeFileSync(lowresPath,Buffer.from(disturbed.lowres,'base64'));
   fs.writeFileSync(tiltedPath,Buffer.from(disturbed.tilted,'base64'));
   const restoredPath=path.join(out,'typeset-jpeg-upscaled-19.png');
   fs.writeFileSync(restoredPath,Buffer.from(disturbed.upscaled,'base64'));
+  fs.writeFileSync(path.join(out,'typeset-jpeg-binary-19.png'),Buffer.from(disturbed.binary,'base64'));
+  fs.writeFileSync(path.join(out,'typeset-jpeg-contrast-19.png'),Buffer.from(disturbed.contrast,'base64'));
   console.log('DISTURBED_FIXTURE '+JSON.stringify({lowres:lowresPath,tilted:tiltedPath,source:'independent typeset score'}));
   console.log(JSON.stringify({generated:true,fullNotation:{measures:truth.measures.length,notes:truth.noteCount,rests:truth.restCount,perLine:truth.perLine},drawn:{measures:pictures.count,internalBarlines:pictures.bars},files:[first,second],size:[pictures.width,pictures.height]}));
  }finally{await browser.close()}
