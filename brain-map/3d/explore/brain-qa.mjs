@@ -17,7 +17,7 @@ const sha=b=>createHash('sha256').update(b).digest('hex');
 async function checkPage(page,name){
  const errors=[];
  page.on('pageerror',e=>errors.push(String(e)));
- await page.goto(BASE+'brain-map/3d/explore/?v=20261010-toy4',{waitUntil:'domcontentloaded',timeout:30000});
+ await page.goto(BASE+'brain-map/3d/explore/?v=20261010-friendly5',{waitUntil:'domcontentloaded',timeout:30000});
  await page.waitForFunction(()=>document.getElementById('viewerFallback')?.hidden===true,{timeout:25000});
  await page.locator('#brainCanvas').waitFor({state:'visible'});
  await page.waitForTimeout(500);
@@ -88,7 +88,7 @@ try{
  await checkPage(mobile,'mobile');
  await mobile.close();
  const parent=await browser.newPage({viewport:{width:1280,height:820}});
- await parent.goto(BASE+'brain-map/3d/?v=20261010-toy4',{waitUntil:'domcontentloaded',timeout:30000});
+ await parent.goto(BASE+'brain-map/3d/?v=20261010-friendly5',{waitUntil:'domcontentloaded',timeout:30000});
  await parent.locator('[data-view="front"]').click();
  const inner=parent.frameLocator('#brainViewerFrame');
  await inner.locator('#brainCanvas').waitFor({state:'visible',timeout:30000});
