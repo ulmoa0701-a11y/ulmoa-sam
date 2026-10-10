@@ -75,8 +75,11 @@ const truth=require('./doremi-ground-truth.json');
         native.save();native.strokeStyle='#111';native.fillStyle='#111';native.lineWidth=1.4;
         if(item.note==='쉼'){
           const rx=note.getAbsoluteX()+7,ry=stave.getYForLine(2),r=item.dur;
-          if(r>=1){native.beginPath();native.moveTo(rx-3,ry-7);native.lineTo(rx+3,ry-1);native.lineTo(rx-3,ry+7);native.lineTo(rx+3,ry+12);native.stroke();}
-          else{native.beginPath();native.arc(rx,ry-6,2,0,Math.PI*2);native.fill();native.beginPath();native.moveTo(rx+2,ry-6);native.lineTo(rx+1,ry+11);native.stroke();}
+          // Native SMuFL rest symbol from locally embedded Bravura font.
+          // SVG/text fallback is deliberately NOT a generic Z; the model must see a real rest.
+          native.font='32px Bravura'; native.textAlign='center'; native.textBaseline='middle';
+          native.fillText(String.fromCodePoint(r>=1?0xE4E5:0xE4E6),rx,ry);
+          native.textAlign='left'; native.textBaseline='alphabetic';
         }else{
           native.beginPath();native.ellipse(cx,cy,6.6,4.6,-.28,0,Math.PI*2);
           if(item.dur>=2){native.fillStyle='#fff';native.fill();native.stroke();native.fillStyle='#111';}else native.fill();
