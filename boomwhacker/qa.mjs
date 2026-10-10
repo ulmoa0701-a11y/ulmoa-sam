@@ -41,7 +41,11 @@ async function basicCase(name,width,height){
   check(fallSize>=(width<=800?56:76),`${name}: falling note is still too small (${fallSize}px)`);
   await page.evaluate(()=>{elapsed=0;draw()});
   check(await page.locator('.fall').count()===0,`${name}: notes must be invisible again after reset`);
-  check(await page.locator('.beat').count()>0,`${name}: score did not render`);
+  check(await page.locator('#scoreRows .beat').count()>0,`${name}: sidebar score did not render`);
+  check(await page.locator('#scoreStageGrid .beat').count()===await page.locator('#scoreRows .beat').count(),`${name}: animated score and sidebar have different note counts`);
+  check(await page.locator('#playViewSelect option').count()===2,`${name}: exactly two playing views required`);
+  check(await page.locator('#scorePngBtn').count()===1&&await page.locator('#scorePdfBtn').count()===1,`${name}: PNG or PDF score export missing`);
+  check((await page.locator('#playViewSelect').inputValue())==='fall',`${name}: initial playing view should remain the familiar falling-notes mode`);
   check(await page.locator('#lyricTrack').count()===1,`${name}: lyric track missing`);
   check(await page.locator('.lyricSyllable').count()>5,`${name}: lyric track did not render a continuous line`);
   if(width<=800)check(await page.locator('.lyricSyllable').count()<=9,`${name}: mobile lyric line is overcrowded`);
@@ -245,6 +249,33 @@ async function basicCase(name,width,height){
   const activeBorder=await page.locator('.lyricSyllable.active').evaluate(el=>getComputedStyle(el).borderTopColor);
   check(activeBorder==='rgb(235, 36, 39)',`${name}: current lyric syllable does not use its Boomwhacker color (${activeBorder})`);
   await page.locator('#resetBtn').click();
+  // Animated score mode is a second rendering of the very same event timeline.
+  await page.locator('#playViewSelect').selectOption('score');
+  const scoreView=await page.evaluate(()=>window.__boomVideoQA.view());
+  check(scoreView.mode==='score'&&scoreView.scoreTiles===scoreView.sideTiles&&scoreView.scoreTiles>10,
+    `${name}: score view does not render the same notes as the side score ${JSON.stringify(scoreView)}`);
+  check(await page.locator('#scoreStage').isVisible(),`${name}: animated score stage is hidden`);
+  const cardGeom=await page.evaluate(()=>{
+    const grid=document.querySelector('#scoreStageGrid'),card=grid.querySelector('.beat'),
+      note=card.querySelector('.note'),lyric=card.querySelector('.lyric'),
+      box=x=>x.getBoundingClientRect();
+    return {cardH:box(card).height,noteH:box(note).height,lyricH:box(lyric).height,
+      cardBottom:box(card).bottom,lyricBottom:box(lyric).bottom,gridH:grid.clientHeight,scrollH:grid.scrollHeight,
+      lyricText:lyric.textContent};
+  });
+  check(cardGeom.cardH>=cardGeom.noteH+cardGeom.lyricH-3&&cardGeom.lyricBottom<=cardGeom.cardBottom+1,
+    `${name}: animated score cards clip their note or lyric ${JSON.stringify(cardGeom)}`);
+  if(width<=800)check(cardGeom.scrollH>cardGeom.gridH&&cardGeom.lyricText==='반',
+    `${name}: mobile score should scroll and show readable lyrics ${JSON.stringify(cardGeom)}`);
+  const highlighted=await page.evaluate(()=>{elapsed=events[5].start+55;draw();return {on:[...document.querySelectorAll('#scoreStageGrid .scoreActive')].map(e=>Number(e.dataset.eventIndex)),
+    side:[...document.querySelectorAll('#scoreRows .scoreActive')].map(e=>[...e.parentElement.children].indexOf(e)),
+    next:[...document.querySelectorAll('#scoreStageGrid .scoreNext')].map(e=>Number(e.dataset.eventIndex))}});
+  check(JSON.stringify(highlighted.on)==='[5]'&&JSON.stringify(highlighted.side)==='[5]'&&JSON.stringify(highlighted.next)==='[6]',
+    `${name}: active score and next beat do not follow playback ${JSON.stringify(highlighted)}`);
+  if(name==='mobile390'||name==='desktop1366')await page.screenshot({path:`${out}/${name}-score-mode.png`,fullPage:false});
+  await page.locator('#playViewSelect').selectOption('fall');
+  check(!(await page.locator('#scoreStage').isVisible()),`${name}: falling mode must hide expanded score`);
+  await page.locator('#resetBtn').click();
   await page.locator(width<=800?'#playBtn':'#startBtn').click();
   const introStart=await page.evaluate(()=>window.__boomVideoQA.intro());
   check(introStart.mode==='music'&&introStart.active&&!introStart.started&&introStart.beats===6&&introStart.previewBeats===0&&introStart.countBeats===6&&introStart.durationMs<=6000,`${name}: musical intro did not start before song ${JSON.stringify(introStart)}`);
@@ -374,6 +405,44 @@ async function basicCase(name,width,height){
   await context.close();
 }
 
+// Real browser download checks: file headers, full note count, A4 PDF paging.
+{
+  const context=await browser.newContext({viewport:{width:1366,height:900},acceptDownloads:true});
+  const page=await context.newPage();
+  const errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(BASE,{waitUntil:'networkidle'});
+  const save=async(kind)=>{
+    const selector=kind==='pdf'?'#scorePdfBtn':'#scorePngBtn';
+    const [download]=await Promise.all([page.waitForEvent('download'),page.locator(selector).click()]);
+    const path=out+'/actual-score-'+kind+(kind==='pdf'?'.pdf':'.png');
+    await download.saveAs(path);
+    return {name:download.suggestedFilename(),buf:fs.readFileSync(path)};
+  };
+  const baseNotes=await page.locator('#scoreRows .beat').count();
+  const png=await save('png');
+  check(png.name.includes('색깔악보')&&png.buf.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])),
+    'score export: downloaded PNG signature or filename invalid');
+  const pngW=png.buf.readUInt32BE(16),pngH=png.buf.readUInt32BE(20);
+  check(pngW===1240&&pngH>=400&&png.buf.length>10000,
+    'score export: image is clipped or too small '+JSON.stringify({pngW,pngH,size:png.buf.length,baseNotes}));
+  const pdf=await save('pdf');
+  const pdfText=pdf.buf.toString('latin1');
+  check(pdf.name.includes('색깔악보')&&pdfText.startsWith('%PDF-1.4')&&pdfText.includes('%%EOF')&&pdfText.includes('/Count 1'),
+    'score export: single-page PDF structure or filename invalid');
+  check(pdf.buf.length>10000&&pdfText.includes('/MediaBox [0 0 595.28 841.89]'),
+    'score export: PDF missing printable A4 portrait page');
+  // Long song must NOT clip notes at the bottom: append pages instead.
+  await page.evaluate(()=>{const originals=[...events];events=Array.from({length:110},(_,i)=>({...originals[i%originals.length],index:i,start:FIRST_NOTE_LEAD_MS+i*beatMs()}));renderScore()});
+  const long=await save('pdf');
+  const longText=long.buf.toString('latin1');
+  check(longText.includes('/Count 3')&&((longText.match(/\/Type \/Page \/Parent/g)||[]).length===3),
+    'score export: long PDF was not split into three pages');
+  check(errors.length===0,'score export: JS errors '+errors.join(' | '));
+  report.push({name:'scoreExport',pngBytes:png.buf.length,pngSize:pngW+'x'+pngH,pdfBytes:pdf.buf.length,longPdfBytes:long.buf.length,pdfPages:3,notes:baseNotes});
+  await context.close();
+}
+
 for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412',412,915],['tablet768',768,1024],['desktop1366short',1366,768],['desktop1600short',1600,800],['desktop1366',1366,900]]) await basicCase(name,w,h);
 
 {
@@ -468,7 +537,7 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   await page.reload({waitUntil:'networkidle'});
   check((await page.locator('#songTitle').innerText())==='QA 전달곡','transfer: song title not loaded from localStorage');
   check((await page.locator('#songMeta').innerText()).includes('3/4'),'transfer: meter not loaded');
-  check(await page.locator('.beat').count()===3,'transfer: note count mismatch');
+  check(await page.locator('#scoreRows .beat').count()===3&&await page.locator('#scoreStageGrid .beat').count()===3,'transfer: note count mismatch');
   check(await page.evaluate(()=>localStorage.getItem('ulmoaBoomTransfer'))===null,'transfer: one-time payload was not consumed');
   await page.screenshot({path:`${out}/transfer390.png`,fullPage:true});
   await context.close();
