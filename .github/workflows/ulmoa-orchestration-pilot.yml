@@ -1,0 +1,34 @@
+name: Ulmoa Orchestration Pilot (read-only)
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'ops/health_report.py'
+      - 'ops/test_health_report.py'
+      - '.github/workflows/ulmoa-orchestration-pilot.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: ulmoa-orchestration-pilot-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run offline unit tests
+        run: python3 -m unittest discover -s ops -p 'test_health_report.py' -v
+      - name: Verify routes and public deployment (read-only)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 ops/health_report.py --root . --live --github --out ops-report
+      - name: Save human-readable QA report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ulmoa-ops-qa-report
+          path: ops-report/
+          if-no-files-found: warn
+          retention-days: 7
