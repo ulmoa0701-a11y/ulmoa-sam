@@ -11,4 +11,10 @@ bad=fresh();bad.measures[13][2].note='시';assert.equal(compareNotation(analysis
 bad=fresh();bad.measures[5][3].note='라';assert.equal(compareNotation(analysis,bad,truth).ok,false);
 assert.equal(compareNotation({...analysis,accepted:false},fresh(),truth).ok,false);
 assert.equal(compareNotation({...analysis,staves:6},fresh(),truth).ok,false);
-console.log(JSON.stringify({ok:true,assertions:7,kind:'validator-unit-only; not image E2E'}));
+bad=fresh();bad.measures[0][0].dur=0;assert.equal(compareNotation(analysis,bad,truth).ok,false,'Zero-length event must fail');
+bad=fresh();bad.measures[0][0].dur=NaN;assert.equal(compareNotation(analysis,bad,truth).ok,false,'Non-finite duration must fail');
+const meterTruth={...truth,timeN:3,timeD:4,measures:[[{note:'도',dur:1},{note:'레',dur:2}]],noteCount:2,restCount:0,staves:1,perLine:[1]};
+const meterAnalysis={accepted:true,staves:1,barGeometry:{perLine:[1]}};
+assert.equal(compareNotation(meterAnalysis,{timeN:3,timeD:4,measures:structuredClone(meterTruth.measures)},meterTruth).ok,true,'3/4 should pass with three quarter-note beats');
+assert.equal(compareNotation(meterAnalysis,{timeN:4,timeD:4,measures:structuredClone(meterTruth.measures)},meterTruth).ok,false,'Incorrect meter must fail');
+console.log(JSON.stringify({ok:true,assertions:11,kind:'validator-unit-only; not image E2E'}));
