@@ -16,3 +16,17 @@ assert.equal(result.measures,19);
 assert.equal(result.modalInternalBars,3);
 assert.ok(result.support>=3);
 console.log(JSON.stringify({ok:true,perLine:result.perLine,measures:result.measures,modalInternalBars:result.modalInternalBars,support:result.support}));
+
+const faintCoordinates=[
+  [497,899,1071,1136,1302],
+  [280,497,899,927,1266,1302],
+  [412,497,899,1136,1302],
+  [303,497,899,1020,1302],
+  [631,929,1168]
+];
+const fadedRows=faintCoordinates.map(xs=>({x0:155,x1:1704,sp:10,
+   strong:[],moderate:xs.map(x=>({x,side:.09})),extended:xs.map(x=>({x,side:.09}))}));
+const faded=planBarRows(fadedRows);
+assert.deepEqual(faded.perLine,[4,4,4,4,3],'Repeated faint barlines, not isolated stem-like distractors, must define measures');
+assert.deepEqual(faded.plans[4].chosen.map(q=>q.x),[631,1168],'Last staff must prefer well-supported spacing without inventing an extra bar');
+console.log(JSON.stringify({ok:true,fadedPerLine:faded.perLine,fadedBars:faded.plans.map(p=>p.chosen.map(q=>q.x)),support:faded.support}));

@@ -1,4 +1,4 @@
-/* Ulmoa AI OMR bootstrap v7.02 */
+/* Ulmoa AI OMR bootstrap v7.03 */
 const ORT_VERSION='1.27.0';
 const ORT_BASE=`https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`;
 function loadScript(src){return new Promise((resolve,reject)=>{const old=[...document.scripts].find(s=>s.src===src);if(old){if(window.ort)return resolve();old.addEventListener('load',resolve,{once:true});old.addEventListener('error',()=>reject(new Error('AI 실행 엔진 다운로드 실패')),{once:true});return;}const s=document.createElement('script');s.src=src;s.async=true;s.onload=resolve;s.onerror=()=>reject(new Error('AI 실행 엔진 다운로드 실패'));document.head.appendChild(s);});}
@@ -6,8 +6,8 @@ async function boot(){
   if(!window.ort)await loadScript(`${ORT_BASE}ort.min.js`);
   if(!window.ort)throw new Error('AI 실행 엔진을 불러오지 못했습니다.');
   if(window.ort.env?.wasm){window.ort.env.wasm.wasmPaths=ORT_BASE;window.ort.env.wasm.numThreads=1;}
-  await import('./omr-ai-v702.js?v=702');
-  console.info('[Ulmoa] AI OMR bootstrap v7.02 ready',{ort:ORT_VERSION});
+  await import('./omr-ai-v702.js?v=703');
+  console.info('[Ulmoa] AI OMR bootstrap v7.03 ready',{ort:ORT_VERSION});
 }
 boot().catch(err=>{
   console.error('[Ulmoa] AI OMR bootstrap failed',err);
