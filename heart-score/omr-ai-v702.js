@@ -6,8 +6,9 @@
  */
 
 import * as omr from './omr-local-v686.js?v=702';
-import {scanConnectedHeads,scanPitchFromY,scanRhythm} from './omr-scan-evidence-v1.mjs';
+import {scanConnectedHeads,scanPitchFromY,scanRhythm,scanHollowHeads} from './omr-scan-evidence-v1.mjs';
 import {planBarRows} from './omr-bar-consensus-v1.mjs?v=1';
+import {recoverFaintBarlines} from './omr-bar-rescue-v1.mjs?v=1';
 
 const W=window;
 const ORT_VERSION='1.27.0';
@@ -81,10 +82,20 @@ function enhancedInput(prep,gray,pageW,pageH,input){
   const b=input.box,crop=new Float32Array(b.w*b.h);
   for(let y=0;y<b.h;y++){const src=(b.y+y)*pageW+b.x,dst=y*b.w;for(let x=0;x<b.w;x++)crop[dst+x]=gray[src+x];}
   const crisp=enhanceScanCrop(crop,b.w,b.h),norm=prep.normalizeStaff(crisp,b.w,b.h,b.lineSpacing,b.padUp,10,128);
-  let ww=norm.width,truncated=false;if(ww>1400){ww=1400;truncated=true;}
+  const sourceW=Math.min(norm.width,1800),truncated=norm.width>1800;
+  // White trailing context avoids losing final notes at the inference boundary.
+  const ww=Math.min(1800,sourceW+(sourceW>1400?128:0));
   const data=new Float32Array(norm.height*ww);
-  for(let y=0;y<norm.height;y++){const src=y*norm.width,dst=y*ww;for(let x=0;x<ww;x++)data[dst+x]=1-norm.data[src+x];}
+  for(let y=0;y<norm.height;y++){const src=y*norm.width,dst=y*ww;for(let x=0;x<sourceW;x++)data[dst+x]=1-norm.data[src+x];}
   return{...input,data,width:ww,height:norm.height,truncated};
+}
+function rightEdgeModelInput(input){
+  const start=Math.max(0,input.width-900),sourceWidth=input.width-start,extra=Math.min(120,1800-sourceWidth);
+  const destWidth=sourceWidth+extra,data=new Float32Array(input.height*destWidth);
+  for(let y=0;y<input.height;y++)data.set(input.data.subarray(y*input.width+start,y*input.width+input.width),y*destWidth);
+  const pixelScale=(Number(input.box.lineSpacing)||10)/10;
+  const shifted={...input,box:{...input.box,x:input.box.x+start*pixelScale}};
+  return{shifted,model:{...input,data,width:destWidth},start};
 }
 function pitchName(p){if(!p?.step)return'';const ko={C:'도',D:'레',E:'미',F:'파',G:'솔',A:'라',B:'시'},flat={C:'도♭',D:'레♭',E:'미♭',F:'파♭',G:'솔♭',A:'라♭',B:'시♭'};let n=ko[p.step]||'';if(!n)return'';if(Number(p.alter)===1)n+='#';else if(Number(p.alter)===-1)n=flat[p.step]||n;if(Number(p.octave)>=5)n='높은'+n;return n;}
 function eventFromIr(ir){if(!ir)return null;const div=Number(ir.duration?.divisions)||48,beats=W.nearestDuration(Math.max(.25,div/48));if(ir.kind==='rest')return W.ev('쉼',beats,'');if(ir.kind!=='note')return null;const note=pitchName(ir.pitch);return note?W.ev(note,beats,''):null;}
@@ -158,9 +169,71 @@ function visualBarCandidates(gray,w,h,line){
   }
   return out;
 }
+function printedAccidentalProbe(gray,w,h,staff,x,note){
+  if(!staff)return null;
+  const base=String(note||'').replace(/^높은/,'').replace(/[#♭]/g,'');
+  const degree={도:-2,레:-1,미:0,파:1,솔:2,라:3,시:4}[base];
+  if(!Number.isFinite(degree))return null;
+  const sp=staff.spacing,dy=degree+(String(note||'').startsWith('높은')?7:0),cy=staff.lines[4]-dy*sp/2;
+  const pixel=(xx,yy)=>gray[Math.max(0,Math.min(h-1,yy))*w+Math.max(0,Math.min(w-1,xx))];
+  const staffLine=yy=>staff.lines.some(l=>Math.abs(yy-l)<=1);
+  let headX=null,headScore=-1;
+  for(let cx=Math.round(x-5.7*sp);cx<=Math.round(x-.55*sp);cx++){
+    if(cx<=3||cx>=w-4)continue;
+    let score=0;
+    for(let yy=Math.round(cy-sp*.38);yy<=Math.round(cy+sp*.38);yy++){
+      if(yy<0||yy>=h||staffLine(yy))continue;
+      for(let xx=cx-Math.round(sp*.48);xx<=cx+Math.round(sp*.48);xx++)if(pixel(xx,yy)<.70)score++;
+    }
+    if(score>headScore){headScore=score;headX=cx;}
+  }
+  if(headX===null)return null;
+  const start=Math.max(0,Math.round(headX-3.5*sp)),end=Math.min(w-1,Math.round(headX-.85*sp)),counts=[];
+  for(let xx=start;xx<=end;xx++){
+    let ink=0;
+    for(let yy=Math.round(cy-2.2*sp);yy<=Math.round(cy+2.2*sp);yy++){
+      if(yy<0||yy>=h||staffLine(yy))continue;
+      if(pixel(xx,yy)<.70)ink++;
+    }
+    counts.push({x:xx,n:ink});
+  }
+  const vertical=counts.filter(v=>v.n>=Math.max(6,sp*.85)),groups=[];
+  for(const v of vertical){const last=groups.at(-1);if(!last||v.x-last.at(-1).x>1)groups.push([v]);else last.push(v);}
+  return{headX,headScore,span:[start,end],total:counts.reduce((a,b)=>a+b.n,0),max:Math.max(0,...counts.map(v=>v.n)),groups:groups.map(g=>({from:g[0].x-headX,to:g.at(-1).x-headX,max:Math.max(...g.map(v=>v.n))}))};
+}
+function visualPitchProposals(staff,fragment){
+  if(!staff)return[];
+  const heads=scanConnectedHeads(staff);
+  return musicalEvents(fragment).filter(v=>v.ir.kind==='note').map(v=>{
+    const nearby=heads.map(h=>({h,delta:Math.abs(h.x-v.x)})).filter(o=>o.delta<staff.spacing*6).sort((a,b)=>a.delta-b.delta);
+    const chosen=nearby[0];
+    if(!chosen)return {x:Math.round(v.x),model:pitchName(v.ir.pitch),found:false};
+    const p=scanPitchFromY(staff,chosen.h.x,chosen.h.y);
+    const rhythm=scanRhythm(staff,{x:chosen.h.x,y:chosen.h.y});return {x:Math.round(v.x),model:pitchName(v.ir.pitch),proposal:p.note,cvX:Math.round(chosen.h.x),cvY:Math.round(chosen.h.y),delta:+chosen.delta.toFixed(1),gap:nearby[1]?+(nearby[1].delta-chosen.delta).toFixed(1):null,area:Math.round(chosen.h.area||0),cvAccidental:chosen.h.accidental||null,rhythm:{dur:rhythm.dur,dot:rhythm.dot,flag:rhythm.flag,beam:+rhythm.beam.toFixed(1),hollow:rhythm.hollow}};
+  });
+}
+function modelNoteShapeDiagnostics(staff,fragment){
+  if(!staff)return[];
+  const degrees={C:0,D:1,E:2,F:3,G:4,A:5,B:6};
+  return musicalEvents(fragment).filter(v=>v.ir.kind==='note').map(v=>{
+    const p=v.ir.pitch,di=degrees[p?.step],oct=Number(p?.octave);
+    if(!Number.isFinite(di)||!Number.isFinite(oct))return{x:Math.round(v.x),model:v.e.dur,skipped:true};
+    const k=(oct-4)*7+di-2,y=staff.lines[4]-k*staff.spacing/2;
+    const shape=scanRhythm(staff,{x:v.x,y});
+    return{x:Math.round(v.x),k,model:v.e.dur,shape:shape.dur,dot:shape.dot,hollow:shape.hollow,beam:+shape.beam.toFixed(1)};
+  });
+}
 function visualBarPlan(gray,w,h,lines){
   const rows=lines.map(line=>{
-    const c=visualBarCandidates(gray,w,h,line),sp=Number(line.input.box?.lineSpacing)||10,b=line.input.box||{},x0=Math.max(0,Number(b.x)||0),x1=Math.min(w-1,(Number(b.x)||0)+(Number(b.w)||0));
+    const b=line.input.box||{},sp=Number(b.lineSpacing)||10,x0=Math.max(0,Number(b.x)||0),x1=Math.min(w-1,(Number(b.x)||0)+(Number(b.w)||0));
+    let c=visualBarCandidates(gray,w,h,line);
+    const found=c.filter(q=>q.x>x0+sp*6&&q.x<x1-sp*4&&q.side<=.12);
+    // The old detector sometimes returned zero interior lines for a complete score.
+    // Recover only from continuous ink in *all four* staff spaces; no equal-width guesses.
+    if(found.length<2){
+      const recovered=recoverFaintBarlines(gray,w,h,b);
+      for(const q of recovered)if(!c.some(v=>Math.abs(v.x-q.x)<sp*.85))c.push(q);
+    }
     const internal=c.filter(q=>q.x>x0+sp*6&&q.x<x1-sp*4);
     const strong=internal.filter(q=>q.side<=.04),moderate=internal.filter(q=>q.side<=.12),extended=internal.filter(q=>q.side<=.18);
     return{line,c,sp,x0,x1,strong,moderate,extended};
@@ -185,6 +258,13 @@ function fitMeasureToBeat(items,left,right,targetQ=4){
       let cost=log*log*2.6+space*space*.75+Math.abs(d-ro)*.12;
       if(Math.abs(d-ro)<.01)cost-=.32;
       if(d===4&&n>1)cost+=4;
+      if(Number.isFinite(items[i].opticalDur)&&Math.abs(d-items[i].opticalDur)>.01)cost+=8;
+      // The notation decoder's dotted-quarter (1.5 beats) is stronger evidence
+      // than a horizontal-space fit; preserving its dot prevents false quartering.
+      if(Math.abs(ro-1.5)<.01&&d<1.5)cost+=2.8;
+      // Three-quarter-beat durations need direct decoded support, not spacing alone.
+      if(Math.abs(d-.75)<.01&&Math.abs(ro-.75)>.01)cost+=1.0;
+
       const nv=dp[i][u]+cost;if(nv<dp[i+1][nu]){dp[i+1][nu]=nv;prev[i+1][nu]=[u,d];}
     }
   }
@@ -194,8 +274,9 @@ function fitMeasureToBeat(items,left,right,targetQ=4){
   const correction=ds.reduce((a,d,i)=>a+Math.abs(d-orig[i]),0)/n;
   return{events:items.map((v,i)=>({...v.e,dur:ds[i]})),correction,rawExact,ok:true};
 }
-function toStateVisual(lines,filename,gray,w,h,threshold){
+function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
   let timeN=4,timeD=4,keyLabel='',measures=[],noteCount=0,rawExact=0,fitCount=0,correctionSum=0;const refs=[],conf=[];
+  const opticalDebug=[];
   const plan=visualBarPlan(gray,w,h,lines);
   for(let li=0;li<lines.length;li++){
     const line=lines[li];
@@ -203,19 +284,92 @@ function toStateVisual(lines,filename,gray,w,h,threshold){
       if(Number.isFinite(ir.confidence))conf.push(ir.confidence);
       if(ir.kind==='attribute'){if(ir.time?.num&&ir.time?.den){timeN=Number(ir.time.num);timeD=Number(ir.time.den);}if(Number.isFinite(ir.keyFifths)&&Number(ir.keyFifths)===0)keyLabel='C';}
     }
-    const musical=line.fragment.filter(ir=>ir.kind==='note'||ir.kind==='rest').map(ir=>{const e=eventFromIr(ir),q=ir.src?.bbox;return e&&q?{ir,e,x:q[0]+q[2]/2}:null;}).filter(Boolean).sort((a,b)=>a.x-b.x);
-    noteCount+=musical.filter(v=>v.ir.kind==='note').length;
     const bars=plan.plans[li]?.bars||[],targetQ=(Number(timeN)||4)*4/(Number(timeD)||4);
+    // A thick barline can be misread as a rest. A rest is a symbol within a
+    // measure, never coincident with a confidently identified printed barline.
+    const sp=Number(line.input.box?.lineSpacing)||10;
+    const votes=visualPitchProposals(cvStaffs[li],line.fragment);const hollow= cvStaffs[li]?scanHollowHeads(cvStaffs[li]):[];let noteIndex=0;
+    const musical=line.fragment.filter(ir=>ir.kind==='note'||ir.kind==='rest').map(ir=>{
+      const e=eventFromIr(ir),q=ir.src?.bbox;let opticalDur=null,visualEvidence=null;
+      if(e&&ir.kind==='note'){
+        const vote=votes[noteIndex++];visualEvidence=vote;
+        // When the model claims a dotted quarter but the matching physical
+        // notehead has an undotted quarter stem, retain optical rhythm evidence.
+        if(Math.abs(e.dur-1.5)<.01&&vote?.rhythm?.dot===false&&
+           vote.rhythm.dur===1&&vote.proposal===e.note&&
+           vote.cvX<vote.x&&vote.delta<=sp*4.5&&
+           (vote.gap===null||vote.gap>=sp*.65)){opticalDebug.push({line:li,x:Math.round(vote.x),from:e.dur,to:1,model:e.note});e.dur=1;opticalDur=1;}
+        // An independent notehead at treble C5 can disambiguate C4/C5 if the
+        // decoded letter agrees; do not overwrite altered or different notes.
+        if(vote?.proposal?.startsWith('높은')&&!e.note.startsWith('높은')&&vote.proposal.slice(2)===e.note&&
+           vote.delta<=sp*6&&vote.cvX<vote.x&&(vote.gap===null||vote.gap>=sp*.65))e.note=vote.proposal;
+      }
+      return e&&q?{ir,e,x:q[0]+q[2]/2,opticalDur,visualEvidence}:null;
+    })
+      .filter(v=>v&&(v.ir.kind!=='rest'||!bars.slice(1,-1).some(x=>Math.abs(x-v.x)<=sp*.85)))
+      .sort((a,b)=>a.x-b.x);
+    noteCount+=musical.filter(v=>v.ir.kind==='note').length;
     if(bars.length>=2){
       for(let i=0;i<bars.length-1;i++){
-        const left=bars[i],right=bars[i+1],items=musical.filter(v=>v.x>left&&v.x<right),fit=fitMeasureToBeat(items,left,right,targetQ);
+        const left=bars[i],right=bars[i+1],items=musical.filter(v=>v.x>left&&v.x<right);
+        const rawBeat=items.reduce((sum,v)=>sum+v.e.dur,0);
+        if(items.length>=3&&Math.abs(targetQ-rawBeat-.5)<.08){
+          const unflagged=items.filter(v=>Math.abs(v.e.dur-.5)<.01&&
+            v.visualEvidence?.rhythm?.flag===0&&v.visualEvidence.rhythm.beam<=3&&
+            v.visualEvidence.delta<=sp*4.5&&v.visualEvidence.cvX<v.x&&
+            (v.visualEvidence.gap===null||v.visualEvidence.gap>=sp*.65));
+          if(unflagged.length===1){
+            unflagged[0].e.dur=1;unflagged[0].opticalDur=1;
+            opticalDebug.push({line:li,bar:i,x:Math.round(unflagged[0].x),reason:'isolated-eighth-without-flag-and-half-beat-deficit'});
+          }
+        }
+        // Independently inspect printed accidental symbols before a notehead.
+        // A no-sharps/no-flats key signature often emits no key attribute at all;
+        // treat an absent key label as visually unconfirmed, rather than disabling
+        // all explicit accidental corrections. Skip only a positively detected
+        // non-C key until its key signature is independently parsed.
+        if((keyLabel===''||keyLabel==='C')&&cvStaffs[li]){
+          let priorFlat=false;
+          for(const v of items){
+            if(v.ir.kind!=='note')continue;
+            const probe=printedAccidentalProbe(gray,w,h,cvStaffs[li],v.x,v.e.note);
+            if(v.e.note.endsWith('♭')&&probe?.total>=35&&probe.max<=9&&
+               probe.groups.length===0&&['도','레','파','솔','라'].includes(v.e.note.replace('♭',''))){
+              const corrected=v.e.note.replace('♭','#');
+              opticalDebug.push({line:li,bar:i,x:Math.round(v.x),reason:'printed-sharp-instead-of-model-flat',from:v.e.note,to:corrected,total:probe.total,max:probe.max});
+              v.e.note=corrected;
+            }else if(v.e.note==='시♭'){
+              if((!probe||probe.groups.length===0||probe.total<9)&&!priorFlat){
+                opticalDebug.push({line:li,bar:i,x:Math.round(v.x),reason:'unprinted-B-flat',total:probe.total});
+                v.e.note='시';
+              }else priorFlat=true;
+            }else if(v.e.note==='파'&&probe?.total>=35&&probe.max<=9){
+              opticalDebug.push({line:li,bar:i,x:Math.round(v.x),reason:'printed-sharp-before-F',total:probe.total,max:probe.max});
+              v.e.note='파#';
+            }
+          }
+        }
+        const longNotes=items.filter(v=>v.ir.kind==='note'&&v.e.dur>=2);
+        const firstNote=items.find(v=>v.ir.kind==='note');
+        if(longNotes.length===1&&longNotes[0]===firstNote){
+          const candidates=hollow.filter(h=>h.x>left+sp*.6&&h.x<right-sp*.8);
+          const strong=candidates.filter(h=>h.ring>=8);
+          const matched=strong.length===1?strong[0]:(items.length===1&&strong.length===0&&candidates.length===1?candidates[0]:null);
+          if(matched){
+            const index=2+matched.k,steps=['C','D','E','F','G','A','B'],degree=((index%7)+7)%7;
+            const octave=4+Math.floor(index/7),visual=pitchName({step:steps[degree],octave,alter:0});
+            if(visual)longNotes[0].e.note=visual;
+          }
+        }
+        const fit=fitMeasureToBeat(items,left,right,targetQ);
+        opticalDebug.push({line:li,bar:i,original:items.map(v=>v.e.dur),locks:items.map(v=>v.opticalDur),fitted:fit.events.map(v=>v.dur)});
         measures.push(fit.events);if(fit.rawExact)rawExact++;if(fit.ok){fitCount++;correctionSum+=fit.correction;}
       }
     }else measures.push(musical.map(v=>v.e));
     for(const v of musical)refs.push({system:line.system,x:v.x,event:v.e});
   }
   const base=typeof W.fileBaseName==='function'?W.fileBaseName(filename):String(filename||'').replace(/\.[^.]+$/,'');
-  return{state:{...W.emptyState(),title:base||'가져온 악보',pageOrientation:'landscape',timeN,timeD,keyLabel,measures},refs,noteCount,avgConfidence:conf.length?conf.reduce((a,b)=>a+b,0)/conf.length:0,segmentation:'visual-fit',barGeometry:{perLine:plan.perLine,modalInternalBars:plan.modalInternalBars,support:plan.support,lines:plan.plans.length,measures:plan.measures},rawExactRatio:measures.length?rawExact/measures.length:0,correctionAvg:fitCount?correctionSum/fitCount:99};
+  return{state:{...W.emptyState(),title:base||'가져온 악보',pageOrientation:'landscape',timeN,timeD,keyLabel,measures},refs,noteCount,avgConfidence:conf.length?conf.reduce((a,b)=>a+b,0)/conf.length:0,segmentation:'visual-fit',barGeometry:{perLine:plan.perLine,modalInternalBars:plan.modalInternalBars,support:plan.support,lines:plan.plans.length,measures:plan.measures},rawExactRatio:measures.length?rawExact/measures.length:0,correctionAvg:fitCount?correctionSum/fitCount:99,opticalDebug};
 }
 function candidateScore(b){const q=measureQa(b.state),m=b.state.measures.length,dp=Number(b.dpExactRatio)||0;return q.exactRatio*100+dp*18-q.over*14+Math.min(25,m)*.35+(b.avgConfidence||0)*5;}
 function measureQa(state){const target=Number(state.timeN)||4,scale=(Number(state.timeD)||4)/4,sums=(state.measures||[]).map(m=>m.reduce((a,e)=>a+(Number(e.dur)||0)*scale,0)),exact=sums.filter(v=>Math.abs(v-target)<.01).length,over=sums.filter(v=>v>target+.01).length;return{target,sums,exactRatio:sums.length?exact/sums.length:0,over};}
@@ -224,7 +378,7 @@ function choosePreprocess(rt,gray,w,h){
   const thresholds=[.60,.72,.78,.82,.85,.88,.90];
   const candidates=[];
   for(const threshold of thresholds){
-    const pre=rt.prep.preprocessPage(gray,w,h,{threshold});
+    const pre=rt.prep.preprocessPage(gray,w,h,{threshold,maxWidth:1800});
     const inputs=filterMainInputs(pre,w);
     if(!inputs.length)continue;
     const widths=inputs.map(v=>Number(v.box?.w)||0).filter(Boolean);
@@ -306,11 +460,89 @@ async function recognizeCanvas(canvas,filename,pageIndex){
   const scanLike=threshold>=.78;
   status(`본문 악보 ${inputs.length}줄 감지 · 원본+스캔보정 이중 판독 · 음표 읽는 중…`);
   const decodeInput=async(input,modelInput,i)=>{const tensor=new W.ort.Tensor('float32',modelInput.data,[1,1,modelInput.height,modelInput.width]),res=await rt.session.run({input:tensor}),logits=res.logits;if(!logits?.data)return null;const dims=logits.dims||[],T=dims[dims.length-2],C=dims[dims.length-1];if(!T||!C)return null;const tokens=rt.dec.decodeLine(logits.data,T,C,rt.i2w),b=input.box,staff={page:pageIndex,system:i,staffIndex:0,bbox:[b.x,b.y,b.w,b.h],lineSpacingPx:b.lineSpacing,normSpacing:10},fragment=rt.dec.lineFragment(tokens,staff);return{system:i,input,fragment,tokens};};
-  const lines=[];for(let i=0;i<inputs.length;i++){const input=inputs[i];status(`AI 악보 인식 ${i+1}/${inputs.length}줄 · 원본 판독 중…`);const raw=await decodeInput(input,input,i);if(!raw)continue;let chosenLine=raw,rawScore=lineDecodeScore(raw.fragment);if(scanLike&&rawScore<11){status(`AI 악보 인식 ${i+1}/${inputs.length}줄 · 스캔 보정 재판독 중…`);const enh=await decodeInput(input,enhancedInput(rt.prep,gray,canvas.width,canvas.height,input),i);if(enh){const enhScore=lineDecodeScore(enh.fragment),rawNotes=musicalEvents(raw.fragment).filter(v=>v.ir.kind==='note').length,enhNotes=musicalEvents(enh.fragment).filter(v=>v.ir.kind==='note').length;if(enhScore>rawScore+2.5&&enhNotes>=Math.max(3,rawNotes*.88))chosenLine=enh;}}lines.push(chosenLine);}
+  const lines=[],passDiagnostics=[];for(let i=0;i<inputs.length;i++){const input=inputs[i];status(`AI 악보 인식 ${i+1}/${inputs.length}줄 · 원본 판독 중…`);const raw=await decodeInput(input,input,i);if(!raw)continue;let chosenLine=raw,rawScore=lineDecodeScore(raw.fragment),enhancedLine=null;if(scanLike){status(`AI 악보 인식 ${i+1}/${inputs.length}줄 · 스캔 보정 재판독 중…`);const enh=await decodeInput(input,enhancedInput(rt.prep,gray,canvas.width,canvas.height,input),i);if(enh){enhancedLine=enh;const enhScore=lineDecodeScore(enh.fragment),rawNotes=musicalEvents(raw.fragment).filter(v=>v.ir.kind==='note').length,enhNotes=musicalEvents(enh.fragment).filter(v=>v.ir.kind==='note').length;if(enhScore>rawScore+2.5&&enhNotes>=Math.max(3,rawNotes*.88))chosenLine=enh;}}
+    const consensusCorrections=[];
+    // A low-confidence rest in the raw pass can be a real printed note.
+    // Require agreement with a note at the same source position in the
+    // independently enhanced pass. Only use this if the full staff exhibits
+    // at least two such paired disagreements (systematic decoder error).
+    const restToNoteCorrections=[];
+    if(enhancedLine&&chosenLine===raw){
+      const pairs=[];
+      const altNotes=enhancedLine.fragment.filter(ir=>ir.kind==='note'&&ir.src?.bbox);
+      for(const ir of raw.fragment.filter(v=>v.kind==='rest'&&v.src?.bbox)){
+        const center=ir.src.bbox[0]+ir.src.bbox[2]/2;
+        const matches=altNotes.filter(v=>Math.abs((v.src.bbox[0]+v.src.bbox[2]/2)-center)<=Math.max(8,input.box.lineSpacing*1.6));
+        if(matches.length!==1)continue;
+        const other=matches[0];
+        if((Number(ir.confidence)||0)>.65||(Number(other.confidence)||0)<.50)continue;
+        pairs.push({ir,other,x:center});
+      }
+      if(pairs.length>=2){
+        for(const {ir,other,x} of pairs){
+          ir.kind='note';ir.pitch={...other.pitch};ir.duration={...other.duration};ir.confidence=other.confidence;
+          restToNoteCorrections.push({x:Math.round(x),note:pitchName(other.pitch),confidence:+(Number(other.confidence)||0).toFixed(2)});
+        }
+      }
+    }
+    if(enhancedLine){
+      const other=chosenLine===raw?enhancedLine:raw;
+      const myNotes=chosenLine.fragment.filter(ir=>ir.kind==='note'&&ir.src?.bbox);
+      const altNotes=other.fragment.filter(ir=>ir.kind==='note'&&ir.src?.bbox);
+      for(const ir of myNotes){
+        const center=ir.src.bbox[0]+ir.src.bbox[2]/2;
+        const matches=altNotes.filter(v=>Math.abs((v.src.bbox[0]+v.src.bbox[2]/2)-center)<=Math.max(8,input.box.lineSpacing*1.6));
+        if(matches.length!==1)continue;
+        const alt=matches[0],present=Number(ir.confidence)||0,otherConf=Number(alt.confidence)||0;
+        if(otherConf<.9||otherConf-present<.2)continue;
+        if(pitchName(alt.pitch)===pitchName(ir.pitch))continue;
+        consensusCorrections.push({x:Math.round(center),from:pitchName(ir.pitch),to:pitchName(alt.pitch),oldConf:+present.toFixed(2),newConf:+otherConf.toFixed(2)});
+        ir.pitch={...alt.pitch};
+      }
+    }
+    let tailDiag=null;
+    if(input.width>1400){const edge=rightEdgeModelInput(input),tail=await decodeInput(edge.shifted,edge.model,i);
+      if(tail){const notes=musicalEvents(tail.fragment).filter(v=>v.ir.kind==='note');tailDiag={start:edge.start,notes:notes.length,xs:notes.map(v=>Math.round(v.x)),rests:musicalEvents(tail.fragment).filter(v=>v.ir.kind==='rest').map(v=>Math.round(v.x))};}}
+    const symbolList=fragment=>musicalEvents(fragment||[]).map(v=>({x:Math.round(v.x),kind:v.ir.kind,p:pitchName(v.ir.pitch),dur:v.e.dur,conf:+(Number(v.ir.confidence)||0).toFixed(2)}));
+    passDiagnostics.push({tailDiag,system:i,consensusCorrections,restToNoteCorrections,rawSymbols:symbolList(raw.fragment),enhancedSymbols:enhancedLine?symbolList(enhancedLine.fragment):null,rawNotes:musicalEvents(raw.fragment).filter(v=>v.ir.kind==='note').length,rawRests:raw.fragment.filter(v=>v.kind==='rest').length,rawScore,chosenNotes:musicalEvents(chosenLine.fragment).filter(v=>v.ir.kind==='note').length,chosenRests:chosenLine.fragment.filter(v=>v.kind==='rest').length,chosenChanged:chosenLine!==raw});lines.push(chosenLine);}
   if(!lines.length)return{staffDetected:true,ok:false,reason:'오선은 찾았지만 음표를 읽어내지 못했습니다.'};
-  const cvStaffs=W.findStaffSystems(canvas);const geometryLines=cvStaffs.length===lines.length?lines.map((line,i)=>({...line,input:{...line.input,box:{...line.input.box,x:cvStaffs[i].x0,w:cvStaffs[i].x1-cvStaffs[i].x0,y:cvStaffs[i].lines[0],padUp:0,lineSpacing:cvStaffs[i].spacing}}})):lines;
-  const barPlan=visualBarPlan(gray,canvas.width,canvas.height,geometryLines),modelBuilt=toStateModel(lines,filename),visualBuilt=toStateVisual(lines,filename,gray,canvas.width,canvas.height,threshold),beatBuilt=toStateBeat(lines,filename),hybridBuilt=buildCvHybrid(canvas,filename,lines,barPlan),g=visualBuilt.barGeometry||{},geometryStrong=g.lines===lines.length&&g.modalInternalBars>=2&&g.support>=2&&g.measures>=lines.length*2,built=hybridBuilt||(geometryStrong?visualBuilt:[modelBuilt,visualBuilt,beatBuilt].sort((a,b)=>candidateScore(b)-candidateScore(a))[0]),q=measureQa(built.state),staves=lines.length,suspiciousShort=staves>=3&&built.state.measures.length<=4,enough=built.noteCount>=Math.max(6,staves*3)&&built.state.measures.length>=Math.max(2,Math.floor(staves*.8)),rhythmOk=built.segmentation==='cv-hybrid'?(q.over===0&&q.exactRatio>=.99):built.segmentation==='visual-fit'?(q.over===0&&q.exactRatio>=.95&&built.correctionAvg<=1.25):(q.over===0&&(q.exactRatio>=.45||built.state.measures.length<=2)),confOk=built.avgConfidence>=.45,shapeOk=!built.shapeEvidence||built.shapeEvidence.every(row=>row.every(e=>Number.isFinite(e.rhythm.dur)&&e.rhythm.dur>0));
-  W.dispatchEvent(new CustomEvent('ulmoa:omr-analysis',{detail:{version:'702',staves,threshold,boxes:lines.map(l=>l.input.box),state:built.state,noteCount:built.noteCount,restCount:built.restCount||0,barGeometry:built.barGeometry,quality:q,shapeEvidence:built.shapeEvidence,segmentation:built.segmentation,accepted:!suspiciousShort&&enough&&rhythmOk&&confOk&&shapeOk}}));
+  const cvStaffs=W.findStaffSystems(canvas);
+  // A long-staff decoder can lose a final half/whole note. Only add when a
+  // genuine white-centered ellipse with ink all around it is visible past
+  // the last model note; no expected song length or pitch is hard-coded.
+  const openTailEvidence=[];
+  if(cvStaffs.length===lines.length)for(let i=0;i<lines.length;i++){
+    const staff=cvStaffs[i],line=lines[i],existing=musicalEvents(line.fragment).filter(v=>v.ir.kind==='note'),last=Math.max(staff.x0,...existing.map(v=>v.x));
+    const bars=visualBarCandidates(gray,canvas.width,canvas.height,{input:{box:{...line.input.box,x:staff.x0,w:staff.x1-staff.x0,y:staff.lines[0],padUp:0,lineSpacing:staff.spacing}}}).filter(v=>v.side<=.12).map(v=>v.x);
+    const tails=scanHollowHeads(staff).filter(h=>h.ring===8&&h.x>last+staff.spacing*2.2&&h.x<staff.x1-staff.spacing*3&&
+      !bars.some(b=>Math.abs(b-h.x)<staff.spacing*1.5));
+    const accepted=[];
+    for(const h of tails){
+      const form=scanRhythm(staff,{x:h.x,y:h.y});
+      if(![2,4].includes(form?.dur)||form.hollow===false)continue;
+      const degree=2+h.k,steps=['C','D','E','F','G','A','B'],n=((degree%7)+7)%7,oct=4+Math.floor(degree/7);
+      line.fragment.push({kind:'note',pitch:{step:steps[n],alter:0,octave:oct},duration:{divisions:form.dur*48},confidence:h.confidence,src:{bbox:[h.x-6,line.input.box.y,12,line.input.box.h]}});
+      accepted.push({x:h.x,pitch:steps[n]+oct,dur:form.dur});
+    }
+    if(accepted.length)openTailEvidence.push({system:i,accepted});
+  }
+  const geometryLines=cvStaffs.length===lines.length?lines.map((line,i)=>({...line,input:{...line.input,box:{...line.input.box,x:cvStaffs[i].x0,w:cvStaffs[i].x1-cvStaffs[i].x0,y:cvStaffs[i].lines[0],padUp:0,lineSpacing:cvStaffs[i].spacing}}})):lines;
+  const barPlan=visualBarPlan(gray,canvas.width,canvas.height,geometryLines),modelBuilt=toStateModel(lines,filename),visualBuilt=toStateVisual(lines,filename,gray,canvas.width,canvas.height,threshold,cvStaffs),beatBuilt=toStateBeat(lines,filename),hybridBuilt=buildCvHybrid(canvas,filename,lines,barPlan),g=visualBuilt.barGeometry||{},geometryStrong=g.lines===lines.length&&g.modalInternalBars>=2&&g.support>=2&&g.measures>=lines.length*2,built=(hybridBuilt&&measureQa(hybridBuilt.state).exactRatio>=.95&&measureQa(hybridBuilt.state).over===0?hybridBuilt:null)||(geometryStrong?visualBuilt:[modelBuilt,visualBuilt,beatBuilt].sort((a,b)=>{
+    const rank=c=>candidateScore(c)-(c.segmentation==='visual-fit'&&c.state.measures.length<=lines.length*1.2?150:0);
+    return rank(b)-rank(a);
+  })[0]),q=measureQa(built.state),staves=lines.length,suspiciousShort=staves>=3&&built.state.measures.length<=4,enough=built.noteCount>=Math.max(6,staves*3)&&built.state.measures.length>=Math.max(2,Math.floor(staves*.8)),rhythmOk=built.segmentation==='cv-hybrid'?(q.over===0&&q.exactRatio>=.99):built.segmentation==='visual-fit'?(q.over===0&&q.exactRatio>=.99&&built.barGeometry?.support>=2&&((built.correctionAvg<=.20&&built.rawExactRatio>=.75)||(built.correctionAvg<=.12&&built.rawExactRatio>=.40&&built.barGeometry?.support>=3))):(q.over===0&&(q.exactRatio>=.9||(built.state.measures.length<=2&&q.exactRatio>=.5))),confOk=built.avgConfidence>=.45,shapeOk=!built.shapeEvidence||built.shapeEvidence.every(row=>row.every(e=>Number.isFinite(e.rhythm.dur)&&e.rhythm.dur>0));
+  W.dispatchEvent(new CustomEvent('ulmoa:omr-analysis',{detail:{version:'702',staves,threshold,boxes:lines.map(l=>l.input.box),state:built.state,noteCount:built.noteCount,restCount:built.restCount||0,barGeometry:built.barGeometry,quality:q,shapeEvidence:built.shapeEvidence,segmentation:built.segmentation,accepted:!suspiciousShort&&enough&&rhythmOk&&confOk&&shapeOk,
+    visualOpticalDebug:visualBuilt.opticalDebug,
+    candidateDiagnostics:[modelBuilt,visualBuilt,beatBuilt,hybridBuilt].filter(Boolean).map(v=>({
+      method:v.segmentation||'model',measures:v.state.measures.length,notes:v.noteCount,
+      qa:measureQa(v.state).exactRatio,perLine:v.barGeometry?.perLine||null,
+      rank:candidateScore(v)
+    })),
+    rawBarGeometry:{visualOpticalDebug:visualBuilt.opticalDebug,accidentalProbes:lines.map((line,i)=>{
+      const staff=cvStaffs[i];if(!staff)return[];
+      return musicalEvents(line.fragment).filter(v=>v.ir.kind==='note').map(v=>({x:Math.round(v.x),note:v.e.note,conf:+(Number(v.ir.confidence)||0).toFixed(2),feature:printedAccidentalProbe(gray,canvas.width,canvas.height,staff,v.x,v.e.note)})).filter(v=>/[파시]|[#♭]/.test(v.note));
+    }),perLine:barPlan.perLine,support:barPlan.support,modalInternalBars:barPlan.modalInternalBars,threshold,passDiagnostics,openTailEvidence,scanRows:geometryLines.map((line,i)=>({box:line.input.box,cvStaff:cvStaffs[i]?{x0:cvStaffs[i].x0,x1:cvStaffs[i].x1,spacing:cvStaffs[i].spacing,lines:cvStaffs[i].lines}:null,heads:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).length:null,headXs:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).map(h=>Math.round(h.x)):null,hollowHeads:cvStaffs[i]?scanHollowHeads(cvStaffs[i]).map(h=>({x:h.x,k:h.k,ring:h.ring})).slice(0,40):null,modelNoteXs:musicalEvents(lines[i].fragment).filter(v=>v.ir.kind==='note').map(v=>Math.round(v.x)),modelShapes:modelNoteShapeDiagnostics(cvStaffs[i],lines[i].fragment),pitchProposals:visualPitchProposals(cvStaffs[i],lines[i].fragment),modelRestXs:musicalEvents(lines[i].fragment).filter(v=>v.ir.kind==='rest').map(v=>Math.round(v.x)),strict:visualBarCandidates(gray,canvas.width,canvas.height,line).filter(v=>v.side<=.12).map(v=>({x:Math.round(v.x),side:+v.side.toFixed(2)})).slice(0,20),rescue:recoverFaintBarlines(gray,canvas.width,canvas.height,line.input.box).map(v=>Math.round(v.x)).slice(0,20)}))}
+  }}));
   if(suspiciousShort||!enough||!rhythmOk||!confOk||!shapeOk)return{staffDetected:true,ok:false,reason:`AI가 ${staves}개 악보 줄을 찾았지만 결과 검증을 통과하지 못했습니다. (${built.state.measures.length}마디 · 음표 ${built.noteCount}개 · 박자일치 ${Math.round(q.exactRatio*100)}% · 신뢰도 ${Math.round(built.avgConfidence*100)}%${built.segmentation==='visual-fit'?` · 마디 ${built.barGeometry?.perLine?.join('·')||'?'} · 원판독 ${Math.round((built.rawExactRatio||0)*100)}% · 평균리듬보정 ${(built.correctionAvg||0).toFixed(2)}박`:''} · ${built.segmentation==='cv-hybrid'?'오선기하+AI 쉼표':built.segmentation==='visual-fit'?'인쇄 마디선+4/4 보정':built.segmentation==='beat-dp'?'4/4 박자 재구성':'AI 마디선'} 기준)`};
   if(typeof W.ocrCanvas==='function'&&typeof W.attachOcrToOmr==='function'){try{status('음표 인식 완료 · 제목과 가사 위치 확인 중…');const data=await W.ocrCanvas(canvas,'제목·가사 OCR');const safeText={...data,lines:scanTitleCandidates(data,canvas),words:(data.words||[]).filter(w=>Number(w.confidence)>=75)};W.attachOcrToOmr(built.cvSystems?{state:built.state,systems:built.cvSystems}:lyricAdapter(lines,built),safeText,filename);}catch(err){console.warn('AI OMR lyric OCR skipped',err);}}
   return{staffDetected:true,ok:true,state:built.state,staves,noteCount:built.noteCount,restCount:built.restCount||0,avgConfidence:built.avgConfidence,quality:q,threshold,segmentation:built.segmentation||'model',scanEnhanced:scanLike,barGeometry:built.barGeometry,correctionAvg:built.correctionAvg,rawExactRatio:built.rawExactRatio};
