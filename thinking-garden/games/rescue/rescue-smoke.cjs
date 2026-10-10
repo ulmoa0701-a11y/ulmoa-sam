@@ -76,7 +76,7 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
        assert.deepEqual(scene.animals.filter(a=>a.species===sp).map(a=>a.size).sort(),['작은','큰'],'Each same-species pair must contain one large and one small');
        const large=scene.animals.find(a=>a.species===sp&&a.size==='큰'),small=scene.animals.find(a=>a.species===sp&&a.size==='작은');
        assert.ok(large.visualBodyHeight/small.visualBodyHeight>=1.7,'Visible size ratio must be unambiguous');
-       assert.ok(Math.abs(large.y-small.y)<2 && Math.abs(large.x-small.x)<=300,'Compare paired species at same baseline and near each other');
+       assert.ok(Math.abs((large.y+large.visualBodyHeight/2)-(small.y+small.visualBodyHeight/2))<=2 && Math.abs(large.x-small.x)<=300,'Compare same-species pairs with their visible feet on one baseline');
      }
    }
    await page.screenshot({path:'rescue-qa-screenshots/'+label+'-round'+(round+1)+'-gameplay.png'});
