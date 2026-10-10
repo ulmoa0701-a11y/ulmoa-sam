@@ -12,15 +12,22 @@ const truth=require('./doremi-ground-truth.json');
  try{
   const page=await browser.newPage({viewport:{width:1940,height:1600}});
   await page.setContent('<html><body><canvas id="score"></canvas></body></html>');
+  // Embed font bytes from free npm packages, avoiding unavailable system fonts/network timing.
+  const fontData={};
+  for(const font of ['bravura','academico']){
+    fontData[font]=fs.readFileSync(path.join(__dirname,'node_modules/@vexflow-fonts',font,font+'.woff2')).toString('base64');
+  }
+  await page.addStyleTag({content:
+    "@font-face{font-family:Bravura;src:url(data:font/woff2;base64,"+fontData.bravura+") format('woff2')}"+
+    "@font-face{font-family:Academico;src:url(data:font/woff2;base64,"+fontData.academico+") format('woff2')}"
+  });
+  await page.evaluate(async()=>{await Promise.all([document.fonts.load('20px Bravura'),document.fonts.load('20px Academico')]);});
   await page.addScriptTag({path:path.join(__dirname,'node_modules/vexflow/build/cjs/vexflow.js')});
   const pictures=await page.evaluate(async truth=>{
    const VF=window.Vex?.Flow||window.VexFlow?.Flow||window.VexFlow;
    if(!VF?.Renderer)throw Error('VexFlow renderer unavailable');
-   if(typeof VF.loadFonts==='function'){
-     await VF.loadFonts('Bravura','Academico');
-     VF.setFonts('Bravura','Academico');
-     await document.fonts.ready;
-   }else throw Error('Renderer lacks music font loader, score would omit noteheads and rests');
+   if(typeof VF.setFonts==='function')VF.setFonts('Bravura','Academico');
+   await document.fonts.ready;
    if(!document.fonts.check('20px Bravura'))throw Error('Bravura font was not loaded');
    const c=document.getElementById('score'),w=1800,h=1480;
    c.width=w;c.height=h;
