@@ -119,6 +119,9 @@ window.addEventListener('message',event=>{
   loading.hidden=true;
   sendViewer('brain-view',{view:liveView==='side'?'left':liveView});
   if(pendingDrag.dx||pendingDrag.dy){sendDrag(pendingDrag.dx,pendingDrag.dy);pendingDrag={dx:0,dy:0};}
+ }else if(event.data?.type==='brain-3d-error'){
+  loading.hidden=false;
+  loading.textContent='3D 그래픽을 사용할 수 없어요. 옆에서 보기로 돌아가 주세요.';
  }else if(event.data?.type==='brain-3d-selected'&&regions[event.data.part]){
   choose(event.data.part);
  }
