@@ -241,7 +241,7 @@ function fitMeasureToBeat(items,left,right,targetQ=4){
   const correction=ds.reduce((a,d,i)=>a+Math.abs(d-orig[i]),0)/n;
   return{events:items.map((v,i)=>({...v.e,dur:ds[i]})),correction,rawExact,ok:true};
 }
-function toStateVisual(lines,filename,gray,w,h,threshold){
+function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
   let timeN=4,timeD=4,keyLabel='',measures=[],noteCount=0,rawExact=0,fitCount=0,correctionSum=0;const refs=[],conf=[];
   const plan=visualBarPlan(gray,w,h,lines);
   for(let li=0;li<lines.length;li++){
@@ -254,7 +254,18 @@ function toStateVisual(lines,filename,gray,w,h,threshold){
     // A thick barline can be misread as a rest. A rest is a symbol within a
     // measure, never coincident with a confidently identified printed barline.
     const sp=Number(line.input.box?.lineSpacing)||10;
-    const musical=line.fragment.filter(ir=>ir.kind==='note'||ir.kind==='rest').map(ir=>{const e=eventFromIr(ir),q=ir.src?.bbox;return e&&q?{ir,e,x:q[0]+q[2]/2}:null;})
+    const votes=visualPitchProposals(cvStaffs[li],line.fragment);let noteIndex=0;
+    const musical=line.fragment.filter(ir=>ir.kind==='note'||ir.kind==='rest').map(ir=>{
+      const e=eventFromIr(ir),q=ir.src?.bbox;
+      if(e&&ir.kind==='note'){
+        const vote=votes[noteIndex++];
+        // An independent notehead at treble C5 can disambiguate C4/C5 if the
+        // decoded letter agrees; do not overwrite altered or different notes.
+        if(vote?.proposal?.startsWith('높은')&&!e.note.startsWith('높은')&&vote.proposal.slice(2)===e.note&&
+           vote.delta<=sp*4.5&&(vote.gap===null||vote.gap>=sp*.65))e.note=vote.proposal;
+      }
+      return e&&q?{ir,e,x:q[0]+q[2]/2}:null;
+    })
       .filter(v=>v&&(v.ir.kind!=='rest'||!bars.slice(1,-1).some(x=>Math.abs(x-v.x)<=sp*.85)))
       .sort((a,b)=>a.x-b.x);
     noteCount+=musical.filter(v=>v.ir.kind==='note').length;
@@ -385,7 +396,7 @@ async function recognizeCanvas(canvas,filename,pageIndex){
     if(accepted.length)openTailEvidence.push({system:i,accepted});
   }
   const geometryLines=cvStaffs.length===lines.length?lines.map((line,i)=>({...line,input:{...line.input,box:{...line.input.box,x:cvStaffs[i].x0,w:cvStaffs[i].x1-cvStaffs[i].x0,y:cvStaffs[i].lines[0],padUp:0,lineSpacing:cvStaffs[i].spacing}}})):lines;
-  const barPlan=visualBarPlan(gray,canvas.width,canvas.height,geometryLines),modelBuilt=toStateModel(lines,filename),visualBuilt=toStateVisual(lines,filename,gray,canvas.width,canvas.height,threshold),beatBuilt=toStateBeat(lines,filename),hybridBuilt=buildCvHybrid(canvas,filename,lines,barPlan),g=visualBuilt.barGeometry||{},geometryStrong=g.lines===lines.length&&g.modalInternalBars>=2&&g.support>=2&&g.measures>=lines.length*2,built=(hybridBuilt&&measureQa(hybridBuilt.state).exactRatio>=.95&&measureQa(hybridBuilt.state).over===0?hybridBuilt:null)||(geometryStrong?visualBuilt:[modelBuilt,visualBuilt,beatBuilt].sort((a,b)=>{
+  const barPlan=visualBarPlan(gray,canvas.width,canvas.height,geometryLines),modelBuilt=toStateModel(lines,filename),visualBuilt=toStateVisual(lines,filename,gray,canvas.width,canvas.height,threshold,cvStaffs),beatBuilt=toStateBeat(lines,filename),hybridBuilt=buildCvHybrid(canvas,filename,lines,barPlan),g=visualBuilt.barGeometry||{},geometryStrong=g.lines===lines.length&&g.modalInternalBars>=2&&g.support>=2&&g.measures>=lines.length*2,built=(hybridBuilt&&measureQa(hybridBuilt.state).exactRatio>=.95&&measureQa(hybridBuilt.state).over===0?hybridBuilt:null)||(geometryStrong?visualBuilt:[modelBuilt,visualBuilt,beatBuilt].sort((a,b)=>{
     const rank=c=>candidateScore(c)-(c.segmentation==='visual-fit'&&c.state.measures.length<=lines.length*1.2?150:0);
     return rank(b)-rank(a);
   })[0]),q=measureQa(built.state),staves=lines.length,suspiciousShort=staves>=3&&built.state.measures.length<=4,enough=built.noteCount>=Math.max(6,staves*3)&&built.state.measures.length>=Math.max(2,Math.floor(staves*.8)),rhythmOk=built.segmentation==='cv-hybrid'?(q.over===0&&q.exactRatio>=.99):built.segmentation==='visual-fit'?(q.over===0&&q.exactRatio>=.99&&built.correctionAvg<=.20&&built.rawExactRatio>=.75&&built.barGeometry?.support>=2):(q.over===0&&(q.exactRatio>=.9||(built.state.measures.length<=2&&q.exactRatio>=.5))),confOk=built.avgConfidence>=.45,shapeOk=!built.shapeEvidence||built.shapeEvidence.every(row=>row.every(e=>Number.isFinite(e.rhythm.dur)&&e.rhythm.dur>0));
