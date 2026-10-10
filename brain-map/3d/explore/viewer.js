@@ -424,7 +424,10 @@ function renderFrame(){
  if(dirty){updateCamera();renderer.render(scene,camera);drawLeaders();needsRender=false;}
 }
 const started=init();
-if(!started)console.warn('3D brain fallback active');
+if(!started){
+ console.warn('3D brain fallback active');
+ if(window.parent!==window)window.parent.postMessage({type:'brain-3d-error'},location.origin);
+}
 else {
  const queryView=new URLSearchParams(window.location.search).get('view');
  if(['front','back','left','right','top','free'].includes(queryView))setView(queryView,true);
