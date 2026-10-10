@@ -148,3 +148,21 @@ body.approved-brain-page{background:#f8faf3;color:#253b31;font-family:Pretendard
 .map-callout.is-related{filter:drop-shadow(0 1px 1px color-mix(in srgb,var(--stroke) 45%,transparent))}
 @media(min-width:721px){.map-callout.temporal{width:20%}.map-callout.cerebellum{width:18.4%}}
 @media(max-width:720px){.map-stage .approved-brain-art{image-rendering:auto}.map-callout{background:#fff}}
+
+/* 승인된 생활 속 예시의 실제 캐릭터 그림: 별도 PNG 모음이 아닌 sprite */
+.activity-card .illustration {
+ background-image:url("approved-children.webp?v=20261010-children1")!important;
+ background-size:400% 100%!important;
+ background-repeat:no-repeat!important;
+ background-color:transparent!important;
+ font-size:0!important;
+ width:75px;flex:0 0 75px;height:88px;
+ border-radius:14px;
+}
+.activity-card .ill-read{background-position:0% 50%!important}
+.activity-card .ill-list{background-position:33.333% 50%!important}
+.activity-card .ill-ball{background-position:66.666% 50%!important}
+.activity-card .ill-memory{background-position:100% 50%!important}
+@media(max-width:1320px){.activity-card .illustration{width:57px;flex-basis:57px;height:74px}}
+@media(max-width:720px){.activity-card .illustration{width:62px;flex-basis:62px;height:80px}}
+@media(max-width:355px){.activity-card .illustration{width:50px;flex-basis:50px;height:67px}}
