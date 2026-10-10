@@ -56,6 +56,9 @@ const truth=require('./doremi-ground-truth.json');
    }
    if(index!==19)throw Error('Expected 19 real measures, got '+index);
    const normal=c.toDataURL('image/png').split(',')[1];
+   const thumb=document.createElement('canvas');thumb.width=900;thumb.height=740;
+   thumb.getContext('2d').drawImage(c,0,0,900,740);
+   const thumbnail=thumb.toDataURL('image/jpeg',.55).split(',')[1];
    // Simulate thin, faint scan barlines without erasing noteheads or shortening staves:
    // repaint only a 5px region spanning the four staff interlines, then restore all
    // five continuous horizontal staff lines and draw a pale full-height barline.
@@ -69,8 +72,9 @@ const truth=require('./doremi-ground-truth.json');
      ic.beginPath();ic.moveTo(x,b.y);ic.lineTo(x,b.bottom);ic.stroke();
    }
    const faint=c.toDataURL('image/png').split(',')[1];
-   return {normal,faint,count:index,width:w,height:h,bars:barPositions.length};
+   return {normal,faint,thumbnail,count:index,width:w,height:h,bars:barPositions.length};
   },truth);
+  console.log('SCORE_THUMBNAIL_BASE64='+pictures.thumbnail);
   const first=path.join(out,'typeset-normal-19.png'),second=path.join(out,'typeset-faint-19.png');
   fs.writeFileSync(first,Buffer.from(pictures.normal,'base64'));
   fs.writeFileSync(second,Buffer.from(pictures.faint,'base64'));
