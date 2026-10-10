@@ -30,6 +30,12 @@ function balancedChoice(pool,target,x0,x1){
   recurse(0,[]);
   return best||cands.slice(0,target);
 }
+function regularity(chosen,x0,x1){
+  const xs=[x0,...chosen.map(p=>p.x).sort((a,b)=>a-b),x1];
+  const ds=xs.slice(1).map((x,i)=>x-xs[i]);
+  const mean=ds.reduce((a,v)=>a+v,0)/(ds.length||1);
+  return mean>0?Math.sqrt(ds.reduce((a,v)=>a+(v-mean)**2,0)/(ds.length||1))/mean:Infinity;
+}
 function alignedBarEvidence(rows){
   if(rows.length<4)return [];
   const base=rows.slice(0,-1),candidateClusters=[];
@@ -66,7 +72,15 @@ export function planBarRows(rows){
       pool=[...r.extended].sort((a,b)=>a.side-b.side);
       target=Math.min(Math.max(1,k-1),pool.length);
     }
-    const chosen=(useAnchors&&i===rows.length-1?balancedChoice(pool,target,r.x0,r.x1):pool.slice(0,target)).sort((a,b)=>a.x-b.x);
+    // Prefer globally coherent spacing when several candidates have equally
+    // dark vertical ink; do not just keep the leftmost strokes (often stems).
+    if(i===rows.length-1&&k>=2&&target===k&&pool.length>=k){
+      const full=balancedChoice(pool,k,r.x0,r.x1);
+      const fewer=balancedChoice(pool,k-1,r.x0,r.x1);
+      if(regularity(full,r.x0,r.x1)>.30&&regularity(fewer,r.x0,r.x1)<.12)
+        target=k-1;
+    }
+    const chosen=(pool.length>target?balancedChoice(pool,target,r.x0,r.x1):pool.slice(0,target)).sort((a,b)=>a.x-b.x);
     const bars=[r.x0,...chosen.map(q=>q.x),r.x1];
     return {bars,chosen,measureCount:Math.max(0,bars.length-1),strongCount:r.strong.length,moderateCount:r.moderate.length};
   });
