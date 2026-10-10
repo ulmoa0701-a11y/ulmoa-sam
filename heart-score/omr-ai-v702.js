@@ -222,9 +222,14 @@ function toStateVisual(lines,filename,gray,w,h,threshold){
       if(Number.isFinite(ir.confidence))conf.push(ir.confidence);
       if(ir.kind==='attribute'){if(ir.time?.num&&ir.time?.den){timeN=Number(ir.time.num);timeD=Number(ir.time.den);}if(Number.isFinite(ir.keyFifths)&&Number(ir.keyFifths)===0)keyLabel='C';}
     }
-    const musical=line.fragment.filter(ir=>ir.kind==='note'||ir.kind==='rest').map(ir=>{const e=eventFromIr(ir),q=ir.src?.bbox;return e&&q?{ir,e,x:q[0]+q[2]/2}:null;}).filter(Boolean).sort((a,b)=>a.x-b.x);
-    noteCount+=musical.filter(v=>v.ir.kind==='note').length;
     const bars=plan.plans[li]?.bars||[],targetQ=(Number(timeN)||4)*4/(Number(timeD)||4);
+    // A thick barline can be misread as a rest. A rest is a symbol within a
+    // measure, never coincident with a confidently identified printed barline.
+    const sp=Number(line.input.box?.lineSpacing)||10;
+    const musical=line.fragment.filter(ir=>ir.kind==='note'||ir.kind==='rest').map(ir=>{const e=eventFromIr(ir),q=ir.src?.bbox;return e&&q?{ir,e,x:q[0]+q[2]/2}:null;})
+      .filter(v=>v&&(v.ir.kind!=='rest'||!bars.slice(1,-1).some(x=>Math.abs(x-v.x)<=sp*.85)))
+      .sort((a,b)=>a.x-b.x);
+    noteCount+=musical.filter(v=>v.ir.kind==='note').length;
     if(bars.length>=2){
       for(let i=0;i<bars.length-1;i++){
         const left=bars[i],right=bars[i+1],items=musical.filter(v=>v.x>left&&v.x<right),fit=fitMeasureToBeat(items,left,right,targetQ);
