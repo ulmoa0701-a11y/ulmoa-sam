@@ -876,3 +876,36 @@
   .glossary-page .gcat-reference-content,
   .glossary-page .gcat-reference-image{padding:11px 12px 14px}
 }
+
+
+/* 두 가지 개념을 설명하는 원문의 비교 구조는 핵심 뜻 안에서 보여준다. */
+.glossary-page .gcat-definition-section .gcat-definition-pair{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin:12px 0 0!important;
+}
+.glossary-page .gcat-definition-section .gcat-definition-pair>div{
+  min-width:0;
+  background:#fffdf9!important;
+  border:1px solid #e9e1d4;
+  border-radius:11px;
+  padding:11px!important;
+  box-shadow:none!important;
+}
+.glossary-page .gcat-definition-section .gcat-definition-pair b,
+.glossary-page .gcat-definition-section .gcat-definition-pair strong{
+  font-size:14px!important;
+  line-height:1.4!important;
+  color:#4b3c31;
+}
+.glossary-page .gcat-definition-section .gcat-definition-pair span{
+  font-size:12.5px!important;
+  line-height:1.55!important;
+  color:#574e46;
+}
+@media(max-width:420px){
+  .glossary-page .gcat-definition-section .gcat-definition-pair{gap:5px}
+  .glossary-page .gcat-definition-section .gcat-definition-pair>div{padding:8px!important}
+  .glossary-page .gcat-definition-section .gcat-definition-pair span{font-size:12px!important}
+}
