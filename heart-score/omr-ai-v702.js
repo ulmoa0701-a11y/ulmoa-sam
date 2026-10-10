@@ -9,6 +9,7 @@ import * as omr from './omr-local-v686.js?v=702';
 import {scanConnectedHeads,scanPitchFromY,scanRhythm,scanHollowHeads} from './omr-scan-evidence-v1.mjs?v=703';
 import {planBarRows} from './omr-bar-consensus-v1.mjs?v=703';
 import {recoverFaintBarlines} from './omr-bar-rescue-v1.mjs?v=703';
+import {deskewScoreCanvas} from './omr-deskew-v1.mjs?v=1';
 
 const W=window;
 const ORT_VERSION='1.27.0';
@@ -455,7 +456,9 @@ function scanTitleCandidates(data,canvas){
   return candidates;
 }
 async function recognizeCanvas(canvas,filename,pageIndex){
-  const rt=await ensureRuntime(),gray=canvasGray(canvas),chosen=choosePreprocess(rt,gray,canvas.width,canvas.height);if(!chosen)return{staffDetected:false};
+  const sourceGray=canvasGray(canvas),deskew=deskewScoreCanvas(canvas,sourceGray);
+  canvas=deskew.canvas;
+  const rt=await ensureRuntime(),gray=deskew.applied?canvasGray(canvas):sourceGray,chosen=choosePreprocess(rt,gray,canvas.width,canvas.height);if(!chosen)return{staffDetected:false};
   const {pre,inputs,threshold}=chosen;if(!(pre.inputs||[]).length)return{staffDetected:false};if(!inputs.length)return{staffDetected:true,ok:false,reason:'오선은 찾았지만 본문 악보 줄을 안정적으로 분리하지 못했습니다.'};
   const scanLike=threshold>=.78;
   status(`본문 악보 ${inputs.length}줄 감지 · 원본+스캔보정 이중 판독 · 음표 읽는 중…`);
@@ -538,6 +541,7 @@ async function recognizeCanvas(canvas,filename,pageIndex){
       qa:measureQa(v.state).exactRatio,perLine:v.barGeometry?.perLine||null,
       rank:candidateScore(v)
     })),
+    deskew:deskew.estimate,deskewApplied:deskew.applied,
     rawBarGeometry:{visualOpticalDebug:visualBuilt.opticalDebug,accidentalProbes:lines.map((line,i)=>{
       const staff=cvStaffs[i];if(!staff)return[];
       return musicalEvents(line.fragment).filter(v=>v.ir.kind==='note').map(v=>({x:Math.round(v.x),note:v.e.note,conf:+(Number(v.ir.confidence)||0).toFixed(2),feature:printedAccidentalProbe(gray,canvas.width,canvas.height,staff,v.x,v.e.note)})).filter(v=>/[파시]|[#♭]/.test(v.note));
