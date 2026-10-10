@@ -51,7 +51,9 @@ function renderKeys(){
  $('#keys').innerHTML='';
  NOTES.forEach((note,i)=>{
   const b=document.createElement('button');b.className='key';b.type='button';b.dataset.note=note;
-  b.style.background=COLORS[note];b.setAttribute('aria-label',note+' 소리 내기');
+  b.style.setProperty('--key-color',COLORS[note]);
+  b.style.setProperty('--key-ink',['미','파'].includes(note)?'#26384a':'#ffffff');
+  b.setAttribute('aria-label',note+' 건반 누르기');
   b.innerHTML='<span>'+(note==='높은도'?'도↑':note)+'</span><span class="hotkey">'+(i+1)+'</span>';
   b.addEventListener('click',()=>tap(note,b));$('#keys').appendChild(b);
  });
@@ -61,10 +63,12 @@ function renderTrack(){
  track.scrollTop=0;
  state.events.forEach(e=>{
   const el=document.createElement('div');el.className='noteTile';el.dataset.i=String(e.i);
+  el.style.setProperty('--score-note-color',COLORS[e.note]);
+  el.style.setProperty('--score-note-ink',['미','파'].includes(e.note)?'#273b47':'#ffffff');
   el.setAttribute('aria-label',(e.i+1)+'번째 '+e.note+' · '+e.lyric);
   const display=e.note==='높은도'?'도↑':e.note;
   const long=e.dur/state.beat>=1.75?'<span class="longNote">길게</span>':'';
-  el.innerHTML='<div class="tileNote" style="background:'+COLORS[e.note]+'"><span class="scoreNoteBubble">'+display+'</span>'+long+'</div><div class="tileLyric">'+e.lyric+'</div>';
+  el.innerHTML='<div class="tileNote"><span class="scoreNoteBubble">'+display+'</span>'+long+'</div><div class="tileLyric">'+e.lyric+'</div>';
   track.appendChild(el);
  });
  track.firstElementChild?.classList.add('ready');

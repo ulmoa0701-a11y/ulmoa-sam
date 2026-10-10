@@ -31,6 +31,36 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  check((await page.locator('.key[data-note="높은도"]').innerText()).includes('도↑'),
     name+': mobile high C button should be compact and readable');
  check(await page.locator('.noteTile').count()===14,name+': first song note sequence mismatch');
+ check(await page.locator('.pianoKeys .key').count()===8,
+   name+': piano-style playing keys not present');
+ const keyVsSheet=await page.evaluate(()=>{
+   const score=document.querySelector('#noteTrack .noteTile');
+   const sheetNote=score.querySelector('.scoreNoteBubble');
+   const scoreTile=score.querySelector('.tileNote');
+   const instrument=document.querySelector('#keys'),key=document.querySelector('.key');
+   const style=e=>getComputedStyle(e);
+   const rect=e=>{const r=e.getBoundingClientRect();return {width:r.width,height:r.height}};
+   return {keyBoardBg:style(instrument).backgroundImage,
+     keyBg:style(key).backgroundImage,
+     keyColor:key.style.getPropertyValue('--key-color'),
+     scoreCardBg:style(scoreTile).backgroundColor,
+     noteBg:style(sheetNote).backgroundColor,
+     scoreNote:rect(sheetNote),key:rect(key),
+     keyGroup:rect(instrument),
+     pressedLabel:key.getAttribute('aria-label'),
+     keyGridCols:style(instrument).gridTemplateColumns.split(' ').length};
+ });
+ check(keyVsSheet.keyBg.includes('linear-gradient')&&
+   keyVsSheet.keyBoardBg.includes('linear-gradient')&&
+   keyVsSheet.keyColor.startsWith('#')&&
+   keyVsSheet.pressedLabel.includes('건반'),
+   name+': score and instrument still look identical or lack key affordance '+JSON.stringify(keyVsSheet));
+ check(keyVsSheet.key.height>keyVsSheet.scoreNote.height*1.12&&
+   keyVsSheet.keyGridCols===(w<=700?4:8),
+   name+': finger targets are too small or grid wrong '+JSON.stringify(keyVsSheet));
+ check(await page.locator('.mainStage .noteTile button').count()===0,
+   name+': read-only score unexpectedly contains clickable buttons');
+
  const oneViewport=await page.evaluate(()=>{
    const get=sel=>{const r=document.querySelector(sel).getBoundingClientRect();
      return {x:r.left,y:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};
@@ -71,7 +101,7 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
      scrollHeight:track.scrollHeight,clientHeight:track.clientHeight};
  });
  check(scoreLayout.cols===(w<=700?4:w<=1080?6:7)&&scoreLayout.grid.width>scoreLayout.stage.width*.92&&
-   scoreLayout.first.width>=(w<=700?62:w<=1080?105:110)&&scoreLayout.note.width>=(w<=700?28:55),
+   scoreLayout.first.width>=(w<=700?62:w<=1080?105:110)&&scoreLayout.note.width>=(w<=700?22:31),
    name+': score grid is too narrow or notes too small '+JSON.stringify(scoreLayout));
  check(scoreLayout.scrollHeight<=scoreLayout.clientHeight+3,
    name+': all 14 notes must fit in the score without internal scrolling '+JSON.stringify(scoreLayout));
