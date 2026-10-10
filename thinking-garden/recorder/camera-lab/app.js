@@ -24,7 +24,7 @@ function markStep(){
 function setPhase(phase){
  S.phase=phase;$('idleActions').hidden=phase!=='idle';
  $('setupPanel').hidden=phase!=='calibrate';
- $('playPanel').hidden=!(phase==='play'||phase==='completed');
+ $('playPanel').hidden=!(phase==='play'||phase==='won'||phase==='completed');
  $('finishPanel').hidden=phase!=='completed';
  $('liveNotice').hidden=!(S.mode==='camera'&&phase!=='idle');
  $('demoNotice').hidden=!(S.mode==='demo'&&phase!=='idle');
@@ -122,6 +122,7 @@ function scoreCurrent(){
 }
 function winStep(byTeacher){
  if(S.phase!=='play')return;
+ S.phase='won';
  S.blooms[S.index]=true;S.progress=0;S.nearSince=0;S.simMoving=false;
  $('resultIcon').textContent=fingers[S.index].flower;
  $('resultTitle').textContent=byTeacher?'함께 찾았어!':'가까이 왔어!';
@@ -133,7 +134,7 @@ function winStep(byTeacher){
 function nextStep(){
  $('winOverlay').hidden=true;
  if(S.index===2){S.phase='completed';setPhase('completed');label('앞쪽 세 구멍 접근 놀이 완료! 실제 운지 정확성은 확인하지 않았어요.');speak('모두 찾아봤네!');return}
- S.index++;S.progress=0;S.nearSince=0;
+ S.index++;S.phase='play';S.progress=0;S.nearSince=0;
  if(S.mode==='demo')S.simTip={x:.16,y:.38};markStep();
  label(fingers[S.index].name+' 손가락을 표시한 위치로 움직여 봐요.');speak(fingers[S.index].speak);
 }
