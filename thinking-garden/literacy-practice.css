@@ -1,0 +1,30 @@
+/* 선택형 읽기·쓰기 연습: 기존 정원 디자인의 크림/초록 톤 유지 */
+.literacy-practice-controls[hidden]{display:none!important}
+.literacy-practice-controls{margin:18px 0 4px;padding:18px;border:1px solid #e0ebdc;border-radius:20px;background:#f7faf3}
+.practice-setting+.practice-setting{margin-top:16px}
+.practice-setting h2{font-size:16px;line-height:1.3;color:#304a35;margin:0 0 9px;font-weight:900}
+.practice-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.practice-options button{min-height:66px;padding:10px 7px;background:#fff;border:2px solid #d9e8d5;color:#354739;border-radius:15px;font:inherit;font-size:17px;font-weight:900;cursor:pointer;line-height:1.25;transition:background .18s,border-color .18s,box-shadow .18s}
+.practice-options button small{display:block;margin:5px 0 0;font-size:11px;color:#6c7c71;line-height:1.35;font-weight:700;word-break:keep-all}
+.practice-options button[aria-pressed="true"]{background:#e3f4da;border-color:#72ae70;box-shadow:0 0 0 2px #c9e5be inset}
+.practice-options button:focus-visible{outline:3px solid #3c814c;outline-offset:3px}
+.practice-counts button{min-height:50px}
+.practice-notice{margin:12px 0 0!important;font-size:13px!important;color:#5b7963!important;font-weight:800}
+.spacing-line.is-long{padding:22px 14px;max-width:100%;gap:0 1px}
+.spacing-line.is-long .spacing-char{font-size:clamp(23px,2.8vw,34px)}
+.spacing-line.is-long .space-gap{height:47px}
+.repair-shop .broken-sign{overflow-wrap:anywhere;word-break:keep-all}
+@media(max-width:560px){
+ .literacy-practice-controls{padding:13px;margin:15px 0 2px}
+ .practice-setting h2{font-size:15px}
+ .practice-options{gap:6px}
+ .practice-options button{min-height:67px;font-size:15px;padding:8px 4px;border-radius:12px}
+ .practice-options button small{font-size:10px}
+ .practice-counts button{min-height:48px}
+ .spacing-line.is-long{padding:17px 8px}
+ .spacing-line.is-long .spacing-char{font-size:22px}
+ .spacing-line.is-long .space-gap{width:20px;height:39px;margin:0 -7px}
+ .spacing-line.is-long .space-gap.opened{width:25px;margin:0 1px}
+ .practice-notice{font-size:12px!important}
+}
+@media(prefers-reduced-motion:reduce){.practice-options button{transition:none}}
