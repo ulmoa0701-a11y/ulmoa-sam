@@ -355,6 +355,12 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
 /* One readiness card throughout: counting and the final '시작' share this same card. */
 .introOverlay{background:rgba(240,249,255,.34);backdrop-filter:blur(2px)}
 .introOverlay.launchCue .introPulse{color:#16836f;font-size:clamp(38px,10vw,62px)}
+/* Keep '시작' visible together, animating only the syllable on the current beat. */
+.introPulse.syllablePair{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;gap:0}
+.introSyllable{display:inline-block;min-width:.95em;color:#597b93;transform-origin:center bottom}
+.introSyllable.active{color:#16836f;animation:syllableBeat .48s ease-out both}
+@keyframes syllableBeat{0%{transform:translateY(2px) scale(.96)}42%{transform:translateY(-12px) scale(1.16)}72%{transform:translateY(1px) scale(.98)}100%{transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.introSyllable.active{animation:none;text-decoration:underline;text-decoration-thickness:4px;text-underline-offset:6px}}
 .introDots>i.done{background:#c1e7d5;border-color:#62b99b}
 .introCard{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-width:184px;max-width:min(88%,360px);padding:23px 25px;border:2px solid rgba(255,255,255,.9);border-radius:26px;background:rgba(255,253,247,.96);box-shadow:0 16px 48px rgba(30,56,82,.16);text-align:center}
 .introHeading{font-size:clamp(18px,4.5vw,27px);line-height:1.25;font-weight:950;color:#223554}
@@ -608,8 +614,13 @@ function introVisual(index){
   // Keep a single card and give "시" and "작" one full beat each.
   $('#introOverlay').classList.toggle('launchCue',syllable);
   $('#introHeading').textContent=countMode?'함께 준비해요':'함께 박자 맞춰요';
-  $('#introPulse').textContent=countMode?String(Math.max(1,3-index)):
-    syllable?(index===introBeats-2?'시':'작'):String(beatNumber);
+  const pulse=$('#introPulse');
+  pulse.classList.toggle('syllablePair',syllable);
+  if(syllable){
+    const onSi=index===introBeats-2;
+    // The text always reads "시작": only the active syllable bounces on its beat.
+    pulse.innerHTML='<span class="introSyllable'+(onSi?' active':'')+'">시</span><span class="introSyllable'+(!onSi?' active':'')+'">작</span>';
+  }else pulse.textContent=countMode?String(Math.max(1,3-index)):String(beatNumber);
   const length=countMode?3:syllable?2:introMeter;
   const dotIndex=syllable?index-(introBeats-2):index%length;
   $('#introDots').innerHTML=Array.from({length},(_,i)=>'<i class="'+(i===dotIndex?'active':i<dotIndex?'done':'')+'"></i>').join('');
