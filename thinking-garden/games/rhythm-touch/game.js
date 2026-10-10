@@ -195,6 +195,7 @@ function finish(){
  $('#resultText').textContent='잘 맞춘 음 '+(state.stats.great+state.stats.good)+'개 · '+state.events.length+'개 중 연주를 확인했어요.';
  $('#scoreBreakdown').innerHTML='<span>✨ 정확 '+state.stats.great+'</span><span>🌼 가까움 '+state.stats.good+'</span><span>🎵 연습 '+state.stats.okay+'</span><span>↔ 다른 음 '+state.stats.wrong+'</span><span>⌛ 놓침 '+state.stats.miss+'</span><span>➕ 추가 누름 '+state.extra+'</span>';
  try{
+  const completed=JSON.parse(localStorage.getItem('moa-garden:completed')||'{}');completed.rhythmTouch=true;localStorage.setItem('moa-garden:completed',JSON.stringify(completed));
   const key='moa-rhythm-best:'+state.song.id;
   const old=Number(localStorage.getItem(key))||0;if(score>old)localStorage.setItem(key,String(score));
  }catch{}
