@@ -87,3 +87,5 @@ header{display:flex;align-items:center;justify-content:space-between;min-height:
 @media(max-width:850px){.flower-head{transform:translateX(-50%) scale(.74)}}
 @media(max-width:520px){.flower-head{transform:translateX(-50%) scale(.51)}.flower-head .bud{filter:drop-shadow(0 6px 3px #52835e38)}}
 @media(prefers-reduced-motion:reduce){.plant.bloom .open{animation:none}}
+
+@media(min-width:851px){.garden-bed{height:68%;bottom:4%}.flower-head{bottom:43%}.moa{height:39%;bottom:5%;max-height:310px;max-width:230px}}
