@@ -282,7 +282,12 @@ function refreshSelection(){
  activityButtons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.activity===activeActivity)));
  needsRender=true;
 }
-function setSelected(key){selected=info[key]?key:null;activeFunction=null;activeActivity=null;refreshSelection();}
+function setSelected(key){
+ selected=info[key]?key:null;activeFunction=null;activeActivity=null;refreshSelection();
+ if(window.parent!==window && selected && ['frontal','parietal','temporal','occipital','cerebellum','brainstem'].includes(selected)){
+  window.parent.postMessage({type:'brain-3d-selected',part:selected},location.origin);
+ }
+}
 function setFunction(key){if(!functionDetails[key])return;activeFunction=key;selected=null;activeActivity=null;refreshSelection();}
 function setActivity(key){if(!activityDetails[key])return;activeActivity=key;activeFunction=null;selected=null;refreshSelection();}
 function updateCalloutMode(){
@@ -423,4 +428,14 @@ if(!started)console.warn('3D brain fallback active');
 else {
  const queryView=new URLSearchParams(window.location.search).get('view');
  if(['front','back','left','right','top','free'].includes(queryView))setView(queryView,true);
+ window.addEventListener('message',event=>{
+  if(event.origin!==location.origin || event.source!==window.parent)return;
+  const data=event.data||{};
+  if(data.type==='brain-view'&&['front','back','left','right','top','free'].includes(data.view)){
+    setView(data.view,true);
+  }else if(data.type==='brain-part'&&info[data.part]){
+    selected=data.part;activeActivity=null;activeFunction=null;refreshSelection();
+  }
+ });
+ if(new URLSearchParams(location.search).has('embedded'))window.parent.postMessage({type:'brain-3d-ready'},location.origin);
 }
