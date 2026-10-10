@@ -53,6 +53,9 @@ class LandscapeMissionScene extends Phaser.Scene{
  }
  spawn(){
   const items=makeChoices(this.round),top=Math.ceil(items.length/2),bottom=items.length-top;
+  if(this.m.focus==='size'){
+   [320,595].forEach(base=>roundRect(this,442,base-4,485,38,18,0xf5eed9,.94,0xb9c9a8,2).setDepth(5));
+  }
   const xAt=(index,count)=>750+(index-(count-1)/2)*218;
   items.forEach((it,i)=>{
    const row=i<top?0:1,j=row===0?i:i-top,n=row===0?top:bottom;
