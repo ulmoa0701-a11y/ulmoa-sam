@@ -68,6 +68,9 @@ function renderKeys(){
   b.style.setProperty('--key-color',COLORS[note]);
   b.style.setProperty('--key-ink',note==='높은도'?'#ffffff':'#111827');
   b.style.setProperty('--key-step',String(i));
+  b.style.setProperty('--key-offset',`${i*3}px`);
+  b.style.setProperty('--key-mobile-offset',`${i*2}px`);
+  b.style.setProperty('--key-small-offset',`${i}px`);
   b.setAttribute('aria-label',note+' 건반 누르기');
   b.innerHTML='<span>'+(note==='높은도'?'도↑':note)+'</span><span class="hotkey">'+(i+1)+'</span>';
   b.addEventListener('click',()=>tap(note,b));group.appendChild(b);
