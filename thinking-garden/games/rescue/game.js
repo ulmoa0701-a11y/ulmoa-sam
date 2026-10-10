@@ -168,7 +168,17 @@ class MissionScene extends Phaser.Scene{
  makeVan(x,y,s=1){const c=this.add.container(x,y).setScale(s),g=this.add.graphics();g.fillStyle(0xf8f2d9,1);g.fillRoundedRect(-110,-50,220,92,22);g.fillStyle(0x3e9564,1);g.fillRoundedRect(-110,-50,220,42,22);g.fillRect(-110,-25,220,22);g.fillStyle(0x284f46,1);g.fillRoundedRect(-82,-20,58,36,10);g.fillRoundedRect(12,-20,58,36,10);g.fillStyle(0x203a34,1);g.fillCircle(-68,44,23);g.fillCircle(69,44,23);g.fillStyle(0xd6eee0,1);g.fillCircle(-68,44,9);g.fillCircle(69,44,9);c.add(g);c.add(label(this,0,8,'모아 구조대',18,'#1b4d3b','900'));return c}
  drawHud(){roundRect(this,20,18,W-40,125,28,0x12392f,.95,0xffffff,2);label(this,75,51,`현장 ${this.round+1}/5`,20,'#cfe8da','900','left').setOrigin(0,.5);label(this,75,91,this.m.place,28,'#ffffff','900','left').setOrigin(0,.5);this.countText=label(this,W-85,76,`0/${this.m.need}`,30,'#ffffff','900');roundRect(this,W-145,48,110,58,24,0x23664d,1);this.countText.setDepth(5);this.progress=this.add.graphics().setDepth(5);for(let i=0;i<5;i++){this.progress.fillStyle(i<=this.round?0xf4d75a:0xffffff,i<=this.round?1:.25);this.progress.fillCircle(310+i*28,52,6)}}
  showBriefing(){this.lock=true;const shade=this.add.rectangle(W/2,H/2,W,H,0x0b241e,.62).setDepth(80).setInteractive();const card=this.add.container(W/2,H/2-20).setDepth(81);const bg=roundRect(this,-290,-265,580,530,34,0xf8fff9,1,0xffffff,3);card.add(bg);const guidePic=this.add.image(-205,-190,'hong').setDisplaySize(92,92);card.add(guidePic);const tag=label(this,25,-215,'📡 구조 무전 도착',25,'#1e6a4c','900');card.add(tag);const portrait=makeTargetPortrait(this,this.m).setPosition(0,-85);card.add(portrait);const target=targetLabel(this.m);
-  const t=label(this,0,55,targetHeadline(this.m),38,'#17382f','900');card.add(t);const sub=label(this,0,112,targetDescription(this.m),22,'#527066','800');card.add(sub);const go=button(this,0,205,330,78,'출동! 🚨',0x1c694d);card.add(go);go.on('pointerdown',()=>{tone(true);speak(target);this.tweens.add({targets:card,y:-420,alpha:0,duration:380,ease:'Back.easeIn',onComplete:()=>{card.destroy();shade.destroy();this.lock=false;this.spawnAnimals();this.installTouchAssist();this.showMissionChip()}})})
+  const headlineSize=target.length>18?29:target.length>12?34:39;
+  const t=this.add.text(0,54,target,{
+   fontFamily:FONT,fontSize:headlineSize+'px',fontStyle:'bold',color:'#17382f',
+   align:'center',wordWrap:{width:510,useAdvancedWrap:true},lineSpacing:6
+  }).setOrigin(.5);
+  card.add(t);
+  const sub=label(this,0,133,this.m.need===1?'한 마리를 찾아요':this.m.focus==='size'?'같은 종류끼리 크기를 비교해요':'한 마리씩 차례대로 찾아요',22,'#527066','800');
+  card.add(sub);
+  const go=button(this,0,207,330,78,'출동! 🚨',0x1c694d);card.add(go);
+  this.briefingTargetText=t;this.briefingStartButton=go;
+  go.on('pointerdown',()=>{tone(true);speak(target);this.tweens.add({targets:card,y:-420,alpha:0,duration:380,ease:'Back.easeIn',onComplete:()=>{card.destroy();shade.destroy();this.lock=false;this.spawnAnimals();this.installTouchAssist();this.showMissionChip()}})})
  }
  showMissionChip(){
   const c=this.add.container(0,0).setDepth(65);

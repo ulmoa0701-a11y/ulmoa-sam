@@ -44,12 +44,28 @@ class LandscapeMissionScene extends Phaser.Scene{
   const back=button(this,166,680,215,58,'처음으로',0x526e60).setDepth(22);
   back.on('pointerdown',()=>this.scene.start('landtitle'));
   roundRect(this,329,18,849,78,24,0x153d32,.9).setDepth(14);
-  label(this,689,56,'조건에 맞는 동물을 찾아요',27,'#ffffff','900').setDepth(15);
+  // The same concrete task stays visible after the team starts searching.
+  this.missionBarText=label(this,689,56,this.targetText,this.targetText.length>18?22:26,'#ffffff','900').setDepth(15);
   const replay=button(this,1094,57,142,60,'🔊 다시',0x2a7858).setDepth(18);
   replay.on('pointerdown',()=>speak(this.targetText));
-  const start=button(this,750,356,370,88,'출동! 🚨',0x226c50).setDepth(55);
   const shade=this.add.rectangle(754,413,875,630,0x0a291e,.42).setDepth(50);
-  start.on('pointerdown',()=>{tone(true);speak(this.targetText);shade.destroy();start.destroy();this.lock=false;this.spawn()});
+  const briefingCard=roundRect(this,393,241,722,340,32,0xfffdf6,.99,0xcde9d8,3).setDepth(52);
+  // Child's reading order: What should I find? -> reassurance -> Dispatch.
+  const missionSize=this.targetText.length>18?31:this.targetText.length>13?34:39;
+  const title=this.add.text(754,330,this.targetText,{
+   fontFamily:FONT,fontSize:missionSize+'px',fontStyle:'bold',color:'#163c30',
+   align:'center',wordWrap:{width:650,useAdvancedWrap:true},lineSpacing:7
+  }).setOrigin(.5).setDepth(54);
+  const helper=this.m.need===1?'한 마리를 찾아요':this.m.focus==='size'?'같은 종류끼리 크기를 비교해요':'한 마리씩 차례대로 찾아요';
+  const subtitle=label(this,754,411,helper,23,'#587264','800').setDepth(54);
+  const start=button(this,754,498,350,78,'출동! 🚨',0x226c50).setDepth(55);
+  this.briefingTargetText=title;
+  this.briefingStartButton=start;
+  start.on('pointerdown',()=>{
+   tone(true);speak(this.targetText);
+   [shade,briefingCard,title,subtitle,start].forEach(item=>item.destroy());
+   this.lock=false;this.spawn();
+  });
  }
  spawn(){
   const items=makeChoices(this.round),top=Math.ceil(items.length/2),bottom=items.length-top;
