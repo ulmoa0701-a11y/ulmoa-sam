@@ -516,3 +516,12 @@ body:has(.login-page) .previewbar{padding-top:6px;padding-bottom:6px;font-size:1
 .parent-guide-body .parent-prompts{margin-top:12px}
 .parent-guide-body>.parent-example{margin-top:8px}
 @media(max-width:690px){.parent-easy-form{gap:10px}.parent-main-label textarea{min-height:86px}}
+
+
+/* Parent v7 - clinical-form benchmarking: event date separate from creation timestamp */
+.parent-when{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,.65fr);gap:12px;align-items:end}
+.parent-when label{gap:5px}.parent-when input{min-height:47px;padding:9px 12px;color:#203436;font-size:15px;line-height:1.35}
+.parent-when .parent-time-field{display:flex;flex-direction:column;justify-content:end}.parent-time-field small{display:inline;font-size:11px;color:#788492;font-weight:550}
+.parent-date-hint{margin:-5px 0 2px!important;font-size:12px!important;line-height:1.55!important;color:#67798c!important}
+.parent-more select{min-height:43px}
+@media(max-width:370px){.parent-when{grid-template-columns:1fr 133px;gap:7px}.parent-when input{padding:8px 7px;font-size:13px}}
