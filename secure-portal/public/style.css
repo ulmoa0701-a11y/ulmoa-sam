@@ -469,3 +469,50 @@ body:has(.login-page) .previewbar{padding-top:6px;padding-bottom:6px;font-size:1
 .empty-state{border:1px dashed #cfdae9;background:#fafbfd;border-radius:14px;padding:24px;color:#79859a;font-size:14px}
 .case-panel{border:1px solid #dae2ef!important;padding:24px!important}.case-panel .form{max-width:750px}.case-panel textarea{min-height:75px}.case-panel .tag{color:#4f64a2}
 @media(max-width:700px){.editor-paper{padding:16px}.soft-intro{padding:11px}.entry-v5{gap:11px}.entry-save{width:100%}.share-picker{gap:6px}.share-picker label{padding:7px}.case-panel{padding:16px!important}}
+
+/* Parent v6: low-pressure one-minute notes and compact clinician inbox */
+.parent-easy-form{gap:13px}
+.parent-start{border:1px solid #d8e4fa;border-radius:14px;background:#f5f8ff;padding:15px 17px;display:flex;flex-direction:column;gap:4px}
+.parent-duration{font-size:11px;color:#4867b6;font-weight:850;letter-spacing:.04em}
+.parent-start strong{font-size:18px;color:#273a61;line-height:1.4}
+.parent-start>span:last-child{font-size:13px;color:#5c6c81}
+.parent-prompts{display:grid;gap:9px}
+.parent-prompts-title{color:#344c6c;font-size:13px;font-weight:800}
+.parent-prompt-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.parent-prompt{min-height:38px;padding:7px 11px;background:white;color:#3c5685;border:1px solid #cdd8eb;border-radius:10px;font-size:13px;font-weight:700}
+.parent-prompt:hover,.parent-prompt.selected{background:#e9f0ff;border-color:#788fdb;color:#29478d}
+.parent-tip-result{border-left:3px solid #9db2e8;background:#f7f9fd;border-radius:4px 9px 9px 4px;padding:9px 12px;color:#425779;font-size:13px;line-height:1.5}
+.parent-main-label textarea{min-height:95px;resize:vertical}
+.parent-guide{border:1px solid #dde5ef;border-radius:13px;background:white}
+.parent-guide summary{cursor:pointer;font-size:14px;font-weight:800;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 14px;color:#375c76}
+.parent-guide summary::-webkit-details-marker{display:none}
+.parent-guide summary span{font-size:11px;font-weight:500;color:#71849b}
+.parent-guide summary:after{content:'⌄';font-size:19px;color:#617ba8}
+.parent-guide[open] summary:after{content:'⌃'}
+.parent-guide-body{padding:1px 14px 13px;border-top:1px solid #edf0f5;font-size:13px;line-height:1.65;color:#52667a}
+.parent-guide-body>p{margin:11px 0;color:#556b7b;font-size:13px}
+.parent-example{margin-top:9px;background:#f3f8f7;border-radius:10px;padding:11px 12px}
+.parent-example span{font-size:11px;font-weight:800;color:#3d7865}.parent-example p{margin:4px 0 0;font-size:13px;color:#2d544b}
+.parent-example.quiet{background:#f8f8fb}.parent-example.quiet span{color:#788196}.parent-example.quiet p{color:#657184}
+.parent-guide-tail{font-size:12px!important}
+.parent-more{margin-top:0}
+.parent-privacy{margin-top:0}
+.parent-easy-form .parent-privacy .checkbox span{font-size:14px}
+.parent-easy-form .share-picker p{order:-1;flex:1 1 100%}
+.parent-nudge{font-size:12px!important;margin:0!important;color:#778595!important}
+.parent-inbox-record{padding:14px 16px;margin:9px 0;border-color:#e2e8f1;background:#fff}
+.parent-inbox-record .meta{font-weight:750;color:#5b6b8a;margin-bottom:7px}
+.parent-inbox-skim{font-size:14px;color:#283f57;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.parent-inbox-details{border-top:1px solid #edf0f5;margin-top:10px}
+.parent-inbox-details summary{cursor:pointer;padding:8px 0 1px;font-size:12px;color:#536d9b;font-weight:750}
+.parent-inbox-full{padding:9px 0;font-size:13px}
+.parent-inbox-policy{font-size:13px!important;margin:9px 0 3px!important;color:#526986!important}
+@media(max-width:690px){.parent-start{padding:12px}.parent-start strong{font-size:17px}.parent-prompt{font-size:12px;min-height:37px;padding:7px 9px}.parent-guide summary{font-size:13px}.parent-inbox-record{padding:12px}}
+
+/* Parent v6 first-action refinement: optional help follows the short note */
+.parent-easy-form{gap:12px}
+.parent-main-label textarea{min-height:94px}
+.parent-inline-tip{font-size:12px!important;line-height:1.5!important;color:#697b89!important;margin:-5px 0 0!important}
+.parent-guide-body .parent-prompts{margin-top:12px}
+.parent-guide-body>.parent-example{margin-top:8px}
+@media(max-width:690px){.parent-easy-form{gap:10px}.parent-main-label textarea{min-height:86px}}
