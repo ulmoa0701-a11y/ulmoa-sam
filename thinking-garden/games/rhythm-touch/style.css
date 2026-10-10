@@ -442,3 +442,96 @@ footer{display:none!important}
  .mainStage .noteTile.active.pulse{animation:none;transform:none}
  .keys.pianoKeys .key{transition:none}
 }
+
+
+/* Lesson structure: readable note names and an instrument the child actually presses.
+   Default on ALL common screen widths is one continuous row of colored keys. */
+.keyHead{display:flex;justify-content:space-between;align-items:center;min-height:28px;gap:5px}
+.keyLayoutLabel{display:inline-flex;align-items:center;gap:6px;min-width:0;white-space:nowrap;font-size:clamp(10px,1vw,13px);font-weight:850;color:#466574}
+.keyLayoutLabel select{min-width:0;width:clamp(118px,14vw,180px);height:30px;min-height:30px;background:#f9fcff;color:#274763;border:1.5px solid #9cbdc7;border-radius:9px;padding:4px 5px;font-size:clamp(11px,1vw,13px);font-weight:850}
+.keyLayoutLabel select:disabled{opacity:.64}
+.keys.pianoKeys{grid-template-columns:repeat(8,minmax(0,1fr))!important;gap:2px!important}
+.keys .key>span:first-child{
+ display:flex;align-items:center;justify-content:center;
+ min-width:0;max-width:100%;
+ border-radius:999px;padding:5px 3px;
+ background:var(--label-back,#fff);color:var(--key-ink,#15191e)!important;
+ line-height:1.05;white-space:nowrap;
+ text-shadow:none!important;box-shadow:0 1px 2px #152b3b20;
+}
+.keys .key[data-note="높은도"]>span:first-child{color:#fff!important;background:#28394f!important}
+.mainStage .noteTile .scoreNoteBubble{
+ background:#fff!important;color:#15191e!important;
+ border:3px solid var(--score-note-color)!important;
+ text-shadow:none!important;
+}
+.mainStage .noteTile[data-note="높은도"] .scoreNoteBubble{
+ background:var(--score-note-color)!important;color:#fff!important;border-color:#fff!important
+}
+/* The xylophone is a single bank of distinct colored sound bars, not white piano keys. */
+.keys.xylophoneKeys{display:grid;grid-template-columns:repeat(8,minmax(0,1fr))!important;
+ gap:clamp(3px,.6vw,10px);background:linear-gradient(180deg,#f2d5a5,#d4a869);
+ padding:7px;border:3px solid #a77847;border-radius:14px;box-shadow:inset 0 2px 4px #8d652f37,0 3px 0 #906e4b}
+.keys.xylophoneKeys .key{
+ height:clamp(70px,12vh,110px);min-height:0!important;
+ background:linear-gradient(90deg,#fff5,transparent 25%,#0001),var(--key-color)!important;
+ border:2px solid #fff9;border-radius:22px!important;
+ border-bottom-width:3px;box-shadow:inset 0 3px 0 #fff6,0 4px 0 #9a7848,0 6px 9px #52381733;
+ transform-origin:center center;position:relative;
+}
+.keys.xylophoneKeys .key:nth-child(2),.keys.xylophoneKeys .key:nth-child(7){transform:scaleY(.91)}
+.keys.xylophoneKeys .key:nth-child(3),.keys.xylophoneKeys .key:nth-child(6){transform:scaleY(.84)}
+.keys.xylophoneKeys .key:nth-child(4),.keys.xylophoneKeys .key:nth-child(5){transform:scaleY(.78)}
+.keys.xylophoneKeys .key:before{content:"";width:9px;height:9px;left:50%;top:8px;transform:translateX(-50%);border-radius:50%;background:#e5d9c3;box-shadow:0 0 0 2px #7c6c6150}
+.keys.xylophoneKeys .key:after{content:"";position:absolute;width:9px;height:9px;bottom:9px;left:50%;transform:translateX(-50%);border-radius:50%;background:#e5d9c3;box-shadow:0 0 0 2px #7c6c6150}
+.keys.xylophoneKeys .key:active,.keys.xylophoneKeys .key.hit{filter:brightness(1.18);transform:translateY(3px) scale(.96)}
+/* Challenge choice: static shuffled positions, relaid out only BEFORE the song starts. */
+.keys.randomKeys{display:grid;grid-template-columns:repeat(8,minmax(0,1fr))!important;
+ gap:clamp(4px,.6vw,9px);padding:7px;border-radius:13px;
+ background:#f3f6ff;border:2px dashed #839cb8;box-shadow:inset 0 0 0 2px #fff}
+.keys.randomKeys .key{
+ height:clamp(66px,11vh,105px);min-height:0!important;
+ background:var(--key-color)!important;
+ border:2px solid #fff9!important;border-radius:13px!important;
+ box-shadow:0 4px 0 #38455735,0 6px 10px #1a2f4930!important
+}
+.keys.randomKeys .key:active,.keys.randomKeys .key.hit{transform:translateY(3px)!important}
+.keys.waiting{filter:saturate(.72);opacity:.72}
+.countOverlay #countNumber{min-width:1.7em;text-align:center}
+.countOverlay .countInfo{font-size:clamp(13px,1.6vw,21px);font-weight:950;color:#376d58}
+@media(max-width:700px){
+ .keyHead{min-height:25px;gap:3px}
+ .keyHead strong{font-size:11px;white-space:nowrap}
+ .keyLayoutLabel{gap:3px;font-size:10px}
+ .keyLayoutLabel select{width:118px;height:27px;min-height:27px;font-size:10px;padding:2px 3px}
+ .keys.pianoKeys{grid-template-columns:repeat(8,minmax(0,1fr))!important;gap:1px!important;padding:5px 3px 7px!important}
+ .keys.pianoKeys .key{height:clamp(65px,11vh,88px)!important;
+  padding:3px 0 8px;border-top-width:2px;border-bottom-width:6px;
+  font-size:clamp(14px,4.2vw,21px)}
+ .keys.pianoKeys .key>span:first-child{padding:5px 1px;font-size:clamp(13px,3.8vw,18px)}
+ .keys.pianoKeys .key[data-note="높은도"]>span:first-child{font-size:clamp(13px,3.7vw,17px)}
+ .keys .key .hotkey{right:2px;font-size:8px}
+ .keys.xylophoneKeys{grid-template-columns:repeat(8,minmax(0,1fr))!important;
+  gap:2px;padding:5px 3px 7px;border-radius:10px;border-width:2px}
+ .keys.xylophoneKeys .key{height:clamp(65px,10.5vh,84px)!important;border-radius:15px!important;padding:2px 1px 7px;
+  font-size:clamp(15px,4vw,21px)}
+ .keys.xylophoneKeys .key>span:first-child{font-size:clamp(13px,3.8vw,18px);padding:4px 1px}
+ .keys.xylophoneKeys .key:before,.keys.xylophoneKeys .key:after{height:5px;width:5px}
+ .keys.xylophoneKeys .key:before{top:4px}.keys.xylophoneKeys .key:after{bottom:4px}
+ .keys.randomKeys{grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  padding:4px;gap:4px;border-radius:10px}
+ .keys.randomKeys .key{height:clamp(43px,7.7vh,66px)!important;min-height:0!important;padding:2px 2px 5px}
+ .keys.randomKeys .key>span:first-child{font-size:clamp(17px,5vw,25px);padding:3px 10px}
+ .keys.randomKeys .key[data-note="높은도"]>span:first-child{font-size:19px}
+}
+@media(max-width:350px){
+ /* Eight tiny keys become unsafe to tap on very narrow phones. */
+ .keys.pianoKeys,.keys.xylophoneKeys{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ .keys.pianoKeys .key,.keys.xylophoneKeys .key{height:clamp(43px,7.7vh,60px)!important}
+}
+@media(max-width:700px) and (max-height:710px){
+ .keys.pianoKeys .key,.keys.xylophoneKeys .key{height:clamp(57px,9.8vh,65px)!important}
+ .keys.randomKeys .key{height:clamp(42px,7vh,53px)!important}
+ .keyLayoutLabel select{height:25px;min-height:25px}
+}
+@media(prefers-reduced-motion:reduce){.keys.xylophoneKeys .key,.keys.randomKeys .key{transition:none}}
