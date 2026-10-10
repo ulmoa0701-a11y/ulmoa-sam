@@ -525,3 +525,4 @@ body:has(.login-page) .previewbar{padding-top:6px;padding-bottom:6px;font-size:1
 .parent-date-hint{margin:-5px 0 2px!important;font-size:12px!important;line-height:1.55!important;color:#67798c!important}
 .parent-more select{min-height:43px}
 @media(max-width:370px){.parent-when{grid-template-columns:1fr 133px;gap:7px}.parent-when input{padding:8px 7px;font-size:13px}}
+@media(max-width:740px){body:has(.parent-easy-form) .hero{display:none}body:has(.parent-easy-form) main{padding-top:10px}body:has(.parent-easy-form) .editor-paper>p{display:none}body:has(.parent-easy-form) .editor-paper{padding-top:16px}}
