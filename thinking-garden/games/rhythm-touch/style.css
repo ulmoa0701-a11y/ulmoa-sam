@@ -483,7 +483,7 @@ footer{display:none!important}
  padding:8px 6px!important;box-shadow:0 3px 0 #b3ccbd!important;
 }
 .keys.xylophoneKeys .key{
- height:clamp(59px,calc(12vh - var(--key-step) * 3px),110px)!important;
+ height:clamp(59px,calc(12vh - var(--key-offset)),110px)!important;
  border-radius:20px 20px 13px 13px!important;
  border:2px solid rgba(255,255,255,.84)!important;
  border-bottom:6px solid #2b3c4570!important;
@@ -522,7 +522,7 @@ footer{display:none!important}
  .keys .key>span:first-child{font-size:clamp(15px,4.25vw,19px)!important;padding:3px 1px;border-radius:5px}
  .keys .key[data-note="높은도"]>span:first-child{font-size:clamp(14px,3.85vw,18px)!important}
  .keys .key .hotkey{font-size:8px!important;right:3px;bottom:4px}
- .keys.xylophoneKeys .key{height:clamp(58px,calc(11vh - var(--key-step) * 2px),83px)!important;
+ .keys.xylophoneKeys .key{height:clamp(58px,calc(11vh - var(--key-mobile-offset)),83px)!important;
    border-radius:14px 14px 9px 9px!important;border-bottom-width:5px!important}
  .keys.xylophoneKeys .key:before{top:6px}.keys.xylophoneKeys .key:after{bottom:7px}
 }
@@ -534,5 +534,5 @@ footer{display:none!important}
 }
 @media(max-width:700px) and (max-height:710px){
  .keys.pianoKeys .key,.keys.shuffleKeys .key,.keys.xylophoneKeys .key{height:clamp(50px,9.6vh,68px)!important}
- .keys.xylophoneKeys .key{height:clamp(49px,calc(9.6vh - var(--key-step) * 1px),68px)!important}
+ .keys.xylophoneKeys .key{height:clamp(49px,calc(9.6vh - var(--key-small-offset)),68px)!important}
 }
