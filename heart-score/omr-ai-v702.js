@@ -259,6 +259,12 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
       const e=eventFromIr(ir),q=ir.src?.bbox;
       if(e&&ir.kind==='note'){
         const vote=votes[noteIndex++];
+        // When the model claims a dotted quarter but the matching physical
+        // notehead has an undotted quarter stem, retain optical rhythm evidence.
+        if(Math.abs(e.dur-1.5)<.01&&vote?.rhythm?.dot===false&&
+           vote.rhythm.dur===1&&vote.proposal===e.note&&
+           vote.cvX<vote.x&&vote.delta<=sp*4.5&&
+           (vote.gap===null||vote.gap>=sp*.65))e.dur=1;
         // An independent notehead at treble C5 can disambiguate C4/C5 if the
         // decoded letter agrees; do not overwrite altered or different notes.
         if(vote?.proposal?.startsWith('높은')&&!e.note.startsWith('높은')&&vote.proposal.slice(2)===e.note&&
