@@ -173,6 +173,7 @@ function init() {
  applyMode('together');
  applySplit(true);
  refreshSelection();
+ updateCalloutMode();
  fallback.hidden=true;
  setView('free',true);
  requestAnimationFrame(renderFrame);
@@ -181,7 +182,7 @@ function init() {
 }
 function resize(){
  if(!renderer||!camera)return;
- const w=Math.max(1,holder.clientWidth),h=Math.max(1,holder.clientHeight);
+ const w=Math.max(1,canvas.clientWidth||holder.clientWidth),h=Math.max(1,canvas.clientHeight||holder.clientHeight);
  renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();needsRender=true;
 }
 function partOffset(mesh){
@@ -245,28 +246,90 @@ function updateCamera(){
  );
  camera.lookAt(0,-.12,0);
 }
+
+function regionsToHighlight(){
+ if(activeActivity)return activityDetails[activeActivity].regions;
+ if(activeFunction)return functionDetails[activeFunction].regions;
+ return selected&&!selected.startsWith('hemisphere-')?[selected]:null;
+}
 function refreshSelection(){
+ const regionKeys=regionsToHighlight();
  for(const mesh of meshes){
-  const match=!selected||(selected.startsWith('hemisphere-')
-   ?mesh.userData.side===selected.split('-')[1]
-   :mesh.userData.key===selected);
-  mesh.material.transparent=Boolean(selected&&!match);
-  mesh.material.opacity=match?1:.28;
+  const match=regionKeys?regionKeys.includes(mesh.userData.key):
+   !selected||(selected.startsWith('hemisphere-')?mesh.userData.side===selected.split('-')[1]:mesh.userData.key===selected);
+  mesh.material.transparent=Boolean((selected||activeFunction||activeActivity)&&!match);
+  mesh.material.opacity=match?1:.25;
   mesh.material.depthWrite=match;
-  mesh.material.emissive.setHex(selected&&match?0x203525:0x000000);
-  mesh.material.emissiveIntensity=selected&&match?.20:0;
+  mesh.material.emissive.setHex((selected||activeFunction||activeActivity)&&match?0x162b1b:0);
+  mesh.material.emissiveIntensity=match?.12:0;
  }
- const item=selected?info[selected]:null;
- document.getElementById('selectedType').textContent=item?item.category:defaultMessage.type;
- document.getElementById('selectedName').textContent=item?item.name:defaultMessage.name;
- document.getElementById('selectedIntro').textContent=item?item.summary:defaultMessage.intro;
- document.getElementById('selectedExample').textContent=item?item.example:defaultMessage.example;
- partButtons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.part===selected)));
+ const item=activeActivity?activityDetails[activeActivity]:
+  activeFunction?functionDetails[activeFunction]:selected?info[selected]:null;
+ const display=item||defaultMessage;
+ const region=selected?regionSummary[selected]:null;
+ document.getElementById('selectedType').textContent=display.category||display.type||'지금 보는 부위';
+ document.getElementById('selectedName').textContent=display.name;
+ document.getElementById('selectedIntro').textContent=display.summary||display.intro;
+ document.getElementById('selectedExample').textContent=display.example;
+ document.getElementById('selectedSkills').textContent=display.skills||region?.skills||'여러 영역이 함께 작동해요';
+ document.getElementById('selectedSymbol').textContent=display.icon||region?.icon||'🧠';
+ const header=document.querySelector('.selected-heading');
+ if(header)header.style.background=display.color||region?.color||'#eef6ed';
+ partButtons.forEach(b=>b.setAttribute('aria-pressed',String(!activeActivity&&!activeFunction&&b.dataset.part===selected)));
+ calloutButtons.forEach(b=>b.setAttribute('aria-pressed',String((activeFunction&&b.dataset.callout===activeFunction)||(!activeFunction&&!activeActivity&&b.dataset.callout===selected))));
+ activityButtons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.activity===activeActivity)));
  needsRender=true;
 }
-function setSelected(key){selected=info[key]?key:null;refreshSelection();}
+function setSelected(key){selected=info[key]?key:null;activeFunction=null;activeActivity=null;refreshSelection();}
+function setFunction(key){if(!functionDetails[key])return;activeFunction=key;selected=null;activeActivity=null;refreshSelection();}
+function setActivity(key){if(!activityDetails[key])return;activeActivity=key;activeFunction=null;selected=null;refreshSelection();}
+function updateCalloutMode(){
+ const fnLabels={frontal:'계획·집중',parietal:'공간지각',temporal:'말 듣기',occipital:'시각처리',cerebellum:'움직임 조절',brainstem:'호흡·각성'};
+ for(const button of calloutButtons){
+  const region=regionSummary[button.dataset.callout];
+  button.querySelector('b').textContent=mapMode==='functions'?fnLabels[button.dataset.callout]:region.name;
+  button.querySelector('small').textContent=mapMode==='functions'?'관련 부위 함께 보기':region.skills;
+ }
+ modeButtons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mapMode===mapMode)));
+ needsRender=true;
+}
+function setMapMode(mode){
+ if(mode!=='regions'&&mode!=='functions')return;
+ mapMode=mode;
+ if(mode==='functions')setFunction('frontal');else setSelected('frontal');
+ updateCalloutMode();
+}
+function drawLeaders(){
+ if(!leaderLines)return;
+ if(window.innerWidth<=680){leaderLines.replaceChildren();return;}
+ const stage=holder.getBoundingClientRect(),view=canvas.getBoundingClientRect();
+ if(!stage.width||!stage.height)return;
+ leaderLines.setAttribute('viewBox',`0 0 ${stage.width} ${stage.height}`);
+ leaderLines.replaceChildren();
+ for(const button of calloutButtons){
+  const key=button.dataset.callout;
+  const mesh=meshes.find(m=>m.userData.key===key&&(m.userData.side==='left'||key==='brainstem'));
+  if(!mesh)continue;
+  const projected=mesh.getWorldPosition(new THREE.Vector3()).project(camera);
+  const x=view.left-stage.left+(projected.x+1)*view.width/2;
+  const y=view.top-stage.top+(1-projected.y)*view.height/2;
+  if(x<0||y<0||x>stage.width||y>stage.height)continue;
+  const b=button.getBoundingClientRect();
+  const cx=b.left-stage.left+b.width/2,cy=b.top-stage.top+b.height/2;
+  const fromX=cx<x?b.right-stage.left:b.left-stage.left;
+  const color=regionSummary[key].color;
+  const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+  for(const [attr,val] of [['x1',fromX],['y1',cy],['x2',x],['y2',y],['stroke',color]])line.setAttribute(attr,String(val));
+  const dot=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  for(const [attr,val] of [['cx',x],['cy',y],['r',6],['fill',color]])dot.setAttribute(attr,String(val));
+  leaderLines.append(line,dot);
+ }
+}
 function bindEvents(){
  viewButtons.forEach(button=>button.addEventListener('click',()=>setView(button.dataset.view)));
+ modeButtons.forEach(b=>b.addEventListener('click',()=>setMapMode(b.dataset.mapMode)));
+ calloutButtons.forEach(b=>b.addEventListener('click',()=>mapMode==='functions'?setFunction(b.dataset.callout):setSelected(b.dataset.callout)));
+ activityButtons.forEach(b=>b.addEventListener('click',()=>setActivity(b.dataset.activity)));
  splitButtons.forEach(button=>button.addEventListener('click',()=>applyMode(button.dataset.split)));
  range.addEventListener('input',()=>{
   splitAmount=Number(range.value);
@@ -274,7 +337,7 @@ function bindEvents(){
   rangeText.textContent=splitAmount+'%';rangeOutput.textContent=splitAmount+'%';
   applySplit();needsRender=true;
  });
- partButtons.forEach(button=>button.addEventListener('click',()=>setSelected(button.dataset.part)));
+ partButtons.forEach(button=>button.addEventListener('click',()=>mapMode==='functions'&&functionDetails[button.dataset.part]?setFunction(button.dataset.part):setSelected(button.dataset.part)));
  document.getElementById('clearSelection').addEventListener('click',()=>setSelected(null));
  document.getElementById('resetCamera').addEventListener('click',()=>{distance=5.8;setView('free');});
  canvas.addEventListener('wheel',event=>{event.preventDefault();distance=THREE.MathUtils.clamp(distance+event.deltaY*.005,3.0,9.0);needsRender=true;},{passive:false});
@@ -351,6 +414,6 @@ function renderFrame(){
    dirty=true;
   }
  }
- if(dirty){updateCamera();renderer.render(scene,camera);needsRender=false;}
+ if(dirty){updateCamera();renderer.render(scene,camera);drawLeaders();needsRender=false;}
 }
 if(!init()) console.warn('3D brain fallback active');
