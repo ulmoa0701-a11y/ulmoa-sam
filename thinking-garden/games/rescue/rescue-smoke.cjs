@@ -84,7 +84,8 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
    assert.equal(scene.animals.filter(a=>a.color===scene.color&&a.size===scene.size&&scene.targetSpecies.includes(a.species)).length,scene.need,'Exactly one instance of each target');
    if(!wide) {
     const banner=await page.evaluate(n=>{const x=window.moaRescueGame.scene.getScene(n).missionChip;return {exists:!!x,copy:x?.list.filter(k=>typeof k.text==='string').map(k=>k.text).join(' | ')||'',audio:x?.list.some(k=>k.type==='Container'&&k.list.some(z=>z.text?.includes('다시'))) }},missionName);
-    assert.ok(banner.exists && banner.copy.includes(scene.color+'색') && banner.copy.includes(scene.size),'Missing persistent child-readable mission prompt '+JSON.stringify(banner));
+    const words={species:['오리'],color:['파란색','토끼'],size:['큰','동물'],['color-species']:['초록색','동물'],combined:['빨간색','작은']}[scene.focus];
+    assert.ok(banner.exists && words.every(w=>banner.copy.includes(w)),'Missing persistent, focus-specific child-readable mission prompt '+JSON.stringify({focus:scene.focus,banner}));
     assert.ok(banner.audio,'Missing repeat-audio button');
    }
    // Negative tests: every distractor must stay wrong, including same-species size pairs.
