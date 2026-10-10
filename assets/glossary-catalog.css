@@ -553,3 +553,74 @@
 @media(max-width:360px){
   .glossary-page .gcat-map-term{font-size:12px;padding:6px 4px}
 }
+
+
+/* 그림 모드: 분류 탭을 확실하게 인지하고 해당 그림 개수를 확인하는 탐색 UI. */
+.glossary-page .gcat-topic-lead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:4px 10px;
+  margin:5px 0 9px;
+}
+.glossary-page .gcat-topic-lead strong{
+  font:750 16px/1.3 "Pretendard Variable",Pretendard,sans-serif;
+  color:#49382e;
+}
+.glossary-page .gcat-topic-lead>span{
+  font:500 12px/1.35 "Pretendard Variable",Pretendard,sans-serif;
+  color:#776a60;
+}
+.glossary-page .gcat .gcat-tabs{
+  gap:7px;
+  margin:0 0 14px;
+}
+.glossary-page .gcat .gcat-tab{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+  padding:8px 6px;
+  min-height:45px;
+  white-space:nowrap;
+}
+.glossary-page .gcat .gcat-tab-title{
+  font-size:13px;
+  letter-spacing:-.4px;
+}
+.glossary-page .gcat .gcat-tab-count{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  padding:1px 5px;
+  min-width:23px;
+  min-height:20px;
+  border-radius:9px;
+  background:rgba(255,255,255,.7);
+  color:#665b50;
+  font:750 11px/1.2 "Pretendard Variable",Pretendard,sans-serif;
+}
+.glossary-page .gcat .gcat-tab[aria-pressed=true] .gcat-tab-count{
+  background:#fffdfa;
+  color:#634c22;
+}
+.glossary-page .gcat.gcat-map-active .gcat-topic-lead{display:none!important}
+@media(max-width:600px){
+  .glossary-page .gcat-topic-lead{
+    align-items:flex-start;
+    gap:3px;
+    margin:5px 0 8px;
+  }
+  .glossary-page .gcat-topic-lead strong{font-size:14px}
+  .glossary-page .gcat-topic-lead>span{font-size:11px}
+  .glossary-page .gcat .gcat-tabs{gap:5px;margin:0 0 12px}
+  .glossary-page .gcat .gcat-tab{
+    min-height:42px;
+    gap:4px;
+    padding:7px 3px;
+  }
+  .glossary-page .gcat .gcat-tab-title{font-size:11.5px;letter-spacing:-.5px}
+  .glossary-page .gcat .gcat-tab-count{font-size:10px;min-height:18px;min-width:19px;padding:1px 4px}
+}

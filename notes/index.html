@@ -14,8 +14,8 @@
 <link href="../assets/notebook-subpages.css?v=20261005-clean3" rel="stylesheet"/>
 <link href="../assets/info.css?v=20261006-study1" rel="stylesheet"/>
 <link href="../assets/info-memory.css?v=20261008-v3vector" rel="stylesheet"/>
-<link href="../assets/glossary-catalog.css?v=20261009-overview1" rel="stylesheet"/>
-<script src="../assets/glossary-catalog.js?v=20261009-overview1" defer></script>
+<link href="../assets/glossary-catalog.css?v=20261010-topics1" rel="stylesheet"/>
+<script src="../assets/glossary-catalog.js?v=20261010-topics1" defer></script>
 
 </head>
 <body class="note-subpage info-page glossary-page">
@@ -76,7 +76,11 @@
     <button type="button" class="gcat-view-mode" id="gcatModeAlbum" aria-pressed="true">그림으로 보기 <span>22</span></button>
     <button type="button" class="gcat-view-mode" id="gcatModeAll" aria-pressed="false">전체 한눈에 <span>30</span></button>
   </div>
-  <nav class="gcat-tabs" id="gcatTabs" aria-label="용어 분야 선택"></nav>
+  <div class="gcat-topic-lead" id="gcatTopicLead">
+    <strong>주제별 그림 찾기</strong>
+    <span>주제를 선택하면 해당 그림만 볼 수 있어요.</span>
+  </div>
+  <nav class="gcat-tabs" id="gcatTabs" aria-label="그림 주제 선택"></nav>
   <div class="gcat-recent" id="gcatRecent" hidden aria-label="최근 본 용어"></div>
   <div class="gcat-results-head"><h2 id="gcatResultsTitle">먼저 볼 용어</h2><span class="gcat-count" id="gcatCount"></span></div>
   <div class="gcat-list" id="gcatList" aria-live="polite" aria-relevant="additions removals"></div>

@@ -233,10 +233,17 @@ function boot(){
   function renderTabs(){
     tabs.replaceChildren();
     CATEGORY.forEach(category=>{
-      const btn=node("button","gcat-tab",category.label);
+      const title=category.id==="featured"?"전체 그림":category.label;
+      const total=category.id==="featured"
+        ?albumItems.length
+        :albumItems.filter(item=>item.entry.category===category.id).length;
+      const btn=node("button","gcat-tab");
       btn.type="button";
-      btn.setAttribute("aria-pressed",String(category.id===active));
+      btn.setAttribute("aria-label",title+" "+total+"개 보기");
+      btn.setAttribute("aria-pressed",String(category.id===active&&!search.value.trim()));
       btn.dataset.tab=category.id;
+      btn.appendChild(node("span","gcat-tab-title",title));
+      btn.appendChild(node("span","gcat-tab-count",String(total)));
       btn.addEventListener("click",()=>{
         active=category.id;
         if(search.value)search.value="";
