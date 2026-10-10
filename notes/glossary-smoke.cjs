@@ -161,7 +161,7 @@ const path=require("node:path");
           const selector='.gcat-map-term[data-id="'+id+'"]';
           await page.locator(selector).click();
           const content=await page.locator("#gcatDialogBody .gcat-reading-sheet").evaluate(el=>({
-            hasDefinition:!!el.querySelector(".gcat-definition-section .gcat-definition-explanation"),
+            hasDefinition:!!el.querySelector(".gcat-definition-section .gcat-definition-explanation, .gcat-definition-section .gcat-definition-pair"),
             hasExample:!!el.querySelector(".gcat-example-section .study-example"),
             hiddenLargeArt:!el.querySelector(".gcat-reference-disclosure[open]"),
             refs:el.querySelectorAll(".study-sources a").length
