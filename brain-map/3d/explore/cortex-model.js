@@ -29,12 +29,12 @@ function cortexPoint(x, y, z, side) {
   const lat = Math.asin(Math.max(-1,Math.min(1,y)));
   // Long, organically turning grooves across a single continuous hemisphere.
   // Ridge spacing has two spatial frequencies; darkened sulci stay subtle.
-  const turns = 11.7 * lon + 2.9*Math.sin(lat*3.8) + 1.4*Math.sin(lat*7.3+lon*1.6);
-  const cross = 12.8*lat + 2.2*Math.sin(lon*3.7-lat*1.2);
+  const turns = 18.7 * lon + 3.8*Math.sin(lat*5.8) + 2.4*Math.sin(lat*9.3+lon*2.6);
+  const cross = 21.8*lat + 2.5*Math.sin(lon*5.7-lat*1.2);
   const path = Math.sin(turns)*.65 + Math.sin(cross)*.35;
   const sulcus = Math.pow(Math.max(0,-path),2.1);
   const ripple = Math.sin(5.1*lon + 2.5*lat)*.012;
-  const radius = 1.018 - .082*sulcus + ripple;
+  const radius = 1.018 - .125*sulcus + ripple;
   const zz = z*1.36*radius;
   const taper = 1-.07*Math.max(0,-z);
   const xx = side * (.545 + x*.533*radius*taper);
@@ -44,6 +44,25 @@ function cortexPoint(x, y, z, side) {
   return [xx,yy,zz,Math.max(0,Math.min(1,1-sulcus*.23))];
 }
 
+function smoothstep(a,b,x){const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)}
+function corticalRGB(x,y,z,shade){
+ const ocBorder=.79-.23*(1-smoothstep(-.18,-.06,y));
+ const occ=smoothstep(ocBorder-.075,ocBorder+.075,-z);
+ const frontBorder=.08+.32*smoothstep(.13,.30,y);
+ const front=(1-occ)*smoothstep(frontBorder-.09,frontBorder+.09,z);
+ const temporal=(1-occ)*(1-front)*(1-smoothstep(-.41,-.24,y));
+ const parietal=Math.max(0,1-occ-front-temporal);
+ const weights=[
+  ['frontal',front],['parietal',parietal],
+  ['temporal',temporal],['occipital',occ]
+ ];
+ let red=0,green=0,blue=0;
+ for(const [key,w] of weights){
+  const col=new THREE.Color(PALETTE[key]);
+  red+=w*col.r;green+=w*col.g;blue+=w*col.b;
+ }
+ return [red*shade,green*shade,blue*shade];
+}
 function appendFace(group,vertices,normals,colors,a,b,c,base) {
   for(const index of [a,b,c]){
     const vi=index*3;
@@ -57,11 +76,11 @@ function appendFace(group,vertices,normals,colors,a,b,c,base) {
 function oneHemisphere(side) {
   const sphere = new THREE.SphereGeometry(1,150,104);
   const pos = sphere.getAttribute('position');
-  const shade=[];
+  const shade=[],blended=[];
   for(let i=0;i<pos.count;i++){
     const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i);
     const v=cortexPoint(x,y,z,side);
-    pos.setXYZ(i,v[0],v[1],v[2]);shade.push(v[3]);
+    pos.setXYZ(i,v[0],v[1],v[2]);shade.push(v[3]);blended.push(corticalRGB(v[0],v[1],v[2],v[3]));
   }
   pos.needsUpdate=true;
   sphere.computeVertexNormals();
@@ -80,7 +99,7 @@ function oneHemisphere(side) {
     for(const i of v){
       g.p.push(pos.getX(i),pos.getY(i),pos.getZ(i));
       g.n.push(norm.getX(i),norm.getY(i),norm.getZ(i));
-      const factor=shade[i];g.c.push(factor,factor,factor);
+      g.c.push(...blended[i]);
     }
   }
   sphere.dispose();
@@ -142,7 +161,7 @@ export function makeBrainSurfaces(){
   ];
   return descriptors.map(d=>{
     const material=new THREE.MeshPhysicalMaterial({
-      color:PALETTE[d.key],vertexColors:d.key!=='brainstem',
+      color:['frontal','parietal','temporal','occipital'].includes(d.key)?0xffffff:PALETTE[d.key],vertexColors:d.key!=='brainstem',
       roughness:.68,metalness:0,clearcoat:.11,clearcoatRoughness:.77,
       side:THREE.DoubleSide,emissive:0x000000
     });
