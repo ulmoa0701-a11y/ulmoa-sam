@@ -86,7 +86,8 @@ function picture(){
 function drawAnnotations(points){
  const w=canvas.width,h=canvas.height;
  S.targets.forEach((t,i)=>{
-  let active=i===S.index&&S.phase==='play';
+  if((S.phase==='play'||S.phase==='won')&&i!==S.index)return;
+  let active=i===S.index&&(S.phase==='play'||S.phase==='won');
   ctx.beginPath();ctx.arc(t.x*w,t.y*h,Math.max(20,w*.037),0,Math.PI*2);
   ctx.lineWidth=active?8:4;ctx.strokeStyle=active?'#ffce69':'#ffffff';ctx.stroke();
   ctx.beginPath();ctx.arc(t.x*w,t.y*h,Math.max(15,w*.03),0,Math.PI*2);
@@ -96,8 +97,8 @@ function drawAnnotations(points){
  if(points&&points.length>=21){
   const bones=[[0,1,2,3,4],[0,5,6,7,8],[0,9,10,11,12],[0,13,14,15,16],[0,17,18,19,20],[5,9,13,17]];
   ctx.strokeStyle='#6ef3bd';ctx.lineWidth=Math.max(3,w*.005);
-  for(const chain of bones){ctx.beginPath();chain.forEach((i,k)=>{const p=points[i];if(!p)return;const x=(1-p.x)*w,y=p.y*h;if(k)ctx.lineTo(x,y);else ctx.moveTo(x,y)});ctx.stroke();}
-  for(const i of [8,12,16]){
+  if(S.phase==='calibrate')for(const chain of bones){ctx.beginPath();chain.forEach((i,k)=>{const p=points[i];if(!p)return;const x=(1-p.x)*w,y=p.y*h;if(k)ctx.lineTo(x,y);else ctx.moveTo(x,y)});ctx.stroke();}
+  for(const i of (S.phase==='calibrate'?[8,12,16]:[fingers[Math.min(S.index,2)].tip])){
    let p=points[i];if(!p)continue;let cx=(1-p.x)*w,cy=p.y*h;
    ctx.beginPath();ctx.arc(cx,cy,Math.max(10,w*.015),0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill();ctx.lineWidth=4;ctx.strokeStyle='#237653';ctx.stroke();
   }
