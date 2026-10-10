@@ -26,7 +26,7 @@
       ['음악활동 자료','하트색깔악보',U('materials/#musicShelf')]]},
     {id:'terms',name:'용어사전',icon:'📖',href:U('notes/')},
     {id:'brain',name:'3D 뇌지도',icon:'🧠',href:U('brain-map/')},
-    {id:'parents',name:'부모님',icon:'💛',items:[
+    {id:'parents',name:'부모님 자료',icon:'💛',items:[
       ['부모님 도움자료','주제별 안내·관찰 메모',U('parents/')],
       ['말·의사소통','언어·표현 살펴보기',U('parents/#speech')],
       ['주의·기억·학습','일상에서 관찰하기',U('parents/#attention')],
