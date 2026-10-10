@@ -479,6 +479,19 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
  .fullscreen #scoreStageGrid .beat{height:110px}
  .fullscreen #scoreStageGrid .beat .note{height:76px}
 }
+/* Restore actual word spacing on the karaoke-style lyric strip. */
+.lyricWordSpace{display:inline-block;flex:0 0 clamp(11px,1.4vw,23px);min-width:11px;white-space:pre}
+@media(min-width:801px){
+ .fullscreen .fall{width:clamp(104px,8vw,132px);height:clamp(104px,8vw,132px);
+   border-width:6px;box-shadow:0 16px 30px rgba(43,66,95,.23),inset 0 0 0 2px rgba(255,255,255,.42)}
+ .fullscreen .fallLabel{font-size:clamp(22px,1.8vw,29px);min-width:50px;min-height:44px;padding:5px 10px}
+ .fullscreen .laneLabel{font-size:clamp(16px,1.22vw,21px);padding:6px 12px;top:13px}
+ .fullscreen .tubeLabel{font-size:clamp(16px,1.35vw,21px);min-height:32px;padding:5px 10px}
+ .fullscreen .lyricTrack{left:clamp(18px,2.5vw,45px);right:clamp(18px,2.5vw,45px);
+   min-height:66px;padding:10px 15px}
+ .fullscreen .lyricSyllable{font-size:clamp(25px,2.1vw,34px);min-width:29px;height:46px}
+ .fullscreen .lyricWordSpace{flex-basis:clamp(16px,1.7vw,27px)}
+}
 </style>
 <link rel="stylesheet" href="./mobile-layout.css?v=20261009" />
 </head>
@@ -803,8 +816,52 @@ async function downloadScore(kind){
 }
 
 function updateRangeInfo(){let outside=outOfBaseCount(),box=$('#rangeNote');box.classList.toggle('show',outside>0);box.textContent=outside?`이 곡에는 기본 8음 붐웨커(C~높은 C) 밖의 음이 ${outside}개 있어요. 다른 음으로 바꾸지 않고 회색으로 표시하며 재생에서 제외합니다.`:'';if(outside)$('#stageStatus').textContent=`범위 밖 음 ${outside}개`;else if(loadedFromTransfer)$('#stageStatus').textContent='하트악보에서 가져옴';else $('#stageStatus').textContent='준비'}
+// Literal word spaces are recovered from the song's syllable-by-syllable lyric data.
+// Only apply verified word boundaries; never invent spacing in imported material.
+const LYRIC_WORDS={
+ twinkle:'반짝반짝 작은 별 아름답게 비치네 동쪽 하늘에서도 서쪽 하늘에서도 반짝반짝 작은 별 아름답게 비치네',
+ plane:'떴다 떴다 비행기 날아라 날아라 높이 높이 날아라 우리 비행기',
+ butterfly:'나비야 나비야 이리 날아오너라 노랑나비 흰나비 춤을 추며 오너라 봄바람에 꽃잎도 방긋방긋 웃으며 참새도 짹짹짹 노래하며 춤춘다',
+ 'butterfly-d':'나비야 나비야 이리 날아오너라 노랑나비 흰나비 춤을 추며 오너라 봄바람에 꽃잎도 방긋방긋 웃으며 참새도 짹짹짹 노래하며 춤춘다',
+ 'butterfly-f':'나비야 나비야 이리 날아오너라 노랑나비 흰나비 춤을 추며 오너라 봄바람에 꽃잎도 방긋방긋 웃으며 참새도 짹짹짹 노래하며 춤춘다',
+ rabbit:'산토끼 토끼야 어디를 가느냐 깡충깡충 뛰면서 어디를 가느냐',
+ same:'무엇이 무엇이 똑같은가 젓가락 두 짝이 똑같아요',
+ bear:'곰 세 마리가 한 집에 있어 아빠곰 엄마곰 애기곰 아빠곰은 뚱뚱해 엄마곰은 날씬해 애기곰은 너무 귀여워 으쓱으쓱 잘한다',
+ 'school-bell':'학교종이 땡땡땡 어서 모이자 선생님이 우리를 기다리신다'
+};
+function lyricWordBreakIndices(){
+ const hits=events.map((e,i)=>({e,i})).filter(x=>x.e.lyric);
+ const words=LYRIC_WORDS[currentSong.key]||'';
+ const compact=s=>Array.from(String(s||'').replace(/\s/g,'')).join('');
+ const joined=hits.map(x=>compact(x.e.lyric)).join('');
+ const wordList=words.split(/\s+/).filter(Boolean);
+ const boundaries=new Set();
+ if(wordList.length&&wordList.join('')===joined){
+   let offset=0;
+   const indices=new Map();for(const {e,i} of hits){indices.set(offset,i);offset+=compact(e.lyric).length}
+   offset=0;
+   for(const word of wordList){if(offset>0&&indices.has(offset))boundaries.add(indices.get(offset));offset+=word.length}
+ }else{
+   // Respect explicit spaces in manually imported lyrics.
+   for(const {e,i} of hits)if(/^\s/.test(e.lyric))boundaries.add(i);
+ }
+ return boundaries;
+}
 function lyricWindowAt(t=elapsed,size=18){const items=events.map((e,i)=>({e,i})).filter(x=>x.e.lyric);if(!items.length)return{items:[],activeIndex:-1,start:0};let activePos=-1;for(let i=0;i<items.length;i++){if(t>=items[i].e.start-90)activePos=i;else break}const anchor=Math.max(0,activePos),start=Math.floor(anchor/size)*size;return{items:items.slice(start,start+size),activeIndex:activePos>=0?items[activePos].i:-1,start}}
-function updateLyricTrack(force=false){const box=$('#lyricTrack');if(!box)return;if(!lyrics){box.classList.add('hide');box.innerHTML='';lastLyricKey='hidden';return}const view=lyricWindowAt(elapsed,window.innerWidth<=800?9:18),key=view.start+':'+view.activeIndex;if(!force&&key===lastLyricKey)return;lastLyricKey=key;box.classList.remove('hide');box.innerHTML=view.items.map(x=>`<span class="lyricSyllable ${x.i===view.activeIndex?'active':''}" style="--note-color:${noteColor(x.e.note)}">${esc(x.e.lyric)}</span>`).join('')}
+function updateLyricTrack(force=false){
+ const box=$('#lyricTrack');if(!box)return;
+ if(!lyrics){box.classList.add('hide');box.innerHTML='';lastLyricKey='hidden';return}
+ const view=lyricWindowAt(elapsed,window.innerWidth<=800?9:18);
+ const key=(currentSong.key||currentSong.title)+':'+view.start+':'+view.activeIndex;
+ if(!force&&key===lastLyricKey)return;
+ lastLyricKey=key;box.classList.remove('hide');
+ const breaks=lyricWordBreakIndices();
+ const visible=view.items.map((x,j)=>(j&&breaks.has(x.i)?' ':'')+x.e.lyric).join('');
+ box.setAttribute('aria-label',visible);
+ box.innerHTML=view.items.map((x,j)=>
+   (j&&breaks.has(x.i)?'<span class="lyricWordSpace" aria-hidden="true"> </span>':'')+
+   `<span class="lyricSyllable ${x.i===view.activeIndex?'active':''}" style="--note-color:${noteColor(x.e.note)}">${esc(String(x.e.lyric).trim())}</span>`).join('');
+}
 function audio(){if(!audioCtx){const A=window.AudioContext||window.webkitAudioContext;if(A)audioCtx=new A()}if(audioCtx?.state==='suspended')audioCtx.resume()}
 function voiceOsc(ac,dest,freq,type,amp,when,attack,decay,stop,mult=1,detune=0){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(freq*mult,when);if(detune)o.detune.setValueAtTime(detune,when);o.connect(g);g.connect(dest);g.gain.setValueAtTime(.0001,when);g.gain.exponentialRampToValueAtTime(Math.max(.0002,amp),when+attack);g.gain.exponentialRampToValueAtTime(.0001,when+decay);o.start(when);o.stop(when+stop)}
 function scheduleMelodyTone(ac,dest,n,when,mode=melodyMode,volume=melodyVolume){const f=FREQ[n],vol=Math.max(0,Math.min(1,Number(volume)||0));if(!f||mode==='none'||vol<=0)return false;const master=ac.createGain();master.gain.setValueAtTime(vol,when);master.connect(dest);if(mode==='piano'){voiceOsc(ac,master,f,'triangle',.19,when,.012,.78,.86);voiceOsc(ac,master,f,'sine',.075,when,.008,.46,.56,2);voiceOsc(ac,master,f,'sine',.035,when,.006,.28,.36,3);return true}if(mode==='xylophone'){voiceOsc(ac,master,f,'sine',.23,when,.004,.42,.5);voiceOsc(ac,master,f,'sine',.075,when,.003,.19,.25,3);voiceOsc(ac,master,f,'sine',.035,when,.003,.13,.19,6);return true}voiceOsc(ac,master,f,'sine',.27,when,.006,.31,.38);voiceOsc(ac,master,f,'triangle',.065,when,.004,.18,.24,2);return true}
@@ -825,7 +882,9 @@ function tone(n,b){if(b){b.classList.add('hit');setTimeout(()=>b.classList.remov
 function draw(){
  updateScoreMotion();
  const stage=$('#stage'),hitY=stage.clientHeight-68;
- const noteRadius=window.innerWidth<=800?29:43,spawnY=-noteRadius-8;
+ const fullWide=document.body.classList.contains('fullscreen')&&window.innerWidth>=801;
+ const noteRadius=fullWide?Math.max(52,Math.min(66,stage.clientWidth*.04)):window.innerWidth<=800?29:43;
+ const spawnY=-noteRadius-8;
  stage.querySelectorAll('.fall').forEach(x=>x.remove());
  // Score mode paints note cards directly; skip hidden falling-note DOM work every frame.
  if(playView==='score')return;
