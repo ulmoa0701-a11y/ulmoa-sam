@@ -140,6 +140,48 @@ function stemGeometry(){
   return {key:'brainstem',side:'center',geometry,anchor:geometry.boundingBox.getCenter(new THREE.Vector3())};
 }
 
+// 승인된 그림체처럼 굵고 둥근 뇌 이랑을 몇 가닥만 살짝 그립니다.
+// 진짜 해부학적 고랑을 깊이 파지 않고, 회전·부위 이동에 함께 붙는 3D 곡선입니다.
+function makeFriendlyRidges(mesh,d){
+  if(!['frontal','parietal','temporal','occipital'].includes(d.key))return;
+  const tracks={
+    frontal:[
+      [[.75,.24],[.66,.35],[.54,.38],[.42,.31]],
+      [[.69,-.16],[.59,-.06],[.46,.00],[.36,-.09]]
+    ],
+    parietal:[
+      [[.17,.64],[.06,.66],[-.12,.59],[-.28,.57]],
+      [[.15,.23],[.02,.32],[-.18,.27],[-.34,.35]]
+    ],
+    temporal:[
+      [[.36,-.35],[.18,-.44],[.00,-.42],[-.20,-.40]],
+      [[.29,-.54],[.12,-.57],[-.09,-.54],[-.23,-.49]]
+    ],
+    occipital:[
+      [[-.51,.40],[-.60,.34],[-.66,.22],[-.71,.12]]
+    ]
+  };
+  const lineColors={
+    frontal:0xab82dc,parietal:0xdbb652,temporal:0x70bd85,occipital:0xe49e84
+  };
+  const side=d.side==='left'?1:-1;
+  const material=new THREE.MeshBasicMaterial({
+    color:lineColors[d.key],transparent:true,opacity:.34,depthWrite:false
+  });
+  for(const line of tracks[d.key]){
+    const points=line.map(([z,y])=>{
+      const x=Math.sqrt(Math.max(.02,1-y*y-z*z));
+      const [X,Y,Z]=cortexPoint(x,y,z,side);
+      return new THREE.Vector3(X+side*.021,Y,Z);
+    });
+    const path=new THREE.CatmullRomCurve3(points);
+    const tube=new THREE.Mesh(new THREE.TubeGeometry(path,28,.012,6,false),material);
+    tube.userData.decorative=true;
+    tube.renderOrder=1;
+    mesh.add(tube);
+  }
+}
+
 export function makeBrainSurfaces(){
   const descriptors=[
     ...oneHemisphere(1),
@@ -155,6 +197,7 @@ export function makeBrainSurfaces(){
     });
     const mesh=new THREE.Mesh(d.geometry,material);
     mesh.userData={key:d.key,side:d.side,base:new THREE.Vector3(),anchor:d.anchor};
+    makeFriendlyRidges(mesh,d);
     mesh.castShadow=false;
     return mesh;
   });
