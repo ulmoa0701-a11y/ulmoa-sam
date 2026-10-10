@@ -482,7 +482,7 @@ for(const [label,w,h] of [['mobile-score-immediate',390,844],['desktop-score-imm
     label+': the second 도 must pulse on the next actual beat '+JSON.stringify(second));
   await page.screenshot({path:`${out}/${label}.png`,fullPage:false});
   await page.locator('#resetBtn').click();
-  await page.locator('#introMode').selectOption('instant');
+  await page.locator('#introMode').evaluate(el=>{el.value='instant';el.dispatchEvent(new Event('change',{bubbles:true}))});
   await page.locator(w<=800?'#playBtn':'#startBtn').click();
   await page.waitForTimeout(95);
   const instant=await page.evaluate(()=>window.__boomVideoQA.scoreTiming());
