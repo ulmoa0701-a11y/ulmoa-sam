@@ -65,7 +65,47 @@ const truth=require('./doremi-ground-truth.json');
       const space=stave.getNoteEndX()-stave.getNoteStartX()-14;
       new VF.Formatter().joinVoices([voice]).format([voice],Math.max(110,space));
       voice.draw(ctx,stave);
-      if(mi<count-1)barPositions.push({x:x+width,y:stave.getYForLine(0),bottom:stave.getYForLine(4)});
+      // Some headless Canvas VexFlow builds render only stems when glyph fallback fails.
+      // Guarantee that this independent pixel fixture contains every symbol before OMR:
+      const native=c.getContext('2d',{willReadFrequently:true}),actual=notes[index-1];
+      const noteY=stave.getYForLine(0);
+      for(let ni=0;ni<n.length;ni++){
+        const item=actual[ni],note=n[ni],ys=note.getYs(),direction=note.getStemDirection()||1;
+        const sx=note.getStemX(),cx=sx-6.1*direction,cy=ys[0];
+        native.save();native.strokeStyle='#111';native.fillStyle='#111';native.lineWidth=1.4;
+        if(item.note==='쉼'){
+          const rx=note.getAbsoluteX()+7,ry=stave.getYForLine(2),r=item.dur;
+          if(r>=1){native.beginPath();native.moveTo(rx-3,ry-7);native.lineTo(rx+3,ry-1);native.lineTo(rx-3,ry+7);native.lineTo(rx+3,ry+12);native.stroke();}
+          else{native.beginPath();native.arc(rx,ry-6,2,0,Math.PI*2);native.fill();native.beginPath();native.moveTo(rx+2,ry-6);native.lineTo(rx+1,ry+11);native.stroke();}
+        }else{
+          native.beginPath();native.ellipse(cx,cy,6.6,4.6,-.28,0,Math.PI*2);
+          if(item.dur>=2){native.fillStyle='#fff';native.fill();native.stroke();native.fillStyle='#111';}else native.fill();
+          if(item.dur===1.5||item.dur===3){native.beginPath();native.arc(cx+12,cy-2,1.8,0,Math.PI*2);native.fill();}
+          if(item.note.includes('#')||item.note.includes('♭')){
+             native.font='bold 18px Arial, sans-serif';
+             native.fillText(item.note.includes('#')?'#':'♭',cx-18,cy+6);
+          }
+          if(item.dur===.5){
+            const ex=sx,ey=cy-direction*33;
+            native.beginPath();native.moveTo(ex,ey);native.quadraticCurveTo(ex+direction*16,ey+4,ex+direction*10,ey+14);native.stroke();
+          }
+        }
+        native.restore();
+      }
+      if(mi===0){
+        const gc=stave.getX()+30,gy=stave.getYForLine(2);native.save();
+        native.strokeStyle='#111';native.lineWidth=2;
+        native.beginPath();native.moveTo(gc,gy+26);native.bezierCurveTo(gc-16,gy+2,gc+18,gy-19,gc+5,gy-29);
+        native.bezierCurveTo(gc-15,gy-42,gc-4,gy+18,gc+11,gy+7);
+        native.bezierCurveTo(gc+29,gy-5,gc+8,gy-25,gc-1,gy-7);native.stroke();
+        native.restore();
+      }
+      if(mi<count-1){
+        const by0=stave.getYForLine(0),by1=stave.getYForLine(4),bx=x+width-.8;
+        native.save();native.strokeStyle='#222';native.lineWidth=1.6;
+        native.beginPath();native.moveTo(bx,by0);native.lineTo(bx,by1);native.stroke();native.restore();
+        barPositions.push({x:bx,y:by0,bottom:by1});
+      }
     }
    }
    if(index!==19)throw Error('Expected 19 real measures, got '+index);
