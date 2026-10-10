@@ -332,7 +332,7 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
             if(v.ir.kind!=='note')continue;
             const probe=printedAccidentalProbe(gray,w,h,cvStaffs[li],v.x,v.e.note);
             if(v.e.note==='시♭'){
-              if(probe?.total<9&&!priorFlat){
+              if((!probe||probe.groups.length===0||probe.total<9)&&!priorFlat){
                 opticalDebug.push({line:li,bar:i,x:Math.round(v.x),reason:'unprinted-B-flat',total:probe.total});
                 v.e.note='시';
               }else priorFlat=true;
