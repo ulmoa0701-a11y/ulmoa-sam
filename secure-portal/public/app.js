@@ -222,15 +222,14 @@ function studentHome(){
  const items=isParent?[
   ['write','✎','기록 남기기','관찰·전달사항'],['history','▤','내 기록','내가 쓴 내용']
  ]:[
-  ['write','✎','기록하기','한 장이면 충분해'],['history','▤','내 기록','지난 기록 확인'],['coding','⌘','코딩 실험실','선택 활동'],['situation','◇','예시 놀이터','원하면 둘러보기']
+  ['write','✎','기록하기','한 장이면 충분해'],['history','▤','내 기록','지난 기록 확인'],['coding','⌘','코딩 실험실','원하면 탐색하기']
  ];
  app.innerHTML=hero(isParent?'일상에서 본 것, 필요한 만큼.':'내가 남기고 싶은 한 페이지.','매일 써야 하는 숙제는 아니야. 기록한 내용은 기본적으로 나만 볼 수 있어.')+
  `<div class="workspace-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">01</span></div>${workspaceNav(items,activeView)}<div class="sidebar-note"><span class="privacy-dot" aria-hidden="true"></span>공유는 내가 선택해요.<br><small>혼자만 볼 수도 있어요.</small></div></aside><div class="workspace-content">
  <section data-workspace-view="write" class="workspace-section"><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>${isParent?'observation.note':'my-note.md'}</span><span class="editor-status">NEW NOTE</span></div><div class="editor-paper"><span class="tag">01 / WRITE</span><h2>${isParent?'생활 메모':'새 페이지'}</h2><p>${isParent?'실제로 관찰한 일과 전달할 내용을 자유롭게 남겨요.':'글이나 그림으로 남겨도 되고, 그냥 둘러봐도 돼.'}</p>${dataForm(me.role)}</div></section>
  <section data-workspace-view="history" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>my-notes.json</span></div><div class="editor-paper"><span class="tag">02 / ARCHIVE</span><h2>내 서랍</h2><p>내가 남긴 페이지들을 모아두는 곳이야.</p><div id="recordsHere">${recordCards()}</div></div></section>
- ${isParent?'':`<section data-workspace-view="situation" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>branch-lab.js</span><span class="editor-status">PLAY MODE</span></div><div class="editor-paper"><span class="tag">OPTIONAL / IF · ELSE</span><h2>선택 예시</h2><p>필요하면 가볍게 둘러봐. 내 기록과는 관계없는 예시야.</p>${situationMarkup()}</div></section>
- <section data-workspace-view="coding" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>studio / playground</span></div><div class="editor-paper"><span class="tag">OPTIONAL / PLAY</span><h2>코딩 실험실</h2><p>조건을 바꿔 결과를 확인하는 작은 실험 공간이야. 기록하지 않고 그냥 놀아도 돼.</p>${codingMarkup()}</div></section>`}
- </div></div><p class="workspace-footer">일단써봄은 생각을 이해하고 선택을 연습하기 위한 보조도구예요. 매일 쓰거나 불안을 반복해서 확인할 필요는 없어요.</p>`;
+ ${isParent?'':`<section data-workspace-view="coding" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>studio / playground</span></div><div class="editor-paper"><span class="tag">OPTIONAL / PLAY</span><h2>코딩 실험실</h2><p>조건을 바꿔 결과를 확인하는 작은 실험 공간이야. 기록하지 않고 그냥 놀아도 돼.</p>${codingMarkup()}<details class="optional-fields"><summary>간단한 선택 예시 살펴보기 <small>선택</small></summary><div class="optional-wrap">${situationMarkup()}</div></details></div></section>`}
+ </div></div><p class="workspace-footer">일단써봄은 원하는 방식으로 경험을 남기는 개인 작업공간이야. 사용하고 싶은 때에만 열어도 돼.</p>`;
  wireEntryForm(isParent);attachShares();bindWorkspace();paintSketches();
  if(!isParent){attachSituation();attachCoding();}
 
