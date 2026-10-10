@@ -3,7 +3,7 @@ const screens={home:$('#homeScreen'),intro:$('#introScreen'),game:$('#gameScreen
 const area=$('#gameArea'),toast=$('#gameToast'),world=$('#gameWorld');
 const missionText=$('#missionText'),missionSub=$('#missionSub'),guide=$('#guideCharacter');
 const STORE={seeds:'moa-garden:seeds',done:'moa-garden:completed',sound:'moa-garden:sound'};
-let state={game:null,previewGame:null,round:0,score:0,total:Number(localStorage.getItem(STORE.seeds)||0),sound:localStorage.getItem(STORE.sound)!=='off',lock:false,lastSpeech:'',timers:[]};
+let state={game:null,previewGame:null,round:0,roundTotal:5,practiceLevel:'easy',practiceCount:10,practiceRounds:[],score:0,total:Number(localStorage.getItem(STORE.seeds)||0),sound:localStorage.getItem(STORE.sound)!=='off',lock:false,lastSpeech:'',timers:[]};
 let completed=readCompleted();
 const meta={
  rescue:{title:'모아 구조대!',kicker:'홍의 구조숲',theme:'find',friend:'assets/friend-hong.png'},
@@ -20,6 +20,44 @@ const meta={
  paint:{title:'정원길 쓱싹 칠하기',kicker:'샘의 색칠길',theme:'spacing',friend:'assets/friend-saem.png'},
  water:{title:'시든 꽃 깨우기',kicker:'홍의 물방울정원',theme:'find',friend:'assets/friend-hong.png'}
 };
+
+// 연습형 게임에만 적용됩니다. 다른 게임은 기존 5스테이지 구조를 유지합니다.
+const LITERACY_GAMES=new Set(['spacing','spelling']);
+const LEVEL_NAMES={easy:'쉬움',normal:'보통',hard:'어려움'};
+const DEFAULT_COUNTS={easy:10,normal:20,hard:30};
+function practiceKey(game,q){return game==='spacing'?q.join(' '):q.before+'|'+q.right+'|'+q.after}
+function choosePracticeRounds(game,level,count){
+ const bank=game==='spacing'?literacySpacingBank[level]:literacySpellingBank[level];
+ if(!Array.isArray(bank)||bank.length<count)throw new Error('연습 문제은행이 부족합니다.');
+ const storageKey='moa-garden:practiced:'+game+':'+level;
+ let used=[];try{const v=JSON.parse(localStorage.getItem(storageKey)||'[]');if(Array.isArray(v))used=v}catch{}
+ const usedSet=new Set(used);
+ const candidates=shuffle(bank);
+ const ordered=[...candidates.filter(q=>!usedSet.has(practiceKey(game,q))),...candidates.filter(q=>usedSet.has(practiceKey(game,q)))];
+ const result=ordered.slice(0,count);
+ const newUsed=new Set([...used.filter(k=>bank.some(q=>practiceKey(game,q)===k)),...result.map(q=>practiceKey(game,q))]);
+ try{localStorage.setItem(storageKey,JSON.stringify(newUsed.size===bank.length?result.map(q=>practiceKey(game,q)): [...newUsed]))}catch{}
+ return result;
+}
+const literacyLevelPreviews={
+ spacing:{
+  easy:'<div class="pv-instruction">띄어야 할 곳을 찾아요</div><div class="pv-glued">학교에가요</div><div class="pv-space-arrow">톡! ↓</div><div class="pv-spaced"><span>학교에</span><span>가요</span></div>',
+  normal:'<div class="pv-instruction">말 덩어리가 세 개예요</div><div class="pv-glued">나는학교에서공부해요</div><div class="pv-space-arrow">톡! ↓</div><div class="pv-spaced"><span>나는</span><span>학교에서</span><span>공부해요</span></div>',
+  hard:'<div class="pv-instruction">문장이 길어져도 천천히 찾아요</div><div class="pv-glued">비가많이와서우산을썼어요</div><div class="pv-space-arrow">톡! ↓</div><div class="pv-spaced"><span>비가</span><span>많이</span><span>와서</span><span>우산을</span><span>썼어요</span></div>'
+ },
+ spelling:{
+  easy:'<div class="pv-instruction">비슷한 글자를 구별해요</div><div class="pv-sign">숙제를 다 <b>?</b></div><div class="pv-options"><span class="preview-pulse">했어요</span><span>햇어요</span></div>',
+  normal:'<div class="pv-instruction">헷갈리는 표현을 비교해요</div><div class="pv-sign">이제 가도 <b>?</b></div><div class="pv-options"><span class="preview-pulse">돼요</span><span>되요</span></div>',
+  hard:'<div class="pv-instruction">문장 뜻을 생각하고 골라요</div><div class="pv-sign">오늘은 <b>?</b> 기분이 좋아요</div><div class="pv-options"><span class="preview-pulse">왠지</span><span>웬지</span></div>'
+ }
+};
+function updatePracticeControls(){
+ $('#literacyPracticeControls [data-level]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.level===state.practiceLevel)));
+ $('#literacyPracticeControls [data-count]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.count)===state.practiceCount)));
+ $('#practiceNotice').textContent=`${LEVEL_NAMES[state.practiceLevel]} · ${state.practiceCount}문제 · 같은 회기 안에서 중복 없이 연습해요.`;
+ $('#previewRoundInfo').textContent=`선택한 ${state.practiceCount}문제를 풀어요.`;
+ if(LITERACY_GAMES.has(state.previewGame))$('#introPreview').innerHTML=literacyLevelPreviews[state.previewGame][state.practiceLevel];
+}
 
 const previewExamples={
  rescue:`<div class="pv-rescue-radio">📡 무전 도착! <b>노란 큰 오리</b></div><div class="pv-rescue-field"><span>🌳</span><span class="duck">🦆</span><span>🌿</span><span>🐷</span><span class="van">🚐</span></div>`,
@@ -45,6 +83,10 @@ function openPreview(id){
   $('#introFriend').src=m.friend;
   $('#introTags').innerHTML=[...card.querySelectorAll('.skill-tags i')].map(x=>`<span>${x.textContent}</span>`).join('');
   $('#introPreview').innerHTML=previewExamples[id]||'<div class="pv-instruction">게임 예시를 보고 시작해요.</div>';
+  const isPractice=LITERACY_GAMES.has(id);
+  $('#literacyPracticeControls').hidden=!isPractice;
+  $('#previewRoundInfo').textContent='실제 게임은 5스테이지로 진행돼요.';
+  if(isPractice)updatePracticeControls();
   show('intro');
 }
 
@@ -73,11 +115,11 @@ function say(text){state.lastSpeech=text;if(!state.sound||!('speechSynthesis'in 
 function sfx(kind='ok'){if(!state.sound)return;try{const C=window.AudioContext||window.webkitAudioContext,c=new C(),o=c.createOscillator(),g=c.createGain();o.type=kind==='ok'?'triangle':'sine';const a=kind==='ok'?640:230,b=kind==='ok'?960:160;o.frequency.setValueAtTime(a,c.currentTime);o.frequency.exponentialRampToValueAtTime(b,c.currentTime+.16);g.gain.setValueAtTime(.07,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.19);o.connect(g).connect(c.destination);o.start();o.stop(c.currentTime+.2)}catch{}}
 function flash(text){toast.textContent=text;toast.classList.add('show');clearTimeout(flash.t);flash.t=setTimeout(()=>toast.classList.remove('show'),1150)}
 function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
-function updateProgress(){ $('#stageLabel').textContent=`${Math.min(state.round+1,5)} / 5`;$('#progressBar').style.width=`${state.round/5*100}%`;const badge=$('#missionBadge');if(badge)badge.textContent=`미션 ${Math.min(state.round+1,5)}` }
-function startGame(id){clearTimers();state.game=id;state.round=0;state.score=0;state.lock=false;const m=meta[id];$('#gameTitle').textContent=m.title;$('#gameKicker').textContent=m.kicker;$('#scoreLabel').textContent='🌱 0';guide.src=m.friend;world.className=`game-world theme-${m.theme}`;show('game');updateProgress();renderRound()}
+function updateProgress(){const total=state.roundTotal;$('#stageLabel').textContent=`${Math.min(state.round+1,total)} / ${total}`;$('#progressBar').style.width=`${state.round/total*100}%`;const badge=$('#missionBadge');if(badge)badge.textContent=`미션 ${Math.min(state.round+1,total)}` }
+function startGame(id){clearTimers();state.game=id;state.round=0;state.score=0;state.lock=false;state.roundTotal=LITERACY_GAMES.has(id)?state.practiceCount:5;state.practiceRounds=LITERACY_GAMES.has(id)?choosePracticeRounds(id,state.practiceLevel,state.roundTotal):[];const m=meta[id];$('#gameTitle').textContent=m.title;$('#gameKicker').textContent=m.kicker;$('#scoreLabel').textContent='🌱 0';guide.src=m.friend;world.className=`game-world theme-${m.theme}`;show('game');updateProgress();renderRound()}
 function renderRound(){clearTimers();state.lock=false;area.innerHTML='';({rescue:renderFind,memory:renderMemory,spacing:renderSpacing,spelling:renderSpelling,sameShape:renderSameShape,flower:renderFlower,hide:renderHide,path:renderPath,calm:renderCalm,inside:renderInside,targets:renderTargets,paint:renderPaint,water:renderWater}[state.game])()}
-function nextRound(delay=700){state.lock=true;later(()=>{state.round++;if(state.round>=5)return finishGame();updateProgress();renderRound()},delay)}
-function finishGame(){completed[state.game]=true;localStorage.setItem(STORE.done,JSON.stringify(completed));$('#progressBar').style.width='100%';const m=meta[state.game];$('#resultCharacter').src=m.friend;$('#resultTitle').textContent=state.score>=46?'정원이 활짝 깨어났어!':state.score>=34?'정원 한 칸 완성!':'끝까지 길을 만들었어!';$('#resultMessage').textContent=`${m.kicker}의 5개 미션을 모두 지나왔어요.`;$('#resultScore').textContent=`🌱 ${state.score}`;later(()=>show('result'),500)}
+function nextRound(delay=700){state.lock=true;later(()=>{state.round++;if(state.round>=state.roundTotal)return finishGame();updateProgress();renderRound()},delay)}
+function finishGame(){completed[state.game]=true;localStorage.setItem(STORE.done,JSON.stringify(completed));$('#progressBar').style.width='100%';const m=meta[state.game];$('#resultCharacter').src=m.friend;$('#resultTitle').textContent=state.score>=state.roundTotal*9?'정원이 활짝 깨어났어!':state.score>=state.roundTotal*6?'정원 한 칸 완성!':'끝까지 길을 만들었어!';$('#resultMessage').textContent=LITERACY_GAMES.has(state.game)?`${LEVEL_NAMES[state.practiceLevel]} · ${state.roundTotal}문제를 끝까지 풀었어요!`:`${m.kicker}의 5개 미션을 모두 지나왔어요.`;$('#resultScore').textContent=`🌱 ${state.score}`;later(()=>show('result'),500)}
 function rewardAt(el){const r=el.getBoundingClientRect(),w=world.getBoundingClientRect(),p=document.createElement('span');p.className='leaf-pop';p.textContent='🌱';p.style.left=`${r.left-w.left+r.width/2}px`;p.style.top=`${r.top-w.top+r.height/2}px`;world.appendChild(p);later(()=>p.remove(),800)}
 function roundGate(parent,label='다음 미션 ▶',delay=500,speech=''){
  state.lock=true;
@@ -167,27 +209,21 @@ function renderMemory(){
  study.querySelector('.memory-ready').onclick=beginRecall;
 }
 
-const sentenceRounds=[
- ['밥을','먹어요'],
- ['학교에','가요'],
- ['나는','축구를','좋아해요'],
- ['엄마에게','카톡을','보내요'],
- ['오늘은','책을','15분씩','읽어요']
-];
-function renderSpacing(){const answer=sentenceRounds[state.round],plain=answer.join(''),correct=new Set(),opened=new Set();let cursor=0;answer.slice(0,-1).forEach(w=>{cursor+=w.length;correct.add(cursor)});missionText.textContent='띄울 곳을 눌러 다리를 만들어요!';missionSub.textContent='띄어야 할 글자 사이를 톡 누르면 다리 판자가 하나씩 생겨요.';say(`${answer.join(' ')}. 띄어야 하는 곳을 찾아 다리를 완성해 주세요.`);const scene=document.createElement('div');scene.className='spacing-scene bridge-adventure';const count=document.createElement('div');count.className='mini-count';count.textContent=`🪵 다리 판자 0 / ${correct.size}`;const line=document.createElement('div');line.className='spacing-line';const bridge=document.createElement('div');bridge.className='spacing-bridge';bridge.innerHTML=`<span class="bridge-bank left">🌳</span><div class="plank-track">${[...correct].map((p,i)=>`<i class="game-plank" data-plank="${p}">${i+1}</i>`).join('')}</div><span class="bridge-bank right">🏡</span><img class="bridge-runner" src="assets/moa-default.png" alt=""></div>`;const review=document.createElement('div');review.className='spacing-review';[...plain].forEach((ch,i)=>{const c=document.createElement('span');c.className='spacing-char';c.textContent=ch;line.appendChild(c);if(i<plain.length-1){const gap=document.createElement('button');gap.className='space-gap';gap.dataset.pos=String(i+1);gap.setAttribute('aria-label',`${i+1}번째 글자 뒤 띄어쓰기`);gap.innerHTML='<i></i>';gap.onclick=()=>{if(state.lock||gap.classList.contains('opened'))return;const pos=Number(gap.dataset.pos);if(correct.has(pos)){gap.classList.add('opened');opened.add(pos);const plank=bridge.querySelector(`[data-plank="${pos}"]`);if(plank)plank.classList.add('built');count.textContent=`🪵 다리 판자 ${opened.size} / ${correct.size}`;sfx('ok');addSeeds(Math.ceil(10/correct.size));flash('판자 한 칸 연결!');if(opened.size===correct.size){line.classList.add('complete');bridge.classList.add('complete');review.innerHTML=`<b>말 덩어리 확인</b><div>${answer.map((w,i)=>`<span data-word="${i}">${w}</span>`).join('')}</div>`;say(answer.join(', '));answer.forEach((w,i)=>later(()=>{review.querySelectorAll('span').forEach(x=>x.classList.remove('active'));review.querySelector(`[data-word="${i}"]`)?.classList.add('active')},250+i*360));flash('띄어쓰기 다리 완성! 말 덩어리도 다시 확인해요 🌱');roundGate(scene,'다음 다리 ▶',Math.max(1100,answer.length*360+450))}}else{gap.classList.add('wrong');scene.classList.add('splash');sfx('no');flash('앗, 여기는 붙여 읽어요. 다른 곳에 판자를 놓아봐요.');later(()=>{gap.classList.remove('wrong');scene.classList.remove('splash')},500)}};line.appendChild(gap)}});const helper=document.createElement('div');helper.className='spacing-helper';helper.innerHTML='<span>👆</span><b>띄어야 하는 글자 사이를 누르면 다리가 이어져요</b>';scene.append(count,line,bridge,review,helper);area.appendChild(scene)}
+// 띄어쓰기 문제는 literacy-banks.js에서 난이도별로 공급합니다.
+function renderSpacing(){const answer=state.practiceRounds[state.round],plain=answer.join(''),correct=new Set(),opened=new Set();let cursor=0;answer.slice(0,-1).forEach(w=>{cursor+=w.length;correct.add(cursor)});missionText.textContent='띄울 곳을 눌러 다리를 만들어요!';missionSub.textContent='띄어야 할 글자 사이를 톡 누르면 다리 판자가 하나씩 생겨요.';say('붙어 있는 문장에서 띄어야 할 자리를 찾아 다리를 완성해 주세요.');const scene=document.createElement('div');scene.className='spacing-scene bridge-adventure';const count=document.createElement('div');count.className='mini-count';count.textContent=`🪵 다리 판자 0 / ${correct.size}`;const line=document.createElement('div');line.className='spacing-line'+(plain.length>=17?' is-long':'');const bridge=document.createElement('div');bridge.className='spacing-bridge';bridge.innerHTML=`<span class="bridge-bank left">🌳</span><div class="plank-track">${[...correct].map((p,i)=>`<i class="game-plank" data-plank="${p}">${i+1}</i>`).join('')}</div><span class="bridge-bank right">🏡</span><img class="bridge-runner" src="assets/moa-default.png" alt=""></div>`;const review=document.createElement('div');review.className='spacing-review';[...plain].forEach((ch,i)=>{const c=document.createElement('span');c.className='spacing-char';c.textContent=ch;line.appendChild(c);if(i<plain.length-1){const gap=document.createElement('button');gap.className='space-gap';gap.dataset.pos=String(i+1);gap.setAttribute('aria-label',`${i+1}번째 글자 뒤 띄어쓰기`);gap.innerHTML='<i></i>';gap.onclick=()=>{if(state.lock||gap.classList.contains('opened'))return;const pos=Number(gap.dataset.pos);if(correct.has(pos)){gap.classList.add('opened');opened.add(pos);const plank=bridge.querySelector(`[data-plank="${pos}"]`);if(plank)plank.classList.add('built');count.textContent=`🪵 다리 판자 ${opened.size} / ${correct.size}`;sfx('ok');addSeeds(Math.ceil(10/correct.size));flash('판자 한 칸 연결!');if(opened.size===correct.size){line.classList.add('complete');bridge.classList.add('complete');review.innerHTML=`<b>말 덩어리 확인</b><div>${answer.map((w,i)=>`<span data-word="${i}">${w}</span>`).join('')}</div>`;say(answer.join(', '));answer.forEach((w,i)=>later(()=>{review.querySelectorAll('span').forEach(x=>x.classList.remove('active'));review.querySelector(`[data-word="${i}"]`)?.classList.add('active')},250+i*360));flash('띄어쓰기 다리 완성! 말 덩어리도 다시 확인해요 🌱');roundGate(scene,'다음 다리 ▶',Math.max(1100,answer.length*360+450))}}else{gap.classList.add('wrong');scene.classList.add('splash');sfx('no');flash('앗, 여기는 붙여 읽어요. 다른 곳에 판자를 놓아봐요.');later(()=>{gap.classList.remove('wrong');scene.classList.remove('splash')},500)}};line.appendChild(gap)}});const helper=document.createElement('div');helper.className='spacing-helper';helper.innerHTML='<span>👆</span><b>띄어야 하는 글자 사이를 누르면 다리가 이어져요</b>';scene.append(count,line,bridge,review,helper);area.appendChild(scene)}
 
-const spellRounds=[
- {before:'숙제를 다 ',right:'했어요',wrong:'햇어요',tip:'과거형은 ‘했어요’처럼 ㅆ을 써요.'},
- {before:'책을 다 ',right:'읽었어요',wrong:'읽엇어요',tip:'‘었어요’의 받침은 ㅆ이에요.'},
- {before:'이제 가도 ',right:'돼요',wrong:'되요',tip:'‘되어요’를 줄이면 ‘돼요’예요.'},
- {before:'나도 ',right:'할 수',wrong:'할수',after:' 있어요',tip:'‘수’는 앞말과 띄어 써요.'},
- {before:'어디 가요',right:'?',wrong:'!',tip:'묻는 문장 끝에는 물음표를 붙여요.',punct:true}
-];
-function renderSpelling(){const q=spellRounds[state.round],shops=[['모아 빵집','🥐'],['책꽃이 서점','📚'],['초록 분식집','🍜'],['샘 문구점','✏️'],['정원 안내소','🪧']],shopInfo=shops[state.round];missionText.textContent=`${shopInfo[0]} 간판을 고쳐요!`;missionSub.textContent=state.round<2?'비슷한 글자 모양을 천천히 비교하면 가게 불이 켜져요.':'맞춤법·띄어쓰기·문장부호를 고치면 가게 문이 열려요.';say(`${q.before}${q.right}${q.after||''}. 알맞은 것을 골라 가게를 열어 주세요.`);const shop=document.createElement('div');shop.className='repair-shop shop-quest';const storefront=document.createElement('div');storefront.className='storefront';storefront.innerHTML=`<div class="shop-awning"><span>${shopInfo[1]}</span><b>${shopInfo[0]}</b></div><div class="shop-window">✨</div><div class="shop-door"><span>🔒</span><small>수리하면 OPEN</small></div>`;const wrap=document.createElement('div');wrap.className='sign-wrap';const sign=document.createElement('div');sign.className='broken-sign neon-sign';sign.innerHTML=`${q.before}<b>?</b>${q.after||''}`;const choices=document.createElement('div');choices.className='repair-choices';const tip=document.createElement('div');tip.className='repair-tip';tip.textContent='🔧 두 표현을 비교해서 고장 난 부분을 고쳐요.';const review=document.createElement('div');review.className='spelling-review';shuffle([q.right,q.wrong]).forEach(w=>{const b=document.createElement('button');b.className='repair-choice';b.textContent=w;b.onclick=()=>{if(state.lock)return;if(w===q.right){b.classList.add('correct');sign.classList.add('fixed');sign.innerHTML=`${q.before}<b>${q.right}</b>${q.after||''}`;tip.textContent='💡 '+q.tip;review.innerHTML=`<small>한 번 더 확인</small><strong>${q.before}<b>${q.right}</b>${q.after||''}</strong>`;shop.classList.add('shop-open');storefront.querySelector('.shop-door').innerHTML='<span>🚪</span><small>OPEN!</small>';sfx('ok');addSeeds(10);rewardAt(b);flash('간판 수리 완료! 맞는 표현을 한 번 더 확인해요 ✨');roundGate(shop,'다음 간판 ▶',900,`${q.before}${q.right}${q.after||''}`)}else{b.classList.add('wrong');sign.classList.add('flicker');sfx('no');tip.textContent='🔧 아직 불이 안 켜졌어요. 두 모양을 다시 비교해봐요.';flash('간판이 깜빡! 다시 살펴봐요.');later(()=>{b.classList.remove('wrong');sign.classList.remove('flicker')},520)}};choices.appendChild(b)});wrap.append(sign,choices,tip,review);shop.append(storefront,wrap);area.appendChild(shop)}
+// 맞춤법 문제는 literacy-banks.js에서 난이도별로 공급합니다.
+function renderSpelling(){const q=state.practiceRounds[state.round],shops=[['모아 빵집','🥐'],['책꽃이 서점','📚'],['초록 분식집','🍜'],['샘 문구점','✏️'],['정원 안내소','🪧']],shopInfo=shops[state.round%shops.length];missionText.textContent=`${shopInfo[0]} 간판을 고쳐요!`;missionSub.textContent=state.practiceLevel==='easy'?'비슷한 글자 모양을 천천히 비교하면 가게 불이 켜져요.':'알맞은 맞춤법·띄어쓰기 표현을 골라 가게를 열어요.';say('간판에서 물음표 자리에 알맞은 표현을 골라 가게를 열어 주세요.');const shop=document.createElement('div');shop.className='repair-shop shop-quest';const storefront=document.createElement('div');storefront.className='storefront';storefront.innerHTML=`<div class="shop-awning"><span>${shopInfo[1]}</span><b>${shopInfo[0]}</b></div><div class="shop-window">✨</div><div class="shop-door"><span>🔒</span><small>수리하면 OPEN</small></div>`;const wrap=document.createElement('div');wrap.className='sign-wrap';const sign=document.createElement('div');sign.className='broken-sign neon-sign';sign.innerHTML=`${q.before}<b>?</b>${q.after||''}`;const choices=document.createElement('div');choices.className='repair-choices';const tip=document.createElement('div');tip.className='repair-tip';tip.textContent='🔧 두 표현을 비교해서 고장 난 부분을 고쳐요.';const review=document.createElement('div');review.className='spelling-review';shuffle([q.right,q.wrong]).forEach(w=>{const b=document.createElement('button');b.className='repair-choice';b.textContent=w;b.onclick=()=>{if(state.lock)return;if(w===q.right){b.classList.add('correct');sign.classList.add('fixed');sign.innerHTML=`${q.before}<b>${q.right}</b>${q.after||''}`;tip.textContent='💡 '+q.tip;review.innerHTML=`<small>한 번 더 확인</small><strong>${q.before}<b>${q.right}</b>${q.after||''}</strong>`;shop.classList.add('shop-open');storefront.querySelector('.shop-door').innerHTML='<span>🚪</span><small>OPEN!</small>';sfx('ok');addSeeds(10);rewardAt(b);flash('간판 수리 완료! 맞는 표현을 한 번 더 확인해요 ✨');roundGate(shop,'다음 간판 ▶',900,`${q.before}${q.right}${q.after||''}`)}else{b.classList.add('wrong');sign.classList.add('flicker');sfx('no');tip.textContent='🔧 아직 불이 안 켜졌어요. 두 모양을 다시 비교해봐요.';flash('간판이 깜빡! 다시 살펴봐요.');later(()=>{b.classList.remove('wrong');sign.classList.remove('flicker')},520)}};choices.appendChild(b)});wrap.append(sign,choices,tip,review);shop.append(storefront,wrap);area.appendChild(shop)}
 
 $$('[data-open]').forEach(b=>b.addEventListener('click',()=>{
  if(b.dataset.open==='rescue'){location.href='games/rescue/';return}
  openPreview(b.dataset.open)
+}));
+$('#literacyPracticeControls [data-level]').forEach(b=>b.addEventListener('click',()=>{
+ state.practiceLevel=b.dataset.level;state.practiceCount=DEFAULT_COUNTS[state.practiceLevel];updatePracticeControls();
+}));
+$('#literacyPracticeControls [data-count]').forEach(b=>b.addEventListener('click',()=>{
+ state.practiceCount=Number(b.dataset.count);updatePracticeControls();
 }));
 $('#introStart').addEventListener('click',()=>{if(state.previewGame==='rescue'){location.href='games/rescue/';return}if(state.previewGame)startGame(state.previewGame)});
 $('#introBack').addEventListener('click',goHome);
