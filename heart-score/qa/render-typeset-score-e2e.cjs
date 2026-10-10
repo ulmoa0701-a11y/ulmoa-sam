@@ -24,9 +24,10 @@ const truth=require('./doremi-ground-truth.json');
   await page.evaluate(async()=>{await Promise.all([document.fonts.load('20px Bravura'),document.fonts.load('20px Academico')]);});
   await page.addScriptTag({path:path.join(__dirname,'node_modules/vexflow/build/cjs/vexflow.js')});
   const pictures=await page.evaluate(async truth=>{
-   const VF=window.Vex?.Flow||window.VexFlow?.Flow||window.VexFlow;
+   const VF=window.VexFlow||window.Vex?.Flow;
    if(!VF?.Renderer)throw Error('VexFlow renderer unavailable');
-   if(typeof VF.setFonts==='function')VF.setFonts('Bravura','Academico');
+   if(typeof VF.setFonts!=='function')throw Error('Top-level VexFlow.setFonts is missing');
+   VF.setFonts('Bravura','Academico');
    await document.fonts.ready;
    if(!document.fonts.check('20px Bravura'))throw Error('Bravura font was not loaded');
    const c=document.getElementById('score'),w=1800,h=1480;
