@@ -8,7 +8,7 @@ const fingers=[{name:'검지',icon:'☝️',tip:8,flower:'🌼',say:'검지를 �
 {name:'중지',icon:'✌️',tip:12,flower:'🌷',say:'이번에는 중지야. 바로 아래 구멍으로 움직여 보자.'},
 {name:'약지',icon:'🖐️',tip:16,flower:'🌸',say:'마지막은 약지야. 아래 구멍으로 움직여 보자.'}];
 const VIRTUAL=[{x:.53,y:.38},{x:.53,y:.51},{x:.53,y:.64}];
-const S={phase:'intro',stage:0,step:0,mode:'none',facing:'user',cam:null,model:null,hand:null,points:[],lastFrame:-1,requestId:0,raf:0,dwell:0,progress:0,demoMoving:false,demoTip:{x:.15,y:.45},mute:false,successes:[0,0,0],inputKind:'none',modelLoading:false,resumeReal:false,resumeSong:false,songKind:'touch',songIndex:0,songActive:false,songArmed:false,songHold:0,songLast:0,songDelayUntil:0,songPlayCount:0,songProofs:[],songMicToken:0,songMicHold:0,songMicFrames:0,songMicRearm:true,songMicLastMismatch:0,demoPressed:false,winTimer:null,nearLast:0,hintState:'far',armed:false,ready:false,lastCameraScored:-1,lastLandmarksAt:0,wrongFinger:false,mic:null,audio:null,analyser:null,fft:null,micFrames:0,micDwell:0,lastWarning:'',camModelReady:false};
+const S={phase:'intro',stage:0,step:0,mode:'none',facing:'user',cam:null,model:null,hand:null,points:[],lastFrame:-1,requestId:0,raf:0,dwell:0,progress:0,demoMoving:false,demoTip:{x:.15,y:.45},mute:false,successes:[0,0,0],inputKind:'none',modelLoading:false,resumeReal:false,resumeSong:false,songKind:'touch',songIndex:0,songActive:false,songArmed:false,songHold:0,songLast:0,songDelayUntil:0,songPlayCount:0,songProofs:[],songSoundCtx:null,songPreviewTime:0,songMicToken:0,songMicHold:0,songMicFrames:0,songMicRearm:true,songMicLastMismatch:0,demoPressed:false,winTimer:null,nearLast:0,hintState:'far',armed:false,ready:false,lastCameraScored:-1,lastLandmarksAt:0,wrongFinger:false,mic:null,audio:null,analyser:null,fft:null,micFrames:0,micDwell:0,lastWarning:'',camModelReady:false};
 const vid=$('vid'),cv=$('view'),g=cv.getContext('2d',{alpha:false});cv.width=W;cv.height=H;
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),mix=(a,b,t)=>a+(b-a)*t;
 const setText=(id,txt)=>{$(id).textContent=txt};
@@ -19,7 +19,9 @@ function show(id){for(const n of ['introPanel','gamePanel','winPanel','calPanel'
 function stopFrames(){if(S.raf)cancelAnimationFrame(S.raf);S.raf=0}
 function stopMic(){S.songMicToken++;if(S.mic){S.mic.getTracks().forEach(t=>t.stop());S.mic=null}if(S.audio){S.audio.close().catch(()=>{});S.audio=null}S.analyser=null;S.fft=null;S.micFrames=0;S.micDwell=0;$('micStart').disabled=false;$('micStart').textContent='🎤 시작';}
 function stopCamera(){S.requestId++;stopFrames();if(S.cam){S.cam.getTracks().forEach(t=>t.stop());S.cam=null}vid.srcObject=null;S.hand=null;S.lastFrame=-1;if(S.model){try{S.model.close()}catch(e){}S.model=null}S.camModelReady=false}
-function closeAll(){if(S.winTimer){clearTimeout(S.winTimer);S.winTimer=null}stopCamera();stopMic();$('winView').hidden=true}
+function closeAll(){if(S.winTimer){clearTimeout(S.winTimer);S.winTimer=null}stopCamera();stopMic();
+if(S.songSoundCtx){try{S.songSoundCtx.close().catch(()=>{})}catch(e){}S.songSoundCtx=null}
+$('winView').hidden=true}
 function drawBg(){let grad=g.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#b4e0fa');grad.addColorStop(1,'#ebf8e9');g.fillStyle=grad;g.fillRect(0,0,W,H);g.fillStyle='#fff7bb';g.beginPath();g.arc(W*.87,H*.15,44,0,7);g.fill();g.fillStyle='#93c995';g.beginPath();g.ellipse(W*.5,H*1.10,W*.8,H*.43,0,0,Math.PI*2);g.fill()}
 function mirror(){return S.facing==='user'}
 function projection(p){let vw=vid.videoWidth||640,vh=vid.videoHeight||480,scale=Math.max(W/vw,H/vh),ox=(W-vw*scale)/2,oy=(H-vh*scale)/2,x=ox+p.x*vw*scale,y=oy+p.y*vh*scale;return{x:mirror()?W-x:x,y}}
@@ -332,7 +334,7 @@ function songPrepare(kind){
  // Enter with camera already running for kind=camera; for others close media.
  if(kind!=='camera')closeAll();
  S.songKind=kind;S.stage=3;S.phase='song';S.mode=kind==='touch'?'demo':kind==='camera'?'camera':'none';
- S.songIndex=0;S.songActive=false;S.songProofs=[];S.songArmed=false;S.songHold=0;S.songLast=0;S.songDelayUntil=0;S.songPlayCount=0;
+ S.songIndex=0;S.songActive=false;S.songProofs=[];S.songPreviewTime=0;S.songArmed=false;S.songHold=0;S.songLast=0;S.songDelayUntil=0;S.songPlayCount=0;
  S.songMicHold=0;S.songMicFrames=0;S.songMicRearm=true;S.songMicLastMismatch=0;
  S.demoTip=null;S.demoPressed=false;S.progress=0;S.step=0;
  $('songChoices').hidden=true;$('songWin').hidden=true;$('songPlay').hidden=false;
@@ -362,23 +364,31 @@ function songRender(){
 }
 function songStart(){
  if(S.phase!=='song'||S.songKind==='mic')return;
+ songPrimeAudio();
  S.songActive=true;S.songArmed=false;S.songHold=0;S.demoTip=null;
  $('songBegin').hidden=true;
  songRender();setText('songHint','☝️ 밖에서 시작해, 천천히 가져가!');
  speak('천천히 움직여서 '+melody[S.songIndex].note+' 소리를 만들어 보자.');
 }
-function songSampleSound(pitchHz,duration=.48){
- // Acoustic approximation only; this is not a recording of a real recorder.
+function songPrimeAudio(){
  if(S.mute)return;
  try{
   const A=window.AudioContext||window.webkitAudioContext;if(!A)return;
-  const a=new A(),osc=a.createOscillator(),gain=a.createGain();
+  if(!S.songSoundCtx)S.songSoundCtx=new A();
+  S.songSoundCtx.resume?.().catch(()=>{});
+ }catch(e){}
+}
+function songSampleSound(pitchHz,duration=.48){
+ // Synthesized sound, not a recording of a recorder.
+ if(S.mute)return;
+ try{
+  songPrimeAudio();const a=S.songSoundCtx;if(!a)return;
+  const osc=a.createOscillator(),gain=a.createGain();
   osc.type='triangle';osc.frequency.value=pitchHz;
   gain.gain.setValueAtTime(.0001,a.currentTime);
   gain.gain.exponentialRampToValueAtTime(.07,a.currentTime+.022);
   gain.gain.exponentialRampToValueAtTime(.0001,a.currentTime+duration);
   osc.connect(gain).connect(a.destination);osc.start();osc.stop(a.currentTime+duration+.025);
-  osc.onended=()=>a.close().catch(()=>{});
  }catch(e){}
 }
 function songScore(now,freshFrame){
@@ -426,6 +436,8 @@ async function songMicStart(){
  if(S.phase!=='song'||S.songKind!=='mic')return;
  if(S.mic){stopMic();S.songActive=false;$('songMicBegin').textContent='🎤 다시 시작';return}
  if(!navigator.mediaDevices?.getUserMedia){setText('songHint','🎤 마이크를 사용할 수 없어요.');return}
+ if(S.songSoundCtx){try{await S.songSoundCtx.suspend?.()}catch(e){}}
+ if(S.songPreviewTime&&performance.now()-S.songPreviewTime<650){setText('songHint','🎧 미리 듣기 소리가 끝난 뒤 다시 시작해 봐.');return}
  const token=++S.songMicToken;
  $('songMicBegin').disabled=true;
  try{
@@ -476,7 +488,7 @@ $('songMicBegin').addEventListener('click',songMicStart);
 $('songHear').addEventListener('click',()=>{
  if(S.phase!=='song'||S.songIndex>=melody.length)return;
  if(S.songKind==='mic'&&S.mic){setText('songHint','🎧 마이크를 끄고 목표 음을 들어봐.');return}
- songSampleSound(melody[S.songIndex].pitch);
+ S.songPreviewTime=performance.now();songSampleSound(melody[S.songIndex].pitch);
 });
 $('songBack').addEventListener('click',songChoose);
 $('songAgain').addEventListener('click',songChoose);
