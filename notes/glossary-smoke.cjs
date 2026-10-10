@@ -58,6 +58,25 @@ const path=require("node:path");
       await cards.first().click();
       assert.equal(await dialog.evaluate(x=>x.open),true,"tap opens explanation");
       assert((await page.locator("#gcatDialogBody .study-paper").textContent()).length>80,"original explanatory text retained");
+      const paperLook=await page.locator("#gcatDialogBody .study-paper").evaluate(paper=>{
+        const style=getComputedStyle(paper);
+        return {
+          backgroundImage:style.backgroundImage,
+          backgroundColor:style.backgroundColor,
+          before:getComputedStyle(paper,"::before").content,
+          after:getComputedStyle(paper,"::after").content,
+          paddingLeft:parseFloat(style.paddingLeft),
+          width:paper.getBoundingClientRect().width
+        };
+      });
+      assert.equal(paperLook.backgroundImage,"none","dialog definition is no longer ruled notebook paper");
+      assert.equal(paperLook.backgroundColor,"rgb(255, 253, 250)","soft, solid, readable paper background");
+      assert.equal(paperLook.before,"none","margin pencil decoration removed inside dialog");
+      assert.equal(paperLook.after,"none","no decorative pseudo-element in dialog");
+      assert(paperLook.paddingLeft>=16&&paperLook.paddingLeft<=20,"usable text padding without giant left gutter");
+      const originalPaperImage=await page.locator(".glossary-category .study-paper").first().evaluate(el=>getComputedStyle(el).backgroundImage);
+      assert.notEqual(originalPaperImage,"none","original non-popup study layout remains unchanged");
+      if(p.name==="mobile"||p.name==="desktop")await page.screenshot({path:path.join(folder,p.name+"-dialog-clean.png")});
       await page.locator(".gcat-art-disclosure > summary").click();
       await page.waitForFunction(()=>{const x=document.querySelector(".gcat-art-panel img");return x&&x.complete&&x.naturalWidth===1122&&x.naturalHeight===1402});
       if(p.name==="mobile")await page.screenshot({path:path.join(folder,"mobile-detail.png")});

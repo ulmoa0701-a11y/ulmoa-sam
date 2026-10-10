@@ -206,6 +206,18 @@
   background-color:#fffef9;
   border:1px solid #f1e9db;border-radius:13px;
 }
+/* 상세 팝업에서만 줄공책 인쇄선 제거. 원본 학습지 및 손그림에는 영향을 주지 않음. */
+.glossary-page .gcat-dialog-body .study-paper{
+  background-color:#fffdfa!important;
+  background-image:none!important;
+  padding:17px 18px 19px!important;
+}
+/* 줄공책 왼쪽 여백에 있던 연필 장식도 팝업에서만 생략. */
+.glossary-page .gcat-dialog-body .study-paper::before,
+.glossary-page .gcat-dialog-body .study-paper::after{
+  content:none!important;
+  background-image:none!important;
+}
 .glossary-page .gcat-dialog-body .study-paper p{font-size:15px!important;line-height:1.7!important}
 .glossary-page .gcat-dialog-body .study-sources a,
 .glossary-page .gcat-dialog-body .study-sources{font-size:12px!important;line-height:1.6!important}
