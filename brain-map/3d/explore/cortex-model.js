@@ -129,8 +129,8 @@ function cerebellumGeometry(side){
 function stemGeometry(){
   // Continuous tapered stem with a slight forward curve, not a dangling ellipse.
   const contour=[
-    [0.00,-1.21],[.13,-1.13],[.17,-.99],[.20,-.84],
-    [.19,-.67],[.16,-.41],[0,-.36]
+    [0.00,-1.17],[.06,-1.17],[.11,-1.14],[.16,-1.05],
+    [.19,-.87],[.19,-.67],[.16,-.41],[0,-.36]
   ].map(([r,y])=>new THREE.Vector2(r,y));
   const geometry=new THREE.LatheGeometry(contour,56,0,Math.PI*2);
   const pos=geometry.getAttribute('position');
