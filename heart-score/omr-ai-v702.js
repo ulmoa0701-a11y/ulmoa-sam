@@ -319,10 +319,31 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
     })
       .filter(v=>v&&(v.ir.kind!=='rest'||!bars.slice(1,-1).some(x=>Math.abs(x-v.x)<=sp*.85)))
       .sort((a,b)=>a.x-b.x);
-    noteCount+=musical.filter(v=>v.ir.kind==='note').length;
     if(bars.length>=2){
       for(let i=0;i<bars.length-1;i++){
         const left=bars[i],right=bars[i+1],items=musical.filter(v=>v.x>left&&v.x<right);
+        // Independent whole-note/rest disambiguation on a one-symbol measure.
+        // Never insert an extra event based on expected song length. A printed
+        // white-centered, fully closed notehead is required.
+        if(items.length===1&&items[0].ir.kind==='rest'&&items[0].e.dur>=3.5&&hollow.length){
+          const candidates=hollow.filter(q=>q.ring>=8&&
+            q.x>left+sp*6&&q.x<right-sp*3);
+          const dedup=[];
+          for(const q of candidates.sort((a,b)=>b.ring-a.ring)){
+            if(!dedup.some(v=>Math.abs(v.x-q.x)<sp*1.25))dedup.push(q);
+          }
+          if(dedup.length===1){
+            const head=dedup[0],index=2+head.k,steps=['C','D','E','F','G','A','B'],degree=((index%7)+7)%7;
+            const note=pitchName({step:steps[degree],octave:4+Math.floor(index/7),alter:0});
+            if(note){
+              opticalDebug.push({line:li,bar:i,reason:'independent-whole-note-ring-vs-model-whole-rest',
+                x:Math.round(head.x),k:head.k,ring:head.ring});
+              items[0].e.note=note;
+              items[0].ir={...items[0].ir,kind:'note'};
+              items[0].x=head.x;
+            }
+          }
+        }
         const rawBeat=items.reduce((sum,v)=>sum+v.e.dur,0);
         if(items.length>=3&&Math.abs(targetQ-rawBeat-.5)<.08){
           const unflagged=items.filter(v=>Math.abs(v.e.dur-.5)<.01&&
@@ -377,6 +398,7 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
         measures.push(fit.events);if(fit.rawExact)rawExact++;if(fit.ok){fitCount++;correctionSum+=fit.correction;}
       }
     }else measures.push(musical.map(v=>v.e));
+    noteCount+=musical.filter(v=>v.ir.kind==='note').length;
     for(const v of musical)refs.push({system:line.system,x:v.x,event:v.e});
   }
   const base=typeof W.fileBaseName==='function'?W.fileBaseName(filename):String(filename||'').replace(/\.[^.]+$/,'');
