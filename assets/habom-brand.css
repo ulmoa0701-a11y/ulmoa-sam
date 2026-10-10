@@ -14,3 +14,11 @@
 .sub-brand .brand-mascot{width:36px;height:34px}
 .sub-brand b{font-size:24px}
 }
+
+/* Approved original character-and-wordmark artwork, used at header sizes */
+.note-brand .brand-logo{display:block;width:196px;height:auto;max-height:61px;object-fit:contain;flex:none}
+.sub-brand .brand-logo{display:block;width:188px;height:auto;max-height:59px;object-fit:contain;flex:none}
+@media(max-width:650px){
+.note-brand .brand-logo{width:154px;max-height:51px}
+.sub-brand .brand-logo{width:150px;max-height:50px}
+}
