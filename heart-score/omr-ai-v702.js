@@ -299,7 +299,7 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
     // A thick barline can be misread as a rest. A rest is a symbol within a
     // measure, never coincident with a confidently identified printed barline.
     const sp=Number(line.input.box?.lineSpacing)||10;
-    const votes=visualPitchProposals(cvStaffs[li],line.fragment);const hollow= cvStaffs[li]?scanHollowHeads(cvStaffs[li]):[];let noteIndex=0;
+    const votes=visualPitchProposals(cvStaffs[li],line.fragment);const hollow= cvStaffs[li]?scanHollowHeads(cvStaffs[li]):[];const physicalHeads=cvStaffs[li]?scanConnectedHeads(cvStaffs[li]):[];let noteIndex=0;
     const musical=line.fragment.filter(ir=>ir.kind==='note'||ir.kind==='rest').map(ir=>{
       const e=eventFromIr(ir),q=ir.src?.bbox;let opticalDur=null,visualEvidence=null;
       if(e&&ir.kind==='note'){
@@ -342,6 +342,33 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
               items[0].ir={...items[0].ir,kind:'note'};
               items[0].x=head.x;
             }
+          }
+        }
+        // A low-resolution decoder sometimes labels a real note as a rest
+        // and places its token center several staff spacings to the right.
+        // Reclassify only with a strong, unclaimed physical notehead, and
+        // exactly one plausible model rest in the same printed measure.
+        if(cvStaffs[li]){
+          const rests=items.filter(v=>v.ir.kind==='rest'&&v.e.dur<=1);
+          const mapped=items.filter(v=>v.ir.kind==='note');
+          for(const rest of rests){
+            const candidates=physicalHeads.filter(head=>head.area>=sp*sp*.60&&
+              head.x>left+sp*2&&head.x<right-sp*2&&
+              rest.x-head.x>sp*1.8&&rest.x-head.x<sp*7&&
+              !mapped.some(v=>Math.abs(v.x-head.x)<sp*3.1));
+            if(candidates.length!==1)continue;
+            const head=candidates[0],optical=scanPitchFromY(cvStaffs[li],head.x,head.y),rhythm=scanRhythm(cvStaffs[li],head);
+            // Reject unknown shapes; do not fill in pitches or beats from
+            // expected measure length or any particular score fixture.
+            if(!optical?.note||!Number.isFinite(rhythm?.dur)||rhythm.dur<.5||rhythm.dur>2)continue;
+            opticalDebug.push({line:li,bar:i,reason:'unmatched-physical-notehead-vs-short-model-rest',
+              modelX:Math.round(rest.x),headX:Math.round(head.x),area:Math.round(head.area),from:'쉼',to:optical.note,
+              beats:rhythm.dur});
+            rest.ir={...rest.ir,kind:'note'};
+            rest.e.note=optical.note;
+            rest.e.dur=rhythm.dur;
+            rest.x=head.x;
+            mapped.push(rest);
           }
         }
         const rawBeat=items.reduce((sum,v)=>sum+v.e.dur,0);
