@@ -4,8 +4,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>박자꽃 톡톡! | 모아의 생각정원</title>
-<meta name="description" content="붐웨커 색깔악보에 맞춰 정확한 계이름을 박자에 맞게 누르는 리듬 연습 게임입니다.">
-<link rel="stylesheet" href="style.css?v=20261010-onepage">
+<meta name="description" content="색깔악보를 읽으며 알맞은 박자에 색깔 피아노 건반을 누르는 리듬·타이밍 게임입니다.">
+<link rel="stylesheet" href="style.css?v=20261010-piano">
 </head>
 <body>
 <div class="app">
@@ -16,7 +16,7 @@
 </header>
 <main>
 <section class="heading">
- <div><small class="eyebrow">🎵 색깔악보로 연주하는 리듬게임</small><h1>노래에 맞춰 <em>톡!</em></h1><p>계이름을 보고, 알맞은 박자에 누르면 꽃이 피어요.</p></div>
+ <div><small class="eyebrow">🎵 리듬과 타이밍을 연습하는 게임</small><h1>노래에 맞춰 <em>톡!</em></h1><p>계이름을 보고, 알맞은 박자에 누르면 꽃이 피어요.</p></div>
  <img src="../../assets/moa-cheer.png" alt="응원하는 모아 캐릭터">
 </section>
 <section class="settings" aria-label="연주 준비">
@@ -33,15 +33,15 @@
    <div class="scoreBox"><small>나의 연주 점수</small><strong><span id="scoreLabel">0</span><small> / 100</small></strong></div>
  </div>
  <div id="mainStage" class="mainStage">
-   <div class="nowHead"><span>🎼 빛나는 칸을 보고, 아래 계이름을 톡!</span><span id="feedback" class="feedback" role="status" aria-live="polite">준비되면 시작해요 🌼</span></div>
+   <div class="nowHead"><span>👀 위 악보를 읽고 아래 건반을 눌러요</span><span id="feedback" class="feedback" role="status" aria-live="polite">준비되면 시작해요 🌼</span></div>
    <div id="noteTrack" class="noteTrack" aria-label="박자에 맞춰 한 칸씩 강조되는 색깔악보"></div>
    <div class="countOverlay" id="countOverlay" hidden aria-live="polite" aria-label="시작 박자">
      <span class="countInfo">같이 박자 맞춰요</span><div id="countNumber">1</div>
    </div>
  </div>
- <div class="keyHead"><strong>👇 지금 빛나는 칸의 계이름을 눌러요!</strong><small>터치 · 클릭 · 키보드 1~8</small></div>
- <div id="keys" class="keys" role="group" aria-label="계이름 연주 버튼"></div>
- <p class="disclaimer">연습용 박자 점수예요. 기기·터치 반응 속도에 따라 차이가 날 수 있으며, 평가나 진단 점수는 아닙니다.</p>
+ <div class="keyHead"><strong>🎹 손으로 연주하는 색깔 피아노</strong><small>계이름을 보고 박자에 맞춰 눌러요</small></div>
+ <div id="keys" class="keys pianoKeys" role="group" aria-label="색깔 피아노 건반 8개"></div>
+ <p class="disclaimer">리듬·타이밍과 눈–손 협응을 연습하는 게임이에요. 점수는 터치 시점과 기기에 따라 달라지며 치료·진단 평가가 아닙니다.</p>
 </section>
 <section class="results" id="results" hidden aria-live="polite">
  <div class="resultArt" aria-hidden="true">🌼 ✨ 🌱</div>
@@ -53,6 +53,6 @@
 </main>
 <footer>일단 해봄 · 울모아쌤 | 학습용 시범 게임</footer>
 </div>
-<script src="game.js?v=20261010-onepage"></script>
+<script src="game.js?v=20261010-piano"></script>
 </body>
 </html>
