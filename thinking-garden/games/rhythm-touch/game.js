@@ -177,11 +177,12 @@ function start(){
  clearGameFrame();state.phase='count';selectSongAfterStart();state.lastCount=-1;
  // Keep the score and the actual instrument buttons together on a small phone.
  // Do this before the musical count-in, never during note-by-note playback.
- if(window.innerWidth<=700){
+ {
    const stage=$('#mainStage'),keys=$('#keys');
    const bottom=keys.getBoundingClientRect().bottom,view=innerHeight-12;
+   const targetTop=innerWidth<=700?115:76;
    if(bottom>view||stage.getBoundingClientRect().top<0)
-     window.scrollTo({top:Math.max(0,window.scrollY+stage.getBoundingClientRect().top-115),behavior:'instant'});
+     window.scrollTo({top:Math.max(0,window.scrollY+stage.getBoundingClientRect().top-targetTop),behavior:'instant'});
  }
  const now=performance.now();state.countStart=now;state.origin=now+state.countLen*state.beat;
  $('#countOverlay').hidden=false;$('#countNumber').textContent='1';
