@@ -16,6 +16,12 @@ const truth=require('./doremi-ground-truth.json');
   const pictures=await page.evaluate(async truth=>{
    const VF=window.Vex?.Flow||window.VexFlow?.Flow||window.VexFlow;
    if(!VF?.Renderer)throw Error('VexFlow renderer unavailable');
+   if(typeof VF.loadFonts==='function'){
+     await VF.loadFonts('Bravura','Academico');
+     VF.setFonts('Bravura','Academico');
+     await document.fonts.ready;
+   }else throw Error('Renderer lacks music font loader, score would omit noteheads and rests');
+   if(!document.fonts.check('20px Bravura'))throw Error('Bravura font was not loaded');
    const c=document.getElementById('score'),w=1800,h=1480;
    c.width=w;c.height=h;
    const renderer=new VF.Renderer(c,VF.Renderer.Backends.CANVAS);
