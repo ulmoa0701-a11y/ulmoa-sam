@@ -8,7 +8,7 @@ const fingers=[{name:'검지',icon:'☝️',tip:8,flower:'🌼',say:'검지를 �
 {name:'중지',icon:'✌️',tip:12,flower:'🌷',say:'이번에는 중지야. 바로 아래 구멍으로 움직여 보자.'},
 {name:'약지',icon:'🖐️',tip:16,flower:'🌸',say:'마지막은 약지야. 아래 구멍으로 움직여 보자.'}];
 const VIRTUAL=[{x:.53,y:.38},{x:.53,y:.51},{x:.53,y:.64}];
-const S={phase:'intro',stage:0,step:0,mode:'none',facing:'user',cam:null,model:null,hand:null,points:[],lastFrame:-1,requestId:0,raf:0,dwell:0,progress:0,demoMoving:false,demoTip:{x:.15,y:.45},mute:false,successes:[0,0,0],inputKind:'none',modelLoading:false,resumeReal:false,demoPressed:false,winTimer:null,nearLast:0,mic:null,audio:null,analyser:null,fft:null,micFrames:0,micDwell:0,lastWarning:'',camModelReady:false};
+const S={phase:'intro',stage:0,step:0,mode:'none',facing:'user',cam:null,model:null,hand:null,points:[],lastFrame:-1,requestId:0,raf:0,dwell:0,progress:0,demoMoving:false,demoTip:{x:.15,y:.45},mute:false,successes:[0,0,0],inputKind:'none',modelLoading:false,resumeReal:false,demoPressed:false,winTimer:null,nearLast:0,hintState:'far',mic:null,audio:null,analyser:null,fft:null,micFrames:0,micDwell:0,lastWarning:'',camModelReady:false};
 const vid=$('vid'),cv=$('view'),g=cv.getContext('2d',{alpha:false});cv.width=W;cv.height=H;
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),mix=(a,b,t)=>a+(b-a)*t;
 const setText=(id,txt)=>{$(id).textContent=txt};
@@ -33,7 +33,7 @@ function roundRect(x,y,w,h,r,fill,stroke,lw=3){g.beginPath();g.roundRect(x,y,w,h
 function virtualRecorder(){
  // A simple semi-transparent overlay for targeting, not a photograph of a particular recorder.
  const cx=VIRTUAL[0].x*W,top=H*.14;
- g.save();g.globalAlpha=.78;roundRect(cx-52,top,104,94,21,'#fae6c5','#947856',4);roundRect(cx-28,top+29,57,12,6,'#6b573e',null);
+ g.save();g.globalAlpha=.5;roundRect(cx-52,top,104,94,21,'#fae6c5','#947856',4);roundRect(cx-28,top+29,57,12,6,'#6b573e',null);
  roundRect(cx-43,top+85,86,H*.69,20,'#faead0','#9a7e59',5);roundRect(cx-37,top+92,73,H*.66,16,'#f5e2bf',null);
  for(let i=0;i<3;i++){const p=VIRTUAL[i];g.beginPath();g.arc(p.x*W,p.y*H,21,0,Math.PI*2);g.fillStyle='#40392e';g.fill();g.strokeStyle='#e5d1a4';g.lineWidth=5;g.stroke()}
  g.restore();
@@ -46,6 +46,8 @@ function drawAim(){
  g.save();g.strokeStyle='#ffffff';g.lineWidth=8;g.beginPath();g.arc(x,y,51,0,Math.PI*2);g.stroke();
  g.strokeStyle='#eda94d';g.lineWidth=9;g.setLineDash([15,9]);g.beginPath();g.arc(x,y,46,0,Math.PI*2);g.stroke();g.setLineDash([]);
  g.fillStyle='rgba(255,237,168,.15)';g.beginPath();g.arc(x,y,43,0,Math.PI*2);g.fill();
+ if(S.progress>0){g.beginPath();g.arc(x,y,55,-Math.PI/2,-Math.PI/2+S.progress*Math.PI*2);g.strokeStyle='#17824d';g.lineWidth=13;g.stroke()}
+
  g.font='900 31px system-ui';g.textAlign='center';g.fillStyle='white';g.strokeStyle='#276f56';g.lineWidth=5;g.strokeText(String(S.step+1),x,y+11);g.fillText(String(S.step+1),x,y+11);
  g.restore();
 }
@@ -68,7 +70,7 @@ function drawFrame(){
 function updateNav(){for(let i=0;i<4;i++){const el=$('nav'+i);el.classList.toggle('done',i<S.stage);el.classList.toggle('now',i===S.stage);}}
 function choosePanel(id){S.currentPanel=id;show(id);$('winView').hidden=id!=='winPanel';updateNav();$('switchCam').disabled=S.mode!=='camera';$('calAgain').disabled=S.mode!=='camera'||S.stage!==2;}
 function setStep(){
- S.progress=0;S.dwell=0;S.nearLast=0;S.demoMoving=false;S.demoTip=null;S.demoPressed=false;
+ S.progress=0;S.dwell=0;S.nearLast=0;S.hintState='far';S.demoMoving=false;S.demoTip=null;S.demoPressed=false;
  const f=fingers[S.step];setText('fingerIcon',f.icon);setText('fingerLabel',f.name);setText('stepNum',(S.step+1)+' / 3');
  setText('message',S.stage===0?'여기!':S.stage===1?'하나 더!':'내 리코더!');
  setText('stageTag',stageName[S.stage]);setText('sceneTag',S.mode==='demo'?'🧪 체험 화면':S.stage===2?'🎼 내 진짜 리코더':'🌱 리코더 그림');
@@ -78,14 +80,15 @@ function setStep(){
  choosePanel('gamePanel');speak(f.say);
 }
 function startPlay(stage=0){
- S.stage=stage;S.phase=['virtual','sequence','real'][stage];S.step=0;
+ S.stage=stage;S.phase=['virtual','sequence','real'][stage];S.step=stage===1?1:0;
  S.successes[stage]=0;setStep();
 }
 function next(){
  if(S.currentPanel!=='winPanel')return;
  if(S.winTimer){clearTimeout(S.winTimer);S.winTimer=null}
+ if(S.stage===0){startPlay(1);return}
  if(S.step<2){S.step++;setStep();return}
- if(S.stage===0||S.stage===1){startPlay(S.stage+1);if(S.stage===2)startCalibration();return}
+ if(S.stage===1){startPlay(2);if(S.stage===2)startCalibration();return}
  if(S.stage===2){enterAudio();return}
 }
 function win(source='camera'){
@@ -94,7 +97,7 @@ function win(source='camera'){
  S.successes[S.stage]++;
  setText('viewWinIcon',fingers[S.step].flower);
  setText('viewWinTitle',source==='demo'?'찾았어!':source==='teacher'?'선생님과 찾았어!':'가까이 왔어!');
- const needsStepButton=S.step===2;
+ const needsStepButton=S.step===2||S.stage===0;
  $('viewNext').hidden=!needsStepButton;
  setText('viewWinCaption',needsStepButton?'▶ 다음 놀이를 눌러줘!':'곧 다음 손가락으로!');
  setText('winFlower',fingers[S.step].flower);
@@ -112,6 +115,9 @@ function score(now){
  if(!target||!tip){if(now-S.nearLast>220){S.dwell=0;S.progress=0}$('bar').style.width=(S.progress*100).toFixed(0)+'%';return}
  const limit=S.stage===0?.17:S.stage===1?.15:.125;
  const near=dist(target,tip)<limit;
+ if(near&&S.hintState!=='near'){S.hintState='near';setText('camHint','✨ 좋아! 잠깐만 그대로!')}
+ else if(!near&&S.hintState!=='far'){S.hintState='far';setText('camHint','☝️ 반짝이는 구멍 안으로 천천히!')}
+
  if(near){if(!S.dwell)S.dwell=now;S.nearLast=now}
  if(!near&&(now-S.nearLast)>200){S.dwell=0;S.progress=0}
  else if(S.dwell){S.progress=clamp((now-S.dwell)/(S.stage===2?760:600),0,1)}
