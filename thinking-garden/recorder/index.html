@@ -132,7 +132,7 @@ $('hearNote').addEventListener('click',()=>{if(stream)stopMic();beep(currentNote
 $('micManual').addEventListener('click',()=>{stopMic();$('flowerPlot').classList.add('bloom');$('micStatus').innerHTML='<strong>🙌 직접 확인했어!</strong> 선생님과 함께 다음 음도 해보자!';beep(740,.15);});
 $('micBack').addEventListener('click',()=>show('home'));$('finishReal').addEventListener('click',micPage);$('finishAgain').addEventListener('click',()=>start(state.level));$('finishHome').addEventListener('click',()=>show('home'));
 window.addEventListener('pagehide',stopMic);window.addEventListener('keydown',e=>{if(e.key==='Escape'&&state.screen!=='home')show('home');});
-show('home');
+if(new URLSearchParams(window.location.search).get('mode')==='real')micPage();else show('home');
 })();
 </script>
 </body></html>
