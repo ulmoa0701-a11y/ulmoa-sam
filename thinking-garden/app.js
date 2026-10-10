@@ -52,8 +52,8 @@ const literacyLevelPreviews={
  }
 };
 function updatePracticeControls(){
- $('#literacyPracticeControls [data-level]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.level===state.practiceLevel)));
- $('#literacyPracticeControls [data-count]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.count)===state.practiceCount)));
+ $$('#literacyPracticeControls [data-level]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.level===state.practiceLevel)));
+ $$('#literacyPracticeControls [data-count]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.count)===state.practiceCount)));
  $('#practiceNotice').textContent=`${LEVEL_NAMES[state.practiceLevel]} · ${state.practiceCount}문제 · 같은 회기 안에서 중복 없이 연습해요.`;
  $('#previewRoundInfo').textContent=`선택한 ${state.practiceCount}문제를 풀어요.`;
  if(LITERACY_GAMES.has(state.previewGame))$('#introPreview').innerHTML=literacyLevelPreviews[state.previewGame][state.practiceLevel];
@@ -219,10 +219,10 @@ $$('[data-open]').forEach(b=>b.addEventListener('click',()=>{
  if(b.dataset.open==='rescue'){location.href='games/rescue/';return}
  openPreview(b.dataset.open)
 }));
-$('#literacyPracticeControls [data-level]').forEach(b=>b.addEventListener('click',()=>{
+$$('#literacyPracticeControls [data-level]').forEach(b=>b.addEventListener('click',()=>{
  state.practiceLevel=b.dataset.level;state.practiceCount=DEFAULT_COUNTS[state.practiceLevel];updatePracticeControls();
 }));
-$('#literacyPracticeControls [data-count]').forEach(b=>b.addEventListener('click',()=>{
+$$('#literacyPracticeControls [data-count]').forEach(b=>b.addEventListener('click',()=>{
  state.practiceCount=Number(b.dataset.count);updatePracticeControls();
 }));
 $('#introStart').addEventListener('click',()=>{if(state.previewGame==='rescue'){location.href='games/rescue/';return}if(state.previewGame)startGame(state.previewGame)});
