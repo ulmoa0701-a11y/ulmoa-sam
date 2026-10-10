@@ -570,12 +570,53 @@ function applyDisplayMode(){document.body.dataset.displayMode=displayMode;$('#di
 // It reaches the hit line 3.1 seconds later; MR and melody use the same event clock.
 const FIRST_NOTE_LEAD_MS=3100,FALL_TRAVEL_MS=3100;
 function noteColor(n){return COLORS[n]||'#e2e8f0'}function noteText(n){return TEXT[n]||'#526071'}function beatMs(){return 60000/Math.max(MIN_TEMPO,bpm)}
+let playView='fall',scorePaintIndex=-999;
+try{const saved=localStorage.getItem('ulmoaBoomPlayView');if(saved==='score')playView='score'}catch(e){}
+function choosePlayView(view){
+  playView=view==='score'?'score':'fall';
+  $('#playViewSelect').value=playView;
+  $('#stage').classList.toggle('scoreMode',playView==='score');
+  $('#scoreStage').setAttribute('aria-hidden',playView==='score'?'false':'true');
+  try{localStorage.setItem('ulmoaBoomPlayView',playView)}catch(e){}
+  scorePaintIndex=-999;
+  draw();
+}
+function activeScoreIndex(t){
+  if(t<0)return -1;
+  for(let i=0;i<events.length;i++)if(t>=events[i].start&&t<events[i].start+events[i].dur)return i;
+  return -1;
+}
+function updateScoreMotion(){
+  const active=activeScoreIndex(elapsed);
+  if(active===scorePaintIndex)return;
+  scorePaintIndex=active;
+  const next=active>=0?active+1:events.findIndex(e=>e.start>elapsed);
+  for(const id of ['scoreRows','scoreStageGrid']){
+    const list=$('#'+id),children=list.children;
+    if(children.length!==events.length)continue;
+    for(let i=0;i<children.length;i++){
+      const item=children[i];
+      item.classList.toggle('scoreActive',i===active);
+      item.classList.toggle('scoreNext',i===next&&next>=0);
+      item.classList.toggle('scorePlayed',events[i].start+events[i].dur<=elapsed);
+      item.setAttribute('aria-current',i===active?'true':'false');
+    }
+    // Follow the score in performance mode, without hijacking the page scroll.
+    if(active>=0&&(id==='scoreStageGrid'?playView==='score':playing)&&list.clientHeight){
+      const card=children[active],outer=list.getBoundingClientRect(),inner=card.getBoundingClientRect();
+      if(inner.top<outer.top+38||inner.bottom>outer.bottom-38){
+        const delta=inner.top-(outer.top+outer.height*.35);
+        list.scrollTop+=delta;
+      }
+    }
+  }
+}
 function outOfBaseCount(){return events.filter(e=>e.note!=='쉼'&&!ALLOWED[8].has(e.note)).length}
-function build(){events=[];let t=FIRST_NOTE_LEAD_MS,u=beatMs(),eventIndex=0;for(const [mi,m] of (currentSong.measures||[]).entries())for(const e of m){let d=Math.max(.125,Number(e.dur)||1),n=canonical(e.note);events.push({note:n,lyric:e.lyric||'',start:t,dur:d*u,active:n!=='쉼'&&ALLOWED[level].has(n),supported:n==='쉼'||ALLOWED[8].has(n),measure:mi,index:eventIndex++});t+=d*u}totalMs=t+u*1.5;lastLyricKey='';renderScore();updateTime();updateLyricTrack(true);updateRangeInfo()}
+function build(){events=[];scorePaintIndex=-999;let t=FIRST_NOTE_LEAD_MS,u=beatMs(),eventIndex=0;for(const [mi,m] of (currentSong.measures||[]).entries())for(const e of m){let d=Math.max(.125,Number(e.dur)||1),n=canonical(e.note);events.push({note:n,lyric:e.lyric||'',start:t,dur:d*u,active:n!=='쉼'&&ALLOWED[level].has(n),supported:n==='쉼'||ALLOWED[8].has(n),measure:mi,index:eventIndex++});t+=d*u}totalMs=t+u*1.5;lastLyricKey='';renderScore();updateTime();updateLyricTrack(true);updateRangeInfo()}
 function buildSampleSelect(){const s=$('#sampleSelect');s.innerHTML='<option value="">현재/가져온 곡</option>';for(const group of ['동요','수업용']){const g=document.createElement('optgroup');g.label=group;for(const x of SAMPLES.filter(v=>v.category===group)){const o=document.createElement('option');o.value=x.key;o.textContent=x.title;g.appendChild(o)}s.appendChild(g)}s.value=currentSampleKey||'';const mobile=$('#mobileSongSelect');if(mobile){mobile.innerHTML=s.innerHTML;mobile.value=s.value}}
 function renderLanes(){let l=$('#lanes'),t=$('#tubes');l.innerHTML=t.innerHTML='';ORDER.forEach(n=>{const label=displayLabel(n),title=displayTitle(n);let a=document.createElement('div');a.className='lane';a.innerHTML=`<div class="laneLabel" title="${esc(title)}">${esc(label)}</div>`;l.appendChild(a);let b=document.createElement('button');b.className='tube'+(ALLOWED[level].has(n)?'':' inactive');b.dataset.note=n;b.style.background=COLORS[n];b.setAttribute('aria-label',title+' 연주');b.title=title;b.innerHTML=`<span class="tubeLabel" style="--note-color:${COLORS[n]}">${esc(label)}</span>`;b.onclick=()=>tone(n,b);t.appendChild(b)})}
 function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function renderScore(){let w=$('#scoreRows');w.innerHTML='';for(const e of events){let d=document.createElement('div'),off=e.note!=='쉼'&&!ALLOWED[level].has(e.note),unsupported=!e.supported;d.className='beat'+(e.note==='쉼'?' rest':'')+(off?' off':'')+(unsupported?' unsupported':'');d.innerHTML=e.note==='쉼'?'<div class="note">쉼</div><div class="lyric"></div>':`<div class="note" style="background:${noteColor(e.note)}"><span class="noteLabelText" style="--note-color:${noteColor(e.note)}">${esc(displayLabel(e.note))}</span></div><div class="lyric">${lyrics?esc(e.lyric):''}</div>`;w.appendChild(d)}let outside=outOfBaseCount(),sub=$('#scoreSub');sub.classList.toggle('warn',outside>0);sub.textContent=`${level}음 모드 · ${events.filter(e=>e.active).length}개 연주음 · ${bpm} BPM${outside?` · 기본 8음 범위 밖 ${outside}개`:''}`;let g=$('#legend');g.innerHTML='';ORDER.forEach(n=>{let c=document.createElement('div');c.className='chip';c.style.opacity=ALLOWED[level].has(n)?1:.28;c.innerHTML=`<span class="dot" style="background:${COLORS[n]}"></span>${esc(displayLabel(n))}`;g.appendChild(c)})}
+function renderScore(){let w=$('#scoreRows');w.innerHTML='';for(const e of events){let d=document.createElement('div'),off=e.note!=='쉼'&&!ALLOWED[level].has(e.note),unsupported=!e.supported;d.className='beat'+(e.note==='쉼'?' rest':'')+(off?' off':'')+(unsupported?' unsupported':'');d.innerHTML=e.note==='쉼'?'<div class="note">쉼</div><div class="lyric"></div>':`<div class="note" style="background:${noteColor(e.note)}"><span class="noteLabelText" style="--note-color:${noteColor(e.note)}">${esc(displayLabel(e.note))}</span></div><div class="lyric">${lyrics?esc(e.lyric):''}</div>`;w.appendChild(d)}let s=$('#scoreStageGrid');s.innerHTML='';for(const [i,e] of events.entries()){const tile=w.children[i].cloneNode(true);tile.dataset.eventIndex=i;tile.title='연주 순서 '+(i+1)+(e.note==='쉼'?' · 쉼':' · '+e.note);if(e.active)tile.addEventListener('click',()=>tone(e.note));s.appendChild(tile)}scorePaintIndex=-999;updateScoreMotion();let outside=outOfBaseCount(),sub=$('#scoreSub');sub.classList.toggle('warn',outside>0);sub.textContent=`${level}음 모드 · ${events.filter(e=>e.active).length}개 연주음 · ${bpm} BPM${outside?` · 기본 8음 범위 밖 ${outside}개`:''}`;let g=$('#legend');g.innerHTML='';ORDER.forEach(n=>{let c=document.createElement('div');c.className='chip';c.style.opacity=ALLOWED[level].has(n)?1:.28;c.innerHTML=`<span class="dot" style="background:${COLORS[n]}"></span>${esc(displayLabel(n))}`;g.appendChild(c)})}
 function updateRangeInfo(){let outside=outOfBaseCount(),box=$('#rangeNote');box.classList.toggle('show',outside>0);box.textContent=outside?`이 곡에는 기본 8음 붐웨커(C~높은 C) 밖의 음이 ${outside}개 있어요. 다른 음으로 바꾸지 않고 회색으로 표시하며 재생에서 제외합니다.`:'';if(outside)$('#stageStatus').textContent=`범위 밖 음 ${outside}개`;else if(loadedFromTransfer)$('#stageStatus').textContent='하트악보에서 가져옴';else $('#stageStatus').textContent='준비'}
 function lyricWindowAt(t=elapsed,size=18){const items=events.map((e,i)=>({e,i})).filter(x=>x.e.lyric);if(!items.length)return{items:[],activeIndex:-1,start:0};let activePos=-1;for(let i=0;i<items.length;i++){if(t>=items[i].e.start-90)activePos=i;else break}const anchor=Math.max(0,activePos),start=Math.floor(anchor/size)*size;return{items:items.slice(start,start+size),activeIndex:activePos>=0?items[activePos].i:-1,start}}
 function updateLyricTrack(force=false){const box=$('#lyricTrack');if(!box)return;if(!lyrics){box.classList.add('hide');box.innerHTML='';lastLyricKey='hidden';return}const view=lyricWindowAt(elapsed,window.innerWidth<=800?9:18),key=view.start+':'+view.activeIndex;if(!force&&key===lastLyricKey)return;lastLyricKey=key;box.classList.remove('hide');box.innerHTML=view.items.map(x=>`<span class="lyricSyllable ${x.i===view.activeIndex?'active':''}" style="--note-color:${noteColor(x.e.note)}">${esc(x.e.lyric)}</span>`).join('')}
@@ -597,6 +638,7 @@ function audioMixLabel(){const mr=mrBuffer?'내 MR':'자동 MR';if(mixMode==='mr
 async function loadMrFile(file){stopMr();mrBuffer=null;mrName='';const status=$('#mrStatus');if(!file){status.textContent='기본 자동 MR 준비됨 · 파일 없이 바로 사용할 수 있어요. 내 MR 파일은 선택사항이에요.';status.className='hint mrStatus ok';if(playing)syncLiveMr();return}if(file.size>80*1024*1024){status.textContent='MR 파일이 너무 커요. 80MB 이하 파일을 사용해 주세요.';status.className='hint mrStatus warn';$('#mrFile').value='';return}try{audio();if(!audioCtx)throw new Error('AudioContext unavailable');const buf=await file.arrayBuffer();mrBuffer=await audioCtx.decodeAudioData(buf.slice(0));mrName=file.name;status.textContent='내 MR 준비됨 · '+mrName+' · '+mrBuffer.duration.toFixed(1)+'초';status.className='hint mrStatus ok';if(playing)syncLiveMr()}catch(err){console.error(err);mrBuffer=null;mrName='';status.textContent='파일을 읽지 못해 기본 자동 MR로 돌아갔어요.';status.className='hint mrStatus warn';$('#mrFile').value='';if(playing)syncLiveMr()}}
 function tone(n,b){if(b){b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),100)}if(!sound||!wantsMelody()||melodyMode==='none'||!FREQ[n])return;audio();if(!audioCtx)return;scheduleMelodyTone(audioCtx,audioCtx.destination,n,audioCtx.currentTime,melodyMode)}
 function draw(){
+ updateScoreMotion();
  const stage=$('#stage'),hitY=stage.clientHeight-68;
  const noteRadius=window.innerWidth<=800?29:43,spawnY=-noteRadius-8;
  stage.querySelectorAll('.fall').forEach(x=>x.remove());
@@ -791,9 +833,10 @@ async function exportVideo(){
  }catch(err){console.error(err);videoStatus('영상 저장에 실패했어요. 브라우저를 최신 버전으로 업데이트한 뒤 다시 시도해 주세요.','warn')}
  finally{if(ac)try{await ac.close()}catch(e){}canvasStream.getTracks().forEach(t=>t.stop());videoExporting=false;btn.disabled=false;btn.textContent='🎥 붐웨커 영상 저장'}
 }
-window.__boomVideoQA={supported:()=>videoSupported(),mime:()=>videoMime(),brand:()=>({brand:VIDEO_BRAND,handle:VIDEO_HANDLE,copy:VIDEO_COPY}),colors:()=>({...COLORS}),melody:()=>({mode:melodyMode,label:MELODY_LABELS[melodyMode],options:{...MELODY_LABELS},volume:melodyVolume}),fall:()=>({leadMs:FIRST_NOTE_LEAD_MS,travelMs:FALL_TRAVEL_MS,firstNoteMs:firstNoteMs(),spawnDelayMs:firstNoteMs()-FALL_TRAVEL_MS,elapsed,playing}),tempo:()=>({bpm,sourceBpm:currentSong.bpm,min:MIN_TEMPO,max:MAX_TEMPO,comfortable:comfortableTempo(currentSong),custom:tempoPrefs[tempoKey(currentSong)]??null,beatMs:beatMs()}),intro:()=>({mode:introMode,active:introActive,started:hasStartedSong,durationMs:introDurationMs,beats:introBeats,meter:introMeter,previewBeats:introPreviewBeats,countBeats:introCountBeats,lastBeat:introLastBeat,progressMs:introActive?Math.max(0,performance.now()-introStartPerf):0}),mix:()=>({mode:mixMode,label:MIX_LABELS[mixMode],options:{...MIX_LABELS},mrReady:true,mrKind:mrBuffer?'file':'auto',mrLoaded:!!mrBuffer,mrName,mrVolume,melodyVolume}),display:()=>({mode:displayMode,label:DISPLAY_LABELS[displayMode],options:{...DISPLAY_LABELS},labels:ORDER.map(displayLabel),names:[...childLabels],custom:[...customLabels],instruments:[...instrumentIds],instrumentLibrary:instrumentLibrary.map(x=>({...x}))}),lyrics:()=>lyricWindowAt(Math.min(2600,totalMs/2)),preview:()=>{const c=videoCanvas(),x=c.getContext('2d');videoScene(x,Math.min(1500,totalMs/2));return {w:c.width,h:c.height,data:c.toDataURL('image/png').slice(0,40)}}};
+window.__boomVideoQA={view:()=>({mode:playView,active:activeScoreIndex(elapsed),scoreTiles:$('#scoreStageGrid').children.length,sideTiles:$('#scoreRows').children.length,elapsed}),supported:()=>videoSupported(),mime:()=>videoMime(),brand:()=>({brand:VIDEO_BRAND,handle:VIDEO_HANDLE,copy:VIDEO_COPY}),colors:()=>({...COLORS}),melody:()=>({mode:melodyMode,label:MELODY_LABELS[melodyMode],options:{...MELODY_LABELS},volume:melodyVolume}),fall:()=>({leadMs:FIRST_NOTE_LEAD_MS,travelMs:FALL_TRAVEL_MS,firstNoteMs:firstNoteMs(),spawnDelayMs:firstNoteMs()-FALL_TRAVEL_MS,elapsed,playing}),tempo:()=>({bpm,sourceBpm:currentSong.bpm,min:MIN_TEMPO,max:MAX_TEMPO,comfortable:comfortableTempo(currentSong),custom:tempoPrefs[tempoKey(currentSong)]??null,beatMs:beatMs()}),intro:()=>({mode:introMode,active:introActive,started:hasStartedSong,durationMs:introDurationMs,beats:introBeats,meter:introMeter,previewBeats:introPreviewBeats,countBeats:introCountBeats,lastBeat:introLastBeat,progressMs:introActive?Math.max(0,performance.now()-introStartPerf):0}),mix:()=>({mode:mixMode,label:MIX_LABELS[mixMode],options:{...MIX_LABELS},mrReady:true,mrKind:mrBuffer?'file':'auto',mrLoaded:!!mrBuffer,mrName,mrVolume,melodyVolume}),display:()=>({mode:displayMode,label:DISPLAY_LABELS[displayMode],options:{...DISPLAY_LABELS},labels:ORDER.map(displayLabel),names:[...childLabels],custom:[...customLabels],instruments:[...instrumentIds],instrumentLibrary:instrumentLibrary.map(x=>({...x}))}),lyrics:()=>lyricWindowAt(Math.min(2600,totalMs/2)),preview:()=>{const c=videoCanvas(),x=c.getContext('2d');videoScene(x,Math.min(1500,totalMs/2));return {w:c.width,h:c.height,data:c.toDataURL('image/png').slice(0,40)}}};
 
-function init(){document.body.dataset.displayMode=displayMode;syncSongUI();$('#melodySelect').value=melodyMode;$('#introMode').value=introMode;$('#displayModeSelect').value=displayMode;$('#displayEditBtn').classList.toggle('show',displayMode==='name'||displayMode==='custom'||displayMode==='instrument');$('#displayEditBtn').textContent=displayMode==='name'?'✎ 이름':displayMode==='instrument'?'✎ 악기':'✎ 설정'}
+function init(){document.body.dataset.displayMode=displayMode;syncSongUI();choosePlayView(playView);$('#melodySelect').value=melodyMode;$('#introMode').value=introMode;$('#displayModeSelect').value=displayMode;$('#displayEditBtn').classList.toggle('show',displayMode==='name'||displayMode==='custom'||displayMode==='instrument');$('#displayEditBtn').textContent=displayMode==='name'?'✎ 이름':displayMode==='instrument'?'✎ 악기':'✎ 설정'}
+$('#playViewSelect').onchange=e=>choosePlayView(e.target.value);
 $('#videoBtn').onclick=exportVideo;
 $('#melodySelect').onchange=e=>{const v=e.target.value;melodyMode=MELODY_LABELS[v]?v:'boom';e.target.value=melodyMode;try{localStorage.setItem('ulmoaBoomMelody',melodyMode)}catch(err){};if(melodyMode!=='none'&&sound&&wantsMelody()){audio();tone('도')} };
 $('#melodyVolume').oninput=e=>{melodyVolume=Math.max(0,Math.min(1,Number(e.target.value)/100));$('#melodyPct').textContent=Math.round(melodyVolume*100)+'%'};
