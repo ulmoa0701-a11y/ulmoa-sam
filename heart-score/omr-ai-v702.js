@@ -244,6 +244,7 @@ function fitMeasureToBeat(items,left,right,targetQ=4){
 }
 function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
   let timeN=4,timeD=4,keyLabel='',measures=[],noteCount=0,rawExact=0,fitCount=0,correctionSum=0;const refs=[],conf=[];
+  const opticalDebug=[];
   const plan=visualBarPlan(gray,w,h,lines);
   for(let li=0;li<lines.length;li++){
     const line=lines[li];
@@ -265,7 +266,7 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
         if(Math.abs(e.dur-1.5)<.01&&vote?.rhythm?.dot===false&&
            vote.rhythm.dur===1&&vote.proposal===e.note&&
            vote.cvX<vote.x&&vote.delta<=sp*4.5&&
-           (vote.gap===null||vote.gap>=sp*.65)){e.dur=1;opticalDur=1;}
+           (vote.gap===null||vote.gap>=sp*.65)){opticalDebug.push({line:li,x:Math.round(vote.x),from:e.dur,to:1,model:e.note});e.dur=1;opticalDur=1;}
         // An independent notehead at treble C5 can disambiguate C4/C5 if the
         // decoded letter agrees; do not overwrite altered or different notes.
         if(vote?.proposal?.startsWith('높은')&&!e.note.startsWith('높은')&&vote.proposal.slice(2)===e.note&&
@@ -292,13 +293,14 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
           }
         }
         const fit=fitMeasureToBeat(items,left,right,targetQ);
+        opticalDebug.push({line:li,bar:i,original:items.map(v=>v.e.dur),locks:items.map(v=>v.opticalDur),fitted:fit.events.map(v=>v.dur)});
         measures.push(fit.events);if(fit.rawExact)rawExact++;if(fit.ok){fitCount++;correctionSum+=fit.correction;}
       }
     }else measures.push(musical.map(v=>v.e));
     for(const v of musical)refs.push({system:line.system,x:v.x,event:v.e});
   }
   const base=typeof W.fileBaseName==='function'?W.fileBaseName(filename):String(filename||'').replace(/\.[^.]+$/,'');
-  return{state:{...W.emptyState(),title:base||'가져온 악보',pageOrientation:'landscape',timeN,timeD,keyLabel,measures},refs,noteCount,avgConfidence:conf.length?conf.reduce((a,b)=>a+b,0)/conf.length:0,segmentation:'visual-fit',barGeometry:{perLine:plan.perLine,modalInternalBars:plan.modalInternalBars,support:plan.support,lines:plan.plans.length,measures:plan.measures},rawExactRatio:measures.length?rawExact/measures.length:0,correctionAvg:fitCount?correctionSum/fitCount:99};
+  return{state:{...W.emptyState(),title:base||'가져온 악보',pageOrientation:'landscape',timeN,timeD,keyLabel,measures},refs,noteCount,avgConfidence:conf.length?conf.reduce((a,b)=>a+b,0)/conf.length:0,segmentation:'visual-fit',barGeometry:{perLine:plan.perLine,modalInternalBars:plan.modalInternalBars,support:plan.support,lines:plan.plans.length,measures:plan.measures},rawExactRatio:measures.length?rawExact/measures.length:0,correctionAvg:fitCount?correctionSum/fitCount:99,opticalDebug};
 }
 function candidateScore(b){const q=measureQa(b.state),m=b.state.measures.length,dp=Number(b.dpExactRatio)||0;return q.exactRatio*100+dp*18-q.over*14+Math.min(25,m)*.35+(b.avgConfidence||0)*5;}
 function measureQa(state){const target=Number(state.timeN)||4,scale=(Number(state.timeD)||4)/4,sums=(state.measures||[]).map(m=>m.reduce((a,e)=>a+(Number(e.dur)||0)*scale,0)),exact=sums.filter(v=>Math.abs(v-target)<.01).length,over=sums.filter(v=>v>target+.01).length;return{target,sums,exactRatio:sums.length?exact/sums.length:0,over};}
@@ -421,6 +423,7 @@ async function recognizeCanvas(canvas,filename,pageIndex){
     return rank(b)-rank(a);
   })[0]),q=measureQa(built.state),staves=lines.length,suspiciousShort=staves>=3&&built.state.measures.length<=4,enough=built.noteCount>=Math.max(6,staves*3)&&built.state.measures.length>=Math.max(2,Math.floor(staves*.8)),rhythmOk=built.segmentation==='cv-hybrid'?(q.over===0&&q.exactRatio>=.99):built.segmentation==='visual-fit'?(q.over===0&&q.exactRatio>=.99&&built.correctionAvg<=.20&&built.rawExactRatio>=.75&&built.barGeometry?.support>=2):(q.over===0&&(q.exactRatio>=.9||(built.state.measures.length<=2&&q.exactRatio>=.5))),confOk=built.avgConfidence>=.45,shapeOk=!built.shapeEvidence||built.shapeEvidence.every(row=>row.every(e=>Number.isFinite(e.rhythm.dur)&&e.rhythm.dur>0));
   W.dispatchEvent(new CustomEvent('ulmoa:omr-analysis',{detail:{version:'702',staves,threshold,boxes:lines.map(l=>l.input.box),state:built.state,noteCount:built.noteCount,restCount:built.restCount||0,barGeometry:built.barGeometry,quality:q,shapeEvidence:built.shapeEvidence,segmentation:built.segmentation,accepted:!suspiciousShort&&enough&&rhythmOk&&confOk&&shapeOk,
+    visualOpticalDebug:visualBuilt.opticalDebug,
     candidateDiagnostics:[modelBuilt,visualBuilt,beatBuilt,hybridBuilt].filter(Boolean).map(v=>({
       method:v.segmentation||'model',measures:v.state.measures.length,notes:v.noteCount,
       qa:measureQa(v.state).exactRatio,perLine:v.barGeometry?.perLine||null,
