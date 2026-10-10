@@ -42,7 +42,7 @@ function targetHeadline(m){
  switch(m.focus){
   case 'species':return '오리 찾기';
   case 'color':return '파란색 토끼';
-  case 'size':return '큰 동물 찾기';
+  case 'size':return '큰 토끼·돼지';
   case 'color-species':return '초록색 동물';
   default:return '빨간색 작은 동물';
  }
@@ -242,7 +242,7 @@ class ResultScene extends Phaser.Scene{
  constructor(){super('result')}
  create(){this.cameras.main.setBackgroundColor('#15382e');const g=this.add.graphics();g.fillStyle(0x214d3d,1);g.fillRect(0,0,W,H);g.fillStyle(0x2f6848,1);g.fillEllipse(100,720,500,360);g.fillEllipse(640,730,620,390);g.fillStyle(0x397751,1);g.fillRect(0,690,W,590);for(let i=0;i<22;i++){g.fillStyle(i%3===0?0xffd965:0xbce18a,.5);g.fillCircle((i*93)%W,80+(i*151)%600,3+(i%4))}
   label(this,W/2,150,'모아 구조대 임무 완료!',48,'#ffffff','900');label(this,W/2,214,'5개의 구조 현장을 모두 안전하게 지나왔어요',23,'#d5eadf','800');
-  roundRect(this,65,280,590,470,38,0xfffdf2,1,0xffffff,4);label(this,W/2,335,'구조 기록',25,'#5d7569','900');const colors=['노란','파란','파란','초록','빨간'];const sizes=['큰','큰','큰','큰','작은'];for(let i=0;i<5;i++){const y=405+i*64;this.add.circle(125,y,19,COLORS[colors[i]],1).setStrokeStyle(3,0xffffff,1);const sp=MISSIONS[i].need===1?MISSIONS[i].species[0]:`${MISSIONS[i].need}종`;label(this,165,y,`${i+1}. ${MISSIONS[i].place}`,22,'#17382f','900','left').setOrigin(0,.5);label(this,420,y,`${colors[i]} · ${sizes[i]} · ${sp}`,20,'#537067','800','left').setOrigin(0,.5)}
+  roundRect(this,65,280,590,470,38,0xfffdf2,1,0xffffff,4);label(this,W/2,335,'구조 기록',25,'#5d7569','900');for(let i=0;i<5;i++){const y=405+i*64,m=MISSIONS[i];this.add.circle(125,y,19,COLORS[m.color],1).setStrokeStyle(3,0xffffff,1);label(this,165,y,`${i+1}. ${m.place}`,22,'#17382f','900','left').setOrigin(0,.5);label(this,405,y,targetHeadline(m),20,'#537067','800','left').setOrigin(0,.5)}
   const friends=this.add.container(W/2,835);SPECIES.forEach((sp,i)=>{const a=animal(this,sp,[COLORS.노란,COLORS.파란,COLORS.초록,COLORS.빨간][i],'큰').setScale(.58).setPosition((i-1.5)*125,0);friends.add(a);this.tweens.add({targets:a,y:-12,yoyo:true,repeat:-1,duration:800+i*160,ease:'Sine.easeInOut'})});
   const cheer=this.add.image(W/2,900,'moaCheer').setDisplaySize(180,180);this.tweens.add({targets:cheer,y:886,yoyo:true,repeat:-1,duration:900,ease:'Sine.easeInOut'});label(this,W/2,1000,'친구들이 무사히 구조차에 탔어요!',26,'#ffffff','900');const replay=button(this,W/2,1090,390,82,'한 번 더 출동하기',0x1f6b50);replay.on('pointerdown',()=>this.scene.start('title'));const back=button(this,W/2,1150,390,76,'생각정원으로 돌아가기',0x43685b);back.on('pointerdown',()=>location.href='../../');this.saveProgress();speak('모든 구조 임무를 완료했어요! 정말 멋진 구조대원이었어요.')
  }
