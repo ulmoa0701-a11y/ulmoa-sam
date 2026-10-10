@@ -17,7 +17,7 @@ const sha=b=>createHash('sha256').update(b).digest('hex');
 async function checkPage(page,name){
  const errors=[];
  page.on('pageerror',e=>errors.push(String(e)));
- await page.goto(BASE+'brain-map/3d/explore/?v=20261010-friendly5',{waitUntil:'domcontentloaded',timeout:30000});
+ await page.goto(BASE+'brain-map/3d/explore/?v=20261011-hemi1',{waitUntil:'domcontentloaded',timeout:30000});
  await page.waitForFunction(()=>document.getElementById('viewerFallback')?.hidden===true,{timeout:25000});
  await page.locator('#brainCanvas').waitFor({state:'visible'});
  await page.waitForTimeout(500);
@@ -91,6 +91,26 @@ async function checkPage(page,name){
  assert.notEqual(sha(before),sha(after),'drag must rotate canvas to a different frame');
  await page.locator('[data-part="temporal"]').click();
  assert.match(await page.locator('#selectedName').textContent(),/측두엽/);
+ // Hemispheric learning: real separation, content and highlighted button state.
+ await page.locator('[data-hemisphere="left"]').click();
+ assert.match(await page.locator('#selectedName').textContent(),/좌뇌/);
+ assert.match(await page.locator('#hemisphereDescription').textContent(),/언어 네트워크/);
+ assert.equal(await page.locator('[data-hemisphere="left"]').getAttribute('aria-pressed'),'true');
+ assert.equal(await page.locator('#separation').inputValue(),'60');
+ assert.equal(await page.locator('[data-view="front"]').getAttribute('aria-pressed'),'true');
+ await page.locator('[data-hemisphere="right"]').click();
+ assert.match(await page.locator('#selectedName').textContent(),/우뇌/);
+ assert.match(await page.locator('#hemisphereDescription').textContent(),/억양/);
+ assert.equal(await page.locator('[data-hemisphere="right"]').getAttribute('aria-pressed'),'true');
+ await page.locator('[data-part="hemisphere-both"]').click();
+ assert.match(await page.locator('#selectedName').textContent(),/좌뇌와 우뇌가 함께/);
+ assert.match(await page.locator('#hemisphereDescription').textContent(),/뇌량/);
+ assert.equal(await page.locator('[data-hemisphere="both"]').getAttribute('aria-pressed'),'true');
+ assert.equal(await page.locator('#separation').inputValue(),'0');
+ assert.equal(await page.locator('#separation').isDisabled(),true);
+ const hemiRow=page.locator('.hemisphere-tabs');
+ assert.equal(await hemiRow.locator('button').count(),3);
+
  assert.equal(errors.length,0,'browser errors: '+errors.join('; '));
  report.push({name,status:'PASS',canvasBytes:starting.length,frontChanged:sha(starting)!==sha(front),topChanged:sha(front)!==sha(top),dragChanged:sha(before)!==sha(after)});
 }
@@ -102,7 +122,8 @@ try{
  await checkPage(mobile,'mobile');
  await mobile.close();
  const parent=await browser.newPage({viewport:{width:1280,height:820}});
- await parent.goto(BASE+'brain-map/3d/?v=20261010-friendly5',{waitUntil:'domcontentloaded',timeout:30000});
+ await parent.goto(BASE+'brain-map/3d/?v=20261011-hemi1',{waitUntil:'domcontentloaded',timeout:30000});
+ assert.match(await parent.locator('a[href*="#hemisphereLearning"]').textContent(),/좌뇌·우뇌/);
  await parent.locator('[data-view="front"]').click();
  const inner=parent.frameLocator('#brainViewerFrame');
  await inner.locator('#brainCanvas').waitFor({state:'visible',timeout:30000});
