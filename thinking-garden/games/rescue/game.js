@@ -122,7 +122,7 @@ class MissionScene extends Phaser.Scene{
   const pic=animal(this,this.m.species[0],COLORS[this.m.color],this.m.size).setPosition(103,223).setScale(.54);
   c.add(pic);
   const main=this.m.need===1?targetLabel(this.m):`${this.m.color}색 ${this.m.size} 동물`;
-  const note=this.m.need===1?'같은 색깔 · 같은 크기':`${this.m.need}마리 · ${targetDescription(this.m)}`;
+  const note=this.m.need===1?'같은 색깔 · 같은 크기':`${this.m.need}마리 · ${this.m.species.join('·')}`;
   c.add(label(this,205,199,main,33,'#154936','900').setOrigin(0,.5));
   c.add(label(this,205,248,note,23,'#536e5e','800').setOrigin(0,.5));
   const repeat=button(this,602,225,162,68,'🔊 다시',0x1c694d);
