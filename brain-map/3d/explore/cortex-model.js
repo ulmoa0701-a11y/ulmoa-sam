@@ -8,65 +8,62 @@
 import * as THREE from 'three';
 
 const PALETTE = Object.freeze({
-  frontal: 0xd3b9f4,
-  parietal: 0xffe49c,
-  temporal: 0xb0e4bd,
-  occipital: 0xffc0a9,
-  cerebellum: 0xa5cdf3,
-  brainstem: 0xc8bfd4,
+  frontal: 0xd9c2ff,
+  parietal: 0xffe89a,
+  temporal: 0xbeebc7,
+  occipital: 0xffc8b2,
+  cerebellum: 0xafcfff,
+  brainstem: 0xd7cce8,
 });
 
 const RGB = Object.fromEntries(Object.entries(PALETTE).map(([key,value])=>[key,new THREE.Color(value)]));
 
 function regionFor(x, y, z) {
   // Approximate cortical boundaries for parent education, not anatomical atlas.
-  if (z < -.82 || (z < -.66 && y < -.12)) return 'occipital';
-  if (y < -.16 && z > -.82 && z < .85) return 'temporal';
-  if (z > .36) return 'frontal';
+  if (z < -.77) return 'occipital';
+  if (y < -.14 && z > -.76 && z < .79) return 'temporal';
+  if (z > .24) return 'frontal';
   return 'parietal';
 }
 
 function cortexPoint(x, y, z, side) {
-  const lon = Math.atan2(z, x);
-  const lat = Math.asin(Math.max(-1,Math.min(1,y)));
-  // 친근한 클레이 일러스트: 둥근 이랑을 살리고 날카롭고 깊은 골은 제거합니다.
-  // 회전해도 동일한 주름이 보이도록 표면 정점에서 직접 계산합니다.
-  const sweep = lon*10.2 + 2.1*Math.sin(lat*3.1 + lon*.62);
-  const cross = lat*11.3 + 1.8*Math.sin(lon*2.4 + lat*.7);
-  const flowing = Math.sin(sweep)*.70 + Math.sin(cross)*.30;
-  const pillow = .5 + .5*Math.sin(sweep + .4*Math.cos(cross));
-  const furrow = Math.pow(Math.max(0,-flowing),1.5);
-  // 이전 모델의 깊은 절개형 요철(.125)을 없애고 낮고 둥근 굴곡으로 만듭니다.
-  const radius = 1.0 + .063*pillow - .018*furrow;
-  const zz = z*1.36*radius;
-  const taper = 1-.07*Math.max(0,-z);
-  const xx = side * (.545 + x*.533*radius*taper);
-  const temporalBulge = Math.exp(-Math.pow((z-.06)/.69,2)) * Math.max(0,-y);
-  const yy = .055 + .78*y*radius -.13*temporalBulge;
-  // Smoothly flatten the lower-back surface above the cerebellum.
-  return [xx,yy,zz,Math.max(.965,1-.035*furrow)];
+  const lon=Math.atan2(z,x);
+  const lat=Math.asin(Math.max(-1,Math.min(1,y)));
+  // 말랑한 교육 교구: 넓은 굴곡 3~5개만 남기고 잔주름과 날카로운 홈은 제거합니다.
+  // 위치 계산은 동일한 한 겹의 연속 표면 위에서 이루어져 회전·분리가 가능합니다.
+  const taperAtPoles=Math.pow(Math.max(0,Math.cos(lat)),1.4);
+  const broad=.5+.5*Math.sin(lon*4.2+.75*Math.sin(lat*1.8));
+  const secondary=.5+.5*Math.sin(lat*4.6+.60*Math.sin(lon*1.5));
+  const cushion=.75*broad+.25*secondary;
+  const radius=1+.070*cushion*taperAtPoles;
+  const taper=1-.035*Math.max(0,-z);
+  const xx=side*(.54+x*.52*radius*taper);
+  const zz=z*1.22*radius;
+  const temporalBulge=Math.exp(-Math.pow((z-.12)/.70,2))*Math.max(0,-y);
+  const yy=.085+y*.74*radius-.045*temporalBulge;
+  // 색만 살짝 다른 부드러운 곡선 3~5개. 메시 밖으로 튀어나오는 선은 사용하지 않습니다.
+  const seamPhase=lon*4.4+.78*Math.sin(lat*2.0);
+  const seam=Math.pow(.5-.5*Math.cos(seamPhase),8)*Math.pow(Math.max(0,Math.cos(lat)),2);
+  return [xx,yy,zz,1-.052*seam];
 }
-
 function smoothstep(a,b,x){const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)}
 function corticalRGB(x,y,z,shade){
- // 부위별 파스텔 영역이 실제로 잘 보이게: 아래 측두엽(민트),
- // 위 두정엽(노랑), 앞 전두엽(라벤더), 뒤 후두엽(살구) 순서입니다.
- const occ=smoothstep(.78,.94,-z);
- const temporal=(1-occ)*(1-smoothstep(-.24,-.035,y))
-   *smoothstep(-.92,-.70,z)*(1-smoothstep(.67,.95,z));
- const front=(1-occ)*(1-temporal)*smoothstep(.02,.31,z);
- const parietal=Math.max(0,1-occ-front-temporal);
- const weights=[
-  ['frontal',front],['parietal',parietal],
-  ['temporal',temporal],['occipital',occ]
- ];
- let red=0,green=0,blue=0;
- for(const [key,w] of weights){
-  const col=RGB[key];
-  red+=w*col.r;green+=w*col.g;blue+=w*col.b;
- }
- return [red*shade,green*shade,blue*shade];
+  // 같은 그림체의 또렷한 파스텔 컬러 블록. 경계는 짧은 폭으로만 부드럽게 연결합니다.
+  const occ=smoothstep(.72,.83,-z);
+  const temporal=(1-occ)*(1-smoothstep(-.19,-.09,y))
+    *smoothstep(-.80,-.69,z)*(1-smoothstep(.74,.84,z));
+  const front=(1-occ)*(1-temporal)*smoothstep(.19,.29,z);
+  const parietal=Math.max(0,1-occ-temporal-front);
+  const weights=[['frontal',front],['parietal',parietal],
+    ['temporal',temporal],['occipital',occ]];
+  let red=0,green=0,blue=0;
+  for(const [key,w] of weights){
+    const color=RGB[key];
+    red+=w*color.r;green+=w*color.g;blue+=w*color.b;
+  }
+  return [red*shade,green*shade,blue*shade];
 }
+
 function oneHemisphere(side) {
   const sphere = new THREE.SphereGeometry(1,150,104);
   const pos = sphere.getAttribute('position');
@@ -116,11 +113,10 @@ function cerebellumGeometry(side){
   const baseX=side*.39;
   for(let i=0;i<position.count;i++){
     const x=position.getX(i),y=position.getY(i),z=position.getZ(i);
-    // 부드러운 소뇌 줄무늬: 조개껍데기처럼 잔잔한 가로 굴곡.
-    const ridge=(.5+.5*Math.sin(y*23+Math.sin(x*3+z*2)*.8));
-    const depth=1-.018*Math.pow(1-ridge,2);
-    position.setXYZ(i,baseX+x*.42*depth,-.69+y*.30*depth,-.98+z*.43*depth);
-    color.push(.965+.035*ridge);
+    // 소뇌도 하늘색 찹쌀떡 형태로: 의학적인 잔주름을 완전히 제거합니다.
+    const depth=1;
+    position.setXYZ(i,side*.32+x*.39*depth,-.63+y*.30*depth,-.76+z*.42*depth);
+    color.push(.995);
   }
   position.needsUpdate=true;shape.computeVertexNormals();
   const fullColors=new Float32Array(position.count*3);
@@ -133,18 +129,59 @@ function cerebellumGeometry(side){
 function stemGeometry(){
   // Continuous tapered stem with a slight forward curve, not a dangling ellipse.
   const contour=[
-    [0.00,-1.68],[.16,-1.59],[.19,-1.45],[.23,-1.26],
-    [.25,-1.08],[.27,-.92],[.25,-.76],[.14,-.69],[0,-.67]
+    [0.00,-1.17],[.06,-1.17],[.11,-1.14],[.16,-1.05],
+    [.19,-.87],[.19,-.67],[.16,-.41],[0,-.36]
   ].map(([r,y])=>new THREE.Vector2(r,y));
   const geometry=new THREE.LatheGeometry(contour,56,0,Math.PI*2);
   const pos=geometry.getAttribute('position');
   for(let i=0;i<pos.count;i++){
     const y=pos.getY(i);
-    pos.setZ(i,pos.getZ(i)-.30+.12*(y+1.2));
+    pos.setZ(i,pos.getZ(i)-.24+.07*(y+1.0));
   }
   pos.needsUpdate=true;geometry.computeVertexNormals();
   geometry.computeBoundingBox();
   return {key:'brainstem',side:'center',geometry,anchor:geometry.boundingBox.getCenter(new THREE.Vector3())};
+}
+
+// 귀여운 파스텔 교구의 '말랑한 뇌이랑': 구체를 따로 띄우지 않고
+// 기존 대뇌 표면 안에 깊이 묻어 넣은 낮고 둥근 쿠션처럼 표현합니다.
+// 각 쿠션은 실제 부위 메시의 자식이어서 선택·자유회전·분리 시 함께 움직입니다.
+function addCorticalCushions(mesh,d){
+  const points={
+    frontal:[
+      [.43,.72,.27,.21,.27], [.23,.88,.28,.23,.28],
+      [.59,.40,.26,.22,.28], [-.06,.71,.27,.21,.26], [-.14,.46,.27,.21,.25]
+    ],
+    parietal:[
+      [.71,.05,.25,.21,.28], [.56,-.22,.27,.22,.27],
+      [.40,-.48,.26,.23,.29], [.25,.09,.29,.23,.28], [.55,-.55,.23,.21,.24]
+    ],
+    temporal:[
+      [-.38,.34,.27,.24,.27],[-.50,.03,.28,.23,.27],
+      [-.39,-.34,.27,.22,.27],[-.21,-.04,.25,.20,.25]
+    ],
+    occipital:[
+      [.31,-.81,.25,.24,.24],[.04,-.91,.24,.25,.25],
+      [-.24,-.81,.24,.22,.23]
+    ]
+  };
+  if(!points[d.key])return;
+  const side=d.side==='left'?1:-1;
+  const commonMaterial=new THREE.MeshStandardMaterial({
+    color:PALETTE[d.key],roughness:1,metalness:0
+  });
+  const geometry=new THREE.SphereGeometry(1,28,18);
+  for(const [y,z,rx,ry,rz] of points[d.key]){
+    const unitX=Math.sqrt(Math.max(.04,1-y*y-z*z));
+    const [surfaceX,surfaceY,surfaceZ]=cortexPoint(unitX,y,z,side);
+    const puff=new THREE.Mesh(geometry,commonMaterial);
+    // Surface-normal inward placement prevents any detached balloon appearance.
+    puff.position.set(surfaceX-side*.115,surfaceY,surfaceZ);
+    puff.scale.set(rx,ry,rz);
+    puff.rotation.z=side*(z>.1?.10:-.07);
+    puff.userData.decorative=true;
+    mesh.add(puff);
+  }
 }
 
 export function makeBrainSurfaces(){
@@ -157,11 +194,12 @@ export function makeBrainSurfaces(){
     const material=new THREE.MeshStandardMaterial({
       color:['frontal','parietal','temporal','occipital'].includes(d.key)?0xffffff:PALETTE[d.key],
       vertexColors:d.key!=='brainstem',
-      roughness:.97,metalness:0,
+      roughness:1.0,metalness:0,
       side:THREE.DoubleSide,emissive:0x000000
     });
     const mesh=new THREE.Mesh(d.geometry,material);
     mesh.userData={key:d.key,side:d.side,base:new THREE.Vector3(),anchor:d.anchor};
+    addCorticalCushions(mesh,d);
     mesh.castShadow=false;
     return mesh;
   });

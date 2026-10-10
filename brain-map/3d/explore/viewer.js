@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {makeBrainSurfaces} from './cortex-model.js?v=20261010-cute3';
+import {makeBrainSurfaces} from './cortex-model.js?v=20261010-toy4';
 
 const canvas = document.getElementById('brainCanvas');
 const holder = document.getElementById('stageShell');
@@ -52,30 +52,30 @@ let activeFunction = null;
 let activeActivity = null;
 let mapMode = 'regions';
 const regionSummary = {
- frontal:{name:'전두엽',skills:'계획 · 집중 · 조절',icon:'💡',color:'#ba9ae9'},
- parietal:{name:'두정엽',skills:'공간 · 감각 · 수 개념',icon:'✋',color:'#f4d47c'},
- temporal:{name:'측두엽',skills:'언어 · 듣기 · 기억',icon:'💬',color:'#a6dcb2'},
- occipital:{name:'후두엽',skills:'보기 · 시각 처리',icon:'👁️',color:'#f0ad91'},
- cerebellum:{name:'소뇌',skills:'균형 · 움직임',icon:'🏃',color:'#95c5ee'},
- brainstem:{name:'뇌줄기',skills:'호흡 · 깨어 있기',icon:'💗',color:'#b5adc7'}
+ frontal:{name:'전두엽',skills:'계획 · 집중 · 조절',icon:'💡',color:'#d9c2ff'},
+ parietal:{name:'두정엽',skills:'공간 · 감각 · 수 개념',icon:'✋',color:'#ffe89a'},
+ temporal:{name:'측두엽',skills:'언어 · 듣기 · 기억',icon:'💬',color:'#beebc7'},
+ occipital:{name:'후두엽',skills:'보기 · 시각 처리',icon:'👁️',color:'#ffc8b2'},
+ cerebellum:{name:'소뇌',skills:'균형 · 움직임',icon:'🏃',color:'#afcfff'},
+ brainstem:{name:'뇌줄기',skills:'호흡 · 깨어 있기',icon:'💗',color:'#d7cce8'}
 };
 const functionDetails={
- frontal:{name:'계획·주의집중',skills:'전두엽 · 두정엽 등',icon:'💡',color:'#ba9ae9',category:'함께 작동하는 인지기능',regions:['frontal','parietal'],summary:'계획을 세우고 필요한 정보에 주의를 기울이는 과정에는 여러 뇌 영역이 함께 참여해요.',example:'숙제를 시작하기 전에 순서를 정하고, 다른 소음이 들려도 과제에 주의를 돌릴 때.'},
- parietal:{name:'공간·몸 감각',skills:'두정엽 · 후두엽 등',icon:'✋',color:'#f4d47c',category:'함께 작동하는 인지기능',regions:['parietal','occipital'],summary:'물체의 위치와 몸의 움직임을 이해하는 데 감각·시각·주의 네트워크가 함께 참여해요.',example:'퍼즐 조각의 위치를 맞추고 공이 오는 방향을 살필 때.'},
- temporal:{name:'말 듣기·이해',skills:'측두엽 · 전두엽 등',icon:'💬',color:'#a6dcb2',category:'함께 작동하는 인지기능',regions:['temporal','frontal'],summary:'소리를 듣고 말뜻을 파악하고 답하는 과정에는 여러 언어 관련 뇌 영역이 연결되어 작동해요.',example:'친구의 이야기를 듣고 질문에 적절히 답할 때.'},
- occipital:{name:'시각 정보 이해',skills:'후두엽 · 두정엽 등',icon:'👁️',color:'#f0ad91',category:'함께 작동하는 인지기능',regions:['occipital','parietal'],summary:'눈으로 본 선과 모양을 분석하고 위치를 알아보는 과정에는 여러 시각 관련 경로가 필요해요.',example:'그림 속 물건을 찾고 글자의 모양을 구별할 때.'},
- cerebellum:{name:'균형·움직임 조절',skills:'소뇌 · 두정엽 · 전두엽 등',icon:'🏃',color:'#95c5ee',category:'함께 작동하는 인지기능',regions:['cerebellum','parietal','frontal'],summary:'움직임을 계획하고 몸의 위치를 느끼며 정확한 타이밍으로 행동할 때 여러 뇌 영역이 협력해요.',example:'공을 잡으려고 손을 뻗거나 균형을 유지할 때.'},
- brainstem:{name:'호흡·각성 유지',skills:'뇌줄기와 연결된 여러 회로',icon:'💗',color:'#b5adc7',category:'기본적인 생명 유지 기능',regions:['brainstem'],summary:'뇌줄기는 호흡, 심장박동과 깨어 있는 상태의 조절에 중요해요.',example:'우리가 의식적으로 생각하지 않아도 숨을 쉬고 기본적인 신체 상태를 유지할 때.'}
+ frontal:{name:'계획·주의집중',skills:'전두엽 · 두정엽 등',icon:'💡',color:'#d9c2ff',category:'함께 작동하는 인지기능',regions:['frontal','parietal'],summary:'계획을 세우고 필요한 정보에 주의를 기울이는 과정에는 여러 뇌 영역이 함께 참여해요.',example:'숙제를 시작하기 전에 순서를 정하고, 다른 소음이 들려도 과제에 주의를 돌릴 때.'},
+ parietal:{name:'공간·몸 감각',skills:'두정엽 · 후두엽 등',icon:'✋',color:'#ffe89a',category:'함께 작동하는 인지기능',regions:['parietal','occipital'],summary:'물체의 위치와 몸의 움직임을 이해하는 데 감각·시각·주의 네트워크가 함께 참여해요.',example:'퍼즐 조각의 위치를 맞추고 공이 오는 방향을 살필 때.'},
+ temporal:{name:'말 듣기·이해',skills:'측두엽 · 전두엽 등',icon:'💬',color:'#beebc7',category:'함께 작동하는 인지기능',regions:['temporal','frontal'],summary:'소리를 듣고 말뜻을 파악하고 답하는 과정에는 여러 언어 관련 뇌 영역이 연결되어 작동해요.',example:'친구의 이야기를 듣고 질문에 적절히 답할 때.'},
+ occipital:{name:'시각 정보 이해',skills:'후두엽 · 두정엽 등',icon:'👁️',color:'#ffc8b2',category:'함께 작동하는 인지기능',regions:['occipital','parietal'],summary:'눈으로 본 선과 모양을 분석하고 위치를 알아보는 과정에는 여러 시각 관련 경로가 필요해요.',example:'그림 속 물건을 찾고 글자의 모양을 구별할 때.'},
+ cerebellum:{name:'균형·움직임 조절',skills:'소뇌 · 두정엽 · 전두엽 등',icon:'🏃',color:'#afcfff',category:'함께 작동하는 인지기능',regions:['cerebellum','parietal','frontal'],summary:'움직임을 계획하고 몸의 위치를 느끼며 정확한 타이밍으로 행동할 때 여러 뇌 영역이 협력해요.',example:'공을 잡으려고 손을 뻗거나 균형을 유지할 때.'},
+ brainstem:{name:'호흡·각성 유지',skills:'뇌줄기와 연결된 여러 회로',icon:'💗',color:'#d7cce8',category:'기본적인 생명 유지 기능',regions:['brainstem'],summary:'뇌줄기는 호흡, 심장박동과 깨어 있는 상태의 조절에 중요해요.',example:'우리가 의식적으로 생각하지 않아도 숨을 쉬고 기본적인 신체 상태를 유지할 때.'}
 };
 const activityDetails={
- reading:{name:'책 읽기',icon:'📖',color:'#a6dcb2',skills:'보기 · 언어 이해 · 주의',regions:['occipital','temporal','frontal'],category:'생활 속 인지기능',summary:'글자 모양을 보고 말소리와 뜻을 연결할 때 여러 영역이 협력해요.',example:'짧은 문장을 눈으로 따라가고 읽은 내용을 이해할 때.'},
- instructions:{name:'지시 따르기',icon:'📝',color:'#ba9ae9',skills:'듣기 · 작업기억 · 계획',regions:['temporal','frontal','parietal'],category:'생활 속 인지기능',summary:'말을 듣고 이해한 내용을 잠깐 유지하면서 행동 순서를 정하는 과정이에요.',example:'“가방 놓고 손 씻자”라는 말을 듣고 순서대로 실행할 때.'},
- ball:{name:'공놀이',icon:'⚽',color:'#95c5ee',skills:'시각 · 공간 · 균형',regions:['occipital','parietal','cerebellum'],category:'생활 속 인지기능',summary:'공이 오는 방향을 보고 몸을 움직이고 손동작 타이밍을 조절해요.',example:'날아오는 공을 눈으로 좇고 팔을 뻗어 잡으려고 할 때.'},
- memory:{name:'기억하기',icon:'💭',color:'#a6dcb2',skills:'측두엽 안쪽 해마 등 · 전두엽',regions:['temporal','frontal'],category:'생활 속 인지기능',summary:'새로운 사건을 기억하고 나중에 떠올리는 일에는 해마를 포함해 여러 영역이 참여해요.',example:'어제 있었던 일을 이야기하거나 전에 들은 지시를 떠올릴 때.'}
+ reading:{name:'책 읽기',icon:'📖',color:'#beebc7',skills:'보기 · 언어 이해 · 주의',regions:['occipital','temporal','frontal'],category:'생활 속 인지기능',summary:'글자 모양을 보고 말소리와 뜻을 연결할 때 여러 영역이 협력해요.',example:'짧은 문장을 눈으로 따라가고 읽은 내용을 이해할 때.'},
+ instructions:{name:'지시 따르기',icon:'📝',color:'#d9c2ff',skills:'듣기 · 작업기억 · 계획',regions:['temporal','frontal','parietal'],category:'생활 속 인지기능',summary:'말을 듣고 이해한 내용을 잠깐 유지하면서 행동 순서를 정하는 과정이에요.',example:'“가방 놓고 손 씻자”라는 말을 듣고 순서대로 실행할 때.'},
+ ball:{name:'공놀이',icon:'⚽',color:'#afcfff',skills:'시각 · 공간 · 균형',regions:['occipital','parietal','cerebellum'],category:'생활 속 인지기능',summary:'공이 오는 방향을 보고 몸을 움직이고 손동작 타이밍을 조절해요.',example:'날아오는 공을 눈으로 좇고 팔을 뻗어 잡으려고 할 때.'},
+ memory:{name:'기억하기',icon:'💭',color:'#beebc7',skills:'측두엽 안쪽 해마 등 · 전두엽',regions:['temporal','frontal'],category:'생활 속 인지기능',summary:'새로운 사건을 기억하고 나중에 떠올리는 일에는 해마를 포함해 여러 영역이 참여해요.',example:'어제 있었던 일을 이야기하거나 전에 들은 지시를 떠올릴 때.'}
 };
 let splitMode = 'together';
 let splitAmount = 0;
-let yaw = Math.PI/2, pitch = .18, distance = 4.65;
+let yaw = Math.PI/2, pitch = .18, distance = 4.45;
 let targetYaw = yaw, targetPitch = pitch;
 let currentView='free';
 let activePointer = new Map(), moved=0, pinchLast=null;
@@ -95,16 +95,17 @@ function init() {
   renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'default'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.8));
   renderer.outputColorSpace=THREE.SRGBColorSpace;
-  renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.16;
+  renderer.toneMapping=THREE.NoToneMapping;
+  renderer.toneMappingExposure=1.0;
  }catch(error){setNotice('이 기기에서 3D 그래픽을 시작하지 못했습니다.');return false;}
  scene=new THREE.Scene();
  camera=new THREE.PerspectiveCamera(38,1,.1,100);
  brainGroup=new THREE.Group();scene.add(brainGroup);
- scene.add(new THREE.HemisphereLight(0xffffff,0xc6dacc,2.0));
- const light=new THREE.DirectionalLight(0xffffff,1.45);light.position.set(-3,5,7);scene.add(light);
- const back=new THREE.DirectionalLight(0xeef8ff,.77);back.position.set(4,2,-5);scene.add(back);
- const under=new THREE.DirectionalLight(0xfff9f2,.35);under.position.set(0,-3,3);scene.add(under);
+ scene.add(new THREE.HemisphereLight(0xffffff,0xedf4ed,1.35));
+ scene.add(new THREE.AmbientLight(0xffffff,.32));
+ const light=new THREE.DirectionalLight(0xffffff,.9);light.position.set(-3,5,7);scene.add(light);
+ const back=new THREE.DirectionalLight(0xf3f8ff,.38);back.position.set(4,2,-5);scene.add(back);
+ const under=new THREE.DirectionalLight(0xfff9f2,.20);under.position.set(0,-3,3);scene.add(under);
  // All visible cortical lobes share one folded surface per hemisphere.
  // The old detached ellipsoids are intentionally no longer constructed.
  for(const mesh of makeBrainSurfaces()){
@@ -132,7 +133,10 @@ function init() {
 function resize(){
  if(!renderer||!camera)return;
  const w=Math.max(1,canvas.clientWidth||holder.clientWidth),h=Math.max(1,canvas.clientHeight||holder.clientHeight);
- renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();needsRender=true;
+ renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+ // Portrait phones have a narrower horizontal field of view; fit the whole brain.
+ if(w/h<1.25 && w<680) distance=Math.max(distance,5.65);
+ needsRender=true;
 }
 function partOffset(mesh){
  const id=mesh.userData,base=id.base;
@@ -219,7 +223,7 @@ function refreshSelection(){
   mesh.material.opacity=1;
   mesh.material.depthWrite=true;
   mesh.material.emissive.setHex((selected||activeFunction||activeActivity)&&match?0xffffff:0);
-  mesh.material.emissiveIntensity=(selected||activeFunction||activeActivity)&&match?.055:0;
+  mesh.material.emissiveIntensity=(selected||activeFunction||activeActivity)&&match?.025:0;
  }
  const item=activeActivity?activityDetails[activeActivity]:
   activeFunction?functionDetails[activeFunction]:selected?info[selected]:null;
@@ -302,7 +306,7 @@ function bindEvents(){
  });
  partButtons.forEach(button=>button.addEventListener('click',()=>mapMode==='functions'&&functionDetails[button.dataset.part]?setFunction(button.dataset.part):setSelected(button.dataset.part)));
  document.getElementById('clearSelection').addEventListener('click',()=>setSelected(null));
- document.getElementById('resetCamera').addEventListener('click',()=>{distance=4.65;setView('left',true);});
+ document.getElementById('resetCamera').addEventListener('click',()=>{distance=holder.clientWidth/Math.max(1,holder.clientHeight)<1.25 && holder.clientWidth<680?5.65:4.45;setView('left',true);});
  canvas.addEventListener('wheel',event=>{event.preventDefault();distance=THREE.MathUtils.clamp(distance+event.deltaY*.005,3.0,9.0);needsRender=true;},{passive:false});
  canvas.addEventListener('pointerdown',event=>{
   canvas.setPointerCapture(event.pointerId);
