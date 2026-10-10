@@ -259,11 +259,13 @@ function refreshSelection(){
  for(const mesh of meshes){
   const match=regionKeys?regionKeys.includes(mesh.userData.key):
    !selected||(selected.startsWith('hemisphere-')?mesh.userData.side===selected.split('-')[1]:mesh.userData.key===selected);
-  mesh.material.transparent=Boolean((selected||activeFunction||activeActivity)&&!match);
-  mesh.material.opacity=match?1:.25;
-  mesh.material.depthWrite=match;
-  mesh.material.emissive.setHex((selected||activeFunction||activeActivity)&&match?0x162b1b:0);
-  mesh.material.emissiveIntensity=match?.12:0;
+  // 선택하지 않은 부위를 투명하게 만들면 기괴한 빈 덩어리처럼 보이므로
+  // 모든 부위는 선명하게 유지하고 선택 부위만 은은하게 강조합니다.
+  mesh.material.transparent=false;
+  mesh.material.opacity=1;
+  mesh.material.depthWrite=true;
+  mesh.material.emissive.setHex((selected||activeFunction||activeActivity)&&match?0x2c322a:0);
+  mesh.material.emissiveIntensity=(selected||activeFunction||activeActivity)&&match?.12:0;
  }
  const item=activeActivity?activityDetails[activeActivity]:
   activeFunction?functionDetails[activeFunction]:selected?info[selected]:null;
