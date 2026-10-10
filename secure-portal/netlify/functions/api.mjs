@@ -17,14 +17,28 @@ const getToken=req=>{const cookies=req.headers.get('cookie')??'';const hit=cooki
 const publicUser=(u)=>({id:u.id,nickname:u.nickname,displayName:u.display_name,role:u.role,therapistId:u.therapist_id,studentId:u.student_id});
 async function identity(db,req){const token=getToken(req);if(token.length<30)return null;const {rows}=await db.query('SELECT u.* FROM portal_sessions s JOIN portal_users u ON u.id=s.user_id WHERE s.token_hash=$1 AND s.expires_at>NOW()',[digest(token)]);return rows[0]??null;}
 async function newSession(db,user,req){const token=randomToken(32),age=['admin','therapist'].includes(user.role)?43200:604800;await db.query('INSERT INTO portal_sessions(token_hash,user_id,expires_at) VALUES ($1,$2,NOW()+($3::integer * interval \'1 second\'))',[digest(token),user.id,age]);return json({user:publicUser(user)},200,{'Set-Cookie':sessionCookie(token,age,req)});}
-function validateEntry(e){if(!e||Array.isArray(e)||typeof e!=='object')throw new Error('기록 내용을 확인해 주세요.');const obj={};for(const k of ['date','event','thought','next','observation','message','note','category']){if(e[k]!==undefined&&e[k]!==null){if(typeof e[k]!=='string')throw new Error('문자 기록만 입력할 수 있어요.');obj[k]=clean(e[k],1200);}}if(!Object.values(obj).some(Boolean))throw new Error('기록을 한 가지 이상 입력해 주세요.');if(JSON.stringify(obj).length>6500)throw new Error('기록은 6,500자 이내로 입력해 주세요.');return obj;}
+const ENTRY_KEYS=['date','event','thought','next','observation','message','note','category','mood','energy','body','action','response','impact','sketch'];
+function validateEntry(e){
+ if(!e||Array.isArray(e)||typeof e!=='object')throw new Error('기록 내용을 확인해 주세요.');
+ const obj={};for(const k of ENTRY_KEYS){if(e[k]===undefined||e[k]===null)continue;if(typeof e[k]!=='string')throw new Error('문자 기록만 입력할 수 있어요.');const max=k==='sketch'?5500:1200;const value=clean(e[k],max);if(value)obj[k]=value;}
+ if(!Object.values(obj).some(Boolean))throw new Error('기록을 한 가지 이상 입력해 주세요.');
+ if(obj.sketch){let paths;try{paths=JSON.parse(obj.sketch)}catch{throw new Error('그림 내용이 올바르지 않습니다.')}if(!Array.isArray(paths)||paths.length>240)throw new Error('그림 내용이 너무 큽니다.');let points=0;for(const stroke of paths){if(!Array.isArray(stroke)||stroke.length>240)throw new Error('그림 내용이 올바르지 않습니다.');points+=stroke.length;for(const p of stroke){if(!Array.isArray(p)||p.length!==2||!p.every(Number.isInteger)||p[0]<0||p[0]>760||p[1]<0||p[1]>380)throw new Error('그림 내용이 올바르지 않습니다.')}}if(points>240)throw new Error('그림 내용이 너무 큽니다.');}
+ if(JSON.stringify(obj).length>14000)throw new Error('기록이 너무 깁니다.');return obj;
+}
+function sharedSelection(entry,requested){
+ if(!Array.isArray(requested)||requested.length<1||requested.length>ENTRY_KEYS.length||requested.some(k=>typeof k!=='string'||!ENTRY_KEYS.includes(k)))throw new Error('공유할 항목을 선택해 주세요.');
+ const selected={};for(const k of new Set(requested)){if(entry[k])selected[k]=entry[k]}
+ if(!Object.keys(selected).length)throw new Error('작성한 항목 중 공유할 내용을 선택해 주세요.');return selected;
+}
+function unpackShared(record,key){if(!record.shared_nonce||!record.shared_auth_tag||!record.encrypted_shared_payload)throw new Error('공유 범위가 없는 기록입니다.');return JSON.parse(open({...record,nonce:record.shared_nonce,auth_tag:record.shared_auth_tag,encrypted_payload:record.encrypted_shared_payload},key));}
+
 async function listRecords(db,u,key){let rows=[];
  if(u.role==='therapist'){
-  const r=await db.query(`SELECT r.*, a.nickname AS writer, s.nickname AS student FROM portal_records r JOIN portal_users a ON a.id=r.author_id JOIN portal_users s ON s.id=r.student_id WHERE r.therapist_id=$1 AND s.therapist_id=$1 AND r.shared_at IS NOT NULL ORDER BY r.created_at DESC LIMIT 250`,[u.id]);rows=r.rows;
+  const r=await db.query(`SELECT r.*, a.nickname AS writer, s.nickname AS student FROM portal_records r JOIN portal_users a ON a.id=r.author_id JOIN portal_users s ON s.id=r.student_id WHERE r.therapist_id=$1 AND s.therapist_id=$1 AND r.shared_at IS NOT NULL AND r.encrypted_shared_payload IS NOT NULL ORDER BY r.created_at DESC LIMIT 250`,[u.id]);rows=r.rows;
  } else if(u.role==='student'||u.role==='parent'){
   rows=(await db.query(`SELECT r.*, a.nickname AS writer, s.nickname AS student FROM portal_records r JOIN portal_users a ON a.id=r.author_id JOIN portal_users s ON s.id=r.student_id WHERE r.author_id=$1 ORDER BY r.created_at DESC LIMIT 250`,[u.id])).rows;
  } else return [];
- return rows.filter(r=>canSeeRecord(u,r,u.role==='therapist')).map(r=>{try{return {id:r.id,kind:r.kind,author:r.writer,student:r.student,shared:!!r.shared_at,createdAt:r.created_at,driveSynced:!!r.drive_file_id,entry:JSON.parse(open(r,key))};}catch(e){return {id:r.id,error:'복호화 실패',createdAt:r.created_at};}});
+ return rows.filter(r=>canSeeRecord(u,r,u.role==='therapist')).map(r=>{try{return {id:r.id,kind:r.kind,author:r.writer,student:r.student,shared:!!r.shared_at,createdAt:r.created_at,driveSynced:!!r.drive_file_id,entry:u.role==='therapist'?unpackShared(r,key):JSON.parse(open(r,key))};}catch(e){return {id:r.id,error:'복호화 실패',createdAt:r.created_at};}});
 }
 
 function challengeFromCredential(credential){
@@ -45,9 +59,9 @@ async function autoBackup(db,recordId,therapistId,key){
  try{
   if(!safeGoogleConfig())return false;
   const oauth=(await db.query('SELECT * FROM portal_oauth WHERE therapist_id=$1',[therapistId])).rows[0];if(!oauth)return false;
-  const record=(await db.query(`SELECT r.*,a.nickname writer,s.nickname student FROM portal_records r JOIN portal_users a ON a.id=r.author_id JOIN portal_users s ON s.id=r.student_id WHERE r.id=$1 AND r.therapist_id=$2 AND s.therapist_id=$2 AND r.shared_at IS NOT NULL AND r.drive_file_id IS NULL`,[recordId,therapistId])).rows[0];if(!record)return false;
+  const record=(await db.query(`SELECT r.*,a.nickname writer,s.nickname student FROM portal_records r JOIN portal_users a ON a.id=r.author_id JOIN portal_users s ON s.id=r.student_id WHERE r.id=$1 AND r.therapist_id=$2 AND s.therapist_id=$2 AND r.shared_at IS NOT NULL AND r.encrypted_shared_payload IS NOT NULL AND r.drive_file_id IS NULL`,[recordId,therapistId])).rows[0];if(!record)return false;
   const refresh=open({...oauth,encrypted_payload:oauth.encrypted_refresh_token},key),access=await googleAccess(refresh);
-  const file=await uploadDrive(access,oauth.folder_id,record,JSON.parse(open(record,key)));
+  const file=await uploadDrive(access,oauth.folder_id,record,unpackShared(record,key));
   await db.query('UPDATE portal_records SET drive_file_id=$1 WHERE id=$2 AND therapist_id=$3',[file,record.id,therapistId]);
   return true;
  }catch(error){console.error('Google Drive backup pending',error?.name||'error');return false;}
@@ -179,14 +193,41 @@ try{
   if(u.role!=='therapist')return fail('치료사만 확인할 수 있습니다.',403);const {rows}=await db.query("SELECT id,nickname,display_name FROM portal_users WHERE role='student' AND therapist_id=$1 ORDER BY created_at DESC LIMIT 200",[u.id]);return json({students:rows});
  }
  if(path==='records'&&req.method==='POST'){
-  if(!['student','parent'].includes(u.role))return fail('학생·학부모만 기록할 수 있습니다.',403);const b=await safeBody(req);const entry=validateEntry(b.entry),shared=b.share===true;const student=u.role==='student'?u.id:u.student_id,teacher=u.therapist_id;
+  if(!['student','parent'].includes(u.role))return fail('학생·학부모만 기록할 수 있습니다.',403);
+  const b=await safeBody(req),entry=validateEntry(b.entry),shared=b.share===true;
+  const student=u.role==='student'?u.id:u.student_id,teacher=u.therapist_id;
   if(!student||!teacher)return fail('담당 학생·치료사 연결이 없습니다.',403);
-  const chk=await db.query("SELECT id FROM portal_users WHERE id=$1 AND therapist_id=$2 AND role='student'",[student,teacher]);if(!chk.rows.length)return fail('담당 연결이 올바르지 않습니다.',403);
-  const sealed=seal(JSON.stringify(entry),key);const res=await db.query(`INSERT INTO portal_records(author_id,therapist_id,student_id,kind,nonce,auth_tag,encrypted_payload,shared_at) VALUES($1,$2,$3,$4,$5,$6,$7,CASE WHEN $8::boolean THEN NOW() ELSE NULL END) RETURNING id,created_at,shared_at`,[u.id,teacher,student,u.role,sealed.nonce,sealed.auth_tag,sealed.encrypted_payload,shared]);const driveSynced=shared?await autoBackup(db,res.rows[0].id,teacher,key):false;return json({record:{id:res.rows[0].id,shared:!!res.rows[0].shared_at,createdAt:res.rows[0].created_at,driveSynced}},201);
+  if((await db.query("SELECT 1 FROM portal_users WHERE id=$1 AND therapist_id=$2 AND role='student'",[student,teacher])).rows.length===0)return fail('담당 연결이 올바르지 않습니다.',403);
+  const privatePayload=seal(JSON.stringify(entry),key),selected=shared?sharedSelection(entry,b.sharedFields):null,publicPayload=selected?seal(JSON.stringify(selected),key):null;
+  const res=await db.query(`INSERT INTO portal_records(author_id,therapist_id,student_id,kind,nonce,auth_tag,encrypted_payload,shared_nonce,shared_auth_tag,encrypted_shared_payload,shared_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,CASE WHEN $11::boolean THEN NOW() ELSE NULL END) RETURNING id,created_at,shared_at`,[u.id,teacher,student,u.role,privatePayload.nonce,privatePayload.auth_tag,privatePayload.encrypted_payload,publicPayload?.nonce??null,publicPayload?.auth_tag??null,publicPayload?.encrypted_payload??null,shared]);
+  const driveSynced=shared?await autoBackup(db,res.rows[0].id,teacher,key):false;
+  return json({record:{id:res.rows[0].id,shared:!!res.rows[0].shared_at,createdAt:res.rows[0].created_at,driveSynced}},201);
  }
  if(path==='records'&&req.method==='GET')return json({records:await listRecords(db,u,key)});
  if(path==='share'&&req.method==='POST'){
-  if(!['student','parent'].includes(u.role))return fail('작성자만 공유할 수 있습니다.',403);const b=await safeBody(req);const r=await db.query('UPDATE portal_records SET shared_at=COALESCE(shared_at,NOW()) WHERE id=$1 AND author_id=$2 RETURNING id,shared_at,therapist_id',[String(b.recordId??''),u.id]);if(!r.rows.length)return fail('내 기록이 아닙니다.',403);const driveSynced=await autoBackup(db,r.rows[0].id,r.rows[0].therapist_id,key);return json({ok:true,shared:true,driveSynced});
+  if(!['student','parent'].includes(u.role))return fail('작성자만 공유할 수 있습니다.',403);
+  const b=await safeBody(req);const c=await db.connect();let out;
+  try{await c.query('BEGIN');const rs=await c.query('SELECT * FROM portal_records WHERE id=$1 AND author_id=$2 FOR UPDATE',[String(b.recordId??''),u.id]);const rec=rs.rows[0];
+   if(!rec){await c.query('ROLLBACK');return fail('내 기록이 아닙니다.',403)}
+   if(rec.shared_at){await c.query('ROLLBACK');return fail('이미 공유된 기록입니다. 추가 공유는 새 기록으로 작성해 주세요.',409)}
+   const payload=sharedSelection(JSON.parse(open(rec,key)),b.sharedFields);const sealed=seal(JSON.stringify(payload),key);
+   await c.query('UPDATE portal_records SET shared_nonce=$1,shared_auth_tag=$2,encrypted_shared_payload=$3,shared_at=NOW() WHERE id=$4 AND author_id=$5',[sealed.nonce,sealed.auth_tag,sealed.encrypted_payload,rec.id,u.id]);await c.query('COMMIT');out={id:rec.id,therapistId:rec.therapist_id};
+  }catch(e){await c.query('ROLLBACK');throw e}finally{c.release()}
+  const driveSynced=await autoBackup(db,out.id,out.therapistId,key);return json({ok:true,shared:true,driveSynced});
+ }
+ if(path==='session-notes'&&req.method==='GET'){
+  if(u.role!=='therapist')return fail('치료사 전용 메모입니다.',403);
+  const rs=await db.query(`SELECT n.*,s.nickname AS student_nickname FROM portal_session_notes n JOIN portal_users s ON s.id=n.student_id WHERE n.therapist_id=$1 AND s.therapist_id=$1 ORDER BY n.created_at DESC LIMIT 150`,[u.id]);
+  return json({notes:rs.rows.map(n=>({id:n.id,studentNickname:n.student_nickname,createdAt:n.created_at,entry:JSON.parse(open(n,key))}))});
+ }
+ if(path==='session-notes'&&req.method==='POST'){
+  if(u.role!=='therapist')return fail('치료사 전용 메모입니다.',403);
+  const b=await safeBody(req);const studentId=String(b.studentId??'');
+  if(!(await db.query("SELECT 1 FROM portal_users WHERE id=$1 AND role='student' AND therapist_id=$2",[studentId,u.id])).rows.length)return fail('담당 학생만 선택할 수 있습니다.',403);
+  if(!b.entry||typeof b.entry!=='object'||Array.isArray(b.entry))return fail('메모를 확인해 주세요.');
+  const entry={};for(const k of ['observation','question','plan']){if(b.entry[k]!==undefined){if(typeof b.entry[k]!=='string')return fail('올바르지 않은 메모 내용입니다.');entry[k]=clean(b.entry[k],1200)}}
+  if(!Object.values(entry).some(Boolean))return fail('메모를 하나 이상 작성해 주세요.');
+  const sealed=seal(JSON.stringify(entry),key);await db.query('INSERT INTO portal_session_notes(student_id,therapist_id,nonce,auth_tag,encrypted_payload) VALUES($1,$2,$3,$4,$5)',[studentId,u.id,sealed.nonce,sealed.auth_tag,sealed.encrypted_payload]);return json({ok:true},201);
  }
  if(path==='drive/status'&&req.method==='GET'){
   if(u.role!=='therapist')return fail('치료사만 연결할 수 있습니다.',403);const r=await db.query('SELECT folder_id FROM portal_oauth WHERE therapist_id=$1',[u.id]);return json({connected:!!r.rows.length,configured:safeGoogleConfig(),folderUrl:r.rows[0]?`https://drive.google.com/drive/folders/${encodeURIComponent(r.rows[0].folder_id)}`:null});
@@ -200,8 +241,8 @@ try{
  }
  if(path==='drive/sync'&&req.method==='POST'){
   if(u.role!=='therapist')return fail('치료사 전용입니다.',403);const o=await db.query('SELECT * FROM portal_oauth WHERE therapist_id=$1',[u.id]);if(!o.rows.length)return fail('담당 치료사의 구글 계정을 먼저 연결해야 합니다.',409);const token=open({...o.rows[0],encrypted_payload:o.rows[0].encrypted_refresh_token},key),access=await googleAccess(token);
-  const q=await db.query(`SELECT r.*,a.nickname writer,s.nickname student FROM portal_records r JOIN portal_users a ON a.id=r.author_id JOIN portal_users s ON s.id=r.student_id WHERE r.therapist_id=$1 AND s.therapist_id=$1 AND r.shared_at IS NOT NULL AND r.drive_file_id IS NULL ORDER BY r.created_at LIMIT 20`,[u.id]);let synced=0;
-  for(const r of q.rows){const entry=JSON.parse(open(r,key));const fileid=await uploadDrive(access,o.rows[0].folder_id,r,entry);await db.query('UPDATE portal_records SET drive_file_id=$1 WHERE id=$2 AND therapist_id=$3',[fileid,r.id,u.id]);synced++;}return json({synced,remainingMayExist:q.rows.length===20});
+  const q=await db.query(`SELECT r.*,a.nickname writer,s.nickname student FROM portal_records r JOIN portal_users a ON a.id=r.author_id JOIN portal_users s ON s.id=r.student_id WHERE r.therapist_id=$1 AND s.therapist_id=$1 AND r.shared_at IS NOT NULL AND r.encrypted_shared_payload IS NOT NULL AND r.drive_file_id IS NULL ORDER BY r.created_at LIMIT 20`,[u.id]);let synced=0;
+  for(const r of q.rows){const entry=unpackShared(r,key);const fileid=await uploadDrive(access,o.rows[0].folder_id,r,entry);await db.query('UPDATE portal_records SET drive_file_id=$1 WHERE id=$2 AND therapist_id=$3',[fileid,r.id,u.id]);synced++;}return json({synced,remainingMayExist:q.rows.length===20});
  }
  return fail('없는 기능입니다.',404);
 }catch(e){console.error('Portal API failure',e.code||e.name||'unknown');if(e.code==='23505')return fail('이미 등록된 값입니다.',409);if(e.name==='SyntaxError')return fail('잘못된 입력입니다.');if(e.message?.startsWith('닉네임')||e.message?.startsWith('기록')||e.message?.startsWith('잘못된'))return fail(e.message);return fail('작업을 처리하지 못했습니다. 관리자에게 문의해 주세요.',500);}
