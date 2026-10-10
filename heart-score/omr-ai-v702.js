@@ -169,6 +169,17 @@ function visualBarCandidates(gray,w,h,line){
   }
   return out;
 }
+function visualPitchProposals(staff,fragment){
+  if(!staff)return[];
+  const heads=scanConnectedHeads(staff);
+  return musicalEvents(fragment).filter(v=>v.ir.kind==='note').map(v=>{
+    const nearby=heads.map(h=>({h,delta:Math.abs(h.x-v.x)})).filter(o=>o.delta<staff.spacing*4.5).sort((a,b)=>a.delta-b.delta);
+    const chosen=nearby[0];
+    if(!chosen)return {x:Math.round(v.x),model:pitchName(v.ir.pitch),found:false};
+    const p=scanPitchFromY(staff,chosen.h.x,chosen.h.y);
+    return {x:Math.round(v.x),model:pitchName(v.ir.pitch),proposal:p.note,cvX:Math.round(chosen.h.x),cvY:Math.round(chosen.h.y),delta:+chosen.delta.toFixed(1),gap:nearby[1]?+(nearby[1].delta-chosen.delta).toFixed(1):null,area:Math.round(chosen.h.area||0)};
+  });
+}
 function modelNoteShapeDiagnostics(staff,fragment){
   if(!staff)return[];
   const degrees={C:0,D:1,E:2,F:3,G:4,A:5,B:6};
@@ -384,7 +395,7 @@ async function recognizeCanvas(canvas,filename,pageIndex){
       qa:measureQa(v.state).exactRatio,perLine:v.barGeometry?.perLine||null,
       rank:candidateScore(v)
     })),
-    rawBarGeometry:{perLine:barPlan.perLine,support:barPlan.support,modalInternalBars:barPlan.modalInternalBars,threshold,passDiagnostics,openTailEvidence,scanRows:geometryLines.map((line,i)=>({box:line.input.box,cvStaff:cvStaffs[i]?{x0:cvStaffs[i].x0,x1:cvStaffs[i].x1,spacing:cvStaffs[i].spacing,lines:cvStaffs[i].lines}:null,heads:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).length:null,headXs:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).map(h=>Math.round(h.x)):null,hollowHeads:cvStaffs[i]?scanHollowHeads(cvStaffs[i]).map(h=>({x:h.x,k:h.k,ring:h.ring})).slice(0,40):null,modelNoteXs:musicalEvents(lines[i].fragment).filter(v=>v.ir.kind==='note').map(v=>Math.round(v.x)),modelShapes:modelNoteShapeDiagnostics(cvStaffs[i],lines[i].fragment),modelRestXs:musicalEvents(lines[i].fragment).filter(v=>v.ir.kind==='rest').map(v=>Math.round(v.x)),strict:visualBarCandidates(gray,canvas.width,canvas.height,line).filter(v=>v.side<=.12).map(v=>({x:Math.round(v.x),side:+v.side.toFixed(2)})).slice(0,20),rescue:recoverFaintBarlines(gray,canvas.width,canvas.height,line.input.box).map(v=>Math.round(v.x)).slice(0,20)}))}
+    rawBarGeometry:{perLine:barPlan.perLine,support:barPlan.support,modalInternalBars:barPlan.modalInternalBars,threshold,passDiagnostics,openTailEvidence,scanRows:geometryLines.map((line,i)=>({box:line.input.box,cvStaff:cvStaffs[i]?{x0:cvStaffs[i].x0,x1:cvStaffs[i].x1,spacing:cvStaffs[i].spacing,lines:cvStaffs[i].lines}:null,heads:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).length:null,headXs:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).map(h=>Math.round(h.x)):null,hollowHeads:cvStaffs[i]?scanHollowHeads(cvStaffs[i]).map(h=>({x:h.x,k:h.k,ring:h.ring})).slice(0,40):null,modelNoteXs:musicalEvents(lines[i].fragment).filter(v=>v.ir.kind==='note').map(v=>Math.round(v.x)),modelShapes:modelNoteShapeDiagnostics(cvStaffs[i],lines[i].fragment),pitchProposals:visualPitchProposals(cvStaffs[i],lines[i].fragment),modelRestXs:musicalEvents(lines[i].fragment).filter(v=>v.ir.kind==='rest').map(v=>Math.round(v.x)),strict:visualBarCandidates(gray,canvas.width,canvas.height,line).filter(v=>v.side<=.12).map(v=>({x:Math.round(v.x),side:+v.side.toFixed(2)})).slice(0,20),rescue:recoverFaintBarlines(gray,canvas.width,canvas.height,line.input.box).map(v=>Math.round(v.x)).slice(0,20)}))}
   }}));
   if(suspiciousShort||!enough||!rhythmOk||!confOk||!shapeOk)return{staffDetected:true,ok:false,reason:`AI가 ${staves}개 악보 줄을 찾았지만 결과 검증을 통과하지 못했습니다. (${built.state.measures.length}마디 · 음표 ${built.noteCount}개 · 박자일치 ${Math.round(q.exactRatio*100)}% · 신뢰도 ${Math.round(built.avgConfidence*100)}%${built.segmentation==='visual-fit'?` · 마디 ${built.barGeometry?.perLine?.join('·')||'?'} · 원판독 ${Math.round((built.rawExactRatio||0)*100)}% · 평균리듬보정 ${(built.correctionAvg||0).toFixed(2)}박`:''} · ${built.segmentation==='cv-hybrid'?'오선기하+AI 쉼표':built.segmentation==='visual-fit'?'인쇄 마디선+4/4 보정':built.segmentation==='beat-dp'?'4/4 박자 재구성':'AI 마디선'} 기준)`};
   if(typeof W.ocrCanvas==='function'&&typeof W.attachOcrToOmr==='function'){try{status('음표 인식 완료 · 제목과 가사 위치 확인 중…');const data=await W.ocrCanvas(canvas,'제목·가사 OCR');const safeText={...data,lines:scanTitleCandidates(data,canvas),words:(data.words||[]).filter(w=>Number(w.confidence)>=75)};W.attachOcrToOmr(built.cvSystems?{state:built.state,systems:built.cvSystems}:lyricAdapter(lines,built),safeText,filename);}catch(err){console.warn('AI OMR lyric OCR skipped',err);}}
