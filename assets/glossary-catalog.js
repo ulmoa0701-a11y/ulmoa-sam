@@ -1,6 +1,6 @@
 /* 해봄노트 42개 용어 통합 탐색기
  * 원래 용어노트 설명/사례/출처는 DOM 원문에서 읽기만 한다.
- * 승인 이미지 22장 자르기/재생성/잘라 확대 없음.
+ * 승인 이미지 22장 보존 + 신규 독립 그림 10장. 자르기/재생성 없음.
  */
 (function(){
 "use strict";
@@ -31,8 +31,19 @@ const COVERS={
   "memo-semantics":[["의미이해","semantic-understanding"]],
   "memo-aac":[["AAC","aac"]],
   "memo-prompting":[["촉구","prompting"]],
-  "memo-reinforcement":[["강화","reinforcement"]]
+  "memo-reinforcement":[["강화","reinforcement"]],
+  "memo-metacognition":[["메타인지","metacognition","png"]],
+  "memo-planning-organization":[["계획과 조직화","planning-organization","png"]],
+  "memo-performance-monitoring":[["수행점검","performance-monitoring","png"]],
+  "memo-phonological-working-memory":[["음운작업기억","phonological-working-memory","png"]],
+  "memo-visuospatial-working-memory":[["시공간 작업기억","visuospatial-working-memory","png"]],
+  "memo-narrative-discourse":[["이야기담화","narrative-discourse","png"]],
+  "memo-inferential-comprehension":[["추론이해","inferential-comprehension","png"]],
+  "memo-reading-fluency":[["읽기유창성","reading-fluency","png"]],
+  "memo-fba":[["기능적 행동평가(FBA)","functional-behavior-assessment","png"]],
+  "memo-abc-observation":[["ABC 관찰기록","abc-observation","png"]]
 };
+function coverUrl(cover){return "../assets/glossary/cards/"+cover[1]+"."+(cover[2]||"webp");}
 const PAGE_SIZE=6;
 const RELATED={
   "memo-working-memory":["memo-short-term-memory","memo-executive","memo-memory"],
@@ -125,13 +136,13 @@ function boot(){
   let active="featured";
   let mode="album";
   let currentPage=0;
-  // 22 approved independent drawings. Paired concepts retain two independently clickable art cards.
+  // 32 independent drawings (22 existing WebP + 10 new PNG). Paired concepts retain separate clickable art cards.
   const albumItems=entries.flatMap(entry=>entry.covers.map((cover,index)=>({entry,cover,index})));
   // Data-driven counter: avoid stale numbers when a new illustration is added.
   const illustrationCount=albumItems.length;
   modeAlbum.querySelector("span").textContent=String(illustrationCount);
   modeAll.querySelector("span").textContent=String(entries.length);
-  if(albumItems.length!==22)console.warn("그림 등록 갯수 확인:",albumItems.length);
+  if(albumItems.length!==32)console.warn("그림 등록 갯수 확인:",albumItems.length);
   let recentIds=storageGet().filter(id=>byId.has(id));
   let lastOpener=null;
 
@@ -238,7 +249,7 @@ function boot(){
       art.loading="eager";
       const choose=index=>{
         const cover=entry.covers[index];
-        art.src="../assets/glossary/cards/"+cover[1]+".webp";
+        art.src=coverUrl(cover);
         art.alt=cover[0]+" 손그림 원본";
         artPanel.querySelectorAll(".gcat-art-choices button").forEach((btn,i)=>btn.setAttribute("aria-pressed",String(i===index)));
       };
@@ -293,7 +304,7 @@ function boot(){
     button.style.setProperty("--tint",TINT[entry.category]||"#fff0dd");
     if(hasArt){
       const img=node("img","gcat-album-image");
-      img.src="../assets/glossary/cards/"+item.cover[1]+".webp";
+      img.src=coverUrl(item.cover);
       img.alt=""; // The original drawing already contains the name and brief explanation.
       img.width=1122;
       img.height=1402;
