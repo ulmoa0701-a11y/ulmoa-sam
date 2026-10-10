@@ -82,7 +82,7 @@ function enhancedInput(prep,gray,pageW,pageH,input){
   const b=input.box,crop=new Float32Array(b.w*b.h);
   for(let y=0;y<b.h;y++){const src=(b.y+y)*pageW+b.x,dst=y*b.w;for(let x=0;x<b.w;x++)crop[dst+x]=gray[src+x];}
   const crisp=enhanceScanCrop(crop,b.w,b.h),norm=prep.normalizeStaff(crisp,b.w,b.h,b.lineSpacing,b.padUp,10,128);
-  let ww=norm.width,truncated=false;if(ww>1400){ww=1400;truncated=true;}
+  let ww=norm.width,truncated=false;if(ww>1800){ww=1800;truncated=true;}
   const data=new Float32Array(norm.height*ww);
   for(let y=0;y<norm.height;y++){const src=y*norm.width,dst=y*ww;for(let x=0;x<ww;x++)data[dst+x]=1-norm.data[src+x];}
   return{...input,data,width:ww,height:norm.height,truncated};
@@ -233,7 +233,7 @@ function choosePreprocess(rt,gray,w,h){
   const thresholds=[.60,.72,.78,.82,.85,.88,.90];
   const candidates=[];
   for(const threshold of thresholds){
-    const pre=rt.prep.preprocessPage(gray,w,h,{threshold});
+    const pre=rt.prep.preprocessPage(gray,w,h,{threshold,maxWidth:1800});
     const inputs=filterMainInputs(pre,w);
     if(!inputs.length)continue;
     const widths=inputs.map(v=>Number(v.box?.w)||0).filter(Boolean);
