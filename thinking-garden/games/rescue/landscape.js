@@ -56,7 +56,8 @@ class LandscapeMissionScene extends Phaser.Scene{
   const xAt=(index,count)=>750+(index-(count-1)/2)*218;
   items.forEach((it,i)=>{
    const row=i<top?0:1,j=row===0?i:i-top,n=row===0?top:bottom;
-   const x=this.m.focus==='size'?(j===0?525:810):xAt(j,n),y=row===0?248:509;
+   const x=this.m.focus==='size'?(j===0?525:810):xAt(j,n),baseY=row===0?320:595;
+   const y=this.m.focus==='size'?baseY-(it.size==='큰'?BODY_PIXELS_BIG:BODY_PIXELS_SMALL)/2:row===0?248:509;
    const a=animal(this,it.species,COLORS[it.color],it.size);
    a.setPosition(x,y).setDepth(8);
    a.setDataEnabled();a.data.set('item',it);
