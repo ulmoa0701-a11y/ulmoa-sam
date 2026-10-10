@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewBox="0 0 800 520" role="img" aria-labelledby="title desc">
+<title id="title">박자꽃 톡톡 리듬게임 미리보기</title>
+<desc id="desc">색깔 계이름 동그라미를 박자에 맞게 눌러 점수가 올라가는 게임 화면</desc>
+<defs><linearGradient id="bg" x2="0" y2="1"><stop stop-color="#e8fbeb"/><stop offset="1" stop-color="#fff9e4"/></linearGradient><filter id="shadow"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#274c4b" flood-opacity=".13"/></filter></defs>
+<rect width="800" height="520" rx="36" fill="url(#bg)"/>
+<circle cx="710" cy="50" r="100" fill="#f2e59e" opacity=".24"/><circle cx="90" cy="476" r="130" fill="#96c99d" opacity=".14"/>
+<rect x="24" y="24" width="752" height="472" rx="26" fill="#fff" stroke="#d6e6d8" stroke-width="4"/>
+<text x="55" y="79" font-size="36" font-family="Arial,sans-serif" font-weight="800" fill="#2e6f51">🎵 박자꽃 톡톡!</text>
+<text x="632" y="78" font-size="25" font-family="Arial,sans-serif" font-weight="800" fill="#2f8065">🌼 95점</text>
+<rect x="53" y="114" width="692" height="212" rx="22" fill="#f1fbff" stroke="#d4ebe5" stroke-width="3"/>
+<text x="83" y="155" font-size="26" fill="#536e73" font-family="sans-serif" font-weight="bold">지금 이 음표!</text>
+<circle cx="318" cy="226" r="84" fill="#EB2427" stroke="white" stroke-width="11" filter="url(#shadow)"/>
+<ellipse cx="283" cy="188" rx="22" ry="9" fill="#fff" opacity=".6" transform="rotate(-23 283 188)"/>
+<text x="318" y="248" font-size="70" font-family="sans-serif" font-weight="bold" text-anchor="middle" fill="white">도</text>
+<text x="535" y="202" font-family="sans-serif" font-size="23" font-weight="bold" text-anchor="middle" fill="#5f7a80">다음 음표</text>
+<circle cx="535" cy="258" r="40" fill="#EB2427" stroke="white" stroke-width="6"/><text x="535" y="272" font-family="sans-serif" font-size="36" font-weight="bold" text-anchor="middle" fill="white">도</text>
+<g filter="url(#shadow)"><rect x="55" y="361" rx="15" width="157" height="105" fill="#EB2427"/><rect x="225" y="361" rx="15" width="157" height="105" fill="#F6851F"/><rect x="395" y="361" rx="15" width="157" height="105" fill="#FBED1B"/><rect x="565" y="361" rx="15" width="157" height="105" fill="#73C84A"/></g>
+<g font-family="sans-serif" font-size="52" font-weight="bold" text-anchor="middle" fill="#243b42"><text x="133" y="428" fill="#fff">도</text><text x="303" y="428" fill="#fff">레</text><text x="473" y="428">미</text><text x="643" y="428">파</text></g>
+</svg>
