@@ -35,7 +35,16 @@ function scanDot(staff,x,y){
   // A 6px staff compresses a printed augmentation dot to roughly 2x2px.
   // Keep the stronger 3x3 criterion at normal resolutions; ignore staff ink.
   const tiny=s<8,band=tiny?1.1:2;
-  const dark=(xx,yy)=>!staff.lines.some(l=>Math.abs(y0+yy-l)<band)&&W.omrGrayAt(staff.img,x0+xx,y0+yy)<170;
+  const dark=(xx,yy)=>{
+    const gx=x0+xx,gy=y0+yy,v=W.omrGrayAt(staff.img,gx,gy);
+    if(v>=170)return false;
+    if(!staff.lines.some(l=>Math.abs(gy-l)<band))return true;
+    // A genuine printed dot can merge into a staff line at 6px spacing.
+    // Count line pixels only when they have extra vertical ink thickness;
+    // continuous one-pixel staff lines alone are never dot evidence.
+    return tiny&&v<160&&(
+      W.omrGrayAt(staff.img,gx,gy-1)<160||W.omrGrayAt(staff.img,gx,gy+1)<160);
+  };
   for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){
     const at=yy*w+xx;if(seen[at]||!dark(xx,yy))continue;const queue=[[xx,yy]];seen[at]=1;let area=0,xa=xx,xb=xx,ya=yy,yb=yy;
     for(let q=0;q<queue.length;q++){const [cx,cy]=queue[q];area++;xa=Math.min(xa,cx);xb=Math.max(xb,cx);ya=Math.min(ya,cy);yb=Math.max(yb,cy);for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=cx+dx,ny=cy+dy;if(nx<0||ny<0||nx>=w||ny>=h||seen[ny*w+nx]||!dark(nx,ny))continue;seen[ny*w+nx]=1;queue.push([nx,ny]);}}
