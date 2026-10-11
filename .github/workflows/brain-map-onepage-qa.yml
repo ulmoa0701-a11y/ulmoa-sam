@@ -1,0 +1,60 @@
+name: Brain Map One-page Browser QA
+on:
+  pull_request:
+    paths:
+      - 'brain-map/index.html'
+      - 'brain-map/brain.css'
+      - 'brain-map/brain.js'
+      - 'brain-map/onepage-qa.mjs'
+      - '.github/workflows/brain-map-onepage-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'brain-map/index.html'
+      - 'brain-map/brain.css'
+      - 'brain-map/brain.js'
+      - 'brain-map/onepage-qa.mjs'
+      - '.github/workflows/brain-map-onepage-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  parent-and-child-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Set up Korean fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk
+      - name: Install Chromium test client
+        run: |
+          npm install --no-save --no-package-lock playwright-core@1.56.1
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Serve original website
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/brainmap-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:8765/brain-map/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/brainmap-http.log
+          exit 1
+      - name: Verify brain map interactions and responsive layout
+        run: node brain-map/onepage-qa.mjs
+        env:
+          BRAIN_BASE: http://127.0.0.1:8765/
+      - name: Preserve QA screenshots and result
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: one-page-brain-map-screenshots
+          path: brain-map/qa-artifacts/
+          if-no-files-found: warn
