@@ -32,6 +32,10 @@ try{
    await page.reload({waitUntil:'domcontentloaded'});
    if(mobile){await page.locator('#mobileSettingsBtn').click();result.settingsOpen=await page.locator('#introMode').isVisible();}
    await page.locator('#introMode').selectOption('interlude');
+   const picker=await page.locator('#introMode').evaluate(el=>({width:el.getBoundingClientRect().width,font:Number.parseFloat(getComputedStyle(el).fontSize),display:getComputedStyle(el.parentElement).display}));
+   result.introPicker=picker;
+   if(mobile&&(picker.width<240||picker.font<12||picker.display!=='grid'))throw Error('Interlude mode unreadable on mobile '+JSON.stringify(picker));
+   if(!mobile&&picker.width<115)throw Error('Interlude mode clipped on desktop '+JSON.stringify(picker));
    const info=await page.evaluate(()=>({mode:introMode,bpm,meter:currentSong.timeN,song:currentSong.title,
      beat:beatMs(),firstNote:firstNoteMs(),view:playView}));
    result.info=info;

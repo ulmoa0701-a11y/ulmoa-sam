@@ -87,7 +87,13 @@
   body:not(.fullscreen) .controls .sampleSelect{font-size:13px;padding:10px}
   body:not(.fullscreen) .controls .seg button,
   body:not(.fullscreen) .controls .toggle{min-height:42px;font-size:12px;padding:8px 5px}
-  body:not(.fullscreen) .controls .speed{gap:8px}
+  body:not(.fullscreen) .controls .speed{
+    display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:7px;
+  }
+  body:not(.fullscreen) .controls .speed #introMode{
+    grid-column:1/-1;width:100%;min-width:0;max-width:none;
+    min-height:43px;padding:8px 12px;font-size:13px;border-radius:12px;
+  }
   body:not(.fullscreen) .controls .bpm{font-size:13px;min-width:66px}
   body:not(.fullscreen) .controls input[type="range"]{height:28px;accent-color:#3c83cf}
   body:not(.fullscreen) .controls .mrVol{grid-template-columns:76px minmax(0,1fr) 46px;gap:6px;margin-top:7px}
