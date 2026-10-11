@@ -347,7 +347,7 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
         // Independent whole-note/rest disambiguation on a one-symbol measure.
         // Never insert an extra event based on expected song length. A printed
         // white-centered, fully closed notehead is required.
-        if(items.length===1&&items[0].ir.kind==='rest'&&items[0].e.dur>=3.5&&hollow.length){
+        if(items.length===1&&items[0].ir.kind==='rest'&&items[0].e.dur>=2.5&&hollow.length){
           const candidates=hollow.filter(q=>q.ring>=8&&
             q.x>left+sp*6&&q.x<right-sp*3);
           const dedup=[];
