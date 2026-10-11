@@ -8,7 +8,7 @@
   body:not(.fullscreen) .top{flex:0 0 auto;min-height:0;margin-bottom:5px;padding:6px 8px}
   body:not(.fullscreen) .brand h1{font-size:clamp(21px,6.2vw,27px);line-height:1.05}
   body:not(.fullscreen) .mobileActions{
-    display:grid;grid-template-columns:minmax(0,1fr) 62px 70px;align-items:center;
+    display:grid;grid-template-columns:minmax(0,1fr) 56px 60px 64px;align-items:center;
     gap:5px;flex:0 0 auto;margin-bottom:5px;
   }
   .mobileSongWrap{min-width:0}

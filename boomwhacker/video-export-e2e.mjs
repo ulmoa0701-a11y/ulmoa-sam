@@ -18,7 +18,7 @@ const serve=(req,res)=>{
  if(!fs.existsSync(file)){res.writeHead(404);res.end();return}
  if(fs.statSync(file).isDirectory())file=path.join(file,'index.html');
  if(!fs.existsSync(file)){res.writeHead(404);res.end();return}
- res.setHeader('Content-Type',file.endsWith('.html')?'text/html':file.endsWith('.js')||file.endsWith('.mjs')?'text/javascript':'application/octet-stream');
+ res.setHeader('Content-Type',file.endsWith('.html')?'text/html':file.endsWith('.js')||file.endsWith('.mjs')?'text/javascript':file.endsWith('.css')?'text/css':'application/octet-stream');
  fs.createReadStream(file).pipe(res);
 };
 try{
@@ -44,7 +44,12 @@ try{
    result.supported=await page.evaluate(()=>window.__boomVideoQA?.supported());
    result.initialStatus=await page.locator('#videoStatus').innerText();
    const pending=page.waitForEvent('download',{timeout:45000}).then(d=>({download:d})).catch(e=>({error:e.message}));
-   await page.locator('#videoBtn').click({timeout:10000});
+   if(scenario.width<=800){
+     result.mobileQuickVisible=await page.locator('#mobileVideoBtn').isVisible();
+     result.settingsHiddenInitially=!(await page.locator('#videoBtn').isVisible());
+     await page.locator('#mobileVideoBtn').click({timeout:10000});
+     result.settingsOpened=await page.locator('#mobileSettingsSheet').evaluate(e=>e.classList.contains('mobileOpen'));
+   }else await page.locator('#videoBtn').click({timeout:10000});
    result.progressVisible=await page.locator('#videoProgress').isVisible();
    result.progressButtonText=await page.locator('#videoBtn').innerText();
    result.clicked=true;
@@ -63,6 +68,7 @@ try{
     result.mime='video/webm';
    }else result.downloadError=downloaded.error;
    result.ok=!!(result.downloaded&&result.ebml&&result.videoBytes>2000&&!jsErrors.length&&!consoleErrors.length
+      &&(scenario.width>800||(result.mobileQuickVisible&&result.settingsHiddenInitially&&result.settingsOpened))
       &&result.progressVisible&&result.retryDownloadVisible&&result.retryDownloadHref?.startsWith('blob:')
       &&result.mobileStatusFontPx>=10&&/영상 제작 완료/.test(result.finalStatus));
    console.log('VIDEO_EXPORT_E2E='+JSON.stringify(result));
