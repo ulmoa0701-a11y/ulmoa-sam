@@ -2,6 +2,7 @@ const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const BASE=process.env.RESCUE_URL||'http://127.0.0.1:8765/thinking-garden/games/rescue/';
+const RUN_MODE=process.env.RESCUE_TEST_MODE||'basic';
 fs.mkdirSync('rescue-qa-screenshots',{recursive:true});
 async function test(label,viewport,wide,touch=false,fullRun=true){
  const browser=await chromium.launch({headless:true});
@@ -45,6 +46,11 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
    const w=wide?1200:720,h=wide?760:1280;
    await page.mouse.click(box.x+box.width*x/w,box.y+box.height*y/h);
   }
+  await page.locator('#teacherBtn').click();
+  assert.equal(await page.locator('#teacherPanel').isVisible(),true);
+  await page.locator('#rescueMode').selectOption(RUN_MODE);
+  await page.locator('#teacherClose').click();
+  assert.equal(await page.locator('#teacherPanel').isVisible(),false);
   await page.screenshot({path:'rescue-qa-screenshots/'+label+'-title.png'});
   await clickAt(wide?600:360,wide?619:1030);
   const missionName=wide?'landmission':'mission';
@@ -72,21 +78,21 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
   await page.waitForFunction(n=>{const sc=window.moaRescueGame.scene.getScene(n);return sc&&sc.lock===false},missionName,{timeout:8000});
   await page.screenshot({path:'rescue-qa-screenshots/'+label+'-gameplay.png'});
   for(let round=0;round<(fullRun?5:1);round++){
-   const scene=await page.evaluate(n=>{const s=window.moaRescueGame.scene.getScene(n);return {round:s.round,need:s.m.need,focus:s.m.focus,color:s.m.color,size:s.m.size,targetSpecies:s.m.species,animals:(n==='landmission'?s.targets:s.actors).filter(a=>a.active&&a.data&&a.data.get('species')||n==='landmission'&&a.active&&a.data&&a.data.get('item')).map(a=>n==='landmission'?{x:a.x,y:a.y,visualBodyHeight:a.data.get('visualBodyHeight'),...a.data.get('item')}:{x:a.x,y:a.y,visualBodyHeight:a.data.get('visualBodyHeight'),species:a.data.get('species'),color:a.data.get('color'),size:a.data.get('size')})}},missionName);
+   const scene=await page.evaluate(n=>{const s=window.moaRescueGame.scene.getScene(n);return {round:s.round,need:s.m.need,focus:s.m.focus,color:s.m.color,size:s.m.size,targetSpecies:s.m.species,choiceCount:s.m.choices.length,animals:(n==='landmission'?s.targets:s.actors).filter(a=>a.active&&a.data&&a.data.get('species')||n==='landmission'&&a.active&&a.data&&a.data.get('item')).map(a=>n==='landmission'?{x:a.x,y:a.y,visualBodyHeight:a.data.get('visualBodyHeight'),...a.data.get('item')}:{x:a.x,y:a.y,visualBodyHeight:a.data.get('visualBodyHeight'),species:a.data.get('species'),color:a.data.get('color'),size:a.data.get('size')})}},missionName);
    assert.equal(scene.round,round);
-   assert.equal(scene.need,[1,1,2,3,4][round],'Difficulty must increase 1,1,2,3,4');
-   assert.equal(scene.animals.length,[4,4,4,7,8][round],'Candidate count follows discriminative skill, not just rising visual clutter');
-   assert.equal(scene.focus,['species','color','size','color-species','combined'][round]);
+   assert.equal(scene.need,({starter:[1,1,1,1,1],basic:[1,1,2,3,2],challenge:[1,1,2,3,3]})[RUN_MODE][round],'Response count by difficulty');
+   assert.equal(scene.animals.length,scene.choiceCount,'Generated choices should all be playable');
+   assert.equal(scene.focus,({starter:['species','color','size','species','color'],basic:['species','color','size','color-species','combined'],challenge:['species','color','size','color-species','combined']})[RUN_MODE][round]);
    assert.ok(scene.animals.every(a=>a.visualBodyHeight===(a.size==='큰'?165:96)),'Rendered characters must use measured silhouette height calibration');
    if(scene.focus==='species'){
      assert.equal(new Set(scene.animals.map(a=>a.color)).size,1,'Species recognition must not be solvable by color');
      assert.equal(new Set(scene.animals.map(a=>a.size)).size,1,'Species recognition must not be solvable by size');
-     assert.equal(new Set(scene.animals.map(a=>a.species)).size,4);
+     assert.equal(new Set(scene.animals.map(a=>a.species)).size,scene.animals.length);
    }
    if(scene.focus==='color'){
      assert.equal(new Set(scene.animals.map(a=>a.species)).size,1,'Color recognition must keep the species fixed');
      assert.equal(new Set(scene.animals.map(a=>a.size)).size,1,'Color recognition must keep size fixed');
-     assert.equal(new Set(scene.animals.map(a=>a.color)).size,4);
+     assert.equal(new Set(scene.animals.map(a=>a.color)).size,scene.animals.length);
    }
    if(scene.focus==='size'){
      assert.equal(new Set(scene.animals.map(a=>a.color)).size,1,'Size comparison must keep color fixed');
@@ -102,7 +108,7 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
    assert.equal(scene.animals.filter(a=>a.color===scene.color&&a.size===scene.size&&scene.targetSpecies.includes(a.species)).length,scene.need,'Exactly one instance of each target');
    if(!wide) {
     const banner=await page.evaluate(n=>{const x=window.moaRescueGame.scene.getScene(n).missionChip;return {exists:!!x,copy:x?.list.filter(k=>typeof k.text==='string').map(k=>k.text).join(' | ')||'',audio:x?.list.some(k=>k.type==='Container'&&k.list.some(z=>z.text?.includes('다시'))) }},missionName);
-    const words={species:['오리'],color:['파란색','토끼'],size:['큰','토끼','돼지'],['color-species']:['초록색','동물'],combined:['빨간색','작은']}[scene.focus];
+    const words=scene.focus==='species'?[scene.targetSpecies[0]]:scene.focus==='color'?[scene.color+'색',scene.targetSpecies[0]]:scene.focus==='size'?[scene.size,scene.targetSpecies[0]]:scene.focus==='combined'?[scene.color+'색',scene.size]:[scene.color+'색',scene.targetSpecies[0]];
     assert.ok(banner.exists && words.every(w=>banner.copy.includes(w)),'Missing persistent, focus-specific child-readable mission prompt '+JSON.stringify({focus:scene.focus,banner}));
     assert.ok(banner.audio,'Missing repeat-audio button');
    }
@@ -142,6 +148,13 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
    await page.screenshot({path:'rescue-qa-screenshots/'+label+'-result.png'});
    const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('moa-garden:completed')||'{}').rescue);
    assert.equal(saved,true);
+   const history=await page.evaluate(()=>JSON.parse(localStorage.getItem('moa-rescue:anonymous-records-v1')||'[]'));
+   assert.ok(history.length>0&&history[0].rounds.length===5,'All five trials should be saved in anonymous history');
+   assert.ok(history[0].rounds.every(x=>x.attempts>0&&!x.firstChoiceCorrect),'First wrong selection should not count as independent success');
+   assert.ok(history[0].rounds.every(x=>Number.isInteger(x.wrongFeatures.color)));
+   await page.locator('#teacherBtn').click();
+   assert.ok((await page.locator('#rescueRecordSummary').textContent()).includes('오답'));
+   await page.locator('#teacherClose').click();
   }
   assert.deepEqual(errors,[],'Browser errors detected');
   process.stdout.write('PASS '+label+' '+JSON.stringify(initial)+' rounds='+ (fullRun?5:1)+'\n');
@@ -152,6 +165,7 @@ async function test(label,viewport,wide,touch=false,fullRun=true){
  }finally{await context.close();await browser.close()}
 }
 (async()=>{
+ if(RUN_MODE!=='basic'){await test('desktop-'+RUN_MODE,{width:1440,height:900},true,false,true);await test('mobile-'+RUN_MODE,{width:390,height:844},false,true,true);return;}
  await test('desktop-1440x900',{width:1440,height:900},true,false,true);
  await test('tablet-1024x768',{width:1024,height:768},true,true,true);
  await test('mobile-390x844',{width:390,height:844},false,true,true);
