@@ -1,0 +1,56 @@
+name: Heart Score homr Browser Transformer Feasibility (PR only)
+on:
+  pull_request:
+    paths:
+      - 'heart-score/qa/homr-transformer-browser-probe.cjs'
+      - '.github/workflows/heart-score-homr-transformer-web.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-homr-transformer-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 19
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install free browser runner
+        run: |
+          npm ci --prefix heart-score/qa --ignore-scripts --no-audit --no-fund
+          npx --prefix heart-score/qa playwright install chromium
+      - name: Download official homr encoder and decoder checkpoints (no external user photos)
+        shell: bash
+        run: |
+          set -euo pipefail
+          dir=heart-score/qa/.homr-transformer-web
+          mkdir -p "$dir/model"
+          base=https://github.com/liebharc/homr/releases/download/onnx_checkpoints
+          for name in encoder decoder; do
+            ckpt="${name}_pytorch_model_465-597144cab54c8f6d0f6c9619df5c5312694eadd6"
+            curl -fLSs --retry 2 --max-time 300 "$base/$ckpt.zip" -o "/tmp/$ckpt.zip"
+            unzip -q "/tmp/$ckpt.zip" -d "$dir/model"
+            test -s "$dir/model/$ckpt.onnx"
+            ls -lh "$dir/model/$ckpt.onnx"
+          done
+      - name: Run real ONNX WASM encoder inference and decoder session load
+        shell: bash
+        run: |
+          set +e
+          base=heart-score/qa/.homr-transformer-web
+          e="$base/model/encoder_pytorch_model_465-597144cab54c8f6d0f6c9619df5c5312694eadd6.onnx"
+          d="$base/model/decoder_pytorch_model_465-597144cab54c8f6d0f6c9619df5c5312694eadd6.onnx"
+          node heart-score/qa/homr-transformer-browser-probe.cjs --encoder "$e" --decoder "$d" --mode desktop --output "$base/desktop.json"
+          status1=$?
+          node heart-score/qa/homr-transformer-browser-probe.cjs --encoder "$e" --decoder "$d" --mode android-simulated --output "$base/android-sim.json"
+          status2=$?
+          echo "HOMR_TRANSFORMER_DESKTOP=$status1 ANDROID_VIEWPORT=$status2"
+          if [[ $status1 -ne 0 || $status2 -ne 0 ]]; then exit 1; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: homr-browser-transformer-probe
+          path: heart-score/qa/.homr-transformer-web/*.json
+          include-hidden-files: true
+          if-no-files-found: warn
