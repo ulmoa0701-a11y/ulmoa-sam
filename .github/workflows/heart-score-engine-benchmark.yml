@@ -58,6 +58,9 @@ jobs:
       - name: Run actual OCR/OMR on same clean and degraded source
         shell: bash
         run: |
+          # Actions invokes bash -e by default; disable abort-on-nonzero
+          # so a failed engine becomes a measured failure with trace logs.
+          set +e
           set -uo pipefail
           mkdir -p heart-score/qa/.engine-bench/results
           echo "ENGINE=${{ matrix.engine }} INSTALL_OUTCOME=${{ steps.install.outcome }}" | tee heart-score/qa/.engine-bench/results/environment.txt
