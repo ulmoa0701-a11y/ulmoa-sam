@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#eaf6ed">
 <meta name="description" content="초등 저학년을 위한 울모아 바람정원. 깃털, 무지개 꽃길, 바람개비, 촛불을 이용한 부드러운 바람 조절 연습과 실제 리코더 연주 연결.">
 <title>모아의 바람정원 | 울모아 리코더 놀이터</title>
-<link rel="stylesheet" href="style-v2.css?v=2">
+<link rel="stylesheet" href="style-v4.css?v=4">
 </head>
 <body>
 <div class="app">
@@ -21,6 +21,8 @@
 <p class="intro-caption">조용히 후~ 불면 꽃들이 깨어나요!</p>
 <div class="preview-cues" aria-label="바람 강도 표시"><span class="weak">💙 약해</span><span class="nice">💚 딱 좋아</span><span class="hard">❤️ 너무 세</span></div>
 <button id="start" class="big-start" type="button"><span aria-hidden="true">▶</span> 시작!</button>
+<button id="introVoicePreview" class="intro-voice-preview" type="button">🔊 목소리 먼저 듣기</button>
+<p id="introVoiceNote" class="voice-small-note" role="status" aria-live="polite">Google 한국어 목소리 준비 중…</p>
 <p class="small print">시작을 누르면 마이크 권한을 요청해요. 글 대신 그림과 소리로 놀아요.</p>
 </section>
 <section id="lesson" class="lesson" hidden>
@@ -70,9 +72,10 @@
 <p>모아의 바람정원은 <b>마이크에 들어오는 비주기적인 소리</b>의 크기를 바람 신호처럼 시각화합니다. 실제 바람의 방향·세기를 측정한 것은 아닙니다. 발성·기침·대화·환경 소음은 잘못 인식될 수 있어요. 처음에는 종이띠 등의 움직임을 교사가 직접 확인해 주세요.</p>
 <div class="config"><label for="sensitivity">마이크 민감도 <strong id="sensitivityValue">보통</strong></label><input type="range" min="1" max="5" step="1" id="sensitivity" value="3"></div>
 <div class="config"><label for="testStrength">색 반응 체험(실제 마이크 아님) <strong id="testLabel">약함</strong></label><input id="testStrength" type="range" min="0" max="100" value="0"></div>
-<div class="config voice-config"><label for="voiceStyle">안내 목소리 <strong id="voiceStyleLabel">꼬마 모아</strong></label><select id="voiceStyle"><option value="kid">🐥 꼬마 모아 (기본)</option><option value="cheerful">🌼 발랄하게</option><option value="gentle">🌿 부드럽게</option></select></div>
+<div class="config voice-config"><label for="voiceStyle">안내 목소리 <strong id="voiceStyleLabel">Google 한국어</strong></label><select id="voiceStyle" aria-label="Google 한국어 온라인 목소리"><option value="google-auto">🌼 Google 한국어 · 자동 추천</option></select></div>
 <div class="teacher-buttons"><button id="voicePreview" type="button">🔊 목소리 미리 듣기</button></div>
-<p>기기에서 제공하는 한국어 합성음의 높이와 속도를 조절해 어린 느낌으로 만들어요. 실제 어린이 성우의 음성은 아니며 기종에 따라 다르게 들릴 수 있어요.</p>
+<p id="voiceAvailability" role="status">Google 한국어 온라인 음성을 확인하고 있어요.</p>
+<p>모아 구조대와 동일하게 Google 한국어 음성을 원래 속도·높낮이로 사용해요. 어린이 성우의 실제 녹음은 아니며, 기기에서 이 음성이 없다면 다른 성인 음성으로 자동 변경하지 않아요.</p>
 <div class="teacher-buttons">
 <button id="tryDemo" type="button">🧪 시각 반응 체험</button>
 <button id="stopDemo" type="button">■ 체험 끝내기</button>
@@ -85,6 +88,6 @@
 </main>
 <footer>울모아 · 아동용 리코더 호흡 연습 실험판 · 음성 및 바람 입력 저장 없음</footer>
 </div>
-<script src="app-v3.js?v=3"></script>
+<script src="app-v4.js?v=4"></script>
 </body>
 </html>
