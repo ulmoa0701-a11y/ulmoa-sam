@@ -54,8 +54,8 @@
   box-shadow:0 12px 26px rgba(50,95,104,.11)!important;
 }
 .desk-collage.featured-two .feature-thinking{transform:rotate(-1deg)!important}
-.desk-collage.featured-two .feature-heart{transform:rotate(1deg)!important}
-.desk-collage.featured-two .feature-heart .tape-pink{
+.desk-collage.featured-two .feature-music{transform:rotate(1deg)!important}
+.desk-collage.featured-two .feature-music .tape-pink{
   width:58px;
   height:18px;
   top:-9px;
@@ -69,7 +69,7 @@
   object-position:top;
   display:block;
 }
-.desk-collage.featured-two .feature-heart img{background:#eef7ff}
+.desk-collage.featured-two .feature-music img{background:#f0f7ea;object-fit:contain;object-position:center}
 .desk-collage.featured-two .feature-card b{
   font-size:23px;
   line-height:1;
@@ -78,8 +78,8 @@
 .desk-collage.featured-two .feature-card small,
 .desk-collage.featured-two .feature-card em{font-size:8px}
 .scrapbook-grid{
-  grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  gap:42px!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:24px!important;
 }
 .scrapbook-grid .entry-game{
   grid-column:auto!important;
@@ -130,3 +130,21 @@
 
 /* 2026-10-06: practical materials preview */
 .latest-materials{max-width:1180px;margin:34px auto 86px;padding:0 22px}.latest-materials .section-heading>a{font:700 16px "Gamja Flower",cursive;color:#214b59;text-decoration:none}.latest-material-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.latest-material-grid>a{display:grid;grid-template-rows:190px auto auto auto;gap:6px;padding:13px;background:#fffef9;border:1px solid #ddd9cf;box-shadow:0 8px 22px rgba(42,61,66,.06);text-decoration:none;color:#16303a}.latest-material-grid img{width:100%;height:190px;object-fit:cover;border-radius:3px;background:#eef5f4}.latest-material-grid small{margin-top:6px;color:#718287;font-size:12px}.latest-material-grid b{font:700 24px "Gamja Flower",cursive}.latest-material-grid span{font-size:13px;color:#315762}@media(max-width:720px){.latest-materials{margin:20px auto 58px;padding:0 10px}.latest-materials .section-heading{align-items:end}.latest-materials .section-heading>a{font-size:14px}.latest-material-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.latest-material-grid>a{grid-template-rows:105px auto auto auto;padding:7px}.latest-material-grid img{height:105px}.latest-material-grid b{font-size:18px}.latest-material-grid span{font-size:11px;line-height:1.25}}
+
+/* The homepage now presents two GAME gardens equally; Heart Score remains a creation tool. */
+.desk-collage.featured-two .feature-music{border-color:#e7ecdf}
+.desk-collage.featured-two .feature-music .tape-pink{background:#eddee9}
+.scrapbook-grid .entry-music .music-window{background:#f2f7ed}
+.scrapbook-grid .entry-music .music-window img{object-fit:contain;background:#f5f9ed}
+.scrapbook-grid .entry-heart .heart-window{background:#eaf7ff}
+@media(min-width:1051px){.scrapbook-grid .entry-copy h3{font-size:clamp(23px,2.35vw,31px)}}
+@media(min-width:601px) and (max-width:1050px){
+ .scrapbook-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:22px!important}
+ .scrapbook-grid .entry-heart{grid-column:1/-1!important;width:min(560px,100%);justify-self:center}
+}
+@media(max-width:600px){
+ .desk-collage.featured-two .feature-card b{font-size:clamp(17px,4.8vw,21px)!important;line-height:1.13}
+ .desk-collage.featured-two .feature-card small,
+ .desk-collage.featured-two .feature-card em{font-size:clamp(8px,2.4vw,10px)!important}
+ .scrapbook-grid .entry-heart{width:100%}
+}
