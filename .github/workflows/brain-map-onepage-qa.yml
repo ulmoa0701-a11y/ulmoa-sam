@@ -59,7 +59,7 @@ jobs:
           version="$(grep -o 'brain.css?v=[^"]*' brain-map/index.html | head -n 1)"
           test -n "$version"
           for attempt in $(seq 1 30); do
-            if curl --fail --silent --show-error --location --max-time 15 "${BRAIN_BASE}brain-map/" | grep -Fq "$version"; then
+            if curl --fail --silent --show-error --location --max-time 15 -o /tmp/brain-map-pages.html "${BRAIN_BASE}brain-map/" && grep -Fq "$version" /tmp/brain-map-pages.html; then
               echo "Live Pages serves $version. Running full four-viewport browser QA."
               node brain-map/onepage-qa.mjs
               exit 0
