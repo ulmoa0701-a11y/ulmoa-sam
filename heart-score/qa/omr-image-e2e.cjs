@@ -87,6 +87,25 @@ const variant=arg('variant','original'),coreOnly=process.argv.includes('--core-o
       extra:actualBar.slice(expected.length)};
   }).filter(Boolean);
   if(perBarDiagnostics.length)console.log('OMR_PER_BAR_DIAGNOSTICS='+JSON.stringify({variant,mobile,perBarDiagnostics}));
+  // These are CI-generated score variants, not real patient/user uploads.
+  // Preserve a small original-pixel crop for each genuinely missing symbol,
+  // so the next change can be justified by optical evidence rather than beats.
+  if(fixture.includes(path.join('heart-score','qa','.scan-debug'))){
+    const misses=perBarDiagnostics.filter(d=>d.region&&d.expected.length>d.actual.length).slice(0,4);
+    for(const item of misses){
+      const source='data:image/'+(fixture.toLowerCase().endsWith('.png')?'png':'jpeg')+';base64,'+fs.readFileSync(fixture).toString('base64');
+      const crop=await page.evaluate(async({source,region})=>{
+        const img=new Image();img.src=source;await img.decode();
+        const margin=8,x=Math.max(0,region.x0-margin),y=Math.max(0,region.y0-margin);
+        const width=Math.min(img.naturalWidth-x,region.x1-region.x0+margin*2),height=Math.min(img.naturalHeight-y,region.y1-region.y0+margin*2);
+        const c=document.createElement('canvas');c.width=width;c.height=height;
+        c.getContext('2d').drawImage(img,x,y,width,height,0,0,width,height);
+        return c.toDataURL('image/png').split(',')[1];
+      },{source,region:item.region});
+      fs.writeFileSync(path.join(out,'missing-bar-'+item.bar+'.png'),Buffer.from(crop,'base64'));
+      console.log('OMR_MISSING_CROP_BASE64 bar'+item.bar+' '+crop);
+    }
+  }
   const report={...comparison,draftComparison,perBarDiagnostics,variant,mobile,coreOnly,optionalTitleLyricsOcr:coreOnly?'excluded':'enabled',elapsedMs:Date.now()-start,fixtureSha256:hash,url,actual,analysis:analyses.at(-1),logs,requests};
   fs.writeFileSync(path.join(out,'result.json'),JSON.stringify(report,null,2));await page.screenshot({path:path.join(out,'screen.png'),fullPage:true});console.log(JSON.stringify({ok:report.ok,variant,mobile,coreOnly,elapsedMs:report.elapsedMs,measures:report.measures,notes:report.notes,rests:report.rests,errors:report.errors.slice(0,12),errorCount:report.errors.length,status:actual.status,draftOnly:{ok:report.draftComparison?.ok,measures:report.draftComparison?.measures,notes:report.draftComparison?.notes,rests:report.draftComparison?.rests,errors:report.draftComparison?.errors,totalErrors:report.draftComparison?.errors?.length},keyLabel:report.analysis?.state?.keyLabel,deskew:report.analysis?.deskew,deskewApplied:report.analysis?.deskewApplied,candidates:report.analysis?.candidateDiagnostics,rawBarGeometry:report.analysis?.rawBarGeometry}));process.exitCode=report.ok?0:1;
  }catch(error){fs.writeFileSync(path.join(out,'failure.json'),JSON.stringify({ok:false,error:String(error),logs,requests,analyses},null,2));throw error;}finally{await browser?.close();await new Promise(resolve=>server?server.close(resolve):resolve());}
