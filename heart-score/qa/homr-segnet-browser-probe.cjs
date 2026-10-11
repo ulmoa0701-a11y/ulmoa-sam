@@ -18,7 +18,7 @@ const mode=arg('mode','desktop');
    const name=decodeURIComponent(request.pathname);
    let file=name==='/model.onnx'?model:name.startsWith('/ort/')?path.join(dist,path.basename(name)):null;
    if(!file||!fs.existsSync(file)){res.writeHead(404);return res.end();}
-   res.setHeader('Content-Type',name.endsWith('.wasm')?'application/wasm':name.endsWith('.js')?'text/javascript':'application/octet-stream');
+   res.setHeader('Content-Type',name.endsWith('.wasm')?'application/wasm':(name.endsWith('.js')||name.endsWith('.mjs'))?'text/javascript':'application/octet-stream');
    fs.createReadStream(file).pipe(res);
   });await new Promise(r=>server.listen(0,'127.0.0.1',r));
   browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--enable-features=SharedArrayBuffer']});
