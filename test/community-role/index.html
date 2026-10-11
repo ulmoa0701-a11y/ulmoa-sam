@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>역할 선택 QA · 내부 테스트</title>
+<style>body{font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:18px;background:#f6f9f6;color:#23412b}form{padding:20px;background:#fff;border:1px solid #dae7dc;border-radius:20px}.field{margin-bottom:20px}label{display:block;font-weight:700;margin-bottom:9px}select,textarea{width:100%;padding:12px;box-sizing:border-box}button{cursor:pointer}.submit{padding:12px 20px;border:0;border-radius:10px;background:#315f45;color:white}#result{white-space:pre-wrap}</style>
+</head>
+<body>
+<h1>역할 선택 테스트</h1>
+<p>실제 소통 게시판이 아닌 버튼 작동 확인용 페이지입니다.</p>
+<form id="qaForm">
+<div class="field"><label>나는</label><select name="audience"><option>치료사</option><option>특수교사</option><option>학부모</option><option>특수교육대상자</option><option>기타</option></select></div>
+<div class="field"><label for="msg">내용</label><textarea id="msg" name="body">테스트</textarea></div>
+<button class="submit" type="submit">선택 결과 확인</button>
+<button class="submit" type="reset">초기화</button>
+</form>
+<p id="result" aria-live="polite"></p>
+<script src="../../assets/habom-role-picker.js?v=20261011-1"></script>
+<script>document.getElementById('qaForm').addEventListener('submit',function(event){event.preventDefault();document.getElementById('result').textContent='전송되는 audience: '+new FormData(this).get('audience');});</script>
+</body></html>
