@@ -18,6 +18,24 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
    name+': Boomwhacker Studio is not listed in website Test category');
  const home=await page.goto(base+'/thinking-garden/',{waitUntil:'networkidle'});
  check(home.ok(),name+': garden home HTTP failure');
+ const returnHome=page.locator('.site-home-link');
+ check(await returnHome.count()===1&&await returnHome.getAttribute('href')==='../',
+   name+': main site home shortcut missing or incorrect');
+ const headerLayout=await page.evaluate(()=>{
+   const link=document.querySelector('.site-home-link');
+   const rect=link.getBoundingClientRect(),header=document.querySelector('.topbar').getBoundingClientRect();
+   return {x:rect.x,right:rect.right,top:rect.top,bottom:rect.bottom,height:rect.height,
+     headerRight:header.right,viewWidth:innerWidth,scrollWidth:document.documentElement.scrollWidth};
+ });
+ check(headerLayout.x>=0&&headerLayout.right<=headerLayout.viewWidth+1&&
+   headerLayout.height>=42&&headerLayout.scrollWidth<=headerLayout.viewWidth+2,
+   name+': main home button clipped or too small '+JSON.stringify(headerLayout));
+ await returnHome.click();
+ await page.waitForURL(base+'/');
+ check((await page.locator('main#top').count())===1,
+   name+': main home button did not open the IlDan Haebom homepage');
+ await page.goto(base+'/thinking-garden/',{waitUntil:'networkidle'});
+
  check(await page.locator('.library-card').count()===15,name+': game library count mismatch');
  await page.locator('.category-tab[data-category="music"]').click();
  check(await page.locator('.library-card:not([hidden])').count()===2,name+': music tab should show recorder and rhythm');
