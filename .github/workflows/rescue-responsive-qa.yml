@@ -45,12 +45,13 @@ jobs:
           ready=0
           for i in $(seq 1 36); do
             curl --max-time 15 -fsSL "${PUBLIC_URL}" -o /tmp/rescue-live-page.html || true
-            curl --max-time 15 -fsSL "${PUBLIC_URL}game.js?v=9" -o /tmp/rescue-live-game.js || true
+            curl --max-time 15 -fsSL "${PUBLIC_URL}game.js?v=10" -o /tmp/rescue-live-game.js || true
             curl --max-time 15 -fsSL "${PUBLIC_URL}landscape.js?v=7" -o /tmp/rescue-live-landscape.js || true
-            if grep -q 'game.js?v=9' /tmp/rescue-live-page.html &&
+            if grep -q 'game.js?v=10' /tmp/rescue-live-page.html &&
                grep -q 'landscape.js?v=7' /tmp/rescue-live-page.html &&
                grep -q 'function makeChoices' /tmp/rescue-live-game.js &&
                grep -q 'refreshKoreanVoices' /tmp/rescue-live-game.js &&
+               grep -q 'isGoogleKoreanVoice' /tmp/rescue-live-game.js &&
                grep -q 'voicePanel' /tmp/rescue-live-page.html &&
                grep -q 'closest' /tmp/rescue-live-landscape.js; then
               ready=1
