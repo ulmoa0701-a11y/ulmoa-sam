@@ -30,15 +30,15 @@ jobs:
            for(const mobile of [false,true]){
             const page=await browser.newPage({viewport:mobile?{width:390,height:844}:{width:1440,height:900},acceptDownloads:true});
             let ready=false,loadError='';
-            for(let i=0;i<12;i++){
+            for(let i=0;i<22;i++){
              try{
               const res=await page.goto(url,{waitUntil:'domcontentloaded',timeout:20000});
-              ready=!!res?.ok()&&await page.locator('#videoDownloadLink').count()===1&&await page.locator('#videoProgress').count()===1;
+              ready=!!res?.ok()&&await page.locator('#videoDownloadLink').count()===1&&await page.locator('#videoProgress').count()===1&&(!mobile||await page.locator('#mobileVideoBtn').isVisible());
               if(ready)break;
              }catch(e){loadError=String(e)}
              await new Promise(r=>setTimeout(r,5000));
             }
-            if(!ready)throw Error('LIVE PAGE NOT UPDATED mobile='+mobile+' error='+loadError);
+            if(!ready)throw Error('LIVE PAGE NOT UPDATED mobile='+mobile+' quickButtonCount='+await page.locator('#mobileVideoBtn').count()+' error='+loadError);
             await page.evaluate(()=>localStorage.setItem('ulmoaBoomTransfer',JSON.stringify({title:'공개검증',bpm:180,timeN:1,timeD:4,measures:[[{note:'도',dur:1,lyric:'도'}]]})));
             await page.reload({waitUntil:'domcontentloaded'});
             if(mobile)await page.evaluate(()=>{document.querySelector('#creditOpt').checked=false});
