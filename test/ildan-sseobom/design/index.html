@@ -602,6 +602,16 @@ main:has(#parentCalendar:not([hidden])){padding-top:14px}
 .parent-guide-body p{font-size:13px;line-height:1.65;color:#485a72}
 .parent-easy-form .parent-main-label{margin-top:0}
 @media(max-width:740px){.parent-type-optional{padding:0 10px}.parent-type-optional>summary{font-size:13px}.parent-easy-form .parent-main-label textarea{min-height:108px}}
+/* Student v11: journal first, optional rich feelings and explicit sharing */
+.student-journal{gap:15px}.student-editor-intro{display:flex;flex-direction:column;gap:4px}.student-editor-intro strong{font-size:19px;color:#25324c}.student-editor-intro span{color:#637087;font-size:13px;line-height:1.55}
+.student-diary-head{display:grid;grid-template-columns:minmax(165px,200px) minmax(0,1fr);gap:12px}.student-diary-head label{margin:0}.student-diary-head input{min-height:45px;background:white;width:100%}
+.student-journal #textPanel textarea[name=note]{min-height:218px;font-size:16px;line-height:1.8;resize:vertical;padding:16px}
+.student-journal .student-context-fields{display:grid;grid-template-columns:minmax(120px,190px) minmax(0,1fr);gap:13px}.student-context-fields p{grid-column:1/-1;font-size:12px;color:#687587;margin:0}
+.student-journal .optional-fields>summary{font-size:14px}.emotion-helper{margin:0;color:#67758d;font-size:13px}.emotion-grid{display:flex;flex-wrap:wrap;gap:8px}.emotion-chip{position:relative;display:block!important;cursor:pointer;font-size:14px!important;margin:0!important;line-height:1.2}.emotion-chip>input{position:absolute;opacity:0;width:1px;height:1px}.emotion-chip>span{display:inline-flex;align-items:center;min-height:38px;border-radius:12px;padding:9px 12px;color:#41526d;border:1px solid #d6dfec;background:white;transition:background .12s,border-color .12s}.emotion-chip>input:checked+span{background:#e7eeff;color:#2b4ba4;border-color:#6e85d7;font-weight:750}.emotion-chip>input:focus-visible+span{outline:3px solid #748de0;outline-offset:3px}
+.emotion-more{border:1px solid #dce4ef;border-radius:11px;padding:8px 12px}.emotion-more>summary{cursor:pointer;color:#334978;font-weight:700}.emotion-more summary span{font-size:12px;font-weight:500;color:#7b8698}.emotion-group{margin-top:13px}.emotion-group p{font-weight:750;color:#586785;font-size:13px;margin:0 0 8px}.student-journal .emotion-more .emotion-grid{gap:6px}
+.student-share .share-picker{display:flex;align-items:center;gap:8px}.student-share-bar{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.student-share-bar strong{font-size:14px}.student-share-actions{display:flex;gap:7px}.student-share-actions button{font-size:12px;min-height:37px;padding:6px 10px}.student-share-field.is-unavailable{opacity:.44;cursor:not-allowed}.student-share-field input:disabled{cursor:not-allowed}.student-share .share-picker>p{margin:0;font-size:12px}.experience-helper,.experience-footer{font-size:13px;color:#68768c;line-height:1.6;margin:0}.student-experience textarea{min-height:85px}.student-save-note{font-size:12px;color:#78859a;line-height:1.5;margin:0}
+@media(max-width:600px){.student-diary-head{grid-template-columns:1fr;gap:8px}.student-journal .student-context-fields{grid-template-columns:1fr}.student-share-actions{width:100%}.student-journal #textPanel textarea[name=note]{min-height:185px}.student-editor-intro strong{font-size:17px}.emotion-chip>span{min-height:37px;padding:8px 11px}}
+@media(prefers-reduced-motion:reduce){.emotion-chip>span{transition:none}}
 </style></head><body><div class="previewbar" id="previewInfo"><strong>🧪 디자인 체험판</strong> · 가상 데이터 전용 · 실제 로그인/Google 저장 미연결 · 실명·상담 내용 입력 금지
 </div>
 <header><div class="topwrap"><a class="brand" href="#" aria-label="일단써봄 홈"><span class="brand-code">&lt;/&gt;</span> 일단<span>써봄</span><small>work • think • play</small></a><div id="account" class="account"></div></div></header>
@@ -733,7 +743,7 @@ function bindWorkspace(){
  }));
  activateWorkspace(activeView);
 }
-const NOTE_LABELS={note:'자유 기록',mood:'오늘의 상태',energy:'컨디션',thought:'떠오른 생각',body:'몸의 느낌',action:'해본 일',sketch:'그림',observation:'관찰한 사실',response:'주변 사람의 말·행동',impact:'일상에서 확인된 변화',message:'전달사항',event:'있었던 일',next:'다음 시도',date:'관찰 날짜',time:'관찰 시간',context:'그전·당시 상황',origin:'정보 출처',place:'장소',signals:'관찰한 모습(선택)',after:'이후에 이어진 일'};
+const NOTE_LABELS={note:'자유 기록',mood:'오늘의 상태',energy:'컨디션',thought:'떠오른 생각',body:'몸의 느낌',action:'해본 일',sketch:'그림',observation:'관찰한 사실',response:'주변 사람의 말·행동',impact:'일상에서 확인된 변화',message:'전달사항',event:'있었던 일',next:'다음 시도',date:'기록 날짜',time:'기록 시간',context:'당시 상황',origin:'정보 출처',title:'제목',experience:'내가 겪은 움직임·소리·반복행동',experienceImpact:'그때 생활에 있었던 변화',place:'장소',signals:'관찰한 모습(선택)',after:'이후에 이어진 일'};
 function todayLocal(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
 
 /* Parent calendar v8: event date, not the entry creation timestamp. */
@@ -787,6 +797,8 @@ function renderParentCalendar(){
  root.querySelector('[data-cal-new]').onclick=()=>{if(parentCalendarDate>todayLocal())return;activateWorkspace('write');const dt=$('entryForm')?.elements?.date;if(dt){dt.value=parentCalendarDate;dt.focus()}};
 }
 
+const STUDENT_EMOTIONS=["기쁨", "편안함", "설렘", "뿌듯함", "즐거움", "걱정", "답답함", "짜증"];
+const STUDENT_MORE_EMOTIONS={"기분 좋은 순간": ["신남", "만족감", "고마움", "홀가분함", "안도감", "평온함", "기대감", "자신감", "뭉클함", "흥미로움"], "복잡하고 힘든 순간": ["긴장됨", "불안함", "초조함", "속상함", "서운함", "억울함", "화남", "슬픔", "외로움", "두려움", "부담스러움", "후회", "당황함", "혼란스러움", "실망함", "부끄러움", "질투", "막막함"], "그 밖의 느낌": ["피곤함", "지루함", "무덤덤함", "궁금함", "어색함", "귀찮음", "복잡함", "잘 모르겠음"]};
 function dataForm(role){
  if(role==='parent')return `<form class="form entry-v5 parent-easy-form" id="entryForm">
  <div class="parent-when"><label class="parent-date-field">일이 있었던 날짜 <input name="date" type="date" value="${todayLocal()}" max="${todayLocal()}" required></label><label class="parent-time-field">시간 <small>(선택)</small><input name="time" type="time"></label></div>
@@ -815,25 +827,35 @@ function dataForm(role){
  ${['observation','context','response','after','impact','origin','message'].map(k=>`<label><input type="checkbox" name="shareField" value="${k}" ${k==='observation'?'checked':''}><span>${NOTE_LABELS[k]}</span></label>`).join('')}
  </div></div>
  <button class="button entry-save" id="saveEntry">내 관찰 메모 저장</button><p class="parent-nudge">보호자는 경험한 일을 남기면 됩니다. 여러 기록의 의미와 치료 방향은 담당 치료사가 검토해요. 실시간 상담창이 아닙니다.</p></form>`;
- return `<form class="form entry-v5" id="entryForm">
- <div class="soft-intro"><strong>자유롭게 남기는 한 페이지</strong><span>글·그림·짧은 단어만 남겨도 돼. 오늘 꼭 작성할 필요는 없어.</span></div>
+ return `<form class="form entry-v5 student-journal" id="entryForm">
+ <div class="student-editor-intro"><strong>내가 남기고 싶은 이야기</strong><span>일기, 고민, 좋았던 일, 그냥 떠오른 생각까지. 아무거나 써도 돼.</span></div>
+ <div class="student-diary-head"><label class="student-diary-date">기록 날짜<input name="date" type="date" max="${todayLocal()}" value="${todayLocal()}"></label><label class="student-diary-title">제목 <small>(선택)</small><input name="title" maxlength="80" placeholder="제목 없이 남겨도 돼"></label></div>
  <div class="form-switcher" role="group" aria-label="기록 방식"><button type="button" class="format-btn active" data-format="text" aria-pressed="true">✎ 글쓰기</button><button type="button" class="format-btn" data-format="draw" aria-pressed="false">◇ 그림 그리기</button></div>
- <div id="textPanel"><label>오늘 남기고 싶은 것 <small>(자유)</small><textarea name="note" maxlength="1200" rows="5" placeholder="오늘 있었던 일, 관심 있는 것, 떠오른 생각... 무엇이든 좋아."></textarea></label></div>
- <div id="drawPanel" hidden><div class="sketch-board"><canvas id="noteCanvas" width="760" height="380" aria-label="마우스나 손가락으로 그리는 그림 메모"></canvas></div><div class="sketch-actions"><span>손가락이나 마우스로 그려봐.</span><button type="button" id="undoStroke" class="button-ghost">↶ 되돌리기</button><button type="button" id="clearSketch" class="button-ghost">지우기</button></div></div>
- <details class="optional-fields" id="stateDetails"><summary>지금 상태도 남길까? <small>선택 · 건너뛰기 가능</small></summary><div class="optional-wrap"><label>오늘의 느낌<select name="mood"><option value="">선택하지 않음</option><option>편안함</option><option>기쁨</option><option>피곤함</option><option>답답함</option><option>긴장됨</option><option>잘 모르겠음</option><option>기타</option></select></label><label>컨디션<select name="energy"><option value="">선택하지 않음</option><option>괜찮음</option><option>기운 있음</option><option>조금 피곤함</option><option>많이 피곤함</option><option>잘 모르겠음</option></select></label></div></details>
- <details class="optional-fields"><summary>한 번 더 살펴보기 <small>선택 · 정답 없음</small></summary><div class="optional-wrap"><label>떠오른 생각이나 이미지<textarea name="thought" maxlength="1200" placeholder="생각나지 않으면 비워 두면 돼."></textarea></label><label>몸에서 느낀 것<textarea name="body" maxlength="1000" placeholder="특별한 느낌이 없다면 비워 둬도 돼."></textarea></label><label>내가 한 일, 혹은 시도해 본 것<textarea name="action" maxlength="1000" placeholder="실천 약속을 꼭 정할 필요는 없어."></textarea></label></div></details>
- <div class="privacy-panel"><label class="checkbox"><input type="checkbox" name="share"><span>치료사에게 일부 공유하기<small>원하는 항목만 고를 수 있어. 기본은 비공개야.</small></span></label><div id="sharePicker" class="share-picker" hidden>${['note','sketch','mood','energy','thought','body','action'].map(k=>`<label><input type="checkbox" name="shareField" value="${k}" ${k==='note'?'checked':''}><span>${NOTE_LABELS[k]}</span></label>`).join('')}<p>체크하지 않은 항목은 치료사에게 전달하지 않아요.</p></div></div>
- <button class="button entry-save" id="saveEntry">🔒 내 기록 저장</button></form>`;
-}
-
-function gatherEntry(f,role){
- const fields=role==='parent'?['date','time','place','observation','context','origin','response','after','impact','message']:['note','mood','energy','thought','body','action'];
+ <div id="textPanel"><label class="student-note-label">자유 기록 <small>(원하는 만큼)</small><textarea name="note" maxlength="4000" rows="7" placeholder="오늘 있었던 일이나 요즘 생각, 좋은 일, 고민, 취미 이야기... 자유롭게 남겨봐."></textarea></label></div>
+ <div id="drawPanel" hidden><div class="sketch-board"><canvas id="noteCanvas" width="760" height="380" aria-label="마우스나 손가락으로 그리는 그림 메모"></canvas></div><div class="sketch-actions"><span>손가락이나 마우스로 그릴 수 있어.</span><button type="button" id="undoStroke" class="button-ghost">↶ 되돌리기</button><button type="button" id="clearSketch" class="button-ghost">지우기</button></div></div>
+ <details class="optional-fields student-context"><summary>시간·장소 추가하기 <small>선택</small></summary><div class="optional-wrap student-context-fields"><label>언제쯤이었어? <small>(선택)</small><input name="time" type="time"></label><label>어디였어? <small>(선택)</small><input name="place" maxlength="100" placeholder="예: 집, 학교, 밖, 온라인"></label><p>정확하게 기억나지 않으면 비워 둬도 돼. 기록을 저장한 시각은 따로 남아.</p></div></details>
+ <details class="optional-fields student-emotion-details" id="stateDetails"><summary>그때의 감정도 남길까? <small>선택 · 여러 개 가능</small></summary><div class="optional-wrap"><p class="emotion-helper">하나만 고르지 않아도 돼. 감정이 섞였거나 잘 모르겠어도 괜찮아.</p><div class="emotion-grid" aria-label="감정 선택">${STUDENT_EMOTIONS.map(w=>`<label class="emotion-chip"><input name="emotionChoice" type="checkbox" value="${w}"><span>${w}</span></label>`).join('')}</div>
+ <details class="emotion-more"><summary>다른 감정도 보기 <span>+ ${Object.values(STUDENT_MORE_EMOTIONS).flat().length}개</span></summary>${Object.entries(STUDENT_MORE_EMOTIONS).map(([group,words])=>`<div class="emotion-group"><p>${group}</p><div class="emotion-grid">${words.map(w=>`<label class="emotion-chip"><input name="emotionChoice" type="checkbox" value="${w}"><span>${w}</span></label>`).join('')}</div></div>`).join('')}</details>
+ <label>내 말로 표현하기 <small>(선택)</small><input name="emotionOther" maxlength="100" placeholder="위에 없는 감정이나 내 표현"></label><label>컨디션 <small>(선택)</small><select name="energy"><option value="">선택하지 않음</option><option>괜찮음</option><option>기운 있음</option><option>조금 피곤함</option><option>많이 피곤함</option><option>잘 모르겠음</option></select></label></div></details>
+ <details class="optional-fields student-experience"><summary>몸의 움직임·소리나 반복된 일이 있었어? <small>선택 · 그냥 넘어가도 돼</small></summary><div class="optional-wrap"><p class="experience-helper">틱인지 강박인지 구분할 필요 없어. 내가 직접 경험한 일을 내 말로 남기고 싶을 때만 써. 기록하지 않아도 괜찮아.</p><label>어떤 일이 있었어? <small>(선택)</small><textarea name="experience" maxlength="900" rows="3" placeholder="움직임, 소리, 반복하고 싶었던 일, 떠오른 생각 등 내가 겪은 일을 자유롭게"></textarea></label><label>일상에서 달라진 점이나 불편한 점이 있었어? <small>(선택)</small><textarea name="experienceImpact" maxlength="500" rows="2" placeholder="특별히 달라진 일이 없었다면 비워 둬도 돼."></textarea></label><p class="experience-footer">횟수를 세거나 정확하게 분석할 필요는 없어. 나만 보관하고 싶으면 공유를 선택하지 않으면 돼.</p></div></details>
+ <details class="optional-fields student-reflect"><summary>좀 더 적고 싶다면 <small>선택 · 정답 없음</small></summary><div class="optional-wrap"><label>떠오른 생각이나 이미지<textarea name="thought" maxlength="1200" placeholder="쓰고 싶은 내용이 있으면 적어도 돼."></textarea></label><label>몸에서 느낀 점<textarea name="body" maxlength="1000" placeholder="특별한 느낌이 없다면 비워 둬도 돼."></textarea></label><label>내가 했던 일이나 해보고 싶은 일<textarea name="action" maxlength="1000" placeholder="꼭 해결책을 적을 필요는 없어."></textarea></label></div></details>
+ <div class="privacy-panel student-share"><label class="checkbox"><input type="checkbox" name="share"><span>담당 치료사에게 기록 공유하기<small>기본 비공개 · 공유 내용은 직접 고를 수 있어.</small></span></label>
+ <div id="sharePicker" class="share-picker" hidden><div class="student-share-bar"><strong>보낼 항목 선택</strong><div class="student-share-actions"><button type="button" class="button-ghost" id="studentSelectAll">전체 선택</button><button type="button" class="button-ghost" id="studentClearAll">선택 해제</button></div></div>
+ ${['title','date','time','place','note','sketch','mood','energy','thought','body','action','experience','experienceImpact'].map(k=>`<label class="student-share-field"><input type="checkbox" name="shareField" value="${k}"><span>${NOTE_LABELS[k]}</span></label>`).join('')}<p id="studentShareCount" aria-live="polite">보낼 항목을 선택해 줘. 작성하지 않은 항목은 선택되지 않아.</p><p>선택하지 않은 내용은 치료사에게 보내지 않아. 전송 전에 확인할 수 있어.</p></div></div>
+ <button class="button entry-save" id="saveEntry">🔒 내 기록 저장</button><p class="student-save-note">매일 쓰지 않아도 괜찮아. 일기를 다시 보고 싶으면 내 기록에서 확인할 수 있어.</p>
+ </form>`;
+}function gatherEntry(f,role){
+ const fields=role==='parent'?['date','time','place','observation','context','origin','response','after','impact','message']:['date','time','place','title','note','energy','thought','body','action','experience','experienceImpact'];
  const entry={};fields.forEach(k=>{const value=formValue(f,k);if(value)entry[k]=value});
  if(role==='parent'){
   const kinds=[...f.querySelectorAll('input[name="signalChoice"]:checked')].map(x=>x.value);
   if(kinds.length)entry.signals=kinds.join(' / ');
+ }else{
+  const emotions=[...f.querySelectorAll('input[name="emotionChoice"]:checked')].map(x=>x.value);
+  const custom=formValue(f,'emotionOther');if(custom)emotions.push(custom);
+  if(emotions.length)entry.mood=emotions.join(' · ');
+  if(sketchStrokes.length)entry.sketch=JSON.stringify(sketchStrokes);
  }
- if(role==='student'&&sketchStrokes.length)entry.sketch=JSON.stringify(sketchStrokes);
  return entry;
 }
 
@@ -849,19 +871,41 @@ function bindSketch(){
  $('undoStroke').onclick=()=>{sketchStrokes.pop();draw()};$('clearSketch').onclick=()=>{sketchStrokes=[];draw()};draw();
 }
 
+function sharePreview(fields,entry){return fields.map(k=>{const v=String(entry[k]||'');const line=k==='sketch'?'[그림 메모]':v.length>90?v.slice(0,90)+'…':v;return '• '+(NOTE_LABELS[k]||k)+': '+line}).join('\n')}
 function wireEntryForm(isParent){
  const f=$('entryForm'),button=$('saveEntry'),share=f.elements.share,area=$('sharePicker');
- share.onchange=()=>{area.hidden=!share.checked;button.textContent=isParent?(share.checked?'짧은 메모 전달하고 저장':'내 메모 저장하기'):(share.checked?'↗ 선택한 내용 공유하고 저장':'🔒 내 기록 저장')};
-
- if(!isParent){sketchStrokes=[];bindSketch();document.querySelectorAll('[data-format]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-format]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b))});$('textPanel').hidden=b.dataset.format!=='text';$('drawPanel').hidden=b.dataset.format!=='draw';});}
- f.onsubmit=e=>{e.preventDefault();const entry=gatherEntry(f,me.role);if(!Object.keys(entry).some(k=>isParent?k==='observation':true)){toast(isParent?'직접 보거나 들은 일을 한 문장만 적어 주세요.':'글이나 그림, 한 가지라도 남겨줘.');return;}
- if(isParent&&!entry.date){toast('일이 있었던 날짜를 선택해 주세요.');return;}
- const sharedFields=share.checked?[...f.querySelectorAll('input[name="shareField"]:checked')].map(x=>x.value).filter(k=>entry[k]):[];
- if(isParent&&share.checked&&sharedFields.includes('observation')){for(const k of ['date','time','place','signals'])if(entry[k]&&!sharedFields.includes(k))sharedFields.push(k);}
- if(share.checked&&!sharedFields.length){toast('공유할 항목을 하나 이상 골라줘.');return;}
- if(share.checked&&!confirm('선택한 항목만 담당 치료사에게 전달할까요? 공유한 내용은 드라이브에 별도 백업될 수도 있어요.'))return;
- loading(button,async()=>{await api('records',{method:'POST',body:{entry,share:share.checked,sharedFields}});if(isParent){parentCalendarDate=entry.date;parentCalendarMode='day';activeView='calendar'}else activeView='history';toast('내 기록에 저장했어.');await dashboard()});};
+ const selectedKeys=()=>[...f.querySelectorAll('input[name="shareField"]:checked')].map(x=>x.value);
+ const updateStudentShare=()=>{
+  if(isParent)return;
+  const entry=gatherEntry(f,'student');
+  f.querySelectorAll('input[name="shareField"]').forEach(x=>{
+   const available=!!entry[x.value];x.disabled=!available;if(!available)x.checked=false;
+   x.closest('label')?.classList.toggle('is-unavailable',!available);
+  });
+  const count=selectedKeys().length;const caption=$('studentShareCount');
+  if(caption)caption.textContent=count?`${count}개 항목 선택됨 · 전송 전에 내용을 확인할 수 있어.`:'작성한 항목 중 보내고 싶은 것을 골라줘.';
+ };
+ share.onchange=()=>{area.hidden=!share.checked;button.textContent=isParent?(share.checked?'짧은 메모 전달하고 저장':'내 메모 저장하기'):(share.checked?'↗ 선택한 항목 공유하고 저장':'🔒 내 기록 저장');if(!isParent)updateStudentShare()};
+ if(!isParent){
+  sketchStrokes=[];bindSketch();
+  document.querySelectorAll('[data-format]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-format]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b))});$('textPanel').hidden=b.dataset.format!=='text';$('drawPanel').hidden=b.dataset.format!=='draw';updateStudentShare()});
+  f.addEventListener('input',updateStudentShare);f.addEventListener('change',updateStudentShare);
+  $('studentSelectAll').onclick=()=>{updateStudentShare();f.querySelectorAll('input[name="shareField"]:not(:disabled)').forEach(x=>x.checked=true);updateStudentShare()};
+  $('studentClearAll').onclick=()=>{f.querySelectorAll('input[name="shareField"]').forEach(x=>x.checked=false);updateStudentShare()};
+  updateStudentShare();
+ }
+ f.onsubmit=e=>{e.preventDefault();const entry=gatherEntry(f,me.role);
+  const meaningful=isParent?!!entry.observation:['note','sketch','mood','energy','thought','body','action','experience','experienceImpact'].some(k=>!!entry[k]);
+  if(!meaningful){toast(isParent?'직접 보거나 들은 일을 한 문장만 적어 주세요.':'일기, 그림, 감정 등 한 가지 이상 남겨줘.');return;}
+  if(isParent&&!entry.date){toast('일이 있었던 날짜를 선택해 주세요.');return;}
+  const sharedFields=share.checked?selectedKeys().filter(k=>entry[k]):[];
+  if(isParent&&share.checked&&sharedFields.includes('observation')){for(const k of ['date','time','place','signals'])if(entry[k]&&!sharedFields.includes(k))sharedFields.push(k);}
+  if(share.checked&&!sharedFields.some(k=>!['date','time','place','title'].includes(k))){toast('공유할 내용을 한 가지 이상 골라줘.');return;}
+  if(share.checked){const details=sharePreview(sharedFields,entry);if(!confirm('담당 치료사에게 아래 내용을 보낼까?\n\n'+details+'\n\n보내지 않은 항목은 비공개로 남아.'))return;}
+  loading(button,async()=>{await api('records',{method:'POST',body:{entry,share:share.checked,sharedFields}});if(isParent){parentCalendarDate=entry.date;parentCalendarMode='day';activeView='calendar'}else activeView='history';toast('내 기록에 저장했어.');await dashboard()});
+ };
 }
+
 function prettyRecordEntry(entry){return Object.entries(entry??{}).map(([k,v])=> k==='sketch'?`<div class="sketch-record" data-sketch="${sanitize(v)}"><div class="sketch-mini-label">그림 메모</div><canvas width="760" height="380"></canvas></div>`:`<p><b>${sanitize(NOTE_LABELS[k]||k)}</b><br>${sanitize(v)}</p>`).join('');}
 function paintSketches(){document.querySelectorAll('[data-sketch]').forEach(el=>{try{const arr=JSON.parse(el.dataset.sketch);if(!Array.isArray(arr)||arr.length>250)return;const ctx=el.querySelector('canvas').getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,760,380);ctx.strokeStyle='#5362cc';ctx.lineWidth=3.5;ctx.lineCap='round';ctx.lineJoin='round';arr.forEach(stroke=>{if(!Array.isArray(stroke)||!stroke.length)return;ctx.beginPath();stroke.slice(0,240).forEach((p,i)=>{if(!Array.isArray(p)||p.length!==2||!Number.isFinite(p[0])||!Number.isFinite(p[1]))return;const x=Math.max(0,Math.min(760,p[0])),y=Math.max(0,Math.min(380,p[1]));i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke()});}catch(_){}})}
 function parentObservationFacts(entry={}){
@@ -872,7 +916,7 @@ function recordCards(list=records){
  if(!list.length)return '<div class="empty-state">아직 남겨둔 기록이 없습니다. 필요할 때만 작성해도 괜찮아요.</div>';
  return list.map(r=>{
   const time=sanitize(new Date(r.createdAt).toLocaleString('ko-KR'));
-  const observed=r.kind==='parent'&&r.entry?.date?`관찰 ${sanitize(r.entry.date)}${r.entry.time?' '+sanitize(r.entry.time):''} · 작성 ${time}`:time;
+  const observed=r.entry?.date?`${r.kind==='parent'?'관찰':'기록'} ${sanitize(r.entry.date)}${r.entry.time?' '+sanitize(r.entry.time):''}${r.entry.place?' · '+sanitize(r.entry.place):''} · 작성 ${time}`:time;
   if(me.role==='therapist'&&r.kind==='parent'){
    const field=String(r.entry?.observation||r.entry?.message||r.entry?.impact||r.entry?.response||'');
    const preview=field.length>110?field.slice(0,110)+'…':field;
@@ -880,11 +924,21 @@ function recordCards(list=records){
    const kinds=r.entry?.signals?' · '+sanitize(r.entry.signals):'';
    return `<article class="record parent-inbox-record"><div class="meta">보호자 기록 · ${observed}${place}${kinds} · ${sanitize(r.student)}</div><div class="parent-inbox-skim">${sanitize(preview)||'공유된 메모가 있어요.'}</div><details class="parent-inbox-details"><summary>전달 내용 더 보기</summary><div class="parent-inbox-full">${parentObservationFacts(r.entry)}<div class="muted">학생: ${sanitize(r.student)} · 작성자: ${sanitize(r.author)}</div></div></details></article>`;
   }
-  return `<article class="record archive-record"><div class="meta">${observed} · ${r.kind==='student'?'학생':'학부모'} · ${r.shared?'치료사와 일부 공유':'나만 보기'}${r.driveSynced?' · 드라이브 백업':''}</div>${prettyRecordEntry(r.entry)}${!r.shared&&me.role!=='therapist'?`<div class="inline-share"><button class="button-ghost" type="button" data-share="${sanitize(r.id)}">선택해서 공유</button><div class="share-choices" data-share-panel="${sanitize(r.id)}" hidden><p>치료사에게 전달할 내용만 골라줘.</p>${Object.keys(r.entry??{}).map(k=>`<label><input type="checkbox" value="${sanitize(k)}" ${k==='note'||k==='observation'?'checked':''}><span>${sanitize(NOTE_LABELS[k]||k)}</span></label>`).join('')}<button class="button" type="button" data-share-confirm="${sanitize(r.id)}">선택한 항목 전달</button></div></div>`:''}${me.role==='therapist'?`<div class="muted">학생: ${sanitize(r.student)} · 작성자: ${sanitize(r.author)}</div>`:''}</article>`;
+  return `<article class="record archive-record"><div class="meta">${observed} · ${r.kind==='student'?'학생':'학부모'} · ${r.shared?'치료사와 일부 공유':'나만 보기'}${r.driveSynced?' · 드라이브 백업':''}</div>${prettyRecordEntry(r.entry)}${!r.shared&&me.role!=='therapist'?`<div class="inline-share"><button class="button-ghost" type="button" data-share="${sanitize(r.id)}">선택해서 공유</button><div class="share-choices" data-share-panel="${sanitize(r.id)}" hidden><p>치료사에게 전달할 내용만 골라줘.</p>${me.role==='student'?`<div class="student-share-bar"><strong>내 기록 공유</strong><div class="student-share-actions"><button type="button" class="button-ghost" data-archive-all="${sanitize(r.id)}">전체 선택</button><button type="button" class="button-ghost" data-archive-clear="${sanitize(r.id)}">선택 해제</button></div></div>`:''}${Object.keys(r.entry??{}).map(k=>`<label><input type="checkbox" value="${sanitize(k)}"><span>${sanitize(NOTE_LABELS[k]||k)}</span></label>`).join('')}<button class="button" type="button" data-share-confirm="${sanitize(r.id)}">선택한 항목 전달</button></div></div>`:''}${me.role==='therapist'?`<div class="muted">학생: ${sanitize(r.student)} · 작성자: ${sanitize(r.author)}</div>`:''}</article>`;
  }).join('');
 }
 
-function attachShares(){document.querySelectorAll('[data-share]').forEach(b=>b.onclick=()=>{const p=document.querySelector(`[data-share-panel="${b.dataset.share}"]`);if(!p)return;p.hidden=!p.hidden});document.querySelectorAll('[data-share-confirm]').forEach(b=>b.onclick=()=>{const r=records.find(x=>x.id===b.dataset.shareConfirm),panel=document.querySelector(`[data-share-panel="${b.dataset.shareConfirm}"]`);if(!r||!panel)return;const fields=[...panel.querySelectorAll('input:checked')].map(x=>x.value).filter(k=>r.entry[k]);if(!fields.length){toast('공유할 항목을 골라줘.');return;}if(!confirm('고른 항목만 담당 치료사에게 전달할까?'))return;loading(b,async()=>{await api('share',{method:'POST',body:{recordId:r.id,sharedFields:fields}});toast('선택한 내용만 공유했어.');await dashboard()})})}
+function attachShares(){
+ document.querySelectorAll('[data-share]').forEach(b=>b.onclick=()=>{const p=document.querySelector(`[data-share-panel="${b.dataset.share}"]`);if(!p)return;p.hidden=!p.hidden});
+ for(const [key,value] of [['archiveAll',true],['archiveClear',false]])document.querySelectorAll(`[data-${key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())}]`).forEach(b=>b.onclick=()=>{const id=b.dataset[key],panel=document.querySelector(`[data-share-panel="${id}"]`);if(panel)panel.querySelectorAll('input[type="checkbox"]').forEach(c=>c.checked=value)});
+ document.querySelectorAll('[data-share-confirm]').forEach(b=>b.onclick=()=>{
+  const r=records.find(x=>x.id===b.dataset.shareConfirm),panel=document.querySelector(`[data-share-panel="${b.dataset.shareConfirm}"]`);if(!r||!panel)return;
+  const fields=[...panel.querySelectorAll('input:checked')].map(x=>x.value).filter(k=>r.entry[k]);
+  if(!fields.some(k=>!['date','time','place','title'].includes(k))){toast('공유할 내용을 한 가지 이상 골라줘.');return;}
+  if(!confirm('담당 치료사에게 아래 내용을 보낼까?\n\n'+sharePreview(fields,r.entry)+'\n\n선택하지 않은 내용은 비공개로 남아.'))return;
+  loading(b,async()=>{await api('share',{method:'POST',body:{recordId:r.id,sharedFields:fields}});toast('선택한 내용만 공유했어.');await dashboard()})
+ });
+}
 
 const CHOICE_LAB_SCENES=[
  {id:'time',icon:'✦',tab:'여유 시간',accent:'mint',title:'갑자기 20분이 생겼어.',desc:'예정보다 일찍 끝났어. 무엇을 해볼까?',options:[
