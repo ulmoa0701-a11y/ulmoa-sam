@@ -1,5 +1,8 @@
 name: Habom Live Community Layout QA
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/habom-community-live-qa.yml'
   workflow_dispatch:
   push:
     branches: [main]
