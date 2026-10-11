@@ -15,6 +15,7 @@ const mode=arg('mode','desktop'),dist=path.join(__dirname,'node_modules/onnxrunt
   server=http.createServer((req,res)=>{
    const pathname=new URL(req.url,'http://127.0.0.1').pathname;
    const file=pathname==='/encoder.onnx'?encoder:pathname==='/decoder.onnx'?decoder:
+              pathname==='/homr-wasm-greedy-decoder.mjs'?path.join(__dirname,'homr-wasm-greedy-decoder.mjs'):
               pathname.startsWith('/ort/')?path.join(dist,path.basename(pathname)):null;
    if(!file||!fs.existsSync(file)){res.writeHead(404);return res.end();}
    res.setHeader('Content-Type',pathname.endsWith('.wasm')?'application/wasm':/\.(m?js)$/.test(pathname)?'text/javascript':'application/octet-stream');
@@ -67,6 +68,11 @@ const mode=arg('mode','desktop'),dist=path.join(__dirname,'node_modules/onnxrunt
           m.firstStepMs=Math.round(performance.now()-t);
           m.firstStepOutputs=Object.fromEntries(Object.entries(out).filter(([k])=>!k.startsWith('cache_out')).map(([k,v])=>[k,v.dims]));
           m.firstTokenDecoded=!!out.out_rhythms&&!!out.out_pitchs;
+          // A full-browser autoregressive loop (not known-ground-truth correction).
+          // Keep a strict six-token limit until staff-level preprocessing exists.
+          const mod=await import('/homr-wasm-greedy-decoder.mjs');
+          m.sequence=await mod.decodeHomrTokens(ort,session,encoderContext,{maxSteps:6});
+          m.multiStepDecoded=m.sequence.steps>=2;
         }catch(e){m.firstTokenError=String(e);}
       }
       await session.release?.();
@@ -80,6 +86,6 @@ const mode=arg('mode','desktop'),dist=path.join(__dirname,'node_modules/onnxrunt
   fs.mkdirSync(path.dirname(output),{recursive:true});
   fs.writeFileSync(output,JSON.stringify(out,null,2));
   console.log('HOMR_TRANSFORMER_BROWSER_PROBE='+JSON.stringify(out));
-  if(!out.encoder?.loaded||!out.encoder?.realInference||!out.decoder?.loaded||!out.decoder?.firstTokenDecoded||errors.length)process.exitCode=1;
+  if(!out.encoder?.loaded||!out.encoder?.realInference||!out.decoder?.loaded||!out.decoder?.firstTokenDecoded||!out.decoder?.multiStepDecoded||errors.length)process.exitCode=1;
  }finally{await browser?.close();if(server)await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1});
