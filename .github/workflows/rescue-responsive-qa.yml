@@ -28,8 +28,11 @@ jobs:
       - name: Start site and test
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/rescue-http.log 2>&1 &
+          node thinking-garden/games/rescue/rescue-core-qa.cjs
           node thinking-garden/games/rescue/rescue-voice-qa.cjs
           node thinking-garden/games/rescue/rescue-smoke.cjs
+          RESCUE_TEST_MODE=starter node thinking-garden/games/rescue/rescue-smoke.cjs
+          RESCUE_TEST_MODE=challenge node thinking-garden/games/rescue/rescue-smoke.cjs
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4
@@ -45,13 +48,14 @@ jobs:
           ready=0
           for i in $(seq 1 36); do
             curl --max-time 15 -fsSL "${PUBLIC_URL}" -o /tmp/rescue-live-page.html || true
-            curl --max-time 15 -fsSL "${PUBLIC_URL}game.js?v=10" -o /tmp/rescue-live-game.js || true
-            curl --max-time 15 -fsSL "${PUBLIC_URL}landscape.js?v=7" -o /tmp/rescue-live-landscape.js || true
-            if grep -q 'game.js?v=10' /tmp/rescue-live-page.html &&
-               grep -q 'landscape.js?v=7' /tmp/rescue-live-page.html &&
+            curl --max-time 15 -fsSL "${PUBLIC_URL}game.js?v=11" -o /tmp/rescue-live-game.js || true
+            curl --max-time 15 -fsSL "${PUBLIC_URL}landscape.js?v=8" -o /tmp/rescue-live-landscape.js || true
+            if grep -q 'game.js?v=11' /tmp/rescue-live-page.html &&
+               grep -q 'landscape.js?v=8' /tmp/rescue-live-page.html &&
                grep -q 'function makeChoices' /tmp/rescue-live-game.js &&
                grep -q 'refreshKoreanVoices' /tmp/rescue-live-game.js &&
                grep -q 'isGoogleKoreanVoice' /tmp/rescue-live-game.js &&
+               grep -q 'rescue-core.js?v=1' /tmp/rescue-live-page.html &&
                grep -q 'voicePanel' /tmp/rescue-live-page.html &&
                grep -q 'closest' /tmp/rescue-live-landscape.js; then
               ready=1
