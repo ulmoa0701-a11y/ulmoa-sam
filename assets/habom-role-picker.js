@@ -82,7 +82,8 @@
       "form select[name='kind']{height:48px!important;min-height:48px!important;max-height:48px!important;flex:0 0 48px!important;align-self:flex-start!important;padding:8px 12px!important;line-height:1.5!important}",
       "form .field:has(>select[name='kind']),form .field:has(select[name='kind']){justify-content:flex-start!important;align-self:start!important;gap:8px!important;min-height:0!important}",
       "form .field:has(input[name='anonymous']){justify-content:flex-start!important;align-items:center!important;gap:9px!important}",
-      "form .field:has(input[name='anonymous']) label,form label:has(input[name='anonymous']){white-space:nowrap!important;word-break:keep-all!important;width:auto!important;max-width:none!important;justify-content:flex-start!important}",
+      "form .field:has(input[name='anonymous']) label,form label:has(input[name='anonymous']),form label[for='anonymous']{white-space:nowrap!important;word-break:keep-all!important;width:auto!important;max-width:none!important;justify-content:flex-start!important}",
+      "form input[name='anonymous'],form #anonymous{width:17px!important;height:17px!important;flex:0 0 17px!important;min-width:17px!important}",
       "@media(max-width:430px){#habom-role-picker .hrp-panel{padding:10px}#habom-role-picker .hrp-chip{font-size:12px;padding:7px 4px}#habom-role-picker .hrp-detail-list{max-height:220px}}",
       "@media(prefers-reduced-motion:reduce){#habom-role-picker *{scroll-behavior:auto!important}}"
     ].join("\n");
@@ -151,7 +152,11 @@
     var itemButtons = [];
 
     function reportHeight() {
-      var height = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+      var height = 680;
+      Array.prototype.forEach.call(document.body.children, function(child) {
+        var rect = child.getBoundingClientRect();
+        if (rect.height > 0) height = Math.max(height, Math.ceil(rect.bottom + (window.scrollY || 0) + 20));
+      });
       try { window.top.postMessage({ type: "habom-community-height-v1", height: height }, "*"); } catch (ignore) {}
     }
     function laterHeight() {
