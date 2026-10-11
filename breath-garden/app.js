@@ -349,5 +349,7 @@ window.addEventListener('pagehide',stopAll);
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&S.playing)stopAll()});
 if(window.speechSynthesis?.addEventListener)window.speechSynthesis.addEventListener('voiceschanged',refreshVoices);
 refreshVoices();
-show('home');
+const directMode=(typeof location!=='undefined'?new URLSearchParams(location.search).get('mode'):null);
+if(['strength','long','beat'].includes(directMode))chooseMode(directMode);
+else show('home');
 })();
