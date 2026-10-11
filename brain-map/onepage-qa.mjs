@@ -73,9 +73,18 @@ try{
   assert.equal(await page.locator('.hemi-ability-list').count(),2);
   assert.equal(await page.locator('.hemi-ability-list li').count(),6);
   assert.equal(await page.locator('.hemi-team-examples span').count(),4);
-  assert.equal(await page.locator('#hemiMascot').count(),1,'redesigned original bunny mascot exists');
+  assert.equal(await page.locator('#hemiMascot').count(),1,'brand character graphic exists');
+  assert.equal(await page.locator('#hemiMoaOriginal').count(),1,'original Moa image is rendered, not recreated');
+  assert.equal(await page.locator('#hemiMoaOriginal').getAttribute('href'),'../thinking-garden/assets/moa-default.png','must use the existing Moa asset');
+  const moaLoaded=await page.evaluate(async()=>{
+    const url=document.querySelector('#hemiMoaOriginal').href.baseVal;
+    const img=new Image(); img.src=new URL(url,location.href).href;
+    try{await img.decode();return {width:img.naturalWidth,height:img.naturalHeight};}
+    catch(error){return {error:String(error)};}
+  });
+  assert.ok(moaLoaded.width>200&&moaLoaded.height>200,'original Moa asset must load in browser: '+JSON.stringify(moaLoaded));
   assert.equal(await page.locator('#hemiBrainGraphic [data-hemi-select]').count(),2,'both brain hemispheres stay clickable');
-  assert.match(await page.locator('#hemiSvgTitle').textContent(),/모아 토끼/);
+  assert.match(await page.locator('#hemiSvgTitle').textContent(),/기존 모아 캐릭터/);
   const artFit=await page.evaluate(()=>{
     const svg=document.querySelector('.hemi-hero-svg');
     const brain=document.querySelector('#hemiBrainGraphic').getBBox();
