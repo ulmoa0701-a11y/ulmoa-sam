@@ -14,7 +14,11 @@
         ['공간·구성','눈–손 협응',U('thinking-garden/?category=space#gardenMap')]]},
       {name:'모아의 음악정원',icon:'🎵',desc:'음악게임 · 2개',href:U('music-garden/'),links:[
         ['박자 맞추기','박자꽃 톡톡!',U('thinking-garden/games/rhythm-touch/')],
-        ['리코더 연습','리코더 마법정원',U('thinking-garden/recorder/')]]}
+        ['리코더 연습','리코더 마법정원',U('thinking-garden/recorder/')]]},
+      {name:'모아의 바람놀이터',icon:'🌬️',desc:'호흡·바람게임 · 3개',href:U('breath-garden/'),links:[
+        ['바람의 힘','세기와 색 조절',U('breath-garden/?mode=strength')],
+        ['오래 후~','2~5초 유지하기',U('breath-garden/?mode=long')],
+        ['박자 바람','박자에 맞춰 불기',U('breath-garden/?mode=beat')]]}
     ]},
     {id:'music',name:'음악·악보',icon:'🎵',items:[
       ['모아의 음악정원','음악게임 2가지 골라보기',U('music-garden/')],
