@@ -84,7 +84,7 @@ try{
     return {brainBottom:brain.y+brain.height,rabbitTop:rabbit.y,viewBox:svg.viewBox.baseVal.width,
       artWidth:art.width,visible:!!art.width};
   });
-  assert.ok(artFit.visible && artFit.artWidth>=120,'mascot must be readable in every viewport: '+JSON.stringify(artFit));
+  assert.ok(artFit.visible && artFit.artWidth>=(width<=370?120:width<500?145:120),'mascot must be readable in every viewport: '+JSON.stringify(artFit));
   assert.ok(artFit.rabbitTop >= artFit.brainBottom-8,
     'brain drawing should float above mascot, not look like an exposed head: '+JSON.stringify(artFit));
   assert.match(await page.locator('.hemi-caution').innerText(),/좌뇌형·우뇌형/);
