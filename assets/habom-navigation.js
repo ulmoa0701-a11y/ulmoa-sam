@@ -6,13 +6,16 @@
   const root=nav.classList.contains('note-nav')?'':'../';
   const U=(p)=>root+p;
   const groups=[
-    {id:'games',name:'게임',icon:'🎮',items:[
-      ['🧠 모아의 생각정원','인지게임 · 주의·기억·읽기쓰기',U('thinking-garden/')],
-      ['🎵 모아의 음악정원','음악게임 · 리듬·리코더',U('music-garden/')],
-      ['시각·주의 게임','조건찾기·시각탐색',U('thinking-garden/?category=visual#gardenMap')],
-      ['기억·집행 게임','순서·기억·억제',U('thinking-garden/?category=memory#gardenMap')],
-      ['읽기·쓰기 게임','맞춤법·띄어쓰기',U('thinking-garden/?category=literacy#gardenMap')],
-      ['공간·구성 게임','눈손협응',U('thinking-garden/?category=space#gardenMap')]]},
+    {id:'games',name:'게임',icon:'🎮',sections:[
+      {name:'모아의 생각정원',icon:'🧠',desc:'인지게임 · 13개',href:U('thinking-garden/'),links:[
+        ['시각·주의','조건찾기 · 시각탐색',U('thinking-garden/?category=visual#gardenMap')],
+        ['기억·집행','순서 · 기억 · 억제',U('thinking-garden/?category=memory#gardenMap')],
+        ['읽기·쓰기','맞춤법 · 띄어쓰기',U('thinking-garden/?category=literacy#gardenMap')],
+        ['공간·구성','눈–손 협응',U('thinking-garden/?category=space#gardenMap')]]},
+      {name:'모아의 음악정원',icon:'🎵',desc:'음악게임 · 2개',href:U('music-garden/'),links:[
+        ['박자 맞추기','박자꽃 톡톡!',U('thinking-garden/games/rhythm-touch/')],
+        ['리코더 연습','리코더 마법정원',U('thinking-garden/recorder/')]]}
+    ]},
     {id:'music',name:'음악·악보',icon:'🎵',items:[
       ['모아의 음악정원','음악게임 2가지 골라보기',U('music-garden/')],
       ['하트색깔악보 Studio','악보 직접 만들기',U('heart-score/')],
@@ -47,7 +50,14 @@
       ['개발 중 미리보기','테스트 공간',U('test/')]]}
   ];
   const esc=(v)=>String(v).replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const submenu=(g)=>g.items.map(([title,desc,url])=>'<a href="'+esc(url)+'"><b>'+esc(title)+'</b><span>'+esc(desc)+'</span></a>').join('');
+  const submenu=(g)=>g.sections
+    ? '<div class="hb-game-groups">'+g.sections.map(section=>
+        '<section class="hb-game-section" aria-label="'+esc(section.name)+'">'+
+          '<a class="hb-game-parent" href="'+esc(section.href)+'"><strong>'+section.icon+' '+esc(section.name)+'</strong><span>'+esc(section.desc)+' <span aria-hidden="true">→</span></span></a>'+
+          '<div class="hb-game-children" role="group" aria-label="'+esc(section.name)+' 세부 게임">'+
+            section.links.map(([title,desc,url])=>'<a class="hb-game-child" href="'+esc(url)+'"><b>'+esc(title)+'</b><span>'+esc(desc)+'</span></a>').join('')+
+          '</div></section>').join('')+'</div>'
+    : g.items.map(([title,desc,url])=>'<a href="'+esc(url)+'"><b>'+esc(title)+'</b><span>'+esc(desc)+'</span></a>').join('');
   const item=(g)=>g.href
     ? '<a class="hb-nav-link" href="'+esc(g.href)+'"><span class="hb-nav-emoji" aria-hidden="true">'+g.icon+'</span>'+esc(g.name)+'</a>'
     : '<details class="hb-menu hb-menu-'+esc(g.id)+'"><summary><span class="hb-nav-emoji" aria-hidden="true">'+g.icon+'</span>'+esc(g.name)+'<span class="hb-chevron" aria-hidden="true">⌄</span></summary><div class="hb-dropdown"><div class="hb-drop-title">'+esc(g.name)+' 바로가기</div>'+submenu(g)+'</div></details>';
@@ -69,6 +79,7 @@
     links.classList.remove('hb-show-subcategory');
     mobileCategory.hidden=true;
     mobileSubgrid.replaceChildren();
+    mobileSubgrid.classList.remove('hb-mobile-game-groups');
   }
   mobileBack.addEventListener('click',()=>{
     resetMobileCategory();
@@ -83,17 +94,30 @@
       const label=menu.querySelector('.hb-nav-emoji')?.nextSibling?.textContent?.trim()||summary.textContent.replace('⌄','').trim();
       mobileCategory.querySelector('.hb-mobile-category-name').textContent=label;
       mobileSubgrid.replaceChildren();
-      menu.querySelectorAll('.hb-dropdown a').forEach(link=>{
-        const tile=document.createElement('a');
-        tile.className='hb-mobile-subtile';
-        tile.href=link.getAttribute('href');
-        const title=document.createElement('b');
-        title.textContent=link.querySelector('b')?.textContent||link.textContent.trim();
-        const description=document.createElement('small');
-        description.textContent=link.querySelector('span')?.textContent||'바로가기';
-        tile.append(title,description);
-        mobileSubgrid.appendChild(tile);
-      });
+      const sections=[...menu.querySelectorAll('.hb-game-section')];
+      mobileSubgrid.classList.toggle('hb-mobile-game-groups',sections.length>0);
+      if(sections.length){
+        // Keep both garden names as clickable parents, with children visibly nested below.
+        sections.forEach(section=>{
+          const box=document.createElement('section');
+          box.className='hb-mobile-game-section';
+          box.append(section.querySelector('.hb-game-parent').cloneNode(true),
+            section.querySelector('.hb-game-children').cloneNode(true));
+          mobileSubgrid.appendChild(box);
+        });
+      }else{
+        menu.querySelectorAll('.hb-dropdown a').forEach(link=>{
+          const tile=document.createElement('a');
+          tile.className='hb-mobile-subtile';
+          tile.href=link.getAttribute('href');
+          const title=document.createElement('b');
+          title.textContent=link.querySelector('b')?.textContent||link.textContent.trim();
+          const description=document.createElement('small');
+          description.textContent=link.querySelector('span')?.textContent||'바로가기';
+          tile.append(title,description);
+          mobileSubgrid.appendChild(tile);
+        });
+      }
       links.classList.add('hb-show-subcategory');
       mobileCategory.hidden=false;
       mobileBack.focus({preventScroll:true});
