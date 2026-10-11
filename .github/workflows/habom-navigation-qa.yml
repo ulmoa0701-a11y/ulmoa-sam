@@ -33,9 +33,10 @@ jobs:
           base=Path('.')
           js=(base/'assets/habom-navigation.js').read_text(encoding='utf-8')
           css=(base/'assets/habom-navigation.css').read_text(encoding='utf-8')
-          assert "name:'용어사전'" in js
+          assert "name:'알아봄'" in js
           assert "name:'3D 뇌지도'" in js
-          assert "name:'부모님 자료'" in js
+          assert "name:'찾아봄'" in js
+          assert "name:'이야기해봄'" in js
           assert 'hb-mobile-toggle' in js and 'hb-find-dialog' in js
           assert 'display:grid!important' in css and '1199px' in css
           assert 'hb-mobile-subgrid' in js and 'hb-show-subcategory' in js
@@ -52,10 +53,10 @@ jobs:
               assert 'habom-navigation.css' in page,filename
               assert 'habom-navigation.js' in page,filename
           home=(base/'index.html').read_text(encoding='utf-8')
-          for label in ['바로 찾기','용어사전','3D 뇌지도','부모님 도움자료']:
+          for label in ['바로 찾기','알아봄','3D 뇌지도','찾아봄','이야기해봄']:
               assert label in home,label
           glossary=(base/'notes/index.html').read_text(encoding='utf-8')
-          assert '<title>용어사전' in glossary
+          assert '<title>알아봄' in glossary
           parents=(base/'parents/index.html').read_text(encoding='utf-8')
           for name in ['speech','attention','emotion','social','daily','school','observation']:
               assert 'id="'+name+'"' in parents,name
