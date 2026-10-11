@@ -44,6 +44,39 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  check(await cognitiveDoor.getAttribute('href')==='thinking-garden/'&&
    await musicDoor.getAttribute('href')==='music-garden/',
    name+': cognitive and music main homepage doors are mixed or missing');
+
+ // Homepage's TOP two polaroids must match the two gardens; Heart Score is a separate tool.
+ const featured=page.locator('.desk-collage.featured-two .feature-card');
+ const featureBoxes=await featured.evaluateAll(cards=>cards.map(card=>{
+   const rect=card.getBoundingClientRect(),img=card.querySelector('img');
+   return {href:card.getAttribute('href'),label:card.querySelector('b')?.textContent,
+     x:rect.x,right:rect.right,y:rect.y,bottom:rect.bottom,width:rect.width,
+     imageLoaded:!!img?.complete&&img.naturalWidth>0,
+     imageFits:!!img&&img.getBoundingClientRect().width>65};
+ }));
+ check(featureBoxes.length===2&&featureBoxes[0].href==='thinking-garden/'&&
+   featureBoxes[1].href==='music-garden/'&&
+   featureBoxes.every(c=>c.imageLoaded&&c.imageFits&&c.x>=0&&c.right<=w+2&&c.width>=125)&&
+   featureBoxes[1].x>featureBoxes[0].x+80&&
+   ! (featureBoxes[0].right>featureBoxes[1].x+3),
+   name+': two featured garden images are missing, cramped or overlap '+JSON.stringify(featureBoxes));
+ check(await page.locator('.desk-collage.featured-two a[href="heart-score/"]').count()===0,
+   name+': Heart Score incorrectly occupies the Music Garden feature slot');
+ await page.locator('.desk-collage.featured-two').screenshot({path:out+'/'+name+'-homepage-featured-gardens.png'});
+ check(await page.locator('#toolGrid .tool-card').count()===3&&
+   await page.locator('#toolGrid .entry-music a[href="music-garden/"]').count()===2&&
+   await page.locator('#toolGrid .entry-heart a[href="heart-score/"]').count()===2,
+   name+': lower tools list lacks cognitive, music, and Heart Score destinations');
+ check((await page.locator('#resultCount').innerText()).trim()==='3개',
+   name+': tools displayed count disagrees with actual three entries');
+ await page.locator('.note-filters [data-search="음악"]').click();
+ check(await page.locator('#toolGrid .tool-card:not([hidden])').count()===2&&
+   (await page.locator('#resultCount').innerText()).trim()==='2개',
+   name+': Music filter should include Music Garden AND Heart Score');
+ await page.locator('.note-filters [data-search="게임"]').click();
+ check(await page.locator('#toolGrid .tool-card:not([hidden])').count()===2,
+   name+': Games filter should include both cognitive and music gardens');
+ await page.locator('.note-filters [data-search=""]').click();
  const navMenus=await page.locator('.hb-menu-games .hb-dropdown a').allTextContents();
  check(navMenus.some(t=>t.includes('생각정원'))&&navMenus.some(t=>t.includes('음악정원')),
    name+': main Games navigation does not show both clearly named gardens');
