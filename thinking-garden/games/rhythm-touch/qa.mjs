@@ -67,6 +67,11 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
    musicPageLayout.cards.every(c=>c.left>=0&&c.right<=w+2&&c.height>=150),
    name+': music garden cards clipped or unreadable '+JSON.stringify(musicPageLayout));
  await page.screenshot({path:out+'/'+name+'-music-garden.png',fullPage:true});
+ // Keep old bookmarked /thinking-garden/?category=music links functional.
+ await page.goto(base+'/thinking-garden/?category=music',{waitUntil:'networkidle'});
+ await page.waitForURL('**/music-garden/');
+ check((await page.title()).includes('모아의 음악정원'),
+   name+': legacy music-category URL did not redirect into music garden');
  await page.locator('.other-garden').click();
  await page.waitForURL('**/thinking-garden/');
  check(await page.locator('.library-card').count()===13,name+': thinking garden must have 13 cognitive games');
