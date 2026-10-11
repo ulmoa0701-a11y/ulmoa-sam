@@ -38,7 +38,7 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
 
  // Two clearly separated entrance points on the real main homepage.
  await page.goto(base+'/',{waitUntil:'networkidle'});
- check(await page.locator('.garden-doorbar a').count()===2,
+ check(await page.locator('.garden-doorbar a').count()>=3,
    name+': home page has no two distinct garden entrances');
  const cognitiveDoor=page.locator('.garden-door.cognitive-door'),musicDoor=page.locator('.garden-door.music-door');
  check(await cognitiveDoor.getAttribute('href')==='thinking-garden/'&&
@@ -99,16 +99,17 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
    href:group.querySelector('.hb-game-parent')?.getAttribute('href'),
    children:[...group.querySelectorAll('.hb-game-child')].map(a=>({label:a.textContent,href:a.getAttribute('href')}))
  })));
- check(gardenHierarchy.length===2&&gardenHierarchy[0].parent.includes('생각정원')&&
+ check(gardenHierarchy.length>=3&&gardenHierarchy[0].parent.includes('생각정원')&&
    gardenHierarchy[0].href==='thinking-garden/'&&gardenHierarchy[0].children.length===4&&
    gardenHierarchy[1].parent.includes('음악정원')&&gardenHierarchy[1].href==='music-garden/'&&
-   gardenHierarchy[1].children.length===2,
+   gardenHierarchy[1].children.length===2&&
+   gardenHierarchy.some(group=>group.parent.includes('바람놀이터')&&group.href==='breath-garden/'&&group.children.length===3),
    name+': garden menu children are not nested by parent '+JSON.stringify(gardenHierarchy));
  if(w<1200){
    await page.locator('.hb-mobile-toggle').click();
    await page.locator('.hb-menu-games > summary').click();
-   check(await page.locator('.hb-mobile-game-section').count()===2&&
-     await page.locator('.hb-mobile-game-section .hb-game-child').count()===6,
+   check(await page.locator('.hb-mobile-game-section').count()>=3&&
+     await page.locator('.hb-mobile-game-section .hb-game-child').count()>=9,
      name+': mobile menus flatten subcategories instead of nesting them');
    const mobileBox=await page.locator('.hb-mobile-game-section').first().evaluate(el=>{
      const r=el.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width}
