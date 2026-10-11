@@ -259,10 +259,13 @@ async function startMic(){
    video:false
   });
   if(token!==S.token){stream.getTracks().forEach(x=>x.stop());return}
+  // Own the newly granted stream before any subsequent operation can throw.
+  // Error cleanup must stop tracks even when WebAudio is unsupported.
+  S.stream=stream;
   const A=window.AudioContext||window.webkitAudioContext;
   if(!A)throw new Error('WebAudio를 지원하지 않아요');
   const context=new A();
-  S.stream=stream;S.context=context;
+  S.context=context;
   await context.resume();
   if(token!==S.token)return;
   S.analyser=context.createAnalyser();
@@ -286,7 +289,8 @@ async function startMic(){
 function startDemo(){
  stopAll();
  if(S.screen!=='lesson')show('lesson');
- S.mode='demo';S.lastTime=0;S.testingLevel=Number(el.testStrength.value)/100;
+ // A teacher demo starts its current stage fresh; no prior real-mic progress leaks in.
+ S.mode='demo';setStage(S.stage);S.lastTime=0;S.testingLevel=Number(el.testStrength.value)/100;
  el.micStart.textContent='🧪 색깔 체험 중';
  el.deviceInfo.textContent='🧪 체험 모드 · 마이크 미사용 · 진짜 바람 판정 아님';
  el.feedback.textContent='🧪 민감도 체험 중. 선생님이 슬라이더를 움직일 수 있어요.';
