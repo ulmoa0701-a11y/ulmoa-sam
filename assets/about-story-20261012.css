@@ -43,3 +43,55 @@
  .about-story .story-actions a{justify-content:center}
 }
 @media(prefers-reduced-motion:reduce){.about-story .story-actions a{scroll-behavior:auto}}
+
+
+/* Natural wave greeting: the existing mascot welcomes visitors beside the maker. */
+.about-story .story-intro-greeting{
+ display:grid;grid-template-columns:140px minmax(0,1fr);column-gap:20px;row-gap:10px;align-items:center;
+ margin:14px 0 32px;padding:18px 24px 20px 16px;border:1px solid #dce9da;border-radius:20px;
+ background:#f7faf6;box-shadow:0 8px 22px rgba(48,75,55,.035)
+}
+.about-story .story-hello-moa{margin:0;display:flex;align-items:center;justify-content:center;min-width:0}
+.about-story .story-hello-moa img{display:block;width:132px;max-width:100%;height:auto;object-fit:contain}
+.about-story .story-hello-copy{min-width:0}
+.about-story .story-hello-bubble{
+ position:relative;max-width:450px;padding:13px 17px 15px;
+ border:1px solid #d0e0d1;border-radius:17px;background:#fff;
+ box-shadow:0 6px 18px rgba(45,71,54,.045)
+}
+.about-story .story-hello-bubble::before{
+ content:"";position:absolute;left:-8px;top:37px;width:14px;height:14px;
+ background:#fff;border-left:1px solid #d0e0d1;border-bottom:1px solid #d0e0d1;
+ transform:rotate(45deg)
+}
+.about-story .story-intro-greeting .story-hello{
+ margin:0 0 5px;color:#284e3d;font-family:"Gamja Flower",cursive;
+ font-size:36px;font-weight:400;line-height:1.14
+}
+.about-story .story-intro-greeting .story-eyebrow{
+ margin:0;font-size:14px;font-weight:750;line-height:1.65;color:#3e5850;letter-spacing:-.02em
+}
+.about-story .story-intro-greeting .story-greeting-lead{
+ grid-column:1/-1;margin:2px 0 0;font-size:15px;line-height:1.76;
+ font-weight:400;color:#435954;word-break:keep-all
+}
+.about-story .story-section p{margin-bottom:15px}
+@media(max-width:650px){
+ .about-story .story-intro-greeting{
+  grid-template-columns:92px minmax(0,1fr);column-gap:11px;row-gap:8px;
+  padding:13px 11px 16px;margin:9px 0 26px;border-radius:16px
+ }
+ .about-story .story-hello-moa img{width:92px}
+ .about-story .story-hello-bubble{padding:10px 11px 11px;border-radius:14px}
+ .about-story .story-hello-bubble::before{top:27px;left:-7px;width:12px;height:12px}
+ .about-story .story-intro-greeting .story-hello{font-size:29px;margin-bottom:3px}
+ .about-story .story-intro-greeting .story-eyebrow{font-size:12.5px;line-height:1.5}
+ .about-story .story-intro-greeting .story-greeting-lead{font-size:14px;line-height:1.7;margin-top:1px}
+ .about-story .story-section p{margin-bottom:13px}
+}
+@media(max-width:350px){
+ .about-story .story-intro-greeting{grid-template-columns:78px minmax(0,1fr);column-gap:8px;padding:12px 10px}
+ .about-story .story-hello-moa img{width:78px}
+ .about-story .story-intro-greeting .story-hello{font-size:26px}
+ .about-story .story-intro-greeting .story-eyebrow{font-size:12px}
+}
