@@ -28,6 +28,7 @@
   }
   function valid(entry){
     if(!entry||entry.visibility!=="list"||entry.approved!==true)return false;
+    if(entry.has_attachment!=null&&typeof entry.has_attachment!=="boolean")return false;
     if(entry.content!=null||entry.body!=null||entry.email!=null||entry.phone!=null
       ||entry.attachment!=null||entry.files!=null||entry.link!=null)return false;
     var title=text(entry.public_title,70);
@@ -51,6 +52,7 @@
     // 닉네임은 이미 검토·마스킹된 값만 전달되어야 합니다.
     if(name!=="익명"&&!name.includes("*")&&!name.includes("＊"))name="익명";
     meta.append(element("span","",kind),element("span","","·"),element("span","",name));
+    if(entry.has_attachment===true)meta.append(element("span","hbl-attachment","· 📎 첨부파일 있음"));
     var status=SAFE_STATUSES[entry.status]?entry.status:"접수";
     var foot=element("div","hbl-foot");
     foot.append(element("span","","내용과 첨부파일은 공개되지 않습니다."),element("span","hbl-status",status));
