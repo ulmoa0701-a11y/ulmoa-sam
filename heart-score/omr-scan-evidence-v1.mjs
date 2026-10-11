@@ -30,11 +30,15 @@ export function scanPitchFromY(staff,x,seedY){
 
 function scanDot(staff,x,y){
   const s=staff.spacing,x0=Math.round(x+s*.85),x1=Math.round(x+s*2),y0=Math.round(y-s*.8),y1=Math.round(y+s*.8),w=x1-x0+1,h=y1-y0+1,seen=new Uint8Array(w*h);
-  const dark=(xx,yy)=>!staff.lines.some(l=>Math.abs(y0+yy-l)<2)&&W.omrGrayAt(staff.img,x0+xx,y0+yy)<170;
+  // A 6px staff compresses a printed augmentation dot to roughly 2x2px.
+  // Keep the stronger 3x3 criterion at normal resolutions; ignore staff ink.
+  const tiny=s<8,band=tiny?1.1:2;
+  const dark=(xx,yy)=>!staff.lines.some(l=>Math.abs(y0+yy-l)<band)&&W.omrGrayAt(staff.img,x0+xx,y0+yy)<170;
   for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){
     const at=yy*w+xx;if(seen[at]||!dark(xx,yy))continue;const queue=[[xx,yy]];seen[at]=1;let area=0,xa=xx,xb=xx,ya=yy,yb=yy;
     for(let q=0;q<queue.length;q++){const [cx,cy]=queue[q];area++;xa=Math.min(xa,cx);xb=Math.max(xb,cx);ya=Math.min(ya,cy);yb=Math.max(yb,cy);for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=cx+dx,ny=cy+dy;if(nx<0||ny<0||nx>=w||ny>=h||seen[ny*w+nx]||!dark(nx,ny))continue;seen[ny*w+nx]=1;queue.push([nx,ny]);}}
-    const cw=xb-xa+1,ch=yb-ya+1;if(cw>=3&&ch>=3&&cw<=s*.7&&ch<=s*.7&&area>=s*s*.07)return true;
+    const cw=xb-xa+1,ch=yb-ya+1,minDim=tiny?2:3,minArea=tiny?2:s*s*.07;
+    if(cw>=minDim&&ch>=minDim&&cw<=s*.7&&ch<=s*.7&&area>=minArea)return true;
   }return false;
 }
 export function scanRhythm(staff,item){
