@@ -28,6 +28,16 @@ const path=require("node:path");
       const page=await browser.newPage({viewport:{width:p.width,height:p.height},deviceScaleFactor:1});
       const errors=[];page.on("pageerror",e=>errors.push(String(e)));
       await page.goto(base,{waitUntil:"networkidle",timeout:90000});
+      // 가상 이용자: 첫 방문 보호자가 선택 없이 대표 상황 4가지를 바로 읽을 수 있어야 한다.
+      assert.equal(await page.locator("#gcatSituationPanel").isVisible(),true,"first-time visitor sees situations immediately");
+      assert.equal(await page.locator("#gcatTermPanel").isVisible(),false,"catalog is optional, not first decision");
+      assert.equal(await page.locator("#gcatJourneyNav button").count(),2,"two clear entry points, not three");
+      assert.equal(await page.locator("#gcatSituationGrid .gcat-situation-card").count(),4,"four representative situations are visible");
+      assert.equal(await page.locator("#gcatSituationGrid .gcat-first-concept").count(),4,"each situation teaches exactly one term without opening anything");
+      assert.equal(await page.locator("#gcatSituationGrid .gcat-why-link").count(),4,"each situation explains the concept connection");
+      assert.equal(await page.locator("#gcatSituationGrid .gcat-situation-more[open]").count(),0,"advanced terms stay optional");
+      await page.locator('#gcatJourneyNav button[data-view="terms"]').click();
+      assert.equal(await page.locator("#gcatTermPanel").isVisible(),true,"one selection opens the original glossary");
       const tabs=page.locator("#gcatTabs .gcat-tab"),cards=page.locator("#gcatList .gcat-card");
       const modeAlbum=page.locator("#gcatModeAlbum"),modeAll=page.locator("#gcatModeAll");
       const paged=page.locator("#gcatPages"),dialog=page.locator("#gcatDialog");
@@ -266,15 +276,21 @@ const path=require("node:path");
 
       // 알아봄: the twelve practical situations, five relationship maps and three deep-linkable views.
       const journey=page.locator("#gcatJourneyNav");
-      assert.equal(await journey.locator("button").count(),3,"three recognizable exploration options");
-      assert.equal(await page.locator("#gcatTermPanel").isVisible(),true,"existing illustrated catalog stays default");
+      assert.equal(await journey.locator("button").count(),2,"two recognizable first-step options");
+      assert.equal(await page.locator("#gcatTermPanel").isVisible(),true,"illustrated catalog remains fully accessible");
       await journey.locator('[data-view="situations"]').click();
       assert.equal(await page.locator("#gcatTermPanel").isVisible(),false,"term gallery hidden rather than destroyed");
       assert.equal(await page.locator("#gcatSituationPanel").isVisible(),true,"situation view directly available");
-      assert.equal(await page.locator("#gcatSituationGrid .gcat-situation-card").count(),12,"all twelve practical situations");
-      assert.equal(await page.locator("#gcatSituationGrid .gcat-topic-term").count(),36,"three actual glossary links per situation");
+      assert.equal(await page.locator("#gcatSituationGrid .gcat-situation-card").count(),4,"start with four situations, not twelve");
+      assert.equal(await page.locator("#gcatSituationGrid .gcat-topic-term").count(),8,"only two advanced terms per default situation");
+      assert.equal(await page.locator("#gcatSituationGrid .gcat-situation-more[open]").count(),0,"no advanced terms displayed without user choice");
+      await page.locator('#gcatSituationFilters button[data-group="all"]').click();
+      assert.equal(await page.locator("#gcatSituationGrid .gcat-situation-card").count(),12,"all twelve practical situations available on demand");
+      assert.equal(await page.locator("#gcatSituationGrid .gcat-primary-term").count(),12,"one clear deeper learning button per situation");
+      assert.equal(await page.locator("#gcatSituationGrid .gcat-topic-term").count(),24,"two optional advanced links per situation");
       assert.equal(await page.locator("#gcatSituationGrid .gcat-scene").count(),12,"twelve familiar daily-life scenes");
-      assert.equal(await page.locator("#gcatSituationGrid .gcat-situation-focus").count(),12,"twelve short memory hooks");
+      assert.equal(await page.locator("#gcatSituationGrid .gcat-situation-focus").count(),12,"twelve clear one-concept learning blocks");
+      assert.equal(await page.locator("#gcatSituationGrid .gcat-why-link").count(),12,"concept link explained in all situations");
       assert.equal(await page.locator("#gcatSituationGrid .gcat-learning-reference").count(),12,"related research links directly available");
       const refLinks=await page.locator("#gcatSituationGrid .gcat-learning-reference").evaluateAll(els=>els.every(a=>a.href.startsWith("https://")&&a.target==="_blank"));
       assert.equal(refLinks,true,"trusted reference links are external and explicit");
@@ -286,12 +302,14 @@ const path=require("node:path");
         assert.equal(await page.locator("#gcatSituationGrid .gcat-situation-card").count(),3,"three examples for "+category);
       }
       await page.locator('#gcatSituationFilters button[data-group="all"]').click();
-      const scenarioChip=page.locator("#gcatSituationGrid .gcat-topic-term").first();
+      const scenarioChip=page.locator("#gcatSituationGrid .gcat-primary-term").first();
       await scenarioChip.click();
       assert.equal(await dialog.evaluate(x=>x.open),true,"situation term opens the same original glossary explanation");
       assert((await page.locator("#gcatDialogBody .study-paper").textContent()).length>80,"one source of truth in situation links");
       await page.locator("#gcatDialogClose").click();
-      await journey.locator('[data-view="connections"]').click();
+      // 심화 관계 지도는 첫 선택지가 아니라 용어를 확인한 뒤 찾을 수 있다.
+      await journey.locator('[data-view="terms"]').click();
+      await page.locator("#gcatOpenConnections").click();
       assert.equal(await page.locator("#gcatConnectionPanel").isVisible(),true,"connections shown in same page");
       assert.equal(await page.locator("#gcatConnectionFilters button").count(),5,"five curated topic maps");
       assert.equal(await page.locator("#gcatConnectionDetail .gcat-concept-node").count(),4,"four readable concept steps");
@@ -319,7 +337,7 @@ const path=require("node:path");
       assert.equal(await page.locator("#gcatTermPanel").isVisible(),true,"original glossary mode restored");
       assert.equal(await page.locator(".study-note").count(),42,"no original note lost on view switching");
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,"no horizontal scrolling on final restored view");
-      console.log(p.name+": PASS "+imageFiles.length+" images + 42-text-map, four branch counts, 12 situations, 5 relationship maps, search, dialogs, responsive");
+      console.log(p.name+": PASS first-visit four-card learning, 2 entry buttons, one term per card, 32 art + 42 glossary, 12 situations, 5 maps, search and responsive");
       await page.close();
     }
   }finally{await browser.close();}
