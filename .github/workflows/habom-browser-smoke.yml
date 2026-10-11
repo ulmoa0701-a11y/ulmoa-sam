@@ -54,8 +54,12 @@ jobs:
               first?.click();
               if(!wrapper.classList.contains('hb-show-subcategory'))issues.push('category panel did not open');
               if(nav.querySelector('details.hb-menu[open]'))issues.push('native details expanded on mobile');
-              const firstTile=nav.querySelector('.hb-mobile-subtile');
-              if(!firstTile||getComputedStyle(firstTile).display==='none')issues.push('category subtiles not visible');
+              const gardenGroups=[...nav.querySelectorAll('.hb-mobile-game-section')];
+              if(gardenGroups.length!==2)issues.push('two nested garden groups not visible');
+              const parentNames=gardenGroups.map(g=>g.querySelector('.hb-game-parent')?.textContent||'');
+              if(!parentNames[0]?.includes('생각정원')||!parentNames[1]?.includes('음악정원'))issues.push('garden hierarchy misnamed');
+              if(gardenGroups[0]?.querySelectorAll('.hb-game-child').length!==4||gardenGroups[1]?.querySelectorAll('.hb-game-child').length!==2)issues.push('garden category counts incorrect');
+              if(gardenGroups.some(g=>!g.querySelector('.hb-game-parent')||getComputedStyle(g).display==='none'))issues.push('nested groups hidden');
               const menuTile=nav.querySelector('.hb-nav-links > .hb-menu');
               if(menuTile&&getComputedStyle(menuTile).display!=='none')issues.push('grid remains visible behind subcategory');
               const back=nav.querySelector('.hb-mobile-back');
@@ -64,8 +68,8 @@ jobs:
               if(menuTile&&getComputedStyle(menuTile).display==='none')issues.push('category grid did not return');
               first?.click();
               if(isSub){
-                const subTile=nav.querySelector('.hb-mobile-subtile');
-                if(!subTile||getComputedStyle(subTile).display==='none')issues.push('subpage tile hidden');
+                const subTile=nav.querySelector('.hb-mobile-game-section .hb-game-child');
+                if(!subTile||getComputedStyle(subTile).display==='none')issues.push('subpage nested game tile hidden');
               }
               nav.querySelector('.hb-quick-search')?.click();
               const dialog=document.querySelector('.hb-find-dialog');
@@ -99,5 +103,7 @@ jobs:
           done
           "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1440,900 --virtual-time-budget=2500 --dump-dom 'http://127.0.0.1:8765/index.html' > /tmp/habom-home.html 2>/tmp/habom-browser.log
           grep -q 'hb-nav-links' /tmp/habom-home.html
+          grep -q 'hb-game-groups' /tmp/habom-home.html
+          grep -q 'hb-game-children' /tmp/habom-home.html
           grep -q '부모님 도움자료' /tmp/habom-home.html
           echo 'PASS: desktop homepage renders menu and shortcut text'
