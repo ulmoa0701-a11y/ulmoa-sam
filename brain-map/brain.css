@@ -161,3 +161,118 @@
  .hemi-fact p{font-size:11px}
  .both-work{font-size:11px}
 }
+
+
+/* -------------------- 좌뇌·우뇌 보기: HTML/SVG live UI (not a picture file) -------------------- */
+.brain-one-glance .brain-view[hidden]{display:none!important}
+.brain-view-tabs{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:2px 0 15px}
+.brain-view-tabs button{font-family:inherit;border:1.5px solid #dce7da;border-radius:15px;min-width:0;min-height:66px;background:#fff;color:#45634e;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:11px;padding:11px 14px;font-weight:950;font-size:18px;box-shadow:0 2px 8px #496c5010}
+.brain-view-tabs button small{font-size:12px;font-weight:700;color:#6f8174}
+.brain-view-tabs button[aria-selected=true]{border-color:#5e9a74;background:#e6f4e7;color:#2e6043;box-shadow:0 0 0 2px #9ecfb03a inset}
+.brain-view-tabs button:hover{border-color:#71ad82}
+.hemi-comparison{border-radius:23px;border:1px solid #dce8dc;background:#fff;box-shadow:0 6px 20px #536d4c0e;padding:19px 19px 16px}
+.hemi-intro{display:flex;justify-content:space-between;align-items:end;gap:12px 24px;flex-wrap:wrap;padding:0 5px 14px}
+.hemi-kicker{font-size:12px;font-weight:850;color:#4c8161;display:block;margin-bottom:5px}
+.hemi-intro h2{font-size:clamp(22px,2.7vw,27px);line-height:1.27;letter-spacing:-.046em;font-weight:950;color:#2c4e3c;margin:0!important}
+.hemi-intro p{font-size:13px;line-height:1.6;margin:0!important;color:#6b7b70}
+.hemi-intro p strong{color:#37724e}
+.hemi-study-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(230px,.86fr) minmax(0,1fr);gap:12px;align-items:stretch}
+.hemi-study-card{border-radius:20px;padding:14px;background:#eef6ff;border:1.5px solid #d4e8fb;display:flex;flex-direction:column;min-width:0}
+.hemi-right{background:#fff7e9;border-color:#f6e3ba}
+.hemi-side-title{background:#ffffffb7;border-radius:14px;border:1.5px solid #c5dffc;display:flex;gap:10px;align-items:center;text-align:left;padding:12px 10px;width:100%;min-width:0;color:#335c88;font-family:inherit;cursor:pointer}
+.hemi-right .hemi-side-title{border-color:#f4d8a5;color:#8d602a}
+.hemi-side-title[aria-pressed=true]{outline:3px solid #77abe4;outline-offset:1px}
+.hemi-right .hemi-side-title[aria-pressed=true]{outline-color:#e2b25b}
+.hemi-title-illustration{display:grid;place-items:center;background:#d2e8ff;border-radius:13px;flex:0 0 44px;width:44px;height:44px;font-size:24px}
+.hemi-right .hemi-title-illustration{background:#ffe5b9}
+.hemi-side-title strong{display:block;font-size:23px;font-weight:950;line-height:1.1;letter-spacing:-.04em}
+.hemi-side-title small{display:block;margin-top:5px;color:#52758a;line-height:1.4;font-size:12px;font-weight:750;word-break:keep-all}
+.hemi-right .hemi-side-title small{color:#90734a}
+.hemi-select-hint{font-size:10px;font-weight:750;color:#8dabc8;margin-left:auto;white-space:nowrap}
+.hemi-right .hemi-select-hint{color:#b9a078}
+.hemi-ability-list{list-style:none;display:grid;gap:8px;padding:0;margin:11px 0 0}
+.hemi-ability-list li{display:flex;align-items:center;gap:10px;border-radius:13px;background:#fff;padding:11px 10px;min-height:66px;min-width:0}
+.ability-icon{font-size:23px;flex:0 0 35px;display:grid;place-items:center}
+.hemi-ability-list b{display:block;font-size:15px;line-height:1.35;font-weight:900;color:#364b5b}
+.hemi-right .hemi-ability-list b{color:#5e4e37}
+.hemi-ability-list small{display:block;font-size:12px;line-height:1.55;font-weight:670;color:#5f7484;margin-top:3px;word-break:keep-all}
+.hemi-right .hemi-ability-list small{color:#7b6b55}
+.hemi-example{background:#e1efff;border-radius:12px;padding:11px 12px;margin-top:auto;min-width:0;transform:translateY(10px);margin-bottom:10px}
+.hemi-right .hemi-example{background:#ffebc5}
+.hemi-example strong{font-size:12px;font-weight:900;color:#446c95}
+.hemi-right .hemi-example strong{color:#987544}
+.hemi-example p{font-size:13px;line-height:1.55;color:#3b5368;font-weight:720;margin:5px 0 0!important;word-break:keep-all}
+.hemi-right .hemi-example p{color:#725a3a}
+.hemi-hero{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;border-radius:19px;background:radial-gradient(circle at 50% 30%,#fff,#f7fbf5 80%);padding:5px 4px 13px}
+.hemi-hero-svg{width:100%;height:auto;max-width:310px;max-height:365px;display:block;overflow:visible}
+.hemi-svg-side{cursor:pointer;outline:none;transition:opacity .13s,filter .13s}
+.hemi-svg-side:hover,.hemi-svg-side:focus-visible{filter:drop-shadow(0 0 5px #9bb4a8)}
+.hemi-svg-side[aria-pressed=true]{filter:drop-shadow(0 0 7px #8ac596)}
+.hemi-hero-svg[data-focused=left] .hemi-svg-side[data-hemi-select=right],
+.hemi-hero-svg[data-focused=right] .hemi-svg-side[data-hemi-select=left]{opacity:.45}
+.hemi-art-caption{font-size:10px;font-weight:650;color:#7b8b7c;text-align:center;margin:0!important;line-height:1.6}
+.hemi-focus{margin:10px auto 0;padding:10px;max-width:285px;background:#eef7ea;border-radius:12px;width:100%;display:grid;gap:3px;text-align:center}
+.hemi-focus b{color:#396949;font-size:14px;font-weight:950}
+.hemi-focus span{color:#54765d;font-size:12px;line-height:1.5}
+.hemi-team{margin-top:13px;padding:14px 15px;background:#f1f9ef;border:1px solid #d9e9d6;border-radius:18px;text-align:center}
+.hemi-together{background:#4f8860;color:white;font:inherit;cursor:pointer;border:0;border-radius:99px;display:inline-flex;align-items:center;gap:8px;justify-content:center;min-height:43px;padding:8px 20px;font-size:16px}
+.hemi-together span{font-size:13px;font-weight:700}
+.hemi-together[aria-pressed=true]{box-shadow:0 0 0 4px #a5d8ab65}
+.hemi-team-examples{margin:12px 0 9px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.hemi-team-examples span{background:#fff;min-width:0;border-radius:12px;padding:12px 6px;font-size:14px;color:#315744;line-height:1.35}
+.hemi-team-examples b{font-size:13px}
+.hemi-team>p{color:#5d7560;line-height:1.65;font-size:13px;margin:0!important}
+.hemi-team>p strong{color:#3d674c}
+.hemi-caution{margin:12px 3px 0!important;color:#697b6c;font-size:12px;line-height:1.7;word-break:keep-all}
+.hemi-study-sources{font-size:11px;color:#7b897e;margin:8px 3px 0;line-height:1.65}
+.hemi-study-sources a{color:#426e54;text-underline-offset:2px}
+@media(max-width:1080px){
+ .hemi-study-grid{grid-template-columns:minmax(0,1fr) minmax(205px,.68fr) minmax(0,1fr);gap:8px}
+ .hemi-study-card{padding:10px}
+ .hemi-side-title small{font-size:11px}
+ .hemi-side-title strong{font-size:20px}
+ .hemi-ability-list small{font-size:11.5px}
+ .hemi-select-hint{display:none}
+ .hemi-ability-list li{padding:10px 6px}
+}
+@media(max-width:760px){
+ .brain-view-tabs{gap:6px;margin-bottom:10px}
+ .brain-view-tabs button{font-size:15px;min-height:58px;flex-direction:column;gap:3px;padding:7px 3px;border-radius:12px}
+ .brain-view-tabs button small{font-size:10px}
+ .hemi-comparison{padding:12px 9px;border-radius:17px}
+ .hemi-intro{padding:1px 4px 11px;gap:6px}
+ .hemi-intro h2{font-size:21px}
+ .hemi-intro p{font-size:12px}
+ .hemi-study-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"hero hero" "left right";gap:8px}
+ .hemi-hero{grid-area:hero;padding:0 4px 8px}
+ .hemi-hero-svg{max-width:270px;max-height:310px}
+ .hemi-left{grid-area:left}.hemi-right{grid-area:right}
+ .hemi-study-card{padding:8px;border-radius:14px}
+ .hemi-side-title{padding:8px 5px;gap:5px}
+ .hemi-title-illustration{width:30px;height:30px;flex-basis:30px;font-size:19px;border-radius:9px}
+ .hemi-side-title strong{font-size:17px}
+ .hemi-side-title small{font-size:10px;margin-top:2px}
+ .hemi-ability-list{gap:5px;margin-top:7px}
+ .hemi-ability-list li{gap:4px;padding:7px 5px;min-height:92px;align-items:flex-start;flex-direction:column}
+ .ability-icon{font-size:19px;flex:0 0 auto;display:inline}
+ .hemi-ability-list b{font-size:13px;line-height:1.35}
+ .hemi-ability-list small{font-size:11px;line-height:1.45}
+ .hemi-example{margin-top:8px;padding:9px 7px;transform:none;margin-bottom:0}
+ .hemi-example strong{font-size:11px}
+ .hemi-example p{font-size:11px}
+ .hemi-focus{max-width:260px;margin:4px auto 0;padding:7px}
+ .hemi-focus b{font-size:13px}
+ .hemi-focus span{font-size:11px}
+ .hemi-team{padding:12px 8px;border-radius:14px}
+ .hemi-team-examples{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .hemi-team-examples span{padding:8px 4px}
+ .hemi-team-examples b{font-size:12px}
+ .hemi-team>p{font-size:12px}
+ .hemi-caution{font-size:11.5px}
+}
+@media(max-width:370px){
+ .hemi-side-title small{font-size:9.5px}
+ .hemi-ability-list b{font-size:12px}
+ .hemi-ability-list small{font-size:10.5px}
+ .hemi-title-illustration{width:28px;height:28px;flex-basis:28px}
+}
