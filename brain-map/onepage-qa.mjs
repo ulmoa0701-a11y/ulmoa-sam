@@ -26,6 +26,7 @@ try{
   assert.equal(await page.locator('.brain-hero,.brain3d-feature,.brain-explorer,.brain-networks,.brain-faq').count(),0,'no prior scrolling sections');
   assert.equal(await page.locator('#simpleDetail').isHidden(),true,'optional detail starts closed');
   assert.equal(await page.locator('.more-learn').getAttribute('open'),null,'advanced features closed by default');
+  assert.notEqual(await page.locator('.sub-footer .footer-social').evaluate(el=>getComputedStyle(el).position),'fixed','shared social links must not float over educational content');
   const allText=await page.locator('.lobe-list').innerText();
   for(const label of ['전두엽','두정엽','측두엽','후두엽','소뇌','뇌줄기'])assert.ok(allText.includes(label),'missing '+label);
   const fit=await page.evaluate(()=>({
