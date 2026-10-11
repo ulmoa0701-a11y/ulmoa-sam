@@ -1,0 +1,80 @@
+name: Habom Locked Metadata Privacy QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'request/index.html'
+      - 'request/locked-posts.json'
+      - 'assets/habom-locked-posts.js'
+      - 'assets/community-board.css'
+      - '.github/workflows/habom-locked-posts-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  metadata-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify redacted-only public data and syntax
+        shell: bash
+        run: |
+          set -eu
+          node --check assets/habom-locked-posts.js
+          node - <<'JS'
+          const data=require('./request/locked-posts.json');
+          if(!Array.isArray(data.posts))throw Error('posts array missing');
+          const allowed=['approved','visibility','category','public_title','nickname_masked','created_at','status'];
+          for(const post of data.posts){
+            if(Object.keys(post).some(k=>!allowed.includes(k)))throw Error('private data present in public metadata JSON');
+            if(post.approved!==true||post.visibility!=='list')throw Error('unapproved public record');
+            if(!/^\d{4}-\d{2}-\d{2}$/.test(post.created_at))throw Error('invalid date');
+            for(const val of Object.values(post)){
+              if(typeof val==='string'&&(/[\w.%+-]+@[\w.-]+\.[A-Za-z]{2,}/.test(val)||/0\d{1,2}[-.\s]?\d{3,4}[-.\s]?\d{4}/.test(val)))
+                 throw Error('potential contact information in public record');
+            }
+          }
+          console.log('PASS: static metadata contains only allowed public fields');
+          JS
+      - name: Install Playwright driver
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Simulate approved and rejected secret metadata in Chrome
+        shell: bash
+        run: |
+          cat > hb-locked-test.cjs <<'JS'
+          const { chromium }=require('playwright-core');
+          const assert=require('node:assert/strict');
+          (async()=>{
+            const browser=await chromium.launch({executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+            try {
+              for (const width of [390,1360]){
+                const page=await browser.newPage({viewport:{width,height:844}});
+                const data={schema_version:1,posts:[
+                  {approved:true,visibility:'list',public_title:'비밀글입니다',nickname_masked:'별빛**',category:'질문',created_at:'2026-10-11',status:'확인 중'},
+                  {approved:true,visibility:'list',public_title:'금지된 글',nickname_masked:'익명',category:'질문',created_at:'2026-10-10',status:'접수',email:'secret@example.test'},
+                  {approved:false,visibility:'list',public_title:'미승인 글',nickname_masked:'익명',category:'자료 요청',created_at:'2026-10-09',status:'접수'}
+                ]};
+                await page.route('**/locked-posts.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(data)}));
+                await page.goto('http://127.0.0.1:8765/request/',{waitUntil:'domcontentloaded',timeout:20000});
+                await page.waitForSelector('#habomLockedPosts[data-loaded="true"]',{timeout:10000});
+                const rows=page.locator('#habomLockedItems .hbl-item');
+                assert.equal(await rows.count(),1,'unapproved/sensitive entries must not appear');
+                const content=await rows.first().innerText();
+                assert.match(content,/비밀글입니다/);
+                assert.match(content,/별빛\*\*/);
+                assert.match(content,/확인 중/);
+                assert.doesNotMatch(content,/금지된 글|미승인 글|secret@example\.test/);
+                assert.equal(await rows.first().locator('a').count(),0,'secret content must not link to unverified URLs');
+                const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+3);
+                assert.equal(overflow,false,'no horizontal overflow');
+                console.log('PASS: '+width+'px, only approved safe metadata rendered, secret data excluded');
+                await page.close();
+              }
+            } finally {await browser.close()}
+          })().catch(e=>{console.error(e.stack||String(e));process.exit(1)});
+          JS
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)" && export CHROME_BIN
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/hb-locked-server.log 2>&1 &
+          sleep 2
+          node hb-locked-test.cjs
