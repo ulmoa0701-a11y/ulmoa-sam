@@ -77,6 +77,8 @@ const path=require("node:path");
       assert.equal(paperLook.after,"none","no decorative pseudo-element in dialog");
       assert.equal(paperLook.paddingLeft,0,"reading layout is not offset by notebook gutter");
       assert.equal(await page.locator("#gcatDialogBody .gcat-definition-section").count(),1,"single clear definition section");
+      assert.equal(await page.locator("#gcatDialogBody .gcat-original-definition-label").textContent(),"정확한 뜻","expert definition remains after one-line plain explanation");
+      assert.equal(await page.locator("#gcatDialogBody .gcat-section-kicker").textContent(),"한마디로","plain language comes before professional meaning");
       assert.equal(await page.locator("#gcatDialogBody .gcat-example-section").count(),1,"real-life example follows definition");
       assert.equal(await page.locator("#gcatDialogBody .gcat-hints-section").count(),1,"optional distinction and keywords retained");
       const infoOrder=await page.locator("#gcatDialogBody .gcat-reading-sheet").evaluate(sheet=>[...sheet.children].map(x=>x.className));
@@ -271,6 +273,13 @@ const path=require("node:path");
       assert.equal(await page.locator("#gcatSituationPanel").isVisible(),true,"situation view directly available");
       assert.equal(await page.locator("#gcatSituationGrid .gcat-situation-card").count(),12,"all twelve practical situations");
       assert.equal(await page.locator("#gcatSituationGrid .gcat-topic-term").count(),36,"three actual glossary links per situation");
+      assert.equal(await page.locator("#gcatSituationGrid .gcat-scene").count(),12,"twelve familiar daily-life scenes");
+      assert.equal(await page.locator("#gcatSituationGrid .gcat-situation-focus").count(),12,"twelve short memory hooks");
+      assert.equal(await page.locator("#gcatSituationGrid .gcat-learning-reference").count(),12,"related research links directly available");
+      const refLinks=await page.locator("#gcatSituationGrid .gcat-learning-reference").evaluateAll(els=>els.every(a=>a.href.startsWith("https://")&&a.target==="_blank"));
+      assert.equal(refLinks,true,"trusted reference links are external and explicit");
+      const cardColumns=await page.locator("#gcatSituationGrid .gcat-situation-card").evaluateAll(els=>new Set(els.map(e=>Math.round(e.getBoundingClientRect().left))).size);
+      assert.equal(cardColumns,p.width<=650?1:2,"readable one/two-column situation cards");
       assert.equal(new URL(page.url()).searchParams.get("view"),"situations","situation view can be shared");
       for(const category of ["attention","memory","language","support"]){
         await page.locator('#gcatSituationFilters button[data-group="'+category+'"]').click();
@@ -290,10 +299,13 @@ const path=require("node:path");
       for(const map of ["executive","memory","language","behavior","teaching"]){
         await page.locator('#gcatConnectionFilters button[data-map="'+map+'"]').click();
         assert.equal(await page.locator("#gcatConnectionDetail .gcat-concept-node").count(),4,"linked steps for "+map);
-        assert.equal(await page.locator("#gcatConnectionDetail .gcat-concept-bridge").count(),3,"relationships explained for "+map);
+        assert.equal(await page.locator("#gcatConnectionDetail .gcat-concept-bridge").count(),0,"unfounded sequential arrows removed for "+map);
+        assert.equal(await page.locator("#gcatConnectionDetail .gcat-concept-related-list .gcat-concept-node").count(),3,"three concepts compared against a central concept");
+        assert.equal(await page.locator("#gcatConnectionDetail .gcat-concept-takeaway").count(),1,"short key point to remember");
+        assert.equal(await page.locator("#gcatConnectionDetail .gcat-learning-reference").count(),1,"topic has expert source");
       }
       await page.locator('#gcatConnectionFilters button[data-map="behavior"]').click();
-      assert((await page.locator("#gcatConnectionDetail").textContent()).includes("ABC 기록만으로"),"limits of behavior data are stated");
+      assert((await page.locator("#gcatConnectionDetail").textContent()).includes("기록 하나만으로"),"limits of behavior data are stated in everyday language");
       await page.locator("#gcatConnectionDetail .gcat-concept-node").last().click();
       assert.equal(await dialog.evaluate(x=>x.open),true,"map node opens original term modal");
       await page.locator("#gcatDialogClose").click();

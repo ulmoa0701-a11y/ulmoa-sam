@@ -1093,3 +1093,81 @@
  .glossary-page .gcat-concept-node strong{font-size:14px}
  .glossary-page .gcat-concept-node small{font-size:10px}
 }
+
+
+/* 알아봄 쉬운 말 버전: 중심 의미 → 구체적인 장면 → 참고 개념.
+   원본 정의·그림과 출처, 기존 카탈로그 CSS는 그대로 둔다. */
+.glossary-page .gcat-original-definition-label{
+  display:block;margin:12px 0 5px;
+  font:700 12px/1.35 "Pretendard Variable",Pretendard,sans-serif;color:#77685a;
+}
+.glossary-page .gcat-definition-headline{letter-spacing:-.025em!important}
+.glossary-page .gcat-situation-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.glossary-page .gcat-situation-card{gap:9px;padding:17px;max-width:100%}
+.glossary-page .gcat-situation-card h3{font-size:17px!important}
+.glossary-page .gcat-scene{
+  margin:0!important;color:#53483e;
+  font:550 14px/1.6 "Pretendard Variable",Pretendard,sans-serif!important;word-break:keep-all;
+}
+.glossary-page .gcat-situation-focus{
+  display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:10px;
+  background:#fff5de;color:#5e4b34;word-break:keep-all;
+}
+.glossary-page .gcat-situation-focus strong{
+  flex:0 0 auto;font:800 11px/1.5 "Pretendard Variable",Pretendard,sans-serif;
+}
+.glossary-page .gcat-situation-focus span{font:650 12.5px/1.5 "Pretendard Variable",Pretendard,sans-serif}
+.glossary-page .gcat-situation-detail{padding:0!important}
+.glossary-page .gcat-situation-detail strong{font-size:12px;color:#726557}
+.glossary-page .gcat-situation-detail p{font-size:13.5px;line-height:1.55}
+.glossary-page .gcat-situation-application{
+  padding:10px 11px!important;background:#f2f7f2;border-radius:10px;
+}
+.glossary-page .gcat-situation-terms{padding-top:10px;margin-top:4px}
+.glossary-page .gcat-topic-term{min-height:34px;font-size:12px;padding:6px 9px}
+.glossary-page .gcat-learning-reference{
+  display:inline-flex;align-self:flex-start;margin-top:1px;min-height:25px;
+  font:600 11.5px/1.5 "Pretendard Variable",Pretend,sans-serif;
+  color:#52695d;text-decoration:underline;text-underline-offset:3px;
+}
+.glossary-page .gcat-learning-reference:hover{color:#284a3e}
+.glossary-page .gcat-concept-detail,.glossary-page .gcat-connection-detail{gap:16px}
+.glossary-page .gcat-concept-takeaway{
+  padding:12px 13px;background:#fff5dc;border-radius:12px;margin-bottom:11px;
+}
+.glossary-page .gcat-concept-takeaway strong,
+.glossary-page .gcat-concept-flow-title,
+.glossary-page .gcat-concept-related-title{
+  display:block;margin:0 0 6px;color:#766048;
+  font:750 12px/1.4 "Pretendard Variable",Pretendard,sans-serif;
+}
+.glossary-page .gcat-concept-takeaway p{
+  margin:0!important;color:#463c2e;
+  font:750 15px/1.6 "Pretendard Variable",Pretendard,sans-serif!important;word-break:keep-all;
+}
+.glossary-page .gcat-concept-flow{gap:7px}
+.glossary-page .gcat-concept-center{
+  display:flex;flex-direction:column;align-items:flex-start;gap:3px;
+  padding:15px;background:#fff2d7;border-color:#ddc8a3;
+}
+.glossary-page .gcat-concept-center small{max-width:none;font-size:11px;color:#876d4e}
+.glossary-page .gcat-concept-center strong{color:#453b2d;font-size:17px}
+.glossary-page .gcat-concept-center>span{color:#65533d;font:600 12px/1.4 "Pretendard Variable",Pretendard,sans-serif}
+.glossary-page .gcat-concept-related-title{margin:10px 0 2px!important}
+.glossary-page .gcat-concept-related-list{display:flex;flex-direction:column;gap:8px;min-width:0}
+.glossary-page .gcat-concept-related-list .gcat-concept-node{min-height:63px;padding:11px 13px}
+.glossary-page .gcat-concept-node-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+.glossary-page .gcat-concept-node-copy strong{font-size:14px;color:#344d40}
+.glossary-page .gcat-concept-node-copy small{
+  max-width:none;font-size:12px;line-height:1.4;color:#647467;text-align:left;word-break:keep-all;
+}
+.glossary-page .gcat-concept-open{color:#73947d;font-size:19px}
+.glossary-page .gcat-concept-bridge{display:none}
+.glossary-page .gcat-concept-explanation>.gcat-learning-reference{margin-top:12px}
+@media(max-width:650px){
+ .glossary-page .gcat-situation-grid{grid-template-columns:minmax(0,1fr)}
+ .glossary-page .gcat-situation-card{padding:13px;gap:8px}
+ .glossary-page .gcat-situation-card h3{font-size:16px!important}
+ .glossary-page .gcat-scene{font-size:13.5px!important}
+ .glossary-page .gcat-concept-takeaway p{font-size:14px!important}
+}
