@@ -31,6 +31,8 @@ try{
    await page.evaluate(x=>localStorage.setItem('ulmoaBoomTransfer',JSON.stringify(x)),song);
    await page.reload({waitUntil:'domcontentloaded'});
    if(mobile){await page.locator('#mobileSettingsBtn').click();result.settingsOpen=await page.locator('#introMode').isVisible();}
+   result.defaultMode=await page.locator('#introMode').inputValue();
+   if(result.defaultMode!=='interlude')throw Error('Default still uses beat-only intro: '+result.defaultMode);
    await page.locator('#introMode').selectOption('interlude');
    const picker=await page.locator('#introMode').evaluate(el=>({width:el.getBoundingClientRect().width,font:Number.parseFloat(getComputedStyle(el).fontSize),display:getComputedStyle(el.parentElement).display}));
    result.introPicker=picker;
@@ -41,19 +43,22 @@ try{
    result.info=info;
    if(info.mode!=='interlude'||info.song!==song.title||info.bpm<35||info.bpm>140||Math.abs(info.beat-60000/info.bpm)>1)throw Error('Incorrect musical interlude selected '+JSON.stringify(info));
    if(mobile)await page.locator('#mobileSettingsClose').click();
+   const phrase=await page.evaluate(()=>interludePhraseNotes(6,beatMs(),2).map(n=>({note:n.note,offsetMs:Math.round(n.offsetMs)})));
+   result.melodyNotes=phrase;
+   if(phrase.map(n=>n.note).join(',')!=='도,솔,미,솔')throw Error('Musical introduction is NOT the actual opening song: '+JSON.stringify(phrase));
    const audioProbe=await page.evaluate(async()=>{
     const ac=new OfflineAudioContext(1,44100*4,44100);
     const g=ac.createGain();g.connect(ac.destination);
-    scheduleInterludeAccompaniment(ac,g,.05,6,beatMs(),2);
+    const melody=scheduleInterludeMusic(ac,g,.05,6,beatMs(),2);
     const rendered=await ac.startRendering(),d=rendered.getChannelData(0);
     const power=(a,b)=>{let energy=0;for(let i=Math.floor(a*44100);i<Math.min(d.length,Math.floor(b*44100));i++)energy+=Math.abs(d[i]);return Math.round(energy)};
-    return {firstBeat:power(0,.3),secondBeat:power(.45,.7),laterBar:power(1.30,1.65)};
+    return {melodyNotes:melody.length,firstBeat:power(0,.3),secondBeat:power(.64,.85),laterBar:power(1.30,1.65)};
    });
    result.audioProbe=audioProbe;
-   if(audioProbe.firstBeat<=5||audioProbe.secondBeat<=5||audioProbe.laterBar<=5)throw Error('Interlude is not true audible chordal accompaniment '+JSON.stringify(audioProbe));
+   if(audioProbe.melodyNotes!==4||audioProbe.firstBeat<=15||audioProbe.secondBeat<=15||audioProbe.laterBar<=15)throw Error('Interlude is not true audible chordal accompaniment '+JSON.stringify(audioProbe));
    await page.locator(mobile?'#playBtn':'#startBtn').click();
    result.start=await page.evaluate(()=>({mode:introMode,active:introActive,beats:introBeats,durationMs:introDurationMs,heading:document.querySelector('#introHeading').innerText,gain:!!introGain}));
-   if(!result.start.active||result.start.beats!==6||result.start.heading!=='반주 간주를 듣고 들어가요'||!result.start.gain)throw Error('Interlude did not start '+JSON.stringify(result.start));
+   if(!result.start.active||result.start.beats!==6||result.start.heading!=='노래 간주를 듣고 들어가요'||!result.start.gain)throw Error('Interlude did not start '+JSON.stringify(result.start));
    await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+15);introFrame(performance.now())});
    await page.waitForTimeout(90);
    result.handoff=await page.evaluate(()=>({introActive,playing,leadGain:!!leadInGain,elapsed,firstNote:firstNoteMs(),beat:beatMs(),sound}));
