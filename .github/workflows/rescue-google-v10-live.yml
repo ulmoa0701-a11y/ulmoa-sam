@@ -1,0 +1,44 @@
+name: Live Google Korean Rescue Voice V10 QA
+on:
+  pull_request:
+    paths: ['.github/workflows/rescue-google-v10-live.yml']
+permissions:
+  contents: read
+jobs:
+  asset-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check actual published Google-only voice JS
+        run: |
+          URL='https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/'
+          ok=0
+          for i in $(seq 1 48); do
+            curl -fsSL --max-time 12 "$URL" -o /tmp/rescue-google-index || true
+            curl -fsSL --max-time 12 "${URL}game.js?v=10" -o /tmp/rescue-google-js || true
+            if grep -q 'game.js?v=10' /tmp/rescue-google-index &&
+               grep -q 'function isGoogleKoreanVoice' /tmp/rescue-google-js &&
+               grep -q 'google-auto' /tmp/rescue-google-js &&
+               grep -q 'Google 한국어' /tmp/rescue-google-index; then
+              ok=1;break
+            fi
+            sleep 7
+          done
+          test "$ok" = "1"
+          echo 'GOOGLE KOREAN LIVE V10 ASSETS PASS'
+  browser:
+    needs: asset-probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+      - name: Test public Google voice defaults and exclusion
+        env:
+          RESCUE_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/
+        run: node thinking-garden/games/rescue/rescue-voice-qa.cjs
