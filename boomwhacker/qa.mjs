@@ -68,7 +68,7 @@ async function basicCase(name,width,height){
   check(await page.locator('#displayModeSelect option').count()===4,`${name}: display mode selector should have 4 choices`);
   check((await page.locator('#displayModeSelect').inputValue())==='note',`${name}: display mode should default to note names`);
   check(await page.locator('#introMode').count()===1,`${name}: intro mode setting missing`);
-  check(await page.locator('#introMode').inputValue()==='music',`${name}: musical intro must default on`);
+  check(await page.locator('#introMode').inputValue()==='interlude',`${name}: audible song melody intro must default on`);
   check(await page.locator('#introOverlay').count()===1,`${name}: readiness overlay missing`);
   const initialTempo=await page.evaluate(()=>window.__boomVideoQA.tempo());
   check(initialTempo.bpm===Math.round(initialTempo.sourceBpm*.72),`${name}: default playback tempo should be gentle ${JSON.stringify(initialTempo)}`);
@@ -283,6 +283,9 @@ async function basicCase(name,width,height){
   await page.locator('#playViewSelect').selectOption('fall');
   check(!(await page.locator('#scoreStage').isVisible()),`${name}: falling mode must hide expanded score`);
   await page.locator('#resetBtn').click();
+  // Explicitly choose the previous beat-only count-in to preserve its
+  // independent visual/timing regressions alongside the new melodic default.
+  await page.locator('#introMode').evaluate(el=>{el.value='music';el.dispatchEvent(new Event('change',{bubbles:true}))});
   await page.locator(width<=800?'#playBtn':'#startBtn').click();
   const introStart=await page.evaluate(()=>window.__boomVideoQA.intro());
   check(introStart.mode==='music'&&introStart.active&&!introStart.started&&introStart.beats===6&&introStart.previewBeats===0&&introStart.countBeats===6&&introStart.durationMs<=6000,`${name}: musical intro did not start before song ${JSON.stringify(introStart)}`);
