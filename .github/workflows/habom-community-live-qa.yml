@@ -42,6 +42,16 @@ jobs:
                 const secret=page.locator('#habomPrivateForm');
                 const src=await secret.getAttribute('src');
                 if(!src||!src.includes('form.jotform.com/262832846022052'))throw new Error('Private form not loaded from private provider');
+                await page.waitForTimeout(1100);
+                let jotformFrame=null;
+                for(const frame of page.frames()){
+                  if(frame.url().includes('/262832846022052')){ jotformFrame=frame; break; }
+                }
+                if(!jotformFrame)throw new Error('Private Jotform iframe content did not load');
+                const privateBody=(await jotformFrame.locator('body').innerText({timeout:10000})).slice(0,3500);
+                if(!privateBody.includes('비밀글')||!privateBody.includes('전화번호')||!privateBody.includes('이메일'))
+                  throw new Error('Private form itself missing expected fields: '+privateBody.slice(0,170));
+                console.log('PASS PRIVATE FORM '+vp.width+'px: external form rendered with optional contact fields');
                 const safeText=await privatePanel.innerText();
                 if(!safeText.includes('Jotform')||!safeText.includes('전화번호')||!safeText.includes('이메일'))throw new Error('Privacy and contact information missing');
                 if(await privateTab.getAttribute('aria-selected')!=='true')throw new Error('Private tab accessibility state wrong');
