@@ -133,3 +133,14 @@
  padding:0!important;
  z-index:auto!important;
 }
+
+.brain-one-glance .sub-footer .footer-social a{
+ color:#F1F8F2!important;
+ opacity:1!important;
+ text-shadow:none!important;
+}
+.brain-one-glance .sub-footer .footer-social a:hover,
+.brain-one-glance .sub-footer .footer-social a:focus-visible{
+ color:#FFF2B9!important;
+ text-decoration:underline!important;
+}
