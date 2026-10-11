@@ -20,6 +20,7 @@ try{
   await page.locator('#brainMap').waitFor({state:'visible'});
   const photo=page.locator('.brain-one-panel');
   assert.equal(await page.locator('.lobe-card').count(),6,'six main functions are visible');
+  assert.equal(await page.locator('.sub-footer > div').count(),1,'footer brand must be valid and grouped in its own div');
   assert.equal(await page.locator('.hemi-fact').count(),2,'both hemispheres immediately visible');
   assert.equal(await page.locator('.both-work').count(),1,'brain cooperation statement visible');
   assert.equal(await page.locator('#brainMap [data-brain-region]').count(),6,'six interactive regions');
@@ -95,11 +96,39 @@ try{
     'Hemispheres view horizontal overflow: '+JSON.stringify(compareFit));
   assert.ok(compareFit.panels.every(p=>p.left>=0&&p.right<=width+1&&p.width>110),
     'Hemispheres cards are clipped: '+JSON.stringify(compareFit));
+  const comparisonA11y=await page.evaluate(()=>{
+    const px=(selector)=>parseFloat(getComputedStyle(document.querySelector(selector)).fontSize);
+    const rect=(selector)=>document.querySelector(selector).getBoundingClientRect();
+    return {
+      ability: px('.hemi-ability-list small'),
+      example: px('.hemi-example p'),
+      tabHint: px('.brain-view-tabs button small'),
+      heroHeight:rect('.hemi-hero').height,
+      buttonHeight:rect('#leftStudyTitle').height,
+      footerTop:rect('.sub-footer').top,
+      contentBottom:rect('.brain-main').bottom
+    };
+  });
+  if(width<=760){
+    const min=width<=370?12:12.5;
+    assert.ok(comparisonA11y.ability>=min,'mobile comparison descriptions too small '+JSON.stringify(comparisonA11y));
+    assert.ok(comparisonA11y.example>=min,'mobile examples too small '+JSON.stringify(comparisonA11y));
+    assert.ok(comparisonA11y.tabHint>=11.5,'tab hint unreadable '+JSON.stringify(comparisonA11y));
+    assert.ok(comparisonA11y.heroHeight<=255,'hero pushes comparison cards too far down '+JSON.stringify(comparisonA11y));
+    assert.ok(comparisonA11y.buttonHeight>=44,'side title touch target too short '+JSON.stringify(comparisonA11y));
+  }
+  assert.ok(comparisonA11y.footerTop>=comparisonA11y.contentBottom-1,'footer overlaps main content '+JSON.stringify(comparisonA11y));
   // A full-page capture from scroll offset makes the site's sticky mobile menu
   // appear halfway down the image; reset to top for an honest screenshot.
   await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
   await page.waitForTimeout(170);
   await page.screenshot({path:out+'/'+name+'-hemispheres.png',fullPage:true});
+  // Small review previews are printed into CI logs for independent visual review.
+  // Full-resolution screenshots remain in the artifact, not the repository.
+  if(name==='desktop'||name==='mobile'){
+    const preview=await page.screenshot({type:'jpeg',quality:50,animations:'disabled'});
+    console.log('BRAIN_HEMI_PREVIEW_'+name+'='+preview.toString('base64'));
+  }
   assert.equal(await page.locator('#mapIntroText').innerText(),'좌뇌와 우뇌가 맡는 일을 비교하고, 함께하는 활동도 살펴봐요.');
   await page.locator('[data-brain-view="lobes"]').click();
   assert.equal(await page.locator('#lobesView').isVisible(),true,'Returning to original map should work');
