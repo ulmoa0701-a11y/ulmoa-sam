@@ -129,18 +129,41 @@ try{
  const mobile=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1,hasTouch:true,isMobile:true});
  await checkPage(mobile,'mobile');
  await mobile.close();
- const parent=await browser.newPage({viewport:{width:1280,height:820}});
- await parent.goto(BASE+'brain-map/3d/?v=20261011-parent2',{waitUntil:'domcontentloaded',timeout:30000});
- assert.match(await parent.locator('a[href*="#hemisphereLearning"]').textContent(),/좌뇌·우뇌/);
- await parent.locator('[data-view="front"]').click();
- const inner=parent.frameLocator('#brainViewerFrame');
- await inner.locator('#brainCanvas').waitFor({state:'visible',timeout:30000});
- await inner.locator('#viewerFallback').waitFor({state:'hidden',timeout:30000});
- assert.equal(await parent.locator('#inline3D').isVisible(),true,'3D mode should appear in parent map');
- await parent.locator('[data-view="side"]').click();
- assert.equal(await parent.locator('#inline3D').isVisible(),false,'side should return to approved picture');
- report.push({name:'embedded navigation',status:'PASS'});
- await parent.close();
+ // Simplified first screen: only the picture and one explanation card, no duplicate callouts.
+ for(const [label,width,height] of [['parent-desktop',1280,820],['parent-mobile',390,844]]){
+   const pg=await browser.newPage({viewport:{width,height},deviceScaleFactor:1,isMobile:width<600,hasTouch:width<600});
+   const parentErrors=[];
+   pg.on('pageerror',e=>parentErrors.push(String(e)));
+   await pg.goto(BASE+'brain-map/3d/?v=20261011-simple1',{waitUntil:'load',timeout:30000});
+   await pg.locator('.brain-stage img').waitFor({state:'visible'});
+   assert.equal(await pg.locator('.map-callout').count(),0,'No duplicate labels printed over artwork');
+   assert.equal(await pg.locator('.quick-parts').count(),0,'No redundant sidebar with the same six choices');
+   assert.equal(await pg.locator('.map-views').count(),0,'No competing camera controls on parent overview');
+   assert.equal(await pg.locator('.region-nav button').count(),6);
+   assert.equal(await pg.locator('.detail-body').count(),1);
+   assert.equal(await pg.locator('.daily-more').getAttribute('open'),null,'Extra examples start closed');
+   assert.match(await pg.locator('#detailName').textContent(),/전두엽/);
+   await pg.screenshot({path:`${OUT}/${label}-overview.png`,fullPage:true});
+   await pg.locator('.region-nav [data-region="temporal"]').click();
+   assert.match(await pg.locator('#detailName').textContent(),/측두엽/);
+   assert.match(await pg.locator('#detailExample').textContent(),/이야기/);
+   assert.equal(await pg.locator('.region-nav [data-region="temporal"]').getAttribute('aria-pressed'),'true');
+   await pg.locator('.region-nav [data-region="occipital"]').click();
+   assert.match(await pg.locator('#detailName').textContent(),/후두엽/);
+   assert.match(await pg.locator('#detailSummary').textContent(),/시각/);
+   await pg.locator('.brain-picture-actions .hit-label-frontal').click();
+   assert.match(await pg.locator('#detailName').textContent(),/전두엽/);
+   await pg.locator('.daily-more summary').click();
+   assert.equal(await pg.locator('.activity-grid article').count(),4,'Previously approved four activity examples remain behind details');
+   assert.equal(await pg.locator('.daily-more').getAttribute('open'),'');
+   const href=await pg.locator('a.go-3d').getAttribute('href');
+   assert.match(href,/explore\//,'3D exploration is still available as a separate link');
+   const viewport=await pg.evaluate(()=>({scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth}));
+   assert.ok(viewport.scrollWidth<=viewport.clientWidth+1,'Overview must not overflow horizontally: '+JSON.stringify(viewport));
+   assert.deepEqual(parentErrors,[],'No 2D page JavaScript runtime errors');
+   report.push({name:label,status:'PASS',regionSelection:true,noDuplicateLabels:true,collapsedExamples:true,noHorizontalOverflow:true});
+   await pg.close();
+ }
  success=true;
 }catch(e){report.push({name:'failure',status:'FAIL',error:String(e.stack||e)});}
 finally{
