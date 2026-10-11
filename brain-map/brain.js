@@ -50,8 +50,8 @@
  const heroSvg=document.querySelector('.hemi-hero-svg');
  const focus=document.getElementById('hemiFocus');
  const sideCopy={
-  left:['💬 좌뇌를 살펴봐요','말과 문장을 다룰 때 더 많이 참여해요.'],
-  right:['🧭 우뇌를 살펴봐요','위치와 말투의 느낌을 살필 때 도움을 줘요.'],
+  left:['💬 좌뇌를 살펴봐요','말과 문장의 일부 과정에서 상대적으로 더 많이 참여해요.'],
+  right:['🧭 우뇌를 살펴봐요','공간 파악과 말투의 감정 단서에 상대적으로 더 관여할 수 있어요.'],
   both:['🤝 함께 일하는 뇌','좌뇌와 우뇌는 한 팀이에요.']
  };
  function selectSide(key){
@@ -90,6 +90,67 @@
    });
   }
  }
+ // Familiar situations connect the comparison to daily life without assigning
+ // an entire activity exclusively to one half of the brain.
+ const sceneData={
+  talk:{title:'💬 친구와 대화할 때',body:'말을 골라 문장을 만들고, 목소리의 느낌과 표정을 살펴요. 여러 뇌 영역이 함께해요.'},
+  read:{title:'📖 책을 읽을 때',body:'글자 모양을 보고, 말소리와 뜻을 연결하고, 집중해요. 양쪽 뇌의 여러 영역이 함께해요.'},
+  ball:{title:'⚽ 공놀이할 때',body:'공의 위치를 보고, 몸을 움직이고, 타이밍을 맞춰요. 두 반구와 여러 뇌 영역이 함께해요.'},
+  solve:{title:'🧩 문제를 해결할 때',body:'필요한 정보를 찾고, 방법을 비교하고, 선택해요. 한쪽 뇌만으로 하는 일이 아니에요.'}
+ };
+ const sceneButtons=[...document.querySelectorAll('[data-brain-scene]')];
+ const sceneTitle=document.getElementById('hemiSceneTitle');
+ const sceneText=document.getElementById('hemiSceneText');
+ function selectScene(key){
+  if(!sceneData[key]||!sceneTitle||!sceneText)return;
+  sceneButtons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.brainScene===key)));
+  sceneTitle.textContent=sceneData[key].title;
+  sceneText.textContent=sceneData[key].body;
+  selectSide('both');
+ }
+ sceneButtons.forEach(b=>b.addEventListener('click',()=>selectScene(b.dataset.brainScene)));
+ selectScene('talk');
+ // Three short retrieval questions, immediate explanatory feedback, no score
+ // or personality/brain-type judgement.
+ const questions=[
+  {q:'말과 문장을 만드는 데 상대적으로 더 많이 참여하는 쪽은?',options:['좌뇌','우뇌'],answer:0,
+   good:'맞아요! 많은 사람에게서 좌뇌의 언어 관련 영역이 더 크게 참여해요. 우뇌도 함께해요.',
+   review:'많은 사람에게서는 좌뇌가 상대적으로 더 관여해요. 우뇌도 언어 활동에 함께 참여해요.'},
+  {q:'말투에 담긴 감정의 단서를 알아차리는 데 상대적으로 더 관여하는 쪽은?',options:['좌뇌','우뇌'],answer:1,
+   good:'맞아요! 우뇌가 상대적으로 더 관여할 수 있어요. 양쪽 뇌가 함께 듣고 이해해요.',
+   review:'말투의 감정 단서에는 우뇌가 상대적으로 더 관여할 수 있어요. 좌뇌도 함께해요.'},
+  {q:'책을 읽거나 공놀이할 때 우리 뇌는 어떻게 일할까요?',options:['한쪽만 일해요','양쪽이 함께해요'],answer:1,
+   good:'맞아요! 양쪽 뇌와 여러 영역이 한 팀으로 일해요.',
+   review:'책 읽기와 공놀이는 여러 기능이 필요한 활동이에요. 양쪽 뇌가 함께 일해요.'}
+ ];
+ const qText=document.getElementById('hemiQuizQuestion');
+ const qProgress=document.getElementById('hemiQuizProgress');
+ const qButtons=[...document.querySelectorAll('[data-hemi-answer]')];
+ const qResponse=document.getElementById('hemiQuizResponse');
+ const qNext=document.getElementById('hemiQuizNext');
+ let qIndex=0,answered=false;
+ function showQuestion(){
+  const q=questions[qIndex];answered=false;
+  qText.textContent=q.q;qProgress.textContent=(qIndex+1)+' / '+questions.length;
+  qButtons.forEach((b,i)=>{b.textContent=q.options[i];b.disabled=false;b.setAttribute('aria-pressed','false');b.removeAttribute('data-correct');});
+  qResponse.hidden=true;qResponse.textContent='';qNext.hidden=true;
+ }
+ qButtons.forEach(button=>button.addEventListener('click',()=>{
+  if(answered)return;
+  answered=true;
+  const answer=Number(button.dataset.hemiAnswer),q=questions[qIndex],correct=answer===q.answer;
+  qButtons.forEach((b,i)=>{b.disabled=true;b.setAttribute('aria-pressed',String(i===answer));if(i===q.answer)b.setAttribute('data-correct','true');});
+  qResponse.hidden=false;
+  qResponse.textContent=(correct?'✓ ':'💡 ')+(correct?q.good:q.review);
+  qResponse.dataset.result=correct?'right':'review';
+  qNext.hidden=false;
+  qNext.textContent=qIndex===questions.length-1?'처음부터 다시':'다음 문제 →';
+ }));
+ qNext?.addEventListener('click',()=>{
+  qIndex=(qIndex+1)%questions.length;showQuestion();
+  qText?.focus?.();
+ });
+ showQuestion();
  selectSide('both');
  chooseView(location.hash==='#hemispheres'?'hemispheres':'lobes',false);
  window.addEventListener('hashchange',()=>chooseView(location.hash==='#hemispheres'?'hemispheres':'lobes',false));
