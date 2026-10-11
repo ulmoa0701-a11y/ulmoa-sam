@@ -1,0 +1,45 @@
+/* About: maker's story. Scoped to this page, preserving shared layouts. */
+.about-page .sub-hero{padding-bottom:24px}
+.about-page .sub-hero h1{margin-bottom:15px}
+.about-page .sub-hero .about-hero-lead{font-family:"Pretendard Variable",Pretendard,sans-serif;font-size:15px;line-height:1.85;color:#536970;max-width:670px;margin:0}
+.about-story{max-width:790px;margin:12px auto 42px;padding:0 36px;color:#26383b}
+.about-story .story-intro{border-left:3px solid #9ab5a2;padding:2px 0 2px 22px;margin:14px 0 37px}
+.about-story .story-eyebrow{font-size:12px;font-weight:800;letter-spacing:.02em;color:#526e65;margin:0 0 12px}
+.about-story .story-intro p{font-size:17px;line-height:1.83;margin:0;color:#354a4d}
+.about-story h2{font-family:"Gamja Flower",cursive;font-weight:400;font-size:clamp(28px,3vw,34px);letter-spacing:-.025em;line-height:1.3;margin:0 0 12px;color:#243d43}
+.about-story .story-section{margin-top:35px}
+.about-story .story-section p{font-size:15.5px;line-height:1.95;margin:0 0 13px;letter-spacing:-.012em;word-break:keep-all;color:#40545a}
+.about-story .story-section p:last-child{margin-bottom:0}
+.about-story .story-highlight{font-weight:750;color:#263f42}
+.about-story .story-closing{margin-top:38px;padding:22px 26px;background:#f0f6ee;border:1px solid #dce7d9;border-radius:16px}
+.about-story .story-closing p{margin:0;font-size:19px;line-height:1.65;font-family:"Gamja Flower",cursive;color:#2f4b3b}
+.about-story .story-closing p+p{margin-top:7px;font-family:"Pretendard Variable",Pretendard,sans-serif;font-size:13px;line-height:1.8;color:#53685d}
+.about-page .about-notes-three{padding-top:0;padding-bottom:34px}
+.about-page .about-note{transform:none;box-shadow:none;min-height:136px;border-radius:10px}
+.about-page .about-note:nth-child(even){transform:none}
+.about-page .about-note h2{font-size:28px}
+.about-page .about-note p{font-size:13px;line-height:1.75}
+.about-story .story-actions{margin-top:28px;display:flex;gap:9px;flex-wrap:wrap}
+.about-story .story-actions a{display:inline-flex;align-items:center;min-height:43px;padding:10px 16px;border:1px solid #cbdcd5;background:#fff;border-radius:999px;font-size:13px;font-weight:750;color:#36584a;text-decoration:none}
+.about-story .story-actions a:first-child{background:#e5f2e6}
+.about-story .story-actions a:focus-visible{outline:3px solid #668db7;outline-offset:3px}
+@media(max-width:650px){
+ .about-page .sub-hero{padding:43px 18px 18px 28px}
+ .about-page .sub-tape{left:28px}
+ .about-page .sub-hero h1{font-size:43px;line-height:1.08}
+ .about-page .sub-hero .about-hero-lead{font-size:13.5px;line-height:1.8}
+ .about-story{padding:0 18px;margin:12px auto 30px}
+ .about-story .story-intro{padding-left:14px;margin-bottom:26px}
+ .about-story .story-intro p{font-size:15px}
+ .about-story .story-section{margin-top:29px}
+ .about-story .story-section p{font-size:14px;line-height:1.9}
+ .about-story h2{font-size:29px}
+ .about-story .story-closing{padding:18px}
+ .about-page .about-notes-three{padding:4px 18px 24px;gap:10px}
+ .about-page .about-note{min-height:0;padding:18px 20px}
+ .about-page .about-note h2{font-size:26px}
+ .about-page .about-note p{font-size:12.5px}
+ .about-story .story-actions{display:grid;grid-template-columns:1fr;gap:9px}
+ .about-story .story-actions a{justify-content:center}
+}
+@media(prefers-reduced-motion:reduce){.about-story .story-actions a{scroll-behavior:auto}}
