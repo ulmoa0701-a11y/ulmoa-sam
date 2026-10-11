@@ -29,7 +29,7 @@ for(const level of LEVELS){
   }
   variants.add(stages.map(m=>m.species.join('+')+'@'+m.color+m.size).join('|'));
  }
- assert.ok(variants.size>=4,'Replays must vary content, not just animal position');
+ assert.ok(variants.size>=16,'Repeat practice should offer at least sixteen distinct problem sets');
  seen.set(level,variants.size);
 }
 assert.equal(buildSeries('basic',0)[4].need,2,'Default final stage should check all three features');
