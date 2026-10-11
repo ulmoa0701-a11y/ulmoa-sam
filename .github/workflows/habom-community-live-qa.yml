@@ -31,6 +31,23 @@ jobs:
                 const page=await browser.newPage({viewport:vp,locale:'ko-KR'});
                 page.on('console', msg=>{if(msg.type()==='error') console.log('BROWSER LOG '+msg.text().slice(0,180));});
                 await page.goto('https://ulmoa0701-a11y.github.io/ulmoa-sam/request/',{waitUntil:'domcontentloaded',timeout:55000});
+                const publicTab=page.locator('#publicPostTab');
+                const privateTab=page.locator('#privatePostTab');
+                const publicPanel=page.locator('#publicPostPanel');
+                const privatePanel=page.locator('#privatePostPanel');
+                if(!(await publicTab.count())||!(await privateTab.count()))throw new Error('Public/private post tabs missing');
+                if(!(await privatePanel.evaluate(n=>n.hidden))||await publicPanel.evaluate(n=>n.hidden))throw new Error('Default public/private visibility wrong');
+                await privateTab.click();
+                if(!(await publicPanel.evaluate(n=>n.hidden))||await privatePanel.evaluate(n=>n.hidden))throw new Error('Private tab did not switch panels');
+                const secret=page.locator('#habomPrivateForm');
+                const src=await secret.getAttribute('src');
+                if(!src||!src.includes('form.jotform.com/262832846022052'))throw new Error('Private form not loaded from private provider');
+                const safeText=await privatePanel.innerText();
+                if(!safeText.includes('Jotform')||!safeText.includes('전화번호')||!safeText.includes('이메일'))throw new Error('Privacy and contact information missing');
+                if(await privateTab.getAttribute('aria-selected')!=='true')throw new Error('Private tab accessibility state wrong');
+                await publicTab.click();
+                if(await publicPanel.evaluate(n=>n.hidden)||!(await privatePanel.evaluate(n=>n.hidden)))throw new Error('Return to public post failed');
+                console.log('PASS MODES '+vp.width+'px: public/private separation and private form URL verified');
                 const deadline=Date.now()+45000;
                 let inner=null;
                 while(Date.now()<deadline){
