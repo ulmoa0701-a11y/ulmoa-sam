@@ -46,7 +46,7 @@ try{
    assert.equal(await page.locator('#simpleDetail').isVisible(),true);
    assert.equal(await page.locator('#simpleDetailTitle').innerText(),label);
    assert.equal(await page.locator('.lobe-card[data-region="'+key+'"]').getAttribute('aria-pressed'),'true');
-   assert.equal(await page.locator('#brainMap [data-brain-region="'+key+'"]').getAttribute('data-active'),'true');
+   assert.equal(await page.locator('#brainMap [data-brain-region="'+key+'"]').evaluate(el=>el.hasAttribute('data-active')),true);
   }
   await page.locator('#detailClose').click();
   assert.equal(await page.locator('#simpleDetail').isHidden(),true);
