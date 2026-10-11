@@ -617,3 +617,29 @@ main:has(#parentCalendar:not([hidden])){padding-top:14px}
 .student-share .share-picker{display:flex;align-items:center;gap:8px}.student-share-bar{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.student-share-bar strong{font-size:14px}.student-share-actions{display:flex;gap:7px}.student-share-actions button{font-size:12px;min-height:37px;padding:6px 10px}.student-share-field.is-unavailable{opacity:.44;cursor:not-allowed}.student-share-field input:disabled{cursor:not-allowed}.student-share .share-picker>p{margin:0;font-size:12px}.experience-helper,.experience-footer{font-size:13px;color:#68768c;line-height:1.6;margin:0}.student-experience textarea{min-height:85px}.student-save-note{font-size:12px;color:#78859a;line-height:1.5;margin:0}
 @media(max-width:600px){.student-diary-head{grid-template-columns:1fr;gap:8px}.student-journal .student-context-fields{grid-template-columns:1fr}.student-share-actions{width:100%}.student-journal #textPanel textarea[name=note]{min-height:185px}.student-editor-intro strong{font-size:17px}.emotion-chip>span{min-height:37px;padding:8px 11px}}
 @media(prefers-reduced-motion:reduce){.emotion-chip>span{transition:none}}
+
+
+/* Student v12: first-action date/time and readable metadata */
+.student-journal .student-editor-intro{margin-bottom:12px;display:flex;flex-direction:column;gap:2px}
+.student-journal .student-editor-intro strong{font-size:18px;line-height:1.5;color:#172c3e;letter-spacing:-.02em}
+.student-journal .student-editor-intro span{color:#425971;font-size:14px;line-height:1.55}
+.student-info-card{padding:16px 17px 13px;border:1px solid #cddde8;border-radius:15px;background:#f3f8fc;margin:6px 0 12px}
+.student-datetime-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.student-datetime-heading strong{font-size:16px;line-height:1.4;color:#182e41;font-weight:800}
+.student-now-btn{border:1px solid #a8c6d4;border-radius:10px;background:#fff;color:#174f61;font-size:13px;font-weight:800;min-height:38px;padding:6px 11px;white-space:nowrap}
+.student-now-btn:hover{background:#e6f4f7}
+.student-datetime-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.85fr);gap:10px}
+.student-datetime-grid label,.student-extra-grid label{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:14px;font-weight:750;line-height:1.4;color:#21384a}
+.student-datetime-grid label small,.student-extra-grid label small{font-weight:550;color:#506176}
+.student-journal .student-datetime-grid input,.student-journal .student-extra-grid input{background:white;border:1px solid #b7c7d7;border-radius:11px;min-height:44px;min-width:0;width:100%;max-width:100%;padding:9px 10px;font-size:16px;font-weight:500;line-height:1.35;color:#1a3042;box-sizing:border-box}
+.student-journal .student-datetime-grid input:focus-visible,.student-journal .student-extra-grid input:focus-visible{outline:3px solid #86a6ea;outline-offset:1px}
+.student-datetime-hint{margin:9px 0 0!important;font-size:12px!important;color:#4b6371!important;line-height:1.5!important}
+.student-extra-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin:0 0 14px}
+.student-journal .student-note-label{font-size:16px;line-height:1.4;color:#223648;font-weight:750}
+.student-journal #textPanel textarea[name="note"]{font-size:16px;line-height:1.65;color:#1a3042;border:1px solid #bbcad8;min-height:172px;padding:14px 15px}
+.student-journal .optional-fields{border-color:#d1dcea;background:#fcfdff}
+.student-journal .optional-fields summary{color:#263c52;font-weight:750;font-size:15px;line-height:1.5}
+.student-journal .optional-fields summary small{color:#54667d;font-size:12px}
+@media(max-width:740px){body:has(.student-journal) .hero{display:none}body:has(.student-journal) main{padding-top:10px}body:has(.student-journal) .editor-paper{padding-top:15px}}
+@media(max-width:440px){.student-info-card{padding:12px 11px 10px}.student-datetime-grid{grid-template-columns:minmax(0,1.18fr) minmax(0,.82fr);gap:7px}.student-now-btn{padding:5px 9px}.student-datetime-heading strong{font-size:15px}.student-datetime-grid label,.student-extra-grid label{font-size:13px}.student-journal .student-datetime-grid input,.student-journal .student-extra-grid input{padding:8px 6px;letter-spacing:-.02em}.student-journal #textPanel textarea[name="note"]{min-height:180px}}
+@media(max-width:345px){.student-datetime-grid{grid-template-columns:1fr}.student-extra-grid{grid-template-columns:1fr}.student-datetime-hint{font-size:11px!important}}
