@@ -80,9 +80,10 @@ function makeChoices(round){
 }
 const FONT='Pretendard, Noto Sans KR, Apple SD Gothic Neo, sans-serif';
 let soundOn=localStorage.getItem('moa-rescue:sound')!=='off';
-const SPEECH_KEY='moa-rescue:voice-v1';
-let savedVoiceUri=localStorage.getItem(SPEECH_KEY)||'auto';
-let koreanVoices=[];
+// Google Korean voices are the only offered voices; do not silently substitute adult/system TTS.
+const SPEECH_KEY='moa-rescue:voice-v2-google';
+let savedVoiceUri=localStorage.getItem(SPEECH_KEY)||'google-auto';
+let googleVoices=[];
 const ui={
  back:document.getElementById('backBtn'),
  sound:document.getElementById('soundBtn'),
@@ -108,61 +109,70 @@ ui.sound.onclick=()=>{
  syncSoundButton();
 };
 syncSoundButton();
-function bestKoreanVoice(){
- if(!koreanVoices.length)return null;
- // Prefer natural Korean voices; avoid picking an arbitrary English OS default.
- const score=v=>{
-  const name=(v.name+' '+v.voiceURI).toLowerCase();
-  let points=(v.lang||'').toLowerCase()==='ko-kr'?20:8;
-  if(/natural|neural|premium|enhanced|high.quality|online/.test(name))points+=10;
-  if(/female|여성|sunhi|sora|jiyeon|yuna|seoyeon|heami|soojin|미선|유나|서연|지연|혜미|선희/.test(name))points+=7;
-  if(/microsoft|google|samsung|apple/.test(name))points+=2;
-  if(v.localService)points+=1;
-  return points;
- };
- return [...koreanVoices].sort((a,b)=>score(b)-score(a))[0];
+function isGoogleKoreanVoice(v){
+ const lang=String(v.lang||'').replace('_','-');
+ const name=String(v.name||'')+' '+String(v.voiceURI||'');
+ return /^ko(?:-|$)/i.test(lang)&&/(google|구글)/i.test(name);
 }
-function currentKoreanVoice(){
- return koreanVoices.find(v=>v.voiceURI===savedVoiceUri)||bestKoreanVoice();
+function preferredGoogleVoice(){
+ if(!googleVoices.length)return null;
+ return [...googleVoices].sort((a,b)=>{
+  const online=v=>v.localService===false||/online|온라인|network/i.test(v.name+' '+v.voiceURI);
+  const onlineDiff=Number(online(b))-Number(online(a));
+  if(onlineDiff)return onlineDiff;
+  return String(a.name).localeCompare(String(b.name),'ko');
+ })[0];
+}
+function selectedGoogleVoice(){
+ return googleVoices.find(v=>v.voiceURI===savedVoiceUri)||preferredGoogleVoice();
 }
 function refreshKoreanVoices(){
- if(!('speechSynthesis' in window)) {
-  koreanVoices=[];
-  ui.note.textContent='이 브라우저에서는 음성 읽기를 지원하지 않아요. 글로도 문제를 확인할 수 있어요.';
+ const hasApi='speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+ if(!hasApi){
+  googleVoices=[];
+  ui.select.replaceChildren(new Option('Google 한국어 음성 사용 불가','google-auto'));
+  ui.note.textContent='이 브라우저에서는 음성을 지원하지 않아요. 화면의 문구로 게임을 계속할 수 있어요.';
   ui.preview.disabled=true;
   return;
  }
- koreanVoices=window.speechSynthesis.getVoices().filter(v=>/^ko(?:-|_|$)/i.test(v.lang||''));
- const selected=savedVoiceUri;
- ui.select.replaceChildren(new Option('자동 선택 · 추천','auto'));
- koreanVoices.forEach(v=>ui.select.add(new Option(v.name+(v.localService?' · 기기 음성':' · 온라인 음성'),v.voiceURI)));
- if(selected!=='auto'&&koreanVoices.some(v=>v.voiceURI===selected))ui.select.value=selected;
- else ui.select.value='auto';
- ui.note.textContent=koreanVoices.length
-  ? '이 기기에서 사용할 수 있는 한국어 목소리예요. ▶ 들어보기를 누르고 마음에 드는 목소리를 골라주세요.'
-  : '설치된 한국어 목소리가 아직 없어요. 기기의 기본 음성으로 읽습니다. 음성 목록은 잠시 후 갱신될 수 있어요.';
- ui.preview.disabled=false;
+ googleVoices=window.speechSynthesis.getVoices().filter(isGoogleKoreanVoice);
+ ui.select.replaceChildren(new Option('Google 한국어 · 자동 추천','google-auto'));
+ // Only Google Korean voices are offered: generic adult system voices cannot be selected.
+ googleVoices.forEach(v=>ui.select.add(new Option(v.name+(v.localService?' · 기기':' · 온라인'),v.voiceURI)));
+ ui.select.value=savedVoiceUri!=='google-auto'&&googleVoices.some(v=>v.voiceURI===savedVoiceUri)?savedVoiceUri:'google-auto';
+ ui.note.textContent=googleVoices.length
+  ? 'Google 한국어 음성을 기본으로 사용해요. ▶ 들어보기로 확인할 수 있어요.'
+  : '이 기기에서는 Google 한국어 음성을 찾지 못했어요. 다른 성인 음성으로 자동 변경하지 않고, 화면 글로 안내해요. Vrew 음성 MP3를 추가할 수도 있어요.';
+ ui.preview.disabled=!googleVoices.length;
 }
 function speak(t,{preview=false}={}){
+ if(!soundOn){
+  if(preview)ui.note.textContent='오른쪽 🔇 버튼으로 소리를 켠 뒤 들어볼 수 있어요.';
+  return false;
+ }
  if(!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window))return false;
- if(!soundOn&&!preview)return false;
- if(!soundOn&&preview){ui.note.textContent='먼저 오른쪽 🔇 버튼을 눌러 소리를 켜주세요.';return false;}
- const synth=window.speechSynthesis;
+ // Some browsers populate Korean voices only after their initial async voiceschanged event.
+ if(!googleVoices.length)refreshKoreanVoices();
+ const voice=selectedGoogleVoice();
+ if(!voice)return false;
  try{
+  const synth=window.speechSynthesis;
   synth.cancel();
-  const speech=new SpeechSynthesisUtterance(String(t));
-  speech.lang='ko-KR';
-  const voice=currentKoreanVoice();
-  if(voice)speech.voice=voice;
-  // Bright, clear guidance without a squeaky/artificial voice.
-  speech.rate=1.02;
-  speech.pitch=1.12;
-  speech.volume=0.92;
-  speech.onerror=ev=>{if(preview&&!['interrupted','canceled'].includes(ev.error))ui.note.textContent='이 목소리를 재생하지 못했어요. 다른 목소리를 선택해 보세요.'};
-  synth.speak(speech);
+  const utterance=new SpeechSynthesisUtterance(String(t));
+  utterance.lang='ko-KR';
+  utterance.voice=voice;
+  // Google's original voice character is preserved: artificial pitch increases made it less natural.
+  utterance.rate=1;
+  utterance.pitch=1;
+  utterance.volume=.95;
+  utterance.onerror=event=>{
+   if(preview&&!['interrupted','canceled'].includes(event.error))
+    ui.note.textContent='Google 음성 재생에 실패했어요. 인터넷 연결과 브라우저 음성 설정을 확인해 주세요.';
+  };
+  synth.speak(utterance);
   return true;
  }catch{
-  if(preview)ui.note.textContent='음성 재생을 사용할 수 없어요. 다른 브라우저나 기기의 음성 설정을 확인해 주세요.';
+  if(preview)ui.note.textContent='Google 음성 재생에 실패했어요. 잠시 후 다시 시도해 주세요.';
   return false;
  }
 }
@@ -179,12 +189,12 @@ ui.select.onchange=()=>{
  stopVoice();
 };
 ui.preview.onclick=()=>speak('안녕! 나는 모아 구조대야. 귀여운 동물을 함께 찾아볼까?',{preview:true});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!ui.panel.hidden){stopVoice();setVoicePanel(false)}});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&!ui.panel.hidden){stopVoice();setVoicePanel(false);}
+});
 refreshKoreanVoices();
 if('speechSynthesis' in window){
  window.speechSynthesis.addEventListener?.('voiceschanged',refreshKoreanVoices);
- // Chrome and some Android browsers expose voices asynchronously.
- // Refresh on the next user gesture as well, without background polling.
  ui.voice.addEventListener('click',refreshKoreanVoices);
 }
 function tone(ok=true){if(!soundOn)return;try{const A=window.AudioContext||window.webkitAudioContext,a=new A(),o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.setValueAtTime(ok?620:180,a.currentTime);o.frequency.exponentialRampToValueAtTime(ok?940:130,a.currentTime+.16);g.gain.setValueAtTime(.06,a.currentTime);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+.2);o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+.21)}catch{}}
