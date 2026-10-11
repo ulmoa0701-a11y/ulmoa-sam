@@ -138,6 +138,21 @@ try{
   await page.locator('.hemi-study-sources summary').click();
   assert.match(await page.locator('.hemi-study-sources').innerText(),/체계적 문헌고찰/);
   await page.locator('.hemi-study-sources summary').click();
+  const lessonFit=await page.evaluate(()=>({
+    scenes:[...document.querySelectorAll('.hemi-team-examples button')].map(e=>{const b=e.getBoundingClientRect();return {w:b.width,h:b.height,left:b.left,right:b.right};}),
+    quiz:[...document.querySelectorAll('.hemi-quiz-options button')].map(e=>{const b=e.getBoundingClientRect();return {w:b.width,h:b.height,left:b.left,right:b.right};}),
+    answerText:parseFloat(getComputedStyle(document.querySelector('.hemi-quiz-options button')).fontSize),
+    sceneText:parseFloat(getComputedStyle(document.getElementById('hemiSceneText')).fontSize)
+  }));
+  assert.ok(lessonFit.scenes.every(x=>x.h>=44&&x.left>=0&&x.right<=width+1),'scene touch size or clipping: '+JSON.stringify(lessonFit));
+  assert.ok(lessonFit.quiz.every(x=>x.h>=44&&x.left>=0&&x.right<=width+1),'quiz touch size or clipping: '+JSON.stringify(lessonFit));
+  assert.ok(lessonFit.answerText>=13 && lessonFit.sceneText>=12.5,'lesson typography too small: '+JSON.stringify(lessonFit));
+  if(name==='desktop'||name==='mobile'){
+    const storyPreview=await page.locator('.hemi-team').screenshot({type:'jpeg',quality:60,animations:'disabled'});
+    console.log('BRAIN_SCENE_PREVIEW_'+name+'='+storyPreview.toString('base64'));
+    const recallPreview=await page.locator('.hemi-quick-check').screenshot({type:'jpeg',quality:60,animations:'disabled'});
+    console.log('BRAIN_RECALL_PREVIEW_'+name+'='+recallPreview.toString('base64'));
+  }
   const compareFit=await page.evaluate(()=>({
     pageWidth:document.documentElement.scrollWidth,
     clientWidth:document.documentElement.clientWidth,
