@@ -51,10 +51,10 @@ const path=require("node:path");
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,"no horizontal scrolling");
       await page.screenshot({path:path.join(folder,p.name+"-album.png")});
       if(p.name==="mobile"){
-        for(const file of imageFiles){
-          const response=await page.request.get(new URL("../assets/glossary/cards/"+file+".webp",base).href);
+        for(const file of filesByName){
+          const response=await page.request.get(new URL("../assets/glossary/cards/"+file,base).href);
           assert.equal(response.status(),200,"art file must resolve "+file);
-          assert(response.headers()["content-type"].includes("image/webp"),"valid WebP "+file);
+          assert(response.headers()["content-type"].includes(file.endsWith(".png")?"image/png":"image/webp"),"valid image mime "+file);
         }
       }
       await cards.first().click();
