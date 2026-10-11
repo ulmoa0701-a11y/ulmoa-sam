@@ -49,7 +49,7 @@ jobs:
           mkdir -p /tmp/audiveris-portable
           dpkg-deb -x /tmp/audiveris.deb /tmp/audiveris-portable
           find /tmp/audiveris-portable -maxdepth 7 -iname '*audiveris*' | head -40
-          launcher=$(find /tmp/audiveris-portable -maxdepth 8 -type f \\( -name 'audiveris' -o -name 'Audiveris' \\) -print -quit)
+          launcher=$(find /tmp/audiveris-portable -maxdepth 8 -type f \( -name 'audiveris' -o -name 'Audiveris' \) -print -quit)
           test -n "$launcher" || { echo "Audiveris binary not found in official archive"; exit 1; }
           echo "$launcher" > heart-score/qa/.audiveris-bench/launcher.txt
           "$launcher" -version
