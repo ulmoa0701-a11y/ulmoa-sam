@@ -10,9 +10,12 @@
 <p>실제 소통 게시판이 아닌 버튼 작동 확인용 페이지입니다.</p>
 <form id="qaForm">
 <div class="qa-columns"><div class="field"><label>구분</label><select name="kind"><option>자료 요청</option><option>질문</option></select></div><div class="field"><label>나는</label><select name="audience"><option>치료사</option><option>특수교사</option><option>학부모</option><option>특수교육대상자</option><option>기타</option></select></div></div>
+<div class="field"><label>닉네임</label><input name="nickname" placeholder="닉네임" value="테스터"></div>
 <div class="field"><label><input type="checkbox" name="anonymous"> 익명으로 남기기</label></div>
+<div class="field"><label>제목 (선택)</label><input name="title" placeholder="짧게 적어도 돼요"></div>
 <div class="field"><label for="msg">내용</label><textarea id="msg" name="body">테스트</textarea></div>
-<button class="submit" type="submit">선택 결과 확인</button>
+<div class="field"><label>링크 (선택)</label><input name="link" placeholder="https://"></div>
+<button class="submit" type="submit">글 남기기</button>
 <button class="submit" type="reset">초기화</button>
 </form>
 <p id="result" aria-live="polite"></p>
@@ -35,6 +38,18 @@ if (new URLSearchParams(location.search).has("qa")) {
         check(!!target, "missing button: " + text);
         if (target) target.click();
       }
+      var writing = document.getElementById("habom-writing-flow");
+      check(!!writing, "writing flow missing");
+      var steps = writing ? writing.querySelectorAll(".hfw-step") : [];
+      check(steps.length === 3, "not three writing steps");
+      if (steps.length === 3) {
+        check(steps[0].contains(document.querySelector('select[name="kind"]')) && steps[0].contains(document.querySelector('input[name="title"]')), "topic/title not first");
+        check(steps[1].contains(document.querySelector('textarea[name="body"]')), "body not second");
+        check(steps[2].contains(document.querySelector('input[name="nickname"]')) && steps[2].contains(document.querySelector('select[name="audience"]')), "author/role not third");
+      }
+      var linkDetails = writing && writing.querySelector("details.hfw-extras");
+      check(linkDetails && !linkDetails.open, "link must be collapsed");
+      check(writing && writing.getBoundingClientRect().width <= document.querySelector("form").getBoundingClientRect().width + 2, "flow overflow");
       var trigger = root && root.querySelector(".hrp-trigger");
       var panel = root && root.querySelector(".hrp-panel");
       var select = document.querySelector('select[name="audience"]');
@@ -74,6 +89,14 @@ if (new URLSearchParams(location.search).has("qa")) {
       check(select.value === "현장지원인력", "other direct entry failed");
       click("선택 해제");
       check(select.value === "선택 안 함", "clear failed");
+      if (linkDetails) {
+        linkDetails.open = true;
+        document.querySelector('input[name="link"]').value = "https://example.com";
+      }
+      check(document.querySelector('input[name="link"]').value === "https://example.com", "link field lost");
+      var btnSubmit = writing && writing.querySelector("button[type=submit]");
+      check(btnSubmit && writing.contains(btnSubmit), "submit not last in writing flow");
+      check(new FormData(document.getElementById("qaForm")).get("nickname") === "테스터", "nickname lost");
       document.documentElement.dataset.roleQa = issues.length ? "FAIL: " + issues.join(" | ") : "PASS";
     }, 110);
   });
