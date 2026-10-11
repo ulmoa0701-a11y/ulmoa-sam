@@ -612,6 +612,32 @@ main:has(#parentCalendar:not([hidden])){padding-top:14px}
 .student-share .share-picker{display:flex;align-items:center;gap:8px}.student-share-bar{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.student-share-bar strong{font-size:14px}.student-share-actions{display:flex;gap:7px}.student-share-actions button{font-size:12px;min-height:37px;padding:6px 10px}.student-share-field.is-unavailable{opacity:.44;cursor:not-allowed}.student-share-field input:disabled{cursor:not-allowed}.student-share .share-picker>p{margin:0;font-size:12px}.experience-helper,.experience-footer{font-size:13px;color:#68768c;line-height:1.6;margin:0}.student-experience textarea{min-height:85px}.student-save-note{font-size:12px;color:#78859a;line-height:1.5;margin:0}
 @media(max-width:600px){.student-diary-head{grid-template-columns:1fr;gap:8px}.student-journal .student-context-fields{grid-template-columns:1fr}.student-share-actions{width:100%}.student-journal #textPanel textarea[name=note]{min-height:185px}.student-editor-intro strong{font-size:17px}.emotion-chip>span{min-height:37px;padding:8px 11px}}
 @media(prefers-reduced-motion:reduce){.emotion-chip>span{transition:none}}
+
+/* Student v12: first-action date/time and readable metadata */
+.student-journal .student-editor-intro{margin-bottom:12px;display:flex;flex-direction:column;gap:2px}
+.student-journal .student-editor-intro strong{font-size:18px;line-height:1.5;color:#172c3e;letter-spacing:-.02em}
+.student-journal .student-editor-intro span{color:#425971;font-size:14px;line-height:1.55}
+.student-info-card{padding:16px 17px 13px;border:1px solid #cddde8;border-radius:15px;background:#f3f8fc;margin:6px 0 12px}
+.student-datetime-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.student-datetime-heading strong{font-size:16px;line-height:1.4;color:#182e41;font-weight:800}
+.student-now-btn{border:1px solid #a8c6d4;border-radius:10px;background:#fff;color:#174f61;font-size:13px;font-weight:800;min-height:38px;padding:6px 11px;white-space:nowrap}
+.student-now-btn:hover{background:#e6f4f7}
+.student-datetime-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.85fr);gap:10px}
+.student-datetime-grid label,.student-extra-grid label{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:14px;font-weight:750;line-height:1.4;color:#21384a}
+.student-datetime-grid label small,.student-extra-grid label small{font-weight:550;color:#506176}
+.student-journal .student-datetime-grid input,.student-journal .student-extra-grid input{background:white;border:1px solid #b7c7d7;border-radius:11px;min-height:44px;min-width:0;width:100%;max-width:100%;padding:9px 10px;font-size:16px;font-weight:500;line-height:1.35;color:#1a3042;box-sizing:border-box}
+.student-journal .student-datetime-grid input:focus-visible,.student-journal .student-extra-grid input:focus-visible{outline:3px solid #86a6ea;outline-offset:1px}
+.student-datetime-hint{margin:9px 0 0!important;font-size:12px!important;color:#4b6371!important;line-height:1.5!important}
+.student-extra-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin:0 0 14px}
+.student-journal .student-note-label{font-size:16px;line-height:1.4;color:#223648;font-weight:750}
+.student-journal #textPanel textarea[name="note"]{font-size:16px;line-height:1.65;color:#1a3042;border:1px solid #bbcad8;min-height:172px;padding:14px 15px}
+.student-journal .optional-fields{border-color:#d1dcea;background:#fcfdff}
+.student-journal .optional-fields summary{color:#263c52;font-weight:750;font-size:15px;line-height:1.5}
+.student-journal .optional-fields summary small{color:#54667d;font-size:12px}
+@media(max-width:740px){body:has(.student-journal) .hero{display:none}body:has(.student-journal) main{padding-top:10px}body:has(.student-journal) .editor-paper{padding-top:15px}}
+@media(max-width:440px){.student-info-card{padding:12px 11px 10px}.student-datetime-grid{grid-template-columns:minmax(0,1.18fr) minmax(0,.82fr);gap:7px}.student-now-btn{padding:5px 9px}.student-datetime-heading strong{font-size:15px}.student-datetime-grid label,.student-extra-grid label{font-size:13px}.student-journal .student-datetime-grid input,.student-journal .student-extra-grid input{padding:8px 6px;letter-spacing:-.02em}.student-journal #textPanel textarea[name="note"]{min-height:180px}}
+@media(max-width:345px){.student-datetime-grid{grid-template-columns:1fr}.student-extra-grid{grid-template-columns:1fr}.student-datetime-hint{font-size:11px!important}}
+
 </style></head><body><div class="previewbar" id="previewInfo"><strong>🧪 디자인 체험판</strong> · 가상 데이터 전용 · 실제 로그인/Google 저장 미연결 · 실명·상담 내용 입력 금지
 </div>
 <header><div class="topwrap"><a class="brand" href="#" aria-label="일단써봄 홈"><span class="brand-code">&lt;/&gt;</span> 일단<span>써봄</span><small>work • think • play</small></a><div id="account" class="account"></div></div></header>
@@ -745,6 +771,7 @@ function bindWorkspace(){
 }
 const NOTE_LABELS={note:'자유 기록',mood:'오늘의 상태',energy:'컨디션',thought:'떠오른 생각',body:'몸의 느낌',action:'해본 일',sketch:'그림',observation:'관찰한 사실',response:'주변 사람의 말·행동',impact:'일상에서 확인된 변화',message:'전달사항',event:'있었던 일',next:'다음 시도',date:'기록 날짜',time:'기록 시간',context:'당시 상황',origin:'정보 출처',title:'제목',experience:'내가 겪은 움직임·소리·반복행동',experienceImpact:'그때 생활에 있었던 변화',place:'장소',signals:'관찰한 모습(선택)',after:'이후에 이어진 일'};
 function todayLocal(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
+function nowLocalTime(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${p(d.getHours())}:${p(d.getMinutes())}`;}
 
 /* Parent calendar v8: event date, not the entry creation timestamp. */
 let parentCalendarMode='month',parentCalendarDate=todayLocal();
@@ -828,12 +855,17 @@ function dataForm(role){
  </div></div>
  <button class="button entry-save" id="saveEntry">내 관찰 메모 저장</button><p class="parent-nudge">보호자는 경험한 일을 남기면 됩니다. 여러 기록의 의미와 치료 방향은 담당 치료사가 검토해요. 실시간 상담창이 아닙니다.</p></form>`;
  return `<form class="form entry-v5 student-journal" id="entryForm">
- <div class="student-editor-intro"><strong>내가 남기고 싶은 이야기</strong><span>일기, 고민, 좋았던 일, 그냥 떠오른 생각까지. 아무거나 써도 돼.</span></div>
- <div class="student-diary-head"><label class="student-diary-date">기록 날짜<input name="date" type="date" max="${todayLocal()}" value="${todayLocal()}"></label><label class="student-diary-title">제목 <small>(선택)</small><input name="title" maxlength="80" placeholder="제목 없이 남겨도 돼"></label></div>
+ <div class="student-editor-intro"><strong>자유롭게 남기는 한 페이지</strong><span>일기, 고민, 좋았던 일, 관심사... 편한 방식으로 남겨봐.</span></div>
+ <section class="student-info-card" aria-label="일기 날짜와 시간">
+ <div class="student-datetime-heading"><strong>언제의 기록이야?</strong><button type="button" id="studentSetNow" class="student-now-btn" aria-label="날짜와 시간을 현재 시각으로 설정">↻ 지금으로 설정</button></div>
+ <div class="student-datetime-grid"><label>날짜<input name="date" type="date" max="${todayLocal()}" value="${todayLocal()}"></label><label>시간 <small>(선택)</small><input name="time" type="time" value="${nowLocalTime()}"></label></div>
+ <p class="student-datetime-hint">현재 날짜·시간이 자동으로 들어가 있어. 지난 일을 쓰는 거라면 바꿔도 되고, 시간을 모르면 비워 둬.</p>
+ </section>
+ <div class="student-extra-grid"><label>제목 <small>(선택)</small><input name="title" maxlength="80" placeholder="제목 없이 써도 돼"></label><label>장소 <small>(선택)</small><input name="place" maxlength="100" placeholder="기억나는 곳만"></label></div>
  <div class="form-switcher" role="group" aria-label="기록 방식"><button type="button" class="format-btn active" data-format="text" aria-pressed="true">✎ 글쓰기</button><button type="button" class="format-btn" data-format="draw" aria-pressed="false">◇ 그림 그리기</button></div>
  <div id="textPanel"><label class="student-note-label">자유 기록 <small>(원하는 만큼)</small><textarea name="note" maxlength="4000" rows="7" placeholder="오늘 있었던 일이나 요즘 생각, 좋은 일, 고민, 취미 이야기... 자유롭게 남겨봐."></textarea></label></div>
  <div id="drawPanel" hidden><div class="sketch-board"><canvas id="noteCanvas" width="760" height="380" aria-label="마우스나 손가락으로 그리는 그림 메모"></canvas></div><div class="sketch-actions"><span>손가락이나 마우스로 그릴 수 있어.</span><button type="button" id="undoStroke" class="button-ghost">↶ 되돌리기</button><button type="button" id="clearSketch" class="button-ghost">지우기</button></div></div>
- <details class="optional-fields student-context"><summary>시간·장소 추가하기 <small>선택</small></summary><div class="optional-wrap student-context-fields"><label>언제쯤이었어? <small>(선택)</small><input name="time" type="time"></label><label>어디였어? <small>(선택)</small><input name="place" maxlength="100" placeholder="예: 집, 학교, 밖, 온라인"></label><p>정확하게 기억나지 않으면 비워 둬도 돼. 기록을 저장한 시각은 따로 남아.</p></div></details>
+ 
  <details class="optional-fields student-emotion-details" id="stateDetails"><summary>그때의 감정도 남길까? <small>선택 · 여러 개 가능</small></summary><div class="optional-wrap"><p class="emotion-helper">하나만 고르지 않아도 돼. 감정이 섞였거나 잘 모르겠어도 괜찮아.</p><div class="emotion-grid" aria-label="감정 선택">${STUDENT_EMOTIONS.map(w=>`<label class="emotion-chip"><input name="emotionChoice" type="checkbox" value="${w}"><span>${w}</span></label>`).join('')}</div>
  <details class="emotion-more"><summary>다른 감정도 보기 <span>+ ${Object.values(STUDENT_MORE_EMOTIONS).flat().length}개</span></summary>${Object.entries(STUDENT_MORE_EMOTIONS).map(([group,words])=>`<div class="emotion-group"><p>${group}</p><div class="emotion-grid">${words.map(w=>`<label class="emotion-chip"><input name="emotionChoice" type="checkbox" value="${w}"><span>${w}</span></label>`).join('')}</div></div>`).join('')}</details>
  <label>내 말로 표현하기 <small>(선택)</small><input name="emotionOther" maxlength="100" placeholder="위에 없는 감정이나 내 표현"></label><label>컨디션 <small>(선택)</small><select name="energy"><option value="">선택하지 않음</option><option>괜찮음</option><option>기운 있음</option><option>조금 피곤함</option><option>많이 피곤함</option><option>잘 모르겠음</option></select></label></div></details>
@@ -887,6 +919,7 @@ function wireEntryForm(isParent){
  };
  share.onchange=()=>{area.hidden=!share.checked;button.textContent=isParent?(share.checked?'짧은 메모 전달하고 저장':'내 메모 저장하기'):(share.checked?'↗ 선택한 항목 공유하고 저장':'🔒 내 기록 저장');if(!isParent)updateStudentShare()};
  if(!isParent){
+  const nowBtn=$('studentSetNow');if(nowBtn)nowBtn.onclick=()=>{const date=f.elements.date,time=f.elements.time;if(date)date.value=todayLocal();if(time)time.value=nowLocalTime();updateStudentShare();toast('날짜와 시간을 현재 시각으로 설정했어.');};
   sketchStrokes=[];bindSketch();
   document.querySelectorAll('[data-format]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-format]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b))});$('textPanel').hidden=b.dataset.format!=='text';$('drawPanel').hidden=b.dataset.format!=='draw';updateStudentShare()});
   f.addEventListener('input',updateStudentShare);f.addEventListener('change',updateStudentShare);
