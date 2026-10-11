@@ -18,7 +18,7 @@ class LandscapeTitleScene extends Phaser.Scene{
    this.tweens.add({targets:a,y:y-17,duration:1200+i*170,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
   });
   const start=button(this,600,619,350,82,'🚨 구조 출동하기',0x226b51).setDepth(50);
-  start.on('pointerdown',()=>{tone(true);this.scene.start('landmission',{round:0})});
+  start.on('pointerdown',()=>{tone(true);beginRescueRun();this.scene.start('landmission',{round:0})});
   label(this,600,708,'마우스로 클릭하거나 화면을 터치해요 · 시간 제한 없음',21,'#3d6354','800').setDepth(10);
  }
 }
@@ -28,7 +28,7 @@ function landscapeBackdrop(scene,place='초원'){
 }
 class LandscapeMissionScene extends Phaser.Scene{
  constructor(){super('landmission')}
- init(data){this.round=data.round||0;this.found=new Set();this.lock=true;this.targets=[];this.completeOverlayShown=false}
+ init(data){this.round=data.round||0;this.found=new Set();this.lock=true;this.targets=[];this.completeOverlayShown=false;this.metrics=null}
  create(){
   this.m=MISSIONS[this.round];landscapeBackdrop(this,this.m.place);
   const panel=roundRect(this,22,22,290,716,30,0xffffff,.96,0xe1ece4,3).setDepth(20);
@@ -37,9 +37,9 @@ class LandscapeMissionScene extends Phaser.Scene{
   this.portrait=makeTargetPortrait(this,this.m).setPosition(166,265).setScale(1.32).setDepth(21);
   this.targetText=targetLabel(this.m);
   label(this,166,383,targetHeadline(this.m),27,'#173f32','900').setDepth(21);
-  label(this,166,426,this.m.focus==='size'?'큰 토끼 · 큰 돼지':this.m.need===1?'한 마리를 찾아요':`${this.m.need}마리 · ${this.m.species.join('·')}`,21,'#567567','800').setDepth(21);
+  label(this,166,426,this.m.focus==='size'?this.m.size+' '+this.m.species.join(' · '):this.m.need===1?'한 마리를 찾아요':`${this.m.need}마리 · ${this.m.species.join('·')}`,21,'#567567','800').setDepth(21);
   this.count=label(this,166,500,`구조 0 / ${this.m.need}`,29,'#1b6a4b','900').setDepth(21);
-  const instruction=this.m.focus==='species'?'모두 같은 색깔이에요':this.m.focus==='color'?'모두 토끼예요 · 색깔을 봐요':this.m.focus==='size'?'같은 종류끼리 크기를 비교해요':this.m.focus==='color-species'?'색깔과 동물 종류를 봐요':'색깔 · 크기를 모두 살펴요';
+  const instruction=targetDescription(this.m);
   this.add.text(166,578,instruction,{fontFamily:FONT,fontSize:'21px',fontStyle:'bold',color:'#436958',align:'center',lineSpacing:10,wordWrap:{width:247}}).setOrigin(.5).setDepth(21);
   const back=button(this,166,680,215,58,'처음으로',0x526e60).setDepth(22);
   back.on('pointerdown',()=>this.scene.start('landtitle'));
@@ -64,11 +64,11 @@ class LandscapeMissionScene extends Phaser.Scene{
   start.on('pointerdown',()=>{
    tone(true);speak(this.targetText);
    [shade,briefingCard,title,subtitle,start].forEach(item=>item.destroy());
-   this.lock=false;this.spawn();
+   this.lock=false;beginTrial(this);this.spawn();
   });
  }
  spawn(){
-  const items=makeChoices(this.round),top=Math.ceil(items.length/2),bottom=items.length-top;
+  const items=makeChoices(this.round),top=this.m.focus==='size'&&items.length===2?2:Math.ceil(items.length/2),bottom=items.length-top;
   if(this.m.focus==='size'){
    [320,595].forEach(base=>roundRect(this,442,base-4,485,38,18,0xf5eed9,.94,0xb9c9a8,2).setDepth(5));
   }
@@ -101,10 +101,12 @@ class LandscapeMissionScene extends Phaser.Scene{
  }
  pick(a){
   if(this.lock||!a.active)return;
-  const it=a.data.get('item'),good=it.color===this.m.color&&it.size===this.m.size&&this.m.species.includes(it.species)&&!this.found.has(it.species);
+  const it=a.data.get('item'),good=isTarget(this.m,it)&&!this.found.has(it.species);
+  recordChoice(this,it,good);
   if(!good){
    const reason=wrongReason(this.m,it);
    tone(false);
+   if(this.metrics.wrong>=2)showComparisonHint(this,a,this.targets);
    const t=this.add.text(a.x,a.y-126,reason,{fontFamily:FONT,fontSize:'24px',fontStyle:'bold',color:'#6c4531',backgroundColor:'#fff9ef',padding:{x:12,y:8}}).setOrigin(.5).setDepth(40);
    this.tweens.add({targets:t,y:t.y-20,alpha:0,duration:1150,onComplete:()=>t.destroy()});
    return;
@@ -118,7 +120,7 @@ class LandscapeMissionScene extends Phaser.Scene{
   if(this.found.size===this.m.need){this.lock=true;this.time.delayedCall(650,()=>this.completed())}
  }
  completed(){
-  this.completeOverlayShown=true;
+  this.completeOverlayShown=true;recordRound(this);
   const shade=this.add.rectangle(600,380,LW,LH,0x0c2a21,.55).setDepth(80).setInteractive();
   roundRect(this,375,184,460,408,32,0xfffdf4,1,0xffffff,4).setDepth(81);
   label(this,605,270,'구조 성공! ✨',43,'#18543d','900').setDepth(82);
