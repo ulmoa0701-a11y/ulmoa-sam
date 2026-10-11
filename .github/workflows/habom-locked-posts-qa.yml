@@ -25,10 +25,11 @@ jobs:
           node - <<'JS'
           const data=require('./request/locked-posts.json');
           if(!Array.isArray(data.posts))throw Error('posts array missing');
-          const allowed=['approved','visibility','category','public_title','nickname_masked','created_at','status'];
+          const allowed=['approved','visibility','category','public_title','nickname_masked','created_at','status','has_attachment'];
           for(const post of data.posts){
             if(Object.keys(post).some(k=>!allowed.includes(k)))throw Error('private data present in public metadata JSON');
             if(post.approved!==true||post.visibility!=='list')throw Error('unapproved public record');
+            if(post.has_attachment!=null&&typeof post.has_attachment!=='boolean')throw Error('invalid attachment metadata');
             if(!/^\d{4}-\d{2}-\d{2}$/.test(post.created_at))throw Error('invalid date');
             for(const val of Object.values(post)){
               if(typeof val==='string'&&(/[\w.%+-]+@[\w.-]+\.[A-Za-z]{2,}/.test(val)||/0\d{1,2}[-.\s]?\d{3,4}[-.\s]?\d{4}/.test(val)))
@@ -51,7 +52,7 @@ jobs:
               for (const width of [390,1360]){
                 const page=await browser.newPage({viewport:{width,height:844}});
                 const data={schema_version:1,posts:[
-                  {approved:true,visibility:'list',public_title:'비밀글입니다',nickname_masked:'별빛**',category:'질문',created_at:'2026-10-11',status:'확인 중'},
+                  {approved:true,visibility:'list',public_title:'비밀글입니다',nickname_masked:'별빛**',category:'질문',created_at:'2026-10-11',status:'확인 중',has_attachment:true},
                   {approved:true,visibility:'list',public_title:'금지된 글',nickname_masked:'익명',category:'질문',created_at:'2026-10-10',status:'접수',email:'secret@example.test'},
                   {approved:false,visibility:'list',public_title:'미승인 글',nickname_masked:'익명',category:'자료 요청',created_at:'2026-10-09',status:'접수'}
                 ]};
@@ -64,6 +65,7 @@ jobs:
                 assert.match(content,/비밀글입니다/);
                 assert.match(content,/별빛\*\*/);
                 assert.match(content,/확인 중/);
+                assert.match(content,/첨부파일 있음/);
                 assert.doesNotMatch(content,/금지된 글|미승인 글|secret@example\.test/);
                 assert.equal(await rows.first().locator('a').count(),0,'secret content must not link to unverified URLs');
                 const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+3);
