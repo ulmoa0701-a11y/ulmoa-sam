@@ -10,7 +10,6 @@ body :is(h1,h2,h3,h4,h5,h6,p,span,b,strong,em,i,small,a,button,input,textarea,se
 }
 /* Handwriting is naturally light: rely on type scale rather than artificial bold headings. */
 body :is(h1,h2,h3,h4,h5,h6){font-weight:400!important;letter-spacing:-.01em!important}
-body :is(p,li,dd,blockquote){line-height:1.55}
 body :is(button,[role="button"],input,textarea,select){font-family:var(--habom-handwriting)!important;letter-spacing:0}
 body :is(b,strong){font-synthesis:weight}
 /* Main and subpage UI: keep even small link captions at readable handwritten sizes. */
