@@ -117,3 +117,19 @@
  .hemi-fact p{font-size:9.5px}
 }
 @media(prefers-reduced-motion:reduce){.brain-one-glance *{scroll-behavior:auto!important;transition:none!important}}
+
+/* 이 교육 페이지에서는 공통 하단 소셜 바로 내용이 가려지지 않도록 푸터로 돌립니다. */
+.brain-one-glance .sub-footer .footer-social{
+ position:static!important;
+ left:auto!important;
+ bottom:auto!important;
+ transform:none!important;
+ translate:none!important;
+ margin:0!important;
+ box-shadow:none!important;
+ backdrop-filter:none!important;
+ background:transparent!important;
+ border:0!important;
+ padding:0!important;
+ z-index:auto!important;
+}
