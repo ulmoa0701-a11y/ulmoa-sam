@@ -30,10 +30,15 @@ const variant=arg('variant','original'),coreOnly=process.argv.includes('--core-o
   await frame.waitForFunction(()=>document.querySelector('#imageScoreFile')?.dataset.aiOmr==='v702');
   if(coreOnly)await frame.evaluate(()=>{window.ocrCanvas=undefined;});
   const start=Date.now();await frame.locator('#imageScoreFile').setInputFiles(fixture);
-  await frame.waitForFunction(()=>/초안 완료|결과 검증|분석 실패|자동 변환/.test(document.querySelector('#imageStatus')?.textContent||''),{},{timeout:180000});
+  await frame.waitForFunction(()=>/초안 완료|결과 검증|분석 실패|자동 변환|읽지 못했어요/.test(document.querySelector('#imageStatus')?.textContent||''),{},{timeout:180000});
   const actual=await frame.evaluate(()=>({status:document.querySelector('#imageStatus').textContent,statusClass:document.querySelector('#imageStatus').className,state,visible:document.querySelector('#pages').innerText,pageInfo:document.querySelector('#pageInfo').textContent}));
-  const {compareNotation}=await import('./omr-exact-validator.mjs');const draftComparison=analyses.at(-1)?.state?compareNotation({...analyses.at(-1),accepted:true},analyses.at(-1).state,truth):null;const comparison=process.argv.includes('--expect-reject')?{ok:false,errors:[],measures:analyses.at(-1)?.state?.measures?.length,notes:analyses.at(-1)?.noteCount,rests:analyses.at(-1)?.restCount}:compareNotation(analyses.at(-1),actual.state,truth);
-  if(process.argv.includes('--expect-reject')){if(analyses.at(-1)?.accepted!==false||/초안 완료/.test(actual.status)||!actual.visible.includes('자동 변환을 중단'))comparison.errors.push('Invalid notation was not visibly rejected');}else if(!/초안 완료/.test(actual.status))comparison.errors.push('No UI success state');
+  const {compareNotation}=await import('./omr-exact-validator.mjs');const draftComparison=analyses.at(-1)?.state?compareNotation({...analyses.at(-1),accepted:true},analyses.at(-1).state,truth):null;const comparison=process.argv.includes('--no-staff')?{ok:false,errors:[],measures:0,notes:0,rests:0}:process.argv.includes('--expect-reject')?{ok:false,errors:[],measures:analyses.at(-1)?.state?.measures?.length,notes:analyses.at(-1)?.noteCount,rests:analyses.at(-1)?.restCount}:compareNotation(analyses.at(-1),actual.state,truth);
+  if(process.argv.includes('--no-staff')){
+    if(!actual.visible.includes('자동 변환을 중단')||
+       !actual.visible.includes('오선이나 계이름을 읽지 못했어요')||
+       !actual.visible.includes('오선 5줄과 음표가'))comparison.errors.push('No-staff upload did not show cause and retake steps');
+    if(analyses.some(v=>v.accepted===true))comparison.errors.push('Blank image was incorrectly recognized as notation');
+  }else if(process.argv.includes('--expect-reject')){if(analyses.at(-1)?.accepted!==false||/초안 완료/.test(actual.status)||!actual.visible.includes('자동 변환을 중단'))comparison.errors.push('Invalid notation was not visibly rejected');}else if(!/초안 완료/.test(actual.status))comparison.errors.push('No UI success state');
   const guidance=analyses.at(-1)?.rejection||null;
   const guidanceVisible=!!guidance&&actual.visible.includes(guidance.title)&&actual.visible.includes(guidance.action)&&actual.visible.includes('자동 변환을 중단');
   if(analyses.at(-1)?.accepted===false&&!guidanceVisible)comparison.errors.push('Rejected scan has no visible issue explanation or corrective advice');
