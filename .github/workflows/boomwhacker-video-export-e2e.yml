@@ -26,6 +26,10 @@ jobs:
         run: npm install --no-save --ignore-scripts --no-audit --no-fund playwright-core@1.56.1
       - name: ACTUALLY record and save WebM on desktop and 390px browser
         run: node boomwhacker/video-export-e2e.mjs
+      - name: Install free local ffprobe media validator
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
       - name: Validate actual exported media stream
         if: always()
         shell: bash
@@ -37,6 +41,7 @@ jobs:
           for file in boomwhacker/video-qa-artifacts/*.webm; do
             echo "=== $file ==="
             ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_type,codec_name -of json "$file"
+            test "$(ffprobe -v error -select_streams v -show_entries stream=index -of csv=p=0 "$file" | wc -l)" -ge 1
           done
       - name: Upload media QA evidence
         if: always()
