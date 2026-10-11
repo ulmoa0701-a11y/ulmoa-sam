@@ -36,7 +36,7 @@ const path=require("node:path");
       assert.equal(await page.locator(".study-sources").count(),42,"all forty-two source citations remain");
       assert.equal(await page.locator("#glossaryApprovedGrid").count(),0,"old giant board removed");
       assert.equal(await tabs.count(),5,"all topic categories");
-      assert.equal((await page.locator("#gcatTitle").textContent()).trim(),"한눈에 보는 용어");
+      assert.equal((await page.locator("#gcatTitle").textContent()).trim(),"그림으로 보는 용어사전");
       assert((await modeAlbum.textContent()).includes("그림으로 보기"));
       assert(!(await modeAlbum.textContent()).includes("그림앨범"));
       assert.equal(await modeAlbum.getAttribute("aria-pressed"),"true","art view is default");
