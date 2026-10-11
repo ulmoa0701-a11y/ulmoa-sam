@@ -50,7 +50,7 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  check(await page.locator('[data-garden-topic]').count()>=6,name+': music topic filters missing');
  await page.locator('button[data-garden-topic="notation"]').click();
  check(await page.locator('[data-garden-view="materials"]').getAttribute('aria-selected')==='true',name+': notation without dedicated game must show real scores');
- check(await page.locator('#gardenResourceCards a[href*="/heart-score/"]').count()===1,name+': Heart Score source missing');
+ check(await page.locator('#gardenResourceCards a[href$="/heart-score/"]').count()===1,name+': Heart Score source missing');
  check(await page.locator('#gardenResourceCards a[href*="twinkle_landscape.pdf"]').count()===1,name+': printable note score missing');
  await page.screenshot({path:out+'/'+name+'-music-scores.png',fullPage:true});
  await page.locator('[data-garden-view="learn"]').click();
