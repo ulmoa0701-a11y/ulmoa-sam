@@ -17,10 +17,10 @@ const getToken=req=>{const cookies=req.headers.get('cookie')??'';const hit=cooki
 const publicUser=(u)=>({id:u.id,nickname:u.nickname,displayName:u.display_name,role:u.role,therapistId:u.therapist_id,studentId:u.student_id});
 async function identity(db,req){const token=getToken(req);if(token.length<30)return null;const {rows}=await db.query('SELECT u.* FROM portal_sessions s JOIN portal_users u ON u.id=s.user_id WHERE s.token_hash=$1 AND s.expires_at>NOW()',[digest(token)]);return rows[0]??null;}
 async function newSession(db,user,req){const token=randomToken(32),age=['admin','therapist'].includes(user.role)?43200:604800;await db.query('INSERT INTO portal_sessions(token_hash,user_id,expires_at) VALUES ($1,$2,NOW()+($3::integer * interval \'1 second\'))',[digest(token),user.id,age]);return json({user:publicUser(user)},200,{'Set-Cookie':sessionCookie(token,age,req)});}
-const ENTRY_KEYS=['date','event','thought','next','observation','message','note','category','mood','energy','body','action','response','impact','sketch','time','context','origin','place','signals','after'];
+const ENTRY_KEYS=['date','event','thought','next','observation','message','note','category','mood','energy','body','action','response','impact','sketch','time','context','origin','place','signals','after','title','experience','experienceImpact'];
 function validateEntry(e){
  if(!e||Array.isArray(e)||typeof e!=='object')throw new Error('기록 내용을 확인해 주세요.');
- const obj={};for(const k of ENTRY_KEYS){if(e[k]===undefined||e[k]===null)continue;if(typeof e[k]!=='string')throw new Error('문자 기록만 입력할 수 있어요.');const max=k==='sketch'?5500:k==='place'?100:k==='signals'?120:k==='after'?600:1200;const value=clean(e[k],max);if(value)obj[k]=value;}
+ const obj={};for(const k of ENTRY_KEYS){if(e[k]===undefined||e[k]===null)continue;if(typeof e[k]!=='string')throw new Error('문자 기록만 입력할 수 있어요.');const max=k==='sketch'?5500:k==='note'?4000:k==='title'?80:k==='experience'?900:k==='experienceImpact'?500:k==='place'?100:k==='signals'?120:k==='after'?600:1200;const value=clean(e[k],max);if(value)obj[k]=value;}
  if(obj.date){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(obj.date)||Number.isNaN(Date.parse(obj.date+'T00:00:00Z'))||new Date(obj.date+'T00:00:00Z').toISOString().slice(0,10)!==obj.date)throw new Error('관찰 날짜를 확인해 주세요.');
  }
@@ -31,13 +31,13 @@ function validateEntry(e){
  if(obj.sketch){let paths;try{paths=JSON.parse(obj.sketch)}catch{throw new Error('그림 내용이 올바르지 않습니다.')}if(!Array.isArray(paths)||paths.length>240)throw new Error('그림 내용이 너무 큽니다.');let points=0;for(const stroke of paths){if(!Array.isArray(stroke)||stroke.length>240)throw new Error('그림 내용이 올바르지 않습니다.');points+=stroke.length;for(const p of stroke){if(!Array.isArray(p)||p.length!==2||!p.every(Number.isInteger)||p[0]<0||p[0]>760||p[1]<0||p[1]>380)throw new Error('그림 내용이 올바르지 않습니다.')}}if(points>240)throw new Error('그림 내용이 너무 큽니다.');}
  if(JSON.stringify(obj).length>14000)throw new Error('기록이 너무 깁니다.');return obj;
 }
-function sharedSelection(entry,requested){
+function sharedSelection(entry,requested,isParent=false){
  if(!Array.isArray(requested)||requested.length<1||requested.length>ENTRY_KEYS.length||requested.some(k=>typeof k!=='string'||!ENTRY_KEYS.includes(k)))throw new Error('공유할 항목을 선택해 주세요.');
  const selected={};for(const k of new Set(requested)){if(entry[k])selected[k]=entry[k]}
- if(!Object.keys(selected).some(k=>!['date','time','origin','place','signals'].includes(k)))throw new Error('공유할 관찰 내용이나 전달사항을 선택해 주세요.');
- if(entry.date)selected.date=entry.date;
- if(entry.time)selected.time=entry.time;
- if(selected.observation){if(entry.place)selected.place=entry.place;if(entry.signals)selected.signals=entry.signals;}
+ if(!Object.keys(selected).some(k=>!['date','time','origin','place','signals','title'].includes(k)))throw new Error('공유할 관찰 내용이나 전달사항을 선택해 주세요.');
+ if(isParent&&entry.date)selected.date=entry.date;
+ if(isParent&&entry.time)selected.time=entry.time;
+ if(isParent&&selected.observation){if(entry.place)selected.place=entry.place;if(entry.signals)selected.signals=entry.signals;}
  return selected;
 }
 function unpackShared(record,key){if(!record.shared_nonce||!record.shared_auth_tag||!record.encrypted_shared_payload)throw new Error('공유 범위가 없는 기록입니다.');return JSON.parse(open({...record,nonce:record.shared_nonce,auth_tag:record.shared_auth_tag,encrypted_payload:record.encrypted_shared_payload},key));}
@@ -209,7 +209,7 @@ try{
   const student=u.role==='student'?u.id:u.student_id,teacher=u.therapist_id;
   if(!student||!teacher)return fail('담당 학생·치료사 연결이 없습니다.',403);
   if((await db.query("SELECT 1 FROM portal_users WHERE id=$1 AND therapist_id=$2 AND role='student'",[student,teacher])).rows.length===0)return fail('담당 연결이 올바르지 않습니다.',403);
-  const privatePayload=seal(JSON.stringify(entry),key),selected=shared?sharedSelection(entry,b.sharedFields):null,publicPayload=selected?seal(JSON.stringify(selected),key):null;
+  const privatePayload=seal(JSON.stringify(entry),key),selected=shared?sharedSelection(entry,b.sharedFields,u.role==='parent'):null,publicPayload=selected?seal(JSON.stringify(selected),key):null;
   const res=await db.query(`INSERT INTO portal_records(author_id,therapist_id,student_id,kind,nonce,auth_tag,encrypted_payload,shared_nonce,shared_auth_tag,encrypted_shared_payload,shared_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,CASE WHEN $11::boolean THEN NOW() ELSE NULL END) RETURNING id,created_at,shared_at`,[u.id,teacher,student,u.role,privatePayload.nonce,privatePayload.auth_tag,privatePayload.encrypted_payload,publicPayload?.nonce??null,publicPayload?.auth_tag??null,publicPayload?.encrypted_payload??null,shared]);
   const driveSynced=shared?await autoBackup(db,res.rows[0].id,teacher,key):false;
   return json({record:{id:res.rows[0].id,shared:!!res.rows[0].shared_at,createdAt:res.rows[0].created_at,driveSynced}},201);
@@ -221,7 +221,7 @@ try{
   try{await c.query('BEGIN');const rs=await c.query('SELECT * FROM portal_records WHERE id=$1 AND author_id=$2 FOR UPDATE',[String(b.recordId??''),u.id]);const rec=rs.rows[0];
    if(!rec){await c.query('ROLLBACK');return fail('내 기록이 아닙니다.',403)}
    if(rec.shared_at){await c.query('ROLLBACK');return fail('이미 공유된 기록입니다. 추가 공유는 새 기록으로 작성해 주세요.',409)}
-   const payload=sharedSelection(JSON.parse(open(rec,key)),b.sharedFields);const sealed=seal(JSON.stringify(payload),key);
+   const payload=sharedSelection(JSON.parse(open(rec,key)),b.sharedFields,u.role==='parent');const sealed=seal(JSON.stringify(payload),key);
    await c.query('UPDATE portal_records SET shared_nonce=$1,shared_auth_tag=$2,encrypted_shared_payload=$3,shared_at=NOW() WHERE id=$4 AND author_id=$5',[sealed.nonce,sealed.auth_tag,sealed.encrypted_payload,rec.id,u.id]);await c.query('COMMIT');out={id:rec.id,therapistId:rec.therapist_id};
   }catch(e){await c.query('ROLLBACK');throw e}finally{c.release()}
   const driveSynced=await autoBackup(db,out.id,out.therapistId,key);return json({ok:true,shared:true,driveSynced});
