@@ -17,7 +17,7 @@ const sha=b=>createHash('sha256').update(b).digest('hex');
 async function checkPage(page,name){
  const errors=[];
  page.on('pageerror',e=>errors.push(String(e)));
- await page.goto(BASE+'brain-map/3d/explore/?v=20261011-hemi1',{waitUntil:'domcontentloaded',timeout:30000});
+ await page.goto(BASE+'brain-map/3d/explore/?v=20261011-parent2',{waitUntil:'domcontentloaded',timeout:30000});
  await page.waitForFunction(()=>document.getElementById('viewerFallback')?.hidden===true,{timeout:25000});
  await page.locator('#brainCanvas').waitFor({state:'visible'});
  await page.waitForTimeout(500);
@@ -67,15 +67,9 @@ async function checkPage(page,name){
  assert.equal(await page.locator('[data-view="top"]').getAttribute('aria-pressed'),'true');
  const top=await page.locator('#brainCanvas').screenshot({path:`${OUT}/${name}-top.png`});
  assert.notEqual(sha(front),sha(top),'top view must differ from front');
- await page.getByRole('button',{name:'좌뇌·우뇌 벌리기'}).click();
- const sep=page.locator('#separation');
- assert.equal(await sep.isDisabled(),false,'hemisphere separation slider should enable');
- assert.equal(await sep.inputValue(),'60','hemisphere split starts at 60 percent');
- await page.getByRole('button',{name:'부위별 벌리기'}).click();
- await sep.fill('90');
- assert.equal(await page.locator('#separationValue').textContent(),'90%');
- await page.getByRole('button',{name:'원래 위치'}).click();
- assert.equal(await sep.isDisabled(),true,'reset separation disables slider');
+ assert.equal(await page.locator('.separation-panel').count(),0,'unnecessary split controls should be removed');
+ assert.equal(await page.locator('[data-split]').count(),0);
+ assert.equal(await page.locator('#separation').count(),0);
  await page.getByRole('button',{name:'자유 회전'}).click();
  const region=page.locator('#brainCanvas');
  const rect=await region.boundingBox();
@@ -91,25 +85,39 @@ async function checkPage(page,name){
  assert.notEqual(sha(before),sha(after),'drag must rotate canvas to a different frame');
  await page.locator('[data-part="temporal"]').click();
  assert.match(await page.locator('#selectedName').textContent(),/측두엽/);
- // Hemispheric learning: real separation, content and highlighted button state.
+ // Parent-oriented learning: highlight while keeping anatomical hemispheres together.
+ const tabs=page.locator('.hemisphere-tabs button');
+ assert.equal(await tabs.count(),3);
+ if(name==='mobile'){
+   const tabBoxes=await tabs.evaluateAll(items=>items.map(e=>{
+     const b=e.getBoundingClientRect();return {left:b.left,right:b.right,width:b.width};
+   }));
+   const viewport=await page.evaluate(()=>document.documentElement.clientWidth);
+   assert.ok(tabBoxes.every(b=>b.left>=0&&b.right<=viewport&&b.width>=75),'Parent cards overflow mobile viewport');
+ }
  await page.locator('[data-hemisphere="left"]').click();
  assert.match(await page.locator('#selectedName').textContent(),/좌뇌/);
- assert.match(await page.locator('#hemisphereDescription').textContent(),/언어 네트워크/);
+ assert.match(await page.locator('#hemisphereDescription').textContent(),/좌뇌/);
  assert.equal(await page.locator('[data-hemisphere="left"]').getAttribute('aria-pressed'),'true');
- assert.equal(await page.locator('#separation').inputValue(),'60');
+ assert.equal(await page.locator('#stageShell').evaluate(e=>e.classList.contains('hemisphere-focus')),true);
  assert.equal(await page.locator('[data-view="front"]').getAttribute('aria-pressed'),'true');
+ assert.equal(await page.locator('.separation-panel').count(),0);
+ await page.waitForTimeout(550);
+ const leftShot=await page.locator('#brainCanvas').screenshot({path:`${OUT}/${name}-left-highlight.png`});
  await page.locator('[data-hemisphere="right"]').click();
  assert.match(await page.locator('#selectedName').textContent(),/우뇌/);
- assert.match(await page.locator('#hemisphereDescription').textContent(),/억양/);
+ assert.match(await page.locator('#hemisphereDescription').textContent(),/우뇌/);
  assert.equal(await page.locator('[data-hemisphere="right"]').getAttribute('aria-pressed'),'true');
+ await page.waitForTimeout(450);
+ const rightShot=await page.locator('#brainCanvas').screenshot({path:`${OUT}/${name}-right-highlight.png`});
+ assert.notEqual(sha(leftShot),sha(rightShot),'left/right highlights must change the 3D brain');
  await page.locator('[data-part="hemisphere-both"]').click();
- assert.match(await page.locator('#selectedName').textContent(),/좌뇌와 우뇌가 함께/);
- assert.match(await page.locator('#hemisphereDescription').textContent(),/뇌량/);
+ assert.match(await page.locator('#selectedName').textContent(),/양쪽 뇌가 함께/);
+ assert.match(await page.locator('#hemisphereDescription').textContent(),/양쪽 뇌/);
  assert.equal(await page.locator('[data-hemisphere="both"]').getAttribute('aria-pressed'),'true');
- assert.equal(await page.locator('#separation').inputValue(),'0');
- assert.equal(await page.locator('#separation').isDisabled(),true);
- const hemiRow=page.locator('.hemisphere-tabs');
- assert.equal(await hemiRow.locator('button').count(),3);
+ assert.equal(await page.locator('#separation').count(),0);
+ await page.locator('[data-part="temporal"]').click();
+ assert.equal(await page.locator('#stageShell').evaluate(e=>e.classList.contains('hemisphere-focus')),false);
 
  assert.equal(errors.length,0,'browser errors: '+errors.join('; '));
  report.push({name,status:'PASS',canvasBytes:starting.length,frontChanged:sha(starting)!==sha(front),topChanged:sha(front)!==sha(top),dragChanged:sha(before)!==sha(after)});
@@ -122,7 +130,7 @@ try{
  await checkPage(mobile,'mobile');
  await mobile.close();
  const parent=await browser.newPage({viewport:{width:1280,height:820}});
- await parent.goto(BASE+'brain-map/3d/?v=20261011-hemi1',{waitUntil:'domcontentloaded',timeout:30000});
+ await parent.goto(BASE+'brain-map/3d/?v=20261011-parent2',{waitUntil:'domcontentloaded',timeout:30000});
  assert.match(await parent.locator('a[href*="#hemisphereLearning"]').textContent(),/좌뇌·우뇌/);
  await parent.locator('[data-view="front"]').click();
  const inner=parent.frameLocator('#brainViewerFrame');
