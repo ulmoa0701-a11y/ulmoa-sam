@@ -66,6 +66,7 @@
       var approved=data.posts.filter(valid).slice(0,30);
       approved.sort(function(a,b){return b.created_at.localeCompare(a.created_at)});
       if(approved.length){
+        host.hidden=false;
         state.hidden=true;
         approved.forEach(render);
       }else{
