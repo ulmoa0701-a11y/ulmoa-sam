@@ -33,6 +33,7 @@
 
 
 /* 잠금글 목록: 본문·첨부·연락처가 없는 승인된 메타데이터만 표시 */
+.community-locked-list[hidden]{display:none!important}
 .community-locked-list{max-width:760px;margin:12px auto 36px;padding:16px 18px;border:1px solid #e2eae4;border-radius:14px;background:#fcfdfc}
 .community-locked-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px}
 .community-locked-head h2{margin:0;font:inherit;font-size:15px;font-weight:800;color:#344f40}
