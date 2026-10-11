@@ -243,3 +243,7 @@
 .garden-doorbar .breath-door strong{font-size:14px;color:#2d8358}
 .garden-doorbar .breath-door span{font-size:11px;color:#598c74;text-align:right}
 @media(max-width:620px){.garden-doorbar .garden-door.breath-door{padding:10px;min-height:50px}.garden-doorbar .breath-door strong{font-size:13px}.garden-doorbar .breath-door span{font-size:10px}}
+
+/* Third independently navigable game collection, not nested in recorder/music. */
+.hb-nav .hb-game-section:nth-child(3){background:#eef8fb;border-color:#cbe7e4}
+.hb-nav .hb-menu-games .hb-dropdown{max-height:min(78dvh,680px);overflow-y:auto;overscroll-behavior:contain}
