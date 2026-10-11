@@ -29,3 +29,21 @@
 .community-private-external{margin:8px auto;max-width:760px;font-size:12px;color:#657970}
 .community-private-external a{color:#336e4d;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:650px){.community-mode{padding:10px 12px 0}.community-mode-heading{display:block;margin-bottom:12px}.community-mode-heading h1{font-size:19px}.community-mode-hint{margin-top:6px;max-width:none;font-size:11px}.community-mode-tabs{gap:7px}.community-mode-tab{min-height:67px;padding:10px;border-radius:11px}.community-mode-tab-title{font-size:13px}.community-mode-tab-note{font-size:10px}.community-mode-reminder{margin:11px 12px 0}.community-private-panel{padding:0 10px 24px}.community-private-notice{margin:14px 6px 8px;font-size:12px}.community-private-warning{margin:0 6px 10px}.community-private-iframe{height:1600px;border-radius:9px}}
+
+
+/* 잠금글 목록: 본문·첨부·연락처가 없는 승인된 메타데이터만 표시 */
+.community-locked-list{max-width:760px;margin:12px auto 36px;padding:16px 18px;border:1px solid #e2eae4;border-radius:14px;background:#fcfdfc}
+.community-locked-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px}
+.community-locked-head h2{margin:0;font:inherit;font-size:15px;font-weight:800;color:#344f40}
+.community-locked-note{font-size:11px;line-height:1.4;color:#788b7e}
+.community-locked-items{display:grid;gap:8px}
+.hbl-item{padding:12px 13px;border:1px solid #e4ece6;border-radius:10px;background:white}
+.hbl-row,.hbl-foot{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hbl-lock{font-size:12px;font-weight:800;color:#52775e}
+.hbl-date,.hbl-meta,.hbl-foot{color:#829188;font-size:11px}
+.hbl-title{font:inherit;font-size:14px;line-height:1.45;font-weight:750;margin:8px 0 7px;color:#3c4b40;overflow-wrap:anywhere}
+.hbl-meta{display:flex;flex-wrap:wrap;gap:5px}
+.hbl-foot{padding-top:10px;line-height:1.5}
+.hbl-status{flex:none;font-size:11px;font-weight:750;color:#448261}
+.community-locked-empty{margin:4px 0 0;padding:12px 6px;text-align:center;font-size:12px;color:#86958b}
+@media(max-width:650px){.community-locked-list{margin:12px 10px 24px;padding:13px 12px}.community-locked-head{display:block}.community-locked-note{display:block;margin-top:4px}.hbl-foot{align-items:flex-start}}
