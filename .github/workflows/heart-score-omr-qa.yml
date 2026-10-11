@@ -30,6 +30,7 @@ jobs:
           node --check heart-score/omr-bar-rescue-v1.mjs
           node --check heart-score/omr-deskew-v1.mjs
           node --check heart-score/omr-notehead-evidence-v1.mjs
+          node --check heart-score/omr-quality-guidance-v1.mjs
       - name: Test independent pitch and rhythm validator
         run: node heart-score/qa/omr-exact-validator-regression.mjs
       - name: Run OMR measure regression (unit only, not image E2E)
@@ -39,3 +40,4 @@ jobs:
           node heart-score/qa/omr-deskew-regression.mjs
           node heart-score/qa/omr-notehead-evidence-regression.mjs
           node heart-score/qa/omr-small-dot-regression.mjs
+          node heart-score/qa/omr-quality-guidance-regression.mjs
