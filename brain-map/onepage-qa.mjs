@@ -43,6 +43,13 @@ try{
   assert.ok(fit.diagram>=250,'brain picture too narrow');
   if(width>=1020)assert.ok(fit.hemi<820,'left-right diagram must be in first desktop viewport, got '+fit.hemi);
   if(width<500)assert.ok(fit.cards.every(c=>c.height>=75),'mobile child-friendly tap target too small');
+  const textSize=await page.evaluate(()=>({
+   cards:parseFloat(getComputedStyle(document.querySelector('.lobe-card small')).fontSize),
+   hemisphere:parseFloat(getComputedStyle(document.querySelector('.hemi-fact p')).fontSize)
+  }));
+  const minimum=width<=380?11.5:width<500?12.5:13;
+  assert.ok(textSize.cards>=minimum,'brain function descriptions too small: '+JSON.stringify(textSize));
+  assert.ok(textSize.hemisphere>=(width<381?11:width<500?12:13),'hemisphere explanation too small');
   await page.screenshot({path:out+'/'+name+'-initial.png',fullPage:true});
   for(const [key,label] of [['frontal','전두엽'],['parietal','두정엽'],['temporal','측두엽'],['occipital','후두엽'],['cerebellum','소뇌'],['brainstem','뇌줄기']]){
    await page.locator('.lobe-card[data-region="'+key+'"]').click();
