@@ -405,3 +405,30 @@
  .hemi-quiz-response{font-size:12.5px}
  .hemi-caution{font-size:12px;line-height:1.55}
 }
+
+
+/* 2026-10-11: expanded lessons remain compact and optional detail stays closed */
+.hemi-more-facts{margin:11px 0 0;background:#f7faf5;border:1px solid #dce9dd;border-radius:14px;overflow:hidden}
+.hemi-more-facts summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:7px;
+ min-height:46px;cursor:pointer;color:#365e46;font-size:14px;font-weight:850;padding:10px 15px}
+.hemi-more-facts summary::-webkit-details-marker{display:none}
+.hemi-more-facts summary:after{content:'⌄';font-size:19px;color:#6b9877;line-height:1}
+.hemi-more-facts[open] summary:after{content:'⌃'}
+.hemi-more-facts summary small{color:#6b8171;font-size:12px;font-weight:600;line-height:1.3;margin-left:auto;text-align:right;word-break:keep-all}
+.hemi-fact-details{padding:2px 15px 12px;display:grid;gap:9px}
+.hemi-fact-details p{margin:0!important;border-top:1px solid #e1eae0;padding:10px 2px 0;
+ color:#4d6654;font-size:13px;line-height:1.6;word-break:keep-all}
+.hemi-fact-details b{display:block;font-size:13px;margin:0 0 3px;color:#315e43}
+.hemi-fact-details strong{color:#366e4b}
+.hemi-more-facts summary:focus-visible{outline:3px solid #427b5a;outline-offset:-3px}
+.hemi-team-examples button{min-height:47px}
+.hemi-quiz-next{min-width:124px}
+@media(max-width:760px){
+ .hemi-more-facts summary{font-size:13px;padding:9px 10px;flex-wrap:wrap}
+ .hemi-more-facts summary small{font-size:11.5px}
+ .hemi-fact-details{padding:0 10px 10px;gap:7px}
+ .hemi-fact-details p{font-size:12.5px;line-height:1.55}
+ .hemi-fact-details b{font-size:12.5px}
+ .hemi-team-examples button{min-height:45px}
+ .hemi-ability-list li{min-height:108px}
+}
