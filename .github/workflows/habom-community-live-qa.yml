@@ -1,0 +1,89 @@
+name: Habom Live Community Layout QA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'assets/habom-role-picker.js'
+      - 'request/index.html'
+      - '.github/workflows/habom-community-live-qa.yml'
+permissions:
+  contents: read
+jobs:
+  live-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Playwright browser driver (system Chrome)
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Test public Apps Script embed on desktop and mobile
+        shell: bash
+        run: |
+          cat > hb-live-qa.cjs <<'JS'
+          const { chromium } = require('playwright-core');
+          const fs = require('node:fs');
+          (async function() {
+            const binary = process.env.CHROME_BIN || '/usr/bin/google-chrome';
+            const browser = await chromium.launch({executablePath:binary,headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+            try {
+              for(const vp of [{width:1360,height:900},{width:390,height:844}]){
+                const page=await browser.newPage({viewport:vp,locale:'ko-KR'});
+                page.on('console', msg=>{if(msg.type()==='error') console.log('BROWSER LOG '+msg.text().slice(0,180));});
+                await page.goto('https://ulmoa0701-a11y.github.io/ulmoa-sam/request/',{waitUntil:'domcontentloaded',timeout:55000});
+                const deadline=Date.now()+45000;
+                let inner=null;
+                while(Date.now()<deadline){
+                  for(const f of page.frames()){
+                    if(f===page.mainFrame()) continue;
+                    try { if(await f.locator('#habom-writing-flow').count()){inner=f;break;} }catch(ignore){}
+                  }
+                  if(inner)break;
+                  await page.waitForTimeout(900);
+                }
+                if(!inner)throw new Error('Live Apps Script inner frame did not render writing flow. frames='+page.frames().map(f=>f.url().slice(0,115)).join('; '));
+                const state=await inner.evaluate(()=>{
+                  const w=document.querySelector('#habom-writing-flow');
+                  const sections=[...w.querySelectorAll('.hfw-step')];
+                  const f=document.querySelector('select[name="kind"]')?.closest('form');
+                  const area=document.querySelector('textarea[name="body"]');
+                  const topic=document.querySelector('select[name="kind"]');
+                  const title=document.querySelector('input[name="title"]');
+                  const nickname=document.querySelector('input[name="nickname"]');
+                  const role=document.querySelector('#habom-role-picker');
+                  const d=document.querySelector('details.hfw-extras');
+                  return {
+                    sections:sections.length,
+                    titles:sections.map(s=>s.querySelector('.hfw-step-title')?.textContent?.trim()),
+                    order:sections.length===3 && sections[0].contains(topic) && sections[0].contains(title) && sections[1].contains(area) && sections[2].contains(nickname) && sections[2].contains(role),
+                    width:Math.round(w.getBoundingClientRect().width),
+                    formWidth:Math.round(f.getBoundingClientRect().width),
+                    linkFolded:!!d && !d.open,
+                    roleFolded:!!role && role.querySelector('.hrp-panel').hidden,
+                    fieldHeights:[topic?.getBoundingClientRect().height,area?.getBoundingClientRect().height],
+                    windowWidth:document.documentElement.clientWidth,
+                    overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth+3
+                  };
+                });
+                console.log('PUBLIC '+vp.width+': '+JSON.stringify(state));
+                if(state.sections!==3||!state.order||!state.linkFolded||!state.roleFolded||state.overflow)throw new Error('Live form layout FAIL at '+vp.width);
+                if(state.width>state.formWidth+3)throw new Error('Form width overflow at '+vp.width);
+                const role=inner.locator('#habom-role-picker');
+                await role.locator('.hrp-trigger').click();
+                await role.locator('.hrp-grid').first().getByRole('button',{name:'치료·상담 전문가'}).click();
+                for (const name of ['음악치료사','놀이치료사','미술치료사']){
+                  if(!(await role.getByRole('button',{name,exact:true}).count()))throw new Error('Missing '+name+' in real app');
+                }
+                await role.getByRole('button',{name:'음악치료사',exact:true}).click();
+                const actual=await inner.locator('select[name="audience"]').inputValue();
+                if(actual!=='음악치료사')throw new Error('Form role binding incorrect '+actual);
+                if(!(await role.locator('.hrp-panel').evaluate(n=>n.hidden)))throw new Error('Picker did not collapse after choosing');
+                console.log('PASS LIVE '+vp.width+'px: writing order, role choices, FormData, no overflow');
+                await page.close();
+              }
+            } finally {await browser.close();}
+          })().catch(e=>{console.error(e.stack||String(e));process.exit(1);});
+          JS
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          export CHROME_BIN
+          node hb-live-qa.cjs
