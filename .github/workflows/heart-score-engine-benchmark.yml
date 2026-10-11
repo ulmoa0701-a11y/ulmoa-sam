@@ -81,7 +81,12 @@ jobs:
               timeout 480s uvx --from 'homr[cpu]' homr "$input" > "$outdir/engine.log" 2>&1
             fi
             status=$?
-            xml=$(find "$outdir" "$(dirname "$input")" -maxdepth 2 -type f \( -iname '*.musicxml' -o -iname '*.mxl' -o -iname '*.xml' \) ! -iname '*container*' -print -quit)
+            # Prevent accidental re-use of normal MusicXML for a low-resolution file.
+            stem=$(basename "${input%.*}")
+            xml=$(find "$(dirname "$input")" "$outdir" -maxdepth 2 -type f \( -name "${stem}*.musicxml" -o -name "${stem}*.mxl" -o -name "${stem}*.xml" \) -print -quit)
+            if [[ -z "$xml" ]]; then
+              xml=$(find "$outdir" -maxdepth 2 -type f \( -name "*.musicxml" -o -name "*.mxl" -o -name "*.xml" \) -print -quit)
+            fi
             if [[ -n "$xml" ]]; then
               python heart-score/qa/compare-musicxml-engines.py --truth heart-score/qa/doremi-ground-truth.json --xml "$xml" --engine "${{ matrix.engine }}" --variant "$variant" --output "$outdir/compare.json" || true
             else
