@@ -5,7 +5,7 @@
 
 :root{--habom-handwriting:"Gamja Flower","Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
 html,body,
-body :is(h1,h2,h3,h4,h5,h6,p,span,b,strong,em,i,small,a,button,input,textarea,select,option,label,li,dt,dd,th,td,summary,legend,blockquote,output,figcaption){
+body :is(h1,h2,h3,h4,h5,h6,p,span,b,strong,em,small,a,button,input,textarea,select,option,label,li,dt,dd,th,td,summary,legend,blockquote,output,figcaption){
   font-family:var(--habom-handwriting)!important;
 }
 /* Handwriting is naturally light: rely on type scale rather than artificial bold headings. */
@@ -36,7 +36,7 @@ body .moa-resource-card .moa-resource-desc{font-size:clamp(15px,1.5vw,17px);line
 body .moa-resource-card .moa-resource-type,body .moa-resource-card .moa-resource-arrow{font-size:14px}
 body .moa-related-links,body .moa-related-links a{font-size:14px}
 /* Do not change literal notation in SVG, canvas, code, icons or preformatted output. */
-body :is(code,pre,kbd,samp),body svg text,body svg tspan{font-family:ui-monospace,"D2Coding",monospace!important}
+body :is(code,pre,kbd,samp){font-family:ui-monospace,"D2Coding",monospace!important}
 @media(max-width:620px){
   body .hb-nav .hb-game-children .hb-game-child b{font-size:14px}
   body .hb-nav .hb-game-children .hb-game-child span{font-size:12px}
