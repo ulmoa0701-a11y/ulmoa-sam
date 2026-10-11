@@ -34,9 +34,10 @@
       ['생활·자기관리','일상생활 자료',U('materials/#lifeShelf')],
       ['음악활동 자료','하트색깔악보',U('materials/#musicShelf')]]},
     {id:'terms',name:'알아봄',icon:'📖',href:U('notes/')},
+    {id:'story',name:'이야기해봄',icon:'💬',href:U('request/')},
     {id:'brain',name:'3D 뇌지도',icon:'🧠',href:U('brain-map/')},
-    {id:'parents',name:'부모님 자료',icon:'💛',items:[
-      ['부모님 도움자료','주제별 안내·관찰 메모',U('parents/')],
+    {id:'parents',name:'찾아봄',icon:'🔎',items:[
+      ['찾아봄 전체','발달·행동·일상별 안내',U('parents/')],
       ['말·의사소통','언어·표현 살펴보기',U('parents/#speech')],
       ['주의·기억·학습','일상에서 관찰하기',U('parents/#attention')],
       ['감정·행동','상황과 반응 기록하기',U('parents/#emotion')],
@@ -50,7 +51,6 @@
       ['지역별 지원','지역 서비스 찾기',U('info/#local')]]},
     {id:'more',name:'더보기',icon:'⋯',items:[
       ['울모아쌤 소개','사이트를 만든 사람',U('about/')],
-      ['자료·아이디어 제안','소통하기',U('request/')],
       ['개발 중 미리보기','테스트 공간',U('test/')]]}
   ];
   const esc=(v)=>String(v).replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -148,10 +148,11 @@
     ['사회성·의사소통 활동지','사회성 관계 사과 대화 자료 pdf',U('materials/#socialShelf')],
     ['생활·자기관리 활동지','자립 일상 자기관리 자료',U('materials/#lifeShelf')],
     ['음악활동 자료','악보 나비야 작은별 pdf png',U('materials/#musicShelf')],
-    ['용어사전','용어 단어 인지 작업기억 촉구 aac 언어 심리 사전',U('notes/')],
+    ['알아봄 · 용어사전','용어 단어 인지 작업기억 촉구 aac 언어 심리 사전',U('notes/')],
     ['3D 뇌지도','뇌그림 전두엽 두정엽 측두엽 후두엽 뇌 공부',U('brain-map/')],
-    ['부모님 도움자료','부모 가정 활동 양육 언어 감정 행동 사회성',U('parents/')],
-    ['부모님 관찰 메모','부모 상담 준비 관찰 기록 인쇄',U('parents/#observation')],
+    ['이야기해봄','질문 답변 소통 자료 요청 아이디어 제안 비밀글',U('request/')],
+    ['찾아봄 · 상황별 정보','보호자 가족 교사 부모 가정 활동 양육 언어 감정 행동 사회성',U('parents/')],
+    ['관찰 메모','보호자 교사 부모 상담 준비 관찰 기록 인쇄',U('parents/#observation')],
     ['바우처·치료비 지원','발달재활 바우처 치료비',U('info/#voucher')],
     ['특수교육·학교','특수교육 선정 학교 교육',U('info/#special')],
     ['부모·가족 복지 지원','양육 가족 돌봄 지원',U('info/#family')],
