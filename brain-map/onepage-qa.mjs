@@ -72,7 +72,7 @@ try{
   assert.equal(await page.locator('#lobesView').isHidden(),true);
   assert.equal(await page.locator('.hemi-ability-list').count(),2);
   assert.equal(await page.locator('.hemi-ability-list li').count(),6);
-  assert.equal(await page.locator('.hemi-team-examples span').count(),4);
+  assert.equal(await page.locator('.hemi-team-examples button').count(),4,'four selectable daily-life scenarios');
   assert.equal(await page.locator('#hemiMascot').count(),1,'brand character graphic exists');
   assert.equal(await page.locator('#hemiMoaOriginal').count(),1,'original Moa image is rendered, not recreated');
   assert.equal(await page.locator('#hemiMoaOriginal').getAttribute('href'),'../thinking-garden/assets/moa-default.png','must use the existing Moa asset');
@@ -108,6 +108,36 @@ try{
   await page.locator('#hemiTogether').click();
   assert.equal(await page.locator('#hemiTogether').getAttribute('aria-pressed'),'true');
   assert.match(await page.locator('#hemiFocus').innerText(),/한 팀/);
+  assert.equal(await page.locator('#hemiSceneTitle').innerText(),'💬 친구와 대화할 때');
+  await page.locator('[data-brain-scene="ball"]').click();
+  assert.equal(await page.locator('[data-brain-scene="ball"]').getAttribute('aria-pressed'),'true');
+  assert.match(await page.locator('#hemiSceneText').innerText(),/공의 위치/);
+  assert.equal(await page.locator('#hemiTogether').getAttribute('aria-pressed'),'true','daily scenes reinforce both hemispheres');
+  await page.locator('[data-brain-scene="read"]').click();
+  assert.match(await page.locator('#hemiSceneText').innerText(),/글자 모양/);
+  assert.equal(await page.locator('#hemiQuizProgress').innerText(),'1 / 3');
+  await page.locator('[data-hemi-answer="0"]').click();
+  assert.equal(await page.locator('#hemiQuizResponse').isVisible(),true);
+  assert.match(await page.locator('#hemiQuizResponse').innerText(),/우뇌도 함께/);
+  assert.equal(await page.locator('[data-hemi-answer="1"]').isDisabled(),true);
+  await page.locator('#hemiQuizNext').click();
+  assert.equal(await page.locator('#hemiQuizProgress').innerText(),'2 / 3');
+  await page.locator('[data-hemi-answer="0"]').click();
+  assert.equal(await page.locator('#hemiQuizResponse').getAttribute('data-result'),'review');
+  assert.match(await page.locator('#hemiQuizResponse').innerText(),/우뇌가 상대적으로/);
+  await page.locator('#hemiQuizNext').click();
+  assert.equal(await page.locator('#hemiQuizProgress').innerText(),'3 / 3');
+  await page.locator('[data-hemi-answer="1"]').click();
+  assert.match(await page.locator('#hemiQuizResponse').innerText(),/양쪽 뇌/);
+  assert.equal(await page.locator('#hemiQuizNext').innerText(),'처음부터 다시');
+  await page.locator('#hemiQuizNext').click();
+  assert.equal(await page.locator('#hemiQuizProgress').innerText(),'1 / 3');
+  assert.equal(await page.locator('#hemiQuizResponse').isHidden(),true);
+  await page.locator('[data-brain-scene="talk"]').click();
+  assert.equal(await page.locator('.hemi-study-sources').getAttribute('open'),null);
+  await page.locator('.hemi-study-sources summary').click();
+  assert.match(await page.locator('.hemi-study-sources').innerText(),/체계적 문헌고찰/);
+  await page.locator('.hemi-study-sources summary').click();
   const compareFit=await page.evaluate(()=>({
     pageWidth:document.documentElement.scrollWidth,
     clientWidth:document.documentElement.clientWidth,
