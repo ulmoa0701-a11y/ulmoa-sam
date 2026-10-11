@@ -508,6 +508,7 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
   <div class="mobileSongWrap"><select id="mobileSongSelect" class="mobileSongSelect" aria-label="연주할 곡 선택"><option value="">현재 곡</option></select></div>
   <button id="mobileScoreBtn" class="mobileActionBtn" type="button" aria-controls="mobileScoreSheet" aria-expanded="false">🎼 악보</button>
   <button id="mobileSettingsBtn" class="mobileActionBtn" type="button" aria-controls="mobileSettingsSheet" aria-expanded="false">⚙ 설정</button>
+  <button id="mobileVideoBtn" class="mobileActionBtn" type="button" aria-controls="mobileSettingsSheet" aria-label="현재 붐웨커 곡을 영상으로 저장">🎥 저장</button>
 </div>
 <div id="mobileBackdrop" class="mobileBackdrop" aria-hidden="true"></div>
 <main class="layout">
@@ -1088,6 +1089,7 @@ async function exportVideo(){
  if(videoDownloadUrl){URL.revokeObjectURL(videoDownloadUrl);videoDownloadUrl=null}
  link.classList.remove('show');link.removeAttribute('href');
  videoExporting=true;btn.disabled=true;btn.textContent='🎥 영상 저장 준비 중…';
+ const mobileSaveBtn=$('#mobileVideoBtn');if(mobileSaveBtn){mobileSaveBtn.disabled=true;mobileSaveBtn.textContent='⏳ 0%'}
  progress.classList.add('show');progress.setAttribute('aria-valuenow','0');fill.style.width='0%';
  videoStatus('녹화 준비 중이에요. 영상은 곡 길이만큼 재생한 뒤 저장돼요.','working');
  let canvasStream=null,ac=null,dest=null;
@@ -1124,6 +1126,7 @@ async function exportVideo(){
       const pct=Math.min(100,Math.floor(t/total*100)),remaining=Math.max(0,Math.ceil((total-t)/1000));
       fill.style.width=pct+'%';progress.setAttribute('aria-valuenow',String(pct));
       btn.textContent='🎥 저장 중 '+pct+'%';
+      if(mobileSaveBtn)mobileSaveBtn.textContent='⏳ '+pct+'%';
       videoStatus('영상 녹화 중 · '+pct+'% · 약 '+remaining+'초 남음. 이 화면을 닫지 마세요.','working');
      }
      if(t>=total){resolve();return}
@@ -1154,6 +1157,7 @@ async function exportVideo(){
   if(ac)try{await ac.close()}catch(e){}
   canvasStream?.getTracks().forEach(t=>t.stop());
   videoExporting=false;btn.disabled=false;btn.textContent='🎥 붐웨커 영상 저장';
+  if(mobileSaveBtn){mobileSaveBtn.disabled=false;mobileSaveBtn.textContent='🎥 저장'}
   if(!videoDownloadUrl){progress.classList.remove('show');fill.style.width='0%'}
  }
 }
@@ -1210,6 +1214,12 @@ function openMobileSheet(which){
 }
 $('#mobileSongSelect').onchange=e=>{if(e.target.value)chooseSample(e.target.value)};
 $('#mobileSettingsBtn').onclick=()=>openMobileSheet('settings');
+$('#mobileVideoBtn').onclick=()=>{
+ if(videoExporting)return;
+ openMobileSheet('settings');
+ $('#videoBtn').scrollIntoView({block:'center'});
+ exportVideo();
+};
 $('#mobileScoreBtn').onclick=()=>openMobileSheet('score');
 $('#mobileSettingsClose').onclick=()=>{closeMobileSheets();$('#mobileSettingsBtn').focus({preventScroll:true})};
 $('#mobileScoreClose').onclick=()=>{closeMobileSheets();$('#mobileScoreBtn').focus({preventScroll:true})};
