@@ -50,9 +50,9 @@
  const heroSvg=document.querySelector('.hemi-hero-svg');
  const focus=document.getElementById('hemiFocus');
  const sideCopy={
-  left:['💬 좌뇌를 살펴보고 있어요','말과 문장을 다루는 기능에 상대적으로 많이 관여해요.'],
-  right:['🧭 우뇌를 살펴보고 있어요','물건의 위치와 말투에 담긴 느낌을 알아차릴 때 상대적으로 더 관여할 수 있어요.'],
-  both:['🤝 함께 일하는 뇌','좌뇌와 우뇌는 한 팀! 어느 한쪽만 쓰는 건 아니에요.']
+  left:['💬 좌뇌를 살펴봐요','말과 문장을 다룰 때 더 많이 참여해요.'],
+  right:['🧭 우뇌를 살펴봐요','위치와 말투의 느낌을 살필 때 도움을 줘요.'],
+  both:['🤝 함께 일하는 뇌','좌뇌와 우뇌는 한 팀이에요.']
  };
  function selectSide(key){
   const parts=sideCopy[key];if(!parts||!focus||!heroSvg)return;

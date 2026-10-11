@@ -330,3 +330,17 @@
  .hemi-example strong{font-size:12px}
  .hemi-example p{font-size:12px}
 }
+
+
+/* 2026-10-11 · 모아 토끼: 작은 화면에서도 캐릭터와 반구를 충분히 크게 */
+@media(max-width:760px){
+ .hemi-hero{grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);gap:4px 7px}
+ .hemi-hero-svg{max-width:190px;max-height:212px}
+}
+@media(max-width:370px){
+ .hemi-hero{grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr)}
+ .hemi-hero-svg{max-width:170px;max-height:190px}
+}
+
+/* 짧은 설명은 단어 중간에서 쪼개지 않도록 */
+.hemi-focus span{word-break:keep-all;overflow-wrap:break-word}
