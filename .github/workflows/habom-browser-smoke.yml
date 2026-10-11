@@ -62,10 +62,10 @@ jobs:
               if(!wrapper.classList.contains('hb-show-subcategory'))issues.push('category panel did not open');
               if(nav.querySelector('details.hb-menu[open]'))issues.push('native details expanded on mobile');
               const gardenGroups=[...nav.querySelectorAll('.hb-mobile-game-section')];
-              if(gardenGroups.length!==2)issues.push('two nested garden groups not visible');
+              if(gardenGroups.length<3)issues.push('nested garden groups not visible (expected cognitive, music and breath)');
               const parentNames=gardenGroups.map(g=>g.querySelector('.hb-game-parent')?.textContent||'');
-              if(!parentNames[0]?.includes('생각정원')||!parentNames[1]?.includes('음악정원'))issues.push('garden hierarchy misnamed');
-              if(gardenGroups[0]?.querySelectorAll('.hb-game-child').length!==4||gardenGroups[1]?.querySelectorAll('.hb-game-child').length!==2)issues.push('garden category counts incorrect');
+              if(!parentNames[0]?.includes('생각정원')||!parentNames[1]?.includes('음악정원')||!parentNames.some(x=>x.includes('바람놀이터')))issues.push('garden hierarchy misnamed');
+              if(gardenGroups[0]?.querySelectorAll('.hb-game-child').length!==4||gardenGroups[1]?.querySelectorAll('.hb-game-child').length!==2||!gardenGroups.some(g=>g.textContent.includes('바람놀이터')&&g.querySelectorAll('.hb-game-child').length===3))issues.push('garden category counts incorrect');
               if(gardenGroups.some(g=>!g.querySelector('.hb-game-parent')||getComputedStyle(g).display==='none'))issues.push('nested groups hidden');
               const menuTile=nav.querySelector('.hb-nav-links > .hb-menu');
               if(menuTile&&getComputedStyle(menuTile).display!=='none')issues.push('grid remains visible behind subcategory');
