@@ -44,8 +44,10 @@
     if (!/(^|\.)googleusercontent\.com$|(^|\.)google\.com$/.test(hostname)) return;
     var measured = Number(msg.height);
     if (!Number.isFinite(measured) || measured < 350 || measured > 10000) return;
-    var target = Math.ceil(measured + 28);
-    if (Math.abs(iframe.offsetHeight - target) > 12) iframe.style.height = target + "px";
+    var existing = iframe.offsetHeight;
+    if (Math.abs(existing - measured) < 40) return;
+    var target = Math.max(700, Math.ceil(measured + 16));
+    if (Math.abs(existing - target) > 50) iframe.style.height = target + "px";
   });
 })();
 </script>
