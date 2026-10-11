@@ -8,6 +8,13 @@ on:
       - 'assets/habom-navigation.css'
       - 'index.html'
       - 'parents/index.html'
+  pull_request:
+    paths:
+      - '.github/workflows/habom-browser-smoke.yml'
+      - 'assets/habom-navigation.js'
+      - 'assets/habom-navigation.css'
+      - 'index.html'
+      - 'thinking-garden/games/rhythm-touch/qa.mjs'
   workflow_dispatch:
 permissions:
   contents: read
