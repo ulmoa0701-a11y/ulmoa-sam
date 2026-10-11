@@ -328,6 +328,9 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
             .filter(ir=>{const x=ir.src.bbox[0]+ir.src.bbox[2]/2;return x>left&&x<right;});
           if(unique.length===1&&altNotes.length===1){
             const head=unique[0],rhythm=scanRhythm(cvStaffs[li],{x:head.x,y:head.y});
+            opticalDebug.push({line:li,bar:i,reason:'empty-measure-hollow-candidate-review',
+              headX:Math.round(head.x),k:head.k,ring:head.ring,altDuration:eventFromIr(altNotes[0])?.dur,
+              opticalDuration:rhythm?.dur,stem:rhythm?.stem?.len||0,hollow:rhythm?.hollow,beams:rhythm?.beam});
             if(rhythm?.dur===4){
               const idx=2+head.k,steps=['C','D','E','F','G','A','B'];
               const p=pitchName({step:steps[((idx%7)+7)%7],octave:4+Math.floor(idx/7),alter:0});
