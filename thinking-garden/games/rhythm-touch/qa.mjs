@@ -47,6 +47,41 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  const navMenus=await page.locator('.hb-menu-games .hb-dropdown a').allTextContents();
  check(navMenus.some(t=>t.includes('생각정원'))&&navMenus.some(t=>t.includes('음악정원')),
    name+': main Games navigation does not show both clearly named gardens');
+ // Subcategories belong INSIDE one of the two parent garden cards.
+ const gardenHierarchy=await page.locator('.hb-menu-games .hb-game-section').evaluateAll(groups=>groups.map(group=>({
+   parent:group.querySelector('.hb-game-parent')?.textContent.trim(),
+   href:group.querySelector('.hb-game-parent')?.getAttribute('href'),
+   children:[...group.querySelectorAll('.hb-game-child')].map(a=>({label:a.textContent,href:a.getAttribute('href')}))
+ })));
+ check(gardenHierarchy.length===2&&gardenHierarchy[0].parent.includes('생각정원')&&
+   gardenHierarchy[0].href==='thinking-garden/'&&gardenHierarchy[0].children.length===4&&
+   gardenHierarchy[1].parent.includes('음악정원')&&gardenHierarchy[1].href==='music-garden/'&&
+   gardenHierarchy[1].children.length===2,
+   name+': garden menu children are not nested by parent '+JSON.stringify(gardenHierarchy));
+ if(w<1200){
+   await page.locator('.hb-mobile-toggle').click();
+   await page.locator('.hb-menu-games > summary').click();
+   check(await page.locator('.hb-mobile-game-section').count()===2&&
+     await page.locator('.hb-mobile-game-section .hb-game-child').count()===6,
+     name+': mobile menus flatten subcategories instead of nesting them');
+   const mobileBox=await page.locator('.hb-mobile-game-section').first().evaluate(el=>{
+     const r=el.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width}
+   });
+   check(mobileBox.left>=0&&mobileBox.right<=w+2,
+     name+': grouped mobile game menu overflows viewport '+JSON.stringify(mobileBox));
+   await page.screenshot({path:out+'/'+name+'-nested-menu.png'});
+   await page.locator('.hb-mobile-game-section .hb-game-child[href*="category=visual"]').click();
+ }else{
+   await page.locator('.hb-menu-games > summary').click();
+   check(await page.locator('.hb-game-section').first().isVisible(),
+     name+': desktop game-menu sections not visible on open');
+   await page.screenshot({path:out+'/'+name+'-nested-menu.png'});
+   await page.locator('.hb-menu-games .hb-game-child[href*="category=visual"]').click();
+ }
+ await page.waitForURL(url=>url.pathname.endsWith('/thinking-garden/')&&url.searchParams.get('category')==='visual');
+ check(await page.locator('.category-tab.active[data-category="visual"]').count()===1,
+   name+': nested visual-attention link did not select the correct garden filter');
+ await page.goto(base+'/',{waitUntil:'networkidle'});
  await musicDoor.click();
  await page.waitForURL('**/music-garden/');
  check((await page.title()).includes('모아의 음악정원'),name+': music garden title wrong');
