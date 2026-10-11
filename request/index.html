@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Gamja+Flower&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link rel="stylesheet" href="../assets/notebook-subpages.css?v=20261006-community3">
-<link rel="stylesheet" href="../assets/community-board.css?v=20261011-locked2">
+<link rel="stylesheet" href="../assets/community-board.css?v=20261012-ux1">
 <link rel="stylesheet" href="../assets/habom-brand.css?v=20261010b">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/habom-favicon-v3-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="../assets/habom-favicon-v3-16.png">
@@ -29,22 +29,22 @@
   <section class="community-mode" aria-labelledby="communityModeHeading">
     <div class="community-mode-heading">
       <div>
-        <p class="community-mode-eyebrow">궁금한 점 · 자료 요청 · 아이디어</p>
+        <p class="community-mode-eyebrow">질문 · 자료 요청 · 사용 후기</p>
         <h1 id="communityModeHeading">이야기해봄</h1>
       </div>
-      <p class="community-mode-hint" id="communityModeDescription">공개글은 모두에게 보여요. 비밀글은 내용이 공개되지 않고, 원하면 목록 표시를 요청할 수 있어요.</p>
+      
     </div>
     <div class="community-mode-tabs" role="tablist" aria-label="글 공개 범위 선택">
       <button class="community-mode-tab active" type="button" id="publicPostTab" role="tab" aria-selected="true" aria-controls="publicPostPanel">
         <span class="community-mode-tab-title"><span aria-hidden="true">💬</span> 공개글</span>
-        <span class="community-mode-tab-note">게시글과 댓글이 공개돼요</span>
+        <span class="community-mode-tab-note">누구나 볼 수 있어요</span>
       </button>
       <button class="community-mode-tab" type="button" id="privatePostTab" role="tab" aria-selected="false" aria-controls="privatePostPanel" tabindex="-1">
         <span class="community-mode-tab-title"><span aria-hidden="true">🔒</span> 비밀글</span>
-        <span class="community-mode-tab-note">잠금글 또는 완전 비공개</span>
+        <span class="community-mode-tab-note">내용은 공개되지 않아요</span>
       </button>
     </div>
-    <p class="community-mode-purpose">궁금한 점이나 자료 요청, 써본 후기와 개선 아이디어도 편하게 남길 수 있어요. 모든 질문에 답하거나 모든 요청을 제작할 수는 없어요.</p>
+    <p class="community-mode-purpose" id="communityModeDescription">궁금한 점, 필요한 자료, 써본 후기를 편하게 남겨주세요. <span>모든 질문에 답하거나 모든 요청을 제작할 수는 없어요.</span></p>
   </section>
   <section id="publicPostPanel" role="tabpanel" aria-labelledby="publicPostTab" class="notebook-page community-embed-page community-post-panel">
     <p class="community-mode-reminder">공개글에는 전화번호·이메일 등 개인정보를 적지 말아주세요. 연락을 원하면 비밀글을 이용할 수 있어요.</p>
@@ -59,8 +59,8 @@
     </section>
   </section>
   <section id="privatePostPanel" role="tabpanel" aria-labelledby="privatePostTab" class="community-private-panel community-post-panel" hidden>
-    <p class="community-private-notice"><strong>비밀글의 내용·연락처·첨부파일은 공개되지 않아요.</strong> 목록 표시를 요청하면 운영자 확인 후 안전한 제목·가린 닉네임만 표시할 수 있어요. 목록에도 남기지 않는 완전 비공개 문의를 선택할 수도 있어요. PDF·이미지 파일을 첨부할 수 있고, 전화번호·이메일은 답변을 원하는 경우에만 선택적으로 남기면 돼요.</p>
-    <p class="community-private-warning">아동 실명, 주민등록번호, 검사결과, 진단서 등 민감한 정보는 남기지 말아주세요.</p>
+    <p class="community-private-notice"><strong>내용과 첨부파일은 운영자만 확인해요.</strong> 목록에 표시해 달라고 요청해도 운영자가 확인한 제목·가린 닉네임만 보이며, 목록에 남기지 않을 수도 있어요. PDF·이미지와 연락처는 선택사항이에요.</p>
+    <p class="community-private-warning">아동 실명·진단서·검사결과 등 민감정보는 보내지 말아주세요. 답변은 보장되지 않으며, 연락처가 없으면 개별 답변을 받기 어려워요.</p>
     <iframe id="habomPrivateForm" class="community-private-iframe" title="일단 해봄 비밀글 작성" loading="lazy" data-src="https://form.jotform.com/262832846022052?isIframeEmbed=1" referrerpolicy="strict-origin-when-cross-origin"></iframe>
     <p class="community-private-external">양식이 보이지 않는다면 <a href="https://form.jotform.com/262832846022052" target="_blank" rel="noopener noreferrer">비밀글 작성 화면을 새 창에서 열기 <span aria-hidden="true">↗</span></a></p>
   </section>
