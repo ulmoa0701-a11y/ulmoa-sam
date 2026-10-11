@@ -51,7 +51,8 @@ jobs:
             const pending=page.waitForEvent('download',{timeout:45000}).then(download=>({download})).catch(error=>({error:String(error)}));
             let clickError='';
             try{
-              await page.locator('#videoBtn').click({timeout:12000});
+              if(mobile&&!await page.locator('#mobileVideoBtn').isVisible())throw Error('Mobile quick save button not visible');
+              await page.locator(mobile?'#mobileVideoBtn':'#videoBtn').click({timeout:12000});
               console.log('LIVE_CLICKED='+mobile);
             }catch(error){
               clickError=String(error);
