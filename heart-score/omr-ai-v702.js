@@ -326,7 +326,11 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
           if(assessed.length)opticalDebug.push({line:li,bar:i,reason:'near-barline-hollow-candidates',
             candidates:assessed.map(v=>({x:Math.round(v.head.x),k:v.head.k,ring:v.head.ring,
               dur:v.rhythm?.dur,hollow:v.rhythm?.hollow,dot:v.rhythm?.dot,stem:!!v.rhythm?.stem}))});
-          const confirmed=assessed.filter(v=>v.rhythm?.hollow===true&&v.rhythm?.dot===true&&
+          // If the model already decoded any long note in this bar, do not
+          // duplicate its independently detected hollow head (the model bbox
+          // center may sit many staff spaces to the right of the pixels).
+          const alreadyHasLongNote=items.some(v=>v.ir.kind==='note'&&v.e.dur>=2);
+          const confirmed=alreadyHasLongNote?[]:assessed.filter(v=>v.rhythm?.hollow===true&&v.rhythm?.dot===true&&
             !!v.rhythm?.stem&&v.rhythm?.dur===3);
           if(confirmed.length===1){
             const head=confirmed[0].head,index=2+head.k,steps=['C','D','E','F','G','A','B'],degree=((index%7)+7)%7;
