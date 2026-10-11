@@ -73,7 +73,7 @@ function headline(m){
  if(m.focus==='species')return m.species[0]+' 찾기';
  if(m.focus==='color')return m.color+'색 '+m.species[0];
  if(m.focus==='size')return m.size+' '+m.species.join('·');
- return m.color+'색 '+(m.focus==='combined'?m.size+' ':'')+m.species.join('·');
+ return m.color+'색 '+(m.focus==='combined'?m.size+' ':'')+'동물';
 }
 function description(m){
  const map={species:'동물 종류를 살펴요',color:'색깔을 살펴요',size:'같은 종류끼리 크기를 비교해요','color-species':'색깔과 동물 종류를 살펴요',combined:'동물 종류 · 색깔 · 크기를 모두 살펴요'};
