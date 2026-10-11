@@ -78,7 +78,7 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
    await page.screenshot({path:out+'/'+name+'-nested-menu.png'});
    await page.locator('.hb-menu-games .hb-game-child[href*="category=visual"]').click();
  }
- await page.waitForURL('**/thinking-garden/?category=visual#gardenMap');
+ await page.waitForURL(url=>url.pathname.endsWith('/thinking-garden/')&&url.searchParams.get('category')==='visual');
  check(await page.locator('.category-tab.active[data-category="visual"]').count()===1,
    name+': nested visual-attention link did not select the correct garden filter');
  await page.goto(base+'/',{waitUntil:'networkidle'});
