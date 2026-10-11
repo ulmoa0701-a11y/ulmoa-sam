@@ -137,7 +137,14 @@ function boot(){
   const dialogTitle=document.getElementById("gcatDialogTitle");
   const dialogBody=document.getElementById("gcatDialogBody");
   const close=document.getElementById("gcatDialogClose");
-  if(!tabs||!search||!list||!dialog)return;
+  const imageViewer=document.getElementById("gcatImageViewer");
+  const imageViewerArt=document.getElementById("gcatImageViewerArt");
+  const imageViewerClose=document.getElementById("gcatImageViewerClose");
+  if(!tabs||!search||!list||!dialog||!imageViewer||!imageViewerArt||!imageViewerClose)return;
+  let zoomReturn=null;
+  imageViewerClose.addEventListener("click",()=>imageViewer.close());
+  imageViewer.addEventListener("click",event=>{if(event.target===imageViewer)imageViewer.close();});
+  imageViewer.addEventListener("close",()=>{if(zoomReturn&&zoomReturn.isConnected)zoomReturn.focus({preventScroll:true});zoomReturn=null;});
   let active="featured";
   let mode="album";
   let currentPage=0;
@@ -210,11 +217,12 @@ function boot(){
       reading.appendChild(hints);
     }
 
+    const resourceActions=node("div","gcat-resource-actions");
     const visual=original.querySelector(":scope > .study-visual");
     if(visual){
       const holder=node("div","gcat-reference-image");
       holder.appendChild(visual);
-      reading.appendChild(makeDisclosure("참고 그림 보기","gcat-reference-disclosure",holder));
+      resourceActions.appendChild(makeDisclosure("참고 그림 보기","gcat-reference-disclosure",holder));
     }
     const more=original.querySelector(":scope > .study-more");
     if(more){
@@ -222,8 +230,10 @@ function boot(){
       const extra=more.querySelector(":scope > div");
       if(extra)holder.append(...Array.from(extra.childNodes));
       else holder.append(...Array.from(more.childNodes).filter(el=>el.nodeType!==1||el.tagName!=="SUMMARY"));
-      reading.appendChild(makeDisclosure("더 알아보기 · 근거","gcat-reference-disclosure",holder));
+      resourceActions.appendChild(makeDisclosure("더 알아보기 · 근거","gcat-reference-disclosure",holder));
     }
+
+    if(resourceActions.childElementCount)reading.appendChild(resourceActions);
 
     // 예상하지 못한 원문 요소도 누락하지 않는다.
     const leftovers=Array.from(original.children).filter(el=>el!==core&&el!==example&&el!==contrast&&el!==tags&&el!==visual&&el!==more);
@@ -244,21 +254,23 @@ function boot(){
     renderRecent();
     dialogTitle.textContent=entry.title;
     dialogBody.replaceChildren();
-    dialogBody.appendChild(buildReadingSheet(entry));
+    const reading=buildReadingSheet(entry);
     if(entry.covers.length){
-      const details=node("details","gcat-art-disclosure");
-      const summary=node("summary",null,entry.covers.length>1?"승인한 손그림 2장 크게 보기 ▾":"손그림 크게 보기 ▾");
-      const artPanel=node("div","gcat-art-panel");
-      const art=node("img");
-      art.width=1122;art.height=1402;art.decoding="async";
-      art.loading="eager";
+      reading.classList.add("gcat-has-preview");
+      const preview=node("aside","gcat-inline-art");
+      const zoom=node("button","gcat-inline-art-zoom");
+      zoom.type="button";
+      zoom.setAttribute("aria-label",entry.title+" 그림 확대");
+      zoom.title="그림 눌러 크게 보기";
+      const art=node("img","gcat-inline-art-image");
+      art.width=1122;art.height=1402;art.decoding="async";art.loading="eager";
+      zoom.appendChild(art);
       const choose=index=>{
         const cover=entry.covers[index];
         art.src=coverUrl(cover[1]);
-        art.alt=cover[0]+" 손그림 원본";
-        artPanel.querySelectorAll(".gcat-art-choices button").forEach((btn,i)=>btn.setAttribute("aria-pressed",String(i===index)));
+        art.alt=cover[0]+" 그림";
+        preview.querySelectorAll(".gcat-art-choices button").forEach((btn,i)=>btn.setAttribute("aria-pressed",String(i===index)));
       };
-      details.appendChild(summary);
       if(entry.covers.length>1){
         const buttons=node("div","gcat-art-choices");
         entry.covers.forEach((cover,i)=>{
@@ -268,13 +280,20 @@ function boot(){
           btn.addEventListener("click",()=>choose(i));
           buttons.appendChild(btn);
         });
-        artPanel.appendChild(buttons);
+        preview.appendChild(buttons);
       }
-      artPanel.appendChild(art);
-      details.appendChild(artPanel);
-      dialogBody.appendChild(details);
+      zoom.addEventListener("click",()=>{
+        zoomReturn=zoom;
+        imageViewerArt.src=art.src;
+        imageViewerArt.alt=art.alt;
+        imageViewer.showModal();
+      });
+      preview.appendChild(zoom);
+      preview.appendChild(node("span","gcat-art-tip","그림을 누르면 확대돼요"));
+      reading.insertBefore(preview,reading.children[1]||null);
       choose(chosenCover||0);
     }
+    dialogBody.appendChild(reading);
     const suggestions=(RELATED[id]||entries.filter(x=>x.category===entry.category&&x.id!==id).slice(0,2).map(x=>x.id))
       .filter(key=>key!==id&&byId.has(key)).slice(0,3);
     if(suggestions.length){
