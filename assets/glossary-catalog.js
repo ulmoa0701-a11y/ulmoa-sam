@@ -253,6 +253,24 @@ const SIMPLE_DEFINITIONS={
   "memo-udl":"처음부터 다양한 배움의 방법을 마련하기"
 };
 
+
+/* 상황에서 용어를 '진단명'처럼 제시하지 않기 위해 관찰된 장면과 관련 개념의 접점을 설명한다. */
+const SITUATION_GUIDES={
+  distracted:{term:"memo-attention",why:"소리가 났을 때 보고 있던 곳이 바뀌는 장면이에요. 주의를 어디에 두는지와 연결해 볼 수 있어요."},
+  planning:{term:"memo-planning-organization",why:"무엇부터 할지 정하는 과정에서 멈췄어요. 계획을 세우는 기능을 살펴볼 수 있어요."},
+  switch:{term:"memo-flexibility",why:"규칙이 달라졌을 때 다른 방법으로 바꾸는 모습과 관련 있어요."},
+  instructions:{term:"memo-working-memory",why:"들은 내용을 잠깐 기억하면서 행동할 때 작업기억이 쓰일 수 있어요."},
+  recall:{term:"memo-retrieval",why:"첫 글자 힌트를 들으니 생각난다면, 기억해 둔 내용을 다시 꺼내는 과정과 연결해 볼 수 있어요."},
+  reading:{term:"memo-inferential-comprehension",why:"글자를 읽는 것과 이야기의 이유를 짐작하는 것은 달라요. 숨은 뜻을 알아보는 기능과 관련 있어요."},
+  story:{term:"memo-narrative-discourse",why:"여러 일을 듣는 사람이 알기 쉽게 연결해서 말하는 모습과 관련 있어요."},
+  context:{term:"memo-pragmatics",why:"같은 말이라도 상황과 상대에 따라 다른 의미로 쓰일 수 있어요."},
+  express:{term:"memo-aac",why:"그림을 가리키는 것도 자기 뜻을 전하는 소통 방식이 될 수 있어요."},
+  refusal:{term:"memo-abc-observation",why:"행동 전·중·후를 나누어 기록하면 반복되는 상황을 더 정확히 살펴볼 수 있어요."},
+  asking:{term:"memo-aac",why:"도움을 요청하는 방식은 말뿐만이 아니에요. 손짓이나 그림도 소통 방법이 될 수 있어요."},
+  access:{term:"memo-udl",why:"배울 때 필요한 정보 제시 방법은 사람마다 다를 수 있어요. 여러 길을 마련하는 설계와 연결돼요."}
+};
+const FEATURED_SITUATIONS=["distracted","instructions","story","refusal"];
+
 const TINT={
   "cognitive":"#ffeedb",
   "memory-perception":"#e5f0e3",
@@ -487,6 +505,19 @@ function boot(){
       group.appendChild(row);
       dialogBody.appendChild(group);
     }
+    const matchedMap=CONNECTION_MAPS.find(map=>map.nodes.some(([termId])=>termId===id));
+    if(matchedMap){
+      const mapButton=node("button","gcat-from-term-map","이 용어와 비슷한 개념 비교하기 →");
+      mapButton.type="button";
+      mapButton.addEventListener("click",()=>{
+        dialog.close();
+        activeConnectionMap=matchedMap.id;
+        renderConnections();
+        setJourney("connections",true);
+        window.scrollTo({top:Math.max(0,document.getElementById("glossaryCatalog").getBoundingClientRect().top+window.scrollY-18),behavior:"instant"});
+      });
+      dialogBody.appendChild(mapButton);
+    }
     dialog.scrollTop=0;
     if(!dialog.open){
       if(typeof dialog.showModal==="function")dialog.showModal();
@@ -708,7 +739,7 @@ function boot(){
   const situationCount=document.getElementById("gcatSituationCount");
   const connectionFilters=document.getElementById("gcatConnectionFilters");
   const connectionDetail=document.getElementById("gcatConnectionDetail");
-  let activeSituationGroup="all";
+  let activeSituationGroup="featured";
   let activeConnectionMap="executive";
   const validIds=new Set(entries.map(e=>e.id));
   for(const situation of SITUATIONS)for(const id of situation.terms)if(!validIds.has(id))console.error("없는 상황 연결 용어:",id);
@@ -725,7 +756,7 @@ function boot(){
   }
   function renderSituations(){
     situationFilters.replaceChildren();
-    [{id:"all",label:"전체"},...SITUATION_GROUPS].forEach(group=>{
+    [{id:"featured",label:"먼저 볼 4가지"},{id:"all",label:"전체 12가지"},...SITUATION_GROUPS].forEach(group=>{
       const button=node("button","gcat-filter-button",group.label);
       button.type="button";
       button.dataset.group=group.id;
@@ -733,8 +764,8 @@ function boot(){
       button.addEventListener("click",()=>{activeSituationGroup=group.id;renderSituations();});
       situationFilters.appendChild(button);
     });
-    const list=SITUATIONS.filter(s=>activeSituationGroup==="all"||s.group===activeSituationGroup);
-    situationCount.textContent=list.length+"가지 상황";
+    const list=SITUATIONS.filter(s=>activeSituationGroup==="all"||(activeSituationGroup==="featured"?FEATURED_SITUATIONS.includes(s.id):s.group===activeSituationGroup));
+    situationCount.textContent=activeSituationGroup==="featured"?"대표 상황 4가지":list.length+"가지 상황";
     situationGrid.replaceChildren();
     for(const situation of list){
       const group=SITUATION_GROUPS.find(g=>g.id===situation.group);
@@ -745,25 +776,53 @@ function boot(){
       article.appendChild(node("h3",null,situation.title));
       const scene=node("p","gcat-scene",situation.scene);
       article.appendChild(scene);
-      const focus=node("div","gcat-situation-focus");
-      focus.appendChild(node("strong",null,"기억할 점"));
-      focus.appendChild(node("span",null,situation.remember));
+      const guide=SITUATION_GUIDES[situation.id];
+      const primary=byId.get(guide.term);
+      const focus=node("section","gcat-situation-focus");
+      focus.appendChild(node("span","gcat-first-kicker","여기서 알아볼 말 하나"));
+      if(primary){
+        const headline=node("div","gcat-first-concept");
+        headline.appendChild(node("strong",null,primary.title));
+        headline.appendChild(node("span",null,SIMPLE_DEFINITIONS[primary.id]||primary.subtitle));
+        focus.appendChild(headline);
+        focus.appendChild(node("p","gcat-why-link",guide.why));
+      }
       article.appendChild(focus);
-      const observations=node("div","gcat-situation-detail");
-      observations.appendChild(node("strong",null,"이런 점을 살펴봐요"));
-      observations.appendChild(node("p",null,situation.observe));
-      article.appendChild(observations);
-      const application=node("div","gcat-situation-detail gcat-situation-application");
-      application.appendChild(node("strong",null,"도움이 될 수 있는 방법"));
-      application.appendChild(node("p",null,situation.try));
+      const observation=node("p","gcat-situation-observe");
+      observation.appendChild(node("strong",null,"이렇게 살펴봐요"));
+      observation.appendChild(document.createTextNode(" "+situation.observe));
+      article.appendChild(observation);
+      const application=node("p","gcat-situation-action");
+      application.appendChild(node("strong",null,"이렇게 도울 수 있어요"));
+      application.appendChild(document.createTextNode(" "+situation.try));
       article.appendChild(application);
-      const footer=node("div","gcat-situation-terms");
-      footer.appendChild(node("strong",null,"연결되는 용어"));
+      const one=node("button","gcat-primary-term",primary?primary.title+" 설명·그림 보기 →":"용어 자세히 보기");
+      one.type="button";
+      if(primary){
+        one.dataset.termId=primary.id;
+        one.addEventListener("click",()=>openTerm(primary.id,one));
+      }else one.disabled=true;
+      article.appendChild(one);
+      const extra=node("details","gcat-situation-more");
+      extra.appendChild(node("summary",null,"함께 알아볼 다른 용어 2개"));
       const chips=node("div","gcat-term-chips");
-      for(const id of situation.terms){const chip=termChip(id);if(chip)chips.appendChild(chip);}
-      footer.appendChild(chips);
-      article.appendChild(footer);
-      const reference=node("a","gcat-learning-reference","관련 개념의 참고자료 ↗");
+      for(const id of situation.terms.filter(id=>id!==guide.term)){
+        const chip=termChip(id);
+        if(chip)chips.appendChild(chip);
+      }
+      // The key concept may not have been first in the original trio.
+      const used=new Set(situation.terms.filter(id=>id!==guide.term));
+      if(used.size<2){
+        const fallback=RELATED[guide.term]||[];
+        for(const id of fallback){
+          if(used.size>=2)break;
+          if(id!==guide.term&&byId.has(id)&&!used.has(id)){const chip=termChip(id);if(chip){chips.appendChild(chip);used.add(id);}}
+        }
+      }
+      extra.appendChild(chips);
+      extra.appendChild(node("p","gcat-remember-note",situation.remember));
+      article.appendChild(extra);
+      const reference=node("a","gcat-learning-reference",situation.source[0]+" · 참고자료 ↗");
       reference.href=situation.source[1];
       reference.target="_blank";
       reference.rel="noopener noreferrer";
@@ -846,19 +905,21 @@ function boot(){
     });
     if(updateUrl){
       const url=new URL(location.href);
-      if(view==="terms")url.searchParams.delete("view"); else url.searchParams.set("view",view);
+      if(view==="situations")url.searchParams.delete("view"); else url.searchParams.set("view",view);
       if(url.href!==location.href)history.pushState(null,"",url);
     }
   }
   journeyNav.querySelectorAll("button[data-view]").forEach(button=>{
     button.addEventListener("click",()=>setJourney(button.dataset.view,true));
   });
+  const deeper=document.getElementById("gcatOpenConnections");
+  if(deeper)deeper.addEventListener("click",()=>setJourney("connections",true));
   window.addEventListener("popstate",()=>{
-    setJourney(new URL(location.href).searchParams.get("view")||"terms",false);
+    setJourney(new URL(location.href).searchParams.get("view")||"situations",false);
   });
   renderSituations();
   renderConnections();
-  setJourney(new URL(location.href).searchParams.get("view")||"terms",false);
+  setJourney(new URL(location.href).searchParams.get("view")||"situations",false);
 
   // 기존 공유 링크 /notes/#memo-aac 등의 직접 방문도 지원.
   const target=decodeURIComponent(location.hash.slice(1));

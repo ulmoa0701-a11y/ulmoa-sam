@@ -1171,3 +1171,70 @@
  .glossary-page .gcat-scene{font-size:13.5px!important}
  .glossary-page .gcat-concept-takeaway p{font-size:14px!important}
 }
+
+
+/* 알아봄 2026-10: 먼저 상황 4개, 각 카드에는 단 하나의 핵심 개념을 펼침 없이 표시 */
+.glossary-page .gcat-journey-nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:13px 0 17px}
+.glossary-page .gcat-journey-nav button{min-height:70px}
+.glossary-page .gcat-journey-nav button>span{font-size:16px}
+.glossary-page .gcat-journey-nav button>small{font-size:12px}
+.glossary-page .gcat-situation-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.glossary-page .gcat-situation-card{gap:10px;padding:16px}
+.glossary-page .gcat-scene{font-size:14px!important;line-height:1.55!important}
+.glossary-page .gcat-situation-focus{
+  display:flex;flex-direction:column;gap:7px;align-items:stretch;
+  padding:13px 14px;background:#fff6e2;border-radius:13px
+}
+.glossary-page .gcat-first-kicker{font:750 11px/1.4 "Pretendard Variable",Pretendard,sans-serif;color:#856b4c}
+.glossary-page .gcat-first-concept{display:flex;flex-direction:column;gap:3px}
+.glossary-page .gcat-first-concept strong{font:800 18px/1.4 "Pretendard Variable",Pretendard,sans-serif;color:#433628}
+.glossary-page .gcat-first-concept span{font:650 14px/1.55 "Pretendard Variable",Pretendard,sans-serif;color:#463d31;word-break:keep-all}
+.glossary-page .gcat-why-link{
+  margin:2px 0 0!important;padding-top:8px;border-top:1px solid #e8d9bf;
+  font:500 12.5px/1.6 "Pretendard Variable",Pretendard,sans-serif!important;color:#685744;word-break:keep-all
+}
+.glossary-page .gcat-situation-observe,.glossary-page .gcat-situation-action{
+  margin:0!important;font:500 13px/1.6 "Pretendard Variable",Pretendard,sans-serif!important;
+  color:#554d44;word-break:keep-all
+}
+.glossary-page .gcat-situation-observe strong,.glossary-page .gcat-situation-action strong{
+  display:block;margin:0 0 3px;color:#625544;font-weight:750
+}
+.glossary-page .gcat-situation-action{border-radius:10px;background:#f3f8f1;padding:10px!important}
+.glossary-page .gcat-primary-term{
+  min-height:42px;width:100%;border:1px solid #c9d9cc;background:#f4faf4;
+  border-radius:11px;padding:9px 10px;cursor:pointer;color:#2e5745;
+  font:750 13px/1.5 "Pretendard Variable",Pretendard,sans-serif;word-break:keep-all
+}
+.glossary-page .gcat-primary-term:focus-visible,
+.glossary-page .gcat-from-term-map:focus-visible,
+.glossary-page .gcat-deeper-link:focus-visible{outline:3px solid #3173a1;outline-offset:2px}
+.glossary-page .gcat-situation-more{padding:0;border-top:1px solid #efe8dd}
+.glossary-page .gcat-situation-more>summary{
+  display:flex;align-items:center;justify-content:space-between;gap:7px;
+  min-height:40px;padding:8px 1px;cursor:pointer;list-style:none;
+  color:#6d6359;font:650 12px/1.5 "Pretendard Variable",Pretendard,sans-serif
+}
+.glossary-page .gcat-situation-more>summary::-webkit-details-marker{display:none}
+.glossary-page .gcat-situation-more>summary:after{content:"＋";font-size:15px}
+.glossary-page .gcat-situation-more[open]>summary:after{content:"−"}
+.glossary-page .gcat-situation-more .gcat-term-chips{padding:4px 0 8px}
+.glossary-page .gcat-remember-note{margin:2px 0 6px!important;font:500 12px/1.5 "Pretendard Variable",Pretendard,sans-serif!important;color:#74685d}
+.glossary-page .gcat-learning-reference{font-size:11px;color:#657568;text-underline-offset:2px}
+.glossary-page .gcat-from-term-map,.glossary-page .gcat-deeper-link{
+  border:1px solid #dce5dc;background:#f6faf5;color:#3c624b;
+  padding:11px 14px;border-radius:12px;font:750 13px/1.5 "Pretendard Variable",Pretendard,sans-serif;cursor:pointer
+}
+.glossary-page .gcat-from-term-map{margin-top:12px;width:100%}
+.glossary-page .gcat-deeper-link-wrap{margin:21px 0 2px;text-align:center}
+.glossary-page .gcat-panel-intro{margin:4px 0 14px}
+@media(max-width:650px){
+  .glossary-page .gcat-journey-nav{gap:7px;margin:11px 0 14px}
+  .glossary-page .gcat-journey-nav button{min-height:67px;padding:9px 5px}
+  .glossary-page .gcat-journey-nav button>span{font-size:14px}
+  .glossary-page .gcat-journey-nav button>small{font-size:11px}
+  .glossary-page .gcat-situation-grid{grid-template-columns:minmax(0,1fr);gap:11px}
+  .glossary-page .gcat-first-concept strong{font-size:17px}
+  .glossary-page .gcat-first-concept span{font-size:14px}
+  .glossary-page .gcat-situation-focus{padding:12px}
+}

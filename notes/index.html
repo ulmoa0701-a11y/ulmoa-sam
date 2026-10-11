@@ -13,8 +13,8 @@
 <link href="../assets/notebook-subpages.css?v=20261005-clean3" rel="stylesheet"/>
 <link href="../assets/info.css?v=20261006-study1" rel="stylesheet"/>
 <link href="../assets/info-memory.css?v=20261008-v3vector" rel="stylesheet"/>
-<link href="../assets/glossary-catalog.css?v=20261011-arabom-plain2" rel="stylesheet"/>
-<script src="../assets/glossary-catalog.js?v=20261011-arabom-plain2" defer></script>
+<link href="../assets/glossary-catalog.css?v=20261012-arabom-one-at-a-time" rel="stylesheet"/>
+<script src="../assets/glossary-catalog.js?v=20261012-arabom-one-at-a-time" defer></script>
 
 <link rel="stylesheet" href="../assets/habom-brand.css?v=20261010b">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/habom-favicon-v3-32.png">
@@ -68,12 +68,11 @@
   <header class="gcat-head">
     <span class="gcat-eyebrow">해봄노트 · 알아봄</span>
     <h1 id="gcatTitle">알아봄</h1>
-    <p>어려운 말도 쉬운 한 줄과 생활 속 예시로 알아봐요.</p>
+    <p>일상에서 궁금했던 모습부터, 어려운 말도 하나씩 알아봐요.</p>
   </header>
-  <nav class="gcat-journey-nav" id="gcatJourneyNav" aria-label="알아봄 탐색 방식">
-    <button type="button" data-view="terms" aria-controls="gcatTermPanel" aria-pressed="true"><span>용어 알아보기</span><small>뜻과 그림</small></button>
-    <button type="button" data-view="situations" aria-controls="gcatSituationPanel" aria-pressed="false"><span>상황에서 찾기</span><small>실제 사례</small></button>
-    <button type="button" data-view="connections" aria-controls="gcatConnectionPanel" aria-pressed="false"><span>개념 이어보기</span><small>관계와 차이</small></button>
+  <nav class="gcat-journey-nav" id="gcatJourneyNav" aria-label="알아봄 시작하기">
+    <button type="button" data-view="situations" aria-controls="gcatSituationPanel" aria-pressed="true"><span>상황에서 시작하기</span><small>우리 생활에서</small></button>
+    <button type="button" data-view="terms" aria-controls="gcatTermPanel" aria-pressed="false"><span>용어 찾아보기</span><small>그림과 쉬운 뜻</small></button>
   </nav>
   <div class="gcat-term-panel" id="gcatTermPanel">
   <div class="gcat-search-rail">
@@ -101,12 +100,15 @@
     <button class="gcat-page-btn" id="gcatNext" type="button">다음 →</button>
   </nav>
   <p class="gcat-no-results" id="gcatEmpty" hidden>해당 용어가 없어요. 다른 말로 검색하거나 분야를 선택해 보세요.</p>
+  <div class="gcat-deeper-link-wrap">
+    <button type="button" class="gcat-deeper-link" id="gcatOpenConnections">비슷한 개념도 비교해 볼까요? <span aria-hidden="true">→</span></button>
+  </div>
   </div>
   <section class="gcat-situation-panel" id="gcatSituationPanel" aria-label="상황에서 찾기" hidden>
-    <div class="gcat-panel-intro"><div><h2>상황에서 찾기</h2><p>익숙한 장면부터 읽어보세요. 왜 그럴지 단정하지 않고 여러 가능성을 살펴봐요.</p></div><span id="gcatSituationCount" aria-live="polite">12가지 상황</span></div>
+    <div class="gcat-panel-intro"><div><h2>이런 모습, 본 적 있나요?</h2><p>생활 속 장면 하나에서 관련 개념 하나만 먼저 알아봐요.</p></div><span id="gcatSituationCount" aria-live="polite">대표 상황 4가지</span></div>
     <nav class="gcat-situation-filters" id="gcatSituationFilters" aria-label="상황 분야 선택"></nav>
     <div class="gcat-situation-grid" id="gcatSituationGrid" aria-live="polite"></div>
-    <p class="gcat-learning-caution">같은 행동에도 여러 이유가 있을 수 있어요. 아래 내용은 관찰과 학습을 위한 예시이며, 행동만으로 원인이나 진단을 판단하지 않습니다.</p>
+    <p class="gcat-learning-caution">사례는 이해를 돕는 예시예요. 같은 행동에도 여러 이유가 있을 수 있고, 용어 하나로 아이의 상태를 판단할 수는 없어요.</p>
   </section>
   <section class="gcat-connection-panel" id="gcatConnectionPanel" aria-label="개념 이어보기" hidden>
     <div class="gcat-panel-intro"><div><h2>개념 이어보기</h2><p>비슷한 용어, 무엇이 같고 다를까요? 중심 개념과 관련 개념을 나란히 비교해요.</p></div><span>5가지 연결 주제</span></div>
