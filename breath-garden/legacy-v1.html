@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#edf9ef"><meta name="description" content="모아의 바람놀이터: 내 바람의 세기, 몇 초 동안 쭉 불기, 박자에 맞춰 후~ 불기. 리코더와 별개로 하는 호흡 놀이.">
+<title>모아의 바람놀이터 | 일단 해봄</title><link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+<div class="app">
+<header class="header">
+ <a href="../" class="site-link" aria-label="일단 해봄 홈페이지로 돌아가기">⌂ <span>일단 해봄 홈</span></a>
+ <div class="brand">🌬️ 모아의 바람놀이터</div>
+ <div class="header-right"><button id="voicePreview" class="icon-btn" type="button" aria-label="안내 음성 듣기">🔊</button><button id="muteBtn" class="icon-btn" type="button" aria-label="음성 켜기 또는 끄기">♫</button></div>
+</header>
+<main>
+<section id="homeScreen" class="home-screen">
+ <div class="intro">
+   <div class="welcome-art" aria-hidden="true">🪶 <span>🌈</span> 🌼</div>
+   <div class="intro-copy"><span class="eyebrow">호흡 · 바람 · 리듬 놀이</span><h1>후~ 불면<br><em>정원이 깨어나요!</em></h1><p>어떤 바람놀이를 해볼까?</p></div>
+ </div>
+ <div class="game-choice">
+  <button class="choice" id="chooseStrength" type="button"><span class="choice-art">🌬️🪶</span><span class="choice-text"><strong>바람의 힘</strong><small>파랑·초록·빨강!<br>살살, 적당히, 세게를 느껴요.</small></span><span class="start-word">시작 →</span></button>
+  <button class="choice" id="chooseLong" type="button"><span class="choice-art">🎈⏳</span><span class="choice-text"><strong>오래 후~</strong><small>2초부터 5초까지<br>숨을 부드럽게 이어봐요.</small></span><span class="start-word">시작 →</span></button>
+  <button class="choice" id="chooseBeat" type="button"><span class="choice-art">🎶🌻</span><span class="choice-text"><strong>박자 바람</strong><small>준비, 후~!<br>빛나는 박자에 맞춰 불어요.</small></span><span class="start-word">시작 →</span></button>
+ </div>
+ <p class="note" id="voiceAvailability">한국어 안내 음성은 기기에서 제공하는 음성을 사용해요.</p>
+</section>
+<section id="playScreen" class="play-screen" hidden>
+ <div class="play-top">
+  <button type="button" class="back-btn" id="backHome">← 다른 놀이</button>
+  <div class="play-title"><span id="modeEmoji">🪶</span><strong id="modeTitle">바람의 힘</strong></div>
+  <button type="button" class="reset-btn" id="restart">↻ 다시</button>
+ </div>
+ <div class="scene" id="scene" data-mode="strength" data-color="idle">
+  <div class="sky"><span class="cloud">☁️</span><span class="sun"></span></div>
+  <div class="scene-center">
+   <div id="strengthScene" class="scene-type">
+    <div class="wind-line" id="windLine">💨</div>
+    <div class="feather" id="feather">🪶</div><div class="flowerbed">🌷 🌼 🌸 🌻</div>
+   </div>
+   <div id="longScene" class="scene-type" hidden>
+     <div class="balloon" id="balloon">🎈</div>
+     <div class="duration" id="duration">0.0 <small>초</small></div>
+     <div class="target-duration" id="targetDuration">2초 동안 부드럽게!</div>
+   </div>
+   <div id="beatScene" class="scene-type" hidden>
+    <div class="beat-orb" id="beatOrb"><span id="beatEmoji">🌱</span><strong id="beatCue">준비!</strong></div>
+    <div id="beatCount" class="beat-count">🌼 ⚪ ⚪ ⚪</div>
+   </div>
+  </div>
+  <div class="scene-ground"></div>
+ </div>
+ <div class="control-area">
+  <div class="hint-main" id="mainHint">숨을 살살 불어봐!</div>
+  <div class="level-status"><span class="status-icon" id="levelIcon">🌱</span><b id="levelText">준비!</b></div>
+  <div class="level-meter" aria-label="바람 소리 강도" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="levelMeter"><span id="meterFill"></span></div>
+  <div class="color-legend"><span class="blue">🔵 약해</span><span class="green">🟢 좋아!</span><span class="red">🔴 조금 세</span></div>
+  <div class="mode-options" id="strengthOptions"><span class="option-title" id="strengthStep">🪶 깃털 불기</span><div class="stamp" id="strengthStamps">⚪ ⚪ ⚪</div></div>
+  <div class="mode-options" id="longOptions" hidden><span class="option-title">몇 초 동안 불까?</span><div class="segments" id="longDuration"><button type="button" data-seconds="2" class="selected">2초</button><button type="button" data-seconds="3">3초</button><button type="button" data-seconds="4">4초</button><button type="button" data-seconds="5">5초</button></div></div>
+  <div class="mode-options" id="beatOptions" hidden><span class="option-title">박자 속도</span><div class="segments" id="beatSpeed"><button type="button" data-beat="slow" class="selected">🐢 천천히</button><button type="button" data-beat="normal">🌼 보통</button></div></div>
+  <button id="micButton" class="main-btn" type="button">🎤 마이크 켜기</button>
+  <p class="live-note" id="statusNote" role="status" aria-live="polite">색을 따라 후~ 불어봐!</p>
+ </div>
+</section>
+<section id="successScreen" class="success-screen" hidden>
+ <div class="win-art">🌈 🌼 🦋</div><h2 id="winTitle">참 잘했어!</h2><p id="winDescription">모아의 바람정원에 꽃이 피었어!</p>
+ <button type="button" class="main-btn" id="playAgain">↻ 또 해볼래!</button><button type="button" class="secondary-btn" id="chooseAgain">🌱 다른 바람놀이</button>
+</section>
+<details class="teacher-panel" id="teacherPanel">
+ <summary>⚙️ 선생님 설정 · 기기 안내</summary>
+ <div class="teacher-body">
+  <p>마이크의 비주기적 소리 신호로 화면을 반응시키는 놀이예요. <b>실제 바람의 세기·방향, 호흡 기능을 의학적으로 측정하거나 평가하지 않습니다.</b> 말소리·주변 소음이 잘못 분류될 수 있으니 처음에는 가벼운 종이띠 등으로 실제 바람의 움직임을 함께 확인해 주세요.</p>
+  <div class="teacher-setting"><label for="sensitivity">마이크 감도 <b id="sensitivityName">보통</b></label><input type="range" min="1" max="5" value="3" step="1" id="sensitivity"></div>
+  <div class="teacher-setting"><label for="voiceSelect">음성 선택</label><select id="voiceSelect"><option value="auto">한국어 자동 선택</option></select></div>
+  <div id="voiceDetail" class="voice-detail">Google 한국어 우선 사용 · 없으면 다른 한국어 음성</div>
+  <div class="teacher-actions"><button type="button" id="previewBtn">🔊 안내 목소리 확인</button><button type="button" id="demoBtn">🧪 화면 반응 체험</button></div>
+  <div id="micDetail" class="voice-detail">마이크 미연결. 소리 녹음·업로드·저장 없음.</div>
+  <p>지속해서 내쉬기는 편안한 범위에서 연습하고 어지러움·불편감이 생기면 중단하세요. 숨을 억지로 참거나 세게 내쉴 필요가 없어요. 소음 측정은 기종과 거리의 영향을 받아요.</p>
+ </div>
+</details>
+</main>
+<footer>일단 해봄 · 울모아쌤 · <a href="../music-garden/">🎵 모아의 음악정원</a> · <a href="../thinking-garden/recorder/">리코더 놀이터</a></footer>
+</div>
+<script src="app.js?v=1"></script>
+</body></html>
