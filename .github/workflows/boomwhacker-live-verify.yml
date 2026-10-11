@@ -43,10 +43,26 @@ jobs:
             await page.reload({waitUntil:'domcontentloaded'});
             if(mobile)await page.evaluate(()=>{document.querySelector('#creditOpt').checked=false});
             const error=[];page.on('pageerror',e=>error.push(e.message));
-            const pending=page.waitForEvent('download',{timeout:55000});
-            await page.locator('#videoBtn').click();
+            const info=await page.locator('#videoBtn').evaluate(b=>{
+              const r=b.getBoundingClientRect(),s=getComputedStyle(b);
+              return {rect:{x:r.x,y:r.y,width:r.width,height:r.height},display:s.display,visible:s.visibility,disabled:b.disabled,status:document.querySelector('#videoStatus')?.innerText}
+            });
+            console.log('LIVE_PRECLICK='+JSON.stringify({mobile,info,ready}));
+            const pending=page.waitForEvent('download',{timeout:45000}).then(download=>({download})).catch(error=>({error:String(error)}));
+            let clickError='';
+            try{
+              await page.locator('#videoBtn').click({timeout:12000});
+              console.log('LIVE_CLICKED='+mobile);
+            }catch(error){
+              clickError=String(error);
+              console.log('LIVE_CLICK_ERROR='+JSON.stringify({mobile,clickError}));
+              await page.screenshot({path:'boomwhacker/live-qa-artifacts/error-'+(mobile?'mobile':'desktop')+'.png',fullPage:true}).catch(()=>{});
+            }
+            if(clickError)throw Error('Live click failed mobile='+mobile+': '+clickError);
             const progressShown=await page.locator('#videoProgress').isVisible();
-            const download=await pending;
+            const res=await pending;
+            if(!res.download)throw Error('Live download never started mobile='+mobile+': '+res.error+' status='+await page.locator('#videoStatus').innerText());
+            const download=res.download;
             const file='boomwhacker/live-qa-artifacts/live-'+(mobile?'mobile':'desktop')+'.webm';
             await download.saveAs(file);
             const b=fs.readFileSync(file),status=await page.locator('#videoStatus').innerText();
