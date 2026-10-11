@@ -45,3 +45,10 @@ html,body{max-width:100%;overflow-x:hidden}.game-page,.game-world,.game-area,.gu
 
 /* keep tap targets still while signaling readiness */
 .trail-node.ready,.signal-btn.go{animation:tapGlow .9s infinite alternate;transform:none}@keyframes tapGlow{to{filter:brightness(1.08)}}
+
+/* Direct return to the main 일단 해봄 site (distinct from the brand's game-list button). */
+.site-home-link{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:9px 13px;background:#eef8ec;color:#275a3b;border:1.5px solid #bcdac0;border-radius:13px;font-size:13px;font-weight:900;white-space:nowrap;text-decoration:none;box-shadow:0 3px 9px rgba(46,83,45,.08)}
+.site-home-link>span:first-child{font-size:23px;line-height:1;transform:translateY(-1px)}
+.site-home-link:hover{background:#ddf1de}.site-home-link:focus-visible{outline:3px solid #2d7d5a;outline-offset:3px}
+@media(max-width:620px){.topbar{gap:5px}.topbar .brand{min-width:0;gap:5px}.topbar .brand b{font-size:clamp(13px,3.8vw,16px);white-space:nowrap}.topbar .leaf-mark{width:29px;height:29px;flex:0 0 29px;font-size:17px}.topbar .top-actions{gap:5px;flex:0 0 auto}.topbar .seed-bank{font-size:11px;padding:7px 8px}.topbar .sound-btn{width:35px;height:35px;border-radius:10px}.site-home-link{gap:3px;min-height:35px;padding:6px 9px;border-radius:10px;font-size:12px}.site-home-link>span:first-child{font-size:20px}.site-home-prefix{display:none}}
+@media(max-width:360px){.topbar{padding-inline:8px}.topbar .brand{gap:3px}.topbar .brand b{font-size:13px}.topbar .top-actions{gap:4px}.site-home-link{padding-inline:6px}.topbar .seed-bank{padding-inline:6px}}
