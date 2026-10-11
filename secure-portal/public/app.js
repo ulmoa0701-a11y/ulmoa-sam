@@ -101,6 +101,7 @@ function bindWorkspace(){
 }
 const NOTE_LABELS={note:'자유 기록',mood:'오늘의 상태',energy:'컨디션',thought:'떠오른 생각',body:'몸의 느낌',action:'해본 일',sketch:'그림',observation:'관찰한 사실',response:'주변 사람의 말·행동',impact:'일상에서 확인된 변화',message:'전달사항',event:'있었던 일',next:'다음 시도',date:'기록 날짜',time:'기록 시간',context:'당시 상황',origin:'정보 출처',title:'제목',experience:'내가 겪은 움직임·소리·반복행동',experienceImpact:'그때 생활에 있었던 변화',place:'장소',signals:'관찰한 모습(선택)',after:'이후에 이어진 일'};
 function todayLocal(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
+function nowLocalTime(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${p(d.getHours())}:${p(d.getMinutes())}`;}
 /* Parent calendar v8: event date, not the entry creation timestamp. */
 let parentCalendarMode='month',parentCalendarDate=todayLocal();
 function isoDay(d){const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
@@ -183,12 +184,17 @@ function dataForm(role){
  </div></div>
  <button class="button entry-save" id="saveEntry">내 관찰 메모 저장</button><p class="parent-nudge">보호자는 경험한 일을 남기면 됩니다. 여러 기록의 의미와 치료 방향은 담당 치료사가 검토해요. 실시간 상담창이 아닙니다.</p></form>`;
  return `<form class="form entry-v5 student-journal" id="entryForm">
- <div class="student-editor-intro"><strong>내가 남기고 싶은 이야기</strong><span>일기, 고민, 좋았던 일, 그냥 떠오른 생각까지. 아무거나 써도 돼.</span></div>
- <div class="student-diary-head"><label class="student-diary-date">기록 날짜<input name="date" type="date" max="${todayLocal()}" value="${todayLocal()}"></label><label class="student-diary-title">제목 <small>(선택)</small><input name="title" maxlength="80" placeholder="제목 없이 남겨도 돼"></label></div>
+ <div class="student-editor-intro"><strong>자유롭게 남기는 한 페이지</strong><span>일기, 고민, 좋았던 일, 관심사... 편한 방식으로 남겨봐.</span></div>
+ <section class="student-info-card" aria-label="일기 날짜와 시간">
+ <div class="student-datetime-heading"><strong>언제의 기록이야?</strong><button type="button" id="studentSetNow" class="student-now-btn" aria-label="날짜와 시간을 현재 시각으로 설정">↻ 지금으로 설정</button></div>
+ <div class="student-datetime-grid"><label>날짜<input name="date" type="date" max="${todayLocal()}" value="${todayLocal()}"></label><label>시간 <small>(선택)</small><input name="time" type="time" value="${nowLocalTime()}"></label></div>
+ <p class="student-datetime-hint">현재 날짜·시간이 자동으로 들어가 있어. 지난 일을 쓰는 거라면 바꿔도 되고, 시간을 모르면 비워 둬.</p>
+ </section>
+ <div class="student-extra-grid"><label>제목 <small>(선택)</small><input name="title" maxlength="80" placeholder="제목 없이 써도 돼"></label><label>장소 <small>(선택)</small><input name="place" maxlength="100" placeholder="기억나는 곳만"></label></div>
  <div class="form-switcher" role="group" aria-label="기록 방식"><button type="button" class="format-btn active" data-format="text" aria-pressed="true">✎ 글쓰기</button><button type="button" class="format-btn" data-format="draw" aria-pressed="false">◇ 그림 그리기</button></div>
  <div id="textPanel"><label class="student-note-label">자유 기록 <small>(원하는 만큼)</small><textarea name="note" maxlength="4000" rows="7" placeholder="오늘 있었던 일이나 요즘 생각, 좋은 일, 고민, 취미 이야기... 자유롭게 남겨봐."></textarea></label></div>
  <div id="drawPanel" hidden><div class="sketch-board"><canvas id="noteCanvas" width="760" height="380" aria-label="마우스나 손가락으로 그리는 그림 메모"></canvas></div><div class="sketch-actions"><span>손가락이나 마우스로 그릴 수 있어.</span><button type="button" id="undoStroke" class="button-ghost">↶ 되돌리기</button><button type="button" id="clearSketch" class="button-ghost">지우기</button></div></div>
- <details class="optional-fields student-context"><summary>시간·장소 추가하기 <small>선택</small></summary><div class="optional-wrap student-context-fields"><label>언제쯤이었어? <small>(선택)</small><input name="time" type="time"></label><label>어디였어? <small>(선택)</small><input name="place" maxlength="100" placeholder="예: 집, 학교, 밖, 온라인"></label><p>정확하게 기억나지 않으면 비워 둬도 돼. 기록을 저장한 시각은 따로 남아.</p></div></details>
+ 
  <details class="optional-fields student-emotion-details" id="stateDetails"><summary>그때의 감정도 남길까? <small>선택 · 여러 개 가능</small></summary><div class="optional-wrap"><p class="emotion-helper">하나만 고르지 않아도 돼. 감정이 섞였거나 잘 모르겠어도 괜찮아.</p><div class="emotion-grid" aria-label="감정 선택">${STUDENT_EMOTIONS.map(w=>`<label class="emotion-chip"><input name="emotionChoice" type="checkbox" value="${w}"><span>${w}</span></label>`).join('')}</div>
  <details class="emotion-more"><summary>다른 감정도 보기 <span>+ ${Object.values(STUDENT_MORE_EMOTIONS).flat().length}개</span></summary>${Object.entries(STUDENT_MORE_EMOTIONS).map(([group,words])=>`<div class="emotion-group"><p>${group}</p><div class="emotion-grid">${words.map(w=>`<label class="emotion-chip"><input name="emotionChoice" type="checkbox" value="${w}"><span>${w}</span></label>`).join('')}</div></div>`).join('')}</details>
  <label>내 말로 표현하기 <small>(선택)</small><input name="emotionOther" maxlength="100" placeholder="위에 없는 감정이나 내 표현"></label><label>컨디션 <small>(선택)</small><select name="energy"><option value="">선택하지 않음</option><option>괜찮음</option><option>기운 있음</option><option>조금 피곤함</option><option>많이 피곤함</option><option>잘 모르겠음</option></select></label></div></details>
@@ -241,6 +247,7 @@ function wireEntryForm(isParent){
  };
  share.onchange=()=>{area.hidden=!share.checked;button.textContent=isParent?(share.checked?'짧은 메모 전달하고 저장':'내 메모 저장하기'):(share.checked?'↗ 선택한 항목 공유하고 저장':'🔒 내 기록 저장');if(!isParent)updateStudentShare()};
  if(!isParent){
+  const nowBtn=$('studentSetNow');if(nowBtn)nowBtn.onclick=()=>{const date=f.elements.date,time=f.elements.time;if(date)date.value=todayLocal();if(time)time.value=nowLocalTime();updateStudentShare();toast('날짜와 시간을 현재 시각으로 설정했어.');};
   sketchStrokes=[];bindSketch();
   document.querySelectorAll('[data-format]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-format]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b))});$('textPanel').hidden=b.dataset.format!=='text';$('drawPanel').hidden=b.dataset.format!=='draw';updateStudentShare()});
   f.addEventListener('input',updateStudentShare);f.addEventListener('change',updateStudentShare);
