@@ -7,33 +7,29 @@ const fallback = document.getElementById('viewerFallback');
 const hint = document.getElementById('stageHint');
 const orient = document.getElementById('orientationLabel');
 const viewButtons = [...document.querySelectorAll('[data-view]')];
-const splitButtons = [...document.querySelectorAll('[data-split]')];
 const partButtons = [...document.querySelectorAll('[data-part]')];
 const calloutButtons = [...document.querySelectorAll('[data-callout]')];
 const modeButtons = [...document.querySelectorAll('[data-map-mode]')];
 const activityButtons = [...document.querySelectorAll('[data-activity]')];
 const hemisphereButtons = [...document.querySelectorAll('[data-hemisphere]')];
 const leaderLines = document.getElementById('leaderLines');
-const range = document.getElementById('separation');
-const rangeText = document.getElementById('separationValue');
-const rangeOutput = document.getElementById('separationOutput');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const info = {
  'hemisphere-left':{
-  name:'좌뇌 · 왼쪽 대뇌반구',category:'좌뇌·우뇌 기능 비교',
-  icon:'💬',color:'#e5f2e9',skills:'말·언어 처리의 상대적 우세',
-  summary:'대부분의 사람은 말을 구성하고 문법과 단어를 처리하는 언어 네트워크가 좌뇌에서 상대적으로 우세해요. 그렇지만 언어를 좌뇌만 담당하는 건 아니에요.',
-  example:'친구에게 오늘 있었던 일을 문장으로 설명하거나 이름을 떠올려 말할 때.'},
+  name:'좌뇌',category:'좌뇌·우뇌 비교',icon:'💬',color:'#e9f6eb',
+  skills:'단어·문장 처리에 상대적으로 우세',
+  summary:'대부분의 사람은 단어를 찾고 문장을 구성하는 언어 처리에 좌뇌가 상대적으로 많이 관여해요. 말을 이해할 때도 양쪽 뇌가 함께 일해요.',
+  example:'“오늘 학교에서 친구랑 놀았어”처럼 경험을 문장으로 이야기할 때.'},
  'hemisphere-right':{
-  name:'우뇌 · 오른쪽 대뇌반구',category:'좌뇌·우뇌 기능 비교',
-  icon:'👀',color:'#fff0e8',skills:'공간 주의·말의 억양 처리',
-  summary:'공간의 위치에 주의를 기울이는 일부 기능과 말의 높낮이·감정적인 억양을 알아차리는 과정에서 우뇌가 상대적으로 더 관여할 수 있어요.',
-  example:'친구의 말투에서 기분을 짐작하거나 주변 물건의 위치를 살펴볼 때.'},
+  name:'우뇌',category:'좌뇌·우뇌 비교',icon:'👀',color:'#fff0e8',
+  skills:'공간 주의·말의 억양에 관여',
+  summary:'주변 물건의 위치를 살피거나 상대방 말투에 담긴 감정을 알아차릴 때 우뇌가 상대적으로 더 관여할 수 있어요.',
+  example:'친구의 목소리를 듣고 “조금 속상한가 봐” 하고 기분을 짐작할 때.'},
  'hemisphere-both':{
-  name:'좌뇌와 우뇌가 함께',category:'두 반구의 협력',
-  icon:'🤝',color:'#eef4ef',skills:'읽기·대화·기억·움직임',
-  summary:'읽기와 대화, 움직임에는 양쪽 대뇌반구의 여러 영역이 함께 참여해요. 뇌량 등 연결 경로를 통해 정보를 주고받지만, 이 모형 안에는 깊은 뇌량 구조를 따로 그리지 않았어요.',
-  example:'이야기를 듣고 뜻과 억양을 이해한 뒤 적절한 말로 대답하거나, 그림책을 읽으며 내용에 집중할 때.'},
+  name:'양쪽 뇌가 함께',category:'두 반구가 협력해요',icon:'🤝',color:'#f1f6eb',
+  skills:'읽기·대화·움직임 등 여러 활동',
+  summary:'글을 읽거나 이야기를 나누거나 몸을 움직일 때 양쪽 뇌의 여러 영역이 함께 일해요. 아이를 좌뇌형·우뇌형으로 나눌 수는 없어요.',
+  example:'책을 보고 문장의 뜻을 이해한 뒤 자기 생각을 말할 때.'},
  frontal:{name:'전두엽',category:'뇌 부위',
   summary:'계획을 세우고 주의·행동을 조절하는 과정에 여러 뇌 영역과 함께 관여합니다.',
   example:'해야 할 일을 순서대로 정하거나 상황에 맞게 행동을 바꿀 때.'},
@@ -81,8 +77,6 @@ const activityDetails={
  ball:{name:'공놀이',icon:'⚽',color:'#afcfff',skills:'시각 · 공간 · 균형',regions:['occipital','parietal','cerebellum'],category:'생활 속 인지기능',summary:'공이 오는 방향을 보고 몸을 움직이고 손동작 타이밍을 조절해요.',example:'날아오는 공을 눈으로 좇고 팔을 뻗어 잡으려고 할 때.'},
  memory:{name:'기억하기',icon:'💭',color:'#beebc7',skills:'측두엽 안쪽 해마 등 · 전두엽',regions:['temporal','frontal'],category:'생활 속 인지기능',summary:'새로운 사건을 기억하고 나중에 떠올리는 일에는 해마를 포함해 여러 영역이 참여해요.',example:'어제 있었던 일을 이야기하거나 전에 들은 지시를 떠올릴 때.'}
 };
-let splitMode = 'together';
-let splitAmount = 0;
 let yaw = Math.PI/2, pitch = .18, distance = 4.45;
 let targetYaw = yaw, targetPitch = pitch;
 let currentView='free';
@@ -128,8 +122,6 @@ function init() {
  if('ResizeObserver' in window)new ResizeObserver(resize).observe(holder);
  else window.addEventListener('resize',resize);
  bindEvents();
- applyMode('together');
- applySplit(true);
  refreshSelection();
  updateCalloutMode();
  fallback.hidden=true;
@@ -145,39 +137,6 @@ function resize(){
  // Portrait phones have a narrower horizontal field of view; fit the whole brain.
  if(w/h<1.25 && w<680) distance=Math.max(distance,5.65);
  needsRender=true;
-}
-function partOffset(mesh){
- const id=mesh.userData,base=id.base;
- const sign=id.side==='left'?1:id.side==='right'?-1:0;
- if(splitMode==='together')return base.clone();
- const t=splitAmount/100;
- const out=base.clone();
- if(splitMode==='hemispheres'){
-   if(sign)out.x+=sign*t*.94;
-   if(id.key==='cerebellum')out.y-=t*.13;
- }else{
-   if(sign)out.x+=sign*t*.85;
-   const regionMoves={frontal:[0,.2,.65],parietal:[0,.58,-.12],
-    temporal:[0,-.44,.32],occipital:[0,.08,-.75],
-    cerebellum:[0,-.83,-.55],brainstem:[0,-.9,.20]};
-   const m=regionMoves[id.key]||[0,0,0];
-   out.add(new THREE.Vector3(m[0]*t,m[1]*t,m[2]*t));
- }
- return out;
-}
-function applySplit(instant=false){
- for(const mesh of meshes){const p=partOffset(mesh);if(instant)mesh.position.copy(p);else mesh.userData.destination=p;}
- needsRender=true;
-}
-function applyMode(mode){
- splitMode=mode;
- splitAmount=mode==='together'?0:Math.max(60,splitAmount);
- range.disabled=mode==='together';
- range.value=String(splitAmount);
- rangeText.textContent=splitAmount+'%';
- rangeOutput.textContent=splitAmount+'%';
- splitButtons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.split===mode)));
- applySplit();
 }
 function viewHeading(key){
  return {front:'앞에서: 화면 오른쪽이 아이의 좌뇌',back:'뒤에서: 화면 왼쪽이 아이의 좌뇌',
@@ -234,7 +193,7 @@ function refreshSelection(){
   mesh.material.opacity=1;
   mesh.material.depthWrite=true;
   mesh.material.emissive.setHex((selected||activeFunction||activeActivity)&&match?0xffffff:0);
-  mesh.material.emissiveIntensity=(selected||activeFunction||activeActivity)&&match?.025:0;
+  mesh.material.emissiveIntensity=(selected||activeFunction||activeActivity)&&match?(selected?.startsWith('hemisphere-')?.13:.035):0;
  }
  const item=activeActivity?activityDetails[activeActivity]:
   activeFunction?functionDetails[activeFunction]:selected?info[selected]:null;
@@ -253,18 +212,17 @@ function refreshSelection(){
  activityButtons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.activity===activeActivity)));
  const hemiKey=selected?.startsWith('hemisphere-')?selected.replace('hemisphere-',''):null;
  hemisphereButtons.forEach(b=>b.setAttribute('aria-pressed',String(!activeActivity&&!activeFunction&&b.dataset.hemisphere===hemiKey)));
- const hemi=hemiKey?info[selected]:info['hemisphere-both'];
- document.getElementById('hemisphereHeading').textContent=hemi.name;
- document.getElementById('hemisphereDescription').textContent=hemi.summary;
- document.getElementById('hemisphereExample').textContent=hemi.example;
+ const hemi=hemiKey?info[selected]:null;
+ document.getElementById('hemisphereHeading').textContent=hemi?.name||'좌뇌와 우뇌는 서로 도와요';
+ document.getElementById('hemisphereDescription').textContent=hemi?.summary||'위의 세 가지 중 하나를 누르면 각 역할과 생활 속 예시를 볼 수 있어요.';
+ document.getElementById('hemisphereExample').textContent=hemi?.example||'책을 읽을 때도 글자를 보고 뜻을 이해하며 여러 영역이 함께 작동해요.';
+ holder.classList.toggle('hemisphere-focus',Boolean(hemiKey));
  needsRender=true;
 }
 function setSelected(key){
  selected=info[key]?key:null;activeFunction=null;activeActivity=null;
  if(selected?.startsWith('hemisphere-')){
-   // 반구별 기능을 누르면 실제 좌우 구조를 벌려 보며 차이를 비교합니다.
-   if(selected==='hemisphere-both')applyMode('together');
-   else applyMode('hemispheres');
+   // 구조를 떼어 놓지 않고, 아이의 실제 좌우 방향을 정면에서 확인합니다.
    setView('front',true);
  }
  refreshSelection();
@@ -321,13 +279,6 @@ function bindEvents(){
  modeButtons.forEach(b=>b.addEventListener('click',()=>setMapMode(b.dataset.mapMode)));
  calloutButtons.forEach(b=>b.addEventListener('click',()=>mapMode==='functions'?setFunction(b.dataset.callout):setSelected(b.dataset.callout)));
  activityButtons.forEach(b=>b.addEventListener('click',()=>setActivity(b.dataset.activity)));
- splitButtons.forEach(button=>button.addEventListener('click',()=>applyMode(button.dataset.split)));
- range.addEventListener('input',()=>{
-  splitAmount=Number(range.value);
-  if(splitMode==='together'&&splitAmount>0)splitMode='hemispheres';
-  rangeText.textContent=splitAmount+'%';rangeOutput.textContent=splitAmount+'%';
-  applySplit();needsRender=true;
- });
  partButtons.forEach(button=>button.addEventListener('click',()=>mapMode==='functions'&&functionDetails[button.dataset.part]?setFunction(button.dataset.part):setSelected(button.dataset.part)));
  hemisphereButtons.forEach(button=>button.addEventListener('click',()=>setSelected('hemisphere-'+button.dataset.hemisphere)));
  document.getElementById('clearSelection').addEventListener('click',()=>setSelected(null));
@@ -398,13 +349,6 @@ function renderFrame(){
  if(Math.abs(targetYaw-yaw)>.0004||Math.abs(targetPitch-pitch)>.0004){
   const factor=reducedMotion?1:.19;
   yaw+=(targetYaw-yaw)*factor;pitch+=(targetPitch-pitch)*factor;dirty=true;
- }
- for(const mesh of meshes){
-  const to=mesh.userData.destination;
-  if(to&&mesh.position.distanceToSquared(to)>.000005){
-   if(reducedMotion)mesh.position.copy(to);else mesh.position.lerp(to,.16);
-   dirty=true;
-  }
  }
  if(dirty){updateCamera();renderer.render(scene,camera);drawLeaders();needsRender=false;}
 }
