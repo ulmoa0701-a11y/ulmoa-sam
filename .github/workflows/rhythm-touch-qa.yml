@@ -7,6 +7,8 @@ on:
       - "index.html"
       - "assets/habom-navigation.js"
       - "assets/habom-navigation.css"
+      - "assets/moa-garden-resources.js"
+      - "assets/moa-garden-resources.css"
       - ".github/workflows/rhythm-touch-qa.yml"
   push:
     branches: ["main"]
@@ -16,6 +18,8 @@ on:
       - "index.html"
       - "assets/habom-navigation.js"
       - "assets/habom-navigation.css"
+      - "assets/moa-garden-resources.js"
+      - "assets/moa-garden-resources.css"
       - ".github/workflows/rhythm-touch-qa.yml"
 jobs:
   rhythm-browser-qa:
@@ -47,6 +51,8 @@ jobs:
           exit 1
       - name: Browser gameplay and scoring QA
         run: node thinking-garden/games/rhythm-touch/qa.mjs
+      - name: Cognitive and music garden resource QA
+        run: node thinking-garden/garden-hub-qa.mjs
       - name: Upload browser screenshots
         if: always()
         uses: actions/upload-artifact@v4

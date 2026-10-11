@@ -1,0 +1,37 @@
+/* Shared entry layout; each garden retains its established hero and game styling. */
+[data-moa-garden] .garden-format-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-width:1180px;margin:17px auto 0;padding:5px;background:#f0f3ec;border:1px solid #e1e8db;border-radius:18px}
+[data-moa-garden] .garden-format-tabs button{min-height:49px;padding:9px 12px;border:0;border-radius:13px;background:transparent;color:#52665c;font:inherit;font-size:clamp(13px,1.5vw,16px);font-weight:850;cursor:pointer}
+[data-moa-garden] .garden-format-tabs button.active{background:#fff;color:#244b3c;box-shadow:0 3px 10px #3f614a1c}
+[data-moa-garden] .garden-format-tabs button:focus-visible,[data-moa-garden] .garden-topic-tabs button:focus-visible,[data-moa-garden] .moa-resource-card:focus-visible{outline:3px solid #277c64;outline-offset:2px}
+[data-moa-garden] .garden-game-panel[hidden],[data-moa-garden] .moa-resource-panel[hidden],[data-moa-garden] .game-card[hidden],[data-moa-garden] .library-card[hidden]{display:none!important}
+[data-moa-garden] .moa-resource-panel{max-width:1180px;margin:17px auto 0}
+[data-moa-garden] .moa-resource-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+[data-moa-garden] .moa-resource-card{display:flex;flex-direction:column;align-items:flex-start;min-width:0;gap:8px;padding:20px 22px;border:1.5px solid #e2ebe0;border-radius:20px;background:white;box-shadow:0 6px 20px rgba(39,76,50,.06);color:#263b31;text-decoration:none;transition:transform .18s,box-shadow .18s}
+[data-moa-garden] .moa-resource-card:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(39,76,50,.12)}
+[data-moa-garden] .moa-resource-type{font-size:12px;font-weight:900;letter-spacing:.01em;color:#4e856b}
+[data-moa-garden] .moa-resource-title{font-size:19px;font-weight:900;line-height:1.33;word-break:keep-all}
+[data-moa-garden] .moa-resource-desc{font-size:14px;line-height:1.58;color:#687b6f;word-break:keep-all}
+[data-moa-garden] .moa-resource-arrow{margin-top:auto;padding-top:4px;font-size:13px;font-weight:900;color:#35785b}
+[data-moa-garden] .moa-resource-note{margin:14px 3px 0;font-size:12px;line-height:1.7;color:#62756a}
+[data-moa-garden] .moa-resource-note a{font-weight:850;color:#286a55}
+[data-moa-garden] .moa-related-links{max-width:1180px;margin:22px auto 0;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:15px 18px;background:#f3f7f0;border-radius:17px;border:1px solid #e2eadf}
+[data-moa-garden] .moa-related-links span{font-size:13px;color:#647b6a;font-weight:800;margin-right:4px}
+[data-moa-garden] .moa-related-links a{display:inline-flex;align-items:center;min-height:40px;padding:7px 11px;border-radius:12px;background:#fff;border:1px solid #dae6d9;color:#356c55;font-size:12px;font-weight:900;text-decoration:none}
+[data-moa-garden="music"] .garden-topic-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 5px}
+[data-moa-garden="music"] .garden-topic-tabs button{border:1px solid #dbe5da;background:#fff;color:#527264;border-radius:999px;padding:9px 14px;min-height:43px;font:inherit;font-size:13px;font-weight:900;cursor:pointer}
+[data-moa-garden="music"] .garden-topic-tabs button.active{color:#fff;background:#367967;border-color:#367967}
+[data-moa-garden="music"] .garden-format-tabs{margin-top:15px}
+[data-moa-garden="music"] .garden-game-panel{margin-top:19px}
+[data-moa-garden="music"] .music-library .cross-garden{margin-top:26px}
+@media(max-width:650px){
+ [data-moa-garden] .moa-resource-grid{grid-template-columns:1fr;gap:10px}
+ [data-moa-garden] .moa-resource-card{padding:16px 17px;gap:6px;border-radius:16px}
+ [data-moa-garden] .moa-resource-title{font-size:17px}
+ [data-moa-garden] .moa-resource-desc{font-size:13px}
+ [data-moa-garden] .garden-format-tabs{gap:3px;padding:4px;border-radius:14px}
+ [data-moa-garden] .garden-format-tabs button{font-size:12px;padding:10px 3px;min-height:47px}
+ [data-moa-garden] .moa-related-links{padding:12px;gap:7px}
+ [data-moa-garden="music"] .garden-topic-tabs{gap:6px}
+ [data-moa-garden="music"] .garden-topic-tabs button{min-height:44px;padding:8px 11px;font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){[data-moa-garden] .moa-resource-card{transition:none}}
