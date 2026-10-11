@@ -313,6 +313,32 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
     if(bars.length>=2){
       for(let i=0;i<bars.length-1;i++){
         const left=bars[i],right=bars[i+1],items=musical.filter(v=>v.x>left&&v.x<right);
+        // The first dotted half-note after a printed barline can have its
+        // decoded center shifted far right or be dropped entirely on a JPEG.
+        // Look for an actual closed, hollow head near that boundary. An empty
+        // bar or the expected beat total ALONE is never enough to add a note.
+        if(i>0&&cvStaffs[li]){
+          const staff=cvStaffs[li];
+          const edgeHeads=hollow.filter(h=>h.ring===8&&
+            h.x>left+sp*1.35&&h.x<left+sp*4.25&&
+            !items.some(v=>Math.abs(v.x-h.x)<sp*4.1));
+          const assessed=edgeHeads.map(head=>({head,rhythm:scanRhythm(staff,{x:head.x,y:head.y})}));
+          if(assessed.length)opticalDebug.push({line:li,bar:i,reason:'near-barline-hollow-candidates',
+            candidates:assessed.map(v=>({x:Math.round(v.head.x),k:v.head.k,ring:v.head.ring,
+              dur:v.rhythm?.dur,hollow:v.rhythm?.hollow,dot:v.rhythm?.dot,stem:!!v.rhythm?.stem}))});
+          const confirmed=assessed.filter(v=>v.rhythm?.hollow===true&&v.rhythm?.dot===true&&
+            !!v.rhythm?.stem&&v.rhythm?.dur===3);
+          if(confirmed.length===1){
+            const head=confirmed[0].head,index=2+head.k,steps=['C','D','E','F','G','A','B'],degree=((index%7)+7)%7;
+            const note=pitchName({step:steps[degree],octave:4+Math.floor(index/7),alter:0});
+            if(note){
+              const e=W.ev(note,3,''),v={ir:{kind:'note'},e,x:head.x,opticalDur:3};
+              items.push(v);items.sort((a,b)=>a.x-b.x);musical.push(v);
+              opticalDebug.push({line:li,bar:i,reason:'independent-near-barline-dotted-half',
+                x:Math.round(head.x),k:head.k,ring:head.ring,pitch:note,dur:3});
+            }
+          }
+        }
         // Independent whole-note/rest disambiguation on a one-symbol measure.
         // Never insert an extra event based on expected song length. A printed
         // white-centered, fully closed notehead is required.
@@ -417,6 +443,7 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
       }
     }else measures.push(musical.map(v=>v.e));
     noteCount+=musical.filter(v=>v.ir.kind==='note').length;
+    musical.sort((a,b)=>a.x-b.x);
     for(const v of musical)refs.push({system:line.system,x:v.x,event:v.e});
   }
   const base=typeof W.fileBaseName==='function'?W.fileBaseName(filename):String(filename||'').replace(/\.[^.]+$/,'');
