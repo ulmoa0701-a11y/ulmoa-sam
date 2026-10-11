@@ -12,7 +12,7 @@ const cases=[
  [{width:1200,height:1000,staffSpacing:6.1,staffDetected:true},'SMALL_STAFF_SYMBOLS','고화질'],
  [{width:1200,height:1000,staffSpacing:10,skewDegrees:4.2,skewConfidence:2},'IMAGE_TILTED','평행'],
  [{width:1200,height:1000,staffSpacing:10,correctionAvg:.34,rawExactRatio:.45},'RHYTHM_UNCERTAIN','점음표'],
- [{width:1200,height:1000,staffSpacing:10,modelDisagreementRatio:.5},'DECODER_DISAGREEMENT','다르게'],
+ [{width:1200,height:1000,staffSpacing:10,modelDisagreementRatio:.5},'DECODER_DISAGREEMENT','다른'],
  [{width:1200,height:1000,staffSpacing:10,notEnough:true},'NOTES_UNCERTAIN','음표'],
  [{width:1200,height:1000,staffSpacing:10,lowConfidence:true},'LOW_CONFIDENCE','신뢰'],
  [{width:1200,height:1000,staffSpacing:10,rawExactRatio:.93,correctionAvg:.04},'NOTATION_UNCERTAIN','원본']
