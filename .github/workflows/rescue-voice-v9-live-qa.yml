@@ -1,0 +1,46 @@
+name: Live Moa Rescue Voice V9 Check
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/rescue-voice-v9-live-qa.yml'
+permissions:
+  contents: read
+jobs:
+  public-assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Verify public homepage, stylesheet and actual voice feature
+        run: |
+          SITE='https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/'
+          ready=0
+          for i in $(seq 1 48); do
+            curl -fsSL --max-time 12 "$SITE" -o /tmp/rescue-index.html || true
+            curl -fsSL --max-time 12 "${SITE}game.js?v=9" -o /tmp/rescue-game-v9.js || true
+            curl -fsSL --max-time 12 "${SITE}style.css?v=2" -o /tmp/rescue-style-v2.css || true
+            if grep -q 'game.js?v=9' /tmp/rescue-index.html &&
+               grep -q 'id="voicePanel"' /tmp/rescue-index.html &&
+               grep -q 'function refreshKoreanVoices' /tmp/rescue-game-v9.js &&
+               grep -q 'voice-panel' /tmp/rescue-style-v2.css; then
+              ready=1;break
+            fi
+            echo "Waiting for deployed Pages v9: $i"
+            sleep 6
+          done
+          test "$ready" = "1"
+          echo 'LIVE VOICE V9 ASSETS PASS'
+  voice-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    needs: public-assets
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+      - name: Browser-test real published voice picker on desktop and mobile
+        env:
+          RESCUE_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/
+        run: node thinking-garden/games/rescue/rescue-voice-qa.cjs
