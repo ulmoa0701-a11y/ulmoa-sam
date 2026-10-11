@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Gamja+Flower&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link rel="stylesheet" href="../assets/notebook-subpages.css?v=20261006-community3">
-<link rel="stylesheet" href="../assets/community-board.css?v=20261006-appsscript1">
+<link rel="stylesheet" href="../assets/community-board.css?v=20261011-compact2">
 <link rel="stylesheet" href="../assets/habom-brand.css?v=20261010b">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/habom-favicon-v3-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="../assets/habom-favicon-v3-16.png">
@@ -31,6 +31,24 @@
   </section>
 </main>
 <footer class="sub-footer"><div><b>일단 해봄</b><span>울모아쌤</span></div><nav class="footer-social"><a href="http://ulmoa.co.kr" target="_blank" rel="noopener">울모아</a><a href="https://www.instagram.com/ulmoa__sam/" target="_blank" rel="noopener">인스타그램</a><a href="https://blog.naver.com/ulmoa" target="_blank" rel="noopener">블로그</a><a href="https://www.threads.com/@ulmoa_sam" target="_blank" rel="noopener">스레드</a></nav></footer>
+<script>
+(function () {
+  "use strict";
+  var iframe = document.querySelector(".community-iframe");
+  if (!iframe) return;
+  window.addEventListener("message", function (event) {
+    var msg = event.data;
+    if (!msg || msg.type !== "habom-community-height-v1") return;
+    var hostname = "";
+    try { hostname = new URL(event.origin).hostname; } catch (ignore) { return; }
+    if (!/(^|\.)googleusercontent\.com$|(^|\.)google\.com$/.test(hostname)) return;
+    var measured = Number(msg.height);
+    if (!Number.isFinite(measured) || measured < 350 || measured > 10000) return;
+    var target = Math.ceil(measured + 28);
+    if (Math.abs(iframe.offsetHeight - target) > 12) iframe.style.height = target + "px";
+  });
+})();
+</script>
 <script src="../assets/habom-navigation.js?v=20261011-nav2" defer></script>
 </body>
 </html>
