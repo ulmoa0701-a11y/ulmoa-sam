@@ -300,3 +300,37 @@ html.brain-embedded,html.brain-embedded body{margin:0!important;width:100%;heigh
  .hemisphere-explainer{padding:12px}
  .hemisphere-sources{padding:12px 8px 0}
 }
+
+/* 2026-10-11: 학부모가 한눈에 이해할 수 있는 좌·우뇌 기능 비교 */
+.hemisphere-learning{padding:18px;margin-top:14px}
+.hemisphere-heading{display:block}
+.hemisphere-heading h2{font-size:21px;line-height:1.3}
+.hemisphere-heading p{max-width:none;margin-top:7px;font-size:14px;color:#4c6b56;line-height:1.55}
+.hemisphere-tabs{gap:9px;align-items:stretch}
+.hemisphere-tabs button{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;min-height:135px;padding:12px 6px 11px;border-radius:17px}
+.hemisphere-tabs button b{font-size:17px;line-height:1.3}
+.hemisphere-tabs button small{font-size:12px;line-height:1.35;margin-top:1px;color:#425949;word-break:keep-all}
+.hemisphere-tabs .hemi-card-icon{display:block;font-size:25px;line-height:1.1;min-height:30px}
+.hemisphere-tabs .hemi-card-example{display:block;font-size:11px;font-weight:700;line-height:1.5;color:#637467;word-break:keep-all;margin-top:auto}
+.hemisphere-tabs button[aria-pressed=true]{outline:3px solid #a1c9a5;outline-offset:1px}
+.hemisphere-tabs button[data-hemisphere=left]{background:#f0faf0}
+.hemisphere-tabs button[data-hemisphere=right]{background:#fff6ef}
+.hemisphere-tabs button[data-hemisphere=both]{background:#f7f1fc}
+.hemisphere-tabs button[data-hemisphere=right][aria-pressed=true]{outline-color:#ebba9f}
+.hemisphere-tabs button[data-hemisphere=both][aria-pressed=true]{outline-color:#c5afe3}
+.hemisphere-explainer{margin-top:14px;min-height:126px}
+.hemisphere-explainer>strong{font-size:17px}
+.hemisphere-explainer>p{font-size:14px}
+.hemisphere-focus .brain-callouts,.hemisphere-focus .leader-lines{display:none!important}
+.hemisphere-focus .orientation{background:#fffffff2;max-width:calc(100% - 22px)}
+@media(max-width:620px){
+ .hemisphere-learning{padding:14px 10px}
+ .hemisphere-heading h2{font-size:19px}
+ .hemisphere-heading p{font-size:12px}
+ .hemisphere-tabs button{min-height:132px;padding:12px 4px}
+ .hemisphere-tabs button b{font-size:15px}
+ .hemisphere-tabs button small{font-size:11px}
+ .hemisphere-tabs .hemi-card-example{font-size:10px}
+ .hemisphere-tabs .hemi-card-icon{font-size:23px}
+ .hemisphere-explainer{min-height:0}
+}
