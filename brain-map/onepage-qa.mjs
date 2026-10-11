@@ -97,6 +97,55 @@ try{
   assert.ok(artFit.rabbitTop >= artFit.brainBottom-8,
     'brain drawing should float above mascot, not look like an exposed head: '+JSON.stringify(artFit));
   assert.match(await page.locator('.hemi-caution').innerText(),/좌뇌형·우뇌형/);
+  assert.equal(await page.locator('.hemi-ability-btn').count(),8,'eight feature squares become individually clickable');
+  const topics=['speech','phonics','syntax','right-hand','space','intonation','attention','left-hand'];
+  const expectedWords=['어휘','음운','통사','운동 피질','시공간 처리','억양','공간 주의','양손 협응'];
+  for(let i=0;i<topics.length;i++){
+    const opener=page.locator('[data-hemi-topic="'+topics[i]+'"]');
+    assert.equal(await opener.getAttribute('aria-haspopup'),'dialog');
+    await opener.click();
+    const dialog=page.locator('#hemiTopicDialog');
+    assert.equal(await dialog.isVisible(),true,'modal visible for '+topics[i]);
+    assert.equal(await dialog.getAttribute('open'),'','native accessible modal opened');
+    assert.equal(await page.locator('#hemiTopicSteps > li').count(),3,'three nested skill explanations');
+    assert.equal(await page.locator('#hemiTopicExamples > li').count(),2,'two concrete examples');
+    assert.equal(await page.locator('#hemiTopicWords .hemi-topic-term').count(),3,'three defined terms');
+    assert.ok((await page.locator('#hemiTopicIntro').innerText()).length>40,'intro too short: '+topics[i]);
+    assert.ok((await page.locator('#hemiTopicBoundary').innerText()).length>40,'scientific caution missing: '+topics[i]);
+    assert.match(await page.locator('#hemiTopicWords').innerText(),new RegExp(expectedWords[i]),'matching glossary term expected');
+    const modalFit=await page.evaluate(()=>{
+      const d=document.querySelector('#hemiTopicDialog').getBoundingClientRect();
+      const header=document.querySelector('.hemi-topic-header').getBoundingClientRect();
+      const footer=document.querySelector('.hemi-topic-footer').getBoundingClientRect();
+      const scrollBox=document.querySelector('.hemi-topic-body');
+      return {left:d.left,right:d.right,top:d.top,bottom:d.bottom,headerTop:header.top,
+       footerBottom:footer.bottom,docWidth:document.documentElement.scrollWidth,
+       docClient:document.documentElement.clientWidth,scrollHeight:scrollBox.scrollHeight,
+       scrollClient:scrollBox.clientHeight};
+    });
+    assert.ok(modalFit.left>=-1 && modalFit.right<=width+1 && modalFit.top>=-1 && modalFit.bottom<=height+1,
+      'dialog clipped: '+JSON.stringify({topic:topics[i],modalFit}));
+    assert.ok(modalFit.footerBottom<=height+1 && modalFit.scrollClient>60,'close footer not reachable: '+JSON.stringify(modalFit));
+    assert.ok(modalFit.docWidth<=modalFit.docClient+1,'opening dialog causes horizontal page overflow');
+    if(i===0 && (name==='desktop'||name==='mobile')){
+      const detailed=await page.screenshot({type:'jpeg',quality:55,animations:'disabled'});
+      console.log('BRAIN_DRILLDOWN_PREVIEW_'+name+'='+detailed.toString('base64'));
+    }
+    if(i%2===0){
+      await page.keyboard.press('Escape');
+    }else{
+      await page.locator('#hemiTopicDone').click();
+    }
+    assert.equal(await dialog.isHidden(),true,'dialog closes for '+topics[i]);
+    assert.equal(await opener.evaluate(el=>document.activeElement===el),true,'focus returns to opened square');
+  }
+  await page.locator('[data-hemi-topic="attention"]').focus();
+  await page.keyboard.press('Enter');
+  assert.equal(await page.locator('#hemiTopicDialog').isVisible(),true,'keyboard Enter opens subtopic');
+  await page.locator('#hemiTopicClose').click();
+  assert.equal(await page.locator('#hemiTopicDialog').isHidden(),true,'X closes modal');
+  const detailSummary=page.locator('[data-hemi-topic="speech"]');
+  assert.match(await detailSummary.innerText(),/자세히 보기/,'cards clearly signal further details');
   await page.locator('#leftStudyTitle').click();
   assert.equal(await page.locator('#leftStudyTitle').getAttribute('aria-pressed'),'true');
   assert.match(await page.locator('#hemiFocus').innerText(),/좌뇌를 살펴/);
