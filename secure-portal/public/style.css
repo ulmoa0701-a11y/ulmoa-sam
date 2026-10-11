@@ -643,3 +643,46 @@ main:has(#parentCalendar:not([hidden])){padding-top:14px}
 @media(max-width:740px){body:has(.student-journal) .hero{display:none}body:has(.student-journal) main{padding-top:10px}body:has(.student-journal) .editor-paper{padding-top:15px}}
 @media(max-width:440px){.student-info-card{padding:12px 11px 10px}.student-datetime-grid{grid-template-columns:minmax(0,1.18fr) minmax(0,.82fr);gap:7px}.student-now-btn{padding:5px 9px}.student-datetime-heading strong{font-size:15px}.student-datetime-grid label,.student-extra-grid label{font-size:13px}.student-journal .student-datetime-grid input,.student-journal .student-extra-grid input{padding:8px 6px;letter-spacing:-.02em}.student-journal #textPanel textarea[name="note"]{min-height:180px}}
 @media(max-width:345px){.student-datetime-grid{grid-template-columns:1fr}.student-extra-grid{grid-template-columns:1fr}.student-datetime-hint{font-size:11px!important}}
+
+
+/* Student v14 – two levels of journaling; quick is the default. */
+.student-journal .student-mode-header{margin:0 0 2px}
+.student-mode-title{font-size:16px;font-weight:800;color:#213448;margin:0 0 9px}
+.journal-mode-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.student-journal .journal-mode-btn{display:flex;align-items:flex-start;flex-direction:column;justify-content:center;gap:3px;text-align:left;background:#fff;border:1px solid #bac8d8;border-radius:13px;min-height:75px;padding:13px 16px;color:#2b4055;line-height:1.35;transition:background .12s,border-color .12s;min-width:0}
+.student-journal .journal-mode-btn strong{font-size:17px;font-weight:850;color:inherit}
+.student-journal .journal-mode-btn small{font-size:12px;font-weight:550;color:#51697d}
+.student-journal .journal-mode-btn.active{border:2px solid #496ad4;padding:12px 15px;background:#edf2ff;color:#284bb1;box-shadow:0 0 0 2px #d9e4ff80}
+.student-journal .journal-mode-btn.active small{color:#344e7a}
+.student-mode-hint{font-size:13px!important;line-height:1.45!important;color:#4b6274!important;margin:9px 0 1px!important}
+.student-journal[data-journal-mode="quick"] .student-mode-advanced{display:none!important}
+.student-journal[data-journal-mode="quick"] .student-datetime-hint{display:none!important}
+.student-journal[data-journal-mode="quick"] .student-info-card{margin:4px 0 7px;padding:12px 14px 10px;background:#f8fafc}
+.student-journal[data-journal-mode="quick"] .student-datetime-heading{margin-bottom:7px}
+.student-journal[data-journal-mode="quick"] .student-datetime-heading strong{font-size:14px}
+.student-journal[data-journal-mode="quick"] #textPanel textarea[name="note"]{min-height:110px;resize:vertical}
+.student-journal[data-journal-mode="quick"] .student-share{padding:12px 15px;margin:0;border-radius:12px;background:#f9fbff}
+.student-journal[data-journal-mode="quick"] .student-share .checkbox{font-size:14px}
+.student-journal .journal-hidden-notice{font-size:12px;color:#624a21;border:1px solid #e0c88f;background:#fff9e7;border-radius:10px;padding:10px;margin:0}
+.student-journal .entry-save{min-height:50px;font-size:16px;font-weight:800}
+.student-journal .student-save-note{font-size:12px!important;margin:0!important;color:#536779!important}
+@media(max-width:740px){.student-journal .journal-mode-btn{min-height:66px;padding:10px 12px}.student-journal .journal-mode-btn strong{font-size:15px}.student-journal .journal-mode-btn small{font-size:11px}.student-journal .journal-mode-btn.active{padding:9px 11px}.student-journal .student-mode-title{font-size:15px}.student-journal[data-journal-mode="quick"] .student-info-card{padding:10px}.student-journal[data-journal-mode="quick"] #textPanel textarea[name="note"]{min-height:100px}.student-mode-hint{font-size:12px!important}}
+@media(max-width:345px){.journal-mode-switch{gap:7px}.student-journal .journal-mode-btn{padding:9px 7px}.student-journal .journal-mode-btn.active{padding:8px 6px}.student-journal .journal-mode-btn strong{font-size:14px}}
+
+@media(max-width:740px){
+ body:has(.student-journal[data-journal-mode="quick"]) .workspace-section[data-workspace-view="write"] > .editor-bar{display:none}
+ body:has(.student-journal[data-journal-mode="quick"]) .editor-paper > .tag,
+ body:has(.student-journal[data-journal-mode="quick"]) .editor-paper > h2,
+ body:has(.student-journal[data-journal-mode="quick"]) .editor-paper > p{display:none}
+ body:has(.student-journal[data-journal-mode="quick"]) .workspace-sidebar{padding:8px;margin-bottom:7px}
+ body:has(.student-journal[data-journal-mode="quick"]) .workspace-link{min-height:38px;padding:7px 10px}
+ body:has(.student-journal[data-journal-mode="quick"]) .editor-paper{padding:12px 14px 15px}
+ body:has(.student-journal[data-journal-mode="quick"]) .workspace-content{border-radius:12px}
+ .student-journal[data-journal-mode="quick"]{gap:10px}
+ .student-journal[data-journal-mode="quick"] .journal-mode-switch{gap:8px}
+ .student-journal[data-journal-mode="quick"] .journal-mode-btn{min-height:56px}
+ .student-journal .student-mode-title{display:none}
+ .student-journal[data-journal-mode="quick"] .student-mode-hint{display:none}
+ .student-journal[data-journal-mode="quick"] .student-datetime-grid input{min-height:38px}
+ .student-journal[data-journal-mode="quick"] #textPanel textarea[name="note"]{min-height:92px;height:104px}
+}
