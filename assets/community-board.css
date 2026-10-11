@@ -12,6 +12,7 @@
 .community-mode-eyebrow{margin:0 0 2px;color:#62826e;font-size:12px;font-weight:700}
 .community-mode-heading h1{margin:0;font-size:22px;font-weight:850;letter-spacing:-.045em}
 .community-mode-hint{margin:0 0 2px;max-width:350px;color:#778680;font-size:12px;line-height:1.5}
+.community-mode-purpose{margin:12px 1px 2px;color:#677c6e;font-size:12px;line-height:1.65;word-break:keep-all}
 .community-mode-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .community-mode-tab{min-width:0;min-height:67px;padding:11px 17px;border:1px solid #d7e3dc;border-radius:13px;background:#fff;color:#63736a;font:inherit;text-align:left;cursor:pointer;transition:border-color .15s,background .15s}
 .community-mode-tab:hover{border-color:#84ac93;background:#f7faf8}
