@@ -29,9 +29,9 @@
  <header class="map-intro">
   <span class="map-eyebrow">🧠 그림으로 배우는 우리 뇌</span>
   <h1>우리 뇌, 무슨 일을 할까?</h1>
-  <p>색깔을 따라가면 뇌의 이름과 하는 일을 쉽게 알 수 있어요.</p>
+  <p id="mapIntroText">색깔을 따라가면 뇌의 이름과 하는 일을 쉽게 알 수 있어요.</p>
  </header>
- <nav class="brain-view-tabs" aria-label="뇌지도 보기 선택">
+ <nav class="brain-view-tabs" role="tablist" aria-label="뇌지도 보기 선택">
     <button type="button" data-brain-view="lobes" aria-controls="lobesView" aria-selected="true" role="tab" id="lobesTab">🧠 뇌 부위별 보기 <small>위치와 하는 일</small></button>
     <button type="button" data-brain-view="hemispheres" aria-controls="hemispheresView" aria-selected="false" role="tab" id="hemispheresTab">💬 좌뇌·우뇌 보기 <small>서로 다른 역할과 협력</small></button>
   </nav>
@@ -190,7 +190,7 @@
          <path d="M170 48V161" stroke="#FAFEFA" stroke-width="5" stroke-linecap="round"/>
          <path d="M36 106l-11-11m12 31-15 4M304 104l11-12m-10 34 13 4" stroke="#E9C97B" stroke-width="6" stroke-linecap="round"/>
        </svg>
-       <p class="hemi-art-caption">좌뇌·우뇌를 쉽게 구분해 그린 개념도예요.</p>
+       <p class="hemi-art-caption">두 반구를 비교하는 캐릭터 그림이에요. 실제 해부학적 방향 표시가 아니에요.</p>
        <div class="hemi-focus" id="hemiFocus" aria-live="polite"><b>🤝 함께 일하는 뇌</b><span>어느 한쪽만 쓰는 건 아니에요.</span></div>
      </div>
      <section class="hemi-study-card hemi-right" aria-labelledby="rightStudyTitle">
