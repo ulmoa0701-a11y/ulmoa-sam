@@ -56,21 +56,35 @@
     var style = el("style");
     style.id = "habom-role-picker-style";
     style.textContent = [
-      "#habom-role-picker{margin:10px 0 14px;width:100%;font:inherit;color:inherit}",
+      "#habom-role-picker{margin:5px 0 0;width:100%;max-width:100%;font:inherit;color:#30443a}",
       "#habom-role-picker *{box-sizing:border-box}",
-      "#habom-role-picker .hrp-helper{margin:0 0 11px;color:#66756c;font-size:13px;line-height:1.5}",
-      "#habom-role-picker .hrp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}",
-      "#habom-role-picker .hrp-chip{display:block;width:100%;min-width:0;min-height:49px;padding:10px 8px;border:1px solid #cfded5;border-radius:12px;background:#fbfdfb;color:#30453b;font:inherit;font-size:13px;font-weight:650;line-height:1.35;text-align:center;overflow-wrap:anywhere;cursor:pointer;touch-action:manipulation;transition:background .12s,border-color .12s}",
-      "#habom-role-picker .hrp-chip:hover{background:#f0f7f1;border-color:#7fa78d}",
-      "#habom-role-picker .hrp-chip:focus-visible{outline:3px solid #719f8b;outline-offset:2px}",
-      "#habom-role-picker .hrp-chip[aria-pressed=true]{background:#e5f3e9;border:2px solid #548c72;color:#20593d;padding:9px 7px}",
-      "#habom-role-picker .hrp-detail{margin-top:14px;padding-top:11px;border-top:1px dashed #d7e3db}",
-      "#habom-role-picker .hrp-detail-title{display:block;margin-bottom:10px;font-size:14px;font-weight:750;color:#365f49}",
-      "#habom-role-picker .hrp-other{display:block;width:100%;min-height:44px;margin:10px 0 0;padding:10px 12px;border:1px solid #b7cabc;border-radius:10px;background:#fff;color:#23362c;font:inherit;font-size:14px}",
-      "#habom-role-picker .hrp-footer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;font-size:12px;color:#5e7566}",
-      "#habom-role-picker .hrp-reset{border:0;background:none;color:#477e62;text-decoration:underline;text-underline-offset:3px;font:inherit;font-size:12px;padding:5px;cursor:pointer}",
-      "@media (max-width:370px){#habom-role-picker .hrp-grid{gap:6px}#habom-role-picker .hrp-chip{font-size:12px;padding:9px 5px}}",
-      "@media (prefers-reduced-motion:reduce){#habom-role-picker .hrp-chip{transition:none}}"
+      "#habom-role-picker [hidden]{display:none!important}",
+      "#habom-role-picker .hrp-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:48px;padding:10px 14px;border:1px solid #ccdcd3;border-radius:11px;background:#fff;color:#4a5b51;font:inherit;font-size:14px;font-weight:600;text-align:left;cursor:pointer;touch-action:manipulation}",
+      "#habom-role-picker .hrp-trigger.hrp-chosen{background:#f2f9f4;color:#246044;border-color:#93b89f}",
+      "#habom-role-picker .hrp-trigger:hover{border-color:#6e9f84}",
+      "#habom-role-picker button:focus-visible,#habom-role-picker input:focus-visible{outline:3px solid #8ebba6;outline-offset:2px}",
+      "#habom-role-picker .hrp-chevron{font-size:17px;color:#55876b;flex:none}",
+      "#habom-role-picker .hrp-panel{margin-top:9px;padding:12px;border:1px solid #cfddd4;border-radius:13px;background:#fff;box-shadow:0 8px 20px rgba(21,58,37,.07)}",
+      "#habom-role-picker .hrp-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;font-size:14px;font-weight:750;color:#2c5540}",
+      "#habom-role-picker .hrp-back{padding:5px 3px;background:none;border:0;color:#4d8469;font:inherit;font-size:13px;font-weight:700;cursor:pointer}",
+      "#habom-role-picker .hrp-hint{margin:0 0 11px;font-size:12px;line-height:1.5;color:#718077}",
+      "#habom-role-picker .hrp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}",
+      "#habom-role-picker .hrp-chip{display:block;width:100%;min-width:0;min-height:43px;padding:7px 6px;border:1px solid #d4e2d9;border-radius:10px;background:#fdfefd;color:#354d3f;font:inherit;font-size:12.5px;font-weight:650;line-height:1.3;text-align:center;overflow-wrap:anywhere;cursor:pointer;touch-action:manipulation}",
+      "#habom-role-picker .hrp-chip:hover{background:#edf7f0;border-color:#83aa91}",
+      "#habom-role-picker .hrp-chip[aria-pressed=true]{background:#e5f3e9;border:2px solid #548c72;color:#20593d;padding:6px 5px}",
+      "#habom-role-picker .hrp-search{display:block;width:100%;min-height:43px;margin-bottom:9px;padding:9px 12px;border:1px solid #cfddd4;border-radius:10px;background:#fff;color:#30443a;font:inherit;font-size:13px}",
+      "#habom-role-picker .hrp-detail-list{max-height:264px;overflow-y:auto;overscroll-behavior:contain;padding:1px 3px 3px 1px}",
+      "#habom-role-picker .hrp-other{display:block;width:100%;min-height:43px;margin-top:9px;padding:9px 12px;border:1px solid #a6c8b3;border-radius:10px;background:#fff;color:#30443a;font:inherit;font-size:13px}",
+      "#habom-role-picker .hrp-done{margin-top:9px;min-height:42px;width:100%;border:0;border-radius:10px;background:#3a7655;color:#fff;font:inherit;font-size:13px;font-weight:750;cursor:pointer}",
+      "#habom-role-picker .hrp-reset{border:0;background:none;color:#588168;text-decoration:underline;text-underline-offset:3px;font:inherit;font-size:12px;cursor:pointer;padding:6px 2px}",
+      "#habom-role-picker .hrp-footer{display:flex;justify-content:flex-end;margin-top:3px}",
+      "#habom-role-picker .hrp-no-result{font-size:12px;color:#66756c;padding:11px 0}",
+      "form select[name='kind']{height:48px!important;min-height:48px!important;max-height:48px!important;flex:0 0 48px!important;align-self:flex-start!important;padding:8px 12px!important;line-height:1.5!important}",
+      "form .field:has(>select[name='kind']),form .field:has(select[name='kind']){justify-content:flex-start!important;align-self:start!important;gap:8px!important;min-height:0!important}",
+      "form .field:has(input[name='anonymous']){justify-content:flex-start!important;align-items:center!important;gap:9px!important}",
+      "form .field:has(input[name='anonymous']) label,form label:has(input[name='anonymous']){white-space:nowrap!important;word-break:keep-all!important;width:auto!important;max-width:none!important;justify-content:flex-start!important}",
+      "@media(max-width:430px){#habom-role-picker .hrp-panel{padding:10px}#habom-role-picker .hrp-chip{font-size:12px;padding:7px 4px}#habom-role-picker .hrp-detail-list{max-height:220px}}",
+      "@media(prefers-reduced-motion:reduce){#habom-role-picker *{scroll-behavior:auto!important}}"
     ].join("\n");
     document.head.appendChild(style);
   }
@@ -78,36 +92,72 @@
   function init() {
     var select = document.querySelector('select[name="audience"]');
     if (!select || select.dataset.habomRoleEnhanced === "yes") return;
+    addStyle();
 
-    var parent = select.parentElement;
     var root = el("section");
     root.id = "habom-role-picker";
     root.setAttribute("aria-label", "방문자 역할 선택");
-    var helper = el("p", "hrp-helper", "가장 가까운 역할을 골라 주세요. 선택하지 않아도 글을 남길 수 있어요.");
-    var groupsEl = el("div", "hrp-grid");
-    var detail = el("div", "hrp-detail");
+    var trigger = el("button", "hrp-trigger");
+    trigger.type = "button";
+    trigger.setAttribute("aria-expanded", "false");
+    trigger.setAttribute("aria-controls", "hrp-panel");
+    var triggerLabel = el("span", "", "역할 선택 (선택사항)");
+    var chevron = el("span", "hrp-chevron", "⌄");
+    chevron.setAttribute("aria-hidden", "true");
+    trigger.append(triggerLabel, chevron);
+
+    var panel = el("div", "hrp-panel");
+    panel.id = "hrp-panel";
+    panel.hidden = true;
+    var header = el("div", "hrp-panel-heading");
+    var heading = el("strong", "", "어떤 분이신가요?");
+    var back = el("button", "hrp-back", "← 분야 선택");
+    back.type = "button";
+    back.hidden = true;
+    header.append(heading, back);
+    var hint = el("p", "hrp-hint", "본인에게 가까운 항목을 하나 선택하면 돼요.");
+    var categories = el("div", "hrp-grid");
+    var detail = el("div");
     detail.hidden = true;
-    var detailTitle = el("strong", "hrp-detail-title");
-    var choicesEl = el("div", "hrp-grid");
-    var otherEl = el("input", "hrp-other");
-    otherEl.type = "text";
-    otherEl.maxLength = 20;
-    otherEl.placeholder = "역할이나 직업을 적어 주세요 (20자 이내)";
-    otherEl.setAttribute("aria-label", "직접 입력할 역할");
-    otherEl.hidden = true;
+    var search = el("input", "hrp-search");
+    search.type = "search";
+    search.placeholder = "직업·분야 검색";
+    search.setAttribute("aria-label", "세부 직업 검색");
+    var detailList = el("div", "hrp-detail-list");
+    var choices = el("div", "hrp-grid");
+    var noResult = el("p", "hrp-no-result", "일치하는 항목이 없어요.");
+    noResult.hidden = true;
+    detailList.append(choices, noResult);
+    var other = el("input", "hrp-other");
+    other.type = "text";
+    other.maxLength = 20;
+    other.placeholder = "역할이나 직업을 입력해 주세요";
+    other.setAttribute("aria-label", "직접 입력할 역할");
+    other.hidden = true;
+    var done = el("button", "hrp-done", "이 역할로 선택");
+    done.type = "button";
+    done.hidden = true;
+    detail.append(search, detailList, other, done);
+    panel.append(header, hint, categories, detail);
     var footer = el("div", "hrp-footer");
-    var status = el("span", "hrp-status", "선택하지 않음");
-    status.setAttribute("aria-live", "polite");
     var reset = el("button", "hrp-reset", "선택 해제");
     reset.type = "button";
-    footer.append(status, reset);
-    detail.append(detailTitle, choicesEl, otherEl);
-    root.append(helper, groupsEl, detail, footer);
+    reset.hidden = true;
+    footer.append(reset);
+    root.append(trigger, panel, footer);
 
-    var selectedGroup = "";
-    var selectedRole = "";
-    var groupButtons = [];
-    var roleButtons = [];
+    var selected = "";
+    var activeGroup = null;
+    var itemButtons = [];
+
+    function reportHeight() {
+      var height = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+      try { window.top.postMessage({ type: "habom-community-height-v1", height: height }, "*"); } catch (ignore) {}
+    }
+    function laterHeight() {
+      window.requestAnimationFrame(reportHeight);
+      window.setTimeout(reportHeight, 150);
+    }
 
     function setAudience(value) {
       var normalized = String(value || "선택 안 함").trim().slice(0, 20) || "선택 안 함";
@@ -122,99 +172,132 @@
       }
       select.value = normalized;
       select.dispatchEvent(new Event("change", { bubbles: true }));
-      status.textContent = normalized === "선택 안 함" ? "선택하지 않음" : "선택: " + normalized;
+      selected = normalized === "선택 안 함" ? "" : normalized;
+      triggerLabel.textContent = selected || "역할 선택 (선택사항)";
+      trigger.classList.toggle("hrp-chosen", !!selected);
+      reset.hidden = !selected;
     }
-
-    function redrawPressed() {
-      groupButtons.forEach(function(button) {
-        button.setAttribute("aria-pressed", String(button.dataset.group === selectedGroup));
-      });
-      roleButtons.forEach(function(button) {
-        button.setAttribute("aria-pressed", String(button.dataset.role === selectedRole));
-      });
+    function showPanel(isOpen) {
+      panel.hidden = !isOpen;
+      trigger.setAttribute("aria-expanded", String(isOpen));
+      chevron.textContent = isOpen ? "⌃" : "⌄";
+      laterHeight();
     }
-
-    function isOther(item) {
-      return item.indexOf("기타") === 0;
+    function showCategories() {
+      activeGroup = null;
+      categories.hidden = false;
+      detail.hidden = true;
+      back.hidden = true;
+      heading.textContent = "어떤 분이신가요?";
+      hint.hidden = false;
+      laterHeight();
     }
-
-    function pickRole(item) {
-      selectedRole = item;
-      otherEl.hidden = !isOther(item);
-      if (isOther(item)) {
-        otherEl.value = "";
-        setAudience(selectedGroup);
-        otherEl.focus();
-      } else {
-        setAudience(item);
-      }
-      redrawPressed();
+    function choose(value) {
+      setAudience(value);
+      showPanel(false);
     }
-
     function pickGroup(group) {
-      selectedGroup = group.name;
-      selectedRole = "";
-      otherEl.hidden = true;
-      otherEl.value = "";
-      setAudience(group.name);
-      choicesEl.textContent = "";
-      roleButtons = [];
-
-      if (group.items && group.items.length) {
-        detail.hidden = false;
-        detailTitle.textContent = group.name + " · 세부 역할";
-        group.items.forEach(function(item) {
-          var button = el("button", "hrp-chip", item);
-          button.type = "button";
-          button.dataset.role = item;
-          button.setAttribute("aria-pressed", "false");
-          button.addEventListener("click", function() { pickRole(item); });
-          choicesEl.appendChild(button);
-          roleButtons.push(button);
-        });
-      } else {
-        detail.hidden = true;
+      if (!group.items) {
+        choose(group.name);
+        return;
       }
-      redrawPressed();
+      activeGroup = group;
+      heading.textContent = group.name;
+      back.hidden = false;
+      hint.hidden = true;
+      categories.hidden = true;
+      detail.hidden = false;
+      search.value = "";
+      other.hidden = true;
+      done.hidden = true;
+      other.value = "";
+      choices.textContent = "";
+      itemButtons = [];
+      group.items.forEach(function(item) {
+        var chip = el("button", "hrp-chip", item);
+        chip.type = "button";
+        chip.dataset.role = item;
+        chip.addEventListener("click", function() {
+          if (item.indexOf("기타") === 0) {
+            other.hidden = false;
+            other.value = "";
+            done.hidden = false;
+            other.focus();
+            return;
+          }
+          choose(item);
+        });
+        choices.append(chip);
+        itemButtons.push(chip);
+      });
+      noResult.hidden = true;
+      laterHeight();
     }
-
     GROUPS.forEach(function(group) {
-      var button = el("button", "hrp-chip", group.name);
-      button.type = "button";
-      button.dataset.group = group.name;
-      button.setAttribute("aria-pressed", "false");
-      button.addEventListener("click", function() { pickGroup(group); });
-      groupsEl.appendChild(button);
-      groupButtons.push(button);
+      var chip = el("button", "hrp-chip", group.name);
+      chip.type = "button";
+      chip.addEventListener("click", function() { pickGroup(group); });
+      categories.append(chip);
     });
-
-    otherEl.addEventListener("input", function() {
-      setAudience(otherEl.value || selectedGroup);
+    search.addEventListener("input", function() {
+      var q = search.value.trim().toLocaleLowerCase();
+      var hits = 0;
+      itemButtons.forEach(function(button) {
+        var visible = button.textContent.toLocaleLowerCase().indexOf(q) !== -1;
+        button.hidden = !visible;
+        if (visible) hits += 1;
+      });
+      noResult.hidden = hits !== 0;
+      laterHeight();
+    });
+    other.addEventListener("input", function() {
+      done.disabled = !other.value.trim();
+    });
+    done.addEventListener("click", function() {
+      if (other.value.trim()) choose(other.value);
+    });
+    back.addEventListener("click", showCategories);
+    trigger.addEventListener("click", function() {
+      if (panel.hidden) {
+        showCategories();
+        showPanel(true);
+      } else {
+        showPanel(false);
+      }
     });
     reset.addEventListener("click", function() {
-      selectedGroup = "";
-      selectedRole = "";
-      detail.hidden = true;
-      otherEl.hidden = true;
-      otherEl.value = "";
       setAudience("선택 안 함");
-      redrawPressed();
+      showCategories();
+      showPanel(false);
     });
-
-    addStyle();
+    document.addEventListener("pointerdown", function(event) {
+      if (!panel.hidden && !root.contains(event.target)) showPanel(false);
+    });
+    document.addEventListener("keydown", function(event) {
+      if (event.key === "Escape" && !panel.hidden) {
+        showPanel(false);
+        trigger.focus();
+      }
+    });
     select.insertAdjacentElement("beforebegin", root);
     setAudience("선택 안 함");
     select.dataset.habomRoleEnhanced = "yes";
     select.style.setProperty("display", "none", "important");
     select.setAttribute("aria-hidden", "true");
     select.tabIndex = -1;
-
     var form = select.closest("form");
     if (form) {
       form.addEventListener("reset", function() {
         window.setTimeout(function() { reset.click(); }, 0);
       });
     }
+    if (window.ResizeObserver) {
+      var observer = new ResizeObserver(laterHeight);
+      observer.observe(document.body);
+    }
+    window.addEventListener("load", laterHeight);
+    window.setTimeout(laterHeight, 500);
+    window.setTimeout(laterHeight, 1800);
   }
 
   if (document.readyState === "loading") {
