@@ -5,10 +5,10 @@
 .about-story{max-width:790px;margin:12px auto 42px;padding:0 36px;color:#26383b}
 .about-story .story-intro{border-left:3px solid #9ab5a2;padding:2px 0 2px 22px;margin:14px 0 37px}
 .about-story .story-eyebrow{font-size:12px;font-weight:800;letter-spacing:.02em;color:#526e65;margin:0 0 12px}
-.about-story .story-intro p{font-size:17px;line-height:1.83;margin:0;color:#354a4d}
+.about-story .story-intro p{font-size:17px;line-height:1.75;margin:0;color:#354a4d}
 .about-story h2{font-family:"Gamja Flower",cursive;font-weight:400;font-size:clamp(28px,3vw,34px);letter-spacing:-.025em;line-height:1.3;margin:0 0 12px;color:#243d43}
 .about-story .story-section{margin-top:35px}
-.about-story .story-section p{font-size:15.5px;line-height:1.95;margin:0 0 13px;letter-spacing:-.012em;word-break:keep-all;color:#40545a}
+.about-story .story-section p{font-size:15.5px;line-height:1.8;margin:0 0 18px;letter-spacing:-.012em;word-break:keep-all;color:#40545a}
 .about-story .story-section p:last-child{margin-bottom:0}
 .about-story .story-highlight{font-weight:750;color:#263f42}
 .about-story .story-closing{margin-top:38px;padding:22px 26px;background:#f0f6ee;border:1px solid #dce7d9;border-radius:16px}
@@ -32,7 +32,7 @@
  .about-story .story-intro{padding-left:14px;margin-bottom:26px}
  .about-story .story-intro p{font-size:15px}
  .about-story .story-section{margin-top:29px}
- .about-story .story-section p{font-size:14px;line-height:1.9}
+ .about-story .story-section p{font-size:14px;line-height:1.73;margin-bottom:16px}
  .about-story h2{font-size:29px}
  .about-story .story-closing{padding:18px}
  .about-page .about-notes-three{padding:4px 18px 24px;gap:10px}
