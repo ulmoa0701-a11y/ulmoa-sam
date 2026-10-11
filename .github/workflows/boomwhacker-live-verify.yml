@@ -76,6 +76,47 @@ jobs:
            }
           }finally{await browser.close();fs.writeFileSync('boomwhacker/live-qa-artifacts/report.json',JSON.stringify(results,null,2))}
           JS
+      - name: Verify deployed musical interlude with real audio and synchronized handoff
+        shell: bash
+        run: |
+          node --input-type=module <<'JS'
+          import {chromium} from 'playwright-core';
+          const browser=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',args:['--no-sandbox','--autoplay-policy=no-user-gesture-required']});
+          try{
+            for(const mobile of [false,true]){
+              const page=await browser.newPage({viewport:mobile?{width:390,height:844}:{width:1366,height:900}});
+              const errors=[];page.on('pageerror',e=>errors.push(e.message));
+              let deployed=false;
+              for(let tries=0;tries<20;tries++){
+                await page.goto('https://ulmoa0701-a11y.github.io/ulmoa-sam/boomwhacker/?interludeQa='+Date.now(),{waitUntil:'domcontentloaded'});
+                deployed=await page.locator('#introMode option[value=interlude]').count()===1;
+                if(deployed)break;
+                await new Promise(r=>setTimeout(r,5000));
+              }
+              if(!deployed)throw Error('LIVE INTERLUDE NOT DEPLOYED mobile='+mobile);
+              await page.evaluate(()=>localStorage.setItem('ulmoaBoomTransfer',JSON.stringify({title:'간주 실제 공개검증',timeN:2,timeD:4,bpm:96,measures:[[{note:'도',dur:1},{note:'미',dur:1}],[{note:'솔',dur:1},{note:'도',dur:1}]]})));
+              await page.reload({waitUntil:'domcontentloaded'});
+              if(mobile)await page.locator('#mobileSettingsBtn').click();
+              await page.locator('#introMode').selectOption('interlude');
+              if(mobile)await page.locator('#mobileSettingsClose').click();
+              const energy=await page.evaluate(async()=>{
+                const ac=new OfflineAudioContext(1,44100*2,44100);
+                scheduleInterludeAccompaniment(ac,ac.destination,.05,3,beatMs(),2);
+                const signal=(await ac.startRendering()).getChannelData(0);
+                let sum=0;for(let i=0;i<22050;i++)sum+=Math.abs(signal[i]);
+                return Math.round(sum);
+              });
+              await page.locator(mobile?'#playBtn':'#startBtn').click();
+              const before=await page.evaluate(()=>({introActive,beats:introBeats,meter:introMeter,heading:document.querySelector('#introHeading').innerText}));
+              await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+10);introFrame(performance.now())});
+              const after=await page.evaluate(()=>({introActive,playing,lead:!!leadInGain,elapsed}));
+              const ok=energy>10&&before.introActive&&before.beats===6&&before.meter===2&&before.heading.includes('간주')&&!after.introActive&&after.playing&&after.lead&&after.elapsed<500&&!errors.length;
+              console.log('LIVE_INTERLUDE='+JSON.stringify({mobile,energy,before,after,errors,ok}));
+              await page.close();
+              if(!ok)throw Error('LIVE musical interlude audio/handoff did not work mobile='+mobile);
+            }
+          }finally{await browser.close()}
+          JS
       - uses: actions/upload-artifact@v4
         if: always()
         with:
