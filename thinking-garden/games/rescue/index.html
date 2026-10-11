@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#16382d">
   <title>모아 구조대!</title>
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
   <main class="app-shell">
@@ -13,6 +13,7 @@
       <button id="backBtn" class="icon-btn" aria-label="생각정원으로 돌아가기">←</button>
       <div class="brand"><span>🌱</span><b>모아 구조대!</b></div>
       <div class="audio-tools">
+        <button id="teacherBtn" class="icon-btn teacher-btn" aria-label="치료사 설정 및 기록" aria-controls="teacherPanel" aria-expanded="false" title="치료사 설정">⚙️</button>
         <button id="voiceBtn" class="icon-btn voice-btn" aria-label="목소리 선택" aria-controls="voicePanel" aria-expanded="false" title="목소리 선택">🎙️</button>
         <button id="soundBtn" class="icon-btn" aria-label="소리 켜기/끄기">🔊</button>
       </div>
@@ -28,13 +29,28 @@
         <button id="voiceClose" type="button">닫기</button>
       </div>
     </section>
+    <section id="teacherPanel" class="teacher-panel" hidden aria-label="치료사 설정 및 익명 기록">
+      <div class="teacher-title"><strong>수업 설정</strong><button id="teacherClose" type="button" aria-label="설정 닫기">✕</button></div>
+      <label for="rescueMode">다음 출동의 난이도</label>
+      <select id="rescueMode">
+        <option value="starter">기초 · 조건 하나씩</option>
+        <option value="basic">기본 · 조건을 차례로 연결</option>
+        <option value="challenge">도전 · 복합 조건 구별</option>
+      </select>
+      <p class="teacher-note">난이도는 다음 출동부터 적용돼요. 게임 중에는 바뀌지 않아요.</p>
+      <strong class="teacher-record-title">최근 익명 플레이 기록</strong>
+      <div id="rescueRecordSummary" class="rescue-record-summary" aria-live="polite">게임을 플레이하면 기록이 표시돼요.</div>
+      <p class="teacher-note">기록은 이 기기에만 최대 20회 저장돼요. 이름·생년월일 등 아동 개인정보는 입력·저장하지 않아요. 학습 수행 참고용이며 임상 검사 결과가 아니에요.</p>
+      <button id="rescueClearRecords" type="button" class="teacher-clear">기록 지우기</button>
+    </section>
     <section class="game-frame" aria-label="모아 구조대 게임">
       <div id="game"></div>
       <div id="rotateHint" class="rotate-hint" hidden>📱 세로 화면으로 보면 더 좋아요</div>
     </section>
   </main>
   <script src="phaser.min.js"></script>
-  <script src="landscape.js?v=7"></script>
-  <script src="game.js?v=10"></script>
+  <script src="rescue-core.js?v=1"></script>
+  <script src="landscape.js?v=8"></script>
+  <script src="game.js?v=11"></script>
 </body>
 </html>
