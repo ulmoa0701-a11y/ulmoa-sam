@@ -344,3 +344,64 @@
 
 /* 짧은 설명은 단어 중간에서 쪼개지 않도록 */
 .hemi-focus span{word-break:keep-all;overflow-wrap:break-word}
+
+
+/* 좌뇌·우뇌: 경험→설명→짧은 기억 확인 (original Moa + six-region map preserved) */
+.hemi-team{margin-top:13px;padding:13px 15px;text-align:left}
+.hemi-team-header{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap}
+.hemi-team-header p{font-size:12px!important;color:#5d7560;margin:0!important}
+.hemi-together{padding:9px 15px;min-height:44px;font-size:15px;white-space:nowrap}
+.hemi-team-examples{margin:10px 0 8px;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.hemi-team-examples button{min-height:48px;border:1.5px solid #dbe9d9;border-radius:12px;background:#fff;
+ padding:9px 6px;display:flex;align-items:center;justify-content:center;gap:6px;
+ color:#315744;font:inherit;font-size:14px;cursor:pointer;word-break:keep-all}
+.hemi-team-examples button b{font-size:13px;line-height:1.4;font-weight:850}
+.hemi-team-examples button[aria-pressed=true]{background:#e6f4e7;border-color:#73a984;box-shadow:inset 0 0 0 1px #b8d8bf}
+.hemi-team-examples button:hover{border-color:#619870}
+.hemi-scene-detail{display:flex;align-items:baseline;gap:9px;border:1px solid #dce9d7;
+ border-radius:12px;background:#fff;padding:10px 13px;color:#355640}
+.hemi-scene-detail b{font-size:13px;white-space:nowrap;flex-shrink:0}
+.hemi-scene-detail p{font-size:13px;line-height:1.5;color:#526b58;margin:0!important;word-break:keep-all}
+.hemi-quick-check{margin-top:12px;padding:14px 16px;background:#fffdf5;border:1px solid #ebe3c9;border-radius:18px}
+.hemi-quick-head{display:flex;align-items:center;justify-content:space-between;gap:9px}
+.hemi-quick-head h3{font-size:17px;line-height:1.35;font-weight:930;color:#486348;margin:0!important}
+.hemi-quick-head span{font-size:12px;font-weight:800;color:#62795f;white-space:nowrap}
+.hemi-quiz-question{font-size:14px;line-height:1.55;color:#35483a;margin:7px 0 9px!important;font-weight:780;word-break:keep-all}
+.hemi-quiz-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-width:540px}
+.hemi-quiz-options button{font:inherit;font-size:14px;font-weight:820;min-width:0;min-height:46px;
+ border:1.5px solid #d5e3d1;border-radius:11px;background:#fff;color:#37573e;cursor:pointer;
+ padding:8px 10px;word-break:keep-all}
+.hemi-quiz-options button:hover:not(:disabled){border-color:#78a588;background:#f1f9f0}
+.hemi-quiz-options button[aria-pressed=true]{border-color:#608f75;background:#e5f3e5}
+.hemi-quiz-options button[data-correct=true]{border-color:#73a87b}
+.hemi-quiz-options button:disabled{cursor:default;opacity:1}
+.hemi-quiz-response{margin:9px 0 0;padding:10px 12px;background:#eaf5e8;color:#345f42;
+ border-radius:10px;font-size:13px;line-height:1.5;word-break:keep-all}
+.hemi-quiz-response[data-result=review]{background:#fff0d9;color:#695332}
+.hemi-quiz-next{margin-top:9px;padding:8px 15px;min-height:44px;border-radius:99px;background:#4d8660;
+ color:#fff;border:0;font:inherit;font-weight:850;cursor:pointer;font-size:13px}
+.hemi-quiz-next[hidden],.hemi-quiz-response[hidden]{display:none!important}
+.hemi-quiz-reminder{font-size:12px;color:#697965;line-height:1.5;margin:11px 0 0!important;word-break:keep-all}
+.hemi-quiz-reminder strong{color:#3e6748}
+.hemi-study-sources{font-size:12px;margin:9px 3px 0;line-height:1.65;color:#6a7d70}
+.hemi-study-sources summary{font-size:12px;color:#497456;cursor:pointer;font-weight:850;min-height:30px}
+.hemi-study-sources p{margin:5px 0!important;font-size:12px;line-height:1.7}
+.hemi-study-sources a{text-decoration:underline;color:#326649}
+.hemi-quick-check button:focus-visible,.hemi-team-examples button:focus-visible{outline:3px solid #427B5A;outline-offset:2px}
+@media(max-width:760px){
+ .hemi-team{padding:11px 9px}
+ .hemi-team-header{align-items:flex-start;gap:5px}
+ .hemi-team-header p{font-size:12px!important}
+ .hemi-team-examples{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:9px 0 7px}
+ .hemi-team-examples button{min-height:47px;padding:7px 5px;font-size:13px}
+ .hemi-team-examples button b{font-size:13px}
+ .hemi-scene-detail{display:block;padding:9px 10px}
+ .hemi-scene-detail b{font-size:13px}
+ .hemi-scene-detail p{font-size:12.5px;margin:4px 0 0!important}
+ .hemi-quick-check{padding:12px 11px;border-radius:15px}
+ .hemi-quick-head h3{font-size:16px}
+ .hemi-quiz-question{font-size:13px}
+ .hemi-quiz-options button{min-height:46px;font-size:13px;padding:7px 6px}
+ .hemi-quiz-response{font-size:12.5px}
+ .hemi-caution{font-size:12px;line-height:1.55}
+}
