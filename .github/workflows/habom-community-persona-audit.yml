@@ -153,10 +153,15 @@ jobs:
                   if(frame)break;await privateUser.waitForTimeout(450);
                 }
                 if(!frame)throw Error('Jotform inner frame missing');
-                const body=await frame.locator('body').innerText({timeout:14000});
+                let body='';
+                for(let load=0;load<32;load++){
+                  try{body=await frame.locator('body').innerText({timeout:2000});}catch(ignore){}
+                  if(body.includes('이메일')&&body.includes('전화번호')&&body.includes('파일 첨부')&&body.includes('비밀글 공개 범위'))break;
+                  await privateUser.waitForTimeout(550);
+                }
                 const labels=['이메일','전화번호','파일 첨부','비밀글 공개 범위'];
                 const missing=labels.filter(x=>!body.includes(x));
-                if(missing.length)throw Error('missing fields '+missing.join(','));
+                if(missing.length)throw Error('missing fields '+missing.join(',')+' / rendered: '+body.slice(0,190));
                 const files=await frame.locator('input[type="file"]').count();
                 const upload=files ? await frame.locator('input[type="file"]').first().evaluate(n=>({accept:n.accept,multiple:n.multiple})) : null;
                 return JSON.stringify({fields:labels,fileInput:files,upload});
@@ -186,11 +191,13 @@ jobs:
 
               const explorer=await makePage(browser,390,844,'visitor');
               await attempt('첫 방문자','잠금글 목록에서 공개 데이터와 실제 잠금 기능 이해',async()=>{
-                await explorer.locator('#habomLockedPosts[data-loaded]').waitFor({timeout:14000});
+                await explorer.waitForFunction(()=>!!document.querySelector('#habomLockedPosts')?.dataset.loaded,{timeout:14000});
                 const items=await explorer.locator('#habomLockedItems .hbl-item').count();
-                const emptyText=(await explorer.locator('#habomLockedState').innerText()).trim();
+                const hidden=await explorer.locator('#habomLockedPosts').evaluate(n=>n.hidden);
+                const emptyText=(await explorer.locator('#habomLockedState').textContent()).trim();
+                if(items===0 && !hidden)throw Error('empty locked section should not clutter the page');
                 const openable=await explorer.locator('#habomLockedItems a').count();
-                return JSON.stringify({listCount:items,emptyText,openable,warning:'cannot self-open secret posts'});
+                return JSON.stringify({listCount:items,hidden,emptyText,openable,warning:'cannot self-open secret posts'});
               });
               await explorer.close();
               const report={timestamp:new Date().toISOString(),actualParticipants:0,testNature:'automated synthetic persona scenarios, no human user testing',cases:results,summary:{passed:results.filter(x=>x.passed).length,failed:results.filter(x=>!x.passed).length}};
