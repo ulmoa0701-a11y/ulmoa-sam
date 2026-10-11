@@ -37,7 +37,7 @@ jobs:
           python - <<'PY'
           import json
           r=json.load(open('/tmp/audiveris-release.json'))
-          debs=[a for a in r.get('assets',[]) if a['name'].endswith('.deb') and 'linux' in a['name'].lower() and 'x86_64' in a['name'].lower()]
+          debs=[a for a in r.get('assets',[]) if a['name'].endswith('.deb') and 'ubuntu24.04' in a['name'].lower() and 'x86_64' in a['name'].lower()]
           if len(debs)!=1:raise SystemExit('Expected exactly one official Linux x86-64 deb; found: '+str([a['name'] for a in r.get('assets',[])]))
           open('/tmp/audiveris-asset.txt','w').write(debs[0]['browser_download_url'])
           print('Audiveris release:',r.get('tag_name'),'asset:',debs[0]['name'])
