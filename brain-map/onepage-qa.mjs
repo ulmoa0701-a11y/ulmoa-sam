@@ -27,6 +27,8 @@ try{
   assert.equal(await page.locator('#simpleDetail').isHidden(),true,'optional detail starts closed');
   assert.equal(await page.locator('.more-learn').getAttribute('open'),null,'advanced features closed by default');
   assert.notEqual(await page.locator('.sub-footer .footer-social').evaluate(el=>getComputedStyle(el).position),'fixed','shared social links must not float over educational content');
+  const footerColor=await page.locator('.sub-footer .footer-social a').first().evaluate(el=>getComputedStyle(el).color);
+  assert.ok(footerColor==='rgb(241, 248, 242)','social links should have readable contrast on dark footer, got '+footerColor);
   const allText=await page.locator('.lobe-list').innerText();
   for(const label of ['전두엽','두정엽','측두엽','후두엽','소뇌','뇌줄기'])assert.ok(allText.includes(label),'missing '+label);
   const fit=await page.evaluate(()=>({
