@@ -1,0 +1,47 @@
+name: Boomwhacker real video save E2E (PR only)
+on:
+  pull_request:
+    paths:
+      - 'boomwhacker/index.html'
+      - 'boomwhacker/video-export-e2e.mjs'
+      - '.github/workflows/boomwhacker-video-export-e2e.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-video-download:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Locate Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Install browser driver
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund playwright-core@1.56.1
+      - name: ACTUALLY record and save WebM on desktop and 390px browser
+        run: node boomwhacker/video-export-e2e.mjs
+      - name: Validate actual exported media stream
+        if: always()
+        shell: bash
+        run: |
+          if ! command -v ffprobe >/dev/null; then
+            echo 'ffprobe missing — cannot assert codecs'
+            exit 1
+          fi
+          for file in boomwhacker/video-qa-artifacts/*.webm; do
+            echo "=== $file ==="
+            ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_type,codec_name -of json "$file"
+          done
+      - name: Upload media QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boomwhacker-export-e2e-evidence
+          path: boomwhacker/video-qa-artifacts
+          if-no-files-found: warn
