@@ -150,6 +150,14 @@ const truth=require('./doremi-ground-truth.json');
   const first=path.join(out,'typeset-normal-19.png'),second=path.join(out,'typeset-faint-19.png');
   fs.writeFileSync(first,Buffer.from(pictures.normal,'base64'));
   fs.writeFileSync(second,Buffer.from(pictures.faint,'base64'));
+  // A blank, valid image exercises the complete no-staff + legacy OCR
+  // fallback path. It is generated here so no external image is required.
+  const empty=await page.evaluate(()=>{
+    const c=document.createElement('canvas');c.width=1000;c.height=800;
+    const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,1000,800);
+    return c.toDataURL('image/png').split(',')[1];
+  });
+  fs.writeFileSync(path.join(out,'typeset-empty-1000.png'),Buffer.from(empty,'base64'));
   // More realistic acquisition conditions than clean rendered PNG:
   // native-resolution compression/downscale and slight handheld-camera tilt.
   // Generated from the same independent score, NOT reconstructed from OMR output.
