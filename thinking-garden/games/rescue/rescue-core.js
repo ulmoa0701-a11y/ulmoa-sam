@@ -22,7 +22,8 @@ function validate(m){
 }
 function buildSeries(mode='basic',run=0){
  if(!LEVELS.includes(mode))mode='basic';
- const colors=rotate(HUES,run%4),species=rotate(ANIMALS,run%4);
+ // Independent rotations produce 16 practice sets before repeating, not four.
+ const colors=rotate(HUES,(run+Math.floor(run/4))%4),species=rotate(ANIMALS,run%4);
  const [c0,c1,c2,c3]=colors,[s0,s1,s2,s3]=species;
  const size=run%2?'작은':'큰',otherSize=size==='큰'?'작은':'큰';
  const stages=[];
