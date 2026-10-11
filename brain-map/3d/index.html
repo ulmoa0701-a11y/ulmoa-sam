@@ -1,88 +1,79 @@
 <!doctype html>
 <html lang="ko"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="아이의 주의·기억·언어·공간지각을 뇌 부위와 함께 이해하는 학부모용 뇌지도">
-<title>뇌지도로 한눈에 보기 — 일단 해봄노트</title>
+<meta name="description" content="뇌의 위치와 역할을 한 장의 귀여운 뇌 그림으로 이해하는 학부모용 뇌지도.">
+<title>뇌는 어떤 일을 할까요? — 일단 해봄노트</title>
 <link rel="icon" href="../../favicon.ico">
 <link rel="stylesheet" href="../../assets/notebook-subpages.css?v=20261005-clean3">
-<link rel="stylesheet" href="map.css?v=20261010-controls1">
-<script defer src="map.js?v=20261010-controls1"></script>
+<link rel="stylesheet" href="map.css?v=20261011-simple1">
+<script defer src="map.js?v=20261011-simple1"></script>
 </head>
-<body class="note-subpage approved-brain-page">
+<body class="note-subpage parent-brain-page">
 <header class="sub-header"><a class="sub-brand" href="../../"><span aria-hidden="true">✦</span><b>일단 해봄노트</b></a>
 <nav class="sub-nav" aria-label="주 메뉴"><a href="../../notes/">노트</a><a class="mobile-priority" href="../" aria-current="page">뇌지도</a><a href="../../info/">정보</a></nav></header>
-<main class="map-wrap">
-<nav class="map-breadcrumb" aria-label="현재 위치"><a href="../">← 뇌지도</a><span> / </span><strong>부위와 기능 한눈에 보기</strong></nav>
-<div class="map-layout">
-<section class="map-main" aria-labelledby="mapTitle">
- <div class="map-top">
-  <div class="map-titles"><h1 id="mapTitle"><span aria-hidden="true">✦</span> 뇌지도로 한눈에 보기</h1><p>뇌 부위를 누르거나 살펴보며 역할과 기능을 쉽게 이해해요.</p></div>
-  <div class="map-switches">
-   <div class="map-mode" role="group" aria-label="학습 보기"><button type="button" data-mode="region" aria-pressed="true">부위별 보기</button><button type="button" data-mode="function" aria-pressed="false">기능별 보기</button></div>
-   <div class="map-views" role="group" aria-label="보는 방향">
-    <button type="button" data-view="front" aria-pressed="false">앞에서</button><button type="button" data-view="side" aria-pressed="true">옆에서</button><button type="button" data-view="back" aria-pressed="false">뒤에서</button><button type="button" data-view="top" aria-pressed="false">위에서</button><button type="button" data-view="free" aria-pressed="false">자유회전</button>
+<main class="brain-wrap">
+ <nav class="brain-crumb" aria-label="현재 위치"><a href="../">← 뇌지도</a></nav>
+ <header class="brain-heading"><span class="brain-kicker">🧠 부모님을 위한 쉬운 뇌 이야기</span>
+   <h1>뇌는 어떤 일을 할까요?</h1>
+   <p>색깔별 뇌 부위를 하나씩 선택하면, 하는 일과 아이의 일상 예시를 알 수 있어요.</p>
+ </header>
+ <div class="brain-layout">
+  <section class="brain-illustration" aria-labelledby="brainSelectTitle">
+   <div class="section-step"><span class="step-count">1</span><h2 id="brainSelectTitle">궁금한 뇌 부위를 골라요</h2><span class="step-hint">그림 속 이름이나 색깔 부분을 선택하세요.</span></div>
+   <div class="brain-stage" id="brainStage">
+    <img src="approved-reference.webp?v=20261010-hires80" alt="전두엽은 계획·집중, 두정엽은 공간·감각, 측두엽은 언어·듣기, 후두엽은 시각처리, 소뇌는 균형·움직임, 뇌줄기는 호흡·깨어있기에 관여하는 파스텔색 뇌 그림" width="1085" height="480">
+    <div class="brain-picture-actions" role="group" aria-label="뇌 그림에 표시된 부위를 선택">
+      <button type="button" class="hit-label hit-label-frontal" data-region="frontal" aria-label="그림에서 전두엽 선택" aria-pressed="true"></button>
+      <button type="button" class="hit-label hit-label-parietal" data-region="parietal" aria-label="그림에서 두정엽 선택" aria-pressed="false"></button>
+      <button type="button" class="hit-label hit-label-temporal" data-region="temporal" aria-label="그림에서 측두엽 선택" aria-pressed="false"></button>
+      <button type="button" class="hit-label hit-label-occipital" data-region="occipital" aria-label="그림에서 후두엽 선택" aria-pressed="false"></button>
+      <button type="button" class="hit-label hit-label-cerebellum" data-region="cerebellum" aria-label="그림에서 소뇌 선택" aria-pressed="false"></button>
+      <button type="button" class="hit-label hit-label-brainstem" data-region="brainstem" aria-label="그림에서 뇌줄기 선택" aria-pressed="false"></button>
+      <button type="button" class="hit-brain hit-brain-frontal" data-region="frontal" aria-label="보라색 전두엽 선택" aria-pressed="true"></button>
+      <button type="button" class="hit-brain hit-brain-parietal" data-region="parietal" aria-label="노란색 두정엽 선택" aria-pressed="false"></button>
+      <button type="button" class="hit-brain hit-brain-temporal" data-region="temporal" aria-label="초록색 측두엽 선택" aria-pressed="false"></button>
+      <button type="button" class="hit-brain hit-brain-occipital" data-region="occipital" aria-label="살구색 후두엽 선택" aria-pressed="false"></button>
+      <button type="button" class="hit-brain hit-brain-cerebellum" data-region="cerebellum" aria-label="하늘색 소뇌 선택" aria-pressed="false"></button>
+      <button type="button" class="hit-brain hit-brain-brainstem" data-region="brainstem" aria-label="회보라색 뇌줄기 선택" aria-pressed="false"></button>
+    </div>
    </div>
-  </div>
+   <div class="region-nav" role="group" aria-label="뇌 부위 바로 선택">
+    <button type="button" data-region="frontal" aria-pressed="true"><i class="region-dot frontal"></i>전두엽</button>
+    <button type="button" data-region="parietal" aria-pressed="false"><i class="region-dot parietal"></i>두정엽</button>
+    <button type="button" data-region="temporal" aria-pressed="false"><i class="region-dot temporal"></i>측두엽</button>
+    <button type="button" data-region="occipital" aria-pressed="false"><i class="region-dot occipital"></i>후두엽</button>
+    <button type="button" data-region="cerebellum" aria-pressed="false"><i class="region-dot cerebellum"></i>소뇌</button>
+    <button type="button" data-region="brainstem" aria-pressed="false"><i class="region-dot brainstem"></i>뇌줄기</button>
+   </div>
+  </section>
+  <aside class="brain-explain" aria-labelledby="brainExplainTitle">
+    <div class="section-step"><span class="step-count">2</span><h2 id="brainExplainTitle">어떤 일을 하는지 알아봐요</h2></div>
+    <div class="detail-title" id="detailBanner"><span class="detail-icon" id="detailIcon" aria-hidden="true">💡</span><div><strong id="detailName">전두엽</strong><span id="detailSkills">계획 · 집중 · 조절</span></div></div>
+    <div aria-live="polite" aria-atomic="true" class="detail-body">
+      <h3>어떤 일을 할까요?</h3>
+      <p id="detailSummary">계획을 세우고 주의를 조절하며 상황에 맞게 행동을 바꾸는 일에 여러 뇌 영역과 함께 관여해요.</p>
+      <div class="daily-example"><h3>🌱 아이의 일상에서는</h3><p id="detailExample">해야 할 일의 순서를 정하거나 하고 싶은 행동을 잠깐 멈추려고 노력할 때</p></div>
+    </div>
+    <p class="brain-caution">뇌의 여러 부위는 서로 협력해요. 한 가지 행동만으로 특정 뇌 부위의 문제를 판단하지 않아요.</p>
+  </aside>
  </div>
- <div class="map-stage" id="mapStage" data-view="side" aria-label="각 부위별 역할이 표시된 뇌 그림">
-   <img class="approved-brain-art" src="approved-reference.webp?v=20261010-hires80" alt="승인된 파스텔 뇌 그림과 전두엽·두정엽·측두엽·후두엽·소뇌·뇌줄기 역할 표시" width="950" height="420">
-   <div class="inline-3d-layer" id="inline3D" hidden aria-label="3D 뇌를 돌려 보는 화면">
-     <iframe id="brainViewerFrame" title="드래그로 회전하는 뇌 지도" data-src="explore/?embedded=1&amp;v=20261010-friendly5" loading="lazy"></iframe>
-     <div class="inline-loading" id="inlineLoading" role="status">3D 뇌지도를 불러오는 중이에요…</div>
-     <div class="inline-guide">↔ 그림을 드래그해 회전 · 휠/두 손가락으로 확대</div>
+ <div class="brain-next">
+   <div><strong>더 살펴보고 싶다면</strong><p>기본 내용을 이해한 뒤 관심 있는 것만 이어서 볼 수 있어요.</p></div>
+   <div class="brain-next-links">
+     <a href="explore/?v=20261011-parent2" class="go-3d">↻ 3D로 돌려보기</a>
+     <a href="explore/?v=20261011-parent2#hemisphereLearning" class="go-hemi">좌뇌·우뇌 알아보기 →</a>
    </div>
-   <svg class="map-connectors" viewBox="0 0 1085 480" preserveAspectRatio="none" aria-hidden="true">
-    <path d="M327 81 Q349 96 382 135" class="stroke-frontal"/><circle cx="382" cy="135" r="10" class="dot-frontal"/>
-    <path d="M705 65 Q668 66 635 100" class="stroke-parietal"/><circle cx="635" cy="100" r="10" class="dot-parietal"/>
-    <path d="M326 319 Q384 315 458 291" class="stroke-temporal"/><circle cx="458" cy="291" r="10" class="dot-temporal"/>
-    <path d="M867 220 Q839 225 799 243" class="stroke-occipital"/><circle cx="799" cy="243" r="10" class="dot-occipital"/>
-    <path d="M840 356 Q807 355 752 352" class="stroke-cerebellum"/><circle cx="752" cy="352" r="10" class="dot-cerebellum"/>
-    <path d="M525 420 Q569 412 588 385" class="stroke-brainstem"/><circle cx="588" cy="385" r="10" class="dot-brainstem"/>
-   </svg>
-   <div class="callout-grid" role="group" aria-label="뇌 부위 선택">
-    <button type="button" data-region="frontal" class="map-callout frontal is-active" aria-pressed="true"><span class="callout-emoji">💡</span><span><strong>전두엽</strong><small>계획 · 집중 · 조절</small></span></button>
-    <button type="button" data-region="parietal" class="map-callout parietal" aria-pressed="false"><span class="callout-emoji">✋</span><span><strong>두정엽</strong><small>공간 · 감각 · 수개념</small></span></button>
-    <button type="button" data-region="temporal" class="map-callout temporal" aria-pressed="false"><span class="callout-emoji">💬</span><span><strong>측두엽</strong><small>언어 · 듣기 · 기억</small></span></button>
-    <button type="button" data-region="occipital" class="map-callout occipital" aria-pressed="false"><span class="callout-emoji">👁️</span><span><strong>후두엽</strong><small>보기 · 시각처리</small></span></button>
-    <button type="button" data-region="cerebellum" class="map-callout cerebellum" aria-pressed="false"><span class="callout-emoji">🏃</span><span><strong>소뇌</strong><small>균형 · 움직임</small></span></button>
-    <button type="button" data-region="brainstem" class="map-callout brainstem" aria-pressed="false"><span class="callout-emoji">💗</span><span><strong>뇌줄기</strong><small>호흡 · 깨어있기</small></span></button>
-   </div>
-   <button type="button" class="map-brain-hotspot hotspot-frontal" data-region="frontal" aria-label="그림에서 전두엽 선택"></button>
-   <button type="button" class="map-brain-hotspot hotspot-parietal" data-region="parietal" aria-label="그림에서 두정엽 선택"></button>
-   <button type="button" class="map-brain-hotspot hotspot-temporal" data-region="temporal" aria-label="그림에서 측두엽 선택"></button>
-   <button type="button" class="map-brain-hotspot hotspot-occipital" data-region="occipital" aria-label="그림에서 후두엽 선택"></button>
-   <button type="button" class="map-brain-hotspot hotspot-cerebellum" data-region="cerebellum" aria-label="그림에서 소뇌 선택"></button>
-   <button type="button" class="map-brain-hotspot hotspot-brainstem" data-region="brainstem" aria-label="그림에서 뇌줄기 선택"></button>
  </div>
- <section class="everyday" aria-labelledby="everydayTitle">
-  <div class="everyday-title"><h2 id="everydayTitle">🌱 생활 속 예시</h2><p>하나의 활동에도 여러 뇌 영역이 함께 참여해요.</p></div>
+ <details class="daily-more">
+  <summary>🌱 생활 속에서 뇌가 함께하는 모습 <span>읽기 · 지시 따르기 · 공놀이 · 기억하기</span></summary>
+  <p class="daily-intro">아이의 활동 하나에도 여러 뇌 영역이 함께 참여해요.</p>
   <div class="activity-grid">
-    <button type="button" class="activity-card" data-activity="reading" aria-pressed="false"><span class="illustration ill-read" aria-hidden="true">📖</span><span class="activity-text"><b>읽기</b><span class="chip-row"><i class="chip green">측두엽</i><i class="chip coral">후두엽</i></span><small>글자를 보고 소리와 뜻을 연결해요.</small></span></button>
-    <button type="button" class="activity-card" data-activity="instructions" aria-pressed="false"><span class="illustration ill-list" aria-hidden="true">📝</span><span class="activity-text"><b>지시 따르기</b><span class="chip-row"><i class="chip purple">전두엽</i><i class="chip green">측두엽</i></span><small>듣고 기억한 뒤 순서대로 실행해요.</small></span></button>
-    <button type="button" class="activity-card" data-activity="ball" aria-pressed="false"><span class="illustration ill-ball" aria-hidden="true">⚽</span><span class="activity-text"><b>공놀이</b><span class="chip-row"><i class="chip blue">소뇌</i><i class="chip yellow">두정엽</i></span><small>공의 위치를 보고 균형을 조절해요.</small></span></button>
-    <button type="button" class="activity-card" data-activity="memory" aria-pressed="false"><span class="illustration ill-memory" aria-hidden="true">💭</span><span class="activity-text"><b>기억하기</b><span class="chip-row"><i class="chip green">측두엽</i><i class="chip purple">전두엽</i></span><small>경험을 기억하고 나중에 떠올려요.</small></span></button>
+   <article><span class="illustration ill-read" aria-hidden="true"></span><div><b>읽기</b><p>글자를 보고 소리와 뜻을 연결해요.</p></div></article>
+   <article><span class="illustration ill-list" aria-hidden="true"></span><div><b>지시 따르기</b><p>말을 듣고 기억한 뒤 순서대로 행동해요.</p></div></article>
+   <article><span class="illustration ill-ball" aria-hidden="true"></span><div><b>공놀이</b><p>공을 보고 몸의 균형과 움직임을 조절해요.</p></div></article>
+   <article><span class="illustration ill-memory" aria-hidden="true"></span><div><b>기억하기</b><p>경험을 기억하고 나중에 떠올려요.</p></div></article>
   </div>
- </section>
- <div class="secondary-links">
-<a href="explore/?v=20261011-parent2#hemisphereLearning" class="three-d-link">🧠 좌뇌·우뇌 역할 쉽게 알아보기</a><a href="explore/?v=20261011-parent2" class="three-d-link">↻ 3D 뇌지도 자유롭게 돌려보기</a><a href="../#hemispheres">좌뇌·우뇌 위치 설명 보기 →</a></div>
-</section>
-<aside class="map-sidebar">
- <section class="region-detail" aria-live="polite" aria-atomic="true">
-  <h2>지금 보는 부위</h2>
-  <div class="detail-banner" id="detailBanner"><span class="detail-icon" id="detailIcon" aria-hidden="true">💡</span><div><h3 id="detailName">전두엽</h3><p id="detailSkills">계획 · 집중 · 조절</p></div></div>
-  <p class="detail-summary" id="detailSummary">계획을 세우고 주의를 조절하며 행동을 조절하는 과정에 여러 뇌 영역과 함께 관여해요.</p>
-  <div class="detail-example"><strong>💡 이럴 때 보여요</strong><p id="detailExample">숙제 순서를 정하거나 하고 싶은 행동을 잠깐 멈추려고 할 때</p></div>
- </section>
- <section class="quick-parts"><h2>뇌 부위 빠르게 보기</h2><div class="quick-grid">
-   <button type="button" data-quick="frontal" aria-pressed="true"><i class="swatch purple"></i><span><b>전두엽</b><small>계획 · 집중 · 조절</small></span></button>
-   <button type="button" data-quick="parietal" aria-pressed="false"><i class="swatch yellow"></i><span><b>두정엽</b><small>공간 · 감각 · 수개념</small></span></button>
-   <button type="button" data-quick="temporal" aria-pressed="false"><i class="swatch green"></i><span><b>측두엽</b><small>언어 · 듣기 · 기억</small></span></button>
-   <button type="button" data-quick="occipital" aria-pressed="false"><i class="swatch coral"></i><span><b>후두엽</b><small>보기 · 시각처리</small></span></button>
-   <button type="button" data-quick="cerebellum" aria-pressed="false"><i class="swatch blue"></i><span><b>소뇌</b><small>균형 · 움직임</small></span></button>
-   <button type="button" data-quick="brainstem" aria-pressed="false"><i class="swatch grey"></i><span><b>뇌줄기</b><small>호흡 · 깨어있기</small></span></button>
- </div></section>
- <p class="parent-note"><strong>꼭 알아두세요.</strong> 뇌는 여러 부위가 함께 작동해요. 아이의 한 가지 행동만으로 특정 부위가 손상되었다고 판단할 수는 없어요. 이 그림의 색상과 경계는 이해를 돕기 위한 개념도입니다.</p>
-</aside>
-</div>
-<footer class="brain-foot"><a href="../">← 뇌지도 안내로</a><a href="../#sourceTitle">참고자료 보기 →</a></footer>
-</main></body></html>
+ </details>
+ <footer class="brain-footer"><span>그림은 뇌 구조와 역할을 쉽게 이해하기 위한 개념도입니다.</span><div>자료: <a href="https://www.ninds.nih.gov/health-information/public-education/brain-basics" target="_blank" rel="noopener noreferrer">NIH 뇌 기초 안내</a> · <a href="https://www.brainfacts.org/3D-Brain" target="_blank" rel="noopener noreferrer">BrainFacts</a></div></footer>
+</main>
+</body></html>
