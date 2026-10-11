@@ -109,6 +109,27 @@ const path=require("node:path");
       }
       assert.deepEqual([...discovered].sort(),imageFiles.slice().sort(),"all thirty-two art tiles reachable without scrolling");
       assert.equal(await page.locator("#gcatPageCount").textContent(),"6 / 6");
+      if(p.name==="desktop"){
+        for(const [name,slug] of [
+          ["메타인지","metacognition"],["계획과 조직화","planning-organization"],["수행점검","performance-monitoring"],
+          ["음운작업기억","phonological-working-memory"],["시공간 작업기억","visuospatial-working-memory"],
+          ["이야기담화","narrative-discourse"],["추론이해","inferential-comprehension"],
+          ["읽기유창성","reading-fluency"],["기능적 행동평가(FBA)","functional-behavior-assessment"],
+          ["ABC 관찰기록","abc-observation"]
+        ]){
+          await search.fill(name);
+          const tile=page.locator('.gcat-card[data-album-cover="'+slug+'"]');
+          assert.equal(await tile.count(),1,"new illustrated term searchable: "+name);
+          await tile.click();
+          assert.equal((await page.locator("#gcatDialogTitle").textContent()).trim(),name);
+          await page.locator(".gcat-art-disclosure > summary").click();
+          const art=page.locator(".gcat-art-panel img");
+          await art.evaluate(img=>img.decode());
+          assert((await art.getAttribute("src")).endsWith(slug+".png"),"matching full-sized art in popup: "+slug);
+          await page.locator("#gcatDialogClose").click();
+        }
+        await search.fill("");
+      }
       await search.fill("표현언어");
       const expressive=page.locator('.gcat-card[data-album-cover="expressive-language"]');
       assert.equal(await expressive.count(),1,"art is reachable through an exact search on every page");
