@@ -44,10 +44,15 @@ try{
    result.supported=await page.evaluate(()=>window.__boomVideoQA?.supported());
    result.initialStatus=await page.locator('#videoStatus').innerText();
    const pending=page.waitForEvent('download',{timeout:45000}).then(d=>({download:d})).catch(e=>({error:e.message}));
-   await page.locator('#videoBtn').click({force:true,timeout:10000});
+   await page.locator('#videoBtn').click({timeout:10000});
+   result.progressVisible=await page.locator('#videoProgress').isVisible();
+   result.progressButtonText=await page.locator('#videoBtn').innerText();
    result.clicked=true;
    const downloaded=await pending;
    result.finalStatus=await page.locator('#videoStatus').innerText();
+   result.retryDownloadVisible=await page.locator('#videoDownloadLink').isVisible();
+   result.retryDownloadHref=await page.locator('#videoDownloadLink').getAttribute('href');
+   result.mobileStatusFontPx=Number.parseFloat(await page.locator('#videoStatus').evaluate(e=>getComputedStyle(e).fontSize));
    if(downloaded.download){
     const d=downloaded.download;
     result.downloaded=true;result.filename=d.suggestedFilename();
@@ -57,7 +62,9 @@ try{
     result.videoBytes=body.length;result.ebml=body.length>4&&body.subarray(0,4).toString('hex')==='1a45dfa3';
     result.mime='video/webm';
    }else result.downloadError=downloaded.error;
-   result.ok=!!(result.downloaded&&result.ebml&&result.videoBytes>2000&&!jsErrors.length&&!consoleErrors.length&&/저장 완료/.test(result.finalStatus));
+   result.ok=!!(result.downloaded&&result.ebml&&result.videoBytes>2000&&!jsErrors.length&&!consoleErrors.length
+      &&result.progressVisible&&result.retryDownloadVisible&&result.retryDownloadHref?.startsWith('blob:')
+      &&result.mobileStatusFontPx>=10&&/영상 제작 완료/.test(result.finalStatus));
    console.log('VIDEO_EXPORT_E2E='+JSON.stringify(result));
   }catch(e){result.ok=false;result.exception=String(e);result.finalStatus=await page.locator('#videoStatus').innerText().catch(()=>'?');console.log('VIDEO_EXPORT_E2E='+JSON.stringify(result));}
   results.push(result);
