@@ -6,7 +6,7 @@
 .parents-hero h1{margin:12px 0 17px;font-family:"Gamja Flower",cursive;font-size:clamp(42px,5.6vw,64px);line-height:1.04;color:#293b3d;font-weight:600}
 .parents-hero h1 em{font-style:normal;color:#507a63}
 .parents-hero p{margin:0;color:#637a7c;font-size:15px;line-height:1.85;max-width:660px;word-break:keep-all}
-.parents-hero-mark{height:140px;width:140px;object-fit:contain}
+.parents-hero-mark{height:100px;width:100px;object-fit:contain;flex-shrink:0}
 .parents-breadcrumb{display:inline-flex;color:#5f8583;text-decoration:none;font-size:12px;margin-bottom:16px}
 .parents-pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:25px}
 .parents-pills a{display:inline-flex;padding:9px 13px;border-radius:999px;background:#fff;border:1px solid #dce9de;color:#395754;font-size:12px;text-decoration:none;font-weight:750}
@@ -45,7 +45,7 @@
 .parents-hero{padding:28px 20px;display:block}
 .parents-hero h1{font-size:47px}
 .parents-hero p{font-size:13px}
-.parents-hero-mark{height:80px;width:80px;position:absolute;right:13px;top:15px;opacity:.34;pointer-events:none}
+.parents-hero-mark{height:72px;width:72px;position:absolute;right:15px;top:15px;opacity:.45;pointer-events:none}
 .parents-pills a{font-size:11px;padding:8px 11px}
 .parents-section{margin-top:32px}
 .parents-section-head h2{font-size:30px}
