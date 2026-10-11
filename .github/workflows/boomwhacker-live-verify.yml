@@ -1,0 +1,67 @@
+name: Boomwhacker LIVE GitHub Pages save verification
+on:
+  pull_request:
+    paths: ['.github/workflows/boomwhacker-live-verify.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-deployed-page:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install free Chrome browser QA driver
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund playwright-core@1.56.1
+      - name: Test LIVE GitHub Pages button, UI feedback and resulting download
+        shell: bash
+        run: |
+          mkdir -p boomwhacker/live-qa-artifacts
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import {chromium} from 'playwright-core';
+          const url='https://ulmoa0701-a11y.github.io/ulmoa-sam/boomwhacker/?liveqa='+Date.now();
+          const browser=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',args:['--no-sandbox','--autoplay-policy=no-user-gesture-required']});
+          const results=[];
+          try{
+           for(const mobile of [false,true]){
+            const page=await browser.newPage({viewport:mobile?{width:390,height:844}:{width:1440,height:900},acceptDownloads:true});
+            let ready=false,loadError='';
+            for(let i=0;i<12;i++){
+             try{
+              const res=await page.goto(url,{waitUntil:'domcontentloaded',timeout:20000});
+              ready=!!res?.ok()&&await page.locator('#videoDownloadLink').count()===1&&await page.locator('#videoProgress').count()===1;
+              if(ready)break;
+             }catch(e){loadError=String(e)}
+             await new Promise(r=>setTimeout(r,5000));
+            }
+            if(!ready)throw Error('LIVE PAGE NOT UPDATED mobile='+mobile+' error='+loadError);
+            await page.evaluate(()=>localStorage.setItem('ulmoaBoomTransfer',JSON.stringify({title:'공개검증',bpm:180,timeN:1,timeD:4,measures:[[{note:'도',dur:1,lyric:'도'}]]})));
+            await page.reload({waitUntil:'domcontentloaded'});
+            if(mobile)await page.evaluate(()=>{document.querySelector('#creditOpt').checked=false});
+            const error=[];page.on('pageerror',e=>error.push(e.message));
+            const pending=page.waitForEvent('download',{timeout:55000});
+            await page.locator('#videoBtn').click();
+            const progressShown=await page.locator('#videoProgress').isVisible();
+            const download=await pending;
+            const file='boomwhacker/live-qa-artifacts/live-'+(mobile?'mobile':'desktop')+'.webm';
+            await download.saveAs(file);
+            const b=fs.readFileSync(file),status=await page.locator('#videoStatus').innerText();
+            const retry=await page.locator('#videoDownloadLink').isVisible();
+            const obj={mobile,url,progressShown,retry,size:b.length,header:b.subarray(0,4).toString('hex'),status,errors:error};
+            obj.pass=progressShown&&retry&&obj.header==='1a45dfa3'&&b.length>2000&&/영상 제작 완료/.test(status)&&!error.length;
+            results.push(obj);console.log('LIVE_BOOM_SAVE='+JSON.stringify(obj));
+            await page.close();
+            if(!obj.pass)process.exitCode=1;
+           }
+          }finally{await browser.close();fs.writeFileSync('boomwhacker/live-qa-artifacts/report.json',JSON.stringify(results,null,2))}
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: boomwhacker-live-save-evidence
+          path: boomwhacker/live-qa-artifacts
+          if-no-files-found: warn
