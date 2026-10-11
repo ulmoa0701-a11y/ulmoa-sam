@@ -1,0 +1,56 @@
+name: Live Moa Rescue Adaptive V11 QA
+on:
+  pull_request:
+    paths: ['.github/workflows/rescue-v11-live-verification.yml']
+permissions:
+  contents: read
+jobs:
+  assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Verify current public version and game logic scripts
+        run: |
+          BASE='https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/'
+          ready=0
+          for i in $(seq 1 45); do
+            curl -fsSL --max-time 12 "$BASE" -o /tmp/rescue-live-index || true
+            curl -fsSL --max-time 12 "${BASE}rescue-core.js?v=1" -o /tmp/rescue-core || true
+            curl -fsSL --max-time 12 "${BASE}game.js?v=11" -o /tmp/rescue-game || true
+            curl -fsSL --max-time 12 "${BASE}landscape.js?v=8" -o /tmp/rescue-landscape || true
+            if grep -q 'game.js?v=11' /tmp/rescue-live-index &&
+               grep -q 'landscape.js?v=8' /tmp/rescue-live-index &&
+               grep -q 'rescue-core.js?v=1' /tmp/rescue-live-index &&
+               grep -q '16 practice sets' /tmp/rescue-core &&
+               grep -q 'function beginRescueRun' /tmp/rescue-game &&
+               grep -q 'recordRound(this)' /tmp/rescue-landscape; then
+               ready=1;break
+            fi
+            echo "Waiting for new Pages version $i/45"
+            sleep 8
+          done
+          test "$ready" = "1"
+          echo 'ADAPTIVE RESCUE V11 PUBLIC ASSETS PASS'
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    needs: assets
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+      - name: Test published game on four screen sizes and all five rounds
+        env:
+          RESCUE_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/rescue/
+        run: |
+          node thinking-garden/games/rescue/rescue-core-qa.cjs
+          node thinking-garden/games/rescue/rescue-smoke.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rescue-adaptive-v11-public-screens
+          path: rescue-qa-screenshots/
+          if-no-files-found: ignore
