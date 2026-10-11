@@ -83,50 +83,175 @@ const RELATED={
 const SITUATION_GROUPS=[
   {id:"attention",label:"주의·실행"},
   {id:"memory",label:"기억·학습"},
-  {id:"language",label:"언어·소통"},
-  {id:"support",label:"행동·지원"}
+  {id:"language",label:"말·소통"},
+  {id:"support",label:"행동·수업"}
 ];
+// 보호자도 바로 이해하도록 사례는 관찰 가능한 장면으로 작성한다.
+// 모든 사례는 설명을 돕기 위한 가상 예시이며 평가·진단을 대신하지 않는다.
 const SITUATIONS=[
-  {id:"distracted",group:"attention",title:"다른 자극을 보느라 하던 활동을 놓쳐요",observe:"주변 자극이 많을 때와 적을 때 참여가 어떻게 달라지는지",try:"활동 시간과 환경을 조금씩 바꿔 반응 비교하기",terms:["memo-attention","memo-attention-types","memo-inhibition"]},
-  {id:"planning",group:"attention",title:"계획은 세웠는데 순서대로 하기 어려워요",observe:"시작·순서 정하기·마무리 중 어느 단계에서 멈추는지",try:"할 일을 작은 단계로 나누고 완료한 단계 표시하기",terms:["memo-planning-organization","memo-performance-monitoring","memo-task-analysis"]},
-  {id:"switch",group:"attention",title:"규칙이나 방법이 바뀌면 적응하기 어려워요",observe:"변화를 미리 알려줄 때와 갑자기 바뀔 때의 차이",try:"바뀔 내용을 미리 보여주고 한 가지씩 전환 연습하기",terms:["memo-flexibility","memo-self-regulation","memo-visual-supports"]},
-  {id:"instructions",group:"memory",title:"여러 가지 지시를 들으면 일부를 빠뜨려요",observe:"지시 길이·주변 소음·그림 제공 여부에 따른 차이",try:"지시를 짧게 나누고 말과 시각정보를 함께 제시하기",terms:["memo-working-memory","memo-phonological-working-memory","memo-auditory"]},
-  {id:"recall",group:"memory",title:"배웠던 것을 바로 떠올리기 어려워해요",observe:"힌트 없이 떠올릴 때와 단서를 제공했을 때의 차이",try:"배운 내용을 시간 간격을 두고 다시 떠올려 보기",terms:["memo-retrieval","memo-encoding","memo-memory"]},
-  {id:"reading",group:"memory",title:"글은 읽는데 내용의 뜻은 잘 연결하지 못해요",observe:"읽기의 정확도·속도와 의미 이해를 따로 살펴보기",try:"짧은 문장을 읽고 핵심 내용과 숨은 이유 질문하기",terms:["memo-reading-fluency","memo-inferential-comprehension","memo-semantics"]},
-  {id:"story",group:"language",title:"이야기할 때 사건의 순서가 자주 뒤섞여요",observe:"누가·무슨 일이·왜·어떻게 끝났는지 연결하는지",try:"처음·중간·끝을 그림으로 배열하고 이야기해 보기",terms:["memo-narrative-discourse","memo-receptive-expressive","memo-planning-organization"]},
-  {id:"context",group:"language",title:"말은 알아듣지만 상황 속 숨은 뜻은 놓쳐요",observe:"앞뒤 맥락·표정·상대의 의도를 어느 정도 활용하는지",try:"같은 표현을 다른 상황에 놓고 의미를 비교해 보기",terms:["memo-pragmatics","memo-inferential-comprehension","memo-semantics"]},
-  {id:"express",group:"language",title:"말보다 손짓이나 그림으로 더 잘 표현해요",observe:"어떤 방식으로 원하는 것을 스스로 전달하는지",try:"말 사용을 제한하지 않고 그림·제스처·AAC 선택지 제공하기",terms:["memo-aac","memo-receptive-expressive","memo-joint-attention"]},
-  {id:"refusal",group:"support",title:"특정 활동을 시작할 때 거부 행동이 반복돼요",observe:"행동 직전의 요구와 이후 주변 반응을 기록하기",try:"여러 차례의 ABC 기록을 비교해 기능 가설 검토하기",terms:["memo-abc-observation","memo-fba","memo-replacement-behavior"]},
-  {id:"asking",group:"support",title:"도움이 필요할 때 말 대신 행동으로 표현해요",observe:"언제 누구에게 어떤 도움을 요청하려는지",try:"'도와주세요'를 말·그림 등 적절한 방식으로 표현해 보기",terms:["memo-replacement-behavior","memo-aac","memo-reinforcement"]},
-  {id:"access",group:"support",title:"같은 수업 방식으로는 참여가 어려운 사람이 있어요",observe:"정보를 이해하거나 표현할 때 생기는 장벽 확인하기",try:"글·그림·음성·반응 방식에 선택지 마련하기",terms:["memo-udl","memo-visual-supports","memo-modeling"]}
+  {id:"distracted",group:"attention",title:"하다가 자꾸 다른 곳을 봐요",
+    scene:"그림을 그리다가 옆에서 소리가 나면 손을 멈춰요.",
+    observe:"조용한 곳에서도 그런지, 관심 있는 활동에서는 다른지",
+    try:"주변 자극을 줄여보고 달라지는지 살펴보기",
+    remember:"집중하기 어려운 이유는 한 가지가 아닐 수 있어요.",
+    terms:["memo-attention","memo-attention-types","memo-inhibition"],
+    source:["NIMH · 주의(Attention)","https://www.nimh.nih.gov/research/research-funded-by-nimh/rdoc/constructs/attention"]},
+  {id:"planning",group:"attention",title:"해야 할 일을 순서대로 못 해요",
+    scene:"준비물은 꺼냈는데 무엇부터 해야 할지 망설여요.",
+    observe:"시작할 때 막히는지, 중간에 순서를 놓치는지",
+    try:"할 일을 세 칸으로 나누어 하나씩 표시하기",
+    remember:"계획을 세우는 힘과 하는 중에 확인하는 힘은 달라요.",
+    terms:["memo-planning-organization","memo-performance-monitoring","memo-task-analysis"],
+    source:["하버드 · 실행기능","https://developingchild.harvard.edu/resource-guides/guide-executive-function/"]},
+  {id:"switch",group:"attention",title:"방법이 바뀌면 당황해요",
+    scene:"익숙한 놀이 규칙이 바뀌자 참여를 멈춰요.",
+    observe:"미리 알려줄 때와 갑자기 바뀔 때의 차이",
+    try:"바뀌는 규칙을 먼저 보여주고 한 가지씩 연습하기",
+    remember:"바꾸기 어려움과 하기 싫음은 같은 뜻이 아니에요.",
+    terms:["memo-flexibility","memo-self-regulation","memo-visual-supports"],
+    source:["하버드 · 실행기능 활동","https://developingchild.harvard.edu/resources/handouts-tools/activities-guide-enhancing-and-practicing-executive-function-skills/"]},
+  {id:"instructions",group:"memory",title:"여러 가지를 말하면 하나를 잊어요",
+    scene:"'가방 놓고 손 씻고 오자' 했더니 가방만 내려놓아요.",
+    observe:"한 가지씩 말할 때는 어떤지, 소음이 있을 때 달라지는지",
+    try:"한 번에 한두 가지씩 말하고 그림으로도 보여주기",
+    remember:"잊어버리는 행동만으로 작업기억이 약하다고 단정할 수 없어요.",
+    terms:["memo-working-memory","memo-phonological-working-memory","memo-auditory"],
+    source:["NIMH · 작업기억","https://www.nimh.nih.gov/research/research-funded-by-nimh/rdoc/constructs/working-memory"]},
+  {id:"recall",group:"memory",title:"배운 내용을 다시 떠올리기 어려워요",
+    scene:"어제 배운 단어가 생각나지 않다가 첫 글자를 들으면 말해요.",
+    observe:"힌트가 있을 때와 없을 때의 차이",
+    try:"시간을 조금 띄워 떠올려 보고 필요한 경우 단서 주기",
+    remember:"처음부터 잘 못 배운 것과 꺼내기 어려운 것은 다를 수 있어요.",
+    terms:["memo-retrieval","memo-encoding","memo-memory"],
+    source:["NIMH · 기억","https://www.nimh.nih.gov/research/research-funded-by-nimh/rdoc/constructs/declarative-memory"]},
+  {id:"reading",group:"memory",title:"글은 읽는데 무슨 뜻인지 어려워해요",
+    scene:"문장을 소리 내어 읽지만 '왜 그랬을까?'에는 답하기 어려워해요.",
+    observe:"글자를 읽는 모습과 내용을 이해하는 모습을 따로 살펴보기",
+    try:"짧은 이야기 뒤에 '누가?', '왜?'를 하나씩 물어보기",
+    remember:"잘 읽는 것과 내용을 잘 이해하는 것은 같지 않아요.",
+    terms:["memo-reading-fluency","memo-inferential-comprehension","memo-semantics"],
+    source:["ASHA · 읽기와 쓰기","https://www.asha.org/practice-portal/clinical-topics/written-language-disorders/"]},
+  {id:"story",group:"language",title:"이야기 순서가 자꾸 뒤섞여요",
+    scene:"오늘 있었던 일을 말하지만 끝난 일을 먼저 이야기해요.",
+    observe:"누가, 무엇을, 왜 했는지 이어서 말하는지",
+    try:"그림 세 장을 처음·중간·끝 순서로 놓아보기",
+    remember:"단어를 많이 알아도 이야기를 이어 말하기는 어려울 수 있어요.",
+    terms:["memo-narrative-discourse","memo-receptive-expressive","memo-planning-organization"],
+    source:["ASHA · 말과 언어","https://www.asha.org/practice-portal/clinical-topics/spoken-language-disorders/"]},
+  {id:"context",group:"language",title:"말 속에 숨은 뜻을 놓쳐요",
+    scene:"'와, 방이 정말 깨끗하네'라는 말을 상황과 다르게 받아들여요.",
+    observe:"말의 앞뒤 상황과 상대의 표정을 함께 살펴보는지",
+    try:"같은 말이 다른 상황에서 어떻게 쓰이는지 비교하기",
+    remember:"말을 듣는 것과 상황에 맞게 이해하는 것은 달라요.",
+    terms:["memo-pragmatics","memo-inferential-comprehension","memo-semantics"],
+    source:["ASHA · 사회적 의사소통","https://www.asha.org/practice-portal/clinical-topics/social-communication-disorder/"]},
+  {id:"express",group:"language",title:"말보다 그림이나 손짓으로 표현해요",
+    scene:"물을 원할 때 말 대신 물 그림을 가리켜요.",
+    observe:"어떤 방법으로, 누구에게, 무엇을 전달하는지",
+    try:"말·손짓·그림 등 사용할 수 있는 소통 방법을 함께 두기",
+    remember:"말 이외의 방법도 소중한 의사소통이에요.",
+    terms:["memo-aac","memo-receptive-expressive","memo-joint-attention"],
+    source:["ASHA · 보완대체의사소통","https://www.asha.org/practice-portal/professional-issues/augmentative-and-alternative-communication/"]},
+  {id:"refusal",group:"support",title:"특정 활동 앞에서 반복해서 거부해요",
+    scene:"쓰기 활동을 시작하자 자리를 벗어나요.",
+    observe:"그 전에 무엇을 요청했고, 뒤에는 무슨 일이 있었는지",
+    try:"여러 번 기록해 공통되는 상황이 있는지 확인하기",
+    remember:"행동이 일어나는 이유는 기록 하나만으로 알 수 없어요.",
+    terms:["memo-abc-observation","memo-fba","memo-replacement-behavior"],
+    source:["PBIS · 기능적 행동평가","https://www.pbis.org/resource/tier-3-comprehensive-functional-behavior-assessment-fba-guide"]},
+  {id:"asking",group:"support",title:"도움이 필요해도 말로 요청하지 못해요",
+    scene:"뚜껑이 안 열릴 때 어른 손을 끌어당겨요.",
+    observe:"정말 원하는 도움이 무엇인지, 어떻게 요청하는지",
+    try:"'도와주세요'를 말·그림 등 편한 방법으로 알려주기",
+    remember:"먼저 무엇을 원하는지 이해하는 것이 중요해요.",
+    terms:["memo-replacement-behavior","memo-aac","memo-reinforcement"],
+    source:["ASHA · 보완대체의사소통","https://www.asha.org/practice-portal/professional-issues/augmentative-and-alternative-communication/"]},
+  {id:"access",group:"support",title:"같은 설명이어도 이해하기 어려운 사람이 있어요",
+    scene:"말로 들으면 어렵지만 그림이 있으면 순서를 따라가요.",
+    observe:"말·그림·시범 중 어떤 방식에서 이해가 쉬워지는지",
+    try:"같은 목표를 여러 방식으로 알려주고 표현하게 하기",
+    remember:"모두가 같은 방법으로 배워야 하는 것은 아니에요.",
+    terms:["memo-udl","memo-visual-supports","memo-modeling"],
+    source:["CAST · UDL 가이드라인","https://udlguidelines.cast.org/"]}
 ];
+// 각 지도는 발달의 단계나 유일한 순서가 아니라 '중심 개념과의 관계'를 비교한다.
 const CONNECTION_MAPS=[
-  {id:"executive",label:"실행과 점검",title:"계획하고, 해보고, 다시 점검하기",
-   lead:"실행기능 관련 개념을 실제 과제 흐름에 연결해 봐요.",
-   example:"숙제를 시작하기 전 순서를 정하고, 하면서 잘 진행되는지 확인하는 상황",
-   note:"메타인지는 자신의 이해와 전략을 돌아보는 과정과도 연결되지만, 모든 과제가 같은 순서로 진행되는 것은 아니에요.",
-   nodes:[["memo-executive","관련 기능"],["memo-planning-organization","과제 시작 전에 계획"],["memo-performance-monitoring","하는 중에 점검"],["memo-metacognition","방법을 돌아보고 조정"]]},
-  {id:"memory",label:"기억과 작업기억",title:"기억하는 정보의 종류와 쓰임",
-   lead:"짧게 붙잡아 두는 정보가 말소리인지, 위치·모양인지 비교해요.",
-   example:"들은 숫자를 따라 말하기와, 방금 본 블록 위치 기억하기를 비교하는 상황",
-   note:"단기기억과 작업기억은 서로 연관되지만 완전히 같은 개념은 아니며, 과제에는 여러 기능이 함께 관여할 수 있어요.",
-   nodes:[["memo-short-term-memory","잠시 유지하는 정보"],["memo-working-memory","유지하면서 활용"],["memo-phonological-working-memory","말소리 정보를 다룰 때"],["memo-visuospatial-working-memory","위치·형태 정보를 다룰 때"]]},
-  {id:"language",label:"언어와 이야기",title:"말의 뜻부터 이야기의 맥락까지",
-   lead:"단어를 아는 것과 이야기를 이해·표현하는 것은 어떻게 다를까요?",
-   example:"그림책의 사건을 이야기하고, 인물이 왜 그런 행동을 했는지 추측하는 상황",
-   note:"어휘·문장 이해, 담화, 추론은 서로 영향을 주지만 어느 하나만으로 언어능력을 판단할 수 없어요.",
-   nodes:[["memo-receptive-expressive","언어 이해·표현"],["memo-narrative-discourse","사건을 연결해 이야기"],["memo-inferential-comprehension","드러나지 않은 뜻 추론"],["memo-pragmatics","상황과 상대를 고려"]]},
-  {id:"behavior",label:"행동 이해와 지원",title:"관찰 자료에서 지원 계획까지",
-   lead:"행동 자체보다 언제, 어떤 맥락에서 나타나는지를 함께 살펴봐요.",
-   example:"요구 과제 전후에 반복되는 행동을 여러 번 관찰한 뒤 지원을 계획하는 상황",
-   note:"ABC 기록만으로 행동의 기능을 확정할 수 없어요. 기능평가는 다양한 자료와 가설 검토가 필요합니다.",
-   nodes:[["memo-abc-observation","전후 상황 기록"],["memo-fba","여러 자료로 기능 가설 검토"],["memo-replacement-behavior","필요를 표현하는 대안 지도"],["memo-reinforcement","적절한 행동을 유지하도록 지원"]]},
-  {id:"teaching",label:"수업과 접근성",title:"배우기 쉽게 설계하고, 필요한 도움 주기",
-   lead:"다양한 학습자가 참여하고 표현할 수 있도록 수업 환경을 살펴봐요.",
-   example:"같은 학습 목표를 글·그림으로 제시하고, 수행 단계를 시각적으로 안내하는 상황",
-   note:"UDL은 촉구·시각지원 등 개별 교수 전략과 연결될 수 있지만, 서로 동일한 개념은 아니에요.",
-   nodes:[["memo-udl","처음부터 선택지 설계"],["memo-visual-supports","정보를 눈으로 확인"],["memo-task-analysis","복잡한 활동을 나누기"],["memo-prompting","필요한 도움을 조정"]]}
+  {id:"executive",label:"계획·점검",title:"시작하기, 해보기, 다시 확인하기",
+    takeaway:"일을 계획하는 것과 하는 중에 살피는 것은 달라요.",
+    example:"숙제할 때 무엇부터 할지 정한 뒤, 하면서 빠뜨린 게 있는지 확인해요.",
+    note:"실행기능에는 여러 능력이 함께 관여해요. 항상 정해진 순서로 발달하거나 사용되는 것은 아니에요.",
+    nodes:[["memo-executive","여러 기능을 함께 조절"],["memo-planning-organization","할 일과 순서를 정하기"],["memo-performance-monitoring","하는 중에 확인하기"],["memo-metacognition","내가 아는지·모르는지 돌아보기"]],
+    source:["하버드 · 실행기능","https://developingchild.harvard.edu/resource-guides/guide-executive-function/"]},
+  {id:"memory",label:"기억의 차이",title:"잠깐 기억하기와 기억하며 쓰기",
+    takeaway:"잠깐 담아두기와 담아둔 정보를 이용하기는 달라요.",
+    example:"숫자를 잠깐 외우기, 거꾸로 말하기, 블록 위치 기억하기를 비교해요.",
+    note:"말소리 정보와 위치·모양 정보는 서로 다른 종류의 정보예요. 아래 개념들은 순서대로 거치는 단계가 아니에요.",
+    nodes:[["memo-working-memory","기억하면서 이용하는 힘"],["memo-short-term-memory","잠깐 유지하는 측면"],["memo-phonological-working-memory","말소리를 기억하며 이용"],["memo-visuospatial-working-memory","위치·모양을 기억하며 이용"]],
+    source:["NIMH · 작업기억","https://www.nimh.nih.gov/research/research-funded-by-nimh/rdoc/constructs/working-memory"]},
+  {id:"language",label:"말과 이야기",title:"단어를 이해하고, 이야기를 잇고, 뜻을 짐작하기",
+    takeaway:"단어를 아는 것만으로 긴 이야기가 쉬워지는 건 아니에요.",
+    example:"그림책을 보고 무슨 일이 있었는지 말하고, 왜 그랬는지 짐작해요.",
+    note:"이해·표현, 이야기 구성, 추론, 상황에 맞는 말 사용은 서로 영향을 주지만 같은 능력은 아니에요.",
+    nodes:[["memo-receptive-expressive","말을 이해하고 표현"],["memo-narrative-discourse","일을 이야기로 연결"],["memo-inferential-comprehension","말에 없는 뜻 짐작"],["memo-pragmatics","상황에 맞는 말 사용"]],
+    source:["ASHA · 말과 언어","https://www.asha.org/practice-portal/clinical-topics/spoken-language-disorders/"]},
+  {id:"behavior",label:"행동 이해",title:"행동만 보지 말고 앞뒤 상황도 보기",
+    takeaway:"왜 그런 행동을 하는지는 여러 자료를 살펴야 해요.",
+    example:"쓰기 전에 자리를 벗어나는 행동이 언제 반복되는지 여러 번 기록해요.",
+    note:"ABC 기록은 기능적 행동평가에 활용되는 자료 중 하나예요. 기록 하나만으로 행동의 이유를 확정할 수 없어요.",
+    nodes:[["memo-fba","행동 이유를 자료로 살피는 평가"],["memo-abc-observation","행동 앞뒤를 기록하는 방법"],["memo-replacement-behavior","같은 필요를 다른 방식으로 표현"],["memo-reinforcement","행동이 반복되는 데 영향을 주는 결과"]],
+    source:["PBIS · 기능적 행동평가","https://www.pbis.org/resource/tier-3-comprehensive-functional-behavior-assessment-fba-guide"]},
+  {id:"teaching",label:"배우는 방법",title:"같은 목표, 다른 배움의 길",
+    takeaway:"배우는 방법과 표현하는 방법은 달라도 괜찮아요.",
+    example:"같은 내용을 말이나 그림으로 알려주고, 필요하면 시범도 보여줘요.",
+    note:"수업 전체를 설계하는 원칙과 한 활동에서 주는 개별 도움은 서로 다른 개념이에요.",
+    nodes:[["memo-udl","여러 방법으로 배울 길 설계"],["memo-visual-supports","그림이나 글자로 알려주기"],["memo-task-analysis","해야 할 일을 작은 단계로 나누기"],["memo-prompting","스스로 할 수 있도록 도움 조정"]],
+    source:["CAST · UDL 가이드라인","https://udlguidelines.cast.org/"]}
 ];
+// 표준 용어는 그대로 두고, 한눈에 읽히는 문장만 별도로 표시한다.
+const SIMPLE_DEFINITIONS={
+  "memo-working-memory":"잠깐 기억한 정보를 바로 써먹는 힘",
+  "memo-short-term-memory":"정보를 잠깐 기억해 두기",
+  "memo-processing-speed":"정보를 보고 생각해 반응하기까지 걸리는 시간",
+  "memo-attention":"지금 필요한 것에 마음을 모으기",
+  "memo-attention-types":"필요한 것을 골라 보기 / 그 상태를 이어가기",
+  "memo-executive":"목표를 위해 계획하고, 멈추고, 바꾸는 여러 능력",
+  "memo-inhibition":"바로 행동하기 전에 잠깐 멈추기",
+  "memo-flexibility":"상황이 달라질 때 생각과 방법도 바꾸기",
+  "memo-self-regulation":"주의와 감정, 행동을 상황에 맞게 조절하기",
+  "memo-metacognition":"내가 아는지 모르는지 스스로 살펴보기",
+  "memo-planning-organization":"무엇부터 할지 순서와 준비물 정하기",
+  "memo-performance-monitoring":"하는 중에 빠뜨리거나 틀린 곳이 없는지 살피기",
+  "memo-memory":"받아들이고, 남기고, 다시 떠올리기",
+  "memo-encoding":"새로운 정보를 기억 속에 받아들이기",
+  "memo-consolidation":"시간이 지나며 기억이 더 안정되기",
+  "memo-retrieval":"배운 것을 필요할 때 다시 떠올리기",
+  "memo-visual":"어디를 볼지 고르기 / 본 것을 알아보기",
+  "memo-auditory":"소리를 듣는 능력 / 들은 소리 정보를 처리하는 능력",
+  "memo-phonological-working-memory":"들은 말소리를 잠깐 기억하고 이용하기",
+  "memo-visuospatial-working-memory":"위치나 모양을 잠깐 기억하고 이용하기",
+  "memo-receptive-expressive":"말의 뜻 이해하기 / 내 생각을 표현하기",
+  "memo-semantics":"단어와 문장의 뜻 이해하기",
+  "memo-morphosyntax":"단어 모양과 문장을 만드는 규칙",
+  "memo-pragmatics":"상황과 상대에 맞게 말하기",
+  "memo-articulation-phonology":"말소리를 만드는 방법 / 말소리의 규칙",
+  "memo-phonological-awareness":"말소리를 알아차리고 나누거나 합치기",
+  "memo-aac":"말·손짓·그림 등 여러 방법으로 소통 돕기",
+  "memo-joint-attention":"두 사람이 같은 것에 관심을 함께 두기",
+  "memo-narrative-discourse":"여러 일을 연결해 하나의 이야기로 만들기",
+  "memo-inferential-comprehension":"직접 말하지 않은 뜻을 단서로 짐작하기",
+  "memo-reading-fluency":"글을 정확하고 자연스럽게 이어 읽기",
+  "memo-generalization":"배운 것을 다른 곳에서도 쓰고 오래 이어가기",
+  "memo-prompting":"스스로 할 수 있게 필요한 도움 주기",
+  "memo-time-delay":"도움을 주기 전에 스스로 해볼 시간 두기",
+  "memo-reinforcement":"어떤 결과 때문에 행동이 더 자주 나타나는 것",
+  "memo-task-analysis":"복잡한 활동을 작은 순서로 나누기",
+  "memo-visual-supports":"말뿐 아니라 그림이나 글자로도 알려주기",
+  "memo-modeling":"먼저 보여주어 따라 배우도록 돕기",
+  "memo-fba":"행동이 일어나는 이유를 여러 자료로 살피기",
+  "memo-abc-observation":"행동 전·행동·행동 후를 나누어 기록하기",
+  "memo-replacement-behavior":"필요를 더 안전하고 알맞은 방법으로 표현하기",
+  "memo-udl":"처음부터 다양한 배움의 방법을 마련하기"
+};
 
 const TINT={
   "cognitive":"#ffeedb",
@@ -222,13 +347,14 @@ function boot(){
     const reading=node("div","study-paper gcat-reading-sheet");
 
     const definition=node("section","gcat-definition-section");
-    definition.appendChild(node("span","gcat-section-kicker","핵심 뜻"));
-    definition.appendChild(node("h3","gcat-definition-headline",entry.subtitle));
+    definition.appendChild(node("span","gcat-section-kicker","한마디로"));
+    definition.appendChild(node("h3","gcat-definition-headline",SIMPLE_DEFINITIONS[entry.id]||entry.subtitle));
     const core=original.querySelector(":scope > .study-core");
     if(core){
       const coreText=core.querySelector(":scope > p");
       if(coreText){
         coreText.classList.add("gcat-definition-explanation");
+        definition.appendChild(node("span","gcat-original-definition-label","정확한 뜻"));
         definition.appendChild(coreText);
       }else{
         // 두 개념을 비교하는 용어는 문장 대신 원본 비교 설명을 핵심 뜻에 배치.
@@ -244,7 +370,7 @@ function boot(){
     const example=original.querySelector(":scope > .study-example");
     if(example){
       const section=node("section","gcat-example-section");
-      section.appendChild(node("h3","gcat-section-heading","이렇게 생각하면 쉬워요"));
+      section.appendChild(node("h3","gcat-section-heading","생활 속 예시"));
       section.appendChild(example);
       reading.appendChild(section);
     }
@@ -617,20 +743,32 @@ function boot(){
       article.dataset.group=situation.group;
       article.appendChild(node("span","gcat-situation-label",group.label));
       article.appendChild(node("h3",null,situation.title));
+      const scene=node("p","gcat-scene",situation.scene);
+      article.appendChild(scene);
+      const focus=node("div","gcat-situation-focus");
+      focus.appendChild(node("strong",null,"기억할 점"));
+      focus.appendChild(node("span",null,situation.remember));
+      article.appendChild(focus);
       const observations=node("div","gcat-situation-detail");
-      observations.appendChild(node("strong",null,"살펴볼 점"));
+      observations.appendChild(node("strong",null,"이런 점을 살펴봐요"));
       observations.appendChild(node("p",null,situation.observe));
       article.appendChild(observations);
       const application=node("div","gcat-situation-detail gcat-situation-application");
-      application.appendChild(node("strong",null,"활용 예시"));
+      application.appendChild(node("strong",null,"도움이 될 수 있는 방법"));
       application.appendChild(node("p",null,situation.try));
       article.appendChild(application);
       const footer=node("div","gcat-situation-terms");
-      footer.appendChild(node("strong",null,"관련 개념"));
+      footer.appendChild(node("strong",null,"연결되는 용어"));
       const chips=node("div","gcat-term-chips");
       for(const id of situation.terms){const chip=termChip(id);if(chip)chips.appendChild(chip);}
       footer.appendChild(chips);
       article.appendChild(footer);
+      const reference=node("a","gcat-learning-reference","관련 개념의 참고자료 ↗");
+      reference.href=situation.source[1];
+      reference.target="_blank";
+      reference.rel="noopener noreferrer";
+      reference.setAttribute("aria-label",situation.source[0]+" 새 창에서 보기");
+      article.appendChild(reference);
       situationGrid.appendChild(article);
     }
   }
@@ -646,37 +784,58 @@ function boot(){
     }
     const map=CONNECTION_MAPS.find(m=>m.id===activeConnectionMap);
     const flow=node("div","gcat-concept-flow");
-    for(let i=0;i<map.nodes.length;i++){
-      const [id,relation]=map.nodes[i];
-      if(i){
-        const bridge=node("div","gcat-concept-bridge");
-        bridge.appendChild(node("span",null,"↓"));
-        bridge.appendChild(node("em",null,relation));
-        flow.appendChild(bridge);
-      }
+    flow.appendChild(node("p","gcat-concept-flow-title","중심 용어와 연결되는 말"));
+    const main=map.nodes[0];
+    const center=byId.get(main[0]);
+    if(center){
+      const root=node("button","gcat-concept-node gcat-concept-center");
+      root.type="button";
+      root.dataset.termId=main[0];
+      root.appendChild(node("small",null,"중심 개념"));
+      root.appendChild(node("strong",null,center.title));
+      root.appendChild(node("span",null,main[1]));
+      root.setAttribute("aria-label",center.title+" 용어 설명 열기");
+      root.addEventListener("click",()=>openTerm(main[0],root));
+      flow.appendChild(root);
+    }
+    flow.appendChild(node("p","gcat-concept-related-title","함께 알아보면 좋은 개념"));
+    const related=node("div","gcat-concept-related-list");
+    for(const [id,relation] of map.nodes.slice(1)){
       const entry=byId.get(id);
       if(!entry)continue;
       const button=node("button","gcat-concept-node");
       button.type="button";
       button.dataset.termId=id;
-      button.appendChild(node("strong",null,entry.title));
-      button.appendChild(node("small",null,i===0?"연결 출발점":relation));
+      const copy=node("span","gcat-concept-node-copy");
+      copy.appendChild(node("strong",null,entry.title));
+      copy.appendChild(node("small",null,relation));
+      button.appendChild(copy);
+      button.appendChild(node("span","gcat-concept-open","↗"));
       button.setAttribute("aria-label",entry.title+" 용어 설명 열기");
       button.addEventListener("click",()=>openTerm(id,button));
-      flow.appendChild(button);
+      related.appendChild(button);
     }
+    flow.appendChild(related);
     const explanation=node("div","gcat-concept-explanation");
-    explanation.appendChild(node("span","gcat-situation-label","개념 연결"));
+    explanation.appendChild(node("span","gcat-situation-label","개념을 쉽게 연결하기"));
     explanation.appendChild(node("h3",null,map.title));
-    explanation.appendChild(node("p","gcat-concept-lead",map.lead));
+    const takeaway=node("div","gcat-concept-takeaway");
+    takeaway.appendChild(node("strong",null,"한 줄로 기억하기"));
+    takeaway.appendChild(node("p",null,map.takeaway));
+    explanation.appendChild(takeaway);
     const use=node("div","gcat-concept-usage");
-    use.appendChild(node("strong",null,"실제 상황에 대입하면"));
+    use.appendChild(node("strong",null,"생활 속에서는"));
     use.appendChild(node("p",null,map.example));
     explanation.appendChild(use);
     const note=node("div","gcat-concept-note");
-    note.appendChild(node("strong",null,"구분해서 이해하기"));
+    note.appendChild(node("strong",null,"헷갈리지 않으려면"));
     note.appendChild(node("p",null,map.note));
     explanation.appendChild(note);
+    const reference=node("a","gcat-learning-reference",map.source[0]+" ↗");
+    reference.href=map.source[1];
+    reference.target="_blank";
+    reference.rel="noopener noreferrer";
+    explanation.appendChild(reference);
     connectionDetail.replaceChildren(explanation,flow);
   }
   function setJourney(view,updateUrl){
