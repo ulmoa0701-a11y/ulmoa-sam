@@ -244,7 +244,7 @@ const path=require("node:path");
       assert.equal(sticky.position,"sticky");
       if(sticky.scroll>100)assert(sticky.top>=-1&&sticky.top<140,"sticky search "+JSON.stringify(sticky));
       assert.deepEqual(errors,[],p.name+" has no JS errors");
-      console.log(p.name+": PASS 22 images + 42-text-map, four branch counts, no art in all view, search, dialogs, responsive");
+      console.log(p.name+": PASS "+imageFiles.length+" images + 42-text-map, four branch counts, no art in all view, search, dialogs, responsive");
       await page.close();
     }
   }finally{await browser.close();}
