@@ -20,7 +20,7 @@ try{
   await page.locator('#brainMap').waitFor({state:'visible'});
   const photo=page.locator('.brain-one-panel');
   assert.equal(await page.locator('.lobe-card').count(),6,'six main functions are visible');
-  assert.equal(await page.locator('.hemisphere-fact').count(),2,'both hemispheres immediately visible');
+  assert.equal(await page.locator('.hemi-fact').count(),2,'both hemispheres immediately visible');
   assert.equal(await page.locator('.both-work').count(),1,'brain cooperation statement visible');
   assert.equal(await page.locator('#brainMap [data-brain-region]').count(),6,'six interactive regions');
   assert.equal(await page.locator('.brain-hero,.brain3d-feature,.brain-explorer,.brain-networks,.brain-faq').count(),0,'no prior scrolling sections');
