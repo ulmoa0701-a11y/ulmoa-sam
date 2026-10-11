@@ -1145,7 +1145,7 @@ async function exportVideo(){
   const fps=30;canvasStream=canvas.captureStream(fps);
   const tracks=[...canvasStream.getVideoTracks()];
   if(!tracks.length)throw new Error('영상 화면을 캡처할 수 없어요');
-  if(sound&&((wantsMelody()&&melodyMode!=='none')||wantsMr())){
+  if(sound&&(introMode==='interlude'||(wantsMelody()&&melodyMode!=='none')||wantsMr())){
    const A=window.AudioContext||window.webkitAudioContext;
    if(A){ac=new A();await ac.resume();dest=ac.createMediaStreamDestination();tracks.push(...dest.stream.getAudioTracks())}
   }
