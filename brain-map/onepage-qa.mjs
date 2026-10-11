@@ -95,7 +95,12 @@ try{
     'Hemispheres view horizontal overflow: '+JSON.stringify(compareFit));
   assert.ok(compareFit.panels.every(p=>p.left>=0&&p.right<=width+1&&p.width>110),
     'Hemispheres cards are clipped: '+JSON.stringify(compareFit));
+  // A full-page capture from scroll offset makes the site's sticky mobile menu
+  // appear halfway down the image; reset to top for an honest screenshot.
+  await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+  await page.waitForTimeout(170);
   await page.screenshot({path:out+'/'+name+'-hemispheres.png',fullPage:true});
+  assert.equal(await page.locator('#mapIntroText').innerText(),'좌뇌와 우뇌가 맡는 일을 비교하고, 함께하는 활동도 살펴봐요.');
   await page.locator('[data-brain-view="lobes"]').click();
   assert.equal(await page.locator('#lobesView').isVisible(),true,'Returning to original map should work');
   assert.equal(await page.locator('.lobe-card').count(),6,'Original cards preserved');
