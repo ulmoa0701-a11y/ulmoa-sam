@@ -296,7 +296,7 @@ const path=require("node:path");
       assert.equal(refLinks,true,"trusted reference links are external and explicit");
       const cardColumns=await page.locator("#gcatSituationGrid .gcat-situation-card").evaluateAll(els=>new Set(els.map(e=>Math.round(e.getBoundingClientRect().left))).size);
       assert.equal(cardColumns,p.width<=650?1:2,"readable one/two-column situation cards");
-      assert.equal(new URL(page.url()).searchParams.get("view"),"situations","situation view can be shared");
+      assert.equal(new URL(page.url()).searchParams.get("view"),null,"situation default needs no query parameter");
       for(const category of ["attention","memory","language","support"]){
         await page.locator('#gcatSituationFilters button[data-group="'+category+'"]').click();
         assert.equal(await page.locator("#gcatSituationGrid .gcat-situation-card").count(),3,"three examples for "+category);
