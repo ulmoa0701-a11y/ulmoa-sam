@@ -341,3 +341,6 @@
  .hemi-hero{grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr)}
  .hemi-hero-svg{max-width:170px;max-height:190px}
 }
+
+/* 짧은 설명은 단어 중간에서 쪼개지 않도록 */
+.hemi-focus span{word-break:keep-all;overflow-wrap:break-word}
