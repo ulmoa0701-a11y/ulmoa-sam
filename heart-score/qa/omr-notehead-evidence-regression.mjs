@@ -3,7 +3,7 @@ import {findFilledHeadNearModelRest} from '../omr-notehead-evidence-v1.mjs';
 const w=1000,h=140,sp=6,lines=[30,36,42,48,54],p=new Uint8Array(w*h).fill(255);
 for(const y of lines)for(let x=40;x<970;x++)p[y*w+x]=90;
 const image={width:w,height:h,data:p};
-window.omrGrayAt=(img,x,y)=>img.data[y*img.width+x];
+globalThis.window={omrGrayAt:(img,x,y)=>img.data[y*img.width+x]};
 const staff={img:image,lines,spacing:sp,x0:40,x1:970};
 assert.equal(findFilledHeadNearModelRest(staff,796,[727,882]),null);
 for(let dy=-3;dy<=3;dy++)for(let dx=-4;dx<=4;dx++)if((dx/4)**2+(dy/2.6)**2<=1)p[(39+dy)*w+760+dx]=10;
