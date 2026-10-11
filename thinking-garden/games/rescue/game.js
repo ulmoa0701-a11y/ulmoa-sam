@@ -203,8 +203,31 @@ ui.select.onchange=()=>{
  stopVoice();
 };
 ui.preview.onclick=()=>speak('안녕! 나는 모아 구조대야. 귀여운 동물을 함께 찾아볼까?',{preview:true});
+const teacherUI={
+ button:document.getElementById('teacherBtn'),panel:document.getElementById('teacherPanel'),
+ close:document.getElementById('teacherClose'),mode:document.getElementById('rescueMode'),
+ clear:document.getElementById('rescueClearRecords')
+};
+teacherUI.mode.value=rescueMode;
+function toggleTeacher(open){
+ teacherUI.panel.hidden=!open;
+ teacherUI.button.setAttribute('aria-expanded',String(open));
+ if(open){setVoicePanel(false);refreshTeacherSummary()}
+}
+teacherUI.button.onclick=()=>toggleTeacher(teacherUI.panel.hidden);
+teacherUI.close.onclick=()=>toggleTeacher(false);
+teacherUI.mode.onchange=()=>{rescueMode=RESCUE.LEVELS.includes(teacherUI.mode.value)?teacherUI.mode.value:'basic';
+ try{localStorage.setItem(MODE_KEY,rescueMode)}catch{}};
+teacherUI.clear.onclick=()=>{
+ if(!window.confirm('이 기기의 모아 구조대 익명 기록을 모두 지울까요?'))return;
+ try{localStorage.removeItem(LOG_KEY)}catch{}
+ refreshTeacherSummary();
+};
+const originalVoiceClick=ui.voice.onclick;
+ui.voice.onclick=()=>{toggleTeacher(false);originalVoiceClick()};
+refreshTeacherSummary();
 document.addEventListener('keydown',e=>{
- if(e.key==='Escape'&&!ui.panel.hidden){stopVoice();setVoicePanel(false);}
+ if(e.key==='Escape'&&!ui.panel.hidden){stopVoice();setVoicePanel(false);} if(e.key==='Escape'&&!teacherUI.panel.hidden)toggleTeacher(false);
 });
 refreshKoreanVoices();
 if('speechSynthesis' in window){
@@ -265,7 +288,7 @@ class TitleScene extends Phaser.Scene{
   label(this,W/2,190,'모아 구조대!',62,'#ffffff','900');label(this,W/2,250,'무전을 듣고 숲속 친구들을 구조해요',25,'#dfeee6','800');
   const van=this.makeVan(W/2,760,1.35);this.tweens.add({targets:van,y:748,yoyo:true,repeat:-1,duration:900,ease:'Sine.easeInOut'});
   const hong=this.add.image(W/2-150,575,'hong').setDisplaySize(230,230).setDepth(12);const moa=this.add.image(W/2+145,610,'moaDiscovery').setDisplaySize(210,210).setDepth(12);this.tweens.add({targets:[hong,moa],y:'-=12',yoyo:true,repeat:-1,duration:1200,stagger:180,ease:'Sine.easeInOut'});
-  const start=button(this,W/2,1030,430,92,'🚨 구조 출동하기',0x1d5a47);start.on('pointerdown',()=>{tone(true);this.tweens.add({targets:start,scale:.94,duration:90,yoyo:true,onComplete:()=>this.scene.start('mission',{round:0})})});
+  const start=button(this,W/2,1030,430,92,'🚨 구조 출동하기',0x1d5a47);start.on('pointerdown',()=>{tone(true);beginRescueRun();this.tweens.add({targets:start,scale:.94,duration:90,yoyo:true,onComplete:()=>this.scene.start('mission',{round:0})})});
   label(this,W/2,1110,'시간 제한 없이 천천히 찾아도 괜찮아요',20,'#cfe6da','800');
   this.add.text(W/2,1215,'ULMOA · MOA GARDEN',{fontFamily:FONT,fontSize:'15px',fontStyle:'bold',color:'#8fb5a2',letterSpacing:2}).setOrigin(.5);
  }
@@ -277,7 +300,7 @@ class TitleScene extends Phaser.Scene{
 }
 class MissionScene extends Phaser.Scene{
  constructor(){super('mission');this.round=0;this.found=new Set();this.lock=false;this.actors=[]}
- init(data){this.round=data.round||0;this.found=new Set();this.lock=false;this.actors=[];this.missionChip=null;this.van=null;this.seatLayer=null;this.completeOverlayShown=false}
+ init(data){this.round=data.round||0;this.found=new Set();this.lock=false;this.actors=[];this.missionChip=null;this.van=null;this.seatLayer=null;this.completeOverlayShown=false;this.metrics=null}
  create(){this.m=MISSIONS[this.round];this.cameras.main.setBackgroundColor('#bfe7f5');this.drawWorld();this.drawHud();this.showBriefing()}
  drawWorld(){
   this.add.image(W/2,H/2,`world-tall-${this.round}`).setDisplaySize(W,H).setDepth(-50);
@@ -304,7 +327,7 @@ class MissionScene extends Phaser.Scene{
   card.add(sub);
   const go=button(this,0,207,330,78,'출동! 🚨',0x1c694d);card.add(go);
   this.briefingTargetText=t;this.briefingStartButton=go;
-  go.on('pointerdown',()=>{tone(true);speak(target);this.tweens.add({targets:card,y:-420,alpha:0,duration:380,ease:'Back.easeIn',onComplete:()=>{card.destroy();shade.destroy();this.lock=false;this.spawnAnimals();this.installTouchAssist();this.showMissionChip()}})})
+  go.on('pointerdown',()=>{tone(true);speak(target);this.tweens.add({targets:card,y:-420,alpha:0,duration:380,ease:'Back.easeIn',onComplete:()=>{card.destroy();shade.destroy();this.lock=false;beginTrial(this);this.spawnAnimals();this.installTouchAssist();this.showMissionChip()}})})
  }
  showMissionChip(){
   const c=this.add.container(0,0).setDepth(65);
@@ -312,7 +335,7 @@ class MissionScene extends Phaser.Scene{
   const pic=animal(this,this.m.species[0],COLORS[this.m.color],this.m.size).setPosition(103,223).setScale(.48);
   c.add(pic);
   const main=targetHeadline(this.m);
-  const note=this.m.focus==='size'?'토끼끼리 · 돼지끼리':this.m.focus==='combined'?'작고 빨간 동물 4마리':this.m.focus==='color-species'?'토끼 · 돼지 · 소':targetDescription(this.m);
+  const note=this.m.focus==='size'?this.m.species.join('끼리 · ')+'끼리 비교':targetDescription(this.m);
   c.add(label(this,205,199,main,main.length>9?28:33,'#154936','900').setOrigin(0,.5));
   c.add(label(this,205,248,note,23,'#536e5e','800').setOrigin(0,.5));
   const repeat=button(this,602,225,162,68,'🔊 다시',0x1c694d);
@@ -358,9 +381,10 @@ class MissionScene extends Phaser.Scene{
   this.input.on('pointerdown',onTap);
   this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>this.input.off('pointerdown',onTap));
  }
- pickAnimal(a){if(this.lock||a.data.get('rescuing'))return;const sp=a.data.get('species'),basic=a.data.get('color')===this.m.color&&a.data.get('size')===this.m.size,good=basic&&this.m.species.includes(sp)&&!this.found.has(sp);if(!good){
+ pickAnimal(a){if(this.lock||a.data.get('rescuing'))return;const sp=a.data.get('species'),item={species:sp,color:a.data.get('color'),size:a.data.get('size')},good=isTarget(this.m,item)&&!this.found.has(sp);recordChoice(this,item,good);if(!good){
    const reason=wrongReason(this.m,{species:sp,color:a.data.get('color'),size:a.data.get('size')});
    tone(false);
+   if(this.metrics.wrong>=2)showComparisonHint(this,a,this.actors.filter(x=>x?.data?.get('species')));
    const q=this.add.text(a.x,a.y-120,reason,{fontFamily:FONT,fontSize:'28px',fontStyle:'bold',color:'#6c4531',backgroundColor:'#fff9ef',padding:{x:13,y:9}}).setOrigin(.5).setDepth(72);
    this.tweens.add({targets:q,y:q.y-20,alpha:0,duration:1200,onComplete:()=>q.destroy()});
    return;
@@ -370,7 +394,7 @@ class MissionScene extends Phaser.Scene{
  rescueBurst(x,y){const ring=this.add.circle(x,y,54,0xffffff,0).setStrokeStyle(6,0xffef9a,1).setDepth(65);this.tweens.add({targets:ring,scale:1.8,alpha:0,duration:520,onComplete:()=>ring.destroy()});for(let i=0;i<10;i++){const p=this.add.circle(x,y,5+(i%3)*2,i%2?0xffdc68:0xffffff,1).setDepth(66),ang=Math.PI*2*i/10,dist=55+Math.random()*40;this.tweens.add({targets:p,x:x+Math.cos(ang)*dist,y:y+Math.sin(ang)*dist,alpha:0,scale:.2,duration:500+Math.random()*250,onComplete:()=>p.destroy()})}}
  addSeat(sp){const i=SPECIES.indexOf(sp),slots=this.m.need===1?[0]:[0,1,2,3],idx=this.m.need===1?0:slots[i],x=(idx-(this.m.need===1?0:1.5))*52;const mini=animal(this,sp,COLORS[this.m.color],this.m.size).setScale(.32).setPosition(x,0);const badge=this.add.circle(x,0,27,0xf8fff9,1).setStrokeStyle(3,0x5fba78,1);this.seatLayer.add([badge,mini]);mini.setDepth(2);this.tweens.add({targets:[badge,mini],scale:'+=.15',duration:120,yoyo:true})}
  showToast(text){const c=this.add.container(W/2,1010).setDepth(75);const bg=roundRect(this,-170,-34,340,68,22,0x133e32,.94);const t=label(this,0,0,`✨ ${text}`,22,'#ffffff','900');c.add([bg,t]);this.tweens.add({targets:c,y:970,duration:180,ease:'Back.easeOut'});this.time.delayedCall(850,()=>this.tweens.add({targets:c,alpha:0,y:940,duration:220,onComplete:()=>c.destroy()}))}
- completeMission(){this.lock=true;this.completeOverlayShown=true;this.missionChip?.destroy();const shade=this.add.rectangle(W/2,H/2,W,H,0x0d2d24,.45).setDepth(79).setInteractive();const card=this.add.container(W/2,640).setDepth(82);const bg=roundRect(this,-290,-210,580,420,34,0xfffdf4,1,0xffffff,4);card.add(bg);card.add(label(this,0,-145,'구조 성공! ✨',43,'#194c3a','900'));card.add(label(this,0,-88,`${this.m.place}의 친구들이 안전해졌어요`,23,'#547064','800'));const row=this.add.container(0,0);this.m.species.slice(0,this.m.need).forEach((sp,i)=>{const a=animal(this,sp,COLORS[this.m.color],this.m.size).setScale(.47);a.setPosition((i-(this.m.need-1)/2)*122,0);row.add(a)});card.add(row);const last=this.round===4;const next=button(this,0,135,340,76,last?'구조 완료 보기 🏕️':'다음 현장으로 ▶',0x1e664d);card.add(next);let advancing=false;const advance=()=>{if(advancing)return;advancing=true;this.input.off('pointerdown',tapHandler);tone(true);if(last)this.scene.start('result');else this.scene.restart({round:this.round+1})};
+ completeMission(){this.lock=true;this.completeOverlayShown=true;recordRound(this);this.missionChip?.destroy();const shade=this.add.rectangle(W/2,H/2,W,H,0x0d2d24,.45).setDepth(79).setInteractive();const card=this.add.container(W/2,640).setDepth(82);const bg=roundRect(this,-290,-210,580,420,34,0xfffdf4,1,0xffffff,4);card.add(bg);card.add(label(this,0,-145,'구조 성공! ✨',43,'#194c3a','900'));card.add(label(this,0,-88,`${this.m.place}의 친구들이 안전해졌어요`,23,'#547064','800'));const row=this.add.container(0,0);this.m.species.slice(0,this.m.need).forEach((sp,i)=>{const a=animal(this,sp,COLORS[this.m.color],this.m.size).setScale(.47);a.setPosition((i-(this.m.need-1)/2)*122,0);row.add(a)});card.add(row);const last=this.round===4;const next=button(this,0,135,340,76,last?'구조 완료 보기 🏕️':'다음 현장으로 ▶',0x1e664d);card.add(next);let advancing=false;const advance=()=>{if(advancing)return;advancing=true;this.input.off('pointerdown',tapHandler);tone(true);if(last)this.scene.start('result');else this.scene.restart({round:this.round+1})};
  const tapHandler=(p)=>{if(p.x>=190&&p.x<=530&&p.y>=737&&p.y<=813)advance()};
  next.on('pointerdown',advance);
  this.input.on('pointerdown',tapHandler);
