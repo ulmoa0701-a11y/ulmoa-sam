@@ -254,6 +254,8 @@ const mapToggle=document.getElementById('mapToggle'),miniWorld=document.getEleme
 applyLibraryFilters();
 // Top-navigation category links: select the existing category without changing game logic.
 const routeCategory=new URLSearchParams(location.search).get('category');
+// Old shared-library links should land in the new music hub, not show unrelated cognitive games.
+if(routeCategory==='music')location.replace('../music-garden/');
 if(routeCategory && Object.prototype.hasOwnProperty.call(subtopicByCategory,routeCategory)){
   const routeTab=categoryTabs.find(tab=>tab.dataset.category===routeCategory);
   if(routeTab)routeTab.click();
