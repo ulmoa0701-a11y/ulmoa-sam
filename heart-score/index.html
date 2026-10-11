@@ -3863,7 +3863,7 @@ async function importScoreFromFile(file){
     if(usedOmr)importStatus(`✓ 오선보 자동 초안 완료 · ${merged.measures.length}마디. 계이름·가사와 특히 임시표·쉼표·붙임줄은 저장 전에 한 번 확인해 주세요.${usedFallback?' 일부 페이지는 OCR 방식으로 보완했습니다.':''}`,'ok');
     else if(qa.bad.length){const badText=qa.bad.slice(0,6).map(v=>`${v.index}마디 ${fmt(v.sum)}/${qa.target}박`).join(' · ');importStatus(`⚠ OCR 자동 인식 완료 · 박자 불일치 ${qa.bad.length}마디 (${badText}). 저장 전에 꼭 수정해 주세요.`,'warn')}
     else importStatus(`완료 · ${merged.measures.length}마디를 불러왔습니다. 계이름·가사는 한 번 확인해 주세요.`,'ok');
-  }catch(err){console.error(err);importStatus('분석 실패: '+err.message,'warn');updateOcrPreview('');alert('악보 이미지/PDF 분석에 실패했습니다.\n'+err.message+'\n\n권장: 정면·고해상도 단선율 오선보, MusicXML/MIDI, 울모아 하트악보 캡처본을 사용하세요.')}
+  }catch(err){console.error(err);importStatus('분석 실패: '+err.message,'warn');updateOcrPreview('');if(new URLSearchParams(location.search).get('aiomr')==='702'&&typeof window.__ulmoaOmrShowIssue==='function'){window.__ulmoaOmrShowIssue({title:'오선이나 계이름을 읽지 못했어요',reason:'AI 오선 판독과 기존 글자 인식 모두에서 악보를 충분히 확인하지 못했어요.',action:'악보의 오선 5줄과 음표가 끝까지 또렷하게 보이는 원본 사진이나 PDF를 올려 주세요.'});return;}alert('악보 이미지/PDF 분석에 실패했습니다.\n'+err.message+'\n\n권장: 정면·고해상도 단선율 오선보, MusicXML/MIDI, 울모아 하트악보 캡처본을 사용하세요.')}
 }
 
 // v6.15 — export with SVG-note font preservation, exact live-label bounds + mobile-safe handoff
