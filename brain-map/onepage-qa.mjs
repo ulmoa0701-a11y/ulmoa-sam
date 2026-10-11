@@ -73,6 +73,20 @@ try{
   assert.equal(await page.locator('.hemi-ability-list').count(),2);
   assert.equal(await page.locator('.hemi-ability-list li').count(),6);
   assert.equal(await page.locator('.hemi-team-examples span').count(),4);
+  assert.equal(await page.locator('#hemiMascot').count(),1,'redesigned original bunny mascot exists');
+  assert.equal(await page.locator('#hemiBrainGraphic [data-hemi-select]').count(),2,'both brain hemispheres stay clickable');
+  assert.match(await page.locator('#hemiSvgTitle').textContent(),/모아 토끼/);
+  const artFit=await page.evaluate(()=>{
+    const svg=document.querySelector('.hemi-hero-svg');
+    const brain=document.querySelector('#hemiBrainGraphic').getBBox();
+    const rabbit=document.querySelector('#hemiMascot').getBBox();
+    const art=svg.getBoundingClientRect();
+    return {brainBottom:brain.y+brain.height,rabbitTop:rabbit.y,viewBox:svg.viewBox.baseVal.width,
+      artWidth:art.width,visible:!!art.width};
+  });
+  assert.ok(artFit.visible && artFit.artWidth>=120,'mascot must be readable in every viewport: '+JSON.stringify(artFit));
+  assert.ok(artFit.rabbitTop >= artFit.brainBottom-8,
+    'brain drawing should float above mascot, not look like an exposed head: '+JSON.stringify(artFit));
   assert.match(await page.locator('.hemi-caution').innerText(),/좌뇌형·우뇌형/);
   await page.locator('#leftStudyTitle').click();
   assert.equal(await page.locator('#leftStudyTitle').getAttribute('aria-pressed'),'true');
