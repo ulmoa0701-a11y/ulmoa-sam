@@ -498,6 +498,8 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
  .fullscreen .lyricSyllable{font-size:clamp(25px,2.1vw,34px);min-width:29px;height:46px}
  .fullscreen .lyricWordSpace{flex-basis:clamp(16px,1.7vw,27px)}
 }
+#introMode option{font-weight:700}
+@media(min-width:801px){.introModeSelect{width:101px;max-width:101px}}
 </style>
 <link rel="stylesheet" href="./mobile-layout.css?v=20261009" />
 </head>
@@ -517,7 +519,7 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
 <div class="sec"><div class="label">현재 곡</div><div class="songTitle" id="songTitle">작은별</div><div class="meta" id="songMeta">2/4 · 92 BPM</div></div>
 <div class="sec"><div class="label">샘플곡 바로 불러오기</div><select id="sampleSelect" class="sampleSelect" aria-label="샘플곡 선택"></select><div class="hint">하트악보의 샘플곡을 같은 음·리듬·가사로 불러옵니다.</div></div>
 <div class="sec"><div class="label">연습 음 범위</div><div class="seg" id="levels"><button data-level="3">3음</button><button data-level="5">5음</button><button data-level="8" class="on">8음</button></div><div class="hint">3음은 도·미·솔, 5음은 도·레·미·솔·라만 활성화해요.</div><div id="rangeNote" class="rangeNote"></div></div>
-<div class="sec"><div class="label">연주 속도</div><div class="speed"><span>천천히</span><input id="tempo" type="range" min="35" max="140" value="66" aria-label="연주 속도 BPM"><span class="bpm" id="bpmLabel">66 BPM</span><select id="introMode" class="introModeSelect" aria-label="재생 전 준비 방식" title="재생 전 준비 방식"><option value="music">🥁 박자 예고</option><option value="count">3초 세기</option><option value="instant">바로 시작</option></select></div></div>
+<div class="sec"><div class="label">연주 속도</div><div class="speed"><span>천천히</span><input id="tempo" type="range" min="35" max="140" value="66" aria-label="연주 속도 BPM"><span class="bpm" id="bpmLabel">66 BPM</span><select id="introMode" class="introModeSelect" aria-label="재생 전 준비 방식" title="재생 전 준비 방식"><option value="music">🥁 박자 예고</option><option value="interlude">🎶 반주 간주 후 시작</option><option value="count">3초 세기</option><option value="instant">바로 시작</option></select></div></div>
 <div class="sec"><div class="label">멜로디 가이드</div><select id="melodySelect" class="sampleSelect" aria-label="멜로디 음색 선택"><option value="none">멜로디 없음</option><option value="piano">🎹 피아노 느낌</option><option value="xylophone">✨ 실로폰 느낌</option><option value="boom" selected>🥁 붐웨커 느낌</option></select><div class="mrVol"><span class="label" style="margin:0">멜로디 음량</span><input id="melodyVolume" type="range" min="0" max="100" value="65"><span id="melodyPct" class="mrPct">65%</span></div><div class="hint">연주할 때와 저장되는 영상에 같은 멜로디 음색·음량이 들어가요.</div></div>
 <div class="sec"><div class="label">소리 조합</div><div class="seg" id="mixModes"><button data-mix="melody" class="on">멜로디만</button><button data-mix="both">멜로디+MR</button><button data-mix="mr">MR만</button></div><div style="margin-top:9px"><input id="mrFile" class="mrFile" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg" aria-label="MR 파일 선택"></div><div class="mrVol"><span class="label" style="margin:0">MR 볼륨</span><input id="mrVolume" type="range" min="0" max="100" value="100"><span id="mrPct" class="mrPct">100%</span></div><div id="mrStatus" class="hint mrStatus ok">기본 자동 MR 준비됨 · 파일 없이 바로 사용할 수 있어요. 내 MR 파일은 선택사항이에요.</div></div>
 <div class="sec"><div class="toggles"><button id="repeatBtn" class="toggle on">↻ 반복</button><button id="soundBtn" class="toggle on">🔊 소리</button><button id="lyricBtn" class="toggle on">가사 표시</button><button id="fullBtn" class="toggle">수업 전체화면</button></div></div>
@@ -628,8 +630,8 @@ function selectedTempo(s){
   return Number.isFinite(saved)&&saved>=MIN_TEMPO&&saved<=MAX_TEMPO?saved:comfortableTempo(s);
 }
 let currentSong=loadSong(),level=8,bpm=66,repeat=true,sound=true,lyrics=true,playing=false,elapsed=0,lastTs=0,raf=0,audioCtx=null,events=[],totalMs=0,lastLyricKey='';
-let introMode='music';try{const saved=localStorage.getItem('ulmoaBoomIntroMode');if(['music','count','instant'].includes(saved))introMode=saved}catch(e){}
-let introActive=false,introRaf=0,introGain=null,introStartPerf=0,introDurationMs=0,introBeats=0,introLastBeat=-1,introHideTimer=0,hasStartedSong=false,introMeter=4,introCountBeats=4,introPreviewBeats=4;
+let introMode='music';try{const saved=localStorage.getItem('ulmoaBoomIntroMode');if(['music','interlude','count','instant'].includes(saved))introMode=saved}catch(e){}
+let introActive=false,introRaf=0,introGain=null,leadInGain=null,introStartPerf=0,introDurationMs=0,introBeats=0,introLastBeat=-1,introHideTimer=0,hasStartedSong=false,introMeter=4,introCountBeats=4,introPreviewBeats=4;
 
 function saveLast(){try{localStorage.setItem('ulmoaBoomLast',JSON.stringify({...currentSong,sampleKey:currentSampleKey}))}catch(e){}}
 function canonical(raw){let n=String(raw||'').replace(/\s/g,'').replace(/♯/g,'#');if(!n||n==='쉼')return'쉼';return n}
@@ -913,7 +915,7 @@ function draw(){
   stage.appendChild(note);
  }
 }
-function frame(ts){if(!playing)return;if(!lastTs)lastTs=ts;let prev=elapsed;elapsed+=ts-lastTs;lastTs=ts;if(elapsed>=totalMs){if(repeat){elapsed=playView==='score'?scoreStartMs()-.5:0;prev=elapsed;syncLiveMr()}else{elapsed=totalMs;playing=false;hasStartedSong=false;stopMr();$('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작'}}for(const e of events)if(e.active&&e.start>prev&&e.start<=elapsed){let b=[...document.querySelectorAll('.tube')].find(x=>x.dataset.note===e.note);tone(e.note,b)}draw();updateTime();updateLyricTrack();if(playing)raf=requestAnimationFrame(frame)}
+function frame(ts){if(!playing)return;if(!lastTs)lastTs=ts;let prev=elapsed;elapsed+=ts-lastTs;lastTs=ts;if(elapsed>=totalMs){if(repeat){elapsed=playView==='score'?scoreStartMs()-.5:0;prev=elapsed;stopLeadIn();syncLiveMr()}else{elapsed=totalMs;playing=false;hasStartedSong=false;stopMr();stopLeadIn();$('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작'}}for(const e of events)if(e.active&&e.start>prev&&e.start<=elapsed){let b=[...document.querySelectorAll('.tube')].find(x=>x.dataset.note===e.note);tone(e.note,b)}draw();updateTime();updateLyricTrack();if(playing)raf=requestAnimationFrame(frame)}
 function stopIntro(){
   introActive=false;
   cancelAnimationFrame(introRaf);introRaf=0;
@@ -922,15 +924,56 @@ function stopIntro(){
   introGain=null;
   $('#introOverlay').classList.remove('show','starting','finalCount','launchCue');
 }
+// An actual musical intro: chord + bass + soft pulse at the song's tempo.
+ // Uses the first measures to choose accompaniment, never a hardcoded melody.
+function scheduleInterludeAccompaniment(ac,dest,start,beats,intervalMs,meter){
+ const beat=intervalMs/1000;
+ for(let i=0;i<beats;i++){
+  const bar=Math.floor(i/meter),strong=i%meter===0;
+  const chord=chordForMeasure(Math.min(bar,(currentSong.measures||[]).length-1));
+  const when=start+i*beat;
+  mrPulse(ac,dest,when,strong);
+  voiceOsc(ac,dest,chord.freqs[0],'triangle',strong?.15:.085,when,.012,strong?.55:.37,strong?.63:.45);
+  for(const hz of chord.freqs.slice(1))
+   voiceOsc(ac,dest,hz,'sine',strong?.065:.037,when,.011,strong?.44:.3,strong?.52:.36);
+ }
+}
+function stopLeadIn(){
+ if(leadInGain&&audioCtx)try{leadInGain.gain.cancelScheduledValues(audioCtx.currentTime);leadInGain.gain.setTargetAtTime(.0001,audioCtx.currentTime,.01)}catch(e){}
+ leadInGain=null;
+}
+// In falling-note mode the first note lands 3.1 seconds after it appears.
+// Continue accompaniment through that visual travel, with pulses anchored
+// backwards from the precise first-note landing (not a separate tempo).
+function startFallLeadIn(){
+ stopLeadIn();
+ if(!sound||introMode!=='interlude'||playView!=='fall')return;
+ audio();if(!audioCtx)return;
+ const ac=audioCtx,beat=beatMs(),lead=firstNoteMs(),start=ac.currentTime+.015;
+ const gain=ac.createGain();gain.gain.setValueAtTime(Math.max(.05,Math.min(.55,mrVolume*.48)),start);gain.connect(ac.destination);
+ leadInGain=gain;
+ const chord=chordForMeasure(0);
+ voiceOsc(ac,gain,chord.freqs[0],'triangle',.075,start,.013,.48,.55);
+ for(let offset=lead-Math.floor(lead/beat)*beat;offset<lead-15;offset+=beat){
+  if(offset<0)continue;
+  const when=start+offset/1000,strong=(Math.round((lead-offset)/beat)%Math.max(1,introMeter))===0;
+  mrPulse(ac,gain,when,strong);
+  voiceOsc(ac,gain,chord.freqs[0],'triangle',strong?.11:.066,when,.012,.36,.43);
+  for(const hz of chord.freqs.slice(1))voiceOsc(ac,gain,hz,'sine',.027,when,.012,.29,.35);
+ }
+}
 function introSound(beats,intervalMs){
   if(!sound)return;
   audio();if(!audioCtx)return;
   const ac=audioCtx,master=ac.createGain(),start=ac.currentTime+.025;
   master.gain.setValueAtTime(.54,ac.currentTime);master.connect(ac.destination);introGain=master;
+  if(introMode==='interlude'){
+    scheduleInterludeAccompaniment(ac,master,start,beats,intervalMs,introMeter);
+    return;
+  }
   for(let i=0;i<beats;i++){
     const when=start+i*intervalMs/1000,strong=i%introMeter===0;
     mrPulse(ac,master,when,strong);
-    // Clear, gentle beat cues only; no separate musical introduction.
     voiceOsc(ac,master,strong?784:659.25,'sine',strong?.16:.11,when,.005,.15,.19);
   }
 }
@@ -942,7 +985,7 @@ function introVisual(index){
   const beatNumber=index%introMeter+1;
   // Keep a single card and give "시" and "작" one full beat each.
   $('#introOverlay').classList.toggle('launchCue',syllable);
-  $('#introHeading').textContent=countMode?'함께 준비해요':'함께 박자 맞춰요';
+  $('#introHeading').textContent=countMode?'함께 준비해요':introMode==='interlude'?'반주 간주를 듣고 들어가요':'함께 박자 맞춰요';
   const pulse=$('#introPulse');
   pulse.classList.toggle('syllablePair',syllable);
   if(syllable){
@@ -958,8 +1001,10 @@ function beginPlayback(){
   // Exactly at the end of "작", the score's first tile may play on the next
   // animation frame (within ~16ms). The fall view keeps its 3.1s descent.
   if(!hasStartedSong&&playView==='score'&&elapsed<scoreStartMs())elapsed=scoreStartMs()-.5;
+  const wasReady=!hasStartedSong;
   hasStartedSong=true;playing=true;lastTs=0;
   syncLiveMr();
+  if(wasReady&&introMode==='interlude')startFallLeadIn();
   $('#playBtn').textContent='Ⅱ';$('#startBtn').textContent='Ⅱ 잠시 멈춤';
   raf=requestAnimationFrame(frame);
 }
@@ -987,9 +1032,9 @@ function startIntro(){
   if(introMode==='count'){
     introBeats=3;introCountBeats=3;introPreviewBeats=0;
   }else{
-    // One continuous count-in at the real song tempo.
-    // 2/4: 1 2 1 2 시 작; 3/4: 1 2 3 시 작; 4/4: 1 2 3 4 시 작.
-    introBeats=introMeter===2?6:introMeter+2;
+    // Music: preserve the existing count-in. Interlude: >=2 bars of REAL
+    // chordal accompaniment, with the final two beats marked 시 / 작.
+    introBeats=introMode==='interlude'?Math.max(6,introMeter*2):(introMeter===2?6:introMeter+2);
     introCountBeats=introBeats;introPreviewBeats=0;
   }
   introDurationMs=introBeats*step;
@@ -1004,7 +1049,7 @@ function startIntro(){
 function toggle(){
   if(introActive){reset();return}
   if(playing){
-    playing=false;stopMr();cancelAnimationFrame(raf);
+    playing=false;stopMr();stopLeadIn();cancelAnimationFrame(raf);
     $('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 계속';
     return;
   }
@@ -1013,7 +1058,7 @@ function toggle(){
   beginPlayback();
 }
 function reset(){
-  stopIntro();playing=false;hasStartedSong=false;stopMr();cancelAnimationFrame(raf);
+  stopIntro();playing=false;hasStartedSong=false;stopMr();stopLeadIn();cancelAnimationFrame(raf);
   elapsed=0;lastTs=0;draw();updateTime();updateLyricTrack(true);
   $('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작';
 }
@@ -1100,16 +1145,29 @@ async function exportVideo(){
   const fps=30;canvasStream=canvas.captureStream(fps);
   const tracks=[...canvasStream.getVideoTracks()];
   if(!tracks.length)throw new Error('영상 화면을 캡처할 수 없어요');
-  if(sound&&((wantsMelody()&&melodyMode!=='none')||wantsMr())){
+  if(sound&&(introMode==='interlude'||(wantsMelody()&&melodyMode!=='none')||wantsMr())){
    const A=window.AudioContext||window.webkitAudioContext;
    if(A){ac=new A();await ac.resume();dest=ac.createMediaStreamDestination();tracks.push(...dest.stream.getAudioTracks())}
   }
   const stream=new MediaStream(tracks),mime=videoMime();
   const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:6000000}),chunks=[];
   rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
-  const intro=$('#creditOpt')?.checked?1200:0,outro=$('#creditOpt')?.checked?1800:0,duration=totalMs,total=intro+duration+outro,startPerf=performance.now();
+  const intro=$('#creditOpt')?.checked?1200:0,outro=$('#creditOpt')?.checked?1800:0;
+  const prepBeats=introMode==='interlude'?Math.max(6,([2,3,4].includes(Number(currentSong.timeN))?Number(currentSong.timeN):4)*2):0;
+  const prep=prepBeats*beatMs(),duration=totalMs,total=intro+prep+duration+outro,startPerf=performance.now();
   if(ac&&dest){
-   const base=ac.currentTime+intro/1000;
+   const base=ac.currentTime+(intro+prep)/1000;
+   if(prepBeats){const gm=ac.createGain();gm.gain.setValueAtTime(.5,ac.currentTime);gm.connect(dest);
+    const meter=[2,3,4].includes(Number(currentSong.timeN))?Number(currentSong.timeN):4;
+    scheduleInterludeAccompaniment(ac,gm,ac.currentTime+intro/1000,prepBeats,beatMs(),meter);
+    if(playView==='fall'){
+     const lead=firstNoteMs(),bt=beatMs(),chord=chordForMeasure(0);
+     for(let o=lead-Math.floor(lead/bt)*bt;o<lead-15;o+=bt){
+      const when=base+o/1000;mrPulse(ac,gm,when,false);
+      voiceOsc(ac,gm,chord.freqs[0],'triangle',.085,when,.012,.35,.42);
+     }
+    }
+   }
    if(wantsMelody()&&melodyMode!=='none')for(const e of events)if(e.active)scheduleMelodyTone(ac,dest,e.note,base+e.start/1000,melodyMode);
    if(wantsMr())scheduleMrTrack(ac,dest,base+firstNoteMs()/1000,0,mrVolume);
   }
@@ -1120,7 +1178,7 @@ async function exportVideo(){
    const tick=()=>{
     try{
      const t=performance.now()-startPerf;
-     if(t<intro)videoIntro(ctx);else if(t<intro+duration)videoScene(ctx,t-intro);else videoOutro(ctx);
+     if(t<intro)videoIntro(ctx);else if(t<intro+prep){videoIntro(ctx);ctx.save();ctx.fillStyle='#155c83';ctx.textAlign='center';ctx.font='900 30px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText('🎶 반주 간주 · 곧 시작해요',VIDEO_W/2,560);ctx.restore()}else if(t<intro+prep+duration)videoScene(ctx,t-intro-prep);else videoOutro(ctx);
      if(t-previous>=350||t>=total){
       previous=t;
       const pct=Math.min(100,Math.floor(t/total*100)),remaining=Math.max(0,Math.ceil((total-t)/1000));
@@ -1181,7 +1239,7 @@ $('#displayModal').onclick=e=>{if(e.target===$('#displayModal'))closeDisplayEdit
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#displayModal').classList.contains('open'))closeDisplayEditor()});
 $('#sampleSelect').onchange=e=>{if(e.target.value)chooseSample(e.target.value)};
 $('#levels').onclick=e=>{let b=e.target.closest('button');if(!b)return;level=Number(b.dataset.level);document.querySelectorAll('#levels button').forEach(x=>x.classList.toggle('on',x===b));renderLanes();build();reset()};
-$('#introMode').onchange=e=>{introMode=['music','count','instant'].includes(e.target.value)?e.target.value:'music';try{localStorage.setItem('ulmoaBoomIntroMode',introMode)}catch(err){};reset()};
+$('#introMode').onchange=e=>{introMode=['music','interlude','count','instant'].includes(e.target.value)?e.target.value:'music';try{localStorage.setItem('ulmoaBoomIntroMode',introMode)}catch(err){};reset()};
 $('#tempo').oninput=e=>{bpm=Math.max(MIN_TEMPO,Math.min(MAX_TEMPO,Number(e.target.value)||66));tempoPrefs[tempoKey(currentSong)]=bpm;try{localStorage.setItem('ulmoaBoomTempoPrefs',JSON.stringify(tempoPrefs))}catch(err){};$('#bpmLabel').textContent=bpm+' BPM';$('#songMeta').textContent=`${currentSong.timeN||4}/${currentSong.timeD||4} · ${bpm} BPM`;build();reset();saveLast()};
 $('#repeatBtn').onclick=()=>{repeat=!repeat;on($('#repeatBtn'),repeat)};$('#soundBtn').onclick=()=>{sound=!sound;on($('#soundBtn'),sound);$('#soundBtn').textContent=sound?'🔊 소리':'🔇 소리';if(!sound&&introGain&&audioCtx)introGain.gain.setValueAtTime(0,audioCtx.currentTime);if(!sound)stopMr();else if(playing)syncLiveMr()};$('#lyricBtn').onclick=()=>{lyrics=!lyrics;on($('#lyricBtn'),lyrics);renderScore();updateLyricTrack(true)};
 async function setClassFullscreen(enable){document.body.classList.toggle('fullscreen',!!enable);on($('#fullBtn'),!!enable);$('#fullBtn').textContent=enable?'수업 전체화면 중':'수업 전체화면';try{if(enable&&document.documentElement.requestFullscreen&&!document.fullscreenElement)await document.documentElement.requestFullscreen();else if(!enable&&document.fullscreenElement)await document.exitFullscreen()}catch(e){}setTimeout(()=>{draw();updateLyricTrack(true)},100)};

@@ -34,15 +34,20 @@ jobs:
         if: always()
         shell: bash
         run: |
-          if ! command -v ffprobe >/dev/null; then
-            echo 'ffprobe missing — cannot assert codecs'
-            exit 1
-          fi
+          set -euo pipefail
+          command -v ffprobe
           for file in boomwhacker/video-qa-artifacts/*.webm; do
+            test -s "$file"
             echo "=== $file ==="
-            ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_type,codec_name -of json "$file"
+            ffprobe -v error -show_entries stream=codec_type,codec_name -of json "$file"
             test "$(ffprobe -v error -select_streams v -show_entries stream=index -of csv=p=0 "$file" | wc -l)" -ge 1
           done
+          intro=boomwhacker/video-qa-artifacts/desktop-interlude-audio.webm
+          test -s "$intro"
+          ffprobe -v error -select_streams a -show_entries stream=codec_name -of csv=p=0 "$intro" | grep -q opus
+          ffmpeg -hide_banner -i "$intro" -t 2 -vn -af volumedetect -f null - > /tmp/interlude-audio-probe.txt 2>&1
+          grep 'max_volume:' /tmp/interlude-audio-probe.txt
+          awk '/max_volume:/ {if ($3 != "-inf" && ($3+0) > -50) good=1} END {exit !good}' /tmp/interlude-audio-probe.txt
       - name: Upload media QA evidence
         if: always()
         uses: actions/upload-artifact@v4

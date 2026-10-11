@@ -27,7 +27,8 @@ try{
  browser=await chromium.launch({executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--autoplay-policy=no-user-gesture-required']});
  for(const scenario of [
   {name:'desktop-default-audio',width:1440,height:900,sound:true,credit:true},
-  {name:'mobile-sized-muted',width:390,height:844,sound:false,credit:false}
+  {name:'mobile-sized-muted',width:390,height:844,sound:false,credit:false},
+  {name:'desktop-interlude-audio',width:1440,height:900,sound:true,credit:false,interlude:true}
  ]){
   const context=await browser.newContext({viewport:{width:scenario.width,height:scenario.height},acceptDownloads:true});
   const page=await context.newPage(),jsErrors=[],consoleErrors=[];
@@ -41,6 +42,7 @@ try{
    await page.locator('#videoBtn').waitFor({state:'attached'});
    if(!scenario.sound)await page.evaluate(()=>{sound=false;});
    if(!scenario.credit)await page.evaluate(()=>{document.querySelector('#creditOpt').checked=false;});
+   if(scenario.interlude){await page.locator('#introMode').selectOption('interlude');result.interludeSelected=await page.locator('#introMode').inputValue()==='interlude'}
    result.supported=await page.evaluate(()=>window.__boomVideoQA?.supported());
    result.initialStatus=await page.locator('#videoStatus').innerText();
    const pending=page.waitForEvent('download',{timeout:45000}).then(d=>({download:d})).catch(e=>({error:e.message}));
@@ -70,7 +72,8 @@ try{
    result.ok=!!(result.downloaded&&result.ebml&&result.videoBytes>2000&&!jsErrors.length&&!consoleErrors.length
       &&(scenario.width>800||(result.mobileQuickVisible&&result.settingsHiddenInitially&&result.settingsOpened))
       &&result.progressVisible&&result.retryDownloadVisible&&result.retryDownloadHref?.startsWith('blob:')
-      &&result.mobileStatusFontPx>=10&&/영상 제작 완료/.test(result.finalStatus));
+      &&result.mobileStatusFontPx>=10&&/영상 제작 완료/.test(result.finalStatus)
+      &&(!scenario.interlude||result.interludeSelected));
    console.log('VIDEO_EXPORT_E2E='+JSON.stringify(result));
   }catch(e){result.ok=false;result.exception=String(e);result.finalStatus=await page.locator('#videoStatus').innerText().catch(()=>'?');console.log('VIDEO_EXPORT_E2E='+JSON.stringify(result));}
   results.push(result);
@@ -81,4 +84,4 @@ try{
  if(server)await new Promise(resolve=>server.close(resolve));
 }
 fs.writeFileSync(path.join(artifactDir,'results.json'),JSON.stringify(results,null,2));
-if(results.length!==2||results.some(r=>!r.ok))process.exitCode=1;
+if(results.length!==3||results.some(r=>!r.ok))process.exitCode=1;
