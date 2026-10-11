@@ -706,8 +706,8 @@ async function pdfScanCanvases(file){
 }
 async function aiImport(file){
   if(!file)return;busy();
-  if(!file.size||/\\.(heic|heif|tiff?)$/i.test(file.name||'')||
-    /image\\/(heic|heif|tiff)/i.test(file.type||'')||
+  if(!file.size||/\.(heic|heif|tiff?)$/i.test(file.name||'')||
+    /image\/(heic|heif|tiff)/i.test(file.type||'')||
     (file.type&&!file.type.startsWith('image/')&&!/pdf/i.test(file.type))){
     const issue=diagnoseScoreIssue({stage:!file.size?'load-error':'unsupported'});
     stopped(issue);status('⚠ '+issue.title,'warn');return;
