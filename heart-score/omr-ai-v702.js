@@ -705,7 +705,14 @@ async function pdfScanCanvases(file){
   }await pdf.destroy();return pages;
 }
 async function aiImport(file){
-  if(!file)return;busy();status('AI 악보 인식 준비 중…');
+  if(!file)return;busy();
+  if(!file.size||/\\.(heic|heif|tiff?)$/i.test(file.name||'')||
+    /image\\/(heic|heif|tiff)/i.test(file.type||'')||
+    (file.type&&!file.type.startsWith('image/')&&!/pdf/i.test(file.type))){
+    const issue=diagnoseScoreIssue({stage:!file.size?'load-error':'unsupported'});
+    stopped(issue);status('⚠ '+issue.title,'warn');return;
+  }
+  status('AI 악보 인식 준비 중…');
   try{const isPdf=/pdf$/i.test(file.type)||/\.pdf$/i.test(file.name||''),canvases=isPdf?await pdfScanCanvases(file):[await W.fileToCanvas(file,2200)],states=[],stats=[];let anyStaff=false;for(let i=0;i<canvases.length;i++){status(`${isPdf?'PDF':'이미지'} ${i+1}/${canvases.length} · 오선 찾는 중…`);const r=await recognizeCanvas(canvases[i],file.name,i);anyStaff=anyStaff||r.staffDetected;if(r.staffDetected&&!r.ok){stopped(r.reason);status('⚠ 이미지 인식 결과 검증에 실패했어요. 아래 원인과 방법을 확인해 주세요.','warn');return;}if(r.ok){states.push(r.state);stats.push(r);}}if(anyStaff&&states.length){const merged=W.mergeImportedStates(states,file.name);if(!merged)throw new Error('AI 인식 결과를 합치지 못했습니다.');W.resetActiveLibrary();W.loadState(merged);const notes=stats.reduce((a,v)=>a+v.noteCount,0),staves=stats.reduce((a,v)=>a+v.staves,0),avg=stats.reduce((a,v)=>a+v.avgConfidence,0)/stats.length;preview(W.summariseImportedState(merged),`AI OMR β · ${staves}줄 · ${merged.measures.length}마디 · 음표 ${notes}개 · 평균 신뢰도 ${Math.round(avg*100)}%`);status(`✓ AI 악보 초안 완료 · ${merged.measures.length}마디. 저장 전 원본과 계이름·리듬·쉼표·임시표를 대조해 주세요.`,'ok');return;}if(typeof legacyImport==='function'){status('오선보가 아니라 기존 계이름/OCR 방식으로 전환합니다…');return legacyImport(file);}throw new Error('악보 인식 방식을 선택하지 못했습니다.');}
   catch(err){console.error(err);const msg=err?.message||String(err);const issue=diagnoseScoreIssue({stage:/PDF 4쪽/.test(msg)?'pdf-limit':/다운로드|불러오|fetch|WASM|Runtime|Session|ORT|network/i.test(msg)?'engine-error':'load-error'});stopped(issue);status('⚠ '+issue.title,'warn');preview('');}
 }
