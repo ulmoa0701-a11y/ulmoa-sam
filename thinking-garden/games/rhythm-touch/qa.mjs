@@ -258,6 +258,59 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
    firstGrade:state.events[0].grade,extra:state.extra,elapsed:performance.now()-state.origin}));
  check(physicalTap.score>0&&['great','good','okay'].includes(physicalTap.firstGrade),
    name+': physical pointer tap did not register first correct note '+JSON.stringify(physicalTap));
+ // A first-downbeat physical tap must count even before the browser paints the next frame.
+ const edgeTap=await page.evaluate(()=>{
+   window.__rhythmQA.reset();start();
+   state.origin=performance.now()-2; // audio/visual downbeat is due, next RAF has not fired yet
+   const key=document.querySelector('#keys [data-note="도"]');
+   tap('도',key);
+   return {phase:state.phase,grade:state.events[0].grade,score:state.score,
+     overlayHidden:document.querySelector('#countOverlay').hidden,
+     firstActive:document.querySelector('#noteTrack .noteTile.active')?.dataset.i};
+ });
+ check(edgeTap.phase==='play'&&edgeTap.grade==='great'&&edgeTap.score>0&&
+   edgeTap.overlayHidden&&edgeTap.firstActive==='0',
+   name+': child tap on exact first beat was swallowed before animation frame '+JSON.stringify(edgeTap));
+ // Count-in pauses must freeze the timeline, resume without dropping the score.
+ const pausedCount=await page.evaluate(()=>{
+   window.__rhythmQA.reset();start();pause();
+   return {phase:state.phase,origin:state.origin,score:state.score};
+ });
+ await page.waitForTimeout(130);
+ const resumedCount=await page.evaluate(()=>{
+   const before=state.origin;pause();
+   return {phase:state.phase,shift:state.origin-before,score:state.score};
+ });
+ check(pausedCount.phase==='paused'&&resumedCount.phase==='count'&&
+   resumedCount.shift>=95&&resumedCount.score===0,
+   name+': count pause/resume shifts onset or awards points '+JSON.stringify({pausedCount,resumedCount}));
+ // Report EARLY versus LATE for both close-but-imperfect and broader tolerance taps.
+ const offsets=await page.evaluate(()=>{
+   window.__rhythmQA.reset();window.__rhythmQA.simulateStart();
+   const early=window.__rhythmQA.tapAt('도',-140);
+   const earlyText=document.querySelector('#feedback').textContent;
+   window.__rhythmQA.reset();window.__rhythmQA.simulateStart();
+   const late=window.__rhythmQA.tapAt('도',140);
+   const lateText=document.querySelector('#feedback').textContent;
+   return {early,earlyText,late,lateText};
+ });
+ check(offsets.early.grade==='good'&&offsets.late.grade==='good'&&
+   offsets.earlyText.includes('빨랐')&&offsets.lateText.includes('늦었'),
+   name+': slightly fast/late taps need distinct feedback '+JSON.stringify(offsets));
+ // Exact taps for every supported tune must complete with a genuine 100/100.
+ const songPerfect={};
+ for(const songId of ['twinkle','butterfly','bear']){
+   await page.evaluate(()=>window.__rhythmQA.reset());
+   await page.locator('#songSelect').selectOption(songId);
+   songPerfect[songId]=await page.evaluate(()=>{
+     window.__rhythmQA.simulateStart();
+     const events=window.__rhythmQA.state().events;
+     const grades=events.map(e=>window.__rhythmQA.tapAt(e.note,e.ms).grade);
+     return {score:window.__rhythmQA.finish(),grades,notes:events.length};
+   });
+   check(songPerfect[songId].score===100&&songPerfect[songId].grades.every(x=>x==='great'),
+     name+': perfect song timing failed '+songId+' '+JSON.stringify(songPerfect[songId]));
+ }
  const overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth));
  check(overflow<=2,name+': screen horizontal overflow '+overflow);
  await page.screenshot({path:out+'/'+name+'.png',fullPage:true});

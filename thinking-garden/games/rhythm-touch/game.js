@@ -123,6 +123,9 @@ function judge(i,grade,point){
 }
 function tap(note,button){
  if(button){button.classList.add('hit');setTimeout(()=>button.classList.remove('hit'),110)}
+ // The child's tap can land on the first downbeat before the next animation frame.
+ // Use the SAME monotonic origin as scoring instead of discarding that correct tap.
+ if(state.phase==='count'&&performance.now()>=state.origin)enterPlay();
  if(state.phase!=='play'){
   if(state.phase==='count')setFeedback('멜로디를 듣고, 시작 박자에 눌러요 🎵');
   else if(state.melody)tone(note,.34,.24);
@@ -146,7 +149,7 @@ function judgeTap(note,relativeMs){
  const grade=abs<=limit.great?'great':abs<=limit.good?'good':'okay';
  const points=grade==='great'?100:grade==='good'?80:55;
  judge(i,grade,points);
- setFeedback(grade==='great'?'반짝! 딱 맞았어요 ✨':grade==='good'?'좋아요! 박자에 가까워요 🌼':'조금 '+(offset<0?'빨랐어요':'늦었어요')+' 🥁');
+ setFeedback(grade==='great'?'반짝! 딱 맞았어요 ✨':grade==='good'?'조금 '+(offset<0?'빨랐어요':'늦었어요')+'! 거의 맞았어요 🌼':'조금 '+(offset<0?'빨랐어요':'늦었어요')+' 🥁');
  return {grade,index:i,offsetMs:Math.round(offset)};
 }
 function resetView(){
@@ -176,6 +179,11 @@ function countWord(i){
  if(i<state.countLen-2)return String(i%state.song.meter+1);
  return '<span class="countChar '+(i===state.countLen-2?'active':'')+'">시</span><span class="countChar '+(i===state.countLen-1?'active':'')+'">작</span>';
 }
+function enterPlay(){
+ if(state.phase!=='count')return;
+ state.phase='play';$('#countOverlay').hidden=true;state.lastUi=-1;
+ changeCue(0);setFeedback('🎹 지금! 첫 음을 눌러요');
+}
 function tick(now){
  if(state.phase==='count'){
   const elapsed=now-state.countStart,previewBeats=state.countLen-2;
@@ -185,7 +193,7 @@ function tick(now){
    state.lastCount=i;
    const el=$('#countNumber');el.classList.toggle('syllables',i>=previewBeats);
    el.innerHTML=countWord(i);
-   $('#countInfo').textContent=i>=previewBeats?'이제 곧 건반을 눌러요!':'먼저 짧은 멜로디를 들어요 🎵';
+   $('#countInfo').textContent=i>=previewBeats?'‘작’ 다음 박자에 첫 건반 톡!':'먼저 짧은 멜로디를 들어요 🎵';
    // In the final '시' / '작' beats there are clear timing ticks, no melody.
    if(i>=previewBeats)tone(i===previewBeats?'high':'low',.18,.13,'beat');
   }
@@ -196,14 +204,12 @@ function tick(now){
     if(e.ms>=previewEnd)break;
     if(!e.previewed&&elapsed>=e.ms){
      e.previewed=true;state.introPreview.push({note:e.note,index:e.i});
-     tone(e.note,.26,Math.min(.36,e.dur/1500));
+     // Avoid a burst of overdue notes if the page briefly skipped animation frames.
+     if(elapsed-e.ms<Math.min(150,state.beat*.45))tone(e.note,.26,Math.min(.36,e.dur/1500));
     }
    }
   }
-  if(now>=state.origin){
-   state.phase='play';$('#countOverlay').hidden=true;state.lastUi=-1;
-   setFeedback('🎹 지금! 첫 음을 눌러요');
-  }
+  if(now>=state.origin)enterPlay();
  }
  if(state.phase==='play'){
   const t=now-state.origin;
