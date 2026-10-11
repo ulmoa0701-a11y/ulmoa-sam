@@ -40,7 +40,7 @@ try{
    await page.reload({waitUntil:'domcontentloaded'});
    await page.locator('#videoBtn').waitFor({state:'attached'});
    if(!scenario.sound)await page.evaluate(()=>{sound=false;});
-   if(!scenario.credit)await page.locator('#creditOpt').uncheck({force:true});
+   if(!scenario.credit)await page.evaluate(()=>{document.querySelector('#creditOpt').checked=false;});
    result.supported=await page.evaluate(()=>window.__boomVideoQA?.supported());
    result.initialStatus=await page.locator('#videoStatus').innerText();
    const pending=page.waitForEvent('download',{timeout:45000}).then(d=>({download:d})).catch(e=>({error:e.message}));
