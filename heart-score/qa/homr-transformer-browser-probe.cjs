@@ -30,6 +30,7 @@ const mode=arg('mode','desktop'),dist=path.join(__dirname,'node_modules/onnxrunt
    const js=document.createElement('script');js.src='/ort/ort.min.js';
    await new Promise((ok,no)=>{js.onload=ok;js.onerror=()=>no(new Error('WASM loader unavailable'));document.head.append(js);});
    ort.env.wasm.wasmPaths='/ort/';ort.env.wasm.numThreads=1;
+   let encoderContext=null;
    for(const name of ['encoder','decoder']){
     const m=result[name],start=performance.now();
     const response=await fetch('/'+name+'.onnx');
@@ -48,7 +49,25 @@ const mode=arg('mode','desktop'),dist=path.join(__dirname,'node_modules/onnxrunt
           m.inferMs=Math.round(performance.now()-t);
           m.outputDims=Object.fromEntries(Object.entries(outs).map(([k,v])=>[k,v.dims]));
           m.realInference=true;
+          encoderContext=outs[Object.keys(outs)[0]];
         }catch(e){m.inferenceError=String(e);}
+      }
+      if(name==='decoder'&&encoderContext){
+        try{
+          const t=performance.now();
+          const seed=(v)=>new ort.Tensor('int64',BigInt64Array.of(BigInt(v)),[1,1]);
+          const feeds={
+            rhythms:seed(1),pitchs:seed(0),lifts:seed(0),
+            articulations:seed(0),slurs:seed(0),
+            context:encoderContext,
+            cache_len:new ort.Tensor('int64',BigInt64Array.of(0n),[1])
+          };
+          for(let i=0;i<32;i++)feeds['cache_in'+i]=new ort.Tensor('float32',new Float32Array(0),[1,8,0,64]);
+          const out=await session.run(feeds);
+          m.firstStepMs=Math.round(performance.now()-t);
+          m.firstStepOutputs=Object.fromEntries(Object.entries(out).filter(([k])=>!k.startsWith('cache_out')).map(([k,v])=>[k,v.dims]));
+          m.firstTokenDecoded=!!out.out_rhythms&&!!out.out_pitchs;
+        }catch(e){m.firstTokenError=String(e);}
       }
       await session.release?.();
     }catch(e){m.error=String(e);}
@@ -61,6 +80,6 @@ const mode=arg('mode','desktop'),dist=path.join(__dirname,'node_modules/onnxrunt
   fs.mkdirSync(path.dirname(output),{recursive:true});
   fs.writeFileSync(output,JSON.stringify(out,null,2));
   console.log('HOMR_TRANSFORMER_BROWSER_PROBE='+JSON.stringify(out));
-  if(!out.encoder?.loaded||!out.encoder?.realInference||!out.decoder?.loaded||errors.length)process.exitCode=1;
+  if(!out.encoder?.loaded||!out.encoder?.realInference||!out.decoder?.loaded||!out.decoder?.firstTokenDecoded||errors.length)process.exitCode=1;
  }finally{await browser?.close();if(server)await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1});
