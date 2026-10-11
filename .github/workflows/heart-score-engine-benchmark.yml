@@ -98,6 +98,17 @@ jobs:
               tail -30 "$outdir/engine.log"
             fi
           done
+      - name: Validate homr MusicXML inside existing heart editor
+        if: matrix.engine == 'homr'
+        shell: bash
+        run: |
+          file=heart-score/qa/.engine-bench/typeset-lowres-19.musicxml
+          if test -s "$file"; then
+            node heart-score/qa/omr-musicxml-interop.cjs --musicxml "$file" --output heart-score/qa/.engine-bench/results/interop-homr-lowres.json
+          else
+            echo 'NO_HOMR_MUSICXML_TO_IMPORT'
+            exit 1
+          fi
       - name: Preserve comparison and failures (synthetic only)
         uses: actions/upload-artifact@v4
         if: always()
