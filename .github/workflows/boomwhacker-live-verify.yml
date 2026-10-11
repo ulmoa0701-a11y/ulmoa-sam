@@ -89,7 +89,7 @@ jobs:
               let deployed=false;
               for(let tries=0;tries<20;tries++){
                 await page.goto('https://ulmoa0701-a11y.github.io/ulmoa-sam/boomwhacker/?interludeQa='+Date.now(),{waitUntil:'domcontentloaded'});
-                deployed=await page.locator('#introMode option[value=interlude]').count()===1;
+                deployed=await page.evaluate(()=>typeof scheduleInterludeMusic==='function'&&typeof interludePhraseNotes==='function');
                 if(deployed)break;
                 await new Promise(r=>setTimeout(r,5000));
               }
@@ -97,15 +97,20 @@ jobs:
               await page.evaluate(()=>localStorage.setItem('ulmoaBoomTransfer',JSON.stringify({title:'간주 실제 공개검증',timeN:2,timeD:4,bpm:96,measures:[[{note:'도',dur:1},{note:'미',dur:1}],[{note:'솔',dur:1},{note:'도',dur:1}]]})));
               await page.reload({waitUntil:'domcontentloaded'});
               if(mobile)await page.locator('#mobileSettingsBtn').click();
+              const initialMode=await page.locator('#introMode').inputValue();
+              if(initialMode!=='interlude')throw Error('LIVE intro still defaults to click-counting: '+initialMode);
               await page.locator('#introMode').selectOption('interlude');
               const picker=await page.locator('#introMode').evaluate(el=>({width:el.getBoundingClientRect().width,label:el.selectedOptions[0]?.textContent||'',font:parseFloat(getComputedStyle(el).fontSize)}));
               console.log('LIVE_INTERLUDE_PICKER='+JSON.stringify({mobile,picker}));
               if(!picker.label.includes('간주 듣고 시작')||(mobile&&(picker.width<240||picker.font<12))||(!mobile&&picker.width<115))
                 throw Error('LIVE deployed interlude picker not readable: '+JSON.stringify({mobile,picker}));
               if(mobile)await page.locator('#mobileSettingsClose').click();
+              const notes=await page.evaluate(()=>interludePhraseNotes(6,beatMs(),2).map(x=>x.note));
+              console.log('LIVE_SONG_INTRO_NOTES='+JSON.stringify({mobile,notes}));
+              if(notes.join(',')!=='도,미,솔,도')throw Error('LIVE musical intro is not using original song notes: '+notes);
               const energy=await page.evaluate(async()=>{
                 const ac=new OfflineAudioContext(1,44100*2,44100);
-                scheduleInterludeAccompaniment(ac,ac.destination,.05,3,beatMs(),2);
+                scheduleInterludeMusic(ac,ac.destination,.05,6,beatMs(),2);
                 const signal=(await ac.startRendering()).getChannelData(0);
                 let sum=0;for(let i=0;i<22050;i++)sum+=Math.abs(signal[i]);
                 return Math.round(sum);
@@ -114,7 +119,7 @@ jobs:
               const before=await page.evaluate(()=>({introActive,beats:introBeats,meter:introMeter,heading:document.querySelector('#introHeading').innerText}));
               await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+10);introFrame(performance.now())});
               const after=await page.evaluate(()=>({introActive,playing,lead:!!leadInGain,elapsed}));
-              const ok=energy>10&&before.introActive&&before.beats===6&&before.meter===2&&before.heading.includes('간주')&&!after.introActive&&after.playing&&after.lead&&after.elapsed<500&&!errors.length;
+              const ok=energy>25&&before.introActive&&before.beats===6&&before.meter===2&&before.heading.includes('노래 간주')&&!after.introActive&&after.playing&&after.lead&&after.elapsed<500&&!errors.length;
               console.log('LIVE_INTERLUDE='+JSON.stringify({mobile,energy,before,after,errors,ok}));
               await page.close();
               if(!ok)throw Error('LIVE musical interlude audio/handoff did not work mobile='+mobile);
