@@ -25,7 +25,7 @@ const target=path.resolve(arg('output',path.join(__dirname,'.interop-result.json
   const page=await browser.newPage({viewport:{width:1440,height:900}});
   const errors=[];page.on('pageerror',err=>errors.push(err.message));
   await page.goto('http://127.0.0.1:'+server.address().port+'/heart-score/',{waitUntil:'domcontentloaded'});
-  await page.locator('#xmlFile').waitFor();
+  await page.locator('#xmlFile').waitFor({state:'attached'});
   await page.locator('#xmlFile').setInputFiles(fixture);
   await page.waitForFunction(()=>/완료|분석 실패/.test(document.querySelector('#xmlStatus')?.textContent||''),{},{timeout:30000});
   const actual=await page.evaluate(()=>({status:document.querySelector('#xmlStatus').innerText,state:JSON.parse(JSON.stringify(state))}));
