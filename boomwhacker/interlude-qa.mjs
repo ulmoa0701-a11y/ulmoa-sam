@@ -43,7 +43,7 @@ try{
     scheduleInterludeAccompaniment(ac,g,.05,6,beatMs(),2);
     const rendered=await ac.startRendering(),d=rendered.getChannelData(0);
     const power=(a,b)=>{let energy=0;for(let i=Math.floor(a*44100);i<Math.min(d.length,Math.floor(b*44100));i++)energy+=Math.abs(d[i]);return Math.round(energy)};
-    return {firstBeat:power(0,.3),secondBeat:power(.45,.7),laterBar:power(.9,1.2)};
+    return {firstBeat:power(0,.3),secondBeat:power(.45,.7),laterBar:power(1.30,1.65)};
    });
    result.audioProbe=audioProbe;
    if(audioProbe.firstBeat<=5||audioProbe.secondBeat<=5||audioProbe.laterBar<=5)throw Error('Interlude is not true audible chordal accompaniment '+JSON.stringify(audioProbe));
