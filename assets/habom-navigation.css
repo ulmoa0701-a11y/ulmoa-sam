@@ -213,3 +213,27 @@
 .garden-door.cognitive-door{border-color:#d2e5d7;background:#f2faf2}.garden-door.music-door{border-color:#f0dfcb;background:#fff9ee}
 .garden-door:hover{transform:translateY(-2px);box-shadow:0 7px 16px #395b4d18}.garden-door:focus-visible{outline:3px solid #389071;outline-offset:2px}
 @media(max-width:620px){.garden-doorbar{margin:11px 0 7px;gap:6px}.garden-door{padding:9px;min-height:65px;border-radius:11px}.garden-door strong{font-size:13px}.garden-door span{font-size:10px}}
+
+/* Hierarchical game navigation — gardens are primary destinations, categories are children. */
+.hb-nav .hb-menu-games .hb-dropdown{width:337px;padding:12px;gap:5px}
+.hb-nav .hb-game-groups{display:grid;gap:11px}
+.hb-nav .hb-game-section{padding:9px;border:1px solid #e2eae2;border-radius:13px;background:#f8fbf7}
+.hb-nav .hb-game-section:nth-child(2){background:#fffaf2;border-color:#f1e6d2}
+.hb-nav .hb-game-parent{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;min-height:44px;border-radius:9px;background:#fff;border:1px solid #e2e9e0}
+.hb-nav .hb-game-parent strong{font-size:14px;line-height:1.3;color:#284b3d;font-weight:900}
+.hb-nav .hb-game-parent>span{font-size:11px;color:#64796b;white-space:nowrap}
+.hb-nav .hb-game-children{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:8px 1px 1px}
+.hb-nav .hb-game-children .hb-game-child{display:flex;align-items:flex-start;justify-content:center;flex-direction:column;gap:3px;min-width:0;min-height:44px;padding:7px 9px;border-radius:9px;color:#365a4f;background:transparent;border:1px solid transparent}
+.hb-nav .hb-game-children .hb-game-child b{font-size:12px;font-weight:850;line-height:1.3}
+.hb-nav .hb-game-children .hb-game-child span{font-size:10px;line-height:1.3;color:#7b8981}
+.hb-nav .hb-game-children .hb-game-child:hover,.hb-nav .hb-game-children .hb-game-child:focus-visible{background:#fff;border-color:#c7ddce}
+@media(max-width:1199px){
+ .hb-nav .hb-mobile-subgrid.hb-mobile-game-groups{grid-template-columns:minmax(0,1fr);gap:12px}
+ .hb-nav .hb-mobile-game-section{min-width:0;padding:11px;border-radius:14px;background:#f2f8f2;border:1px solid #d7e8d9}
+ .hb-nav .hb-mobile-game-section:nth-child(2){background:#fff8ee;border-color:#ecdfc9}
+ .hb-nav .hb-mobile-game-section>.hb-game-parent{display:flex;align-items:center;min-height:54px;padding:10px 12px}
+ .hb-nav .hb-mobile-game-section>.hb-game-children{margin-top:10px;gap:7px}
+ .hb-nav .hb-mobile-game-section>.hb-game-children .hb-game-child{background:#fff;min-height:50px;border:1px solid #e0e9e3;padding:8px 10px}
+ .hb-nav .hb-mobile-game-section>.hb-game-children .hb-game-child b{font-size:13px}
+ .hb-nav .hb-mobile-game-section>.hb-game-children .hb-game-child span{font-size:11px}
+}
