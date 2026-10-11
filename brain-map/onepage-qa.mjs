@@ -62,6 +62,43 @@ try{
   assert.equal(await page.locator('#simpleDetail').isHidden(),true);
   await page.locator('#brainMap [data-brain-region="occipital"]').click();
   assert.equal(await page.locator('#simpleDetailTitle').innerText(),'후두엽');
+  // Newly added native HTML/SVG side-by-side hemispheres view.
+  assert.equal(await page.locator('#lobesView').isVisible(),true,'Original six-lobe map is default');
+  assert.equal(await page.locator('#hemispheresView').isHidden(),true,'Comparison should not replace the approved default');
+  assert.equal(await page.locator('.brain-view-tabs button').count(),2);
+  await page.locator('[data-brain-view="hemispheres"]').click();
+  assert.equal(await page.locator('#hemispheresView').isVisible(),true);
+  assert.equal(await page.locator('#lobesView').isHidden(),true);
+  assert.equal(await page.locator('.hemi-ability-list').count(),2);
+  assert.equal(await page.locator('.hemi-ability-list li').count(),6);
+  assert.equal(await page.locator('.hemi-team-examples span').count(),4);
+  assert.match(await page.locator('.hemi-caution').innerText(),/좌뇌형·우뇌형/);
+  await page.locator('#leftStudyTitle').click();
+  assert.equal(await page.locator('#leftStudyTitle').getAttribute('aria-pressed'),'true');
+  assert.match(await page.locator('#hemiFocus').innerText(),/좌뇌를 살펴/);
+  assert.equal(await page.locator('.hemi-hero-svg').getAttribute('data-focused'),'left');
+  await page.locator('[data-hemi-select="right"].hemi-svg-side').focus();
+  await page.keyboard.press('Enter');
+  assert.equal(await page.locator('#rightStudyTitle').getAttribute('aria-pressed'),'true');
+  assert.match(await page.locator('#hemiFocus').innerText(),/우뇌를 살펴/);
+  await page.locator('#hemiTogether').click();
+  assert.equal(await page.locator('#hemiTogether').getAttribute('aria-pressed'),'true');
+  assert.match(await page.locator('#hemiFocus').innerText(),/한 팀/);
+  const compareFit=await page.evaluate(()=>({
+    pageWidth:document.documentElement.scrollWidth,
+    clientWidth:document.documentElement.clientWidth,
+    panels:[...document.querySelectorAll('.hemi-study-card')].map(e=>{
+      const r=e.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width};
+    })
+  }));
+  assert.ok(compareFit.pageWidth<=compareFit.clientWidth+1,
+    'Hemispheres view horizontal overflow: '+JSON.stringify(compareFit));
+  assert.ok(compareFit.panels.every(p=>p.left>=0&&p.right<=width+1&&p.width>110),
+    'Hemispheres cards are clipped: '+JSON.stringify(compareFit));
+  await page.screenshot({path:out+'/'+name+'-hemispheres.png',fullPage:true});
+  await page.locator('[data-brain-view="lobes"]').click();
+  assert.equal(await page.locator('#lobesView').isVisible(),true,'Returning to original map should work');
+  assert.equal(await page.locator('.lobe-card').count(),6,'Original cards preserved');
   await page.locator('.more-learn summary').click();
   assert.equal(await page.locator('.more-learn').getAttribute('open'),'');
   assert.match(await page.locator('.more-links a').first().getAttribute('href'),/3d\/explore/);
