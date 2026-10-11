@@ -20,7 +20,7 @@ const el={
  micButton:$('micButton'),statusNote:$('statusNote'),
  winTitle:$('winTitle'),winDescription:$('winDescription'),playAgain:$('playAgain'),chooseAgain:$('chooseAgain'),
  sensitivity:$('sensitivity'),sensitivityName:$('sensitivityName'),voiceSelect:$('voiceSelect'),voiceAvailability:$('voiceAvailability'),voiceDetail:$('voiceDetail'),
- micDetail:$('micDetail'),demoBtn:$('demoBtn'),teacher:$('teacherPanel')
+ micDetail:$('micDetail'),demoBtn:$('demoBtn'),teacher:$('teacherPanel'),recalibrate:$('recalibrate'),inputDiagnostic:$('inputDiagnostic'),colorHelp:$('colorHelp')
 };
 const ACTS=[
  {title:'깃털',icon:'🪶',blows:2,hold:.65,tip:'깃털을 살살 움직여봐!'},
@@ -31,8 +31,9 @@ const ACTS=[
 const S={
  screen:'home',mode:'strength',playing:false,demo:false,muted:false,
  microphone:null,context:null,analyser:null,samples:null,frame:0,token:0,lastFrame:0,
- calibratingUntil:0,calibration:[],noiseFloor:.006,reference:.4,hasReference:false,
+ calibratingUntil:0,calibration:[],noiseFloor:.006,reference:.22,hasReference:false,
  raw:0,level:0,band:'idle',voice:false,voiceURI:'auto',voices:[],sensitivity:3,
+ displayBand:'idle',pendingBand:'idle',pendingBandFor:0,voiceEvidence:0,inputPercent:0,diagnosticFrames:0,
  holdTarget:2,holdTime:0,gapTime:0,
  actIndex:0,blowCount:0,blowHold:0,needsRelease:false,releaseTime:0,intermission:false,
  bpmPeriod:1900,beatStart:0,beatScore:0,beatHold:0,lastSlot:-1,slotCredited:false,beatReady:false
@@ -95,7 +96,7 @@ function stopAll(){
 }
 function resetRuntime(){
  S.holdTime=0;S.gapTime=0;S.actIndex=0;S.blowCount=0;S.blowHold=0;S.needsRelease=false;S.releaseTime=0;S.intermission=false;
- S.beatScore=0;S.beatHold=0;S.beatStart=0;S.lastSlot=-1;S.slotCredited=false;S.beatReady=false;S.band='idle';S.level=0;
+ S.beatScore=0;S.beatHold=0;S.beatStart=0;S.lastSlot=-1;S.slotCredited=false;S.beatReady=false;S.band='idle';S.level=0;S.displayBand='idle';S.pendingBand='idle';S.pendingBandFor=0;S.voiceEvidence=0;
  el.meterFill.style.width='0%';el.duration.innerHTML='0.0 <small>초</small>';
  renderMode();renderLevel(0,'idle');
 }
@@ -122,7 +123,7 @@ function renderMode(){
 function chooseMode(mode){
  stopAll();S.mode=mode;show('play');resetRuntime();
  el.teacher.open=false;el.statusNote.textContent='🎤 아래 버튼을 눌러 바람을 들려줘!';
- S.reference=.40;S.hasReference=false;
+ S.reference=.22;S.hasReference=false;S.pendingBand='idle';S.pendingBandFor=0;S.voiceEvidence=0;
 }
 function finish(){
  stopAll();show('win');
@@ -146,22 +147,45 @@ function classify(data){
  const periodic=amp>.011?voicePattern(data):0;
  const voiced=amp>.014&&periodic>.67;
  const threshold=Math.max(.008,S.noiseFloor*2.6);
- // Do not map a first soft blow straight to red. A normal blow defines roughly 1/3 scale.
- // Even at the highest sensitivity red requires substantially more energy than that first blow.
- if(!voiced&&!S.hasReference&&amp>threshold+.035){
-  S.reference=clamp((amp-S.noiseFloor)*3.2,.38,1.15);
+ // Comfortable first blow maps near half-scale. A clearly stronger sound can
+ // reach red. Old 3.2x factor over-normalized and often made red unreachable.
+ const excess=Math.max(0,amp-threshold);
+ if(!voiced&&!S.hasReference&&excess>.020){
+  S.reference=clamp(excess*2.05,.095,.48);
   S.hasReference=true;
  }
- const gain=[0,.6,.82,1,1.15,1.28][S.sensitivity];
- const strength=clamp(Math.max(0,amp-threshold)*gain/S.reference,0,1);
+ const gain=[0,.65,.82,1,1.19,1.42][S.sensitivity]||1;
+ const strength=clamp(excess*gain/Math.max(.095,S.reference),0,1);
  return {amp,periodic,voiced,strength:voiced?0:strength};
 }
-function bandOf(strength,voiced){
+/* Keep feedback readable: a color change needs sustained evidence.
+   Hysteresis prevents small noise fluctuations from toggling nearby colors. */
+function bandOf(level,voiced){
  if(voiced)return 'voice';
- if(strength<.07)return 'idle';
- if(strength<.20)return 'weak';
- if(strength<=.90)return 'good';
+ if(level<.055)return 'idle';
+ if(level<.19)return 'weak';
+ if(level<.76)return 'good';
  return 'strong';
+}
+function stableBand(level,voiced,dt){
+ S.voiceEvidence=clamp(S.voiceEvidence+(voiced?dt:-dt*2),0,1);
+ const sustainedVoice=S.voiceEvidence>=.31;
+ let candidate=bandOf(level,sustainedVoice);
+ const previous=S.displayBand;
+ if(!sustainedVoice){
+  if(previous==='good'&&level>=.13&&level<.83)candidate='good';
+  if(previous==='strong'&&level>.67)candidate='strong';
+  if(previous==='weak'&&level>=.035&&level<.25)candidate='weak';
+  if(previous==='idle'&&level<.10)candidate='idle';
+ }
+ if(candidate===previous){S.pendingBand=candidate;S.pendingBandFor=0;return previous}
+ if(candidate!==S.pendingBand){S.pendingBand=candidate;S.pendingBandFor=0}
+ S.pendingBandFor+=dt;
+ const dwell=candidate==='idle'?.17:candidate==='voice'?.36:.21;
+ if(S.pendingBandFor>=dwell){
+  S.displayBand=candidate;S.pendingBandFor=0;return candidate;
+ }
+ return previous;
 }
 function renderLevel(level,band){
  S.level=level;S.band=band;
@@ -276,9 +300,14 @@ function tick(now){
   S.analyser.getFloatTimeDomainData(S.samples);
   const c=classify(S.samples);
   voiced=c.voiced;
-  level=voiced?0:(S.level*.68+c.strength*.32);
+  // Time-aware envelope smoothing works consistently on 60/120Hz displays.
+  const tau=c.strength>S.level?.19:.33;
+  const alpha=dt>0?1-Math.exp(-dt/tau):.26;
+  level=S.level+(c.strength-S.level)*alpha;
+  S.inputPercent=Math.round(c.strength*100);
+  if(++S.diagnosticFrames%12===0)el.inputDiagnostic.textContent='현재 상대적인 소리 강도 '+S.inputPercent+'% · 민감도 '+S.sensitivity+'/5';
  }
- const band=bandOf(level,voiced);
+ const band=stableBand(level,voiced,dt);
  renderLevel(level,band);
  if(!S.demo&&dt){
   if(S.mode==='strength')strengthTick(band,dt);
@@ -314,7 +343,7 @@ async function startMic(){
   context.createMediaStreamSource(mic).connect(analyser);
   S.analyser=analyser;S.samples=new Float32Array(analyser.fftSize);
   S.playing=true;S.demo=false;S.calibratingUntil=performance.now()+800;S.lastFrame=0;S.calibration=[];
-  S.noiseFloor=.006;S.reference=.40;S.hasReference=false;S.level=0;
+  S.noiseFloor=.006;S.reference=.22;S.hasReference=false;S.level=0;S.displayBand='idle';S.pendingBand='idle';S.pendingBandFor=0;S.voiceEvidence=0;S.diagnosticFrames=0;
   if(S.mode==='beat')S.beatStart=0;
   el.micButton.textContent='■ 마이크 멈춤';el.micDetail.textContent='잠깐 조용히 · 마이크 주변 소리 확인 중';
   try{window.speechSynthesis?.cancel()}catch(e){}
@@ -356,6 +385,11 @@ el.beatBtns.forEach(btn=>btn.addEventListener('click',()=>{
  S.beatScore=0;S.beatHold=0;S.lastSlot=-1;S.beatStart=performance.now()+800;renderMode()
 }));
 el.sensitivity.addEventListener('input',()=>{S.sensitivity=Number(el.sensitivity.value);el.sensitivityName.textContent=['','아주 둔감','둔감','보통','민감','아주 민감'][S.sensitivity]});
+el.recalibrate.addEventListener('click',()=>{
+ S.hasReference=false;S.reference=.22;S.level=0;S.displayBand='idle';S.pendingBand='idle';S.pendingBandFor=0;S.voiceEvidence=0;
+ el.inputDiagnostic.textContent='기준 초기화됨 · 평소처럼 편안하게 후~';
+ if(S.screen==='play'){S.blowHold=0;S.needsRelease=false;S.releaseTime=0;S.holdTime=0;S.gapTime=0;}
+});
 el.voiceSelect.addEventListener('change',()=>{S.voiceURI=el.voiceSelect.value;refreshVoices();if(!S.playing)speakPreview()});
 el.demoBtn.addEventListener('click',demo);
 window.addEventListener('pagehide',stopAll);
