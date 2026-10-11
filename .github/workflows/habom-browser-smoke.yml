@@ -51,7 +51,8 @@ jobs:
               if(menu && getComputedStyle(menu).display==='none')issues.push('mobile toggle not visible');
               if(!nav.querySelector('a[href$="notes/"]'))issues.push('glossary link missing');
               if(!nav.querySelector('a[href$="brain-map/"]'))issues.push('brain link missing');
-              if(!nav.textContent.includes('부모님 자료'))issues.push('parent menu missing');
+              if(!nav.textContent.includes('찾아봄'))issues.push('find-info menu missing');
+              if(!nav.textContent.includes('이야기해봄'))issues.push('discussion menu missing');
               menu?.click();
               if(!nav.classList.contains('hb-mobile-open')||menu.getAttribute('aria-expanded')!=='true')issues.push('mobile panel did not open');
               const wrapper=nav.querySelector('.hb-nav-links');
@@ -112,5 +113,6 @@ jobs:
           grep -q 'hb-nav-links' /tmp/habom-home.html
           grep -q 'hb-game-groups' /tmp/habom-home.html
           grep -q 'hb-game-children' /tmp/habom-home.html
-          grep -q '부모님 도움자료' /tmp/habom-home.html
+          grep -q '찾아봄' /tmp/habom-home.html
+          grep -q '이야기해봄' /tmp/habom-home.html
           echo 'PASS: desktop homepage renders menu and shortcut text'
