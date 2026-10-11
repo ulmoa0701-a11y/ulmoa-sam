@@ -91,7 +91,7 @@ function setView(next,updateURL=true){
  }
  group.hidden=view!=='games';
  resources.hidden=view==='games';
- buttons.forEach(b=>{const active=b.dataset.gardenView===view;b.classList.toggle('active',active);b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1});
+ buttons.forEach(b=>{const active=b.dataset.gardenView===view;b.classList.toggle('active',active);b.setAttribute('aria-selected',String(active));b.tabIndex=0});
  resources.setAttribute('aria-labelledby','gardenView-'+view);
  if(view!=='games')render(view,garden==='cognitive'?(root.querySelector('.category-tab.active')?.dataset.category||'all'):topic);
  if(updateURL){
