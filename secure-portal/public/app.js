@@ -183,16 +183,18 @@ function dataForm(role){
  ${['observation','context','response','after','impact','origin','message'].map(k=>`<label><input type="checkbox" name="shareField" value="${k}" ${k==='observation'?'checked':''}><span>${NOTE_LABELS[k]}</span></label>`).join('')}
  </div></div>
  <button class="button entry-save" id="saveEntry">내 관찰 메모 저장</button><p class="parent-nudge">보호자는 경험한 일을 남기면 됩니다. 여러 기록의 의미와 치료 방향은 담당 치료사가 검토해요. 실시간 상담창이 아닙니다.</p></form>`;
- return `<form class="form entry-v5 student-journal" id="entryForm">
- <div class="student-editor-intro"><strong>자유롭게 남기는 한 페이지</strong><span>일기, 고민, 좋았던 일, 관심사... 편한 방식으로 남겨봐.</span></div>
+ return `<form class="form entry-v5 student-journal" id="entryForm" data-journal-mode="quick">
+ <div class="student-mode-header"><div class="student-mode-title">어떤 방식으로 남길까?</div><div class="journal-mode-switch" role="group" aria-label="기록 상세 정도 선택"><button class="journal-mode-btn active" type="button" data-journal-mode="quick" aria-pressed="true"><strong>⚡ 간편 기록</strong><small>한두 줄이면 끝</small></button><button class="journal-mode-btn" type="button" data-journal-mode="detail" aria-pressed="false"><strong>▤ 자세히 기록</strong><small>필요한 만큼 더 쓰기</small></button></div><p class="student-mode-hint" id="journalModeHint" aria-live="polite">한 줄만 남겨도 돼. 나머지는 선택이야.</p></div>
  <section class="student-info-card" aria-label="일기 날짜와 시간">
  <div class="student-datetime-heading"><strong>언제의 기록이야?</strong><button type="button" id="studentSetNow" class="student-now-btn" aria-label="날짜와 시간을 현재 시각으로 설정">↻ 지금으로 설정</button></div>
  <div class="student-datetime-grid"><label>날짜<input name="date" type="date" max="${todayLocal()}" value="${todayLocal()}"></label><label>시간 <small>(선택)</small><input name="time" type="time" value="${nowLocalTime()}"></label></div>
- <p class="student-datetime-hint">현재 날짜·시간이 자동으로 들어가 있어. 지난 일을 쓰는 거라면 바꿔도 되고, 시간을 모르면 비워 둬.</p>
+ <p class="student-datetime-hint">현재 날짜·시간 자동 입력 · 필요하면 직접 변경할 수 있어.</p>
  </section>
+ <div class="student-mode-advanced">
  <div class="student-extra-grid"><label>제목 <small>(선택)</small><input name="title" maxlength="80" placeholder="제목 없이 써도 돼"></label><label>장소 <small>(선택)</small><input name="place" maxlength="100" placeholder="기억나는 곳만"></label></div>
- <div class="form-switcher" role="group" aria-label="기록 방식"><button type="button" class="format-btn active" data-format="text" aria-pressed="true">✎ 글쓰기</button><button type="button" class="format-btn" data-format="draw" aria-pressed="false">◇ 그림 그리기</button></div>
- <div id="textPanel"><label class="student-note-label">자유 기록 <small>(원하는 만큼)</small><textarea name="note" maxlength="4000" rows="7" placeholder="오늘 있었던 일이나 요즘 생각, 좋은 일, 고민, 취미 이야기... 자유롭게 남겨봐."></textarea></label></div>
+ <div class="form-switcher" role="group" aria-label="기록 방식"><button type="button" class="format-btn active" data-format="text" aria-pressed="true">✎ 글쓰기</button><button type="button" class="format-btn" data-format="draw" aria-pressed="false">◇ 그림 그리기</button></div></div>
+ <div id="textPanel"><label class="student-note-label">하고 싶은 이야기 <small>(짧아도 좋아)</small><textarea name="note" maxlength="4000" rows="5" placeholder="오늘 있었던 일, 좋은 일, 고민, 그냥 생각나는 말... 자유롭게."></textarea></label></div>
+ <div class="student-mode-advanced">
  <div id="drawPanel" hidden><div class="sketch-board"><canvas id="noteCanvas" width="760" height="380" aria-label="마우스나 손가락으로 그리는 그림 메모"></canvas></div><div class="sketch-actions"><span>손가락이나 마우스로 그릴 수 있어.</span><button type="button" id="undoStroke" class="button-ghost">↶ 되돌리기</button><button type="button" id="clearSketch" class="button-ghost">지우기</button></div></div>
  
  <details class="optional-fields student-emotion-details" id="stateDetails"><summary>그때의 감정도 남길까? <small>선택 · 여러 개 가능</small></summary><div class="optional-wrap"><p class="emotion-helper">하나만 고르지 않아도 돼. 감정이 섞였거나 잘 모르겠어도 괜찮아.</p><div class="emotion-grid" aria-label="감정 선택">${STUDENT_EMOTIONS.map(w=>`<label class="emotion-chip"><input name="emotionChoice" type="checkbox" value="${w}"><span>${w}</span></label>`).join('')}</div>
@@ -200,6 +202,8 @@ function dataForm(role){
  <label>내 말로 표현하기 <small>(선택)</small><input name="emotionOther" maxlength="100" placeholder="위에 없는 감정이나 내 표현"></label><label>컨디션 <small>(선택)</small><select name="energy"><option value="">선택하지 않음</option><option>괜찮음</option><option>기운 있음</option><option>조금 피곤함</option><option>많이 피곤함</option><option>잘 모르겠음</option></select></label></div></details>
  <details class="optional-fields student-experience"><summary>몸의 움직임·소리나 반복된 일이 있었어? <small>선택 · 그냥 넘어가도 돼</small></summary><div class="optional-wrap"><p class="experience-helper">틱인지 강박인지 구분할 필요 없어. 내가 직접 경험한 일을 내 말로 남기고 싶을 때만 써. 기록하지 않아도 괜찮아.</p><label>어떤 일이 있었어? <small>(선택)</small><textarea name="experience" maxlength="900" rows="3" placeholder="움직임, 소리, 반복하고 싶었던 일, 떠오른 생각 등 내가 겪은 일을 자유롭게"></textarea></label><label>일상에서 달라진 점이나 불편한 점이 있었어? <small>(선택)</small><textarea name="experienceImpact" maxlength="500" rows="2" placeholder="특별히 달라진 일이 없었다면 비워 둬도 돼."></textarea></label><p class="experience-footer">횟수를 세거나 정확하게 분석할 필요는 없어. 나만 보관하고 싶으면 공유를 선택하지 않으면 돼.</p></div></details>
  <details class="optional-fields student-reflect"><summary>좀 더 적고 싶다면 <small>선택 · 정답 없음</small></summary><div class="optional-wrap"><label>떠오른 생각이나 이미지<textarea name="thought" maxlength="1200" placeholder="쓰고 싶은 내용이 있으면 적어도 돼."></textarea></label><label>몸에서 느낀 점<textarea name="body" maxlength="1000" placeholder="특별한 느낌이 없다면 비워 둬도 돼."></textarea></label><label>내가 했던 일이나 해보고 싶은 일<textarea name="action" maxlength="1000" placeholder="꼭 해결책을 적을 필요는 없어."></textarea></label></div></details>
+ </div>
+ <p id="journalHiddenNotice" class="journal-hidden-notice" hidden>자세히 기록에서 작성한 내용도 함께 보관돼. 다시 보려면 자세히 기록을 선택해.</p>
  <div class="privacy-panel student-share"><label class="checkbox"><input type="checkbox" name="share"><span>담당 치료사에게 기록 공유하기<small>기본 비공개 · 공유 내용은 직접 고를 수 있어.</small></span></label>
  <div id="sharePicker" class="share-picker" hidden><div class="student-share-bar"><strong>보낼 항목 선택</strong><div class="student-share-actions"><button type="button" class="button-ghost" id="studentSelectAll">전체 선택</button><button type="button" class="button-ghost" id="studentClearAll">선택 해제</button></div></div>
  ${['title','date','time','place','note','sketch','mood','energy','thought','body','action','experience','experienceImpact'].map(k=>`<label class="student-share-field"><input type="checkbox" name="shareField" value="${k}"><span>${NOTE_LABELS[k]}</span></label>`).join('')}<p id="studentShareCount" aria-live="polite">보낼 항목을 선택해 줘. 작성하지 않은 항목은 선택되지 않아.</p><p>선택하지 않은 내용은 치료사에게 보내지 않아. 전송 전에 확인할 수 있어.</p></div></div>
@@ -248,6 +252,18 @@ function wireEntryForm(isParent){
  share.onchange=()=>{area.hidden=!share.checked;button.textContent=isParent?(share.checked?'짧은 메모 전달하고 저장':'내 메모 저장하기'):(share.checked?'↗ 선택한 항목 공유하고 저장':'🔒 내 기록 저장');if(!isParent)updateStudentShare()};
  if(!isParent){
   const nowBtn=$('studentSetNow');if(nowBtn)nowBtn.onclick=()=>{const date=f.elements.date,time=f.elements.time;if(date)date.value=todayLocal();if(time)time.value=nowLocalTime();updateStudentShare();toast('날짜와 시간을 현재 시각으로 설정했어.');};
+  const journalModeHint=$('journalModeHint');
+  const modeButtons=[...f.querySelectorAll('button[data-journal-mode]')];
+  modeButtons.forEach(modeButton=>modeButton.addEventListener('click',()=>{
+    const mode=modeButton.dataset.journalMode;
+    f.dataset.journalMode=mode;
+    modeButtons.forEach(b=>{const active=b===modeButton;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
+    if(mode==='quick'&&$('drawPanel')&&!$('drawPanel').hidden){f.querySelector('[data-format="text"]')?.click();}
+    if(journalModeHint)journalModeHint.textContent=mode==='quick'?'한 줄만 남겨도 돼. 나머지는 선택이야.':'감정·장소·그림·내 경험도 원하는 만큼 추가해 봐.';
+    const extra=mode==='quick'&&['title','place','energy','thought','body','action','experience','experienceImpact'].some(k=>!!formValue(f,k));
+    const summary=$('journalHiddenNotice');if(summary)summary.hidden=!extra;
+    updateStudentShare();
+  }));
   sketchStrokes=[];bindSketch();
   document.querySelectorAll('[data-format]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-format]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b))});$('textPanel').hidden=b.dataset.format!=='text';$('drawPanel').hidden=b.dataset.format!=='draw';updateStudentShare()});
   f.addEventListener('input',updateStudentShare);f.addEventListener('change',updateStudentShare);
