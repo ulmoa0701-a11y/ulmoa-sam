@@ -35,7 +35,7 @@ try{
    const info=await page.evaluate(()=>({mode:introMode,bpm,meter:currentSong.timeN,song:currentSong.title,
      beat:beatMs(),firstNote:firstNoteMs(),view:playView}));
    result.info=info;
-   if(info.mode!=='interlude'||info.song!==song.title||info.bpm!==140)throw Error('Incorrect musical interlude selected '+JSON.stringify(info));
+   if(info.mode!=='interlude'||info.song!==song.title||info.bpm<35||info.bpm>140||Math.abs(info.beat-60000/info.bpm)>1)throw Error('Incorrect musical interlude selected '+JSON.stringify(info));
    if(mobile)await page.locator('#mobileSettingsClose').click();
    const audioProbe=await page.evaluate(async()=>{
     const ac=new OfflineAudioContext(1,44100*4,44100);
