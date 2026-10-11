@@ -2,12 +2,12 @@
 (()=>{
  'use strict';
  const data={
-  frontal:{name:'전두엽',icon:'💡',fact:'오늘 할 일을 생각하고, 차례를 정하거나 잠깐 멈출 때 여러 뇌 부분과 함께 일해요.'},
-  parietal:{name:'두정엽',icon:'✋',fact:'눈을 감고 내 손의 위치를 느끼거나, 퍼즐 조각이 들어갈 자리를 찾을 때 중요해요.'},
-  temporal:{name:'측두엽',icon:'👂',fact:'친구가 하는 말을 듣고 이해할 때 관여해요. 기억을 만드는 데에는 이 안쪽의 해마도 중요해요.'},
-  occipital:{name:'후두엽',icon:'👀',fact:'그림의 선과 모양, 글자 모양을 보는 초기 과정에 중요해요. 의미를 아는 일은 다른 부분과 함께해요.'},
-  cerebellum:{name:'소뇌',icon:'⚽',fact:'공을 잡으려고 팔을 뻗거나 걸을 때 균형과 움직임의 타이밍을 맞추도록 도와요.'},
-  brainstem:{name:'뇌줄기',icon:'💗',fact:'잠잘 때도 숨을 쉬고 심장이 뛰도록 돕는, 생명을 유지하는 기본적인 일을 해요.'}
+  frontal:{name:'전두엽',icon:'💡',fact:'전두엽은 계획을 세우고 행동을 조절하는 데 중요해요. 예를 들어 ‘숙제부터 하고 놀자’고 순서를 정하거나, 차례가 올 때까지 기다릴 때 다른 뇌 영역과 함께해요.'},
+  parietal:{name:'두정엽',icon:'✋',fact:'두정엽은 몸에서 오는 감각과 공간 정보를 처리하는 데 중요해요. 눈을 감고 손의 위치를 느끼거나, 퍼즐 조각이 들어갈 자리를 찾을 때 다른 영역과 함께해요.'},
+  temporal:{name:'측두엽',icon:'👂',fact:'측두엽은 소리와 언어의 여러 정보를 처리하는 데 관여해요. 친구 말을 이해하고 익숙한 목소리를 알아들을 때 중요해요. 안쪽 해마는 새로운 기억 형성에 관여해요.'},
+  occipital:{name:'후두엽',icon:'👀',fact:'후두엽은 눈으로 본 정보를 처음 분석하는 과정에 중요해요. 글자 모양이나 그림의 선을 볼 때 활동하고, 무엇인지 알아보는 일은 다른 부분과 함께해요.'},
+  cerebellum:{name:'소뇌',icon:'⚽',fact:'소뇌는 균형과 움직임의 정확한 타이밍을 돕고 연습한 동작을 다듬는 데 관여해요. 공을 잡거나 계단을 오를 때 다른 운동 영역과 함께해요.'},
+  brainstem:{name:'뇌줄기',icon:'💗',fact:'뇌줄기는 숨쉬기와 심장박동 같은 기본 생명 기능의 조절에 중요해요. 자고 있을 때도 이 기능들이 이어지도록 다른 신체 조절 체계와 함께 작동해요.'}
  };
  const nodes=[...document.querySelectorAll('.lobe-card[data-region]')];
  const shapes=[...document.querySelectorAll('#brainMap [data-brain-region]')];
@@ -93,10 +93,14 @@
  // Familiar situations connect the comparison to daily life without assigning
  // an entire activity exclusively to one half of the brain.
  const sceneData={
-  talk:{title:'💬 친구와 대화할 때',body:'말을 골라 문장을 만들고, 목소리의 느낌과 표정을 살펴요. 여러 뇌 영역이 함께해요.'},
-  read:{title:'📖 책을 읽을 때',body:'글자 모양을 보고, 말소리와 뜻을 연결하고, 집중해요. 양쪽 뇌의 여러 영역이 함께해요.'},
-  ball:{title:'⚽ 공놀이할 때',body:'공의 위치를 보고, 몸을 움직이고, 타이밍을 맞춰요. 두 반구와 여러 뇌 영역이 함께해요.'},
-  solve:{title:'🧩 문제를 해결할 때',body:'필요한 정보를 찾고, 방법을 비교하고, 선택해요. 한쪽 뇌만으로 하는 일이 아니에요.'}
+  talk:{title:'💬 친구와 대화할 때',body:'친구가 “괜찮아”라고 하면 말의 뜻을 이해하고, 목소리 높낮이와 표정을 함께 살펴요. 듣기·말하기·감정 단서 처리에 여러 영역이 관여해요.'},
+  read:{title:'📖 책을 읽을 때',body:'“고양이가 의자 밑에 있어요”를 읽을 때 글자 모양을 보고 말소리·뜻을 연결하고, 고양이가 어디 있을지 떠올려요. 여러 뇌 영역이 협력해요.'},
+  map:{title:'🧭 길을 찾을 때',body:'“교실에서 왼쪽으로 돌아 도서관에 가자”를 듣고 방향을 기억해요. 말 이해·공간 파악·움직임을 함께 사용해요.'},
+  ball:{title:'⚽ 공놀이할 때',body:'날아오는 공의 위치와 속도를 살피고, 양손과 몸의 움직임을 조절해요. 눈·운동 영역·소뇌 등 여러 곳이 함께 일해요.'},
+  music:{title:'🎵 노래 부를 때',body:'가사를 떠올리고 음의 높낮이와 박자를 들으며 목소리와 호흡을 맞춰요. 음악은 우뇌 한쪽만의 일이 아니에요.'},
+  draw:{title:'🎨 그림을 그릴 때',body:'집을 그리려면 모양과 위치를 생각하고, 종이 위에 배치하고, 손을 조절해요. 모양·움직임·계획이 함께 필요해요.'},
+  bag:{title:'🎒 가방을 챙길 때',body:'“필통→책→물통” 순서를 기억하고 물건의 위치를 찾고 가방에 넣어요. 기억·공간 파악·손 움직임이 함께해요.'},
+  feeling:{title:'🙂 친구 기분을 살필 때',body:'“정말 잘했네!”라는 말도 기쁜 목소리인지 비꼬는 말투인지 살펴요. 말뜻뿐 아니라 억양·표정·상황을 함께 고려해야 해요.'}
  };
  const sceneButtons=[...document.querySelectorAll('[data-brain-scene]')];
  const sceneTitle=document.getElementById('hemiSceneTitle');
@@ -110,44 +114,71 @@
  }
  sceneButtons.forEach(b=>b.addEventListener('click',()=>selectScene(b.dataset.brainScene)));
  selectScene('talk');
- // Three short retrieval questions, immediate explanatory feedback, no score
- // or personality/brain-type judgement.
- const questions=[
-  {q:'말과 문장을 만드는 데 상대적으로 더 많이 참여하는 쪽은?',options:['좌뇌','우뇌'],answer:0,
-   good:'맞아요! 많은 사람에게서 좌뇌의 언어 관련 영역이 더 크게 참여해요. 우뇌도 함께해요.',
-   review:'많은 사람에게서는 좌뇌가 상대적으로 더 관여해요. 우뇌도 언어 활동에 함께 참여해요.'},
-  {q:'말투에 담긴 감정의 단서를 알아차리는 데 상대적으로 더 관여하는 쪽은?',options:['좌뇌','우뇌'],answer:1,
-   good:'맞아요! 우뇌가 상대적으로 더 관여할 수 있어요. 양쪽 뇌가 함께 듣고 이해해요.',
-   review:'말투의 감정 단서에는 우뇌가 상대적으로 더 관여할 수 있어요. 좌뇌도 함께해요.'},
-  {q:'책을 읽거나 공놀이할 때 우리 뇌는 어떻게 일할까요?',options:['한쪽만 일해요','양쪽이 함께해요'],answer:1,
-   good:'맞아요! 양쪽 뇌와 여러 영역이 한 팀으로 일해요.',
-   review:'책 읽기와 공놀이는 여러 기능이 필요한 활동이에요. 양쪽 뇌가 함께 일해요.'}
+ // Three short questions at a time, with three rotating sets. These are
+ // recall prompts, not a hemisphere/personality test.
+ const questionSets=[
+  [
+   {q:'말과 문장을 만드는 데 상대적으로 더 많이 참여하는 쪽은?',options:['좌뇌','우뇌'],answer:0,
+    good:'맞아요! 많은 사람에게서 좌뇌의 언어 관련 영역이 더 크게 참여해요. 우뇌도 함께해요.',
+    review:'많은 사람에게서는 좌뇌가 상대적으로 더 관여해요. 우뇌도 언어 활동에 함께 참여해요.'},
+   {q:'말투에 담긴 감정의 단서를 알아차리는 데 상대적으로 더 관여하는 쪽은?',options:['좌뇌','우뇌'],answer:1,
+    good:'맞아요! 우뇌가 상대적으로 더 관여할 수 있어요. 양쪽 뇌가 함께 듣고 이해해요.',
+    review:'말투의 감정 단서에는 우뇌가 상대적으로 더 관여할 수 있어요. 좌뇌도 함께해요.'},
+   {q:'책을 읽거나 공놀이할 때 우리 뇌는 어떻게 일할까요?',options:['한쪽만 일해요','양쪽이 함께해요'],answer:1,
+    good:'맞아요! 양쪽 뇌와 여러 영역이 한 팀으로 일해요.',
+    review:'책 읽기와 공놀이는 여러 기능이 필요한 활동이에요. 양쪽 뇌가 함께 일해요.'}
+  ],
+  [
+   {q:'왼손을 움직일 때 주로 관여하는 운동 영역은 어느 쪽에 있을까요?',options:['좌뇌','우뇌'],answer:1,
+    good:'맞아요! 왼손 움직임은 반대쪽인 우뇌 운동 영역이 주로 조절해요. 다른 영역도 협력해요.',
+    review:'왼손은 반대쪽인 우뇌 운동 영역이 주로 조절해요. 그렇다고 우뇌만 쓰는 건 아니에요.'},
+   {q:'“괜찮아”라는 말에서 친구 기분을 짐작하려면?',options:['말뜻만 살펴요','말투·표정·상황도 살펴요'],answer:1,
+    good:'맞아요! 같은 말도 말투와 상황에 따라 다르게 느껴져요. 여러 영역이 함께 처리해요.',
+    review:'말뜻만으로는 알기 어려워요. 말투·표정·상황 같은 단서도 함께 살펴요.'},
+   {q:'좌뇌와 우뇌 사이에서 정보를 주고받는 데 중요한 연결 통로는?',options:['뇌량','두 반구는 연결되지 않아요'],answer:0,
+    good:'맞아요! 뇌량은 좌우 뇌 사이에 정보를 전달하는 중요한 신경섬유 다발이에요.',
+    review:'뇌량이라는 신경섬유 다발이 좌우 뇌를 이어줘요. 뇌 속에 있어서 바깥 그림에는 보이지 않아요.'}
+  ],
+  [
+   {q:'물건의 위치·방향을 살필 때 상대적으로 더 관여할 수 있는 쪽은?',options:['좌뇌','우뇌'],answer:1,
+    good:'맞아요! 공간 처리의 일부는 우뇌가 상대적으로 더 관여하는 경향이 있어요. 좌뇌도 함께해요.',
+    review:'공간 파악의 일부는 우뇌가 상대적으로 더 관여할 수 있어요. 좌뇌도 참여해요.'},
+   {q:'그림을 그리고 노래를 부를 때는?',options:['우뇌만 일해요','여러 뇌 영역이 함께해요'],answer:1,
+    good:'맞아요! 미술·음악·창의력도 한쪽 반구만 담당하는 일이 아니에요.',
+    review:'미술과 음악에는 보기·듣기·기억·움직임 등이 필요해요. 양쪽 뇌가 협력해요.'},
+   {q:'오른손잡이이고 수학을 좋아하면 좌뇌형일까요?',options:['네, 좌뇌형이에요','아니요, 그렇게 나눌 수 없어요'],answer:1,
+    good:'맞아요! 손잡이나 잘하는 과목으로 사람을 좌뇌형·우뇌형으로 나누지 않아요.',
+    review:'손잡이와 좋아하는 과목만으로 좌뇌형·우뇌형을 정하는 것은 과학적으로 뒷받침되지 않아요.'}
+  ]
  ];
  const qText=document.getElementById('hemiQuizQuestion');
  const qProgress=document.getElementById('hemiQuizProgress');
  const qButtons=[...document.querySelectorAll('[data-hemi-answer]')];
  const qResponse=document.getElementById('hemiQuizResponse');
  const qNext=document.getElementById('hemiQuizNext');
- let qIndex=0,answered=false;
+ let qIndex=0,roundIndex=0,answered=false;
+ const questions=()=>questionSets[roundIndex];
  function showQuestion(){
-  const q=questions[qIndex];answered=false;
-  qText.textContent=q.q;qProgress.textContent=(qIndex+1)+' / '+questions.length;
+  const q=questions()[qIndex];answered=false;
+  qText.textContent=q.q;qProgress.textContent=(qIndex+1)+' / '+questions().length;
   qButtons.forEach((b,i)=>{b.textContent=q.options[i];b.disabled=false;b.setAttribute('aria-pressed','false');b.removeAttribute('data-correct');});
   qResponse.hidden=true;qResponse.textContent='';qNext.hidden=true;
  }
  qButtons.forEach(button=>button.addEventListener('click',()=>{
   if(answered)return;
   answered=true;
-  const answer=Number(button.dataset.hemiAnswer),q=questions[qIndex],correct=answer===q.answer;
+  const answer=Number(button.dataset.hemiAnswer),q=questions()[qIndex],correct=answer===q.answer;
   qButtons.forEach((b,i)=>{b.disabled=true;b.setAttribute('aria-pressed',String(i===answer));if(i===q.answer)b.setAttribute('data-correct','true');});
   qResponse.hidden=false;
   qResponse.textContent=(correct?'✓ ':'💡 ')+(correct?q.good:q.review);
   qResponse.dataset.result=correct?'right':'review';
   qNext.hidden=false;
-  qNext.textContent=qIndex===questions.length-1?'처음부터 다시':'다음 문제 →';
+  qNext.textContent=qIndex===questions().length-1?'다른 3문제 →':'다음 문제 →';
  }));
  qNext?.addEventListener('click',()=>{
-  qIndex=(qIndex+1)%questions.length;showQuestion();
+  if(qIndex===questions().length-1){roundIndex=(roundIndex+1)%questionSets.length;qIndex=0;}
+  else qIndex+=1;
+  showQuestion();
   qText?.focus?.();
  });
  showQuestion();
