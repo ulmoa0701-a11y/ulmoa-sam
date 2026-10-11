@@ -313,6 +313,34 @@ function toStateVisual(lines,filename,gray,w,h,threshold,cvStaffs=[]){
     if(bars.length>=2){
       for(let i=0;i<bars.length-1;i++){
         const left=bars[i],right=bars[i+1],items=musical.filter(v=>v.x>left&&v.x<right);
+        // Structural OMR engines explicitly detect hollow noteheads instead
+        // of relying on a line-level decoder to output every whole note.
+        // An empty printed measure can only be recovered if an independent
+        // hollow ring agrees with a whole note in the second decoder.
+        if(!items.length&&cvStaffs[li]&&line.secondaryFragment?.length){
+          const heads=hollow.filter(h=>h.ring>=8&&h.x>left+sp*1.1&&h.x<right-sp*1.0);
+          const unique=[];
+          for(const q of heads.sort((a,b)=>b.ring-a.ring)){
+            if(!unique.some(v=>Math.abs(v.x-q.x)<sp*1.4))unique.push(q);
+          }
+          const altNotes=line.secondaryFragment
+            .filter(ir=>ir.kind==='note'&&ir.src?.bbox&&eventFromIr(ir)?.dur>=3.5)
+            .filter(ir=>{const x=ir.src.bbox[0]+ir.src.bbox[2]/2;return x>left&&x<right;});
+          if(unique.length===1&&altNotes.length===1){
+            const head=unique[0],rhythm=scanRhythm(cvStaffs[li],{x:head.x,y:head.y});
+            if(rhythm?.dur===4){
+              const idx=2+head.k,steps=['C','D','E','F','G','A','B'];
+              const p=pitchName({step:steps[((idx%7)+7)%7],octave:4+Math.floor(idx/7),alter:0});
+              if(p){
+                const e=W.ev(p,4,'');
+                items.push({ir:{kind:'note',confidence:Math.min(.95,Number(altNotes[0].confidence)||.7)},e,x:head.x});
+                opticalDebug.push({line:li,bar:i,reason:'empty-bar-whole-note-glyph-and-alternate-model',
+                  headX:Math.round(head.x),ring:head.ring,pitch:p,dur:4});
+                noteCount++;refs.push({system:line.system,x:head.x,event:e});
+              }
+            }
+          }
+        }
         // Independent whole-note/rest disambiguation on a one-symbol measure.
         // Never insert an extra event based on expected song length. A printed
         // white-centered, fully closed notehead is required.
@@ -584,6 +612,7 @@ async function recognizeCanvas(canvas,filename,pageIndex){
         ir.pitch={...alt.pitch};
       }
     }
+    chosenLine.secondaryFragment=enhancedLine?.fragment||null;
     let tailDiag=null;
     if(input.width>1400){const edge=rightEdgeModelInput(input),tail=await decodeInput(edge.shifted,edge.model,i);
       if(tail){const notes=musicalEvents(tail.fragment).filter(v=>v.ir.kind==='note');tailDiag={start:edge.start,notes:notes.length,xs:notes.map(v=>Math.round(v.x)),rests:musicalEvents(tail.fragment).filter(v=>v.ir.kind==='rest').map(v=>Math.round(v.x))};}}
