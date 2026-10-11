@@ -98,6 +98,10 @@ jobs:
               await page.reload({waitUntil:'domcontentloaded'});
               if(mobile)await page.locator('#mobileSettingsBtn').click();
               await page.locator('#introMode').selectOption('interlude');
+              const picker=await page.locator('#introMode').evaluate(el=>({width:el.getBoundingClientRect().width,label:el.selectedOptions[0]?.textContent||'',font:parseFloat(getComputedStyle(el).fontSize)}));
+              console.log('LIVE_INTERLUDE_PICKER='+JSON.stringify({mobile,picker}));
+              if(!picker.label.includes('간주 듣고 시작')||(mobile&&(picker.width<240||picker.font<12))||(!mobile&&picker.width<115))
+                throw Error('LIVE deployed interlude picker not readable: '+JSON.stringify({mobile,picker}));
               if(mobile)await page.locator('#mobileSettingsClose').click();
               const energy=await page.evaluate(async()=>{
                 const ac=new OfflineAudioContext(1,44100*2,44100);
