@@ -43,15 +43,23 @@ jobs:
           print('Audiveris release:',r.get('tag_name'),'asset:',debs[0]['name'])
           PY
           curl -fLsS --retry 2 --max-time 240 "$(cat /tmp/audiveris-asset.txt)" -o /tmp/audiveris.deb
-          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y /tmp/audiveris.deb
-          command -v audiveris
-          audiveris -version
+          # GitHub headless runners have no XDG desktop menu; Debian's
+          # post-install UI hook fails even though the portable bundled JRE
+          # is present. Extract the official unmodified package instead.
+          mkdir -p /tmp/audiveris-portable
+          dpkg-deb -x /tmp/audiveris.deb /tmp/audiveris-portable
+          find /tmp/audiveris-portable -maxdepth 7 -iname '*audiveris*' | head -40
+          launcher=$(find /tmp/audiveris-portable -maxdepth 8 -type f \\( -name 'audiveris' -o -name 'Audiveris' \\) -print -quit)
+          test -n "$launcher" || { echo "Audiveris binary not found in official archive"; exit 1; }
+          echo "$launcher" > heart-score/qa/.audiveris-bench/launcher.txt
+          "$launcher" -version
       - name: Compare Audiveris result with EXACT same score images
         shell: bash
         run: |
           set -uo pipefail
           mkdir -p heart-score/qa/.audiveris-bench/results
           echo "INSTALL_OUTCOME=${{ steps.install.outcome }}" | tee heart-score/qa/.audiveris-bench/results/environment.txt
+          launcher=$(cat heart-score/qa/.audiveris-bench/launcher.txt 2>/dev/null || true)
           if [[ "${{ steps.install.outcome }}" != "success" ]]; then
             echo '{"engine":"audiveris","status":"installation_failed","accuracy":"not_measured"}' > heart-score/qa/.audiveris-bench/results/install-failed.json
             exit 0
@@ -64,7 +72,7 @@ jobs:
             esac
             outdir="heart-score/qa/.audiveris-bench/results/$variant"
             mkdir -p "$outdir"
-            timeout 330s audiveris -batch -export -output "$GITHUB_WORKSPACE/$outdir" -- "$GITHUB_WORKSPACE/$input" > "$outdir/engine.log" 2>&1
+            timeout 330s "$launcher" -batch -export -output "$GITHUB_WORKSPACE/$outdir" -- "$GITHUB_WORKSPACE/$input" > "$outdir/engine.log" 2>&1
             status=$?
             xml=$(find "$outdir" -maxdepth 6 -type f \( -iname '*.mxl' -o -iname '*.musicxml' -o -iname '*.xml' \) -print -quit)
             if [[ -n "$xml" ]]; then
