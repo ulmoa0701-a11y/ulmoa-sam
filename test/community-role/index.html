@@ -3,13 +3,14 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>역할 선택 QA · 내부 테스트</title>
-<style>body{font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:18px;background:#f6f9f6;color:#23412b}form{padding:20px;background:#fff;border:1px solid #dae7dc;border-radius:20px}.field{margin-bottom:20px}label{display:block;font-weight:700;margin-bottom:9px}select,textarea{width:100%;padding:12px;box-sizing:border-box}button{cursor:pointer}.submit{padding:12px 20px;border:0;border-radius:10px;background:#315f45;color:white}#result{white-space:pre-wrap}</style>
+<style>body{font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:18px;background:#f6f9f6;color:#23412b}form{padding:20px;background:#fff;border:1px solid #dae7dc;border-radius:20px}.field{margin-bottom:20px}label{display:block;font-weight:700;margin-bottom:9px}select,textarea{width:100%;padding:12px;box-sizing:border-box}button{cursor:pointer}.submit{padding:12px 20px;border:0;border-radius:10px;background:#315f45;color:white}#result{white-space:pre-wrap} .qa-columns{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}.qa-columns>.field{min-width:0}@media(max-width:430px){.qa-columns{grid-template-columns:1fr}} </style>
 </head>
 <body>
 <h1>역할 선택 테스트</h1>
 <p>실제 소통 게시판이 아닌 버튼 작동 확인용 페이지입니다.</p>
 <form id="qaForm">
-<div class="field"><label>나는</label><select name="audience"><option>치료사</option><option>특수교사</option><option>학부모</option><option>특수교육대상자</option><option>기타</option></select></div>
+<div class="qa-columns"><div class="field"><label>구분</label><select name="kind"><option>자료 요청</option><option>질문</option></select></div><div class="field"><label>나는</label><select name="audience"><option>치료사</option><option>특수교사</option><option>학부모</option><option>특수교육대상자</option><option>기타</option></select></div></div>
+<div class="field"><label><input type="checkbox" name="anonymous"> 익명으로 남기기</label></div>
 <div class="field"><label for="msg">내용</label><textarea id="msg" name="body">테스트</textarea></div>
 <button class="submit" type="submit">선택 결과 확인</button>
 <button class="submit" type="reset">초기화</button>
@@ -17,4 +18,65 @@
 <p id="result" aria-live="polite"></p>
 <script src="../../assets/habom-role-picker.js?v=20261011-1"></script>
 <script>document.getElementById('qaForm').addEventListener('submit',function(event){event.preventDefault();document.getElementById('result').textContent='전송되는 audience: '+new FormData(this).get('audience');});</script>
+<script>
+if (new URLSearchParams(location.search).has("qa")) {
+  window.addEventListener("load", function () {
+    window.setTimeout(function () {
+      var issues = [];
+      var root = document.getElementById("habom-role-picker");
+      function check(ok, msg) { if (!ok) issues.push(msg); }
+      function btn(text, scope) {
+        return Array.from((scope || root).querySelectorAll("button")).find(function (b) {
+          return b.textContent.trim() === text;
+        });
+      }
+      function click(text, scope) {
+        var target = btn(text, scope);
+        check(!!target, "missing button: " + text);
+        if (target) target.click();
+      }
+      var trigger = root && root.querySelector(".hrp-trigger");
+      var panel = root && root.querySelector(".hrp-panel");
+      var select = document.querySelector('select[name="audience"]');
+      check(!!root && !!trigger && !!panel, "role picker not initialized");
+      check(panel && panel.hidden, "role panel expanded by default");
+      check(root && root.getBoundingClientRect().height < 105, "collapsed role too tall");
+      var kind = document.querySelector('select[name="kind"]');
+      check(kind && kind.getBoundingClientRect().height < 60, "category select stretched vertically");
+      if (trigger) trigger.click();
+      var groups = root.querySelectorAll(".hrp-grid")[0];
+      check(!panel.hidden, "panel didn't open");
+      check(groups.querySelectorAll("button").length === 8, "8 groups missing");
+      check(getComputedStyle(groups).gridTemplateColumns.split(" ").filter(Boolean).length === 2, "group grid not two columns");
+      click("치료·상담 전문가");
+      var opts = Array.from(root.querySelectorAll("button")).map(function (b) { return b.textContent.trim(); });
+      check(["음악치료사", "놀이치료사", "미술치료사"].every(function(t) { return opts.includes(t); }), "separate therapy subroles missing");
+      check(groups.hidden, "group list remained during detail selection");
+      click("음악치료사");
+      check(new FormData(document.getElementById("qaForm")).get("audience") === "음악치료사", "music value missing");
+      check(panel.hidden, "panel not collapsed after choice");
+      check(trigger.textContent.includes("음악치료사"), "selection not on trigger");
+      trigger.click();
+      click("예비 전문가·전공생");
+      click("예비 음악치료사");
+      check(select.value === "예비 음악치료사", "pre-professional selection failed");
+      trigger.click();
+      click("보호자");
+      check(select.value === "보호자", "guardian selection failed");
+      check(panel.hidden, "guardian didn't collapse");
+      trigger.click();
+      click("기타 방문자");
+      click("기타 직접 입력");
+      var other = root.querySelector(".hrp-other");
+      other.value = "현장지원인력";
+      other.dispatchEvent(new Event("input", { bubbles: true }));
+      click("이 역할로 선택");
+      check(select.value === "현장지원인력", "other direct entry failed");
+      click("선택 해제");
+      check(select.value === "선택 안 함", "clear failed");
+      document.documentElement.dataset.roleQa = issues.length ? "FAIL: " + issues.join(" | ") : "PASS";
+    }, 110);
+  });
+}
+</script>
 </body></html>
