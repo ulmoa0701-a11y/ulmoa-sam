@@ -11,8 +11,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Gamja+Flower&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
 <link rel="stylesheet" href="../assets/notebook-subpages.css?v=20261005-clean3">
-<link rel="stylesheet" href="brain.css?v=20261011-oneglance1">
-<script src="brain.js?v=20261011-oneglance1" defer></script>
+<link rel="stylesheet" href="brain.css?v=20261011-hemi-ui2">
+<script src="brain.js?v=20261011-hemi-ui2" defer></script>
 <link rel="stylesheet" href="../assets/habom-brand.css?v=20261010b">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/habom-favicon-v3-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="../assets/habom-favicon-v3-16.png">
@@ -29,8 +29,13 @@
  <header class="map-intro">
   <span class="map-eyebrow">🧠 그림으로 배우는 우리 뇌</span>
   <h1>우리 뇌, 무슨 일을 할까?</h1>
-  <p>색깔을 따라가면 뇌의 이름과 하는 일을 쉽게 알 수 있어요.</p>
+  <p id="mapIntroText">색깔을 따라가면 뇌의 이름과 하는 일을 쉽게 알 수 있어요.</p>
  </header>
+ <nav class="brain-view-tabs" role="tablist" aria-label="뇌지도 보기 선택">
+    <button type="button" data-brain-view="lobes" aria-controls="lobesView" aria-selected="true" role="tab" id="lobesTab">🧠 뇌 부위별 보기 <small>위치와 하는 일</small></button>
+    <button type="button" data-brain-view="hemispheres" aria-controls="hemispheresView" aria-selected="false" role="tab" id="hemispheresTab">💬 좌뇌·우뇌 보기 <small>서로 다른 역할과 협력</small></button>
+  </nav>
+ <div id="lobesView" class="brain-view" role="tabpanel" aria-labelledby="lobesTab">
  <section class="brain-one-panel" aria-labelledby="brainAreasHeading">
   <div class="map-panel-heading"><h2 id="brainAreasHeading">뇌의 6가지 부분</h2><span>그림 속 숫자와 오른쪽 숫자가 같아요</span></div>
   <div class="one-panel-grid">
@@ -129,8 +134,91 @@
     </div>
   </details>
  </div>
+</div>
+
+ <section class="hemi-comparison brain-view" role="tabpanel" aria-labelledby="hemispheresTab" id="hemispheresView" aria-labelledby="hemiCompareTitle" hidden>
+   <header class="hemi-intro">
+     <div><span class="hemi-kicker">🧠 우리 뇌 알아보기</span><h2 id="hemiCompareTitle">좌뇌와 우뇌, 어떤 일을 할까?</h2></div>
+     <p>서로 조금 더 잘하는 일이 있지만 <strong>늘 함께 일해요.</strong></p>
+   </header>
+   <div class="hemi-study-grid">
+     <section class="hemi-study-card hemi-left" aria-labelledby="leftStudyTitle">
+       <button class="hemi-side-title" type="button" data-hemi-select="left" aria-pressed="false" id="leftStudyTitle">
+         <span class="hemi-title-illustration" aria-hidden="true">💬</span>
+         <span><strong>좌뇌</strong><small>말과 문장을 다룰 때 중요해요</small></span><span class="hemi-select-hint">살펴보기 ↗</span>
+       </button>
+       <ul class="hemi-ability-list">
+         <li><span class="ability-icon">🗣️</span><span><b>말하고 글 읽기</b><small>단어를 떠올리고 문장을 만들어요.</small></span></li>
+         <li><span class="ability-icon">🧩</span><span><b>말의 순서와 규칙</b><small>낱말과 문장 속 순서를 구분해요.</small></span></li>
+         <li><span class="ability-icon">✋</span><span><b>오른쪽 몸 움직이기</b><small>오른손·오른발 움직임을 주로 조절해요.</small></span></li>
+       </ul>
+       <div class="hemi-example"><strong>이런 때 함께 일해요</strong><p>“오늘 친구랑 놀았어!”라고 이야기할 때</p></div>
+     </section>
+     <div class="hemi-hero" aria-label="알록달록한 좌뇌와 우뇌를 그린 교육용 일러스트">
+       <svg class="hemi-hero-svg" viewBox="0 0 340 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hemiSvgTitle hemiSvgDesc">
+         <title id="hemiSvgTitle">좌뇌와 우뇌를 보여 주는 귀여운 뇌 그림</title>
+         <desc id="hemiSvgDesc">머리 위에서 본 모양을 단순화한 파란색 좌뇌와 노란색 우뇌가 나란히 있고 아래에는 웃는 아이 얼굴이 있어요.</desc>
+         <defs>
+           <linearGradient id="hemiBlue" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#B6DDFF"/><stop offset="1" stop-color="#D6E9FF"/></linearGradient>
+           <linearGradient id="hemiYellow" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#FFF0AD"/><stop offset="1" stop-color="#FFE0AA"/></linearGradient>
+           <linearGradient id="hemiShirt" x1="0" x2="1"><stop stop-color="#87B99E"/><stop offset="1" stop-color="#659A7E"/></linearGradient>
+         </defs>
+         <ellipse cx="170" cy="356" rx="131" ry="13" fill="#DDEADF" opacity=".65"/>
+         <path d="M56 357 Q64 296 116 297 L222 297 Q273 300 284 357Z" fill="url(#hemiShirt)" stroke="#699C81" stroke-width="3"/>
+         <path d="M142 286 Q170 308 199 286 L190 326 Q171 338 149 326Z" fill="#F6C3A6"/>
+         <path d="M84 163 C77 112 114 79 170 79 C224 77 264 113 257 167 L257 235 C262 289 220 315 170 315 C119 315 79 282 84 235 Z" fill="#F9D2B9" stroke="#DEB197" stroke-width="3"/>
+         <path d="M81 171 C72 110 111 66 171 65 C235 65 274 116 259 180 C243 163 232 142 222 130 C185 139 143 123 110 132 C101 150 90 165 81 171Z" fill="#6D5549"/>
+         <ellipse cx="83" cy="221" rx="16" ry="26" fill="#F8CAB1" stroke="#DFB399" stroke-width="3"/>
+         <ellipse cx="257" cy="221" rx="16" ry="26" fill="#F8CAB1" stroke="#DFB399" stroke-width="3"/>
+         <path d="M119 211 Q134 201 148 211 M194 211 Q207 200 224 211" stroke="#604439" stroke-width="6" stroke-linecap="round" fill="none"/>
+         <ellipse cx="137" cy="230" rx="7" ry="9" fill="#453932"/><ellipse cx="204" cy="230" rx="7" ry="9" fill="#453932"/>
+         <ellipse cx="118" cy="253" rx="19" ry="10" fill="#F1A99F" opacity=".76"/>
+         <ellipse cx="224" cy="253" rx="19" ry="10" fill="#F1A99F" opacity=".76"/>
+         <path d="M161 262 Q170 276 179 262" fill="none" stroke="#CE9778" stroke-width="3" stroke-linecap="round"/>
+         <path d="M149 280 Q172 301 194 278" fill="none" stroke="#67453B" stroke-width="5" stroke-linecap="round"/>
+         <rect x="66" y="36" width="208" height="146" rx="65" fill="#FFFFFF" opacity=".91"/>
+         <g class="hemi-svg-side" data-hemi-select="left" role="button" tabindex="0" aria-label="좌뇌 선택" aria-pressed="false">
+           <path d="M165 48 C129 31 97 45 90 67 C65 72 62 97 71 111 C64 127 76 144 96 148 C106 169 131 167 166 163Z" fill="url(#hemiBlue)" stroke="#FFFFFF" stroke-width="6"/>
+           <path d="M128 64 Q113 81 127 99 M94 111 Q117 105 123 126 M145 113 Q134 130 149 146" stroke="#8EBCE9" stroke-width="5" stroke-linecap="round" fill="none"/>
+           <text x="121" y="161" text-anchor="middle" font-size="15" font-weight="900" fill="#416A9A">좌뇌</text>
+         </g>
+         <g class="hemi-svg-side" data-hemi-select="right" role="button" tabindex="0" aria-label="우뇌 선택" aria-pressed="false">
+           <path d="M175 48 C210 31 243 45 249 67 C274 72 278 97 269 111 C278 127 266 144 244 148 C236 169 206 167 174 163Z" fill="url(#hemiYellow)" stroke="#FFFFFF" stroke-width="6"/>
+           <path d="M205 65 Q224 79 210 98 M247 109 Q222 102 221 125 M193 111 Q206 130 191 147" stroke="#E7C177" stroke-width="5" stroke-linecap="round" fill="none"/>
+           <text x="219" y="161" text-anchor="middle" font-size="15" font-weight="900" fill="#876B3F">우뇌</text>
+         </g>
+         <path d="M170 48V161" stroke="#FAFEFA" stroke-width="5" stroke-linecap="round"/>
+         <path d="M36 106l-11-11m12 31-15 4M304 104l11-12m-10 34 13 4" stroke="#E9C97B" stroke-width="6" stroke-linecap="round"/>
+       </svg>
+       <p class="hemi-art-caption">두 반구를 비교하는 캐릭터 그림이에요. 실제 해부학적 방향 표시가 아니에요.</p>
+       <div class="hemi-focus" id="hemiFocus" aria-live="polite"><b>🤝 함께 일하는 뇌</b><span>어느 한쪽만 쓰는 건 아니에요.</span></div>
+     </div>
+     <section class="hemi-study-card hemi-right" aria-labelledby="rightStudyTitle">
+       <button class="hemi-side-title" type="button" data-hemi-select="right" aria-pressed="false" id="rightStudyTitle">
+         <span class="hemi-title-illustration" aria-hidden="true">🧭</span>
+         <span><strong>우뇌</strong><small>공간과 말투를 살필 때 중요해요</small></span><span class="hemi-select-hint">살펴보기 ↗</span>
+       </button>
+       <ul class="hemi-ability-list">
+         <li><span class="ability-icon">📍</span><span><b>공간과 위치 알아보기</b><small>물건이 어디 있는지 살펴봐요.</small></span></li>
+         <li><span class="ability-icon">🙂</span><span><b>말투에 담긴 기분</b><small>말의 높낮이와 느낌을 알아차려요.</small></span></li>
+         <li><span class="ability-icon">✋</span><span><b>왼쪽 몸 움직이기</b><small>왼손·왼발 움직임을 주로 조절해요.</small></span></li>
+       </ul>
+       <div class="hemi-example"><strong>이런 때 함께 일해요</strong><p>친구 목소리를 듣고 기분을 짐작할 때</p></div>
+     </section>
+   </div>
+   <section class="hemi-team" aria-labelledby="hemiTeamTitle">
+     <button type="button" id="hemiTogether" class="hemi-together" data-hemi-select="both" aria-pressed="true">🤝 <strong id="hemiTeamTitle">함께하는 일</strong> <span>좌뇌와 우뇌는 한 팀!</span></button>
+     <div class="hemi-team-examples">
+       <span>📖 <b>책 읽기</b></span><span>💬 <b>친구와 대화</b></span><span>⚽ <b>공놀이</b></span><span>💡 <b>문제 해결</b></span>
+     </div>
+     <p>실제로는 <strong>양쪽 뇌의 여러 부분이 같이 움직여요.</strong> 미술·음악·창의력도 우뇌만의 일이 아니에요.</p>
+   </section>
+   <p class="hemi-caution">※ 이 그림은 좌우 기능의 <b>상대적인 차이</b>를 쉽게 설명하는 학습용 그림입니다. 사람이나 아이를 ‘좌뇌형·우뇌형’으로 나누지 않아요. 좌우 기능은 개인과 발달에 따라 달라질 수 있어요.</p>
+   <div class="hemi-study-sources">더 읽기: <a href="https://www.ncbi.nlm.nih.gov/books/NBK10936/" target="_blank" rel="noopener noreferrer">언어와 뇌의 좌우 기능</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/15325382/" target="_blank" rel="noopener noreferrer">말의 억양 처리 연구</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23297206/" target="_blank" rel="noopener noreferrer">언어·공간 주의 연구</a></div>
+ </section>
+
 </main>
-<footer class="sub-footer"><div><b>일단 해봄</b><span>울모아쌤</span></div><nav class="footer-social"><a href="http://ulmoa.co.kr" rel="noopener" target="_blank">울모아</a><a href="https://www.instagram.com/ulmoa__sam/" rel="noopener" target="_blank">인스타그램</a><a href="https://blog.naver.com/ulmoa" rel="noopener" target="_blank">블로그</a><a href="https://www.threads.com/@ulmoa_sam" rel="noopener" target="_blank">스레드</a></nav></footer>
+<footer class="sub-footer"<div><b>일단 해봄</b><span>울모아쌤</span></div><nav class="footer-social"><a href="http://ulmoa.co.kr" rel="noopener" target="_blank">울모아</a><a href="https://www.instagram.com/ulmoa__sam/" rel="noopener" target="_blank">인스타그램</a><a href="https://blog.naver.com/ulmoa" rel="noopener" target="_blank">블로그</a><a href="https://www.threads.com/@ulmoa_sam" rel="noopener" target="_blank">스레드</a></nav></footer>
 <script src="../assets/habom-navigation.js?v=20261011-nav2" defer></script>
 </body>
 </html>
