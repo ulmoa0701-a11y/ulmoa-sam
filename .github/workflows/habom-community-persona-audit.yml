@@ -5,6 +5,10 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/habom-community-persona-audit.yml'
+      - 'request/index.html'
+      - 'assets/habom-role-picker.js'
+      - 'assets/community-board.css'
+      - 'assets/habom-locked-posts.js'
 permissions:
   contents: read
 jobs:
@@ -69,7 +73,24 @@ jobs:
                 if(role!=='보호자')throw Error('role='+role);
                 const data=await f.locator('select[name="kind"]').evaluate(n=>({role:n.form?.elements?.audience?.value,kind:n.value}));
                 if(!data.kind.includes('질문'))throw Error('category not bound');
+                const questionHint=await f.locator('textarea[name="body"]').getAttribute('placeholder');
+                if(!questionHint||!questionHint.includes('궁금'))throw Error('question input hint not changed: '+questionHint);
+                const purpose=await phone.locator('.community-mode-purpose').innerText();
+                if(!purpose.includes('모든 질문에 답하거나')||!purpose.includes('요청을 제작'))throw Error('operating expectations absent');
                 return 'category/textarea/role bound; no submission';
+              });
+              await attempt('보호자·모바일','분류 변경 시 작성 내용 보존',async()=>{
+                const f=await getFrame(phone);
+                const kind=f.locator('select[name="kind"]');
+                const before=await f.locator('textarea[name="body"]').inputValue();
+                const options=await kind.locator('option').allTextContents();
+                const target=options.find(t=>t.includes('자료'));
+                if(!target)throw Error('materials option missing');
+                await kind.selectOption({label:target});
+                const hint=await f.locator('textarea[name="body"]').getAttribute('placeholder');
+                if(!hint||!hint.includes('자료'))throw Error('material request hint not shown: '+hint);
+                if(await f.locator('textarea[name="body"]').inputValue()!==before)throw Error('typed text wiped on kind change');
+                return 'context hint updated, content preserved';
               });
               await attempt('보호자·모바일','입력 흐름·빈 공간·가로넘침 점검',async()=>{
                 const f=await getFrame(phone);let a=await f.evaluate(()=>{
