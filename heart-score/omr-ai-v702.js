@@ -10,6 +10,7 @@ import {scanConnectedHeads,scanPitchFromY,scanRhythm,scanHollowHeads} from './om
 import {planBarRows} from './omr-bar-consensus-v1.mjs?v=703';
 import {recoverFaintBarlines} from './omr-bar-rescue-v1.mjs?v=703';
 import {deskewScoreCanvas} from './omr-deskew-v1.mjs?v=1';
+import {findFilledHeadNearModelRest} from './omr-notehead-evidence-v1.mjs?v=1';
 
 const W=window;
 const ORT_VERSION='1.27.0';
@@ -512,6 +513,7 @@ async function recognizeCanvas(canvas,filename,pageIndex){
   const scanLike=threshold>=.78;
   status(`본문 악보 ${inputs.length}줄 감지 · 원본+스캔보정 이중 판독 · 음표 읽는 중…`);
   const decodeInput=async(input,modelInput,i)=>{const tensor=new W.ort.Tensor('float32',modelInput.data,[1,1,modelInput.height,modelInput.width]),res=await rt.session.run({input:tensor}),logits=res.logits;if(!logits?.data)return null;const dims=logits.dims||[],T=dims[dims.length-2],C=dims[dims.length-1];if(!T||!C)return null;const tokens=rt.dec.decodeLine(logits.data,T,C,rt.i2w),b=input.box,staff={page:pageIndex,system:i,staffIndex:0,bbox:[b.x,b.y,b.w,b.h],lineSpacingPx:b.lineSpacing,normSpacing:10},fragment=rt.dec.lineFragment(tokens,staff);return{system:i,input,fragment,tokens};};
+  const structuralStaffs=W.findStaffSystems(canvas);
   const lines=[],passDiagnostics=[];for(let i=0;i<inputs.length;i++){const input=inputs[i];status(`AI 악보 인식 ${i+1}/${inputs.length}줄 · 원본 판독 중…`);const raw=await decodeInput(input,input,i);if(!raw)continue;let chosenLine=raw,rawScore=lineDecodeScore(raw.fragment),enhancedLine=null,enhancedRejectedForCollapse=false;if(scanLike){status(`AI 악보 인식 ${i+1}/${inputs.length}줄 · 스캔 보정 재판독 중…`);const enh=await decodeInput(input,enhancedInput(rt.prep,gray,canvas.width,canvas.height,input),i);if(enh){enhancedLine=enh;const enhScore=lineDecodeScore(enh.fragment),rawNotes=musicalEvents(raw.fragment).filter(v=>v.ir.kind==='note').length,enhNotes=musicalEvents(enh.fragment).filter(v=>v.ir.kind==='note').length;// Some noisy JPEG enhanced passes collapse almost every note duration
       // to a sixteenth (0.25 beats) despite clear mixed values in the raw
       // pass. Such a pass is not reliable evidence, regardless of DP score.
@@ -521,6 +523,28 @@ async function recognizeCanvas(canvas,filename,pageIndex){
       const enhTiny=enhMus.filter(v=>v.e.dur<=.25).length/Math.max(1,enhMus.length);
       enhancedRejectedForCollapse=enhNotes>=8&&enhTiny>.70&&rawTiny<.20;
       if(!enhancedRejectedForCollapse&&enhScore>rawScore+2.5&&enhNotes>=Math.max(3,rawNotes*.88))chosenLine=enh;}}
+    // Structural OMR cross-check: require a second model's note at the same
+    // position AND an independent printed filled notehead in the source.
+    const structuralRestCorrections=[];
+    if(scanLike&&enhancedLine&&chosenLine===raw&&structuralStaffs?.length===inputs.length){
+      const staff=structuralStaffs[i];
+      const knownNotes=raw.fragment.filter(v=>v.kind==='note'&&v.src?.bbox)
+        .map(v=>v.src.bbox[0]+v.src.bbox[2]/2);
+      const alternative=enhancedLine.fragment.filter(v=>v.kind==='note'&&v.src?.bbox);
+      for(const ir of raw.fragment.filter(v=>v.kind==='rest'&&v.src?.bbox)){
+        const center=ir.src.bbox[0]+ir.src.bbox[2]/2;
+        if((Number(ir.confidence)||0)>.87)continue;
+        const alt=alternative.filter(v=>Math.abs(v.src.bbox[0]+v.src.bbox[2]/2-center)<=Math.max(8,input.box.lineSpacing*1.5));
+        if(alt.length!==1)continue;
+        const evidence=findFilledHeadNearModelRest(staff,center,knownNotes);
+        if(!evidence)continue;
+        const idx=2+evidence.k,steps=['C','D','E','F','G','A','B'];
+        const step=steps[((idx%7)+7)%7],octave=4+Math.floor(idx/7);
+        ir.kind='note';ir.pitch={step,octave,alter:0};
+        structuralRestCorrections.push({x:Math.round(center),headX:evidence.x,
+          k:evidence.k,energy:evidence.energy,from:'rest',to:pitchName(ir.pitch)});
+      }
+    }
     const consensusCorrections=[];
     // A low-confidence rest in the raw pass can be a real printed note.
     // Require agreement with a note at the same source position in the
@@ -564,7 +588,7 @@ async function recognizeCanvas(canvas,filename,pageIndex){
     if(input.width>1400){const edge=rightEdgeModelInput(input),tail=await decodeInput(edge.shifted,edge.model,i);
       if(tail){const notes=musicalEvents(tail.fragment).filter(v=>v.ir.kind==='note');tailDiag={start:edge.start,notes:notes.length,xs:notes.map(v=>Math.round(v.x)),rests:musicalEvents(tail.fragment).filter(v=>v.ir.kind==='rest').map(v=>Math.round(v.x))};}}
     const symbolList=fragment=>musicalEvents(fragment||[]).map(v=>({x:Math.round(v.x),kind:v.ir.kind,p:pitchName(v.ir.pitch),dur:v.e.dur,conf:+(Number(v.ir.confidence)||0).toFixed(2)}));
-    passDiagnostics.push({tailDiag,system:i,consensusCorrections,restToNoteCorrections,enhancedRejectedForCollapse,rawSymbols:symbolList(raw.fragment),enhancedSymbols:enhancedLine?symbolList(enhancedLine.fragment):null,rawNotes:musicalEvents(raw.fragment).filter(v=>v.ir.kind==='note').length,rawRests:raw.fragment.filter(v=>v.kind==='rest').length,rawScore,chosenNotes:musicalEvents(chosenLine.fragment).filter(v=>v.ir.kind==='note').length,chosenRests:chosenLine.fragment.filter(v=>v.kind==='rest').length,chosenChanged:chosenLine!==raw});lines.push(chosenLine);}
+    passDiagnostics.push({tailDiag,system:i,structuralRestCorrections,consensusCorrections,restToNoteCorrections,enhancedRejectedForCollapse,rawSymbols:symbolList(raw.fragment),enhancedSymbols:enhancedLine?symbolList(enhancedLine.fragment):null,rawNotes:musicalEvents(raw.fragment).filter(v=>v.ir.kind==='note').length,rawRests:raw.fragment.filter(v=>v.kind==='rest').length,rawScore,chosenNotes:musicalEvents(chosenLine.fragment).filter(v=>v.ir.kind==='note').length,chosenRests:chosenLine.fragment.filter(v=>v.kind==='rest').length,chosenChanged:chosenLine!==raw});lines.push(chosenLine);}
   if(!lines.length)return{staffDetected:true,ok:false,reason:'오선은 찾았지만 음표를 읽어내지 못했습니다.'};
   const cvStaffs=W.findStaffSystems(canvas);
   // A long-staff decoder can lose a final half/whole note. Only add when a
