@@ -219,7 +219,7 @@
 .hb-nav .hb-game-groups{display:grid;gap:11px}
 .hb-nav .hb-game-section{padding:9px;border:1px solid #e2eae2;border-radius:13px;background:#f8fbf7}
 .hb-nav .hb-game-section:nth-child(2){background:#fffaf2;border-color:#f1e6d2}
-.hb-nav .hb-game-parent{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;min-height:44px;border-radius:9px;background:#fff;border:1px solid #e2e9e0}
+.hb-nav .hb-menu-games .hb-game-parent{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;min-height:44px;border-radius:9px;background:#fff;border:1px solid #e2e9e0}
 .hb-nav .hb-game-parent strong{font-size:14px;line-height:1.3;color:#284b3d;font-weight:900}
 .hb-nav .hb-game-parent>span{font-size:11px;color:#64796b;white-space:nowrap}
 .hb-nav .hb-game-children{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:8px 1px 1px}
