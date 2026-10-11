@@ -723,6 +723,7 @@ if(new URLSearchParams(location.search).get('aiomr')==='702'){
   }
 }
 const input=el('imageScoreFile');if(input){input.onchange=async e=>{const f=e.target.files?.[0];if(!f)return;await aiImport(f);e.target.value='';};input.dataset.aiOmr='v702';}
+W.__ulmoaOmrShowIssue=(issue)=>{stopped(issue);status('⚠ '+issue.title,'warn');};
 W.importScoreFromFileAI=aiImport;
 const st=el('imageStatus');if(st){st.className='status ok';st.innerHTML='🤖 <b>AI 악보인식 β 준비됨</b> · 모바일용 로컬 인식 모듈을 사용하고, 품질 검증 실패 시 잘못된 악보를 만들지 않고 중단합니다.';}
 console.info('[Ulmoa] AI OMR v7.02 ready',{ort:ORT_VERSION,model:'fp16-public-domain',adaptiveThreshold:true,hybridBarlines:true,scanEnhancement:true,beatPartition:true,dualPass:true,visualMeasureFit:true,barConsensus:true,doReMiRegression:true,sharedConsensus:true,cvHybrid:true,fixtureE2E:true,primaryMeasureConsensus:true});
