@@ -60,6 +60,19 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
    featureBoxes[1].x>featureBoxes[0].x+80&&
    ! (featureBoxes[0].right>featureBoxes[1].x+3),
    name+': two featured garden images are missing, cramped or overlap '+JSON.stringify(featureBoxes));
+ // Both existing music entry images must reuse the user-approved Moa & note-friends art.
+ const approvedArt=await page.evaluate(()=>{
+   const feature=document.querySelector('.desk-collage .feature-music img');
+   const catalog=document.querySelector('#toolGrid .entry-music img');
+   return [feature,catalog].map(img=>({
+     src:img?.getAttribute('src'),alt:img?.alt,
+     loaded:!!img?.complete&&img.naturalWidth>0&&img.naturalHeight>0,
+     naturalWidth:img?.naturalWidth,aspect:img?.naturalWidth/img?.naturalHeight
+   }));
+ });
+ check(approvedArt.every(i=>i.src?.startsWith('assets/moa-music-garden-approved.webp')&&
+   i.loaded&&i.naturalWidth>=350&&Math.abs(i.aspect-1.6)<.04),
+   name+': approved Moa Music Garden illustration missing or broken '+JSON.stringify(approvedArt));
  check(await page.locator('.desk-collage.featured-two a[href="heart-score/"]').count()===0,
    name+': Heart Score incorrectly occupies the Music Garden feature slot');
  await page.locator('.desk-collage.featured-two').screenshot({path:out+'/'+name+'-homepage-featured-gardens.png'});
