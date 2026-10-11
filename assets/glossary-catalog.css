@@ -909,3 +909,73 @@
   .glossary-page .gcat-definition-section .gcat-definition-pair>div{padding:8px!important}
   .glossary-page .gcat-definition-section .gcat-definition-pair span{font-size:12px!important}
 }
+
+
+/* 알아봄: 펼침 없이 그림을 설명 옆에 제시하고, 원본 확대만 선택적으로 실행 */
+@media (min-width:720px){
+  .glossary-page .gcat-dialog{width:min(865px,calc(100vw - 32px));max-width:calc(100vw - 32px)}
+}
+.glossary-page .gcat-dialog-body .gcat-reading-sheet.gcat-has-preview{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.2fr) minmax(0,.9fr);
+  gap:12px 17px;
+  align-items:start;
+}
+.glossary-page .gcat-reading-sheet.gcat-has-preview>.gcat-definition-section{grid-column:1;grid-row:1}
+.glossary-page .gcat-reading-sheet.gcat-has-preview>.gcat-example-section{grid-column:1;grid-row:2}
+.glossary-page .gcat-reading-sheet.gcat-has-preview>.gcat-hints-section{grid-column:1;grid-row:3}
+.glossary-page .gcat-reading-sheet.gcat-has-preview>.gcat-inline-art{grid-column:2;grid-row:1 / span 3}
+.glossary-page .gcat-reading-sheet.gcat-has-preview>.gcat-resource-actions,
+.glossary-page .gcat-reading-sheet.gcat-has-preview>.gcat-preserved-content{grid-column:1 / -1}
+.glossary-page .gcat-inline-art{
+  min-width:0;
+  padding:8px;
+  border:1px solid #ebe4d9;
+  border-radius:13px;
+  background:#fffefa;
+}
+.glossary-page .gcat-inline-art-zoom{
+  display:block;width:100%;padding:0;margin:0;
+  border:0;border-radius:8px;background:transparent;cursor:zoom-in;overflow:hidden;
+}
+.glossary-page .gcat-inline-art-image{
+  display:block;width:100%;height:auto;max-height:min(55dvh,550px);
+  object-fit:contain;border-radius:7px;
+}
+.glossary-page .gcat-art-tip{display:block;text-align:center;margin:5px 0 0;color:#827667;font:550 11px/1.35 "Pretendard Variable",Pretendard,sans-serif}
+.glossary-page .gcat-inline-art-zoom:focus-visible{outline:3px solid #3173a1;outline-offset:3px}
+.glossary-page .gcat-inline-art .gcat-art-choices{gap:5px;flex-wrap:wrap;margin:0 0 8px}
+.glossary-page .gcat-inline-art .gcat-art-choices button{padding:6px 8px;font-size:11px}
+.glossary-page .gcat-resource-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.glossary-page .gcat-resource-actions>:only-child{grid-column:1/-1}
+.glossary-page .gcat-resource-actions .gcat-reference-disclosure>summary{
+  padding:10px 11px;min-height:45px;font-size:12px;gap:4px;word-break:keep-all;
+}
+.glossary-page .gcat-resource-actions .gcat-reference-disclosure>summary::after{margin-left:4px;flex:0 0 auto}
+.glossary-page .gcat-image-viewer{
+  position:fixed;inset:0;margin:auto;
+  width:min(97vw,1050px);max-width:97vw;max-height:96dvh;
+  background:#fffdf9;border:1px solid #e6dbcf;border-radius:15px;padding:12px;
+  box-shadow:0 15px 70px rgba(0,0,0,.35);overflow:auto;
+}
+.glossary-page .gcat-image-viewer:not([open]){display:none}
+.glossary-page .gcat-image-viewer::backdrop{background:rgba(24,21,19,.77)}
+.glossary-page .gcat-image-viewer img{display:block;max-width:100%;max-height:calc(96dvh - 80px);width:auto;height:auto;object-fit:contain;margin:auto}
+.glossary-page .gcat-image-viewer-close{
+  display:block;margin:0 0 8px auto;padding:8px 14px;
+  border:1px solid #e7decf;background:#fff;border-radius:10px;
+  font:700 13px/1.4 "Pretendard Variable",Pretendard,sans-serif;cursor:pointer;
+}
+@media(max-width:719px){
+  .glossary-page .gcat-dialog-body .gcat-reading-sheet.gcat-has-preview{
+    display:flex!important;flex-direction:column!important;gap:10px;
+  }
+  .glossary-page .gcat-reading-sheet.gcat-has-preview>.gcat-definition-section,
+  .glossary-page .gcat-reading-sheet.gcat-has-preview>.gcat-example-section,
+  .glossary-page .gcat-reading-sheet.gcat-has-preview>.gcat-hints-section,
+  .glossary-page .gcat-reading-sheet.gcat-has-preview>.gcat-inline-art,
+  .glossary-page .gcat-reading-sheet.gcat-has-preview>.gcat-resource-actions{width:100%;min-width:0}
+  .glossary-page .gcat-inline-art-zoom{max-width:290px;margin:auto}
+  .glossary-page .gcat-inline-art-image{max-height:390px}
+  .glossary-page .gcat-art-tip{margin-bottom:2px}
+}
