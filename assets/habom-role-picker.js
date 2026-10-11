@@ -305,9 +305,159 @@
     window.setTimeout(laterHeight, 1800);
   }
 
+
+  // 글쓰기 순서를 한 방향으로 정돈합니다. 기존 입력 요소를 이동하므로
+  // FormData / google.script.run / 익명 처리 이벤트는 그대로 유지됩니다.
+  function enhanceWritingFlow() {
+    var roleSelect = document.querySelector('select[name="audience"]');
+    var form = roleSelect && roleSelect.closest("form");
+    if (!form || form.dataset.habomWriteFlow === "yes") return;
+    var kindInput = form.querySelector('select[name="kind"]');
+    var titleInput = form.querySelector('input[name="title"]');
+    var bodyInput = form.querySelector('textarea[name="body"]');
+    var nicknameInput = form.querySelector('input[name="nickname"]');
+    var anonymousInput = form.querySelector('input[name="anonymous"], input#anonymous');
+    var linkInput = form.querySelector('input[name="link"]');
+    if (!kindInput || !bodyInput || !nicknameInput) return;
+
+    function wholeField(control) {
+      if (!control) return null;
+      var node = control.closest(".field, .form-field, .form-line, .input-group");
+      if (!node || node === form || !form.contains(node)) node = control.parentElement;
+      // 다른 입력이 같은 상위 요소에 포함돼 있으면 해당 입력만 이동합니다.
+      var many = node.querySelectorAll("input:not([type='hidden']), select, textarea");
+      if (many.length > 1) {
+        node = control.closest("label") || control.parentElement;
+      }
+      return node;
+    }
+    var kindField = wholeField(kindInput);
+    var titleField = wholeField(titleInput);
+    var bodyField = wholeField(bodyInput);
+    var nicknameField = wholeField(nicknameInput);
+    var anonymousField = wholeField(anonymousInput);
+    var roleField = wholeField(roleSelect);
+    var linkField = wholeField(linkInput);
+    if (!kindField || !bodyField || !nicknameField || !roleField) return;
+
+    var write = el("div", "hfw-writing");
+    write.id = "habom-writing-flow";
+    function step(number, name, help) {
+      var section = el("section", "hfw-step");
+      var head = el("div", "hfw-step-head");
+      head.append(el("span", "hfw-number", String(number)), el("h2", "hfw-step-title", name));
+      section.append(head);
+      if (help) section.append(el("p", "hfw-note", help));
+      return section;
+    }
+    function appendField(destination, field, classname) {
+      if (!field || !destination) return;
+      if (classname) field.classList.add(classname);
+      destination.append(field);
+    }
+
+    var topic = step(1, "어떤 이야기인가요?");
+    appendField(topic, kindField, "hfw-kind");
+    appendField(topic, titleField, "hfw-title");
+
+    var message = step(2, "내용을 적어주세요");
+    appendField(message, bodyField, "hfw-body");
+    if (linkField) {
+      var extras = el("details", "hfw-extras");
+      var summary = el("summary", "", "관련 링크 추가");
+      var optional = el("span", "hfw-optional", "선택사항");
+      summary.append(optional);
+      extras.append(summary);
+      appendField(extras, linkField, "hfw-link");
+      extras.open = !!(linkInput && linkInput.value.trim());
+      message.append(extras);
+    }
+
+    var sender = step(3, "마지막으로 작성자 정보");
+    var senderRow = el("div", "hfw-author");
+    appendField(senderRow, nicknameField, "hfw-nickname");
+    if (anonymousField && anonymousField !== nicknameField) {
+      appendField(senderRow, anonymousField, "hfw-anonymous");
+    }
+    sender.append(senderRow);
+    appendField(sender, roleField, "hfw-role");
+
+    write.append(topic, message, sender);
+    form.insertBefore(write, form.firstChild);
+
+    // 기존 글 남기기 버튼은 동일한 form 안에 유지하며 마지막에 배치합니다.
+    var submit = Array.from(form.querySelectorAll("button")).find(function(button) {
+      return !button.closest("#habom-role-picker") &&
+        (button.type === "submit" || /글\s*남기기|등록하기|작성하기/.test(button.textContent));
+    });
+    var submitOuter = submit && (submit.closest(".submit-row, .form-actions, .actions, .button-row") || submit);
+    if (submitOuter && !write.contains(submitOuter) && form.contains(submitOuter)) {
+      var actions = el("div", "hfw-actions");
+      actions.append(submitOuter);
+      write.append(actions);
+    }
+    form.classList.add("habom-flow-form");
+    form.dataset.habomWriteFlow = "yes";
+
+    // 링크/필드가 접히고 펼쳐져도 iframe의 높이 자동 조절이 반영되도록 합니다.
+    function requestHeight() {
+      window.dispatchEvent(new Event("resize"));
+    }
+    write.querySelectorAll("details").forEach(function(node) {
+      node.addEventListener("toggle", requestHeight);
+    });
+  }
+
+  function addWritingStyle() {
+    if (document.getElementById("habom-writing-style")) return;
+    var style = el("style");
+    style.id = "habom-writing-style";
+    style.textContent = [
+      "form.habom-flow-form{display:block!important;max-width:760px!important;width:100%!important;margin:0 auto!important;padding:0!important;grid-template-columns:none!important;gap:0!important;}",
+      "#habom-writing-flow{display:block;width:100%;max-width:100%;color:#293c34;font:inherit}",
+      "#habom-writing-flow *{box-sizing:border-box}",
+      "#habom-writing-flow .hfw-step{display:block!important;position:relative;min-width:0;max-width:100%;padding:20px 0 25px;margin:0;border-bottom:1px solid #e6ede7;}",
+      "#habom-writing-flow .hfw-step:first-child{padding-top:4px}",
+      "#habom-writing-flow .hfw-step:nth-child(3){border-bottom:0;padding-bottom:10px}",
+      "#habom-writing-flow .hfw-step-head{display:flex;gap:9px;align-items:center;margin:0 0 16px}",
+      "#habom-writing-flow .hfw-number{display:inline-flex;align-items:center;justify-content:center;flex:none;width:25px;height:25px;border-radius:50%;background:#eaf4ed;color:#3c7956;font-size:12px;font-weight:800}",
+      "#habom-writing-flow .hfw-step-title{margin:0;color:#2a4136;font:inherit;font-size:17px;font-weight:800;line-height:1.35}",
+      "#habom-writing-flow .hfw-note{margin:0 0 12px;color:#7f8e83;font-size:12px;line-height:1.5}",
+      "#habom-writing-flow .field,#habom-writing-flow .form-field,#habom-writing-flow .form-line{display:block!important;position:relative!important;grid-area:auto!important;grid-column:auto!important;grid-row:auto!important;min-width:0!important;max-width:none!important;width:100%!important;min-height:0!important;height:auto!important;margin:0 0 15px!important;padding:0!important;align-self:auto!important;justify-self:stretch!important}",
+      "#habom-writing-flow .hfw-role{margin-bottom:0!important}",
+      "#habom-writing-flow label:not(.hfw-anonymous label){display:block;margin:0 0 7px;color:#3b5144;font-size:13px;font-weight:700;line-height:1.4}",
+      "#habom-writing-flow input:not([type='checkbox']):not([type='hidden']),#habom-writing-flow select,#habom-writing-flow textarea{display:block;width:100%!important;min-width:0!important;max-width:100%!important;padding:11px 13px!important;margin:0!important;box-sizing:border-box;border:1px solid #d6e2da!important;border-radius:10px!important;background:#fff!important;color:#34453b!important;font:inherit!important;font-size:14px!important;line-height:1.5!important;box-shadow:none!important;outline:none}",
+      "#habom-writing-flow input:not([type='checkbox']):focus,#habom-writing-flow select:focus,#habom-writing-flow textarea:focus{border-color:#68a281!important;box-shadow:0 0 0 3px rgba(83,150,110,.12)!important}",
+      "#habom-writing-flow input::placeholder,#habom-writing-flow textarea::placeholder{color:#9ba8a0!important;opacity:1}",
+      "#habom-writing-flow .hfw-kind select{display:block!important;width:100%!important;height:46px!important;min-height:46px!important;max-height:46px!important}",
+      "#habom-writing-flow .hfw-body textarea{min-height:145px!important;resize:vertical!important}",
+      "#habom-writing-flow .hfw-extras{margin:1px 0 0;padding:0;border:0;background:none}",
+      "#habom-writing-flow .hfw-extras summary{list-style:none;display:flex;align-items:center;gap:10px;width:max-content;max-width:100%;min-height:39px;padding:0 1px;color:#488266;font-size:13px;font-weight:700;cursor:pointer}",
+      "#habom-writing-flow .hfw-extras summary::-webkit-details-marker{display:none}",
+      "#habom-writing-flow .hfw-extras summary:before{content:'+';display:inline-flex;width:18px;height:18px;border:1px solid #91b69e;border-radius:50%;align-items:center;justify-content:center;font-size:14px;font-weight:500}",
+      "#habom-writing-flow .hfw-extras[open] summary:before{content:'−'}",
+      "#habom-writing-flow .hfw-optional{font-size:11px;color:#8c9b91;font-weight:500}",
+      "#habom-writing-flow .hfw-link{margin:9px 0 2px!important}",
+      "#habom-writing-flow .hfw-author{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:end}",
+      "#habom-writing-flow .hfw-nickname{min-width:0!important;margin:0 0 16px!important}",
+      "#habom-writing-flow .hfw-anonymous{width:auto!important;margin:0 0 16px!important;align-self:end!important;min-height:46px!important;display:flex!important;align-items:center!important}",
+      "#habom-writing-flow .hfw-anonymous label{display:flex!important;align-items:center!important;justify-content:flex-start!important;flex-wrap:nowrap!important;gap:8px!important;white-space:nowrap!important;font-size:13px!important;color:#344e3d!important;margin:0!important}",
+      "#habom-writing-flow .hfw-anonymous input[type='checkbox']{display:inline-block!important;flex:0 0 17px!important;width:17px!important;height:17px!important;min-width:17px!important;max-width:17px!important;min-height:17px!important;margin:0!important;accent-color:#488569}",
+      "#habom-writing-flow .hfw-role #habom-role-picker{margin:0;width:100%}",
+      "#habom-writing-flow .hfw-role #habom-role-picker .hrp-trigger{font-weight:550;font-size:13px;min-height:44px}",
+      "#habom-writing-flow .hfw-actions{display:flex;justify-content:flex-start;align-items:center;gap:10px;padding:7px 0 3px}",
+      "#habom-writing-flow .hfw-actions button{min-height:45px;padding:10px 24px;border-radius:12px;font-size:14px;font-weight:800}",
+      "form.habom-flow-form > .hfw-writing + .field{margin-top:5px}",
+      "@media(max-width:600px){form.habom-flow-form{width:100%!important;padding:0!important}#habom-writing-flow .hfw-step{padding:17px 0 21px}#habom-writing-flow .hfw-step-title{font-size:16px}#habom-writing-flow .hfw-author{grid-template-columns:minmax(0,1fr);gap:0}#habom-writing-flow .hfw-nickname{margin-bottom:9px!important}#habom-writing-flow .hfw-anonymous{min-height:30px!important;margin-bottom:15px!important}#habom-writing-flow .hfw-actions button{width:100%;max-width:100%}#habom-writing-flow .hfw-actions{display:block}}"
+    ].join("\n");
+    document.head.appendChild(style);
+  }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init, { once: true });
+    document.addEventListener("DOMContentLoaded", function() { init(); addWritingStyle(); enhanceWritingFlow(); }, { once: true });
   } else {
     init();
+    addWritingStyle();
+    enhanceWritingFlow();
   }
 })();
