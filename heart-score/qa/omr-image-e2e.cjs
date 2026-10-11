@@ -67,7 +67,27 @@ const variant=arg('variant','original'),coreOnly=process.argv.includes('--core-o
       fs.writeFileSync(path.join(out,'barline-overlay.png'),Buffer.from(overlay,'base64'));
     }
   }
-  const report={...comparison,draftComparison,variant,mobile,coreOnly,optionalTitleLyricsOcr:coreOnly?'excluded':'enabled',elapsedMs:Date.now()-start,fixtureSha256:hash,url,actual,analysis:analyses.at(-1),logs,requests};
-  fs.writeFileSync(path.join(out,'result.json'),JSON.stringify(report,null,2));await page.screenshot({path:path.join(out,'screen.png'),fullPage:true});console.log(JSON.stringify({ok:report.ok,variant,mobile,coreOnly,elapsedMs:report.elapsedMs,measures:report.measures,notes:report.notes,rests:report.rests,errors:report.errors.slice(0,12),errorCount:report.errors.length,status:actual.status,draftOnly:{ok:report.draftComparison?.ok,measures:report.draftComparison?.measures,notes:report.draftComparison?.notes,rests:report.draftComparison?.rests,errors:report.draftComparison?.errors?.slice(0,24),totalErrors:report.draftComparison?.errors?.length},keyLabel:report.analysis?.state?.keyLabel,deskew:report.analysis?.deskew,deskewApplied:report.analysis?.deskewApplied,candidates:report.analysis?.candidateDiagnostics,rawBarGeometry:report.analysis?.rawBarGeometry}));process.exitCode=report.ok?0:1;
+  // Synthetic-fixture diagnostics only: localize missing events by exact printed
+  // measure and keep the entire pitch/duration mismatch list. Never use the
+  // ground truth to adjust recognizer output or to accept a bad import.
+  const draftState=analyses.at(-1)?.state;
+  const perBarDiagnostics=truth.measures.map((expected,i)=>{
+    const actualBar=draftState?.measures?.[i]||[];
+    const different=actualBar.length!==expected.length||expected.some((e,j)=>e.note!==actualBar[j]?.note||Math.abs(e.dur-(actualBar[j]?.dur??NaN))>1e-8);
+    if(!different)return null;
+    const row=(truth.perLine||[]).findIndex((_,r)=>i<(truth.perLine||[]).slice(0,r+1).reduce((a,b)=>a+b,0));
+    const before=(truth.perLine||[]).slice(0,row).reduce((a,b)=>a+b,0),bar=i-before;
+    const geometry=analyses.at(-1)?.rawBarGeometry;
+    const scan=geometry?.scanRows?.[row],staff=scan?.cvStaff,bars=geometry?.chosenBarXs?.[row]||[];
+    const x0=bar===0?staff?.x0:bars[bar-1]?.x;
+    const x1=bar===bars.length?staff?.x1:bars[bar]?.x;
+    return{bar:i+1,staffRow:row+1,region:Number.isFinite(x0)&&Number.isFinite(x1)?{x0:Math.round(x0),x1:Math.round(x1),y0:Math.round(staff.lines[0]-staff.spacing*5),y1:Math.round(staff.lines[4]+staff.spacing*4)}:null,
+      expected,actual:actualBar,
+      differences:expected.map((e,j)=>({event:j+1,expected:e,actual:actualBar[j]||null})).filter(v=>v.actual?.note!==v.expected.note||Math.abs((v.actual?.dur??NaN)-v.expected.dur)>1e-8),
+      extra:actualBar.slice(expected.length)};
+  }).filter(Boolean);
+  if(perBarDiagnostics.length)console.log('OMR_PER_BAR_DIAGNOSTICS='+JSON.stringify({variant,mobile,perBarDiagnostics}));
+  const report={...comparison,draftComparison,perBarDiagnostics,variant,mobile,coreOnly,optionalTitleLyricsOcr:coreOnly?'excluded':'enabled',elapsedMs:Date.now()-start,fixtureSha256:hash,url,actual,analysis:analyses.at(-1),logs,requests};
+  fs.writeFileSync(path.join(out,'result.json'),JSON.stringify(report,null,2));await page.screenshot({path:path.join(out,'screen.png'),fullPage:true});console.log(JSON.stringify({ok:report.ok,variant,mobile,coreOnly,elapsedMs:report.elapsedMs,measures:report.measures,notes:report.notes,rests:report.rests,errors:report.errors.slice(0,12),errorCount:report.errors.length,status:actual.status,draftOnly:{ok:report.draftComparison?.ok,measures:report.draftComparison?.measures,notes:report.draftComparison?.notes,rests:report.draftComparison?.rests,errors:report.draftComparison?.errors,totalErrors:report.draftComparison?.errors?.length},keyLabel:report.analysis?.state?.keyLabel,deskew:report.analysis?.deskew,deskewApplied:report.analysis?.deskewApplied,candidates:report.analysis?.candidateDiagnostics,rawBarGeometry:report.analysis?.rawBarGeometry}));process.exitCode=report.ok?0:1;
  }catch(error){fs.writeFileSync(path.join(out,'failure.json'),JSON.stringify({ok:false,error:String(error),logs,requests,analyses},null,2));throw error;}finally{await browser?.close();await new Promise(resolve=>server?server.close(resolve):resolve());}
 })().catch(e=>{console.error(e);process.exitCode=1;});
