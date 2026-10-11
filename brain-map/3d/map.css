@@ -122,3 +122,6 @@ body.parent-brain-page{background:#f8faf5;color:#2c4032;font-family:Pretendard,s
  .activity-grid .illustration{width:38px;height:59px;flex-basis:38px}
 }
 @media(prefers-reduced-motion:reduce){.brain-wrap *{transition:none!important}}
+
+.hint-mobile{display:none}
+@media(max-width:700px){.hint-wide{display:none}.hint-mobile{display:inline}}
