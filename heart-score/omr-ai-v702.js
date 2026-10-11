@@ -11,6 +11,7 @@ import {planBarRows} from './omr-bar-consensus-v1.mjs?v=703';
 import {recoverFaintBarlines} from './omr-bar-rescue-v1.mjs?v=703';
 import {deskewScoreCanvas} from './omr-deskew-v1.mjs?v=1';
 import {findFilledHeadNearModelRest} from './omr-notehead-evidence-v1.mjs?v=1';
+import {diagnoseScoreIssue} from './omr-quality-guidance-v1.mjs?v=1';
 
 const W=window;
 const ORT_VERSION='1.27.0';
@@ -30,9 +31,21 @@ function busy(label='새 악보를 분석하고 있어요…'){
   preview('');const pages=el('pages'),info=el('pageInfo');if(info)info.textContent='새 악보 분석 중';
   if(pages)pages.innerHTML=`<div style="margin:24px auto;max-width:620px;padding:28px 22px;border:1px solid #dbe3ef;border-radius:22px;background:#fff;text-align:center;font-weight:850;color:#233654;overflow-wrap:anywhere">🎼 ${esc(label)}<div style="margin-top:8px;font-size:13px;font-weight:600;color:#718096">이전 저장 결과는 새 분석 결과처럼 보여주지 않습니다.</div></div>`;
 }
-function stopped(msg){
-  const pages=el('pages'),info=el('pageInfo');if(info)info.textContent='자동 변환 보류';
-  if(pages)pages.innerHTML=`<div style="margin:24px auto;max-width:650px;padding:26px 22px;border:1px solid #f2c9c9;border-radius:22px;background:#fffafa;color:#7b2f36;overflow-wrap:anywhere;word-break:break-word"><div style="font-size:18px;font-weight:900">자동 변환을 중단했어요</div><div style="margin-top:9px;line-height:1.6;font-weight:650">${esc(msg)}</div><div style="margin-top:10px;font-size:13px;color:#8d6670">틀린 악보를 성공으로 표시하지 않습니다. MusicXML/MIDI는 그대로 사용할 수 있어요.</div></div>`;
+function stopped(problem){
+  const issue=typeof problem==='string'?{title:'악보를 정확하게 읽지 못했어요',reason:problem,action:'원본 악보를 더 선명하게 촬영하여 다시 올려 주세요.'}:problem;
+  const pages=el('pages'),info=el('pageInfo');
+  if(info)info.textContent='악보 자동 변환 보류';
+  if(pages)pages.innerHTML=`<section role="alert" style="margin:18px auto;max-width:650px;padding:22px 20px;border:1px solid #e7d0bc;border-radius:20px;background:#fffaf5;color:#443628;overflow-wrap:anywhere;word-break:keep-all;font-family:inherit">
+    <div style="font-size:14px;font-weight:800;color:#97582d">⚠ 자동 변환을 중단했어요</div>
+    <div style="margin-top:8px;font-size:20px;font-weight:900;line-height:1.4">${esc(issue.title||'악보를 정확하게 읽지 못했어요')}</div>
+    <p style="margin:12px 0 0;font-size:15px;line-height:1.6;font-weight:600">${esc(issue.reason||'악보 인식 결과를 확인할 수 없어요.')}</p>
+    <div style="margin-top:14px;padding:14px 15px;border-radius:14px;background:#fff;border:1px solid #e6dfd4">
+      <div style="font-size:14px;font-weight:850;color:#6b4b23">📷 이렇게 다시 해보세요</div>
+      <p style="margin:6px 0 0;font-size:14px;line-height:1.6">${esc(issue.action||'원본 파일로 다시 시도해 주세요.')}</p>
+    </div>
+    ${issue.detail?`<div style="margin-top:9px;color:#786d62;font-size:12px">${esc(issue.detail)}</div>`:''}
+    <div style="margin-top:14px;color:#725f4e;font-size:12px;line-height:1.5">정확하지 않은 결과는 저장하지 않아요. 사진을 다시 선택하면 재시도할 수 있어요.</div>
+  </section>`;
 }
 function assertHost(){
   const names=['fileToCanvas','pdfToCanvases','emptyState','ev','nearestDuration','loadState','resetActiveLibrary','mergeImportedStates','summariseImportedState','findStaffSystems','omrConnectedHeads','omrPitchFromY','omrFindBarlines','omrMeasureDurations','omrGrayAt'];
@@ -540,7 +553,7 @@ async function recognizeCanvas(canvas,filename,pageIndex){
   const sourceGray=canvasGray(canvas),deskew=deskewScoreCanvas(canvas,sourceGray);
   canvas=deskew.canvas;
   const rt=await ensureRuntime(),gray=deskew.applied?canvasGray(canvas):sourceGray,chosen=choosePreprocess(rt,gray,canvas.width,canvas.height);if(!chosen)return{staffDetected:false};
-  const {pre,inputs,threshold}=chosen;if(!(pre.inputs||[]).length)return{staffDetected:false};if(!inputs.length)return{staffDetected:true,ok:false,reason:'오선은 찾았지만 본문 악보 줄을 안정적으로 분리하지 못했습니다.'};
+  const {pre,inputs,threshold}=chosen;if(!(pre.inputs||[]).length)return{staffDetected:false};if(!inputs.length)return{staffDetected:true,ok:false,reason:diagnoseScoreIssue({stage:'staff-split'})};
   const scanLike=threshold>=.78;
   status(`본문 악보 ${inputs.length}줄 감지 · 원본+스캔보정 이중 판독 · 음표 읽는 중…`);
   const decodeInput=async(input,modelInput,i)=>{const tensor=new W.ort.Tensor('float32',modelInput.data,[1,1,modelInput.height,modelInput.width]),res=await rt.session.run({input:tensor}),logits=res.logits;if(!logits?.data)return null;const dims=logits.dims||[],T=dims[dims.length-2],C=dims[dims.length-1];if(!T||!C)return null;const tokens=rt.dec.decodeLine(logits.data,T,C,rt.i2w),b=input.box,staff={page:pageIndex,system:i,staffIndex:0,bbox:[b.x,b.y,b.w,b.h],lineSpacingPx:b.lineSpacing,normSpacing:10},fragment=rt.dec.lineFragment(tokens,staff);return{system:i,input,fragment,tokens};};
@@ -620,7 +633,7 @@ async function recognizeCanvas(canvas,filename,pageIndex){
       if(tail){const notes=musicalEvents(tail.fragment).filter(v=>v.ir.kind==='note');tailDiag={start:edge.start,notes:notes.length,xs:notes.map(v=>Math.round(v.x)),rests:musicalEvents(tail.fragment).filter(v=>v.ir.kind==='rest').map(v=>Math.round(v.x))};}}
     const symbolList=fragment=>musicalEvents(fragment||[]).map(v=>({x:Math.round(v.x),kind:v.ir.kind,p:pitchName(v.ir.pitch),dur:v.e.dur,conf:+(Number(v.ir.confidence)||0).toFixed(2)}));
     passDiagnostics.push({tailDiag,system:i,structuralRestCorrections,consensusCorrections,restToNoteCorrections,enhancedRejectedForCollapse,rawSymbols:symbolList(raw.fragment),enhancedSymbols:enhancedLine?symbolList(enhancedLine.fragment):null,rawNotes:musicalEvents(raw.fragment).filter(v=>v.ir.kind==='note').length,rawRests:raw.fragment.filter(v=>v.kind==='rest').length,rawScore,chosenNotes:musicalEvents(chosenLine.fragment).filter(v=>v.ir.kind==='note').length,chosenRests:chosenLine.fragment.filter(v=>v.kind==='rest').length,chosenChanged:chosenLine!==raw});lines.push(chosenLine);}
-  if(!lines.length)return{staffDetected:true,ok:false,reason:'오선은 찾았지만 음표를 읽어내지 못했습니다.'};
+  if(!lines.length)return{staffDetected:true,ok:false,reason:diagnoseScoreIssue({notEnough:true})};
   const cvStaffs=W.findStaffSystems(canvas);
   // A long-staff decoder can lose a final half/whole note. Only add when a
   // genuine white-centered ellipse with ink all around it is visible past
@@ -646,7 +659,13 @@ async function recognizeCanvas(canvas,filename,pageIndex){
     const rank=c=>candidateScore(c)-(c.segmentation==='visual-fit'&&c.state.measures.length<=lines.length*1.2?150:0);
     return rank(b)-rank(a);
   })[0]),q=measureQa(built.state),staves=lines.length,suspiciousShort=staves>=3&&built.state.measures.length<=4,enough=built.noteCount>=Math.max(6,staves*3)&&built.state.measures.length>=Math.max(2,Math.floor(staves*.8)),rhythmOk=built.segmentation==='cv-hybrid'?(q.over===0&&q.exactRatio>=.99):built.segmentation==='visual-fit'?(q.over===0&&q.exactRatio>=.99&&built.barGeometry?.support>=2&&((built.correctionAvg<=.20&&built.rawExactRatio>=.75)||(built.correctionAvg<=.12&&built.rawExactRatio>=.40&&built.barGeometry?.support>=3))):(q.over===0&&(q.exactRatio>=.9||(built.state.measures.length<=2&&q.exactRatio>=.5))),confOk=built.avgConfidence>=.45,shapeOk=!built.shapeEvidence||built.shapeEvidence.every(row=>row.every(e=>Number.isFinite(e.rhythm.dur)&&e.rhythm.dur>0));
-  W.dispatchEvent(new CustomEvent('ulmoa:omr-analysis',{detail:{version:'702',staves,threshold,boxes:lines.map(l=>l.input.box),state:built.state,noteCount:built.noteCount,restCount:built.restCount||0,barGeometry:built.barGeometry,quality:q,shapeEvidence:built.shapeEvidence,segmentation:built.segmentation,accepted:!suspiciousShort&&enough&&rhythmOk&&confOk&&shapeOk,
+  const scanSpacings=inputs.map(v=>Number(v.box?.lineSpacing)).filter(v=>Number.isFinite(v)&&v>0).sort((a,b)=>a-b);
+  const staffSpacing=scanSpacings.length?scanSpacings[Math.floor(scanSpacings.length/2)]:0;
+  const rejection=diagnoseScoreIssue({width:canvas.width,height:canvas.height,staffDetected:true,staffSpacing,
+    skewDegrees:deskew.estimate?.degrees,skewConfidence:deskew.estimate?.confidence,
+    correctionAvg:built.correctionAvg,rawExactRatio:built.rawExactRatio,
+    notEnough:!enough||suspiciousShort,lowConfidence:!confOk});
+  W.dispatchEvent(new CustomEvent('ulmoa:omr-analysis',{detail:{version:'702',rejection:!suspiciousShort&&enough&&rhythmOk&&confOk&&shapeOk?null:rejection,staves,threshold,boxes:lines.map(l=>l.input.box),state:built.state,noteCount:built.noteCount,restCount:built.restCount||0,barGeometry:built.barGeometry,quality:q,shapeEvidence:built.shapeEvidence,segmentation:built.segmentation,accepted:!suspiciousShort&&enough&&rhythmOk&&confOk&&shapeOk,
     visualOpticalDebug:visualBuilt.opticalDebug,
     candidateDiagnostics:[modelBuilt,visualBuilt,beatBuilt,hybridBuilt].filter(Boolean).map(v=>({
       method:v.segmentation||'model',measures:v.state.measures.length,notes:v.noteCount,
@@ -659,7 +678,7 @@ async function recognizeCanvas(canvas,filename,pageIndex){
       return musicalEvents(line.fragment).filter(v=>v.ir.kind==='note').map(v=>({x:Math.round(v.x),note:v.e.note,conf:+(Number(v.ir.confidence)||0).toFixed(2),feature:printedAccidentalProbe(gray,canvas.width,canvas.height,staff,v.x,v.e.note)})).filter(v=>/[파시]|[#♭]/.test(v.note));
     }),perLine:barPlan.perLine,support:barPlan.support,modalInternalBars:barPlan.modalInternalBars,chosenBarXs:barPlan.plans.map(p=>p.chosen.map(v=>({x:Math.round(v.x),side:Number(v.side),source:v.source||'long-vertical'}))),threshold,passDiagnostics,openTailEvidence,scanRows:geometryLines.map((line,i)=>({box:line.input.box,cvStaff:cvStaffs[i]?{x0:cvStaffs[i].x0,x1:cvStaffs[i].x1,spacing:cvStaffs[i].spacing,lines:cvStaffs[i].lines}:null,heads:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).length:null,headXs:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).map(h=>Math.round(h.x)):null,hollowHeads:cvStaffs[i]?scanHollowHeads(cvStaffs[i]).map(h=>({x:h.x,k:h.k,ring:h.ring})).slice(0,40):null,modelNoteXs:musicalEvents(lines[i].fragment).filter(v=>v.ir.kind==='note').map(v=>Math.round(v.x)),modelShapes:modelNoteShapeDiagnostics(cvStaffs[i],lines[i].fragment),pitchProposals:visualPitchProposals(cvStaffs[i],lines[i].fragment),modelRestXs:musicalEvents(lines[i].fragment).filter(v=>v.ir.kind==='rest').map(v=>Math.round(v.x)),connectedHeads:cvStaffs[i]?scanConnectedHeads(cvStaffs[i]).map(q=>({x:Math.round(q.x),y:Math.round(q.y),area:q.area,synthetic:!!q.synthetic})).slice(0,45):[],strict:visualBarCandidates(gray,canvas.width,canvas.height,line).filter(v=>v.side<=.12).map(v=>({x:Math.round(v.x),side:+v.side.toFixed(2)})).slice(0,20),rescue:recoverFaintBarlines(gray,canvas.width,canvas.height,line.input.box).map(v=>Math.round(v.x)).slice(0,20)}))}
   }}));
-  if(suspiciousShort||!enough||!rhythmOk||!confOk||!shapeOk)return{staffDetected:true,ok:false,reason:`AI가 ${staves}개 악보 줄을 찾았지만 결과 검증을 통과하지 못했습니다. (${built.state.measures.length}마디 · 음표 ${built.noteCount}개 · 박자일치 ${Math.round(q.exactRatio*100)}% · 신뢰도 ${Math.round(built.avgConfidence*100)}%${built.segmentation==='visual-fit'?` · 마디 ${built.barGeometry?.perLine?.join('·')||'?'} · 원판독 ${Math.round((built.rawExactRatio||0)*100)}% · 평균리듬보정 ${(built.correctionAvg||0).toFixed(2)}박`:''} · ${built.segmentation==='cv-hybrid'?'오선기하+AI 쉼표':built.segmentation==='visual-fit'?'인쇄 마디선+4/4 보정':built.segmentation==='beat-dp'?'4/4 박자 재구성':'AI 마디선'} 기준)`};
+  if(suspiciousShort||!enough||!rhythmOk||!confOk||!shapeOk)return{staffDetected:true,ok:false,reason:rejection};
   if(typeof W.ocrCanvas==='function'&&typeof W.attachOcrToOmr==='function'){try{status('음표 인식 완료 · 제목과 가사 위치 확인 중…');const data=await W.ocrCanvas(canvas,'제목·가사 OCR');const safeText={...data,lines:scanTitleCandidates(data,canvas),words:(data.words||[]).filter(w=>Number(w.confidence)>=75)};W.attachOcrToOmr(built.cvSystems?{state:built.state,systems:built.cvSystems}:lyricAdapter(lines,built),safeText,filename);}catch(err){console.warn('AI OMR lyric OCR skipped',err);}}
   return{staffDetected:true,ok:true,state:built.state,staves,noteCount:built.noteCount,restCount:built.restCount||0,avgConfidence:built.avgConfidence,quality:q,threshold,segmentation:built.segmentation||'model',scanEnhanced:scanLike,barGeometry:built.barGeometry,correctionAvg:built.correctionAvg,rawExactRatio:built.rawExactRatio};
 }
@@ -687,8 +706,8 @@ async function pdfScanCanvases(file){
 }
 async function aiImport(file){
   if(!file)return;busy();status('AI 악보 인식 준비 중…');
-  try{const isPdf=/pdf$/i.test(file.type)||/\.pdf$/i.test(file.name||''),canvases=isPdf?await pdfScanCanvases(file):[await W.fileToCanvas(file,2200)],states=[],stats=[];let anyStaff=false;for(let i=0;i<canvases.length;i++){status(`${isPdf?'PDF':'이미지'} ${i+1}/${canvases.length} · 오선 찾는 중…`);const r=await recognizeCanvas(canvases[i],file.name,i);anyStaff=anyStaff||r.staffDetected;if(r.staffDetected&&!r.ok){stopped(r.reason);status('⚠ '+r.reason,'warn');return;}if(r.ok){states.push(r.state);stats.push(r);}}if(anyStaff&&states.length){const merged=W.mergeImportedStates(states,file.name);if(!merged)throw new Error('AI 인식 결과를 합치지 못했습니다.');W.resetActiveLibrary();W.loadState(merged);const notes=stats.reduce((a,v)=>a+v.noteCount,0),staves=stats.reduce((a,v)=>a+v.staves,0),avg=stats.reduce((a,v)=>a+v.avgConfidence,0)/stats.length;preview(W.summariseImportedState(merged),`AI OMR β · ${staves}줄 · ${merged.measures.length}마디 · 음표 ${notes}개 · 평균 신뢰도 ${Math.round(avg*100)}%`);status(`✓ AI 악보 초안 완료 · ${merged.measures.length}마디. 저장 전 원본과 계이름·리듬·쉼표·임시표를 대조해 주세요.`,'ok');return;}if(typeof legacyImport==='function'){status('오선보가 아니라 기존 계이름/OCR 방식으로 전환합니다…');return legacyImport(file);}throw new Error('악보 인식 방식을 선택하지 못했습니다.');}
-  catch(err){console.error(err);const msg=err?.message||String(err);stopped(msg);status('분석 실패: '+msg,'warn');preview('');}
+  try{const isPdf=/pdf$/i.test(file.type)||/\.pdf$/i.test(file.name||''),canvases=isPdf?await pdfScanCanvases(file):[await W.fileToCanvas(file,2200)],states=[],stats=[];let anyStaff=false;for(let i=0;i<canvases.length;i++){status(`${isPdf?'PDF':'이미지'} ${i+1}/${canvases.length} · 오선 찾는 중…`);const r=await recognizeCanvas(canvases[i],file.name,i);anyStaff=anyStaff||r.staffDetected;if(r.staffDetected&&!r.ok){stopped(r.reason);status('⚠ 이미지 인식 결과 검증에 실패했어요. 아래 원인과 방법을 확인해 주세요.','warn');return;}if(r.ok){states.push(r.state);stats.push(r);}}if(anyStaff&&states.length){const merged=W.mergeImportedStates(states,file.name);if(!merged)throw new Error('AI 인식 결과를 합치지 못했습니다.');W.resetActiveLibrary();W.loadState(merged);const notes=stats.reduce((a,v)=>a+v.noteCount,0),staves=stats.reduce((a,v)=>a+v.staves,0),avg=stats.reduce((a,v)=>a+v.avgConfidence,0)/stats.length;preview(W.summariseImportedState(merged),`AI OMR β · ${staves}줄 · ${merged.measures.length}마디 · 음표 ${notes}개 · 평균 신뢰도 ${Math.round(avg*100)}%`);status(`✓ AI 악보 초안 완료 · ${merged.measures.length}마디. 저장 전 원본과 계이름·리듬·쉼표·임시표를 대조해 주세요.`,'ok');return;}if(typeof legacyImport==='function'){status('오선보가 아니라 기존 계이름/OCR 방식으로 전환합니다…');return legacyImport(file);}throw new Error('악보 인식 방식을 선택하지 못했습니다.');}
+  catch(err){console.error(err);const msg=err?.message||String(err);const issue=diagnoseScoreIssue({stage:/PDF 4쪽/.test(msg)?'pdf-limit':/다운로드|불러오|fetch|WASM|Runtime|Session|ORT|network/i.test(msg)?'engine-error':'load-error'});stopped(issue);status('⚠ '+issue.title,'warn');preview('');}
 }
 
 if(new URLSearchParams(location.search).get('aiomr')==='702'){
