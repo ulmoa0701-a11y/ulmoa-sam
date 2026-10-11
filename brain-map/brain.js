@@ -42,4 +42,54 @@
  });
  close.addEventListener('click',reset);
  reset();
+ // The current six-lobe diagram remains the default. The second tab is a genuine
+ // DOM/SVG lesson with live selection, not a flattened generated image.
+ const viewTabs=[...document.querySelectorAll('[data-brain-view]')];
+ const viewPanels={lobes:document.getElementById('lobesView'),hemispheres:document.getElementById('hemispheresView')};
+ const sideButtons=[...document.querySelectorAll('[data-hemi-select]')];
+ const heroSvg=document.querySelector('.hemi-hero-svg');
+ const focus=document.getElementById('hemiFocus');
+ const sideCopy={
+  left:['💬 좌뇌를 살펴보고 있어요','말과 문장을 다루는 기능에 상대적으로 많이 관여해요.'],
+  right:['🧭 우뇌를 살펴보고 있어요','물건의 위치와 말투에 담긴 느낌을 알아차릴 때 상대적으로 더 관여할 수 있어요.'],
+  both:['🤝 함께 일하는 뇌','좌뇌와 우뇌는 한 팀! 어느 한쪽만 쓰는 건 아니에요.']
+ };
+ function selectSide(key){
+  const parts=sideCopy[key];if(!parts||!focus||!heroSvg)return;
+  sideButtons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.hemiSelect===key)));
+  heroSvg.setAttribute('data-focused',key);
+  focus.querySelector('b').textContent=parts[0];
+  focus.querySelector('span').textContent=parts[1];
+ }
+ function chooseView(key,updateHash=true){
+  if(!viewPanels[key])return;
+  for(const [name,panel] of Object.entries(viewPanels)){
+   panel.hidden=name!==key;
+  }
+  viewTabs.forEach(button=>button.setAttribute('aria-selected',String(button.dataset.brainView===key)));
+  if(updateHash)window.history.replaceState(null,'',key==='hemispheres'?'#hemispheres':'#lobes');
+ }
+ for(const button of viewTabs){
+  button.addEventListener('click',()=>chooseView(button.dataset.brainView));
+  button.addEventListener('keydown',e=>{
+    if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight')return;
+    e.preventDefault();
+    const next=button.dataset.brainView==='lobes'?'hemispheres':'lobes';
+    chooseView(next);
+    viewTabs.find(b=>b.dataset.brainView===next)?.focus();
+  });
+ }
+ for(const button of sideButtons){
+  const activate=()=>selectSide(button.dataset.hemiSelect);
+  button.addEventListener('click',activate);
+  if(button.tagName.toLowerCase()==='g'){
+   button.addEventListener('keydown',e=>{
+    if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();}
+   });
+  }
+ }
+ selectSide('both');
+ chooseView(location.hash==='#hemispheres'?'hemispheres':'lobes',false);
+ window.addEventListener('hashchange',()=>chooseView(location.hash==='#hemispheres'?'hemispheres':'lobes',false));
+
 })();
