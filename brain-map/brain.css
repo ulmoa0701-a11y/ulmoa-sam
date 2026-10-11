@@ -276,3 +276,57 @@
  .hemi-ability-list small{font-size:10.5px}
  .hemi-title-illustration{width:28px;height:28px;flex-basis:28px}
 }
+
+
+/* 2026-10-11: reading comfort and shorter first screen for the comparison.
+   Keep the six-region map and its separately approved styles unchanged. */
+.hemi-example{transform:none;margin-bottom:0;margin-top:auto}
+.hemi-side-title{min-height:60px}
+.hemi-side-title:focus-visible{outline:3px solid #356d4b!important;outline-offset:3px}
+.hemi-hero-svg .hemi-svg-side:focus-visible{filter:drop-shadow(0 0 5px #316f4c)}
+@media(max-width:760px){
+ .brain-view-tabs button{min-height:62px;font-size:15px;line-height:1.25;padding:8px 6px}
+ .brain-view-tabs button small{font-size:11.5px;line-height:1.35}
+ .hemi-intro{padding-bottom:8px}
+ .hemi-intro p{font-size:13px;line-height:1.5}
+ .hemi-study-grid{gap:9px}
+ .hemi-hero{
+   display:grid;
+   grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);
+   grid-template-areas:"art focus" "caption focus";
+   align-items:center;gap:3px 8px;
+   padding:7px 8px;border:1px solid #e1eee2
+ }
+ .hemi-hero-svg{grid-area:art;width:100%;max-width:180px;max-height:203px;justify-self:center}
+ .hemi-art-caption{grid-area:caption;font-size:10.5px;line-height:1.4}
+ .hemi-focus{grid-area:focus;align-self:center;max-width:none;min-width:0;
+   margin:0;padding:11px 7px;gap:6px}
+ .hemi-focus b{font-size:14px;line-height:1.4}
+ .hemi-focus span{font-size:12.5px;line-height:1.5}
+ .hemi-side-title{min-height:48px;justify-content:flex-start;padding:9px 7px}
+ .hemi-side-title strong{font-size:19px}
+ .hemi-side-title small,.hemi-select-hint{display:none}
+ .hemi-title-illustration{width:29px;height:29px;flex-basis:29px;font-size:19px}
+ .hemi-ability-list li{padding:10px 8px;min-height:100px;gap:6px}
+ .hemi-ability-list b{font-size:13.5px;line-height:1.4}
+ .hemi-ability-list small{font-size:12.5px;line-height:1.45}
+ .hemi-example{padding:10px 8px}
+ .hemi-example strong{font-size:12px}
+ .hemi-example p{font-size:12.5px;line-height:1.5}
+ .hemi-team-examples span{font-size:13px}
+ .hemi-team-examples b{font-size:13px}
+ .hemi-team>p,.hemi-caution{font-size:12.5px}
+ .hemi-study-sources{font-size:12px}
+}
+@media(max-width:370px){
+ .hemi-hero{grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);gap:3px 6px;padding:7px 5px}
+ .hemi-hero-svg{max-width:156px;max-height:175px}
+ .hemi-focus{padding:8px 5px}
+ .hemi-focus b{font-size:13px}
+ .hemi-focus span{font-size:12px}
+ .hemi-ability-list li{padding:8px 6px}
+ .hemi-ability-list b{font-size:13px}
+ .hemi-ability-list small{font-size:12px}
+ .hemi-example strong{font-size:12px}
+ .hemi-example p{font-size:12px}
+}
