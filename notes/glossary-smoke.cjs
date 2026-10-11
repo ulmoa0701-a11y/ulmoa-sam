@@ -112,7 +112,7 @@ const path=require("node:path");
       assert.equal(await previewArt.evaluate(img=>img.naturalWidth===1122&&img.naturalHeight===1402),true,"original resolution retained");
       await page.locator(".gcat-inline-art-zoom").click();
       assert.equal(await page.locator("#gcatImageViewer").evaluate(x=>x.open),true,"clicking picture opens zoom");
-      assert.equal(await page.locator("#gcatImageViewerArt").getAttribute("src"),await previewArt.getAttribute("src"),"zoom uses identical source");
+      assert.equal(await page.locator("#gcatImageViewerArt").evaluate(img=>img.src),await previewArt.evaluate(img=>img.src),"zoom uses identical source");
       await page.keyboard.press("Escape");
       assert.equal(await page.locator("#gcatImageViewer").evaluate(x=>x.open),false,"Escape dismisses only picture zoom");
       if(p.name==="mobile")await page.screenshot({path:path.join(folder,"mobile-detail.png")});
