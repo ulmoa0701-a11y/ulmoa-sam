@@ -33,7 +33,7 @@
       ['사회성·의사소통','관계·사과 연습 자료',U('materials/#socialShelf')],
       ['생활·자기관리','일상생활 자료',U('materials/#lifeShelf')],
       ['음악활동 자료','하트색깔악보',U('materials/#musicShelf')]]},
-    {id:'terms',name:'용어사전',icon:'📖',href:U('notes/')},
+    {id:'terms',name:'알아봄',icon:'📖',href:U('notes/')},
     {id:'brain',name:'3D 뇌지도',icon:'🧠',href:U('brain-map/')},
     {id:'parents',name:'부모님 자료',icon:'💛',items:[
       ['부모님 도움자료','주제별 안내·관찰 메모',U('parents/')],

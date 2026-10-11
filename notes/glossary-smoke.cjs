@@ -261,7 +261,53 @@ const path=require("node:path");
       assert.equal(sticky.position,"sticky");
       if(sticky.scroll>100)assert(sticky.top>=-1&&sticky.top<140,"sticky search "+JSON.stringify(sticky));
       assert.deepEqual(errors,[],p.name+" has no JS errors");
-      console.log(p.name+": PASS "+imageFiles.length+" images + 42-text-map, four branch counts, no art in all view, search, dialogs, responsive");
+
+      // 알아봄: the twelve practical situations, five relationship maps and three deep-linkable views.
+      const journey=page.locator("#gcatJourneyNav");
+      assert.equal(await journey.locator("button").count(),3,"three recognizable exploration options");
+      assert.equal(await page.locator("#gcatTermPanel").isVisible(),true,"existing illustrated catalog stays default");
+      await journey.locator('[data-view="situations"]').click();
+      assert.equal(await page.locator("#gcatTermPanel").isVisible(),false,"term gallery hidden rather than destroyed");
+      assert.equal(await page.locator("#gcatSituationPanel").isVisible(),true,"situation view directly available");
+      assert.equal(await page.locator("#gcatSituationGrid .gcat-situation-card").count(),12,"all twelve practical situations");
+      assert.equal(await page.locator("#gcatSituationGrid .gcat-topic-term").count(),36,"three actual glossary links per situation");
+      assert.equal(new URL(page.url()).searchParams.get("view"),"situations","situation view can be shared");
+      for(const category of ["attention","memory","language","support"]){
+        await page.locator('#gcatSituationFilters button[data-group="'+category+'"]').click();
+        assert.equal(await page.locator("#gcatSituationGrid .gcat-situation-card").count(),3,"three examples for "+category);
+      }
+      await page.locator('#gcatSituationFilters button[data-group="all"]').click();
+      const scenarioChip=page.locator("#gcatSituationGrid .gcat-topic-term").first();
+      await scenarioChip.click();
+      assert.equal(await dialog.evaluate(x=>x.open),true,"situation term opens the same original glossary explanation");
+      assert((await page.locator("#gcatDialogBody .study-paper").textContent()).length>80,"one source of truth in situation links");
+      await page.locator("#gcatDialogClose").click();
+      await journey.locator('[data-view="connections"]').click();
+      assert.equal(await page.locator("#gcatConnectionPanel").isVisible(),true,"connections shown in same page");
+      assert.equal(await page.locator("#gcatConnectionFilters button").count(),5,"five curated topic maps");
+      assert.equal(await page.locator("#gcatConnectionDetail .gcat-concept-node").count(),4,"four readable concept steps");
+      assert.equal(new URL(page.url()).searchParams.get("view"),"connections","connection map has a shareable URL");
+      for(const map of ["executive","memory","language","behavior","teaching"]){
+        await page.locator('#gcatConnectionFilters button[data-map="'+map+'"]').click();
+        assert.equal(await page.locator("#gcatConnectionDetail .gcat-concept-node").count(),4,"linked steps for "+map);
+        assert.equal(await page.locator("#gcatConnectionDetail .gcat-concept-bridge").count(),3,"relationships explained for "+map);
+      }
+      await page.locator('#gcatConnectionFilters button[data-map="behavior"]').click();
+      assert((await page.locator("#gcatConnectionDetail").textContent()).includes("ABC 기록만으로"),"limits of behavior data are stated");
+      await page.locator("#gcatConnectionDetail .gcat-concept-node").last().click();
+      assert.equal(await dialog.evaluate(x=>x.open),true,"map node opens original term modal");
+      await page.locator("#gcatDialogClose").click();
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,"no horizontal overflow in connection view");
+      await page.screenshot({path:path.join(folder,p.name+"-connection.png")});
+      await page.goto(new URL("?view=situations",base).href,{waitUntil:"networkidle"});
+      assert.equal(await page.locator("#gcatSituationPanel").isVisible(),true,"situation deep link loads correct mode");
+      await page.goto(new URL("?view=connections",base).href,{waitUntil:"networkidle"});
+      assert.equal(await page.locator("#gcatConnectionPanel").isVisible(),true,"connection deep link loads correct mode");
+      await journey.locator('[data-view="terms"]').click();
+      assert.equal(await page.locator("#gcatTermPanel").isVisible(),true,"original glossary mode restored");
+      assert.equal(await page.locator(".study-note").count(),42,"no original note lost on view switching");
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,"no horizontal scrolling on final restored view");
+      console.log(p.name+": PASS "+imageFiles.length+" images + 42-text-map, four branch counts, 12 situations, 5 relationship maps, search, dialogs, responsive");
       await page.close();
     }
   }finally{await browser.close();}

@@ -77,6 +77,57 @@ const RELATED={
   "memo-replacement-behavior":["memo-fba","memo-abc-observation","memo-aac"],
   "memo-udl":["memo-visual-supports","memo-task-analysis","memo-modeling"]
 };
+
+/* 별도 그림이나 원문을 복제하지 않는 '상황 ↔ 용어 ↔ 개념 지도' 탐색 데이터.
+ * 이 예시는 진단·평가 결론이 아니며, 실제 관찰에서는 환경·맥락을 함께 고려한다. */
+const SITUATION_GROUPS=[
+  {id:"attention",label:"주의·실행"},
+  {id:"memory",label:"기억·학습"},
+  {id:"language",label:"언어·소통"},
+  {id:"support",label:"행동·지원"}
+];
+const SITUATIONS=[
+  {id:"distracted",group:"attention",title:"다른 자극을 보느라 하던 활동을 놓쳐요",observe:"주변 자극이 많을 때와 적을 때 참여가 어떻게 달라지는지",try:"활동 시간과 환경을 조금씩 바꿔 반응 비교하기",terms:["memo-attention","memo-attention-types","memo-inhibition"]},
+  {id:"planning",group:"attention",title:"계획은 세웠는데 순서대로 하기 어려워요",observe:"시작·순서 정하기·마무리 중 어느 단계에서 멈추는지",try:"할 일을 작은 단계로 나누고 완료한 단계 표시하기",terms:["memo-planning-organization","memo-performance-monitoring","memo-task-analysis"]},
+  {id:"switch",group:"attention",title:"규칙이나 방법이 바뀌면 적응하기 어려워요",observe:"변화를 미리 알려줄 때와 갑자기 바뀔 때의 차이",try:"바뀔 내용을 미리 보여주고 한 가지씩 전환 연습하기",terms:["memo-flexibility","memo-self-regulation","memo-visual-supports"]},
+  {id:"instructions",group:"memory",title:"여러 가지 지시를 들으면 일부를 빠뜨려요",observe:"지시 길이·주변 소음·그림 제공 여부에 따른 차이",try:"지시를 짧게 나누고 말과 시각정보를 함께 제시하기",terms:["memo-working-memory","memo-phonological-working-memory","memo-auditory"]},
+  {id:"recall",group:"memory",title:"배웠던 것을 바로 떠올리기 어려워해요",observe:"힌트 없이 떠올릴 때와 단서를 제공했을 때의 차이",try:"배운 내용을 시간 간격을 두고 다시 떠올려 보기",terms:["memo-retrieval","memo-encoding","memo-memory"]},
+  {id:"reading",group:"memory",title:"글은 읽는데 내용의 뜻은 잘 연결하지 못해요",observe:"읽기의 정확도·속도와 의미 이해를 따로 살펴보기",try:"짧은 문장을 읽고 핵심 내용과 숨은 이유 질문하기",terms:["memo-reading-fluency","memo-inferential-comprehension","memo-semantics"]},
+  {id:"story",group:"language",title:"이야기할 때 사건의 순서가 자주 뒤섞여요",observe:"누가·무슨 일이·왜·어떻게 끝났는지 연결하는지",try:"처음·중간·끝을 그림으로 배열하고 이야기해 보기",terms:["memo-narrative-discourse","memo-receptive-expressive","memo-planning-organization"]},
+  {id:"context",group:"language",title:"말은 알아듣지만 상황 속 숨은 뜻은 놓쳐요",observe:"앞뒤 맥락·표정·상대의 의도를 어느 정도 활용하는지",try:"같은 표현을 다른 상황에 놓고 의미를 비교해 보기",terms:["memo-pragmatics","memo-inferential-comprehension","memo-semantics"]},
+  {id:"express",group:"language",title:"말보다 손짓이나 그림으로 더 잘 표현해요",observe:"어떤 방식으로 원하는 것을 스스로 전달하는지",try:"말 사용을 제한하지 않고 그림·제스처·AAC 선택지 제공하기",terms:["memo-aac","memo-receptive-expressive","memo-joint-attention"]},
+  {id:"refusal",group:"support",title:"특정 활동을 시작할 때 거부 행동이 반복돼요",observe:"행동 직전의 요구와 이후 주변 반응을 기록하기",try:"여러 차례의 ABC 기록을 비교해 기능 가설 검토하기",terms:["memo-abc-observation","memo-fba","memo-replacement-behavior"]},
+  {id:"asking",group:"support",title:"도움이 필요할 때 말 대신 행동으로 표현해요",observe:"언제 누구에게 어떤 도움을 요청하려는지",try:"'도와주세요'를 말·그림 등 적절한 방식으로 표현해 보기",terms:["memo-replacement-behavior","memo-aac","memo-reinforcement"]},
+  {id:"access",group:"support",title:"같은 수업 방식으로는 참여가 어려운 사람이 있어요",observe:"정보를 이해하거나 표현할 때 생기는 장벽 확인하기",try:"글·그림·음성·반응 방식에 선택지 마련하기",terms:["memo-udl","memo-visual-supports","memo-modeling"]}
+];
+const CONNECTION_MAPS=[
+  {id:"executive",label:"실행과 점검",title:"계획하고, 해보고, 다시 점검하기",
+   lead:"실행기능 관련 개념을 실제 과제 흐름에 연결해 봐요.",
+   example:"숙제를 시작하기 전 순서를 정하고, 하면서 잘 진행되는지 확인하는 상황",
+   note:"메타인지는 자신의 이해와 전략을 돌아보는 과정과도 연결되지만, 모든 과제가 같은 순서로 진행되는 것은 아니에요.",
+   nodes:[["memo-executive","관련 기능"],["memo-planning-organization","과제 시작 전에 계획"],["memo-performance-monitoring","하는 중에 점검"],["memo-metacognition","방법을 돌아보고 조정"]]},
+  {id:"memory",label:"기억과 작업기억",title:"기억하는 정보의 종류와 쓰임",
+   lead:"짧게 붙잡아 두는 정보가 말소리인지, 위치·모양인지 비교해요.",
+   example:"들은 숫자를 따라 말하기와, 방금 본 블록 위치 기억하기를 비교하는 상황",
+   note:"단기기억과 작업기억은 서로 연관되지만 완전히 같은 개념은 아니며, 과제에는 여러 기능이 함께 관여할 수 있어요.",
+   nodes:[["memo-short-term-memory","잠시 유지하는 정보"],["memo-working-memory","유지하면서 활용"],["memo-phonological-working-memory","말소리 정보를 다룰 때"],["memo-visuospatial-working-memory","위치·형태 정보를 다룰 때"]]},
+  {id:"language",label:"언어와 이야기",title:"말의 뜻부터 이야기의 맥락까지",
+   lead:"단어를 아는 것과 이야기를 이해·표현하는 것은 어떻게 다를까요?",
+   example:"그림책의 사건을 이야기하고, 인물이 왜 그런 행동을 했는지 추측하는 상황",
+   note:"어휘·문장 이해, 담화, 추론은 서로 영향을 주지만 어느 하나만으로 언어능력을 판단할 수 없어요.",
+   nodes:[["memo-receptive-expressive","언어 이해·표현"],["memo-narrative-discourse","사건을 연결해 이야기"],["memo-inferential-comprehension","드러나지 않은 뜻 추론"],["memo-pragmatics","상황과 상대를 고려"]]},
+  {id:"behavior",label:"행동 이해와 지원",title:"관찰 자료에서 지원 계획까지",
+   lead:"행동 자체보다 언제, 어떤 맥락에서 나타나는지를 함께 살펴봐요.",
+   example:"요구 과제 전후에 반복되는 행동을 여러 번 관찰한 뒤 지원을 계획하는 상황",
+   note:"ABC 기록만으로 행동의 기능을 확정할 수 없어요. 기능평가는 다양한 자료와 가설 검토가 필요합니다.",
+   nodes:[["memo-abc-observation","전후 상황 기록"],["memo-fba","여러 자료로 기능 가설 검토"],["memo-replacement-behavior","필요를 표현하는 대안 지도"],["memo-reinforcement","적절한 행동을 유지하도록 지원"]]},
+  {id:"teaching",label:"수업과 접근성",title:"배우기 쉽게 설계하고, 필요한 도움 주기",
+   lead:"다양한 학습자가 참여하고 표현할 수 있도록 수업 환경을 살펴봐요.",
+   example:"같은 학습 목표를 글·그림으로 제시하고, 수행 단계를 시각적으로 안내하는 상황",
+   note:"UDL은 촉구·시각지원 등 개별 교수 전략과 연결될 수 있지만, 서로 동일한 개념은 아니에요.",
+   nodes:[["memo-udl","처음부터 선택지 설계"],["memo-visual-supports","정보를 눈으로 확인"],["memo-task-analysis","복잡한 활동을 나누기"],["memo-prompting","필요한 도움을 조정"]]}
+];
+
 const TINT={
   "cognitive":"#ffeedb",
   "memory-perception":"#e5f0e3",
@@ -518,6 +569,138 @@ function boot(){
   dialog.addEventListener("close",()=>{if(lastOpener&&lastOpener.isConnected)lastOpener.focus({preventScroll:true});lastOpener=null;});
   renderRecent();
   render();
+
+  // 3가지 탐색은 한 페이지에서 전환하고 각 화면은 공유 가능한 URL을 갖는다.
+  const journeyNav=document.getElementById("gcatJourneyNav");
+  const journeyPanels={
+    terms:document.getElementById("gcatTermPanel"),
+    situations:document.getElementById("gcatSituationPanel"),
+    connections:document.getElementById("gcatConnectionPanel")
+  };
+  const situationFilters=document.getElementById("gcatSituationFilters");
+  const situationGrid=document.getElementById("gcatSituationGrid");
+  const situationCount=document.getElementById("gcatSituationCount");
+  const connectionFilters=document.getElementById("gcatConnectionFilters");
+  const connectionDetail=document.getElementById("gcatConnectionDetail");
+  let activeSituationGroup="all";
+  let activeConnectionMap="executive";
+  const validIds=new Set(entries.map(e=>e.id));
+  for(const situation of SITUATIONS)for(const id of situation.terms)if(!validIds.has(id))console.error("없는 상황 연결 용어:",id);
+  for(const map of CONNECTION_MAPS)for(const [id] of map.nodes)if(!validIds.has(id))console.error("없는 개념 연결 용어:",id);
+  function termChip(id){
+    const entry=byId.get(id);
+    if(!entry)return null;
+    const button=node("button","gcat-topic-term",entry.title+" ↗");
+    button.type="button";
+    button.dataset.termId=id;
+    button.setAttribute("aria-label",entry.title+" 원래 용어 설명 열기");
+    button.addEventListener("click",()=>openTerm(id,button));
+    return button;
+  }
+  function renderSituations(){
+    situationFilters.replaceChildren();
+    [{id:"all",label:"전체"},...SITUATION_GROUPS].forEach(group=>{
+      const button=node("button","gcat-filter-button",group.label);
+      button.type="button";
+      button.dataset.group=group.id;
+      button.setAttribute("aria-pressed",String(activeSituationGroup===group.id));
+      button.addEventListener("click",()=>{activeSituationGroup=group.id;renderSituations();});
+      situationFilters.appendChild(button);
+    });
+    const list=SITUATIONS.filter(s=>activeSituationGroup==="all"||s.group===activeSituationGroup);
+    situationCount.textContent=list.length+"가지 상황";
+    situationGrid.replaceChildren();
+    for(const situation of list){
+      const group=SITUATION_GROUPS.find(g=>g.id===situation.group);
+      const article=node("article","gcat-situation-card");
+      article.id="gcat-situation-"+situation.id;
+      article.dataset.group=situation.group;
+      article.appendChild(node("span","gcat-situation-label",group.label));
+      article.appendChild(node("h3",null,situation.title));
+      const observations=node("div","gcat-situation-detail");
+      observations.appendChild(node("strong",null,"살펴볼 점"));
+      observations.appendChild(node("p",null,situation.observe));
+      article.appendChild(observations);
+      const application=node("div","gcat-situation-detail gcat-situation-application");
+      application.appendChild(node("strong",null,"활용 예시"));
+      application.appendChild(node("p",null,situation.try));
+      article.appendChild(application);
+      const footer=node("div","gcat-situation-terms");
+      footer.appendChild(node("strong",null,"관련 개념"));
+      const chips=node("div","gcat-term-chips");
+      for(const id of situation.terms){const chip=termChip(id);if(chip)chips.appendChild(chip);}
+      footer.appendChild(chips);
+      article.appendChild(footer);
+      situationGrid.appendChild(article);
+    }
+  }
+  function renderConnections(){
+    connectionFilters.replaceChildren();
+    for(const map of CONNECTION_MAPS){
+      const button=node("button","gcat-filter-button",map.label);
+      button.type="button";
+      button.dataset.map=map.id;
+      button.setAttribute("aria-pressed",String(activeConnectionMap===map.id));
+      button.addEventListener("click",()=>{activeConnectionMap=map.id;renderConnections();});
+      connectionFilters.appendChild(button);
+    }
+    const map=CONNECTION_MAPS.find(m=>m.id===activeConnectionMap);
+    const flow=node("div","gcat-concept-flow");
+    for(let i=0;i<map.nodes.length;i++){
+      const [id,relation]=map.nodes[i];
+      if(i){
+        const bridge=node("div","gcat-concept-bridge");
+        bridge.appendChild(node("span",null,"↓"));
+        bridge.appendChild(node("em",null,relation));
+        flow.appendChild(bridge);
+      }
+      const entry=byId.get(id);
+      if(!entry)continue;
+      const button=node("button","gcat-concept-node");
+      button.type="button";
+      button.dataset.termId=id;
+      button.appendChild(node("strong",null,entry.title));
+      button.appendChild(node("small",null,i===0?"연결 출발점":relation));
+      button.setAttribute("aria-label",entry.title+" 용어 설명 열기");
+      button.addEventListener("click",()=>openTerm(id,button));
+      flow.appendChild(button);
+    }
+    const explanation=node("div","gcat-concept-explanation");
+    explanation.appendChild(node("span","gcat-situation-label","개념 연결"));
+    explanation.appendChild(node("h3",null,map.title));
+    explanation.appendChild(node("p","gcat-concept-lead",map.lead));
+    const use=node("div","gcat-concept-usage");
+    use.appendChild(node("strong",null,"실제 상황에 대입하면"));
+    use.appendChild(node("p",null,map.example));
+    explanation.appendChild(use);
+    const note=node("div","gcat-concept-note");
+    note.appendChild(node("strong",null,"구분해서 이해하기"));
+    note.appendChild(node("p",null,map.note));
+    explanation.appendChild(note);
+    connectionDetail.replaceChildren(explanation,flow);
+  }
+  function setJourney(view,updateUrl){
+    if(!Object.prototype.hasOwnProperty.call(journeyPanels,view))view="terms";
+    for(const [key,panel] of Object.entries(journeyPanels))panel.hidden=key!==view;
+    journeyNav.querySelectorAll("button[data-view]").forEach(button=>{
+      button.setAttribute("aria-pressed",String(button.dataset.view===view));
+    });
+    if(updateUrl){
+      const url=new URL(location.href);
+      if(view==="terms")url.searchParams.delete("view"); else url.searchParams.set("view",view);
+      if(url.href!==location.href)history.pushState(null,"",url);
+    }
+  }
+  journeyNav.querySelectorAll("button[data-view]").forEach(button=>{
+    button.addEventListener("click",()=>setJourney(button.dataset.view,true));
+  });
+  window.addEventListener("popstate",()=>{
+    setJourney(new URL(location.href).searchParams.get("view")||"terms",false);
+  });
+  renderSituations();
+  renderConnections();
+  setJourney(new URL(location.href).searchParams.get("view")||"terms",false);
+
   // 기존 공유 링크 /notes/#memo-aac 등의 직접 방문도 지원.
   const target=decodeURIComponent(location.hash.slice(1));
   if(byId.has(target))openTerm(target);

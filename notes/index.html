@@ -4,8 +4,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <meta content="noindex,nofollow" name="robots"/>
-<title>용어사전 — 일단 해봄</title>
-<meta content="인지·학습·발달 현장에서 자주 만나는 용어를 근거와 함께 짧게 정리한 관련 용어 사전입니다." name="description"/>
+<title>알아봄 — 일단 해봄</title>
+<meta content="용어를 쉽게 이해하고, 실제 상황에서 찾고, 관련 개념을 연결해 보는 알아봄입니다." name="description"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Gamja+Flower&amp;display=swap" rel="stylesheet"/>
@@ -13,8 +13,8 @@
 <link href="../assets/notebook-subpages.css?v=20261005-clean3" rel="stylesheet"/>
 <link href="../assets/info.css?v=20261006-study1" rel="stylesheet"/>
 <link href="../assets/info-memory.css?v=20261008-v3vector" rel="stylesheet"/>
-<link href="../assets/glossary-catalog.css?v=20261011-inlineart32" rel="stylesheet"/>
-<script src="../assets/glossary-catalog.js?v=20261011-inlineart32" defer></script>
+<link href="../assets/glossary-catalog.css?v=20261011-arabom-journeys1" rel="stylesheet"/>
+<script src="../assets/glossary-catalog.js?v=20261011-arabom-journeys1" defer></script>
 
 <link rel="stylesheet" href="../assets/habom-brand.css?v=20261010b">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/habom-favicon-v3-32.png">
@@ -68,8 +68,14 @@
   <header class="gcat-head">
     <span class="gcat-eyebrow">해봄노트 · 알아봄</span>
     <h1 id="gcatTitle">알아봄</h1>
-    <p>용어를 이해하고, 그림과 실제 예시를 한눈에 살펴봐요.</p>
+    <p>용어를 알아보고, 실제 상황과 연결해 이해해요.</p>
   </header>
+  <nav class="gcat-journey-nav" id="gcatJourneyNav" aria-label="알아봄 탐색 방식">
+    <button type="button" data-view="terms" aria-controls="gcatTermPanel" aria-pressed="true"><span>용어 알아보기</span><small>뜻과 그림</small></button>
+    <button type="button" data-view="situations" aria-controls="gcatSituationPanel" aria-pressed="false"><span>상황에서 찾기</span><small>실제 사례</small></button>
+    <button type="button" data-view="connections" aria-controls="gcatConnectionPanel" aria-pressed="false"><span>개념 이어보기</span><small>관계와 차이</small></button>
+  </nav>
+  <div class="gcat-term-panel" id="gcatTermPanel">
   <div class="gcat-search-rail">
     <label class="gcat-search-wrap" for="gcatSearch">
       <span class="gcat-search-icon" aria-hidden="true">⌕</span>
@@ -95,6 +101,19 @@
     <button class="gcat-page-btn" id="gcatNext" type="button">다음 →</button>
   </nav>
   <p class="gcat-no-results" id="gcatEmpty" hidden>해당 용어가 없어요. 다른 말로 검색하거나 분야를 선택해 보세요.</p>
+  </div>
+  <section class="gcat-situation-panel" id="gcatSituationPanel" aria-label="상황에서 찾기" hidden>
+    <div class="gcat-panel-intro"><div><h2>상황에서 찾기</h2><p>익숙한 상황에서 출발해, 관련 개념과 활용 예시를 함께 살펴봐요.</p></div><span id="gcatSituationCount" aria-live="polite">12가지 상황</span></div>
+    <nav class="gcat-situation-filters" id="gcatSituationFilters" aria-label="상황 분야 선택"></nav>
+    <div class="gcat-situation-grid" id="gcatSituationGrid" aria-live="polite"></div>
+    <p class="gcat-learning-caution">같은 행동에도 여러 이유가 있을 수 있어요. 아래 내용은 관찰과 학습을 위한 예시이며, 행동만으로 원인이나 진단을 판단하지 않습니다.</p>
+  </section>
+  <section class="gcat-connection-panel" id="gcatConnectionPanel" aria-label="개념 이어보기" hidden>
+    <div class="gcat-panel-intro"><div><h2>개념 이어보기</h2><p>비슷한 용어의 차이와 연결되는 이유를 한 주제씩 살펴봐요.</p></div><span>5가지 연결 주제</span></div>
+    <nav class="gcat-connection-filters" id="gcatConnectionFilters" aria-label="연결 지도 주제 선택"></nav>
+    <div class="gcat-connection-detail" id="gcatConnectionDetail" aria-live="polite"></div>
+    <p class="gcat-learning-caution">연결 순서는 이해를 돕기 위한 예시예요. 기능의 위계나 반드시 거쳐야 하는 절차를 뜻하지 않습니다.</p>
+  </section>
   <dialog class="gcat-dialog" id="gcatDialog" aria-labelledby="gcatDialogTitle">
     <div class="gcat-dialog-top"><h2 id="gcatDialogTitle"></h2><button class="gcat-dialog-close" id="gcatDialogClose" type="button" aria-label="설명 닫기">×</button></div>
     <div class="gcat-dialog-body" id="gcatDialogBody"></div>
@@ -106,7 +125,7 @@
 </section>
 <div class="sub-hero info-hero glossary-hero">
 <span aria-hidden="true" class="sub-tape"></span>
-<p class="sub-kicker">용어노트</p>
+<p class="sub-kicker">알아봄</p>
 <div class="glossary-hero-row"><div><h1>관련 용어 <em>사전.</em></h1><p>학부모·치료사가 자주 만나지만 헷갈리기 쉬운 말을, 근거를 확인해 짧게 정리해둡니다.</p></div><div class="glossary-count"><b>42</b><span>개 용어</span></div></div>
 </div>
 <section class="glossary-explorer glossary-explorer-v2" aria-labelledby="glossaryFindTitle">
