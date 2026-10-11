@@ -13,14 +13,16 @@ const path=require("node:path");
     {name:"tablet",width:768,height:1024,columns:3},
     {name:"desktop",width:1440,height:900,columns:4}
   ];
-  const categories={"cognitive":8,"memory-perception":7,"language":5,"intervention":2};
+  const categories={"cognitive":11,"memory-perception":9,"language":8,"intervention":4};
   const newArt=["executive-function","inhibitory-control","cognitive-flexibility","self-regulation","visual-attention","encoding","consolidation","retrieval","pragmatic-language","semantic-understanding"];
   const originalArt=["working-memory","short-term-memory","processing-speed","attention","memory","visual-perception","auditory-processing","receptive-language","expressive-language","aac","prompting","reinforcement"];
-  const imageFiles=[...originalArt,...newArt];
+  const addedArt=["metacognition","planning-organization","performance-monitoring","phonological-working-memory","visuospatial-working-memory","narrative-discourse","inferential-comprehension","reading-fluency","functional-behavior-assessment","abc-observation"];
+  const imageFiles=[...originalArt,...newArt,...addedArt];
+  const filesByName=[...originalArt,...newArt].map(s=>s+".webp").concat(addedArt.map(s=>s+".png"));
   try{
     if(!process.env.GLOSSARY_QA_URL){
-      const files=fs.readdirSync(path.resolve("assets/glossary/cards")).filter(s=>s.endsWith(".webp")).sort();
-      assert.deepEqual(files,imageFiles.map(s=>s+".webp").sort(),"all 12 original + 10 new art files exist");
+      const files=fs.readdirSync(path.resolve("assets/glossary/cards")).filter(s=>/\.(?:webp|png)$/.test(s)).sort();
+      assert.deepEqual(files,filesByName.slice().sort(),"all original and ten newly added art files exist");
     }
     for(const p of profiles){
       const page=await browser.newPage({viewport:{width:p.width,height:p.height},deviceScaleFactor:1});
