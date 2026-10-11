@@ -56,6 +56,7 @@ jobs:
       - name: Compare Audiveris result with EXACT same score images
         shell: bash
         run: |
+          set +e
           set -uo pipefail
           mkdir -p heart-score/qa/.audiveris-bench/results
           echo "INSTALL_OUTCOME=${{ steps.install.outcome }}" | tee heart-score/qa/.audiveris-bench/results/environment.txt
