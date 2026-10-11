@@ -381,6 +381,35 @@
     }
     sender.append(senderRow);
     appendField(sender, roleField, "hfw-role");
+    var roleLabel = roleField.querySelector("label");
+    if (roleLabel && /^나는\s*:?$/.test(roleLabel.textContent.trim())) {
+      roleLabel.textContent = "내 역할 (선택)";
+    }
+
+    // 안내용 빈칸만 바꿉니다. 이미 작성한 제목·본문은 절대로 변경하지 않습니다.
+    function applyTopicHelp() {
+      var selected = kindInput.options[kindInput.selectedIndex];
+      var category = selected ? selected.textContent.trim() : "";
+      var titleHint = "어떤 이야기인지 한 줄로 적어주세요";
+      var bodyHint = "편하게 적어주세요";
+      if (/질문|궁금/.test(category)) {
+        titleHint = "무엇이 궁금한가요?";
+        bodyHint = "궁금한 점을 편하게 적어주세요";
+      } else if (/자료|요청/.test(category)) {
+        titleHint = "어떤 자료가 필요하신가요?";
+        bodyHint = "어떤 상황에서 사용할 자료인지 적어주시면 도움이 돼요";
+      } else if (/아이디어|제안|함께/.test(category)) {
+        titleHint = "떠오른 아이디어를 한 줄로";
+        bodyHint = "어떤 내용이 있으면 좋을지 적어주세요";
+      } else if (/후기|개선|사용|추천|공유/.test(category)) {
+        titleHint = "써본 경험이나 개선 의견";
+        bodyHint = "좋았던 점이나 불편했던 점을 편하게 적어주세요";
+      }
+      if (titleInput) titleInput.placeholder = titleHint;
+      bodyInput.placeholder = bodyHint;
+    }
+    kindInput.addEventListener("change", applyTopicHelp);
+    applyTopicHelp();
 
     write.append(topic, message, sender);
     form.insertBefore(write, form.firstChild);
