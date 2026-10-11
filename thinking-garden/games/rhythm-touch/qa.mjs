@@ -36,14 +36,61 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
    name+': main home button did not open the IlDan Haebom homepage');
  await page.goto(base+'/thinking-garden/',{waitUntil:'networkidle'});
 
- check(await page.locator('.library-card').count()===15,name+': game library count mismatch');
- await page.locator('.category-tab[data-category="music"]').click();
- check(await page.locator('.library-card:not([hidden])').count()===2,name+': music tab should show recorder and rhythm');
- await page.locator('.subtopic-tab[data-subtopic="rhythm"]').click();
- check(await page.locator('.library-card:not([hidden])').count()===1,name+': rhythm subtopic did not filter game');
- check(await page.locator('[data-open="rhythmTouch"]').isVisible(),name+': rhythm card missing');
- await page.locator('[data-open="rhythmTouch"]').click();
+ // Two clearly separated entrance points on the real main homepage.
+ await page.goto(base+'/',{waitUntil:'networkidle'});
+ check(await page.locator('.garden-doorbar a').count()===2,
+   name+': home page has no two distinct garden entrances');
+ const cognitiveDoor=page.locator('.garden-door.cognitive-door'),musicDoor=page.locator('.garden-door.music-door');
+ check(await cognitiveDoor.getAttribute('href')==='thinking-garden/'&&
+   await musicDoor.getAttribute('href')==='music-garden/',
+   name+': cognitive and music main homepage doors are mixed or missing');
+ const navMenus=await page.locator('.hb-menu-games .hb-dropdown a').allTextContents();
+ check(navMenus.some(t=>t.includes('생각정원'))&&navMenus.some(t=>t.includes('음악정원')),
+   name+': main Games navigation does not show both clearly named gardens');
+ await musicDoor.click();
+ await page.waitForURL('**/music-garden/');
+ check((await page.title()).includes('모아의 음악정원'),name+': music garden title wrong');
+ check(await page.locator('.game-card').count()===2,
+   name+': music garden needs exactly two working game entrances');
+ check(await page.locator('.game-card[href="../thinking-garden/recorder/"]').count()===1,
+   name+': music garden recorder entry missing');
+ check(await page.locator('.game-card[href="../thinking-garden/games/rhythm-touch/"]').count()===1,
+   name+': music garden rhythm entry missing');
+ const musicPageLayout=await page.evaluate(()=>({
+   horizontalOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+   title:document.querySelector('h1')?.textContent,
+   cards:[...document.querySelectorAll('.game-card')].map(e=>{
+     const r=e.getBoundingClientRect();return {width:r.width,height:r.height,left:r.left,right:r.right}
+   })
+ }));
+ check(musicPageLayout.horizontalOverflow<=2&&
+   musicPageLayout.cards.every(c=>c.left>=0&&c.right<=w+2&&c.height>=150),
+   name+': music garden cards clipped or unreadable '+JSON.stringify(musicPageLayout));
+ await page.screenshot({path:out+'/'+name+'-music-garden.png',fullPage:true});
+ // Keep old bookmarked /thinking-garden/?category=music links functional.
+ await page.goto(base+'/thinking-garden/?category=music',{waitUntil:'networkidle'});
+ await page.waitForURL('**/music-garden/');
+ check((await page.title()).includes('모아의 음악정원'),
+   name+': legacy music-category URL did not redirect into music garden');
+ await page.locator('.other-garden').click();
+ await page.waitForURL('**/thinking-garden/');
+ check(await page.locator('.library-card').count()===13,name+': thinking garden must have 13 cognitive games');
+ check(await page.locator('.library-card.music').count()===0&&
+   await page.locator('.category-tab[data-category="music"]').count()===0,
+   name+': music game cards must not be mixed into cognitive garden');
+ check(await page.locator('.garden-music-link').getAttribute('href')==='../music-garden/',
+   name+': music garden return route from cognitive garden missing');
+ // Separate hubs have distinct routes, but the original recorder and rhythm URLs stay unchanged.
+ await page.goto(base+'/music-garden/',{waitUntil:'networkidle'});
+ await page.locator('.recorder-card').click();
+ await page.waitForURL('**/thinking-garden/recorder/');
+ check(await page.locator('a.brand').getAttribute('href')==='../../music-garden/',
+   name+': recorder back button still navigates to cognitive games');
+ await page.goto(base+'/music-garden/',{waitUntil:'networkidle'});
+ await page.locator('.rhythm-card').click();
  await page.waitForURL('**/thinking-garden/games/rhythm-touch/');
+ check(await page.locator('.top .back').getAttribute('href')==='../../../music-garden/',
+   name+': rhythm game back button still navigates to cognitive games');
  check((await page.title()).includes('박자꽃 톡톡'),name+': game page wrong');
  check(await page.locator('.key').count()===8,name+': 8 large touch note keys required');
  check((await page.locator('.key[data-note="높은도"]').innerText()).includes('도↑'),

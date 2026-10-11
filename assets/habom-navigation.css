@@ -205,3 +205,11 @@
   .hb-nav .hb-nav-links > .hb-menu > summary .hb-nav-emoji,
   .hb-nav .hb-nav-links > .hb-nav-link .hb-nav-emoji{font-size:18px;min-width:20px}
 }
+
+/* Home: two separate game destinations without changing the approved hero collage. */
+.garden-doorbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:min(100%,410px);margin:17px 0 10px}
+.garden-door{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;min-height:69px;padding:11px 13px;border:1.5px solid #dbe5df;border-radius:14px;background:#fff;text-decoration:none;color:#334d4b;box-shadow:0 4px 12px rgba(33,60,54,.08)}
+.garden-door strong{font-size:14px;font-weight:850;line-height:1.2}.garden-door span{font-size:11px;color:#617e78;font-weight:750;line-height:1.35}
+.garden-door.cognitive-door{border-color:#d2e5d7;background:#f2faf2}.garden-door.music-door{border-color:#f0dfcb;background:#fff9ee}
+.garden-door:hover{transform:translateY(-2px);box-shadow:0 7px 16px #395b4d18}.garden-door:focus-visible{outline:3px solid #389071;outline-offset:2px}
+@media(max-width:620px){.garden-doorbar{margin:11px 0 7px;gap:6px}.garden-door{padding:9px;min-height:65px;border-radius:11px}.garden-door strong{font-size:13px}.garden-door span{font-size:10px}}

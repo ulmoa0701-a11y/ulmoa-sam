@@ -3,11 +3,19 @@ on:
   pull_request:
     paths:
       - "thinking-garden/**"
+      - "music-garden/**"
+      - "index.html"
+      - "assets/habom-navigation.js"
+      - "assets/habom-navigation.css"
       - ".github/workflows/rhythm-touch-qa.yml"
   push:
     branches: ["main"]
     paths:
-      - "thinking-garden/games/rhythm-touch/**"
+      - "thinking-garden/**"
+      - "music-garden/**"
+      - "index.html"
+      - "assets/habom-navigation.js"
+      - "assets/habom-navigation.css"
       - ".github/workflows/rhythm-touch-qa.yml"
 jobs:
   rhythm-browser-qa:

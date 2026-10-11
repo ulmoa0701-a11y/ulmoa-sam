@@ -52,3 +52,9 @@ html,body{max-width:100%;overflow-x:hidden}.game-page,.game-world,.game-area,.gu
 .site-home-link:hover{background:#ddf1de}.site-home-link:focus-visible{outline:3px solid #2d7d5a;outline-offset:3px}
 @media(max-width:620px){.topbar{gap:5px}.topbar .brand{min-width:0;gap:5px}.topbar .brand b{font-size:clamp(13px,3.8vw,16px);white-space:nowrap}.topbar .leaf-mark{width:29px;height:29px;flex:0 0 29px;font-size:17px}.topbar .top-actions{gap:5px;flex:0 0 auto}.topbar .seed-bank{font-size:11px;padding:7px 8px}.topbar .sound-btn{width:40px;height:40px;border-radius:10px}.site-home-link{gap:3px;min-height:44px;padding:6px 9px;border-radius:10px;font-size:12px}.site-home-link>span:first-child{font-size:20px}.site-home-prefix{display:none}}
 @media(max-width:360px){.topbar{padding-inline:8px}.topbar .brand{gap:3px}.topbar .brand b{font-size:13px}.topbar .top-actions{gap:4px}.site-home-link{padding-inline:6px}.topbar .seed-bank{padding-inline:6px}}
+
+/* Cognitive hub / music hub share the same Moa world, but have distinct entrances. */
+.garden-hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.garden-music-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 16px;background:#fff;border:1.5px solid #d4e1d0;border-radius:14px;color:#346a5b;font-weight:850;text-decoration:none;font-size:14px;box-shadow:0 3px 10px #5c785518}
+.garden-music-link:hover{background:#f2faf0}.garden-music-link:focus-visible{outline:3px solid #3c9174;outline-offset:2px}
+@media(max-width:520px){.garden-hero-actions{gap:8px}.garden-music-link{font-size:13px;padding:9px 12px}}

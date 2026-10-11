@@ -7,12 +7,14 @@
   const U=(p)=>root+p;
   const groups=[
     {id:'games',name:'게임',icon:'🎮',items:[
-      ['모아의 생각정원','전체 인지·음악 게임',U('thinking-garden/')],
+      ['🧠 모아의 생각정원','인지게임 · 주의·기억·읽기쓰기',U('thinking-garden/')],
+      ['🎵 모아의 음악정원','음악게임 · 리듬·리코더',U('music-garden/')],
       ['시각·주의 게임','조건찾기·시각탐색',U('thinking-garden/?category=visual#gardenMap')],
       ['기억·집행 게임','순서·기억·억제',U('thinking-garden/?category=memory#gardenMap')],
       ['읽기·쓰기 게임','맞춤법·띄어쓰기',U('thinking-garden/?category=literacy#gardenMap')],
       ['공간·구성 게임','눈손협응',U('thinking-garden/?category=space#gardenMap')]]},
     {id:'music',name:'음악·악보',icon:'🎵',items:[
+      ['모아의 음악정원','음악게임 2가지 골라보기',U('music-garden/')],
       ['하트색깔악보 Studio','악보 직접 만들기',U('heart-score/')],
       ['붐웨커 Studio','색깔 건반·연주',U('boomwhacker/')],
       ['박자 맞추기','박자꽃 톡톡 게임',U('thinking-garden/games/rhythm-touch/')],
@@ -105,7 +107,8 @@
   document.addEventListener('click',(e)=>{if(!nav.contains(e.target)){closeMenus();closeMobile()}});
   document.addEventListener('keydown',(e)=>{if(e.key==='Escape'){closeMenus();closeMobile()}});
   const known=[
-    ['모아의 생각정원','게임 인지 시각탐색 주의 집중 기억 읽기 쓰기 공간',U('thinking-garden/')],
+    ['모아의 생각정원','인지게임 시각탐색 주의 집중 기억 읽기 쓰기 공간',U('thinking-garden/')],
+    ['모아의 음악정원','음악게임 리듬 박자 리코더 운지 악기 음악놀이',U('music-garden/')],
     ['시각·주의 게임','조건찾기 주의 시각탐색 집중력',U('thinking-garden/?category=visual#gardenMap')],
     ['기억·집행 게임','작업기억 순서기억 집행기능 억제',U('thinking-garden/?category=memory#gardenMap')],
     ['읽기·쓰기 게임','띄어쓰기 맞춤법 문해',U('thinking-garden/?category=literacy#gardenMap')],
