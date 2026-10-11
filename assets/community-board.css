@@ -2,5 +2,5 @@
 @media(max-width:650px){.board-shell{padding:30px 16px 36px}.board-head{display:block;margin-bottom:22px}.board-head h1{font-size:40px}.board-head p{margin-top:7px}.board-form{padding:17px 14px;border-radius:14px}.board-inline{grid-template-columns:1fr}.anon-check{justify-content:flex-start;height:auto;padding:10px 12px}.board-input,.board-textarea{font-size:12px}.board-label,.board-row>label{font-size:19px}.chip-row button{font-size:9px;padding:7px 9px}.board-submit{width:100%}.board-list-section{margin-top:28px}.post-card{padding:15px}.post-card h3{font-size:22px}.admin-reply-form{grid-template-columns:1fr}.embed-mode .board-shell{padding:22px 10px 28px}}
 
 /* Apps Script embedded community board */
-.community-embed-page{background:#fff;padding:0;overflow:hidden}.community-iframe{display:block;width:100%;height:980px;border:0;background:#fff}.footer-social{display:flex;flex-wrap:wrap;gap:12px}.footer-social a{white-space:nowrap}
-@media(max-width:650px){.community-iframe{height:1120px}.sub-footer{align-items:flex-start;gap:14px;flex-direction:column;padding-top:24px;padding-bottom:24px}.footer-social{gap:10px}}
+.community-embed-page{background:#fff;padding:0;overflow:visible}.community-iframe{display:block;width:100%;height:1150px;min-height:700px;border:0;background:#fff}.footer-social{display:flex;flex-wrap:wrap;gap:12px}.footer-social a{white-space:nowrap}
+@media(max-width:650px){.community-iframe{height:1280px}.sub-footer{align-items:flex-start;gap:14px;flex-direction:column;padding-top:24px;padding-bottom:24px}.footer-social{gap:10px}}
