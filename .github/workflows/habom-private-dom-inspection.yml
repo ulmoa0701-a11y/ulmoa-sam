@@ -1,0 +1,56 @@
+name: Habom Private Form DOM Inspection
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/habom-private-dom-inspection.yml'
+permissions:
+  contents: read
+jobs:
+  form-dom:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --no-save playwright-core@1.56.1
+      - name: Inspect live public/private forms without submitting
+        shell: bash
+        run: |
+          cat > /tmp/hb-private-dom.cjs <<'JS'
+          const {chromium}=require(process.cwd()+'/node_modules/playwright-core');
+          const fs=require('node:fs');
+          (async()=>{
+            const browser=await chromium.launch({executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+            try{
+              for(const vp of [{width:1360,height:900},{width:390,height:844}]){
+                const page=await browser.newPage({viewport:vp,locale:'ko-KR'});
+                const messages=[];
+                page.on('console',m=>{if(m.type()==='error')messages.push(m.text().slice(0,180))});
+                page.on('pageerror',e=>messages.push(e.message.slice(0,180)));
+                await page.goto('https://ulmoa0701-a11y.github.io/ulmoa-sam/request/#private',{waitUntil:'domcontentloaded',timeout:40000});
+                await page.waitForTimeout(3500);
+                const nested=page.frames().find(f=>f.url().includes('/262832846022052'));
+                if(!nested)throw Error('Private frame missing');
+                const frame=page.locator('#habomPrivateForm');
+                const outer=await frame.evaluate(e=>({height:e.offsetHeight,clientWidth:e.clientWidth,styleHeight:e.style.height,scrolling:e.getAttribute('scrolling'),src:e.src,handlerActive:!!window.jotformEmbedHandler}));
+                const inner=await nested.evaluate(()=>{
+                  let scroller=document.scrollingElement||document.documentElement;
+                  let selected=[...document.querySelectorAll('select')].map(e=>({name:e.name,options:[...e.options].slice(0,7).map(o=>o.textContent.trim().slice(0,25))}));
+                  let radios=[...document.querySelectorAll('input[type=radio]')].slice(0,15).map(e=>({name:e.name,parent:e.closest('li')?.innerText.slice(0,50)}));
+                  let labels=[...document.querySelectorAll('.form-line')].map(e=>({id:e.id,classes:e.className,label:e.querySelector('.form-label')?.innerText?.trim().slice(0,100),rect:Math.round(e.getBoundingClientRect().height)})).slice(0,27);
+                  let texts=[...document.querySelectorAll('h1,h2,.form-header-group')].map(e=>e.innerText.slice(0,90)).slice(0,10);
+                  let styles={bodyFont:getComputedStyle(document.body).fontFamily,bodyFontSize:getComputedStyle(document.body).fontSize,background:getComputedStyle(document.body).backgroundColor};
+                  return {scrollHeight:scroller.scrollHeight,clientHeight:scroller.clientHeight,overflowY:getComputedStyle(document.documentElement).overflowY,bodyHeight:document.body.scrollHeight,bodyWidth:document.body.scrollWidth,viewportWidth:innerWidth,selected,radios,labels,texts,styles,plain:document.body.innerText.slice(0,500)};
+                });
+                console.log('AUDIT '+vp.width+' OUTER '+JSON.stringify(outer));
+                console.log('AUDIT '+vp.width+' INNER '+JSON.stringify(inner));
+                console.log('AUDIT '+vp.width+' ERRORS '+JSON.stringify(messages));
+                await page.close();
+              }
+            }finally{await browser.close()}
+          })().catch(e=>{console.error(e.stack||String(e));process.exit(1)});
+          JS
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          export CHROME_BIN
+          node /tmp/hb-private-dom.cjs
