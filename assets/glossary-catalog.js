@@ -744,7 +744,8 @@ function boot(){
   const journeyPanels={
     terms:document.getElementById("gcatTermPanel"),
     situations:document.getElementById("gcatSituationPanel"),
-    connections:document.getElementById("gcatConnectionPanel")
+    connections:document.getElementById("gcatConnectionPanel"),
+    games:document.getElementById("gcatGamesPanel")
   };
   const situationFilters=document.getElementById("gcatSituationFilters");
   const situationGrid=document.getElementById("gcatSituationGrid");
@@ -958,6 +959,14 @@ function boot(){
   });
   const deeper=document.getElementById("gcatOpenConnections");
   if(deeper)deeper.addEventListener("click",()=>setJourney("connections",true));
+  const gamesRoot=document.getElementById("gcatGamesRoot");
+  if(gamesRoot){
+    if(!window.HabomGlossaryGames)console.error("알아봄 게임 모듈을 불러오지 못했습니다.");
+    else window.HabomGlossaryGames.mount({host:gamesRoot,byId,situations:SITUATIONS,openTerm});
+  }
+  document.getElementById("gcatGamesFromSituations")?.addEventListener("click",()=>setJourney("games",true));
+  document.getElementById("gcatGamesFromTerms")?.addEventListener("click",()=>setJourney("games",true));
+  document.getElementById("gcatGamesBack")?.addEventListener("click",()=>setJourney("situations",true));
   window.addEventListener("popstate",()=>{
     setJourney(new URL(location.href).searchParams.get("view")||"situations",false);
   });

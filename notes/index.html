@@ -14,7 +14,9 @@
 <link href="../assets/info.css?v=20261006-study1" rel="stylesheet"/>
 <link href="../assets/info-memory.css?v=20261008-v3vector" rel="stylesheet"/>
 <link href="../assets/glossary-catalog.css?v=20261012-crosspaths1" rel="stylesheet"/>
-<script src="../assets/glossary-catalog.js?v=20261012-crosspaths1" defer></script>
+<link href="../assets/glossary-games.css?v=20261012-arabom-games1" rel="stylesheet"/>
+<script src="../assets/glossary-games.js?v=20261012-arabom-games1" defer></script>
+<script src="../assets/glossary-catalog.js?v=20261012-arabom-games1" defer></script>
 
 <link rel="stylesheet" href="../assets/habom-brand.css?v=20261010b">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/habom-favicon-v3-32.png">
@@ -106,12 +108,25 @@
   <div class="gcat-deeper-link-wrap">
     <button type="button" class="gcat-deeper-link" id="gcatOpenConnections">비슷한 개념도 비교해 볼까요? <span aria-hidden="true">→</span></button>
   </div>
+  <div class="gcat-game-cta">
+    <div><strong>배운 용어, 게임으로 익혀볼까요?</strong><p>뜻 맞히기와 상황 선택하기를 5문제씩 가볍게 해봐요.</p></div>
+    <button type="button" id="gcatGamesFromTerms">게임 해보기 →</button>
+  </div>
   </div>
   <section class="gcat-situation-panel" id="gcatSituationPanel" aria-label="상황에서 찾기" hidden>
     <div class="gcat-panel-intro"><div><h2>이런 모습, 본 적 있나요?</h2><p>생활 속 장면 하나에서 관련 개념 하나만 먼저 알아봐요.</p></div><span id="gcatSituationCount" aria-live="polite">대표 상황 4가지</span></div>
     <nav class="gcat-situation-filters" id="gcatSituationFilters" aria-label="상황 분야 선택"></nav>
     <div class="gcat-situation-grid" id="gcatSituationGrid" aria-live="polite"></div>
+    <div class="gcat-game-cta">
+      <div><strong>읽은 내용, 게임으로 기억해볼까요?</strong><p>용어와 실제 상황을 연결해 보는 두 가지 게임이에요.</p></div>
+      <button type="button" id="gcatGamesFromSituations">게임 해보기 →</button>
+    </div>
     <p class="gcat-learning-caution">이 사례는 개념 이해를 위한 가상의 예시예요. 같은 행동도 사람·환경에 따라 이유가 다를 수 있어요. 특정 장애나 원인을 판단하는 자료는 아니에요.</p>
+  </section>
+  <section class="gcat-games-panel" id="gcatGamesPanel" aria-label="알아봄 공부 게임" hidden>
+    <button type="button" class="gcat-games-back" id="gcatGamesBack">← 알아봄으로 돌아가기</button>
+    <div class="gcat-games-intro"><h2>게임으로 익혀봄</h2><p>맞히는 것보다 이해하는 데 집중해요. 정답을 고른 뒤 이유도 확인해요.</p></div>
+    <div class="gcat-games-root" id="gcatGamesRoot"></div>
   </section>
   <section class="gcat-connection-panel" id="gcatConnectionPanel" aria-label="개념 이어보기" hidden>
     <div class="gcat-panel-intro"><div><h2>개념 이어보기</h2><p>비슷한 용어, 무엇이 같고 다를까요? 중심 개념과 관련 개념을 나란히 비교해요.</p></div><span>5가지 연결 주제</span></div>
