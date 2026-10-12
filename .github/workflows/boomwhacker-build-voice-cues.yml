@@ -1,21 +1,17 @@
 name: Build free Korean count-in WAV cues
 on:
-  pull_request:
-    paths:
-      - 'boomwhacker/generate-voice-cues.py'
-      - '.github/workflows/boomwhacker-build-voice-cues.yml'
   workflow_dispatch:
 permissions:
   contents: write
 jobs:
   generate-cues:
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: feat/boomwhacker-musical-intro-voice-reset-20261012
           persist-credentials: true
       - uses: actions/setup-python@v5
         with:
@@ -33,4 +29,4 @@ jobs:
           git add boomwhacker/voice/*.wav
           git diff --cached --quiet && exit 0
           git commit -m "assets(boomwhacker): pre-render Korean count cues, no browser TTS"
-          git push origin HEAD:${{ github.head_ref }}
+          git push origin HEAD:feat/boomwhacker-musical-intro-voice-reset-20261012
