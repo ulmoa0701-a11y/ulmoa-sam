@@ -43,7 +43,7 @@ jobs:
                   let field=null;
                   for(const frm of p.frames()){
                     try {
-                      const selector=mode==='private'?'#id_19':'select[name="kind"]';
+                      const selector=mode==='private'?'#q19_input':'select[name="kind"]';
                       if(!(await frm.locator(selector).count()))continue;
                       const shape=await frm.locator(selector).first().evaluate(e=>({x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y,width:e.getBoundingClientRect().width,font:getComputedStyle(e).fontFamily,border:getComputedStyle(e).border,rounded:getComputedStyle(e).borderRadius,height:Math.round(e.getBoundingClientRect().height)}));
                       const frameEl=await frm.frameElement();
@@ -60,6 +60,8 @@ jobs:
                   const deltaW=Math.abs(layoutByMode.public.width-layoutByMode.private.width);
                   console.log('FORM_PARITY '+vp.width+' '+JSON.stringify({deltaX,deltaW,public:layoutByMode.public,private:layoutByMode.private}));
                   if(deltaX>12||deltaW>16)throw Error('Input column widths/positions differ between public and private at '+vp.width+'px');
+                  const pvt=layoutByMode.private;
+                  if(!/1px solid/.test(pvt.border)||!/10px/.test(pvt.radius)) throw Error('Private select must have the same visible solid 1px rounded 10px border: '+JSON.stringify(pvt));
                 }
                 await p.close();
               }
