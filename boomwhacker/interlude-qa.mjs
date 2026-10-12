@@ -61,6 +61,28 @@ try{
     return{bars:built.bars,introStart:power(start+.05,start+.26),lastPreludeBeat:power(last+.04,last+.23)};
    });
    result.audioProbe=audioProbe;
+   // Rendering sound energy alone does not prove perceptual clarity; check
+   // an actual strong/weak cue waveform across three classroom tempos.
+   result.preludePulseProbe=await page.evaluate(async()=>{
+     const probes=[];
+     for(const tempo of [66,100,140]){
+       const beat=60/tempo,start=.08,rate=44100;
+       const ac=new OfflineAudioContext(1,Math.ceil(rate*(beat+.32)),rate);
+       schedulePreludeBeat(ac,ac.destination,start,true);
+       schedulePreludeBeat(ac,ac.destination,start+beat,false);
+       const wave=(await ac.startRendering()).getChannelData(0);
+       const energy=(a,b)=>{
+         let sum=0;
+         for(let i=Math.floor(a*rate);i<Math.min(wave.length,Math.floor(b*rate));i++)sum+=Math.abs(wave[i]);
+         return Math.round(sum);
+       };
+       const strong=energy(start+.012,start+.115),weak=energy(start+beat+.012,start+beat+.115);
+       probes.push({tempo,strong,weak,ratio:Number((strong/Math.max(1,weak)).toFixed(2))});
+     }
+     return probes;
+   });
+   if(result.preludePulseProbe.some(x=>x.strong<55||x.weak<20||x.ratio<1.8))
+     throw Error('Instrumental prelude strong/weak pulse is too faint or insufficiently contrasted '+JSON.stringify(result.preludePulseProbe));
    if(audioProbe.introStart<15||audioProbe.lastPreludeBeat<15)
      throw Error('Must hear countdown THEN actual instrumental intro '+JSON.stringify(audioProbe));
    result.musicality=await page.evaluate(async()=>{
