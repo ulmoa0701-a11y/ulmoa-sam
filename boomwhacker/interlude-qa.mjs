@@ -108,19 +108,23 @@ try{
    });
    if(!result.beforeBall.introActive||result.beforeBall.playing||result.beforeBall.balls!==0)
      throw Error('Balls appeared BEFORE the prelude runway '+JSON.stringify(result.beforeBall));
-   result.duringBall=await page.evaluate(()=>{
+   const duringAndOverlay=await page.evaluate(()=>{
      const p=instrumentalPreludePlan(),offset=3*beatMs()+p.firstBallOffsetMs+Math.min(750,firstNoteMs()/2);
-     const originalAudioStart=introAudioStartAt;introAudioStartAt=audioCtx.currentTime-offset/1000;introFrame(performance.now());introAudioStartAt=originalAudioStart;
-     return{introActive,playing,balls:document.querySelectorAll('.fall').length,elapsed,pulse:document.querySelector('#introPulse').innerText};
+     const originalAudioStart=introAudioStartAt;
+     introAudioStartAt=audioCtx.currentTime-offset/1000;
+     introFrame(performance.now());
+     const el=document.querySelector('#introOverlay'),css=getComputedStyle(el),card=el.querySelector('.introCard');
+     const during={introActive,playing,balls:document.querySelectorAll('.fall').length,elapsed,pulse:document.querySelector('#introPulse').innerText};
+     const overlay={compact:el.classList.contains('preludePlaying'),background:css.backgroundColor,blur:css.backdropFilter,
+       cardH:card.getBoundingClientRect().height,stageH:document.querySelector('#stage').getBoundingClientRect().height};
+     introAudioStartAt=originalAudioStart;
+     return{during,overlay};
    });
+   result.duringBall=duringAndOverlay.during;
+   result.overlay=duringAndOverlay.overlay;
    if(!result.duringBall.introActive||result.duringBall.playing||result.duringBall.balls<1||
       result.duringBall.elapsed<=0||result.duringBall.pulse!=='🎶')
      throw Error('First ball must descend WHILE instrumental intro plays '+JSON.stringify(result.duringBall));
-   result.overlay=await page.evaluate(()=>{
-     const el=document.querySelector('#introOverlay'),css=getComputedStyle(el),card=el.querySelector('.introCard');
-     return {compact:el.classList.contains('preludePlaying'),background:css.backgroundColor,blur:css.backdropFilter,
-       cardH:card.getBoundingClientRect().height,stageH:document.querySelector('#stage').getBoundingClientRect().height};
-   });
    if(!result.overlay.compact||result.overlay.blur!=='none'||result.overlay.cardH>result.overlay.stageH/2)
      throw Error('Musical intro overlay still obscures falling balls '+JSON.stringify(result.overlay));
    await page.waitForFunction(()=>!introActive&&playing,null,{timeout:16000});
