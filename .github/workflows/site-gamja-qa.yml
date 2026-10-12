@@ -3,7 +3,7 @@ on:
   pull_request:
     paths:
       - "assets/habom-gamja-font.css"
-      - "assets/about-story-20261012.css"
+      - "assets/habom-home-story-hero.css"
       - "assets/about-story-20261012.css"
       - "index.html"
       - "about/index.html"
@@ -21,6 +21,7 @@ on:
     branches: ["main"]
     paths:
       - "assets/habom-gamja-font.css"
+      - "assets/habom-home-story-hero.css"
       - "index.html"
       - "about/index.html"
       - "notes/index.html"
