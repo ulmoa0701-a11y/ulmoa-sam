@@ -8,7 +8,16 @@ const $=(q,root=document)=>root.querySelector(q);
 const form=$('#postForm'), anon=$('#anonymous'),nick=$('#nickname'),secret=$('#secretOptions');
 const status=$('#formStatus'),submit=$('#sendButton');
 const receiptPanel=$('#receiptPanel'),receiptCode=$('#receiptCode');
+const memo=$('#body'),memoCount=$('#memoCount'),category=$('#category');
 let adminKey='',latestReceipt='';
+function updateCount(){memoCount.textContent=memo.value.length.toLocaleString('ko-KR')+' / 2,000';}
+memo.addEventListener('input',updateCount);
+document.querySelectorAll('.prompt-chip').forEach(chip=>chip.addEventListener('click',()=>{
+  category.value=chip.dataset.kind;
+  if(!memo.value.trim()){memo.value=chip.dataset.start||'';memo.dispatchEvent(new Event('input',{bubbles:true}));}
+  memo.focus();memo.setSelectionRange(memo.value.length,memo.value.length);
+}));
+updateCount();
 function setStatus(el,msg,kind){el.textContent=msg;el.className='status'+(kind?' '+kind:'');}
 function el(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
 function selectMode(){
@@ -33,7 +42,7 @@ async function sendForm(ev){
  const data=new FormData(form);
  data.set('anonymous',anon.checked?'true':'false');
  data.set('consent',$('#consent').checked?'true':'false');
- submit.disabled=true;submit.textContent='등록하고 있어요…';
+ submit.disabled=true;submit.textContent='쪽지를 전하는 중…';
  try{
   const response=await fetch('./api/posts'.replace('./api','/api'),{method:'POST',body:data,credentials:'omit',cache:'no-store'});
   const result=await response.json();
@@ -42,11 +51,11 @@ async function sendForm(ev){
   receiptCode.value=latestReceipt;
   receiptPanel.hidden=false;
   receiptPanel.scrollIntoView({block:'start',behavior:'smooth'});
-  setStatus(status,'글을 접수했어요. 확인 코드를 보관해 주세요.','ok');
-  form.reset();syncAnon();selectMode();
+  setStatus(status,'쪽지가 도착했어요. 내 쪽지를 다시 확인할 수 있도록 코드를 보관해 주세요.','ok');
+  form.reset();syncAnon();selectMode();updateCount();
   await loadFeed();
  }catch(err){setStatus(status,err.message||'연결을 확인해 주세요.','error');}
- finally{submit.disabled=false;submit.textContent='이야기 남기기';}
+ finally{submit.disabled=false;submit.innerHTML='<span aria-hidden="true">✉</span> 쪽지 보내기';}
 }
 form.addEventListener('submit',sendForm);
 function receiptUrl(){return location.origin+location.pathname+'#mine='+encodeURIComponent(latestReceipt);}
@@ -66,7 +75,7 @@ function postCard(p,locked=false){
  if(!locked){
   card.append(el('p',p.body,'post-text'));
   if(p.link){try{const u=new URL(p.link);if(['https:','http:'].includes(u.protocol)){const a=el('a','관련 링크 ↗');a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';card.append(a);}}catch{}}
-  if(p.reply){const answer=el('div',undefined,'answer');answer.append(el('strong','울모아쌤'),el('p',p.reply,'post-text'));card.append(answer);}
+  if(p.reply){const answer=el('div',undefined,'answer');answer.append(el('strong','울모아쌤의 답장'),el('p',p.reply,'post-text'));card.append(answer);}
  }else{card.append(el('p','본문과 첨부파일은 공개되지 않습니다. · '+p.status+(p.hasReply?' · 답변 완료':''),'muted'));}
  if(p.hasAttachment){if(locked)card.append(el('span',' · 📎 첨부 있음','muted'));else{const a=el('a','📎 승인된 첨부파일 받기');a.href='/api/public/'+encodeURIComponent(p.id)+'/file';a.rel='noopener noreferrer';card.append(a);}}
  return card;
@@ -79,7 +88,7 @@ async function loadFeed(){
   if(!r.ok)throw Error('server not ready');
   const d=await r.json();pub.replaceChildren();locked.replaceChildren();
   if(!Array.isArray(d.posts)||!Array.isArray(d.locked))throw Error('invalid response');
-  if(!d.posts.length)pub.append(el('p','아직 공개글이 없어요.','muted'));
+  if(!d.posts.length)pub.append(el('p','아직 공개된 쪽지가 없어요. 첫 번째 쪽지를 남겨보세요.','muted'));
   else d.posts.forEach(p=>pub.append(postCard(p)));
   if(!d.locked.length)locked.append(el('p','공개가 승인된 잠금글이 없어요.','muted'));
   else d.locked.forEach(p=>locked.append(postCard(p,true)));
