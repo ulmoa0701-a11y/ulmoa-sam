@@ -527,7 +527,7 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
 <div class="sec"><div class="label">연주 속도</div><div class="speed"><span>천천히</span><input id="tempo" type="range" min="35" max="140" value="66" aria-label="연주 속도 BPM"><span class="bpm" id="bpmLabel">66 BPM</span></div></div>
 <div class="sec"><div class="label">시작 안내 · 세 가지 중 선택</div>
 <select id="introMode" class="introModeSelect sampleSelect" aria-label="연주 시작 안내 방식">
-<option value="interlude">🎶 음악 전주 · 반주와 함께</option>
+<option value="interlude">🎹 선율 전주 · 노래처럼 준비</option>
 <option value="music">🥁 박자 안내 · 쿵 짝</option>
 <option value="voice">🗣️ 말로 세기 · 하나 둘</option>
 <option value="instant">⏩ 바로 시작 · 안내 없이</option>
@@ -1078,7 +1078,7 @@ function scheduleInterludeAccompaniment(ac,dest,start,beats,intervalMs,meter){
 function isGuidedStartMode(){return introMode==='interlude'||introMode==='music'||introMode==='voice'}
 function guideNumber(beatIndex){return ['하나','둘','셋','넷'][beatIndex%Math.max(1,introMeter)]||'하나'}
 function introHelpText(){
- if(introMode==='interlude')return '쿵·짝 박자가 들리는 짧은 전주예요. 공을 따라가면 첫 음에서 바로 시작해요.';
+ if(introMode==='interlude')return '짧은 악기 선율과 박자가 흐르다가 첫 공에서 바로 연주가 시작돼요.';
  if(introMode==='music')return '첫 박은 쿵, 다음 박은 짝. 같은 박자로 공이 내려와요.';
  if(introMode==='voice')return '하나·둘을 소리로 세어 줘요. 한국어 음성은 기기에 따라 다르고, 음성이 없으면 박자 소리로 안내해요. 영상에는 박자 소리만 저장돼요.';
  if(introMode==='instant')return '시작 안내 없이 곧바로 공이 내려와요.';
@@ -1127,7 +1127,7 @@ function scheduleRhythmGuide(ac,dest,start,beats,intervalMs,meter){
 const INTERLUDE_COUNTDOWN_BEATS=3;
 function instrumentalPreludePlan(){
  const meter=[2,3,4].includes(Number(currentSong.timeN))?Number(currentSong.timeN):4;
- const beat=beatMs(),bars=Math.max(2,Math.ceil((firstNoteMs()+100)/(meter*beat)));
+ const beat=beatMs(),bars=Math.max(1,Math.ceil((firstNoteMs()+100)/(meter*beat)));
  return{meter,bars,beats:meter*bars,durationMs:meter*bars*beat,countdownBeats:INTERLUDE_COUNTDOWN_BEATS,
    firstBallOffsetMs:meter*bars*beat-firstNoteMs()};
 }
@@ -1139,27 +1139,44 @@ function schedulePreludeBeat(ac,dest,when,strong){
   voiceOsc(ac,dest,strong?196:880,strong?'triangle':'sine',strong?.25:.115,when,.004,strong?.14:.085,strong?.19:.12);
   voiceOsc(ac,dest,strong?1046.50:1318.51,'sine',strong?.07:.047,when,.002,.045,.063);
 }
+// Intentionally composed tonic -> dominant prelude, not random chord blips.
+// A short familiar musical gesture leads directly into the song's first beat.
+function preludeLeadNote(bar,pos,meter,bars){
+ const finalBar=bar===bars-1;
+ const dominant=finalBar&&(bars>1||pos>=Math.ceil(meter/2));
+ const tonic=chordForMeasure(0);
+ const chord=dominant?preludeChordForBar(bars-1,Math.max(2,bars)):tonic;
+ const f=chord.freqs.slice(1);
+ const tones=meter===2?(dominant?[f[1],f[0]]:[f[0],f[1]]):
+   meter===3?(dominant?[f[1],f[2],f[0]]:[f[0],f[1],f[2]]):
+   (dominant?[f[1],f[2],f[1],f[0]]:[f[0],f[1],f[2],f[1]]);
+ return {freq:tones[pos%tones.length],chord,dominant};
+}
+function schedulePreludeMallet(ac,dest,hz,when,amp,beat){
+ const d=Math.min(.7,Math.max(.18,beat*.88));
+ voiceOsc(ac,dest,hz,'triangle',amp,when,.007,d*.73,d);
+ voiceOsc(ac,dest,hz,'sine',amp*.24,when,.003,d*.44,d*.68,2);
+ voiceOsc(ac,dest,hz,'sine',amp*.08,when,.004,d*.30,d*.50,3);
+}
 function scheduleInterludeMusic(ac,dest,start,intervalMs,meter){
- const p=instrumentalPreludePlan(),beat=intervalMs/1000;
- const chords=ac.createGain(),arpeggio=ac.createGain(),percussion=ac.createGain();
- chords.gain.setValueAtTime(.50,start);chords.connect(dest);
- arpeggio.gain.setValueAtTime(.84,start);arpeggio.connect(dest);
- percussion.gain.setValueAtTime(.95,start);percussion.connect(dest);
- for(let i=0;i<p.beats;i++){
-  const bar=Math.floor(i/meter),pos=i%meter,time=start+i*beat;
-  const chord=preludeChordForBar(bar,p.bars),freqs=chord.freqs;
-  schedulePreludeBeat(ac,percussion,time,pos===0);
-  voiceOsc(ac,chords,freqs[0],'triangle',pos===0?.15:.086,time,.013,Math.max(.14,beat*.64),Math.max(.19,beat*.78));
-  const upper=freqs.slice(1);
-  for(let j=0;j<upper.length;j++)
-   voiceOsc(ac,chords,upper[j],'sine',pos===0?.035:.020,time,.014,Math.max(.12,beat*.5),Math.max(.17,beat*.69));
-  if(upper.length){
-   const note=upper[(i+bar)%upper.length],offset=(pos%2===0?0:.20)*beat;
-   voiceOsc(ac,arpeggio,note,'triangle',.11,time+offset,.009,Math.max(.10,beat*.54),Math.max(.16,beat*.72)+offset);
+ const plan=instrumentalPreludePlan(),beat=intervalMs/1000;
+ const tune=ac.createGain(),chords=ac.createGain(),percussion=ac.createGain();
+ tune.gain.setValueAtTime(.95,start);tune.connect(dest);
+ chords.gain.setValueAtTime(.55,start);chords.connect(dest);
+ percussion.gain.setValueAtTime(.72,start);percussion.connect(dest);
+ for(let i=0;i<plan.beats;i++){
+  const bar=Math.floor(i/meter),position=i%meter,when=start+i*beat;
+  const {freq,chord}=preludeLeadNote(bar,position,meter,plan.bars);
+  schedulePreludeBeat(ac,percussion,when,position===0);
+  schedulePreludeMallet(ac,tune,freq,when,position===0?.30:.25,beat);
+  if(position===0||(plan.bars===1&&position===Math.ceil(meter/2))){
+   const duration=Math.min(1.8,(meter-position)*beat*.92);
+   voiceOscHold(ac,chords,chord.freqs[0],'triangle',.115,when,.014,duration);
+   for(const hz of chord.freqs.slice(1))
+    voiceOscHold(ac,chords,hz,'sine',.027,when,.015,duration*.85);
   }
-  if(i===p.beats-1)voiceOsc(ac,percussion,783.99,'sine',.07,time,.007,.15,.20);
  }
- return p;
+ return plan;
 }
 function scheduleInterludeCountdown(ac,dest,start,intervalMs){
  for(let i=0;i<INTERLUDE_COUNTDOWN_BEATS;i++){
