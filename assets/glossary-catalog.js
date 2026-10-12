@@ -488,7 +488,19 @@ function boot(){
       reading.insertBefore(preview,reading.children[1]||null);
       choose(chosenCover||0);
     }
+    const sourceParams=new URL(location.href).searchParams;
+    const returningFromParent=sourceParams.get("from")==="parents"&&PARENT_TOPICS.has(sourceParams.get("topic"));
+    if(returningFromParent){
+      const back=parentLink(sourceParams.get("topic"),"← 찾아봄의 원래 상황으로 돌아가기");
+      back.classList.add("gcat-parent-return");
+      dialogBody.prepend(back);
+    }
     dialogBody.appendChild(reading);
+    const selfCheck=node("details","gcat-self-check");
+    selfCheck.appendChild(node("summary",null,"읽고 나서 20초만 생각해보기"));
+    selfCheck.appendChild(node("p",null,"이 용어를 내 말로 한 문장으로 설명할 수 있나요? 위의 생활 예시와 연결해서 떠올려 보세요. 정답을 입력하거나 제출할 필요는 없어요."));
+    dialogBody.appendChild(selfCheck);
+    dialogBody.appendChild(parentLink(topicForTerm(id),"찾아봄에서 관련 상황·관찰 질문 보기 →"));
     const suggestions=(RELATED[id]||entries.filter(x=>x.category===entry.category&&x.id!==id).slice(0,2).map(x=>x.id))
       .filter(key=>key!==id&&byId.has(key)).slice(0,3);
     if(suggestions.length){
@@ -754,6 +766,37 @@ function boot(){
     button.addEventListener("click",()=>openTerm(id,button));
     return button;
   }
+
+  const PARENT_TOPICS=new Set(["speech","attention","emotion","social","daily","school"]);
+  const TERM_PARENT_TOPIC={
+    "memo-aac":"speech","memo-pragmatics":"social",
+    "memo-narrative-discourse":"speech","memo-receptive-expressive":"speech",
+    "memo-inferential-comprehension":"speech","memo-reading-fluency":"school",
+    "memo-abc-observation":"emotion","memo-fba":"emotion",
+    "memo-replacement-behavior":"emotion","memo-self-regulation":"emotion",
+    "memo-joint-attention":"social","memo-flexibility":"social",
+    "memo-task-analysis":"daily","memo-generalization":"daily",
+    "memo-time-delay":"daily","memo-prompting":"daily",
+    "memo-modeling":"daily","memo-visual-supports":"daily",
+    "memo-udl":"school","memo-planning-organization":"school",
+    "memo-working-memory":"attention","memo-attention":"attention",
+    "memo-performance-monitoring":"attention","memo-executive":"attention"
+  };
+  function topicForTerm(id){
+    const entry=byId.get(id);
+    return TERM_PARENT_TOPIC[id]||({language:"speech","memory-perception":"attention",intervention:"daily",cognitive:"attention"}[entry?.category]||"school");
+  }
+  const SITUATION_PARENT_TOPIC={
+    distracted:"attention",planning:"attention",switch:"social",
+    instructions:"attention",recall:"attention",reading:"school",
+    story:"speech",context:"social",express:"speech",
+    refusal:"emotion",asking:"speech",access:"school"
+  };
+  function parentLink(topic,textLabel){
+    const link=node("a","gcat-parent-link",textLabel);
+    link.href="../parents/#"+(PARENT_TOPICS.has(topic)?topic:"school");
+    return link;
+  }
   function renderSituations(){
     situationFilters.replaceChildren();
     [{id:"featured",label:"먼저 볼 4가지"},{id:"all",label:"전체 12가지"},...SITUATION_GROUPS].forEach(group=>{
@@ -822,6 +865,7 @@ function boot(){
       extra.appendChild(chips);
       extra.appendChild(node("p","gcat-remember-note",situation.remember));
       article.appendChild(extra);
+      article.appendChild(parentLink(SITUATION_PARENT_TOPIC[situation.id],"찾아봄에서 관찰할 점도 보기 ↗"));
       const reference=node("a","gcat-learning-reference",situation.source[0]+" · 참고자료 ↗");
       reference.href=situation.source[1];
       reference.target="_blank";

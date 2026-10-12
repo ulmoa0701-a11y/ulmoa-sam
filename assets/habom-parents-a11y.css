@@ -1,0 +1,38 @@
+/* 찾아봄 2026-10: 관찰·기록 중심, 교사/청소년/보호자 모두 읽기 쉬운 크기 */
+body.parents-page .parents-main{font-family:"Pretendard Variable",Pretendard,"SUIT",sans-serif!important}
+body.parents-page .parents-main :is(p,li,a,button,input,textarea,label,summary,small,span){font-family:"Pretendard Variable",Pretendard,"SUIT",sans-serif!important}
+body.parents-page .parents-main :is(h2,h3){font-family:"Habom MaruBuri","Maru Buri","Nanum Myeongjo",serif!important;font-weight:600!important;line-height:1.5!important;letter-spacing:-.025em!important}
+body.parents-page .parents-hero h1{font-family:"Habom MaruBuri","Maru Buri","Nanum Myeongjo",serif!important;font-weight:600!important;line-height:1.32!important;font-size:clamp(32px,4.2vw,47px)!important;letter-spacing:-.035em!important}
+body.parents-page .parents-hero p{font-size:clamp(15px,1.5vw,17px)!important;line-height:1.72}
+body.parents-page .parents-main .parents-section-head p{font-size:14px!important;line-height:1.65}
+body.parents-page .parents-main .parents-topic p{font-size:clamp(14px,1.3vw,15px)!important;line-height:1.7}
+body.parents-page .parents-main .parents-topic ul{font-size:14px!important;line-height:1.7}
+body.parents-page .parents-main .parents-topic summary{font-size:14px!important;min-height:35px}
+body.parents-page .parents-main .parents-topic-links a{font-size:13.5px!important;min-height:40px;display:inline-flex;align-items:center}
+body.parents-page .parents-pills a{font-size:13px!important;min-height:41px;align-items:center}
+body.parents-page .parents-context{padding:10px 11px;background:#f5f9f2;border-radius:10px;color:#4e695b!important}
+body.parents-page .parents-context strong{color:#43654e}
+body.parents-page .parents-source{display:inline-block;margin-top:13px;padding:6px 0;min-height:32px;font:550 12px/1.55 "Pretendard Variable",sans-serif!important;color:#557163!important;text-underline-offset:3px;word-break:keep-all}
+body.parents-page .parents-purpose{margin:14px 0 8px;padding:17px 20px;background:#fffdf8;border:1px solid #e8e5d9;border-radius:16px;display:flex;flex-wrap:wrap;align-items:center;gap:9px 11px}
+body.parents-page .parents-purpose p{flex:1 1 100%;font-size:15px!important;line-height:1.65;margin:0 0 3px;color:#4f5c55}
+body.parents-page .parents-purpose a{padding:10px 12px;border:1px solid #d5e5d8;background:#f1f8f2;color:#2e5947;border-radius:9px;font-weight:700;font-size:14px;text-decoration:none;min-height:42px}
+body.parents-page .parents-save-actions{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:15px}
+body.parents-page .parents-save-actions button{min-height:44px;font-size:14px!important;margin:0;padding:11px 13px;cursor:pointer}
+body.parents-page .parents-file-action{background:#eff7f0;border:1px solid #b9d5c1;border-radius:11px;color:#2f5948;font-weight:750}
+body.parents-page .parents-save-status{font-size:14px!important;line-height:1.55!important;color:#376d54!important;margin:11px 0 8px!important}
+body.parents-page .parents-observation label{font-size:14px;font-weight:650}
+body.parents-page .parents-observation :is(input,textarea){font-size:15px!important;line-height:1.55!important}
+body.parents-page .parents-note{font-size:13px!important;line-height:1.65!important}
+body.parents-page .parents-bottom{font-size:14px!important}
+body.parents-page :is(.parents-purpose a,.parents-topic a,.parents-topic summary,.parents-save-actions button):focus-visible{outline:3px solid #356da2;outline-offset:2px}
+@media(max-width:700px){
+  body.parents-page .parents-purpose{padding:13px}
+  body.parents-page .parents-purpose p{font-size:14px!important}
+  body.parents-page .parents-purpose a{flex:1 1 100%;text-align:center}
+  body.parents-page .parents-hero h1{font-size:34px!important}
+  body.parents-page .parents-topic{padding:16px 14px}
+  body.parents-page .parents-topic h3{font-size:18px!important}
+}
+@media print{
+ body.parents-page .parents-purpose,body.parents-page .parents-save-actions,body.parents-page .parents-save-status{display:none!important}
+}

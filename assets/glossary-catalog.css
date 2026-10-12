@@ -1250,3 +1250,13 @@ body.note-subpage.glossary-page .gcat :is(h1,h2,h3,h4,h5,h6) :is(span,em,b,stron
 body.note-subpage.glossary-page .gcat :is(p,span,b,strong,small,a,button,input,label,li,dt,dd,summary){
  font-family:var(--habom-readable-body,"Pretendard Variable",Pretendard,sans-serif)!important;
 }
+
+/* 알아봄 ↔ 찾아봄: 긴 설명을 읽고 실생활 질문으로 이동 */
+.glossary-page .gcat-sibling-link,.glossary-page .gcat-parent-link{display:inline-flex;align-items:center;min-height:40px;padding:8px 11px;border:1px solid #cbdacb;border-radius:9px;background:#f3f8f1;text-decoration:none!important;color:#345e4c!important;font:650 14px/1.5 "Pretendard Variable",Pretendard,sans-serif!important;word-break:keep-all}
+.glossary-page .gcat-sibling-link{border:0;padding:0;min-height:0;background:transparent;text-decoration:underline!important}
+.glossary-page .gcat-parent-return{display:flex;margin:0 0 12px;background:#fff7e7}
+.glossary-page .gcat-situation-card>.gcat-parent-link{font-size:13px!important;justify-content:center}
+.glossary-page .gcat-dialog-body>.gcat-parent-link{display:flex;justify-content:center;margin-top:10px}
+.glossary-page .gcat-self-check{margin:14px 0 6px;padding:10px 12px;border:1px solid #e5dfd3;border-radius:11px;background:#fffef7}
+.glossary-page .gcat-self-check summary{cursor:pointer;min-height:27px;font-size:14px!important;font-weight:650!important}
+.glossary-page .gcat-self-check p{font-size:14px!important;line-height:1.65!important;margin:10px 0 2px!important}

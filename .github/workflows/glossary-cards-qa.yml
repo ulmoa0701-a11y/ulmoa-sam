@@ -3,6 +3,10 @@ on:
   pull_request:
     paths:
       - 'notes/**'
+      - 'parents/**'
+      - 'qa/arabom-chajabom-smoke.cjs'
+      - 'assets/habom-parents-a11y.css'
+      - 'assets/habom-parents-notes.js'
       - 'assets/glossary/cards/**'
       - 'assets/glossary-catalog.css'
       - 'assets/glossary-catalog.js'
@@ -11,6 +15,10 @@ on:
     branches: [main]
     paths:
       - 'notes/**'
+      - 'parents/**'
+      - 'qa/arabom-chajabom-smoke.cjs'
+      - 'assets/habom-parents-a11y.css'
+      - 'assets/habom-parents-notes.js'
       - 'assets/glossary/cards/**'
       - 'assets/glossary-catalog.css'
       - 'assets/glossary-catalog.js'
@@ -35,6 +43,7 @@ jobs:
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/glossary-http.log 2>&1 &
           node notes/glossary-smoke.cjs
+          node qa/arabom-chajabom-smoke.cjs
       - name: Screenshots
         if: always()
         uses: actions/upload-artifact@v4
@@ -49,7 +58,7 @@ jobs:
         run: |
           ready=0
           for n in $(seq 1 36); do
-            if curl --max-time 15 -fsSL "$PUBLIC_URL" -o /tmp/glossary-live.html && grep -q 'id="gcatSituationPanel"' /tmp/glossary-live.html && grep -q 'id="gcatConnectionPanel"' /tmp/glossary-live.html; then
+            if curl --max-time 15 -fsSL "$PUBLIC_URL" -o /tmp/glossary-live.html && grep -q 'id="gcatSituationPanel"' /tmp/glossary-live.html && grep -q 'id="gcatConnectionPanel"' /tmp/glossary-live.html && grep -q '20261012-crosspaths1' /tmp/glossary-live.html && curl --max-time 15 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/parents/" -o /tmp/chajabom-live.html && grep -q 'habom-parents-notes.js?v=20261012-paths1' /tmp/chajabom-live.html; then
               ready=1
               break
             fi
@@ -59,6 +68,7 @@ jobs:
           test "$ready" = "1"
           curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary/cards/working-memory.webp" -o /tmp/glossary-live.webp
           head -c 4 /tmp/glossary-live.webp | grep -q 'RIFF'
-          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.js?v=20261012-arabom-one-at-a-time" | grep -q 'FEATURED_SITUATIONS='
-          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.css?v=20261012-arabom-one-at-a-time" | grep -q '.gcat-journey-nav'
+          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.js?v=20261012-crosspaths1" | grep -q 'FEATURED_SITUATIONS='
+          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.css?v=20261012-crosspaths1" | grep -q '.gcat-journey-nav'
           GLOSSARY_QA_URL="$PUBLIC_URL" node notes/glossary-smoke.cjs
+          GLOSSARY_QA_URL="$PUBLIC_URL" node qa/arabom-chajabom-smoke.cjs
