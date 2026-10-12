@@ -1,0 +1,126 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>일단써봄 v15 독립 QA</title><style>body{font:14px system-ui;margin:0;padding:0}h1{font-size:17px;margin:6px}#log{font-size:11px;white-space:pre-wrap}iframe{width:100%;height:950px;border:0}#qa{height:1px;overflow:hidden}</style></head><body><h1>v15 synthetic independent QA</h1><div id="log" aria-live="polite"></div><iframe id="frame" title="synthetic-test-app" src="design-v15/"></iframe><script>
+const frame=document.getElementById('frame'),log=document.getElementById('log');
+const D=()=>frame.contentDocument,W=()=>frame.contentWindow;
+function say(s){log.textContent+=s+'\n';console.log(s)}
+function check(expr,msg){if(!expr)throw Error(msg);say('PASS '+msg)}
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function until(cond,time=5000){const begin=Date.now();while(Date.now()-begin<time){try{if(cond())return true;}catch(_){}await sleep(45)}throw Error('TIMEOUT '+String(cond).slice(0,140))}
+function enter(role){D().querySelector('[data-login-role="'+role+'"]').click();D().getElementById('oneLogin').click()}
+function setField(el,v){if(!el)throw Error('field missing');el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))}
+function tick(el,value){if(!el)throw Error('checkbox missing');if(el.checked!==value)el.click()}
+function fields(){return [...D().querySelectorAll('#entryForm input[name="shareField"]:checked')].map(x=>x.value)}
+function mainScroll(){return {width:W().innerWidth,scroll:D().documentElement.scrollWidth,body:D().body.scrollWidth}}
+async function role(role){D().getElementById('signOut').click();await until(()=>D().getElementById('oneLogin'));enter(role);await until(()=>role==='therapist'?D().getElementById('sessionForm'):D().getElementById('entryForm'))}
+async function run(){
+ try{
+  await until(()=>D().getElementById('oneLogin'));
+  check(W().ILDAN_PREVIEW===true,'가상체험 모드 고정');
+  check(D().body.textContent.includes('실명·상담 내용 입력 금지'),'실제 상담정보 입력금지 안내');
+  check(!D().querySelector('#registerForm')?.offsetParent,'가상 데모의 계정 생성 UI 기본 숨김');
+  const illegalGuest=await W().fetch('/api/records',{method:'POST',body:JSON.stringify({entry:{note:'not authorized'},share:false})});
+  check(illegalGuest.status===403,'미인증 역할 기록 생성 요청 거부');
+  enter('student');await until(()=>D().getElementById('entryForm'));
+  check(D().querySelector('form.student-journal')?.dataset.journalMode==='quick','학생 간편 기록 첫 화면');
+  check(!D().querySelector('form.student-journal textarea[name="note"]').required,'학생 내용 입력을 평소 강요하지 않음');
+  check(D().getElementById('entryForm').elements.share.checked===false,'학생 기록 기본 비공개');
+  check(!D().querySelector('[name="experience"]').closest('details').open,'증상 경험 기록 기본 접힘');
+  check(!D().body.textContent.includes('연속 기록 보상'),'연속기록 보상 강제 없음');
+  const emptyCount=W().PREVIEW_RECORDS.length;
+  D().getElementById('saveEntry').click();await sleep(60);
+  check(W().PREVIEW_RECORDS.length===emptyCount,'빈 학생 기록은 강제 제출되지 않음');
+  const text='XSS test <img src=x onerror="window.__ILDAN_AUDIT_XSS=1"> '+('길고 평범한 가상 내용 '.repeat(26))+'꼬리 문장';
+  setField(D().querySelector('textarea[name="note"]'),text);
+  D().querySelector('[data-journal-mode="detail"]').click();
+  setField(D().querySelector('[name="thought"]'),'비공개 상세 생각, 공유되면 안 됨');
+  D().querySelector('[data-journal-mode="quick"]').click();
+  tick(D().querySelector('[name="share"]'),true);
+  check(!D().getElementById('sharePicker').hidden,'공유 항목 패널 표시');
+  check(D().querySelector('input[name="shareField"][value="thought"]').disabled,'간편 모드에서 숨긴 상세 생각 공유 제외');
+  const noteField=D().querySelector('input[name="shareField"][value="note"]');
+  tick(noteField,true);
+  D().getElementById('saveEntry').click();
+  await until(()=>D().getElementById('shareReviewDialog')?.open);
+  check(D().querySelector('.share-review-body').textContent.includes('꼬리 문장'),'긴 공유 원문 완전 표시');
+  check(!D().querySelector('.share-review-body').textContent.includes('비공개 상세 생각'),'공유 전 확인에서 미선택 항목 제외');
+  check(D().activeElement?.closest('#shareReviewDialog')===D().getElementById('shareReviewDialog'),'모달 열릴 때 키보드 초점이 모달 안에 위치');
+  D().querySelector('#shareReviewDialog [data-cancel]').click();await sleep(50);
+  check(W().PREVIEW_RECORDS.length===emptyCount,'공유 취소는 기록 전송하지 않음');
+  D().getElementById('saveEntry').click();await until(()=>D().getElementById('shareReviewDialog')?.open);
+  D().querySelector('#shareReviewDialog [data-approve]').click();
+  await until(()=>W().PREVIEW_RECORDS.length===1&&D().querySelector('[data-unshare]'));
+  const first=W().PREVIEW_RECORDS[0];
+  check(first.entry.thought.includes('비공개 상세'),'원래 입력한 자세히 기록은 내 기록에 보존');
+  check(!first.sharedEntry.thought&&first.sharedEntry.note===text,'치료사에게는 선택한 글만 보임');
+  check(!D().querySelector('img[src="x"]')&&W().__ILDAN_AUDIT_XSS!==1,'악성 HTML 문자열 렌더링 시 실행되지 않음');
+  W().confirm=()=>true;D().querySelector('[data-unshare]').click();
+  await until(()=>!W().PREVIEW_RECORDS[0].shared);
+  W().PREVIEW_ROLE='therapist';
+  const afterRevocation=await (await W().fetch('/api/records',{method:'GET'})).json();
+  check(!afterRevocation.records?.some(r=>r.id===first.id),'공유 철회 후 치료사 API에서 제외');
+  const illegalTherapist=await W().fetch('/api/records',{method:'POST',body:JSON.stringify({entry:{note:'invalid write'}})});
+  check(illegalTherapist.status===403,'치료사의 학생 기록 생성 API 거부');
+  W().PREVIEW_ROLE='student';
+  D().querySelector('[data-workspace-target="write"]').click();
+  await until(()=>D().getElementById('entryForm'));
+  setField(D().querySelector('textarea[name="note"]'),'복구될 가상 초안');
+  tick(D().querySelector('[name="share"]'),true);
+  tick(D().querySelector('input[name="shareField"][value="note"]'),true);
+  check(!!W().sessionStorage.getItem('ildan-v15-preview-draft-student'),'공유 선택을 포함한 초안 임시 보관');
+  frame.src='design-v15/?scenario=restore-audit';
+  await until(()=>D().getElementById('oneLogin')&&W().PREVIEW_ROLE==='guest');
+  enter('student');
+  await until(()=>D().querySelector('textarea[name="note"]')?.value==='복구될 가상 초안');
+  check(D().querySelector('[name="share"]').checked&&!D().getElementById('sharePicker').hidden,'새로고침 후 공유 선택 상태와 패널 일치');
+  check(D().getElementById('saveEntry').textContent.includes('공유'),'새로고침 후 저장 버튼도 공유 여부 표시');
+  await role('parent');
+  check(!!D().querySelector('select[name="origin"]'),'보호자 정보 출처 기본 화면 노출');
+  check(!D().querySelector('select[name="origin"]').required,'보호자 출처 선택 사항');
+  check(!D().querySelector('textarea[name="childWords"]').required,'아동 발언은 선택 사항');
+  check(!D().querySelector('details.parent-more').open,'앞뒤 상황은 접힌 추가 항목');
+  check(!D().getElementById('entryForm').elements.share.checked,'보호자 공유 기본 해제');
+  await until(()=>!D().getElementById('saveEntry').disabled);
+  setField(D().querySelector('[name="date"]'),'2026-10-01');
+  setField(D().querySelector('textarea[name="observation"]'),'보호자 직접 본 사실');
+  setField(D().querySelector('select[name="origin"]'),'직접 관찰');
+  setField(D().querySelector('[name="childWords"]'),'아이가 실제로 한 말');
+  tick(D().querySelector('[name="share"]'),true);
+  tick(D().querySelector('input[name="shareField"][value="origin"]'),true);
+  tick(D().querySelector('input[name="shareField"][value="childWords"]'),true);
+  D().getElementById('saveEntry').click();await until(()=>D().getElementById('shareReviewDialog')?.open);
+  const parentReview=D().querySelector('.share-review-body').textContent;
+  check(parentReview.includes('아이가 실제로 한 말')&&parentReview.includes('직접 관찰'),'보호자 실제 발언과 출처 공유 전문 확인');
+  D().querySelector('#shareReviewDialog [data-approve]').click();
+  await until(()=>W().PREVIEW_RECORDS.some(r=>r.kind==='parent'&&r.shared));
+  const caregiver=W().PREVIEW_RECORDS.find(r=>r.kind==='parent'&&r.shared);
+  check(caregiver.entry.date==='2026-10-01'&&caregiver.createdAt!==caregiver.entry.date,'관찰 날짜와 작성 타임스탬프 구분');
+  check(caregiver.sharedEntry.origin==='직접 관찰'&&caregiver.sharedEntry.childWords.includes('실제로'),'보호자 진술 선택 공유 필드만 노출');
+  check(!caregiver.sharedEntry.response&&!caregiver.sharedEntry.context,'보호자 상세 비선택 내용 비공개');
+  await role('therapist');
+  check(D().querySelectorAll('details.clinician-extra').length===3,'치료사 사례개념화 ERP CBIT 별도 접힌 영역');
+  check([...D().querySelectorAll('details.clinician-extra')].every(x=>!x.open),'치료사 상세항목 초기 접힘');
+  check(D().getElementById('inboxResults').textContent.includes('아이가 실제로 한 말'),'치료사 기록함에서 보호자 원문 구분');
+  const form=D().getElementById('sessionForm');
+  for(const k of ['studentReport','parentReport','observation','functionalImpact','workingHypothesis','alternatives','uncertainty','burdenReview','erpReview','cbitReview']){
+   check(!!form.elements[k],'치료사 가설·출처·대안 필드 '+k);
+  }
+  setField(form.elements.studentReport,'가상 아동 직접 진술');
+  setField(form.elements.parentReport,'가상 보호자가 전한 내용');
+  setField(form.elements.observation,'치료사 관찰 사실');
+  setField(form.elements.workingHypothesis,'진단이 아니라 잠정적인 가설');
+  setField(form.elements.alternatives,'틱 외 다른 해석의 가능성');
+  setField(form.elements.burdenReview,'부담 또는 반복 확인이 보고됨');
+  form.querySelector('button[type="submit"]').click();
+  await until(()=>W().PREVIEW_SESSION_NOTES?.length===1);
+  const note=W().PREVIEW_SESSION_NOTES[0].entry;
+  check(note.studentReport.includes('아동')&&note.parentReport.includes('보호자')&&note.observation.includes('치료사'),'치료사 메모에서 정보 출처 분리 저장');
+  check(note.workingHypothesis.includes('잠정')&&note.alternatives.includes('가능성'),'가설과 대안 분리 저장');
+  check(!note.erpTarget&&!note.cbitTarget,'앱이 치료 과제를 임의 생성하지 않음');
+  W().PREVIEW_ROLE='parent';
+  check((await W().fetch('/api/session-notes',{method:'GET'})).status===403,'보호자 역할 치료사 메모 조회 거부');
+  check((await W().fetch('/api/session-notes',{method:'POST',body:JSON.stringify({entry:{question:'no'}})})).status===403,'보호자 역할 치료사 메모 작성 거부');
+  say('PASS AUDIT COMPLETE');
+  document.documentElement.dataset.audit='PASS';
+ }catch(e){say('FAIL '+(e.stack||e));document.documentElement.dataset.audit='FAIL';}
+}
+run();
+</script></body></html>
