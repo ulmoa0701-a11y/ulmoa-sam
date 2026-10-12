@@ -46,6 +46,13 @@ jobs:
                 console.log('AUDIT '+vp.width+' OUTER '+JSON.stringify(outer));
                 console.log('AUDIT '+vp.width+' INNER '+JSON.stringify(inner));
                 console.log('AUDIT '+vp.width+' ERRORS '+JSON.stringify(messages));
+                const order=inner.labels.filter(e=>e.label).map(e=>e.label);
+                const positions=['구분','제목 (선택)','내용','파일 첨부 (선택)','닉네임 (선택)','비밀글 공개 범위'].map(t=>order.findIndex(s=>s.includes(t)));
+                const isOrdered=positions.every((p,i)=>p>=0&&(i===0||p>positions[i-1]));
+                const nickname=inner.labels.find(e=>e.label&&e.label.includes('닉네임 (선택)'));
+                console.log('AUDIT '+vp.width+' FIELD_FLOW '+JSON.stringify({order,positions,isOrdered,nicknameRequired:nickname?.classes.includes('jf-required'),internalScrollbar:inner.scrollHeight>outer.height+4}));
+                if(!isOrdered)throw Error('Still wrong private field order: '+order.join(' > '));
+                if(nickname?.classes.includes('jf-required'))throw Error('Private nickname unexpectedly required');
                 await page.close();
               }
             }finally{await browser.close()}
