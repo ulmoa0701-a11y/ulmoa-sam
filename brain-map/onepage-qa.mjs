@@ -200,6 +200,7 @@ try{
     assert.match(await page.locator('#hemiSceneAction').innerText(),/직접 해보기/);
     await page.locator('[data-brain-scene="ball"]').click();
     assert.equal(await page.locator('#hemiSceneAction').isHidden(),true,'switching scenes clears stale activity');
+    await page.locator('[data-brain-scene="talk"]').click();
   }
   const listening=page.locator('#hemiReadOverview');
   assert.equal(await listening.count(),1,'optional spoken summary available');
