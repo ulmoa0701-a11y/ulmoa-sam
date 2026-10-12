@@ -110,10 +110,10 @@ jobs:
               if(!picker.label.includes('간주 듣고 시작')||(mobile&&(picker.width<240||picker.font<12))||(!mobile&&picker.width<115))
                 throw Error('LIVE deployed interlude picker not readable: '+JSON.stringify({mobile,picker}));
               if(mobile)await page.locator('#mobileSettingsClose').click();
-              const phrase=await page.evaluate(()=>interludePhrasePlan());
+              const phrase=await page.evaluate(()=>({...interludePhrasePlan(),beatMs:beatMs()}));
               const notes=phrase.notes.map(n=>n.note);
               console.log('LIVE_SONG_INTRO_NOTES='+JSON.stringify({mobile,notes,beats:phrase.beats,lastDurationMs:phrase.notes.at(-1)?.durationMs}));
-              if(phrase.beats!==8||notes.join(',')!=='도,도,솔,솔,라,라,솔'||Math.abs(phrase.notes.at(-1).durationMs/2-beatMs())>1)
+              if(phrase.beats!==8||notes.join(',')!=='도,도,솔,솔,라,라,솔'||Math.abs(phrase.notes.at(-1).durationMs/2-phrase.beatMs)>1)
                 throw Error('LIVE four-measure musical phrase cut mid-song: '+JSON.stringify({notes,phrase}));
               const audio=await page.evaluate(async()=>{
                 const ac=new OfflineAudioContext(1,44100*8,44100),beat=beatMs();
