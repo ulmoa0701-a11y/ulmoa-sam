@@ -15,3 +15,67 @@ input:not([type=checkbox]):not([type=radio]),select,textarea{width:100%;min-heig
 footer{text-align:center;color:var(--muted);padding:19px;font-size:12px}
 @media(max-width:600px){body{font-size:14px}.wrap{padding:12px 12px 35px}.heading{padding:8px 6px}.heading h1{font-size:30px}.sheet{padding:22px 16px;border-radius:15px;margin-bottom:12px}h2{font-size:21px}.step{padding-top:21px}.choice{padding:12px;min-height:65px}.actions button{width:100%}.post{padding:14px}input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+
+/* 이야기해봄 — '메모를 건네는' 정서, 과잉 장식 없는 쪽지 디자인 */
+body{background:#f8f9f4}
+.heading{padding:4px 0 0;margin-bottom:17px}
+.note-hero{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:25px 29px 26px;border:1px solid #d4e3d6;border-radius:20px;background:linear-gradient(130deg,#f1f8ee 2%,#fffdf5 92%);overflow:hidden}
+.note-hero-copy{position:relative;z-index:2;max-width:560px}
+.heading .eyebrow{letter-spacing:.012em;font-size:13px;color:#527a59}
+.heading h1{font-size:36px;line-height:1.2;margin:9px 0 13px}
+.hero-doodle{font-family:"Gamja Flower","Nanum Pen Script",cursive;font-weight:400;color:#c47468;white-space:nowrap;font-size:29px;margin-left:8px;letter-spacing:0}
+.heading .hero-lead{margin:0;line-height:1.7;font-size:16px;color:#47624f;word-break:keep-all}
+.heading .hero-caption{margin:11px 6px 0;line-height:1.65;color:#66776b;font-size:12px;word-break:keep-all}
+.hero-envelope{flex:0 0 154px;height:124px;position:relative;transform:rotate(6deg);filter:drop-shadow(0 6px 6px rgba(68,86,61,.08))}
+.envelope-paper{position:absolute;z-index:1;top:0;left:17px;width:122px;height:84px;background:#fffdf7;border:1px solid #dfd8c7;border-radius:3px;text-align:center;padding-top:16px;color:#6b7057;font-family:"Gamja Flower",cursive;font-size:20px;transform:rotate(-5deg)}
+.envelope-front{position:absolute;z-index:2;inset:47px 0 0;border-radius:4px 4px 9px 9px;border:1px solid #ddcba9;background:linear-gradient(150deg,transparent 49.4%,#e4d6ba 50%,transparent 50.6%),linear-gradient(210deg,transparent 49.4%,#e4d6ba 50%,transparent 50.6%),#fae9cb}
+.envelope-flap{position:absolute;z-index:0;inset:27px 0 16px;background:#eedab4;clip-path:polygon(0 20%,50% 95%,100% 20%);border-radius:8px}
+.envelope-seal{position:absolute;z-index:3;top:79px;left:62px;display:grid;place-items:center;background:#7b987e;color:#fff;border-radius:50%;font-family:"Gamja Flower",cursive;font-size:15px;width:33px;height:33px;border:3px solid #e7d9c5}
+.writing-sheet{background:#fffefa;padding-top:25px}
+.note-address{display:flex;gap:10px;align-items:center;padding:12px 16px;background:#f7faf5;border:1px dashed #cddccc;border-radius:12px;margin-bottom:17px;color:#40634a}
+.note-stamp{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;background:#e9f2e5;border:1px solid #cfddcc;border-radius:10px;font-size:20px}
+.note-address small,.note-address strong{display:block;line-height:1.2}.note-address small{font-size:11px;color:#67806e}.note-address strong{font-size:14px;margin-top:3px}
+.note-address-caption{margin-left:auto;font-size:12px;color:#809282;font-family:"Gamja Flower",cursive;font-size:19px}
+.writing-sheet h2{margin-bottom:3px;font-family:"MaruBuri","Gowun Batang",serif;color:#32563e}
+.writing-intro{color:#697b6c;font-size:13px;margin-bottom:12px}
+.writing-sheet .step:first-child{padding-top:20px}
+.step h3{margin-bottom:12px}
+.step-number{background:#edf4e4;border:1px solid #dbe9d1;color:#41704e}
+.writing-sheet .step{border-color:#e6ebe1}
+.title-more{background:#f9fbf8}
+.prompt-hint{font-size:12px;color:#66806b;margin:0 0 9px}
+.prompt-chips{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 14px}
+.prompt-chip{font:inherit;font-weight:650;color:#4f7358;background:#f4f8f1;border:1px solid #dce9d6;border-radius:999px;padding:7px 11px;font-size:12px;line-height:1.4;cursor:pointer;min-height:38px;transition:background .12s,border-color .12s}
+.prompt-chip:hover,.prompt-chip:focus-visible{background:#eaf4e6;border-color:#8eb391}
+.prompt-chip:active{transform:translateY(1px)}
+.memo-editor{overflow:hidden;background:#fffef9;border:1px solid #cbd9c6;border-radius:12px}
+.memo-editor:focus-within{outline:3px solid #89b498;outline-offset:2px}
+.memo-editor textarea{display:block;padding:16px 16px 13px;min-height:150px;line-height:2.05;border:none;border-radius:0;box-shadow:none;outline:0;resize:vertical;background:repeating-linear-gradient(to bottom,#fffefa 0,#fffefa 31px,#f1efe4 32px,#fffefa 33px);color:#31453a}
+.memo-editor textarea:focus-visible{outline:0}
+.memo-editor textarea::placeholder{color:#8b998c}
+.memo-editor-foot{display:flex;justify-content:space-between;gap:10px;padding:7px 13px 10px;background:#fffefa;color:#8c9a87;font-size:12px}
+.memo-editor-foot span:first-child{font-family:"Gamja Flower",cursive;font-size:17px}
+.writing-sheet .privacy-choice legend{font-weight:800;color:#334f3a}
+.writing-sheet .choice.selected{background:#eef6e9}
+.submit{background:#39724b;box-shadow:0 3px 0 #c8ddc7;letter-spacing:.01em}
+.submit:hover{background:#2d6040}.submit:active{transform:translateY(1px)}
+.submit span{margin-right:6px}
+.receipt{background:#f7fcf5;border:1px solid #b8d7bf}
+.browse .post{background:#fffefa}
+.browse .post h3{font-family:"MaruBuri","Gowun Batang",serif}
+@media(max-width:600px){
+  .note-hero{padding:20px 17px;gap:8px;border-radius:15px}
+  .heading h1{font-size:29px}
+  .hero-doodle{display:block;font-size:25px;margin:1px 0 0}
+  .heading .hero-lead{font-size:14px}
+  .hero-envelope{flex-basis:80px;transform:scale(.66) rotate(7deg);transform-origin:center;min-width:80px;margin-left:-21px;margin-right:-24px}
+  .heading .hero-caption{margin-top:10px}
+  .writing-sheet{padding-top:19px}
+  .note-address{padding:10px 12px}
+  .note-address-caption{font-size:16px}
+  .prompt-chip{font-size:12px;min-height:40px}
+  .memo-editor textarea{min-height:148px;padding:12px;line-height:2}
+}
+@media(max-width:350px){.hero-envelope{display:none}.heading h1{font-size:28px}.prompt-chip{padding:7px 10px}}
+@media(prefers-reduced-motion:reduce){.prompt-chip:active,.submit:active{transform:none}}
