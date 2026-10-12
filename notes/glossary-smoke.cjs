@@ -362,70 +362,26 @@ const path=require("node:path");
       assert.equal(await page.locator("#gcatTermPanel").isVisible(),true,"original glossary mode restored");
       assert.equal(await page.locator(".study-note").count(),42,"no original note lost on view switching");
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,"no horizontal scrolling on final restored view");
-      // 두 종류의 익힘 게임을 실제로 플레이: 첫화면, 기본/응용, 오답/정답, 해설, 원자료, 복습, 키보드, 뒤로가기.
-      assert.equal(await page.locator("#gcatGamesFromTerms").count(),1,"term panel has a game entry");
-      assert.equal(await page.locator("#gcatGamesFromSituations").count(),1,"situation panel has a game entry");
+      // 알아봄 게임은 어휘 시험이 아니라 상황을 여러 관점에서 보는 활동.
+      assert.equal(await page.locator("#gcatGamesFromTerms").count(),1,"glossary has optional scene activities");
+      assert.equal(await page.locator("#gcatGamesFromSituations").count(),1,"situations invite observation play");
       await page.goto(new URL("?view=games",base).href,{waitUntil:"networkidle",timeout:90000});
-      assert.equal(await page.locator("#gcatGamesPanel").isVisible(),true,"games have a directly shareable URL");
-      assert.equal(await page.locator("#gcatGamesRoot").getAttribute("data-game-stage"),"hub","game hub opens by default");
-      assert.equal(await page.locator(".gcat-game-mode-card").count(),2,"two game types are shown");
-      assert.deepEqual(await page.locator(".gcat-game-mode-card").evaluateAll(cards=>cards.map(card=>card.querySelector("button[data-game-start]").dataset.gameStart)),["situations","terms"],"game mode left/right order matches homepage");
-      assert((await page.locator(".gcat-game-note").textContent()).includes("보호자가 전문 용어를 외워야"),"optional parent-education purpose is explicit");
-      assert.deepEqual(await page.evaluate(()=>Object.values(window.HabomGlossaryGames.counts)),[12,12],"curated term and scenario banks");
-      for(const mode of ["terms","situations"]){
-        for(const level of ["start","more"]){
-          await page.locator('[data-game-start="'+mode+'"][data-level="'+level+'"]').click();
-          assert.equal(await page.locator("#gcatGamesRoot").getAttribute("data-game-stage"),"question","five-question round starts");
-          const questionIds=new Set();
-          for(let roundIndex=0;roundIndex<5;roundIndex++){
-            questionIds.add(await page.locator(".gcat-game-question").getAttribute("data-game-question"));
-            assert.equal(await page.locator(".gcat-game-choice").count(),3,"every question has three choices");
-            const choice=page.locator('.gcat-game-choice[data-game-answer="'+(roundIndex===0?"false":"true")+'"]').first();
-            if(roundIndex===0)await choice.press("Enter");else await choice.click();
-            assert.equal(await page.locator(".gcat-game-feedback").count(),1,"feedback appears immediately");
-            assert.equal(await page.locator(".gcat-game-choice.correct").count(),1,"correct option is visible as text, not color only");
-            assert((await page.locator(".gcat-game-why").textContent()).length>20,"every choice has an explanatory rationale");
-            assert.equal(await page.locator(".gcat-game-ref").count(),1,"original glossary is reachable");
-            if(roundIndex===0){
-              await page.locator(".gcat-game-ref").click();
-              assert.equal(await dialog.evaluate(x=>x.open),true,"game opens actual reference note");
-              await page.locator("#gcatDialogClose").click();
-            }
-            await page.locator('[data-game-next="true"]').click();
-          }
-          assert.equal(questionIds.size,5,"question pool does not repeat within five steps");
-          assert.equal(await page.locator("#gcatGamesRoot").getAttribute("data-game-stage"),"done","round ends");
-          if(mode==="terms"){
-            assert((await page.locator(".gcat-game-score").textContent()).includes("4개"),"term-game outcomes reflect chosen answers");
-          }else{
-            assert((await page.locator(".gcat-game-score").textContent()).includes("상황을 살펴봤어요"),"scenario activity emphasizes reflection, not clinical scores");
-            assert(!(await page.locator(".gcat-game-score").textContent()).includes("4개"),"scenario activity avoids clinical skill grading");
-          }
-          assert.equal(await page.locator('[data-game-review="true"]').count(),1,"missed questions can be repeated");
-          await page.locator('[data-game-review="true"]').click();
-          assert.equal(await page.locator(".gcat-game-progress strong").textContent(),"1 / 1","review selects only missed items");
-          await page.locator('[data-game-skip="true"]').click();
-          assert.equal(await page.locator(".gcat-game-feedback").count(),1,"not-sure gives an explanation without punishment");
-          await page.locator('[data-game-next="true"]').click();
-          await page.locator(".gcat-game-finish-actions button:last-child").click();
-          assert.equal(await page.locator("#gcatGamesRoot").getAttribute("data-game-stage"),"hub","can return to choose another game");
-        }
-      }
+      assert.equal(await page.locator("#gcatGamesPanel").isVisible(),true,"learning activities load on direct URL");
+      assert.deepEqual(await page.locator(".gcat-game-mode-card").evaluateAll(cards=>cards.map(c=>c.dataset.learningMode)),["observe","support"],"observation first, supports second");
+      assert.deepEqual(await page.evaluate(()=>window.HabomGlossaryGames.counts),{cases:12,activities:24},"24 non-exam activities");
+      await page.locator('[data-game-start="observe"][data-level="start"]').click();
+      assert.equal(await page.locator(".gcat-game-choice").count(),3,"case has three inquiry perspectives");
+      assert.equal(await page.locator("[data-game-answer]").count(),0,"no single correct answer");
+      await page.locator(".gcat-game-choice").first().click();
+      assert.equal(await page.locator(".gcat-game-perspective").count(),3,"all three perspectives explained");
+      assert.equal(await page.locator(".gcat-game-source").count(),1,"original case reference available optionally");
+      await page.locator("[data-game-next=true]").click();
+      assert.equal(await page.locator(".gcat-game-question").count(),1,"advances without quiz score");
       await page.locator("#gcatGamesBack").click();
-      assert.equal(await page.locator("#gcatSituationPanel").isVisible(),true,"back returns to familiar situations");
-      assert.equal(new URL(page.url()).searchParams.get("view"),null,"game route removed after exit");
-      await page.locator("#gcatGamesFromSituations").click();
-      assert.equal(await page.locator("#gcatGamesPanel").isVisible(),true,"situation call-to-action opens game");
-      await page.locator("#gcatGamesBack").click();
-      await journey.locator('[data-view="terms"]').click();
-      await page.locator("#gcatGamesFromTerms").click();
-      assert.equal(await page.locator("#gcatGamesPanel").isVisible(),true,"term panel can launch the same games");
-      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,"game fits viewport");
-      await page.screenshot({path:path.join(folder,p.name+"-games.png")});
-      await page.locator("#gcatGamesBack").click();
-      await journey.locator('[data-view="terms"]').click();
-      assert.equal(await page.locator(".study-note").count(),42,"all original glossary notes survive games");
-      console.log(p.name+": PASS first-visit learning, 32 images, 42 glossary terms, 12 situations, 5 maps, both 2-level games and responsive QA");
+      assert.equal(await page.locator("#gcatSituationPanel").isVisible(),true,"original scenario gallery restored");
+      assert.equal(await page.locator(".study-note").count(),42,"42 original note sources preserved");
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,"no viewport overflow");
+      console.log(p.name+": PASS first-visit learning, 32 images, 42 glossary terms, 12 situations, 5 maps, two non-graded situational activities and responsive QA");
       await page.close();
     }
   }finally{await browser.close();}
