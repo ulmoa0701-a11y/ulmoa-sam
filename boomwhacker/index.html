@@ -956,7 +956,7 @@ function draw(){
   stage.appendChild(note);
  }
 }
-function frame(ts){if(!playing)return;if(!lastTs)lastTs=ts;let prev=elapsed;elapsed+=ts-lastTs;lastTs=ts;if(elapsed>=totalMs){if(repeat){elapsed=playView==='score'?scoreStartMs()-.5:0;prev=elapsed;stopLeadIn();syncLiveMr()}else{elapsed=totalMs;playing=false;hasStartedSong=false;stopMr();stopLeadIn();$('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작'}}for(const e of events)if(e.active&&e.start>prev&&e.start<=elapsed){let b=[...document.querySelectorAll('.tube')].find(x=>x.dataset.note===e.note);tone(e.note,b,e.dur)}draw();updateTime();updateLyricTrack();if(playing)raf=requestAnimationFrame(frame)}
+function frame(ts){if(!playing)return;if(!lastTs)lastTs=ts;let prev=elapsed;elapsed+=ts-lastTs;lastTs=ts;if(elapsed>=totalMs){if(repeat){elapsed=playView==='score'?scoreStartMs()-.5:0;prev=elapsed;stopLeadIn();syncLiveMr()}else{elapsed=totalMs;playing=false;hasStartedSong=false;stopMr();stopLeadIn();stopFirstMelody();$('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작'}}for(const e of events)if(e.active&&e.start>prev&&e.start<=elapsed){let b=[...document.querySelectorAll('.tube')].find(x=>x.dataset.note===e.note);tone(e.note,b,e.dur)}draw();updateTime();updateLyricTrack();if(playing)raf=requestAnimationFrame(frame)}
 function stopFirstMelody(){if(introFirstMelodyGain&&audioCtx)try{introFirstMelodyGain.gain.cancelScheduledValues(audioCtx.currentTime);introFirstMelodyGain.gain.setValueAtTime(0,audioCtx.currentTime)}catch(e){}introFirstMelodyGain=null;introFirstMelodyScheduled=false}
 function stopIntro(keepFirstMelody=false){if(!keepFirstMelody)stopFirstMelody();
   introActive=false;
@@ -1061,6 +1061,14 @@ function introSound(beats,intervalMs){
    const scheduled=scheduleMrTrack(ac,ac.destination,songStart,0,mrVolume);
    if(scheduled){mrSource=scheduled.src;mrGain=scheduled.g;introScheduledMr=true}
   }
+  // Schedule the FIRST note on the same AudioContext downbeat. Setting
+  // elapsed directly to firstNoteMs() previously skipped it in frame().
+  const first=events.find(e=>e.active);
+  if(first&&wantsMelody()&&melodyMode!=='none'){
+   const gain=ac.createGain();gain.connect(ac.destination);
+   introFirstMelodyScheduled=scheduleMelodyTone(ac,gain,first.note,songStart,melodyMode,melodyVolume,first.dur);
+   if(introFirstMelodyScheduled)introFirstMelodyGain=gain;
+  }
   return;
  }
  for(let i=0;i<beats;i++){
@@ -1128,7 +1136,7 @@ function introFrame(now){
   draw();
   if(progress>=introDurationMs){
     const scheduled=introScheduledMr;
-    stopIntro();
+    stopIntro(introMode==='interlude');
     elapsed=introMode==='interlude'?firstNoteMs():(playView==='score'?scoreStartMs()-.5:0);
     introScheduledMr=scheduled;
     beginPlayback(introMode==='interlude');
@@ -1162,7 +1170,7 @@ function startIntro(){
 function toggle(){
   if(introActive){reset();return}
   if(playing){
-    playing=false;stopMr();stopLeadIn();introScheduledMr=false;cancelAnimationFrame(raf);
+    playing=false;stopMr();stopLeadIn();stopFirstMelody();introScheduledMr=false;cancelAnimationFrame(raf);
     $('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 계속';
     return;
   }
@@ -1279,7 +1287,7 @@ async function exportVideo(){
     scheduleInterludeMusic(ac,gm,ac.currentTime+(intro+countdownMs)/1000,beatMs(),meter);
    }
    if(wantsMelody()&&melodyMode!=='none')for(const e of events)if(e.active)
-    scheduleMelodyTone(ac,dest,e.note,base+(e.start-(introMode==='interlude'?firstSongNote:0))/1000,melodyMode);
+    scheduleMelodyTone(ac,dest,e.note,base+(e.start-(introMode==='interlude'?firstSongNote:0))/1000,melodyMode,melodyVolume,e.dur);
    if(wantsMr())scheduleMrTrack(ac,dest,base+(introMode==='interlude'?0:firstSongNote/1000),0,mrVolume);
   }
   const done=new Promise((resolve,reject)=>{rec.onerror=e=>reject(e.error||new Error('녹화 도중 브라우저 오류'));rec.onstop=()=>resolve()});
@@ -1364,7 +1372,7 @@ $('#sampleSelect').onchange=e=>{if(e.target.value)chooseSample(e.target.value)};
 $('#levels').onclick=e=>{let b=e.target.closest('button');if(!b)return;level=Number(b.dataset.level);document.querySelectorAll('#levels button').forEach(x=>x.classList.toggle('on',x===b));renderLanes();build();reset()};
 $('#introMode').onchange=e=>{introMode=['music','interlude','count','instant'].includes(e.target.value)?e.target.value:'interlude';try{localStorage.setItem('ulmoaBoomIntroMode',introMode)}catch(err){};reset()};
 $('#tempo').oninput=e=>{bpm=Math.max(MIN_TEMPO,Math.min(MAX_TEMPO,Number(e.target.value)||66));tempoPrefs[tempoKey(currentSong)]=bpm;try{localStorage.setItem('ulmoaBoomTempoPrefs',JSON.stringify(tempoPrefs))}catch(err){};$('#bpmLabel').textContent=bpm+' BPM';$('#songMeta').textContent=`${currentSong.timeN||4}/${currentSong.timeD||4} · ${bpm} BPM`;build();reset();saveLast()};
-$('#repeatBtn').onclick=()=>{repeat=!repeat;on($('#repeatBtn'),repeat)};$('#soundBtn').onclick=()=>{sound=!sound;on($('#soundBtn'),sound);$('#soundBtn').textContent=sound?'🔊 소리':'🔇 소리';if(!sound&&introGain&&audioCtx){introGain.gain.setValueAtTime(0,audioCtx.currentTime);stopMr();introScheduledMr=false};if(!sound)stopMr();else if(playing)syncLiveMr()};$('#lyricBtn').onclick=()=>{lyrics=!lyrics;on($('#lyricBtn'),lyrics);renderScore();updateLyricTrack(true)};
+$('#repeatBtn').onclick=()=>{repeat=!repeat;on($('#repeatBtn'),repeat)};$('#soundBtn').onclick=()=>{sound=!sound;on($('#soundBtn'),sound);$('#soundBtn').textContent=sound?'🔊 소리':'🔇 소리';if(!sound&&introGain&&audioCtx){introGain.gain.setValueAtTime(0,audioCtx.currentTime);stopMr();stopFirstMelody();introScheduledMr=false};if(!sound)stopMr();else if(playing)syncLiveMr()};$('#lyricBtn').onclick=()=>{lyrics=!lyrics;on($('#lyricBtn'),lyrics);renderScore();updateLyricTrack(true)};
 async function setClassFullscreen(enable){document.body.classList.toggle('fullscreen',!!enable);on($('#fullBtn'),!!enable);$('#fullBtn').textContent=enable?'수업 전체화면 중':'수업 전체화면';try{if(enable&&document.documentElement.requestFullscreen&&!document.fullscreenElement)await document.documentElement.requestFullscreen();else if(!enable&&document.fullscreenElement)await document.exitFullscreen()}catch(e){}setTimeout(()=>{draw();updateLyricTrack(true)},100)};
 $('#fullBtn').onclick=()=>setClassFullscreen(!document.body.classList.contains('fullscreen'));
 $('#stageFsBtn').onclick=()=>setClassFullscreen(true);
