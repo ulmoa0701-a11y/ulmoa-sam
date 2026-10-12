@@ -73,7 +73,7 @@ jobs:
           test "$ready" = "1"
           curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary/cards/working-memory.webp" -o /tmp/glossary-live.webp
           head -c 4 /tmp/glossary-live.webp | grep -q 'RIFF'
-          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.js?v=20261012-crosspaths1" | grep -q 'FEATURED_SITUATIONS='
+          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.js?v=20261012-arabom-games1" | grep -q 'FEATURED_SITUATIONS='
           curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.css?v=20261012-crosspaths1" | grep -q '.gcat-journey-nav'
           curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-games.js?v=20261012-arabom-games1" | grep -q 'TERM_BANK='
           curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-games.css?v=20261012-arabom-games1" | grep -q 'gcat-game-choice'
