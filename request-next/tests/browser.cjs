@@ -43,5 +43,28 @@ const assert=require('node:assert/strict');
    console.log('PASS '+width+'px unified public/list/hidden form, anonymous, posting, receipt, scroll');
    await page.close();
   }
+  const page=await browser.newPage({viewport:{width:390,height:844},locale:'ko-KR'});
+  await page.route('**/api/posts',route=>route.fulfill({status:200,contentType:'application/json',body:'{"posts":[],"locked":[]}'}));
+  await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded'});
+  const roles=['보호자','특수교사','음악치료사','언어재활사','인지치료사','아동·청소년'];
+  assert.equal(await page.locator('.step').count(),3,'first-time writer should see three ordered sections');
+  await page.locator('.step details.more').last().locator('summary').click();
+  for(const role of roles){
+    await page.locator('#role').selectOption({label:role});
+    assert.equal(await page.locator('#role').inputValue(),role,'persona role '+role);
+  }
+  await page.locator('input[value="public"]').focus();
+  await page.keyboard.press('ArrowRight');
+  assert.equal(await page.locator('input[value="list"]').isChecked(),true,'keyboard should select locked mode');
+  assert.equal(await page.locator('#secretOptions').isVisible(),true);
+  await page.locator('input[value="hidden"]').check();
+  await page.locator('#secretOptions details summary').click();
+  await page.locator('#email').fill('privacy-persona@example.test');
+  await page.locator('#body').fill('안전성 검사: 실제 전송 없음');
+  await page.locator('#nickname').fill('가상 이용자');
+  await page.locator('#sendButton').click();
+  assert.match(await page.locator('#formStatus').innerText(),/연락처 수집·이용 동의/);
+  console.log('PASS personas: parent, special educator, music/speech/cognitive therapist, child, keyboard, privacy-sensitive visitor');
+  await page.close();
  }finally{await browser.close();}
 })().catch(e=>{console.error(e.stack||String(e));process.exit(1)});
