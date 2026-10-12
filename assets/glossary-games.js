@@ -50,23 +50,24 @@ function mount({host,byId,situations,openTerm}){
   function title(text){const e=el("h3","gcat-game-title",text);e.tabIndex=-1;return e;}
   function focusTitle(){host.querySelector(".gcat-game-title")?.focus({preventScroll:true});}
   function hub(){
-    round=null;host.dataset.gameStage="hub";host.replaceChildren();
+    round=null;host.dataset.gameStage="hub";delete host.dataset.gameMode;host.replaceChildren();
     const intro=el("div","gcat-game-hub-intro");
-    intro.append(title("어떤 게임을 해볼까요?"),el("p",null,"각 5문제. 제한시간도 탈락도 없어요. 헷갈리면 설명을 보고 다시 익혀봐요."));
+    intro.append(title("어떤 게임을 해볼까요?"),el("p",null,"일상 속 상황을 더 넓게 바라보거나, 궁금한 용어를 익혀봐요. 각 5문제이며 시간제한은 없어요."));
     host.append(intro);
     const deck=el("div","gcat-game-deck");
-    for(const mode of ["terms","situations"]){
+    // 알아봄 첫 화면과 같은 순서: 상황을 먼저, 용어는 선택형 보충 학습.
+    for(const mode of ["situations","terms"]){
       const card=el("article","gcat-game-mode-card");
-      card.append(el("span","gcat-game-mode-icon",mode==="terms"?"가나다":"상황"),el("h4",null,mode==="terms"?"용어 연결하기":"상황에서 선택하기"),
-        el("p",null,mode==="terms"?"짧은 설명을 보고 알맞은 용어 고르기":"생활 속 장면을 보고 먼저 살펴볼 점 고르기"));
+      card.append(el("span","gcat-game-mode-icon",mode==="terms"?"가나다":"상황"),el("h4",null,mode==="terms"?"용어 연결하기":"상황을 살펴보기"),
+        el("p",null,mode==="terms"?"알고 싶은 용어만 골라서 기억해 보기":"아이의 행동을 단정하지 않고 관찰·지원의 선택지 생각하기"));
       const actions=el("div","gcat-game-mode-actions");
       for(const level of ["start","more"]){
-        const b=btn(level==="start"?"기초 5문제 시작":"응용 5문제 시작","gcat-game-start"+(level==="more"?" secondary":""),()=>start(mode,level));
+        const b=btn(level==="start"?"처음 5문제":"더 알아볼 5문제","gcat-game-start"+(level==="more"?" secondary":""),()=>start(mode,level));
         b.dataset.gameStart=mode;b.dataset.level=level;actions.append(b);
       }
       card.append(actions);deck.append(card);
     }
-    host.append(deck,el("p","gcat-game-note","교육용 연습 문제예요. 어떤 행동의 원인이나 진단을 결정하지 않으며, 답과 결과를 저장하지 않아요."));
+    host.append(deck,el("p","gcat-game-note","보호자가 전문 용어를 외워야 한다는 뜻이 아니에요. 함께 생각해 보는 교육용 예시이며, 상황별 선택지는 실제 아이에게 그대로 적용할 처방이나 유일한 정답이 아니에요. 답과 결과는 저장하지 않아요."));
   }
   function start(mode,level,review){
     const bank=mode==="terms"?TERM_BANK:SITUATION_BANK;
@@ -76,10 +77,10 @@ function mount({host,byId,situations,openTerm}){
     question();focusTitle();
   }
   function question(){
-    host.dataset.gameStage="question";host.replaceChildren();
+    host.dataset.gameStage="question";host.dataset.gameMode=round.mode;host.replaceChildren();
     const q=round.items[round.index],isTerms=round.mode==="terms",chosen=round.selected;
     const progress=el("div","gcat-game-progress");
-    progress.append(el("span",null,(isTerms?"용어 연결하기":"상황에서 선택하기")+" · "+(round.level==="start"?"기초":"응용")+(round.review?" · 다시 익히기":"")),
+    progress.append(el("span",null,(isTerms?"용어 연결하기":"상황에서 선택하기")+" · "+(round.level==="start"?"처음":"더 알아보기")+(round.review?" · 다시 익히기":"")),
       el("strong",null,(round.index+1)+" / "+round.items.length));
     host.append(progress);
     const bar=el("div","gcat-game-progress-bar"),fill=el("span");fill.style.width=((round.index+1)*100/round.items.length)+"%";bar.append(fill);host.append(bar);
@@ -108,8 +109,8 @@ function mount({host,byId,situations,openTerm}){
     }else{
       const right=isTerms?q.options[chosen]===q.term:chosen===0;
       const info=el("div","gcat-game-feedback");info.dataset.gameFeedback="true";info.setAttribute("role","status");info.setAttribute("aria-live","polite");
-      info.append(el("strong",null,right?"맞아요!":"괜찮아요. 설명을 보고 기억해봐요."),
-        el("p","gcat-game-answer","기억할 답: "+(isTerms?byId.get(q.term).title:q.choices[0])),
+      info.append(el("strong",null,isTerms?(right?"맞아요!":"괜찮아요. 설명을 보고 기억해봐요."):(right?"이렇게 살펴볼 수 있어요.":"다른 관점도 함께 알아봐요.")),
+        el("p","gcat-game-answer",(isTerms?"기억할 답: ":"이 문제에서 제안하는 접근: ")+(isTerms?byId.get(q.term).title:q.choices[0])),
         el("p","gcat-game-why",q.why));
       if(isTerms)info.append(el("p","gcat-game-hook","한 줄 기억: "+q.hook));
       const link=btn("원래 용어 설명·그림·근거 보기 ↗","gcat-game-ref",()=>openTerm(q.term,link));
@@ -134,15 +135,15 @@ function mount({host,byId,situations,openTerm}){
     if(round.index<round.items.length){question();focusTitle();}else done();
   }
   function done(){
-    host.dataset.gameStage="done";host.replaceChildren();
+    host.dataset.gameStage="done";host.dataset.gameMode=round.mode;host.replaceChildren();
     const card=el("section","gcat-game-done");
     card.append(el("span","gcat-game-kicker","이번 연습 끝"),title("하나씩 알아봤어요!"),
-      el("p","gcat-game-score",round.items.length+"문제 중 "+round.hits+"개를 바로 골랐어요."),
-      el("p","gcat-game-remark",round.missed.length?"헷갈린 문제는 다시 살펴봐도 좋아요.":"다음에도 뜻을 다시 떠올려 보면 좋아요."));
+      el("p","gcat-game-score",round.mode==="terms"?(round.items.length+"문제 중 "+round.hits+"개를 바로 연결했어요."):(round.items.length+"가지 상황을 살펴봤어요.")),
+      el("p","gcat-game-remark",round.mode==="terms"?(round.missed.length?"헷갈린 용어를 다시 연결해볼 수 있어요.":"나중에 다시 떠올려 봐도 좋아요."):(round.missed.length?"다른 선택을 했던 상황을 다시 살펴볼 수 있어요.":"한 가지 접근만이 늘 정답인 것은 아니에요.")));
     const actions=el("div","gcat-game-finish-actions");
     if(round.missed.length){
       const missed=round.missed.slice();
-      const retry=btn("헷갈린 "+missed.length+"문제 다시 익히기","gcat-game-next",()=>start(round.mode,round.level,missed));
+      const retry=btn(round.mode==="terms"?"헷갈린 "+missed.length+"문제 다시 익히기":"다르게 선택한 "+missed.length+"가지 다시 보기","gcat-game-next",()=>start(round.mode,round.level,missed));
       retry.dataset.gameReview="true";actions.append(retry);
     }
     const mode=round.mode,level=round.level;
