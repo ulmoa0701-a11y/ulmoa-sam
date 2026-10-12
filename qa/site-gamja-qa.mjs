@@ -91,7 +91,9 @@ for(const plan of plans){
    if(p==='/thinking-garden/')assert(reading.gameCards===13&&reading.resourceTabs===3,plan.name+': existing cognitive games/tabs changed');
    if(p==='/music-garden/')assert(reading.gameCards===2&&reading.resourceTabs===3,plan.name+': existing music games/tabs changed');
    if(plan.name==='mobile360'||(plan.name==='mobile390'&&['/','/notes/','/materials/','/thinking-garden/','/music-garden/'].includes(p))||(['desktop1366','desktop1600'].includes(plan.name)&&['/','/thinking-garden/','/music-garden/','/about/'].includes(p))){
-    await page.screenshot({path:path.join(out,plan.name+'-'+(p==='/'?'home':p.split('/')[1])+'.png'),fullPage:true,timeout:12000});
+    const screenshot=await page.screenshot({path:path.join(out,plan.name+'-'+(p==='/'?'home':p.split('/')[1])+'.png'),fullPage:true,timeout:12000});
+    const screenshotWidth=screenshot.readUInt32BE(16); // PNG IHDR width: catches absolute/flex overflow that scrollWidth misses
+    assert(screenshotWidth<=plan.width+3,plan.name+' '+p+': screenshot wider than viewport '+screenshotWidth+' > '+plan.width);
    }
    assert(errors.length===0,plan.name+' '+p+': JavaScript errors '+errors.join('; '));
    results.push({viewport:plan.name,path:p,...reading,errors});
