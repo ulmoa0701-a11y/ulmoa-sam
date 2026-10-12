@@ -60,3 +60,20 @@ body :is(.parents-topic-tag,.book-meta,.card-category,.skill-tags,.moa-resource-
  .moa-resource-desc,.entry-copy p,.game-info p,.score-resource-copy p){font-size:16px}
  body :is(.parents-topic-tag,.book-meta,.card-category,.skill-tags,.moa-resource-type){font-size:14px}
 }
+
+/* Approved homepage's small handwritten labels need a real reading size. */
+body.notebook-home .garden-door strong{font-size:clamp(17px,1.3vw,19px)!important}
+body.notebook-home .garden-door span{font-size:clamp(14px,1.15vw,16px)!important;line-height:1.3}
+body.notebook-home .desk-collage.featured-two .feature-card small,
+body.notebook-home .desk-collage.featured-two .feature-card em{font-size:13px!important;line-height:1.35}
+body.notebook-home .hb-shortcut-heading span{font-size:15px!important}
+body.notebook-home .hb-shortcut-text b{font-size:18px!important;line-height:1.25}
+body.notebook-home .hb-shortcut-text small{font-size:14px!important;line-height:1.35}
+body.notebook-home .field-tags span{font-size:14px!important}
+body.notebook-home .maker-link b{font-size:15px!important}
+@media(max-width:620px){
+ body.notebook-home .desk-collage.featured-two .feature-card small,
+ body.notebook-home .desk-collage.featured-two .feature-card em{font-size:12px!important}
+ body.notebook-home .hb-shortcut-text b{font-size:17px!important}
+ body.notebook-home .hb-shortcut-text small{font-size:14px!important}
+}
