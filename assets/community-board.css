@@ -158,3 +158,22 @@
 .community-page #privatePostPanel .community-private-reminder{max-width:760px}
 .community-page #privatePostPanel .community-private-iframe{background:#fff}
 @media(max-width:650px){.community-page #privatePostPanel.community-embed-page{width:100%;box-sizing:border-box}}
+
+/* Mobile iframe clipping corrects Jotform's unavoidable inner gutters, without touching secure child DOM. */
+.community-page .community-private-viewport{
+  display:block;
+  box-sizing:border-box;
+  width:100%;
+  max-width:1180px;
+  margin:0 auto;
+  overflow:hidden;
+}
+@media(max-width:650px){
+  .community-page #privatePostPanel .community-private-viewport{width:100%;max-width:100%}
+  .community-page #privatePostPanel #habomPrivateForm{
+    width:calc(100% + 44px)!important;
+    max-width:none!important;
+    margin-left:-22px!important;
+    margin-right:0!important;
+  }
+}

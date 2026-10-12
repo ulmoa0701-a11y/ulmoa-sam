@@ -56,6 +56,10 @@ for(const plan of plans){
        actualBodyFontLoaded:[...document.fonts].some(f=>f.family.replaceAll('"','')==='Pretendard Variable'&&f.status==='loaded'),
        actualHeadingFontLoaded:[...document.fonts].some(f=>f.family.replaceAll('"','')==='Habom MaruBuri'&&f.status==='loaded'),
        actualPenFontLoaded:[...document.fonts].some(f=>f.family.replaceAll('"','')==='Nanum Pen Script'&&f.status==='loaded'),
+       brainSubheadingFont:document.querySelector('.map-panel-heading h2')?
+         getComputedStyle(document.querySelector('.map-panel-heading h2')).fontFamily:null,
+       brainMaruLoaded:[...document.fonts].some(f=>f.family.replaceAll('"','')==='MaruBuriSemiBold'&&f.status==='loaded'),
+       brainPenLoaded:[...document.fonts].some(f=>f.family.replaceAll('"','')==='Nanum Pen Script'&&f.status==='loaded'),
        viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth,
        headerWidth:first?.scrollWidth,headerClientWidth:first?.clientWidth,
        resourceTabs:document.querySelectorAll('[data-garden-view]').length,
@@ -64,15 +68,25 @@ for(const plan of plans){
       };
    });
    assert(res?.ok(),plan.name+' '+p+': HTTP failure');
-   assert(reading.cssLoaded,plan.name+' '+p+': shared typography stylesheet absent');
-   assert(reading.bodyFont.startsWith('"Pretendard Variable"'),plan.name+' '+p+': incorrect body font '+reading.bodyFont);
-   if(p==='/notes/'){
-     assert(reading.headingFont?.includes('Nanum Pen Script'),plan.name+' '+p+': 알아봄 one-line handwriting title missing '+reading.headingFont);
+   if(p==='/brain-map/'){
+     // Brain map has its own approved local font hierarchy, without the shared CSS.
+     assert(!reading.cssLoaded,plan.name+' '+p+': brain map typography must remain independent');
+     assert(reading.bodyFont.startsWith('"Pretendard Variable"'),plan.name+' '+p+': brain body incorrect '+reading.bodyFont);
+     assert(reading.headingFont?.includes('Nanum Pen Script'),plan.name+' '+p+': brain point handwriting missing '+reading.headingFont);
+     assert(reading.brainSubheadingFont?.includes('MaruBuriSemiBold'),plan.name+' '+p+': brain subheading font missing '+reading.brainSubheadingFont);
+     assert(reading.brainMaruLoaded,plan.name+' '+p+': brain MaruBuri did not load');
+     assert(reading.brainPenLoaded,plan.name+' '+p+': brain Nanum Pen did not load');
    }else{
-     assert(reading.headingFont?.startsWith('"Habom MaruBuri"'),plan.name+' '+p+': incorrect headline font '+reading.headingFont);
+     assert(reading.cssLoaded,plan.name+' '+p+': shared typography stylesheet absent');
+     assert(reading.bodyFont.startsWith('"Pretendard Variable"'),plan.name+' '+p+': incorrect body font '+reading.bodyFont);
+     if(p==='/notes/'){
+       assert(reading.headingFont?.includes('Nanum Pen Script'),plan.name+' '+p+': 알아봄 one-line handwriting title missing '+reading.headingFont);
+     }else{
+       assert(reading.headingFont?.startsWith('"Habom MaruBuri"'),plan.name+' '+p+': incorrect headline font '+reading.headingFont);
+     }
+     assert(reading.actualBodyFontLoaded,plan.name+' '+p+': Pretendard Korean webfont did not load');
+     assert(reading.actualHeadingFontLoaded,plan.name+' '+p+': MaruBuri SemiBold did not load');
    }
-   assert(reading.actualBodyFontLoaded,plan.name+' '+p+': Pretendard Korean webfont did not load');
-   assert(reading.actualHeadingFontLoaded,plan.name+' '+p+': MaruBuri SemiBold did not load');
    if(reading.navFont)assert(reading.navFont.startsWith('"Pretendard Variable"'),plan.name+' '+p+': nav link inconsistent '+reading.navFont);
    if(['/', '/about/', '/notes/'].includes(p)){
       assert(reading.accentFont?.includes('Nanum Pen Script'),plan.name+' '+p+': point handwriting missing '+reading.accentFont);
