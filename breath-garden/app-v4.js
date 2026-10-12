@@ -277,7 +277,7 @@ function strengthTick(band,dt){
     // Stop capturing during praise, avoiding microphone hearing speakers.
     if(S.microphone){for(const track of S.microphone.getAudioTracks?.()||[])track.enabled=false}
     S.playing=false;speech(stage.title+' 성공! 잘했어!',true);
-    el.mainHint.textContent='🌼 '+stage.earned;
+    el.mainHint.textContent='🌼 성공! '+stage.earned;
     scheduleNextStrength();
    }else el.statusNote.textContent='🌼 '+stage.earned+' 다시 후~';
   }else if(!S.needsRelease&&S.releaseTime>.30){S.blowHold=0;el.statusNote.textContent='💨 편안하게 후~ 했다가 쉬기!'}
@@ -475,6 +475,7 @@ function restart(){
  el.statusNote.textContent=S.mode==='calm'?'▶ 숨놀이를 시작해요.':'🎤 준비됐으면 다시 시작해요!';
 }
 function demo(){
+ if(S.mode==='calm'){startOrPauseCalm();return}
  if(S.playing){el.micDetail.textContent='마이크를 끈 뒤 화면 체험을 시작해 주세요.';return}
  if(S.demo){stopAll();return}
  if(S.screen==='home')chooseMode('strength');
