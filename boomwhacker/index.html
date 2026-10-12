@@ -923,7 +923,30 @@ function firstNoteMs(){const e=events.find(x=>x.active);return e?e.start:FIRST_N
 function stopMr(){if(mrSource){try{mrSource.onended=null;mrSource.stop()}catch(e){}}mrSource=null;mrGain=null}
 function scheduleMrBuffer(ac,dest,when,offsetSec=0,volume=mrVolume){if(!mrBuffer)return null;const offset=Math.max(0,Number(offsetSec)||0);if(offset>=mrBuffer.duration)return null;const src=ac.createBufferSource(),g=ac.createGain();src.buffer=mrBuffer;g.gain.setValueAtTime(Math.max(0,Math.min(1,Number(volume)||0)),when);src.connect(g);g.connect(dest);src.start(when,offset);return{src,g}}
 function mrBaseNote(n){return String(n||'').replace('높은','').replace('낮은','').replace(/[♯#♭b]/g,'')}
-function chordForMeasure(mi){const weight={};for(const e of events.filter(x=>x.measure===mi&&x.active)){const n=mrBaseNote(e.note);weight[n]=(weight[n]||0)+(Number(e.dur)||1)}let best=MR_CHORDS[0],score=-1;for(const c of MR_CHORDS){let s=0;for(const n of c.tones)s+=weight[n]||0;if(s>score){score=s;best=c}}return best}
+// Curated harmonic structure for the built-in Small Star arrangement.
+// Greedy per-bar matching mistakes the second '솔·솔' bar for C (tie),
+// and can produce a directionless auto-MR despite correctly timed beats.
+const TWINKLE_CHORDS=[
+ 'C','C','F','C','F','C','G','C',
+ 'G','G','F','G','G','G','F','G',
+ 'C','C','F','C','F','C','G','C'
+];
+function isTwinkleScore(){
+ const m=currentSong.measures||[];
+ return (currentSong.key==='twinkle'||currentSong.title==='작은별')
+    &&m.length>=8&&m[0]?.[0]?.note==='도'&&m[1]?.[0]?.note==='솔';
+}
+function chordByName(name){return MR_CHORDS.find(x=>x.name===name)||MR_CHORDS[0]}
+function preludeChordForBar(bar,bars){
+ const tonic=chordForMeasure(0);
+ if(bar===bars-1){
+  const dominant={C:'G',F:'C',G:'Dm',Am:'Em',Dm:'Am',Em:'G'}[tonic.name];
+  return dominant?chordByName(dominant):tonic;
+ }
+ if(bar===0||bars<=2)return tonic;
+ return bar%2===0?tonic:chordForMeasure(Math.min(bar,(currentSong.measures||[]).length-1));
+}
+function chordForMeasure(mi){if(isTwinkleScore()&&Number.isInteger(mi)&&mi>=0&&mi<TWINKLE_CHORDS.length)return chordByName(TWINKLE_CHORDS[mi]);const weight={};for(const e of events.filter(x=>x.measure===mi&&x.active)){const n=mrBaseNote(e.note);weight[n]=(weight[n]||0)+(Number(e.dur)||1)}let best=MR_CHORDS[0],score=-1;for(const c of MR_CHORDS){let s=0;for(const n of c.tones)s+=weight[n]||0;if(s>score){score=s;best=c}}return best}
 function mrPulse(ac,dest,when,strong=false){const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.setValueAtTime(strong?95:125,when);o.frequency.exponentialRampToValueAtTime(strong?52:78,when+.11);o.connect(g);g.connect(dest);g.gain.setValueAtTime(.0001,when);g.gain.exponentialRampToValueAtTime(strong?.09:.04,when+.006);g.gain.exponentialRampToValueAtTime(.0001,when+.13);o.start(when);o.stop(when+.15)}
 function scheduleBuiltinMr(ac,dest,when,offsetSec=0,volume=mrVolume){const startMs=Math.max(0,Number(offsetSec)||0)*1000,lead=firstNoteMs(),beat=beatMs(),pre=ac.createGain(),comp=ac.createDynamicsCompressor(),master=ac.createGain();pre.gain.setValueAtTime(3.6,when);comp.threshold.setValueAtTime(-18,when);comp.knee.setValueAtTime(10,when);comp.ratio.setValueAtTime(4,when);comp.attack.setValueAtTime(.003,when);comp.release.setValueAtTime(.16,when);master.gain.setValueAtTime(Math.max(.0001,Math.min(1,Number(volume)||0)),when);pre.connect(comp);comp.connect(master);master.connect(dest);const measureIds=[...new Set(events.map(e=>e.measure))];for(const mi of measureIds){const es=events.filter(e=>e.measure===mi);if(!es.length)continue;const ms=Math.min(...es.map(e=>e.start))-lead,nextId=measureIds[measureIds.indexOf(mi)+1],nextEvents=events.filter(e=>e.measure===nextId),me=nextEvents.length?Math.min(...nextEvents.map(e=>e.start))-lead:Math.max(ms+beat*(currentSong.timeN||4),totalMs-lead);if(me<=startMs)continue;const chord=chordForMeasure(mi),beats=Math.max(1,Math.round((me-ms)/beat));for(let b=0;b<beats;b++){const rel=ms+b*beat;if(rel<startMs-1)continue;const t=when+(rel-startMs)/1000,strong=b===0;mrPulse(ac,pre,t,strong);const bass=chord.freqs[0];voiceOsc(ac,pre,bass,'triangle',strong?.11:.055,t,.012,strong?.58:.38,strong?.64:.44);for(const f of chord.freqs.slice(1)){voiceOsc(ac,pre,f,'sine',strong?.06:.032,t,.012,strong?.46:.31,strong?.52:.36)}}}const stopper={stop(){try{master.gain.cancelScheduledValues(ac.currentTime);master.gain.setTargetAtTime(.0001,ac.currentTime,.012)}catch(e){}}};return{src:stopper,g:master}}
 function scheduleMrTrack(ac,dest,when,offsetSec=0,volume=mrVolume){return mrBuffer?scheduleMrBuffer(ac,dest,when,offsetSec,volume):scheduleBuiltinMr(ac,dest,when,offsetSec,volume)}
@@ -997,7 +1020,7 @@ function scheduleInterludeMusic(ac,dest,start,intervalMs,meter){
  const measureCount=Math.max(1,Math.min(2,currentSong.measures?.length||1));
  for(let i=0;i<p.beats;i++){
   const bar=Math.floor(i/meter),pos=i%meter,time=start+i*beat;
-  const chord=chordForMeasure(bar%measureCount),freqs=chord.freqs;
+  const chord=preludeChordForBar(bar,p.bars),freqs=chord.freqs;
   mrPulse(ac,percussion,time,pos===0);
   voiceOsc(ac,chords,freqs[0],'triangle',pos===0?.15:.086,time,.013,Math.max(.14,beat*.64),Math.max(.19,beat*.78));
   const upper=freqs.slice(1);
