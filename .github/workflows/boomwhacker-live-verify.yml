@@ -196,6 +196,44 @@ jobs:
             }
           }finally{await browser.close()}
           JS
+      - name: Real-time LIVE Chrome song-note rhythm drift versus WebAudio song clock
+        shell: bash
+        run: |
+          node --input-type=module <<'JS'
+          import {chromium} from 'playwright-core';
+          const browser=await chromium.launch({executablePath:'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--autoplay-policy=no-user-gesture-required']});
+          try{
+            for(const mobile of [false,true]){
+              const page=await browser.newPage({viewport:mobile?{width:390,height:844}:{width:1366,height:900}});
+              const errors=[];page.on('pageerror',e=>errors.push(e.message));
+              await page.goto('https://ulmoa0701-a11y.github.io/ulmoa-sam/boomwhacker/?song=twinkle&realClockQa='+Date.now(),{waitUntil:'domcontentloaded'});
+              await page.locator('#tempo').evaluate(el=>{el.value='120';el.dispatchEvent(new Event('input',{bubbles:true}))});
+              await page.evaluate(()=>{
+                window.__songAudit={notes:[],first:null,mr:null};
+                const oldTone=tone,oldMelody=scheduleMelodyTone,oldMR=scheduleMrTrack;
+                tone=function(n,b,durationMs){window.__songAudit.notes.push({note:n,when:audioCtx.currentTime,elapsed,durationMs});return oldTone(n,b,durationMs)};
+                scheduleMelodyTone=function(...args){if(!window.__songAudit.first)window.__songAudit.first={note:args[2],when:args[3],durationMs:args[6]};return oldMelody(...args)};
+                scheduleMrTrack=function(...args){if(window.__songAudit.mr===null)window.__songAudit.mr=args[2];return oldMR(...args)};
+              });
+              await page.locator(mobile?'#playBtn':'#startBtn').click();
+              await page.waitForFunction(()=>window.__songAudit.notes.length>=5,null,{timeout:23000});
+              const audit=await page.evaluate(()=>({log:window.__songAudit,beatMs:beatMs(),bpm}));
+              const expected=['도','솔','솔','라','라'],time= audit.log.first?.when;
+              const rows=audit.log.notes.slice(0,5).map((n,i)=>({
+                pitch:n.note,expectedPitch:expected[i],
+                errorMs:Math.round((n.when-(time+(i+1)*audit.beatMs/1000))*1000),
+                noteDurationMs:n.durationMs
+              }));
+              const maxDrift=Math.max(...rows.map(x=>Math.abs(x.errorMs)));
+              const pass=audit.bpm===120&&audit.log.first?.note==='도'&&Math.abs(audit.log.mr-time)<.003&&
+                rows.every(x=>x.pitch===x.expectedPitch&&Math.abs(x.noteDurationMs-audit.beatMs)<4)
+                &&maxDrift<100&&!errors.length;
+              console.log('LIVE_REAL_TIME_RHYTHM='+JSON.stringify({mobile,maxDrift,audit,rows,errors,pass}));
+              await page.close();
+              if(!pass)throw Error('LIVE actual song sounds do not follow WebAudio beats, mobile='+mobile);
+            }
+          }finally{await browser.close()}
+          JS
       - uses: actions/upload-artifact@v4
         if: always()
         with:
