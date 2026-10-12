@@ -42,9 +42,10 @@ jobs:
                   let radios=[...document.querySelectorAll('input[type=radio]')].slice(0,15).map(e=>({name:e.name,parent:e.closest('li')?.innerText.slice(0,50)}));
                   let labels=[...document.querySelectorAll('.form-line')].map(e=>({id:e.id,classes:e.className,label:e.querySelector('.form-label')?.innerText?.trim().slice(0,100),rect:Math.round(e.getBoundingClientRect().height)})).slice(0,27);
                   let texts=[...document.querySelectorAll('h1,h2,.form-header-group')].map(e=>e.innerText.slice(0,90)).slice(0,10);
+                  let stepText=[...document.querySelectorAll('.form-line')].map(e=>e.textContent||'').filter(e=>/①\s*어떤 이야기인가요|②\s*내용을 적어주세요|③\s*마지막으로 작성자 정보/.test(e)).map(e=>e.trim().slice(0,85));
                   let styles={bodyFont:getComputedStyle(document.body).fontFamily,bodyFontSize:getComputedStyle(document.body).fontSize,background:getComputedStyle(document.body).backgroundColor};
                   let lastVisibleBottom=Math.ceil(document.querySelector('#id_13')?.getBoundingClientRect().bottom||0);
-                  return {scrollHeight:scroller.scrollHeight,clientHeight:scroller.clientHeight,overflowY:getComputedStyle(document.documentElement).overflowY,bodyHeight:document.body.scrollHeight,bodyWidth:document.body.scrollWidth,viewportWidth:innerWidth,selected,radios,labels,texts,styles,lastVisibleBottom,plain:document.body.innerText.slice(0,500)};
+                  return {scrollHeight:scroller.scrollHeight,clientHeight:scroller.clientHeight,overflowY:getComputedStyle(document.documentElement).overflowY,bodyHeight:document.body.scrollHeight,bodyWidth:document.body.scrollWidth,viewportWidth:innerWidth,selected,radios,labels,texts,styles,stepText,lastVisibleBottom,plain:document.body.innerText.slice(0,500)};
                 });
                 console.log('AUDIT '+vp.width+' OUTER '+JSON.stringify(outer));
                 console.log('AUDIT '+vp.width+' INNER '+JSON.stringify(inner));
@@ -55,6 +56,12 @@ jobs:
                 const nickname=inner.labels.find(e=>e.label&&e.label.includes('닉네임 (선택)'));
                 console.log('AUDIT '+vp.width+' FIELD_FLOW '+JSON.stringify({order,positions,isOrdered,nicknameRequired:nickname?.classes.includes('jf-required'),internalScrollbar:inner.scrollHeight>outer.height+4}));
                 if(!isOrdered)throw Error('Still wrong private field order: '+order.join(' > '));
+                const expectedSteps=['① 어떤 이야기인가요?','② 내용을 적어주세요','③ 마지막으로 작성자 정보'];
+                const stepPositions=expectedSteps.map(t=>inner.stepText.findIndex(s=>s.includes(t)));
+                if(stepPositions.some(p=>p<0)||stepPositions.some((p,i)=>i>0&&p<=stepPositions[i-1]))throw Error('Private three section headings missing or wrong order '+JSON.stringify(inner.stepText));
+                if(inner.texts.length<1||!inner.texts[0].includes('소통하기'))throw Error('Private form heading mismatch '+JSON.stringify(inner.texts));
+                const firstSelect=inner.selected.find(s=>s.name==='q19_input');
+                if(!firstSelect||firstSelect.value!=='자료 요청')throw Error('Private default not applied '+JSON.stringify(firstSelect));
                 if(nickname?.classes.includes('jf-required'))throw Error('Private nickname unexpectedly required');
                 if(outer.scrolling!=='no')throw Error('Inner Jotform scrolling is not disabled');
                 if(!outer.styleHeight)throw Error('Auto-resize handler did not attach to direct #private navigation');
