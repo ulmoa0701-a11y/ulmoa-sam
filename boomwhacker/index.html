@@ -891,6 +891,18 @@ function updateLyricTrack(force=false){
 }
 function audio(){if(!audioCtx){const A=window.AudioContext||window.webkitAudioContext;if(A)audioCtx=new A()}if(audioCtx?.state==='suspended')audioCtx.resume()}
 function voiceOsc(ac,dest,freq,type,amp,when,attack,decay,stop,mult=1,detune=0){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(freq*mult,when);if(detune)o.detune.setValueAtTime(detune,when);o.connect(g);g.connect(dest);g.gain.setValueAtTime(.0001,when);g.gain.exponentialRampToValueAtTime(Math.max(.0002,amp),when+attack);g.gain.exponentialRampToValueAtTime(.0001,when+decay);o.start(when);o.stop(when+stop)}
+// Keep held notes AUDIBLE across their notated duration, then release gently.
+function voiceOscHold(ac,dest,freq,type,amp,when,attack,duration,mult=1){
+ const osc=ac.createOscillator(),gain=ac.createGain(),dur=Math.max(.11,Number(duration)||.11);
+ osc.type=type;osc.frequency.setValueAtTime(freq*mult,when);osc.connect(gain);gain.connect(dest);
+ const attackEnd=when+Math.min(attack,dur*.17);
+ const release=Math.min(.13,Math.max(.035,dur*.16)),releaseStart=Math.max(attackEnd+.005,when+dur-release);
+ gain.gain.setValueAtTime(.0001,when);
+ gain.gain.exponentialRampToValueAtTime(Math.max(.0002,amp),attackEnd);
+ gain.gain.setValueAtTime(Math.max(.0002,amp*.76),releaseStart);
+ gain.gain.exponentialRampToValueAtTime(.0001,when+dur);
+ osc.start(when);osc.stop(when+dur);
+}
 // Respect the written rhythm: old fixed 0.38s notes created long gaps.
 function melodySoundDuration(noteDurationMs,mode='boom'){
  const ms=Number(noteDurationMs),seconds=Number.isFinite(ms)&&ms>0?ms/1000:beatMs()/1000;
@@ -903,7 +915,7 @@ function scheduleMelodyTone(ac,dest,n,when,mode=melodyMode,volume=melodyVolume,n
  const d=melodySoundDuration(noteDurationMs,mode),master=ac.createGain();
  master.gain.setValueAtTime(vol,when);master.connect(dest);
  if(mode==='piano'){
-  voiceOsc(ac,master,f,'triangle',.19,when,.012,Math.max(.14,d*.84),d);
+  voiceOscHold(ac,master,f,'triangle',.19,when,.012,d);
   voiceOsc(ac,master,f,'sine',.075,when,.008,Math.max(.12,d*.70),Math.max(.14,d*.89),2);
   voiceOsc(ac,master,f,'sine',.035,when,.006,Math.max(.10,d*.47),Math.max(.13,d*.67),3);
   return true;
@@ -913,7 +925,7 @@ function scheduleMelodyTone(ac,dest,n,when,mode=melodyMode,volume=melodyVolume,n
   voiceOsc(ac,master,f,'sine',.075,when,.003,Math.max(.09,d*.42),Math.max(.12,d*.60),3);
   return true;
  }
- voiceOsc(ac,master,f,'sine',.27,when,.006,Math.max(.11,d*.87),d);
+ voiceOscHold(ac,master,f,'sine',.27,when,.006,d);
  voiceOsc(ac,master,f,'triangle',.065,when,.004,Math.max(.10,d*.62),Math.max(.13,d*.76),2);
  return true;
 }
