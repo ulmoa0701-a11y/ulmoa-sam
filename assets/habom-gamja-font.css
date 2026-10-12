@@ -95,3 +95,14 @@ body :is(.material-icons,.material-symbols-outlined){font-family:"Material Symbo
  body.notebook-home .hb-shortcut-text small{font-size:13px!important}
 }
 @media print{body :is(p,li,td,th,blockquote){line-height:1.5}}
+
+/* Mobile finder must be allowed to shrink when serif headings change intrinsic widths. */
+@media(max-width:620px){
+ body.notebook-home .finder-board,
+ body.notebook-home .finder-inner,
+ body.notebook-home .finder-board .finder{box-sizing:border-box;max-width:100%;min-width:0}
+ body.notebook-home .finder-inner{grid-template-columns:minmax(0,1fr)!important}
+ body.notebook-home .finder-board .finder{width:100%;display:flex;overflow:hidden}
+ body.notebook-home .finder-board .finder input{width:0;min-width:0;flex:1 1 0}
+ body.notebook-home .finder-board .finder button{flex:0 0 auto;white-space:nowrap;padding-inline:12px}
+}
