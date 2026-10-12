@@ -21,6 +21,9 @@ function fixture(){
   if(query.startsWith("SELECT id,category,public_title,display_name,created_at,status,attachment_key,reply FROM posts")){
    return posts.filter(p=>p.visibility==='list'&&p.metadata_approved===1);
   }
+  if(query.startsWith('SELECT attachment_key,attachment_name,attachment_approved,visibility FROM posts WHERE id=')){
+   const row=posts.find(p=>p.id===args[0]);return row?[row]:[];
+  }
   if(query.startsWith('SELECT * FROM posts WHERE id=')){
    const row=posts.find(p=>p.id===args[0]);return row?[row]:[];
   }
