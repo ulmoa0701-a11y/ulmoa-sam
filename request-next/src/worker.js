@@ -17,7 +17,7 @@ async function hash(x){return bytesHex(await crypto.subtle.digest('SHA-256',new 
 function key(){return [...crypto.getRandomValues(new Uint8Array(32))].map(x=>x.toString(16).padStart(2,'0')).join('');}
 async function same(a,b){if(!a||!b)return false;const [x,y]=await Promise.all([hash(a),hash(b)]);let mismatch=0;for(let i=0;i<x.length;i++)mismatch|=x.charCodeAt(i)^y.charCodeAt(i);return mismatch===0;}
 async function admin(req,env){const h=req.headers.get('authorization')||'';if(!env.ADMIN_KEY||env.ADMIN_KEY.length<32)return false;return same(h.startsWith('Bearer ')?h.slice(7):'',env.ADMIN_KEY);}
-async function author(req,row){const token=req.headers.get('x-receipt-token')||'';return token.length===64 && same(token,row.access_hash);}
+async function author(req,row){const token=req.headers.get('x-receipt-token')||'';if(token.length!==64||!row.access_hash)return false;const digest=await hash(token);let mismatch=0;for(let i=0;i<digest.length;i++)mismatch|=digest.charCodeAt(i)^row.access_hash.charCodeAt(i);return mismatch===0;}
 function extractId(url){const a=url.pathname.split('/').filter(Boolean);return a[2]||'';}
 function publicPost(row){return {id:row.id,category:row.category,title:row.title,body:row.body,link:row.link,displayName:row.display_name,role:row.role,createdAt:row.created_at,reply:row.reply,repliedAt:row.replied_at,hasAttachment:!!row.attachment_key&&row.attachment_approved===1};}
 function personalPost(row){return {id:row.id,visibility:row.visibility,category:row.category,title:row.title,body:row.body,link:row.link,displayName:row.display_name,role:row.role,email:row.email,phone:row.phone,createdAt:row.created_at,reply:row.reply,repliedAt:row.replied_at,status:row.status,hasAttachment:!!row.attachment_key,attachmentName:row.attachment_name};}
@@ -131,6 +131,12 @@ export default {
    if(!url.pathname.startsWith('/api/'))return env.ASSETS.fetch(request);
    if(request.method==='GET'&&url.pathname==='/api/posts')return readPosts(env);
    if(request.method==='POST'&&url.pathname==='/api/posts')return storePost(request,env);
+   if(/^\/api\/public\/[a-f0-9-]+\/file$/.test(url.pathname)&&request.method==='GET'){
+    const id=url.pathname.split('/')[3];
+    const row=await env.DB.prepare("SELECT attachment_key,attachment_name,attachment_approved,visibility FROM posts WHERE id=?").bind(id).first();
+    if(!row||row.visibility!=='public'||row.attachment_approved!==1)return reply({error:'공개할 수 없는 파일입니다.'},404);
+    return downloadFile(env,row);
+   }
    if(/^\/api\/mine\/[a-f0-9-]+(?:\/file)?$/.test(url.pathname)&&request.method==='GET'){
     const id=extractId(url),isFile=url.pathname.endsWith('/file');
     return readMine(request,env,id,isFile);
