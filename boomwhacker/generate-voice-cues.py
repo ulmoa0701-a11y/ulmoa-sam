@@ -16,7 +16,7 @@ OUT.mkdir(parents=True, exist_ok=True)
 tts = TTS(auto_download=True)
 for style_name, suffix in (("F1", "soft"), ("F4", "bright")):
     style = tts.get_voice_style(voice_name=style_name)
-    for name, word in (("hana", "하나"), ("dul", "둘"), ("set", "셋"), ("net", "넷")):
+    for name, word in (("hana", "하나"), ("dul", "둘"), ("set", "세엣"), ("net", "네엣")):
         raw_path = OUT / (f".{suffix}-{name}.wav")
         output = OUT / f"{suffix}-{name}.wav"
         samples, seconds = tts.synthesize(word + ".", voice_style=style, lang="ko")
