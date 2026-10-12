@@ -16,11 +16,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install Korean fonts
+      - name: Ensure Korean fonts without blocking QA on package mirror
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq fonts-noto-cjk
-          fc-cache -f
+          if fc-list :lang=ko family | grep -q .; then
+            echo 'Korean font already available'
+          else
+            timeout 60s sudo apt-get update -qq && timeout 90s sudo apt-get install -y -qq fonts-noto-cjk || echo 'Using existing font fallbacks due to package mirror timeout'
+            fc-cache -f || true
+          fi
       - name: Install Playwright core
         run: npm install --no-save playwright-core@1.56.1
       - name: Locate Chrome
