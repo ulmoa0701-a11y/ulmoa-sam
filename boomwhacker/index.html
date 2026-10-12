@@ -1142,8 +1142,8 @@ function schedulePreludeBeat(ac,dest,when,strong){
 function scheduleInterludeMusic(ac,dest,start,intervalMs,meter){
  const p=instrumentalPreludePlan(),beat=intervalMs/1000;
  const chords=ac.createGain(),arpeggio=ac.createGain(),percussion=ac.createGain();
- chords.gain.setValueAtTime(.42,start);chords.connect(dest);
- arpeggio.gain.setValueAtTime(.72,start);arpeggio.connect(dest);
+ chords.gain.setValueAtTime(.50,start);chords.connect(dest);
+ arpeggio.gain.setValueAtTime(.84,start);arpeggio.connect(dest);
  percussion.gain.setValueAtTime(.95,start);percussion.connect(dest);
  for(let i=0;i<p.beats;i++){
   const bar=Math.floor(i/meter),pos=i%meter,time=start+i*beat;
