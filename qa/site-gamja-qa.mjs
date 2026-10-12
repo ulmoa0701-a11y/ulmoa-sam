@@ -49,7 +49,7 @@ for(const plan of plans){
        accentFont:accent?getComputedStyle(accent).fontFamily:null,
        featureTitleFont:featureTitle?getComputedStyle(featureTitle).fontFamily:null,
        aboutParagraphSize:aboutParagraph?parseFloat(getComputedStyle(aboutParagraph).fontSize):null,
-       homeHeroText:homeTitle?.textContent?.replace(/\\s+/g,'')||null,
+       homeHeroText:homeTitle?.textContent?.replace(/\s+/g,'')||null,
        homeHeroClipped:homeTitle?homeTitle.scrollWidth>homeTitle.clientWidth+3:null,
        homeHeroIntroSize:homeIntro?parseFloat(getComputedStyle(homeIntro).fontSize):null,
        homeHeroKicker:document.querySelector('body.notebook-home .hero-overline')?.textContent?.trim()||null,
