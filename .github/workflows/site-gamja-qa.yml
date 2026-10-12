@@ -1,4 +1,4 @@
-name: Site Gamja Flower Typography QA
+name: Site Readable Typography QA
 on:
   pull_request:
     paths:
@@ -54,11 +54,11 @@ jobs:
           for i in {1..40}; do curl -fsS http://127.0.0.1:8765/ >/dev/null && exit 0; sleep 0.25; done
           cat /tmp/site-font-server.log
           exit 1
-      - name: Check website fonts and device layouts
+      - name: Check readable website fonts and device layouts
         run: node qa/site-gamja-qa.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: site-gamja-screenshots
+          name: site-readable-typography-screenshots
           path: qa/site-gamja-qa-artifacts
           if-no-files-found: warn
