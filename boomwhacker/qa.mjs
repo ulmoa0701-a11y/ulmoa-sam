@@ -305,10 +305,10 @@ async function basicCase(name,width,height){
     await page.locator(width<=800?'#playBtn':'#startBtn').click();
     const started=await page.evaluate(()=>({
       ...window.__boomVideoQA.intro(),mode:introMode,expected:instrumentalPreludePlan().beats,
-      firstBallOffset:instrumentalPreludePlan().firstBallOffsetMs,firstBeat:document.querySelector('#introPulse').innerText
+      firstBallOffset:instrumentalPreludePlan().firstBallOffsetMs,firstNoteMs:firstNoteMs(),firstBeat:document.querySelector('#introPulse').innerText
     }));
     check(started.active&&started.mode===selected&&started.countBeats===0&&started.previewBeats===started.expected
-       &&started.beats===started.expected&&started.durationMs>=firstNoteMs()&&started.firstBallOffset>=0,
+       &&started.beats===started.expected&&started.durationMs>=started.firstNoteMs&&started.firstBallOffset>=0,
        name+': '+selected+' guide not beat-aligned '+JSON.stringify(started));
     check(await page.locator('#introOverlay').evaluate(el=>el.classList.contains('preludePlaying')),
        name+': '+selected+' hides descending balls');
