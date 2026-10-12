@@ -1,0 +1,79 @@
+/* 알아봄 전용 글꼴 규칙, 2026-10-12.
+ * 공통 사이트/게임 폰트는 건드리지 않는다.
+ * 본문 Pretendard/SUIT, 작은 제목 MaruBuri SemiBold,
+ * 필기체는 주 제목과 한 줄 메시지에만.
+ *
+ * 교보 손글씨 2020 박도연: 제작자의 재배포/파일변환 금지 조건에 따라
+ * 사이트에는 폰트 파일을 배포하거나 무단 CDN 복사본을 사용하지 않는다.
+ * 방문자 PC에 설치되어 있는 경우에만 local()을 통해 사용한다.
+ * 미설치 환경은 OFL 나눔손글씨 펜 웹폰트로 대체된다.
+ */
+@font-face{
+  font-family:"Habom MaruBuri";
+  src:url("https://cdn.jsdelivr.net/gh/fonts-archive/MaruBuri/MaruBuri-SemiBold.woff2") format("woff2");
+  font-style:normal;
+  font-weight:600;
+  font-display:swap;
+}
+@font-face{
+  font-family:"Habom Kyobo Local";
+  src:local("교보 손글씨 2020 박도연"),local("KyoboHandwriting2020pdy"),local("Kyobo Handwriting 2020");
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+}
+body.glossary-page{
+  --arabom-body:"Pretendard Variable","SUIT",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --arabom-heading:"Habom MaruBuri","Maru Buri","Nanum Myeongjo",serif;
+  --arabom-hand:"Habom Kyobo Local","Nanum Pen Script",cursive;
+}
+/* 이미 사이트 전체에 걸린 Gamja/Gowun 강제 font-family를
+   이 콘텐츠 영역에서만 덮어쓴다. */
+body.glossary-page .gcat,
+body.glossary-page .gcat :is(p,span,small,b,strong,em,mark,a,button,input,textarea,select,label,summary,li,dt,dd,blockquote,figcaption){
+  font-family:var(--arabom-body)!important;
+}
+body.glossary-page .gcat :is(h2,h3,h4),
+body.glossary-page .gcat :is(h2,h3,h4) :is(span,small,b,strong,em){
+  font-family:var(--arabom-heading)!important;
+  font-weight:600!important;
+  letter-spacing:-.025em!important;
+  line-height:1.43;
+}
+/* 기능상 소제목 역할인 글자는 마루부리로, 조작 버튼은 본문 글꼴로. */
+body.glossary-page .gcat :is(.gcat-first-concept strong,.gcat-card-title,.gcat-concept-center strong,.gcat-concept-node-copy strong){
+  font-family:var(--arabom-heading)!important;
+  font-weight:600!important;
+  letter-spacing:-.02em!important;
+  line-height:1.45;
+}
+body.glossary-page .gcat .gcat-head h1{
+  font-family:var(--arabom-hand)!important;
+  font-weight:400!important;
+  letter-spacing:-.02em!important;
+  font-size:clamp(42px,5.5vw,60px)!important;
+  line-height:1.22!important;
+}
+body.glossary-page .gcat .gcat-head p{
+  font-family:var(--arabom-body)!important;
+  font-size:clamp(14px,1.5vw,16px)!important;
+  line-height:1.6!important;
+}
+body.glossary-page .gcat .gcat-concept-takeaway p{
+  font-family:var(--arabom-hand)!important;
+  font-weight:400!important;
+  font-size:clamp(21px,2.8vw,28px)!important;
+  letter-spacing:0!important;
+  line-height:1.45!important;
+  word-break:keep-all;
+}
+/* 전문적인 설명의 정확성·가독성을 위해 본문/출처는 손글씨로 쓰지 않는다. */
+body.glossary-page .gcat :is(.gcat-definition-explanation,.gcat-why-link,.gcat-situation-observe,.gcat-situation-action,.gcat-learning-reference){
+  font-family:var(--arabom-body)!important;
+}
+/* 기존 페이지 글꼴보다 크기가 작아지는 경우를 피한다. */
+@media(max-width:650px){
+  body.glossary-page .gcat .gcat-situation-card h3{font-size:17px!important}
+  body.glossary-page .gcat .gcat-panel-intro h2{font-size:21px!important}
+  body.glossary-page .gcat .gcat-concept-takeaway p{font-size:23px!important}
+}

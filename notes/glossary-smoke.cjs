@@ -275,6 +275,30 @@ const path=require("node:path");
       assert.deepEqual(errors,[],p.name+" has no JS errors");
 
       // 알아봄: the twelve practical situations, five relationship maps and three deep-linkable views.
+      // Typography contract — protect readability for novice guardians without changing games.
+      const typefaces=await page.evaluate(async()=>{
+        await document.fonts.ready;
+        const font=selector=>getComputedStyle(document.querySelector(selector)).fontFamily;
+        const weight=selector=>getComputedStyle(document.querySelector(selector)).fontWeight;
+        return {
+          body:font(".gcat .gcat-scene"),
+          subheading:font(".gcat .gcat-situation-card h3"),
+          subheadingWeight:weight(".gcat .gcat-situation-card h3"),
+          mainTitle:font(".gcat .gcat-head h1"),
+          message:font(".gcat .gcat-concept-takeaway p"),
+          source:font(".gcat .gcat-learning-reference"),
+          registeredMaru:[...document.fonts].some(face=>face.family==="Habom MaruBuri"),
+          registeredNanum:[...document.fonts].some(face=>face.family==="Nanum Pen Script")
+        };
+      });
+      assert(typefaces.body.includes("Pretendard"),"body remains Pretendard/SUIT: "+JSON.stringify(typefaces));
+      assert(typefaces.subheading.includes("Habom MaruBuri"),"subheadings use MaruBuri");
+      assert.equal(typefaces.subheadingWeight,"600","MaruBuri is semibold");
+      assert(typefaces.mainTitle.includes("Habom Kyobo Local")&&typefaces.mainTitle.includes("Nanum Pen Script"),"title prefers installed Kyobo, then Nanum Pen");
+      assert(typefaces.message.includes("Nanum Pen Script"),"single takeaway uses the rare handwriting accent");
+      assert(typefaces.source.includes("Pretendard"),"references remain readable sans-serif");
+      assert(typefaces.registeredMaru,"semibold MaruBuri web font is defined");
+      assert(typefaces.registeredNanum,"Nanum Pen Script fallback web font is defined");
       const journey=page.locator("#gcatJourneyNav");
       assert.equal(await journey.locator("button").count(),2,"two recognizable first-step options");
       assert.equal(await page.locator("#gcatTermPanel").isVisible(),true,"illustrated catalog remains fully accessible");
