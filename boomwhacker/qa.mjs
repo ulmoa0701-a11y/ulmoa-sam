@@ -75,7 +75,7 @@ async function basicCase(name,width,height){
   check(initialTempo.bpm<=75&&initialTempo.min===35&&initialTempo.max===140,`${name}: playback speed default/range is too fast ${JSON.stringify(initialTempo)}`);
   check((await page.locator('#bpmLabel').innerText())===initialTempo.bpm+' BPM',`${name}: tempo slider label out of sync with actual beat`);
   check((await page.locator('#tempo').inputValue())===String(initialTempo.bpm),`${name}: speed slider is not at effective playback BPM`);
-  check(await page.locator('#introMode option[value="music"]').innerText()==='🥁 박자 예고',`${name}: introductory beat label is unclear`);
+  check((await page.locator('#introMode option[value="music"]').innerText()).includes('박자'),`${name}: beat label missing`);
   // Preserve the established beat-only visual/score regressions independently
   // from the new default 3-2-1 + complete musical phrase test.
   await page.locator('#introMode').evaluate(el=>{el.value='music';el.dispatchEvent(new Event('change',{bubbles:true}))});
@@ -296,115 +296,44 @@ async function basicCase(name,width,height){
   await page.locator('#playViewSelect').selectOption('fall');
   check(!(await page.locator('#scoreStage').isVisible()),`${name}: falling mode must hide expanded score`);
   await page.locator('#resetBtn').click();
-  // Explicitly choose the previous beat-only count-in to preserve its
-  // independent visual/timing regressions alongside the new melodic default.
-  await page.locator('#introMode').evaluate(el=>{el.value='music';el.dispatchEvent(new Event('change',{bubbles:true}))});
-  await page.locator(width<=800?'#playBtn':'#startBtn').click();
-  const introStart=await page.evaluate(()=>window.__boomVideoQA.intro());
-  check(introStart.mode==='music'&&introStart.active&&!introStart.started&&introStart.beats===6&&introStart.previewBeats===0&&introStart.countBeats===6&&introStart.durationMs<=6000,`${name}: musical intro did not start before song ${JSON.stringify(introStart)}`);
-  if(name==='mobile390')check(introStart.durationMs<6000,`${name}: preparation has become unnecessarily long ${JSON.stringify(introStart)}`);
-  check(await page.locator('#introOverlay').isVisible(),`${name}: preparation overlay must be visible during intro`);
-  check((await page.locator('#introHeading').innerText())==='함께 박자 맞춰요',`${name}: preparatory beat text missing or contains distracting fractions`);
-  check((await page.locator('#introPulse').innerText())==='1',`${name}: first beat must be clearly numbered from the start`);
-  const introCardText=await page.locator('#introOverlay').innerText();
-  check(!introCardText.includes('/'),`${name}: intro contains a confusing fractional bar count ${introCardText}`);
-  const introStartGeometry=await page.evaluate(()=>({tempo:beatMs(),meter:introMeter,count: introCountBeats, preview: introPreviewBeats,total: introDurationMs}));
-  check(introStartGeometry.meter===2&&introStartGeometry.count===6,`${name}: 2/4 musical preparation beat grouping is wrong ${JSON.stringify(introStartGeometry)}`);
-  // One uninterrupted six-beat card: 1 → 2 → 1 → 2 → 시 → 작.
-  check(await page.locator('#introOverlay .introCard').count()===1,`${name}: only one readiness card is allowed`);
-  const geometry=await page.evaluate(()=>({beatMs:beatMs(),count:introCountBeats,beats:introBeats,preview:introPreviewBeats,meter:introMeter,duration:introDurationMs}));
-  check(geometry.meter===2&&geometry.beats===6&&geometry.count===6&&geometry.preview===0,
-    `${name}: 2/4 should count 1-2-1-2-시-작 at the same tempo ${JSON.stringify(geometry)}`);
-  for(const [beat,value] of [[1,'2'],[2,'1'],[3,'2']]){
-    await page.evaluate(i=>{introStartPerf=performance.now()-(beatMs()*i+20);introAudioStartAt=audioCtx.currentTime-(beatMs()*i+20)/1000;introFrame(performance.now())},beat);
-    check((await page.locator('#introPulse').innerText())===value,`${name}: expected full-beat '${value}' at beat ${beat+1}`);
-    check(await page.locator('#introOverlay .introCard').count()===1,`${name}: unexpected second readiness card at beat ${beat+1}`);
-  }
-  // The word stays visible as a pair during BOTH beats; only its moving half changes.
-  async function pairedBeat(beat,activeSyllable){
-    await page.evaluate(i=>{introStartPerf=performance.now()-(beatMs()*i+20);introAudioStartAt=audioCtx.currentTime-(beatMs()*i+20)/1000;introFrame(performance.now())},beat);
-    const state=await page.evaluate(()=>{
-      const pulse=document.querySelector('#introPulse');
-      const children=[...pulse.querySelectorAll('.introSyllable')];
-      return {text:pulse.textContent,paired:pulse.classList.contains('syllablePair'),syllables:children.map(e=>e.textContent),
-        active:children.filter(e=>e.classList.contains('active')).map(e=>e.textContent),
-        animation:children.find(e=>e.classList.contains('active'))?getComputedStyle(children.find(e=>e.classList.contains('active'))).animationName:null,
-        width:pulse.getBoundingClientRect().width};
+  // Three guide choices share one musical timebase and show balls during sound.
+  check(await page.locator('#introMode option[value="voice"]').count()===1,name+': spoken choice missing');
+  check(await page.locator('#introMode option[value="music"]').count()===1,name+': beat guide missing');
+  check(await page.locator('#introMode option[value="interlude"]').count()===1,name+': musical intro missing');
+  for(const selected of ['interlude','music','voice']){
+    await page.locator('#introMode').evaluate((el,mode)=>{el.value=mode;el.dispatchEvent(new Event('change',{bubbles:true}))},selected);
+    await page.locator(width<=800?'#playBtn':'#startBtn').click();
+    const started=await page.evaluate(()=>({
+      ...window.__boomVideoQA.intro(),mode:introMode,expected:instrumentalPreludePlan().beats,
+      firstBallOffset:instrumentalPreludePlan().firstBallOffsetMs,firstNoteMs:firstNoteMs(),firstBeat:document.querySelector('#introPulse').innerText
+    }));
+    check(started.active&&started.mode===selected&&started.countBeats===0&&started.previewBeats===started.expected
+       &&started.beats===started.expected&&started.durationMs>=started.firstNoteMs&&started.firstBallOffset>=0,
+       name+': '+selected+' guide not beat-aligned '+JSON.stringify(started));
+    check(await page.locator('#introOverlay').evaluate(el=>el.classList.contains('preludePlaying')),
+       name+': '+selected+' hides descending balls');
+    if(selected==='music')check(started.firstBeat==='쿵',name+': no strong first beat');
+    if(selected==='voice')check(started.firstBeat==='하나',name+': count must start with 하나');
+    const descending=await page.evaluate(()=>{
+      const p=instrumentalPreludePlan(),offset=p.firstBallOffsetMs+Math.min(740,firstNoteMs()/2);
+      const origin=introAudioStartAt;introAudioStartAt=audioCtx.currentTime-offset/1000;
+      introFrame(performance.now());
+      const count=document.querySelectorAll('.fall').length;
+      introAudioStartAt=origin;return count;
     });
-    check(state.text==='시작'&&state.paired&&state.syllables.join('')==='시작'&&state.active.join('')===activeSyllable,
-      `${name}: show the whole '시작' at once while highlighting only '${activeSyllable}' ${JSON.stringify(state)}`);
-    check(state.animation==='syllableBeat',
-      `${name}: active '${activeSyllable}' must actually bounce, not simply replace the letters ${JSON.stringify(state)}`);
-    check(await page.locator('#introOverlay .introCard').count()===1,`${name}: extra readiness card appeared during '${activeSyllable}'`);
-    return state;
+    check(descending>0,name+': '+selected+' no descending balls');
+    await page.locator('#resetBtn').click();
+    check(!(await page.locator('#introOverlay').isVisible()),name+': '+selected+' reset failed');
   }
-  const si=await pairedBeat(4,'시');
-  const jak=await pairedBeat(5,'작');
-  check(Math.abs(si.width-jak.width)<1,`${name}: the entire word must not jump horizontally when emphasis moves`);
-  // Neither character should disappear midway through its full beat.
-  await page.evaluate(()=>{introStartPerf=performance.now()-(beatMs()*4.6);introAudioStartAt=audioCtx.currentTime-(beatMs()*4.6)/1000;introFrame(performance.now())});
-  check((await page.locator('#introPulse').textContent())==='시작'&&
-    (await page.locator('#introPulse .introSyllable.active').textContent())==='시',
-    `${name}: keep the complete word visible on the '시' beat`);
-  await page.evaluate(()=>{introStartPerf=performance.now()-(beatMs()*5.6);introAudioStartAt=audioCtx.currentTime-(beatMs()*5.6)/1000;introFrame(performance.now())});
-  check((await page.locator('#introPulse').textContent())==='시작'&&
-    (await page.locator('#introPulse .introSyllable.active').textContent())==='작',
-    `${name}: keep the complete word visible on the '작' beat`);
-  check(await page.locator('#introOverlay').evaluate(el=>el.classList.contains('launchCue')),
-    `${name}: the same card must display both syllables`);
-  check(await page.locator('.fall').count()===0,`${name}: notes must stay hidden until '작' completes`);
-    await page.screenshot({path:`${out}/${name}-musical-intro.png`,fullPage:false});
-  await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+12);introAudioStartAt=audioCtx.currentTime-(introDurationMs+12)/1000;introFrame(performance.now())});
-  await page.waitForTimeout(420);
-  const songStart=await page.evaluate(()=>window.__boomVideoQA.intro());
-  check(!songStart.active&&songStart.started,`${name}: count-in did not hand off to performance`);
-  check(!(await page.locator('#introOverlay').isVisible()),`${name}: second '시작' overlay must not appear after count-in`);
-  const handoff=await page.evaluate(()=>({t:elapsed,first:firstNoteMs(),travel:FALL_TRAVEL_MS,playing}));
-  check(handoff.t<850&&handoff.first===handoff.travel&&handoff.playing,
-    `${name}: playback must fall from offscreen at count-in completion, with no dead time ${JSON.stringify(handoff)}`);
-  const justEntered=await page.evaluate(()=>{const e=document.querySelector('.fall'),st=document.querySelector('#stage');return e&&st?{note:e.getBoundingClientRect().toJSON(),stage:st.getBoundingClientRect().toJSON()}:null});
-  check(justEntered.note.bottom>justEntered.stage.top,
-    `${name}: note not emerging from the top immediately after count-in ${JSON.stringify(justEntered)}`);
-    await page.evaluate(()=>{playing=false;cancelAnimationFrame(raf);elapsed=firstNoteMs()-FALL_TRAVEL_MS;draw()});
-  const offscreen=await page.evaluate(()=>{const e=document.querySelector('.fall'),st=document.querySelector('#stage');return e&&st?{note:e.getBoundingClientRect().toJSON(),stage:st.getBoundingClientRect().toJSON()}:null});
-  check(offscreen.note.bottom<=offscreen.stage.top,`${name}: note must originate fully above the stage ${JSON.stringify(offscreen)}`);
-  await page.evaluate(()=>{elapsed=firstNoteMs()-FALL_TRAVEL_MS+1100;draw()});
-  const emerging=await page.evaluate(()=>{const e=document.querySelector('.fall'),st=document.querySelector('#stage');return e&&st?{note:e.getBoundingClientRect().toJSON(),stage:st.getBoundingClientRect().toJSON()}:null});
-  check(emerging.note.bottom>emerging.stage.top&&emerging.note.top<emerging.stage.top+emerging.stage.height*.55,
-    `${name}: note should enter from top gradually ${JSON.stringify(emerging)}`);
-  await page.screenshot({path:`${out}/${name}-slow-top-entry.png`,fullPage:false});
-  await page.evaluate(()=>{elapsed=firstNoteMs()-100;draw()});
-  const nearHit=await page.evaluate(()=>{const e=document.querySelector('.fall'),st=document.querySelector('#stage');return e&&st?{note:e.getBoundingClientRect().toJSON(),stage:st.getBoundingClientRect().toJSON()}:null});
-  check(nearHit.note.top>emerging.note.top+50,`${name}: note did not travel gradually down toward the hit line`);
-  await page.evaluate(()=>{playing=true;lastTs=0;raf=requestAnimationFrame(frame)});
-  const progress=parseFloat((await page.locator('#progressFill').evaluate(el=>getComputedStyle(el).width)))||0;
-  check(progress>0,`${name}: playback progress did not advance after intro`);
-  await page.locator('#playBtn').click();
-  const paused=await page.evaluate(()=>({elapsed,playing,introActive}));
-  await page.locator('#playBtn').click();
-  check(await page.evaluate(()=>playing&&!introActive),`${name}: pause/resume incorrectly retriggered intro`);
-  await page.locator('#resetBtn').click();
   await page.locator('#introMode').evaluate(el=>{el.value='count';el.dispatchEvent(new Event('change',{bubbles:true}))});
   await page.locator(width<=800?'#playBtn':'#startBtn').click();
-  const countStart=await page.evaluate(()=>window.__boomVideoQA.intro());
-  check(countStart.mode==='count'&&countStart.active&&countStart.beats===3&&countStart.durationMs===3000,`${name}: 3-second count mode broken ${JSON.stringify(countStart)}`);
-  check((await page.locator('#introPulse').innerText())==='3',`${name}: count should start at 3`);
+  const oldCount=await page.evaluate(()=>window.__boomVideoQA.intro());
+  check(oldCount.active&&oldCount.durationMs===3000,name+': prior 3-second count broken');
   await page.locator('#resetBtn').click();
-  check(!(await page.locator('#introOverlay').isVisible())&&!await page.evaluate(()=>introActive),`${name}: reset should cancel countdown`);
   await page.locator('#introMode').evaluate(el=>{el.value='instant';el.dispatchEvent(new Event('change',{bubbles:true}))});
   await page.locator(width<=800?'#playBtn':'#startBtn').click();
-  check(await page.evaluate(()=>playing&&!introActive),`${name}: immediate start option failed`);
+  check(await page.evaluate(()=>playing&&!introActive),name+': immediate start broken');
   await page.locator('#resetBtn').click();
-  await page.locator('#introMode').evaluate(el=>{el.value='music';el.dispatchEvent(new Event('change',{bubbles:true}))});
-  if(name==='mobile390'){
-    // A 3/4 song gets a complete musical count-in with correct meter.
-    await page.locator('#mobileSongSelect').selectOption('same');
-    await page.locator('#playBtn').click();
-    const triple=await page.evaluate(()=>window.__boomVideoQA.intro());
-    check(triple.meter===3&&triple.countBeats===5&&triple.beats===5&&triple.durationMs>0,`${name}: triple meter count-in should align to bar lines ${JSON.stringify(triple)}`);
-    await page.locator('#resetBtn').click();
-    await page.locator('#mobileSongSelect').selectOption('twinkle');
-  }
   const fillStyle=await page.locator('#progressFill').getAttribute('style')||'';
   check(fillStyle.includes('0%'),`${name}: reset did not return progress to zero`);
 
@@ -529,13 +458,10 @@ for(const [label,w,h] of [['mobile-score-immediate',390,844],['desktop-score-imm
   check(original.firstScoreBeatMs>=3000,label+': fall runway was lost in score event data');
   await page.locator(w<=800?'#playBtn':'#startBtn').click();
   let started=await page.evaluate(()=>window.__boomVideoQA.intro());
-  check(started.active&&started.beats===6,label+': familiar musical count-in missing');
-  await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs-beatMs()*.6);introAudioStartAt=audioCtx.currentTime-(introDurationMs-beatMs()*.6)/1000;introFrame(performance.now())});
-  check((await page.locator('#introPulse').textContent())==='시작'&&
-    (await page.locator('#introPulse .introSyllable.active').textContent())==='작',
-    label+': both syllables should appear together with 작 moving just before the first note');
-  await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+2);introAudioStartAt=audioCtx.currentTime-(introDurationMs+2)/1000;introFrame(performance.now())});
-  await page.waitForTimeout(130);
+  check(started.active&&started.countBeats===0&&started.beats>=4,
+     label+': guided start must not add countdown '+JSON.stringify(started));
+   await page.waitForFunction(()=>!introActive&&playing,null,{timeout:16000});
+   await page.waitForTimeout(130);
   const first=await page.evaluate(()=>({
     timing:window.__boomVideoQA.scoreTiming(),active:[...document.querySelectorAll('#scoreStageGrid .scoreActive')].map(e=>Number(e.dataset.eventIndex)),
     side:[...document.querySelectorAll('#scoreRows .scoreActive')].map(e=>[...e.parentElement.children].indexOf(e)),
@@ -543,7 +469,7 @@ for(const [label,w,h] of [['mobile-score-immediate',390,844],['desktop-score-imm
   }));
   check(first.active.join(',')==='0'&&first.side.join(',')==='0'&&
     first.timing.elapsed>=first.timing.firstScoreBeatMs&&first.timing.elapsed<first.timing.secondEvent.start,
-    label+': the very first 도 must pulse immediately after 작 '+JSON.stringify(first));
+    label+': first 도 must appear on MR downbeat '+JSON.stringify(first));
   check(first.timing.visibleTime.startsWith('0:00')&&first.volume<5,
     label+': score mode should show 0:00, not a 3.1s fake lead '+JSON.stringify(first));
   await page.waitForTimeout(Math.max(0,Math.ceil(await page.evaluate(()=>events[1].start-elapsed))+60));

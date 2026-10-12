@@ -36,7 +36,7 @@ try{
    await page.locator('#introMode').selectOption('interlude');
    const picker=await page.locator('#introMode').evaluate(el=>({width:el.getBoundingClientRect().width,font:Number.parseFloat(getComputedStyle(el).fontSize),display:getComputedStyle(el.parentElement).display}));
    result.introPicker=picker;
-   if(mobile&&(picker.width<240||picker.font<12||picker.display!=='grid'))throw Error('Interlude mode unreadable on mobile '+JSON.stringify(picker));
+   if(mobile&&(picker.width<240||picker.font<12))throw Error('Interlude mode unreadable on mobile '+JSON.stringify(picker));
    if(!mobile&&picker.width<115)throw Error('Interlude mode clipped on desktop '+JSON.stringify(picker));
    const info=await page.evaluate(()=>({mode:introMode,bpm,meter:currentSong.timeN,song:currentSong.title,
      beat:beatMs(),firstNote:firstNoteMs(),view:playView}));
@@ -52,17 +52,16 @@ try{
    // 도·도·솔·솔·라·라·솔. It is chord/bass/percussion only.
    const audioProbe=await page.evaluate(async()=>{
     const plan=instrumentalPreludePlan(),beat=beatMs();
-    const ac=new OfflineAudioContext(1,Math.ceil(44100*(3*beat+plan.durationMs)/1000)+44100,44100);
+    const ac=new OfflineAudioContext(1,Math.ceil(44100*plan.durationMs/1000)+44100,44100);
     const g=ac.createGain();g.connect(ac.destination);
-    scheduleInterludeCountdown(ac,g,.05,beat);
-    const built=scheduleInterludeMusic(ac,g,.05+3*beat/1000,beat,plan.meter);
+    const built=scheduleInterludeMusic(ac,g,.05,beat,plan.meter);
     const rendered=await ac.startRendering(),d=rendered.getChannelData(0);
     const power=(a,b)=>{let energy=0;for(let i=Math.floor(a*44100);i<Math.min(d.length,Math.floor(b*44100));i++)energy+=Math.abs(d[i]);return Math.round(energy)};
-    const start=.05+3*beat/1000,last=start+(plan.durationMs-beat)/1000;
-    return{bars:built.bars,firstCount:power(.07,.27),introStart:power(start+.05,start+.26),lastPreludeBeat:power(last+.04,last+.23)};
+    const start=.05,last=start+(plan.durationMs-beat)/1000;
+    return{bars:built.bars,introStart:power(start+.05,start+.26),lastPreludeBeat:power(last+.04,last+.23)};
    });
    result.audioProbe=audioProbe;
-   if(audioProbe.firstCount<8||audioProbe.introStart<15||audioProbe.lastPreludeBeat<15)
+   if(audioProbe.introStart<15||audioProbe.lastPreludeBeat<15)
      throw Error('Must hear countdown THEN actual instrumental intro '+JSON.stringify(audioProbe));
    result.musicality=await page.evaluate(async()=>{
      const originalSong=currentSong,oldBpm=bpm;
@@ -98,18 +97,18 @@ try{
       active:introActive,beats:introBeats,preview:introPreviewBeats,count:introCountBeats,
       heading:document.querySelector('#introHeading').innerText,first:document.querySelector('#introPulse').innerText,
       scheduled:!!mrSource,firstBallOffsetMs:instrumentalPreludePlan().firstBallOffsetMs}));
-   if(!result.start.active||result.start.count!==3||result.start.preview!==plan.beats||result.start.beats!==plan.beats+3||
-      result.start.first!=='3'||!result.start.scheduled)
+   if(!result.start.active||result.start.count!==0||result.start.preview!==plan.beats||result.start.beats!==plan.beats||
+      result.start.first!=='🎶'||!result.start.scheduled)
      throw Error('Countdown and future MR schedule wrong '+JSON.stringify(result.start));
    result.beforeBall=await page.evaluate(()=>{
-     const p=instrumentalPreludePlan(),offset=(3*beatMs()+Math.max(0,p.firstBallOffsetMs-80));
+     const p=instrumentalPreludePlan(),offset=Math.max(0,p.firstBallOffsetMs-80);
      const originalAudioStart=introAudioStartAt;introAudioStartAt=audioCtx.currentTime-offset/1000;introFrame(performance.now());introAudioStartAt=originalAudioStart;
      return{introActive,playing,balls:document.querySelectorAll('.fall').length,elapsed};
    });
    if(!result.beforeBall.introActive||result.beforeBall.playing||result.beforeBall.balls!==0)
      throw Error('Balls appeared BEFORE the prelude runway '+JSON.stringify(result.beforeBall));
    const duringAndOverlay=await page.evaluate(()=>{
-     const p=instrumentalPreludePlan(),offset=3*beatMs()+p.firstBallOffsetMs+Math.min(750,firstNoteMs()/2);
+     const p=instrumentalPreludePlan(),offset=p.firstBallOffsetMs+Math.min(750,firstNoteMs()/2);
      const originalAudioStart=introAudioStartAt;
      introAudioStartAt=audioCtx.currentTime-offset/1000;
      introFrame(performance.now());
@@ -144,6 +143,55 @@ try{
    await page.locator('#resetBtn').click();
    result.reset=await page.evaluate(()=>({playing,introActive,leadGain:!!leadInGain}));
    if(result.reset.playing||result.reset.introActive||result.reset.leadGain)throw Error('Lead was not safely cancelled');
+   // These are THREE genuinely distinct start options, not renamed
+   // countdowns. Probe the strong/weak beat audio and Korean speech calls.
+   result.beatProbe=await page.evaluate(async()=>{
+     const beat=beatMs(),plan=instrumentalPreludePlan();
+     const ac=new OfflineAudioContext(1,Math.ceil(44100*plan.durationMs/1000)+44100,44100);
+     scheduleRhythmGuide(ac,ac.destination,.07,plan.beats,beat,plan.meter);
+     const samples=(await ac.startRendering()).getChannelData(0);
+     const energy=(a,b)=>{let t=0;for(let i=Math.floor(a*44100);i<Math.min(samples.length,Math.floor(b*44100));i++)t+=Math.abs(samples[i]);return Math.round(t)};
+     return{strong:energy(.08,.25),weak:energy(.07+beat/1000+.01,.07+beat/1000+.22)};
+   });
+   if(result.beatProbe.strong<=20||result.beatProbe.weak<=15)
+     throw Error('Strong/weak beat guide produces no audible sound '+JSON.stringify(result.beatProbe));
+   await page.evaluate(()=>{
+     window.__spokenBeats=[];
+     Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
+       cancel(){},getVoices(){return []},
+       speak(utterance){window.__spokenBeats.push({text:utterance.text,lang:utterance.lang,rate:utterance.rate})}
+     }});
+     if(!window.SpeechSynthesisUtterance)
+       window.SpeechSynthesisUtterance=function(text){this.text=text};
+   });
+   for(const mode of ['music','voice']){
+     if(mobile)await page.locator('#mobileSettingsBtn').click();
+     await page.locator('#introMode').selectOption(mode);
+     if(mobile)await page.locator('#mobileSettingsClose').click();
+     await page.locator(mobile?'#playBtn':'#startBtn').click();
+     const started=await page.evaluate(()=>({count:introCountBeats,preview:introPreviewBeats,beats:introBeats,
+       expected:instrumentalPreludePlan().beats,pulse:document.querySelector('#introPulse').innerText,
+       spoken:window.__spokenBeats.slice(),speechAvailable:guideSpeechAvailable,lastVoiceBeat:guideLastVoiceBeat,hasSynth:typeof window.speechSynthesis,hasUtter:typeof window.SpeechSynthesisUtterance,state:$('#introHelp').textContent}));
+     if(started.count!==0||started.preview!==started.expected||started.beats!==started.expected)
+       throw Error('Mode not synchronized to musical plan '+JSON.stringify({mode,started}));
+     if(mode==='music'&&started.pulse!=='쿵')
+       throw Error('Rhythm mode must show strong first beat '+JSON.stringify(started));
+     if(mode==='voice'&&(started.pulse!=='하나'||started.spoken.at(-1)?.text!=='하나'||started.spoken.at(-1)?.lang!=='ko-KR'))
+       throw Error('Spoken mode must REALLY request Korean 하나 '+JSON.stringify(started));
+     if(mode==='voice'){
+       await page.evaluate(()=>{
+         const beat=beatMs(),original=introAudioStartAt;
+         introAudioStartAt=audioCtx.currentTime-(beat+30)/1000;
+         introFrame(performance.now());introAudioStartAt=original;
+       });
+       result.speech=await page.evaluate(()=>window.__spokenBeats.slice());
+       if(result.speech.at(-1)?.text!=='둘')throw Error('Spoken mode did not advance to 둘 '+JSON.stringify(result.speech));
+     }
+     await page.locator('#resetBtn').click();
+   }
+   if(mobile)await page.locator('#mobileSettingsBtn').click();
+   await page.locator('#introMode').selectOption('interlude');
+   if(mobile)await page.locator('#mobileSettingsClose').click();
    await page.locator('#playViewSelect').selectOption('score');
    await page.locator(mobile?'#playBtn':'#startBtn').click();
    await page.waitForFunction(()=>!introActive&&playing,null,{timeout:16000});
