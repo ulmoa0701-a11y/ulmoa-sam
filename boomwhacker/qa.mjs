@@ -99,7 +99,7 @@ async function basicCase(name,width,height){
   check(videoInfo.brand?.brand==='울모아쌤'&&videoInfo.brand?.handle==='@ulmoa__sam',`${name}: video brand metadata wrong`);
   check(videoInfo.colors?.도==='#EB2427'&&videoInfo.colors?.레==='#F6851F'&&videoInfo.colors?.미==='#FBED1B'&&videoInfo.colors?.파==='#73C84A'&&videoInfo.colors?.솔==='#00A39A'&&videoInfo.colors?.라==='#4B4AA8'&&videoInfo.colors?.시==='#D83A9B',`${name}: Boomwhacker color mapping wrong`);
   check(videoInfo.melody?.mode==='boom'&&Object.keys(videoInfo.melody?.options||{}).length===4&&Math.abs(videoInfo.melody?.volume-.65)<.001,`${name}: melody QA metadata wrong`);
-  check(videoInfo.mix?.mode==='melody'&&Object.keys(videoInfo.mix?.options||{}).length===3&&videoInfo.mix?.mrReady===true&&videoInfo.mix?.mrKind==='auto'&&!videoInfo.mix?.mrLoaded,`${name}: mix QA metadata wrong`);
+  check(videoInfo.mix?.mode==='both'&&Object.keys(videoInfo.mix?.options||{}).length===3&&videoInfo.mix?.mrReady===true&&videoInfo.mix?.mrKind==='auto'&&!videoInfo.mix?.mrLoaded,`${name}: mix QA metadata wrong`);
   check(videoInfo.display?.mode==='note'&&Object.keys(videoInfo.display?.options||{}).length===4&&videoInfo.display?.labels?.[0]==='도',`${name}: display QA metadata wrong`);
   check((videoInfo.lyrics?.items?.length||0)>5,`${name}: continuous lyric window missing`);
   check(videoInfo.preview?.w===1280&&videoInfo.preview?.h===720&&String(videoInfo.preview?.data||'').startsWith('data:image/png'),`${name}: 16:9 video preview render failed`);
