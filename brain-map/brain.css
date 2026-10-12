@@ -667,7 +667,7 @@
 .brain-page :is(.hemi-topic-first,.hemi-quiz-question,.hemi-purpose-note) ::selection{background:#f8d992}
 @media(max-width:760px){
  /* Keep both sides visible early, and avoid a mascot-only first mobile screen. */
- .brain-page .hemi-study-grid{grid-template-areas:"art" "left" "right";gap:9px}
+ .brain-page .hemi-study-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"art" "left" "right";gap:9px}
  .brain-page .hemi-hero{padding:5px 7px!important;min-height:0}
  .brain-page .hemi-hero-svg{max-width:157px;max-height:169px}
  .brain-page .hemi-hero .hemi-art-caption{display:none}
