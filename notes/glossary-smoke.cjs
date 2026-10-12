@@ -369,6 +369,8 @@ const path=require("node:path");
       assert.equal(await page.locator("#gcatGamesPanel").isVisible(),true,"games have a directly shareable URL");
       assert.equal(await page.locator("#gcatGamesRoot").getAttribute("data-game-stage"),"hub","game hub opens by default");
       assert.equal(await page.locator(".gcat-game-mode-card").count(),2,"two game types are shown");
+      assert.deepEqual(await page.locator(".gcat-game-mode-card").evaluateAll(cards=>cards.map(card=>card.querySelector("button[data-game-start]").dataset.gameStart)),["situations","terms"],"game mode left/right order matches homepage");
+      assert((await page.locator(".gcat-game-note").textContent()).includes("보호자가 전문 용어를 외워야"),"optional parent-education purpose is explicit");
       assert.deepEqual(await page.evaluate(()=>Object.values(window.HabomGlossaryGames.counts)),[12,12],"curated term and scenario banks");
       for(const mode of ["terms","situations"]){
         for(const level of ["start","more"]){
@@ -393,7 +395,12 @@ const path=require("node:path");
           }
           assert.equal(questionIds.size,5,"question pool does not repeat within five steps");
           assert.equal(await page.locator("#gcatGamesRoot").getAttribute("data-game-stage"),"done","round ends");
-          assert((await page.locator(".gcat-game-score").textContent()).includes("4개"),"outcomes reflect real answers");
+          if(mode==="terms"){
+            assert((await page.locator(".gcat-game-score").textContent()).includes("4개"),"term-game outcomes reflect chosen answers");
+          }else{
+            assert((await page.locator(".gcat-game-score").textContent()).includes("상황을 살펴봤어요"),"scenario activity emphasizes reflection, not clinical scores");
+            assert(!(await page.locator(".gcat-game-score").textContent()).includes("4개"),"scenario activity avoids clinical skill grading");
+          }
           assert.equal(await page.locator('[data-game-review="true"]').count(),1,"missed questions can be repeated");
           await page.locator('[data-game-review="true"]').click();
           assert.equal(await page.locator(".gcat-game-progress strong").textContent(),"1 / 1","review selects only missed items");
