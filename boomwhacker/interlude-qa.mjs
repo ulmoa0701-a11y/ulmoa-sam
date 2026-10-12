@@ -87,6 +87,13 @@ try{
    if(!result.duringBall.introActive||result.duringBall.playing||result.duringBall.balls<1||
       result.duringBall.elapsed<=0||result.duringBall.pulse!=='🎶')
      throw Error('First ball must descend WHILE instrumental intro plays '+JSON.stringify(result.duringBall));
+   result.overlay=await page.evaluate(()=>{
+     const el=document.querySelector('#introOverlay'),css=getComputedStyle(el),card=el.querySelector('.introCard');
+     return {compact:el.classList.contains('preludePlaying'),background:css.backgroundColor,blur:css.backdropFilter,
+       cardH:card.getBoundingClientRect().height,stageH:document.querySelector('#stage').getBoundingClientRect().height};
+   });
+   if(!result.overlay.compact||result.overlay.blur!=='none'||result.overlay.cardH>result.overlay.stageH/2)
+     throw Error('Musical intro overlay still obscures falling balls '+JSON.stringify(result.overlay));
    await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+15);introFrame(performance.now())});
    result.handoff=await page.evaluate(()=>({introActive,playing,mrScheduled:!!mrSource,mix:mixMode,elapsed,firstNote:firstNoteMs(),leadGain:!!leadInGain}));
    if(result.handoff.introActive||!result.handoff.playing||!result.handoff.mrScheduled||
