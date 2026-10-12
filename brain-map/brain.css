@@ -522,3 +522,77 @@
  .hemi-ability-btn{padding:8px 6px;min-height:120px}
  .hemi-ability-action{font-size:10.5px}
 }
+
+/* Brain-map typography, 2026-10-12.
+   Preserve the approved brand-image, diagram, colors and other pages.
+   Body = Pretendard, subheadings = official Naver MaruBuri SemiBold.
+   Short accent text = locally available Kyobo Handwriting 2020, otherwise
+   Google Fonts' Nanum Pen Script. No Kyobo font files are redistributed. */
+.brain-page{
+  --brain-font-body:"Pretendard Variable",Pretendard,SUIT,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --brain-font-heading:"MaruBuriSemiBold","MaruBuri", "Noto Serif KR",serif;
+  --brain-font-accent:"KyoboHandwriting2020","Kyobo Handwriting 2020","교보손글씨 2020 박도연",
+    "Nanum Pen Script","NanumPen",cursive;
+  font-family:var(--brain-font-body);
+  font-synthesis:none;
+}
+.brain-page :is(button,input,textarea,select,summary){
+  font-family:var(--brain-font-body);
+}
+/* Heading styles include semantic headings and the eight clickable concept names. */
+.brain-page .brain-main :is(h2,h3,h4,h5,.lobe-card strong,.hemi-side-title strong,
+  .hemi-ability-copy b,.hemi-scene-detail b,.hemi-topic-steps b,
+  .hemi-topic-term dt,.hemi-fact-details b){
+  font-family:var(--brain-font-heading);
+  font-weight:600;
+  font-synthesis:none;
+  letter-spacing:-.025em;
+  word-break:keep-all;
+}
+.brain-page .brain-main :is(.map-panel-heading h2,.hemi-intro h2){
+  font-size:clamp(21px,2.1vw,26px);
+  line-height:1.36;
+}
+.brain-page .brain-main :is(.hemi-quick-head h3,.hemi-topic-header h3){
+  line-height:1.35;
+}
+.brain-page .brain-main .lobe-card strong{font-size:18px;line-height:1.35}
+.brain-page .brain-main .hemi-ability-copy b{font-size:15px;line-height:1.5}
+.brain-page .brain-main .hemi-side-title strong{font-size:22px;line-height:1.35}
+.brain-page .brain-main .hemi-topic-section h4{line-height:1.4}
+/* Handwriting stays decorative: only the opening headline and Moa speech cue. */
+.brain-page .brain-main .map-intro h1{
+  font-family:var(--brain-font-accent);
+  font-weight:400;
+  font-size:clamp(35px,3.3vw,44px);
+  line-height:1.27;
+  letter-spacing:-.015em;
+  word-break:keep-all;
+}
+.brain-page .brain-main .hemi-focus b{
+  font-family:var(--brain-font-accent);
+  font-size:clamp(20px,2vw,24px);
+  line-height:1.15;
+  font-weight:400;
+  letter-spacing:0;
+  word-break:keep-all;
+}
+/* Text labels and controls are deliberately not handwriting. */
+.brain-page :is(.sub-header,.sub-header button,.sub-header a,.hb-nav,.hb-nav button,
+  .hb-nav a,.hb-nav summary,.sub-footer,.sub-footer b,
+  .hemi-quiz-options button,.hemi-topic-done,.hemi-topic-close,
+  .hemi-ability-action){
+  font-family:var(--brain-font-body);
+}
+@media(max-width:760px){
+  .brain-page .brain-main .map-intro h1{font-size:clamp(29px,8vw,34px);line-height:1.3}
+  .brain-page .brain-main .hemi-focus b{font-size:19px;line-height:1.17}
+  .brain-page .brain-main .hemi-ability-copy b{font-size:14px;line-height:1.48}
+  .brain-page .brain-main .hemi-side-title strong{font-size:19px}
+  .brain-page .brain-main :is(.map-panel-heading h2,.hemi-intro h2){font-size:21px}
+}
+@media(max-width:370px){
+  .brain-page .brain-main .map-intro h1{font-size:28px}
+  .brain-page .brain-main .hemi-focus b{font-size:18px}
+  .brain-page .brain-main .hemi-ability-copy b{font-size:13.5px}
+}
