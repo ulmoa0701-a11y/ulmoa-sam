@@ -642,7 +642,7 @@ try{
   if(saved==='music')localStorage.setItem('ulmoaBoomIntroMode','interlude');
  }
 }catch(e){}
-let introActive=false,introRaf=0,introGain=null,leadInGain=null,introStartPerf=0,introDurationMs=0,introBeats=0,introLastBeat=-1,introHideTimer=0,hasStartedSong=false,introMeter=4,introCountBeats=4,introPreviewBeats=4;
+let introActive=false,introRaf=0,introGain=null,leadInGain=null,introScheduledMr=false,introStartPerf=0,introDurationMs=0,introBeats=0,introLastBeat=-1,introHideTimer=0,hasStartedSong=false,introMeter=4,introCountBeats=4,introPreviewBeats=4;
 
 function saveLast(){try{localStorage.setItem('ulmoaBoomLast',JSON.stringify({...currentSong,sampleKey:currentSampleKey}))}catch(e){}}
 function canonical(raw){let n=String(raw||'').replace(/\s/g,'').replace(/♯/g,'#');if(!n||n==='쉼')return'쉼';return n}
@@ -948,40 +948,37 @@ function scheduleInterludeAccompaniment(ac,dest,start,beats,intervalMs,meter){
    voiceOsc(ac,dest,hz,'sine',strong?.065:.037,when,.011,strong?.44:.3,strong?.52:.36);
  }
 }
-// Full written phrase. Never cut "도·도·솔·솔·라·라" halfway through its bar.
+// A real instrumental introduction, NOT a replay of the opening tune.
+// The note balls travel during its last 3.1 seconds to the first downbeat.
 const INTERLUDE_COUNTDOWN_BEATS=3;
-function interludePhrasePlan(){
- const score=Array.isArray(currentSong.measures)?currentSong.measures.filter(m=>Array.isArray(m)&&m.length):[];
- const selected=score.slice(0,4),beat=beatMs(),notes=[];
- if(!selected.length)return{beats:4,notes,measures:0,cycles:0};
- const sourceBeats=selected.reduce((sum,m)=>sum+m.reduce((n,e)=>n+Math.max(.125,Number(e.dur)||1),0),0);
- // Short imported exercises: repeat a complete 1-2 bar phrase once.
- const cycles=selected.length<=2&&sourceBeats<=8?2:1;
- let offset=0;
- for(let round=0;round<cycles;round++)for(const m of selected){
-  const barLength=m.reduce((n,e)=>n+Math.max(.125,Number(e.dur)||1),0);
-  if(offset>0&&offset+barLength>16.001)break;
-  for(const e of m){
-   const dur=Math.max(.125,Number(e.dur)||1),note=canonical(e.note);
-   if(note!=='쉼'&&Number.isFinite(FREQ[note]))
-    notes.push({note,offsetMs:offset*beat,durationMs:dur*beat});
-   offset+=dur;
-  }
- }
- return{beats:offset||4,notes,measures:selected.length,cycles};
+function instrumentalPreludePlan(){
+ const meter=[2,3,4].includes(Number(currentSong.timeN))?Number(currentSong.timeN):4;
+ const beat=beatMs(),bars=Math.max(2,Math.ceil((firstNoteMs()+100)/(meter*beat)));
+ return{meter,bars,beats:meter*bars,durationMs:meter*bars*beat,countdownBeats:INTERLUDE_COUNTDOWN_BEATS,
+   firstBallOffsetMs:meter*bars*beat-firstNoteMs()};
 }
-function interludePhraseNotes(){return interludePhrasePlan().notes}
 function scheduleInterludeMusic(ac,dest,start,intervalMs,meter){
- const plan=interludePhrasePlan(),chords=ac.createGain(),melody=ac.createGain();
- chords.gain.setValueAtTime(.31,start);chords.connect(dest);
- melody.gain.setValueAtTime(1,start);melody.connect(dest);
- scheduleInterludeAccompaniment(ac,chords,start,plan.beats,intervalMs,meter);
- for(const note of plan.notes){
-  const t=start+note.offsetMs/1000,f=FREQ[note.note],length=Math.max(.11,Math.min(2.5,note.durationMs/1000-.065));
-  voiceOsc(ac,melody,f,'triangle',.34,t,.008,Math.max(.09,length-.025),length);
-  voiceOsc(ac,melody,f,'sine',.10,t,.006,Math.max(.08,length-.055),Math.max(.09,length-.03),2);
+ const p=instrumentalPreludePlan(),beat=intervalMs/1000;
+ const chords=ac.createGain(),arpeggio=ac.createGain(),percussion=ac.createGain();
+ chords.gain.setValueAtTime(.50,start);chords.connect(dest);
+ arpeggio.gain.setValueAtTime(.84,start);arpeggio.connect(dest);
+ percussion.gain.setValueAtTime(.65,start);percussion.connect(dest);
+ const measureCount=Math.max(1,Math.min(2,currentSong.measures?.length||1));
+ for(let i=0;i<p.beats;i++){
+  const bar=Math.floor(i/meter),pos=i%meter,time=start+i*beat;
+  const chord=chordForMeasure(bar%measureCount),freqs=chord.freqs;
+  mrPulse(ac,percussion,time,pos===0);
+  voiceOsc(ac,chords,freqs[0],'triangle',pos===0?.15:.086,time,.013,Math.max(.14,beat*.64),Math.max(.19,beat*.78));
+  const upper=freqs.slice(1);
+  for(let j=0;j<upper.length;j++)
+   voiceOsc(ac,chords,upper[j],'sine',pos===0?.035:.020,time,.014,Math.max(.12,beat*.5),Math.max(.17,beat*.69));
+  if(upper.length){
+   const note=upper[(i+bar)%upper.length],offset=(pos%2===0?0:.20)*beat;
+   voiceOsc(ac,arpeggio,note,'triangle',.11,time+offset,.009,Math.max(.10,beat*.54),Math.max(.16,beat*.72)+offset);
+  }
+  if(i===p.beats-1)voiceOsc(ac,percussion,783.99,'sine',.07,time,.007,.15,.20);
  }
- return plan;
+ return p;
 }
 function scheduleInterludeCountdown(ac,dest,start,intervalMs){
  for(let i=0;i<INTERLUDE_COUNTDOWN_BEATS;i++){
@@ -1015,20 +1012,29 @@ function startFallLeadIn(){
  }
 }
 function introSound(beats,intervalMs){
-  if(!sound)return;
-  audio();if(!audioCtx)return;
-  const ac=audioCtx,master=ac.createGain(),start=ac.currentTime+.025;
-  master.gain.setValueAtTime(introMode==='interlude'?.9:.54,ac.currentTime);master.connect(ac.destination);introGain=master;
-  if(introMode==='interlude'){
-    scheduleInterludeCountdown(ac,master,start,intervalMs);
-    scheduleInterludeMusic(ac,master,start+INTERLUDE_COUNTDOWN_BEATS*intervalMs/1000,intervalMs,introMeter);
-    return;
+ if(!sound)return;
+ audio();if(!audioCtx)return;
+ const ac=audioCtx,master=ac.createGain(),start=ac.currentTime+.030;
+ master.gain.setValueAtTime(introMode==='interlude'?.85:.54,start);
+ master.connect(ac.destination);introGain=master;
+ if(introMode==='interlude'){
+  const p=instrumentalPreludePlan(),preludeStart=start+INTERLUDE_COUNTDOWN_BEATS*intervalMs/1000;
+  const songStart=preludeStart+p.durationMs/1000;
+  scheduleInterludeCountdown(ac,master,start,intervalMs);
+  scheduleInterludeMusic(ac,master,preludeStart,intervalMs,p.meter);
+  master.gain.setValueAtTime(.85,Math.max(start,songStart-.06));
+  master.gain.linearRampToValueAtTime(.0001,songStart);
+  if(wantsMr()){
+   const scheduled=scheduleMrTrack(ac,ac.destination,songStart,0,mrVolume);
+   if(scheduled){mrSource=scheduled.src;mrGain=scheduled.g;introScheduledMr=true}
   }
-  for(let i=0;i<beats;i++){
-    const when=start+i*intervalMs/1000,strong=i%introMeter===0;
-    mrPulse(ac,master,when,strong);
-    voiceOsc(ac,master,strong?784:659.25,'sine',strong?.16:.11,when,.005,.15,.19);
-  }
+  return;
+ }
+ for(let i=0;i<beats;i++){
+  const when=start+i*intervalMs/1000,strong=i%introMeter===0;
+  mrPulse(ac,master,when,strong);
+  voiceOsc(ac,master,strong?784:659.25,'sine',strong?.16:.11,when,.005,.15,.19);
+ }
 }
 function introVisual(index){
   if(index===introLastBeat)return;
