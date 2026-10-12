@@ -647,7 +647,7 @@ try{
   if(saved==='music')localStorage.setItem('ulmoaBoomIntroMode','interlude');
  }
 }catch(e){}
-let introActive=false,introRaf=0,introGain=null,leadInGain=null,introScheduledMr=false,introAudioStartPerf=0,introStartPerf=0,introDurationMs=0,introBeats=0,introLastBeat=-1,introHideTimer=0,hasStartedSong=false,introMeter=4,introCountBeats=4,introPreviewBeats=4;
+let introActive=false,introRaf=0,introGain=null,leadInGain=null,introFirstMelodyGain=null,introFirstMelodyScheduled=false,introScheduledMr=false,introAudioStartPerf=0,introStartPerf=0,introDurationMs=0,introBeats=0,introLastBeat=-1,introHideTimer=0,hasStartedSong=false,introMeter=4,introCountBeats=4,introPreviewBeats=4;
 
 function saveLast(){try{localStorage.setItem('ulmoaBoomLast',JSON.stringify({...currentSong,sampleKey:currentSampleKey}))}catch(e){}}
 function canonical(raw){let n=String(raw||'').replace(/\s/g,'').replace(/♯/g,'#');if(!n||n==='쉼')return'쉼';return n}
@@ -891,7 +891,32 @@ function updateLyricTrack(force=false){
 }
 function audio(){if(!audioCtx){const A=window.AudioContext||window.webkitAudioContext;if(A)audioCtx=new A()}if(audioCtx?.state==='suspended')audioCtx.resume()}
 function voiceOsc(ac,dest,freq,type,amp,when,attack,decay,stop,mult=1,detune=0){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(freq*mult,when);if(detune)o.detune.setValueAtTime(detune,when);o.connect(g);g.connect(dest);g.gain.setValueAtTime(.0001,when);g.gain.exponentialRampToValueAtTime(Math.max(.0002,amp),when+attack);g.gain.exponentialRampToValueAtTime(.0001,when+decay);o.start(when);o.stop(when+stop)}
-function scheduleMelodyTone(ac,dest,n,when,mode=melodyMode,volume=melodyVolume){const f=FREQ[n],vol=Math.max(0,Math.min(1,Number(volume)||0));if(!f||mode==='none'||vol<=0)return false;const master=ac.createGain();master.gain.setValueAtTime(vol,when);master.connect(dest);if(mode==='piano'){voiceOsc(ac,master,f,'triangle',.19,when,.012,.78,.86);voiceOsc(ac,master,f,'sine',.075,when,.008,.46,.56,2);voiceOsc(ac,master,f,'sine',.035,when,.006,.28,.36,3);return true}if(mode==='xylophone'){voiceOsc(ac,master,f,'sine',.23,when,.004,.42,.5);voiceOsc(ac,master,f,'sine',.075,when,.003,.19,.25,3);voiceOsc(ac,master,f,'sine',.035,when,.003,.13,.19,6);return true}voiceOsc(ac,master,f,'sine',.27,when,.006,.31,.38);voiceOsc(ac,master,f,'triangle',.065,when,.004,.18,.24,2);return true}
+// Respect the written rhythm: old fixed 0.38s notes created long gaps.
+function melodySoundDuration(noteDurationMs,mode='boom'){
+ const ms=Number(noteDurationMs),seconds=Number.isFinite(ms)&&ms>0?ms/1000:beatMs()/1000;
+ const duration=Math.max(.12,Math.min(4.8,seconds));
+ return mode==='xylophone'?Math.min(duration,.78):Math.max(.11,duration*.93);
+}
+function scheduleMelodyTone(ac,dest,n,when,mode=melodyMode,volume=melodyVolume,noteDurationMs=beatMs()){
+ const f=FREQ[n],vol=Math.max(0,Math.min(1,Number(volume)||0));
+ if(!f||mode==='none'||vol<=0)return false;
+ const d=melodySoundDuration(noteDurationMs,mode),master=ac.createGain();
+ master.gain.setValueAtTime(vol,when);master.connect(dest);
+ if(mode==='piano'){
+  voiceOsc(ac,master,f,'triangle',.19,when,.012,Math.max(.14,d*.84),d);
+  voiceOsc(ac,master,f,'sine',.075,when,.008,Math.max(.12,d*.70),Math.max(.14,d*.89),2);
+  voiceOsc(ac,master,f,'sine',.035,when,.006,Math.max(.10,d*.47),Math.max(.13,d*.67),3);
+  return true;
+ }
+ if(mode==='xylophone'){
+  voiceOsc(ac,master,f,'sine',.23,when,.004,Math.max(.10,d*.82),d);
+  voiceOsc(ac,master,f,'sine',.075,when,.003,Math.max(.09,d*.42),Math.max(.12,d*.60),3);
+  return true;
+ }
+ voiceOsc(ac,master,f,'sine',.27,when,.006,Math.max(.11,d*.87),d);
+ voiceOsc(ac,master,f,'triangle',.065,when,.004,Math.max(.10,d*.62),Math.max(.13,d*.76),2);
+ return true;
+}
 function wantsMelody(){return mixMode==='melody'||mixMode==='both'}
 function wantsMr(){return mixMode==='mr'||mixMode==='both'}
 function firstNoteMs(){const e=events.find(x=>x.active);return e?e.start:FIRST_NOTE_LEAD_MS}
@@ -905,7 +930,7 @@ function scheduleMrTrack(ac,dest,when,offsetSec=0,volume=mrVolume){return mrBuff
 function syncLiveMr(){stopMr();if(!playing||!sound||!wantsMr())return;audio();if(!audioCtx)return;const lead=firstNoteMs(),delay=Math.max(0,lead-elapsed)/1000,offset=Math.max(0,elapsed-lead)/1000,scheduled=scheduleMrTrack(audioCtx,audioCtx.destination,audioCtx.currentTime+delay,offset,mrVolume);if(scheduled){mrSource=scheduled.src;mrGain=scheduled.g}}
 function audioMixLabel(){const mr=mrBuffer?'내 MR':'자동 MR';if(mixMode==='mr')return mr;if(mixMode==='both'){const m=melodyMode==='none'?'멜로디 없음':MELODY_LABELS[melodyMode];return m+' + '+mr}return melodyMode==='none'?'멜로디 없음':MELODY_LABELS[melodyMode]}
 async function loadMrFile(file){stopMr();mrBuffer=null;mrName='';const status=$('#mrStatus');if(!file){status.textContent='기본 자동 MR 준비됨 · 파일 없이 바로 사용할 수 있어요. 내 MR 파일은 선택사항이에요.';status.className='hint mrStatus ok';if(playing)syncLiveMr();return}if(file.size>80*1024*1024){status.textContent='MR 파일이 너무 커요. 80MB 이하 파일을 사용해 주세요.';status.className='hint mrStatus warn';$('#mrFile').value='';return}try{audio();if(!audioCtx)throw new Error('AudioContext unavailable');const buf=await file.arrayBuffer();mrBuffer=await audioCtx.decodeAudioData(buf.slice(0));mrName=file.name;status.textContent='내 MR 준비됨 · '+mrName+' · '+mrBuffer.duration.toFixed(1)+'초';status.className='hint mrStatus ok';if(playing)syncLiveMr()}catch(err){console.error(err);mrBuffer=null;mrName='';status.textContent='파일을 읽지 못해 기본 자동 MR로 돌아갔어요.';status.className='hint mrStatus warn';$('#mrFile').value='';if(playing)syncLiveMr()}}
-function tone(n,b){if(b){b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),100)}if(!sound||!wantsMelody()||melodyMode==='none'||!FREQ[n])return;audio();if(!audioCtx)return;scheduleMelodyTone(audioCtx,audioCtx.destination,n,audioCtx.currentTime,melodyMode)}
+function tone(n,b,durationMs=beatMs()){if(b){b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),100)}if(!sound||!wantsMelody()||melodyMode==='none'||!FREQ[n])return;audio();if(!audioCtx)return;scheduleMelodyTone(audioCtx,audioCtx.destination,n,audioCtx.currentTime,melodyMode,melodyVolume,durationMs)}
 function draw(){
  updateScoreMotion();
  const stage=$('#stage'),hitY=stage.clientHeight-68;
@@ -931,8 +956,9 @@ function draw(){
   stage.appendChild(note);
  }
 }
-function frame(ts){if(!playing)return;if(!lastTs)lastTs=ts;let prev=elapsed;elapsed+=ts-lastTs;lastTs=ts;if(elapsed>=totalMs){if(repeat){elapsed=playView==='score'?scoreStartMs()-.5:0;prev=elapsed;stopLeadIn();syncLiveMr()}else{elapsed=totalMs;playing=false;hasStartedSong=false;stopMr();stopLeadIn();$('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작'}}for(const e of events)if(e.active&&e.start>prev&&e.start<=elapsed){let b=[...document.querySelectorAll('.tube')].find(x=>x.dataset.note===e.note);tone(e.note,b)}draw();updateTime();updateLyricTrack();if(playing)raf=requestAnimationFrame(frame)}
-function stopIntro(){
+function frame(ts){if(!playing)return;if(!lastTs)lastTs=ts;let prev=elapsed;elapsed+=ts-lastTs;lastTs=ts;if(elapsed>=totalMs){if(repeat){elapsed=playView==='score'?scoreStartMs()-.5:0;prev=elapsed;stopLeadIn();syncLiveMr()}else{elapsed=totalMs;playing=false;hasStartedSong=false;stopMr();stopLeadIn();$('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작'}}for(const e of events)if(e.active&&e.start>prev&&e.start<=elapsed){let b=[...document.querySelectorAll('.tube')].find(x=>x.dataset.note===e.note);tone(e.note,b,e.dur)}draw();updateTime();updateLyricTrack();if(playing)raf=requestAnimationFrame(frame)}
+function stopFirstMelody(){if(introFirstMelodyGain&&audioCtx)try{introFirstMelodyGain.gain.cancelScheduledValues(audioCtx.currentTime);introFirstMelodyGain.gain.setValueAtTime(0,audioCtx.currentTime)}catch(e){}introFirstMelodyGain=null;introFirstMelodyScheduled=false}
+function stopIntro(keepFirstMelody=false){if(!keepFirstMelody)stopFirstMelody();
   introActive=false;
   cancelAnimationFrame(introRaf);introRaf=0;
   clearTimeout(introHideTimer);introHideTimer=0;
