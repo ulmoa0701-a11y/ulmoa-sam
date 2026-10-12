@@ -967,6 +967,46 @@ function scheduleMrTrack(ac,dest,when,offsetSec=0,volume=mrVolume){return mrBuff
 function syncLiveMr(){stopMr();if(!playing||!sound||!wantsMr())return;audio();if(!audioCtx)return;const lead=firstNoteMs(),delay=Math.max(0,lead-elapsed)/1000,offset=Math.max(0,elapsed-lead)/1000,scheduled=scheduleMrTrack(audioCtx,audioCtx.destination,audioCtx.currentTime+delay,offset,mrVolume);if(scheduled){mrSource=scheduled.src;mrGain=scheduled.g}}
 function audioMixLabel(){const mr=mrBuffer?'내 MR':'자동 MR';if(mixMode==='mr')return mr;if(mixMode==='both'){const m=melodyMode==='none'?'멜로디 없음':MELODY_LABELS[melodyMode];return m+' + '+mr}return melodyMode==='none'?'멜로디 없음':MELODY_LABELS[melodyMode]}
 async function loadMrFile(file){stopMr();mrBuffer=null;mrName='';const status=$('#mrStatus');if(!file){status.textContent='기본 자동 MR 준비됨 · 파일 없이 바로 사용할 수 있어요. 내 MR 파일은 선택사항이에요.';status.className='hint mrStatus ok';if(playing)syncLiveMr();return}if(file.size>80*1024*1024){status.textContent='MR 파일이 너무 커요. 80MB 이하 파일을 사용해 주세요.';status.className='hint mrStatus warn';$('#mrFile').value='';return}try{audio();if(!audioCtx)throw new Error('AudioContext unavailable');const buf=await file.arrayBuffer();mrBuffer=await audioCtx.decodeAudioData(buf.slice(0));mrName=file.name;status.textContent='내 MR 준비됨 · '+mrName+' · '+mrBuffer.duration.toFixed(1)+'초';status.className='hint mrStatus ok';if(playing)syncLiveMr()}catch(err){console.error(err);mrBuffer=null;mrName='';status.textContent='파일을 읽지 못해 기본 자동 MR로 돌아갔어요.';status.className='hint mrStatus warn';$('#mrFile').value='';if(playing)syncLiveMr()}}
+// Keep the ENTIRE melody on the WebAudio clock. Browser repaint/tube-hit
+// events can be 30-60ms late, so they must never trigger the music itself.
+let songMelodyGain=null,songAudioStartAt=0,nextMelodyNoteIndex=-1;
+const AUDIO_LOOKAHEAD_SEC=.24;
+function stopSongMelody(){
+ if(songMelodyGain&&audioCtx)try{
+  songMelodyGain.gain.cancelScheduledValues(audioCtx.currentTime);
+  songMelodyGain.gain.setValueAtTime(0,audioCtx.currentTime);
+ }catch(e){}
+ songMelodyGain=null;songAudioStartAt=0;nextMelodyNoteIndex=-1;
+}
+function queueUpcomingMelody(){
+ if(!songMelodyGain||!audioCtx||!sound||!wantsMelody()||melodyMode==='none')return;
+ const limit=audioCtx.currentTime+AUDIO_LOOKAHEAD_SEC;
+ while(nextMelodyNoteIndex>=0&&nextMelodyNoteIndex<events.length){
+  const e=events[nextMelodyNoteIndex];
+  if(!e.active){nextMelodyNoteIndex++;continue}
+  const when=songAudioStartAt+(e.start-firstNoteMs())/1000;
+  if(when>limit)break;
+  scheduleMelodyTone(audioCtx,songMelodyGain,e.note,
+    Math.max(audioCtx.currentTime+.004,when),melodyMode,melodyVolume,e.dur);
+  nextMelodyNoteIndex++;
+ }
+}
+function syncLiveSongMelody(){
+ stopSongMelody();
+ if(!playing||!sound||!wantsMelody()||melodyMode==='none')return;
+ audio();if(!audioCtx)return;
+ // Same musical time origin as syncLiveMr(). Song starts on first beat.
+ songAudioStartAt=audioCtx.currentTime+Math.max(0,(firstNoteMs()-elapsed)/1000);
+ const gain=audioCtx.createGain();gain.connect(audioCtx.destination);songMelodyGain=gain;
+ let next=events.findIndex(e=>e.active&&e.start+e.dur>elapsed+.5);
+ if(next<0)return;
+ const e=events[next],past=Math.max(0,elapsed-e.start);
+ const at=Math.max(audioCtx.currentTime+.006,
+   songAudioStartAt+(e.start-firstNoteMs())/1000);
+ scheduleMelodyTone(audioCtx,songMelodyGain,e.note,at,melodyMode,melodyVolume,Math.max(110,e.dur-past));
+ nextMelodyNoteIndex=next+1;
+ queueUpcomingMelody();
+}
 function tone(n,b,durationMs=beatMs()){if(b){b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),100)}if(!sound||!wantsMelody()||melodyMode==='none'||!FREQ[n])return;audio();if(!audioCtx)return;scheduleMelodyTone(audioCtx,audioCtx.destination,n,audioCtx.currentTime,melodyMode,melodyVolume,durationMs)}
 function draw(){
  updateScoreMotion();
