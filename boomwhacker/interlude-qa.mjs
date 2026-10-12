@@ -64,6 +64,35 @@ try{
    result.audioProbe=audioProbe;
    if(audioProbe.firstCount<8||audioProbe.introStart<15||audioProbe.lastPreludeBeat<15)
      throw Error('Must hear countdown THEN actual instrumental intro '+JSON.stringify(audioProbe));
+   result.musicality=await page.evaluate(async()=>{
+     const originalSong=currentSong,oldBpm=bpm;
+     currentSong=clone(twinkle);bpm=66;build();
+     const harmonies=Array.from({length:8},(_,i)=>chordForMeasure(i).name);
+     const leadIn=instrumentalPreludePlan();
+     const preludeHarmony=Array.from({length:leadIn.bars},(_,i)=>preludeChordForBar(i,leadIn.bars).name);
+     const sustainedNote=events.find(e=>e.note==='솔'&&e.dur>1.5*beatMs());
+     const ac=new OfflineAudioContext(1,Math.ceil(44100*3.5),44100);
+     scheduleMelodyTone(ac,ac.destination,'솔',.1,'boom',.65,sustainedNote.dur);
+     const wave=(await ac.startRendering()).getChannelData(0);
+     const energy=(a,b)=>{let total=0;for(let i=Math.floor(a*44100);i<Math.floor(b*44100);i++)total+=Math.abs(wave[i]);return Math.round(total)};
+     const tail=energy(1.08,1.24),start=energy(.16,.31);
+     const notes=events.slice(0,7).map(e=>e.note);
+     const noteDuration=sustainedNote.dur;
+     currentSong=originalSong;bpm=oldBpm;build();
+     return{harmonies,preludeHarmony,notes,noteDuration,start,tail};
+   });
+   const mu=result.musicality;
+   if(mu.notes.join(',')!=='도,도,솔,솔,라,라,솔'||
+      mu.harmonies.join(',')!=='C,C,F,C,F,C,G,C'||
+      mu.preludeHarmony.at(0)!=='C'||mu.preludeHarmony.at(-1)!=='G'||
+      mu.noteDuration<1500||mu.start<15||mu.tail<6)
+     throw Error('Real musical rhythm / sustained sol / cadence failed '+JSON.stringify(mu));
+   await page.evaluate(()=>{
+     window.__musicClock=[];
+     const m=scheduleMelodyTone, mr=scheduleMrTrack;
+     scheduleMelodyTone=function(...args){window.__musicClock.push({type:'melody',pitch:args[2],when:args[3],noteDur:args[6]});return m(...args)};
+     scheduleMrTrack=function(...args){window.__musicClock.push({type:'mr',when:args[2]});return mr(...args)};
+   });
    await page.locator(mobile?'#playBtn':'#startBtn').click();
    result.start=await page.evaluate(()=>({
       active:introActive,beats:introBeats,preview:introPreviewBeats,count:introCountBeats,
@@ -96,6 +125,14 @@ try{
      throw Error('Musical intro overlay still obscures falling balls '+JSON.stringify(result.overlay));
    await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+15);introFrame(performance.now())});
    result.handoff=await page.evaluate(()=>({introActive,playing,mrScheduled:!!mrSource,mix:mixMode,elapsed,firstNote:firstNoteMs(),leadGain:!!leadInGain}));
+   result.audioClock=await page.evaluate(()=>window.__musicClock);
+   const scheduledNote=result.audioClock.find(x=>x.type==='melody');
+   const scheduledMr=result.audioClock.find(x=>x.type==='mr');
+   if(!scheduledNote||!scheduledMr||scheduledNote.pitch!=='도'||
+      Math.abs(scheduledNote.when-scheduledMr.when)>.003||
+      Math.abs(scheduledNote.noteDur-result.info.beat)>5)
+     throw Error('First melody note was skipped or starts off-beat from MR '+JSON.stringify(result.audioClock));
+
    if(result.handoff.introActive||!result.handoff.playing||!result.handoff.mrScheduled||
       result.handoff.mix!=='both'||Math.abs(result.handoff.elapsed-result.handoff.firstNote)>70||
       result.handoff.leadGain)
