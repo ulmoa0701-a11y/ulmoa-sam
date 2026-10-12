@@ -68,7 +68,7 @@ function postCard(p,locked=false){
   if(p.link){try{const u=new URL(p.link);if(['https:','http:'].includes(u.protocol)){const a=el('a','관련 링크 ↗');a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';card.append(a);}}catch{}}
   if(p.reply){const answer=el('div',undefined,'answer');answer.append(el('strong','울모아쌤'),el('p',p.reply,'post-text'));card.append(answer);}
  }else{card.append(el('p','본문과 첨부파일은 공개되지 않습니다. · '+p.status+(p.hasReply?' · 답변 완료':''),'muted'));}
- if(p.hasAttachment)card.append(el('span',locked?' · 📎 첨부 있음':' · 📎 첨부 있음','muted'));
+ if(p.hasAttachment){if(locked)card.append(el('span',' · 📎 첨부 있음','muted'));else{const a=el('a','📎 승인된 첨부파일 받기');a.href='/api/public/'+encodeURIComponent(p.id)+'/file';a.rel='noopener noreferrer';card.append(a);}}
  return card;
 }
 async function loadFeed(){
