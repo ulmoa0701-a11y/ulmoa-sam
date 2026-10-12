@@ -85,7 +85,7 @@ async function basicCase(name,width,height){
   check(await page.locator('#melodyVolume').count()===1,`${name}: melody volume control missing`);
   check((await page.locator('#melodyVolume').inputValue())==='65',`${name}: default melody volume should be 65%`);
   check(await page.locator('#mixModes button').count()===3,`${name}: mix mode should have 3 choices`);
-  check(await page.locator('#mixModes button.on').getAttribute('data-mix')==='melody',`${name}: default mix mode should be melody only`);
+  check(await page.locator('#mixModes button.on').getAttribute('data-mix')==='both',`${name}: auto-MR should play on the song downbeat by default`);
   check(await page.locator('#mrFile').count()===1,`${name}: MR file input missing`);
   check(await page.locator('#mrVolume').count()===1,`${name}: MR volume control missing`);
   check((await page.locator('#mrVolume').inputValue())==='100',`${name}: default MR volume should be 100%`);
