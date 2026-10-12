@@ -12,8 +12,9 @@ async function loadAxe(){
 async function scan(where){
  await loadAxe();await sleep(180);
  const root=doc();
+ if(where!=='login')root.querySelectorAll('details:not([hidden])').forEach(el=>{el.open=true});
  const result=await frame.contentWindow.axe.run(root,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']},resultTypes:['violations','incomplete']});
- const problems=result.violations.map(x=>({where,id:x.id,impact:x.impact,count:x.nodes.length,targets:x.nodes.slice(0,5).map(n=>n.target.join(' ')),detail:x.nodes[0]?.failureSummary?.slice(0,220)}));
+ const problems=result.violations.map(x=>({where,id:x.id,impact:x.impact,count:x.nodes.length,targets:x.nodes.slice(0,15).map(n=>n.target.join(' ')),detail:x.nodes[0]?.failureSummary?.slice(0,220)}));
  issues.push(...problems);
  say(where+' scanned '+result.passes.length+' passing rules, '+problems.length+' violated rules, '+result.incomplete.length+' inconclusive');
  for(const p of problems)say('ISSUE '+JSON.stringify(p));
