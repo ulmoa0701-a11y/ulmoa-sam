@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#edf9ef"><meta name="description" content="모아의 바람놀이터: 내 바람의 세기, 몇 초 동안 쭉 불기, 박자에 맞춰 후~ 불기. 리코더와 별개로 하는 호흡 놀이.">
-<title>모아의 바람놀이터 | 일단 해봄</title><link rel="stylesheet" href="style-v2.css?v=2">
+<title>모아의 바람놀이터 | 일단 해봄</title><link rel="stylesheet" href="style-v3.css?v=3">
 </head>
 <body>
 <div class="app">
@@ -35,8 +35,39 @@
   <div class="sky"><span class="cloud">☁️</span><span class="sun"></span></div>
   <div class="scene-center">
    <div id="strengthScene" class="scene-type">
-    <div class="wind-line" id="windLine">💨</div>
-    <div class="feather" id="feather">🪶</div><div class="flowerbed">🌷 🌼 🌸 🌻</div>
+    <div class="scene-goal" id="sceneGoal">🪶 바람으로 깃털을 오른쪽으로!</div>
+    <div class="wind-line" id="windLine" aria-hidden="true">💨</div>
+    <div class="strength-stage feather-stage" id="featherStage" aria-label="바람으로 깃털을 오른쪽으로 보내기">
+      <div class="feather-route" aria-hidden="true"></div>
+      <div class="feather" id="feather" aria-hidden="true">🪶</div>
+      <div class="feather-goal" aria-hidden="true">⭐<small>여기까지!</small></div>
+    </div>
+    <div class="strength-stage flower-stage" id="flowerStage" hidden aria-label="바람을 불고 쉬면 꽃이 한 송이씩 피어나는 장면">
+      <div class="flower-pots" id="flowerPots" aria-hidden="true">
+        <div class="flower-pot"><span class="flower-head" id="flowerBloom0">🌱</span><span class="flower-base"></span></div>
+        <div class="flower-pot"><span class="flower-head" id="flowerBloom1">🌱</span><span class="flower-base"></span></div>
+        <div class="flower-pot"><span class="flower-head" id="flowerBloom2">🌱</span><span class="flower-base"></span></div>
+      </div>
+      <span class="flower-result" id="flowerResult">꽃이 피기를 기다려요!</span>
+    </div>
+    <div class="strength-stage pinwheel-stage" id="pinwheelStage" hidden aria-label="바람 세기에 따라 바람개비만 회전하는 장면">
+      <div class="pinwheel-assembly" aria-hidden="true">
+        <div class="pinwheel-stand"></div>
+        <div id="pinwheelWheel" class="pinwheel-wheel">
+          <span class="pinwheel-blade blade-a"></span><span class="pinwheel-blade blade-b"></span>
+          <span class="pinwheel-blade blade-c"></span><span class="pinwheel-blade blade-d"></span>
+          <span class="pinwheel-hub"></span>
+        </div>
+      </div>
+      <span class="motion-help">바람이 불면 빙글빙글!</span>
+    </div>
+    <div class="strength-stage candle-stage" id="candleStage" hidden aria-label="촛불은 그대로 있고 불꽃만 바람에 따라 움직이는 장면">
+      <div class="candle-illustration" aria-hidden="true">
+        <div class="candle-flame" id="candleFlame"><span class="flame-core"></span></div>
+        <div class="candle-wick"></div><div class="candle-body"></div><div class="candle-plate"></div>
+      </div>
+      <span class="motion-help">불은 끄지 않고 살랑살랑!</span>
+    </div>
    </div>
    <div id="longScene" class="scene-type" hidden>
      <div class="balloon" id="balloon">🎈</div>
@@ -81,5 +112,5 @@
 </main>
 <footer>일단 해봄 · 울모아쌤 · <a href="../music-garden/">🎵 모아의 음악정원</a> · <a href="../thinking-garden/recorder/">리코더 놀이터</a></footer>
 </div>
-<script src="app-v2.js?v=2"></script>
+<script src="app-v3.js?v=3"></script>
 </body></html>
