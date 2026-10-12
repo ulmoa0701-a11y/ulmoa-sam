@@ -43,7 +43,7 @@ jobs:
                   let field=null;
                   for(const frm of p.frames()){
                     try {
-                      const selector=mode==='private'?'#q19_input':'select[name="kind"]';
+                      const selector=mode==='private'?'select[name="q19_input"]':'select[name="kind"]';
                       if(!(await frm.locator(selector).count()))continue;
                       const shape=await frm.locator(selector).first().evaluate(e=>({x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y,width:e.getBoundingClientRect().width,font:getComputedStyle(e).fontFamily,border:getComputedStyle(e).border,rounded:getComputedStyle(e).borderRadius,height:Math.round(e.getBoundingClientRect().height)}));
                       const frameEl=await frm.frameElement();
