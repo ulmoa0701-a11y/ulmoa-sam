@@ -38,7 +38,7 @@ jobs:
                 const outer=await frame.evaluate(e=>({height:e.offsetHeight,clientWidth:e.clientWidth,styleHeight:e.style.height,scrolling:e.getAttribute('scrolling'),src:e.src,handlerActive:!!window.jotformEmbedHandler}));
                 const inner=await nested.evaluate(()=>{
                   let scroller=document.scrollingElement||document.documentElement;
-                  let selected=[...document.querySelectorAll('select')].map(e=>({name:e.name,options:[...e.options].slice(0,7).map(o=>o.textContent.trim().slice(0,25))}));
+                  let selected=[...document.querySelectorAll('select')].map(e=>({name:e.name,value:e.value,selectedText:e.selectedOptions[0]?.textContent?.trim(),options:[...e.options].slice(0,7).map(o=>o.textContent.trim().slice(0,25))}));
                   let radios=[...document.querySelectorAll('input[type=radio]')].slice(0,15).map(e=>({name:e.name,parent:e.closest('li')?.innerText.slice(0,50)}));
                   let labels=[...document.querySelectorAll('.form-line')].map(e=>({id:e.id,classes:e.className,label:e.querySelector('.form-label')?.innerText?.trim().slice(0,100),rect:Math.round(e.getBoundingClientRect().height)})).slice(0,27);
                   let texts=[...document.querySelectorAll('h1,h2,.form-header-group')].map(e=>e.innerText.slice(0,90)).slice(0,10);
