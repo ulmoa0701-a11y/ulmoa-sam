@@ -16,6 +16,7 @@ const plans=[
   {name:'desktop1366',width:1366,height:768,pages:['/','/thinking-garden/','/music-garden/','/notes/','/brain-map/']},
   {name:'desktop1600',width:1600,height:900,pages:['/','/thinking-garden/','/music-garden/','/about/']}
 ];
+// Legacy filename retained; this suite now guards approved readable editorial typography.
 const results=[],failures=[];
 const assert=(condition,msg)=>{if(!condition)failures.push(msg)};
 for(const plan of plans){
@@ -49,7 +50,7 @@ for(const plan of plans){
        headingFont:first&&getComputedStyle(first).fontFamily,
        headingName:first?.textContent?.trim().slice(0,70),
        navFont:nav&&getComputedStyle(nav).fontFamily,
-       actualFontLoaded:[...document.fonts].some(f=>f.family.replaceAll('"','')==='Gamja Flower'&&f.status==='loaded'),
+       readableTitleLoaded:[...document.fonts].some(f=>f.family.replaceAll('"','')==='Gowun Dodum'&&f.status==='loaded'),
        viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth,
        headerWidth:first?.scrollWidth,headerClientWidth:first?.clientWidth,
        resourceTabs:document.querySelectorAll('[data-garden-view]').length,
@@ -59,10 +60,13 @@ for(const plan of plans){
    });
    assert(res?.ok(),plan.name+' '+p+': HTTP failure');
    assert(reading.cssLoaded,plan.name+' '+p+': shared typography stylesheet absent');
-   assert(reading.bodyFont.startsWith('"Gamja Flower"'),plan.name+' '+p+': incorrect body font '+reading.bodyFont);
-   assert(reading.headingFont?.startsWith('"Gamja Flower"'),plan.name+' '+p+': incorrect headline font '+reading.headingFont);
-   assert(reading.actualFontLoaded,plan.name+' '+p+': actual Korean web font was not loaded');
-   if(reading.navFont)assert(reading.navFont.startsWith('"Gamja Flower"'),plan.name+' '+p+': nav link inconsistent '+reading.navFont);
+   const isGarden=p==='/thinking-garden/'||p==='/music-garden/';
+   // Keep standalone game-stage typography, while entry content and all reading pages use legible fonts.
+   const expectedBody=isGarden?'"Gamja Flower"':'"Pretendard Variable"';
+   assert(reading.bodyFont.startsWith(expectedBody),plan.name+' '+p+': incorrect body font '+reading.bodyFont);
+   assert(reading.headingFont?.startsWith('"Gowun Dodum"'),plan.name+' '+p+': incorrect headline font '+reading.headingFont);
+   assert(reading.readableTitleLoaded,plan.name+' '+p+': Gowun Dodum title face did not load');
+   if(reading.navFont)assert(reading.navFont.startsWith('"Pretendard Variable"'),plan.name+' '+p+': nav link inconsistent '+reading.navFont);
    if(p==='/'){
      assert(reading.homeDoorSize>=17,plan.name+': game door text too small '+reading.homeDoorSize);
      assert(reading.homeFeatureCaptionSize>=12,plan.name+': polaroid caption too small '+reading.homeFeatureCaptionSize);
@@ -70,8 +74,8 @@ for(const plan of plans){
      assert(reading.homeShortcutCaptionSize>=14,plan.name+': shortcut caption too small '+reading.homeShortcutCaptionSize);
    }
    if(p==='/about/'){
-     assert(reading.aboutParagraphFont?.startsWith('"Gamja Flower"'),plan.name+' '+p+': about story body font inconsistent '+reading.aboutParagraphFont);
-     assert(reading.aboutParagraphSize>=17,plan.name+' '+p+': about story copy too small '+reading.aboutParagraphSize);
+     assert(reading.aboutParagraphFont?.startsWith('"Pretendard Variable"'),plan.name+' '+p+': about story body font inconsistent '+reading.aboutParagraphFont);
+     assert(reading.aboutParagraphSize>=15,plan.name+' '+p+': about story copy too small '+reading.aboutParagraphSize);
    }
    if(['/', '/thinking-garden/','/music-garden/'].includes(p)){
      assert(reading.scrollWidth<=plan.width+3,plan.name+' '+p+': unexpected horizontal overflow '+reading.scrollWidth);
