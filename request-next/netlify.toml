@@ -1,0 +1,8 @@
+[build]
+  publish = "site"
+  functions = "netlify/functions"
+
+# Functions use Netlify custom URL /api/*, so no client-side CORS secrets.
+# Publishing this config alone does not provision or deploy a server.
+[functions]
+  node_bundler = "esbuild"
