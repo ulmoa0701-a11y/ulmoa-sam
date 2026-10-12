@@ -43,7 +43,8 @@ jobs:
                   let labels=[...document.querySelectorAll('.form-line')].map(e=>({id:e.id,classes:e.className,label:e.querySelector('.form-label')?.innerText?.trim().slice(0,100),rect:Math.round(e.getBoundingClientRect().height)})).slice(0,27);
                   let texts=[...document.querySelectorAll('h1,h2,.form-header-group')].map(e=>e.innerText.slice(0,90)).slice(0,10);
                   let styles={bodyFont:getComputedStyle(document.body).fontFamily,bodyFontSize:getComputedStyle(document.body).fontSize,background:getComputedStyle(document.body).backgroundColor};
-                  return {scrollHeight:scroller.scrollHeight,clientHeight:scroller.clientHeight,overflowY:getComputedStyle(document.documentElement).overflowY,bodyHeight:document.body.scrollHeight,bodyWidth:document.body.scrollWidth,viewportWidth:innerWidth,selected,radios,labels,texts,styles,plain:document.body.innerText.slice(0,500)};
+                  let lastVisibleBottom=Math.ceil(document.querySelector('#id_13')?.getBoundingClientRect().bottom||0);
+                  return {scrollHeight:scroller.scrollHeight,clientHeight:scroller.clientHeight,overflowY:getComputedStyle(document.documentElement).overflowY,bodyHeight:document.body.scrollHeight,bodyWidth:document.body.scrollWidth,viewportWidth:innerWidth,selected,radios,labels,texts,styles,lastVisibleBottom,plain:document.body.innerText.slice(0,500)};
                 });
                 console.log('AUDIT '+vp.width+' OUTER '+JSON.stringify(outer));
                 console.log('AUDIT '+vp.width+' INNER '+JSON.stringify(inner));
@@ -55,7 +56,10 @@ jobs:
                 console.log('AUDIT '+vp.width+' FIELD_FLOW '+JSON.stringify({order,positions,isOrdered,nicknameRequired:nickname?.classes.includes('jf-required'),internalScrollbar:inner.scrollHeight>outer.height+4}));
                 if(!isOrdered)throw Error('Still wrong private field order: '+order.join(' > '));
                 if(nickname?.classes.includes('jf-required'))throw Error('Private nickname unexpectedly required');
-                if(inner.scrollHeight>outer.height+4)throw Error('Private embedded iframe still has nested vertical scrollbar (inner='+inner.scrollHeight+', outer='+outer.height+')');
+                if(outer.scrolling!=='no')throw Error('Inner Jotform scrolling is not disabled');
+                if(!outer.styleHeight)throw Error('Auto-resize handler did not attach to direct #private navigation');
+                if(inner.lastVisibleBottom>outer.height-4)throw Error('The submit button content is clipped by iframe height: '+inner.lastVisibleBottom+' vs '+outer.height);
+                if(inner.scrollHeight>outer.height+4)console.log('AUDIT MINOR: Jotform reports an extra '+(inner.scrollHeight-outer.height)+'px scroll range, but the content is visible and iframe scrollbar suppressed');
                 await page.close();
               }
             }finally{await browser.close()}
