@@ -67,21 +67,12 @@ jobs:
                 if(!outer.styleHeight)throw Error('Auto-resize handler did not attach to direct #private navigation');
                 if(inner.lastVisibleBottom>outer.height-4)throw Error('The submit button content is clipped by iframe height: '+inner.lastVisibleBottom+' vs '+outer.height);
                 if(inner.scrollHeight>outer.height+4)console.log('AUDIT MINOR: Jotform reports an extra '+(inner.scrollHeight-outer.height)+'px scroll range, but the content is visible and iframe scrollbar suppressed');
-                const secondFields=await nested.locator('#id_16, #id_17').evaluateAll(nodes=>nodes.map(e=>({id:e.id,display:getComputedStyle(e).display,visible:!!e.getClientRects().length})));
-                const rangeRadios=nested.locator('#id_15 input[type="radio"]');
-                const radioState=await rangeRadios.evaluateAll(nodes=>nodes.map(e=>({value:e.value,checked:e.checked})));
-                console.log('AUDIT '+vp.width+' PRIVATE_RULE_INITIAL '+JSON.stringify({fields:secondFields,radios:radioState}));
-                if((await rangeRadios.count())!==2)throw Error('Expected 2 privacy scope options');
-                await rangeRadios.nth(1).check({force:true});
-                await nested.waitForTimeout(350);
-                const afterPublic=await nested.locator('#id_16, #id_17').evaluateAll(nodes=>nodes.map(e=>!!e.getClientRects().length));
-                console.log('AUDIT '+vp.width+' SHOW_PUBLIC_METADATA '+JSON.stringify(afterPublic));
-                if(afterPublic.length!==2||afterPublic.some(v=>!v))throw Error('Metadata must show only after requesting list preview');
-                await rangeRadios.first().check({force:true});
-                await nested.waitForTimeout(350);
-                const afterPrivate=await nested.locator('#id_16, #id_17').evaluateAll(nodes=>nodes.map(e=>!!e.getClientRects().length));
-                console.log('AUDIT '+vp.width+' HIDE_PUBLIC_METADATA '+JSON.stringify(afterPrivate));
-                if(afterPrivate.length!==2||afterPrivate.some(Boolean))throw Error('Public metadata fields should hide in completely private mode');
+                const removed=await nested.locator('#id_16, #id_17, #id_18').count();
+                if(removed!==0)throw Error('Redundant public-only fields or block still visible in private form');
+                const fieldLabels=inner.labels.filter(e=>e.label).map(e=>e.label);
+                if(fieldLabels.filter(x=>x.startsWith('제목 (선택)')).length!==1)throw Error('Duplicate title input still exists');
+                console.log('AUDIT '+vp.width+' SIMPLIFIED_PRIVATE '+JSON.stringify({removed,visibleInputLabels:fieldLabels}));
+                
                 await page.close();
               }
             }finally{await browser.close()}
