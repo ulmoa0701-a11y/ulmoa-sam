@@ -22,6 +22,7 @@ jobs:
           python-version: '3.11'
       - name: Verify free, open-weight synthesizer and create eight voice cue WAVs
         run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
           python -m pip install --disable-pip-version-check supertonic==1.3.1
           python boomwhacker/generate-voice-cues.py
           test "$(find boomwhacker/voice -name '*.wav' | wc -l)" -eq 8
