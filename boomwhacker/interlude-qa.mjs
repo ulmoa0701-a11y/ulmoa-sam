@@ -143,6 +143,54 @@ try{
    await page.locator('#resetBtn').click();
    result.reset=await page.evaluate(()=>({playing,introActive,leadGain:!!leadInGain}));
    if(result.reset.playing||result.reset.introActive||result.reset.leadGain)throw Error('Lead was not safely cancelled');
+   // These are THREE genuinely distinct start options, not renamed
+   // countdowns. Probe the strong/weak beat audio and Korean speech calls.
+   result.beatProbe=await page.evaluate(async()=>{
+     const beat=beatMs(),plan=instrumentalPreludePlan();
+     const ac=new OfflineAudioContext(1,Math.ceil(44100*plan.durationMs/1000)+44100,44100);
+     scheduleRhythmGuide(ac,ac.destination,.07,plan.beats,beat,plan.meter);
+     const samples=(await ac.startRendering()).getChannelData(0);
+     const energy=(a,b)=>{let t=0;for(let i=Math.floor(a*44100);i<Math.min(samples.length,Math.floor(b*44100));i++)t+=Math.abs(samples[i]);return Math.round(t)};
+     return{strong:energy(.08,.25),weak:energy(.07+beat/1000+.01,.07+beat/1000+.22)};
+   });
+   if(result.beatProbe.strong<=20||result.beatProbe.weak<=15)
+     throw Error('Strong/weak beat guide produces no audible sound '+JSON.stringify(result.beatProbe));
+   await page.evaluate(()=>{
+     window.__spokenBeats=[];
+     Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
+       cancel(){},getVoices(){return[{lang:'ko-KR',name:'Sample Korean Voice'}]},
+       speak(utterance){window.__spokenBeats.push({text:utterance.text,lang:utterance.lang,rate:utterance.rate})}
+     }});
+     if(!window.SpeechSynthesisUtterance)
+       window.SpeechSynthesisUtterance=function(text){this.text=text};
+   });
+   for(const mode of ['music','voice']){
+     await page.locator('#introMode').selectOption(mode);
+     if(mobile)await page.locator('#mobileSettingsClose').click().catch(()=>{});
+     await page.locator(mobile?'#playBtn':'#startBtn').click();
+     const started=await page.evaluate(()=>({count:introCountBeats,preview:introPreviewBeats,beats:introBeats,
+       expected:instrumentalPreludePlan().beats,pulse:document.querySelector('#introPulse').innerText,
+       spoken:window.__spokenBeats.slice(),state:$('#introHelp').textContent}));
+     if(started.count!==0||started.preview!==started.expected||started.beats!==started.expected)
+       throw Error('Mode not synchronized to musical plan '+JSON.stringify({mode,started}));
+     if(mode==='music'&&started.pulse!=='쿵')
+       throw Error('Rhythm mode must show strong first beat '+JSON.stringify(started));
+     if(mode==='voice'&&(started.pulse!=='하나'||started.spoken.at(-1)?.text!=='하나'||started.spoken.at(-1)?.lang!=='ko-KR'))
+       throw Error('Spoken mode must REALLY request Korean 하나 '+JSON.stringify(started));
+     if(mode==='voice'){
+       await page.evaluate(()=>{
+         const beat=beatMs(),original=introAudioStartAt;
+         introAudioStartAt=audioCtx.currentTime-(beat+30)/1000;
+         introFrame(performance.now());introAudioStartAt=original;
+       });
+       result.speech=await page.evaluate(()=>window.__spokenBeats.slice());
+       if(result.speech.at(-1)?.text!=='둘')throw Error('Spoken mode did not advance to 둘 '+JSON.stringify(result.speech));
+     }
+     await page.locator('#resetBtn').click();
+     if(mobile)await page.locator('#mobileSettingsBtn').click();
+   }
+   await page.locator('#introMode').selectOption('interlude');
+   if(mobile)await page.locator('#mobileSettingsClose').click();
    await page.locator('#playViewSelect').selectOption('score');
    await page.locator(mobile?'#playBtn':'#startBtn').click();
    await page.waitForFunction(()=>!introActive&&playing,null,{timeout:16000});
