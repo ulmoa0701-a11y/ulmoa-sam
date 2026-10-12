@@ -89,12 +89,17 @@ jobs:
               let deployed=false;
               for(let tries=0;tries<20;tries++){
                 await page.goto('https://ulmoa0701-a11y.github.io/ulmoa-sam/boomwhacker/?interludeQa='+Date.now(),{waitUntil:'domcontentloaded'});
-                deployed=await page.evaluate(()=>typeof scheduleInterludeMusic==='function'&&typeof interludePhraseNotes==='function');
+                deployed=await page.evaluate(()=>typeof interludePhrasePlan==='function'&&typeof scheduleInterludeCountdown==='function'&&interludePhrasePlan().beats>0);
                 if(deployed)break;
                 await new Promise(r=>setTimeout(r,5000));
               }
               if(!deployed)throw Error('LIVE INTERLUDE NOT DEPLOYED mobile='+mobile);
-              await page.evaluate(()=>localStorage.setItem('ulmoaBoomTransfer',JSON.stringify({title:'간주 실제 공개검증',timeN:2,timeD:4,bpm:96,measures:[[{note:'도',dur:1},{note:'미',dur:1}],[{note:'솔',dur:1},{note:'도',dur:1}]]})));
+              await page.evaluate(()=>localStorage.setItem('ulmoaBoomTransfer',JSON.stringify({title:'작은별 4마디 공개검증',timeN:2,timeD:4,bpm:96,measures:[
+               [{note:'도',dur:1},{note:'도',dur:1}],
+               [{note:'솔',dur:1},{note:'솔',dur:1}],
+               [{note:'라',dur:1},{note:'라',dur:1}],
+               [{note:'솔',dur:2}]
+              ]})));
               await page.reload({waitUntil:'domcontentloaded'});
               if(mobile)await page.locator('#mobileSettingsBtn').click();
               const initialMode=await page.locator('#introMode').inputValue();
@@ -105,22 +110,29 @@ jobs:
               if(!picker.label.includes('간주 듣고 시작')||(mobile&&(picker.width<240||picker.font<12))||(!mobile&&picker.width<115))
                 throw Error('LIVE deployed interlude picker not readable: '+JSON.stringify({mobile,picker}));
               if(mobile)await page.locator('#mobileSettingsClose').click();
-              const notes=await page.evaluate(()=>interludePhraseNotes(6,beatMs(),2).map(x=>x.note));
-              console.log('LIVE_SONG_INTRO_NOTES='+JSON.stringify({mobile,notes}));
-              if(notes.join(',')!=='도,미,솔,도')throw Error('LIVE musical intro is not using original song notes: '+notes);
-              const energy=await page.evaluate(async()=>{
-                const ac=new OfflineAudioContext(1,44100*2,44100);
-                scheduleInterludeMusic(ac,ac.destination,.05,6,beatMs(),2);
+              const phrase=await page.evaluate(()=>({...interludePhrasePlan(),beatMs:beatMs()}));
+              const notes=phrase.notes.map(n=>n.note);
+              console.log('LIVE_SONG_INTRO_NOTES='+JSON.stringify({mobile,notes,beats:phrase.beats,lastDurationMs:phrase.notes.at(-1)?.durationMs}));
+              if(phrase.beats!==8||notes.join(',')!=='도,도,솔,솔,라,라,솔'||Math.abs(phrase.notes.at(-1).durationMs/2-phrase.beatMs)>1)
+                throw Error('LIVE four-measure musical phrase cut mid-song: '+JSON.stringify({notes,phrase}));
+              const audio=await page.evaluate(async()=>{
+                const ac=new OfflineAudioContext(1,44100*16,44100),beat=beatMs();
+                scheduleInterludeCountdown(ac,ac.destination,.05,beat);
+                scheduleInterludeMusic(ac,ac.destination,.05+3*beat/1000,beat,2);
                 const signal=(await ac.startRendering()).getChannelData(0);
-                let sum=0;for(let i=0;i<22050;i++)sum+=Math.abs(signal[i]);
-                return Math.round(sum);
+                const power=(a,b)=>{let e=0;for(let i=Math.floor(a*44100);i<Math.floor(b*44100);i++)e+=Math.abs(signal[i]);return Math.round(e)};
+                return{count1:power(.05,.3),melodyStart:power(.05+3*beat/1000,.35+3*beat/1000),lastHeldNote:power(.05+9*beat/1000,.3+9*beat/1000)};
               });
               await page.locator(mobile?'#playBtn':'#startBtn').click();
-              const before=await page.evaluate(()=>({introActive,beats:introBeats,meter:introMeter,heading:document.querySelector('#introHeading').innerText}));
+              const before=await page.evaluate(()=>({introActive,beats:introBeats,count:introCountBeats,preview:introPreviewBeats,meter:introMeter,heading:document.querySelector('#introHeading').innerText,pulse:document.querySelector('#introPulse').innerText}));
+              const phase=await page.evaluate(()=>{introStartPerf=performance.now()-(beatMs()*3+20);introFrame(performance.now());return{introActive,playing,balls:document.querySelectorAll('.fall').length,pulse:document.querySelector('#introPulse').innerText}});
               await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+10);introFrame(performance.now())});
-              const after=await page.evaluate(()=>({introActive,playing,lead:!!leadInGain,elapsed}));
-              const ok=energy>25&&before.introActive&&before.beats===6&&before.meter===2&&before.heading.includes('노래 간주')&&!after.introActive&&after.playing&&after.lead&&after.elapsed<500&&!errors.length;
-              console.log('LIVE_INTERLUDE='+JSON.stringify({mobile,energy,before,after,errors,ok}));
+              const after=await page.evaluate(()=>({introActive,playing,lead:!!leadInGain,mrScheduled:!!mrSource,mix:mixMode,elapsed,first:firstNoteMs()}));
+              const ok=audio.count1>10&&audio.melodyStart>20&&audio.lastHeldNote>20
+                &&before.introActive&&before.beats===11&&before.count===3&&before.preview===8&&before.meter===2&&before.pulse==='3'
+                &&phase.introActive&&!phase.playing&&phase.balls===0&&phase.pulse==='🎶'
+                &&!after.introActive&&after.playing&&after.lead&&after.mrScheduled&&after.mix==='both'&&after.elapsed<500&&!errors.length;
+              console.log('LIVE_INTERLUDE='+JSON.stringify({mobile,audio,before,phase,after,errors,ok}));
               await page.close();
               if(!ok)throw Error('LIVE musical interlude audio/handoff did not work mobile='+mobile);
             }
