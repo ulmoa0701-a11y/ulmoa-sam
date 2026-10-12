@@ -1,0 +1,56 @@
+name: Ildan v15 WCAG axe accessibility audit
+on:
+  push:
+    branches:
+      - main
+      - feature/ildan-v15-independent-audit-20261012
+    paths:
+      - 'test/ildan-sseobom/design-v15/**'
+      - 'test/ildan-sseobom/v15-accessibility-audit.html'
+      - '.github/workflows/ildan-v15-accessibility.yml'
+  pull_request:
+    paths:
+      - 'test/ildan-sseobom/design-v15/**'
+      - 'test/ildan-sseobom/v15-accessibility-audit.html'
+      - '.github/workflows/ildan-v15-accessibility.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  automated-wcag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install free axe-core accessibility scanner
+        run: |
+          npm install --no-save --ignore-scripts axe-core@4.10.3
+          cp node_modules/axe-core/axe.min.js test/ildan-sseobom/axe.min.js
+      - name: Run WCAG 2.2 A/AA against real Chrome synthetic roles
+        shell: bash
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$CHROME" ]; then echo 'Chrome missing'; exit 1; fi
+          python3 -m http.server 8939 --bind 127.0.0.1 >/tmp/ildan-axe-server.log 2>&1 &
+          sleep 2
+          for SIZE in 1440,900 390,844; do
+            "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size="$SIZE" --virtual-time-budget=23000 --dump-dom "http://127.0.0.1:8939/test/ildan-sseobom/v15-accessibility-audit.html" > /tmp/ildan-axe-result.html 2>/tmp/ildan-axe-chrome.log
+            python3 - <<'PY'
+          from html.parser import HTMLParser
+          class Dump(HTMLParser):
+              on=False
+              def handle_starttag(self,tag,attrs):
+                  if dict(attrs).get('id')=='log':self.on=True
+              def handle_endtag(self,tag):
+                  if self.on and tag=='div':self.on=False
+              def handle_data(self,text):
+                  if self.on:print(text[-10000:])
+          Dump().feed(open('/tmp/ildan-axe-result.html').read())
+          PY
+            if ! grep -q 'data-axe="PASS"' /tmp/ildan-axe-result.html; then
+              echo "WCAG unresolved serious/critical violations at $SIZE";
+              grep -o 'data-axe="[^"]*"' /tmp/ildan-axe-result.html || true
+              exit 1
+            fi
+            echo "PASS automated axe-core accessibility at $SIZE"
+          done
