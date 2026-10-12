@@ -63,7 +63,7 @@ jobs:
         run: |
           ready=0
           for n in $(seq 1 36); do
-            if curl --max-time 15 -fsSL "$PUBLIC_URL" -o /tmp/glossary-live.html && grep -q 'id="gcatSituationPanel"' /tmp/glossary-live.html && grep -q 'id="gcatConnectionPanel"' /tmp/glossary-live.html && grep -q 'id="gcatGamesPanel"' /tmp/glossary-live.html && grep -q '20261012-arabom-games1' /tmp/glossary-live.html && grep -q '20261012-crosspaths1' /tmp/glossary-live.html && curl --max-time 15 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/parents/" -o /tmp/chajabom-live.html && grep -q 'habom-parents-notes.js?v=20261012-paths1' /tmp/chajabom-live.html; then
+            if curl --max-time 15 -fsSL "$PUBLIC_URL" -o /tmp/glossary-live.html && grep -q 'id="gcatSituationPanel"' /tmp/glossary-live.html && grep -q 'id="gcatConnectionPanel"' /tmp/glossary-live.html && grep -q 'id="gcatGamesPanel"' /tmp/glossary-live.html && grep -q '20261012-arabom-real-scenes3' /tmp/glossary-live.html && grep -q '20261012-crosspaths1' /tmp/glossary-live.html && curl --max-time 15 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/parents/" -o /tmp/chajabom-live.html && grep -q 'habom-parents-notes.js?v=20261012-paths1' /tmp/chajabom-live.html; then
               ready=1
               break
             fi
@@ -73,10 +73,10 @@ jobs:
           test "$ready" = "1"
           curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary/cards/working-memory.webp" -o /tmp/glossary-live.webp
           head -c 4 /tmp/glossary-live.webp | grep -q 'RIFF'
-          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.js?v=20261012-arabom-games1" | grep -q 'FEATURED_SITUATIONS='
+          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.js?v=20261012-arabom-real-scenes3" | grep -q 'FEATURED_SITUATIONS='
           curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.css?v=20261012-crosspaths1" | grep -q '.gcat-journey-nav'
-          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-games.js?v=20261012-arabom-games2" | grep -q 'TERM_BANK='
-          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-games.css?v=20261012-arabom-games2" | grep -q 'gcat-game-choice'
+          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-games.js?v=20261012-arabom-real-scenes3" | grep -q 'TERM_BANK='
+          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-games.css?v=20261012-arabom-real-scenes3" | grep -q 'gcat-game-choice'
           GLOSSARY_QA_URL="$PUBLIC_URL" node notes/glossary-smoke.cjs
           GLOSSARY_QA_URL="$PUBLIC_URL" node notes/glossary-games-smoke.cjs
           GLOSSARY_QA_URL="$PUBLIC_URL" node qa/arabom-chajabom-smoke.cjs
