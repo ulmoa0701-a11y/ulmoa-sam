@@ -96,14 +96,14 @@
  .about-story .story-intro-greeting .story-eyebrow{font-size:12px}
 }
 
-/* About: readable editorial type. The mature, calm font choice must outrank old Gamja overrides. */
+/* About: readable editorial roles matching the shared site typography. */
 body.about-page .sub-main :is(p,span,small,b,strong,a,em){
- font-family:var(--habom-readable-body,"Pretendard Variable",Pretendard,sans-serif)!important;
+ font-family:var(--habom-body-font)!important;
 }
-body.about-page .sub-main :is(.sub-hero h1,.story-section h2,.story-closing p:first-child,.story-hello-bubble .story-hello,.profile-strip h2,.sub-hero h1 em){
- font-family:var(--habom-readable-title,"Gowun Dodum",Pretendard,sans-serif)!important;
- font-weight:700!important;
- letter-spacing:-.04em!important;
+body.about-page .sub-main :is(.sub-hero h1,.story-section h2,.story-closing p:first-child,.profile-strip h2,.sub-hero h1 em){
+ font-family:var(--habom-heading-font)!important;
+ font-weight:600!important;
+ letter-spacing:-.027em!important;
 }
 body.about-page .sub-main .sub-hero h1{font-size:clamp(34px,4.7vw,58px)!important;line-height:1.24!important}
 body.about-page .sub-main .about-hero-lead{font-size:16px!important;line-height:1.75!important;letter-spacing:-.015em}
@@ -132,4 +132,11 @@ body.about-page .sub-main .profile-strip :is(p,span,small,a){font-size:clamp(13p
 /* Keep the two-line personal headline readable without extra wrapping on phones. */
 @media(max-width:480px){
  body.about-page .sub-main .sub-hero h1{font-size:clamp(30px,8vw,34px)!important;line-height:1.27!important;letter-spacing:-.055em!important}
+}
+
+/* One handwritten point only: Moa's greeting speech bubble. */
+body.about-page .sub-main .story-hello-bubble .story-hello{
+ font-family:var(--habom-accent-font)!important;
+ font-weight:400!important;
+ letter-spacing:0!important;
 }
