@@ -108,3 +108,43 @@
   .community-page .community-mode-reminder{margin:11px 12px 6px}
   .community-page .community-private-iframe{max-width:100%;border-radius:0}
 }
+
+/* Private editor: same container dimensions and quiet start as the public editor. */
+.community-page .community-private-panel {
+  max-width:1180px;
+  background:#fff;
+  padding:0 0 20px;
+}
+.community-page .community-private-reminder {
+  padding:0 3px;
+  margin:13px auto 7px;
+  color:#63776a;
+  line-height:1.65;
+  font-size:12px;
+  max-width:760px;
+}
+.community-page #habomPrivateForm{
+  display:block;
+  width:100%;
+  max-width:1180px;
+  margin:0 auto;
+  height:2600px;
+  border:0;
+  border-radius:0;
+  background:#fff;
+}
+.community-page .community-private-more{
+  max-width:760px;
+  margin:8px auto 0;
+  color:#738578;
+  line-height:1.6;
+  font-size:12px;
+}
+.community-page .community-private-more summary{width:max-content;cursor:pointer;color:#547965;font-weight:650;}
+.community-page .community-private-more p{margin:8px 0;}
+@media(max-width:650px){
+  .community-page .community-private-panel{padding:0 10px 18px;}
+  .community-page .community-private-reminder{margin:11px 12px 6px;}
+  .community-page #habomPrivateForm{max-width:100%;height:2800px;}
+  .community-page .community-private-more{margin:8px 6px;}
+}
