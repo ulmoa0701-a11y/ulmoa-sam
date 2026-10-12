@@ -33,8 +33,8 @@ body.glossary-page .gcat,
 body.glossary-page .gcat :is(p,span,small,b,strong,em,mark,a,button,input,textarea,select,label,summary,li,dt,dd,blockquote,figcaption){
   font-family:var(--arabom-body)!important;
 }
-body.glossary-page .gcat :is(h2,h3,h4),
-body.glossary-page .gcat :is(h2,h3,h4) :is(span,small,b,strong,em){
+body.note-subpage.glossary-page #glossaryCatalog.gcat :is(h2,h3,h4),
+body.note-subpage.glossary-page #glossaryCatalog.gcat :is(h2,h3,h4) :is(span,small,b,strong,em){
   font-family:var(--arabom-heading)!important;
   font-weight:600!important;
   letter-spacing:-.025em!important;
