@@ -64,8 +64,14 @@ for(const plan of plans){
    // Keep standalone game-stage typography, while entry content and all reading pages use legible fonts.
    const expectedBody=isGarden?'"Gamja Flower"':'"Pretendard Variable"';
    assert(reading.bodyFont.startsWith(expectedBody),plan.name+' '+p+': incorrect body font '+reading.bodyFont);
-   assert(reading.headingFont?.startsWith('"Gowun Dodum"'),plan.name+' '+p+': incorrect headline font '+reading.headingFont);
-   assert(reading.readableTitleLoaded,plan.name+' '+p+': Gowun Dodum title face did not load');
+   // 알아봄 uses its own verified type hierarchy; other pages keep the shared editorial font.
+   if(p==='/notes/'){
+     assert(reading.headingFont?.includes('Habom Kyobo Local')&&reading.headingFont?.includes('Nanum Pen Script'),
+       plan.name+' '+p+': 알아봄 handwritten title/fallback missing '+reading.headingFont);
+   }else{
+     assert(reading.headingFont?.startsWith('"Gowun Dodum"'),plan.name+' '+p+': incorrect headline font '+reading.headingFont);
+     assert(reading.readableTitleLoaded,plan.name+' '+p+': Gowun Dodum title face did not load');
+   }
    if(reading.navFont)assert(reading.navFont.startsWith('"Pretendard Variable"'),plan.name+' '+p+': nav link inconsistent '+reading.navFont);
    if(p==='/'){
      assert(reading.homeDoorSize>=17,plan.name+': game door text too small '+reading.homeDoorSize);
