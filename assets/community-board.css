@@ -177,3 +177,21 @@
     margin-right:0!important;
   }
 }
+
+/* Launch readiness: disclose external submission services, with readable typography. */
+.community-page .community-provider-note{
+  margin:8px 0 18px;
+  font-family:var(--habom-body-font,"Pretendard Variable",Pretendard,sans-serif);
+  color:#536d6d;font-size:14px;line-height:1.65;
+  word-break:keep-all;
+}
+.community-page .community-provider-note a{
+  color:#315f57;text-decoration:underline;text-underline-offset:3px;
+  overflow-wrap:anywhere;
+}
+.community-page .community-provider-note a:focus-visible{
+  outline:2px solid #438a79;outline-offset:3px;
+}
+@media(max-width:600px){
+  .community-page .community-provider-note{font-size:13px;line-height:1.6}
+}
