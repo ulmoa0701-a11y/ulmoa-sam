@@ -1,115 +1,108 @@
-/* 일단 해봄 shared typography — same Gamja Flower handwriting used for the
-   score titles, notes and lyrics in 울모아 하트색깔악보 Studio.
-   Website content only: existing game engines, printable scores and user files are untouched. */
-@import url('https://fonts.googleapis.com/css2?family=Gamja+Flower&family=Gowun+Dodum&display=swap');
+/* 일단 해봄 | 공통 텍스트 역할
+ * Compatibility: this file retains its historic URL for all existing pages.
+ * UI/body: Pretendard (fallback SUIT); headings: MaruBuri SemiBold;
+ * 1-line accent / speech bubble only: installed Kyobo 2020, else Nanum Pen Script.
+ * Approved characters, SVG/canvas, printable scores, gameplay engines untouched.
+ * Kyobo proprietary files are NOT copied or distributed.
+ */
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css');
-
-:root{--habom-handwriting:"Gamja Flower","Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
-html,body,
-body :is(h1,h2,h3,h4,h5,h6,p,span,b,strong,em,small,a,button,input,textarea,select,option,label,li,dt,dd,th,td,summary,legend,blockquote,output,figcaption){
-  font-family:var(--habom-handwriting)!important;
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
+@font-face{
+  font-family:"Habom MaruBuri";
+  src:url("https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-SemiBold.woff2") format("woff2");
+  font-style:normal;font-weight:600;font-display:swap;
 }
-/* Handwriting is naturally light: rely on type scale rather than artificial bold headings. */
-body :is(h1,h2,h3,h4,h5,h6){font-weight:400!important;letter-spacing:-.01em!important}
-body :is(button,[role="button"],input,textarea,select){font-family:var(--habom-handwriting)!important;letter-spacing:0}
-body :is(b,strong){font-synthesis:weight}
-/* Main and subpage UI: keep even small link captions at readable handwritten sizes. */
-body .note-nav a,body .sub-nav a,body .hb-nav a,body .hb-nav button,body .hb-nav summary{
-  font-family:var(--habom-handwriting)!important;
+:root{
+  --habom-body-font:"Pretendard Variable",Pretendard,SUIT,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --habom-heading-font:"Habom MaruBuri","Maru Buri",MaruBuri,Georgia,serif;
+  --habom-accent-font:"교보손글씨 2020 박도연","Kyobo Handwriting 2020","Nanum Pen Script",cursive;
+  --habom-handwriting:var(--habom-body-font); /* legacy selector compatibility */
+  --habom-readable-body:var(--habom-body-font); /* older glossary CSS */
+  --habom-readable-title:var(--habom-heading-font); /* old Gowun override */
+}
+html,body,
+body :is(p,span,b,strong,em,small,a,button,input,textarea,select,option,label,li,dt,dd,th,td,summary,legend,blockquote,output,figcaption){
+  font-family:var(--habom-body-font)!important;
+}
+body :is(h1,h2,h3,h4,h5,h6),
+body :is(h1,h2,h3,h4,h5,h6) :is(span,em,b,strong){
+  font-family:var(--habom-heading-font)!important;
+  font-weight:600!important;
+  font-synthesis:weight;
+  letter-spacing:-.027em!important;
+}
+body :is(p,li,blockquote,dd){line-height:1.65;word-break:keep-all}
+body :is(button,[role="button"],input,textarea,select){font-family:var(--habom-body-font)!important}
+body :is(.note-nav a,.sub-nav a,.hb-nav a,.hb-nav button,.hb-nav summary,
+ .hb-game-parent,.hb-game-child,.hb-mobile-subtile,.hb-mobile-game-section,
+ .hb-find-dialog,.hb-find-dialog *,
+ .garden-format-tabs button,.garden-topic-tabs button,.category-tab,.subtopic-tab,
+ .library-card,.moa-resource-card,.moa-related-links){
+  font-family:var(--habom-body-font)!important;
+}
+/* Card titles are headings; card descriptions and all interactive controls remain body text. */
+body :is(.desk-collage.featured-two .feature-card b,.section-heading h2,.library-hero h2,
+ .entry-copy h3,.game-info h3,.moa-resource-title,.hb-shortcut-heading h2,
+ .hb-shortcut-text b,.finder-label b){
+  font-family:var(--habom-heading-font)!important;
+  font-weight:600!important;
+}
+body :is(.hero-lead,.parents-topic p,.parents-section-head p,.parents-note,
+ .moa-resource-desc,.entry-copy p,.game-info p,.score-resource-copy p){
+  font-size:clamp(15px,1.2vw,17px);line-height:1.65;
+}
+body :is(.parents-topic-tag,.book-meta,.card-category,.skill-tags,.moa-resource-type){
+  font-size:clamp(13px,1.1vw,15px);line-height:1.5;
+}
+/* Exactly two decorative handwriting placements; no handwritten paragraphs or UI. */
+body.notebook-home .hero-copy h1 em{
+  font-family:var(--habom-accent-font)!important;
+  font-weight:400!important;
+  font-synthesis:none;
+  letter-spacing:-.02em!important;
+}
+body.about-page .story-hello-bubble .story-hello{
+  font-family:var(--habom-accent-font)!important;
+  font-weight:400!important;
+  font-synthesis:none;
   letter-spacing:0!important;
 }
-body .hb-nav :is(.hb-game-parent,.hb-game-child,.hb-mobile-subtile,.hb-mobile-game-section){
-  font-family:var(--habom-handwriting)!important;
-}
-body .hb-nav .hb-game-children .hb-game-child b{font-size:clamp(13px,1.15vw,15px)}
-body .hb-nav .hb-game-children .hb-game-child span{font-size:12px}
-body .note-brand b,body .sub-brand b{font-weight:400!important}
-body .hb-find-dialog,body .hb-find-dialog *{font-family:var(--habom-handwriting)!important}
-body :is(.hero-copy h1,.sub-hero h1,.section-heading h2,.music-hero h1,.library-hero h2){
-  letter-spacing:-.014em!important;
-}
-body :is(.polaroid-game b,.entry-copy h3,.game-info h3,.moa-resource-title){letter-spacing:-.01em!important}
-body :is(.moa-resource-card,.garden-format-tabs button,.garden-topic-tabs button,.category-tab,.subtopic-tab,.library-card) {
-  font-family:var(--habom-handwriting)!important;
-}
-/* Keep tightly packed descriptive copy from becoming tiny when the handmade font renders. */
-body .moa-resource-card .moa-resource-desc{font-size:clamp(15px,1.5vw,17px);line-height:1.52}
-body .moa-resource-card .moa-resource-type,body .moa-resource-card .moa-resource-arrow{font-size:14px}
-body .moa-related-links,body .moa-related-links a{font-size:14px}
-/* Do not change literal notation in SVG, canvas, code, icons or preformatted output. */
+body :is(.moa-resource-card .moa-resource-desc){font-size:clamp(15px,1.2vw,17px);line-height:1.5}
+body .moa-resource-card .moa-resource-type,
+body .moa-resource-card .moa-resource-arrow,
+body .moa-related-links{font-size:14px}
+body.notebook-home .garden-door strong{font-size:clamp(15px,1.2vw,17px)!important}
+body.notebook-home .garden-door span{font-size:clamp(13px,1.1vw,15px)!important;line-height:1.32}
+body.notebook-home .desk-collage.featured-two .feature-card small,
+body.notebook-home .desk-collage.featured-two .feature-card em{font-size:13px!important;line-height:1.4}
+body.notebook-home .hb-shortcut-heading span{font-size:14px!important}
+body.notebook-home .hb-shortcut-text b{font-size:17px!important;line-height:1.25}
+body.notebook-home .hb-shortcut-text small{font-size:13px!important;line-height:1.35}
+body.notebook-home .field-tags span{font-size:13px!important}
+body.notebook-home .maker-link b{font-size:15px!important}
 body :is(code,pre,kbd,samp){font-family:ui-monospace,"D2Coding",monospace!important}
+/* Avoid swapping icon fonts if later installed by a section. */
+body :is(.material-icons,.material-symbols-outlined){font-family:"Material Symbols Outlined","Material Icons"!important}
 @media(max-width:620px){
-  body .hb-nav .hb-game-children .hb-game-child b{font-size:14px}
-  body .hb-nav .hb-game-children .hb-game-child span{font-size:12px}
-  body .moa-resource-card .moa-resource-title{font-size:20px}
-  body .moa-resource-card .moa-resource-desc{font-size:16px}
+ body :is(.hero-lead,.parents-topic p,.parents-section-head p,.parents-note,
+ .moa-resource-desc,.entry-copy p,.game-info p,.score-resource-copy p){font-size:15px}
+ body .hb-nav .hb-game-children .hb-game-child b{font-size:14px}
+ body .hb-nav .hb-game-children .hb-game-child span{font-size:12px}
+ body .moa-resource-card .moa-resource-title{font-size:20px}
+ body.notebook-home .desk-collage.featured-two .feature-card small,
+ body.notebook-home .desk-collage.featured-two .feature-card em{font-size:12px!important}
+ body.notebook-home .hb-shortcut-text b{font-size:16px!important}
+ body.notebook-home .hb-shortcut-text small{font-size:13px!important}
 }
 @media print{body :is(p,li,td,th,blockquote){line-height:1.5}}
 
-/* Site-wide Gamja legibility refinements (no second font family). */
-body :is(p,li,blockquote,dd){line-height:1.7;word-break:keep-all}
-body :is(.hero-lead,.parents-topic p,.parents-section-head p,.parents-note,
- .moa-resource-desc,.entry-copy p,.game-info p,.score-resource-copy p){
- font-size:clamp(16px,1.2vw,18px);line-height:1.7;
-}
-body :is(.parents-topic-tag,.book-meta,.card-category,.skill-tags,.moa-resource-type){
- font-size:clamp(14px,1.1vw,16px);line-height:1.5;
-}
+/* Mobile finder must be allowed to shrink when serif headings change intrinsic widths. */
 @media(max-width:620px){
- body :is(.hero-lead,.parents-topic p,.parents-section-head p,.parents-note,
- .moa-resource-desc,.entry-copy p,.game-info p,.score-resource-copy p){font-size:16px}
- body :is(.parents-topic-tag,.book-meta,.card-category,.skill-tags,.moa-resource-type){font-size:14px}
-}
-
-/* Approved homepage's small handwritten labels need a real reading size. */
-body.notebook-home .garden-door strong{font-size:clamp(17px,1.3vw,19px)!important}
-body.notebook-home .garden-door span{font-size:clamp(14px,1.15vw,16px)!important;line-height:1.3}
-body.notebook-home .desk-collage.featured-two .feature-card small,
-body.notebook-home .desk-collage.featured-two .feature-card em{font-size:13px!important;line-height:1.35}
-body.notebook-home .hb-shortcut-heading span{font-size:15px!important}
-body.notebook-home .hb-shortcut-text b{font-size:18px!important;line-height:1.25}
-body.notebook-home .hb-shortcut-text small{font-size:14px!important;line-height:1.35}
-body.notebook-home .field-tags span{font-size:14px!important}
-body.notebook-home .maker-link b{font-size:15px!important}
-@media(max-width:620px){
- body.notebook-home .desk-collage.featured-two .feature-card small,
- body.notebook-home .desk-collage.featured-two .feature-card em{font-size:12px!important}
- body.notebook-home .hb-shortcut-text b{font-size:17px!important}
- body.notebook-home .hb-shortcut-text small{font-size:14px!important}
-}
-
-/* HABOM_READABLE_EDITORIAL_20261012_v2 */
-/* Restore readable adult-facing typography; keep the original Gamja type in playable game areas. */
-:root{
- --habom-readable-body:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
- --habom-readable-title:"Gowun Dodum","Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
-}
-/* Pages for reading, navigating, discussing and finding resources. */
-body:is(.notebook-home,.note-subpage),
-body:is(.notebook-home,.note-subpage) :is(p,span,b,strong,em,small,a,button,input,textarea,select,option,label,li,dt,dd,th,td,summary,legend,blockquote,output,figcaption){
- font-family:var(--habom-readable-body)!important;
-}
-body:is(.notebook-home,.note-subpage) :is(h1,h2,h3,h4,h5,h6),
-body:is(.notebook-home,.note-subpage) :is(h1,h2,h3,h4,h5,h6) :is(span,em,b,strong){
- font-family:var(--habom-readable-title)!important;
- font-weight:700!important;
- letter-spacing:-.04em!important;
-}
-body:is(.notebook-home,.note-subpage) :is(.note-nav,.sub-nav,.hb-nav,.hb-find-dialog) *,
-body:is(.notebook-home,.note-subpage) :is(.garden-door,.hb-shortcut-card,.moa-resource-card,.library-card,.parents-topic) :is(p,span,b,strong,em,small,a,button){
- font-family:var(--habom-readable-body)!important;
-}
-body:is(.notebook-home,.note-subpage) :is(.hb-nav-link,.hb-menu>summary,.hb-mobile-subtile,.hb-game-parent,.hb-game-child,.note-nav a,.sub-nav a){
- font-family:var(--habom-readable-body)!important;
- letter-spacing:-.01em!important;
-}
-/* Cognitive/music garden listing screens, not live exercise stages. */
-[data-moa-garden] :is(.topbar,.library-hero,.game-library,.music-header,.music-hero,.music-library,.garden-topic-tabs,.garden-format-tabs,.moa-resource-panel,.cross-garden,.intro-copy) :is(p,span,b,strong,em,small,a,button,li,summary){
- font-family:var(--habom-readable-body)!important;
-}
-[data-moa-garden] :is(.topbar,.library-hero,.game-library,.music-header,.music-hero,.music-library,.moa-resource-panel,.intro-copy) :is(h1,h2,h3,h4,h5,h6),
-[data-moa-garden] :is(.topbar,.library-hero,.game-library,.music-header,.music-hero,.music-library,.moa-resource-panel,.intro-copy) :is(h1,h2,h3,h4,h5,h6) :is(span,em,b,strong){
- font-family:var(--habom-readable-title)!important;
- font-weight:700!important;
- letter-spacing:-.035em!important;
+ body.notebook-home .finder-board,
+ body.notebook-home .finder-inner,
+ body.notebook-home .finder-board .finder{box-sizing:border-box;max-width:100%;min-width:0}
+ body.notebook-home .finder-inner{grid-template-columns:minmax(0,1fr)!important}
+ body.notebook-home .finder-board .finder{width:100%;display:flex;overflow:hidden}
+ body.notebook-home .finder-board .finder input{width:0;min-width:0;flex:1 1 0}
+ body.notebook-home .finder-board .finder button{flex:0 0 auto;white-space:nowrap;padding-inline:12px}
 }
