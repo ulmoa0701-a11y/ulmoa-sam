@@ -647,7 +647,7 @@ try{
   if(saved==='music')localStorage.setItem('ulmoaBoomIntroMode','interlude');
  }
 }catch(e){}
-let introActive=false,introRaf=0,introGain=null,leadInGain=null,introScheduledMr=false,introStartPerf=0,introDurationMs=0,introBeats=0,introLastBeat=-1,introHideTimer=0,hasStartedSong=false,introMeter=4,introCountBeats=4,introPreviewBeats=4;
+let introActive=false,introRaf=0,introGain=null,leadInGain=null,introScheduledMr=false,introAudioStartPerf=0,introStartPerf=0,introDurationMs=0,introBeats=0,introLastBeat=-1,introHideTimer=0,hasStartedSong=false,introMeter=4,introCountBeats=4,introPreviewBeats=4;
 
 function saveLast(){try{localStorage.setItem('ulmoaBoomLast',JSON.stringify({...currentSong,sampleKey:currentSampleKey}))}catch(e){}}
 function canonical(raw){let n=String(raw||'').replace(/\s/g,'').replace(/♯/g,'#');if(!n||n==='쉼')return'쉼';return n}
@@ -1019,7 +1019,9 @@ function startFallLeadIn(){
 function introSound(beats,intervalMs){
  if(!sound)return;
  audio();if(!audioCtx)return;
- const ac=audioCtx,master=ac.createGain(),start=ac.currentTime+.030;
+ const ac=audioCtx,master=ac.createGain(),start=ac.currentTime+.035;
+ // Tie falling-ball timing to the same AudioContext start time as music.
+ introAudioStartPerf=performance.now()+Math.max(0,start-ac.currentTime)*1000;
  master.gain.setValueAtTime(introMode==='interlude'?.85:.54,start);
  master.connect(ac.destination);introGain=master;
  if(introMode==='interlude'){
@@ -1108,7 +1110,7 @@ function introFrame(now){
   }else introRaf=requestAnimationFrame(introFrame);
 }
 function startIntro(){
-  stopIntro();stopMr();stopLeadIn();introScheduledMr=false;
+  stopIntro();stopMr();stopLeadIn();introScheduledMr=false;introAudioStartPerf=0;
   introActive=true;introLastBeat='';
   introMeter=[2,3,4].includes(Number(currentSong.timeN))?Number(currentSong.timeN):4;
   const step=introMode==='count'?1000:beatMs();
@@ -1127,7 +1129,7 @@ function startIntro(){
   $('#introOverlay').classList.add('show');
   introVisual(0);draw();
   introSound(introBeats,step);
-  introStartPerf=performance.now();
+  introStartPerf=introAudioStartPerf||performance.now();
   $('#playBtn').textContent='Ⅱ';$('#startBtn').textContent='취소';
   introRaf=requestAnimationFrame(introFrame);
 }
