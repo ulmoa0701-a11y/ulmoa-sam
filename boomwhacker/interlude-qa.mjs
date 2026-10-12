@@ -81,7 +81,7 @@ try{
      }
      return probes;
    });
-   if(result.preludePulseProbe.some(x=>x.strong<100||x.weak<45||x.ratio<1.25))
+   if(result.preludePulseProbe.some(x=>x.strong<55||x.weak<20||x.ratio<1.8))
      throw Error('Instrumental prelude strong/weak pulse is too faint or insufficiently contrasted '+JSON.stringify(result.preludePulseProbe));
    if(audioProbe.introStart<15||audioProbe.lastPreludeBeat<15)
      throw Error('Must hear countdown THEN actual instrumental intro '+JSON.stringify(audioProbe));
