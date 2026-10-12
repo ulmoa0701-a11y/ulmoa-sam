@@ -130,7 +130,7 @@ try{
    const scheduledMr=result.audioClock.find(x=>x.type==='mr');
    if(!scheduledNote||!scheduledMr||scheduledNote.pitch!=='도'||
       Math.abs(scheduledNote.when-scheduledMr.when)>.003||
-      Math.abs(scheduledNote.noteDur-beatMs())>5)
+      Math.abs(scheduledNote.noteDur-result.info.beat)>5)
      throw Error('First melody note was skipped or starts off-beat from MR '+JSON.stringify(result.audioClock));
 
    if(result.handoff.introActive||!result.handoff.playing||!result.handoff.mrScheduled||
