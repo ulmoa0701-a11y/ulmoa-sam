@@ -132,6 +132,15 @@ try{
     const dialog=page.locator('#hemiTopicDialog');
     assert.equal(await dialog.isVisible(),true,'modal visible for '+topics[i]);
     assert.equal(await dialog.getAttribute('open'),'','native accessible modal opened');
+    assert.equal(await page.locator('#hemiTopicMore').getAttribute('open'),null,'advanced details start closed');
+    assert.ok((await page.locator('#hemiTopicEasyExample').innerText()).length>12,'each topic has a plain-life quick example');
+    assert.match(await page.locator('#hemiTopicEvidence').getAttribute('href'),/^https:\/\//,'source link should be valid absolute URL');
+    if(i===0 && (name==='desktop'||name==='mobile')){
+      const simple=await page.screenshot({type:'jpeg',quality:55,animations:'disabled'});
+      console.log('BRAIN_SIMPLE_PREVIEW_'+name+'='+simple.toString('base64'));
+    }
+    await page.locator('#hemiTopicMore summary').click();
+    assert.equal(await page.locator('#hemiTopicMore').getAttribute('open'),'','advanced content expands');
     assert.equal(await page.locator('#hemiTopicSteps > li').count(),3,'three nested skill explanations');
     assert.equal(await page.locator('#hemiTopicExamples > li').count(),2,'two concrete examples');
     assert.equal(await page.locator('#hemiTopicWords .hemi-topic-term').count(),3,'three defined terms');
@@ -171,6 +180,32 @@ try{
   assert.equal(await page.locator('#hemiTopicDialog').isHidden(),true,'X closes modal');
   const detailSummary=page.locator('[data-hemi-topic="speech"]');
   assert.match(await detailSummary.innerText(),/자세히 보기/,'cards clearly signal further details');
+  // Classroom view is an explicit reversible display preference, no persistence.
+  const classToggle=page.locator('#hemiClassMode');
+  await classToggle.click();
+  assert.equal(await classToggle.getAttribute('aria-pressed'),'true');
+  assert.equal(await page.locator('body').evaluate(el=>el.classList.contains('brain-class-mode')),true);
+  await classToggle.click();
+  assert.equal(await classToggle.getAttribute('aria-pressed'),'false');
+  assert.equal(await page.locator('body').evaluate(el=>el.classList.contains('brain-class-mode')),false);
+  assert.match(await page.locator('.hemi-purpose-note').innerText(),/판단하지 않아요/);
+  assert.equal(await page.locator('.hemi-teacher-notes').getAttribute('open'),null);
+  await page.locator('.hemi-teacher-notes summary').click();
+  assert.match(await page.locator('.hemi-teacher-steps').innerText(),/진단하지/);
+  await page.locator('.hemi-teacher-notes summary').click();
+  if(name==='desktop'||name==='mobile'){
+    const sceneAction=page.locator('#hemiTryScene');
+    await sceneAction.click();
+    assert.equal(await page.locator('#hemiSceneAction').isVisible(),true,'hands-on action must be shown');
+    assert.match(await page.locator('#hemiSceneAction').innerText(),/직접 해보기/);
+    await page.locator('[data-brain-scene="ball"]').click();
+    assert.equal(await page.locator('#hemiSceneAction').isHidden(),true,'switching scenes clears stale activity');
+  }
+  const listening=page.locator('#hemiReadOverview');
+  assert.equal(await listening.count(),1,'optional spoken summary available');
+  assert.equal(await page.locator('#hemiTopicRead').count(),1,'topic speech entry is accessible');
+  assert.equal(await page.locator('#hemiReadScene').count(),1);
+  assert.equal(await page.locator('#hemiReadQuiz').count(),1);
   await page.locator('#leftStudyTitle').click();
   assert.equal(await page.locator('#leftStudyTitle').getAttribute('aria-pressed'),'true');
   assert.match(await page.locator('#hemiFocus').innerText(),/좌뇌를 살펴/);
@@ -234,6 +269,22 @@ try{
   await page.locator('#hemiQuizNext').click();
   assert.match(await page.locator('#hemiQuizQuestion').innerText(),/말과 문장을 만드는/,'all three groups rotate');
   assert.equal(await page.locator('#hemiQuizProgress').innerText(),'1 / 3');
+  const apply=page.locator('#hemiPracticeMode');
+  await apply.click();
+  assert.equal(await apply.getAttribute('aria-pressed'),'true');
+  assert.match(await page.locator('#hemiQuizQuestion').innerText(),/민지가/,'real-life practice question');
+  await page.locator('[data-hemi-answer="1"]').click();
+  assert.match(await page.locator('#hemiQuizResponse').innerText(),/여러 뇌 영역/);
+  await page.locator('#hemiQuizNext').click();
+  assert.match(await page.locator('#hemiQuizQuestion').innerText(),/공을 잡는/);
+  await page.locator('[data-hemi-answer="0"]').click();
+  await page.locator('#hemiQuizNext').click();
+  assert.match(await page.locator('#hemiQuizQuestion').innerText(),/글씨 쓰기/);
+  await page.locator('[data-hemi-answer="0"]').click();
+  assert.equal(await page.locator('#hemiQuizNext').innerText(),'생활 문제 다시 풀기');
+  await apply.click();
+  assert.equal(await apply.getAttribute('aria-pressed'),'false');
+  assert.match(await page.locator('#hemiQuizQuestion').innerText(),/말과 문장을 만드는/,'switching back resets basic exercise');
   for(const scene of ['talk','read','map','ball','music','draw','bag','feeling']){
     await page.locator('[data-brain-scene="'+scene+'"]').click();
     assert.equal(await page.locator('[data-brain-scene="'+scene+'"]').getAttribute('aria-pressed'),'true');
