@@ -899,7 +899,7 @@ function voiceOscHold(ac,dest,freq,type,amp,when,attack,duration,mult=1){
  const release=Math.min(.13,Math.max(.035,dur*.16)),releaseStart=Math.max(attackEnd+.005,when+dur-release);
  gain.gain.setValueAtTime(.0001,when);
  gain.gain.exponentialRampToValueAtTime(Math.max(.0002,amp),attackEnd);
- gain.gain.setValueAtTime(Math.max(.0002,amp*.76),releaseStart);
+ gain.gain.linearRampToValueAtTime(Math.max(.0002,amp*.76),releaseStart);
  gain.gain.exponentialRampToValueAtTime(.0001,when+dur);
  osc.start(when);osc.stop(when+dur);
 }
