@@ -1,8 +1,10 @@
-name: Site Gamja Flower Typography QA
+name: Site Typography Role QA (Pretendard MaruBuri Pen)
 on:
   pull_request:
     paths:
       - "assets/habom-gamja-font.css"
+      - "assets/about-story-20261012.css"
+      - "assets/about-story-20261012.css"
       - "index.html"
       - "about/index.html"
       - "notes/index.html"
