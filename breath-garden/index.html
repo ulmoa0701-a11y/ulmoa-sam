@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#edf9ef"><meta name="description" content="모아의 바람놀이터: 내 바람의 세기, 몇 초 동안 쭉 불기, 박자에 맞춰 후~ 불기. 리코더와 별개로 하는 호흡 놀이.">
-<title>모아의 바람놀이터 | 일단 해봄</title><link rel="stylesheet" href="style-v3.css?v=3">
+<title>모아의 바람놀이터 | 일단 해봄</title><link rel="stylesheet" href="style-v4.css?v=4">
 </head>
 <body>
 <div class="app">
@@ -22,6 +22,7 @@
   <button class="choice" id="chooseStrength" type="button"><span class="choice-art">🌬️🪶</span><span class="choice-text"><strong>바람의 힘</strong><small>파랑·초록·빨강!<br>살살, 적당히, 세게를 느껴요.</small></span><span class="start-word">시작 →</span></button>
   <button class="choice" id="chooseLong" type="button"><span class="choice-art">🎈⏳</span><span class="choice-text"><strong>오래 후~</strong><small>2초부터 5초까지<br>숨을 부드럽게 이어봐요.</small></span><span class="start-word">시작 →</span></button>
   <button class="choice" id="chooseBeat" type="button"><span class="choice-art">🎶🌻</span><span class="choice-text"><strong>박자 바람</strong><small>준비, 후~!<br>빛나는 박자에 맞춰 불어요.</small></span><span class="start-word">시작 →</span></button>
+  <button class="choice breathe-choice" id="chooseCalm" type="button"><span class="choice-art">🌷🫧</span><span class="choice-text"><strong>숨 고르기</strong><small>꽃향기 · 풍선 배 · 별빛<br>조용히 들이쉬고 내쉬어요.</small></span><span class="start-word">시작 →</span></button>
  </div>
  <p class="note" id="voiceAvailability">한국어 안내 음성은 기기에서 제공하는 음성을 사용해요.</p>
 </section>
@@ -79,6 +80,11 @@
     <div id="beatCount" class="beat-count">🌼 ⚪ ⚪ ⚪</div>
    </div>
   </div>
+  
+  <div id="calmScene" class="scene-type calm-scene" hidden>
+    <div class="calm-circle" id="calmCircle"><span class="calm-art" id="calmArt">🌷</span><strong id="calmCue">준비!</strong></div>
+    <div class="calm-round" id="calmRound">1 / 3</div>
+  </div>
   <div class="scene-ground"></div>
  </div>
  <div class="control-area">
@@ -89,7 +95,17 @@
   <div class="mode-options" id="strengthOptions"><span class="option-title" id="strengthStep">🪶 깃털 불기</span><div class="stamp" id="strengthStamps">⚪ ⚪ ⚪</div></div>
   <div class="mode-options" id="longOptions" hidden><span class="option-title">몇 초 동안 불까?</span><div class="segments" id="longDuration"><button type="button" data-seconds="2" class="selected">2초</button><button type="button" data-seconds="3">3초</button><button type="button" data-seconds="4">4초</button><button type="button" data-seconds="5">5초</button></div></div>
   <div class="mode-options" id="beatOptions" hidden><span class="option-title">박자 속도</span><div class="segments" id="beatSpeed"><button type="button" data-beat="slow" class="selected">🐢 천천히</button><button type="button" data-beat="normal">🌼 보통</button></div></div>
-  <button id="micButton" class="main-btn" type="button">🎤 마이크 켜기</button>
+  <div class="mode-options" id="calmOptions" hidden>
+    <span class="option-title">어떤 숨놀이를 할까?</span>
+    <div class="segments" id="calmPresets">
+      <button type="button" class="selected" data-calm="flower">🌷 꽃향기</button>
+      <button type="button" data-calm="balloon">🎈 풍선 배</button>
+      <button type="button" data-calm="star">⭐ 별빛</button>
+    </div>
+    <p class="calm-help">마이크 없이 그림을 따라해요. 편안한 속도로, 숨은 참지 않아요.</p>
+  </div>
+  <div class="auto-flow-tip" id="autoFlowTip" aria-live="polite">🌿 한번 시작하면 다음 놀이까지 이어져요.</div>
+  <button id="micButton" class="main-btn" type="button">▶ 시작하기</button>
   <p class="live-note" id="statusNote" role="status" aria-live="polite">색을 따라 후~ 불어봐!</p>
  </div>
 </section>
@@ -102,6 +118,8 @@
  <div class="teacher-body">
   <p>마이크의 비주기적 소리 신호로 화면을 반응시키는 놀이예요. <b>실제 바람의 세기·방향, 호흡 기능을 의학적으로 측정하거나 평가하지 않습니다.</b> 말소리·주변 소음이 잘못 분류될 수 있으니 처음에는 가벼운 종이띠 등으로 실제 바람의 움직임을 함께 확인해 주세요.</p>
   <div class="teacher-setting"><label for="sensitivity">강도 표시 감도 <b id="sensitivityName">보통</b></label><input type="range" min="1" max="5" value="3" step="1" id="sensitivity"></div><div class="teacher-actions"><button type="button" id="recalibrate">↻ 바람 세기 다시 맞추기</button></div><p class="voice-detail" id="inputDiagnostic">현재 상대적인 소리 강도 · 0%</p>
+  <div class="teacher-setting"><label for="autoNext">놀이 자동으로 이어하기</label><input type="checkbox" id="autoNext" checked aria-label="성공하면 자동으로 다음 놀이"></div>
+  <div class="teacher-setting"><label for="pauseLength">성공 그림 보여주는 시간</label><select id="pauseLength"><option value="3500">여유 있게 · 3.5초</option><option value="5000">더 천천히 · 5초</option><option value="2200">조금 빠르게 · 2.2초</option></select></div>
   <div class="teacher-setting"><label for="voiceSelect">음성 선택</label><select id="voiceSelect"><option value="auto">한국어 자동 선택</option></select></div>
   <div id="voiceDetail" class="voice-detail">모아 구조대와 같은 Google 한국어 목소리만 사용해요. 없으면 일반 성인 목소리로 변경하지 않아요.</div>
   <div class="teacher-actions"><button type="button" id="previewBtn">🔊 안내 목소리 확인</button><button type="button" id="demoBtn">🧪 화면 반응 체험</button></div>
@@ -112,5 +130,5 @@
 </main>
 <footer>일단 해봄 · 울모아쌤 · <a href="../music-garden/">🎵 모아의 음악정원</a> · <a href="../thinking-garden/recorder/">리코더 놀이터</a></footer>
 </div>
-<script src="app-v3.js?v=3"></script>
+<script src="app-v4.js?v=4"></script>
 </body></html>
