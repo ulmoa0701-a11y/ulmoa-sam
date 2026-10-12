@@ -38,6 +38,9 @@ for(const plan of plans){
       const accent=document.querySelector('body.notebook-home .hero-copy h1 em, body.about-page .story-hello-bubble .story-hello, body.glossary-page .gcat-head h1');
       const featureTitle=document.querySelector('.desk-collage.featured-two .feature-card b');
       const aboutParagraph=document.querySelector('.about-story .story-section p');
+      const homeTitle=document.querySelector('body.notebook-home .hero-copy h1');
+      const homeIntro=document.querySelector('body.notebook-home .hero-lead');
+      const homeLink=document.querySelector('body.notebook-home .hero-copy .maker-link');
       const sizeOf=s=>{const e=document.querySelector(s);return e?parseFloat(getComputedStyle(e).fontSize):null};
       return {
        cssLoaded:!!document.querySelector('link[href*="habom-gamja-font.css"]'),
@@ -46,7 +49,18 @@ for(const plan of plans){
        accentFont:accent?getComputedStyle(accent).fontFamily:null,
        featureTitleFont:featureTitle?getComputedStyle(featureTitle).fontFamily:null,
        aboutParagraphSize:aboutParagraph?parseFloat(getComputedStyle(aboutParagraph).fontSize):null,
-       homeDoorSize:sizeOf('.garden-door strong'),
+       homeHeroText:homeTitle?.textContent?.replace(/\s+/g,'')||null,
+       homeHeroClipped:homeTitle?homeTitle.scrollWidth>homeTitle.clientWidth+3:null,
+       homeHeroIntroSize:homeIntro?parseFloat(getComputedStyle(homeIntro).fontSize):null,
+       homeHeroKicker:document.querySelector('body.notebook-home .hero-overline')?.textContent?.trim()||null,
+       homeHeroLinkText:homeLink?.textContent?.trim()||null,
+       homeHeroLinkTarget:homeLink?.getAttribute('href')||null,
+       homeHeroDuplicateDoors:document.querySelectorAll('body.notebook-home .hero-copy .garden-door').length,
+       homeFeaturedGardens:document.querySelectorAll('body.notebook-home .desk-collage.featured-two > a.feature-card').length,
+       homeMusicApprovedImage:!!document.querySelector('body.notebook-home .feature-music img[src*="moa-music-garden-approved.webp"]'),
+       homeBreathShortcut:!!document.querySelector('body.notebook-home .hb-shortcuts a[href="breath-garden/"]'),
+       homeSocialNavPosition:document.querySelector('body.notebook-home .note-footer .footer-social')?getComputedStyle(document.querySelector('body.notebook-home .note-footer .footer-social')).position:null,
+       homeSocialLinks:document.querySelectorAll('body.notebook-home .note-footer .footer-social a').length,
        homeFeatureCaptionSize:sizeOf('.desk-collage.featured-two .feature-card small'),
        homeShortcutTitleSize:sizeOf('.hb-shortcut-text b'),
        homeShortcutCaptionSize:sizeOf('.hb-shortcut-text small'),
@@ -94,7 +108,17 @@ for(const plan of plans){
    }
    if(p==='/'){
      assert(reading.featureTitleFont?.startsWith('"Habom MaruBuri"'),plan.name+': card title is not MaruBuri '+reading.featureTitleFont);
-     assert(reading.homeDoorSize>=15,plan.name+': game door text too small '+reading.homeDoorSize);
+     assert(reading.homeHeroText==='해보고싶은게많아서,일단해봄.',plan.name+': homepage and About tagline mismatch '+reading.homeHeroText);
+     assert(reading.homeHeroKicker==='만들면서 배우는 작은 작업실',plan.name+': headline eyebrow is missing');
+     assert(reading.homeHeroIntroSize>=15,plan.name+': welcome explanation too small '+reading.homeHeroIntroSize);
+     assert(!reading.homeHeroClipped,plan.name+': headline text is clipped');
+     assert(reading.homeHeroLinkTarget==='about/' && reading.homeHeroLinkText?.includes('만든 이야기'),plan.name+': About story link missing');
+     assert(reading.homeHeroDuplicateDoors===0,plan.name+': redundant garden menu still in hero');
+     assert(reading.homeFeaturedGardens===2,plan.name+': approved garden cards changed '+reading.homeFeaturedGardens);
+     assert(reading.homeMusicApprovedImage,plan.name+': approved music garden art missing');
+     assert(reading.homeBreathShortcut,plan.name+': breathing garden lost homepage access');
+     assert(reading.homeSocialNavPosition==='static',plan.name+': social links float over game buttons '+reading.homeSocialNavPosition);
+     assert(reading.homeSocialLinks===4,plan.name+': original social destinations changed '+reading.homeSocialLinks);
      assert(reading.homeFeatureCaptionSize>=12,plan.name+': polaroid caption too small '+reading.homeFeatureCaptionSize);
      assert(reading.homeShortcutTitleSize>=16,plan.name+': shortcut title too small '+reading.homeShortcutTitleSize);
      assert(reading.homeShortcutCaptionSize>=13,plan.name+': shortcut caption too small '+reading.homeShortcutCaptionSize);

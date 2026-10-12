@@ -36,14 +36,15 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
    name+': main home button did not open the IlDan Haebom homepage');
  await page.goto(base+'/thinking-garden/',{waitUntil:'networkidle'});
 
- // Two clearly separated entrance points on the real main homepage.
+ // Entrances remain obvious without duplicating the same buttons above the featured gardens.
  await page.goto(base+'/',{waitUntil:'networkidle'});
- check(await page.locator('.garden-doorbar a').count()>=3,
-   name+': home page has no two distinct garden entrances');
- const cognitiveDoor=page.locator('.garden-door.cognitive-door'),musicDoor=page.locator('.garden-door.music-door');
- check(await cognitiveDoor.getAttribute('href')==='thinking-garden/'&&
-   await musicDoor.getAttribute('href')==='music-garden/',
-   name+': cognitive and music main homepage doors are mixed or missing');
+ const cognitiveDoor=page.locator('.desk-collage.featured-two .feature-thinking');
+ const musicDoor=page.locator('.desk-collage.featured-two .feature-music');
+ check(await cognitiveDoor.count()===1&&await musicDoor.count()===1&&
+   await cognitiveDoor.getAttribute('href')==='thinking-garden/'&&
+   await musicDoor.getAttribute('href')==='music-garden/'&&
+   await page.locator('.hb-shortcuts a[href="breath-garden/"]').count()===1,
+   name+': cognitive, music, or breathing garden homepage links are missing');
 
  // Homepage's TOP two polaroids must match the two gardens; Heart Score is a separate tool.
  const featured=page.locator('.desk-collage.featured-two .feature-card');
