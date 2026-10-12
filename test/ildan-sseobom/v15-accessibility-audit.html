@@ -1,0 +1,38 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>일단써봄 WCAG 자동 검토</title><style>body{font:13px system-ui;margin:0}#log{white-space:pre-wrap}iframe{width:100%;height:940px;border:0}</style></head><body><div id="log">AXE audit</div><iframe id="frame" src="design-v15/" title="접근성 검사 프레임"></iframe><script>
+const frame=document.getElementById('frame'),log=document.getElementById('log');let issues=[];
+const doc=()=>frame.contentDocument;const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function say(s){log.textContent+='\n'+s;console.log(s);}
+async function until(fn,ms=6500){let start=Date.now();while(Date.now()-start<ms){try{if(fn())return}catch(_){}await sleep(55)}throw Error('timed out');}
+async function loadAxe(){
+ if(frame.contentWindow.axe)return;
+ await new Promise((resolve,reject)=>{
+  const script=doc().createElement('script');script.src='../axe.min.js';script.onload=resolve;script.onerror=()=>reject(Error('Unable to load axe in target document'));doc().head.append(script);
+ });
+}
+async function scan(where){
+ await loadAxe();await sleep(180);
+ const root=doc();
+ if(where!=='login')root.querySelectorAll('details:not([hidden])').forEach(el=>{el.open=true});
+ const result=await frame.contentWindow.axe.run(root,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']},resultTypes:['violations','incomplete']});
+ const problems=result.violations.map(x=>({where,id:x.id,impact:x.impact,count:x.nodes.length,targets:x.nodes.slice(0,15).map(n=>n.target.join(' ')),detail:x.nodes[0]?.failureSummary?.slice(0,220)}));
+ issues.push(...problems);
+ say(where+' scanned '+result.passes.length+' passing rules, '+problems.length+' violated rules, '+result.incomplete.length+' inconclusive');
+ for(const p of problems)say('ISSUE '+JSON.stringify(p));
+}
+async function run(){
+ try{
+  await until(()=>doc().getElementById('oneLogin'));
+  await scan('login');
+  for(const role of ['student','parent','therapist']){
+   if(doc().getElementById('signOut')){doc().getElementById('signOut').click();await until(()=>doc().getElementById('oneLogin'));}
+   doc().querySelector('[data-login-role="'+role+'"]').click();doc().getElementById('oneLogin').click();
+   await until(()=>role==='therapist'?doc().getElementById('sessionForm'):doc().getElementById('entryForm'));
+   await scan(role);
+  }
+  const critical=issues.filter(x=>x.impact==='critical'||x.impact==='serious');
+  say('TOTAL '+issues.length+' violations, '+critical.length+' serious/critical');
+  document.documentElement.dataset.axe=critical.length?'FAIL':'PASS';
+ }catch(e){say('FATAL '+(e.stack||e));document.documentElement.dataset.axe='ERROR';}
+}
+run();
+</script></body></html>

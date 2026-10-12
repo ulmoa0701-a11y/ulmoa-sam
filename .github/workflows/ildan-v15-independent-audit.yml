@@ -1,0 +1,75 @@
+name: Ildan v15 Independent Security & UX Audit
+on:
+  push:
+    branches:
+      - main
+      - feature/ildan-v15-independent-audit-20261012
+    paths:
+      - 'test/ildan-sseobom/design-v15/**'
+      - 'test/ildan-sseobom/v15-independent-audit.html'
+      - '.github/workflows/ildan-v15-independent-audit.yml'
+  pull_request:
+    paths:
+      - 'test/ildan-sseobom/design-v15/**'
+      - 'test/ildan-sseobom/v15-independent-audit.html'
+      - '.github/workflows/ildan-v15-independent-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static source and evidence safety checks
+        shell: bash
+        run: |
+          node <<'JS'
+          const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+          const dir='test/ildan-sseobom/design-v15/';
+          const code=fs.readFileSync(dir+'index.html','utf8');
+          const doc=fs.readFileSync(dir+'EVIDENCE-MAP.md','utf8');
+          const browserTest=fs.readFileSync('test/ildan-sseobom/v15-independent-audit.html','utf8');
+          const js=code.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+          assert(js&&code.includes('ILDAN_PREVIEW=true'));
+          new vm.Script(js,{filename:'v15-demo.js'});
+          new vm.Script(browserTest.match(/<script>([\s\S]*?)<\/script>/)?.[1]);
+          assert(code.includes('실명·상담 내용 입력 금지'));
+          assert(code.includes("role!=='student'&&role!=='parent'"));
+          assert(code.includes('if(restored)share.onchange()'));
+          assert(code.includes("if(path==='session-notes'&&role!=='therapist')"));
+          assert(code.includes('confirmSharedEntry')&&code.includes('data-unshare'));
+          assert(doc.includes('입력하지 않는다')&&doc.includes('검증')&&doc.includes('가설'));
+          assert(!code.includes("v.length>90?v.slice(0,90)"));
+          console.log('PASS static JS syntax; explicit DEMO warning; API role guards; modal; independent test; evidence limitations');
+          JS
+      - name: Test real Chrome with synthetic student caregiver therapist cases
+        shell: bash
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$CHROME" ]; then echo 'No Chrome found'; exit 1; fi
+          python3 -m http.server 8936 --bind 127.0.0.1 >/tmp/ildan-independent-server.log 2>&1 &
+          sleep 2
+          for SIZE in 1440,900 768,1024 390,844 320,700; do
+            echo "=== BROWSER VIEWPORT $SIZE ==="
+            "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size="$SIZE" --virtual-time-budget=22000 --dump-dom "http://127.0.0.1:8936/test/ildan-sseobom/v15-independent-audit.html" > /tmp/ildan-independent-dom.html 2>/tmp/ildan-independent-chrome.log
+            if ! grep -q 'data-audit="PASS"' /tmp/ildan-independent-dom.html; then
+              echo "FAIL audit for $SIZE";grep -o 'data-audit="[^"]*"' /tmp/ildan-independent-dom.html || true
+              python3 - <<'PY'
+          from html.parser import HTMLParser
+          class Dump(HTMLParser):
+              on=False
+              def handle_starttag(self,tag,attrs):
+                  if dict(attrs).get('id')=='log': self.on=True
+              def handle_endtag(self,tag):
+                  if self.on and tag=='div': self.on=False
+              def handle_data(self,text):
+                  if self.on: print('QA TRACE:',text[-6000:])
+          Dump().feed(open('/tmp/ildan-independent-dom.html').read())
+          PY
+              tail -n 12 /tmp/ildan-independent-chrome.log || true
+              exit 1
+            fi
+            echo "PASS independent synthetic browser audit for $SIZE"
+          done

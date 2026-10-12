@@ -712,6 +712,17 @@ main:has(#parentCalendar:not([hidden])){padding-top:14px}
 .clinician-extra-inner select{min-height:44px;width:100%}
 .clinician-save-row>p{font-size:13px;color:#5e7080;line-height:1.5;margin:7px 0}
 @media(min-width:900px){.clinician-quick-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* independent axe-core WCAG AA contrast audit 2026-10-12: darker low-contrast helper text */
+.ide-language{color:#40546b}
+.code-lines .ln{color:#52667b}
+.syntax-gray{color:#4a6849}
+.parent-more .optional-wrap label small,.observed-type legend small,.observed-type p{color:#45596b}
+.student-note-label>small,.parent-time-field>small,.parent-date-hint,.parent-location>small,.parent-main-label>small,.parent-source-field>small,.parent-nudge{color:#40586d!important}
+.sidebar-note small{color:#426352}
+.parent-type-optional>summary small{color:#4b5d72}
+.parent-guide summary span{color:#486174}
+.privacy-panel .checkbox span small{color:#405f50}
+.empty-state{color:#465a70}
 </style></head><body><div class="previewbar" id="previewInfo"><strong>🧪 일단써봄 v15</strong> · 간편·자세히 기록 · 가상 데이터만 사용 · 체험 내용은 이 브라우저 세션에 임시 보관될 수 있음 · 실제 로그인/Google 저장 미연결 · 실명·상담 내용 입력 금지
 </div>
 <header><div class="topwrap"><a class="brand" href="#" aria-label="일단써봄 홈"><span class="brand-code">&lt;/&gt;</span> 일단<span>써봄</span><small>work • think • play</small></a><div id="account" class="account"></div></div></header>
@@ -727,12 +738,15 @@ window.fetch=async (url,opts={})=>{
   return previewResponse({records:role==='therapist'?list.map(r=>({...r,entry:r.sharedEntry})):list});
  }
  if(path==='records'&&opts.method==='POST'){
-  const body=JSON.parse(opts.body||'{}');const id='sample-'+(window.PREVIEW_RECORDS.length+1);
+  if(role!=='student'&&role!=='parent')return previewResponse({error:'학생·보호자만 기록을 만들 수 있습니다. (체험용 가상 권한)'},403);
+  const body=JSON.parse(opts.body||'{}');if(!body.entry||typeof body.entry!=='object'||Array.isArray(body.entry))return previewResponse({error:'기록 형식이 올바르지 않습니다.'},400);
+  if(body.share===true&&!(body.sharedFields||[]).some(k=>body.entry[k]&&!['date','time','place','title'].includes(k)))return previewResponse({error:'공유할 내용이 없습니다.'},400);
+  const id='sample-'+(window.PREVIEW_RECORDS.length+1);
   const record={id,kind:role,author:'가상 '+role,student:'가상 학생',createdAt:new Date().toISOString(),shared:body.share===true,driveSynced:false,entry:body.entry,sharedEntry:Object.fromEntries((body.sharedFields||[]).filter(k=>body.entry[k]).map(k=>[k,body.entry[k]]))};window.PREVIEW_RECORDS.unshift(record);
   return previewResponse({record},201);
  }
- if(path==='share'){const body=JSON.parse(opts.body||'{}');const entry=window.PREVIEW_RECORDS.find(r=>r.id===body.recordId&&r.kind===role);if(!entry)return previewResponse({error:'이 기록을 공유할 권한이 없어요.'},403);entry.shared=true;entry.sharedEntry=Object.fromEntries((body.sharedFields||[]).filter(k=>entry.entry[k]).map(k=>[k,entry.entry[k]]));return previewResponse({ok:true});}
- if(path==='unshare'&&opts.method==='POST'){const body=JSON.parse(opts.body||'{}');const entry=window.PREVIEW_RECORDS.find(r=>r.id===body.recordId&&r.kind===role);if(!entry)return previewResponse({error:'이 기록의 공유를 취소할 권한이 없어요.'},403);entry.shared=false;entry.sharedEntry={};return previewResponse({ok:true,previewOnly:true});}
+ if(path==='share'&&opts.method==='POST'){if(role!=='student'&&role!=='parent')return previewResponse({error:'작성자만 공유할 수 있습니다.'},403);const body=JSON.parse(opts.body||'{}');const entry=window.PREVIEW_RECORDS.find(r=>r.id===body.recordId&&r.kind===role);if(!entry)return previewResponse({error:'이 기록을 공유할 권한이 없어요.'},403);entry.shared=true;entry.sharedEntry=Object.fromEntries((body.sharedFields||[]).filter(k=>entry.entry[k]).map(k=>[k,entry.entry[k]]));return previewResponse({ok:true});}
+ if(path==='unshare'&&opts.method==='POST'){if(role!=='student'&&role!=='parent')return previewResponse({error:'작성자만 공유를 취소할 수 있습니다.'},403);const body=JSON.parse(opts.body||'{}');const entry=window.PREVIEW_RECORDS.find(r=>r.id===body.recordId&&r.kind===role);if(!entry)return previewResponse({error:'이 기록의 공유를 취소할 권한이 없어요.'},403);entry.shared=false;entry.sharedEntry={};return previewResponse({ok:true,previewOnly:true});}
  if(path==='session-notes'&&role!=='therapist')return previewResponse({error:'치료사 전용'},403);
  if(path==='session-notes'&&(!opts.method||opts.method==='GET'))return previewResponse({notes:window.PREVIEW_SESSION_NOTES||[]});
  if(path==='session-notes'&&opts.method==='POST'){const b=JSON.parse(opts.body||'{}');window.PREVIEW_SESSION_NOTES=window.PREVIEW_SESSION_NOTES||[];window.PREVIEW_SESSION_NOTES.unshift({studentNickname:'가상 학생',createdAt:new Date().toISOString(),entry:b.entry});return previewResponse({ok:true},201);}
@@ -992,7 +1006,7 @@ function confirmSharedEntry(fields,entry){
   d.querySelector('.share-review-body').textContent=sharePreview(fields,entry);
   const drawing=d.querySelector('.share-review-sketch');
   drawing.innerHTML=fields.includes('sketch')&&entry.sketch?'<div class="sketch-record" data-sketch="'+sanitize(entry.sketch)+'"><div class="sketch-mini-label">공유할 그림 전체</div><canvas width="760" height="380"></canvas></div>':'';
-  const finish=ok=>{d.close();resolve(ok)};
+  let completed=false;const finish=ok=>{if(completed)return;completed=true;d.close();resolve(ok)};
   d.querySelector('[data-cancel]').onclick=()=>finish(false);
   d.querySelector('[data-approve]').onclick=()=>finish(true);
   d.oncancel=e=>{e.preventDefault();finish(false)};
@@ -1044,6 +1058,8 @@ function wireEntryForm(isParent){
   if(caption)caption.textContent=count?`${count}개 항목 선택됨 · 전송 전에 내용을 확인할 수 있어.`:'작성한 항목 중 보내고 싶은 것을 골라줘.';
  };
  share.onchange=()=>{area.hidden=!share.checked;button.textContent=isParent?(share.checked?'짧은 메모 전달하고 저장':'내 메모 저장하기'):(share.checked?'↗ 선택한 항목 공유하고 저장':'🔒 내 기록 저장');if(!isParent)updateStudentShare()};
+ // A restored checkbox needs the matching UI; otherwise a hidden share choice could be submitted.
+ if(restored)share.onchange();
  if(!isParent){
   const nowBtn=$('studentSetNow');if(nowBtn)nowBtn.onclick=()=>{const date=f.elements.date,time=f.elements.time;if(date)date.value=todayLocal();if(time)time.value=nowLocalTime();updateStudentShare();toast('날짜와 시간을 현재 시각으로 설정했어.');};
   const journalModeHint=$('journalModeHint');
