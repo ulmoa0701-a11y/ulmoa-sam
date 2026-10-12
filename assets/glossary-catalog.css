@@ -1238,3 +1238,15 @@
   .glossary-page .gcat-first-concept span{font-size:14px}
   .glossary-page .gcat-situation-focus{padding:12px}
 }
+
+/* GLOSSARY_READABLE_FONT_GUARD_20261012 */
+/* The glossary catalog used !important font shorthands that overrode the shared readable type scale. */
+body.note-subpage.glossary-page .gcat :is(h1,h2,h3,h4,h5,h6),
+body.note-subpage.glossary-page .gcat :is(h1,h2,h3,h4,h5,h6) :is(span,em,b,strong){
+ font-family:var(--habom-readable-title,"Gowun Dodum",sans-serif)!important;
+ font-weight:700!important;
+ letter-spacing:-.035em!important;
+}
+body.note-subpage.glossary-page .gcat :is(p,span,b,strong,small,a,button,input,label,li,dt,dd,summary){
+ font-family:var(--habom-readable-body,"Pretendard Variable",Pretendard,sans-serif)!important;
+}
