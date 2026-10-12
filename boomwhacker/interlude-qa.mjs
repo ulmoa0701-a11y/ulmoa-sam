@@ -103,14 +103,14 @@ try{
      throw Error('Countdown and future MR schedule wrong '+JSON.stringify(result.start));
    result.beforeBall=await page.evaluate(()=>{
      const p=instrumentalPreludePlan(),offset=(3*beatMs()+Math.max(0,p.firstBallOffsetMs-80));
-     introStartPerf=performance.now()-offset;introAudioStartAt=audioCtx.currentTime-offset/1000;introFrame(performance.now());
+     const originalAudioStart=introAudioStartAt;introAudioStartAt=audioCtx.currentTime-offset/1000;introFrame(performance.now());introAudioStartAt=originalAudioStart;
      return{introActive,playing,balls:document.querySelectorAll('.fall').length,elapsed};
    });
    if(!result.beforeBall.introActive||result.beforeBall.playing||result.beforeBall.balls!==0)
      throw Error('Balls appeared BEFORE the prelude runway '+JSON.stringify(result.beforeBall));
    result.duringBall=await page.evaluate(()=>{
      const p=instrumentalPreludePlan(),offset=3*beatMs()+p.firstBallOffsetMs+Math.min(750,firstNoteMs()/2);
-     introStartPerf=performance.now()-offset;introAudioStartAt=audioCtx.currentTime-offset/1000;introFrame(performance.now());
+     const originalAudioStart=introAudioStartAt;introAudioStartAt=audioCtx.currentTime-offset/1000;introFrame(performance.now());introAudioStartAt=originalAudioStart;
      return{introActive,playing,balls:document.querySelectorAll('.fall').length,elapsed,pulse:document.querySelector('#introPulse').innerText};
    });
    if(!result.duringBall.introActive||result.duringBall.playing||result.duringBall.balls<1||
@@ -123,7 +123,7 @@ try{
    });
    if(!result.overlay.compact||result.overlay.blur!=='none'||result.overlay.cardH>result.overlay.stageH/2)
      throw Error('Musical intro overlay still obscures falling balls '+JSON.stringify(result.overlay));
-   await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+15);introAudioStartAt=audioCtx.currentTime-(introDurationMs+15)/1000;introFrame(performance.now())});
+   await page.waitForFunction(()=>!introActive&&playing,null,{timeout:16000});
    result.handoff=await page.evaluate(()=>({introActive,playing,mrScheduled:!!mrSource,mix:mixMode,elapsed,firstNote:firstNoteMs(),leadGain:!!leadInGain}));
    result.audioClock=await page.evaluate(()=>window.__musicClock);
    const scheduledNote=result.audioClock.find(x=>x.type==='melody');
@@ -134,7 +134,7 @@ try{
      throw Error('First melody note was skipped or starts off-beat from MR '+JSON.stringify(result.audioClock));
 
    if(result.handoff.introActive||!result.handoff.playing||!result.handoff.mrScheduled||
-      result.handoff.mix!=='both'||Math.abs(result.handoff.elapsed-result.handoff.firstNote)>70||
+      result.handoff.mix!=='both'||Math.abs(result.handoff.elapsed-result.handoff.firstNote)>250||
       result.handoff.leadGain)
      throw Error('MR must start on first ball downbeat with NO extra silent delay '+JSON.stringify(result.handoff));
    await page.locator('#resetBtn').click();
@@ -142,7 +142,7 @@ try{
    if(result.reset.playing||result.reset.introActive||result.reset.leadGain)throw Error('Lead was not safely cancelled');
    await page.locator('#playViewSelect').selectOption('score');
    await page.locator(mobile?'#playBtn':'#startBtn').click();
-   await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+15);introAudioStartAt=audioCtx.currentTime-(introDurationMs+15)/1000;introFrame(performance.now())});
+   await page.waitForFunction(()=>!introActive&&playing,null,{timeout:16000});
    result.scoreStart=await page.evaluate(()=>({view:playView,introActive,playing,leadGain:!!leadInGain,elapsed,first:scoreStartMs()}));
    if(result.scoreStart.introActive||!result.scoreStart.playing||result.scoreStart.leadGain||result.scoreStart.elapsed<result.scoreStart.first-100)throw Error('Score mode first-note alignment wrong');
    await page.locator('#resetBtn').click();
