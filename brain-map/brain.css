@@ -610,3 +610,94 @@
  .brain-page .brain-main .lobe-card{min-height:94px;padding:8px 9px;gap:9px}
  .brain-page .brain-main .hemisphere-inline{margin-top:10px;padding:12px 18px}
 }
+
+
+/* 2026-10-12 · Inclusive brain-map learning without adding a competing navigation layer.
+   Progressive disclosure / optional local speech / movement examples / classroom view. */
+.brain-page .hemi-intro{position:relative}
+.brain-page .hemi-intro-tools{display:flex;align-items:center;gap:7px;flex-wrap:wrap;grid-column:1/-1;margin-top:5px}
+.brain-page .hemi-tool{font-family:var(--brain-font-body);min-height:44px;font-size:13px;line-height:1.35;
+ font-weight:800;padding:8px 13px;border:1.5px solid #8aa898;border-radius:12px;
+ background:#fff;color:#294f3a;cursor:pointer;white-space:normal;word-break:keep-all}
+.brain-page .hemi-tool[aria-pressed=true],.brain-page .hemi-tool[aria-expanded=true]{background:#e0f1e5;border-color:#4f8362}
+.brain-page .hemi-tool:disabled{opacity:.7;cursor:not-allowed}
+.brain-page .hemi-tool:focus-visible,.brain-page .hemi-topic-more summary:focus-visible,
+.brain-page .hemi-teacher-notes summary:focus-visible{outline:3px solid #246842;outline-offset:2px}
+.brain-page .hemi-speech-status{color:#315c40;font-size:12px;line-height:1.5;word-break:keep-all}
+.brain-page .hemi-purpose-note{grid-column:1/-1;margin:5px 0 0!important;background:#f0f8f2;
+ border:1px solid #c4dfcc;border-radius:12px;padding:9px 12px;
+ font-family:var(--brain-font-body);font-size:13px!important;line-height:1.6!important;color:#2e5941!important;word-break:keep-all}
+.brain-page .hemi-purpose-note strong{font-weight:850}
+.brain-page .hemi-topic-first{padding:12px 14px;background:#fffaf0;border:1px solid #efe0bc;
+ border-radius:13px;margin-bottom:11px}
+.brain-page .hemi-topic-first strong{display:block;color:#705527;font-size:14px;line-height:1.4;margin-bottom:5px}
+.brain-page .hemi-topic-first p{font-size:14px;color:#55452e;line-height:1.6;margin:0 0 11px!important;word-break:keep-all}
+.brain-page .hemi-topic-more{border:1px solid #d7e6d9;border-radius:13px;background:#f8fcf9}
+.brain-page .hemi-topic-more summary{display:flex;align-items:center;gap:8px;justify-content:space-between;
+ cursor:pointer;padding:13px 14px;font:800 14px var(--brain-font-body);line-height:1.45;color:#315c47;list-style:none;min-height:49px}
+.brain-page .hemi-topic-more summary::-webkit-details-marker{display:none}
+.brain-page .hemi-topic-more summary:after{content:'⌄';font-size:20px;line-height:1;color:#406f53}
+.brain-page .hemi-topic-more[open] summary:after{content:'⌃'}
+.brain-page .hemi-topic-more summary span{font-size:12px;font-weight:600;color:#395b47;word-break:keep-all}
+.brain-page .hemi-topic-extra{padding:4px 13px 15px;border-top:1px solid #dceade}
+.brain-page .hemi-topic-extra .hemi-topic-section:first-child{margin-top:10px}
+.brain-page .hemi-topic-source{font-size:12.5px;line-height:1.65;color:#34523e;margin:13px 0 0!important}
+.brain-page .hemi-topic-source a{color:#235c39;font-weight:800;text-decoration:underline;text-underline-offset:3px}
+.brain-page .hemi-topic-source small{display:block;font-size:12px;color:#49634e;margin-top:5px}
+.brain-page .hemi-scene-actions,.brain-page .hemi-quiz-tools{display:flex;gap:8px;flex-wrap:wrap;margin:9px 0 0}
+.brain-page .hemi-scene-action{background:#ecf5f0;border-left:4px solid #5a9871;
+ border-radius:0 11px 11px 0;color:#2c593d;font-size:14px;line-height:1.6;
+ padding:11px 13px;margin:8px 0 0!important;word-break:keep-all}
+.brain-page .hemi-scene-action[hidden]{display:none}
+.brain-page .hemi-quiz-help{margin:7px 0 6px!important;font-size:12.5px;color:#3a5845;line-height:1.5;word-break:keep-all}
+.brain-page .hemi-quiz-tools{margin:6px 0 11px}
+.brain-page .hemi-teacher-notes{margin:10px 0 0;background:#f7f9fc;border-radius:14px;border:1px solid #cfdce7;color:#2c4c62}
+.brain-page .hemi-teacher-notes summary{font:800 14px var(--brain-font-body);cursor:pointer;padding:14px;
+ min-height:44px;line-height:1.5;word-break:keep-all}
+.brain-page .hemi-teacher-notes summary small{font-size:12px;font-weight:600;color:#3e5e74}
+.brain-page .hemi-teacher-steps{padding:0 14px 12px}
+.brain-page .hemi-teacher-steps p{font-size:13px;line-height:1.6;color:#36536b;margin:7px 0!important;word-break:keep-all}
+.brain-page .hemi-caution,.brain-page .hemi-art-caption,
+.brain-page .hemi-study-sources summary,.brain-page .hemi-team-header p,
+.brain-page .hemi-quiz-reminder,.brain-page .hemi-ability-action{
+ color:#375740!important
+}
+.brain-page .hemi-ability-copy small,.brain-page .hemi-side-title small,
+.brain-page .hemi-topic-principle{color:#3d5849!important}
+.brain-page :is(.hemi-topic-first,.hemi-quiz-question,.hemi-purpose-note) ::selection{background:#f8d992}
+@media(max-width:760px){
+ /* Keep both sides visible early, and avoid a mascot-only first mobile screen. */
+ .brain-page .hemi-study-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"hero hero" "left right";gap:9px}
+ .brain-page .hemi-hero{padding:5px 7px!important;min-height:0}
+ .brain-page .hemi-hero-svg{max-width:157px;max-height:169px}
+ .brain-page .hemi-hero .hemi-art-caption{display:none}
+ .brain-page .hemi-intro-tools{margin-top:4px}
+ .brain-page .hemi-purpose-note{font-size:12.5px!important;margin:3px 0 0!important;padding:8px 10px}
+ .brain-page .hemi-topic-first{padding:10px 11px}
+ .brain-page .hemi-topic-first p{font-size:13px}
+ .brain-page .hemi-topic-extra{padding:1px 9px 12px}
+ .brain-page .hemi-topic-more summary{padding:10px;gap:5px;font-size:13px}
+ .brain-page .hemi-topic-more summary span{font-size:11.5px}
+ .brain-page .hemi-tool{font-size:12.5px;padding:7px 11px}
+ .brain-page .hemi-scene-action{font-size:13px}
+ .brain-page .hemi-quiz-help{font-size:12px}
+ .brain-page .hemi-teacher-notes summary{font-size:13px}
+}
+@media(max-width:370px){
+ .brain-page .hemi-hero-svg{max-width:145px;max-height:157px}
+ .brain-page .hemi-tool{font-size:12px;padding:7px 9px}
+ .brain-page .hemi-intro-tools{gap:5px}
+}
+/* Teacher display is an explicit user-controlled view, not automatic fullscreen. */
+.brain-page.brain-class-mode .sub-header,
+.brain-page.brain-class-mode .sub-footer{display:none!important}
+.brain-page.brain-class-mode .brain-main{max-width:1380px;margin:auto}
+.brain-page.brain-class-mode .hemi-study-grid{gap:14px}
+.brain-page.brain-class-mode .hemi-ability-copy b{font-size:18px;line-height:1.5}
+.brain-page.brain-class-mode .hemi-ability-copy small{font-size:15px;line-height:1.55}
+.brain-page.brain-class-mode .hemi-quiz-question{font-size:18px}
+.brain-page.brain-class-mode .hemi-quiz-options button{font-size:17px;min-height:56px}
+@media(max-width:760px){
+ .brain-page.brain-class-mode .hemi-ability-copy b{font-size:16px}
+ .brain-page.brain-class-mode .hemi-ability-copy small{font-size:13px}
+}
