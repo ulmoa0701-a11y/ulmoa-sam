@@ -127,17 +127,17 @@ jobs:
               await page.locator(mobile?'#playBtn':'#startBtn').click();
               const before=await page.evaluate(()=>({introActive,beats:introBeats,count:introCountBeats,preview:introPreviewBeats,meter:introMeter,pulse:document.querySelector('#introPulse').innerText,scheduled:!!mrSource}));
               const beforeBall=await page.evaluate(()=>{
-                const p=instrumentalPreludePlan();introStartPerf=performance.now()-(3*beatMs()+Math.max(0,p.firstBallOffsetMs-80));
+                const p=instrumentalPreludePlan();introAudioStartAt=audioCtx.currentTime-(3*beatMs()+Math.max(0,p.firstBallOffsetMs-80))/1000;
                 introFrame(performance.now());return{introActive,playing,balls:document.querySelectorAll('.fall').length,elapsed};
               });
               const during=await page.evaluate(()=>{
-                const p=instrumentalPreludePlan();introStartPerf=performance.now()-(3*beatMs()+p.firstBallOffsetMs+700);
+                const p=instrumentalPreludePlan();introAudioStartAt=audioCtx.currentTime-(3*beatMs()+p.firstBallOffsetMs+700)/1000;
                 introFrame(performance.now());
                 const overlay=document.querySelector('#introOverlay');
                 return{introActive,playing,balls:document.querySelectorAll('.fall').length,pulse:document.querySelector('#introPulse').innerText,
                   compact:overlay.classList.contains('preludePlaying'),blur:getComputedStyle(overlay).backdropFilter};
               });
-              await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+10);introFrame(performance.now())});
+              await page.evaluate(()=>{introAudioStartAt=audioCtx.currentTime-(introDurationMs+10)/1000;introFrame(performance.now())});
               const after=await page.evaluate(()=>({introActive,playing,lead:!!leadInGain,mrScheduled:!!mrSource,mix:mixMode,elapsed,first:firstNoteMs()}));
               const ok=audio.count>10&&audio.prelude>10&&audio.lastChord>10
                 &&before.introActive&&before.count===3&&before.preview===plan.beats&&before.beats===plan.beats+3&&before.pulse==='3'&&before.scheduled
@@ -150,6 +150,10 @@ jobs:
             }
           }finally{await browser.close()}
           JS
+      - name: Measure REAL public-site note/audio/video timing with 120 BPM in Chrome
+        env:
+          BOOM_PUBLIC_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam/boomwhacker/?song=twinkle
+        run: node boomwhacker/audio-clock-e2e.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
