@@ -1034,7 +1034,11 @@ function draw(){
   stage.appendChild(note);
  }
 }
-function frame(ts){if(!playing)return;queueUpcomingMelody();if(!lastTs)lastTs=ts;let prev=elapsed;elapsed+=ts-lastTs;lastTs=ts;if(elapsed>=totalMs){if(repeat){elapsed=playView==='score'?scoreStartMs()-.5:0;prev=elapsed;stopLeadIn();syncLiveMr();syncLiveSongMelody()}else{elapsed=totalMs;playing=false;hasStartedSong=false;stopMr();stopLeadIn();stopFirstMelody();stopSongMelody();$('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작'}}for(const e of events)if(e.active&&e.start>prev&&e.start<=elapsed){let b=[...document.querySelectorAll('.tube')].find(x=>x.dataset.note===e.note);if(songMelodyGain){if(b){b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),100)}}else tone(e.note,b,e.dur)}draw();updateTime();updateLyricTrack();if(playing)raf=requestAnimationFrame(frame)}
+function frame(ts){if(!playing)return;queueUpcomingMelody();if(!lastTs)lastTs=ts;
+ let prev=elapsed;
+ if(sound&&audioCtx&&audioRenderSongStartAt)elapsed=firstNoteMs()+(audioCtx.currentTime-audioRenderSongStartAt)*1000;
+ else elapsed+=ts-lastTs;
+ lastTs=ts;if(elapsed>=totalMs){if(repeat){elapsed=playView==='score'?scoreStartMs()-.5:0;prev=elapsed;stopLeadIn();syncLiveMr();syncLiveSongMelody()}else{elapsed=totalMs;playing=false;hasStartedSong=false;stopMr();stopLeadIn();stopFirstMelody();stopSongMelody();audioRenderSongStartAt=0;$('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작'}}for(const e of events)if(e.active&&e.start>prev&&e.start<=elapsed){let b=[...document.querySelectorAll('.tube')].find(x=>x.dataset.note===e.note);if(songMelodyGain){if(b){b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),100)}}else tone(e.note,b,e.dur)}draw();updateTime();updateLyricTrack();if(playing)raf=requestAnimationFrame(frame)}
 function stopFirstMelody(){if(introFirstMelodyGain&&audioCtx)try{introFirstMelodyGain.gain.cancelScheduledValues(audioCtx.currentTime);introFirstMelodyGain.gain.setValueAtTime(0,audioCtx.currentTime)}catch(e){}introFirstMelodyGain=null;introFirstMelodyScheduled=false}
 function stopIntro(keepFirstMelody=false){if(!keepFirstMelody)stopFirstMelody();
   introActive=false;
@@ -1262,7 +1266,7 @@ function startIntro(){
 function toggle(){
   if(introActive){reset();return}
   if(playing){
-    playing=false;stopMr();stopLeadIn();stopFirstMelody();stopSongMelody();introScheduledMr=false;cancelAnimationFrame(raf);
+    playing=false;stopMr();stopLeadIn();stopFirstMelody();stopSongMelody();audioRenderSongStartAt=0;introScheduledMr=false;cancelAnimationFrame(raf);
     $('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 계속';
     return;
   }
@@ -1271,7 +1275,7 @@ function toggle(){
   beginPlayback();
 }
 function reset(){
-  stopIntro();playing=false;hasStartedSong=false;stopMr();stopLeadIn();stopSongMelody();introScheduledMr=false;cancelAnimationFrame(raf);
+  stopIntro();playing=false;hasStartedSong=false;stopMr();stopLeadIn();stopSongMelody();audioRenderSongStartAt=0;introAudioStartAt=0;introScheduledMr=false;cancelAnimationFrame(raf);
   elapsed=0;lastTs=0;draw();updateTime();updateLyricTrack(true);
   $('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작';
 }
