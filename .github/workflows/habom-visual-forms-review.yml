@@ -42,6 +42,7 @@ jobs:
                   for(const frm of p.frames()){
                     try {
                       const selector=mode==='private'?'#id_19':'select[name="kind"]';
+                      if(!(await frm.locator(selector).count()))continue;
                       const shape=await frm.locator(selector).first().evaluate(e=>({x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y,width:e.getBoundingClientRect().width,font:getComputedStyle(e).fontFamily}));
                       const frameEl=await frm.frameElement();
                       const origin=await frameEl.boundingBox();
