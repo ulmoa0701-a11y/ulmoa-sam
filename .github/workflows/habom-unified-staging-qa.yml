@@ -25,7 +25,9 @@ jobs:
         run: |
           node --check request-next/src/worker.js
           node --check request-next/site/app.js
-          node --test request-next/tests/security.test.mjs
+          node --test request-next/tests/security.test.mjs request-next/tests/netlify-adapter.test.mjs
+          node --check request-next/netlify/adapter.mjs
+          node --check request-next/netlify/functions/board.mjs
   browser:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -70,3 +72,17 @@ jobs:
           name: habom-current-live-screenshots
           path: habom-current-live-*.png
           if-no-files-found: ignore
+
+  netlify-dependencies:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check the free-host adapter dependencies without deploying
+        working-directory: request-next
+        run: |
+          npm install --ignore-scripts --no-audit --no-fund
+          npm ls --depth=0
