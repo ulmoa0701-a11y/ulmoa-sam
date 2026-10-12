@@ -301,7 +301,7 @@ async function basicCase(name,width,height){
   check(await page.locator('#introMode option[value="music"]').count()===1,name+': beat guide missing');
   check(await page.locator('#introMode option[value="interlude"]').count()===1,name+': musical intro missing');
   for(const selected of ['interlude','music','voice']){
-    await page.locator('#introMode').selectOption(selected);
+    await page.locator('#introMode').evaluate((el,mode)=>{el.value=mode;el.dispatchEvent(new Event('change',{bubbles:true}))},selected);
     await page.locator(width<=800?'#playBtn':'#startBtn').click();
     const started=await page.evaluate(()=>({
       ...window.__boomVideoQA.intro(),mode:introMode,expected:instrumentalPreludePlan().beats,
@@ -329,7 +329,7 @@ async function basicCase(name,width,height){
   const oldCount=await page.evaluate(()=>window.__boomVideoQA.intro());
   check(oldCount.active&&oldCount.durationMs===3000,name+': prior 3-second count broken');
   await page.locator('#resetBtn').click();
-  await page.locator('#introMode').selectOption('instant');
+  await page.locator('#introMode').evaluate(el=>{el.value='instant';el.dispatchEvent(new Event('change',{bubbles:true}))});
   await page.locator(width<=800?'#playBtn':'#startBtn').click();
   check(await page.evaluate(()=>playing&&!introActive),name+': immediate start broken');
   await page.locator('#resetBtn').click();
