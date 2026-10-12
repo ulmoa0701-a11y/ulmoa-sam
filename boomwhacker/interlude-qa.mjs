@@ -81,8 +81,8 @@ try{
      throw Error('Balls must wait until FULL musical intro ends: '+JSON.stringify(result.phase));
    await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+15);introFrame(performance.now())});
    await page.waitForTimeout(90);
-   result.handoff=await page.evaluate(()=>({introActive,playing,leadGain:!!leadInGain,elapsed,firstNote:firstNoteMs(),beat:beatMs(),sound}));
-   if(result.handoff.introActive||!result.handoff.playing||!result.handoff.leadGain||result.handoff.elapsed>=1000)throw Error('No real falling-note handoff '+JSON.stringify(result.handoff));
+   result.handoff=await page.evaluate(()=>({introActive,playing,leadGain:!!leadInGain,mrScheduled:!!mrSource,mix:mixMode,elapsed,firstNote:firstNoteMs(),beat:beatMs(),sound}));
+   if(result.handoff.introActive||!result.handoff.playing||!result.handoff.leadGain||!result.handoff.mrScheduled||result.handoff.mix!=='both'||result.handoff.elapsed>=1000)throw Error('No real falling-note handoff '+JSON.stringify(result.handoff));
    await page.locator('#resetBtn').click();
    result.reset=await page.evaluate(()=>({playing,introActive,leadGain:!!leadInGain}));
    if(result.reset.playing||result.reset.introActive||result.reset.leadGain)throw Error('Lead was not safely cancelled');
