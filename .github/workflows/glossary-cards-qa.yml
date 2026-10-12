@@ -73,10 +73,19 @@ jobs:
           test "$ready" = "1"
           curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary/cards/working-memory.webp" -o /tmp/glossary-live.webp
           head -c 4 /tmp/glossary-live.webp | grep -q 'RIFF'
-          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.js?v=20261012-arabom-real-scenes3" | grep -q 'FEATURED_SITUATIONS='
-          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.css?v=20261012-crosspaths1" | grep -q '.gcat-journey-nav'
-          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-games.js?v=20261012-arabom-real-scenes3" | grep -q 'TERM_BANK='
-          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-games.css?v=20261012-arabom-real-scenes3" | grep -q 'gcat-game-choice'
+          # Download first, then inspect: grep -q on curl pipes can close early (curl 23).
+          # The rebuilt scene-education game contains CASES/MODE, not deleted TERM_BANK.
+          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.js?v=20261012-arabom-real-scenes3" -o /tmp/arabom-catalog-live.js
+          grep -q 'FEATURED_SITUATIONS=' /tmp/arabom-catalog-live.js
+          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-catalog.css?v=20261012-crosspaths1" -o /tmp/arabom-catalog-live.css
+          grep -q '.gcat-journey-nav' /tmp/arabom-catalog-live.css
+          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-games.js?v=20261012-arabom-real-scenes3" -o /tmp/arabom-games-live.js
+          grep -q 'const CASES=' /tmp/arabom-games-live.js
+          grep -q 'observe:' /tmp/arabom-games-live.js
+          grep -q 'support:' /tmp/arabom-games-live.js
+          if grep -q 'TERM_BANK=' /tmp/arabom-games-live.js; then echo 'Outdated term exam unexpectedly deployed'; exit 1; fi
+          curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-games.css?v=20261012-arabom-real-scenes3" -o /tmp/arabom-games-live.css
+          grep -q 'gcat-game-perspective' /tmp/arabom-games-live.css
           GLOSSARY_QA_URL="$PUBLIC_URL" node notes/glossary-smoke.cjs
           GLOSSARY_QA_URL="$PUBLIC_URL" node notes/glossary-games-smoke.cjs
           GLOSSARY_QA_URL="$PUBLIC_URL" node qa/arabom-chajabom-smoke.cjs
