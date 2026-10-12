@@ -223,6 +223,57 @@
    note:'왼손의 움직임에도 양쪽 운동 네트워크가 함께 관여할 수 있어요. 왼손잡이라고 “우뇌형”인 것은 아니에요.'
   }
  };
+ const topicEvidence={
+  speech:'https://www.ninds.nih.gov/health-information/public-education/brain-basics',
+  phonics:'https://pubmed.ncbi.nlm.nih.gov/32900940/',
+  syntax:'https://pubmed.ncbi.nlm.nih.gov/32900940/',
+  'right-hand':'https://www.ninds.nih.gov/health-information/public-education/brain-basics',
+  space:'https://pubmed.ncbi.nlm.nih.gov/37771079/',
+  intonation:'https://pmc.ncbi.nlm.nih.gov/articles/PMC4158374/',
+  attention:'https://pubmed.ncbi.nlm.nih.gov/37771079/',
+  'left-hand':'https://www.ninds.nih.gov/health-information/public-education/brain-basics'
+ };
+ // Browser's local voice only. No recording, network transcription, user profile
+ // or auto-play. Voice quality depends on system; lack of Korean voice is disclosed.
+ const speechStatus=document.getElementById('hemiSpeechStatus');
+ const readButtons=['hemiReadOverview','hemiTopicRead','hemiReadScene','hemiReadQuiz']
+   .map(id=>document.getElementById(id)).filter(Boolean);
+ const canSpeak=typeof window.speechSynthesis!=='undefined'&&typeof window.SpeechSynthesisUtterance==='function';
+ let speakingButton=null,activeUtterance=null;
+ function speechReset(){
+  if(canSpeak)window.speechSynthesis.cancel();
+  activeUtterance=null;speakingButton=null;
+  readButtons.forEach(button=>{button.setAttribute('aria-pressed','false');button.textContent=button.dataset.defaultLabel||button.textContent;});
+ }
+ function readText(value,button){
+  if(!button)return;
+  if(!canSpeak){if(speechStatus)speechStatus.textContent='이 브라우저에서는 읽어주기를 지원하지 않아요.';return;}
+  if(speakingButton===button){speechReset();if(speechStatus)speechStatus.textContent='읽기를 멈췄어요.';return;}
+  speechReset();
+  const korean=(window.speechSynthesis.getVoices()||[]).find(v=>v.lang?.toLowerCase().startsWith('ko'));
+  const utterance=new SpeechSynthesisUtterance(value);
+  utterance.lang='ko-KR';utterance.rate=.86;
+  if(korean)utterance.voice=korean;
+  activeUtterance=utterance;speakingButton=button;
+  button.setAttribute('aria-pressed','true');button.textContent='⏹ 듣기 멈추기';
+  if(speechStatus)speechStatus.textContent=korean?'한국어 음성으로 읽고 있어요.':'기기에서 제공되는 음성으로 읽어요. 한국어 음성이 없으면 발음이 어색할 수 있어요.';
+  const clear=()=>{if(activeUtterance===utterance){speechReset();}};
+  utterance.onend=clear;utterance.onerror=()=>{clear();if(speechStatus)speechStatus.textContent='음성 재생을 시작하지 못했어요. 기기의 한국어 음성 설정을 확인해 주세요.';};
+  try{window.speechSynthesis.speak(utterance);}catch(error){clear();if(speechStatus)speechStatus.textContent='이 기기에서는 음성 재생이 어려워요.';}
+ }
+ readButtons.forEach(button=>{
+  button.dataset.defaultLabel=button.textContent;
+  if(!canSpeak){button.disabled=true;button.title='이 브라우저는 음성 읽기를 지원하지 않아요.';}
+ });
+ const classButton=document.getElementById('hemiClassMode');
+ classButton?.addEventListener('click',()=>{
+  const enabled=document.body.classList.toggle('brain-class-mode');
+  classButton.setAttribute('aria-pressed',String(enabled));
+  classButton.textContent=enabled?'↩ 일반 화면으로':'▣ 크게 보기';
+ });
+ document.getElementById('hemiReadOverview')?.addEventListener('click',event=>{
+  readText('좌뇌와 우뇌는 조금 더 많이 맡는 일이 있지만, 둘 다 함께 일해요. 이 설명은 교육용이며 좌뇌형 우뇌형을 판단하는 검사가 아니에요.',event.currentTarget);
+ });
  const topicDialog=document.getElementById('hemiTopicDialog');
  const topicOpeners=[...document.querySelectorAll('[data-hemi-topic]')];
  const topicUI={
@@ -245,7 +296,13 @@
   const topic=topicData[key];
   if(!topic||!topicDialog||Object.values(topicUI).some(n=>!n))return;
   topicOpener=opener;
-  topicUI.side.textContent=(topic.side==='좌뇌'?'🔵 ':'🟡 ')+topic.side+' · 기능을 더 쪼개서 알아봐요';
+  speechReset();
+  const extra=document.getElementById('hemiTopicMore');
+  if(extra)extra.open=false;
+  document.getElementById('hemiTopicEasyExample').textContent=topic.examples[0];
+  document.getElementById('hemiTopicEvidence').href=topicEvidence[key];
+  topicDialog.dataset.topic=key;
+  topicUI.side.textContent=(topic.side==='좌뇌'?'🔵 ':'🟡 ')+topic.side+' · 쉬운 예부터 알아봐요';
   topicUI.title.textContent=topic.title;topicUI.intro.textContent=topic.intro;
   topicUI.steps.replaceChildren();topicUI.examples.replaceChildren();topicUI.words.replaceChildren();
   topic.steps.forEach(([name,detail])=>{
@@ -270,7 +327,11 @@
  document.getElementById('hemiTopicClose')?.addEventListener('click',()=>topicDialog?.close());
  document.getElementById('hemiTopicDone')?.addEventListener('click',()=>topicDialog?.close());
  topicDialog?.addEventListener('click',e=>{if(e.target===topicDialog)topicDialog.close();});
- topicDialog?.addEventListener('close',()=>{if(topicOpener?.isConnected)topicOpener.focus();topicOpener=null;});
+ document.getElementById('hemiTopicRead')?.addEventListener('click',event=>{
+  const topic=topicData[topicDialog?.dataset.topic];
+  if(topic)readText(topic.title+'. '+topic.intro+' 예를 들면 '+topic.examples[0],event.currentTarget);
+ });
+ topicDialog?.addEventListener('close',()=>{speechReset();if(topicOpener?.isConnected)topicOpener.focus();topicOpener=null;});
  // Familiar situations connect the comparison to daily life without assigning
  // an entire activity exclusively to one half of the brain.
  const sceneData={
@@ -283,6 +344,19 @@
   bag:{title:'🎒 가방을 챙길 때',body:'“필통→책→물통” 순서를 기억하고 물건의 위치를 찾고 가방에 넣어요. 기억·공간 파악·손 움직임이 함께해요.'},
   feeling:{title:'🙂 친구 기분을 살필 때',body:'“정말 잘했네!”라는 말도 기쁜 목소리인지 비꼬는 말투인지 살펴요. 말뜻뿐 아니라 억양·표정·상황을 함께 고려해야 해요.'}
  };
+ const scenePractice={
+  talk:'가까운 사람에게 오늘 있었던 일을 한 문장으로 말하고, 표정과 목소리도 살펴요.',
+  read:'“고양이가 의자 밑에 있어요”를 읽고 고양이가 어디 있는지 그림이나 손짓으로 나타내요.',
+  map:'지금 있는 자리에서 창문과 문이 어느 방향에 있는지 손으로 가리켜요.',
+  ball:'부드러운 공이나 손수건을 천천히 주고받으며 눈과 손이 함께 움직이는지 살펴요.',
+  music:'좋아하는 노래 한 줄을 부르며 가사·박자·목소리 높낮이를 하나씩 찾아봐요.',
+  draw:'종이에 집과 나무를 그리고 “나무를 집 왼쪽에 그렸어”처럼 위치를 말해요.',
+  bag:'필통·책·물통을 하나씩 찾아 가방에 넣고, 어떤 순서로 넣었는지 말해요.',
+  feeling:'“괜찮아”를 밝게, 조용하게 두 번 말해 봐요. 말투만으로 기분을 확신하지는 않아요.'
+ };
+ const practiceButton=document.getElementById('hemiTryScene');
+ const practiceText=document.getElementById('hemiSceneAction');
+ const quizRead=document.getElementById('hemiReadQuiz');
  const sceneButtons=[...document.querySelectorAll('[data-brain-scene]')];
  const sceneTitle=document.getElementById('hemiSceneTitle');
  const sceneText=document.getElementById('hemiSceneText');
@@ -291,9 +365,22 @@
   sceneButtons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.brainScene===key)));
   sceneTitle.textContent=sceneData[key].title;
   sceneText.textContent=sceneData[key].body;
+  if(practiceText)practiceText.hidden=true;
+  if(practiceButton)practiceButton.setAttribute('aria-expanded','false');
+  speechReset();
   selectSide('both');
  }
  sceneButtons.forEach(b=>b.addEventListener('click',()=>selectScene(b.dataset.brainScene)));
+ practiceButton?.addEventListener('click',()=>{
+  const chosen=sceneButtons.find(b=>b.getAttribute('aria-pressed')==='true')?.dataset.brainScene||'talk';
+  const opening=practiceText.hidden;
+  practiceText.hidden=!opening;
+  if(opening)practiceText.textContent='직접 해보기 · '+scenePractice[chosen];
+  practiceButton.setAttribute('aria-expanded',String(opening));
+ });
+ document.getElementById('hemiReadScene')?.addEventListener('click',event=>{
+  readText(sceneTitle.textContent+'. '+sceneText.textContent,event.currentTarget);
+ });
  selectScene('talk');
  // Three short questions at a time, with three rotating sets. These are
  // recall prompts, not a hemisphere/personality test.
@@ -332,15 +419,35 @@
     review:'손잡이와 좋아하는 과목만으로 좌뇌형·우뇌형을 정하는 것은 과학적으로 뒷받침되지 않아요.'}
   ]
  ];
+ // Optional situation-transfer questions. Never treated as assessment or score.
+ const transferQuestions=[
+  {q:'민지가 “괜찮아”라고 했지만 표정이 어두워요. 어떤 방법이 좋을까요?',options:['우뇌만 보면 알아요','말뜻·말투·표정·상황을 함께 살펴요'],answer:1,
+   good:'맞아요! 상대의 마음은 한 단서로 단정할 수 없고, 여러 뇌 영역의 처리가 함께 필요해요.',
+   review:'감정은 목소리 하나로 판단할 수 없어요. 상황과 표정, 말뜻을 함께 살펴요.'},
+  {q:'친구가 공을 던져 주었어요. 공을 잡는 데 필요한 일은?',options:['눈으로 보고 몸을 맞춰 움직이기','오른쪽 뇌만 쓰기'],answer:0,
+   good:'맞아요! 위치를 보고 움직임을 조절하는 여러 영역이 함께해요.',
+   review:'공을 잡으려면 보고, 위치를 파악하고, 움직임을 조절해야 해요. 양쪽 뇌가 협력해요.'},
+  {q:'글씨 쓰기가 어려운 아이를 보고 “좌뇌가 약하다”고 말해도 될까요?',options:['그렇게 단정할 수 없어요','네, 한쪽 뇌 때문이에요'],answer:0,
+   good:'맞아요! 쓰기에는 시각·운동·언어 등 다양한 기능이 필요하며, 이 뇌지도로 개인을 평가할 수 없어요.',
+   review:'이 뇌지도만으로 원인을 판단할 수 없어요. 여러 요인을 함께 살펴야 해요.'}
+ ];
+ const practiceModeButton=document.getElementById('hemiPracticeMode');
+ let transferMode=false;
  const qText=document.getElementById('hemiQuizQuestion');
  const qProgress=document.getElementById('hemiQuizProgress');
  const qButtons=[...document.querySelectorAll('[data-hemi-answer]')];
  const qResponse=document.getElementById('hemiQuizResponse');
  const qNext=document.getElementById('hemiQuizNext');
  let qIndex=0,roundIndex=0,answered=false;
- const questions=()=>questionSets[roundIndex];
+ const questions=()=>transferMode?transferQuestions:questionSets[roundIndex];
+ practiceModeButton?.addEventListener('click',()=>{
+   transferMode=!transferMode;qIndex=0;roundIndex=0;
+   practiceModeButton.setAttribute('aria-pressed',String(transferMode));
+   practiceModeButton.textContent=transferMode?'↩ 기본 문제로 돌아가기':'🧩 생활 문제로 연습';
+   showQuestion();
+ });
  function showQuestion(){
-  const q=questions()[qIndex];answered=false;
+  const q=questions()[qIndex];answered=false;speechReset();
   qText.textContent=q.q;qProgress.textContent=(qIndex+1)+' / '+questions().length;
   qButtons.forEach((b,i)=>{b.textContent=q.options[i];b.disabled=false;b.setAttribute('aria-pressed','false');b.removeAttribute('data-correct');});
   qResponse.hidden=true;qResponse.textContent='';qNext.hidden=true;
@@ -354,10 +461,13 @@
   qResponse.textContent=(correct?'✓ ':'💡 ')+(correct?q.good:q.review);
   qResponse.dataset.result=correct?'right':'review';
   qNext.hidden=false;
-  qNext.textContent=qIndex===questions().length-1?'다른 3문제 →':'다음 문제 →';
+  qNext.textContent=qIndex===questions().length-1?(transferMode?'생활 문제 다시 풀기':'다른 3문제 →'):'다음 문제 →';
  }));
+ quizRead?.addEventListener('click',event=>{
+  readText(qText.textContent+'. '+qButtons.map((b,i)=>(i+1)+'번 '+b.textContent).join('. '),event.currentTarget);
+ });
  qNext?.addEventListener('click',()=>{
-  if(qIndex===questions().length-1){roundIndex=(roundIndex+1)%questionSets.length;qIndex=0;}
+  if(qIndex===questions().length-1){if(!transferMode)roundIndex=(roundIndex+1)%questionSets.length;qIndex=0;}
   else qIndex+=1;
   showQuestion();
   qText?.focus?.();
