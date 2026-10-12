@@ -1,0 +1,51 @@
+name: Habom Launch Beta Readiness QA
+on:
+  pull_request:
+    paths:
+      - "index.html"
+      - "request/index.html"
+      - "assets/habom-home-story-hero.css"
+      - "assets/community-board.css"
+      - "qa/launch-readiness.mjs"
+      - ".github/workflows/launch-readiness.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "index.html"
+      - "request/index.html"
+      - "assets/habom-home-story-hero.css"
+      - "assets/community-board.css"
+      - "qa/launch-readiness.mjs"
+      - ".github/workflows/launch-readiness.yml"
+  workflow_dispatch:
+jobs:
+  five-viewport-live-flow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser automation
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Find installed Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Serve website
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/habom-launch-qa.log 2>&1 &
+          for i in {1..45}; do curl -fsS http://127.0.0.1:8765/ >/dev/null && exit 0; sleep 0.25; done
+          cat /tmp/habom-launch-qa.log
+          exit 1
+      - name: Check first-visit and public-private submission paths
+        run: node qa/launch-readiness.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: habom-launch-beta-screenshots
+          path: qa/launch-readiness-artifacts
+          if-no-files-found: warn
