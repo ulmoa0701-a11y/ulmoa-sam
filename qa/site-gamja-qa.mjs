@@ -59,6 +59,8 @@ for(const plan of plans){
        homeFeaturedGardens:document.querySelectorAll('body.notebook-home .desk-collage.featured-two > a.feature-card').length,
        homeMusicApprovedImage:!!document.querySelector('body.notebook-home .feature-music img[src*="moa-music-garden-approved.webp"]'),
        homeBreathShortcut:!!document.querySelector('body.notebook-home .hb-shortcuts a[href="breath-garden/"]'),
+       homeSocialNavPosition:document.querySelector('body.notebook-home .note-footer .footer-social')?getComputedStyle(document.querySelector('body.notebook-home .note-footer .footer-social')).position:null,
+       homeSocialLinks:document.querySelectorAll('body.notebook-home .note-footer .footer-social a').length,
        homeFeatureCaptionSize:sizeOf('.desk-collage.featured-two .feature-card small'),
        homeShortcutTitleSize:sizeOf('.hb-shortcut-text b'),
        homeShortcutCaptionSize:sizeOf('.hb-shortcut-text small'),
@@ -115,6 +117,8 @@ for(const plan of plans){
      assert(reading.homeFeaturedGardens===2,plan.name+': approved garden cards changed '+reading.homeFeaturedGardens);
      assert(reading.homeMusicApprovedImage,plan.name+': approved music garden art missing');
      assert(reading.homeBreathShortcut,plan.name+': breathing garden lost homepage access');
+     assert(reading.homeSocialNavPosition==='static',plan.name+': social links float over game buttons '+reading.homeSocialNavPosition);
+     assert(reading.homeSocialLinks===4,plan.name+': original social destinations changed '+reading.homeSocialLinks);
      assert(reading.homeFeatureCaptionSize>=12,plan.name+': polaroid caption too small '+reading.homeFeatureCaptionSize);
      assert(reading.homeShortcutTitleSize>=16,plan.name+': shortcut title too small '+reading.homeShortcutTitleSize);
      assert(reading.homeShortcutCaptionSize>=13,plan.name+': shortcut caption too small '+reading.homeShortcutCaptionSize);
