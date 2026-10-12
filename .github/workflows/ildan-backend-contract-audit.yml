@@ -1,0 +1,70 @@
+name: Ildan backend contract and unit-test audit
+on:
+  push:
+    branches:
+      - main
+      - feature/ildan-v15-independent-audit-20261012
+    paths:
+      - 'test/ildan-sseobom/design-v15/**'
+      - '.github/workflows/ildan-backend-contract-audit.yml'
+  pull_request:
+    paths:
+      - 'test/ildan-sseobom/design-v15/**'
+      - '.github/workflows/ildan-backend-contract-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-backend-and-compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Read current frontend code
+        uses: actions/checkout@v4
+        with:
+          path: frontend-repo
+      - name: Read separate undeployed secure backend branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/ildan-secure-auth-20261010
+          path: secure-branch
+      - name: Verify backend JavaScript parses
+        shell: bash
+        run: |
+          cd secure-branch/secure-portal
+          node --check netlify/functions/api.mjs
+          node --check lib/security.mjs
+          node --check public/app.js
+      - name: Execute existing backend unit tests (no database)
+        shell: bash
+        run: |
+          cd secure-branch/secure-portal
+          node --test tests/security.test.mjs
+      - name: Independent v15 frontend versus backend contract report
+        shell: bash
+        run: |
+          node <<'JS'
+          const fs=require('node:fs');
+          const frontend=fs.readFileSync('frontend-repo/test/ildan-sseobom/design-v15/index.html','utf8');
+          const backend=fs.readFileSync('secure-branch/secure-portal/netlify/functions/api.mjs','utf8');
+          const match=backend.match(/const ENTRY_KEYS\s*=\s*\[([^\]]+)\]/);
+          const keys=match?[...match[1].matchAll(/'([^']+)'/g)].map(m=>m[1]):[];
+          const clinician=backend.match(/for\(const k of \['observation','question','plan'\]\)/);
+          const checks=[
+           ['Parent direct quote field childWords',frontend.includes('name="childWords"')&&keys.includes('childWords')],
+           ['Extra source category accepted',backend.includes("'그 밖의 사람에게 들음'")],
+           ['Student/parent/therapist source distinctions supported',backend.includes("'studentReport'")&&backend.includes("'parentReport'")&&backend.includes("'workingHypothesis'")],
+           ['v15 clinician fields saved',!clinician],
+           ['Share withdrawal endpoint implemented',backend.includes("path==='unshare'")],
+           ['Frontend client is wired to actual secure API',!frontend.includes('window.ILDAN_PREVIEW=true')]
+          ];
+          for(const [name,ok] of checks)console.log((ok?'READY':'BLOCKED')+' '+name);
+          const blocked=checks.filter(x=>!x[1]).map(x=>x[0]);
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,'## 일단써봄 v15 실제 운영 계약 검사\n\n');
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,'보안 서버 기본 단위 테스트는 별도이며, 이 검사는 최신 체험판과 백엔드의 계약/기능 차이를 확인합니다.\n\n');
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,checks.map(([x,ok])=>'- '+(ok?'✅':'⛔')+' '+x).join('\n')+'\n\n');
+          if(blocked.length){
+           console.log('RELEASE GATE BLOCKED: '+blocked.length+' known integrations not implemented; DO NOT use real child health data.');
+           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,'**실사용 금지:** 호환성 미통과 '+blocked.length+'개. 이 워크플로 성공은 문제 발견·보고 성공일 뿐 실운영 승인이 아닙니다.\n');
+          }
+          JS
