@@ -120,3 +120,20 @@ body.notebook-home .note-footer .footer-social a:hover{
  body.notebook-home .note-footer .footer-social{justify-content:center;gap:14px!important}
  body.notebook-home .note-footer .footer-social a{font-size:12px!important}
 }
+
+/* First visit: one immediately legible path for game, printable material or concepts.
+   The five other shortcuts stay one tap away, without another tab/page. */
+body.notebook-home .hb-shortcut-heading{flex-wrap:wrap;row-gap:3px}
+body.notebook-home .hb-shortcut-heading span{font-size:14px;line-height:1.5}
+body.notebook-home .hb-shortcut-primary{
+  background:#fbfdfb;
+  border-color:#b6cdc2;
+  box-shadow:0 3px 14px rgba(42,89,71,.045);
+}
+body.notebook-home .hb-shortcut-primary .hb-shortcut-text b{font-weight:800}
+body.notebook-home .hb-shortcut-primary .hb-shortcut-arrow{color:#37695a;font-size:20px}
+body.notebook-home .hb-shortcut-card:focus-visible{outline:3px solid #7cba9e;outline-offset:3px}
+@media(max-width:600px){
+ body.notebook-home .hb-shortcut-heading span{font-size:13px}
+ body.notebook-home .hb-shortcut-primary{box-shadow:none}
+}
