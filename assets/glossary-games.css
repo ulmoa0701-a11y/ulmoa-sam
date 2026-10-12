@@ -1,0 +1,58 @@
+/* 알아봄 학습게임: 저압력 5문제, 핵심 피드백, 모바일 접근성 */
+.glossary-page #gcatGamesPanel[hidden]{display:none!important}
+.glossary-page .gcat-game-cta{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:17px 0 14px;padding:18px 20px;border:1px solid #dce9d8;border-radius:17px;background:linear-gradient(110deg,#f2f8ee,#fff7e9)}
+.glossary-page .gcat-game-cta strong{display:block;font-size:17px;line-height:1.5;color:#375842}
+.glossary-page .gcat-game-cta p{margin:3px 0 0;font-size:13px;line-height:1.55;color:#667462}
+.glossary-page .gcat-game-cta button{flex:0 0 auto;min-height:45px;background:#457e5e;border:0;border-radius:12px;padding:10px 17px;color:#fff;font-size:14px;font-weight:750;cursor:pointer}
+.glossary-page .gcat-game-cta button:hover{background:#34664a}
+.glossary-page .gcat-games-panel{padding:4px 0 15px}
+.glossary-page .gcat-games-back{min-height:44px;border:0;background:transparent;color:#4f705e;font-size:14px;font-weight:750;cursor:pointer;padding:10px 3px}
+.glossary-page .gcat-games-intro{margin:6px 0 19px}
+.glossary-page .gcat-games-intro h2{margin:0 0 5px!important;font-size:27px!important}
+.glossary-page .gcat-games-intro p{margin:0!important;font-size:14px;line-height:1.55;color:#6e6b61}
+.glossary-page .gcat-games-root{max-width:860px;margin:0 auto}
+.glossary-page .gcat-game-title{font-size:clamp(20px,3.5vw,25px)!important;line-height:1.5;letter-spacing:-.025em;word-break:keep-all;margin:0 0 14px!important}
+.glossary-page .gcat-game-title:focus{outline:0}
+.glossary-page .gcat-game-hub-intro p{font-size:14px;line-height:1.65;color:#716d65;margin:0 0 17px}
+.glossary-page .gcat-game-deck{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.glossary-page .gcat-game-mode-card,.glossary-page .gcat-game-question,.glossary-page .gcat-game-done{padding:20px;background:#fff;border:1px solid #e8e0d6;border-radius:19px;box-shadow:0 4px 12px rgba(55,52,35,.035)}
+.glossary-page .gcat-game-mode-icon{display:inline-flex;align-items:center;justify-content:center;min-width:60px;height:40px;padding:4px 10px;border-radius:12px;background:#f6edda;color:#705736;font-size:14px;font-weight:800}
+.glossary-page .gcat-game-mode-card:nth-child(2) .gcat-game-mode-icon{background:#e7f1e6;color:#486e4e}
+.glossary-page .gcat-game-mode-card h4{font-size:20px;margin:12px 0 5px;line-height:1.4}
+.glossary-page .gcat-game-mode-card p{font-size:14px;margin:0 0 15px;line-height:1.6;color:#706b60}
+.glossary-page .gcat-game-mode-actions{display:flex;gap:8px;flex-wrap:wrap}
+.glossary-page .gcat-game-start{flex:1 1 120px;min-height:46px;border:1px solid #4c8260;border-radius:12px;background:#4c8260;color:#fff;font-size:14px;font-weight:750;cursor:pointer;padding:9px}
+.glossary-page .gcat-game-start.secondary{background:#fff;color:#456f53}
+.glossary-page .gcat-game-note{font-size:12px;color:#746f67;line-height:1.65;background:#f8f6f0;padding:12px 14px;border-radius:11px;margin:15px 0 0}
+.glossary-page .gcat-game-progress{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:1px 0 9px;font-size:14px;color:#617366}
+.glossary-page .gcat-game-progress strong{font-size:15px;color:#467554;white-space:nowrap}
+.glossary-page .gcat-game-progress-bar{height:8px;border-radius:99px;overflow:hidden;margin-bottom:19px;background:#e7eee5}
+.glossary-page .gcat-game-progress-bar span{display:block;height:100%;border-radius:99px;background:#8bb69a;transition:width .2s ease}
+.glossary-page .gcat-game-question,.glossary-page .gcat-game-done{padding:clamp(17px,3vw,29px)}
+.glossary-page .gcat-game-kicker{display:block;font-size:12px;color:#5c8167;font-weight:750;margin-bottom:12px}
+.glossary-page .gcat-game-scene{background:#fff8e7;border-left:3px solid #dfc57d;border-radius:4px;margin:0 0 17px!important;padding:12px 14px!important;font-size:15px!important;color:#594c3c;line-height:1.6}
+.glossary-page .gcat-game-choices{display:grid;gap:9px;margin:21px 0 10px}
+.glossary-page .gcat-game-choice{display:flex;align-items:center;gap:11px;text-align:left;min-width:0;min-height:57px;background:#f9fbf8;border:1.5px solid #e0e9df;border-radius:13px;padding:12px 14px;color:#435344;font-size:15px;line-height:1.55;cursor:pointer}
+.glossary-page .gcat-game-choice:not(:disabled):hover{background:#eef6ee;border-color:#9fc8a9}
+.glossary-page .gcat-game-choice-number{width:27px;height:27px;flex:0 0 27px;display:grid;place-items:center;border-radius:50%;background:#e8eee5;color:#54715a;font-size:13px;font-weight:800}
+.glossary-page .gcat-game-choice:disabled{cursor:default;opacity:1}
+.glossary-page .gcat-game-choice.correct{background:#e9f7ec;border-color:#8bbda0}
+.glossary-page .gcat-game-choice.correct:after{content:"맞는 답";white-space:nowrap;margin-left:auto;color:#3d7452;font-size:11px;font-weight:750}
+.glossary-page .gcat-game-choice.missed{background:#fff3e8;border-color:#e0b99b}
+.glossary-page .gcat-game-skip{display:block;margin:8px auto 0;min-height:44px;border:0;background:transparent;color:#5d7f67;text-decoration:underline;font-size:14px;cursor:pointer;padding:7px}
+.glossary-page .gcat-game-feedback{margin:18px 0 13px;padding:16px 17px;background:#f3f8ef;border:1px solid #d5e6d2;border-radius:14px;color:#3d5744}
+.glossary-page .gcat-game-feedback:focus{outline:2px solid #83b691;outline-offset:2px}
+.glossary-page .gcat-game-feedback strong{display:block;font-size:16px;margin-bottom:8px}
+.glossary-page .gcat-game-answer{font-weight:750!important;font-size:15px!important;margin:0 0 7px!important}
+.glossary-page .gcat-game-why{font-size:14px!important;line-height:1.7!important;margin:0 0 8px!important}
+.glossary-page .gcat-game-hook{color:#61755f;font-size:13px!important;margin:9px 0!important}
+.glossary-page .gcat-game-ref{min-height:42px;display:inline-flex;align-items:center;border:0;background:transparent;color:#376f4d;font-size:13px;font-weight:750;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:9px 0}
+.glossary-page .gcat-game-next{display:block;margin-left:auto;min-height:47px;border:0;background:#477e5c;color:#fff;border-radius:12px;padding:11px 19px;font-size:14px;font-weight:800;cursor:pointer}
+.glossary-page .gcat-game-score{font-weight:750;font-size:19px;margin:10px 0 4px;color:#487756}
+.glossary-page .gcat-game-remark{font-size:14px;line-height:1.6;color:#677063}
+.glossary-page .gcat-game-finish-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
+.glossary-page .gcat-game-finish-actions .gcat-game-next{margin:0}
+.glossary-page .gcat-game-secondary{min-height:47px;border-radius:12px;border:1px solid #b3ceb9;background:white;color:#41694e;padding:10px 15px;font-size:14px;font-weight:750;cursor:pointer}
+.glossary-page .gcat-games-panel button:focus-visible,.glossary-page .gcat-game-cta button:focus-visible{outline:3px solid #377eaa;outline-offset:2px}
+@media(max-width:650px){.glossary-page .gcat-game-cta{flex-direction:column;align-items:stretch;padding:15px;gap:10px}.glossary-page .gcat-game-cta button{width:100%}.glossary-page .gcat-game-deck{grid-template-columns:1fr}.glossary-page .gcat-game-mode-card{padding:16px}.glossary-page .gcat-game-choice{padding:11px 12px;font-size:14px}.glossary-page .gcat-game-scene{font-size:14px!important}.glossary-page .gcat-game-finish-actions{flex-direction:column}.glossary-page .gcat-game-finish-actions button{width:100%}}
+@media(prefers-reduced-motion:reduce){.glossary-page .gcat-game-progress-bar span{transition:none}}
