@@ -158,7 +158,7 @@ try{
    await page.evaluate(()=>{
      window.__spokenBeats=[];
      Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
-       cancel(){},getVoices(){return[{lang:'ko-KR',name:'Sample Korean Voice'}]},
+       cancel(){},getVoices(){return []},
        speak(utterance){window.__spokenBeats.push({text:utterance.text,lang:utterance.lang,rate:utterance.rate})}
      }});
      if(!window.SpeechSynthesisUtterance)
