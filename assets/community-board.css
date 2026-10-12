@@ -148,3 +148,7 @@
   .community-page #habomPrivateForm{max-width:100%;height:2800px;}
   .community-page .community-private-more{margin:8px 6px;}
 }
+
+/* First-paint fallback heights before Jotform's native resize event. */
+.community-page #habomPrivateForm{height:2400px}
+@media(max-width:650px){.community-page #habomPrivateForm{height:2570px}}
