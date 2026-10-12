@@ -733,7 +733,7 @@ const hint=(s)=>`<div class="callout">${s}</div>`;
 function toast(s){$('toast').textContent=s;$('toast').classList.add('visible');setTimeout(()=>$('toast').classList.remove('visible'),3400)}
 async function api(path,{method='GET',body}={}){const o={method,credentials:'same-origin',headers:{}};if(method!=='GET'){o.headers['Content-Type']='application/json';o.body=JSON.stringify(body??{})}const res=await fetch('/api/'+path,o);let data=await res.json().catch(()=>({}));if(!res.ok)throw Error(data.error||'서버 요청 실패');return data}
 function formValue(form,name){return form.elements[name]?.value?.trim()??''}
-function header(){if(!me){account.innerHTML='<span class="role-chip">가상 화면</span>';return}account.innerHTML=`<span>${sanitize(me.nickname)} <span class="role-chip">${me.role==='therapist'?'치료사':me.role==='student'?'학생':me.role==='parent'?'학부모':'관리자'}</span></span><button id="signOut">로그아웃</button>`;$('signOut').onclick=async()=>{await api('logout',{method:'POST'});if(window.ILDAN_PREVIEW===true)window.PREVIEW_ROLE='guest';me=null;records=[];activeView='write';render();};}
+function header(){if(!me){account.innerHTML='<span class="role-chip">가상 화면</span>';return}account.innerHTML=`<span>${sanitize(me.nickname)} <span class="role-chip">${me.role==='therapist'?'치료사':me.role==='student'?'학생':me.role==='parent'?'학부모':'관리자'}</span></span><button id="signOut">로그아웃</button>`;$('signOut').onclick=async()=>{await api('logout',{method:'POST'});if(window.ILDAN_PREVIEW===true){clearPreviewDraft(me.role);window.PREVIEW_ROLE='guest';}me=null;records=[];activeView='write';render();};}
 function hero(t,d){return `<div class="hero"><div class="eyebrow">WORKSPACE / ${sanitize(me?.role||'START')}</div><h1>${t}</h1><p>${d}</p></div>`;}
 function loading(btn,task){btn.disabled=true;Promise.resolve(task()).catch(e=>toast(e.message)).finally(()=>btn.disabled=false)}
 // The same passkey flow serves students, parents, therapists and administrators.
@@ -775,12 +775,12 @@ function loginScreen(){
  <div class="login-body"><div class="login-step"><span class="step-no">01</span><div><h2 id="roleTitle">어떤 사용자세요?</h2><p>학생·학부모·치료사 모두 같은 방법으로 로그인해요.</p></div></div>${rolePicker()}
  <div class="login-step step-two"><span class="step-no">02</span><div><h2>간편 로그인</h2><p class="login-caption">${caption}</p></div></div>
  <button type="button" id="oneLogin" class="login-cta" ${usable||demo?'':'disabled'}><span class="cta-play">▶</span><span>${demo?'선택한 화면 체험하기':'패스키로 로그인'}</span><span aria-hidden="true">↗</span></button>
- <details class="enroll-details signup-options" ${view==='register'||view==='recovery'?'open':''}><summary>처음 이용하거나 기기를 바꿨나요?</summary>
+ <details class="enroll-details signup-options" ${demo?'hidden':''} ${view==='register'||view==='recovery'?'open':''}><summary>처음 이용하거나 기기를 바꿨나요?</summary>
  <div class="seg"><button type="button" id="newAccount" class="${view!=='recovery'?'on':''}">처음 등록</button><button type="button" id="recoverAccount" class="${view==='recovery'?'on':''}">기기 재등록</button></div>
  ${view==='recovery'?`<form class="form" id="recoveryForm"><p class="muted">신원을 확인한 담당자가 발급한 재등록 코드가 필요해요.</p><label>재등록 코드<input name="resetCode" required autocomplete="off"></label><button class="button" type="submit">다시 등록하기</button></form>`:
  `<form class="form" id="registerForm"><label class="${chosenRole==='therapist'?'hidden':''}">담당 치료사<select name="selectedTherapistId"><option value="">담당 치료사 선택</option>${therapists.map(t=>`<option value="${sanitize(t.id)}">${sanitize(t.display_name)}</option>`).join('')}</select></label><label>초대코드<input name="invite" autocomplete="off" placeholder="담당 치료사가 전달한 코드" required></label><label>닉네임<input name="nickname" minlength="3" maxlength="24" autocomplete="off" placeholder="실명 대신 나만의 닉네임" required></label><button class="button" type="submit">패스키 등록하기</button></form>`}
- </details><details class="enroll-details admin-details"><summary>운영자 최초 설정</summary><form id="setupForm" class="form"><label>관리자 설정코드<input name="setupToken" type="password" autocomplete="off" required></label><label>관리자 닉네임<input name="nickname" required minlength="3"></label><button class="button-ghost" type="submit">관리자 기기 등록</button></form></details>
- <div class="login-privacy"><span aria-hidden="true">◈</span> 비공개 기록은 작성자만, 공유한 기록은 담당 치료사만 확인해요.</div></div>
+ </details><details class="enroll-details admin-details" ${demo?'hidden':''}><summary>운영자 최초 설정</summary><form id="setupForm" class="form"><label>관리자 설정코드<input name="setupToken" type="password" autocomplete="off" required></label><label>관리자 닉네임<input name="nickname" required minlength="3"></label><button class="button-ghost" type="submit">관리자 기기 등록</button></form></details>
+ <div class="login-privacy"><span aria-hidden="true">◈</span> ${demo?'가상 화면 체험이야. 역할을 누구나 바꿔 볼 수 있으므로 실제 개인정보는 입력하지 마.':'비공개 기록은 작성자만, 공유한 기록은 담당 치료사만 확인해요.'}</div></div>
  <div class="ide-statusbar"><span><span class="live-dot"></span> ${demo?'DEMO MODE':'READY'}</span><span>PASSKEY / ROLE-BASED WORKSPACE</span></div></section>
  <aside class="login-code-preview" aria-label="프로그래밍 디자인 안내"><div class="ide-titlebar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="ide-filename">welcome.js</span><span class="ide-language">PREVIEW</span></div>
  <div class="code-lines" aria-hidden="true"><div><span class="ln">01</span><span class="syntax-purple">const</span> <span class="syntax-blue">workspace</span> = {</div><div><span class="ln">02</span>&nbsp;&nbsp;role: <span id="roleCode" class="syntax-orange">'${chosenRole}'</span>,</div><div><span class="ln">03</span>&nbsp;&nbsp;space: <span class="syntax-orange">'my own'</span>,</div><div><span class="ln">04</span>&nbsp;&nbsp;privacy: <span class="syntax-purple">true</span></div><div><span class="ln">05</span>};</div><div><span class="ln">06</span><span class="syntax-blue">open</span>(workspace); <span class="syntax-gray">// start</span></div></div>
@@ -935,7 +935,7 @@ function dataForm(role){
  <div class="privacy-panel student-share"><label class="checkbox"><input type="checkbox" name="share"><span>담당 치료사에게 기록 공유하기<small>기본 비공개 · 공유 내용은 직접 고를 수 있어.</small></span></label>
  <div id="sharePicker" class="share-picker" hidden><div class="student-share-bar"><strong>보낼 항목 선택</strong><div class="student-share-actions"><button type="button" class="button-ghost" id="studentSelectAll">전체 선택</button><button type="button" class="button-ghost" id="studentClearAll">선택 해제</button></div></div>
  ${['title','date','time','place','note','sketch','mood','energy','thought','body','action','experience','experienceImpact'].map(k=>`<label class="student-share-field"><input type="checkbox" name="shareField" value="${k}"><span>${NOTE_LABELS[k]}</span></label>`).join('')}<p id="studentShareCount" aria-live="polite">보낼 항목을 선택해 줘. 작성하지 않은 항목은 선택되지 않아.</p><p>선택하지 않은 내용은 치료사에게 보내지 않아. 전송 전에 확인할 수 있어.</p></div></div>
- <button class="button entry-save" id="saveEntry">🔒 내 기록 저장</button><p class="student-save-note">매일 쓰지 않아도 괜찮아. 기록을 정확하게 쓰려 애쓸 필요도 없어. 작성 중인 내용은 체험판에서만 이 브라우저 세션에 임시 저장돼.</p>
+ <button class="button entry-save" id="saveEntry">🔒 내 기록 저장</button><p class="student-save-note">매일 쓰지 않아도 괜찮아. 기록을 정확하게 쓰려 애쓸 필요도 없어. 실시간 상담·응급 연락창이 아니야. 체험판의 작성 중 내용은 이 브라우저 세션에만 임시 저장돼.</p>
  </form>`;
 }function gatherEntry(f,role){
  const fields=role==='parent'?['date','time','place','observation','context','origin','response','after','impact','message']:['date','time','place','title','note','energy','thought','body','action','experience','experienceImpact'];
@@ -1068,6 +1068,11 @@ function recordCards(list=records){
  return list.map(r=>{
   const time=sanitize(new Date(r.createdAt).toLocaleString('ko-KR'));
   const observed=r.entry?.date?`${r.kind==='parent'?'관찰':'기록'} ${sanitize(r.entry.date)}${r.entry.time?' '+sanitize(r.entry.time):''}${r.entry.place?' · '+sanitize(r.entry.place):''} · 작성 ${time}`:time;
+  if(me.role==='therapist'&&r.kind==='student'){
+   const text=String(r.entry?.note||r.entry?.experience||r.entry?.thought||r.entry?.action||r.entry?.mood||'');
+   const short=text.length>120?text.slice(0,120)+'…':text;
+   return `<article class="record archive-record"><div class="meta">학생 공유 기록 · ${observed} · ${sanitize(r.student)}</div><div class="parent-inbox-skim">${sanitize(short)||'선택된 공유 내용이 있어.'}</div><details class="parent-inbox-details"><summary>공유한 내용 전체 보기</summary><div class="parent-inbox-full">${prettyRecordEntry(r.entry)}</div></details><p class="muted">학생이 선택해 공유한 내용만 표시돼.</p></article>`;
+  }
   if(me.role==='therapist'&&r.kind==='parent'){
    const field=String(r.entry?.observation||r.entry?.message||r.entry?.impact||r.entry?.response||'');
    const preview=field.length>110?field.slice(0,110)+'…':field;
