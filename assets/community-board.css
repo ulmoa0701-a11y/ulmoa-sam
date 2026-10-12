@@ -154,7 +154,7 @@
 @media(max-width:650px){.community-page #habomPrivateForm{height:2570px}}
 
 /* Both modes now use the identical outer writing-paper card. Keep embed-specific CSS inside the card. */
-.community-page #privatePostPanel.community-embed-page{box-sizing:border-box;max-width:1180px;margin:0 auto;background:#fff;overflow:visible}
+.community-page #privatePostPanel.community-embed-page{box-sizing:border-box;max-width:1180px;margin:0 auto;background:#fff;overflow:visible;border:1px solid #e4e9e6;box-shadow:0 14px 42px rgba(39,62,68,.06)}
 .community-page #privatePostPanel .community-private-reminder{max-width:760px}
 .community-page #privatePostPanel .community-private-iframe{background:#fff}
 @media(max-width:650px){.community-page #privatePostPanel.community-embed-page{width:100%;box-sizing:border-box}}
