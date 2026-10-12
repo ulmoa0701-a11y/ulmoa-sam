@@ -103,7 +103,7 @@ function stopAll(){
  if(S.microphone){for(const t of S.microphone.getTracks())t.stop();S.microphone=null}
  if(S.context){try{S.context.close().catch(()=>{})}catch(e){}S.context=null}
  S.analyser=null;S.samples=null;S.playing=false;S.demo=false;S.lastFrame=0;
- el.micButton.disabled=false;el.micButton.textContent='🎤 마이크 켜기';
+ el.micButton.disabled=false;el.micButton.hidden=false;el.micButton.textContent='🎤 마이크 켜기';
  el.micDetail.textContent='마이크 미연결 · 녹음·업로드·저장 없음';
 }
 function resetRuntime(){
@@ -151,6 +151,7 @@ function renderMode(){
  el.scene.dataset.mode=S.mode;el.play.dataset.mode=S.mode;
  el.strengthScene.hidden=S.mode!=='strength';el.longScene.hidden=S.mode!=='long';el.beatScene.hidden=S.mode!=='beat';el.calmScene.hidden=S.mode!=='calm';
  el.strengthOptions.hidden=S.mode!=='strength';el.longOptions.hidden=S.mode!=='long';el.beatOptions.hidden=S.mode!=='beat';el.calmOptions.hidden=S.mode!=='calm';
+ el.micButton.hidden=false;
  el.micButton.textContent=S.mode==='calm'?(S.calmRunning?'⏸ 잠깐 쉬기':S.calmPaused?'▶ 다시 이어하기':'▶ 숨놀이 시작'):S.playing?'⏸ 잠깐 멈춤':'🎤 다시 시작하기';
  if(S.mode==='strength'){
   const a=ACTS[S.actIndex];
@@ -374,6 +375,7 @@ function startOrPauseCalm(){
 function nextStrengthStage(){
  if(!S.intermission||S.screen!=='play'||S.mode!=='strength')return false;
  if(S.autoTimer){clearTimeout(S.autoTimer);S.autoTimer=0}
+ el.micButton.hidden=false;
  if(S.actIndex===ACTS.length-1){finish();return true}
  S.actIndex++;S.blowCount=0;S.blowHold=0;S.needsRelease=false;
  S.releaseTime=0;S.intermission=false;S.windAngle=0;
@@ -385,10 +387,11 @@ function nextStrengthStage(){
  return true;
 }
 function scheduleNextStrength(){
- if(!el.autoNext.checked)return;
+ if(!el.autoNext.checked){el.micButton.hidden=false;el.autoFlowTip.textContent='🌼 성공! 준비되면 아래에서 다음 놀이로 넘어가요.';return}
  const token=S.token;
  const delay=Number(el.pauseLength.value)||3500;
- el.autoFlowTip.textContent='🌼 성공! 잠깐 감상하고 다음으로 이어갈게요.';
+ el.micButton.hidden=true;
+ el.autoFlowTip.textContent='🌼 성공! '+(delay/1000).toFixed(1)+'초 감상한 뒤 자동으로 다음 놀이가 나와요.';
  S.autoTimer=setTimeout(()=>{
   S.autoTimer=0;
   if(S.token!==token||S.screen!=='play'||!S.intermission)return;
@@ -517,7 +520,7 @@ el.recalibrate.addEventListener('click',()=>{
 });
 el.voiceSelect.addEventListener('change',()=>{S.voiceURI=el.voiceSelect.value;refreshVoices();if(!S.playing)speakPreview()});
 el.demoBtn.addEventListener('click',demo);
-el.autoNext.addEventListener('change',()=>{if(S.intermission&&el.autoNext.checked)scheduleNextStrength();else if(S.autoTimer){clearTimeout(S.autoTimer);S.autoTimer=0}});
+el.autoNext.addEventListener('change',()=>{if(S.intermission&&el.autoNext.checked)scheduleNextStrength();else if(S.autoTimer){clearTimeout(S.autoTimer);S.autoTimer=0;el.micButton.hidden=false;el.autoFlowTip.textContent='🌼 성공! 아래에서 다음 놀이로 넘어가요.'}});
 el.pauseLength.addEventListener('change',()=>{if(S.intermission&&S.autoTimer){clearTimeout(S.autoTimer);S.autoTimer=0;scheduleNextStrength()}});
 window.addEventListener('pagehide',stopAll);
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&S.playing)stopAll()});
