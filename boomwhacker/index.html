@@ -1232,25 +1232,21 @@ async function exportVideo(){
   const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:6000000}),chunks=[];
   rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
   const intro=$('#creditOpt')?.checked?1200:0,outro=$('#creditOpt')?.checked?1800:0;
-  const prepBeats=introMode==='interlude'?INTERLUDE_COUNTDOWN_BEATS+interludePhrasePlan().beats:0;
+  const prepBeats=introMode==='interlude'?INTERLUDE_COUNTDOWN_BEATS+instrumentalPreludePlan().beats:0;
   const countdownMs=introMode==='interlude'?INTERLUDE_COUNTDOWN_BEATS*beatMs():0;
-  const prep=prepBeats*beatMs(),duration=totalMs,total=intro+prep+duration+outro,startPerf=performance.now();
+  const prep=prepBeats*beatMs(),firstSongNote=firstNoteMs();
+  const duration=totalMs-(introMode==='interlude'?firstSongNote:0);
+  const total=intro+prep+duration+outro,startPerf=performance.now();
   if(ac&&dest){
    const base=ac.currentTime+(intro+prep)/1000;
    if(prepBeats){const gm=ac.createGain();gm.gain.setValueAtTime(.5,ac.currentTime);gm.connect(dest);
     const meter=[2,3,4].includes(Number(currentSong.timeN))?Number(currentSong.timeN):4;
     scheduleInterludeCountdown(ac,gm,ac.currentTime+intro/1000,beatMs());
     scheduleInterludeMusic(ac,gm,ac.currentTime+(intro+countdownMs)/1000,beatMs(),meter);
-    if(playView==='fall'){
-     const lead=firstNoteMs(),bt=beatMs(),chord=chordForMeasure(0);
-     for(let o=lead-Math.floor(lead/bt)*bt;o<lead-15;o+=bt){
-      const when=base+o/1000;mrPulse(ac,gm,when,false);
-      voiceOsc(ac,gm,chord.freqs[0],'triangle',.085,when,.012,.35,.42);
-     }
-    }
    }
-   if(wantsMelody()&&melodyMode!=='none')for(const e of events)if(e.active)scheduleMelodyTone(ac,dest,e.note,base+e.start/1000,melodyMode);
-   if(wantsMr())scheduleMrTrack(ac,dest,base+firstNoteMs()/1000,0,mrVolume);
+   if(wantsMelody()&&melodyMode!=='none')for(const e of events)if(e.active)
+    scheduleMelodyTone(ac,dest,e.note,base+(e.start-(introMode==='interlude'?firstSongNote:0))/1000,melodyMode);
+   if(wantsMr())scheduleMrTrack(ac,dest,base+(introMode==='interlude'?0:firstSongNote/1000),0,mrVolume);
   }
   const done=new Promise((resolve,reject)=>{rec.onerror=e=>reject(e.error||new Error('녹화 도중 브라우저 오류'));rec.onstop=()=>resolve()});
   rec.start(250);
@@ -1261,11 +1257,17 @@ async function exportVideo(){
      const t=performance.now()-startPerf;
      if(t<intro)videoIntro(ctx);
      else if(t<intro+prep){
-      videoIntro(ctx);ctx.save();ctx.fillStyle='#155c83';ctx.textAlign='center';
-      ctx.font='900 38px "Noto Sans KR","Malgun Gothic",sans-serif';
-      ctx.fillText(t<intro+countdownMs?String(Math.max(1,3-Math.floor((t-intro)/beatMs()))):'🎶 노래 간주를 듣고 있어요',VIDEO_W/2,565);
+      const inCountdown=t<intro+countdownMs;
+      if(inCountdown)videoIntro(ctx);
+      else videoScene(ctx,firstSongNote-(prep-(t-intro)));
+      ctx.save();ctx.textAlign='center';
+      rr(ctx,440,83,400,72,20);ctx.fillStyle='rgba(255,255,255,.92)';ctx.fill();
+      ctx.fillStyle='#155c83';ctx.font='900 29px "Noto Sans KR","Malgun Gothic",sans-serif';
+      ctx.fillText(inCountdown?String(Math.max(1,3-Math.floor((t-intro)/beatMs()))):'🎶 전주 · 공 준비',VIDEO_W/2,131);
       ctx.restore();
-     }else if(t<intro+prep+duration)videoScene(ctx,t-intro-prep);else videoOutro(ctx);
+     }else if(t<intro+prep+duration)
+      videoScene(ctx,t-intro-prep+(introMode==='interlude'?firstSongNote:0));
+     else videoOutro(ctx);
      if(t-previous>=350||t>=total){
       previous=t;
       const pct=Math.min(100,Math.floor(t/total*100)),remaining=Math.max(0,Math.ceil((total-t)/1000));
