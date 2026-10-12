@@ -1,4 +1,5 @@
 name: Habom Two Forms Visual Review
+# Post-spacing compactness verification
 # Jotform mobile gutter + desktop width visual verification after theme updates.
 on:
   workflow_dispatch:
