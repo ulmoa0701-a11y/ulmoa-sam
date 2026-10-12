@@ -21,6 +21,7 @@ async function run(){
   check(illegalGuest.status===403,'미인증 역할 기록 생성 요청 거부');
   enter('student');await until(()=>D().getElementById('entryForm'));
   check(D().querySelector('form.student-journal')?.dataset.journalMode==='quick','학생 간편 기록 첫 화면');
+  check(mainScroll().scroll<=mainScroll().width+3,'학생 화면 수평 넘침 없음 '+JSON.stringify(mainScroll()));
   check(!D().querySelector('form.student-journal textarea[name="note"]').required,'학생 내용 입력을 평소 강요하지 않음');
   check(D().getElementById('entryForm').elements.share.checked===false,'학생 기록 기본 비공개');
   check(!D().querySelector('[name="experience"]').closest('details').open,'증상 경험 기록 기본 접힘');
@@ -73,6 +74,7 @@ async function run(){
   check(D().querySelector('[name="share"]').checked&&!D().getElementById('sharePicker').hidden,'새로고침 후 공유 선택 상태와 패널 일치');
   check(D().getElementById('saveEntry').textContent.includes('공유'),'새로고침 후 저장 버튼도 공유 여부 표시');
   await role('parent');
+  check(mainScroll().scroll<=mainScroll().width+3,'보호자 화면 수평 넘침 없음 '+JSON.stringify(mainScroll()));
   check(!!D().querySelector('select[name="origin"]'),'보호자 정보 출처 기본 화면 노출');
   check(!D().querySelector('select[name="origin"]').required,'보호자 출처 선택 사항');
   check(!D().querySelector('textarea[name="childWords"]').required,'아동 발언은 선택 사항');
@@ -96,6 +98,7 @@ async function run(){
   check(caregiver.sharedEntry.origin==='직접 관찰'&&caregiver.sharedEntry.childWords.includes('실제로'),'보호자 진술 선택 공유 필드만 노출');
   check(!caregiver.sharedEntry.response&&!caregiver.sharedEntry.context,'보호자 상세 비선택 내용 비공개');
   await role('therapist');
+  check(mainScroll().scroll<=mainScroll().width+3,'치료사 화면 수평 넘침 없음 '+JSON.stringify(mainScroll()));
   check(D().querySelectorAll('details.clinician-extra').length===3,'치료사 사례개념화 ERP CBIT 별도 접힌 영역');
   check([...D().querySelectorAll('details.clinician-extra')].every(x=>!x.open),'치료사 상세항목 초기 접힘');
   check(D().getElementById('inboxResults').textContent.includes('아이가 실제로 한 말'),'치료사 기록함에서 보호자 원문 구분');
