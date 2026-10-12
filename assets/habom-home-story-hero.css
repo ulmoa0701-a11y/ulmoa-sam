@@ -4,7 +4,7 @@
 .notebook-home .notebook-hero{padding-bottom:22px}
 .notebook-home .hero-paper{
   grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-  min-height:530px;
+  min-height:485px;
 }
 .notebook-home .hero-copy{
   display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
@@ -96,3 +96,27 @@
  .notebook-home .hero-copy h1 em{font-size:50px}
 }
 @media(prefers-reduced-motion:reduce){.notebook-home .maker-link span{transition:none}}
+
+/* Homepage footer social links are useful in the footer, not floating over
+   the shortcuts and game cards. Other pages keep their existing behavior. */
+body.notebook-home{padding-bottom:0}
+body.notebook-home .note-footer .footer-social{
+  position:static;left:auto;right:auto;top:auto;bottom:auto;
+  translate:none;z-index:auto;
+  display:flex;flex-wrap:wrap;align-items:center;gap:12px!important;
+  padding:0;border:0;border-radius:0;
+  background:transparent;box-shadow:none;backdrop-filter:none;
+}
+body.notebook-home .note-footer .footer-social a{
+  color:#fff!important;font-size:12px!important;font-weight:600!important;
+  padding:6px 0;border-radius:0;
+}
+body.notebook-home .note-footer .footer-social a:hover{
+  background:transparent;text-decoration:underline!important;
+  text-underline-offset:4px;
+}
+@media(max-width:600px){
+ body.notebook-home .note-footer{gap:10px;justify-content:center;text-align:center}
+ body.notebook-home .note-footer .footer-social{justify-content:center;gap:14px!important}
+ body.notebook-home .note-footer .footer-social a{font-size:12px!important}
+}
