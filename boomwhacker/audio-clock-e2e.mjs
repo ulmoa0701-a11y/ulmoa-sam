@@ -7,8 +7,9 @@ import {chromium} from 'playwright-core';
 const root=path.resolve('.');
 let server,browser;
 const outcomes=[];
+const publicUrl=process.env.BOOM_PUBLIC_URL||'';
 try{
- server=http.createServer((req,res)=>{
+ if(!publicUrl){server=http.createServer((req,res)=>{
   let filename=path.resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));
   if(!filename.startsWith(root+path.sep)||!fs.existsSync(filename)){res.writeHead(404);return res.end()}
   if(fs.statSync(filename).isDirectory())filename=path.join(filename,'index.html');
@@ -16,14 +17,14 @@ try{
   res.setHeader('Content-Type',filename.endsWith('.css')?'text/css':filename.endsWith('.js')?'text/javascript':filename.endsWith('.html')?'text/html':'application/octet-stream');
   fs.createReadStream(filename).pipe(res);
  });
- await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));}
  browser=await chromium.launch({executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--autoplay-policy=no-user-gesture-required']});
  for(const mobile of [false,true]){
   const page=await browser.newPage({viewport:mobile?{width:390,height:844}:{width:1366,height:900}});
   const errors=[],out={mobile};
   page.on('pageerror',e=>errors.push(e.message));
   try{
-   await page.goto('http://127.0.0.1:'+server.address().port+'/boomwhacker/?song=twinkle',{waitUntil:'domcontentloaded'});
+   await page.goto(publicUrl||'http://127.0.0.1:'+server.address().port+'/boomwhacker/?song=twinkle',{waitUntil:'domcontentloaded'});
    await page.locator('#tempo').evaluate(el=>{el.value='120';el.dispatchEvent(new Event('input',{bubbles:true}))});
    await page.evaluate(()=>{
     window.__musicAudit={notes:[],render:[],mr:null};
