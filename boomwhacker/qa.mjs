@@ -76,13 +76,16 @@ async function basicCase(name,width,height){
   check((await page.locator('#bpmLabel').innerText())===initialTempo.bpm+' BPM',`${name}: tempo slider label out of sync with actual beat`);
   check((await page.locator('#tempo').inputValue())===String(initialTempo.bpm),`${name}: speed slider is not at effective playback BPM`);
   check(await page.locator('#introMode option[value="music"]').innerText()==='🥁 박자 예고',`${name}: introductory beat label is unclear`);
+  // Preserve the established beat-only visual/score regressions independently
+  // from the new default 3-2-1 + complete musical phrase test.
+  await page.locator('#introMode').evaluate(el=>{el.value='music';el.dispatchEvent(new Event('change',{bubbles:true}))});
   check(await page.locator('#melodySelect').count()===1,`${name}: melody selector missing`);
   check(await page.locator('#melodySelect option').count()===4,`${name}: melody selector should have 4 choices`);
   check((await page.locator('#melodySelect').inputValue())==='boom',`${name}: default melody should be Boomwhacker`);
   check(await page.locator('#melodyVolume').count()===1,`${name}: melody volume control missing`);
   check((await page.locator('#melodyVolume').inputValue())==='65',`${name}: default melody volume should be 65%`);
   check(await page.locator('#mixModes button').count()===3,`${name}: mix mode should have 3 choices`);
-  check(await page.locator('#mixModes button.on').getAttribute('data-mix')==='melody',`${name}: default mix mode should be melody only`);
+  check(await page.locator('#mixModes button.on').getAttribute('data-mix')==='both',`${name}: auto-MR should play on the song downbeat by default`);
   check(await page.locator('#mrFile').count()===1,`${name}: MR file input missing`);
   check(await page.locator('#mrVolume').count()===1,`${name}: MR volume control missing`);
   check((await page.locator('#mrVolume').inputValue())==='100',`${name}: default MR volume should be 100%`);
@@ -96,7 +99,7 @@ async function basicCase(name,width,height){
   check(videoInfo.brand?.brand==='울모아쌤'&&videoInfo.brand?.handle==='@ulmoa__sam',`${name}: video brand metadata wrong`);
   check(videoInfo.colors?.도==='#EB2427'&&videoInfo.colors?.레==='#F6851F'&&videoInfo.colors?.미==='#FBED1B'&&videoInfo.colors?.파==='#73C84A'&&videoInfo.colors?.솔==='#00A39A'&&videoInfo.colors?.라==='#4B4AA8'&&videoInfo.colors?.시==='#D83A9B',`${name}: Boomwhacker color mapping wrong`);
   check(videoInfo.melody?.mode==='boom'&&Object.keys(videoInfo.melody?.options||{}).length===4&&Math.abs(videoInfo.melody?.volume-.65)<.001,`${name}: melody QA metadata wrong`);
-  check(videoInfo.mix?.mode==='melody'&&Object.keys(videoInfo.mix?.options||{}).length===3&&videoInfo.mix?.mrReady===true&&videoInfo.mix?.mrKind==='auto'&&!videoInfo.mix?.mrLoaded,`${name}: mix QA metadata wrong`);
+  check(videoInfo.mix?.mode==='both'&&Object.keys(videoInfo.mix?.options||{}).length===3&&videoInfo.mix?.mrReady===true&&videoInfo.mix?.mrKind==='auto'&&!videoInfo.mix?.mrLoaded,`${name}: mix QA metadata wrong`);
   check(videoInfo.display?.mode==='note'&&Object.keys(videoInfo.display?.options||{}).length===4&&videoInfo.display?.labels?.[0]==='도',`${name}: display QA metadata wrong`);
   check((videoInfo.lyrics?.items?.length||0)>5,`${name}: continuous lyric window missing`);
   check(videoInfo.preview?.w===1280&&videoInfo.preview?.h===720&&String(videoInfo.preview?.data||'').startsWith('data:image/png'),`${name}: 16:9 video preview render failed`);
@@ -508,6 +511,7 @@ for(const [label,w,h] of [['mobile-score-immediate',390,844],['desktop-score-imm
   const page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(BASE,{waitUntil:'networkidle'});
+  await page.locator('#introMode').evaluate(el=>{el.value='music';el.dispatchEvent(new Event('change',{bubbles:true}))});
   await page.locator('#playViewSelect').selectOption('score');
   const original=await page.evaluate(()=>window.__boomVideoQA.scoreTiming());
   check(original.firstEvent?.note==='도'&&original.secondEvent?.note==='도',
