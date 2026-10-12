@@ -43,7 +43,7 @@ async function run(){
   await until(()=>d().querySelector('textarea[name="observation"]'));
   input(d().querySelector('textarea[name="observation"]'),'가상 관찰: 책을 한 번 다시 읽었다.');
   d().getElementById('saveEntry').click();
-  await until(()=>w().PREVIEW_RECORDS.length===1&&w().PREVIEW_RECORDS[0].kind==='parent');
+  await until(()=>w().PREVIEW_RECORDS.length===1&&w().PREVIEW_RECORDS[0].kind==='parent'&&d().querySelector('[data-workspace-view="calendar"]')?.hidden===false);
   ok(!w().PREVIEW_RECORDS[0].shared,'보호자 관찰 기본 비공개');
   d().querySelector('[data-workspace-target="write"]').click();
   await until(()=>d().querySelector('textarea[name="observation"]'));
@@ -61,15 +61,9 @@ async function run(){
   ok(parentForm.checkValidity(),'보호자 상세 공유 양식 입력 유효');
   ok(parentForm.elements.share.checked,'보호자 선택 공유 활성화');
   ok(parentForm.querySelector('input[name="shareField"][value="observation"]').checked,'관찰 원문 공유 선택');
-  let submitted=false;parentForm.addEventListener('submit',()=>{submitted=true});
-  w().addEventListener('unhandledrejection',event=>say('PARENT async rejection '+String(event.reason)));
-  w().addEventListener('error',event=>say('PARENT script error '+String(event.error)));
-  say('PARENT PRE '+JSON.stringify({hasSubmit:typeof parentForm.onsubmit,disabled:parentForm.querySelector('#saveEntry').disabled,observation:parentForm.elements.observation.value,origin:parentForm.elements.origin.value,childWords:parentForm.elements.childWords.value,shareFields:[...parentForm.querySelectorAll('input[name="shareField"]:checked')].map(x=>x.value)}));
+  await until(()=>!parentForm.querySelector('#saveEntry').disabled);
   parentForm.querySelector('#saveEntry').click();
-  await sleep(150);
-  say('PARENT POST '+JSON.stringify({submitted,buttonDisabled:parentForm.querySelector('#saveEntry').disabled,dialog:d().getElementById('shareReviewDialog')?.open,toast:d().getElementById('toast')?.textContent,active:parentForm.elements.share.checked,validation:parentForm.checkValidity()}));
-  await until(()=>d().getElementById('shareReviewDialog')?.open||d().getElementById('toast')?.classList.contains('visible')&&d().getElementById('toast')?.textContent.includes('공유할 내용'));
-  if(!d().getElementById('shareReviewDialog')?.open)throw Error('공유 검토 화면 열리지 않음: '+d().getElementById('toast')?.textContent+'; 공유 목록='+[...parentForm.querySelectorAll('input[name="shareField"]:checked')].map(x=>x.value).join(','));
+  await until(()=>d().getElementById('shareReviewDialog')?.open);
   const parentSharePreview=d().querySelector('.share-review-body').textContent;
   ok(parentSharePreview.includes('가상 학생의 말')&&parentSharePreview.includes('직접 관찰'),'공유전 보호자 기록 출처·직접 발언 전체 확인');
   d().querySelector('[data-approve]').click();
