@@ -17,6 +17,8 @@
   --habom-heading-font:"Habom MaruBuri","Maru Buri",MaruBuri,Georgia,serif;
   --habom-accent-font:"교보손글씨 2020 박도연","Kyobo Handwriting 2020","Nanum Pen Script",cursive;
   --habom-handwriting:var(--habom-body-font); /* legacy selector compatibility */
+  --habom-readable-body:var(--habom-body-font); /* older glossary CSS */
+  --habom-readable-title:var(--habom-heading-font); /* old Gowun override */
 }
 html,body,
 body :is(p,span,b,strong,em,small,a,button,input,textarea,select,option,label,li,dt,dd,th,td,summary,legend,blockquote,output,figcaption){
