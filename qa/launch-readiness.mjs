@@ -67,6 +67,10 @@ for(const [label,width,height] of [
   await page.locator('#toolSearch').fill('');
   check((await page.locator('#resultCount').textContent()).trim()==='3개',
     label+': clearing search did not restore all tool cards');
+  // The search button scrolls the page to #made. Reset before full-page
+  // capture so a sticky header is not baked into the middle of the screenshot.
+  await page.evaluate(()=>{window.scrollTo({top:0,left:0,behavior:'instant'});});
+  await page.waitForTimeout(450);
   await page.screenshot({path:path.join(dir,label+'-home.png'),fullPage:true,timeout:18000});
   const community=await page.goto(origin+'/request/',{waitUntil:'domcontentloaded',timeout:25000});
   check(community?.ok(),label+': request page missing');
