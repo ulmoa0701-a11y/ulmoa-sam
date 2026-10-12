@@ -77,3 +77,39 @@ body.notebook-home .maker-link b{font-size:15px!important}
  body.notebook-home .hb-shortcut-text b{font-size:17px!important}
  body.notebook-home .hb-shortcut-text small{font-size:14px!important}
 }
+
+/* HABOM_READABLE_EDITORIAL_20261012_v2 */
+/* Restore readable adult-facing typography; keep the original Gamja type in playable game areas. */
+:root{
+ --habom-readable-body:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+ --habom-readable-title:"Gowun Dodum","Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+/* Pages for reading, navigating, discussing and finding resources. */
+body:is(.notebook-home,.note-subpage),
+body:is(.notebook-home,.note-subpage) :is(p,span,b,strong,em,small,a,button,input,textarea,select,option,label,li,dt,dd,th,td,summary,legend,blockquote,output,figcaption){
+ font-family:var(--habom-readable-body)!important;
+}
+body:is(.notebook-home,.note-subpage) :is(h1,h2,h3,h4,h5,h6),
+body:is(.notebook-home,.note-subpage) :is(h1,h2,h3,h4,h5,h6) :is(span,em,b,strong){
+ font-family:var(--habom-readable-title)!important;
+ font-weight:700!important;
+ letter-spacing:-.04em!important;
+}
+body:is(.notebook-home,.note-subpage) :is(.note-nav,.sub-nav,.hb-nav,.hb-find-dialog) *,
+body:is(.notebook-home,.note-subpage) :is(.garden-door,.hb-shortcut-card,.moa-resource-card,.library-card,.parents-topic) :is(p,span,b,strong,em,small,a,button){
+ font-family:var(--habom-readable-body)!important;
+}
+body:is(.notebook-home,.note-subpage) :is(.hb-nav-link,.hb-menu>summary,.hb-mobile-subtile,.hb-game-parent,.hb-game-child,.note-nav a,.sub-nav a){
+ font-family:var(--habom-readable-body)!important;
+ letter-spacing:-.01em!important;
+}
+/* Cognitive/music garden listing screens, not live exercise stages. */
+[data-moa-garden] :is(.topbar,.library-hero,.game-library,.music-header,.music-hero,.music-library,.garden-topic-tabs,.garden-format-tabs,.moa-resource-panel,.cross-garden,.intro-copy) :is(p,span,b,strong,em,small,a,button,li,summary){
+ font-family:var(--habom-readable-body)!important;
+}
+[data-moa-garden] :is(.topbar,.library-hero,.game-library,.music-header,.music-hero,.music-library,.moa-resource-panel,.intro-copy) :is(h1,h2,h3,h4,h5,h6),
+[data-moa-garden] :is(.topbar,.library-hero,.game-library,.music-header,.music-hero,.music-library,.moa-resource-panel,.intro-copy) :is(h1,h2,h3,h4,h5,h6) :is(span,em,b,strong){
+ font-family:var(--habom-readable-title)!important;
+ font-weight:700!important;
+ letter-spacing:-.035em!important;
+}
