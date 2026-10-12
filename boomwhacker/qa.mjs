@@ -222,7 +222,17 @@ async function basicCase(name,width,height){
   await page.locator('#newInstrumentName').fill('차임');
   await page.locator('#addInstrumentBtn').click();
   const addedInstrument=await page.evaluate(()=>window.__boomVideoQA.display().instrumentLibrary.find(x=>x.name==='차임'));
-  check(!!addedInstrument?.id,`${name}: custom instrument was not added to library`);
+  if(!addedInstrument?.id){
+    const diag=await page.evaluate(()=>({
+      icon:document.querySelector('#newInstrumentIcon')?.value,
+      name:document.querySelector('#newInstrumentName')?.value,
+      note:document.querySelector('#displayDialogDesc')?.textContent,
+      mode:displayMode,library:instrumentLibrary.map(x=>({id:x.id,icon:x.icon,name:x.name})),
+      editorOpen:document.querySelector('#displayModal')?.classList.contains('open'),
+      addedButton:!!document.querySelector('#addInstrumentBtn')
+    }));
+    throw new Error(`${name}: custom instrument was not added to library ${JSON.stringify(diag)}`);
+  }
   check(await page.locator('#displayInputs select[data-instrument-index="0"] option[value="'+addedInstrument.id+'"]').count()===1,`${name}: custom instrument option was not rebuilt`);
   await page.locator('#displayInputs select[data-instrument-index="0"]').selectOption(addedInstrument.id);
   await page.locator('#displayApplyBtn').click();
@@ -306,13 +316,13 @@ async function basicCase(name,width,height){
   check(geometry.meter===2&&geometry.beats===6&&geometry.count===6&&geometry.preview===0,
     `${name}: 2/4 should count 1-2-1-2-시-작 at the same tempo ${JSON.stringify(geometry)}`);
   for(const [beat,value] of [[1,'2'],[2,'1'],[3,'2']]){
-    await page.evaluate(i=>{introStartPerf=performance.now()-(beatMs()*i+20);introFrame(performance.now())},beat);
+    await page.evaluate(i=>{introStartPerf=performance.now()-(beatMs()*i+20);introAudioStartAt=audioCtx.currentTime-(beatMs()*i+20)/1000;introFrame(performance.now())},beat);
     check((await page.locator('#introPulse').innerText())===value,`${name}: expected full-beat '${value}' at beat ${beat+1}`);
     check(await page.locator('#introOverlay .introCard').count()===1,`${name}: unexpected second readiness card at beat ${beat+1}`);
   }
   // The word stays visible as a pair during BOTH beats; only its moving half changes.
   async function pairedBeat(beat,activeSyllable){
-    await page.evaluate(i=>{introStartPerf=performance.now()-(beatMs()*i+20);introFrame(performance.now())},beat);
+    await page.evaluate(i=>{introStartPerf=performance.now()-(beatMs()*i+20);introAudioStartAt=audioCtx.currentTime-(beatMs()*i+20)/1000;introFrame(performance.now())},beat);
     const state=await page.evaluate(()=>{
       const pulse=document.querySelector('#introPulse');
       const children=[...pulse.querySelectorAll('.introSyllable')];
@@ -332,11 +342,11 @@ async function basicCase(name,width,height){
   const jak=await pairedBeat(5,'작');
   check(Math.abs(si.width-jak.width)<1,`${name}: the entire word must not jump horizontally when emphasis moves`);
   // Neither character should disappear midway through its full beat.
-  await page.evaluate(()=>{introStartPerf=performance.now()-(beatMs()*4.6);introFrame(performance.now())});
+  await page.evaluate(()=>{introStartPerf=performance.now()-(beatMs()*4.6);introAudioStartAt=audioCtx.currentTime-(beatMs()*4.6)/1000;introFrame(performance.now())});
   check((await page.locator('#introPulse').textContent())==='시작'&&
     (await page.locator('#introPulse .introSyllable.active').textContent())==='시',
     `${name}: keep the complete word visible on the '시' beat`);
-  await page.evaluate(()=>{introStartPerf=performance.now()-(beatMs()*5.6);introFrame(performance.now())});
+  await page.evaluate(()=>{introStartPerf=performance.now()-(beatMs()*5.6);introAudioStartAt=audioCtx.currentTime-(beatMs()*5.6)/1000;introFrame(performance.now())});
   check((await page.locator('#introPulse').textContent())==='시작'&&
     (await page.locator('#introPulse .introSyllable.active').textContent())==='작',
     `${name}: keep the complete word visible on the '작' beat`);
@@ -344,7 +354,7 @@ async function basicCase(name,width,height){
     `${name}: the same card must display both syllables`);
   check(await page.locator('.fall').count()===0,`${name}: notes must stay hidden until '작' completes`);
     await page.screenshot({path:`${out}/${name}-musical-intro.png`,fullPage:false});
-  await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+12);introFrame(performance.now())});
+  await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+12);introAudioStartAt=audioCtx.currentTime-(introDurationMs+12)/1000;introFrame(performance.now())});
   await page.waitForTimeout(420);
   const songStart=await page.evaluate(()=>window.__boomVideoQA.intro());
   check(!songStart.active&&songStart.started,`${name}: count-in did not hand off to performance`);
@@ -520,11 +530,11 @@ for(const [label,w,h] of [['mobile-score-immediate',390,844],['desktop-score-imm
   await page.locator(w<=800?'#playBtn':'#startBtn').click();
   let started=await page.evaluate(()=>window.__boomVideoQA.intro());
   check(started.active&&started.beats===6,label+': familiar musical count-in missing');
-  await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs-beatMs()*.6);introFrame(performance.now())});
+  await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs-beatMs()*.6);introAudioStartAt=audioCtx.currentTime-(introDurationMs-beatMs()*.6)/1000;introFrame(performance.now())});
   check((await page.locator('#introPulse').textContent())==='시작'&&
     (await page.locator('#introPulse .introSyllable.active').textContent())==='작',
     label+': both syllables should appear together with 작 moving just before the first note');
-  await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+2);introFrame(performance.now())});
+  await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+2);introAudioStartAt=audioCtx.currentTime-(introDurationMs+2)/1000;introFrame(performance.now())});
   await page.waitForTimeout(130);
   const first=await page.evaluate(()=>({
     timing:window.__boomVideoQA.scoreTiming(),active:[...document.querySelectorAll('#scoreStageGrid .scoreActive')].map(e=>Number(e.dataset.eventIndex)),
