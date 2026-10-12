@@ -358,6 +358,11 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
 /* Soft musical preparation cue, independent of the scrolling layout. */
 .introOverlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:12;pointer-events:none;background:rgba(240,249,255,.58);backdrop-filter:blur(3px)}
 .introOverlay.show{display:flex}
+.introOverlay.preludePlaying{align-items:flex-start;justify-content:center;background:transparent;backdrop-filter:none;padding-top:8px}
+.introOverlay.preludePlaying .introCard{gap:2px;min-width:0;width:max-content;max-width:90%;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.9);box-shadow:0 3px 12px rgba(22,48,73,.12)}
+.introOverlay.preludePlaying .introHeading{font-size:clamp(12px,2.8vw,15px)}
+.introOverlay.preludePlaying .introPulse{font-size:19px;min-height:0;line-height:1}
+.introOverlay.preludePlaying .introDots{display:none}
 /* One readiness card throughout: counting and the final '시작' share this same card. */
 .introOverlay{background:rgba(240,249,255,.34);backdrop-filter:blur(2px)}
 .introOverlay.launchCue .introPulse{color:#16836f;font-size:clamp(38px,10vw,62px)}
@@ -933,7 +938,7 @@ function stopIntro(){
   clearTimeout(introHideTimer);introHideTimer=0;
   if(introGain&&audioCtx){try{introGain.gain.cancelScheduledValues(audioCtx.currentTime);introGain.gain.setValueAtTime(0,audioCtx.currentTime)}catch(e){}}
   introGain=null;
-  $('#introOverlay').classList.remove('show','starting','finalCount','launchCue');
+  $('#introOverlay').classList.remove('show','starting','finalCount','launchCue','preludePlaying');
 }
 // Backing harmony follows the current score's bar chords.
 function scheduleInterludeAccompaniment(ac,dest,start,beats,intervalMs,meter){
@@ -1042,6 +1047,7 @@ function introVisual(index){
   if(introMode==='interlude'){
     const counting=index<INTERLUDE_COUNTDOWN_BEATS,phraseIndex=index-INTERLUDE_COUNTDOWN_BEATS;
     $('#introOverlay').classList.remove('launchCue','finalCount');
+    $('#introOverlay').classList.toggle('preludePlaying',!counting);
     $('#introHeading').textContent=counting?'3·2·1 준비':'🎶 기악 전주 · 첫 공을 기다려요';
     const pulse=$('#introPulse');pulse.classList.remove('syllablePair');
     pulse.textContent=counting?String(INTERLUDE_COUNTDOWN_BEATS-index):'🎶';
