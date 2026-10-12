@@ -442,7 +442,7 @@
     var style = el("style");
     style.id = "habom-writing-style";
     style.textContent = [
-      "form.habom-flow-form{display:block!important;max-width:760px!important;width:100%!important;margin:0 auto!important;padding:0!important;grid-template-columns:none!important;gap:0!important;}",
+      "form.habom-flow-form{font-family:Pretendard,'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif!important;display:block!important;max-width:760px!important;width:100%!important;margin:0 auto!important;padding:0!important;grid-template-columns:none!important;gap:0!important;}",
       "#habom-writing-flow{display:block;width:100%;max-width:100%;color:#293c34;font:inherit}",
       "#habom-writing-flow *{box-sizing:border-box}",
       "#habom-writing-flow .hfw-step{display:block!important;position:relative;min-width:0;max-width:100%;padding:15px 0 18px;margin:0;border-bottom:1px solid #e6ede7;}",
