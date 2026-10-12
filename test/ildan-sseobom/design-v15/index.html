@@ -1,0 +1,1262 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><title>일단써봄 v15 — 기록·공유 안전성 개선 체험판</title><style>/* 일단써봄 — light, high-contrast and accessible, 2026-10-10 */
+:root {
+  color-scheme: light;
+  font-family: 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  --ink:#213637;
+  --ink-soft:#405d5d;
+  --muted:#526c6b;
+  --surface:#ffffff;
+  --canvas:#f7f9f6;
+  --line:#dbe5de;
+  --primary:#126958;
+  --primary-hover:#105747;
+  --accent:#e9f5ef;
+  --sun:#fff5dc;
+  color:var(--ink);background:var(--canvas);
+  font-synthesis:none;
+}
+* {box-sizing:border-box}
+html {scroll-behavior:smooth}
+body {margin:0;min-height:100vh;font-size:16px;line-height:1.65}
+button,input,textarea,select {font:inherit}
+button {cursor:pointer}
+a {color:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible {outline:3px solid #177464;outline-offset:3px}
+button:disabled {cursor:not-allowed;opacity:.6}
+header {position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 3px 18px #314b3808}
+.topwrap {max-width:1080px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 24px}
+.brand {text-decoration:none;font-size:25px;font-weight:900;letter-spacing:-1.25px;display:flex;gap:2px;align-items:baseline;white-space:nowrap}
+.brand span {color:#177b63}
+.brand small {font-size:12px;margin-left:14px;color:var(--muted);font-weight:600;letter-spacing:0}
+.account {display:flex;gap:10px;align-items:center;font-size:14px;color:var(--ink-soft)}
+.account button {background:#fff;color:var(--ink);border:1px solid #c4d5cc;border-radius:11px;padding:8px 12px;font-size:14px;font-weight:700;min-height:42px}
+main {max-width:1080px;margin:0 auto;padding:38px 23px 96px}
+.hero {margin-bottom:24px}
+.eyebrow {display:inline-block;font-size:12px;font-weight:850;letter-spacing:.06em;color:#176e5b;text-transform:uppercase;margin-bottom:5px}
+.hero h1 {font-size:clamp(27px,4.5vw,37px);margin:5px 0 8px;letter-spacing:-1.25px;line-height:1.35;word-break:keep-all}
+.hero p {color:var(--ink-soft);margin:0;max-width:680px;line-height:1.7}
+.grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.panel {background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:27px;box-shadow:0 6px 26px #294e3610;min-width:0}
+.panel.highlight {background:#fff;border:2px solid #94c9b2;box-shadow:0 10px 30px #206e4620}
+.panel h2,.panel h3 {margin:7px 0 9px;letter-spacing:-.7px;font-size:clamp(20px,2.7vw,24px);line-height:1.38}
+.panel p {margin:7px 0 15px;color:var(--ink-soft);font-size:15px;line-height:1.7}
+.panel .tag {color:#176a58;font-size:13px;font-weight:850}
+.panel .tag.yellow {color:#815c12}
+.panel.full {grid-column:1/-1}
+.panel.slate,.panel.soft-lab {background:#f9fbf7;color:var(--ink);border-color:var(--line)}
+.panel.slate p,.panel.soft-lab p {color:var(--ink-soft)}
+.form {display:grid;gap:18px}
+label {display:grid;gap:8px;color:var(--ink);font-size:15px;font-weight:750;min-width:0}
+input:not([type=checkbox]),textarea,select {display:block;width:100%;min-width:0;border:1.5px solid #a8beb3;border-radius:12px;background:#fff;padding:13px 14px;color:#203436;font-size:16px;outline-offset:2px}
+input::placeholder,textarea::placeholder {color:#637b78;opacity:1}
+textarea {resize:vertical;min-height:102px;line-height:1.7}
+input:focus,textarea:focus,select:focus {outline:2px solid #168268;border-color:#168268}
+.checkbox {display:flex;align-items:flex-start;gap:12px;font-size:15px;line-height:1.55;background:#f5f9f6;border:1px solid #e0eae3;padding:15px;border-radius:13px;color:var(--ink)}
+.checkbox input {width:23px;height:23px;margin:1px 0 0;flex:none;accent-color:var(--primary)}
+.button,.button-ghost,.button-warm {display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:12px;border:1px solid transparent;background:var(--primary);color:white;font-weight:800;letter-spacing:-.1px;text-decoration:none;min-height:50px;padding:12px 21px;white-space:normal;line-height:1.4;text-align:center}
+.button:hover {background:var(--primary-hover)}
+.button-ghost {background:#fff;color:#195348;border-color:#adc9bc}
+.button-ghost:hover {background:#f0f7f2}
+.button-warm {background:#fae5ac;color:#593f0b;border-color:#e4cb86}
+.buttons {display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.seg {display:flex;gap:8px;margin:12px 0 16px}
+.seg button {flex:0 1 auto;min-height:48px;border-radius:11px;border:1px solid #bbd3c7;background:#fff;padding:11px 16px;font-size:15px;color:var(--ink);font-weight:750;line-height:1.45}
+.seg button.on {background:#dceee4;border-color:#39836c;color:#164a3d}
+.callout {padding:15px 18px;background:var(--sun);border-left:4px solid #d7b35c;color:#604c23;font-size:14px;line-height:1.7;border-radius:10px;margin:18px 0}
+.muted {font-size:14px;color:var(--muted);line-height:1.7}
+.record {border:1px solid #d2e1d7;border-radius:15px;padding:17px;margin:12px 0;background:#fff}
+.record .meta {color:var(--muted);font-size:13px;margin-bottom:9px}
+.record p {white-space:pre-wrap;margin:7px 0;overflow-wrap:anywhere}
+.record b {color:var(--ink)}
+.line {height:1px;background:var(--line);margin:19px 0}
+.code {font-family:ui-monospace,'Cascadia Code',Consolas,monospace;background:#fff;color:#234851;border:1px solid #bcd5c7;border-radius:13px;padding:17px;line-height:1.85;white-space:pre-wrap;overflow:auto;font-size:14px}
+.code strong {color:#135c4b}
+.small {font-size:13px}
+.hidden {display:none!important}
+.toast {position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:20;background:#195749;color:#fff;border-radius:12px;padding:13px 22px;max-width:calc(100vw - 30px);box-shadow:0 8px 18px #0002;display:none;font-size:15px}
+.toast.visible {display:block}
+.welcome {max-width:700px;margin:8px auto 0}
+.welcome .panel {padding:30px}
+.welcome .panel>.tag {display:inline-flex;padding:5px 11px;border-radius:99px;background:var(--accent)}
+.welcome #oneLogin {width:100%;font-size:18px;min-height:58px}
+.welcome .buttons {margin:20px 0 9px}
+.welcome .hero h1 {font-size:clamp(29px,5vw,39px)}
+.role-chip {background:#e5f3ed;color:#145344;border-radius:99px;padding:5px 10px;font-size:12px;font-weight:850}
+.loading {text-align:center;padding:65px 10px;color:var(--muted)}
+.enroll-details,.optional-fields {border:1px solid var(--line);border-radius:13px;margin-top:18px;background:#fafcf9;overflow:hidden}
+.enroll-details>summary,.optional-fields>summary {cursor:pointer;padding:16px 18px;font-weight:800;color:var(--ink);list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.enroll-details>summary::-webkit-details-marker,.optional-fields>summary::-webkit-details-marker {display:none}
+.enroll-details>summary::after,.optional-fields>summary::after {content:'＋';color:var(--primary);font-size:23px;line-height:1}
+.enroll-details[open]>summary::after,.optional-fields[open]>summary::after {content:'−'}
+.enroll-details>form,.enroll-details>.form,.enroll-details>.seg,.enroll-details>p,.optional-fields>.optional-wrap {margin:0 17px 18px}
+.enroll-details>.seg {margin-top:6px}
+.enroll-details>p {font-size:14px}
+.optional-fields {margin-top:0}
+.optional-wrap {display:grid;gap:16px;padding-top:1px}
+.optional-fields summary {font-size:15px}
+.optional-fields small {font-weight:500;color:var(--muted)}
+.record-summary {display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px;color:var(--muted);font-size:14px}
+.record-summary strong {color:var(--ink)}
+.record-visibility {font-size:13px;font-weight:750;padding:3px 10px;border-radius:99px;background:#eaf2e9;color:#315d45}
+.section-toggle {border:1px solid var(--line);border-radius:18px;background:#fff;margin:14px 0;padding:0 22px;box-shadow:0 3px 17px #294e3609}
+.section-toggle>summary {cursor:pointer;list-style:none;padding:19px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:850;font-size:18px}
+.section-toggle>summary::-webkit-details-marker {display:none}
+.section-toggle>summary::after {content:'＋';font-size:23px;color:var(--primary);line-height:1}
+.section-toggle[open]>summary::after {content:'−'}
+.section-toggle .panel {box-shadow:none;border-radius:13px;margin:0 0 20px;padding:20px}
+.section-toggle .panel.soft-lab {background:#f8faf5}
+.field-note {font-size:13px;color:var(--muted);margin:0}
+@media(min-width:691px){.panel.first-record {max-width:none}.welcome .panel {padding:33px}}
+@media(max-width:690px){
+ main {padding:25px 14px 75px}
+ .topwrap {padding:11px 15px;gap:8px}
+ .grid {grid-template-columns:1fr;gap:13px}
+ .panel {padding:19px;border-radius:17px}
+ .panel.full {grid-column:1}
+ .welcome .panel {padding:20px}
+ .brand {font-size:22px}.brand small {display:none}
+ .account {font-size:12px;gap:7px}.account button {font-size:12px;padding:7px 9px;min-height:42px}
+ .hero {margin-bottom:20px}.hero h1 {font-size:29px}
+ .seg {flex-wrap:wrap}.seg button {flex:1;min-width:0;padding:11px 8px}
+ .button,.button-ghost,.button-warm {min-height:50px}
+ .buttons>.button,.buttons>.button-ghost,.buttons>.button-warm {flex:1 1 auto}
+ .section-toggle {padding:0 16px}
+ .checkbox {padding:13px 12px}
+ textarea {min-height:97px}
+}
+@media(max-width:370px){.brand {font-size:20px}.account>span {max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.panel {padding:16px}.welcome .panel {padding:16px} .hero h1{font-size:27px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+.admin-details {border:0;border-top:1px solid var(--line);background:transparent;border-radius:0;margin:27px 0 0}
+.admin-details>summary {font-size:13px;font-weight:650;color:var(--muted);padding:11px 0}
+.admin-details>summary::after {font-size:17px}
+.admin-details>form {margin:8px 0 14px}
+
+/* Workspace v2: IDE-inspired structure, not an IDE-shaped dark background. */
+:root{--canvas:#f5f7f5;--ink:#243532;--ink-soft:#4e625e;--primary:#216b59;--primary-hover:#165745;--line:#dce5de;--soft:#eef5ef}
+body{background:linear-gradient(165deg,#f5f8f3 0%,#f8f9f6 55%,#f5f6f3 100%);color:var(--ink)}
+header{box-shadow:none}
+.topwrap{max-width:1190px;padding-block:13px}
+.brand{font-size:23px;letter-spacing:-.8px}
+.brand span{color:#27745c}
+main{max-width:1190px;padding-top:36px}
+.hero{margin-bottom:25px}.hero h1{font-size:clamp(30px,4.3vw,42px);font-weight:850;letter-spacing:-1.4px}
+.hero .eyebrow{color:#51786d;font-size:11px;letter-spacing:.15em}
+.hero p{font-size:15px;line-height:1.7}
+.workspace-shell{display:grid;grid-template-columns:225px minmax(0,1fr);align-items:start;gap:22px}
+.workspace-sidebar{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 11px;box-shadow:0 10px 26px #203a2920;position:sticky;top:96px}
+.sidebar-label{display:flex;align-items:center;justify-content:space-between;color:#66817a;font-size:10px;font-weight:850;letter-spacing:.13em;padding:9px 13px 15px}
+.sidebar-version{font-family:ui-monospace,monospace;font-size:10px;color:#9caeaa}
+.workspace-nav{display:flex;flex-direction:column;gap:5px}
+.workspace-link{text-align:left;width:100%;border:1px solid transparent;background:transparent;border-radius:12px;min-height:67px;padding:11px 13px;display:flex;align-items:center;gap:11px;color:#3e5550}
+.workspace-link:hover{background:#f1f7f2}
+.workspace-link.selected{background:#e7f4eb;border-color:#b8d9c7;color:#145443;box-shadow:inset 3px 0 0 #257460}
+.w-icon{font-family:ui-monospace,monospace;display:flex;align-items:center;justify-content:center;flex-shrink:0;width:27px;height:27px;background:#edf3ed;color:#53726b;border-radius:8px;font-size:17px;font-weight:700}
+.selected .w-icon{background:#cce8d9;color:#145b46}
+.w-copy{display:flex;flex-direction:column;min-width:0;gap:0}.w-copy strong{font-size:15px;line-height:1.4;font-weight:780}.w-copy small{font-size:11px;line-height:1.55;color:#6c837d;font-weight:500}
+.sidebar-note{border-top:1px solid var(--line);margin:18px 10px 0;padding-top:17px;color:#4f6f62;line-height:1.7;font-size:12px}
+.sidebar-note small{color:#758b81}.privacy-dot{display:inline-block;width:7px;height:7px;background:#5ca07d;border-radius:50%;margin-right:5px}
+.workspace-content{min-width:0;scroll-margin-top:100px}
+.workspace-section{background:#fff;border:1px solid #d7e3d9;border-radius:19px;overflow:hidden;box-shadow:0 12px 35px #294b3721;min-height:300px}
+.workspace-section[hidden],[data-workspace-view][hidden]{display:none!important}
+.editor-bar{height:45px;display:flex;gap:14px;align-items:center;padding:0 22px;background:#f2f6f2;border-bottom:1px solid #e0eae3;font:600 12px ui-monospace,Consolas,monospace;color:#5e756d;white-space:nowrap}
+.editor-dots{font-size:12px;letter-spacing:2px;color:#c5d4c9}
+.editor-status{margin-left:auto;color:#648779;font-size:10px;letter-spacing:.1em}
+.editor-paper{padding:31px 35px 38px}
+.editor-paper h2{font-size:clamp(25px,2.9vw,30px);letter-spacing:-.9px;line-height:1.32;margin:6px 0 8px}
+.editor-paper>p{font-size:15px;color:#52675f;margin:0 0 26px;line-height:1.7}
+.editor-paper .tag{color:#417c6a;font-weight:850;font-size:11px;letter-spacing:.12em}
+.editor-paper .form{gap:21px}
+.editor-paper textarea{background:#fbfdfb;border:1.5px solid #b8ccc1;border-radius:12px;min-height:125px}
+.editor-paper textarea:focus{background:#fff}
+.editor-paper label{font-size:15px}
+.editor-paper .button{min-width:210px}
+.editor-paper .optional-fields{background:#f9fbf8}
+.editor-paper .checkbox{background:#f5f8f5;border-color:#d8e5dc}
+.editor-paper .record{background:#fbfdfa}
+.editor-paper .panel{border:0;box-shadow:none;padding:3px 0 0;border-radius:0}
+.workspace-footer{font-size:12px;color:#71837b;margin:21px 0;line-height:1.8}
+.lab-shell{border:1px solid #d9e4dc;border-radius:15px;background:#fff;overflow:hidden;margin:17px 0}
+.lab-tabbar{padding:12px 17px;border-bottom:1px solid #e4eae4;background:#f3f6f1;color:#44625b;font:700 13px ui-monospace,Consolas,monospace;display:flex;align-items:center;gap:9px}
+.lab-dot{width:9px;height:9px;border-radius:50%;background:#e5ba6d}.lab-sub{margin-left:auto;color:#7a9188;font-size:11px}
+.lab-layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(240px,.75fr)}
+.lab-editor{background:#fcfdfa;border-right:1px solid #e1eae3;padding:20px 13px 25px 17px;min-width:0}
+.lab-overline{display:flex;justify-content:space-between;color:#5e8272;font-size:11px;font-weight:750;margin-bottom:15px}.lab-overline span{color:#8c9e96}
+.lab-editor .code{background:transparent;border:0;border-radius:0;padding:0;font-size:13px;margin:0;line-height:2.05;white-space:pre;overflow:auto;color:#31534b}
+.code-purple{color:#724fa6;font-weight:700}.code-green{color:#167058}.line-number{color:#9db1a9;user-select:none}
+.lab-controls{display:flex;flex-direction:column;gap:17px;padding:22px;min-width:0}.lab-controls .button{min-width:0}
+.lab-result{background:#f0f8f2;border:1px solid #d5eadb;border-radius:12px;padding:13px 15px;min-height:95px;color:#24574b}.lab-result strong{display:block;font:800 10px ui-monospace,monospace;letter-spacing:.1em;color:#6c8d7d;margin-bottom:9px}
+.lab-result div{font-weight:750;font-size:15px}
+.editor-paper #situation{background:#f7faf7}
+.editor-paper #situation p{font-size:15px}
+.therapist-shell .workspace-content>.grid{gap:14px}
+.therapist-shell .panel{box-shadow:0 10px 28px #294b3717}
+.therapist-shell .panel[data-workspace-view="inbox"]{border-color:#d5e3da;background:#fff;box-shadow:0 12px 35px #294b3721}
+.filter-strip{display:flex;gap:11px;flex-wrap:wrap;margin:18px 0 10px}.filter-strip label{flex:1 1 160px;font-size:12px;gap:5px;color:#506c60}
+.filter-strip select{padding:9px 12px;font-size:14px;background:#fcfefa}
+.therapist-shell .panel[data-workspace-view="accounts"]{grid-column:span 1}
+.therapist-shell .panel[data-workspace-view="drive"]{grid-column:1/-1}
+.welcome .panel{border-radius:22px}.welcome .panel>.tag{font-size:11px;letter-spacing:.1em}
+.welcome #oneLogin{background:#216b59}
+@media(max-width:740px){
+ main{padding:24px 15px 70px}
+ .workspace-shell{display:block}
+ .workspace-sidebar{position:static;margin-bottom:13px;padding:11px}
+ .sidebar-label,.sidebar-note{display:none}
+ .workspace-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .workspace-link{min-height:50px;padding:9px 10px;gap:8px;border-color:#e3ebe4;background:#fbfcfa}
+ .workspace-link.selected{box-shadow:inset 0 -3px 0 #257460}
+ .w-icon{width:24px;height:24px;font-size:15px}
+ .w-copy strong{font-size:13px}.w-copy small{display:none}
+ .workspace-content{scroll-margin-top:77px}
+ .editor-paper{padding:23px 20px 27px}
+ .editor-paper h2{font-size:26px}
+ .editor-paper>p{font-size:14px;margin-bottom:20px}
+ .editor-bar{height:40px;padding:0 14px}
+ .editor-paper .button{width:100%;min-width:0}
+ .editor-paper textarea{min-height:110px}
+ .lab-layout{grid-template-columns:1fr}.lab-editor{border-right:0;border-bottom:1px solid #e1eae3}
+ .lab-controls{padding:17px}.lab-sub{display:none}
+ .therapist-shell .panel[data-workspace-view="accounts"]{grid-column:1/-1}
+ .hero{margin-bottom:19px}
+}
+@media(max-width:350px){.editor-paper{padding:18px 14px}.w-copy strong{font-size:12px}.workspace-link{padding:9px 6px;gap:6px}.hero h1{font-size:29px}}
+@media(prefers-reduced-motion:reduce){.workspace-link{transition:none!important}}
+
+/* WCAG contrast polish for functional microcopy */
+.w-copy small,.sidebar-label,.sidebar-version,.workspace-footer{color:#526b62}
+.editor-status,.lab-sub{color:#486d5b}
+.editor-dots{color:#718b7d}
+
+
+.previewbar{position:sticky;top:0;z-index:200;background:#fff6d8;border-bottom:1px solid #eac979;padding:10px max(14px,calc((100vw - 1080px)/2));font-size:13px;color:#694809;line-height:1.6}
+.previewbar strong{font-weight:900}.preview-switch{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:7px}
+.preview-switch button{font-size:13px;font-weight:800;border:1px solid #beaa6a;border-radius:9px;background:#fff;padding:6px 10px;color:#62481c;min-height:36px}
+.preview-switch button.active{background:#685326;color:white}
+@media(max-width:500px){.previewbar{position:relative;font-size:12px}.preview-switch button{flex:1;white-space:nowrap}}
+
+/* Programming Workspace v3: obvious role selector and readable light-code IDE */
+:root{--canvas:#f3f5fa;--ink:#202d40;--ink-soft:#435366;--muted:#516073;--line:#d8deea;--primary:#285bd4;--primary-hover:#1c49b3;--accent:#edf2ff;--violet:#7551c0;--orange:#a05721}
+body{background:#f4f6fb;color:var(--ink)}
+header{background:#fff;border-bottom-color:#e1e5f0}
+.topwrap{max-width:1260px}
+.brand{font-size:23px;letter-spacing:-1.2px}
+.brand span{color:#325fcb}.brand-code{color:#4e5fc6;font:800 23px ui-monospace,monospace;letter-spacing:-3px;align-self:center;margin-right:10px}
+main{max-width:1260px}
+.hero .eyebrow{color:#5260a2;font-family:ui-monospace,Consolas,monospace}
+.hero h1{font-weight:900}
+.login-page{max-width:1150px;margin:0 auto}
+.login-heading{margin:7px 0 24px}
+.login-heading .eyebrow{font:800 12px ui-monospace,Consolas,monospace;color:#536ab3;letter-spacing:.03em}
+.terminal-cursor{color:#426ef2;animation:blink 1.2s step-end infinite}
+@keyframes blink{50%{opacity:.15}}
+.login-heading h1{font-size:clamp(35px,5vw,54px);line-height:1.17;letter-spacing:-2px;margin:10px 0 12px}
+.login-heading em{font-style:normal;color:#315cc8}
+.code-period{color:#d08b3e}
+.login-heading p{margin:0;color:#526177;font-size:16px}
+.login-layout{display:grid;grid-template-columns:minmax(0,1.07fr) minmax(280px,.93fr);align-items:start;gap:22px}
+.login-window,.login-code-preview{background:#fff;border:1px solid #cfd8e8;border-radius:17px;overflow:hidden;box-shadow:0 13px 34px #1b3a7320}
+.ide-titlebar{min-height:43px;padding:0 15px;display:flex;align-items:center;gap:10px;background:#eef2f9;border-bottom:1px solid #d7deed;font:700 12px ui-monospace,Consolas,monospace;color:#3f5579}
+.ide-dots{display:inline-flex;gap:5px;align-items:center;flex-shrink:0}
+.ide-dots i{display:block;width:9px;height:9px;border-radius:50%;background:#d9928d}.ide-dots i:nth-child(2){background:#e6c176}.ide-dots i:nth-child(3){background:#76bb9b}
+.ide-filename{background:#fff;border-top:2px solid #688af0;align-self:stretch;display:flex;align-items:center;padding:0 18px;margin-left:6px;margin-bottom:-1px;border-right:1px solid #e1e5f0;border-left:1px solid #e1e5f0;color:#2b4972}
+.ide-language{margin-left:auto;font-size:10px;font-weight:800;color:#667a92;letter-spacing:.11em}
+.login-body{padding:25px 28px 22px}
+.login-step{display:flex;align-items:flex-start;gap:12px}
+.login-step h2{margin:0 0 4px;font-size:19px;letter-spacing:-.6px;line-height:1.45}
+.login-step p{margin:0;font-size:13px;color:#526177;line-height:1.5}
+.step-no{font:800 12px ui-monospace,Consolas,monospace;display:flex;align-items:center;justify-content:center;flex:none;background:#e9efff;color:#315bb4;border-radius:7px;width:32px;height:32px}
+.role-picker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0 27px}
+.role-choice{appearance:none;border:1.5px solid #d6deea;background:#fff;padding:17px 7px 13px;border-radius:13px;display:flex;align-items:center;flex-direction:column;gap:3px;color:#374963;min-height:119px;text-align:center;position:relative;transition:border-color .12s,background .12s,box-shadow .12s}
+.role-choice:hover{border-color:#7693d6;background:#f7f9ff}
+.role-choice.active{border:2px solid #3868d7;background:#eff4ff;box-shadow:0 0 0 3px #4774dc1c;color:#213e87}
+.role-choice.active:after{content:'✓';position:absolute;right:10px;top:8px;color:#2d61cd;font-size:13px;font-weight:900}
+.role-glyph{width:41px;height:38px;display:grid;place-items:center;background:#edf0fa;color:#5267a9;border-radius:10px;font:900 17px ui-monospace,Consolas,monospace;letter-spacing:-1px;margin-bottom:2px}
+.role-choice.active .role-glyph{background:#dce8ff;color:#2854b9}
+.role-choice strong{font-size:16px;font-weight:900}
+.role-choice small{font-size:12px;color:#586a81}
+.step-two{margin-bottom:16px}
+.login-cta{background:#285bd4;border:1px solid #285bd4;border-radius:11px;color:#fff;display:flex;align-items:center;justify-content:center;gap:11px;width:100%;min-height:55px;padding:11px 15px;font-weight:900;font-size:17px;box-shadow:0 5px 12px #2d5fca2b}
+.login-cta:hover{background:#214bb1}.login-cta:disabled{background:#80899a;border-color:#80899a;box-shadow:none}
+.cta-play{font-size:13px;background:#ffffff24;display:grid;place-items:center;width:29px;height:29px;border-radius:7px}
+.login-cta>span:last-child{margin-left:auto}
+.signup-options{margin:19px 0 0;border:0;border-top:1px solid #e0e6f0;border-radius:0;background:#fff;padding:5px 0 0}
+.signup-options summary{padding:13px 4px;color:#355a9f;font-size:14px;font-weight:800}
+.signup-options[open] summary{margin-bottom:16px}
+.signup-options .seg button{border-color:#b9c7e2}
+.signup-options .seg button.on{background:#e5eeff;color:#2954ac;border-color:#6289df}
+.signup-options>.form{margin-top:17px}
+.login-privacy{font-size:12px;color:#4d5e77;line-height:1.6;margin-top:16px;display:flex;gap:8px;align-items:start}
+.ide-statusbar{height:28px;background:#315ac0;color:white;font:700 10px ui-monospace,Consolas,monospace;display:flex;align-items:center;justify-content:space-between;padding:0 13px;gap:10px}
+.live-dot{display:inline-block;width:7px;height:7px;background:#a4ecc4;border-radius:50%;margin-right:5px}
+.login-code-preview{min-height:390px}
+.code-lines{padding:39px 17px 46px;background:#fbfcff;font:14px/2.35 ui-monospace,'Cascadia Code',Consolas,monospace;color:#243854;white-space:nowrap;overflow:auto}
+.code-lines .ln{display:inline-block;width:35px;user-select:none;color:#7e91aa}
+.syntax-purple{color:#6d3fbd;font-weight:800}.syntax-blue{color:#0e67ad;font-weight:700}.syntax-orange{color:#a84c18}.syntax-gray{color:#63815f}
+.ide-terminal{border-top:1px solid #d5dfec;background:#f1f6fb;padding:0 16px 18px;font:12px/2 ui-monospace,Consolas,monospace;color:#40526b}
+.terminal-header{color:#48628a;display:flex;align-items:center;gap:7px;border-bottom:1px solid #dce3f0;font-size:10px;font-weight:900;letter-spacing:.06em;margin-bottom:10px;height:38px}
+.terminal-ready{margin-left:auto;color:#227655;font-size:10px}.prompt{color:#2972c1;margin-right:8px;font-weight:900}
+/* Make the entire application feel like a light IDE: explorer/sidebar, tabs, syntax and statusbar */
+.workspace-sidebar{border-radius:13px;background:#fafdff;border-color:#d2ddec;box-shadow:0 8px 22px #17357a12}
+.sidebar-label{font-family:ui-monospace,Consolas,monospace;color:#526382}
+.workspace-link{border-radius:8px}
+.workspace-link.selected{background:#e8efff;border-color:#a9bdee;color:#214bb0;box-shadow:inset 3px 0 0 #3b68d2}
+.workspace-link.selected .w-icon{color:#345dc2;background:#dce8ff}
+.w-icon{font:800 14px ui-monospace,Consolas,monospace;background:#edf1fb;color:#5265a0}
+.workspace-section{border-radius:13px;border-color:#cfdced;box-shadow:0 12px 28px #27448117}
+.editor-bar{background:#e9eef9;border-bottom-color:#d0dced;color:#374d7a;height:47px;padding:0 18px;font-size:12px}
+.editor-bar>span:nth-child(2){background:white;align-self:stretch;border-top:2px solid #4b74d8;border-left:1px solid #d8e2f0;border-right:1px solid #d8e2f0;padding:0 17px;display:flex;align-items:center;margin-bottom:-1px}
+.editor-status{font:800 10px ui-monospace,Consolas,monospace;color:#3659a6}
+.editor-paper{background:linear-gradient(to right,#f6f8fe 0px,#f6f8fe 44px,#fff 44px,#fff 100%);padding-left:75px}
+.editor-paper>.tag{font-family:ui-monospace,Consolas,monospace;color:#5267ac}
+.editor-paper h2{color:#202f4d}
+.editor-paper .button{background:#285bd4}.editor-paper .button:hover{background:#214cb5}
+.editor-paper textarea,.editor-paper input,.editor-paper select{border-color:#aabbd7;background:#fff}
+.editor-paper .optional-fields{background:#fbfcff;border-color:#d4e0f5}
+.editor-paper .checkbox{background:#f4f7ff;border-color:#d5e0f5}
+.editor-paper .panel{background:transparent}
+.lab-shell{border-color:#d1dff0}.lab-tabbar{background:#eaf0fd;color:#3555a6}.lab-editor{background:#fff}
+.lab-result{background:#eff5ff;border-color:#d4e3ff;color:#274a90}
+.therapist-shell .panel[data-workspace-view="inbox"]{background:#fff;border-color:#c8d6ee}
+.therapist-shell .panel{border-color:#d7e0ef}
+.panel.highlight{border-color:#88a6e5}
+.button{background:#2c60d0}.button:hover{background:#224eb1}
+.button-ghost{border-color:#adc3e5;color:#2552a3}
+.role-chip{background:#e7eeff!important;color:#355cb2!important}
+.field-note,.sidebar-note{color:#4a5e77}
+.previewbar{background:#fff8e9;color:#74511c;border-bottom-color:#e7d6a0}
+@media(max-width:900px){.login-layout{grid-template-columns:1fr}.login-code-preview{display:none}.login-page{max-width:600px}.login-heading h1{font-size:clamp(35px,6vw,45px)}}
+@media(max-width:740px){.editor-paper{background:#fff;padding-left:20px}.login-body{padding:21px 19px 19px}.login-heading{margin-bottom:20px}.login-heading h1{font-size:36px}.login-window{border-radius:14px}.role-choice{min-height:105px;padding:14px 4px 10px}.role-glyph{width:35px;height:32px;font-size:14px}.role-choice strong{font-size:15px}.role-choice small{font-size:11px}.login-privacy{font-size:12px}.ide-statusbar>span:last-child{font-size:9px}.editor-bar{padding:0 12px}.editor-bar>span:nth-child(2){padding:0 9px}.workspace-sidebar{padding:10px}.workspace-link.selected{box-shadow:inset 0 -3px 0 #3b68d2}}
+@media(max-width:370px){.role-picker{gap:6px}.role-choice{padding-left:1px;padding-right:1px}.role-choice strong{font-size:14px}.role-choice small{font-size:10px}.login-heading h1{font-size:33px}.login-body{padding:18px 13px}.editor-paper{padding-left:14px}}
+@media(prefers-reduced-motion:reduce){.terminal-cursor{animation:none}}
+
+/* 2026-10-10 login viewport QA: role picker + CTA above first fold, without dark UI */
+main:has(.login-page){padding-top:16px;padding-bottom:18px}
+body:has(.login-page) .topwrap{padding-top:8px;padding-bottom:8px}
+body:has(.login-page) .previewbar{padding-top:6px;padding-bottom:6px;font-size:12px;line-height:1.45}
+.login-page{max-width:1150px}
+.login-heading{margin:0 0 12px}
+.login-heading .eyebrow{font-size:11px}
+.login-heading h1{font-size:clamp(29px,3.3vw,39px);line-height:1.2;letter-spacing:-1.3px;margin:2px 0 4px}
+.login-heading h1 br{display:none}
+.login-heading p{font-size:14px;line-height:1.4}
+.login-layout{gap:16px;grid-template-columns:minmax(0,1.08fr) minmax(260px,.92fr)}
+.login-window,.login-code-preview{border-radius:13px}
+.ide-titlebar{min-height:37px;padding:0 12px}
+.login-body{padding:15px 20px 10px}
+.login-step{gap:9px;align-items:center}
+.login-step h2{font-size:16px;margin:0 0 1px;line-height:1.35}
+.login-step p{font-size:12px;line-height:1.4}
+.step-no{width:27px;height:27px;font-size:11px}
+.role-picker{margin:11px 0 13px;gap:9px}
+.role-choice{min-height:88px;padding:8px 4px 7px;gap:1px;border-radius:10px}
+.role-choice.active:after{top:4px;right:5px}
+.role-glyph{height:29px;width:34px;font-size:15px;margin-bottom:1px}
+.role-choice strong{font-size:15px}
+.role-choice small{font-size:11px}
+.step-two{margin-bottom:10px}
+.login-cta{min-height:48px;font-size:15px;padding:8px 12px}
+.cta-play{width:26px;height:26px}
+.signup-options{margin:10px 0 0;padding-top:2px}
+.signup-options summary{padding:8px 4px;font-size:12px}
+.admin-details{margin-top:0}
+.admin-details>summary{padding:5px 0;font-size:11px}
+.login-privacy{font-size:11px;margin-top:5px;line-height:1.35}
+.ide-statusbar{height:25px;font-size:9px}
+.login-code-preview{min-height:0}
+.code-lines{padding:19px 15px 17px;font-size:12px;line-height:2.1}
+.ide-terminal{padding:0 13px 10px;font-size:11px;line-height:1.6}
+.terminal-header{height:30px;margin-bottom:4px}
+@media(max-width:900px){
+ .login-layout{grid-template-columns:1fr}
+ .login-page{max-width:650px}
+ .login-heading h1{font-size:clamp(28px,4.5vw,35px)}
+}
+@media(max-width:740px){
+ main:has(.login-page){padding:12px 12px 15px}
+ body:has(.login-page) .topwrap{padding:7px 12px}
+ body:has(.login-page) .previewbar{padding:5px 12px;font-size:10.5px;line-height:1.3}
+ .login-heading{margin-bottom:10px}
+ .login-heading .eyebrow{font-size:10px}
+ .login-heading h1{font-size:30px;margin:1px 0 3px;line-height:1.16}
+ .login-heading p{font-size:12px}
+ .login-body{padding:12px 12px 7px}
+ .login-step h2{font-size:15px}
+ .login-step p{font-size:11px}
+ .role-picker{margin:9px 0 10px;gap:6px}
+ .role-choice{min-height:82px;padding:7px 3px}
+ .role-glyph{width:31px;height:26px;font-size:13px}
+ .role-choice strong{font-size:14px}
+ .role-choice small{font-size:10px}
+ .step-two{margin-bottom:8px}
+ .login-cta{min-height:46px}
+ .signup-options{margin-top:7px}
+ .signup-options summary{padding:7px 2px}
+ .login-privacy{font-size:10.5px}
+ .ide-statusbar{height:23px;font-size:8px}
+}
+.login-step h2{font-size:17px}
+.login-step p{font-size:13px}
+.role-choice{min-height:94px}
+.role-choice strong{font-size:16px}
+.role-choice small{font-size:12px}
+.login-cta{font-size:16px}
+.login-privacy{font-size:12px}
+@media(max-width:740px){.login-step h2{font-size:16px}.login-step p{font-size:12px}.role-choice{min-height:85px}.role-choice strong{font-size:15px}.role-choice small{font-size:11px}.login-privacy{font-size:11px}}
+@media(max-width:370px){.login-heading h1{font-size:27px}.role-choice{min-height:79px}.login-body{padding:10px 10px 6px}}
+
+/* Choice lab: low-pressure, light programming playground (no mental-health logging) */
+.choice-lab{border:1px solid #dce4ee;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 11px 32px #3146640b;margin-top:12px}
+.choice-top{height:38px;padding:0 18px;background:#f7f9fd;border-bottom:1px solid #e6ebf2;display:flex;align-items:center;justify-content:space-between;gap:8px;font:800 10px ui-monospace,'Cascadia Code',monospace;color:#617398;letter-spacing:.06em}
+.choice-top-label{display:flex;align-items:center;gap:8px}.choice-top-label span{color:#3cae8c}
+.choice-count{font:800 10px ui-monospace,monospace;color:#9aa8bb}
+.choice-tabs{display:flex;gap:7px;padding:12px 16px 2px;background:#fff}
+.choice-tabs button{border:1px solid #e2e8f2;background:#fafbfe;border-radius:10px;padding:9px 14px;font:750 13px inherit;color:#62708d;min-height:42px;flex:1;white-space:nowrap}
+.choice-tabs button.selected{background:#ecf2ff;border-color:#9caeea;color:#344fac;box-shadow:inset 0 -2px 0 #5675db}
+.choice-tabs button:hover{border-color:#9fb4df}
+.choice-scene{margin:13px 16px 0;border-radius:15px;min-height:133px;display:flex;align-items:center;gap:19px;padding:19px 24px;position:relative;overflow:hidden}
+.choice-mint{background:linear-gradient(120deg,#e9f8f1,#f2faf8);color:#235e50}
+.choice-lavender{background:linear-gradient(120deg,#eeeefa,#f6f6ff);color:#464a91}
+.choice-peach{background:linear-gradient(120deg,#fff0e7,#fff7ed);color:#915238}
+.choice-scene-art{position:relative;flex:0 0 100px;height:77px;display:flex;align-items:center;justify-content:center}
+.choice-art-chip{background:#fff;border:2px solid currentColor;box-shadow:0 4px 0 #0000000c;color:inherit;border-radius:12px;font:900 19px ui-monospace,monospace;padding:12px 15px;transform:rotate(-7deg);z-index:2}
+.choice-art-route{position:absolute;width:65px;height:2px;background:currentColor;opacity:.28;transform:rotate(32deg);left:53px;top:46px}
+.choice-art-node{position:absolute;right:-5px;bottom:0;background:#ffffffbe;border:1px solid #ffffffdc;border-radius:50%;width:28px;height:28px;display:grid;place-items:center;font:800 15px ui-monospace,monospace}
+.choice-scene-text{position:relative;z-index:1;min-width:0}
+.choice-kicker{font:800 10px ui-monospace,monospace;letter-spacing:.12em;opacity:.75}
+.choice-scene-text h3{font-size:clamp(22px,2.5vw,27px)!important;line-height:1.35;margin:6px 0 5px!important;letter-spacing:-.8px}
+.choice-scene-text p{font-size:14px!important;line-height:1.5!important;color:inherit!important;margin:0!important;opacity:.86}
+.choice-columns{display:grid;grid-template-columns:minmax(0,1.06fr) minmax(0,.94fr);gap:13px;padding:14px 16px 11px}
+.choice-actions{min-width:0}.choice-section-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:0 2px 11px}
+.choice-section-head strong{font-size:16px}.choice-section-head span{font-size:11px;color:#78879b}
+.choice-options{display:grid;gap:8px}
+.choice-option{width:100%;border-radius:11px;border:1.5px solid #e1e7ed;background:#fff;min-height:51px;display:flex;align-items:center;gap:12px;text-align:left;color:#273b50;padding:7px 14px;transition:background .13s,border-color .13s}
+.choice-option:hover{background:#f7faff;border-color:#a5b9ea}.choice-option:focus-visible{outline:3px solid #4968ce;outline-offset:2px}
+.choice-option.picked{background:#f1f5ff;border-color:#5c77dc}
+.choice-option-icon{display:grid;place-items:center;flex:0 0 32px;height:32px;border-radius:9px;background:#f0f3f8;color:#5266a2;font-size:17px}
+.choice-option.picked .choice-option-icon{background:#dbe5ff;color:#344aa6}
+.choice-option strong{font-size:14px;font-weight:770;line-height:1.35}.choice-arrow{margin-left:auto;font-size:14px;color:#8394ac}
+.choice-result{border:1px solid #e1e6f0;border-radius:13px;overflow:hidden;background:#fafbff;min-height:186px;display:flex;flex-direction:column}
+.choice-console-top{height:35px;background:#f1f4fa;border-bottom:1px solid #e0e5f0;display:flex;align-items:center;gap:9px;padding:0 12px;font:700 11px ui-monospace,monospace;color:#5a6c89}
+.choice-console-top>span:first-child{color:#b6c3d3;font-size:10px;letter-spacing:2px}
+.choice-console-status{margin-left:auto;color:#39856b;font-size:10px}
+.choice-console-content{display:flex;align-items:center;gap:9px;padding:17px 15px;min-height:73px;line-height:1.55;font-size:14px;color:#2a4264;font-weight:700;overflow-wrap:anywhere}
+.choice-cursor{font:900 19px ui-monospace,monospace;color:#5076cf}
+.choice-code{margin-top:auto;white-space:pre-wrap;overflow-wrap:anywhere;border-top:1px solid #e4eaf2;padding:11px 15px 13px;color:#63738f;font:550 11.5px/1.8 ui-monospace,'Cascadia Code',monospace}
+.choice-ln{color:#b2bccc}.choice-keyword{color:#7658b5;font-weight:800}
+.choice-bottom{padding:5px 17px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;color:#82909d;font-size:11px}
+.choice-reset{border:0;background:transparent;color:#5267a8;font-size:12px;font-weight:800;padding:7px 9px;min-height:36px}
+.choice-reset:hover{text-decoration:underline}
+.editor-paper:has(.choice-lab){padding:19px 21px 18px}
+.editor-paper:has(.choice-lab)>p{margin-bottom:10px;font-size:13px}
+.editor-paper:has(.choice-lab)>h2{font-size:22px;margin-bottom:3px}
+.editor-paper #situation.choice-lab{background:#fff}
+@media(max-width:920px){.choice-columns{grid-template-columns:1fr}.choice-options{grid-template-columns:repeat(3,minmax(0,1fr))}.choice-option{padding:9px 8px;flex-direction:column;min-height:92px;gap:5px;align-items:center;text-align:center}.choice-arrow{display:none}}
+@media(max-width:590px){.choice-lab{border-radius:13px;margin-top:10px}.choice-top{padding:0 12px;height:32px}.choice-tabs{padding:9px 10px 0;gap:5px}.choice-tabs button{padding:7px 4px;min-height:40px;font-size:11px}.choice-scene{margin:9px 10px 0;padding:13px 13px;gap:8px;min-height:110px;border-radius:12px}.choice-scene-art{flex-basis:52px;transform:scale(.7);transform-origin:center}.choice-art-node{right:-24px}.choice-scene-text h3{font-size:18px!important;margin:3px 0!important}.choice-scene-text p{font-size:12px!important}.choice-kicker{font-size:9px}.choice-columns{padding:11px 10px 8px;gap:10px}.choice-section-head{margin-bottom:7px}.choice-section-head strong{font-size:14px}.choice-options{gap:5px}.choice-option{min-height:86px;padding:8px 2px}.choice-option strong{font-size:11px}.choice-option-icon{flex-basis:28px;height:28px;font-size:15px}.choice-result{min-height:120px}.choice-console-content{min-height:60px;padding:11px 13px;font-size:13px}.choice-code{padding:8px 13px;font-size:10px}.choice-bottom{padding:0 10px 6px;font-size:10px}.editor-paper:has(.choice-lab){padding:15px 12px}.editor-paper:has(.choice-lab)>h2{font-size:21px}.editor-paper:has(.choice-lab)>p{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.choice-option{transition:none}}
+
+/* v5 content-first layout, not a symptom tracking dashboard */
+.entry-v5{gap:13px}.soft-intro{border:1px solid #e3e8f3;background:#f7f9ff;color:#2b4163;border-radius:13px;padding:14px 17px;display:flex;flex-direction:column;gap:3px}.soft-intro strong{font-size:16px}.soft-intro span{font-size:13px;line-height:1.5;color:#64718a}
+.entry-v5 label{font-size:15px}.entry-v5 label small{font-size:12px;color:#758198;font-weight:550}.entry-v5 textarea{background:#fff;min-height:100px;border-color:#d5dce9}.entry-v5 textarea[name=note]{min-height:145px}
+.form-switcher{display:flex;align-items:center;gap:7px}.format-btn{border:1px solid #dde4ef;border-radius:10px;background:#fff;padding:8px 14px;min-height:43px;color:#53647c;font-weight:750}.format-btn.active{background:#eaf0ff;border-color:#8fa3ed;color:#334eb5}.format-btn:hover{background:#f4f6fc}
+#drawPanel[hidden],#textPanel[hidden],#sharePicker[hidden]{display:none!important}
+.sketch-board{border:1px solid #d7dfec;border-radius:13px;overflow:hidden;background:#fff;max-width:760px;touch-action:none}.sketch-board canvas{display:block;width:100%;height:auto;aspect-ratio:2/1;touch-action:none;cursor:crosshair}.sketch-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}.sketch-actions span{margin-right:auto;font-size:12px;color:#6f7b8c}.sketch-actions button{padding:7px 12px;min-height:38px;font-size:12px}
+.privacy-panel{border:1px solid #dbe7e1;border-radius:13px;padding:10px;background:#fbfdfb}.privacy-panel .checkbox{border:0;background:transparent;padding:4px 5px;align-items:center}.privacy-panel .checkbox span small{display:block;font-size:12px;color:#677f75;font-weight:500;margin-top:1px}.share-picker{border-top:1px solid #e2ebe7;margin-top:6px;padding:13px 6px 4px;display:flex;flex-wrap:wrap;gap:8px}.share-picker label{display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:7px 10px;border:1px solid #d6e1dd;border-radius:10px;background:white;white-space:nowrap}.share-picker input{width:17px;height:17px;accent-color:#3a65cc}.share-picker p{font-size:12px;line-height:1.6;flex:1 1 100%;margin:0 0 3px;color:#6a796f}
+.share-choices[hidden]{display:none!important}.share-choices{margin-top:9px;padding:12px;background:#f8faff;border:1px solid #dfe6f7;border-radius:11px;display:flex;flex-wrap:wrap;gap:8px}.share-choices>p{flex:0 0 100%;margin:0;font-size:12px}.share-choices label{display:flex;align-items:center;gap:6px;font-size:13px}.share-choices button{flex:0 0 100%;min-height:42px;font-size:13px}.entry-save{min-width:200px;align-self:flex-start}.archive-record p{border-left:2px solid #dfe6f1;padding-left:10px;margin:10px 0;white-space:pre-wrap;line-height:1.65}.archive-record b{font-size:12px;letter-spacing:.01em;color:#67738e}.sketch-record{padding:12px;border:1px solid #e2e6ed;border-radius:13px;margin:10px 0;background:white}.sketch-record canvas{display:block;width:100%;max-width:420px;aspect-ratio:2/1;border:1px solid #e6ebf0;border-radius:7px}.sketch-mini-label{font-size:12px;margin-bottom:6px;color:#67738e}
+.empty-state{border:1px dashed #cfdae9;background:#fafbfd;border-radius:14px;padding:24px;color:#79859a;font-size:14px}
+.case-panel{border:1px solid #dae2ef!important;padding:24px!important}.case-panel .form{max-width:750px}.case-panel textarea{min-height:75px}.case-panel .tag{color:#4f64a2}
+@media(max-width:700px){.editor-paper{padding:16px}.soft-intro{padding:11px}.entry-v5{gap:11px}.entry-save{width:100%}.share-picker{gap:6px}.share-picker label{padding:7px}.case-panel{padding:16px!important}}
+
+/* Parent v6: low-pressure one-minute notes and compact clinician inbox */
+.parent-easy-form{gap:13px}
+.parent-start{border:1px solid #d8e4fa;border-radius:14px;background:#f5f8ff;padding:15px 17px;display:flex;flex-direction:column;gap:4px}
+.parent-duration{font-size:11px;color:#4867b6;font-weight:850;letter-spacing:.04em}
+.parent-start strong{font-size:18px;color:#273a61;line-height:1.4}
+.parent-start>span:last-child{font-size:13px;color:#5c6c81}
+.parent-prompts{display:grid;gap:9px}
+.parent-prompts-title{color:#344c6c;font-size:13px;font-weight:800}
+.parent-prompt-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.parent-prompt{min-height:38px;padding:7px 11px;background:white;color:#3c5685;border:1px solid #cdd8eb;border-radius:10px;font-size:13px;font-weight:700}
+.parent-prompt:hover,.parent-prompt.selected{background:#e9f0ff;border-color:#788fdb;color:#29478d}
+.parent-tip-result{border-left:3px solid #9db2e8;background:#f7f9fd;border-radius:4px 9px 9px 4px;padding:9px 12px;color:#425779;font-size:13px;line-height:1.5}
+.parent-main-label textarea{min-height:95px;resize:vertical}
+.parent-guide{border:1px solid #dde5ef;border-radius:13px;background:white}
+.parent-guide summary{cursor:pointer;font-size:14px;font-weight:800;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 14px;color:#375c76}
+.parent-guide summary::-webkit-details-marker{display:none}
+.parent-guide summary span{font-size:11px;font-weight:500;color:#71849b}
+.parent-guide summary:after{content:'⌄';font-size:19px;color:#617ba8}
+.parent-guide[open] summary:after{content:'⌃'}
+.parent-guide-body{padding:1px 14px 13px;border-top:1px solid #edf0f5;font-size:13px;line-height:1.65;color:#52667a}
+.parent-guide-body>p{margin:11px 0;color:#556b7b;font-size:13px}
+.parent-example{margin-top:9px;background:#f3f8f7;border-radius:10px;padding:11px 12px}
+.parent-example span{font-size:11px;font-weight:800;color:#3d7865}.parent-example p{margin:4px 0 0;font-size:13px;color:#2d544b}
+.parent-example.quiet{background:#f8f8fb}.parent-example.quiet span{color:#788196}.parent-example.quiet p{color:#657184}
+.parent-guide-tail{font-size:12px!important}
+.parent-more{margin-top:0}
+.parent-privacy{margin-top:0}
+.parent-easy-form .parent-privacy .checkbox span{font-size:14px}
+.parent-easy-form .share-picker p{order:-1;flex:1 1 100%}
+.parent-nudge{font-size:12px!important;margin:0!important;color:#778595!important}
+.parent-inbox-record{padding:14px 16px;margin:9px 0;border-color:#e2e8f1;background:#fff}
+.parent-inbox-record .meta{font-weight:750;color:#5b6b8a;margin-bottom:7px}
+.parent-inbox-skim{font-size:14px;color:#283f57;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.parent-inbox-details{border-top:1px solid #edf0f5;margin-top:10px}
+.parent-inbox-details summary{cursor:pointer;padding:8px 0 1px;font-size:12px;color:#536d9b;font-weight:750}
+.parent-inbox-full{padding:9px 0;font-size:13px}
+.parent-inbox-policy{font-size:13px!important;margin:9px 0 3px!important;color:#526986!important}
+@media(max-width:690px){.parent-start{padding:12px}.parent-start strong{font-size:17px}.parent-prompt{font-size:12px;min-height:37px;padding:7px 9px}.parent-guide summary{font-size:13px}.parent-inbox-record{padding:12px}}
+
+/* Parent v6 first-action refinement: optional help follows the short note */
+.parent-easy-form{gap:12px}
+.parent-main-label textarea{min-height:94px}
+.parent-inline-tip{font-size:12px!important;line-height:1.5!important;color:#697b89!important;margin:-5px 0 0!important}
+.parent-guide-body .parent-prompts{margin-top:12px}
+.parent-guide-body>.parent-example{margin-top:8px}
+@media(max-width:690px){.parent-easy-form{gap:10px}.parent-main-label textarea{min-height:86px}}
+
+/* Parent v7 - clinical-form benchmarking: event date separate from creation timestamp */
+.parent-when{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,.65fr);gap:12px;align-items:end}
+.parent-when label{gap:5px}.parent-when input{min-height:47px;padding:9px 12px;color:#203436;font-size:15px;line-height:1.35}
+.parent-when .parent-time-field{display:flex;flex-direction:column;justify-content:end}.parent-time-field small{display:inline;font-size:11px;color:#788492;font-weight:550}
+.parent-date-hint{margin:-5px 0 2px!important;font-size:12px!important;line-height:1.55!important;color:#67798c!important}
+.parent-more select{min-height:43px}
+@media(max-width:370px){.parent-when{grid-template-columns:1fr 133px;gap:7px}.parent-when input{padding:8px 7px;font-size:13px}}
+@media(max-width:740px){body:has(.parent-easy-form) .hero{display:none}body:has(.parent-easy-form) main{padding-top:10px}body:has(.parent-easy-form) .editor-paper>p{display:none}body:has(.parent-easy-form) .editor-paper{padding-top:16px}}
+
+/* Parent calendar: three views, no symptom scores or mandatory streaks */
+main:has(#parentCalendar:not([hidden])) .hero{display:none}
+main:has(#parentCalendar:not([hidden])){padding-top:14px}
+.parent-calendar-caption{margin-bottom:15px!important;font-size:13px!important}
+.calendar-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:14px 0}
+.calendar-modes{display:inline-flex;align-items:center;background:#f0f3fb;border:1px solid #dbe3f0;border-radius:11px;padding:3px;gap:3px}
+.calendar-modes button{border:0;background:transparent;min-height:37px;min-width:45px;border-radius:8px;color:#556786;font-size:13px;font-weight:750}
+.calendar-modes button.current{background:white;box-shadow:0 2px 8px #2b395c16;color:#314bb5}
+.calendar-date-nav{display:flex;align-items:center;gap:5px}
+.calendar-date-nav strong{display:block;min-width:130px;text-align:center;color:#283952;font-size:14px;white-space:nowrap}
+.calendar-date-nav button{border:1px solid #dae1ed;background:#fff;color:#374962;min-width:36px;min-height:37px;border-radius:9px;font-weight:800}
+.calendar-date-nav button:hover,.calendar-modes button:hover{background:#eef2fc}
+.calendar-date-nav .calendar-today{font-size:12px;font-weight:700;padding:5px 9px}
+.calendar-weekdays,.calendar-month-grid,.calendar-week-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;min-width:0}
+.calendar-weekdays{margin-bottom:6px}
+.calendar-weekdays span,.calendar-weekday{text-align:center;font-size:12px;font-weight:750;color:#7a869d}
+.calendar-month-grid{margin-bottom:15px}
+.calendar-day{min-width:0;position:relative;display:flex;align-items:flex-start;flex-direction:column;gap:3px;justify-content:flex-start;padding:7px 7px;min-height:63px;background:#fff;border:1px solid #e1e6ef;border-radius:9px;text-align:left;color:#344463;cursor:pointer}
+.calendar-day:hover{background:#f3f6ff;border-color:#bdc9eb}
+.calendar-day.is-outside{opacity:.43;background:#f9fafc}
+.calendar-day.is-today .calendar-day-num{text-decoration:underline;text-decoration-color:#5b6acc;text-underline-offset:3px;text-decoration-thickness:2px}
+.calendar-day.is-selected{background:#ebefff;border:2px solid #5966d6;padding:6px 6px}
+.calendar-day-num{font-size:14px;font-weight:750;line-height:1.25}
+.calendar-day-count{font-size:11px;background:#dfe7ff;color:#394f9c;padding:1px 5px;border-radius:5px;white-space:nowrap;font-weight:760}
+.calendar-week-grid{margin:14px 0 17px;gap:6px}
+.calendar-week-col{display:flex;flex-direction:column;gap:7px;min-width:0}
+.calendar-week-col .calendar-day{min-height:95px}
+.calendar-day-overview{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f4f6fb;padding:13px 15px;border-radius:12px;border:1px solid #e2e7f2;margin:13px 0}
+.calendar-day-title{font-weight:780;color:#344762}
+.calendar-day-summary{font-size:12px;color:#63728b}
+.calendar-details{border-top:1px solid #e2e7ef;margin-top:15px;padding-top:15px}
+.calendar-details-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:11px}
+.calendar-details-heading strong{font-size:15px;color:#2d415f}
+.calendar-details-heading button:disabled{opacity:.45;cursor:not-allowed}
+.calendar-details-heading button{font-size:12px;font-weight:700;border:1px solid #d4ddf4;background:#f7f9ff;color:#3b51a5;padding:8px 10px;min-height:36px;border-radius:9px}
+.calendar-empty{font-size:13px;color:#77869b;background:#fafbfe;border:1px dashed #dbe2ee;border-radius:10px;padding:17px 14px;margin:0}
+.calendar-record{border:1px solid #dfe5ef;border-radius:11px;overflow:hidden;margin:9px 0;background:#fff}
+.calendar-record summary{list-style:none;cursor:pointer;display:flex;gap:10px;justify-content:space-between;align-items:center;padding:11px 13px}
+.calendar-record summary::-webkit-details-marker{display:none}
+.calendar-record-copy{min-width:0;display:flex;flex-direction:column;gap:5px}
+.calendar-record-snippet{font-size:14px;color:#303f58;overflow-wrap:anywhere;line-height:1.55;font-weight:650}
+.calendar-record-meta{font-size:11px;color:#697a91}
+.calendar-open{font-size:11px;color:#4562b3;font-weight:700;white-space:nowrap}
+.calendar-record-full{background:#fafbfe;padding:13px;border-top:1px solid #e4e8ef;overflow-wrap:anywhere}
+.calendar-created{font-size:11px;color:#7888a0}
+@media(max-width:740px){.parent-calendar-wrap{padding:15px 12px 20px}.calendar-toolbar{gap:8px}.calendar-date-nav{flex:1;justify-content:space-between}.calendar-date-nav strong{min-width:0;font-size:13px}.calendar-weekdays,.calendar-month-grid,.calendar-week-grid{gap:3px}.calendar-day{min-height:52px;padding:5px 3px;border-radius:6px}.calendar-day.is-selected{padding:4px 2px}.calendar-day-num{font-size:12px}.calendar-day-count{font-size:10px;padding:0 3px}.calendar-week-col .calendar-day{min-height:67px}.calendar-details-heading strong{font-size:13px}}
+@media(max-width:370px){.calendar-date-nav button{min-width:30px;padding:3px}.calendar-date-nav strong{font-size:12px}.calendar-modes button{min-width:39px}.calendar-day{min-height:48px}.calendar-day-num{font-size:11px}.calendar-day-count{font-size:9px}}
+
+
+/* v9: factual parent observation, no tic/OCD labels on recording screen */
+.parent-easy-form .parent-location{display:flex;flex-direction:column;gap:7px;font-size:14px;font-weight:750;color:#263856}
+.parent-easy-form input[name="place"]{width:100%;max-width:500px;min-height:43px;border:1px solid #d4ddec;border-radius:10px;padding:10px 12px;font:inherit;color:#243750;background:#fff}
+.observed-type{border:1px solid #e1e7f1;border-radius:13px;padding:12px 13px 10px;margin:0;background:#fafbfe;min-width:0}
+.observed-type legend{font-size:14px;font-weight:800;color:#293b5b;padding:0 6px}
+.observed-type legend small{font-weight:500;color:#697993;font-size:11px}
+.observed-type-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.observed-type-chip{display:flex!important;align-items:center;justify-content:center;gap:6px;min-width:0;min-height:44px;border:1px solid #d9e2ef;border-radius:10px;padding:7px;background:white;cursor:pointer;font-weight:700!important;font-size:13px!important;color:#384a66}
+.observed-type-chip:has(input:checked){background:#eaf0ff;border-color:#7890ea;color:#2844a1}
+.observed-type-chip:focus-within{outline:2px solid #4d6bce;outline-offset:2px}
+.observed-type-chip input{width:16px;height:16px;accent-color:#4968cb;margin:0;flex-shrink:0}
+.observed-type-chip .signal-glyph{display:none}
+.observed-type>p{font-size:12px;color:#67768d;line-height:1.55;margin:8px 1px 0}
+.parent-easy-form .parent-main-label textarea{min-height:104px}
+.parent-easy-form .parent-date-hint{margin-top:-7px}
+.observed-facts{display:grid;gap:8px}.observed-fact-row{display:grid;grid-template-columns:145px minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid #e9edf5;font-size:13px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.observed-fact-row strong{color:#425171}.clinical-neutral{background:#f6f8fd;border:1px solid #e4e9f2;padding:10px 12px;border-radius:10px;color:#566680;font-size:12px;line-height:1.5;margin:0}
+@media(max-width:700px){.observed-type-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.observed-type{padding:10px}.observed-type-chip{font-size:12px!important;padding:7px 3px}.observed-fact-row{grid-template-columns:1fr;gap:2px}.parent-easy-form .parent-main-label textarea{min-height:92px}}
+
+
+/* v10: fact-first, non-leading caregiver observation form */
+.parent-type-optional{border:1px solid #e1e7f1;border-radius:12px;background:#fdfefe;padding:0 13px}
+.parent-type-optional>summary{cursor:pointer;min-height:45px;display:flex;align-items:center;justify-content:space-between;gap:9px;font-weight:750;color:#344766;font-size:14px}
+.parent-type-optional>summary small{font-size:11px;color:#8491a3;font-weight:500}
+.parent-type-optional>.observed-type{margin:2px 0 12px}
+.parent-more .optional-wrap label{display:flex;flex-direction:column;gap:6px}
+.parent-more .optional-wrap label small{font-size:12px;font-weight:450;color:#6f7e8e;line-height:1.65}
+.parent-guide-body p{font-size:13px;line-height:1.65;color:#485a72}
+.parent-easy-form .parent-main-label{margin-top:0}
+@media(max-width:740px){.parent-type-optional{padding:0 10px}.parent-type-optional>summary{font-size:13px}.parent-easy-form .parent-main-label textarea{min-height:108px}}
+/* Student v11: journal first, optional rich feelings and explicit sharing */
+.student-journal{gap:15px}.student-editor-intro{display:flex;flex-direction:column;gap:4px}.student-editor-intro strong{font-size:19px;color:#25324c}.student-editor-intro span{color:#637087;font-size:13px;line-height:1.55}
+.student-diary-head{display:grid;grid-template-columns:minmax(165px,200px) minmax(0,1fr);gap:12px}.student-diary-head label{margin:0}.student-diary-head input{min-height:45px;background:white;width:100%}
+.student-journal #textPanel textarea[name=note]{min-height:218px;font-size:16px;line-height:1.8;resize:vertical;padding:16px}
+.student-journal .student-context-fields{display:grid;grid-template-columns:minmax(120px,190px) minmax(0,1fr);gap:13px}.student-context-fields p{grid-column:1/-1;font-size:12px;color:#687587;margin:0}
+.student-journal .optional-fields>summary{font-size:14px}.emotion-helper{margin:0;color:#67758d;font-size:13px}.emotion-grid{display:flex;flex-wrap:wrap;gap:8px}.emotion-chip{position:relative;display:block!important;cursor:pointer;font-size:14px!important;margin:0!important;line-height:1.2}.emotion-chip>input{position:absolute;opacity:0;width:1px;height:1px}.emotion-chip>span{display:inline-flex;align-items:center;min-height:38px;border-radius:12px;padding:9px 12px;color:#41526d;border:1px solid #d6dfec;background:white;transition:background .12s,border-color .12s}.emotion-chip>input:checked+span{background:#e7eeff;color:#2b4ba4;border-color:#6e85d7;font-weight:750}.emotion-chip>input:focus-visible+span{outline:3px solid #748de0;outline-offset:3px}
+.emotion-more{border:1px solid #dce4ef;border-radius:11px;padding:8px 12px}.emotion-more>summary{cursor:pointer;color:#334978;font-weight:700}.emotion-more summary span{font-size:12px;font-weight:500;color:#7b8698}.emotion-group{margin-top:13px}.emotion-group p{font-weight:750;color:#586785;font-size:13px;margin:0 0 8px}.student-journal .emotion-more .emotion-grid{gap:6px}
+.student-share .share-picker{display:flex;align-items:center;gap:8px}.student-share-bar{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.student-share-bar strong{font-size:14px}.student-share-actions{display:flex;gap:7px}.student-share-actions button{font-size:12px;min-height:37px;padding:6px 10px}.student-share-field.is-unavailable{opacity:.44;cursor:not-allowed}.student-share-field input:disabled{cursor:not-allowed}.student-share .share-picker>p{margin:0;font-size:12px}.experience-helper,.experience-footer{font-size:13px;color:#68768c;line-height:1.6;margin:0}.student-experience textarea{min-height:85px}.student-save-note{font-size:12px;color:#78859a;line-height:1.5;margin:0}
+@media(max-width:600px){.student-diary-head{grid-template-columns:1fr;gap:8px}.student-journal .student-context-fields{grid-template-columns:1fr}.student-share-actions{width:100%}.student-journal #textPanel textarea[name=note]{min-height:185px}.student-editor-intro strong{font-size:17px}.emotion-chip>span{min-height:37px;padding:8px 11px}}
+@media(prefers-reduced-motion:reduce){.emotion-chip>span{transition:none}}
+
+/* Student v12: first-action date/time and readable metadata */
+.student-journal .student-editor-intro{margin-bottom:12px;display:flex;flex-direction:column;gap:2px}
+.student-journal .student-editor-intro strong{font-size:18px;line-height:1.5;color:#172c3e;letter-spacing:-.02em}
+.student-journal .student-editor-intro span{color:#425971;font-size:14px;line-height:1.55}
+.student-info-card{padding:16px 17px 13px;border:1px solid #cddde8;border-radius:15px;background:#f3f8fc;margin:6px 0 12px}
+.student-datetime-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.student-datetime-heading strong{font-size:16px;line-height:1.4;color:#182e41;font-weight:800}
+.student-now-btn{border:1px solid #a8c6d4;border-radius:10px;background:#fff;color:#174f61;font-size:13px;font-weight:800;min-height:38px;padding:6px 11px;white-space:nowrap}
+.student-now-btn:hover{background:#e6f4f7}
+.student-datetime-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.85fr);gap:10px}
+.student-datetime-grid label,.student-extra-grid label{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:14px;font-weight:750;line-height:1.4;color:#21384a}
+.student-datetime-grid label small,.student-extra-grid label small{font-weight:550;color:#506176}
+.student-journal .student-datetime-grid input,.student-journal .student-extra-grid input{background:white;border:1px solid #b7c7d7;border-radius:11px;min-height:44px;min-width:0;width:100%;max-width:100%;padding:9px 10px;font-size:16px;font-weight:500;line-height:1.35;color:#1a3042;box-sizing:border-box}
+.student-journal .student-datetime-grid input:focus-visible,.student-journal .student-extra-grid input:focus-visible{outline:3px solid #86a6ea;outline-offset:1px}
+.student-datetime-hint{margin:9px 0 0!important;font-size:12px!important;color:#4b6371!important;line-height:1.5!important}
+.student-extra-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin:0 0 14px}
+.student-journal .student-note-label{font-size:16px;line-height:1.4;color:#223648;font-weight:750}
+.student-journal #textPanel textarea[name="note"]{font-size:16px;line-height:1.65;color:#1a3042;border:1px solid #bbcad8;min-height:172px;padding:14px 15px}
+.student-journal .optional-fields{border-color:#d1dcea;background:#fcfdff}
+.student-journal .optional-fields summary{color:#263c52;font-weight:750;font-size:15px;line-height:1.5}
+.student-journal .optional-fields summary small{color:#54667d;font-size:12px}
+@media(max-width:740px){body:has(.student-journal) .hero{display:none}body:has(.student-journal) main{padding-top:10px}body:has(.student-journal) .editor-paper{padding-top:15px}}
+@media(max-width:440px){.student-info-card{padding:12px 11px 10px}.student-datetime-grid{grid-template-columns:minmax(0,1.18fr) minmax(0,.82fr);gap:7px}.student-now-btn{padding:5px 9px}.student-datetime-heading strong{font-size:15px}.student-datetime-grid label,.student-extra-grid label{font-size:13px}.student-journal .student-datetime-grid input,.student-journal .student-extra-grid input{padding:8px 6px;letter-spacing:-.02em}.student-journal #textPanel textarea[name="note"]{min-height:180px}}
+@media(max-width:345px){.student-datetime-grid{grid-template-columns:1fr}.student-extra-grid{grid-template-columns:1fr}.student-datetime-hint{font-size:11px!important}}
+
+
+/* Student v14 – two levels of journaling; quick is the default. */
+.student-journal .student-mode-header{margin:0 0 2px}
+.student-mode-title{font-size:16px;font-weight:800;color:#213448;margin:0 0 9px}
+.journal-mode-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.student-journal .journal-mode-btn{display:flex;align-items:flex-start;flex-direction:column;justify-content:center;gap:3px;text-align:left;background:#fff;border:1px solid #bac8d8;border-radius:13px;min-height:75px;padding:13px 16px;color:#2b4055;line-height:1.35;transition:background .12s,border-color .12s;min-width:0}
+.student-journal .journal-mode-btn strong{font-size:17px;font-weight:850;color:inherit}
+.student-journal .journal-mode-btn small{font-size:12px;font-weight:550;color:#51697d}
+.student-journal .journal-mode-btn.active{border:2px solid #496ad4;padding:12px 15px;background:#edf2ff;color:#284bb1;box-shadow:0 0 0 2px #d9e4ff80}
+.student-journal .journal-mode-btn.active small{color:#344e7a}
+.student-mode-hint{font-size:13px!important;line-height:1.45!important;color:#4b6274!important;margin:9px 0 1px!important}
+.student-journal[data-journal-mode="quick"] .student-mode-advanced{display:none!important}
+.student-journal[data-journal-mode="quick"] .student-datetime-hint{display:none!important}
+.student-journal[data-journal-mode="quick"] .student-info-card{margin:4px 0 7px;padding:12px 14px 10px;background:#f8fafc}
+.student-journal[data-journal-mode="quick"] .student-datetime-heading{margin-bottom:7px}
+.student-journal[data-journal-mode="quick"] .student-datetime-heading strong{font-size:14px}
+.student-journal[data-journal-mode="quick"] #textPanel textarea[name="note"]{min-height:110px;resize:vertical}
+.student-journal[data-journal-mode="quick"] .student-share{padding:12px 15px;margin:0;border-radius:12px;background:#f9fbff}
+.student-journal[data-journal-mode="quick"] .student-share .checkbox{font-size:14px}
+.student-journal .journal-hidden-notice{font-size:12px;color:#624a21;border:1px solid #e0c88f;background:#fff9e7;border-radius:10px;padding:10px;margin:0}
+.student-journal .entry-save{min-height:50px;font-size:16px;font-weight:800}
+.student-journal .student-save-note{font-size:12px!important;margin:0!important;color:#536779!important}
+@media(max-width:740px){.student-journal .journal-mode-btn{min-height:66px;padding:10px 12px}.student-journal .journal-mode-btn strong{font-size:15px}.student-journal .journal-mode-btn small{font-size:11px}.student-journal .journal-mode-btn.active{padding:9px 11px}.student-journal .student-mode-title{font-size:15px}.student-journal[data-journal-mode="quick"] .student-info-card{padding:10px}.student-journal[data-journal-mode="quick"] #textPanel textarea[name="note"]{min-height:100px}.student-mode-hint{font-size:12px!important}}
+@media(max-width:345px){.journal-mode-switch{gap:7px}.student-journal .journal-mode-btn{padding:9px 7px}.student-journal .journal-mode-btn.active{padding:8px 6px}.student-journal .journal-mode-btn strong{font-size:14px}}
+
+@media(max-width:740px){
+ body:has(.student-journal[data-journal-mode="quick"]) .workspace-section[data-workspace-view="write"] > .editor-bar{display:none}
+ body:has(.student-journal[data-journal-mode="quick"]) .editor-paper > .tag,
+ body:has(.student-journal[data-journal-mode="quick"]) .editor-paper > h2,
+ body:has(.student-journal[data-journal-mode="quick"]) .editor-paper > p{display:none}
+ body:has(.student-journal[data-journal-mode="quick"]) .workspace-sidebar{padding:8px;margin-bottom:7px}
+ body:has(.student-journal[data-journal-mode="quick"]) .workspace-link{min-height:38px;padding:7px 10px}
+ body:has(.student-journal[data-journal-mode="quick"]) .editor-paper{padding:12px 14px 15px}
+ body:has(.student-journal[data-journal-mode="quick"]) .workspace-content{border-radius:12px}
+ .student-journal[data-journal-mode="quick"]{gap:10px}
+ .student-journal[data-journal-mode="quick"] .journal-mode-switch{gap:8px}
+ .student-journal[data-journal-mode="quick"] .journal-mode-btn{min-height:56px}
+ .student-journal .student-mode-title{display:none}
+ .student-journal[data-journal-mode="quick"] .student-mode-hint{display:none}
+ .student-journal[data-journal-mode="quick"] .student-datetime-grid input{min-height:38px}
+ .student-journal[data-journal-mode="quick"] #textPanel textarea[name="note"]{min-height:92px;height:104px}
+}
+.share-review-dialog{border:1px solid #aec0d7;border-radius:18px;padding:24px;max-width:min(760px,94vw);width:100%;max-height:85vh;overflow:auto;color:#213637;box-shadow:0 18px 60px #13263f40;background:#fff}
+.share-review-dialog::backdrop{background:#0b1b32a8}
+.share-review-body{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;font-size:16px;line-height:1.65;background:#f5f7fc;border:1px solid #d8e0ee;padding:16px;border-radius:10px;max-height:38vh;overflow:auto}
+.share-review-help{font-size:15px;line-height:1.55;color:#405469}
+.share-review-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.share-review-sketch canvas{max-width:100%;height:auto}
+.student-journal[data-journal-mode="quick"] .student-datetime-hint{font-size:13px}
+.student-journal[data-journal-mode="quick"] .student-info-card{padding:11px 14px}
+.student-journal[data-journal-mode="quick"] .student-datetime-heading{margin-bottom:4px}
+.lab-optional{margin-top:26px;border-top:1px solid #d9e1ed;padding-top:12px}
+.lab-optional>summary{font-weight:600;color:#37526b;cursor:pointer;padding:12px}
+.lab-optional-content{margin-top:12px}
+.inline-share>small{display:block;margin-top:6px;color:#576b7c}
+@media(max-width:600px){.share-review-dialog{padding:17px;max-height:88vh}.share-review-actions button{flex:1 1 100%}.share-review-body{max-height:35vh}}
+/* v15 clinical note: therapist-only, collapsed by default */
+.clinician-form{gap:14px}.clinician-quick-fields{display:grid;gap:12px}
+.clinician-quick-fields textarea{min-height:74px}
+.clinician-extra{border:1px solid #dbe4ea;border-radius:12px;background:#fbfcfe;overflow:hidden}
+.clinician-extra>summary{cursor:pointer;font-weight:730;color:#253d48;min-height:52px;padding:14px 16px;line-height:1.5}
+.clinician-extra>summary small{font-size:12px;color:#687781;font-weight:500}
+.clinician-extra-inner{padding:2px 16px 16px;display:grid;gap:12px}
+.clinician-extra-inner label{display:grid;gap:5px}
+.clinician-extra-inner textarea{min-height:66px}
+.clinician-extra-inner select{min-height:44px;width:100%}
+.clinician-save-row>p{font-size:13px;color:#5e7080;line-height:1.5;margin:7px 0}
+@media(min-width:900px){.clinician-quick-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style></head><body><div class="previewbar" id="previewInfo"><strong>🧪 일단써봄 v15</strong> · 간편·자세히 기록 · 가상 데이터만 사용 · 체험 내용은 이 브라우저 세션에 임시 보관될 수 있음 · 실제 로그인/Google 저장 미연결 · 실명·상담 내용 입력 금지
+</div>
+<header><div class="topwrap"><a class="brand" href="#" aria-label="일단써봄 홈"><span class="brand-code">&lt;/&gt;</span> 일단<span>써봄</span><small>work • think • play</small></a><div id="account" class="account"></div></div></header>
+<main id="app"><section class="loading">안전하게 화면을 불러오고 있어요.</section></main><div id="toast" class="toast" role="status" aria-live="polite"></div><script>
+window.ILDAN_PREVIEW=true;window.PREVIEW_ROLE='guest';window.PREVIEW_RECORDS=[];
+const previewResponse=(obj,status=200)=>new Response(JSON.stringify(obj),{status,headers:{'content-type':'application/json'}});
+window.fetch=async (url,opts={})=>{
+ const urlString=String(url);if(!urlString.startsWith('/api/'))return previewResponse({error:'미리보기 전용'},403);
+ const path=urlString.slice('/api/'.length);const role=window.PREVIEW_ROLE;
+ if(path==='me')return role==='guest'?previewResponse({error:'미리보기'},401):previewResponse({user:{id:'preview-'+role,nickname:'가상 '+({student:'학생',parent:'학부모',therapist:'치료사'}[role]||'계정'),role}});
+ if(path==='records'&&(!opts.method||opts.method==='GET')){
+  const list=window.PREVIEW_RECORDS.filter(r=>role==='therapist'?r.shared:r.kind===role);
+  return previewResponse({records:role==='therapist'?list.map(r=>({...r,entry:r.sharedEntry})):list});
+ }
+ if(path==='records'&&opts.method==='POST'){
+  const body=JSON.parse(opts.body||'{}');const id='sample-'+(window.PREVIEW_RECORDS.length+1);
+  const record={id,kind:role,author:'가상 '+role,student:'가상 학생',createdAt:new Date().toISOString(),shared:body.share===true,driveSynced:false,entry:body.entry,sharedEntry:Object.fromEntries((body.sharedFields||[]).filter(k=>body.entry[k]).map(k=>[k,body.entry[k]]))};window.PREVIEW_RECORDS.unshift(record);
+  return previewResponse({record},201);
+ }
+ if(path==='share'){const body=JSON.parse(opts.body||'{}');const entry=window.PREVIEW_RECORDS.find(r=>r.id===body.recordId&&r.kind===role);if(!entry)return previewResponse({error:'이 기록을 공유할 권한이 없어요.'},403);entry.shared=true;entry.sharedEntry=Object.fromEntries((body.sharedFields||[]).filter(k=>entry.entry[k]).map(k=>[k,entry.entry[k]]));return previewResponse({ok:true});}
+ if(path==='unshare'&&opts.method==='POST'){const body=JSON.parse(opts.body||'{}');const entry=window.PREVIEW_RECORDS.find(r=>r.id===body.recordId&&r.kind===role);if(!entry)return previewResponse({error:'이 기록의 공유를 취소할 권한이 없어요.'},403);entry.shared=false;entry.sharedEntry={};return previewResponse({ok:true,previewOnly:true});}
+ if(path==='session-notes'&&role!=='therapist')return previewResponse({error:'치료사 전용'},403);
+ if(path==='session-notes'&&(!opts.method||opts.method==='GET'))return previewResponse({notes:window.PREVIEW_SESSION_NOTES||[]});
+ if(path==='session-notes'&&opts.method==='POST'){const b=JSON.parse(opts.body||'{}');window.PREVIEW_SESSION_NOTES=window.PREVIEW_SESSION_NOTES||[];window.PREVIEW_SESSION_NOTES.unshift({studentNickname:'가상 학생',createdAt:new Date().toISOString(),entry:b.entry});return previewResponse({ok:true},201);}
+ if(path==='students')return previewResponse({students:[{id:'sample-student',nickname:'가상 학생',display_name:'가상 학생'}]});
+ if(path==='accounts')return previewResponse({accounts:[{id:'sample-student',nickname:'가상 학생',role:'student'}]});
+ if(path==='drive/status')return previewResponse({connected:false,configured:false,folderUrl:null});
+ if(path==='therapists')return previewResponse({therapists:[{id:'sample-therapist',display_name:'가상 치료사'}]});
+ if(path==='logout')return previewResponse({ok:true});
+ return previewResponse({error:'이 기능은 체험 전용이에요. 실사용 서버 연결 전입니다.'},503);
+};
+const $=(id)=>document.getElementById(id);const app=$('app'),account=$('account');
+let me=null,records=[],students=[],therapists=[],view='login',drive={connected:false,configured:false};
+let activeView='write';
+const sanitize=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+const hint=(s)=>`<div class="callout">${s}</div>`;
+function toast(s){$('toast').textContent=s;$('toast').classList.add('visible');setTimeout(()=>$('toast').classList.remove('visible'),3400)}
+async function api(path,{method='GET',body}={}){const o={method,credentials:'same-origin',headers:{}};if(method!=='GET'){o.headers['Content-Type']='application/json';o.body=JSON.stringify(body??{})}const res=await fetch('/api/'+path,o);let data=await res.json().catch(()=>({}));if(!res.ok)throw Error(data.error||'서버 요청 실패');return data}
+function formValue(form,name){return form.elements[name]?.value?.trim()??''}
+function header(){if(!me){account.innerHTML='<span class="role-chip">가상 화면</span>';return}account.innerHTML=`<span>${sanitize(me.nickname)} <span class="role-chip">${me.role==='therapist'?'치료사':me.role==='student'?'학생':me.role==='parent'?'학부모':'관리자'}</span></span><button id="signOut">로그아웃</button>`;$('signOut').onclick=async()=>{await api('logout',{method:'POST'});if(window.ILDAN_PREVIEW===true){clearPreviewDraft(me.role);window.PREVIEW_ROLE='guest';}me=null;records=[];activeView='write';render();};}
+function hero(t,d){return `<div class="hero"><div class="eyebrow">WORKSPACE / ${sanitize(me?.role||'START')}</div><h1>${t}</h1><p>${d}</p></div>`;}
+function loading(btn,task){btn.disabled=true;Promise.resolve(task()).catch(e=>toast(e.message)).finally(()=>btn.disabled=false)}
+// The same passkey flow serves students, parents, therapists and administrators.
+// Fingerprints/faces/PIN remain inside the device and are never sent to this page.
+const fromB64=s=>Uint8Array.from(atob(String(s).replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(String(s).length/4)*4,'=')),c=>c.charCodeAt(0));
+const toB64=x=>btoa(String.fromCharCode(...new Uint8Array(x))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+function passkeyAvailable(){return window.isSecureContext&&typeof PublicKeyCredential!=='undefined'&&!!navigator.credentials?.create&&!!navigator.credentials?.get;}
+function createOptions(json){
+ if(typeof PublicKeyCredential.parseCreationOptionsFromJSON==='function')return PublicKeyCredential.parseCreationOptionsFromJSON(json);
+ return {...json,challenge:fromB64(json.challenge),user:{...json.user,id:fromB64(json.user.id)},excludeCredentials:(json.excludeCredentials||[]).map(x=>({...x,id:fromB64(x.id)}))};
+}
+function requestOptions(json){
+ if(typeof PublicKeyCredential.parseRequestOptionsFromJSON==='function')return PublicKeyCredential.parseRequestOptionsFromJSON(json);
+ return {...json,challenge:fromB64(json.challenge),allowCredentials:(json.allowCredentials||[]).map(x=>({...x,id:fromB64(x.id)}))};
+}
+function credentialPayload(cred){
+ if(typeof cred.toJSON==='function')return cred.toJSON();
+ const response=cred.response;
+ const common={id:cred.id,rawId:toB64(cred.rawId),type:cred.type,clientExtensionResults:cred.getClientExtensionResults()};
+ if(response.attestationObject)return {...common,response:{clientDataJSON:toB64(response.clientDataJSON),attestationObject:toB64(response.attestationObject),transports:response.getTransports?.()||[]}};
+ return {...common,response:{clientDataJSON:toB64(response.clientDataJSON),authenticatorData:toB64(response.authenticatorData),signature:toB64(response.signature),userHandle:response.userHandle?toB64(response.userHandle):undefined}};
+}
+function errorPasskey(e){if(e?.name==='NotAllowedError')return '인증이 취소되었어요. 다시 로그인하기를 눌러주세요.';if(e?.name==='NotSupportedError'||e?.name==='SecurityError')return '이 기기에서는 패스키를 사용할 수 없습니다. 최신 브라우저의 HTTPS 연결을 확인해 주세요.';return e?.message||'본인 확인에 실패했습니다.';}
+// Role is solely a navigation hint. The server decides access from verified session identity.
+let chosenRole='student';
+const roleNames={student:'학생',parent:'학부모',therapist:'치료사'};
+function rolePicker(){return `<div class="role-picker" role="group" aria-label="사용자 구분 선택">
+  <button type="button" data-login-role="student" class="role-choice${chosenRole==='student'?' active':''}" aria-pressed="${chosenRole==='student'}"><span class="role-glyph" aria-hidden="true">{ }</span><strong>학생</strong><small>내 기록</small></button>
+  <button type="button" data-login-role="parent" class="role-choice${chosenRole==='parent'?' active':''}" aria-pressed="${chosenRole==='parent'}"><span class="role-glyph" aria-hidden="true">//</span><strong>학부모</strong><small>관찰·전달</small></button>
+  <button type="button" data-login-role="therapist" class="role-choice${chosenRole==='therapist'?' active':''}" aria-pressed="${chosenRole==='therapist'}"><span class="role-glyph" aria-hidden="true">&lt;/&gt;</span><strong>치료사</strong><small>공유 기록</small></button>
+ </div>`;}
+function loginScreen(){
+ const usable=passkeyAvailable();
+ const demo=window.ILDAN_PREVIEW===true;
+ const caption=demo?'화면 체험용 · 실제 로그인이나 기록 저장은 되지 않아요.':usable?'지문·얼굴인식 또는 기기 잠금으로 본인을 확인해요.':'이 기기는 패스키 인증을 지원하지 않아요. HTTPS와 브라우저를 확인해 주세요.';
+ app.innerHTML=`<div class="login-page">
+ <div class="login-heading"><span class="eyebrow">일단써봄 <span class="terminal-cursor">_</span> / YOUR WORKSPACE</span><h1>내 공간으로<br><em>접속하기<span class="code-period">.</span></em></h1><p>누구로 시작할지만 선택해 주세요.</p></div>
+ <div class="login-layout"><section class="login-window" aria-labelledby="roleTitle"><div class="ide-titlebar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="ide-filename">login.tsx</span><span class="ide-language">LOGIN</span></div>
+ <div class="login-body"><div class="login-step"><span class="step-no">01</span><div><h2 id="roleTitle">어떤 사용자세요?</h2><p>학생·학부모·치료사 모두 같은 방법으로 로그인해요.</p></div></div>${rolePicker()}
+ <div class="login-step step-two"><span class="step-no">02</span><div><h2>간편 로그인</h2><p class="login-caption">${caption}</p></div></div>
+ <button type="button" id="oneLogin" class="login-cta" ${usable||demo?'':'disabled'}><span class="cta-play">▶</span><span>${demo?'선택한 화면 체험하기':'패스키로 로그인'}</span><span aria-hidden="true">↗</span></button>
+ <details class="enroll-details signup-options" ${demo?'hidden':''} ${view==='register'||view==='recovery'?'open':''}><summary>처음 이용하거나 기기를 바꿨나요?</summary>
+ <div class="seg"><button type="button" id="newAccount" class="${view!=='recovery'?'on':''}">처음 등록</button><button type="button" id="recoverAccount" class="${view==='recovery'?'on':''}">기기 재등록</button></div>
+ ${view==='recovery'?`<form class="form" id="recoveryForm"><p class="muted">신원을 확인한 담당자가 발급한 재등록 코드가 필요해요.</p><label>재등록 코드<input name="resetCode" required autocomplete="off"></label><button class="button" type="submit">다시 등록하기</button></form>`:
+ `<form class="form" id="registerForm"><label class="${chosenRole==='therapist'?'hidden':''}">담당 치료사<select name="selectedTherapistId"><option value="">담당 치료사 선택</option>${therapists.map(t=>`<option value="${sanitize(t.id)}">${sanitize(t.display_name)}</option>`).join('')}</select></label><label>초대코드<input name="invite" autocomplete="off" placeholder="담당 치료사가 전달한 코드" required></label><label>닉네임<input name="nickname" minlength="3" maxlength="24" autocomplete="off" placeholder="실명 대신 나만의 닉네임" required></label><button class="button" type="submit">패스키 등록하기</button></form>`}
+ </details><details class="enroll-details admin-details" ${demo?'hidden':''}><summary>운영자 최초 설정</summary><form id="setupForm" class="form"><label>관리자 설정코드<input name="setupToken" type="password" autocomplete="off" required></label><label>관리자 닉네임<input name="nickname" required minlength="3"></label><button class="button-ghost" type="submit">관리자 기기 등록</button></form></details>
+ <div class="login-privacy"><span aria-hidden="true">◈</span> ${demo?'가상 화면 체험이야. 역할을 누구나 바꿔 볼 수 있으므로 실제 개인정보는 입력하지 마.':'비공개 기록은 작성자만, 공유한 기록은 담당 치료사만 확인해요.'}</div></div>
+ <div class="ide-statusbar"><span><span class="live-dot"></span> ${demo?'DEMO MODE':'READY'}</span><span>PASSKEY / ROLE-BASED WORKSPACE</span></div></section>
+ <aside class="login-code-preview" aria-label="프로그래밍 디자인 안내"><div class="ide-titlebar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="ide-filename">welcome.js</span><span class="ide-language">PREVIEW</span></div>
+ <div class="code-lines" aria-hidden="true"><div><span class="ln">01</span><span class="syntax-purple">const</span> <span class="syntax-blue">workspace</span> = {</div><div><span class="ln">02</span>&nbsp;&nbsp;role: <span id="roleCode" class="syntax-orange">'${chosenRole}'</span>,</div><div><span class="ln">03</span>&nbsp;&nbsp;space: <span class="syntax-orange">'my own'</span>,</div><div><span class="ln">04</span>&nbsp;&nbsp;privacy: <span class="syntax-purple">true</span></div><div><span class="ln">05</span>};</div><div><span class="ln">06</span><span class="syntax-blue">open</span>(workspace); <span class="syntax-gray">// start</span></div></div>
+ <div class="ide-terminal"><div class="terminal-header"><span>⌘</span> TERMINAL <span class="terminal-ready">● READY</span></div><div><span class="prompt">➜</span> 일단써봄 시작 준비</div><div><span class="prompt">✓</span> ${demo?'가상 계정 체험 가능':'기기 인증 후 시작'}</div></div></aside>
+ </div></div>`;
+ document.querySelectorAll('[data-login-role]').forEach(b=>b.onclick=()=>{chosenRole=b.dataset.loginRole;document.querySelectorAll('[data-login-role]').forEach(el=>{const on=el===b;el.classList.toggle('active',on);el.setAttribute('aria-pressed',on?'true':'false')});const txt=$('roleCode');if(txt)txt.textContent="'"+chosenRole+"'";const teacherRow=$('registerForm')?.elements.selectedTherapistId?.closest('label');if(teacherRow)teacherRow.classList.toggle('hidden',chosenRole==='therapist');});
+ $('oneLogin').onclick=e=>loading(e.currentTarget,async()=>{
+  if(demo){window.PREVIEW_ROLE=chosenRole;me={id:'preview-'+chosenRole,nickname:'가상 '+roleNames[chosenRole],role:chosenRole};activeView=chosenRole==='therapist'?'inbox':'write';await dashboard();return;}
+  if(!passkeyAvailable())throw Error('이 기기는 패스키 인증을 지원하지 않습니다.');
+  try{const r=await api('passkeys/login/options',{method:'POST',body:{}});const cr=await navigator.credentials.get({publicKey:requestOptions(r.options)});if(!cr)throw Error('인증이 완료되지 않았어요.');const out=await api('passkeys/login/verify',{method:'POST',body:{credential:credentialPayload(cr)}});
+   if(out.user?.role!==chosenRole){await api('logout',{method:'POST'});throw Error('선택한 사용자 유형과 등록된 계정이 달라요. 자신의 역할을 선택해 주세요.');}
+   me=out.user;activeView=chosenRole==='therapist'?'inbox':'write';await dashboard();
+  }catch(err){throw Error(errorPasskey(err));}
+ });
+ $('newAccount').onclick=async()=>{view='register';try{therapists=(await api('therapists')).therapists}catch{}render()};
+ $('recoverAccount').onclick=()=>{view='recovery';render()};
+ if(view==='recovery')$('recoveryForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;loading(f.querySelector('button'),()=>enrollWithPasskey({resetCode:formValue(f,'resetCode')}))};
+ else $('registerForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;loading(f.querySelector('button'),async()=>{await enrollWithPasskey({selectedTherapistId:formValue(f,'selectedTherapistId'),invite:formValue(f,'invite'),nickname:formValue(f,'nickname'),selectedRole:chosenRole})})};
+ $('setupForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;loading(f.querySelector('button'),()=>enrollWithPasskey({setupToken:formValue(f,'setupToken'),nickname:formValue(f,'nickname')}))};
+}
+async function enrollWithPasskey(details){
+ if(!passkeyAvailable())throw Error('기기에서 패스키를 지원하지 않습니다.');
+ try{const r=await api('passkeys/enroll/options',{method:'POST',body:details});const cr=await navigator.credentials.create({publicKey:createOptions(r.options)});if(!cr)throw Error('기기 등록이 완료되지 않았어요.');const out=await api('passkeys/enroll/verify',{method:'POST',body:{credential:credentialPayload(cr)}});if(details.selectedRole&&out.user?.role!==details.selectedRole){await api('logout',{method:'POST'});throw Error('선택한 역할과 초대코드가 일치하지 않습니다.');}me=out.user;view='login';activeView=me.role==='therapist'?'inbox':'write';await dashboard();toast('기기 등록이 완료됐어요.');}catch(err){throw Error(errorPasskey(err));}
+}
+function workspaceNav(items, selected){
+ return `<nav class="workspace-nav" aria-label="내 공간 메뉴">${items.map(([id,ico,name,sub])=>`<button type="button" data-workspace-target="${id}" class="workspace-link${selected===id?' selected':''}" aria-current="${selected===id?'page':'false'}"><span class="w-icon" aria-hidden="true">${ico}</span><span class="w-copy"><strong>${name}</strong><small>${sub}</small></span></button>`).join('')}</nav>`;
+}
+function activateWorkspace(next){
+ const views=[...document.querySelectorAll('[data-workspace-view]')];
+ if(!views.some(x=>x.dataset.workspaceView===next)) next=views[0]?.dataset.workspaceView || next;
+ activeView=next;
+ views.forEach(el=>{el.hidden=el.dataset.workspaceView!==next});
+ document.querySelectorAll('[data-workspace-target]').forEach(el=>{
+  const isCurrent=el.dataset.workspaceTarget===next;
+  el.classList.toggle('selected',isCurrent);
+  el.setAttribute('aria-current',isCurrent?'page':'false');
+ });
+}
+function bindWorkspace(){
+ document.querySelectorAll('[data-workspace-target]').forEach(b=>b.addEventListener('click',()=>{
+  activateWorkspace(b.dataset.workspaceTarget);paintSketches();if(me?.role==='parent'&&activeView==='calendar')renderParentCalendar();
+  if(window.innerWidth<741)document.querySelector('.workspace-content')?.scrollIntoView({behavior:'smooth',block:'start'});
+ }));
+ activateWorkspace(activeView);
+}
+const NOTE_LABELS={studentReport:'학생이 직접 말한 내용',parentReport:'보호자가 전한 내용',functionalImpact:'일상에서 확인된 영향',familyResponse:'가족·주변의 반응',workingHypothesis:'잠정적 이해·가설',alternatives:'다른 설명 가능성',uncertainty:'아직 확인되지 않은 점',burdenReview:'기록 사용 부담 검토',erpReview:'ERP 회기 검토 여부',erpTarget:'ERP 치료 목표·계획 (치료사 전용)',erpSafety:'ERP 실행 후 경과·안전 검토',cbitReview:'CBIT 회기 검토 여부',cbitTarget:'CBIT 치료 목표·계획 (치료사 전용)',cbitContext:'틱 관련 맥락·기능적 영향',note:'자유 기록',mood:'오늘의 상태',energy:'컨디션',thought:'떠오른 생각',body:'몸의 느낌',action:'해본 일',sketch:'그림',observation:'관찰한 사실',response:'주변 사람의 말·행동',impact:'일상에서 확인된 변화',message:'전달사항',event:'있었던 일',next:'다음 시도',date:'기록 날짜',time:'기록 시간',context:'당시 상황',origin:'정보 출처',title:'제목',experience:'내가 겪은 움직임·소리·반복행동',experienceImpact:'그때 생활에 있었던 변화',place:'장소',signals:'관찰한 모습(선택)',after:'이후에 이어진 일'};
+function todayLocal(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
+function nowLocalTime(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${p(d.getHours())}:${p(d.getMinutes())}`;}
+
+/* Parent calendar v8: event date, not the entry creation timestamp. */
+let parentCalendarMode='month',parentCalendarDate=todayLocal();
+function isoDay(d){const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
+function parseIsoDay(s){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(s||'')))return null;const [y,m,d]=s.split('-').map(Number),v=new Date(y,m-1,d,12);return v.getFullYear()===y&&v.getMonth()===m-1&&v.getDate()===d?v:null;}
+function dayShift(date,amount){const d=parseIsoDay(date)||new Date();d.setDate(d.getDate()+amount);return isoDay(d);}
+function monthShift(date,amount){const d=parseIsoDay(date)||new Date();const orig=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+amount);const max=new Date(d.getFullYear(),d.getMonth()+1,0,12).getDate();d.setDate(Math.min(orig,max));return isoDay(d);}
+function parentRecordDay(record){const day=record.entry?.date;if(parseIsoDay(day))return day;const created=new Date(record.createdAt);return Number.isNaN(created.valueOf())?todayLocal():isoDay(created);}
+function parentCalendarHTML(){return `<div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>calendar / my-notes</span><span class="editor-status">PRIVATE</span></div>
+ <div class="editor-paper parent-calendar-wrap"><span class="tag">MY RECORDS</span><h2>생활 기록 달력</h2><p class="parent-calendar-caption">일이 있었던 날을 기준으로 보여요. 기록이 없는 날은 그대로 비워둬요.</p>
+ <div class="calendar-toolbar"><div class="calendar-modes" role="group" aria-label="달력 보기 방식"><button type="button" data-cal-mode="month">월</button><button type="button" data-cal-mode="week">주</button><button type="button" data-cal-mode="day">일</button></div><div class="calendar-date-nav"><button type="button" data-cal-prev aria-label="이전 기간">‹</button><strong id="calendarPeriod" aria-live="polite"></strong><button type="button" data-cal-next aria-label="다음 기간">›</button><button type="button" class="calendar-today" data-cal-today>오늘</button></div></div>
+ <div id="calendarOverview" aria-label="기록 달력"></div><div id="calendarDayDetails" class="calendar-details"></div></div>`;}
+function renderParentCalendar(){
+ const root=$('parentCalendar');if(!root||me?.role!=='parent')return;
+ if(!parseIsoDay(parentCalendarDate))parentCalendarDate=todayLocal();
+ const selected=parseIsoDay(parentCalendarDate),ym=selected.getFullYear(),mm=selected.getMonth(),index=new Map();
+ records.filter(r=>r.kind==='parent').forEach(r=>{const date=parentRecordDay(r);if(!index.has(date))index.set(date,[]);index.get(date).push(r)});
+ root.querySelectorAll('[data-cal-mode]').forEach(b=>{const on=b.dataset.calMode===parentCalendarMode;b.classList.toggle('current',on);b.setAttribute('aria-pressed',String(on))});
+ const period=$('calendarPeriod'),overview=$('calendarOverview'),detail=$('calendarDayDetails'),weekdays=['월','화','수','목','금','토','일'];
+ const monday=new Date(selected);monday.setDate(selected.getDate()-(selected.getDay()+6)%7);
+ const weekEnd=new Date(monday);weekEnd.setDate(monday.getDate()+6);
+ const dateLabel=d=>`${d.getMonth()+1}월 ${d.getDate()}일`;
+ if(parentCalendarMode==='month')period.textContent=`${ym}년 ${mm+1}월`;
+ else if(parentCalendarMode==='week')period.textContent=`${dateLabel(monday)} – ${dateLabel(weekEnd)}`;
+ else period.textContent=`${ym}년 ${dateLabel(selected)}`;
+ const weekday=(d)=>weekdays[(d.getDay()+6)%7];
+ const dayButton=(d,isMonth)=>{const iso=isoDay(d),n=index.get(iso)?.length||0,selectedDay=iso===parentCalendarDate,otherMonth=isMonth&&d.getMonth()!==mm;
+  return `<button type="button" class="calendar-day${selectedDay?' is-selected':''}${otherMonth?' is-outside':''}${iso===todayLocal()?' is-today':''}" data-cal-date="${iso}" aria-pressed="${selectedDay}" aria-label="${iso}, 메모 ${n}건"><span class="calendar-day-num">${d.getDate()}</span>${n?`<span class="calendar-day-count">${n}건</span>`:''}</button>`;};
+ if(parentCalendarMode==='month'){
+  const first=new Date(ym,mm,1,12),firstWeek=(first.getDay()+6)%7,last=new Date(ym,mm+1,0,12),slots=Math.ceil((firstWeek+last.getDate())/7)*7,start=new Date(ym,mm,1-firstWeek,12);
+  const days=Array.from({length:slots},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return dayButton(d,true)}).join('');
+  overview.innerHTML=`<div class="calendar-weekdays">${weekdays.map(d=>`<span>${d}</span>`).join('')}</div><div class="calendar-month-grid">${days}</div>`;
+ }else if(parentCalendarMode==='week'){
+  const days=Array.from({length:7},(_,i)=>{const d=new Date(monday);d.setDate(monday.getDate()+i);return `<div class="calendar-week-col"><span class="calendar-weekday">${weekday(d)}</span>${dayButton(d,false)}</div>`}).join('');
+  overview.innerHTML=`<div class="calendar-week-grid">${days}</div>`;
+ }else{
+  overview.innerHTML=`<div class="calendar-day-overview"><span class="calendar-day-title">${dateLabel(selected)} (${weekday(selected)})</span><span class="calendar-day-summary">메모 ${index.get(parentCalendarDate)?.length||0}건</span></div>`;
+ }
+ const list=(index.get(parentCalendarDate)||[]).slice().sort((a,b)=>String(a.entry?.time||'99:99').localeCompare(String(b.entry?.time||'99:99')));
+ const items=list.map(r=>{
+  const entry=r.entry||{},time=entry.time?`${sanitize(entry.time)} · `:'',text=String(entry.observation||entry.message||entry.response||entry.impact||entry.context||'관찰 메모'),ex=text.length>105?text.slice(0,105)+'…':text,legacy=!parseIsoDay(entry.date);
+  return `<details class="calendar-record"><summary><span class="calendar-record-copy"><span class="calendar-record-snippet">${time}${sanitize(ex)}</span><span class="calendar-record-meta">${r.shared?'담당 치료사에게 일부 공유':'나만 보기'}${legacy?' · 작성일 기준(관찰일 미지정)':''}</span></span><span class="calendar-open">열어보기</span></summary><div class="calendar-record-full">${prettyRecordEntry(entry)}<p class="calendar-created">작성: ${sanitize(new Date(r.createdAt).toLocaleString('ko-KR'))}</p></div></details>`;
+ }).join('');
+ detail.innerHTML=`<div class="calendar-details-heading"><strong>${ym}년 ${dateLabel(selected)} · 메모 ${list.length}건</strong><button type="button" data-cal-new ${parentCalendarDate>todayLocal()?'disabled aria-label="미래 날짜는 기록할 수 없습니다"':''}>+ 이 날짜에 메모하기</button></div>${items||'<p class="calendar-empty">이 날짜에 남긴 기록이 없어요. 꼭 기록하지 않아도 괜찮아요.</p>'}`;
+ root.querySelectorAll('[data-cal-date]').forEach(b=>b.onclick=()=>{parentCalendarDate=b.dataset.calDate;renderParentCalendar();if(window.innerWidth<=740)document.querySelector('.calendar-details')?.scrollIntoView({block:'nearest',behavior:'smooth'})});
+ root.querySelectorAll('[data-cal-mode]').forEach(b=>b.onclick=()=>{parentCalendarMode=b.dataset.calMode;renderParentCalendar()});
+ root.querySelector('[data-cal-prev]').onclick=()=>{parentCalendarDate=parentCalendarMode==='month'?monthShift(parentCalendarDate,-1):dayShift(parentCalendarDate,parentCalendarMode==='week'?-7:-1);renderParentCalendar()};
+ root.querySelector('[data-cal-next]').onclick=()=>{parentCalendarDate=parentCalendarMode==='month'?monthShift(parentCalendarDate,1):dayShift(parentCalendarDate,parentCalendarMode==='week'?7:1);renderParentCalendar()};
+ root.querySelector('[data-cal-today]').onclick=()=>{parentCalendarDate=todayLocal();renderParentCalendar()};
+ root.querySelector('[data-cal-new]').onclick=()=>{if(parentCalendarDate>todayLocal())return;activateWorkspace('write');const dt=$('entryForm')?.elements?.date;if(dt){dt.value=parentCalendarDate;dt.focus()}};
+}
+
+const STUDENT_EMOTIONS=["기쁨", "편안함", "설렘", "뿌듯함", "즐거움", "걱정", "답답함", "짜증"];
+const STUDENT_MORE_EMOTIONS={"기분 좋은 순간": ["신남", "만족감", "고마움", "홀가분함", "안도감", "평온함", "기대감", "자신감", "뭉클함", "흥미로움"], "복잡하고 힘든 순간": ["긴장됨", "불안함", "초조함", "속상함", "서운함", "억울함", "화남", "슬픔", "외로움", "두려움", "부담스러움", "후회", "당황함", "혼란스러움", "실망함", "부끄러움", "질투", "막막함"], "그 밖의 느낌": ["피곤함", "지루함", "무덤덤함", "궁금함", "어색함", "귀찮음", "복잡함", "잘 모르겠음"]};
+function dataForm(role){
+ if(role==='parent')return `<form class="form entry-v5 parent-easy-form" id="entryForm">
+ <div class="parent-when"><label class="parent-date-field">일이 있었던 날짜 <input name="date" type="date" value="${todayLocal()}" max="${todayLocal()}" required></label><label class="parent-time-field">시간 <small>(선택)</small><input name="time" type="time"></label></div>
+ <p class="parent-date-hint">정확한 시간이 기억나지 않으면 비워 두세요. 기록을 작성한 시각은 자동으로 남아요.</p>
+ <label class="parent-location">장소 <small>(선택)</small><input name="place" maxlength="100" placeholder="기억나는 장소만 적어 주세요."></label>
+ <label class="parent-main-label">어떤 일을 보거나 들으셨나요? <small>필수 · 360자 이내</small><textarea name="observation" maxlength="360" rows="3" required placeholder="보거나 들은 내용을 기억나는 그대로 적어 주세요."></textarea></label>
+ <details class="optional-fields parent-more"><summary>당시 상황과 앞뒤 내용 더 남기기 <small>선택</small></summary><div class="optional-wrap">
+ <label>그전에 또는 그때 어떤 상황이 있었나요?<small>하고 있던 활동, 앞서 일어난 일, 주변 환경, 사람들과의 대화·요청 등 기억나는 사실이면 됩니다.</small><textarea name="context" maxlength="450" rows="2" placeholder="특별한 일이 없거나 기억나지 않으면 비워 두세요."></textarea></label>
+ <label>그때 주변 사람이 한 말이나 행동이 있었나요? <small>선택</small><textarea name="response" maxlength="450" rows="2" placeholder="직접 보거나 들은 말과 행동만 적어 주세요."></textarea></label>
+ <label>그 뒤에 어떤 일이 이어졌나요? <small>선택</small><textarea name="after" maxlength="450" rows="2" placeholder="이후에 보거나 들은 일이 있다면 적어 주세요."></textarea></label>
+ <label>그 뒤 일상에서 확인된 변화가 있나요? <small>선택</small><textarea name="impact" maxlength="450" rows="2" placeholder="없거나 확인하지 못했다면 비워 두어도 됩니다."></textarea></label>
+ <label>이 내용은 어떻게 알게 되었나요? <small>선택</small><select name="origin"><option value="">선택하지 않음</option><option value="직접 관찰">직접 보거나 들음</option><option value="아이가 말함">아이에게 들음</option><option value="가족에게 들음">다른 가족에게 들음</option></select></label>
+ <label>치료사에게 별도로 전할 말 <small>선택 · 160자 이내</small><textarea name="message" maxlength="160" rows="2" placeholder="전할 내용이 없다면 비워 두세요."></textarea></label>
+ </div></details>
+ <details class="parent-type-optional"><summary>관찰 내용을 표시해 두기 <small>선택 · 생략 가능</small></summary><fieldset class="observed-type"><legend>눈에 띈 내용 <small>여러 개 선택 가능</small></legend>
+ <div class="observed-type-grid">${['몸 움직임','소리·말','여러 번 한 행동','그 밖의 모습'].map((kind,i)=>`<label class="observed-type-chip"><input name="signalChoice" type="checkbox" value="${kind}"><span class="signal-glyph" aria-hidden="true">${['◌','♪','↻','＋'][i]}</span><span>${kind}</span></label>`).join('')}</div>
+ <p>어느 항목에도 맞지 않으면 선택하지 않아도 돼요. 이것은 진단 분류가 아니에요.</p></fieldset></details>
+ <details class="parent-guide"><summary>관찰 메모 작성 안내 <span>필요할 때만 열기</span></summary><div class="parent-guide-body">
+ <p><b>기억나는 사실만 기록하면 됩니다.</b> 직접 본 일인지, 아이나 다른 사람에게 들은 이야기인지를 구분하면 치료사가 참고하기 좋아요.</p>
+ <p>‘그전·당시 상황’은 원인을 찾는 질문이 아니에요. 하던 일, 앞서 있었던 사건, 주변의 소리·환경, 누군가의 말이나 행동 등 여러 상황을 포함할 수 있어요.</p>
+ <p>그 일이 어떤 행동의 원인이라고 단정할 필요는 없고, 기억나지 않거나 확인하지 못한 내용은 비워 두어도 됩니다.</p>
+ <p class="parent-guide-tail">특정 행동을 일부러 찾아보거나 횟수를 계속 셀 필요는 없어요. 기록이 없는 날은 아무 일이 없었다는 뜻이 아니에요.</p>
+ </div></details>
+ <div class="privacy-panel parent-privacy"><label class="checkbox"><input type="checkbox" name="share"><span>담당 치료사에게 전달하기<small>선택하지 않으면 내 기록에만 남아요.</small></span></label><div id="sharePicker" class="share-picker" hidden>
+ <p>관찰 내용을 공유하면 날짜·시간·장소·선택한 표시도 함께 전달돼요. 아래 추가 항목은 직접 고른 것만 보냅니다.</p>
+ ${['observation','context','response','after','impact','origin','message'].map(k=>`<label><input type="checkbox" name="shareField" value="${k}" ${k==='observation'?'checked':''}><span>${NOTE_LABELS[k]}</span></label>`).join('')}
+ </div></div>
+ <button class="button entry-save" id="saveEntry">내 관찰 메모 저장</button><p class="parent-nudge">보호자는 관찰하거나 전해 들은 사실만 남기면 됩니다. 기록하지 않는 날도 괜찮습니다. 진단이나 원인 판단은 하지 않아도 됩니다. 실시간 상담·응급 연락창이 아닙니다.</p></form>`;
+ return `<form class="form entry-v5 student-journal" id="entryForm" data-journal-mode="quick">
+ <div class="student-mode-header"><div class="student-mode-title">어떤 방식으로 남길까?</div><div class="journal-mode-switch" role="group" aria-label="기록 상세 정도 선택"><button class="journal-mode-btn active" type="button" data-journal-mode="quick" aria-pressed="true"><strong>⚡ 간편 기록</strong><small>한두 줄이면 끝</small></button><button class="journal-mode-btn" type="button" data-journal-mode="detail" aria-pressed="false"><strong>▤ 자세히 기록</strong><small>필요한 만큼 더 쓰기</small></button></div><p class="student-mode-hint" id="journalModeHint" aria-live="polite">한 줄만 남겨도 돼. 나머지는 선택이야.</p></div>
+ <section class="student-info-card" aria-label="일기 날짜와 시간">
+ <div class="student-datetime-heading"><strong>언제의 기록이야?</strong><button type="button" id="studentSetNow" class="student-now-btn" aria-label="날짜와 시간을 현재 시각으로 설정">↻ 지금으로 설정</button></div>
+ <div class="student-datetime-grid"><label>날짜<input name="date" type="date" max="${todayLocal()}" value="${todayLocal()}"></label><label>시간 <small>(선택)</small><input name="time" type="time" value="${nowLocalTime()}"></label></div>
+ <p class="student-datetime-hint">현재 날짜·시간 자동 입력 · 필요하면 직접 변경할 수 있어.</p>
+ </section>
+ <div class="student-mode-advanced">
+ <div class="student-extra-grid"><label>제목 <small>(선택)</small><input name="title" maxlength="80" placeholder="제목 없이 써도 돼"></label><label>장소 <small>(선택)</small><input name="place" maxlength="100" placeholder="기억나는 곳만"></label></div>
+ <div class="form-switcher" role="group" aria-label="기록 방식"><button type="button" class="format-btn active" data-format="text" aria-pressed="true">✎ 글쓰기</button><button type="button" class="format-btn" data-format="draw" aria-pressed="false">◇ 그림 그리기</button></div></div>
+ <div id="textPanel"><label class="student-note-label">하고 싶은 이야기 <small>(짧아도 좋아)</small><textarea name="note" maxlength="4000" rows="5" placeholder="오늘 있었던 일, 좋은 일, 고민, 그냥 생각나는 말... 자유롭게."></textarea></label></div>
+ <div class="student-mode-advanced">
+ <div id="drawPanel" hidden><div class="sketch-board"><canvas id="noteCanvas" width="760" height="380" aria-label="마우스나 손가락으로 그리는 그림 메모"></canvas></div><div class="sketch-actions"><span>손가락이나 마우스로 그릴 수 있어.</span><button type="button" id="undoStroke" class="button-ghost">↶ 되돌리기</button><button type="button" id="clearSketch" class="button-ghost">지우기</button></div></div>
+ 
+ <details class="optional-fields student-emotion-details" id="stateDetails"><summary>그때의 감정도 남길까? <small>선택 · 여러 개 가능</small></summary><div class="optional-wrap"><p class="emotion-helper">하나만 고르지 않아도 돼. 감정이 섞였거나 잘 모르겠어도 괜찮아.</p><div class="emotion-grid" aria-label="감정 선택">${STUDENT_EMOTIONS.map(w=>`<label class="emotion-chip"><input name="emotionChoice" type="checkbox" value="${w}"><span>${w}</span></label>`).join('')}</div>
+ <details class="emotion-more"><summary>다른 감정도 보기 <span>+ ${Object.values(STUDENT_MORE_EMOTIONS).flat().length}개</span></summary>${Object.entries(STUDENT_MORE_EMOTIONS).map(([group,words])=>`<div class="emotion-group"><p>${group}</p><div class="emotion-grid">${words.map(w=>`<label class="emotion-chip"><input name="emotionChoice" type="checkbox" value="${w}"><span>${w}</span></label>`).join('')}</div></div>`).join('')}</details>
+ <label>내 말로 표현하기 <small>(선택)</small><input name="emotionOther" maxlength="100" placeholder="위에 없는 감정이나 내 표현"></label><label>컨디션 <small>(선택)</small><select name="energy"><option value="">선택하지 않음</option><option>괜찮음</option><option>기운 있음</option><option>조금 피곤함</option><option>많이 피곤함</option><option>잘 모르겠음</option></select></label></div></details>
+ <details class="optional-fields student-experience"><summary>몸의 움직임·소리나 반복된 일이 있었어? <small>선택 · 그냥 넘어가도 돼</small></summary><div class="optional-wrap"><p class="experience-helper">틱인지 강박인지 구분할 필요 없어. 내가 직접 경험한 일을 내 말로 남기고 싶을 때만 써. 기록하지 않아도 괜찮아.</p><label>어떤 일이 있었어? <small>(선택)</small><textarea name="experience" maxlength="900" rows="3" placeholder="움직임, 소리, 반복하고 싶었던 일, 떠오른 생각 등 내가 겪은 일을 자유롭게"></textarea></label><label>일상에서 달라진 점이나 불편한 점이 있었어? <small>(선택)</small><textarea name="experienceImpact" maxlength="500" rows="2" placeholder="특별히 달라진 일이 없었다면 비워 둬도 돼."></textarea></label><p class="experience-footer">횟수를 세거나 정확하게 분석할 필요는 없어. 나만 보관하고 싶으면 공유를 선택하지 않으면 돼.</p></div></details>
+ <details class="optional-fields student-reflect"><summary>좀 더 적고 싶다면 <small>선택 · 정답 없음</small></summary><div class="optional-wrap"><label>떠오른 생각이나 이미지<textarea name="thought" maxlength="1200" placeholder="쓰고 싶은 내용이 있으면 적어도 돼."></textarea></label><label>몸에서 느낀 점<textarea name="body" maxlength="1000" placeholder="특별한 느낌이 없다면 비워 둬도 돼."></textarea></label><label>내가 했던 일이나 해보고 싶은 일<textarea name="action" maxlength="1000" placeholder="꼭 해결책을 적을 필요는 없어."></textarea></label></div></details>
+ </div>
+ <p id="journalHiddenNotice" class="journal-hidden-notice" hidden>자세히 기록에서 작성한 내용도 함께 보관돼. 다시 보려면 자세히 기록을 선택해.</p>
+ <div class="privacy-panel student-share"><label class="checkbox"><input type="checkbox" name="share"><span>담당 치료사에게 기록 공유하기<small>기본 비공개 · 공유 내용은 직접 고를 수 있어.</small></span></label>
+ <div id="sharePicker" class="share-picker" hidden><div class="student-share-bar"><strong>보낼 항목 선택</strong><div class="student-share-actions"><button type="button" class="button-ghost" id="studentSelectAll">전체 선택</button><button type="button" class="button-ghost" id="studentClearAll">선택 해제</button></div></div>
+ ${['title','date','time','place','note','sketch','mood','energy','thought','body','action','experience','experienceImpact'].map(k=>`<label class="student-share-field"><input type="checkbox" name="shareField" value="${k}"><span>${NOTE_LABELS[k]}</span></label>`).join('')}<p id="studentShareCount" aria-live="polite">보낼 항목을 선택해 줘. 작성하지 않은 항목은 선택되지 않아.</p><p>선택하지 않은 내용은 치료사에게 보내지 않아. 전송 전에 확인할 수 있어.</p></div></div>
+ <button class="button entry-save" id="saveEntry">🔒 내 기록 저장</button><p class="student-save-note">매일 쓰지 않아도 괜찮아. 기록을 정확하게 쓰려 애쓸 필요도 없어. 실시간 상담·응급 연락창이 아니야. 체험판의 작성 중 내용은 이 브라우저 세션에만 임시 저장돼.</p>
+ </form>`;
+}function gatherEntry(f,role){
+ const fields=role==='parent'?['date','time','place','observation','context','origin','response','after','impact','message']:['date','time','place','title','note','energy','thought','body','action','experience','experienceImpact'];
+ const entry={};fields.forEach(k=>{const value=formValue(f,k);if(value)entry[k]=value});
+ if(role==='parent'){
+  const kinds=[...f.querySelectorAll('input[name="signalChoice"]:checked')].map(x=>x.value);
+  if(kinds.length)entry.signals=kinds.join(' / ');
+ }else{
+  const emotions=[...f.querySelectorAll('input[name="emotionChoice"]:checked')].map(x=>x.value);
+  const custom=formValue(f,'emotionOther');if(custom)emotions.push(custom);
+  if(emotions.length)entry.mood=emotions.join(' · ');
+  if(sketchStrokes.length)entry.sketch=JSON.stringify(sketchStrokes);
+ }
+ return entry;
+}
+
+let sketchStrokes=[],sketchActive=false;
+function bindSketch(){
+ const canvas=$('noteCanvas');if(!canvas)return;const ctx=canvas.getContext('2d');
+ const draw=()=>{ctx.clearRect(0,0,760,380);ctx.fillStyle='#fff';ctx.fillRect(0,0,760,380);ctx.strokeStyle='#5362cc';ctx.lineWidth=3.4;ctx.lineJoin='round';ctx.lineCap='round';sketchStrokes.forEach(stroke=>{if(!stroke.length)return;ctx.beginPath();ctx.moveTo(stroke[0][0],stroke[0][1]);if(stroke.length===1)ctx.lineTo(stroke[0][0]+.01,stroke[0][1]);else stroke.slice(1).forEach(p=>ctx.lineTo(p[0],p[1]));ctx.stroke()})};
+ const xy=e=>{const r=canvas.getBoundingClientRect();return [Math.min(760,Math.max(0,Math.round((e.clientX-r.left)*760/r.width))),Math.min(380,Math.max(0,Math.round((e.clientY-r.top)*380/r.height)))]};
+ const total=()=>sketchStrokes.reduce((a,b)=>a+b.length,0);
+ canvas.addEventListener('pointerdown',e=>{if(total()>=240)return;canvas.setPointerCapture(e.pointerId);sketchActive=true;sketchStrokes.push([xy(e)]);draw()});
+ canvas.addEventListener('pointermove',e=>{if(!sketchActive||total()>=240)return;const path=sketchStrokes[sketchStrokes.length-1],p=xy(e),q=path[path.length-1];if(Math.abs(p[0]-q[0])+Math.abs(p[1]-q[1])>4){path.push(p);draw()}});
+ for(const ev of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(ev,()=>{sketchActive=false});
+ $('undoStroke').onclick=()=>{sketchStrokes.pop();draw()};$('clearSketch').onclick=()=>{sketchStrokes=[];draw()};draw();
+}
+
+function sharePreview(fields,entry){return fields.map(k=>{const v=String(entry[k]||'');return '• '+(NOTE_LABELS[k]||k)+': '+(k==='sketch'?'[아래 그림 전체 미리보기]':v)}).join('\n\n')}
+function confirmSharedEntry(fields,entry){
+ return new Promise(resolve=>{
+  let d=document.getElementById('shareReviewDialog');
+  if(!d){d=document.createElement('dialog');d.id='shareReviewDialog';d.className='share-review-dialog';d.innerHTML='<h2>담당 치료사에게 공유할 내용</h2><p class="share-review-help">아래 항목만 공유돼. 선택하지 않은 내용은 보내지 않아. 실제 체험판에서는 서버로 전송되지 않아.</p><pre class="share-review-body"></pre><div class="share-review-sketch"></div><p class="share-review-help">보낸 뒤에는 공유를 취소할 수 있지만 이미 별도로 복사된 자료까지 되돌릴 수는 없어.</p><div class="share-review-actions"><button type="button" data-cancel class="button-ghost">돌아가기</button><button type="button" data-approve class="button">이 내용 공유하기</button></div>';document.body.append(d);}
+  d.querySelector('.share-review-body').textContent=sharePreview(fields,entry);
+  const drawing=d.querySelector('.share-review-sketch');
+  drawing.innerHTML=fields.includes('sketch')&&entry.sketch?'<div class="sketch-record" data-sketch="'+sanitize(entry.sketch)+'"><div class="sketch-mini-label">공유할 그림 전체</div><canvas width="760" height="380"></canvas></div>':'';
+  const finish=ok=>{d.close();resolve(ok)};
+  d.querySelector('[data-cancel]').onclick=()=>finish(false);
+  d.querySelector('[data-approve]').onclick=()=>finish(true);
+  d.oncancel=e=>{e.preventDefault();finish(false)};
+  if(typeof d.showModal==='function'){d.showModal();paintSketches();}
+  else resolve(confirm('담당 치료사에게 아래 내용만 공유할까?\n\n'+sharePreview(fields,entry)));
+ });
+}
+const PREVIEW_DRAFT_PREFIX='ildan-v15-preview-draft-';
+function savePreviewDraft(form,role){
+ if(!window.ILDAN_PREVIEW)return;
+ try{
+  const values=[...form.querySelectorAll('[name]')].map(el=>({name:el.name,value:el.value,type:el.type,checked:el.checked}));
+  sessionStorage.setItem(PREVIEW_DRAFT_PREFIX+role,JSON.stringify({savedAt:Date.now(),mode:form.dataset.journalMode||'quick',values,sketch:role==='student'?sketchStrokes:[]}));
+ }catch(_){}
+}
+function restorePreviewDraft(form,role){
+ if(!window.ILDAN_PREVIEW)return false;
+ try{
+  const raw=sessionStorage.getItem(PREVIEW_DRAFT_PREFIX+role);if(!raw)return false;
+  const draft=JSON.parse(raw);if(!draft||!Array.isArray(draft.values)||Date.now()-draft.savedAt>12*3600000){sessionStorage.removeItem(PREVIEW_DRAFT_PREFIX+role);return false;}
+  const els=[...form.querySelectorAll('[name]')];
+  draft.values.forEach((item,i)=>{const el=els[i];if(!el||el.name!==item.name)return;if(el.type==='checkbox'||el.type==='radio')el.checked=!!item.checked;else el.value=String(item.value||'')});
+  if(role==='student'){
+   sketchStrokes=Array.isArray(draft.sketch)?draft.sketch.slice(0,240):[];
+   const mode=draft.mode==='detail'?'detail':'quick';form.dataset.journalMode=mode;
+   form.querySelectorAll('[data-journal-mode]').forEach(b=>{const on=b.dataset.journalMode===mode;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on))});
+   const hint=document.getElementById('journalModeHint');if(hint)hint.textContent=mode==='quick'?'한 줄만 남겨도 돼. 나머지는 선택이야.':'감정·장소·그림·내 경험도 원하는 만큼 추가해 봐.';
+  }
+  return true;
+ }catch(_){return false}
+}
+function clearPreviewDraft(role){try{sessionStorage.removeItem(PREVIEW_DRAFT_PREFIX+role)}catch(_){}}
+
+function wireEntryForm(isParent){
+ const f=$('entryForm'),button=$('saveEntry'),share=f.elements.share,area=$('sharePicker');
+ const restored=restorePreviewDraft(f,me.role);
+ const persist=()=>savePreviewDraft(f,me.role);
+ f.addEventListener('input',persist);f.addEventListener('change',persist);
+ if(restored)toast('이 브라우저에서 작성 중이던 체험 내용을 복구했어.');
+ const selectedKeys=()=>[...f.querySelectorAll('input[name="shareField"]:checked')].map(x=>x.value);
+ const updateStudentShare=()=>{
+  if(isParent)return;
+  const entry=gatherEntry(f,'student');
+  f.querySelectorAll('input[name="shareField"]').forEach(x=>{
+   const mode=f.dataset.journalMode||'quick';const available=!!entry[x.value]&&(mode==='detail'||['note','date','time'].includes(x.value));x.disabled=!available;if(!available)x.checked=false;
+   x.closest('label')?.classList.toggle('is-unavailable',!available);
+  });
+  const count=selectedKeys().length;const caption=$('studentShareCount');
+  if(caption)caption.textContent=count?`${count}개 항목 선택됨 · 전송 전에 내용을 확인할 수 있어.`:'작성한 항목 중 보내고 싶은 것을 골라줘.';
+ };
+ share.onchange=()=>{area.hidden=!share.checked;button.textContent=isParent?(share.checked?'짧은 메모 전달하고 저장':'내 메모 저장하기'):(share.checked?'↗ 선택한 항목 공유하고 저장':'🔒 내 기록 저장');if(!isParent)updateStudentShare()};
+ if(!isParent){
+  const nowBtn=$('studentSetNow');if(nowBtn)nowBtn.onclick=()=>{const date=f.elements.date,time=f.elements.time;if(date)date.value=todayLocal();if(time)time.value=nowLocalTime();updateStudentShare();toast('날짜와 시간을 현재 시각으로 설정했어.');};
+  const journalModeHint=$('journalModeHint');
+  const modeButtons=[...f.querySelectorAll('button[data-journal-mode]')];
+  modeButtons.forEach(modeButton=>modeButton.addEventListener('click',()=>{
+    const mode=modeButton.dataset.journalMode;
+    f.dataset.journalMode=mode;
+    modeButtons.forEach(b=>{const active=b===modeButton;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
+    if(mode==='quick'&&$('drawPanel')&&!$('drawPanel').hidden){f.querySelector('[data-format="text"]')?.click();}
+    if(journalModeHint)journalModeHint.textContent=mode==='quick'?'한 줄만 남겨도 돼. 나머지는 선택이야.':'감정·장소·그림·내 경험도 원하는 만큼 추가해 봐.';
+    const extra=mode==='quick'&&['title','place','energy','thought','body','action','experience','experienceImpact'].some(k=>!!formValue(f,k));
+    const summary=$('journalHiddenNotice');if(summary)summary.hidden=!extra;
+    updateStudentShare();
+  }));
+  if(!restored)sketchStrokes=[];bindSketch();
+  document.querySelectorAll('[data-format]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-format]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b))});$('textPanel').hidden=b.dataset.format!=='text';$('drawPanel').hidden=b.dataset.format!=='draw';updateStudentShare()});
+  f.addEventListener('input',updateStudentShare);f.addEventListener('change',updateStudentShare);
+  $('studentSelectAll').onclick=()=>{updateStudentShare();f.querySelectorAll('input[name="shareField"]:not(:disabled)').forEach(x=>x.checked=true);updateStudentShare()};
+  $('studentClearAll').onclick=()=>{f.querySelectorAll('input[name="shareField"]').forEach(x=>x.checked=false);updateStudentShare()};
+  updateStudentShare();
+ }
+ f.onsubmit=async e=>{e.preventDefault();const entry=gatherEntry(f,me.role);
+  const meaningful=isParent?!!entry.observation:['note','sketch','mood','energy','thought','body','action','experience','experienceImpact'].some(k=>!!entry[k]);
+  if(!meaningful){toast(isParent?'직접 보거나 들은 일을 한 문장만 적어 주세요.':'일기, 그림, 감정 등 한 가지 이상 남겨줘.');return;}
+  if(isParent&&!entry.date){toast('일이 있었던 날짜를 선택해 주세요.');return;}
+  const sharedFields=share.checked?selectedKeys().filter(k=>entry[k]):[];
+  if(isParent&&share.checked&&sharedFields.includes('observation')){for(const k of ['date','time','place','signals'])if(entry[k]&&!sharedFields.includes(k))sharedFields.push(k);}
+  if(share.checked&&!sharedFields.some(k=>!['date','time','place','title'].includes(k))){toast('공유할 내용을 한 가지 이상 골라줘.');return;}
+  if(share.checked&&!(await confirmSharedEntry(sharedFields,entry)))return;
+  loading(button,async()=>{await api('records',{method:'POST',body:{entry,share:share.checked,sharedFields}});if(isParent){parentCalendarDate=entry.date;parentCalendarMode='day';activeView='calendar'}else activeView='history';clearPreviewDraft(me.role);toast('내 기록에 저장했어.');await dashboard()});
+ };
+}
+
+function prettyRecordEntry(entry){return Object.entries(entry??{}).map(([k,v])=> k==='sketch'?`<div class="sketch-record" data-sketch="${sanitize(v)}"><div class="sketch-mini-label">그림 메모</div><canvas width="760" height="380"></canvas></div>`:`<p><b>${sanitize(NOTE_LABELS[k]||k)}</b><br>${sanitize(v)}</p>`).join('');}
+function paintSketches(){document.querySelectorAll('[data-sketch]').forEach(el=>{try{const arr=JSON.parse(el.dataset.sketch);if(!Array.isArray(arr)||arr.length>250)return;const ctx=el.querySelector('canvas').getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,760,380);ctx.strokeStyle='#5362cc';ctx.lineWidth=3.5;ctx.lineCap='round';ctx.lineJoin='round';arr.forEach(stroke=>{if(!Array.isArray(stroke)||!stroke.length)return;ctx.beginPath();stroke.slice(0,240).forEach((p,i)=>{if(!Array.isArray(p)||p.length!==2||!Number.isFinite(p[0])||!Number.isFinite(p[1]))return;const x=Math.max(0,Math.min(760,p[0])),y=Math.max(0,Math.min(380,p[1]));i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke()});}catch(_){}})}
+function parentObservationFacts(entry={}){
+ const fields=[['date','관찰 날짜'],['time','시간'],['place','장소'],['signals','관찰한 모습(선택)'],['context','그전·당시 상황'],['observation','보거나 들은 내용'],['response','주변 사람의 말·행동'],['after','이후에 이어진 일'],['impact','일상에서 확인된 변화'],['origin','정보 출처'],['message','보호자 전달사항']];
+ return `<div class="observed-facts"><p class="clinical-neutral">보호자가 전달한 기록입니다. 직접 관찰했는지 또는 전해 들었는지 확인하고, 해석과 판단은 치료사가 별도로 검토합니다.</p>${fields.filter(([k])=>entry[k]).map(([k,name])=>`<div class="observed-fact-row"><strong>${name}</strong><span>${sanitize(entry[k])}</span></div>`).join('')}</div>`;
+}
+function recordCards(list=records){
+ if(!list.length)return '<div class="empty-state">아직 남겨둔 기록이 없습니다. 필요할 때만 작성해도 괜찮아요.</div>';
+ return list.map(r=>{
+  const time=sanitize(new Date(r.createdAt).toLocaleString('ko-KR'));
+  const observed=r.entry?.date?`${r.kind==='parent'?'관찰':'기록'} ${sanitize(r.entry.date)}${r.entry.time?' '+sanitize(r.entry.time):''}${r.entry.place?' · '+sanitize(r.entry.place):''} · 작성 ${time}`:time;
+  if(me.role==='therapist'&&r.kind==='student'){
+   const text=String(r.entry?.note||r.entry?.experience||r.entry?.thought||r.entry?.action||r.entry?.mood||'');
+   const short=text.length>120?text.slice(0,120)+'…':text;
+   return `<article class="record archive-record"><div class="meta">학생 공유 기록 · ${observed} · ${sanitize(r.student)}</div><div class="parent-inbox-skim">${sanitize(short)||'선택된 공유 내용이 있어.'}</div><details class="parent-inbox-details"><summary>공유한 내용 전체 보기</summary><div class="parent-inbox-full">${prettyRecordEntry(r.entry)}</div></details><p class="muted">학생이 선택해 공유한 내용만 표시돼.</p></article>`;
+  }
+  if(me.role==='therapist'&&r.kind==='parent'){
+   const field=String(r.entry?.observation||r.entry?.message||r.entry?.impact||r.entry?.response||'');
+   const preview=field.length>110?field.slice(0,110)+'…':field;
+   const place=r.entry?.place?' · '+sanitize(r.entry.place):'';
+   const kinds=r.entry?.signals?' · '+sanitize(r.entry.signals):'';
+   return `<article class="record parent-inbox-record"><div class="meta">보호자 기록 · ${observed}${place}${kinds} · ${sanitize(r.student)}</div><div class="parent-inbox-skim">${sanitize(preview)||'공유된 메모가 있어요.'}</div><details class="parent-inbox-details"><summary>전달 내용 더 보기</summary><div class="parent-inbox-full">${parentObservationFacts(r.entry)}<div class="muted">학생: ${sanitize(r.student)} · 작성자: ${sanitize(r.author)}</div></div></details></article>`;
+  }
+  return `<article class="record archive-record"><div class="meta">${observed} · ${r.kind==='student'?'학생':'학부모'} · ${r.shared?'치료사와 일부 공유':'나만 보기'}${r.driveSynced?' · 드라이브 백업':''}</div>${prettyRecordEntry(r.entry)}${!r.shared&&me.role!=='therapist'?`<div class="inline-share"><button class="button-ghost" type="button" data-share="${sanitize(r.id)}">선택해서 공유</button><div class="share-choices" data-share-panel="${sanitize(r.id)}" hidden><p>치료사에게 전달할 내용만 골라줘.</p>${me.role==='student'?`<div class="student-share-bar"><strong>내 기록 공유</strong><div class="student-share-actions"><button type="button" class="button-ghost" data-archive-all="${sanitize(r.id)}">전체 선택</button><button type="button" class="button-ghost" data-archive-clear="${sanitize(r.id)}">선택 해제</button></div></div>`:''}${Object.keys(r.entry??{}).map(k=>`<label><input type="checkbox" value="${sanitize(k)}"><span>${sanitize(NOTE_LABELS[k]||k)}</span></label>`).join('')}<button class="button" type="button" data-share-confirm="${sanitize(r.id)}">선택한 항목 전달</button></div></div>`:''}${r.shared&&me.role!=='therapist'?`<div class="inline-share"><button type="button" class="button-ghost" data-unshare="${sanitize(r.id)}">이후 공유 취소</button><small>이미 전달된 복사본은 별도 관리가 필요해.</small></div>`:''}${me.role==='therapist'?`<div class="muted">학생: ${sanitize(r.student)} · 작성자: ${sanitize(r.author)}</div>`:''}</article>`;
+ }).join('');
+}
+
+function attachShares(){
+ document.querySelectorAll('[data-share]').forEach(b=>b.onclick=()=>{const p=document.querySelector(`[data-share-panel="${b.dataset.share}"]`);if(!p)return;p.hidden=!p.hidden});
+ for(const [key,value] of [['archiveAll',true],['archiveClear',false]])document.querySelectorAll(`[data-${key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())}]`).forEach(b=>b.onclick=()=>{const id=b.dataset[key],panel=document.querySelector(`[data-share-panel="${id}"]`);if(panel)panel.querySelectorAll('input[type="checkbox"]').forEach(c=>c.checked=value)});
+ document.querySelectorAll('[data-share-confirm]').forEach(b=>b.onclick=async()=>{
+  const r=records.find(x=>x.id===b.dataset.shareConfirm),panel=document.querySelector(`[data-share-panel="${b.dataset.shareConfirm}"]`);if(!r||!panel)return;
+  const fields=[...panel.querySelectorAll('input:checked')].map(x=>x.value).filter(k=>r.entry[k]);
+  if(!fields.some(k=>!['date','time','place','title'].includes(k))){toast('공유할 내용을 한 가지 이상 골라줘.');return;}
+  if(!(await confirmSharedEntry(fields,r.entry)))return;
+  loading(b,async()=>{await api('share',{method:'POST',body:{recordId:r.id,sharedFields:fields}});toast('선택한 내용만 공유했어.');await dashboard()})
+ });
+ document.querySelectorAll('[data-unshare]').forEach(b=>b.onclick=()=>{
+  if(!confirm('이 기록의 앞으로의 치료사 열람을 중단할까? 이미 별도로 저장되거나 전달된 복사본은 자동으로 삭제되지 않아.'))return;
+  loading(b,async()=>{await api('unshare',{method:'POST',body:{recordId:b.dataset.unshare}});toast('체험판에서 공유를 취소했어.');await dashboard()})
+ });
+}
+
+const CHOICE_LAB_SCENES=[
+ {id:'time',icon:'✦',tab:'여유 시간',accent:'mint',title:'갑자기 20분이 생겼어.',desc:'예정보다 일찍 끝났어. 무엇을 해볼까?',options:[
+  {label:'음악 한 곡',glyph:'♫',line:'음악을 켰어. 잠깐 다른 분위기로 전환!',code:'listen_to_music()',out:'음악 한 곡을 듣는 방법을 골랐어.'},
+  {label:'게임 한 판',glyph:'▣',line:'가벼운 게임을 골라봤어.',code:'play_a_round()',out:'게임 한 판을 즐기는 방법을 골랐어.'},
+  {label:'잠깐 쉬기',glyph:'☁',line:'아무것도 하지 않고 시간을 보내도 돼.',code:'take_a_break()',out:'잠깐 쉬어 가는 방법을 골랐어.'}]},
+ {id:'team',icon:'◈',tab:'팀 활동',accent:'lavender',title:'새 프로젝트를 시작해.',desc:'함께 무언가를 만들기로 했어. 어떤 역할이 끌려?',options:[
+  {label:'아이디어 내기',glyph:'✳',line:'아이디어를 하나 꺼내서 이야기해 봤어.',code:'share_an_idea()',out:'새로운 생각으로 시작했어.'},
+  {label:'순서 정리',glyph:'☷',line:'어디부터 할지 간단히 정했어.',code:'make_a_plan()',out:'순서를 정하는 방식으로 시작했어.'},
+  {label:'먼저 둘러보기',glyph:'◎',line:'다른 사람이 하는 걸 보고 방향을 잡았어.',code:'explore_first()',out:'천천히 살펴보는 방식으로 시작했어.'}]},
+ {id:'game',icon:'⌘',tab:'새 게임',accent:'peach',title:'처음 보는 게임을 발견했어.',desc:'어떻게 시작해 보고 싶어?',options:[
+  {label:'일단 플레이',glyph:'▶',line:'직접 움직여 보면서 알아봤어.',code:'start_playing()',out:'직접 해보는 방법을 골랐어.'},
+  {label:'규칙 살펴보기',glyph:'≡',line:'규칙을 읽고 흐름을 알아봤어.',code:'read_the_rules()',out:'정보를 먼저 살펴보는 방법을 골랐어.'},
+  {label:'다음에 하기',glyph:'↷',line:'지금은 지나가고 다음을 기약했어.',code:'save_for_later()',out:'다음 기회를 선택했어.'}]}
+];
+let choiceLabScene=0,choiceLabOption=-1;
+function situationMarkup(){return `<div class="choice-lab" id="situation">
+ <div class="choice-top"><span class="choice-top-label"><span aria-hidden="true">●</span> PLAYGROUND / IF · ELSE</span><span class="choice-count" id="choiceCount">01 / 03</span></div>
+ <div class="choice-tabs" role="group" aria-label="장면 고르기">${CHOICE_LAB_SCENES.map((s,i)=>`<button type="button" data-choice-scene="${i}" aria-pressed="${i===choiceLabScene?'true':'false'}"><span aria-hidden="true">${s.icon}</span> ${s.tab}</button>`).join('')}</div>
+ <div class="choice-scene choice-mint" id="choiceScene"><div class="choice-scene-art" aria-hidden="true"><span class="choice-art-chip">IF</span><span class="choice-art-route"></span><span class="choice-art-node">?</span></div><div class="choice-scene-text"><span class="choice-kicker">SCENE 01</span><h3 id="choiceTitle"></h3><p id="choiceDescription"></p></div></div>
+ <div class="choice-columns"><div class="choice-actions"><div class="choice-section-head"><strong>이렇게 해볼래?</strong><span>하나만 골라봐</span></div><div class="choice-options" id="choiceOptions"></div></div>
+ <div class="choice-result"><div class="choice-console-top"><span aria-hidden="true">● ● ●</span><span>output.log</span><span class="choice-console-status" id="choiceStatus">READY</span></div><div class="choice-console-content" aria-live="polite" aria-atomic="true" id="choiceOutput"><span class="choice-cursor">›</span><span>선택하면 결과가 나타나.</span></div><div class="choice-code" id="choiceCode"><span class="choice-ln">01</span> <span class="choice-keyword">if</span> (selected) {<br><span class="choice-ln">02</span> &nbsp; run(selected);<br><span class="choice-ln">03</span> }</div></div></div>
+ <div class="choice-bottom"><span>정답 · 점수 · 기록 저장 없음</span><button type="button" id="choiceReset" class="choice-reset">↻ 다시 선택</button></div>
+ </div>`;}
+function attachSituation(){
+ const root=document.querySelector('#situation');if(!root)return;
+ const count=root.querySelector('#choiceCount'),title=root.querySelector('#choiceTitle'),desc=root.querySelector('#choiceDescription'),scene=root.querySelector('#choiceScene'),options=root.querySelector('#choiceOptions'),output=root.querySelector('#choiceOutput'),status=root.querySelector('#choiceStatus'),code=root.querySelector('#choiceCode');
+ const draw=()=>{
+  const s=CHOICE_LAB_SCENES[choiceLabScene];count.textContent=String(choiceLabScene+1).padStart(2,'0')+' / 03';title.textContent=s.title;desc.textContent=s.desc;
+  scene.className='choice-scene choice-'+s.accent;
+  root.querySelector('.choice-kicker').textContent='SCENE '+String(choiceLabScene+1).padStart(2,'0');
+  root.querySelectorAll('[data-choice-scene]').forEach((b,i)=>{const on=i===choiceLabScene;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',String(on));});
+  options.innerHTML=s.options.map((o,i)=>`<button type="button" class="choice-option${i===choiceLabOption?' picked':''}" data-choice-option="${i}" aria-pressed="${i===choiceLabOption?'true':'false'}"><span class="choice-option-icon" aria-hidden="true">${o.glyph}</span><strong>${o.label}</strong><span aria-hidden="true" class="choice-arrow">↗</span></button>`).join('');
+  if(choiceLabOption<0){status.textContent='READY';output.innerHTML='<span class="choice-cursor" aria-hidden="true">›</span><span>선택하면 결과가 나타나.</span>';code.innerHTML='<span class="choice-ln">01</span> <span class="choice-keyword">if</span> (selected) {<br><span class="choice-ln">02</span> &nbsp; run(selected);<br><span class="choice-ln">03</span> }';}
+  else{const o=s.options[choiceLabOption];status.textContent='DONE';output.textContent=o.out;code.textContent='> '+o.code+'\n'+o.line;}
+  options.querySelectorAll('[data-choice-option]').forEach(b=>b.onclick=()=>{choiceLabOption=Number(b.dataset.choiceOption);draw();});
+ };
+ root.querySelectorAll('[data-choice-scene]').forEach(b=>b.onclick=()=>{choiceLabScene=Number(b.dataset.choiceScene);choiceLabOption=-1;draw();});
+ root.querySelector('#choiceReset').onclick=()=>{choiceLabOption=-1;draw();};
+ draw();
+}
+function codingMarkup(){return `<div class="lab-shell">
+  <div class="lab-tabbar"><span class="lab-dot" aria-hidden="true"></span><span>condition_lab.js</span><span class="lab-sub">로직 살펴보기 · 선택 활동</span></div>
+  <div class="lab-layout">
+   <div class="lab-editor"><div class="lab-overline">코드 미리보기 <span>JAVASCRIPT</span></div><pre id="codingCode" class="code"><span class="line-number">01</span> <span class="code-purple">const</span> weather = <span class="code-green">'sun'</span>;
+<span class="line-number">02</span> <span class="code-purple">if</span> (weather === <span class="code-green">'sun'</span>) {
+<span class="line-number">03</span>   action = <span class="code-green">'산책'</span>;
+<span class="line-number">04</span> } <span class="code-purple">else</span> {
+<span class="line-number">05</span>   action = <span class="code-green">'실내 활동'</span>;
+<span class="line-number">06</span> }</pre></div>
+   <div class="lab-controls"><label>날씨 조건 선택<select id="codingSelect"><option value="sun">맑음</option><option value="rain">비</option><option value="cloud">구름</option></select></label><button id="runCode" class="button">▶ 실행 결과 보기</button><div class="lab-result"><strong>OUTPUT</strong><div id="codeResult" aria-live="polite">조건을 고르고 실행해 봐.</div></div><p class="field-note">실제 코드를 실행하는 편집기가 아닌 조건문 실험이에요. 상담 기록과는 별개예요.</p></div>
+  </div></div>`;}
+function attachCoding(){
+ const refresh=()=>{
+  const value=$('codingSelect').value;
+  const condition=value==='sun'?'sun':value==='rain'?'rain':'cloud';
+  $('codingCode').innerHTML=`<span class="line-number">01</span> <span class="code-purple">const</span> weather = <span class="code-green">'${condition}'</span>;
+<span class="line-number">02</span> <span class="code-purple">if</span> (weather === <span class="code-green">'sun'</span>) {
+<span class="line-number">03</span>   action = <span class="code-green">'산책'</span>;
+<span class="line-number">04</span> } <span class="code-purple">else</span> {
+<span class="line-number">05</span>   action = <span class="code-green">'실내 활동'</span>;
+<span class="line-number">06</span> }`;
+  $('codeResult').textContent='▶ 실행하면 결과가 표시돼.';
+ };
+ $('codingSelect').onchange=refresh;
+ $('runCode').onclick=()=>{const x=$('codingSelect').value;const act=x==='sun'?'산책':'실내 활동';$('codeResult').textContent=`출력: ${act}`;};
+}
+function studentHome(){
+ const isParent=me.role==='parent';
+ const items=isParent?[
+  ['write','✎','1분 생활 메모','필요할 때만'],['calendar','▦','기록 달력','월·주·일'],['history','▤','내 기록','내가 쓴 내용']
+ ]:[
+  ['write','✎','기록하기','한 장이면 충분해'],['history','▤','내 기록','지난 기록 확인']
+ ];
+ app.innerHTML=hero(isParent?'필요할 때만 짧게 남겨요.':'내가 남기고 싶은 한 페이지.',isParent?'모든 변화를 적을 필요는 없어요. 기억에 남은 한 가지면 충분해요.':'매일 써야 하는 숙제는 아니야. 기록한 내용은 기본적으로 나만 볼 수 있어.')+
+ `<div class="workspace-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">01</span></div>${workspaceNav(items,activeView)}<div class="sidebar-note"><span class="privacy-dot" aria-hidden="true"></span>공유는 내가 선택해요.<br><small>혼자만 볼 수도 있어요.</small></div></aside><div class="workspace-content">
+ <section data-workspace-view="write" class="workspace-section"><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>${isParent?'observation.note':'my-note.md'}</span><span class="editor-status">NEW NOTE</span></div><div class="editor-paper"><span class="tag">01 / WRITE</span><h2>${isParent?'간단한 생활 메모':'새 페이지'}</h2><p>${isParent?'한 가지를 짧게 적어도 충분해요. 치료사에게 전달하지 않아도 돼요.':'글이나 그림으로 남겨도 되고, 그냥 둘러봐도 돼.'}</p>${dataForm(me.role)}</div></section>
+ ${isParent?`<section data-workspace-view="calendar" id="parentCalendar" class="workspace-section" hidden>${parentCalendarHTML()}</section>`:''}
+ <section data-workspace-view="history" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>my-notes.json</span></div><div class="editor-paper"><span class="tag">02 / ARCHIVE</span><h2>${isParent?'내 생활 메모':'내 서랍'}</h2><p>${isParent?'내가 남긴 메모만 보여요.':'내가 남긴 페이지들을 모아두는 곳이야.'}</p><div id="recordsHere">${recordCards()}</div>${isParent?'':`<details class="lab-optional"><summary>선택 활동 · 코딩 실험실 (기록과 별개)</summary><div class="lab-optional-content"><p>예시로 구성한 간단한 조건문 체험이야. 실제 프로그래밍 학습이나 CBT 과제는 아니야.</p>${codingMarkup()}</div></details>`}</div></section>
+ ${isParent?'':`<section data-workspace-view="coding" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>studio / playground</span></div><div class="editor-paper"><span class="tag">OPTIONAL / PLAY</span><h2>코딩 실험실</h2><p>조건을 바꿔 결과를 확인하는 작은 실험 공간이야. 기록하지 않고 그냥 놀아도 돼.</p>${codingMarkup()}<details class="optional-fields"><summary>간단한 선택 예시 살펴보기 <small>선택</small></summary><div class="optional-wrap">${situationMarkup()}</div></details></div></section>`}
+ </div></div><p class="workspace-footer">일단써봄은 원하는 방식으로 경험을 남기는 개인 작업공간이야. 사용하고 싶은 때에만 열어도 돼.</p>`;
+ wireEntryForm(isParent);attachShares();bindWorkspace();paintSketches();if(isParent)renderParentCalendar();
+ if(!isParent){attachCoding();}
+
+}
+function exportCSV(){const labels={event:'있었던 일',thought:'떠오른 생각',next:'해보고 싶은 것',observation:'관찰한 상황',message:'전달사항'};function cell(s){let x=String(s??'');if(/^[\s]*[=+\-@\t\r]/.test(x))x="'"+x;return '"'+x.replaceAll('"','""')+'"'}const rows=[['작성일','학생','작성자','유형','기록 내용'],...records.map(r=>[r.createdAt,r.student,r.author,r.kind,Object.entries(r.entry??{}).map(([k,v])=>(labels[k]||k)+': '+v).join('\n')])];const csv='\uFEFF'+rows.map(row=>row.map(cell).join(',')).join('\r\n');const u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=u;a.download='일단써봄_담당치료사_공유기록.csv';a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
+async function initSessionNotes(){
+ const wrap=$('sessionSaved'),form=$('sessionForm');if(!wrap||!form)return;
+ const display=async()=>{try{const out=await api('session-notes');wrap.innerHTML=(out.notes?.length?out.notes.map(n=>`<article class="record"><div class="meta">${sanitize(n.studentNickname||'학생')} · ${sanitize(new Date(n.createdAt).toLocaleDateString('ko-KR'))} · 치료사 전용</div>${prettyRecordEntry(n.entry)}</article>`).join(''):'<div class="empty-state">아직 회기 메모가 없습니다.</div>');}catch(e){wrap.textContent='회기 메모 기능 연결 전: '+e.message;}};
+ form.onsubmit=e=>{e.preventDefault();const entry={};["studentReport","parentReport","observation","question","plan","functionalImpact","familyResponse","workingHypothesis","alternatives","uncertainty","burdenReview","erpReview","erpTarget","erpSafety","cbitReview","cbitTarget","cbitContext"].forEach(k=>{const v=formValue(form,k);if(v)entry[k]=v});if(!Object.keys(entry).length){toast('한 가지 이상 남겨주세요.');return;}loading(form.querySelector('button'),async()=>{await api('session-notes',{method:'POST',body:{studentId:formValue(form,'studentId'),entry}});form.reset();toast('회기 메모를 보관했어요.');await display()})};
+ await display();
+}
+async function therapistHome(){const r=await Promise.all([api('students'),api('drive/status'),api('accounts')]);students=r[0].students;drive=r[1];const accounts=r[2].accounts;app.innerHTML=hero('오늘의 사례 공간','학생이 공유한 내용과 보호자 관찰을 구분해 보고, 다음 회기를 준비해요.')+`<div class="workspace-shell therapist-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">02</span></div>${workspaceNav([['inbox','▣','공유 자료','학생·보호자'],['session','▤','회기 준비','치료사 메모'],['accounts','♙','계정 연결','초대·재등록'],['drive','↗','Google Drive','담당자 전용']],activeView)}<div class="sidebar-note">배정된 학생의 공유 기록만<br><small>담당 치료사가 확인할 수 있어요.</small></div></aside><div class="workspace-content"><div class="grid"><section class="panel highlight full" data-workspace-view="inbox"><span class="tag">01 / INBOX</span><h2>학생·보호자가 공유한 기록 <small>(${records.length}건)</small></h2><p>원문을 유지하며 작성자의 관점에 따라 구분해요. 자동으로 진단하거나 평가하지 않아요.</p><div class="buttons"><button id="refresh" class="button-ghost">↻ 새 기록 확인</button><button id="csv" class="button-ghost">CSV 다운로드</button></div><p class="parent-inbox-policy">보호자 메모는 <b>짧은 내용만 먼저</b> 보여요. 길게 작성한 원문은 필요할 때 펼쳐볼 수 있어요.</p><div class="filter-strip"><label>학생별 보기<select id="filterStudent"><option value="all">전체 학생</option>${students.map(s=>`<option value="${sanitize(s.nickname)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><label>작성자 구분<select id="filterKind"><option value="all">전체</option><option value="student">학생 기록</option><option value="parent">학부모 전달</option></select></label></div><div id="inboxResults">${recordCards()}</div></section><section class="panel full case-panel" data-workspace-view="session" hidden><span class="tag">SESSION / THERAPIST ONLY</span><h2>회기 준비·메모</h2><p>학생이 선택해 공유한 내용과 실제 회기에서 확인한 내용을 분리해 기록합니다. 치료사의 가설은 관찰 사실이 아니며, 앱이 진단이나 치료 효과를 판단하지 않습니다. <b>가상 체험판의 역할 전환은 실제 접근 통제가 아닙니다.</b></p>
+<form id="sessionForm" class="form clinician-form">
+<label>담당 학생<select name="studentId" required>${students.map(s=>`<option value="${sanitize(s.id)}">${sanitize(s.nickname)}</option>`).join('')}</select></label>
+<div class="clinician-quick-fields">
+ <label>학생이 직접 이야기한 내용 <small>(선택)</small><textarea name="studentReport" maxlength="1200" rows="2" placeholder="학생의 표현을 가능하면 그대로. 공유 기록과 회기 진술은 구별해요."></textarea></label>
+ <label>보호자에게 들은 내용 <small>(선택)</small><textarea name="parentReport" maxlength="1200" rows="2" placeholder="직접 관찰인지 전해 들은 내용인지 구분해 적어요."></textarea></label>
+ <label>치료사가 직접 확인한 사실 <small>(선택)</small><textarea name="observation" maxlength="1200" rows="2" placeholder="회기에서 실제 관찰한 행동·상황. 원인이나 진단을 단정하지 않아요."></textarea></label>
+ <label>다음 회기에 함께 살펴볼 것 <small>(선택)</small><textarea name="plan" maxlength="1200" rows="2" placeholder="학생과 합의한 목표 또는 질문. 기록하지 않는 선택도 존중해요."></textarea></label>
+</div>
+<details class="clinician-extra">
+ <summary>사례개념화와 기록 부담 점검 <small>필요할 때만</small></summary>
+ <div class="clinician-extra-inner">
+  <p class="clinical-neutral">한 번의 기록만으로 틱·강박·불안 등을 구분하지 않습니다. 아래 내용은 표준화 검사나 진단 판정을 대신하지 않습니다.</p>
+  <label>일상생활에 실제 어떤 영향이 있었나요?<textarea name="functionalImpact" maxlength="900" rows="2" placeholder="수면·학업·관계·시간 사용 등 확인된 영향. 확인되지 않았다면 비워 두세요."></textarea></label>
+  <label>가족이나 주변의 반응은 무엇이었나요?<textarea name="familyResponse" maxlength="900" rows="2" placeholder="관찰한 대응만 기록. 가족 수용행동 여부를 자동 분류하지 않습니다."></textarea></label>
+  <label>현재의 잠정적인 이해·가설<textarea name="workingHypothesis" maxlength="1000" rows="2" placeholder="사실과 분리하여 가설로만 작성. 단정하지 않습니다."></textarea></label>
+  <label>다른 설명 가능성<textarea name="alternatives" maxlength="1000" rows="2" placeholder="습관·발달·감각·틱·강박·피로·상황 등 필요에 따라 검토"></textarea></label>
+  <label>추가로 확인해야 할 내용<textarea name="uncertainty" maxlength="1000" rows="2" placeholder="아직 모르는 점과 확인 자료"></textarea></label>
+  <label>기록 사용이 학생에게 부담이 되었나요? <small>(상담에서 확인, 선택)</small>
+   <select name="burdenReview">
+    <option value="">확인하지 않음 / 기록하지 않음</option>
+    <option value="학생이 별다른 부담을 말하지 않음">학생이 별다른 부담을 말하지 않음</option>
+    <option value="부담 또는 반복 확인이 보고됨">부담 또는 반복 확인이 보고됨</option>
+    <option value="작성 축소·중단 또는 다른 방법을 합의함">작성 축소·중단 또는 다른 방법을 합의함</option>
+   </select>
+  </label>
+  <label>회기에서 확인할 질문<textarea name="question" maxlength="1200" rows="2" placeholder="정답 확인이나 반복적인 안심 제공이 아닌 개방형 질문"></textarea></label>
+ </div>
+</details>
+<details class="clinician-extra">
+ <summary>CBT·ERP 회기 검토 <small>훈련받은 치료사만 · 선택</small></summary>
+ <div class="clinician-extra-inner">
+  <p class="clinical-neutral"><strong>치료사 전용 임상 메모입니다.</strong> 강박 증상을 확인했다는 표시가 아니며 자동 과제·노출·반응방지 지시를 생성하지 않습니다. 적합성 평가, 치료적 합의, 개별 안전 검토가 선행되어야 합니다.</p>
+  <label>회기 검토 상태<select name="erpReview"><option value="">선택하지 않음</option><option value="적합성 평가가 필요함">적합성 평가가 필요함</option><option value="별도의 치료계획에서 검토 중">별도의 치료계획에서 검토 중</option><option value="이번 회기에 해당 없음">이번 회기에 해당 없음</option></select></label>
+  <label>치료사 전용 목표·계획 메모<textarea name="erpTarget" maxlength="1200" rows="2" placeholder="실제 치료계획이 있는 경우에만 기재. 학생 앱에 자동 전달되지 않음."></textarea></label>
+  <label>합의·안전·경과 관련 확인<textarea name="erpSafety" maxlength="1000" rows="2" placeholder="학생과의 합의, 치료 반응, 안전 관련 확인 필요사항"></textarea></label>
+ </div>
+</details>
+<details class="clinician-extra">
+ <summary>CBIT·틱 관련 회기 검토 <small>훈련받은 치료사만 · 선택</small></summary>
+ <div class="clinician-extra-inner">
+  <p class="clinical-neutral"><strong>치료사 전용 임상 메모입니다.</strong> 일기만으로 CBIT가 시행된 것은 아닙니다. 틱과 강박행동을 같은 것으로 간주하지 않으며 경쟁반응을 자동으로 추천하지 않습니다.</p>
+  <label>회기 검토 상태<select name="cbitReview"><option value="">선택하지 않음</option><option value="적합성 평가가 필요함">적합성 평가가 필요함</option><option value="별도의 치료계획에서 검토 중">별도의 치료계획에서 검토 중</option><option value="이번 회기에 해당 없음">이번 회기에 해당 없음</option></select></label>
+  <label>틱 관련 상황·기능적 영향<textarea name="cbitContext" maxlength="1000" rows="2" placeholder="회기에서 확인된 맥락과 일상생활 영향, 추측과 구분"></textarea></label>
+  <label>치료사 전용 목표·계획 메모<textarea name="cbitTarget" maxlength="1200" rows="2" placeholder="치료 평가와 합의에 근거한 계획만. 학생 앱으로 자동 전송되지 않음."></textarea></label>
+ </div>
+</details>
+<div class="clinician-save-row"><button class="button" type="submit">치료사 메모 보관</button><p>모든 항목은 선택입니다. 별도의 임상 평가·동의 절차와 치료기록을 대신하지 않습니다.</p></div>
+</form><div id="sessionSaved"></div></section><section class="panel" data-workspace-view="accounts"><span class="tag">02 / ACCOUNTS</span><h2>학생·학부모 초대하기</h2><p>초대코드를 전달해 담당 학생·학부모를 연결해요.</p><form id="inviteForm" class="form"><label>초대할 사람<select name="role" id="inviteRole"><option value="student">학생</option><option value="parent">학부모</option></select></label><label id="studentPicker" class="hidden">연결할 학생<select name="studentId">${students.map(s=>`<option value="${sanitize(s.id)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><button class="button">7일짜리 초대코드 만들기</button></form><div id="inviteOutput"></div></section><section class="panel" data-workspace-view="accounts"><span class="tag">02 / ACCOUNT HELP</span><h2>패스키 재등록 코드</h2><p>기기를 잃어버린 경우 신원 확인 후 30분짜리 재등록 코드를 발급합니다.</p><label>대상 계정<select id="resetUser">${accounts.map(a=>`<option value="${sanitize(a.id)}">${sanitize(a.nickname)} · ${a.role==='student'?'학생':'학부모'}</option>`).join('')}</select></label><div class="buttons"><button id="resetIssue" class="button-ghost" ${accounts.length?'':'disabled'}>재설정 코드 발급</button></div><div id="resetOutput"></div></section><section class="panel full" data-workspace-view="drive"><span class="tag">03 / GOOGLE DRIVE</span><h2>Google Drive</h2><p>${drive.connected?'내 구글 계정이 연결돼 있습니다.':'구글 계정 연결 전입니다. 학생 기록은 아직 자동 업로드되지 않습니다.'}</p><div class="buttons"><button id="googleConnect" class="button-ghost" ${drive.configured?'':'disabled'}>${drive.connected?'구글 계정 다시 연결':'내 구글 계정 연결'}</button><button id="driveSync" class="button" ${drive.connected?'':'disabled'}>공유 기록 백업</button>${drive.folderUrl?`<a class="button-ghost" href="${sanitize(drive.folderUrl)}" target="_blank" rel="noopener noreferrer">내 드라이브 폴더 열기 ↗</a>`:''}</div>${!drive.configured?hint('구글 OAuth 관리자 설정이 아직 끝나지 않았습니다. 인증을 완료하면 담당 치료사의 구글 계정에만 기록을 복사할 수 있습니다.'):''}</section></div></div></div>`;
+attachShares();bindWorkspace();paintSketches();initSessionNotes();const rerenderInbox=()=>{const name=$('filterStudent').value,kind=$('filterKind').value;const list=records.filter(r=>(name==='all'||r.student===name)&&(kind==='all'||r.kind===kind));$('inboxResults').innerHTML=recordCards(list);paintSketches();};$('filterStudent').onchange=rerenderInbox;$('filterKind').onchange=rerenderInbox;$('refresh').onclick=()=>dashboard();$('csv').onclick=exportCSV;$('inviteRole').onchange=()=>{$('studentPicker').classList.toggle('hidden',$('inviteRole').value!=='parent')};$('inviteForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;loading(f.querySelector('button'),async()=>{const out=await api('invites',{method:'POST',body:{role:formValue(f,'role'),studentId:formValue(f,'studentId')}});const div=$('inviteOutput');div.innerHTML='<p class="muted">초대코드는 한 번만 사용할 수 있으며 7일 뒤 만료됩니다. 개인적인 방법으로 전달하세요.</p><textarea id="inviteCode" readonly></textarea><button class="button-ghost" type="button" id="copyCode">초대코드 복사</button>';$('inviteCode').value=out.invite;$('copyCode').onclick=()=>{navigator.clipboard.writeText(out.invite).then(()=>toast('초대코드를 복사했어요.'))}})};
+$('resetIssue').onclick=e=>loading(e.target,async()=>{if(!confirm('대상자의 신원을 별도로 확인했나요?'))return;const result=await api('reset/create',{method:'POST',body:{userId:$('resetUser').value}});$('resetOutput').innerHTML='<p>30분 뒤 만료되는 재설정 코드입니다.</p><textarea readonly id="resetCode"></textarea>';$('resetCode').value=result.resetCode;});$('googleConnect').onclick=()=>{location.assign('/api/drive/start')};$('driveSync').onclick=e=>loading(e.target,async()=>{const x=await api('drive/sync',{method:'POST'});toast(`${x.synced}건을 담당 치료사의 드라이브에 백업했습니다.`);await dashboard()});}
+function adminHome(){app.innerHTML=hero('계정 운영','최초 관리자 계정은 기록을 읽을 수 없습니다. 치료사 초대만 발급할 수 있어요.')+`<div class="panel"><h2>치료사 초대코드 발급</h2><p>치료사도 학생·학부모와 같은 패스키 방식으로 등록합니다.</p><button id="inviteTherapist" class="button">치료사 초대코드 만들기</button><div id="adminInvite"></div></div>`;$('inviteTherapist').onclick=e=>loading(e.target,async()=>{const r=await api('invites',{method:'POST',body:{role:'therapist'}});const d=$('adminInvite');d.innerHTML='<p>코드를 복사해 치료사에게 개별 전달하세요. 7일간 유효합니다.</p><textarea readonly id="adminCode"></textarea>';$('adminCode').value=r.invite;})}
+async function dashboard(){header();records=me.role==='admin'?[]:(await api('records')).records??[];if(me.role==='therapist')await therapistHome();else if(me.role==='admin')adminHome();else studentHome();}
+function render(){header();if(!me)loginScreen();else dashboard().catch(e=>{app.innerHTML=hint('화면을 불러오지 못했어요. '+sanitize(e.message))})}
+(async()=>{try{me=(await api('me')).user}catch{me=null}render()})();
+
+</script></body></html>

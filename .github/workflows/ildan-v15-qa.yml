@@ -1,0 +1,73 @@
+name: Ildan Sseobom v15 Clinical Preview QA
+on:
+  push:
+    branches:
+      - main
+      - feature/ildan-sseobom-v15-clinical-qa-20261012
+    paths:
+      - 'test/ildan-sseobom/design-v15/**'
+      - 'test/ildan-sseobom/v15-qa.html'
+      - '.github/workflows/ildan-v15-qa.yml'
+  pull_request:
+    paths:
+      - 'test/ildan-sseobom/design-v15/**'
+      - 'test/ildan-sseobom/v15-qa.html'
+      - '.github/workflows/ildan-v15-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  desktop-mobile-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate v15 JavaScript syntax and privacy guardrails
+        shell: bash
+        run: |
+          node <<'JS'
+          const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+          const page=fs.readFileSync('test/ildan-sseobom/design-v15/index.html','utf8');
+          const v14=fs.readFileSync('test/ildan-sseobom/design-v14/index.html','utf8');
+          const script=page.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+          assert(script,'v15 script exists');
+          new vm.Script(script);
+          assert(page.includes('ILDAN_PREVIEW=true'),'preview cannot be mistaken for production');
+          assert(page.includes('실명·상담 내용 입력 금지'),'privacy warning present');
+          assert(page.includes('confirmSharedEntry'),'full disclosure screen present');
+          assert(!page.includes('v.length>90?v.slice(0,90)'),'truncated share content removed');
+          assert(page.includes("path==='unshare'"),'revoke implemented');
+          assert(page.includes('PREVIEW_DRAFT_PREFIX'),'session draft prototype present');
+          assert(page.includes("['note','date','time'].includes(x.value)"),'quick-mode shared fields constrained');
+          assert(!v14.includes('PREVIEW_DRAFT_PREFIX'),'legacy v14 remains unmodified');
+          console.log('PASS: JavaScript syntax and privacy guardrails');
+          JS
+      - name: Run actual Chrome interaction tests at desktop and mobile sizes
+        shell: bash
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$CHROME" ]; then echo 'Chrome binary unavailable'; exit 1; fi
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/ildan-v15-server.log 2>&1 &
+          sleep 2
+          for SIZE in 1440,900 390,844; do
+            "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size="$SIZE" --virtual-time-budget=14000 --dump-dom "http://127.0.0.1:8765/test/ildan-sseobom/v15-qa.html" > /tmp/ildan-v15-result.html 2>/tmp/ildan-v15-chrome.log
+            if ! grep -q 'data-qa-result="PASS"' /tmp/ildan-v15-result.html; then
+              echo "FAIL v15 browser test for $SIZE"
+              grep -o 'data-qa-result="[^"]*"' /tmp/ildan-v15-result.html || true
+              python3 - <<'PY'
+          from html.parser import HTMLParser
+          class TextDump(HTMLParser):
+              active=False
+              def handle_starttag(self,tag,attrs):
+                  if dict(attrs).get('id')=='log': self.active=True
+              def handle_endtag(self,tag):
+                  if self.active and tag=='div': self.active=False
+              def handle_data(self,data):
+                  if self.active: print('QA DETAIL:',data[-4500:])
+          TextDump().feed(open('/tmp/ildan-v15-result.html').read())
+          PY
+              tail -n 10 /tmp/ildan-v15-chrome.log || true
+              exit 1
+            fi
+            echo "PASS v15 Chrome $SIZE"
+          done
