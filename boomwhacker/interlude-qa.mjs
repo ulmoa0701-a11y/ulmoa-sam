@@ -165,8 +165,9 @@ try{
        window.SpeechSynthesisUtterance=function(text){this.text=text};
    });
    for(const mode of ['music','voice']){
+     if(mobile)await page.locator('#mobileSettingsBtn').click();
      await page.locator('#introMode').selectOption(mode);
-     if(mobile)await page.locator('#mobileSettingsClose').click().catch(()=>{});
+     if(mobile)await page.locator('#mobileSettingsClose').click();
      await page.locator(mobile?'#playBtn':'#startBtn').click();
      const started=await page.evaluate(()=>({count:introCountBeats,preview:introPreviewBeats,beats:introBeats,
        expected:instrumentalPreludePlan().beats,pulse:document.querySelector('#introPulse').innerText,
@@ -187,8 +188,8 @@ try{
        if(result.speech.at(-1)?.text!=='둘')throw Error('Spoken mode did not advance to 둘 '+JSON.stringify(result.speech));
      }
      await page.locator('#resetBtn').click();
-     if(mobile)await page.locator('#mobileSettingsBtn').click();
    }
+   if(mobile)await page.locator('#mobileSettingsBtn').click();
    await page.locator('#introMode').selectOption('interlude');
    if(mobile)await page.locator('#mobileSettingsClose').click();
    await page.locator('#playViewSelect').selectOption('score');
