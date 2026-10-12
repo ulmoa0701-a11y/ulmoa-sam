@@ -47,6 +47,7 @@ jobs:
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/glossary-http.log 2>&1 &
           node notes/glossary-smoke.cjs
+          node notes/glossary-games-smoke.cjs
           node qa/arabom-chajabom-smoke.cjs
       - name: Screenshots
         if: always()
@@ -77,4 +78,5 @@ jobs:
           curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-games.js?v=20261012-arabom-games1" | grep -q 'TERM_BANK='
           curl --max-time 20 -fsSL "https://ulmoa0701-a11y.github.io/ulmoa-sam/assets/glossary-games.css?v=20261012-arabom-games1" | grep -q 'gcat-game-choice'
           GLOSSARY_QA_URL="$PUBLIC_URL" node notes/glossary-smoke.cjs
+          GLOSSARY_QA_URL="$PUBLIC_URL" node notes/glossary-games-smoke.cjs
           GLOSSARY_QA_URL="$PUBLIC_URL" node qa/arabom-chajabom-smoke.cjs
