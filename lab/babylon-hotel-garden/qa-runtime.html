@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hotel Garden Runtime QA</title>
+<style>body{font:16px system-ui;padding:20px;background:#f6f6ef;color:#173525}#game{position:fixed;left:-10000px;top:0;width:390px;height:844px;border:0}pre{white-space:pre-wrap;padding:14px;border-radius:12px;background:#fff;border:2px solid #355847}.pass{border-color:#238636}.fail{border-color:#c62828}</style></head>
+<body><h1>Hotel Garden Runtime QA</h1><p id="status">RUNNING</p><iframe id="game" src="./?qa=child-feedback-runtime"></iframe>
+<script>
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{const f=document.getElementById('game'),status=document.getElementById('status');let out={pass:false,error:'timeout'};
+try{for(let i=0;i<120;i++){let w;try{w=f.contentWindow}catch{}if(w?.__ulmoaGameQa?.runSmoke){out=await w.__ulmoaGameQa.runSmoke();break}await sleep(250)}}catch(e){out={pass:false,error:String(e)}}
+status.textContent=out.pass?'PASS':'FAIL';const pre=document.createElement('pre');pre.id='qaResult';pre.className=out.pass?'pass':'fail';pre.textContent=JSON.stringify(out,null,2);document.body.appendChild(pre);document.title=(out.pass?'PASS':'FAIL')+' · Hotel Garden Runtime QA';
+})()
+</script></body></html>
