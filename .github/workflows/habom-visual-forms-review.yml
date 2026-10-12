@@ -48,7 +48,7 @@ jobs:
                       const shape=await frm.locator(selector).first().evaluate(e=>({x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y,width:e.getBoundingClientRect().width,font:getComputedStyle(e).fontFamily,border:getComputedStyle(e).border,rounded:getComputedStyle(e).borderRadius,height:Math.round(e.getBoundingClientRect().height)}));
                       const frameEl=await frm.frameElement();
                       const origin=await frameEl.boundingBox();
-                      field={absoluteX:Math.round(shape.x+origin.x),absoluteY:Math.round(shape.y+origin.y),width:Math.round(shape.width),font:shape.font};
+                      field={absoluteX:Math.round(shape.x+origin.x),absoluteY:Math.round(shape.y+origin.y),width:Math.round(shape.width),height:shape.height,font:shape.font,border:shape.border,radius:shape.rounded};
                       break;
                     }catch(ignore){}
                   }
