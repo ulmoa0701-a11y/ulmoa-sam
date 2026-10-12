@@ -128,3 +128,8 @@ body.about-page .sub-main .profile-strip :is(p,span,small,a){font-size:clamp(15p
  body.about-page .sub-main .story-intro-greeting .story-hello{font-size:27px!important}
  body.about-page .sub-main .story-closing p:first-child{font-size:20px!important}
 }
+
+/* Keep the two-line personal headline readable without extra wrapping on phones. */
+@media(max-width:480px){
+ body.about-page .sub-main .sub-hero h1{font-size:clamp(30px,8vw,34px)!important;line-height:1.27!important;letter-spacing:-.055em!important}
+}
