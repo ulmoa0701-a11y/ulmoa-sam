@@ -291,6 +291,7 @@ const path=require("node:path");
           registeredNanum:[...document.fonts].some(face=>face.family==="Nanum Pen Script")
         };
       });
+      console.log(p.name+" computed typography "+JSON.stringify(typefaces));
       assert(typefaces.body.includes("Pretendard"),"body remains Pretendard/SUIT: "+JSON.stringify(typefaces));
       assert(typefaces.subheading.includes("Habom MaruBuri"),"subheadings use MaruBuri");
       assert.equal(typefaces.subheadingWeight,"600","MaruBuri is semibold");
