@@ -150,6 +150,52 @@ jobs:
             }
           }finally{await browser.close()}
           JS
+      - name: Verify LIVE Small Star first melody hit, held Sol and musical chord progression
+        shell: bash
+        run: |
+          node --input-type=module <<'JS'
+          import {chromium} from 'playwright-core';
+          const browser=await chromium.launch({executablePath:'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--autoplay-policy=no-user-gesture-required']});
+          try{
+            for(const mobile of [false,true]){
+              const page=await browser.newPage({viewport:mobile?{width:390,height:844}:{width:1366,height:900}});
+              const errors=[];page.on('pageerror',e=>errors.push(e.message));
+              let ready=false;
+              for(let i=0;i<20;i++){
+                await page.goto('https://ulmoa0701-a11y.github.io/ulmoa-sam/boomwhacker/?song=twinkle&musicalQa='+Date.now(),{waitUntil:'domcontentloaded'});
+                ready=await page.evaluate(()=>typeof voiceOscHold==='function'&&typeof TWINKLE_CHORDS!=='undefined');
+                if(ready)break;
+                await new Promise(r=>setTimeout(r,5000));
+              }
+              if(!ready)throw Error('Revised melodic sustain NOT on live GitHub Pages');
+              const music=await page.evaluate(async()=>{
+                const harmony=Array.from({length:8},(_,i)=>chordForMeasure(i).name);
+                const p=instrumentalPreludePlan(),cadence=Array.from({length:p.bars},(_,i)=>preludeChordForBar(i,p.bars).name);
+                const held=events.find(e=>e.note==='솔'&&e.dur>1.5*beatMs());
+                const ctx=new OfflineAudioContext(1,Math.ceil(44100*3.2),44100);
+                scheduleMelodyTone(ctx,ctx.destination,'솔',.1,'boom',.65,held.dur);
+                const signal=(await ctx.startRendering()).getChannelData(0);
+                const power=(a,b)=>{let t=0;for(let i=Math.floor(a*44100);i<Math.floor(b*44100);i++)t+=Math.abs(signal[i]);return Math.round(t)};
+                return{harmony,cadence,heldDurationMs:held.dur,audibleStart:power(.16,.3),audibleAt1Second:power(1.08,1.22)};
+              });
+              await page.evaluate(()=>{
+                window.__musicCalls=[];
+                const oldM=scheduleMelodyTone,oldR=scheduleMrTrack;
+                scheduleMelodyTone=function(...args){window.__musicCalls.push({type:'melody',pitch:args[2],time:args[3],duration:args[6]});return oldM(...args)};
+                scheduleMrTrack=function(...args){window.__musicCalls.push({type:'mr',time:args[2]});return oldR(...args)};
+              });
+              await page.locator(mobile?'#playBtn':'#startBtn').click();
+              const timing=await page.evaluate(()=>({calls:window.__musicCalls,beat:beatMs(),start:introActive,mode:introMode}));
+              const first=timing.calls.find(x=>x.type==='melody'),mr=timing.calls.find(x=>x.type==='mr');
+              const pass=music.harmony.join(',')==='C,C,F,C,F,C,G,C'&&music.cadence[0]==='C'&&music.cadence.at(-1)==='G'&&
+                music.heldDurationMs>=1500&&music.audibleStart>20&&music.audibleAt1Second>20&&timing.start&&
+                first?.pitch==='도'&&Math.abs(first.time-mr?.time)<.003&&Math.abs(first.duration-timing.beat)<5&&!errors.length;
+              console.log('LIVE_MUSICAL_RHYTHM='+JSON.stringify({mobile,music,timing,errors,pass}));
+              await page.close();
+              if(!pass)throw Error('LIVE song rhythm / first note / harmony or sustain failed mobile='+mobile);
+            }
+          }finally{await browser.close()}
+          JS
       - uses: actions/upload-artifact@v4
         if: always()
         with:
