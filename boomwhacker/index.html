@@ -964,13 +964,13 @@ function chordForMeasure(mi){if(isTwinkleScore()&&Number.isInteger(mi)&&mi>=0&&m
 function mrPulse(ac,dest,when,strong=false){const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.setValueAtTime(strong?95:125,when);o.frequency.exponentialRampToValueAtTime(strong?52:78,when+.11);o.connect(g);g.connect(dest);g.gain.setValueAtTime(.0001,when);g.gain.exponentialRampToValueAtTime(strong?.09:.04,when+.006);g.gain.exponentialRampToValueAtTime(.0001,when+.13);o.start(when);o.stop(when+.15)}
 function scheduleBuiltinMr(ac,dest,when,offsetSec=0,volume=mrVolume){const startMs=Math.max(0,Number(offsetSec)||0)*1000,lead=firstNoteMs(),beat=beatMs(),pre=ac.createGain(),comp=ac.createDynamicsCompressor(),master=ac.createGain();pre.gain.setValueAtTime(3.6,when);comp.threshold.setValueAtTime(-18,when);comp.knee.setValueAtTime(10,when);comp.ratio.setValueAtTime(4,when);comp.attack.setValueAtTime(.003,when);comp.release.setValueAtTime(.16,when);master.gain.setValueAtTime(Math.max(.0001,Math.min(1,Number(volume)||0)),when);pre.connect(comp);comp.connect(master);master.connect(dest);const measureIds=[...new Set(events.map(e=>e.measure))];for(const mi of measureIds){const es=events.filter(e=>e.measure===mi);if(!es.length)continue;const ms=Math.min(...es.map(e=>e.start))-lead,nextId=measureIds[measureIds.indexOf(mi)+1],nextEvents=events.filter(e=>e.measure===nextId),me=nextEvents.length?Math.min(...nextEvents.map(e=>e.start))-lead:Math.max(ms+beat*(currentSong.timeN||4),totalMs-lead);if(me<=startMs)continue;const chord=chordForMeasure(mi),beats=Math.max(1,Math.round((me-ms)/beat));for(let b=0;b<beats;b++){const rel=ms+b*beat;if(rel<startMs-1)continue;const t=when+(rel-startMs)/1000,strong=b===0;mrPulse(ac,pre,t,strong);const bass=chord.freqs[0];voiceOsc(ac,pre,bass,'triangle',strong?.11:.055,t,.012,strong?.58:.38,strong?.64:.44);for(const f of chord.freqs.slice(1)){voiceOsc(ac,pre,f,'sine',strong?.06:.032,t,.012,strong?.46:.31,strong?.52:.36)}}}const stopper={stop(){try{master.gain.cancelScheduledValues(ac.currentTime);master.gain.setTargetAtTime(.0001,ac.currentTime,.012)}catch(e){}}};return{src:stopper,g:master}}
 function scheduleMrTrack(ac,dest,when,offsetSec=0,volume=mrVolume){return mrBuffer?scheduleMrBuffer(ac,dest,when,offsetSec,volume):scheduleBuiltinMr(ac,dest,when,offsetSec,volume)}
-function syncLiveMr(){stopMr();if(!playing||!sound||!wantsMr())return;audio();if(!audioCtx)return;const lead=firstNoteMs(),delay=Math.max(0,lead-elapsed)/1000,offset=Math.max(0,elapsed-lead)/1000,scheduled=scheduleMrTrack(audioCtx,audioCtx.destination,audioCtx.currentTime+delay,offset,mrVolume);if(scheduled){mrSource=scheduled.src;mrGain=scheduled.g}}
+function syncLiveMr(){stopMr();if(!playing||!sound||!wantsMr())return;audio();if(!audioCtx)return;const lead=firstNoteMs(),delay=Math.max(0,lead-elapsed)/1000,offset=Math.max(0,elapsed-lead)/1000,scheduled=scheduleMrTrack(audioCtx,audioCtx.destination,audioCtx.currentTime+delay,offset,mrVolume);if(scheduled)audioRenderSongStartAt=audioCtx.currentTime+(lead-elapsed)/1000;if(scheduled){mrSource=scheduled.src;mrGain=scheduled.g}}
 function audioMixLabel(){const mr=mrBuffer?'내 MR':'자동 MR';if(mixMode==='mr')return mr;if(mixMode==='both'){const m=melodyMode==='none'?'멜로디 없음':MELODY_LABELS[melodyMode];return m+' + '+mr}return melodyMode==='none'?'멜로디 없음':MELODY_LABELS[melodyMode]}
 async function loadMrFile(file){stopMr();mrBuffer=null;mrName='';const status=$('#mrStatus');if(!file){status.textContent='기본 자동 MR 준비됨 · 파일 없이 바로 사용할 수 있어요. 내 MR 파일은 선택사항이에요.';status.className='hint mrStatus ok';if(playing)syncLiveMr();return}if(file.size>80*1024*1024){status.textContent='MR 파일이 너무 커요. 80MB 이하 파일을 사용해 주세요.';status.className='hint mrStatus warn';$('#mrFile').value='';return}try{audio();if(!audioCtx)throw new Error('AudioContext unavailable');const buf=await file.arrayBuffer();mrBuffer=await audioCtx.decodeAudioData(buf.slice(0));mrName=file.name;status.textContent='내 MR 준비됨 · '+mrName+' · '+mrBuffer.duration.toFixed(1)+'초';status.className='hint mrStatus ok';if(playing)syncLiveMr()}catch(err){console.error(err);mrBuffer=null;mrName='';status.textContent='파일을 읽지 못해 기본 자동 MR로 돌아갔어요.';status.className='hint mrStatus warn';$('#mrFile').value='';if(playing)syncLiveMr()}}
 // Keep the ENTIRE melody on the WebAudio clock. Browser repaint/tube-hit
 // events can be 30-60ms late, so they must never trigger the music itself.
-let songMelodyGain=null,songAudioStartAt=0,nextMelodyNoteIndex=-1;
-const AUDIO_LOOKAHEAD_SEC=.24;
+let songMelodyGain=null,songAudioStartAt=0,nextMelodyNoteIndex=-1,audioRenderSongStartAt=0,introAudioStartAt=0;
+const AUDIO_LOOKAHEAD_SEC=.85;
 function stopSongMelody(){
  if(songMelodyGain&&audioCtx)try{
   songMelodyGain.gain.cancelScheduledValues(audioCtx.currentTime);
@@ -997,6 +997,7 @@ function syncLiveSongMelody(){
  audio();if(!audioCtx)return;
  // Same musical time origin as syncLiveMr(). Song starts on first beat.
  songAudioStartAt=audioCtx.currentTime+(firstNoteMs()-elapsed)/1000;
+ audioRenderSongStartAt=songAudioStartAt;
  const gain=audioCtx.createGain();gain.connect(audioCtx.destination);songMelodyGain=gain;
  let next=events.findIndex(e=>e.active&&e.start+e.dur>elapsed+.5);
  if(next<0)return;
@@ -1125,11 +1126,13 @@ function introSound(beats,intervalMs){
  const ac=audioCtx,master=ac.createGain(),start=ac.currentTime+.035;
  // Tie falling-ball timing to the same AudioContext start time as music.
  introAudioStartPerf=performance.now()+Math.max(0,start-ac.currentTime)*1000;
+ introAudioStartAt=start;
  master.gain.setValueAtTime(introMode==='interlude'?.85:.54,start);
  master.connect(ac.destination);introGain=master;
  if(introMode==='interlude'){
   const p=instrumentalPreludePlan(),preludeStart=start+INTERLUDE_COUNTDOWN_BEATS*intervalMs/1000;
   const songStart=preludeStart+p.durationMs/1000;
+  audioRenderSongStartAt=songStart;
   scheduleInterludeCountdown(ac,master,start,intervalMs);
   scheduleInterludeMusic(ac,master,preludeStart,intervalMs,p.meter);
   master.gain.setValueAtTime(.85,Math.max(start,songStart-.06));
@@ -1201,7 +1204,7 @@ function beginPlayback(fromInstrumentalPrelude=false){
    stopSongMelody();
    songMelodyGain=introFirstMelodyGain;
    introFirstMelodyGain=null;introFirstMelodyScheduled=false;
-   songAudioStartAt=originalAudioStart;
+   songAudioStartAt=originalAudioStart;audioRenderSongStartAt=originalAudioStart;
    nextMelodyNoteIndex=events.findIndex(e=>e.active)+1;
   }else syncLiveSongMelody();
   introScheduledMr=false;
@@ -1211,7 +1214,8 @@ function beginPlayback(fromInstrumentalPrelude=false){
 }
 function introFrame(now){
   if(!introActive)return;
-  const progress=Math.max(0,Math.min(introDurationMs,now-introStartPerf));
+  const audioProgress=sound&&audioCtx&&introAudioStartAt?(audioCtx.currentTime-introAudioStartAt)*1000:now-introStartPerf;
+  const progress=Math.max(0,Math.min(introDurationMs,audioProgress));
   const step=introMode==='count'?1000:beatMs();
   // 1 → 2 → 1 → 2 → 시 → 작: every cue occupies its own complete beat.
   introVisual(Math.min(introBeats-1,Math.floor(progress/step)));
@@ -1232,7 +1236,7 @@ function introFrame(now){
   }else introRaf=requestAnimationFrame(introFrame);
 }
 function startIntro(){
-  stopIntro();stopSongMelody();stopMr();stopLeadIn();introScheduledMr=false;introAudioStartPerf=0;
+  stopIntro();stopSongMelody();stopMr();audioRenderSongStartAt=0;introAudioStartAt=0;stopLeadIn();introScheduledMr=false;introAudioStartPerf=0;
   introActive=true;introLastBeat='';
   introMeter=[2,3,4].includes(Number(currentSong.timeN))?Number(currentSong.timeN):4;
   const step=introMode==='count'?1000:beatMs();
