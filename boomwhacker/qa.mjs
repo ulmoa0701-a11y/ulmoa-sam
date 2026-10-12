@@ -76,6 +76,9 @@ async function basicCase(name,width,height){
   check((await page.locator('#bpmLabel').innerText())===initialTempo.bpm+' BPM',`${name}: tempo slider label out of sync with actual beat`);
   check((await page.locator('#tempo').inputValue())===String(initialTempo.bpm),`${name}: speed slider is not at effective playback BPM`);
   check(await page.locator('#introMode option[value="music"]').innerText()==='🥁 박자 예고',`${name}: introductory beat label is unclear`);
+  // Preserve the established beat-only visual/score regressions independently
+  // from the new default 3-2-1 + complete musical phrase test.
+  await page.locator('#introMode').evaluate(el=>{el.value='music';el.dispatchEvent(new Event('change',{bubbles:true}))});
   check(await page.locator('#melodySelect').count()===1,`${name}: melody selector missing`);
   check(await page.locator('#melodySelect option').count()===4,`${name}: melody selector should have 4 choices`);
   check((await page.locator('#melodySelect').inputValue())==='boom',`${name}: default melody should be Boomwhacker`);
@@ -508,6 +511,7 @@ for(const [label,w,h] of [['mobile-score-immediate',390,844],['desktop-score-imm
   const page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(BASE,{waitUntil:'networkidle'});
+  await page.locator('#introMode').evaluate(el=>{el.value='music';el.dispatchEvent(new Event('change',{bubbles:true}))});
   await page.locator('#playViewSelect').selectOption('score');
   const original=await page.evaluate(()=>window.__boomVideoQA.scoreTiming());
   check(original.firstEvent?.note==='도'&&original.secondEvent?.note==='도',
