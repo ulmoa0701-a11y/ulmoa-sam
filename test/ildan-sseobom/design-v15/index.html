@@ -694,6 +694,12 @@ main:has(#parentCalendar:not([hidden])){padding-top:14px}
 .lab-optional-content{margin-top:12px}
 .inline-share>small{display:block;margin-top:6px;color:#576b7c}
 @media(max-width:600px){.share-review-dialog{padding:17px;max-height:88vh}.share-review-actions button{flex:1 1 100%}.share-review-body{max-height:35vh}}
+/* v15 caregiver clinical-quality enhancement: provenance is visible but remains optional */
+.parent-source-field{display:flex;flex-direction:column;gap:5px}
+.parent-source-field select{min-height:46px}
+.parent-source-field small{font-size:12px;font-weight:500;color:#687781}
+.parent-fact-note{font-size:13px;line-height:1.5;color:#536875;margin:0 0 4px!important}
+@media(max-width:600px){.parent-fact-note{font-size:12.5px}}
 /* v15 clinical note: therapist-only, collapsed by default */
 .clinician-form{gap:14px}.clinician-quick-fields{display:grid;gap:12px}
 .clinician-quick-fields textarea{min-height:74px}
@@ -838,7 +844,7 @@ function bindWorkspace(){
  }));
  activateWorkspace(activeView);
 }
-const NOTE_LABELS={studentReport:'학생이 직접 말한 내용',parentReport:'보호자가 전한 내용',functionalImpact:'일상에서 확인된 영향',familyResponse:'가족·주변의 반응',workingHypothesis:'잠정적 이해·가설',alternatives:'다른 설명 가능성',uncertainty:'아직 확인되지 않은 점',burdenReview:'기록 사용 부담 검토',erpReview:'ERP 회기 검토 여부',erpTarget:'ERP 치료 목표·계획 (치료사 전용)',erpSafety:'ERP 실행 후 경과·안전 검토',cbitReview:'CBIT 회기 검토 여부',cbitTarget:'CBIT 치료 목표·계획 (치료사 전용)',cbitContext:'틱 관련 맥락·기능적 영향',note:'자유 기록',mood:'오늘의 상태',energy:'컨디션',thought:'떠오른 생각',body:'몸의 느낌',action:'해본 일',sketch:'그림',observation:'관찰한 사실',response:'주변 사람의 말·행동',impact:'일상에서 확인된 변화',message:'전달사항',event:'있었던 일',next:'다음 시도',date:'기록 날짜',time:'기록 시간',context:'당시 상황',origin:'정보 출처',title:'제목',experience:'내가 겪은 움직임·소리·반복행동',experienceImpact:'그때 생활에 있었던 변화',place:'장소',signals:'관찰한 모습(선택)',after:'이후에 이어진 일'};
+const NOTE_LABELS={studentReport:'학생이 직접 말한 내용',parentReport:'보호자가 전한 내용',functionalImpact:'일상에서 확인된 영향',familyResponse:'가족·주변의 반응',workingHypothesis:'잠정적 이해·가설',alternatives:'다른 설명 가능성',uncertainty:'아직 확인되지 않은 점',burdenReview:'기록 사용 부담 검토',erpReview:'ERP 회기 검토 여부',erpTarget:'ERP 치료 목표·계획 (치료사 전용)',erpSafety:'ERP 실행 후 경과·안전 검토',cbitReview:'CBIT 회기 검토 여부',cbitTarget:'CBIT 치료 목표·계획 (치료사 전용)',cbitContext:'틱 관련 맥락·기능적 영향',note:'자유 기록',mood:'오늘의 상태',energy:'컨디션',thought:'떠오른 생각',body:'몸의 느낌',action:'해본 일',sketch:'그림',observation:'관찰한 사실',response:'주변 사람의 말·행동',impact:'일상에서 확인된 변화',message:'전달사항',childWords:'아이가 실제로 한 말',event:'있었던 일',next:'다음 시도',date:'기록 날짜',time:'기록 시간',context:'당시 상황',origin:'정보 출처',title:'제목',experience:'내가 겪은 움직임·소리·반복행동',experienceImpact:'그때 생활에 있었던 변화',place:'장소',signals:'관찰한 모습(선택)',after:'이후에 이어진 일'};
 function todayLocal(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
 function nowLocalTime(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${p(d.getHours())}:${p(d.getMinutes())}`;}
 
@@ -900,13 +906,15 @@ function dataForm(role){
  <div class="parent-when"><label class="parent-date-field">일이 있었던 날짜 <input name="date" type="date" value="${todayLocal()}" max="${todayLocal()}" required></label><label class="parent-time-field">시간 <small>(선택)</small><input name="time" type="time"></label></div>
  <p class="parent-date-hint">정확한 시간이 기억나지 않으면 비워 두세요. 기록을 작성한 시각은 자동으로 남아요.</p>
  <label class="parent-location">장소 <small>(선택)</small><input name="place" maxlength="100" placeholder="기억나는 장소만 적어 주세요."></label>
- <label class="parent-main-label">어떤 일을 보거나 들으셨나요? <small>필수 · 360자 이내</small><textarea name="observation" maxlength="360" rows="3" required placeholder="보거나 들은 내용을 기억나는 그대로 적어 주세요."></textarea></label>
+ <label class="parent-main-label">어떤 일을 보거나 들으셨나요? <small>필수 · 360자 이내</small><textarea name="observation" maxlength="360" rows="3" required placeholder="기억나는 사실만 간단히. 원인이나 진단을 추측하지 않아도 됩니다."></textarea></label>
+ <label class="parent-source-field">이 내용은 어떻게 알게 되었나요? <small>선택 · 정확한 출처가 아니면 비워 두세요.</small><select name="origin"><option value="">출처를 선택하지 않음</option><option value="직접 관찰">직접 보거나 들었어요</option><option value="아이가 말함">아이에게 들었어요</option><option value="가족에게 들음">다른 가족에게 들었어요</option><option value="그 밖의 사람에게 들음">그 밖의 사람에게 들었어요</option></select></label>
+ <p class="parent-fact-note">아이의 마음이나 의도를 단정하지 않아도 됩니다. 일부러 행동을 관찰하거나 횟수를 셀 필요도 없어요.</p>
  <details class="optional-fields parent-more"><summary>당시 상황과 앞뒤 내용 더 남기기 <small>선택</small></summary><div class="optional-wrap">
  <label>그전에 또는 그때 어떤 상황이 있었나요?<small>하고 있던 활동, 앞서 일어난 일, 주변 환경, 사람들과의 대화·요청 등 기억나는 사실이면 됩니다.</small><textarea name="context" maxlength="450" rows="2" placeholder="특별한 일이 없거나 기억나지 않으면 비워 두세요."></textarea></label>
  <label>그때 주변 사람이 한 말이나 행동이 있었나요? <small>선택</small><textarea name="response" maxlength="450" rows="2" placeholder="직접 보거나 들은 말과 행동만 적어 주세요."></textarea></label>
  <label>그 뒤에 어떤 일이 이어졌나요? <small>선택</small><textarea name="after" maxlength="450" rows="2" placeholder="이후에 보거나 들은 일이 있다면 적어 주세요."></textarea></label>
  <label>그 뒤 일상에서 확인된 변화가 있나요? <small>선택</small><textarea name="impact" maxlength="450" rows="2" placeholder="없거나 확인하지 못했다면 비워 두어도 됩니다."></textarea></label>
- <label>이 내용은 어떻게 알게 되었나요? <small>선택</small><select name="origin"><option value="">선택하지 않음</option><option value="직접 관찰">직접 보거나 들음</option><option value="아이가 말함">아이에게 들음</option><option value="가족에게 들음">다른 가족에게 들음</option></select></label>
+ <label>아이의 말을 그대로 기억하고 계신가요? <small>선택 · 직접 들은 표현만</small><textarea name="childWords" maxlength="450" rows="2" placeholder="예: \"지금은 쉬고 싶어.\" 정확히 기억나지 않으면 비워 두세요."></textarea></label>
  <label>치료사에게 별도로 전할 말 <small>선택 · 160자 이내</small><textarea name="message" maxlength="160" rows="2" placeholder="전할 내용이 없다면 비워 두세요."></textarea></label>
  </div></details>
  <details class="parent-type-optional"><summary>관찰 내용을 표시해 두기 <small>선택 · 생략 가능</small></summary><fieldset class="observed-type"><legend>눈에 띈 내용 <small>여러 개 선택 가능</small></legend>
@@ -915,12 +923,12 @@ function dataForm(role){
  <details class="parent-guide"><summary>관찰 메모 작성 안내 <span>필요할 때만 열기</span></summary><div class="parent-guide-body">
  <p><b>기억나는 사실만 기록하면 됩니다.</b> 직접 본 일인지, 아이나 다른 사람에게 들은 이야기인지를 구분하면 치료사가 참고하기 좋아요.</p>
  <p>‘그전·당시 상황’은 원인을 찾는 질문이 아니에요. 하던 일, 앞서 있었던 사건, 주변의 소리·환경, 누군가의 말이나 행동 등 여러 상황을 포함할 수 있어요.</p>
- <p>그 일이 어떤 행동의 원인이라고 단정할 필요는 없고, 기억나지 않거나 확인하지 못한 내용은 비워 두어도 됩니다.</p>
+ <p>그 일이 어떤 행동의 원인이라고 단정할 필요는 없고, 기억나지 않거나 확인하지 못한 내용은 비워 두어도 됩니다. 아이가 했던 말과 보호자가 추측한 생각은 서로 다릅니다.</p>
  <p class="parent-guide-tail">특정 행동을 일부러 찾아보거나 횟수를 계속 셀 필요는 없어요. 기록이 없는 날은 아무 일이 없었다는 뜻이 아니에요.</p>
  </div></details>
  <div class="privacy-panel parent-privacy"><label class="checkbox"><input type="checkbox" name="share"><span>담당 치료사에게 전달하기<small>선택하지 않으면 내 기록에만 남아요.</small></span></label><div id="sharePicker" class="share-picker" hidden>
  <p>관찰 내용을 공유하면 날짜·시간·장소·선택한 표시도 함께 전달돼요. 아래 추가 항목은 직접 고른 것만 보냅니다.</p>
- ${['observation','context','response','after','impact','origin','message'].map(k=>`<label><input type="checkbox" name="shareField" value="${k}" ${k==='observation'?'checked':''}><span>${NOTE_LABELS[k]}</span></label>`).join('')}
+ ${['observation','origin','context','childWords','response','after','impact','message'].map(k=>`<label><input type="checkbox" name="shareField" value="${k}" ${k==='observation'?'checked':''}><span>${NOTE_LABELS[k]}</span></label>`).join('')}
  </div></div>
  <button class="button entry-save" id="saveEntry">내 관찰 메모 저장</button><p class="parent-nudge">보호자는 관찰하거나 전해 들은 사실만 남기면 됩니다. 기록하지 않는 날도 괜찮습니다. 진단이나 원인 판단은 하지 않아도 됩니다. 실시간 상담·응급 연락창이 아닙니다.</p></form>`;
  return `<form class="form entry-v5 student-journal" id="entryForm" data-journal-mode="quick">
@@ -950,7 +958,7 @@ function dataForm(role){
  <button class="button entry-save" id="saveEntry">🔒 내 기록 저장</button><p class="student-save-note">매일 쓰지 않아도 괜찮아. 기록을 정확하게 쓰려 애쓸 필요도 없어. 실시간 상담·응급 연락창이 아니야. 체험판의 작성 중 내용은 이 브라우저 세션에만 임시 저장돼.</p>
  </form>`;
 }function gatherEntry(f,role){
- const fields=role==='parent'?['date','time','place','observation','context','origin','response','after','impact','message']:['date','time','place','title','note','energy','thought','body','action','experience','experienceImpact'];
+ const fields=role==='parent'?['date','time','place','observation','origin','context','childWords','response','after','impact','message']:['date','time','place','title','note','energy','thought','body','action','experience','experienceImpact'];
  const entry={};fields.forEach(k=>{const value=formValue(f,k);if(value)entry[k]=value});
  if(role==='parent'){
   const kinds=[...f.querySelectorAll('input[name="signalChoice"]:checked')].map(x=>x.value);
@@ -1072,7 +1080,7 @@ function wireEntryForm(isParent){
 function prettyRecordEntry(entry){return Object.entries(entry??{}).map(([k,v])=> k==='sketch'?`<div class="sketch-record" data-sketch="${sanitize(v)}"><div class="sketch-mini-label">그림 메모</div><canvas width="760" height="380"></canvas></div>`:`<p><b>${sanitize(NOTE_LABELS[k]||k)}</b><br>${sanitize(v)}</p>`).join('');}
 function paintSketches(){document.querySelectorAll('[data-sketch]').forEach(el=>{try{const arr=JSON.parse(el.dataset.sketch);if(!Array.isArray(arr)||arr.length>250)return;const ctx=el.querySelector('canvas').getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,760,380);ctx.strokeStyle='#5362cc';ctx.lineWidth=3.5;ctx.lineCap='round';ctx.lineJoin='round';arr.forEach(stroke=>{if(!Array.isArray(stroke)||!stroke.length)return;ctx.beginPath();stroke.slice(0,240).forEach((p,i)=>{if(!Array.isArray(p)||p.length!==2||!Number.isFinite(p[0])||!Number.isFinite(p[1]))return;const x=Math.max(0,Math.min(760,p[0])),y=Math.max(0,Math.min(380,p[1]));i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke()});}catch(_){}})}
 function parentObservationFacts(entry={}){
- const fields=[['date','관찰 날짜'],['time','시간'],['place','장소'],['signals','관찰한 모습(선택)'],['context','그전·당시 상황'],['observation','보거나 들은 내용'],['response','주변 사람의 말·행동'],['after','이후에 이어진 일'],['impact','일상에서 확인된 변화'],['origin','정보 출처'],['message','보호자 전달사항']];
+ const fields=[['date','관찰 날짜'],['time','시간'],['place','장소'],['origin','정보 출처'],['signals','관찰한 모습(선택)'],['observation','보거나 들은 내용'],['context','그전·당시 상황'],['childWords','아이가 실제로 한 말'],['response','주변 사람의 말·행동'],['after','이후에 이어진 일'],['impact','일상에서 확인된 변화'],['message','보호자 전달사항']];
  return `<div class="observed-facts"><p class="clinical-neutral">보호자가 전달한 기록입니다. 직접 관찰했는지 또는 전해 들었는지 확인하고, 해석과 판단은 치료사가 별도로 검토합니다.</p>${fields.filter(([k])=>entry[k]).map(([k,name])=>`<div class="observed-fact-row"><strong>${name}</strong><span>${sanitize(entry[k])}</span></div>`).join('')}</div>`;
 }
 function recordCards(list=records){
