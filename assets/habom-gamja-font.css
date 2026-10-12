@@ -46,50 +46,17 @@ body :is(code,pre,kbd,samp){font-family:ui-monospace,"D2Coding",monospace!import
 }
 @media print{body :is(p,li,td,th,blockquote){line-height:1.5}}
 
-
-/* habom-readable-20261012: editorial text readability without modifying gameplay art or scores */
-:root{
- --habom-text-font:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
- --habom-title-font:"Gowun Dodum","Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
-}
-html,body{font-family:var(--habom-text-font)!important}
-body :is(p,span,b,strong,em,small,a,button,input,textarea,select,option,label,li,dt,dd,th,td,summary,legend,blockquote,output,figcaption){
- font-family:var(--habom-text-font)!important;
- letter-spacing:-.012em;
-}
-body :is(h1,h2,h3,h4,h5,h6),
-body :is(h1,h2,h3,h4,h5,h6) :is(span,em,b,strong){
- font-family:var(--habom-title-font)!important;
- font-weight:700!important;
- letter-spacing:-.04em!important;
-}
+/* Site-wide Gamja legibility refinements (no second font family). */
 body :is(p,li,blockquote,dd){line-height:1.7;word-break:keep-all}
-body :is(.sub-nav a,.note-nav a,.hb-nav a,.hb-nav button,.hb-nav summary){
- font-family:var(--habom-text-font)!important;letter-spacing:-.012em!important;
-}
-body .hb-nav :is(.hb-game-parent,.hb-game-child,.hb-mobile-subtile,.hb-mobile-game-section),
-body .hb-nav :is(.hb-game-parent,.hb-game-child,.hb-mobile-subtile,.hb-mobile-game-section) :is(span,b,strong){
- font-family:var(--habom-text-font)!important;
-}
-body :is(.garden-format-tabs button,.garden-topic-tabs button,.category-tab,.subtopic-tab,.library-card,
- .moa-resource-card,.moa-related-links,.note-nav,.sub-nav,.hb-nav,.hb-shortcut-card){
- font-family:var(--habom-text-font)!important;
-}
-body :is(.moa-resource-card,.library-card,.parents-topic,.book-item,.score-resource-card,
- .entry-copy,.hb-shortcut-card,.game-info) :is(p,small,span,a,b,strong){
- font-family:var(--habom-text-font)!important;
-}
 body :is(.hero-lead,.parents-topic p,.parents-section-head p,.parents-note,
  .moa-resource-desc,.entry-copy p,.game-info p,.score-resource-copy p){
- font-size:clamp(15px,1.2vw,17px);line-height:1.7;
+ font-size:clamp(16px,1.2vw,18px);line-height:1.7;
 }
 body :is(.parents-topic-tag,.book-meta,.card-category,.skill-tags,.moa-resource-type){
- font-size:clamp(13px,1.1vw,15px);line-height:1.5;
+ font-size:clamp(14px,1.1vw,16px);line-height:1.5;
 }
-body :is(.hb-find-dialog,.hb-find-dialog *){font-family:var(--habom-text-font)!important}
-body :is(code,pre,kbd,samp){font-family:ui-monospace,"D2Coding",monospace!important}
 @media(max-width:620px){
  body :is(.hero-lead,.parents-topic p,.parents-section-head p,.parents-note,
- .moa-resource-desc,.entry-copy p,.game-info p,.score-resource-copy p){font-size:15px}
- body :is(.parents-topic-tag,.book-meta,.card-category,.skill-tags,.moa-resource-type){font-size:13px}
+ .moa-resource-desc,.entry-copy p,.game-info p,.score-resource-copy p){font-size:16px}
+ body :is(.parents-topic-tag,.book-meta,.card-category,.skill-tags,.moa-resource-type){font-size:14px}
 }
