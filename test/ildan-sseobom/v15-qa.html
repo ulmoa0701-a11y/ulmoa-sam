@@ -1,0 +1,62 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>일단써봄 v15 브라우저 QA</title><style>body{font:16px system-ui}iframe{height:750px;width:95%;border:1px solid #ccd}#log{white-space:pre-wrap}</style></head><body><h1>v15 자동 브라우저 QA · 합성자료 전용</h1><div id="log"></div><iframe id="target" title="테스트 앱" src="design-v15/"></iframe><script>
+const log=document.getElementById('log'),frame=document.getElementById('target');
+const say=s=>{log.textContent+=s+'\n';console.log(s)};
+const ok=(value,message)=>{if(!value)throw Error(message);say('PASS '+message)};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function until(fn,limit=5000){const start=Date.now();while(Date.now()-start<limit){try{if(fn())return;}catch(_){}await sleep(45)}throw Error('TIMEOUT')}
+function enter(role){const d=frame.contentDocument;d.querySelector('[data-login-role="'+role+'"]').click();d.getElementById('oneLogin').click();}
+function input(el,text){el.value=text;el.dispatchEvent(new Event('input',{bubbles:true}))}
+async function run(){
+ const d=()=>frame.contentDocument,w=()=>frame.contentWindow;
+ try{
+  await until(()=>d().getElementById('oneLogin'));
+  enter('student');await until(()=>d().getElementById('entryForm'));
+  ok(d().getElementById('entryForm').dataset.journalMode==='quick','간편 기록 기본');
+  ok(d().querySelector('[data-workspace-target="coding"]')===null,'코딩 실험실 기본 메뉴에서 분리');
+  const note='가상 메모: '+('반복 검토를 유발하지 않는 자유로운 문장 연습. '.repeat(9))+'끝까지 보이는 내용';
+  input(d().querySelector('textarea[name="note"]'),note);
+  d().querySelector('input[name="share"]').click();
+  d().getElementById('studentSelectAll').click();
+  ok(d().querySelector('input[name="shareField"][value="experience"]').disabled,'간편 화면의 숨김 항목 공유 불가');
+  d().getElementById('saveEntry').click();
+  await until(()=>d().getElementById('shareReviewDialog')?.open);
+  ok(d().querySelector('.share-review-body').textContent.includes('끝까지 보이는 내용'),'공유 확인 모달에 전체 글 표시');
+  d().querySelector('[data-approve]').click();
+  await until(()=>w().PREVIEW_RECORDS.length===1&&d().querySelector('[data-unshare]'));
+  ok(w().PREVIEW_RECORDS[0].shared,'가상 학생 공유 등록');
+  w().confirm=()=>true;
+  d().querySelector('[data-unshare]').click();
+  await until(()=>w().PREVIEW_RECORDS[0]&&!w().PREVIEW_RECORDS[0].shared);
+  ok(!w().PREVIEW_RECORDS[0].shared,'공유 취소 및 치료사 접근 중단');
+  d().querySelector('[data-workspace-target="write"]').click();
+  await until(()=>d().querySelector('textarea[name="note"]'));
+  input(d().querySelector('textarea[name="note"]'),'저장 전 임시 보관된 체험글');
+  ok(!!w().sessionStorage.getItem('ildan-v15-preview-draft-student'),'체험판 작성 중 세션 임시보관');
+  frame.src='design-v15/?qa=restore';
+  await until(()=>d().getElementById('oneLogin')&&w().PREVIEW_ROLE==='guest');
+  enter('student');
+  await until(()=>d().querySelector('textarea[name="note"]')?.value==='저장 전 임시 보관된 체험글');
+  ok(true,'새로고침 후 체험 기록 복구');
+  d().getElementById('signOut').click();
+  await until(()=>d().getElementById('oneLogin'));
+  enter('parent');
+  await until(()=>d().querySelector('textarea[name="observation"]'));
+  input(d().querySelector('textarea[name="observation"]'),'가상 관찰: 책을 한 번 다시 읽었다.');
+  d().getElementById('saveEntry').click();
+  await until(()=>w().PREVIEW_RECORDS.length===1&&w().PREVIEW_RECORDS[0].kind==='parent');
+  ok(!w().PREVIEW_RECORDS[0].shared,'보호자 관찰 기본 비공개');
+  d().getElementById('signOut').click();
+  await until(()=>d().getElementById('oneLogin'));
+  enter('therapist');
+  await until(()=>d().getElementById('inboxResults'));
+  ok(w().PREVIEW_RECORDS.filter(r=>r.shared).length===0,'비공개 보호자 기록 치료사에게 보이지 않음');
+  const parentRecord=w().PREVIEW_RECORDS[0];
+  w().PREVIEW_ROLE='student';
+  const illegal=await w().fetch('/api/share',{method:'POST',body:JSON.stringify({recordId:parentRecord.id,sharedFields:['observation']})});
+  ok(illegal.status===403,'작성자 아닌 역할의 공유 조작 차단');
+  say('BROWSER QA COMPLETED');
+  document.documentElement.setAttribute('data-qa-result','PASS');
+ }catch(e){say('FAIL '+e.stack);document.documentElement.setAttribute('data-qa-result','FAIL');}
+}
+run();
+</script></body></html>
