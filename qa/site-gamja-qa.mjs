@@ -51,6 +51,10 @@ for(const plan of plans){
        headingName:first?.textContent?.trim().slice(0,70),
        navFont:nav&&getComputedStyle(nav).fontFamily,
        readableTitleLoaded:[...document.fonts].some(f=>f.family.replaceAll('"','')==='Gowun Dodum'&&f.status==='loaded'),
+       brainSubheadingFont:document.querySelector('.map-panel-heading h2')?
+         getComputedStyle(document.querySelector('.map-panel-heading h2')).fontFamily:null,
+       brainMaruLoaded:[...document.fonts].some(f=>f.family.replaceAll('"','')==='MaruBuriSemiBold'&&f.status==='loaded'),
+       brainPenLoaded:[...document.fonts].some(f=>f.family.replaceAll('"','')==='Nanum Pen Script'&&f.status==='loaded'),
        viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth,
        headerWidth:first?.scrollWidth,headerClientWidth:first?.clientWidth,
        resourceTabs:document.querySelectorAll('[data-garden-view]').length,
@@ -59,13 +63,24 @@ for(const plan of plans){
       };
    });
    assert(res?.ok(),plan.name+' '+p+': HTTP failure');
-   assert(reading.cssLoaded,plan.name+' '+p+': shared typography stylesheet absent');
+   const isBrainMap=p==='/brain-map/';
    const isGarden=p==='/thinking-garden/'||p==='/music-garden/';
-   // Keep standalone game-stage typography, while entry content and all reading pages use legible fonts.
-   const expectedBody=isGarden?'"Gamja Flower"':'"Pretendard Variable"';
-   assert(reading.bodyFont.startsWith(expectedBody),plan.name+' '+p+': incorrect body font '+reading.bodyFont);
-   assert(reading.headingFont?.startsWith('"Gowun Dodum"'),plan.name+' '+p+': incorrect headline font '+reading.headingFont);
-   assert(reading.readableTitleLoaded,plan.name+' '+p+': Gowun Dodum title face did not load');
+   // The brain map explicitly uses its own approved educational font hierarchy.
+   // All other pages keep their existing shared readable-typography contract.
+   if(isBrainMap){
+     assert(!reading.cssLoaded,plan.name+' '+p+': unexpected global Gamja override on brain map');
+     assert(reading.bodyFont.startsWith('"Pretendard Variable"'),plan.name+' '+p+': incorrect Pretendard body '+reading.bodyFont);
+     assert(reading.headingFont?.includes('Nanum Pen Script'),plan.name+' '+p+': handwritten hero missing '+reading.headingFont);
+     assert(reading.brainSubheadingFont?.includes('MaruBuriSemiBold'),plan.name+' '+p+': MaruBuri section heading missing');
+     assert(reading.brainMaruLoaded,plan.name+' '+p+': MaruBuri SemiBold face not loaded');
+     assert(reading.brainPenLoaded,plan.name+' '+p+': Nanum Pen Script face not loaded');
+   }else{
+     assert(reading.cssLoaded,plan.name+' '+p+': shared typography stylesheet absent');
+     const expectedBody=isGarden?'"Gamja Flower"':'"Pretendard Variable"';
+     assert(reading.bodyFont.startsWith(expectedBody),plan.name+' '+p+': incorrect body font '+reading.bodyFont);
+     assert(reading.headingFont?.startsWith('"Gowun Dodum"'),plan.name+' '+p+': incorrect headline font '+reading.headingFont);
+     assert(reading.readableTitleLoaded,plan.name+' '+p+': Gowun Dodum title face did not load');
+   }
    if(reading.navFont)assert(reading.navFont.startsWith('"Pretendard Variable"'),plan.name+' '+p+': nav link inconsistent '+reading.navFont);
    if(p==='/'){
      assert(reading.homeDoorSize>=17,plan.name+': game door text too small '+reading.homeDoorSize);
