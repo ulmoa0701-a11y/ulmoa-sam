@@ -1,0 +1,49 @@
+name: Habom Two Forms Visual Review
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/habom-visual-forms-review.yml'
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - run: npm install --no-save playwright-core@1.56.1
+      - name: Read-only live screenshot comparison
+        run: |
+          cat >/tmp/habom-visual.cjs <<'JS'
+          const {chromium}=require(process.cwd()+'/node_modules/playwright-core');
+          (async()=>{
+            const browser=await chromium.launch({executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+            try{
+              for(const vp of [{width:1360,height:900},{width:390,height:844}]){
+                const p=await browser.newPage({viewport:vp,locale:'ko-KR',deviceScaleFactor:1});
+                for(const mode of ['public','private']){
+                  await p.goto('https://ulmoa0701-a11y.github.io/ulmoa-sam/request/#'+mode,{waitUntil:'domcontentloaded',timeout:45000});
+                  await p.waitForTimeout(2800);
+                  const label='VIEW_'+vp.width+'_'+mode.toUpperCase();
+                  const result=await p.screenshot({type:'jpeg',quality:65,fullPage:false});
+                  const b64=result.toString('base64');
+                  console.log('IMG_START '+label+' '+b64.length);
+                  for(let at=0;at<b64.length;at+=5000)console.log('IMG_PART '+label+' '+b64.slice(at,at+5000));
+                  console.log('IMG_END '+label);
+                  const pos=await p.evaluate(()=>{
+                    const root=document.querySelector(location.hash==='#private'?'#privatePostPanel':'#publicPostPanel');
+                    const tabs=document.querySelector('.community-mode-tabs');
+                    const e=root?.getBoundingClientRect(); const t=tabs?.getBoundingClientRect();
+                    return {panelX:e?.x,panelY:e?.y,panelWidth:e?.width,tabWidth:t?.width,innerScroll:root?.querySelector('iframe')?.getAttribute('scrolling')||null};
+                  });
+                  console.log('SCREEN_METRICS '+label+' '+JSON.stringify(pos));
+                }
+                await p.close();
+              }
+            }finally{await browser.close()}
+          })().catch(e=>{console.error(e.stack||String(e));process.exit(1)});
+          JS
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          export CHROME_BIN
+          node /tmp/habom-visual.cjs
