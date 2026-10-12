@@ -996,7 +996,7 @@ function syncLiveSongMelody(){
  if(!playing||!sound||!wantsMelody()||melodyMode==='none')return;
  audio();if(!audioCtx)return;
  // Same musical time origin as syncLiveMr(). Song starts on first beat.
- songAudioStartAt=audioCtx.currentTime+Math.max(0,(firstNoteMs()-elapsed)/1000);
+ songAudioStartAt=audioCtx.currentTime+(firstNoteMs()-elapsed)/1000;
  const gain=audioCtx.createGain();gain.connect(audioCtx.destination);songMelodyGain=gain;
  let next=events.findIndex(e=>e.active&&e.start+e.dur>elapsed+.5);
  if(next<0)return;
@@ -1138,13 +1138,15 @@ function introSound(beats,intervalMs){
    const scheduled=scheduleMrTrack(ac,ac.destination,songStart,0,mrVolume);
    if(scheduled){mrSource=scheduled.src;mrGain=scheduled.g;introScheduledMr=true}
   }
-  // Schedule the FIRST note on the same AudioContext downbeat. Setting
-  // elapsed directly to firstNoteMs() previously skipped it in frame().
-  const first=events.find(e=>e.active);
+  // Schedule first sung note with the SAME AudioContext timestamp as MR.
+  const firstIndex=events.findIndex(e=>e.active),first=events[firstIndex];
   if(first&&wantsMelody()&&melodyMode!=='none'){
    const gain=ac.createGain();gain.connect(ac.destination);
    introFirstMelodyScheduled=scheduleMelodyTone(ac,gain,first.note,songStart,melodyMode,melodyVolume,first.dur);
-   if(introFirstMelodyScheduled)introFirstMelodyGain=gain;
+   if(introFirstMelodyScheduled){
+    introFirstMelodyGain=gain;songAudioStartAt=songStart;
+    nextMelodyNoteIndex=firstIndex+1;
+   }
   }
   return;
  }
@@ -1192,9 +1194,18 @@ function beginPlayback(fromInstrumentalPrelude=false){
   if(!hasStartedSong&&playView==='score'&&elapsed<scoreStartMs())elapsed=scoreStartMs()-.5;
   const wasReady=!hasStartedSong;
   hasStartedSong=true;playing=true;lastTs=0;
-  // Keep the MR scheduled on the same AudioContext clock as the prelude.
+  // Keep both melody and MR on the shared song audio clock.
   if(!(fromInstrumentalPrelude&&introScheduledMr))syncLiveMr();
+  if(fromInstrumentalPrelude&&introFirstMelodyGain&&introFirstMelodyScheduled){
+   const originalAudioStart=songAudioStartAt;
+   stopSongMelody();
+   songMelodyGain=introFirstMelodyGain;
+   introFirstMelodyGain=null;introFirstMelodyScheduled=false;
+   songAudioStartAt=originalAudioStart;
+   nextMelodyNoteIndex=events.findIndex(e=>e.active)+1;
+  }else syncLiveSongMelody();
   introScheduledMr=false;
+  queueUpcomingMelody();
   $('#playBtn').textContent='Ⅱ';$('#startBtn').textContent='Ⅱ 잠시 멈춤';
   raf=requestAnimationFrame(frame);
 }
