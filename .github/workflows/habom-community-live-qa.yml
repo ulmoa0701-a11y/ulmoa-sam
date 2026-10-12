@@ -38,9 +38,13 @@ jobs:
                 const privateTab=page.locator('#privatePostTab');
                 const publicPanel=page.locator('#publicPostPanel');
                 const privatePanel=page.locator('#privatePostPanel');
+                const publicStyle=await publicPanel.evaluate(e=>({width:Math.round(e.getBoundingClientRect().width),border:getComputedStyle(e).borderTopWidth}));
                 if(!(await publicTab.count())||!(await privateTab.count()))throw new Error('Public/private post tabs missing');
                 if(!(await privatePanel.evaluate(n=>n.hidden))||await publicPanel.evaluate(n=>n.hidden))throw new Error('Default public/private visibility wrong');
                 await privateTab.click();
+                const privateStyle=await privatePanel.evaluate(e=>({width:Math.round(e.getBoundingClientRect().width),border:getComputedStyle(e).borderTopWidth}));
+                if(Math.abs(publicStyle.width-privateStyle.width)>4)throw new Error('Different outer card widths '+JSON.stringify({publicStyle,privateStyle}));
+                console.log('PASS OUTER CARD '+vp.width+'px '+JSON.stringify({publicStyle,privateStyle}));
                 if(!(await publicPanel.evaluate(n=>n.hidden))||await privatePanel.evaluate(n=>n.hidden))throw new Error('Private tab did not switch panels');
                 const secret=page.locator('#habomPrivateForm');
                 const src=await secret.getAttribute('src');
