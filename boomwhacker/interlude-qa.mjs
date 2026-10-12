@@ -47,9 +47,9 @@ try{
      const one=interludePhrasePlan();
      const prior=currentSong,priorBpm=bpm;
      currentSong=clone(twinkle);bpm=selectedTempo(currentSong);build();
-     const stars=interludePhrasePlan();
+     const stars=interludePhrasePlan(),twinkleBeat=beatMs();
      currentSong=prior;bpm=priorBpm;build();
-     return {one:{beats:one.beats,notes:one.notes.map(n=>n.note)},stars:{beats:stars.beats,notes:stars.notes.map(n=>({note:n.note,durationBeats:Math.round(n.durationMs/(60000/bpm))}))}};
+     return {one:{beats:one.beats,notes:one.notes.map(n=>n.note)},stars:{beats:stars.beats,notes:stars.notes.map(n=>({note:n.note,durationBeats:Math.round(n.durationMs/twinkleBeat)}))}};
    });
    result.melodyPlan=plan;
    if(plan.one.beats!==8||plan.one.notes.join(',')!=='도,솔,미,솔,도,솔,미,솔')
