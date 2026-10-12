@@ -4,7 +4,7 @@ import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 const {chromium}=require('playwright-core');
 const base='http://127.0.0.1:8765';
-const out=path.resolve('qa/site-gamja-qa-artifacts');
+const out=path.resolve('qa/site-gamja-qa-artifacts'); // historic artifact path; tests now verify the 3-role typography
 fs.mkdirSync(out,{recursive:true});
 const browser=await chromium.launch({
   headless:true,executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',args:['--no-sandbox']
@@ -35,12 +35,16 @@ for(const plan of plans){
       const first=document.querySelector('h1, h2');
       const nav=document.querySelector('nav a, .category-tab, .garden-format-tabs button, .site-home');
       const b=document.body;
+      const accent=document.querySelector('body.notebook-home .hero-copy h1 em, body.about-page .story-hello-bubble .story-hello');
+      const featureTitle=document.querySelector('.desk-collage.featured-two .feature-card b');
       const aboutParagraph=document.querySelector('.about-story .story-section p');
       const sizeOf=s=>{const e=document.querySelector(s);return e?parseFloat(getComputedStyle(e).fontSize):null};
       return {
        cssLoaded:!!document.querySelector('link[href*="habom-gamja-font.css"]'),
        bodyFont:getComputedStyle(b).fontFamily,
        aboutParagraphFont:aboutParagraph?getComputedStyle(aboutParagraph).fontFamily:null,
+       accentFont:accent?getComputedStyle(accent).fontFamily:null,
+       featureTitleFont:featureTitle?getComputedStyle(featureTitle).fontFamily:null,
        aboutParagraphSize:aboutParagraph?parseFloat(getComputedStyle(aboutParagraph).fontSize):null,
        homeDoorSize:sizeOf('.garden-door strong'),
        homeFeatureCaptionSize:sizeOf('.desk-collage.featured-two .feature-card small'),
@@ -49,7 +53,9 @@ for(const plan of plans){
        headingFont:first&&getComputedStyle(first).fontFamily,
        headingName:first?.textContent?.trim().slice(0,70),
        navFont:nav&&getComputedStyle(nav).fontFamily,
-       actualFontLoaded:[...document.fonts].some(f=>f.family.replaceAll('"','')==='Gamja Flower'&&f.status==='loaded'),
+       actualBodyFontLoaded:[...document.fonts].some(f=>f.family.replaceAll('"','')==='Pretendard Variable'&&f.status==='loaded'),
+       actualHeadingFontLoaded:[...document.fonts].some(f=>f.family.replaceAll('"','')==='Habom MaruBuri'&&f.status==='loaded'),
+       actualPenFontLoaded:[...document.fonts].some(f=>f.family.replaceAll('"','')==='Nanum Pen Script'&&f.status==='loaded'),
        viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth,
        headerWidth:first?.scrollWidth,headerClientWidth:first?.clientWidth,
        resourceTabs:document.querySelectorAll('[data-garden-view]').length,
@@ -59,19 +65,25 @@ for(const plan of plans){
    });
    assert(res?.ok(),plan.name+' '+p+': HTTP failure');
    assert(reading.cssLoaded,plan.name+' '+p+': shared typography stylesheet absent');
-   assert(reading.bodyFont.startsWith('"Gamja Flower"'),plan.name+' '+p+': incorrect body font '+reading.bodyFont);
-   assert(reading.headingFont?.startsWith('"Gamja Flower"'),plan.name+' '+p+': incorrect headline font '+reading.headingFont);
-   assert(reading.actualFontLoaded,plan.name+' '+p+': actual Korean web font was not loaded');
-   if(reading.navFont)assert(reading.navFont.startsWith('"Gamja Flower"'),plan.name+' '+p+': nav link inconsistent '+reading.navFont);
+   assert(reading.bodyFont.startsWith('"Pretendard Variable"'),plan.name+' '+p+': incorrect body font '+reading.bodyFont);
+   assert(reading.headingFont?.startsWith('"Habom MaruBuri"'),plan.name+' '+p+': incorrect headline font '+reading.headingFont);
+   assert(reading.actualBodyFontLoaded,plan.name+' '+p+': Pretendard Korean webfont did not load');
+   assert(reading.actualHeadingFontLoaded,plan.name+' '+p+': MaruBuri SemiBold did not load');
+   if(reading.navFont)assert(reading.navFont.startsWith('"Pretendard Variable"'),plan.name+' '+p+': nav link inconsistent '+reading.navFont);
+   if(['/', '/about/'].includes(p)){
+      assert(reading.accentFont?.includes('Nanum Pen Script'),plan.name+' '+p+': point handwriting missing '+reading.accentFont);
+      assert(reading.actualPenFontLoaded,plan.name+' '+p+': Nanum Pen Script did not load for accent');
+   }
    if(p==='/'){
-     assert(reading.homeDoorSize>=17,plan.name+': game door text too small '+reading.homeDoorSize);
+     assert(reading.featureTitleFont?.startsWith('"Habom MaruBuri"'),plan.name+': card title is not MaruBuri '+reading.featureTitleFont);
+     assert(reading.homeDoorSize>=15,plan.name+': game door text too small '+reading.homeDoorSize);
      assert(reading.homeFeatureCaptionSize>=12,plan.name+': polaroid caption too small '+reading.homeFeatureCaptionSize);
-     assert(reading.homeShortcutTitleSize>=17,plan.name+': shortcut title too small '+reading.homeShortcutTitleSize);
-     assert(reading.homeShortcutCaptionSize>=14,plan.name+': shortcut caption too small '+reading.homeShortcutCaptionSize);
+     assert(reading.homeShortcutTitleSize>=16,plan.name+': shortcut title too small '+reading.homeShortcutTitleSize);
+     assert(reading.homeShortcutCaptionSize>=13,plan.name+': shortcut caption too small '+reading.homeShortcutCaptionSize);
    }
    if(p==='/about/'){
-     assert(reading.aboutParagraphFont?.startsWith('"Gamja Flower"'),plan.name+' '+p+': about story body font inconsistent '+reading.aboutParagraphFont);
-     assert(reading.aboutParagraphSize>=17,plan.name+' '+p+': about story copy too small '+reading.aboutParagraphSize);
+     assert(reading.aboutParagraphFont?.startsWith('"Pretendard Variable"'),plan.name+' '+p+': about story body font inconsistent '+reading.aboutParagraphFont);
+     assert(reading.aboutParagraphSize>=15,plan.name+' '+p+': about story copy too small '+reading.aboutParagraphSize);
    }
    if(['/', '/thinking-garden/','/music-garden/'].includes(p)){
      assert(reading.scrollWidth<=plan.width+3,plan.name+' '+p+': unexpected horizontal overflow '+reading.scrollWidth);
