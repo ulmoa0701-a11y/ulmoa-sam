@@ -171,7 +171,7 @@ try{
      await page.locator(mobile?'#playBtn':'#startBtn').click();
      const started=await page.evaluate(()=>({count:introCountBeats,preview:introPreviewBeats,beats:introBeats,
        expected:instrumentalPreludePlan().beats,pulse:document.querySelector('#introPulse').innerText,
-       spoken:window.__spokenBeats.slice(),state:$('#introHelp').textContent}));
+       spoken:window.__spokenBeats.slice(),speechAvailable:guideSpeechAvailable,lastVoiceBeat:guideLastVoiceBeat,hasSynth:typeof window.speechSynthesis,hasUtter:typeof window.SpeechSynthesisUtterance,state:$('#introHelp').textContent}));
      if(started.count!==0||started.preview!==started.expected||started.beats!==started.expected)
        throw Error('Mode not synchronized to musical plan '+JSON.stringify({mode,started}));
      if(mode==='music'&&started.pulse!=='쿵')
