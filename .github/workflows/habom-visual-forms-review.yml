@@ -23,6 +23,7 @@ jobs:
             try{
               for(const vp of [{width:1360,height:900},{width:390,height:844}]){
                 const p=await browser.newPage({viewport:vp,locale:'ko-KR',deviceScaleFactor:1});
+                const layoutByMode={};
                 for(const mode of ['public','private']){
                   await p.goto('https://ulmoa0701-a11y.github.io/ulmoa-sam/request/#'+mode,{waitUntil:'domcontentloaded',timeout:45000});
                   await p.waitForTimeout(2800);
@@ -52,6 +53,13 @@ jobs:
                     }catch(ignore){}
                   }
                   console.log('FIELD_METRICS '+label+' '+JSON.stringify(field));
+                  layoutByMode[mode]=field;
+                }
+                if(layoutByMode.public&&layoutByMode.private){
+                  const deltaX=Math.abs(layoutByMode.public.absoluteX-layoutByMode.private.absoluteX);
+                  const deltaW=Math.abs(layoutByMode.public.width-layoutByMode.private.width);
+                  console.log('FORM_PARITY '+vp.width+' '+JSON.stringify({deltaX,deltaW,public:layoutByMode.public,private:layoutByMode.private}));
+                  if(deltaX>12||deltaW>16)throw Error('Input column widths/positions differ between public and private at '+vp.width+'px');
                 }
                 await p.close();
               }
