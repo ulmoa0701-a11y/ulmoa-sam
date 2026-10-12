@@ -38,6 +38,18 @@ jobs:
                     return {panelX:e?.x,panelY:e?.y,panelWidth:e?.width,tabWidth:t?.width,innerScroll:root?.querySelector('iframe')?.getAttribute('scrolling')||null};
                   });
                   console.log('SCREEN_METRICS '+label+' '+JSON.stringify(pos));
+                  let field=null;
+                  for(const frm of p.frames()){
+                    try {
+                      const selector=mode==='private'?'#id_19':'select[name="kind"]';
+                      const shape=await frm.locator(selector).first().evaluate(e=>({x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y,width:e.getBoundingClientRect().width,font:getComputedStyle(e).fontFamily}));
+                      const frameEl=await frm.frameElement();
+                      const origin=await frameEl.boundingBox();
+                      field={absoluteX:Math.round(shape.x+origin.x),absoluteY:Math.round(shape.y+origin.y),width:Math.round(shape.width),font:shape.font};
+                      break;
+                    }catch(ignore){}
+                  }
+                  console.log('FIELD_METRICS '+label+' '+JSON.stringify(field));
                 }
                 await p.close();
               }
