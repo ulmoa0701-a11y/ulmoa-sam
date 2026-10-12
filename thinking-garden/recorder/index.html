@@ -33,15 +33,86 @@
 @media(max-width:360px){.brand{font-size:13px}.pill{font-size:11px;padding:7px}.comparison{grid-template-columns:1fr 1fr}.recorder{transform:scale(.72);margin-bottom:-58px}.hero h1{font-size:32px}}
 .flower-plot{width:100%;height:110px;display:grid;place-items:center;position:relative;overflow:hidden;transition:transform .25s}.flower-plot svg{width:150px;height:111px;filter:drop-shadow(0 6px 4px #315a3028)}.flower-plot .stem{transform-origin:75px 112px;transform:scaleY(.34);transition:transform .75s cubic-bezier(.2,1,.3,1)}.flower-plot .petal{transform-origin:75px 49px;transform:scale(.2);opacity:0;transition:transform .55s cubic-bezier(.2,1.8,.5,1),opacity .3s}.flower-plot.bloom .stem{transform:scaleY(1)}.flower-plot.bloom .petal{transform:scale(1);opacity:1}.flower-plot.bloom{animation:happywiggle .8s ease-in-out 1}@keyframes happywiggle{30%{transform:rotate(-5deg) scale(1.1)}65%{transform:rotate(5deg) scale(1.04)}}.mic-status strong{color:#287f57}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-@media(min-width:800px){.menu{grid-template-columns:repeat(auto-fit,minmax(192px,1fr))}}</style>
+@media(min-width:800px){.menu{grid-template-columns:repeat(auto-fit,minmax(192px,1fr))}}
+/* Home V2: an obvious guided start, one consistent path, optional advanced choices */
+.rec-home{display:flex;flex-direction:column;align-items:center;justify-content:center;width:min(100%,880px);margin:auto;gap:15px;min-height:510px}
+.rec-welcome{display:grid;grid-template-columns:minmax(0,1fr) 195px;align-items:center;width:100%;gap:16px;min-height:150px}
+.rec-intro{text-align:left}.rec-intro h1{font-size:clamp(34px,4.5vw,54px);line-height:1.1;letter-spacing:-1.7px;color:#254c3c}
+.rec-intro h1 em{font-style:normal;color:#d96761}.rec-intro p{font-size:clamp(13px,1.65vw,17px);line-height:1.55;margin-top:8px;color:#50715f;font-weight:800}
+.rec-moa{height:158px;text-align:center}.rec-moa img{max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 7px 5px #36705124)}
+.rec-journey{background:#fffef8d9;border:2px solid #d7ebd1;border-radius:18px;display:flex;align-items:center;justify-content:space-around;gap:8px;width:100%;padding:12px 13px}
+.rec-journey span{display:flex;align-items:center;gap:8px;white-space:nowrap;font-size:clamp(12px,1.8vw,17px);font-weight:950;color:#3e7058}
+.rec-journey b{width:31px;height:31px;display:grid;place-items:center;border-radius:50%;background:#e8f7e6;color:#317759;font-size:19px}
+.rec-journey .rec-journey-arrow{font-size:20px;color:#a7bea4}
+.rec-main-start{width:100%;border:0;border-bottom:6px solid #bd7a32;border-radius:22px;min-height:104px;background:linear-gradient(#fff0b4,#ffdc81);color:#68421b;display:flex;align-items:center;justify-content:center;gap:11px;padding:12px 20px;font-weight:1000;box-shadow:0 7px 15px #8d764729}
+.rec-main-start>span:first-child{font-size:35px}.rec-main-start>span:nth-child(2){font-size:clamp(25px,3.9vw,36px)}
+.rec-main-start small{font-size:13px;color:#8d6630;background:#fff8df;border-radius:20px;padding:7px 11px}
+.rec-next-row{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.rec-next-action{background:#fffefa;border:3px solid #fff;border-bottom:5px solid #c9d9c5;border-radius:20px;min-height:86px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;color:#345c4a;box-shadow:0 4px 13px #386b4e18}
+.rec-next-action strong{font-size:clamp(17px,2.3vw,21px)}.rec-next-action span{font-size:13px;color:#668170;font-weight:700}
+.rec-more{width:100%;background:#fffefaab;border:2px solid #d8ebd7;border-radius:17px;overflow:hidden}
+.rec-more summary{cursor:pointer;list-style:none;text-align:center;padding:12px;font-size:15px;font-weight:950;color:#4b785d}
+.rec-more summary::-webkit-details-marker{display:none}
+.rec-more-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:0 12px 13px}
+.rec-more-grid a{min-width:0;text-decoration:none;background:#eff7ea;border:2px solid #dbe9d2;padding:12px;border-radius:13px;display:flex;flex-direction:column;gap:5px}
+.rec-more-grid strong{font-size:16px;color:#346e53}.rec-more-grid small{font-size:12px;color:#648072;font-weight:700;line-height:1.4}
+.rec-breath-link{font-size:12px;font-weight:850;text-align:center;color:#427b5f;background:#ffffffad;border-radius:15px;padding:10px 13px;text-decoration:none}
+@media(max-width:780px){
+ .stage{min-height:calc(100dvh - 90px)}
+ .rec-home{gap:10px;min-height:0}
+ .rec-welcome{grid-template-columns:minmax(0,1fr) 105px;gap:7px;min-height:110px}
+ .rec-moa{height:112px}.rec-intro h1{font-size:35px}.rec-intro p{font-size:12px;line-height:1.42}
+ .rec-intro .eyebrow{font-size:10px;padding:5px 9px;margin-bottom:7px}
+ .rec-journey{gap:3px;padding:9px 6px}.rec-journey span{font-size:11px;gap:3px}.rec-journey b{height:22px;width:22px;font-size:13px}
+ .rec-journey .rec-journey-arrow{font-size:12px}
+ .rec-main-start{min-height:81px;padding:9px;display:grid;grid-template-columns:35px 1fr;gap:3px 8px}
+ .rec-main-start>span:first-child{grid-row:1/3;font-size:29px}
+ .rec-main-start>span:nth-child(2){font-size:26px;justify-self:center}
+ .rec-main-start small{font-size:11px;grid-column:2;justify-self:center;padding:3px 8px}
+ .rec-next-row{gap:7px}.rec-next-action{min-height:76px;padding:9px 6px}
+ .rec-next-action strong{font-size:15px}.rec-next-action span{font-size:11px}
+ .rec-more summary{padding:10px;font-size:13px}
+ .rec-more-grid{grid-template-columns:1fr;gap:6px}.rec-more-grid a{padding:8px 11px}
+ .rec-breath-link{font-size:11px;padding:7px}
+}
+@media(max-width:380px){.rec-intro h1{font-size:31px}.rec-welcome{grid-template-columns:1fr 75px}.rec-moa{height:90px}.rec-journey span{font-size:10px}.rec-next-action strong{font-size:13px}}
+
+</style>
 </head>
 <body><div class="app">
 <header class="top"><a class="brand" href="../../music-garden/"><span class="brand-mark">🎵</span>모아의 음악정원</a><div class="top-right"><button class="pill" type="button" id="soundBtn" aria-label="효과음 끄기">🔊 소리 켜짐</button><button class="pill" type="button" id="homeBtn">⌂ 처음</button></div></header>
 <main class="stage"><div class="deco-stars"></div><div class="sun"></div><div class="cloud c1"></div><div class="cloud c2"></div><div class="hill h1"></div><div class="hill h2"></div><span class="plant p1">🌷</span><span class="plant p2">🌼</span><span class="plant p3">🍀</span>
 <div class="content">
 <section class="screen" id="homeScreen">
- <div class="hero"><div class="hero-copy"><span class="eyebrow">🎵 모아와 함께 첫 리코더 도전!</span><h1>손가락 톡톡!<br><em>리코더 마법정원</em></h1><p>구멍 하나부터 천천히. 화면에서 해보고,<br>진짜 리코더로 꽃도 피워보자!</p></div><div class="hero-moa"><span class="bubble">하나만 해도 멋져!</span><img src="../assets/moa-default.png" alt="모아 캐릭터" onerror="this.style.display='none'"></div></div>
- <div class="menu"><a class="mode-card feature" href="finger-adventure/hands/?v=7" style="text-decoration:none;color:inherit"><span class="mode-icon">👐</span><b>두 손 모험</b><small>큰 시작 → 그림 익히기 → 카메라 두 손 → 내 리코더</small><span class="arrow">➜</span></a><a class="mode-card feature" href="finger-adventure/?v=7" style="text-decoration:none;color:inherit"><span class="mode-icon">☝️</span><b>손가락 대모험</b><small>검지·중지·약지 인식 → 시·라·솔 직접 연주</small><span class="arrow">➜</span></a><a class="mode-card feature" href="step-by-step/" style="text-decoration:none;color:inherit"><span class="mode-icon">🌷</span><b>모아의 소리꽃 정원</b><small>시·라·솔 · 실제 리코더로 꽃 피우기</small><span class="arrow">➜</span></a><button class="mode-card" data-start="easy"><span class="mode-icon">🌱</span><b>처음 만나는 리코더</b><small>6문제 · 그림 보고 구멍 막기</small><span class="arrow">➜</span></button><button class="mode-card" data-start="normal"><span class="mode-icon">🌼</span><b>손가락 바꾸기</b><small>10문제 · 시, 라, 솔로 바꿔보기</small><span class="arrow">➜</span></button><button class="mode-card feature" data-start="real"><span class="mode-icon">🎤</span><b>진짜 리코더 마법!</b><small>실제 리코더로 소리 내면 꽃이 피어요</small><span class="arrow">➜</span></button></div><p class="footnote">시간제한 없음 · 틀려도 괜찮아 · 리코더 없이도 시작 가능</p><p class="footnote">🌬️ 바람의 세기·오래 후~·박자 바람은 <a href="../../breath-garden/" style="font-weight:900;color:#287a54">별도 모아의 바람놀이터 →</a></p>
+ <div class="rec-home">
+  <div class="rec-welcome">
+   <div class="rec-intro">
+    <span class="eyebrow">🎶 처음이라면 여기부터!</span>
+    <h1>모아의<br><em>리코더 놀이터</em></h1>
+    <p>먼저 그림으로 시·라·솔을 익히고, 손가락을 움직인 다음 진짜 리코더에 도전해요.</p>
+   </div>
+   <div class="rec-moa" aria-hidden="true"><img src="../assets/moa-default.png" alt="" onerror="this.style.display='none'"></div>
+  </div>
+  <div class="rec-journey" aria-label="리코더 연습 추천 순서">
+    <span><b>①</b> 구멍 알아보기</span><span class="rec-journey-arrow" aria-hidden="true">→</span>
+    <span><b>②</b> 손가락 연습</span><span class="rec-journey-arrow" aria-hidden="true">→</span>
+    <span><b>③</b> 실제로 불기</span>
+  </div>
+  <button type="button" data-start="easy" class="rec-main-start"><span aria-hidden="true">▶</span><span>처음부터 시작!</span><small>리코더 없이도 할 수 있어요</small></button>
+  <div class="rec-next-row" aria-label="이미 리코더를 연습해 본 사람을 위한 선택">
+    <button type="button" data-start="normal" class="rec-next-action"><strong>👆 운지 바꾸기</strong><span>시·라·솔 반복하기</span></button>
+    <button type="button" data-start="real" class="rec-next-action"><strong>🎤 실제 리코더 연주</strong><span>소리 인식해 보기</span></button>
+  </div>
+  <details class="rec-more">
+   <summary>🧩 다른 리코더 놀이도 있어요 <span aria-hidden="true">⌄</span></summary>
+   <div class="rec-more-grid">
+    <a href="finger-adventure/hands/?v=7"><strong>👐 두 손 모험</strong><small>왼손·오른손과 카메라 놀이</small></a>
+    <a href="finger-adventure/?v=7"><strong>☝️ 손가락 대모험</strong><small>손가락 움직이기·실제 연주</small></a>
+    <a href="step-by-step/"><strong>🌷 소리꽃 정원</strong><small>시·라·솔 실제 소리 놀이</small></a>
+   </div>
+  </details>
+  <a class="rec-breath-link" href="../../breath-garden/">🌬️ 바람 세기·오래 불기·숨 고르기는 별도의 바람놀이터에서 →</a>
+ </div>
 </section>
 <section class="screen" id="practiceScreen" hidden>
 <div class="progress-line"><span id="roundTitle">🌱 1 / 6</span><span id="stars">⭐ 0</span></div><div class="progress"><b id="progressFill"></b></div>
