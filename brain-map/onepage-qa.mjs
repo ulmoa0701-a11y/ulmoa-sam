@@ -18,6 +18,31 @@ try{
   const response=await page.goto(base+'brain-map/',{waitUntil:'networkidle',timeout:30000});
   assert.equal(response?.status(),200,'homepage HTTP 200');
   await page.locator('#brainMap').waitFor({state:'visible'});
+  // Font hierarchy must be real in the browser rather than a nominal CSS declaration.
+  const fontCheck=await page.evaluate(async()=>{
+    await document.fonts.load('600 22px "MaruBuriSemiBold"','좌뇌 우뇌');
+    await document.fonts.load('400 34px "Nanum Pen Script"','우리 뇌');
+    await document.fonts.ready;
+    const read=(selector)=>{
+      const style=getComputedStyle(document.querySelector(selector));
+      return {family:style.fontFamily,size:parseFloat(style.fontSize),weight:style.fontWeight};
+    };
+    const faces=[...document.fonts].filter(x=>/MaruBuriSemiBold|Nanum Pen Script|Pretendard/i.test(x.family))
+      .map(x=>({family:x.family,status:x.status}));
+    return {body:read('.brain-main .map-intro p'),title:read('.map-intro h1'),
+      subheading:read('.map-panel-heading h2'),card:read('.lobe-card small'),
+      cardTitle:read('.lobe-card strong'),faces,hasGamjaOverride:!!document.querySelector('link[href*="habom-gamja-font"]')};
+  });
+  assert.match(fontCheck.body.family,/Pretendard/i,'main body must use Pretendard: '+JSON.stringify(fontCheck));
+  assert.match(fontCheck.subheading.family,/MaruBuriSemiBold/,'subheading font family: '+JSON.stringify(fontCheck));
+  assert.match(fontCheck.cardTitle.family,/MaruBuriSemiBold/,'small section headings: '+JSON.stringify(fontCheck));
+  assert.match(fontCheck.title.family,/Nanum Pen Script/,'headline handwriting fallback must be present: '+JSON.stringify(fontCheck));
+  assert.equal(fontCheck.hasGamjaOverride,false,'shared Gamja !important must not override the brain map');
+  assert.ok(fontCheck.faces.some(x=>x.family.includes('MaruBuriSemiBold')&&x.status==='loaded'),
+    'real MaruBuri SemiBold webfont missing: '+JSON.stringify(fontCheck));
+  assert.ok(fontCheck.faces.some(x=>x.family.includes('Nanum Pen Script')&&x.status==='loaded'),
+    'real Nanum Pen Script webfont missing: '+JSON.stringify(fontCheck));
+  console.log('BRAIN_FONT_QA_'+name+'='+JSON.stringify(fontCheck));
   const photo=page.locator('.brain-one-panel');
   assert.equal(await page.locator('.lobe-card').count(),6,'six main functions are visible');
   assert.equal(await page.locator('.sub-footer > div').count(),1,'footer brand must be valid and grouped in its own div');
@@ -157,6 +182,10 @@ try{
   await page.locator('#hemiTogether').click();
   assert.equal(await page.locator('#hemiTogether').getAttribute('aria-pressed'),'true');
   assert.match(await page.locator('#hemiFocus').innerText(),/한 팀/);
+  const speechFont=await page.locator('.hemi-focus b').evaluate(el=>getComputedStyle(el).fontFamily);
+  assert.match(speechFont,/Nanum Pen Script/,'speech cue uses handwriting only');
+  const conceptFont=await page.locator('.hemi-ability-copy b').first().evaluate(el=>getComputedStyle(el).fontFamily);
+  assert.match(conceptFont,/MaruBuriSemiBold/,'clickable concept headings use MaruBuri');
   assert.equal(await page.locator('#hemiSceneTitle').innerText(),'💬 친구와 대화할 때');
   await page.locator('[data-brain-scene="ball"]').click();
   assert.equal(await page.locator('[data-brain-scene="ball"]').getAttribute('aria-pressed'),'true');
