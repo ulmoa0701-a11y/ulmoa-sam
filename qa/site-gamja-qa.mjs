@@ -51,6 +51,10 @@ for(const plan of plans){
        headingName:first?.textContent?.trim().slice(0,70),
        navFont:nav&&getComputedStyle(nav).fontFamily,
        readableTitleLoaded:[...document.fonts].some(f=>f.family.replaceAll('"','')==='Gowun Dodum'&&f.status==='loaded'),
+       brainSubheadingFont:document.querySelector('.map-panel-heading h2')?
+         getComputedStyle(document.querySelector('.map-panel-heading h2')).fontFamily:null,
+       brainMaruLoaded:[...document.fonts].some(f=>f.family.replaceAll('"','')==='MaruBuriSemiBold'&&f.status==='loaded'),
+       brainPenLoaded:[...document.fonts].some(f=>f.family.replaceAll('"','')==='Nanum Pen Script'&&f.status==='loaded'),
        viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth,
        headerWidth:first?.scrollWidth,headerClientWidth:first?.clientWidth,
        resourceTabs:document.querySelectorAll('[data-garden-view]').length,
@@ -59,6 +63,14 @@ for(const plan of plans){
       };
    });
    assert(res?.ok(),plan.name+' '+p+': HTTP failure');
+   if(p==='/brain-map/'){
+     assert(!reading.cssLoaded,plan.name+' '+p+': shared Gamja override must be absent for approved brain map fonts');
+     assert(reading.bodyFont.startsWith('"Pretendard Variable"'),plan.name+' '+p+': main copy is not Pretendard');
+     assert(reading.headingFont?.includes('Nanum Pen Script'),plan.name+' '+p+': hero handwriting missing');
+     assert(reading.brainSubheadingFont?.includes('MaruBuriSemiBold'),plan.name+' '+p+': subhead Maru Buri missing');
+     assert(reading.brainMaruLoaded,plan.name+' '+p+': Maru Buri font failed to load');
+     assert(reading.brainPenLoaded,plan.name+' '+p+': Nanum Pen font failed to load');
+   }else{
    assert(reading.cssLoaded,plan.name+' '+p+': shared typography stylesheet absent');
    const isGarden=p==='/thinking-garden/'||p==='/music-garden/';
    // Keep standalone game-stage typography, while entry content and all reading pages use legible fonts.
@@ -71,6 +83,7 @@ for(const plan of plans){
    }else{
      assert(reading.headingFont?.startsWith('"Gowun Dodum"'),plan.name+' '+p+': incorrect headline font '+reading.headingFont);
      assert(reading.readableTitleLoaded,plan.name+' '+p+': Gowun Dodum title face did not load');
+   }
    }
    if(reading.navFont)assert(reading.navFont.startsWith('"Pretendard Variable"'),plan.name+' '+p+': nav link inconsistent '+reading.navFont);
    if(p==='/'){
