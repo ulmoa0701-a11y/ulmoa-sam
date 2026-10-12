@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Gamja+Flower&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link rel="stylesheet" href="../assets/notebook-subpages.css?v=20261006-community3">
-<link rel="stylesheet" href="../assets/community-board.css?v=20261012-form-parity2">
+<link rel="stylesheet" href="../assets/community-board.css?v=20261012-form-parity3">
 <link rel="stylesheet" href="../assets/habom-brand.css?v=20261010b">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/habom-favicon-v3-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="../assets/habom-favicon-v3-16.png">
@@ -110,6 +110,16 @@
     formResizeObserver.observe(privateFrame, { attributes: true, attributeFilter: ["style"] });
   }
   if (!publicTab || !privateTab || !publicPanel || !privatePanel) return;
+  function activatePrivateEmbedResizer() {
+    if (!privateFrame || !privateFrame.getAttribute("src")) return;
+    if (privateFrame.dataset.resizeReady || !window.jotformEmbedHandler) return;
+    window.jotformEmbedHandler('iframe[id="habomPrivateForm"]', "https://form.jotform.com/");
+    privateFrame.dataset.resizeReady = "true";
+  }
+  // Deferred Jotform loader may become available AFTER an initial #private navigation.
+  // The load event plus a delayed retry cover first navigation and tab changes.
+  window.addEventListener("load", activatePrivateEmbedResizer);
+  window.setTimeout(activatePrivateEmbedResizer, 1200);
 
   function openMode(mode, shouldFocus) {
     var isPrivate = mode === "private";
@@ -124,12 +134,8 @@
     privateTab.tabIndex = isPrivate ? 0 : -1;
     if (isPrivate && privateFrame) {
       if (!privateFrame.getAttribute("src")) privateFrame.src = privateFrame.dataset.src;
-      window.setTimeout(function() {
-        if (window.jotformEmbedHandler && !privateFrame.dataset.resizeReady) {
-          window.jotformEmbedHandler('iframe[id="habomPrivateForm"]', "https://form.jotform.com/");
-          privateFrame.dataset.resizeReady = "true";
-        }
-      }, 200);
+      window.setTimeout(activatePrivateEmbedResizer, 200);
+      window.setTimeout(activatePrivateEmbedResizer, 1200);
     }
     if (shouldFocus) activeTab.focus();
     try { history.replaceState(null, "", isPrivate ? "#private" : "#public"); } catch (ignore) {}
