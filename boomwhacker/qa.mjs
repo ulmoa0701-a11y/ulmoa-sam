@@ -314,13 +314,14 @@ async function basicCase(name,width,height){
        name+': '+selected+' hides descending balls');
     if(selected==='music')check(started.firstBeat==='쿵',name+': no strong first beat');
     if(selected==='voice')check(started.firstBeat==='하나',name+': count must start with 하나');
-    await page.evaluate(()=>{
+    const descending=await page.evaluate(()=>{
       const p=instrumentalPreludePlan(),offset=p.firstBallOffsetMs+Math.min(740,firstNoteMs()/2);
-      const origin=introAudioStartAt;
-      introAudioStartAt=audioCtx.currentTime-offset/1000;
-      introFrame(performance.now());introAudioStartAt=origin;
+      const origin=introAudioStartAt;introAudioStartAt=audioCtx.currentTime-offset/1000;
+      introFrame(performance.now());
+      const count=document.querySelectorAll('.fall').length;
+      introAudioStartAt=origin;return count;
     });
-    check(await page.locator('.fall').count()>0,name+': '+selected+' no descending balls');
+    check(descending>0,name+': '+selected+' no descending balls');
     await page.locator('#resetBtn').click();
     check(!(await page.locator('#introOverlay').isVisible()),name+': '+selected+' reset failed');
   }
@@ -457,13 +458,10 @@ for(const [label,w,h] of [['mobile-score-immediate',390,844],['desktop-score-imm
   check(original.firstScoreBeatMs>=3000,label+': fall runway was lost in score event data');
   await page.locator(w<=800?'#playBtn':'#startBtn').click();
   let started=await page.evaluate(()=>window.__boomVideoQA.intro());
-  check(started.active&&started.beats===6,label+': familiar musical count-in missing');
-  await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs-beatMs()*.6);introAudioStartAt=audioCtx.currentTime-(introDurationMs-beatMs()*.6)/1000;introFrame(performance.now())});
-  check((await page.locator('#introPulse').textContent())==='시작'&&
-    (await page.locator('#introPulse .introSyllable.active').textContent())==='작',
-    label+': both syllables should appear together with 작 moving just before the first note');
-  await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+2);introAudioStartAt=audioCtx.currentTime-(introDurationMs+2)/1000;introFrame(performance.now())});
-  await page.waitForTimeout(130);
+  check(started.active&&started.countBeats===0&&started.beats>=4,
+     label+': guided start must not add countdown '+JSON.stringify(started));
+   await page.waitForFunction(()=>!introActive&&playing,null,{timeout:16000});
+   await page.waitForTimeout(130);
   const first=await page.evaluate(()=>({
     timing:window.__boomVideoQA.scoreTiming(),active:[...document.querySelectorAll('#scoreStageGrid .scoreActive')].map(e=>Number(e.dataset.eventIndex)),
     side:[...document.querySelectorAll('#scoreRows .scoreActive')].map(e=>[...e.parentElement.children].indexOf(e)),
@@ -471,7 +469,7 @@ for(const [label,w,h] of [['mobile-score-immediate',390,844],['desktop-score-imm
   }));
   check(first.active.join(',')==='0'&&first.side.join(',')==='0'&&
     first.timing.elapsed>=first.timing.firstScoreBeatMs&&first.timing.elapsed<first.timing.secondEvent.start,
-    label+': the very first 도 must pulse immediately after 작 '+JSON.stringify(first));
+    label+': first 도 must appear on MR downbeat '+JSON.stringify(first));
   check(first.timing.visibleTime.startsWith('0:00')&&first.volume<5,
     label+': score mode should show 0:00, not a 3.1s fake lead '+JSON.stringify(first));
   await page.waitForTimeout(Math.max(0,Math.ceil(await page.evaluate(()=>events[1].start-elapsed))+60));
