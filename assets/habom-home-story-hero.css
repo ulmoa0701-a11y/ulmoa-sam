@@ -1,0 +1,98 @@
+/* 일단 해봄 첫 화면 · 소개 페이지와 이어지는 브랜드 문장
+   승인된 두 정원 폴라로이드/캐릭터 이미지 변경 없음.
+   헤드라인 = MaruBuri, 짧은 '일단 해봄.' 포인트만 손글씨. */
+.notebook-home .notebook-hero{padding-bottom:22px}
+.notebook-home .hero-paper{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  min-height:530px;
+}
+.notebook-home .hero-copy{
+  display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+  min-width:0;padding:49px 15px 45px clamp(28px,4.5vw,56px);
+}
+.notebook-home .hero-overline{
+  display:inline-flex;align-items:center;gap:9px;
+  margin:0 0 22px;
+  color:#52746a;font-size:13px;font-weight:700;letter-spacing:.015em;
+  line-height:1.5;
+}
+.notebook-home .hero-overline::before{
+  content:"";width:8px;height:8px;flex:none;border-radius:50%;
+  background:#85b6a0;box-shadow:0 0 0 4px #e8f4e9;
+}
+.notebook-home .hero-copy h1{
+  margin:0 0 18px;max-width:100%;
+  font-family:var(--habom-heading-font)!important;
+  font-size:clamp(32px,3.0vw,40px);
+  font-weight:600!important;line-height:1.27;letter-spacing:-.045em!important;
+  word-break:keep-all;
+}
+.notebook-home .hero-copy h1 em{
+  display:inline-block;margin-top:9px;
+  font-family:var(--habom-accent-font)!important;
+  font-size:clamp(57px,5.3vw,76px);
+  font-weight:400!important;line-height:1.07;letter-spacing:-.025em!important;
+  color:#3a7168;white-space:nowrap;
+}
+.notebook-home .hero-copy h1 em::after{
+  height:12px;bottom:3px;left:1%;right:1%;
+  background:#f3df8b99;border-radius:44% 56% 45% 60%;
+}
+.notebook-home .hero-lead{
+  margin:0 0 8px;max-width:485px;
+  font-size:clamp(15px,1.35vw,17px);line-height:1.72;
+  letter-spacing:-.012em;color:#354c4c;font-weight:550;
+}
+.notebook-home .hero-workline{
+  margin:0;max-width:460px;font-size:14px;line-height:1.7;color:#687c7b;
+  word-break:keep-all;
+}
+.notebook-home .maker-link{
+  display:inline-flex;align-items:center;gap:8px;
+  margin-top:24px;padding:0 0 7px;
+  border-bottom:1.5px solid #86b5a5;
+  color:#2e665b;text-decoration:none;
+  font-size:15px;font-weight:750;line-height:1.4;
+}
+.notebook-home .maker-link span{font-size:17px;font-weight:400;transition:transform .16s}
+.notebook-home .maker-link:hover span{transform:translate(2px,-2px)}
+.notebook-home .maker-link:focus-visible{
+  outline:3px solid #77baa1;outline-offset:4px;border-radius:2px
+}
+.notebook-home .desk-collage.featured-two{
+  align-content:center;align-items:start;min-height:0!important;
+  padding:52px 28px 52px!important;
+}
+/* At narrow tablet widths both approved polaroids sit beneath the message. */
+@media(max-width:900px){
+ .notebook-home .hero-paper{grid-template-columns:minmax(0,1fr);min-height:0}
+ .notebook-home .hero-copy{padding:46px 34px 10px}
+ .notebook-home .hero-overline{margin-bottom:16px}
+ .notebook-home .hero-copy h1{font-size:clamp(30px,4.4vw,40px)}
+ .notebook-home .hero-copy h1 em{font-size:clamp(60px,8vw,76px)}
+ .notebook-home .desk-collage.featured-two{padding:35px 24px 44px!important}
+}
+@media(max-width:600px){
+ .notebook-home .notebook-hero{padding-top:12px;padding-bottom:12px}
+ .notebook-home .hero-copy{padding:32px 21px 4px}
+ .notebook-home .hero-overline{font-size:12px;gap:8px;margin-bottom:14px}
+ .notebook-home .hero-copy h1{
+   margin-bottom:14px;font-size:clamp(24px,7.15vw,28px);
+   line-height:1.28;letter-spacing:-.055em!important;
+ }
+ .notebook-home .hero-copy h1 em{
+   margin-top:6px;font-size:clamp(51px,14.1vw,59px);line-height:1.15;
+ }
+ .notebook-home .hero-copy h1 em::after{height:9px;bottom:5px}
+ .notebook-home .hero-lead{font-size:15px;line-height:1.62;margin-bottom:8px}
+ .notebook-home .hero-desktop-break{display:none}
+ .notebook-home .hero-workline{font-size:13px;line-height:1.6}
+ .notebook-home .maker-link{font-size:14px;margin-top:17px}
+ .notebook-home .desk-collage.featured-two{padding:31px 10px 29px!important}
+}
+@media(max-width:370px){
+ .notebook-home .hero-copy{padding-inline:17px}
+ .notebook-home .hero-copy h1{font-size:24px}
+ .notebook-home .hero-copy h1 em{font-size:50px}
+}
+@media(prefers-reduced-motion:reduce){.notebook-home .maker-link span{transition:none}}
