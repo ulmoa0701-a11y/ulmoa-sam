@@ -1,0 +1,29 @@
+name: Boomwhacker audible samples QA
+on:
+  pull_request:
+    paths:
+      - 'boomwhacker/start-audio-preview-e2e.mjs'
+      - 'boomwhacker/index.html'
+      - 'boomwhacker/voice/**'
+      - '.github/workflows/boomwhacker-audio-previews.yml'
+permissions:
+  contents: read
+jobs:
+  previews:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install free browser driver
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund playwright-core@1.56.1
+      - name: Render exact prelude/rhythm/voice into eight 66/100 BPM playable WAV files
+        run: node boomwhacker/start-audio-preview-e2e.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: boomwhacker-musical-voice-previews
+          path: boomwhacker/audio-preview-artifacts
+          if-no-files-found: error
