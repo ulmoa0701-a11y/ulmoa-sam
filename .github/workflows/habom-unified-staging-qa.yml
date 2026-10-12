@@ -49,3 +49,24 @@ jobs:
           name: habom-unified-staging-screenshots
           path: habom-staging-*.png
           if-no-files-found: ignore
+
+  current-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright-core@1.56.1
+      - name: Check current public site without writing any test posts
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          export CHROME_BIN
+          node request-next/tests/live-regression.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: habom-current-live-screenshots
+          path: habom-current-live-*.png
+          if-no-files-found: ignore
