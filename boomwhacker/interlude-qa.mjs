@@ -43,46 +43,63 @@ try{
    result.info=info;
    if(info.mode!=='interlude'||info.song!==song.title||info.bpm<35||info.bpm>140||Math.abs(info.beat-60000/info.bpm)>1)throw Error('Incorrect musical interlude selected '+JSON.stringify(info));
    if(mobile)await page.locator('#mobileSettingsClose').click();
-   const plan=await page.evaluate(()=>{
-     const one=interludePhrasePlan();
-     const prior=currentSong,priorBpm=bpm;
-     currentSong=clone(twinkle);bpm=selectedTempo(currentSong);build();
-     const stars=interludePhrasePlan(),twinkleBeat=beatMs();
-     currentSong=prior;bpm=priorBpm;build();
-     return {one:{beats:one.beats,notes:one.notes.map(n=>n.note)},stars:{beats:stars.beats,notes:stars.notes.map(n=>({note:n.note,durationBeats:Math.round(n.durationMs/twinkleBeat)}))}};
-   });
-   result.melodyPlan=plan;
-   if(plan.one.beats!==8||plan.one.notes.join(',')!=='도,솔,미,솔,도,솔,미,솔')
-     throw Error('Imported exercise phrase was truncated: '+JSON.stringify(plan.one));
-   if(plan.stars.beats!==8||plan.stars.notes.map(n=>n.note).join(',')!=='도,도,솔,솔,라,라,솔'||plan.stars.notes.at(-1).durationBeats!==2)
-     throw Error('Small Star melody must finish its sustained 솔, not stop after 라 라: '+JSON.stringify(plan.stars));
+   const plan=await page.evaluate(()=>instrumentalPreludePlan());
+   result.preludePlan=plan;
+   if(plan.bars<2||plan.durationMs<info.firstNote||plan.firstBallOffsetMs<0||
+      plan.firstBallOffsetMs>=plan.durationMs)
+     throw Error('Instrumental intro too short for falling-note runway '+JSON.stringify(plan));
+   // For a Small Star fixture the intro must NOT emit the note pitches
+   // 도·도·솔·솔·라·라·솔. It is chord/bass/percussion only.
    const audioProbe=await page.evaluate(async()=>{
-    const ac=new OfflineAudioContext(1,44100*8,44100);
+    const plan=instrumentalPreludePlan(),beat=beatMs();
+    const ac=new OfflineAudioContext(1,Math.ceil(44100*(3*beat+plan.durationMs)/1000)+44100,44100);
     const g=ac.createGain();g.connect(ac.destination);
-    scheduleInterludeCountdown(ac,g,.05,beatMs());
-    const phrase=scheduleInterludeMusic(ac,g,.05+INTERLUDE_COUNTDOWN_BEATS*beatMs()/1000,beatMs(),2);
+    scheduleInterludeCountdown(ac,g,.05,beat);
+    const built=scheduleInterludeMusic(ac,g,.05+3*beat/1000,beat,plan.meter);
     const rendered=await ac.startRendering(),d=rendered.getChannelData(0);
     const power=(a,b)=>{let energy=0;for(let i=Math.floor(a*44100);i<Math.min(d.length,Math.floor(b*44100));i++)energy+=Math.abs(d[i]);return Math.round(energy)};
-    const firstMelody=.05+3*beatMs()/1000;
-    return {notes:phrase.notes.length,beats:phrase.beats,firstCount:power(.05,.28),secondCount:power(.68,.88),firstMelody:power(firstMelody+.08,firstMelody+.27),nextMelody:power(firstMelody+.7,firstMelody+.9)};
+    const start=.05+3*beat/1000,last=start+(plan.durationMs-beat)/1000;
+    return{bars:built.bars,firstCount:power(.07,.27),introStart:power(start+.05,start+.26),lastPreludeBeat:power(last+.04,last+.23)};
    });
    result.audioProbe=audioProbe;
-   if(audioProbe.notes!==8||audioProbe.beats!==8||audioProbe.firstCount<=10||audioProbe.secondCount<=10||audioProbe.firstMelody<=20||audioProbe.nextMelody<=20)
-     throw Error('Audio must play 3 countdown ticks THEN full uncut melody: '+JSON.stringify(audioProbe));
+   if(audioProbe.firstCount<8||audioProbe.introStart<15||audioProbe.lastPreludeBeat<15)
+     throw Error('Must hear countdown THEN actual instrumental intro '+JSON.stringify(audioProbe));
    await page.locator(mobile?'#playBtn':'#startBtn').click();
-   result.start=await page.evaluate(()=>({mode:introMode,active:introActive,beats:introBeats,preview:introPreviewBeats,count:introCountBeats,durationMs:introDurationMs,heading:document.querySelector('#introHeading').innerText,first:document.querySelector('#introPulse').innerText,gain:!!introGain}));
-   if(!result.start.active||result.start.beats!==11||result.start.count!==3||result.start.preview!==8||result.start.first!=='3'||!result.start.heading.includes('3·2·1')||!result.start.gain)
-     throw Error('Intro must start with 3-2-1 countdown: '+JSON.stringify(result.start));
-   result.phase=await page.evaluate(()=>{
-    introStartPerf=performance.now()-(beatMs()*3+20);introFrame(performance.now());
-    return {heading:document.querySelector('#introHeading').innerText,visual:document.querySelector('#introPulse').innerText,elapsed,playing,balls:document.querySelectorAll('.fall').length};
+   result.start=await page.evaluate(()=>({
+      active:introActive,beats:introBeats,preview:introPreviewBeats,count:introCountBeats,
+      heading:document.querySelector('#introHeading').innerText,first:document.querySelector('#introPulse').innerText,
+      scheduled:!!mrSource,firstBallOffsetMs:instrumentalPreludePlan().firstBallOffsetMs}));
+   if(!result.start.active||result.start.count!==3||result.start.preview!==plan.beats||result.start.beats!==plan.beats+3||
+      result.start.first!=='3'||!result.start.scheduled)
+     throw Error('Countdown and future MR schedule wrong '+JSON.stringify(result.start));
+   result.beforeBall=await page.evaluate(()=>{
+     const p=instrumentalPreludePlan(),offset=(3*beatMs()+Math.max(0,p.firstBallOffsetMs-80));
+     introStartPerf=performance.now()-offset;introFrame(performance.now());
+     return{introActive,playing,balls:document.querySelectorAll('.fall').length,elapsed};
    });
-   if(result.phase.visual!=='🎶'||!result.phase.heading.includes('노래 간주')||result.phase.playing||result.phase.balls!==0)
-     throw Error('Balls must wait until FULL musical intro ends: '+JSON.stringify(result.phase));
+   if(!result.beforeBall.introActive||result.beforeBall.playing||result.beforeBall.balls!==0)
+     throw Error('Balls appeared BEFORE the prelude runway '+JSON.stringify(result.beforeBall));
+   result.duringBall=await page.evaluate(()=>{
+     const p=instrumentalPreludePlan(),offset=3*beatMs()+p.firstBallOffsetMs+Math.min(750,firstNoteMs()/2);
+     introStartPerf=performance.now()-offset;introFrame(performance.now());
+     return{introActive,playing,balls:document.querySelectorAll('.fall').length,elapsed,pulse:document.querySelector('#introPulse').innerText};
+   });
+   if(!result.duringBall.introActive||result.duringBall.playing||result.duringBall.balls<1||
+      result.duringBall.elapsed<=0||result.duringBall.pulse!=='🎶')
+     throw Error('First ball must descend WHILE instrumental intro plays '+JSON.stringify(result.duringBall));
+   result.overlay=await page.evaluate(()=>{
+     const el=document.querySelector('#introOverlay'),css=getComputedStyle(el),card=el.querySelector('.introCard');
+     return {compact:el.classList.contains('preludePlaying'),background:css.backgroundColor,blur:css.backdropFilter,
+       cardH:card.getBoundingClientRect().height,stageH:document.querySelector('#stage').getBoundingClientRect().height};
+   });
+   if(!result.overlay.compact||result.overlay.blur!=='none'||result.overlay.cardH>result.overlay.stageH/2)
+     throw Error('Musical intro overlay still obscures falling balls '+JSON.stringify(result.overlay));
    await page.evaluate(()=>{introStartPerf=performance.now()-(introDurationMs+15);introFrame(performance.now())});
-   await page.waitForTimeout(90);
-   result.handoff=await page.evaluate(()=>({introActive,playing,leadGain:!!leadInGain,mrScheduled:!!mrSource,mix:mixMode,elapsed,firstNote:firstNoteMs(),beat:beatMs(),sound}));
-   if(result.handoff.introActive||!result.handoff.playing||!result.handoff.leadGain||!result.handoff.mrScheduled||result.handoff.mix!=='both'||result.handoff.elapsed>=1000)throw Error('No real falling-note handoff '+JSON.stringify(result.handoff));
+   result.handoff=await page.evaluate(()=>({introActive,playing,mrScheduled:!!mrSource,mix:mixMode,elapsed,firstNote:firstNoteMs(),leadGain:!!leadInGain}));
+   if(result.handoff.introActive||!result.handoff.playing||!result.handoff.mrScheduled||
+      result.handoff.mix!=='both'||Math.abs(result.handoff.elapsed-result.handoff.firstNote)>70||
+      result.handoff.leadGain)
+     throw Error('MR must start on first ball downbeat with NO extra silent delay '+JSON.stringify(result.handoff));
    await page.locator('#resetBtn').click();
    result.reset=await page.evaluate(()=>({playing,introActive,leadGain:!!leadInGain}));
    if(result.reset.playing||result.reset.introActive||result.reset.leadGain)throw Error('Lead was not safely cancelled');
