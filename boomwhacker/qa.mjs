@@ -222,7 +222,17 @@ async function basicCase(name,width,height){
   await page.locator('#newInstrumentName').fill('차임');
   await page.locator('#addInstrumentBtn').click();
   const addedInstrument=await page.evaluate(()=>window.__boomVideoQA.display().instrumentLibrary.find(x=>x.name==='차임'));
-  check(!!addedInstrument?.id,`${name}: custom instrument was not added to library`);
+  if(!addedInstrument?.id){
+    const diag=await page.evaluate(()=>({
+      icon:document.querySelector('#newInstrumentIcon')?.value,
+      name:document.querySelector('#newInstrumentName')?.value,
+      note:document.querySelector('#displayDialogDesc')?.textContent,
+      mode:displayMode,library:instrumentLibrary.map(x=>({id:x.id,icon:x.icon,name:x.name})),
+      editorOpen:document.querySelector('#displayModal')?.classList.contains('open'),
+      addedButton:!!document.querySelector('#addInstrumentBtn')
+    }));
+    throw new Error(`${name}: custom instrument was not added to library ${JSON.stringify(diag)}`);
+  }
   check(await page.locator('#displayInputs select[data-instrument-index="0"] option[value="'+addedInstrument.id+'"]').count()===1,`${name}: custom instrument option was not rebuilt`);
   await page.locator('#displayInputs select[data-instrument-index="0"]').selectOption(addedInstrument.id);
   await page.locator('#displayApplyBtn').click();
