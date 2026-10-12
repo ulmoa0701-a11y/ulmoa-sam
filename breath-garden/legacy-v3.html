@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#edf9ef"><meta name="description" content="모아의 바람놀이터: 내 바람의 세기, 몇 초 동안 쭉 불기, 박자에 맞춰 후~ 불기. 리코더와 별개로 하는 호흡 놀이.">
+<title>모아의 바람놀이터 | 일단 해봄</title><link rel="stylesheet" href="style-v3.css?v=3">
+</head>
+<body>
+<div class="app">
+<header class="header">
+ <a href="../" class="site-link" aria-label="일단 해봄 홈페이지로 돌아가기">⌂ <span>일단 해봄 홈</span></a>
+ <div class="brand">🌬️ 모아의 바람놀이터</div>
+ <div class="header-right"><button id="voicePreview" class="icon-btn" type="button" aria-label="안내 음성 듣기">🔊</button><button id="muteBtn" class="icon-btn" type="button" aria-label="음성 켜기 또는 끄기">♫</button></div>
+</header>
+<main>
+<section id="homeScreen" class="home-screen">
+ <div class="intro">
+   <div class="welcome-art" aria-hidden="true">🪶 <span>🌈</span> 🌼</div>
+   <div class="intro-copy"><span class="eyebrow">호흡 · 바람 · 리듬 놀이</span><h1>후~ 불면<br><em>정원이 깨어나요!</em></h1><p>어떤 바람놀이를 해볼까?</p></div>
+ </div>
+ <div class="game-choice">
+  <button class="choice" id="chooseStrength" type="button"><span class="choice-art">🌬️🪶</span><span class="choice-text"><strong>바람의 힘</strong><small>파랑·초록·빨강!<br>살살, 적당히, 세게를 느껴요.</small></span><span class="start-word">시작 →</span></button>
+  <button class="choice" id="chooseLong" type="button"><span class="choice-art">🎈⏳</span><span class="choice-text"><strong>오래 후~</strong><small>2초부터 5초까지<br>숨을 부드럽게 이어봐요.</small></span><span class="start-word">시작 →</span></button>
+  <button class="choice" id="chooseBeat" type="button"><span class="choice-art">🎶🌻</span><span class="choice-text"><strong>박자 바람</strong><small>준비, 후~!<br>빛나는 박자에 맞춰 불어요.</small></span><span class="start-word">시작 →</span></button>
+ </div>
+ <p class="note" id="voiceAvailability">한국어 안내 음성은 기기에서 제공하는 음성을 사용해요.</p>
+</section>
+<section id="playScreen" class="play-screen" hidden>
+ <div class="play-top">
+  <button type="button" class="back-btn" id="backHome">← 다른 놀이</button>
+  <div class="play-title"><span id="modeEmoji">🪶</span><strong id="modeTitle">바람의 힘</strong></div>
+  <button type="button" class="reset-btn" id="restart">↻ 다시</button>
+ </div>
+ <div class="scene" id="scene" data-mode="strength" data-color="idle">
+  <div class="sky"><span class="cloud">☁️</span><span class="sun"></span></div>
+  <div class="scene-center">
+   <div id="strengthScene" class="scene-type">
+    <div class="scene-goal" id="sceneGoal">🪶 바람으로 깃털을 오른쪽으로!</div>
+    <div class="wind-line" id="windLine" aria-hidden="true">💨</div>
+    <div class="strength-stage feather-stage" id="featherStage" aria-label="바람으로 깃털을 오른쪽으로 보내기">
+      <div class="feather-route" aria-hidden="true"></div>
+      <div class="feather" id="feather" aria-hidden="true">🪶</div>
+      <div class="feather-goal" aria-hidden="true">⭐<small>여기까지!</small></div>
+    </div>
+    <div class="strength-stage flower-stage" id="flowerStage" hidden aria-label="바람을 불고 쉬면 꽃이 한 송이씩 피어나는 장면">
+      <div class="flower-pots" id="flowerPots" aria-hidden="true">
+        <div class="flower-pot"><span class="flower-head" id="flowerBloom0">🌱</span><span class="flower-base"></span></div>
+        <div class="flower-pot"><span class="flower-head" id="flowerBloom1">🌱</span><span class="flower-base"></span></div>
+        <div class="flower-pot"><span class="flower-head" id="flowerBloom2">🌱</span><span class="flower-base"></span></div>
+      </div>
+      <span class="flower-result" id="flowerResult">꽃이 피기를 기다려요!</span>
+    </div>
+    <div class="strength-stage pinwheel-stage" id="pinwheelStage" hidden aria-label="바람 세기에 따라 바람개비만 회전하는 장면">
+      <div class="pinwheel-assembly" aria-hidden="true">
+        <div class="pinwheel-stand"></div>
+        <div id="pinwheelWheel" class="pinwheel-wheel">
+          <span class="pinwheel-blade blade-a"></span><span class="pinwheel-blade blade-b"></span>
+          <span class="pinwheel-blade blade-c"></span><span class="pinwheel-blade blade-d"></span>
+          <span class="pinwheel-hub"></span>
+        </div>
+      </div>
+      <span class="motion-help">바람이 불면 빙글빙글!</span>
+    </div>
+    <div class="strength-stage candle-stage" id="candleStage" hidden aria-label="촛불은 그대로 있고 불꽃만 바람에 따라 움직이는 장면">
+      <div class="candle-illustration" aria-hidden="true">
+        <div class="candle-flame" id="candleFlame"><span class="flame-core"></span></div>
+        <div class="candle-wick"></div><div class="candle-body"></div><div class="candle-plate"></div>
+      </div>
+      <span class="motion-help">불은 끄지 않고 살랑살랑!</span>
+    </div>
+   </div>
+   <div id="longScene" class="scene-type" hidden>
+     <div class="balloon" id="balloon">🎈</div>
+     <div class="duration" id="duration">0.0 <small>초</small></div>
+     <div class="target-duration" id="targetDuration">2초 동안 부드럽게!</div>
+   </div>
+   <div id="beatScene" class="scene-type" hidden>
+    <div class="beat-orb" id="beatOrb"><span id="beatEmoji">🌱</span><strong id="beatCue">준비!</strong></div>
+    <div id="beatCount" class="beat-count">🌼 ⚪ ⚪ ⚪</div>
+   </div>
+  </div>
+  <div class="scene-ground"></div>
+ </div>
+ <div class="control-area">
+  <div class="hint-main" id="mainHint">숨을 살살 불어봐!</div>
+  <div class="level-status"><span class="status-icon" id="levelIcon">🌱</span><b id="levelText">준비!</b></div>
+  <div class="level-meter" aria-label="바람 소리 강도" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="levelMeter"><span id="meterFill"></span></div>
+  <div class="color-legend"><span class="blue">🔵 약해</span><span class="green">🟢 좋아!</span><span class="red">🔴 더 세게</span></div><p class="color-help" id="colorHelp">색은 잠깐 유지돼요. 편안하게 후~ 불어봐!</p>
+  <div class="mode-options" id="strengthOptions"><span class="option-title" id="strengthStep">🪶 깃털 불기</span><div class="stamp" id="strengthStamps">⚪ ⚪ ⚪</div></div>
+  <div class="mode-options" id="longOptions" hidden><span class="option-title">몇 초 동안 불까?</span><div class="segments" id="longDuration"><button type="button" data-seconds="2" class="selected">2초</button><button type="button" data-seconds="3">3초</button><button type="button" data-seconds="4">4초</button><button type="button" data-seconds="5">5초</button></div></div>
+  <div class="mode-options" id="beatOptions" hidden><span class="option-title">박자 속도</span><div class="segments" id="beatSpeed"><button type="button" data-beat="slow" class="selected">🐢 천천히</button><button type="button" data-beat="normal">🌼 보통</button></div></div>
+  <button id="micButton" class="main-btn" type="button">🎤 마이크 켜기</button>
+  <p class="live-note" id="statusNote" role="status" aria-live="polite">색을 따라 후~ 불어봐!</p>
+ </div>
+</section>
+<section id="successScreen" class="success-screen" hidden>
+ <div class="win-art">🌈 🌼 🦋</div><h2 id="winTitle">참 잘했어!</h2><p id="winDescription">모아의 바람정원에 꽃이 피었어!</p>
+ <button type="button" class="main-btn" id="playAgain">↻ 또 해볼래!</button><button type="button" class="secondary-btn" id="chooseAgain">🌱 다른 바람놀이</button>
+</section>
+<details class="teacher-panel" id="teacherPanel">
+ <summary>⚙️ 선생님 설정 · 기기 안내</summary>
+ <div class="teacher-body">
+  <p>마이크의 비주기적 소리 신호로 화면을 반응시키는 놀이예요. <b>실제 바람의 세기·방향, 호흡 기능을 의학적으로 측정하거나 평가하지 않습니다.</b> 말소리·주변 소음이 잘못 분류될 수 있으니 처음에는 가벼운 종이띠 등으로 실제 바람의 움직임을 함께 확인해 주세요.</p>
+  <div class="teacher-setting"><label for="sensitivity">강도 표시 감도 <b id="sensitivityName">보통</b></label><input type="range" min="1" max="5" value="3" step="1" id="sensitivity"></div><div class="teacher-actions"><button type="button" id="recalibrate">↻ 바람 세기 다시 맞추기</button></div><p class="voice-detail" id="inputDiagnostic">현재 상대적인 소리 강도 · 0%</p>
+  <div class="teacher-setting"><label for="voiceSelect">음성 선택</label><select id="voiceSelect"><option value="auto">한국어 자동 선택</option></select></div>
+  <div id="voiceDetail" class="voice-detail">모아 구조대와 같은 Google 한국어 목소리만 사용해요. 없으면 일반 성인 목소리로 변경하지 않아요.</div>
+  <div class="teacher-actions"><button type="button" id="previewBtn">🔊 안내 목소리 확인</button><button type="button" id="demoBtn">🧪 화면 반응 체험</button></div>
+  <div id="micDetail" class="voice-detail">마이크 미연결. 소리 녹음·업로드·저장 없음.</div><p>표시되는 강도는 마이크가 감지한 소리의 상대값이지 실제 공기압이 아닙니다. 마이크 자동음량조절 때문에 빨강 구별이 어려울 수 있어요. 이때 감도 설정을 높이거나 세기 기준을 다시 맞춰보세요.</p>
+  <p>지속해서 내쉬기는 편안한 범위에서 연습하고 어지러움·불편감이 생기면 중단하세요. 숨을 억지로 참거나 세게 내쉴 필요가 없어요. 소음 측정은 기종과 거리의 영향을 받아요.</p>
+ </div>
+</details>
+</main>
+<footer>일단 해봄 · 울모아쌤 · <a href="../music-garden/">🎵 모아의 음악정원</a> · <a href="../thinking-garden/recorder/">리코더 놀이터</a></footer>
+</div>
+<script src="app-v3.js?v=3"></script>
+</body></html>
