@@ -1055,6 +1055,7 @@ function stopIntro(keepFirstMelody=false){if(!keepFirstMelody)stopFirstMelody();
   introActive=false;
   cancelAnimationFrame(introRaf);introRaf=0;
   clearTimeout(introHideTimer);introHideTimer=0;
+  stopGuideSpeech();
   if(introGain&&audioCtx){try{introGain.gain.cancelScheduledValues(audioCtx.currentTime);introGain.gain.setValueAtTime(0,audioCtx.currentTime)}catch(e){}}
   introGain=null;
   $('#introOverlay').classList.remove('show','starting','finalCount','launchCue','preludePlaying');
@@ -1070,6 +1071,55 @@ function scheduleInterludeAccompaniment(ac,dest,start,beats,intervalMs,meter){
   voiceOsc(ac,dest,chord.freqs[0],'triangle',strong?.15:.085,when,.012,strong?.55:.37,strong?.63:.45);
   for(const hz of chord.freqs.slice(1))
    voiceOsc(ac,dest,hz,'sine',strong?.065:.037,when,.011,strong?.44:.3,strong?.52:.36);
+ }
+}
+// All three choices share exactly one song clock and the same falling-note
+// runway. Only the audible guidance changes; no extra silent waiting.
+function isGuidedStartMode(){return introMode==='interlude'||introMode==='music'||introMode==='voice'}
+function guideNumber(beatIndex){return ['하나','둘','셋','넷'][beatIndex%Math.max(1,introMeter)]||'하나'}
+function introHelpText(){
+ if(introMode==='interlude')return '기악 전주에 맞춰 공이 내려와요. 숫자 카운트다운 없이 바로 음악이 시작돼요.';
+ if(introMode==='music')return '첫 박은 쿵, 다음 박은 짝. 같은 박자로 공이 내려와요.';
+ if(introMode==='voice')return '하나·둘을 소리로 세어 줘요. 한국어 음성은 기기에 따라 다르고, 음성이 없으면 박자 소리로 안내해요. 영상에는 박자 소리만 저장돼요.';
+ if(introMode==='instant')return '시작 안내 없이 곧바로 공이 내려와요.';
+ return '기존 3초 숫자 카운트다운';
+}
+function updateIntroHelp(){const node=$('#introHelp');if(node)node.textContent=introHelpText()}
+function stopGuideSpeech(){
+ if(typeof speechSynthesis!=='undefined')try{speechSynthesis.cancel()}catch(e){}
+ guideLastVoiceBeat=-1;
+}
+function speakGuideBeat(i){
+ if(introMode!=='voice'||!sound||guideLastVoiceBeat===i)return;
+ guideLastVoiceBeat=i;
+ if(typeof window.speechSynthesis==='undefined'||typeof window.SpeechSynthesisUtterance==='undefined'){
+  guideSpeechAvailable=false;return;
+ }
+ try{
+  // Native, free Korean TTS. Keep the audible metronome independent,
+  // because speech engines cannot promise millisecond-exact onset.
+  const synth=window.speechSynthesis;
+  synth.cancel();
+  const utterance=new SpeechSynthesisUtterance(guideNumber(i));
+  utterance.lang='ko-KR';utterance.rate=Math.min(1.65,Math.max(1,125/Math.max(50,bpm)));
+  utterance.pitch=1.12;utterance.volume=.95;
+  const voices=synth.getVoices?.()||[];
+  const kr=voices.filter(v=>/^ko([-_]|$)/i.test(v.lang||''));
+  if(kr.length){
+   utterance.voice=kr.find(v=>/female|여성|yuna|sora|seoyeon|sunhi/i.test(v.name))||kr[0];
+  }
+  utterance.onerror=()=>{guideSpeechAvailable=false;const hint=$('#introHelp');if(hint)hint.textContent='이 기기에서는 말소리가 재생되지 않아 박자 소리로 안내하고 있어요.'};
+  synth.speak(utterance);
+  guideSpeechAvailable=true;
+ }catch(e){guideSpeechAvailable=false}
+}
+function scheduleRhythmGuide(ac,dest,start,beats,intervalMs,meter){
+ for(let i=0;i<beats;i++){
+  const time=start+i*intervalMs/1000,strong=i%meter===0;
+  mrPulse(ac,dest,time,strong);
+  // Crisp two-timbre cues with an unmistakable first beat.
+  voiceOsc(ac,dest,strong?392:659.25,'sine',strong?.32:.22,time,.006,.19,.24);
+  if(strong)voiceOsc(ac,dest,196,'triangle',.17,time,.009,.22,.28);
  }
 }
 // A real instrumental introduction, NOT a replay of the opening tune.
@@ -1139,32 +1189,26 @@ function introSound(beats,intervalMs){
  if(!sound)return;
  audio();if(!audioCtx)return;
  const ac=audioCtx,master=ac.createGain(),start=ac.currentTime+.035;
- // Tie falling-ball timing to the same AudioContext start time as music.
  introAudioStartPerf=performance.now()+Math.max(0,start-ac.currentTime)*1000;
  introAudioStartAt=start;
- master.gain.setValueAtTime(introMode==='interlude'?.85:.54,start);
+ master.gain.setValueAtTime(isGuidedStartMode()?.85:.54,start);
  master.connect(ac.destination);introGain=master;
- if(introMode==='interlude'){
-  const p=instrumentalPreludePlan(),preludeStart=start+INTERLUDE_COUNTDOWN_BEATS*intervalMs/1000;
-  const songStart=preludeStart+p.durationMs/1000;
+ if(isGuidedStartMode()){
+  const p=instrumentalPreludePlan(),songStart=start+p.durationMs/1000;
   audioRenderSongStartAt=songStart;
-  scheduleInterludeCountdown(ac,master,start,intervalMs);
-  scheduleInterludeMusic(ac,master,preludeStart,intervalMs,p.meter);
+  if(introMode==='interlude')scheduleInterludeMusic(ac,master,start,intervalMs,p.meter);
+  else scheduleRhythmGuide(ac,master,start,p.beats,intervalMs,p.meter);
   master.gain.setValueAtTime(.85,Math.max(start,songStart-.06));
   master.gain.linearRampToValueAtTime(.0001,songStart);
   if(wantsMr()){
    const scheduled=scheduleMrTrack(ac,ac.destination,songStart,0,mrVolume);
    if(scheduled){mrSource=scheduled.src;mrGain=scheduled.g;introScheduledMr=true}
   }
-  // Schedule first sung note with the SAME AudioContext timestamp as MR.
   const firstIndex=events.findIndex(e=>e.active),first=events[firstIndex];
   if(first&&wantsMelody()&&melodyMode!=='none'){
    const gain=ac.createGain();gain.connect(ac.destination);
    introFirstMelodyScheduled=scheduleMelodyTone(ac,gain,first.note,songStart,melodyMode,melodyVolume,first.dur);
-   if(introFirstMelodyScheduled){
-    introFirstMelodyGain=gain;songAudioStartAt=songStart;
-    nextMelodyNoteIndex=firstIndex+1;
-   }
+   if(introFirstMelodyScheduled){introFirstMelodyGain=gain;songAudioStartAt=songStart;nextMelodyNoteIndex=firstIndex+1}
   }
   return;
  }
@@ -1175,36 +1219,32 @@ function introSound(beats,intervalMs){
  }
 }
 function introVisual(index){
-  if(index===introLastBeat)return;
-  introLastBeat=index;
-  if(introMode==='interlude'){
-    const counting=index<INTERLUDE_COUNTDOWN_BEATS,phraseIndex=index-INTERLUDE_COUNTDOWN_BEATS;
-    $('#introOverlay').classList.remove('launchCue','finalCount');
-    $('#introOverlay').classList.toggle('preludePlaying',!counting);
-    $('#introHeading').textContent=counting?'3·2·1 준비':'🎶 기악 전주 · 첫 공을 기다려요';
-    const pulse=$('#introPulse');pulse.classList.remove('syllablePair');
-    pulse.textContent=counting?String(INTERLUDE_COUNTDOWN_BEATS-index):'🎶';
-    const dotCount=counting?INTERLUDE_COUNTDOWN_BEATS:Math.max(1,Math.ceil(introPreviewBeats/introMeter));
-    const active=counting?index:Math.min(dotCount-1,Math.floor(Math.max(0,phraseIndex)/introMeter));
-    $('#introDots').innerHTML=Array.from({length:dotCount},(_,i)=>'<i class="'+(i===active?'active':i<active?'done':'')+'"></i>').join('');
-    return;
-  }
-  const countMode=introMode==='count';
-  const syllable=!countMode&&index>=introBeats-2;
-  const beatNumber=index%introMeter+1;
-  // Keep a single card and give "시" and "작" one full beat each.
-  $('#introOverlay').classList.toggle('launchCue',syllable);
-  $('#introHeading').textContent=countMode?'함께 준비해요':introMode==='interlude'?'노래 간주를 듣고 들어가요':'함께 박자 맞춰요';
-  const pulse=$('#introPulse');
-  pulse.classList.toggle('syllablePair',syllable);
-  if(syllable){
-    const onSi=index===introBeats-2;
-    // The text always reads "시작": only the active syllable bounces on its beat.
-    pulse.innerHTML='<span class="introSyllable'+(onSi?' active':'')+'">시</span><span class="introSyllable'+(!onSi?' active':'')+'">작</span>';
-  }else pulse.textContent=countMode?String(Math.max(1,3-index)):String(beatNumber);
-  const length=countMode?3:syllable?2:introMeter;
-  const dotIndex=syllable?index-(introBeats-2):index%length;
-  $('#introDots').innerHTML=Array.from({length},(_,i)=>'<i class="'+(i===dotIndex?'active':i<dotIndex?'done':'')+'"></i>').join('');
+ if(index===introLastBeat)return;
+ introLastBeat=index;
+ if(isGuidedStartMode()){
+  const mode=introMode,meter=Math.max(1,introMeter);
+  $('#introOverlay').classList.remove('launchCue','finalCount');
+  $('#introOverlay').classList.add('preludePlaying');
+  $('#introHeading').textContent=mode==='interlude'?'🎶 음악 전주 · 공을 보고 준비해요':
+    mode==='music'?'🥁 박자를 듣고 공을 봐요':'🗣️ 하나 둘 · 박자에 맞춰 준비해요';
+  const pulse=$('#introPulse');pulse.classList.remove('syllablePair');
+  pulse.textContent=mode==='interlude'?'🎶':mode==='music'?(index%meter===0?'쿵':'짝'):guideNumber(index);
+  const count=Math.max(1,Math.ceil(introPreviewBeats/meter)),active=Math.min(count-1,Math.floor(index/meter));
+  $('#introDots').innerHTML=Array.from({length:count},(_,i)=>'<i class="'+(i===active?'active':i<active?'done':'')+'"></i>').join('');
+  if(mode==='voice')speakGuideBeat(index);
+  return;
+ }
+ const countMode=introMode==='count',syllable=!countMode&&index>=introBeats-2,beatNumber=index%introMeter+1;
+ $('#introOverlay').classList.toggle('launchCue',syllable);
+ $('#introOverlay').classList.remove('preludePlaying');
+ $('#introHeading').textContent=countMode?'함께 준비해요':'함께 박자 맞춰요';
+ const pulse=$('#introPulse');pulse.classList.toggle('syllablePair',syllable);
+ if(syllable){
+  const onSi=index===introBeats-2;
+  pulse.innerHTML='<span class="introSyllable'+(onSi?' active':'')+'">시</span><span class="introSyllable'+(!onSi?' active':'')+'">작</span>';
+ }else pulse.textContent=countMode?String(Math.max(1,3-index)):String(beatNumber);
+ const length=countMode?3:syllable?2:introMeter,dotIndex=syllable?index-(introBeats-2):index%length;
+ $('#introDots').innerHTML=Array.from({length},(_,i)=>'<i class="'+(i===dotIndex?'active':i<dotIndex?'done':'')+'"></i>').join('');
 }
 function beginPlayback(fromInstrumentalPrelude=false){
   // Exactly at the end of "작", the score's first tile may play on the next
@@ -1236,29 +1276,29 @@ function introFrame(now){
   introVisual(Math.min(introBeats-1,Math.floor(progress/step)));
   // Balls enter during the last FALL_TRAVEL_MS of the prelude.
   // First ball reaches the hit line exactly as the MR/song starts.
-  if(introMode==='interlude'&&progress>=introCountBeats*step){
+  if(isGuidedStartMode()&&progress>=introCountBeats*step){
     const preludeElapsed=progress-introCountBeats*step;
     elapsed=firstNoteMs()-(introPreviewBeats*step-preludeElapsed);
   }else elapsed=-Math.max(0,introDurationMs-progress);
   draw();
   if(progress>=introDurationMs){
     const scheduled=introScheduledMr;
-    stopIntro(introMode==='interlude');
-    elapsed=introMode==='interlude'?firstNoteMs():(playView==='score'?scoreStartMs()-.5:0);
+    stopIntro(isGuidedStartMode());
+    elapsed=isGuidedStartMode()?firstNoteMs():(playView==='score'?scoreStartMs()-.5:0);
     introScheduledMr=scheduled;
-    beginPlayback(introMode==='interlude');
+    beginPlayback(isGuidedStartMode());
     draw();
   }else introRaf=requestAnimationFrame(introFrame);
 }
 function startIntro(){
   stopIntro();stopSongMelody();stopMr();audioRenderSongStartAt=0;introAudioStartAt=0;stopLeadIn();introScheduledMr=false;introAudioStartPerf=0;
-  introActive=true;introLastBeat='';
+  introActive=true;introLastBeat='';guideLastVoiceBeat=-1;guideSpeechAvailable=true;
   introMeter=[2,3,4].includes(Number(currentSong.timeN))?Number(currentSong.timeN):4;
   const step=introMode==='count'?1000:beatMs();
   if(introMode==='count'){
     introBeats=3;introCountBeats=3;introPreviewBeats=0;
-  }else if(introMode==='interlude'){
-    introCountBeats=INTERLUDE_COUNTDOWN_BEATS;
+  }else if(isGuidedStartMode()){
+    introCountBeats=0;
     introPreviewBeats=instrumentalPreludePlan().beats;
     introBeats=introCountBeats+introPreviewBeats;
   }else{
@@ -1268,8 +1308,8 @@ function startIntro(){
   introDurationMs=introBeats*step;
   elapsed=-introDurationMs;
   $('#introOverlay').classList.add('show');
-  introVisual(0);draw();
   introSound(introBeats,step);
+  introVisual(0);draw();
   introStartPerf=introAudioStartPerf||performance.now();
   $('#playBtn').textContent='Ⅱ';$('#startBtn').textContent='취소';
   introRaf=requestAnimationFrame(introFrame);
