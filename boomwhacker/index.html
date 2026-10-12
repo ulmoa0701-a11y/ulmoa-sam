@@ -913,7 +913,9 @@ function scheduleMelodyTone(ac,dest,n,when,mode=melodyMode,volume=melodyVolume,n
  const f=FREQ[n],vol=Math.max(0,Math.min(1,Number(volume)||0));
  if(!f||mode==='none'||vol<=0)return false;
  const d=melodySoundDuration(noteDurationMs,mode),master=ac.createGain();
- master.gain.setValueAtTime(vol,when);master.connect(dest);
+ // The sustained note has more integrated loudness than the old .38s blip.
+ // Balance the melody below the MR without making the held note inaudible.
+ master.gain.setValueAtTime(mode==='boom'?vol*.78:vol,when);master.connect(dest);
  if(mode==='piano'){
   voiceOscHold(ac,master,f,'triangle',.19,when,.012,d);
   voiceOsc(ac,master,f,'sine',.075,when,.008,Math.max(.12,d*.70),Math.max(.14,d*.89),2);
