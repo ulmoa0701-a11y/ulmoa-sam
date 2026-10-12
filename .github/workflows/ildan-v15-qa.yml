@@ -54,7 +54,19 @@ jobs:
             if ! grep -q 'data-qa-result="PASS"' /tmp/ildan-v15-result.html; then
               echo "FAIL v15 browser test for $SIZE"
               grep -o 'data-qa-result="[^"]*"' /tmp/ildan-v15-result.html || true
-              tail -n 30 /tmp/ildan-v15-chrome.log || true
+              python3 - <<'PY'
+          from html.parser import HTMLParser
+          class TextDump(HTMLParser):
+              active=False
+              def handle_starttag(self,tag,attrs):
+                  if dict(attrs).get('id')=='log': self.active=True
+              def handle_endtag(self,tag):
+                  if self.active and tag=='div': self.active=False
+              def handle_data(self,data):
+                  if self.active: print('QA DETAIL:',data[-4500:])
+          TextDump().feed(open('/tmp/ildan-v15-result.html').read())
+          PY
+              tail -n 10 /tmp/ildan-v15-chrome.log || true
               exit 1
             fi
             echo "PASS v15 Chrome $SIZE"
