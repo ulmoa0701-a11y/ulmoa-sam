@@ -686,3 +686,25 @@ main:has(#parentCalendar:not([hidden])){padding-top:14px}
  .student-journal[data-journal-mode="quick"] .student-datetime-grid input{min-height:38px}
  .student-journal[data-journal-mode="quick"] #textPanel textarea[name="note"]{min-height:92px;height:104px}
 }
+
+/* v15 clinical notes and full disclosure */
+.share-review-dialog{border:1px solid #a7b6c9;border-radius:16px;background:#fff;color:#233b42;max-width:min(780px,94vw);width:100%;max-height:86vh;overflow:auto;padding:20px;box-shadow:0 16px 65px #152e4055}
+.share-review-dialog::backdrop{background:#0b1b32ae}
+.share-review-body{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;line-height:1.62;max-height:40vh;overflow:auto;padding:14px;background:#f6f8fd;border:1px solid #d8e2ed;border-radius:10px}
+.share-review-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.share-review-help{font-size:14px;color:#415b68}
+.share-review-sketch canvas{max-width:100%;height:auto}
+.clinician-form{gap:13px}.clinician-quick-fields{display:grid;gap:12px}
+.clinician-extra{border:1px solid #d4e1e4;border-radius:11px;background:#fbfcff;overflow:hidden}
+.clinician-extra>summary{cursor:pointer;font-weight:720;padding:13px 15px;min-height:48px}
+.clinician-extra>summary small{font-weight:450;font-size:12px;color:#495a69}
+.clinician-extra-inner{padding:0 14px 14px;display:grid;gap:11px}
+.clinician-extra-inner label{display:grid;gap:6px}
+.clinician-extra-inner textarea{min-height:66px}
+.clinician-extra-inner select{min-height:45px}
+.clinician-save-row p,.clinical-neutral{font-size:13px;color:#435e6a;line-height:1.6}
+.parent-source-field{display:grid;gap:5px}.parent-source-field select{min-height:44px}
+.parent-fact-note{font-size:13px;color:#425b68}
+.inline-share small{display:block;color:#415d68}
+@media (min-width:900px){.clinician-quick-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.share-review-dialog{padding:15px}.share-review-actions>button{flex:1 1 100%}}

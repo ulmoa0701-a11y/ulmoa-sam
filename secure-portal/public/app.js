@@ -99,7 +99,7 @@ function bindWorkspace(){
  }));
  activateWorkspace(activeView);
 }
-const NOTE_LABELS={note:'자유 기록',mood:'오늘의 상태',energy:'컨디션',thought:'떠오른 생각',body:'몸의 느낌',action:'해본 일',sketch:'그림',observation:'관찰한 사실',response:'주변 사람의 말·행동',impact:'일상에서 확인된 변화',message:'전달사항',event:'있었던 일',next:'다음 시도',date:'기록 날짜',time:'기록 시간',context:'당시 상황',origin:'정보 출처',title:'제목',experience:'내가 겪은 움직임·소리·반복행동',experienceImpact:'그때 생활에 있었던 변화',place:'장소',signals:'관찰한 모습(선택)',after:'이후에 이어진 일'};
+const NOTE_LABELS={childWords:'아이가 실제로 한 말',studentReport:'학생이 직접 말한 내용',parentReport:'보호자가 전한 내용',functionalImpact:'일상에서 확인된 영향',familyResponse:'가족·주변의 반응',workingHypothesis:'잠정적 이해·가설',alternatives:'다른 설명 가능성',uncertainty:'아직 확인되지 않은 점',burdenReview:'기록 사용 부담 검토',erpReview:'ERP 회기 검토 여부',erpTarget:'ERP 치료 목표·계획 (치료사 전용)',erpSafety:'ERP 경과·안전 검토',cbitReview:'CBIT 회기 검토 여부',cbitTarget:'CBIT 치료 목표·계획 (치료사 전용)',cbitContext:'틱 관련 맥락·기능 영향',note:'자유 기록',mood:'오늘의 상태',energy:'컨디션',thought:'떠오른 생각',body:'몸의 느낌',action:'해본 일',sketch:'그림',observation:'관찰한 사실',response:'주변 사람의 말·행동',impact:'일상에서 확인된 변화',message:'전달사항',event:'있었던 일',next:'다음 시도',date:'기록 날짜',time:'기록 시간',context:'당시 상황',origin:'정보 출처',title:'제목',experience:'내가 겪은 움직임·소리·반복행동',experienceImpact:'그때 생활에 있었던 변화',place:'장소',signals:'관찰한 모습(선택)',after:'이후에 이어진 일'};
 function todayLocal(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
 function nowLocalTime(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${p(d.getHours())}:${p(d.getMinutes())}`;}
 /* Parent calendar v8: event date, not the entry creation timestamp. */
@@ -160,13 +160,15 @@ function dataForm(role){
  <div class="parent-when"><label class="parent-date-field">일이 있었던 날짜 <input name="date" type="date" value="${todayLocal()}" max="${todayLocal()}" required></label><label class="parent-time-field">시간 <small>(선택)</small><input name="time" type="time"></label></div>
  <p class="parent-date-hint">정확한 시간이 기억나지 않으면 비워 두세요. 기록을 작성한 시각은 자동으로 남아요.</p>
  <label class="parent-location">장소 <small>(선택)</small><input name="place" maxlength="100" placeholder="기억나는 장소만 적어 주세요."></label>
- <label class="parent-main-label">어떤 일을 보거나 들으셨나요? <small>필수 · 360자 이내</small><textarea name="observation" maxlength="360" rows="3" required placeholder="보거나 들은 내용을 기억나는 그대로 적어 주세요."></textarea></label>
+ <label class="parent-main-label">어떤 일을 보거나 들으셨나요? <small>필수 · 360자 이내</small><textarea name="observation" maxlength="360" rows="3" required placeholder="기억나는 사실만 간단히. 원인이나 진단을 추측하지 않아도 됩니다."></textarea></label>
+ <label class="parent-source-field">이 내용은 어떻게 알게 되었나요? <small>선택 · 정확한 출처가 아니면 비워 두세요.</small><select name="origin"><option value="">출처를 선택하지 않음</option><option value="직접 관찰">직접 보거나 들었어요</option><option value="아이가 말함">아이에게 들었어요</option><option value="가족에게 들음">다른 가족에게 들었어요</option><option value="그 밖의 사람에게 들음">그 밖의 사람에게 들었어요</option></select></label>
+ <p class="parent-fact-note">아이의 마음이나 의도를 단정하지 않아도 됩니다. 일부러 행동을 관찰하거나 횟수를 셀 필요도 없어요.</p>
  <details class="optional-fields parent-more"><summary>당시 상황과 앞뒤 내용 더 남기기 <small>선택</small></summary><div class="optional-wrap">
  <label>그전에 또는 그때 어떤 상황이 있었나요?<small>하고 있던 활동, 앞서 일어난 일, 주변 환경, 사람들과의 대화·요청 등 기억나는 사실이면 됩니다.</small><textarea name="context" maxlength="450" rows="2" placeholder="특별한 일이 없거나 기억나지 않으면 비워 두세요."></textarea></label>
  <label>그때 주변 사람이 한 말이나 행동이 있었나요? <small>선택</small><textarea name="response" maxlength="450" rows="2" placeholder="직접 보거나 들은 말과 행동만 적어 주세요."></textarea></label>
  <label>그 뒤에 어떤 일이 이어졌나요? <small>선택</small><textarea name="after" maxlength="450" rows="2" placeholder="이후에 보거나 들은 일이 있다면 적어 주세요."></textarea></label>
  <label>그 뒤 일상에서 확인된 변화가 있나요? <small>선택</small><textarea name="impact" maxlength="450" rows="2" placeholder="없거나 확인하지 못했다면 비워 두어도 됩니다."></textarea></label>
- <label>이 내용은 어떻게 알게 되었나요? <small>선택</small><select name="origin"><option value="">선택하지 않음</option><option value="직접 관찰">직접 보거나 들음</option><option value="아이가 말함">아이에게 들음</option><option value="가족에게 들음">다른 가족에게 들음</option></select></label>
+ <label>아이의 말을 그대로 기억하고 계신가요? <small>선택 · 직접 들은 표현만</small><textarea name="childWords" maxlength="450" rows="2" placeholder="예: \"지금은 쉬고 싶어.\" 정확히 기억나지 않으면 비워 두세요."></textarea></label>
  <label>치료사에게 별도로 전할 말 <small>선택 · 160자 이내</small><textarea name="message" maxlength="160" rows="2" placeholder="전할 내용이 없다면 비워 두세요."></textarea></label>
  </div></details>
  <details class="parent-type-optional"><summary>관찰 내용을 표시해 두기 <small>선택 · 생략 가능</small></summary><fieldset class="observed-type"><legend>눈에 띈 내용 <small>여러 개 선택 가능</small></legend>
@@ -175,14 +177,14 @@ function dataForm(role){
  <details class="parent-guide"><summary>관찰 메모 작성 안내 <span>필요할 때만 열기</span></summary><div class="parent-guide-body">
  <p><b>기억나는 사실만 기록하면 됩니다.</b> 직접 본 일인지, 아이나 다른 사람에게 들은 이야기인지를 구분하면 치료사가 참고하기 좋아요.</p>
  <p>‘그전·당시 상황’은 원인을 찾는 질문이 아니에요. 하던 일, 앞서 있었던 사건, 주변의 소리·환경, 누군가의 말이나 행동 등 여러 상황을 포함할 수 있어요.</p>
- <p>그 일이 어떤 행동의 원인이라고 단정할 필요는 없고, 기억나지 않거나 확인하지 못한 내용은 비워 두어도 됩니다.</p>
+ <p>그 일이 어떤 행동의 원인이라고 단정할 필요는 없고, 기억나지 않거나 확인하지 못한 내용은 비워 두어도 됩니다. 아이가 했던 말과 보호자가 추측한 생각은 서로 다릅니다.</p>
  <p class="parent-guide-tail">특정 행동을 일부러 찾아보거나 횟수를 계속 셀 필요는 없어요. 기록이 없는 날은 아무 일이 없었다는 뜻이 아니에요.</p>
  </div></details>
  <div class="privacy-panel parent-privacy"><label class="checkbox"><input type="checkbox" name="share"><span>담당 치료사에게 전달하기<small>선택하지 않으면 내 기록에만 남아요.</small></span></label><div id="sharePicker" class="share-picker" hidden>
  <p>관찰 내용을 공유하면 날짜·시간·장소·선택한 표시도 함께 전달돼요. 아래 추가 항목은 직접 고른 것만 보냅니다.</p>
- ${['observation','context','response','after','impact','origin','message'].map(k=>`<label><input type="checkbox" name="shareField" value="${k}" ${k==='observation'?'checked':''}><span>${NOTE_LABELS[k]}</span></label>`).join('')}
+ ${['observation','origin','context','childWords','response','after','impact','message'].map(k=>`<label><input type="checkbox" name="shareField" value="${k}" ${k==='observation'?'checked':''}><span>${NOTE_LABELS[k]}</span></label>`).join('')}
  </div></div>
- <button class="button entry-save" id="saveEntry">내 관찰 메모 저장</button><p class="parent-nudge">보호자는 경험한 일을 남기면 됩니다. 여러 기록의 의미와 치료 방향은 담당 치료사가 검토해요. 실시간 상담창이 아닙니다.</p></form>`;
+ <button class="button entry-save" id="saveEntry">내 관찰 메모 저장</button><p class="parent-nudge">보호자는 관찰하거나 전해 들은 사실만 남기면 됩니다. 기록하지 않는 날도 괜찮습니다. 진단이나 원인 판단은 하지 않아도 됩니다. 실시간 상담·응급 연락창이 아닙니다.</p></form>`;
  return `<form class="form entry-v5 student-journal" id="entryForm" data-journal-mode="quick">
  <div class="student-mode-header"><div class="student-mode-title">어떤 방식으로 남길까?</div><div class="journal-mode-switch" role="group" aria-label="기록 상세 정도 선택"><button class="journal-mode-btn active" type="button" data-journal-mode="quick" aria-pressed="true"><strong>⚡ 간편 기록</strong><small>한두 줄이면 끝</small></button><button class="journal-mode-btn" type="button" data-journal-mode="detail" aria-pressed="false"><strong>▤ 자세히 기록</strong><small>필요한 만큼 더 쓰기</small></button></div><p class="student-mode-hint" id="journalModeHint" aria-live="polite">한 줄만 남겨도 돼. 나머지는 선택이야.</p></div>
  <section class="student-info-card" aria-label="일기 날짜와 시간">
@@ -207,10 +209,10 @@ function dataForm(role){
  <div class="privacy-panel student-share"><label class="checkbox"><input type="checkbox" name="share"><span>담당 치료사에게 기록 공유하기<small>기본 비공개 · 공유 내용은 직접 고를 수 있어.</small></span></label>
  <div id="sharePicker" class="share-picker" hidden><div class="student-share-bar"><strong>보낼 항목 선택</strong><div class="student-share-actions"><button type="button" class="button-ghost" id="studentSelectAll">전체 선택</button><button type="button" class="button-ghost" id="studentClearAll">선택 해제</button></div></div>
  ${['title','date','time','place','note','sketch','mood','energy','thought','body','action','experience','experienceImpact'].map(k=>`<label class="student-share-field"><input type="checkbox" name="shareField" value="${k}"><span>${NOTE_LABELS[k]}</span></label>`).join('')}<p id="studentShareCount" aria-live="polite">보낼 항목을 선택해 줘. 작성하지 않은 항목은 선택되지 않아.</p><p>선택하지 않은 내용은 치료사에게 보내지 않아. 전송 전에 확인할 수 있어.</p></div></div>
- <button class="button entry-save" id="saveEntry">🔒 내 기록 저장</button><p class="student-save-note">매일 쓰지 않아도 괜찮아. 일기를 다시 보고 싶으면 내 기록에서 확인할 수 있어.</p>
+ <button class="button entry-save" id="saveEntry">🔒 내 기록 저장</button><p class="student-save-note">매일 쓰지 않아도 괜찮아. 기록을 정확하게 쓰려 애쓸 필요도 없어. 실시간 상담·응급 연락창이 아니야. 체험판의 작성 중 내용은 이 브라우저 세션에만 임시 저장돼.</p>
  </form>`;
 }function gatherEntry(f,role){
- const fields=role==='parent'?['date','time','place','observation','context','origin','response','after','impact','message']:['date','time','place','title','note','energy','thought','body','action','experience','experienceImpact'];
+ const fields=role==='parent'?['date','time','place','observation','origin','context','childWords','response','after','impact','message']:['date','time','place','title','note','energy','thought','body','action','experience','experienceImpact'];
  const entry={};fields.forEach(k=>{const value=formValue(f,k);if(value)entry[k]=value});
  if(role==='parent'){
   const kinds=[...f.querySelectorAll('input[name="signalChoice"]:checked')].map(x=>x.value);
@@ -235,7 +237,22 @@ function bindSketch(){
  for(const ev of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(ev,()=>{sketchActive=false});
  $('undoStroke').onclick=()=>{sketchStrokes.pop();draw()};$('clearSketch').onclick=()=>{sketchStrokes=[];draw()};draw();
 }
-function sharePreview(fields,entry){return fields.map(k=>{const v=String(entry[k]||'');const line=k==='sketch'?'[그림 메모]':v.length>90?v.slice(0,90)+'…':v;return '• '+(NOTE_LABELS[k]||k)+': '+line}).join('\n')}
+function sharePreview(fields,entry){return fields.map(k=>{const v=String(entry[k]||'');return '• '+(NOTE_LABELS[k]||k)+': '+(k==='sketch'?'[아래 그림 전체 미리보기]':v)}).join('\n\n')}
+function confirmSharedEntry(fields,entry){
+ return new Promise(resolve=>{
+  let d=document.getElementById('shareReviewDialog');
+  if(!d){d=document.createElement('dialog');d.id='shareReviewDialog';d.className='share-review-dialog';d.innerHTML='<h2>담당 치료사에게 공유할 내용</h2><p class="share-review-help">아래 항목만 공유돼. 선택하지 않은 내용은 보내지 않아. 실제 체험판에서는 서버로 전송되지 않아.</p><pre class="share-review-body"></pre><div class="share-review-sketch"></div><p class="share-review-help">보낸 뒤에는 공유를 취소할 수 있지만 이미 별도로 복사된 자료까지 되돌릴 수는 없어.</p><div class="share-review-actions"><button type="button" data-cancel class="button-ghost">돌아가기</button><button type="button" data-approve class="button">이 내용 공유하기</button></div>';document.body.append(d);}
+  d.querySelector('.share-review-body').textContent=sharePreview(fields,entry);
+  const drawing=d.querySelector('.share-review-sketch');
+  drawing.innerHTML=fields.includes('sketch')&&entry.sketch?'<div class="sketch-record" data-sketch="'+sanitize(entry.sketch)+'"><div class="sketch-mini-label">공유할 그림 전체</div><canvas width="760" height="380"></canvas></div>':'';
+  let completed=false;const finish=ok=>{if(completed)return;completed=true;d.close();resolve(ok)};
+  d.querySelector('[data-cancel]').onclick=()=>finish(false);
+  d.querySelector('[data-approve]').onclick=()=>finish(true);
+  d.oncancel=e=>{e.preventDefault();finish(false)};
+  if(typeof d.showModal==='function'){d.showModal();paintSketches();}
+  else resolve(confirm('담당 치료사에게 아래 내용만 공유할까?\n\n'+sharePreview(fields,entry)));
+ });
+}
 function wireEntryForm(isParent){
  const f=$('entryForm'),button=$('saveEntry'),share=f.elements.share,area=$('sharePicker');
  const selectedKeys=()=>[...f.querySelectorAll('input[name="shareField"]:checked')].map(x=>x.value);
@@ -243,7 +260,7 @@ function wireEntryForm(isParent){
   if(isParent)return;
   const entry=gatherEntry(f,'student');
   f.querySelectorAll('input[name="shareField"]').forEach(x=>{
-   const available=!!entry[x.value];x.disabled=!available;if(!available)x.checked=false;
+   const mode=f.dataset.journalMode||'quick';const available=!!entry[x.value]&&(mode==='detail'||['note','date','time'].includes(x.value));x.disabled=!available;if(!available)x.checked=false;
    x.closest('label')?.classList.toggle('is-unavailable',!available);
   });
   const count=selectedKeys().length;const caption=$('studentShareCount');
@@ -271,14 +288,14 @@ function wireEntryForm(isParent){
   $('studentClearAll').onclick=()=>{f.querySelectorAll('input[name="shareField"]').forEach(x=>x.checked=false);updateStudentShare()};
   updateStudentShare();
  }
- f.onsubmit=e=>{e.preventDefault();const entry=gatherEntry(f,me.role);
+ f.onsubmit=async e=>{e.preventDefault();const entry=gatherEntry(f,me.role);
   const meaningful=isParent?!!entry.observation:['note','sketch','mood','energy','thought','body','action','experience','experienceImpact'].some(k=>!!entry[k]);
   if(!meaningful){toast(isParent?'직접 보거나 들은 일을 한 문장만 적어 주세요.':'일기, 그림, 감정 등 한 가지 이상 남겨줘.');return;}
   if(isParent&&!entry.date){toast('일이 있었던 날짜를 선택해 주세요.');return;}
   const sharedFields=share.checked?selectedKeys().filter(k=>entry[k]):[];
   if(isParent&&share.checked&&sharedFields.includes('observation')){for(const k of ['date','time','place','signals'])if(entry[k]&&!sharedFields.includes(k))sharedFields.push(k);}
   if(share.checked&&!sharedFields.some(k=>!['date','time','place','title'].includes(k))){toast('공유할 내용을 한 가지 이상 골라줘.');return;}
-  if(share.checked){const details=sharePreview(sharedFields,entry);if(!confirm('담당 치료사에게 아래 내용을 보낼까?\n\n'+details+'\n\n보내지 않은 항목은 비공개로 남아.'))return;}
+  if(share.checked&&!(await confirmSharedEntry(sharedFields,entry)))return;
   loading(button,async()=>{await api('records',{method:'POST',body:{entry,share:share.checked,sharedFields}});if(isParent){parentCalendarDate=entry.date;parentCalendarMode='day';activeView='calendar'}else activeView='history';toast('내 기록에 저장했어.');await dashboard()});
  };
 }
@@ -286,7 +303,7 @@ function wireEntryForm(isParent){
 function prettyRecordEntry(entry){return Object.entries(entry??{}).map(([k,v])=> k==='sketch'?`<div class="sketch-record" data-sketch="${sanitize(v)}"><div class="sketch-mini-label">그림 메모</div><canvas width="760" height="380"></canvas></div>`:`<p><b>${sanitize(NOTE_LABELS[k]||k)}</b><br>${sanitize(v)}</p>`).join('');}
 function paintSketches(){document.querySelectorAll('[data-sketch]').forEach(el=>{try{const arr=JSON.parse(el.dataset.sketch);if(!Array.isArray(arr)||arr.length>250)return;const ctx=el.querySelector('canvas').getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,760,380);ctx.strokeStyle='#5362cc';ctx.lineWidth=3.5;ctx.lineCap='round';ctx.lineJoin='round';arr.forEach(stroke=>{if(!Array.isArray(stroke)||!stroke.length)return;ctx.beginPath();stroke.slice(0,240).forEach((p,i)=>{if(!Array.isArray(p)||p.length!==2||!Number.isFinite(p[0])||!Number.isFinite(p[1]))return;const x=Math.max(0,Math.min(760,p[0])),y=Math.max(0,Math.min(380,p[1]));i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke()});}catch(_){}})}
 function parentObservationFacts(entry={}){
- const fields=[['date','관찰 날짜'],['time','시간'],['place','장소'],['signals','관찰한 모습(선택)'],['context','그전·당시 상황'],['observation','보거나 들은 내용'],['response','주변 사람의 말·행동'],['after','이후에 이어진 일'],['impact','일상에서 확인된 변화'],['origin','정보 출처'],['message','보호자 전달사항']];
+ const fields=[['date','관찰 날짜'],['time','시간'],['place','장소'],['origin','정보 출처'],['signals','관찰한 모습(선택)'],['observation','보거나 들은 내용'],['context','그전·당시 상황'],['childWords','아이가 실제로 한 말'],['response','주변 사람의 말·행동'],['after','이후에 이어진 일'],['impact','일상에서 확인된 변화'],['message','보호자 전달사항']];
  return `<div class="observed-facts"><p class="clinical-neutral">보호자가 전달한 기록입니다. 직접 관찰했는지 또는 전해 들었는지 확인하고, 해석과 판단은 치료사가 별도로 검토합니다.</p>${fields.filter(([k])=>entry[k]).map(([k,name])=>`<div class="observed-fact-row"><strong>${name}</strong><span>${sanitize(entry[k])}</span></div>`).join('')}</div>`;
 }
 function recordCards(list=records){
@@ -294,6 +311,11 @@ function recordCards(list=records){
  return list.map(r=>{
   const time=sanitize(new Date(r.createdAt).toLocaleString('ko-KR'));
   const observed=r.entry?.date?`${r.kind==='parent'?'관찰':'기록'} ${sanitize(r.entry.date)}${r.entry.time?' '+sanitize(r.entry.time):''}${r.entry.place?' · '+sanitize(r.entry.place):''} · 작성 ${time}`:time;
+  if(me.role==='therapist'&&r.kind==='student'){
+   const text=String(r.entry?.note||r.entry?.experience||r.entry?.thought||r.entry?.action||r.entry?.mood||'');
+   const short=text.length>120?text.slice(0,120)+'…':text;
+   return `<article class="record archive-record"><div class="meta">학생 공유 기록 · ${observed} · ${sanitize(r.student)}</div><div class="parent-inbox-skim">${sanitize(short)||'선택된 공유 내용이 있어.'}</div><details class="parent-inbox-details"><summary>공유한 내용 전체 보기</summary><div class="parent-inbox-full">${prettyRecordEntry(r.entry)}</div></details><p class="muted">학생이 선택해 공유한 내용만 표시돼.</p></article>`;
+  }
   if(me.role==='therapist'&&r.kind==='parent'){
    const field=String(r.entry?.observation||r.entry?.message||r.entry?.impact||r.entry?.response||'');
    const preview=field.length>110?field.slice(0,110)+'…':field;
@@ -301,19 +323,23 @@ function recordCards(list=records){
    const kinds=r.entry?.signals?' · '+sanitize(r.entry.signals):'';
    return `<article class="record parent-inbox-record"><div class="meta">보호자 기록 · ${observed}${place}${kinds} · ${sanitize(r.student)}</div><div class="parent-inbox-skim">${sanitize(preview)||'공유된 메모가 있어요.'}</div><details class="parent-inbox-details"><summary>전달 내용 더 보기</summary><div class="parent-inbox-full">${parentObservationFacts(r.entry)}<div class="muted">학생: ${sanitize(r.student)} · 작성자: ${sanitize(r.author)}</div></div></details></article>`;
   }
-  return `<article class="record archive-record"><div class="meta">${observed} · ${r.kind==='student'?'학생':'학부모'} · ${r.shared?'치료사와 일부 공유':'나만 보기'}${r.driveSynced?' · 드라이브 백업':''}</div>${prettyRecordEntry(r.entry)}${!r.shared&&me.role!=='therapist'?`<div class="inline-share"><button class="button-ghost" type="button" data-share="${sanitize(r.id)}">선택해서 공유</button><div class="share-choices" data-share-panel="${sanitize(r.id)}" hidden><p>치료사에게 전달할 내용만 골라줘.</p>${me.role==='student'?`<div class="student-share-bar"><strong>내 기록 공유</strong><div class="student-share-actions"><button type="button" class="button-ghost" data-archive-all="${sanitize(r.id)}">전체 선택</button><button type="button" class="button-ghost" data-archive-clear="${sanitize(r.id)}">선택 해제</button></div></div>`:''}${Object.keys(r.entry??{}).map(k=>`<label><input type="checkbox" value="${sanitize(k)}"><span>${sanitize(NOTE_LABELS[k]||k)}</span></label>`).join('')}<button class="button" type="button" data-share-confirm="${sanitize(r.id)}">선택한 항목 전달</button></div></div>`:''}${me.role==='therapist'?`<div class="muted">학생: ${sanitize(r.student)} · 작성자: ${sanitize(r.author)}</div>`:''}</article>`;
+  return `<article class="record archive-record"><div class="meta">${observed} · ${r.kind==='student'?'학생':'학부모'} · ${r.shared?'치료사와 일부 공유':'나만 보기'}${r.driveSynced?' · 드라이브 백업':''}</div>${prettyRecordEntry(r.entry)}${!r.shared&&me.role!=='therapist'?`<div class="inline-share"><button class="button-ghost" type="button" data-share="${sanitize(r.id)}">선택해서 공유</button><div class="share-choices" data-share-panel="${sanitize(r.id)}" hidden><p>치료사에게 전달할 내용만 골라줘.</p>${me.role==='student'?`<div class="student-share-bar"><strong>내 기록 공유</strong><div class="student-share-actions"><button type="button" class="button-ghost" data-archive-all="${sanitize(r.id)}">전체 선택</button><button type="button" class="button-ghost" data-archive-clear="${sanitize(r.id)}">선택 해제</button></div></div>`:''}${Object.keys(r.entry??{}).map(k=>`<label><input type="checkbox" value="${sanitize(k)}"><span>${sanitize(NOTE_LABELS[k]||k)}</span></label>`).join('')}<button class="button" type="button" data-share-confirm="${sanitize(r.id)}">선택한 항목 전달</button></div></div>`:''}${r.shared&&me.role!=='therapist'?`<div class="inline-share"><button type="button" class="button-ghost" data-unshare="${sanitize(r.id)}">이후 공유 취소</button><small>이미 전달된 복사본은 별도 관리가 필요해.</small></div>`:''}${me.role==='therapist'?`<div class="muted">학생: ${sanitize(r.student)} · 작성자: ${sanitize(r.author)}</div>`:''}</article>`;
  }).join('');
 }
 
 function attachShares(){
  document.querySelectorAll('[data-share]').forEach(b=>b.onclick=()=>{const p=document.querySelector(`[data-share-panel="${b.dataset.share}"]`);if(!p)return;p.hidden=!p.hidden});
  for(const [key,value] of [['archiveAll',true],['archiveClear',false]])document.querySelectorAll(`[data-${key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())}]`).forEach(b=>b.onclick=()=>{const id=b.dataset[key],panel=document.querySelector(`[data-share-panel="${id}"]`);if(panel)panel.querySelectorAll('input[type="checkbox"]').forEach(c=>c.checked=value)});
- document.querySelectorAll('[data-share-confirm]').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('[data-share-confirm]').forEach(b=>b.onclick=async()=>{
   const r=records.find(x=>x.id===b.dataset.shareConfirm),panel=document.querySelector(`[data-share-panel="${b.dataset.shareConfirm}"]`);if(!r||!panel)return;
   const fields=[...panel.querySelectorAll('input:checked')].map(x=>x.value).filter(k=>r.entry[k]);
   if(!fields.some(k=>!['date','time','place','title'].includes(k))){toast('공유할 내용을 한 가지 이상 골라줘.');return;}
-  if(!confirm('담당 치료사에게 아래 내용을 보낼까?\n\n'+sharePreview(fields,r.entry)+'\n\n선택하지 않은 내용은 비공개로 남아.'))return;
+  if(!(await confirmSharedEntry(fields,r.entry)))return;
   loading(b,async()=>{await api('share',{method:'POST',body:{recordId:r.id,sharedFields:fields}});toast('선택한 내용만 공유했어.');await dashboard()})
+ });
+ document.querySelectorAll('[data-unshare]').forEach(b=>b.onclick=()=>{
+  if(!confirm('이 기록의 앞으로의 치료사 열람을 중단할까? 이미 별도로 저장되거나 전달된 복사본은 자동으로 삭제되지 않아.'))return;
+  loading(b,async()=>{const result=await api('unshare',{method:'POST',body:{recordId:b.dataset.unshare}});toast(result.remoteCopyStatus==='pending'?'서버 열람을 중단했어. 드라이브 사본 삭제는 아직 확인되지 않았어.':'서버 열람을 중단했어. 별도로 전달된 복사본은 남을 수 있어.');await dashboard()})
  });
 }
 
@@ -405,10 +431,58 @@ function exportCSV(){const labels=NOTE_LABELS;function cell(s){let x=String(s??'
 async function initSessionNotes(){
  const wrap=$('sessionSaved'),form=$('sessionForm');if(!wrap||!form)return;
  const display=async()=>{try{const out=await api('session-notes');wrap.innerHTML=(out.notes?.length?out.notes.map(n=>`<article class="record"><div class="meta">${sanitize(n.studentNickname||'학생')} · ${sanitize(new Date(n.createdAt).toLocaleDateString('ko-KR'))} · 치료사 전용</div>${prettyRecordEntry(n.entry)}</article>`).join(''):'<div class="empty-state">아직 회기 메모가 없습니다.</div>');}catch(e){wrap.textContent='회기 메모 기능 연결 전: '+e.message;}};
- form.onsubmit=e=>{e.preventDefault();const entry={};['observation','question','plan'].forEach(k=>{const v=formValue(form,k);if(v)entry[k]=v});if(!Object.keys(entry).length){toast('한 가지 이상 남겨주세요.');return;}loading(form.querySelector('button'),async()=>{await api('session-notes',{method:'POST',body:{studentId:formValue(form,'studentId'),entry}});form.reset();toast('회기 메모를 보관했어요.');await display()})};
+ form.onsubmit=e=>{e.preventDefault();const entry={};["studentReport","parentReport","observation","question","plan","functionalImpact","familyResponse","workingHypothesis","alternatives","uncertainty","burdenReview","erpReview","erpTarget","erpSafety","cbitReview","cbitTarget","cbitContext"].forEach(k=>{const v=formValue(form,k);if(v)entry[k]=v});if(!Object.keys(entry).length){toast('한 가지 이상 남겨주세요.');return;}loading(form.querySelector('button'),async()=>{await api('session-notes',{method:'POST',body:{studentId:formValue(form,'studentId'),entry}});form.reset();toast('회기 메모를 보관했어요.');await display()})};
  await display();
 }
-async function therapistHome(){const r=await Promise.all([api('students'),api('drive/status'),api('accounts')]);students=r[0].students;drive=r[1];const accounts=r[2].accounts;app.innerHTML=hero('오늘의 사례 공간','학생이 공유한 내용과 보호자 관찰을 구분해 보고, 다음 회기를 준비해요.')+`<div class="workspace-shell therapist-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">02</span></div>${workspaceNav([['inbox','▣','공유 자료','학생·보호자'],['session','▤','회기 준비','치료사 메모'],['accounts','♙','계정 연결','초대·재등록'],['drive','↗','Google Drive','담당자 전용']],activeView)}<div class="sidebar-note">배정된 학생의 공유 기록만<br><small>담당 치료사가 확인할 수 있어요.</small></div></aside><div class="workspace-content"><div class="grid"><section class="panel highlight full" data-workspace-view="inbox"><span class="tag">01 / INBOX</span><h2>학생·보호자가 공유한 기록 <small>(${records.length}건)</small></h2><p>원문을 유지하며 작성자의 관점에 따라 구분해요. 자동으로 진단하거나 평가하지 않아요.</p><div class="buttons"><button id="refresh" class="button-ghost">↻ 새 기록 확인</button><button id="csv" class="button-ghost">CSV 다운로드</button></div><p class="parent-inbox-policy">보호자 메모는 <b>짧은 내용만 먼저</b> 보여요. 길게 작성한 원문은 필요할 때 펼쳐볼 수 있어요.</p><div class="filter-strip"><label>학생별 보기<select id="filterStudent"><option value="all">전체 학생</option>${students.map(s=>`<option value="${sanitize(s.nickname)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><label>작성자 구분<select id="filterKind"><option value="all">전체</option><option value="student">학생 기록</option><option value="parent">학부모 전달</option></select></label></div><div id="inboxResults">${recordCards()}</div></section><section class="panel full case-panel" data-workspace-view="session" hidden><span class="tag">SESSION / THERAPIST ONLY</span><h2>회기 준비·메모</h2><p>치료사 전용 기록입니다. 공유한 학생·학부모에게 자동으로 노출되지 않아요.</p><form id="sessionForm" class="form"><label>담당 학생<select name="studentId" required>${students.map(s=>`<option value="${sanitize(s.id)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><label>오늘 확인한 사실<textarea name="observation" maxlength="1200" placeholder="학생이 말한 내용 / 보호자가 관찰한 내용은 구분해서 기록"></textarea></label><label>확인이 필요한 점<textarea name="question" maxlength="1200" placeholder="아직 확인하지 못한 내용과 가설"></textarea></label><label>다음 회기에 함께 살펴볼 것<textarea name="plan" maxlength="1200" placeholder="합의한 목표나 다음 수업 방향"></textarea></label><button class="button">치료사 메모 보관</button></form><div id="sessionSaved"></div></section><section class="panel" data-workspace-view="accounts"><span class="tag">02 / ACCOUNTS</span><h2>학생·학부모 초대하기</h2><p>초대코드를 전달해 담당 학생·학부모를 연결해요.</p><form id="inviteForm" class="form"><label>초대할 사람<select name="role" id="inviteRole"><option value="student">학생</option><option value="parent">학부모</option></select></label><label id="studentPicker" class="hidden">연결할 학생<select name="studentId">${students.map(s=>`<option value="${sanitize(s.id)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><button class="button">7일짜리 초대코드 만들기</button></form><div id="inviteOutput"></div></section><section class="panel" data-workspace-view="accounts"><span class="tag">02 / ACCOUNT HELP</span><h2>패스키 재등록 코드</h2><p>기기를 잃어버린 경우 신원 확인 후 30분짜리 재등록 코드를 발급합니다.</p><label>대상 계정<select id="resetUser">${accounts.map(a=>`<option value="${sanitize(a.id)}">${sanitize(a.nickname)} · ${a.role==='student'?'학생':'학부모'}</option>`).join('')}</select></label><div class="buttons"><button id="resetIssue" class="button-ghost" ${accounts.length?'':'disabled'}>재설정 코드 발급</button></div><div id="resetOutput"></div></section><section class="panel full" data-workspace-view="drive"><span class="tag">03 / GOOGLE DRIVE</span><h2>Google Drive</h2><p>${drive.connected?'내 구글 계정이 연결돼 있습니다.':'구글 계정 연결 전입니다. 학생 기록은 아직 자동 업로드되지 않습니다.'}</p><div class="buttons"><button id="googleConnect" class="button-ghost" ${drive.configured?'':'disabled'}>${drive.connected?'구글 계정 다시 연결':'내 구글 계정 연결'}</button><button id="driveSync" class="button" ${drive.connected?'':'disabled'}>공유 기록 백업</button>${drive.folderUrl?`<a class="button-ghost" href="${sanitize(drive.folderUrl)}" target="_blank" rel="noopener noreferrer">내 드라이브 폴더 열기 ↗</a>`:''}</div>${!drive.configured?hint('구글 OAuth 관리자 설정이 아직 끝나지 않았습니다. 인증을 완료하면 담당 치료사의 구글 계정에만 기록을 복사할 수 있습니다.'):''}</section></div></div></div>`;
+async function therapistHome(){const r=await Promise.all([api('students'),api('drive/status'),api('accounts')]);students=r[0].students;drive=r[1];const accounts=r[2].accounts;app.innerHTML=hero('오늘의 사례 공간','학생이 공유한 내용과 보호자 관찰을 구분해 보고, 다음 회기를 준비해요.')+`<div class="workspace-shell therapist-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">02</span></div>${workspaceNav([['inbox','▣','공유 자료','학생·보호자'],['session','▤','회기 준비','치료사 메모'],['accounts','♙','계정 연결','초대·재등록'],['drive','↗','Google Drive','담당자 전용']],activeView)}<div class="sidebar-note">배정된 학생의 공유 기록만<br><small>담당 치료사가 확인할 수 있어요.</small></div></aside><div class="workspace-content"><div class="grid"><section class="panel highlight full" data-workspace-view="inbox"><span class="tag">01 / INBOX</span><h2>학생·보호자가 공유한 기록 <small>(${records.length}건)</small></h2><p>원문을 유지하며 작성자의 관점에 따라 구분해요. 자동으로 진단하거나 평가하지 않아요.</p><div class="buttons"><button id="refresh" class="button-ghost">↻ 새 기록 확인</button><button id="csv" class="button-ghost">CSV 다운로드</button></div><p class="parent-inbox-policy">보호자 메모는 <b>짧은 내용만 먼저</b> 보여요. 길게 작성한 원문은 필요할 때 펼쳐볼 수 있어요.</p><div class="filter-strip"><label>학생별 보기<select id="filterStudent"><option value="all">전체 학생</option>${students.map(s=>`<option value="${sanitize(s.nickname)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><label>작성자 구분<select id="filterKind"><option value="all">전체</option><option value="student">학생 기록</option><option value="parent">학부모 전달</option></select></label></div><div id="inboxResults">${recordCards()}</div></section><section class="panel full case-panel" data-workspace-view="session" hidden><span class="tag">SESSION / THERAPIST ONLY</span><h2>회기 준비·메모</h2><p>학생이 선택해 공유한 내용과 실제 회기에서 확인한 내용을 분리해 기록합니다. 치료사의 가설은 관찰 사실이 아니며, 앱이 진단이나 치료 효과를 판단하지 않습니다. <b>가상 체험판의 역할 전환은 실제 접근 통제가 아닙니다.</b></p>
+<form id="sessionForm" class="form clinician-form">
+<label>담당 학생<select name="studentId" required>${students.map(s=>`<option value="${sanitize(s.id)}">${sanitize(s.nickname)}</option>`).join('')}</select></label>
+<div class="clinician-quick-fields">
+ <label>학생이 직접 이야기한 내용 <small>(선택)</small><textarea name="studentReport" maxlength="1200" rows="2" placeholder="학생의 표현을 가능하면 그대로. 공유 기록과 회기 진술은 구별해요."></textarea></label>
+ <label>보호자에게 들은 내용 <small>(선택)</small><textarea name="parentReport" maxlength="1200" rows="2" placeholder="직접 관찰인지 전해 들은 내용인지 구분해 적어요."></textarea></label>
+ <label>치료사가 직접 확인한 사실 <small>(선택)</small><textarea name="observation" maxlength="1200" rows="2" placeholder="회기에서 실제 관찰한 행동·상황. 원인이나 진단을 단정하지 않아요."></textarea></label>
+ <label>다음 회기에 함께 살펴볼 것 <small>(선택)</small><textarea name="plan" maxlength="1200" rows="2" placeholder="학생과 합의한 목표 또는 질문. 기록하지 않는 선택도 존중해요."></textarea></label>
+</div>
+<details class="clinician-extra">
+ <summary>사례개념화와 기록 부담 점검 <small>필요할 때만</small></summary>
+ <div class="clinician-extra-inner">
+  <p class="clinical-neutral">한 번의 기록만으로 틱·강박·불안 등을 구분하지 않습니다. 아래 내용은 표준화 검사나 진단 판정을 대신하지 않습니다.</p>
+  <label>일상생활에 실제 어떤 영향이 있었나요?<textarea name="functionalImpact" maxlength="900" rows="2" placeholder="수면·학업·관계·시간 사용 등 확인된 영향. 확인되지 않았다면 비워 두세요."></textarea></label>
+  <label>가족이나 주변의 반응은 무엇이었나요?<textarea name="familyResponse" maxlength="900" rows="2" placeholder="관찰한 대응만 기록. 가족 수용행동 여부를 자동 분류하지 않습니다."></textarea></label>
+  <label>현재의 잠정적인 이해·가설<textarea name="workingHypothesis" maxlength="1000" rows="2" placeholder="사실과 분리하여 가설로만 작성. 단정하지 않습니다."></textarea></label>
+  <label>다른 설명 가능성<textarea name="alternatives" maxlength="1000" rows="2" placeholder="습관·발달·감각·틱·강박·피로·상황 등 필요에 따라 검토"></textarea></label>
+  <label>추가로 확인해야 할 내용<textarea name="uncertainty" maxlength="1000" rows="2" placeholder="아직 모르는 점과 확인 자료"></textarea></label>
+  <label>기록 사용이 학생에게 부담이 되었나요? <small>(상담에서 확인, 선택)</small>
+   <select name="burdenReview">
+    <option value="">확인하지 않음 / 기록하지 않음</option>
+    <option value="학생이 별다른 부담을 말하지 않음">학생이 별다른 부담을 말하지 않음</option>
+    <option value="부담 또는 반복 확인이 보고됨">부담 또는 반복 확인이 보고됨</option>
+    <option value="작성 축소·중단 또는 다른 방법을 합의함">작성 축소·중단 또는 다른 방법을 합의함</option>
+   </select>
+  </label>
+  <label>회기에서 확인할 질문<textarea name="question" maxlength="1200" rows="2" placeholder="정답 확인이나 반복적인 안심 제공이 아닌 개방형 질문"></textarea></label>
+ </div>
+</details>
+<details class="clinician-extra">
+ <summary>CBT·ERP 회기 검토 <small>훈련받은 치료사만 · 선택</small></summary>
+ <div class="clinician-extra-inner">
+  <p class="clinical-neutral"><strong>치료사 전용 임상 메모입니다.</strong> 강박 증상을 확인했다는 표시가 아니며 자동 과제·노출·반응방지 지시를 생성하지 않습니다. 적합성 평가, 치료적 합의, 개별 안전 검토가 선행되어야 합니다.</p>
+  <label>회기 검토 상태<select name="erpReview"><option value="">선택하지 않음</option><option value="적합성 평가가 필요함">적합성 평가가 필요함</option><option value="별도의 치료계획에서 검토 중">별도의 치료계획에서 검토 중</option><option value="이번 회기에 해당 없음">이번 회기에 해당 없음</option></select></label>
+  <label>치료사 전용 목표·계획 메모<textarea name="erpTarget" maxlength="1200" rows="2" placeholder="실제 치료계획이 있는 경우에만 기재. 학생 앱에 자동 전달되지 않음."></textarea></label>
+  <label>합의·안전·경과 관련 확인<textarea name="erpSafety" maxlength="1000" rows="2" placeholder="학생과의 합의, 치료 반응, 안전 관련 확인 필요사항"></textarea></label>
+ </div>
+</details>
+<details class="clinician-extra">
+ <summary>CBIT·틱 관련 회기 검토 <small>훈련받은 치료사만 · 선택</small></summary>
+ <div class="clinician-extra-inner">
+  <p class="clinical-neutral"><strong>치료사 전용 임상 메모입니다.</strong> 일기만으로 CBIT가 시행된 것은 아닙니다. 틱과 강박행동을 같은 것으로 간주하지 않으며 경쟁반응을 자동으로 추천하지 않습니다.</p>
+  <label>회기 검토 상태<select name="cbitReview"><option value="">선택하지 않음</option><option value="적합성 평가가 필요함">적합성 평가가 필요함</option><option value="별도의 치료계획에서 검토 중">별도의 치료계획에서 검토 중</option><option value="이번 회기에 해당 없음">이번 회기에 해당 없음</option></select></label>
+  <label>틱 관련 상황·기능적 영향<textarea name="cbitContext" maxlength="1000" rows="2" placeholder="회기에서 확인된 맥락과 일상생활 영향, 추측과 구분"></textarea></label>
+  <label>치료사 전용 목표·계획 메모<textarea name="cbitTarget" maxlength="1200" rows="2" placeholder="치료 평가와 합의에 근거한 계획만. 학생 앱으로 자동 전송되지 않음."></textarea></label>
+ </div>
+</details>
+<div class="clinician-save-row"><button class="button" type="submit">치료사 메모 보관</button><p>모든 항목은 선택입니다. 별도의 임상 평가·동의 절차와 치료기록을 대신하지 않습니다.</p></div>
+</form><div id="sessionSaved"></div></section><section class="panel" data-workspace-view="accounts"><span class="tag">02 / ACCOUNTS</span><h2>학생·학부모 초대하기</h2><p>초대코드를 전달해 담당 학생·학부모를 연결해요.</p><form id="inviteForm" class="form"><label>초대할 사람<select name="role" id="inviteRole"><option value="student">학생</option><option value="parent">학부모</option></select></label><label id="studentPicker" class="hidden">연결할 학생<select name="studentId">${students.map(s=>`<option value="${sanitize(s.id)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><button class="button">7일짜리 초대코드 만들기</button></form><div id="inviteOutput"></div></section><section class="panel" data-workspace-view="accounts"><span class="tag">02 / ACCOUNT HELP</span><h2>패스키 재등록 코드</h2><p>기기를 잃어버린 경우 신원 확인 후 30분짜리 재등록 코드를 발급합니다.</p><label>대상 계정<select id="resetUser">${accounts.map(a=>`<option value="${sanitize(a.id)}">${sanitize(a.nickname)} · ${a.role==='student'?'학생':'학부모'}</option>`).join('')}</select></label><div class="buttons"><button id="resetIssue" class="button-ghost" ${accounts.length?'':'disabled'}>재설정 코드 발급</button></div><div id="resetOutput"></div></section><section class="panel full" data-workspace-view="drive"><span class="tag">03 / GOOGLE DRIVE</span><h2>Google Drive</h2><p>${drive.connected?'내 구글 계정이 연결돼 있습니다.':'구글 계정 연결 전입니다. 학생 기록은 아직 자동 업로드되지 않습니다.'}</p><div class="buttons"><button id="googleConnect" class="button-ghost" ${drive.configured&&drive.backupEnabled?'':'disabled'}>${drive.connected?'구글 계정 다시 연결':'내 구글 계정 연결'}</button><button id="driveSync" class="button" ${drive.connected&&drive.backupEnabled?'':'disabled'}>공유 기록 백업</button>${drive.folderUrl?`<a class="button-ghost" href="${sanitize(drive.folderUrl)}" target="_blank" rel="noopener noreferrer">내 드라이브 폴더 열기 ↗</a>`:''}</div>${!drive.backupEnabled?hint('보존·삭제·동의 및 사본 처리 정책 검증 전까지 Google Drive 백업이 비활성화되어 있습니다. 서버 공유를 취소해도 기존 다운로드 파일은 자동으로 회수되지 않습니다.'):!drive.configured?hint('구글 OAuth 관리자 설정이 아직 끝나지 않았습니다.'):''}<p>삭제 확인이 필요한 사본은 치료사의 기록 관리자에게 문의하세요.</p></section></div></div></div>`;
 attachShares();bindWorkspace();paintSketches();initSessionNotes();const rerenderInbox=()=>{const name=$('filterStudent').value,kind=$('filterKind').value;const list=records.filter(r=>(name==='all'||r.student===name)&&(kind==='all'||r.kind===kind));$('inboxResults').innerHTML=recordCards(list);paintSketches();};$('filterStudent').onchange=rerenderInbox;$('filterKind').onchange=rerenderInbox;$('refresh').onclick=()=>dashboard();$('csv').onclick=exportCSV;$('inviteRole').onchange=()=>{$('studentPicker').classList.toggle('hidden',$('inviteRole').value!=='parent')};$('inviteForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;loading(f.querySelector('button'),async()=>{const out=await api('invites',{method:'POST',body:{role:formValue(f,'role'),studentId:formValue(f,'studentId')}});const div=$('inviteOutput');div.innerHTML='<p class="muted">초대코드는 한 번만 사용할 수 있으며 7일 뒤 만료됩니다. 개인적인 방법으로 전달하세요.</p><textarea id="inviteCode" readonly></textarea><button class="button-ghost" type="button" id="copyCode">초대코드 복사</button>';$('inviteCode').value=out.invite;$('copyCode').onclick=()=>{navigator.clipboard.writeText(out.invite).then(()=>toast('초대코드를 복사했어요.'))}})};
 $('resetIssue').onclick=e=>loading(e.target,async()=>{if(!confirm('대상자의 신원을 별도로 확인했나요?'))return;const result=await api('reset/create',{method:'POST',body:{userId:$('resetUser').value}});$('resetOutput').innerHTML='<p>30분 뒤 만료되는 재설정 코드입니다.</p><textarea readonly id="resetCode"></textarea>';$('resetCode').value=result.resetCode;});$('googleConnect').onclick=()=>{location.assign('/api/drive/start')};$('driveSync').onclick=e=>loading(e.target,async()=>{const x=await api('drive/sync',{method:'POST'});toast(`${x.synced}건을 담당 치료사의 드라이브에 백업했습니다.`);await dashboard()});}
 function adminHome(){app.innerHTML=hero('계정 운영','최초 관리자 계정은 기록을 읽을 수 없습니다. 치료사 초대만 발급할 수 있어요.')+`<div class="panel"><h2>치료사 초대코드 발급</h2><p>치료사도 학생·학부모와 같은 패스키 방식으로 등록합니다.</p><button id="inviteTherapist" class="button">치료사 초대코드 만들기</button><div id="adminInvite"></div></div>`;$('inviteTherapist').onclick=e=>loading(e.target,async()=>{const r=await api('invites',{method:'POST',body:{role:'therapist'}});const d=$('adminInvite');d.innerHTML='<p>코드를 복사해 치료사에게 개별 전달하세요. 7일간 유효합니다.</p><textarea readonly id="adminCode"></textarea>';$('adminCode').value=r.invite;})}
