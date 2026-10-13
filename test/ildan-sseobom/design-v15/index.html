@@ -1176,8 +1176,18 @@ function restorePreviewDraft(form,role){
  try{
   const raw=sessionStorage.getItem(PREVIEW_DRAFT_PREFIX+role);if(!raw)return false;
   const draft=JSON.parse(raw);if(!draft||!Array.isArray(draft.values)||Date.now()-draft.savedAt>12*3600000){sessionStorage.removeItem(PREVIEW_DRAFT_PREFIX+role);return false;}
-  const els=[...form.querySelectorAll('[name]')];
-  draft.values.forEach((item,i)=>{const el=els[i];if(!el||el.name!==item.name)return;if(el.type==='checkbox'||el.type==='radio')el.checked=!!item.checked;else el.value=String(item.value||'')});
+  // Match by semantic field identity, not DOM position: adding the quick mood/parent rows
+  // must not silently discard an older draft in the current preview browser session.
+  const used=new Set();
+  [...form.querySelectorAll('[name]')].forEach(el=>{
+   const isChoice=el.type==='checkbox'||el.type==='radio';
+   const idx=draft.values.findIndex((item,i)=>!used.has(i)&&item.name===el.name&&
+     (isChoice?item.value===el.value:(item.type||'')===el.type));
+   if(idx<0)return;
+   used.add(idx);const item=draft.values[idx];
+   if(isChoice)el.checked=!!item.checked;
+   else el.value=String(item.value??'');
+  });
   if(role==='student'){
    sketchStrokes=Array.isArray(draft.sketch)?draft.sketch.slice(0,240):[];
    const mode=draft.mode==='detail'?'detail':'quick';form.dataset.journalMode=mode;
