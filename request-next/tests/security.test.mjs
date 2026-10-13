@@ -55,7 +55,7 @@ async function call(env,path,method='GET',body=null,headers={}){
 }
 function form(mode='public',overrides={}){
  const data=new FormData();
- const fields={visibility:mode,category:'질문',title:'문의 제목',body:mode==='public'?'안녕하세요':privateText,nickname:'시험 작성자',anonymous:'false',role:'보호자',link:'',website:'',consent:'false',...overrides};
+ const fields={visibility:mode,category:'질문',title:'문의 제목',body:mode==='public'?'안녕하세요':privateText,nickname:'시험 작성자',anonymous:'false',role:'보호자',link:'',website:'',consent:mode==='public'?'false':'true',...overrides};
  Object.entries(fields).forEach(([k,v])=>data.append(k,String(v)));
  return data;
 }
@@ -107,8 +107,21 @@ test('private attachment remains inaccessible without token; public attachment n
 
 test('invalid private consent, personal details in public, and script disguises are rejected',async()=>{
  const env=makeEnv();
- assert.equal((await create(env,form('list',{email:'ask@example.test'}))).status,400);
+ assert.equal((await create(env,form('list',{email:'ask@example.test',consent:'false'}))).status,400);
  assert.equal((await create(env,form('public',{body:'연락처 010-1234-5678'}))).status,400);
  const disguised=form('list');disguised.append('attachment',new File(['<svg><script>alert(1)</script></svg>'],'fake.pdf',{type:'application/pdf'}));
  assert.equal((await create(env,disguised)).status,415);
+});
+
+
+test('all private content requires affirmative consent and rejects cross-site writes',async()=>{
+ const env=makeEnv();
+ assert.equal((await create(env,form('hidden',{consent:'false'}))).status,400);
+ assert.equal((await create(env,form('list',{consent:'false'}))).status,400);
+ const originBlock=await call(env,'/api/posts','POST',form('public'),{'Origin':'https://attacker.example.test'});
+ assert.equal(originBlock.status,403);
+ const fetchSiteBlock=await call(env,'/api/posts','POST',form('public'),{'Sec-Fetch-Site':'cross-site'});
+ assert.equal(fetchSiteBlock.status,403);
+ const allowed=await call(env,'/api/posts','POST',form('public'),{'Origin':'https://example.test'});
+ assert.equal(allowed.status,201);
 });
