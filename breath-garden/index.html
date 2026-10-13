@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#edf9ef"><meta name="description" content="모아의 바람놀이터: 내 바람의 세기, 몇 초 동안 쭉 불기, 박자에 맞춰 후~ 불기. 리코더와 별개로 하는 호흡 놀이.">
-<title>모아의 바람놀이터 | 일단 해봄</title><link rel="stylesheet" href="style-v4.css?v=4">
+<title>모아의 바람놀이터 | 일단 해봄</title><link rel="stylesheet" href="style-v5.css?v=5">
 </head>
 <body>
 <div class="app">
@@ -86,9 +86,18 @@
     <div class="calm-round" id="calmRound">1 / 3</div>
   </div>
   <div class="scene-ground"></div>
+  <div id="nextOverlay" class="next-overlay" hidden aria-live="polite">
+    <span class="next-art" id="nextArt">🌼</span>
+    <strong id="nextMessage">참 잘했어!</strong>
+    <p id="nextDescription">다음 놀이를 준비하고 있어요.</p>
+    <span id="nextCountdown" class="next-countdown">5초 후 자동 진행</span>
+  </div>
  </div>
  <div class="control-area">
+  <div class="flow-track" id="flowTrack" aria-label="네 가지 바람 놀이 순서"><span class="current">🪶 1</span><span>🌼 2</span><span>🌻 3</span><span>🕯️ 4</span></div>
   <div class="hint-main" id="mainHint">숨을 살살 불어봐!</div>
+  <div class="breath-task" id="breathTask" aria-live="polite">🌬️ 천천히 불고, 잠깐 쉬어요.</div>
+  <div class="hold-track" id="holdTrack"><span id="holdFill"></span></div>
   <div class="level-status"><span class="status-icon" id="levelIcon">🌱</span><b id="levelText">준비!</b></div>
   <div class="level-meter" aria-label="바람 소리 강도" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="levelMeter"><span id="meterFill"></span></div>
   <div class="color-legend"><span class="blue">🔵 약해</span><span class="green">🟢 좋아!</span><span class="red">🔴 너무 세요</span></div><p class="color-help" id="colorHelp">색은 잠깐 유지돼요. 편안하게 후~ 불어봐!</p>
@@ -101,10 +110,13 @@
       <button type="button" class="selected" data-calm="flower">🌷 꽃향기</button>
       <button type="button" data-calm="balloon">🎈 풍선 배</button>
       <button type="button" data-calm="star">⭐ 별빛</button>
+      <button type="button" data-calm="wave">🌊 파도</button>
+      <button type="button" data-calm="leaf">🍃 나뭇잎</button>
     </div>
-    <p class="calm-help">마이크 없이 그림을 따라해요. 편안한 속도로, 숨은 참지 않아요.</p>
+    <div class="calm-repeat"><span>몇 번 따라 할까?</span><div class="segments" id="calmRounds"><button type="button" data-rounds="2">2번</button><button type="button" data-rounds="3" class="selected">3번</button><button type="button" data-rounds="5">5번</button></div></div>
+    <p class="calm-help">마이크 없이 그림을 따라해요. 부담 없이 편안한 속도로, 숨을 억지로 참지 않아요.</p>
   </div>
-  <div class="auto-flow-tip" id="autoFlowTip" aria-live="polite">🌿 한번 시작하면 다음 놀이까지 이어져요.</div>
+  <div class="auto-flow-tip" id="autoFlowTip" aria-live="polite">🌿 한 번 시작하면 자동으로 이어져요.</div>
   <button id="micButton" class="main-btn" type="button">▶ 시작하기</button>
   <p class="live-note" id="statusNote" role="status" aria-live="polite">색을 따라 후~ 불어봐!</p>
  </div>
@@ -119,7 +131,7 @@
   <p>마이크의 비주기적 소리 신호로 화면을 반응시키는 놀이예요. <b>실제 바람의 세기·방향, 호흡 기능을 의학적으로 측정하거나 평가하지 않습니다.</b> 말소리·주변 소음이 잘못 분류될 수 있으니 처음에는 가벼운 종이띠 등으로 실제 바람의 움직임을 함께 확인해 주세요.</p>
   <div class="teacher-setting"><label for="sensitivity">강도 표시 감도 <b id="sensitivityName">보통</b></label><input type="range" min="1" max="5" value="3" step="1" id="sensitivity"></div><div class="teacher-actions"><button type="button" id="recalibrate">↻ 바람 세기 다시 맞추기</button></div><p class="voice-detail" id="inputDiagnostic">현재 상대적인 소리 강도 · 0%</p>
   <div class="teacher-setting"><label for="autoNext">놀이 자동으로 이어하기</label><input type="checkbox" id="autoNext" checked aria-label="성공하면 자동으로 다음 놀이"></div>
-  <div class="teacher-setting"><label for="pauseLength">성공 그림 보여주는 시간</label><select id="pauseLength"><option value="3500">여유 있게 · 3.5초</option><option value="5000">더 천천히 · 5초</option><option value="2200">조금 빠르게 · 2.2초</option></select></div>
+  <div class="teacher-setting"><label for="pauseLength">성공 그림 보여주는 시간</label><select id="pauseLength"><option value="5000" selected>기본 · 5초</option><option value="7000">더 여유롭게 · 7초</option><option value="4000">조금 빠르게 · 4초</option></select></div>
   <div class="teacher-setting"><label for="voiceSelect">음성 선택</label><select id="voiceSelect"><option value="auto">한국어 자동 선택</option></select></div>
   <div id="voiceDetail" class="voice-detail">모아 구조대와 같은 Google 한국어 목소리만 사용해요. 없으면 일반 성인 목소리로 변경하지 않아요.</div>
   <div class="teacher-actions"><button type="button" id="previewBtn">🔊 안내 목소리 확인</button><button type="button" id="demoBtn">🧪 화면 반응 체험</button></div>
@@ -130,5 +142,5 @@
 </main>
 <footer>일단 해봄 · 울모아쌤 · <a href="../music-garden/">🎵 모아의 음악정원</a> · <a href="../thinking-garden/recorder/">리코더 놀이터</a></footer>
 </div>
-<script src="app-v4.js?v=4.1"></script>
+<script src="app-v5.js?v=5"></script>
 </body></html>
