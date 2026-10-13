@@ -13,7 +13,7 @@ page_html=page_html.replace('<script type="module" src="/app.js"></script>','<sc
 setup_script=r"""
 window.__caseRecords=[];window.__caseSessions=[];
 window.fetch=async(url,opt={})=>{
- const endpoint=String(url).replace(/^\\/api\\//,'');
+ const raw=String(url),endpoint=raw.startsWith('/api/')?raw.slice(5):raw;
  let data={},status=200;
  const role=window.TEST_ROLE||'student',method=opt.method||'GET';
  const entry=opt.body?JSON.parse(opt.body):{};
@@ -53,11 +53,11 @@ with sync_playwright() as pw:
    page=browser.new_page(viewport={'width':width,'height':860})
    page.set_default_timeout(9500)
    errs=[];page.on('pageerror',lambda e:errs.append(str(e)))
-   page.goto('http://127.0.0.1:8990/')
+   page.goto('about:blank')
    page.evaluate('() => {'+setup_script+'window.TEST_ROLE='+json.dumps(role)+';}')
    page.set_content(page_html,wait_until='load')
    page.locator('#oneLogin').click()
-   target='#sessionForm' if role=='therapist' else '#entryForm'
+   target='#inviteForm' if role=='therapist' else '#entryForm'
    page.locator(target).wait_for()
    assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth+3'),('overflow',role,width)
    if role=='student':
