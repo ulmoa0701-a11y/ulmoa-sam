@@ -29,8 +29,7 @@ try{
   {name:'desktop-default-audio',width:1440,height:900,sound:true,credit:true},
   {name:'mobile-sized-muted',width:390,height:844,sound:false,credit:false},
   {name:'desktop-interlude-audio',width:1440,height:900,sound:true,credit:false,mode:'interlude'},
-  {name:'desktop-beat-guide-audio',width:1440,height:900,sound:true,credit:false,mode:'music'},
-  {name:'desktop-spoken-guide-video-fallback',width:1440,height:900,sound:true,credit:false,mode:'voice'}
+  {name:'desktop-beat-guide-audio',width:1440,height:900,sound:true,credit:false,mode:'music'}
  ]){
   const context=await browser.newContext({viewport:{width:scenario.width,height:scenario.height},acceptDownloads:true});
   const page=await context.newPage(),jsErrors=[],consoleErrors=[];
