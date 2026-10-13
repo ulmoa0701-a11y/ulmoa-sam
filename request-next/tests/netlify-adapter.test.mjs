@@ -45,7 +45,7 @@ const key='admin-testing-secret-key-40-characters-long';
 const salt='rate-testing-secret-key-40-characters-long';
 function form(mode,over={}){
  const f=new FormData();
- Object.entries({visibility:mode,category:'질문',title:'',body:mode==='public'?'공개 메모':'PRIVATE MESSAGE CONTENT',nickname:'가상 작성자',anonymous:'false',role:'보호자',link:'',consent:'false',...over}).forEach(([k,v])=>f.set(k,String(v)));
+ Object.entries({visibility:mode,category:'질문',title:'',body:mode==='public'?'공개 메모':'PRIVATE MESSAGE CONTENT',nickname:'가상 작성자',anonymous:'false',role:'보호자',link:'',consent:mode==='public'?'false':'true',...over}).forEach(([k,v])=>f.set(k,String(v)));
  return f;
 }
 async function request(env,path,method='GET',body,headers={}){
