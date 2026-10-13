@@ -53,7 +53,7 @@ with sync_playwright() as pw:
    page=browser.new_page(viewport={'width':width,'height':860})
    page.set_default_timeout(9500)
    errs=[];page.on('pageerror',lambda e:errs.append(str(e)))
-   page.goto('about:blank')
+   page.goto('http://127.0.0.1:8990/')
    page.evaluate('() => {'+setup_script+'window.TEST_ROLE='+json.dumps(role)+';}')
    page.set_content(page_html,wait_until='load')
    page.locator('#oneLogin').click()
