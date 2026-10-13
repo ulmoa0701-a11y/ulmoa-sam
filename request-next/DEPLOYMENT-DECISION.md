@@ -33,3 +33,14 @@
 - 제목 기본 접기, 문장 시작칩 5개, 기존 내용 비파괴, 2,000자 글자 수 표시.
 - 공개/비밀 옵션은 한 폼을 유지, 제출 후에만 접수확인문.
 - 일관된 타이포, PC/모바일, 접근성에 초점. 캐릭터/메인 홈페이지/기존 공개본 변경 없음.
+
+## 2026-10-13 실제 독립 Netlify 프로젝트 확보
+- Netlify Free 팀에서 기존 사이트를 변경하지 않고 새 테스트 프로젝트 habom-unified-private-staging 생성.
+- 프로젝트: https://app.netlify.com/projects/habom-unified-private-staging
+- Netlify site ID: f9c910bc-97fe-482e-8b84-dc2ba8584907
+- 연결된 Netlify 도구로 readback: 프로젝트 존재, Free plan, SSO login required for all deploys 확인.
+- 아직 Git 저장소 연결, Functions, Database, Blob 구성 및 배포를 실행하지 않았으며 live deployed URL이 없음.
+- 배포용 Git branch는 feature/habom-unified-secure-20261012, Base directory request-next, publish site, Netlify functions netlify/functions.
+- 중요: 원본 ulmoa-sam main 브랜치로 연결되면 다른 게임/파일을 잘못 배포할 수 있으므로 반드시 배포 브랜치와 base directory를 지정해야 함.
+- 연결된 Netlify 도구는 Git repository linking 및 environment-secret mutation을 제공하지 않으며, Remote Desktop Commander 실행 잔여 호출도 0%. 이 단계는 계정 관리자 Netlify UI 동작이 필요함.
+- 비밀키 HABOM_ADMIN_KEY와 HABOM_RATE_SALT는 32자 이상 무작위 값으로 해당 신규 프로젝트의 Functions 환경변수에만 저장; GitHub에 커밋하거나 채팅에 입력하지 않음.
