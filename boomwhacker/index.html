@@ -1482,7 +1482,9 @@ function startIntro(){
   $('#playBtn').textContent='Ⅱ';$('#startBtn').textContent='취소';
   introRaf=requestAnimationFrame(introFrame);
 }
+let pianoStartPending=false,pianoStartTicket=0;
 function toggle(){
+  if(pianoStartPending){reset();return}
   if(introActive){reset();return}
   if(playing){
     playing=false;stopMr();stopLeadIn();stopFirstMelody();stopSongMelody();audioRenderSongStartAt=0;introScheduledMr=false;cancelAnimationFrame(raf);
@@ -1490,10 +1492,24 @@ function toggle(){
     return;
   }
   if(elapsed>=totalMs){elapsed=0;hasStartedSong=false}
+  if(!hasStartedSong&&sound&&pianoLoadState==='loading'){
+    // A slow phone/network must never substitute synthetic notes for the
+    // intended acoustic-piano accompaniment on the first user click.
+    audio();const ticket=++pianoStartTicket;pianoStartPending=true;
+    $('#startBtn').textContent='🎹 피아노 준비 중 · 취소';
+    $('#playBtn').textContent='⏳';
+    loadPianoSamples().then(()=>{
+      if(!pianoStartPending||ticket!==pianoStartTicket||playing||introActive||hasStartedSong)return;
+      pianoStartPending=false;$('#playBtn').textContent='▶';
+      if(introMode!=='instant')startIntro();else beginPlayback();
+    });
+    return;
+  }
   if(!hasStartedSong&&introMode!=='instant'){startIntro();return}
   beginPlayback();
 }
 function reset(){
+  ++pianoStartTicket;pianoStartPending=false;
   stopIntro();playing=false;hasStartedSong=false;stopMr();stopLeadIn();stopSongMelody();audioRenderSongStartAt=0;introAudioStartAt=0;introScheduledMr=false;cancelAnimationFrame(raf);
   elapsed=0;lastTs=0;draw();updateTime();updateLyricTrack(true);
   $('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작';
@@ -1575,6 +1591,8 @@ async function exportVideo(){
  videoStatus('녹화 준비 중이에요. 영상은 곡 길이만큼 재생한 뒤 저장돼요.','working');
  let canvasStream=null,ac=null,dest=null;
  try{
+  // Wait for decoded acoustic piano before beginning the recording clock.
+  if(sound)await loadPianoSamples();
   reset();
   const canvas=videoCanvas(),ctx=canvas.getContext('2d');
   if(!ctx)throw new Error('화면 녹화용 캔버스를 열 수 없어요');
