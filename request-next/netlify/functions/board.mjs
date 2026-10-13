@@ -20,7 +20,13 @@ export default async function handler(req,context){
   const files=live?getStore({name:'habom-private-files',consistency:'strong'})
     :getDeployStore({name:'habom-private-files',consistency:'strong'});
   const env=createNetlifyEnv({database:getDatabase(),files,adminKey,rateSalt});
-  return worker.fetch(req,env);
+  // Only Netlify's trusted Context IP may drive per-visitor throttling.
+  // Never trust a client-supplied cf-connecting-ip header on Netlify.
+  const forwarded=new Headers(req.headers);
+  forwarded.delete('cf-connecting-ip');
+  if(typeof context.ip==='string'&&context.ip)forwarded.set('cf-connecting-ip',context.ip);
+  const verifiedRequest=new Request(req,{headers:forwarded});
+  return worker.fetch(verifiedRequest,env);
  }catch(e){
   console.error('habom staging backend unavailable',e instanceof Error?e.message:'unknown');
   return new Response(JSON.stringify({error:'현재 쪽지를 받을 수 없습니다.'}),{
