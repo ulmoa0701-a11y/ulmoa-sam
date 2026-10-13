@@ -32,6 +32,15 @@ jobs:
         run: |
           cd secure-portal
           node --test tests/*.test.mjs
+      - name: Install browser test harness
+        run: |
+          python3 -m pip install --disable-pip-version-check --quiet playwright==1.57.0
+      - name: Run real Chrome synthetic secure user-role UI tests
+        shell: bash
+        run: |
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          if [ -z "$CHROME_BIN" ]; then echo 'Chrome missing'; exit 1; fi
+          python3 secure-portal/tests/v15_ui_secure_qa.py
       - name: Enforce hard limits on real-use claims
         shell: bash
         run: |
