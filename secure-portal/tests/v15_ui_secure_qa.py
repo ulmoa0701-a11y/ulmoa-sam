@@ -41,7 +41,7 @@ window.fetch=async(url,opt={})=>{
  return new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json'}});
 };
 Object.defineProperty(window,'isSecureContext',{value:true,configurable:true});
-Object.defineProperty(navigator,'credentials',{value:{get:async()=>({id:'mock',type:'public-key',toJSON:()=>({id:'mock',type:'public-key',response:{clientDataJSON:'Y2hhbGxlbmdl'}})})},configurable:true});
+Object.defineProperty(navigator,'credentials',{value:{get:async()=>({id:'mock',type:'public-key',toJSON:()=>({id:'mock',type:'public-key',response:{clientDataJSON:'Y2hhbGxlbmdl'}})}),create:async()=>({id:'mock',type:'public-key',toJSON:()=>({id:'mock',type:'public-key',response:{clientDataJSON:'Y2hhbGxlbmdl'}})})},configurable:true});
 window.PublicKeyCredential=class PublicKeyCredential{static parseRequestOptionsFromJSON(x){return x}};
 """
 cases=[]
