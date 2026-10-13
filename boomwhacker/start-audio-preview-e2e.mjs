@@ -17,6 +17,25 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const browser=await chromium.launch({executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--autoplay-policy=no-user-gesture-required']});
 const outputs=[],types=['interlude','music','bright','soft'];
 try{
+ // Real slow-network simulation: tapping play before all voice WAVs
+ // have decoded must wait, not silently turn into a different cue mode.
+ const delayed=await browser.newPage({viewport:{width:1280,height:900}});
+ await delayed.route('**/voice/*.wav',async route=>{
+   await new Promise(resolve=>setTimeout(resolve,900));
+   await route.continue();
+ });
+ await delayed.goto('http://127.0.0.1:'+server.address().port+'/boomwhacker/',{waitUntil:'domcontentloaded'});
+ await delayed.locator('#introMode').selectOption('voice');
+ await delayed.locator('#startBtn').click();
+ const pending=await delayed.evaluate(()=>({state:guideVoiceState,active:introActive,text:document.querySelector('#startBtn').textContent}));
+ if(pending.state!=='loading'||pending.active||!pending.text.includes('준비 중'))
+   throw Error('Slow network voice start not deferred '+JSON.stringify(pending));
+ await delayed.waitForFunction(()=>introActive&&guideVoiceState==='ready',null,{timeout:12000});
+ const resumed=await delayed.evaluate(()=>({active:introActive,state:guideVoiceState,mode:introMode,scheduled:!!introGain}));
+ if(!resumed.active||resumed.state!=='ready'||resumed.mode!=='voice'||!resumed.scheduled)
+   throw Error('Voice did not start after slow network load '+JSON.stringify(resumed));
+ console.log('BOOM_SLOW_VOICE_QA='+JSON.stringify({pending,resumed}));
+ await delayed.close();
  const page=await browser.newPage({acceptDownloads:true,viewport:{width:1280,height:900}});
  await page.goto('http://127.0.0.1:'+server.address().port+'/boomwhacker/?song=twinkle',{waitUntil:'networkidle'});
  const voiceOK=await page.evaluate(()=>loadGuideVoices());
