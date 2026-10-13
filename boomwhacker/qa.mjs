@@ -457,7 +457,13 @@ for(const [label,w,h] of [['mobile-score-immediate',390,844],['desktop-score-imm
   check(started.active&&started.countBeats===0&&started.beats>=4,
      label+': guided start must not add countdown '+JSON.stringify(started));
    await page.waitForFunction(()=>!introActive&&playing,null,{timeout:16000});
-   await page.waitForTimeout(130);
+   // Visual handoff now arms a little before the real downbeat, so wait
+   // for the AUDIO clock to reach note 1, not an arbitrary 130 ms delay.
+   await page.waitForFunction(()=>{
+     const t=window.__boomVideoQA.scoreTiming();
+     return playing&&t.elapsed>=t.firstScoreBeatMs+12
+       &&!!document.querySelector('#scoreStageGrid .scoreActive');
+   },null,{timeout:3500});
   const first=await page.evaluate(()=>({
     timing:window.__boomVideoQA.scoreTiming(),active:[...document.querySelectorAll('#scoreStageGrid .scoreActive')].map(e=>Number(e.dataset.eventIndex)),
     side:[...document.querySelectorAll('#scoreRows .scoreActive')].map(e=>[...e.parentElement.children].indexOf(e)),
