@@ -1072,7 +1072,7 @@ function scheduleInterludeAccompaniment(ac,dest,start,beats,intervalMs,meter){
 // Both audible start choices share one song clock and falling-note runway.
 function isGuidedStartMode(){return introMode==='interlude'||introMode==='music'}
 function introHelpText(){
- if(introMode==='interlude')return '충분한 길이의 악기 전주를 듣고, 마지막 부분에 내려오는 공을 보며 시작해요.';
+ if(introMode==='interlude')return isTwinkleScore()?'작은별: 도도솔솔 라라솔 / 파파미미 레레도 선율을 먼저 듣고, 도도솔솔부터 연주해요.':'곡의 선율 전주를 들은 뒤, 마지막 부분에 내려오는 공을 보며 시작해요.';
  if(introMode==='music')return '첫 박은 쿵, 다음 박은 짝. 같은 박자로 공이 내려와요.';
  if(introMode==='instant')return '시작 안내 없이 곧바로 공이 내려와요.';
  return '기존 3초 숫자 카운트다운';
@@ -1093,13 +1093,20 @@ const INTERLUDE_COUNTDOWN_BEATS=0;
 function instrumentalPreludePlan(){
  const meter=[2,3,4].includes(Number(currentSong.timeN))?Number(currentSong.timeN):4;
  const beat=beatMs(),barMs=meter*beat;
- // Use full even-bar phrases (>=6.5 s) while preserving the final
- // 3.1-second visual descent before the first exact song downbeat.
+ // For Twinkle Twinkle, the prelude is EXACTLY its first eight written
+ // bars: C C G G | A A G(2) | F F E E | D D C(2).
+ // The song then starts again from C C G G; do not invent a separate tune.
+ if(isTwinkleScore()){
+   const bars=8,beats=16;
+   return{meter,bars,beats,durationMs:beats*beat,countdownBeats:INTERLUDE_COUNTDOWN_BEATS,
+     firstBallOffsetMs:beats*beat-firstNoteMs(),source:'score-opening'};
+ }
+ // Other song types retain the proven complete even-bar introduction.
  const minimumMs=Math.max(6500,firstNoteMs()+100);
  let bars=Math.max(2,Math.ceil(minimumMs/barMs));
  if(bars%2!==0)bars++;
  return{meter,bars,beats:meter*bars,durationMs:meter*bars*beat,countdownBeats:INTERLUDE_COUNTDOWN_BEATS,
-   firstBallOffsetMs:meter*bars*beat-firstNoteMs()};
+   firstBallOffsetMs:meter*bars*beat-firstNoteMs(),source:'general'};
 }
 // Give phones and tablets a mid/high-frequency attack: a 50-90 Hz kick
 // alone can disappear on their small speakers. This is a beat cue,
@@ -1129,6 +1136,21 @@ function schedulePreludeMallet(ac,dest,hz,when,amp,beat){
 }
 function scheduleInterludeMusic(ac,dest,start,intervalMs,meter){
  const plan=instrumentalPreludePlan(),beat=intervalMs/1000;
+ // Play the ACTUAL score at the exact same rhythm before the playing screen.
+ // First 8 bars = 도도솔솔 라라솔 파파미미 레레도 (including held notes).
+ // Never double the song audio: live MR and first playing note start AFTER it.
+ if(isTwinkleScore()){
+   const melody=ac.createGain();
+   melody.gain.setValueAtTime(.98,start);
+   melody.connect(dest);
+   const origin=firstNoteMs();
+   for(const e of events){
+     if(e.measure>=8)break;
+     if(e.note==='쉼'||!FREQ[e.note])continue;
+     scheduleMelodyTone(ac,melody,e.note,start+(e.start-origin)/1000,'piano',.95,e.dur);
+   }
+   return plan;
+ }
  const tune=ac.createGain(),chords=ac.createGain(),percussion=ac.createGain();
  tune.gain.setValueAtTime(.95,start);tune.connect(dest);
  chords.gain.setValueAtTime(.55,start);chords.connect(dest);

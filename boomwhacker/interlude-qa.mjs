@@ -105,6 +105,35 @@ try{
      const harmonies=Array.from({length:8},(_,i)=>chordForMeasure(i).name);
      const leadIn=instrumentalPreludePlan();
      const preludeHarmony=Array.from({length:leadIn.bars},(_,i)=>preludeChordForBar(i,leadIn.bars).name);
+     // Regression: the 8-bar Twinkle intro must literally be
+     // 도 도 솔 솔 라 라 솔(hold) 파 파 미 미 레 레 도(hold),
+     // not an unrelated arpeggio/chord tune.
+     const twinklePrelude=instrumentalPreludePlan(),voiceOriginal=scheduleMelodyTone,sequence=[];
+     const checkAC=new OfflineAudioContext(1,Math.ceil(44100*(twinklePrelude.durationMs/1000+1)),44100);
+     try{
+       scheduleMelodyTone=function(...args){
+         sequence.push({pitch:args[2],time:args[3],duration:args[6],instrument:args[4]});
+         return voiceOriginal(...args);
+       };
+       scheduleInterludeMusic(checkAC,checkAC.destination,.15,beatMs(),2);
+     }finally{scheduleMelodyTone=voiceOriginal}
+     const phraseScore=events.filter(e=>e.measure<8&&e.note!=='쉼'&&FREQ[e.note]);
+     const preludeErrors=sequence.flatMap((note,i)=>{
+       const fromScore=phraseScore[i];
+       if(!fromScore)return ['Unexpected extra note '+i];
+       const expectedAt=.15+(fromScore.start-firstNoteMs())/1000;
+       return note.pitch!==fromScore.note||Math.abs(note.time-expectedAt)>.0001||
+         Math.abs(note.duration-fromScore.dur)>.01||note.instrument!=='piano'?
+         ['Note '+i+' does not match exact Small Star score']: [];
+     });
+     const expectedPitches=['도','도','솔','솔','라','라','솔','파','파','미','미','레','레','도'];
+     const exactSequence=sequence.map(n=>n.pitch).join(',')===expectedPitches.join(',');
+     const firstPhraseBeats=twinklePrelude.beats;
+     const firstScoreNoteAt=.15+twinklePrelude.durationMs/1000;
+     const finalPreludeRelease=.15+(phraseScore.at(-1).start-firstNoteMs()+phraseScore.at(-1).dur)/1000;
+     if(!exactSequence||preludeErrors.length||phraseScore.length!==14||firstPhraseBeats!==16||
+        twinklePrelude.bars!==8||Math.abs(firstScoreNoteAt-finalPreludeRelease)>.001)
+       throw Error('Small Star exact melody/restart timing error '+JSON.stringify({sequence,preludeErrors,twinklePrelude,firstScoreNoteAt,finalPreludeRelease}));
      const sustainedNote=events.find(e=>e.note==='솔'&&e.dur>1.5*beatMs());
      const ac=new OfflineAudioContext(1,Math.ceil(44100*3.5),44100);
      scheduleMelodyTone(ac,ac.destination,'솔',.1,'boom',.65,sustainedNote.dur);
@@ -114,7 +143,7 @@ try{
      const notes=events.slice(0,7).map(e=>e.note);
      const noteDuration=sustainedNote.dur;
      currentSong=originalSong;bpm=oldBpm;build();
-     return{harmonies,preludeHarmony,notes,noteDuration,start,tail};
+     return{harmonies,preludeHarmony,notes,noteDuration,start,tail,twinklePrelude:{beats:firstPhraseBeats,bars:twinklePrelude.bars,source:twinklePrelude.source,sequence:sequence.map(n=>n.pitch),durationMs:twinklePrelude.durationMs,restartAtMs:Math.round(firstScoreNoteAt*1000),errors:preludeErrors}};
    });
    const mu=result.musicality;
    if(mu.notes.join(',')!=='도,도,솔,솔,라,라,솔'||

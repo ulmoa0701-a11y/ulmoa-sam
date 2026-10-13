@@ -46,15 +46,24 @@ try{
     };
    });
    await page.locator(mobile?'#playBtn':'#startBtn').click();
-   await page.waitForFunction(()=>window.__musicAudit.notes.length>=6&&window.__musicAudit.render.length>=6,null,{timeout:23000});
+   // The 14 prelude notes are *also* intentionally scheduled. Wait for
+   // six notes from the REAL song after the prelude/MR start.
+   await page.waitForFunction(()=>{
+     const a=window.__musicAudit;
+     return a.mr!==null&&a.notes.filter(n=>n.when>=a.mr-.003).length>=6&&a.render.length>=6;
+   },null,{timeout:23000});
    const data=await page.evaluate(()=>({...window.__musicAudit,beat:beatMs(),bpm}));
-   const expected=['도','도','솔','솔','라','라'],first=data.notes[0].when;
-   const melodic=data.notes.slice(0,6).map((n,i)=>({pitch:n.note,errorMs:Math.round((n.when-first-i*data.beat/1000)*1000),advanceMs:Math.round((n.when-n.bookedAt)*1000),durationMs:n.duration}));
+   const expected=['도','도','솔','솔','라','라'];
+   const preludeExpected=['도','도','솔','솔','라','라','솔','파','파','미','미','레','레','도'];
+   const prelude=data.notes.filter(n=>n.when<data.mr-.003);
+   const realSongNotes=data.notes.filter(n=>n.when>=data.mr-.003);
+   const first=realSongNotes[0].when;
+   const melodic=realSongNotes.slice(0,6).map((n,i)=>({pitch:n.note,errorMs:Math.round((n.when-first-i*data.beat/1000)*1000),advanceMs:Math.round((n.when-n.bookedAt)*1000),durationMs:n.duration}));
    const visual=data.render.slice(0,6).map(r=>({i:r.i,pitch:r.note,lateMs:Math.round((r.time-r.when)*1000)}));
    const maxPitchDrift=Math.max(...melodic.map(x=>Math.abs(x.errorMs)));
    const maxVisualDelay=Math.max(...visual.map(x=>Math.max(0,x.lateMs)));
-   out.data={melodic,visual,maxPitchDrift,maxVisualDelay,beat:data.beat,mr:data.mr,first};
-   out.ok=data.bpm===120&&expected.every((x,i)=>melodic[i].pitch===x)&&
+   out.data={melodic,visual,maxPitchDrift,maxVisualDelay,beat:data.beat,mr:data.mr,first,preludeNotes:prelude.map(n=>n.note),preludeMs:Math.round((first-prelude[0].when)*1000)};
+   out.ok=data.bpm===120&&prelude.length===14&&prelude.every((n,i)=>n.note===preludeExpected[i])&&Math.abs(first-prelude[0].when-8)<.005&&expected.every((x,i)=>melodic[i].pitch===x)&&
      maxPitchDrift<=5&&melodic.slice(1).every(x=>x.advanceMs>=60)&&
      Math.abs(first-data.mr)<=.003&&maxVisualDelay<65&&!errors.length;
    await page.locator('#resetBtn').click();
