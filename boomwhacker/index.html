@@ -533,8 +533,8 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
 </select>
 <div id="introHelp" class="hint" aria-live="polite">짧은 악기 선율과 박자에 맞춰 시작해요.</div>
 </div>
-<div class="sec"><div class="label">멜로디 가이드</div><select id="melodySelect" class="sampleSelect" aria-label="멜로디 음색 선택"><option value="none">멜로디 없음</option><option value="piano">🎹 피아노 느낌</option><option value="xylophone">✨ 실로폰 느낌</option><option value="boom" selected>🥁 붐웨커 느낌</option></select><div class="mrVol"><span class="label" style="margin:0">멜로디 음량</span><input id="melodyVolume" type="range" min="0" max="100" value="65"><span id="melodyPct" class="mrPct">65%</span></div><div class="hint">연주할 때와 저장되는 영상에 같은 멜로디 음색·음량이 들어가요.</div></div>
-<div class="sec"><div class="label">소리 조합</div><div class="seg" id="mixModes"><button data-mix="melody">멜로디만</button><button data-mix="both" class="on">멜로디+MR</button><button data-mix="mr">MR만</button></div><div style="margin-top:9px"><input id="mrFile" class="mrFile" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg" aria-label="MR 파일 선택"></div><div class="mrVol"><span class="label" style="margin:0">MR 볼륨</span><input id="mrVolume" type="range" min="0" max="100" value="100"><span id="mrPct" class="mrPct">100%</span></div><div id="mrStatus" class="hint mrStatus ok">기본 자동 MR 준비됨 · 파일 없이 바로 사용할 수 있어요. 내 MR 파일은 선택사항이에요.</div></div>
+<div class="sec"><div class="label">멜로디 가이드</div><select id="melodySelect" class="sampleSelect" aria-label="멜로디 음색 선택"><option value="none">멜로디 없음</option><option value="piano" selected>🎹 실제 피아노 소리</option><option value="xylophone">✨ 실로폰 느낌</option><option value="boom">🥁 붐웨커 느낌</option></select><div class="mrVol"><span class="label" style="margin:0">멜로디 음량</span><input id="melodyVolume" type="range" min="0" max="100" value="70"><span id="melodyPct" class="mrPct">70%</span></div><div class="hint">연주할 때와 저장되는 영상에 같은 멜로디 음색·음량이 들어가요.</div></div>
+<div class="sec"><div class="label">소리 조합</div><div class="seg" id="mixModes"><button data-mix="melody">멜로디만</button><button data-mix="both" class="on">멜로디+MR</button><button data-mix="mr">MR만</button></div><div class="mrVol"><label for="mrStyle" class="label" style="margin:0">반주 분위기</label><select id="mrStyle" class="sampleSelect" aria-label="자동 반주 스타일 선택"><option value="kids">🎶 경쾌한 동요 반주</option><option value="soft">🎹 부드러운 피아노 반주</option></select></div><div style="margin-top:9px"><input id="mrFile" class="mrFile" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg" aria-label="MR 파일 선택"></div><div class="mrVol"><span class="label" style="margin:0">MR 볼륨</span><input id="mrVolume" type="range" min="0" max="100" value="70"><span id="mrPct" class="mrPct">70%</span></div><div id="mrStatus" class="hint mrStatus ok">기본 자동 MR 준비됨 · 파일 없이 바로 사용할 수 있어요. 내 MR 파일은 선택사항이에요.</div></div>
 <div class="sec"><div class="toggles"><button id="repeatBtn" class="toggle on">↻ 반복</button><button id="soundBtn" class="toggle on">🔊 소리</button><button id="lyricBtn" class="toggle on">가사 표시</button><button id="fullBtn" class="toggle">수업 전체화면</button></div></div>
 <div class="sec playSec"><button id="startBtn" class="primary">▶ 연주 시작</button><button id="restartBtn" class="ghost">↺ 처음부터</button><div class="hint">화면 아래 색 막대를 직접 눌러도 소리가 납니다.</div></div>
 <div class="sec videoSec">
@@ -616,8 +616,9 @@ function loadSong(){
  try{const raw=localStorage.getItem('ulmoaBoomLast');if(raw){const x=JSON.parse(raw);if(x&&Array.isArray(x.measures)){currentSampleKey=x.sampleKey||'';return x}}}catch(e){}
  currentSampleKey='twinkle';return clone(twinkle)
 }
-let melodyMode='boom';try{const saved=localStorage.getItem('ulmoaBoomMelody');if(MELODY_LABELS[saved])melodyMode=saved}catch(e){}
-let melodyVolume=.65,mixMode='both',mrBuffer=null,mrName='',mrVolume=1,mrSource=null,mrGain=null;
+let melodyMode='piano';try{const saved=localStorage.getItem('ulmoaBoomMelody');if(MELODY_LABELS[saved])melodyMode=saved}catch(e){}
+let melodyVolume=.7,mixMode='both',mrBuffer=null,mrName='',mrVolume=.7,mrSource=null,mrGain=null;
+let mrStyle='kids';try{if(localStorage.getItem('ulmoaBoomMrStyle')==='soft')mrStyle='soft'}catch(e){}
 let displayMode='note',childLabels=ORDER.map((_,i)=>'친구'+(i+1)),customLabels=ORDER.map(n=>noteLabel(n)),instrumentLibrary=DEFAULT_INSTRUMENT_LIBRARY.map(x=>({...x})),instrumentIds=[...DEFAULT_INSTRUMENT_IDS];
 try{
  const raw=JSON.parse(localStorage.getItem('ulmoaBoomDisplay')||'null');
@@ -898,6 +899,60 @@ function updateLyricTrack(force=false){
    `<span class="lyricSyllable ${x.i===view.activeIndex?'active':''}" style="--note-color:${noteColor(x.e.note)}">${esc(String(x.e.lyric).trim())}</span>`).join('');
 }
 function audio(){if(!audioCtx){const A=window.AudioContext||window.webkitAudioContext;if(A)audioCtx=new A()}if(audioCtx?.state==='suspended')audioCtx.resume()}
+// Licensed acoustic piano recordings instead of triangle/sine "piano" notes.
+// The compact sprite (314 KiB) is from Mats Helgesson, CC BY 4.0;
+// see boomwhacker/audio/ATTRIBUTION.md. If loading fails, synthesized
+// tones remain available so pupils can still play without interruption.
+const PIANO_ZONES=[
+ [36,34,37,.2,4.8],[40,38,41,5.2,4.8],[44,42,45,10.2,3.8],
+ [48,46,49,14.2,3.8],[52,50,53,18.2,3.8],[56,54,57,22.2,2.8],
+ [60,58,61,25.2,2.8],[64,62,65,28.2,2.3],[68,66,69,30.7,2.3],
+ [72,70,73,33.2,1.8],[76,74,77,35.2,1.3],[80,78,81,36.7,1.3],
+ [84,82,85,38.2,1.3]
+];
+let pianoBuffer=null,pianoLoadPromise=null,pianoLoadState='idle',pianoSampleOffset=0;
+function loadPianoSamples(){
+ if(pianoLoadPromise)return pianoLoadPromise;
+ pianoLoadState='loading';
+ pianoLoadPromise=(async()=>{
+  const AC=window.AudioContext||window.webkitAudioContext;
+  if(!AC)throw Error('AudioContext not supported');
+  const response=await fetch('./audio/mats-helgesson-piano.mp3');
+  if(!response.ok)throw Error('Piano recording unavailable '+response.status);
+  const context=new AC();
+  try{
+   const decoded=await context.decodeAudioData(await response.arrayBuffer());
+   if(decoded.duration<40)throw Error('Piano sprite appears incomplete');
+   // MP3 encoder delay, matching piano.js's published sampler decoder.
+   const data=decoded.getChannelData(0);
+   for(let i=0;i<Math.min(data.length,decoded.sampleRate);i++){
+    if(data[i]>.5){pianoSampleOffset=i/decoded.sampleRate-27/44100;break}
+   }
+   pianoBuffer=decoded;pianoLoadState='ready';return true;
+  }finally{await context.close().catch(()=>{})}
+ })().catch(e=>{pianoLoadState='unavailable';console.warn('Piano sample fallback:',e.message);return false});
+ return pianoLoadPromise;
+}
+function sampledPiano(ac,dest,hz,when,volume,durationSec){
+ if(!pianoBuffer||!Number.isFinite(hz)||hz<=0||volume<=0)return false;
+ const key=Math.round(69+12*Math.log2(hz/440));
+ const zone=PIANO_ZONES.find(z=>key>=z[1]&&key<=z[2])||PIANO_ZONES.reduce((a,z)=>Math.abs(z[0]-key)<Math.abs(a[0]-key)?z:a,PIANO_ZONES[0]);
+ const ratio=Math.pow(2,(key-zone[0])/12),startOffset=Math.max(0,zone[3]+pianoSampleOffset);
+ const source=ac.createBufferSource(),g=ac.createGain();
+ source.buffer=pianoBuffer;source.playbackRate.setValueAtTime(ratio,when);
+ source.connect(g);g.connect(dest);
+ const duration=Math.max(.12,Math.min(4.5,Number(durationSec)||.35));
+ const attack=Math.min(.009,duration*.12),fade=Math.min(.19,duration*.22);
+ g.gain.setValueAtTime(.00001,when);
+ g.gain.linearRampToValueAtTime(Math.max(.0001,volume),when+attack);
+ g.gain.setValueAtTime(Math.max(.0001,volume*.83),Math.max(when+attack,when+duration-fade));
+ g.gain.exponentialRampToValueAtTime(.00001,when+duration);
+ // Stop before this sample's following zone in the packed MP3.
+ const natural=Math.min(duration+.06,zone[4]/Math.max(.7,ratio)-.05);
+ source.start(when,startOffset);
+ source.stop(when+Math.max(.11,natural));
+ return true;
+}
 function voiceOsc(ac,dest,freq,type,amp,when,attack,decay,stop,mult=1,detune=0){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(freq*mult,when);if(detune)o.detune.setValueAtTime(detune,when);o.connect(g);g.connect(dest);g.gain.setValueAtTime(.0001,when);g.gain.exponentialRampToValueAtTime(Math.max(.0002,amp),when+attack);g.gain.exponentialRampToValueAtTime(.0001,when+decay);o.start(when);o.stop(when+stop)}
 // Keep held notes AUDIBLE across their notated duration, then release gently.
 function voiceOscHold(ac,dest,freq,type,amp,when,attack,duration,mult=1){
@@ -925,9 +980,11 @@ function scheduleMelodyTone(ac,dest,n,when,mode=melodyMode,volume=melodyVolume,n
  // Balance the melody below the MR without making the held note inaudible.
  master.gain.setValueAtTime(mode==='boom'?vol*.78:vol,when);master.connect(dest);
  if(mode==='piano'){
-  voiceOscHold(ac,master,f,'triangle',.19,when,.012,d);
-  voiceOsc(ac,master,f,'sine',.075,when,.008,Math.max(.12,d*.70),Math.max(.14,d*.89),2);
-  voiceOsc(ac,master,f,'sine',.035,when,.006,Math.max(.10,d*.47),Math.max(.13,d*.67),3);
+  if(sampledPiano(ac,master,f,when,.65,d))return true;
+  // Offline/slow-network fallback uses a softer attack, not the old
+  // hard continuous oscillator sound.
+  voiceOscHold(ac,master,f,'sine',.14,when,.012,d);
+  voiceOsc(ac,master,f,'triangle',.045,when,.012,Math.max(.15,d*.66),Math.max(.18,d*.86),2);
   return true;
  }
  if(mode==='xylophone'){
@@ -1512,7 +1569,7 @@ async function exportVideo(){
 }
 window.__boomVideoQA={scoreTiming:()=>({view:playView,firstScoreBeatMs:scoreStartMs(),elapsed,playing,introActive,firstEvent:events[0]?{note:events[0].note,start:events[0].start,duration:events[0].dur}:null,secondEvent:events[1]?{note:events[1].note,start:events[1].start,duration:events[1].dur}:null,visibleTime:$('#timeLabel').textContent}),print:()=>({pngCanvas:scoreSheetCanvas().width+'x'+scoreSheetCanvas().height,pdfPageCount:Math.max(1,Math.ceil(events.length/PRINT_PAGE_NOTES)),pdfBytes:scorePdfBytes([scoreSheetCanvas(0,Math.min(events.length,PRINT_PAGE_NOTES),true)]).size}),view:()=>({mode:playView,active:activeScoreIndex(elapsed),scoreTiles:$('#scoreStageGrid').children.length,sideTiles:$('#scoreRows').children.length,elapsed}),supported:()=>videoSupported(),mime:()=>videoMime(),brand:()=>({brand:VIDEO_BRAND,handle:VIDEO_HANDLE,copy:VIDEO_COPY}),colors:()=>({...COLORS}),melody:()=>({mode:melodyMode,label:MELODY_LABELS[melodyMode],options:{...MELODY_LABELS},volume:melodyVolume}),fall:()=>({leadMs:FIRST_NOTE_LEAD_MS,travelMs:FALL_TRAVEL_MS,firstNoteMs:firstNoteMs(),spawnDelayMs:firstNoteMs()-FALL_TRAVEL_MS,elapsed,playing}),tempo:()=>({bpm,sourceBpm:currentSong.bpm,min:MIN_TEMPO,max:MAX_TEMPO,comfortable:comfortableTempo(currentSong),custom:tempoPrefs[tempoKey(currentSong)]??null,beatMs:beatMs()}),intro:()=>({mode:introMode,active:introActive,started:hasStartedSong,durationMs:introDurationMs,beats:introBeats,meter:introMeter,previewBeats:introPreviewBeats,countBeats:introCountBeats,lastBeat:introLastBeat,progressMs:introActive?Math.max(0,performance.now()-introStartPerf):0}),mix:()=>({mode:mixMode,label:MIX_LABELS[mixMode],options:{...MIX_LABELS},mrReady:true,mrKind:mrBuffer?'file':'auto',mrLoaded:!!mrBuffer,mrName,mrVolume,melodyVolume}),display:()=>({mode:displayMode,label:DISPLAY_LABELS[displayMode],options:{...DISPLAY_LABELS},labels:ORDER.map(displayLabel),names:[...childLabels],custom:[...customLabels],instruments:[...instrumentIds],instrumentLibrary:instrumentLibrary.map(x=>({...x}))}),lyrics:()=>lyricWindowAt(Math.min(2600,totalMs/2)),preview:()=>{const c=videoCanvas(),x=c.getContext('2d');videoScene(x,Math.min(1500,totalMs/2));return {w:c.width,h:c.height,data:c.toDataURL('image/png').slice(0,40)}}};
 
-function init(){document.body.dataset.displayMode=displayMode;syncSongUI();choosePlayView(playView);$('#melodySelect').value=melodyMode;$('#introMode').value=introMode;updateIntroHelp();$('#displayModeSelect').value=displayMode;$('#displayEditBtn').classList.toggle('show',displayMode==='name'||displayMode==='custom'||displayMode==='instrument');$('#displayEditBtn').textContent=displayMode==='name'?'✎ 이름':displayMode==='instrument'?'✎ 악기':'✎ 설정'}
+function init(){document.body.dataset.displayMode=displayMode;loadPianoSamples();syncSongUI();choosePlayView(playView);$('#melodySelect').value=melodyMode;$('#mrStyle').value=mrStyle;$('#introMode').value=introMode;updateIntroHelp();$('#displayModeSelect').value=displayMode;$('#displayEditBtn').classList.toggle('show',displayMode==='name'||displayMode==='custom'||displayMode==='instrument');$('#displayEditBtn').textContent=displayMode==='name'?'✎ 이름':displayMode==='instrument'?'✎ 악기':'✎ 설정'}
 $('#playViewSelect').onchange=e=>choosePlayView(e.target.value);
 $('#scorePngBtn').onclick=()=>downloadScore('png');
 $('#scorePdfBtn').onclick=()=>downloadScore('pdf');
@@ -1521,6 +1578,7 @@ $('#melodySelect').onchange=e=>{const v=e.target.value;melodyMode=MELODY_LABELS[
 $('#melodyVolume').oninput=e=>{melodyVolume=Math.max(0,Math.min(1,Number(e.target.value)/100));$('#melodyPct').textContent=Math.round(melodyVolume*100)+'%'};
 $('#mixModes').onclick=e=>{const b=e.target.closest('button[data-mix]');if(!b)return;mixMode=MIX_LABELS[b.dataset.mix]?b.dataset.mix:'melody';document.querySelectorAll('#mixModes button').forEach(x=>x.classList.toggle('on',x.dataset.mix===mixMode));if(wantsMr()&&!mrBuffer){$('#mrStatus').textContent='기본 자동 MR을 사용 중이에요. 내 MR 파일을 선택하면 자동으로 바뀝니다.';$('#mrStatus').className='hint mrStatus ok'}if(playing){syncLiveMr();syncLiveSongMelody()}};
 $('#mrFile').onchange=e=>loadMrFile(e.target.files?.[0]||null);
+$('#mrStyle').onchange=e=>{mrStyle=e.target.value==='soft'?'soft':'kids';try{localStorage.setItem('ulmoaBoomMrStyle',mrStyle)}catch(err){};if(playing&&wantsMr()&&!mrBuffer)syncLiveMr()};
 $('#mrVolume').oninput=e=>{mrVolume=Math.max(0,Math.min(1,Number(e.target.value)/100));$('#mrPct').textContent=Math.round(mrVolume*100)+'%';if(mrGain&&audioCtx)mrGain.gain.setTargetAtTime(mrVolume,audioCtx.currentTime,.02)};
 $('#displayModeSelect').onchange=e=>{displayMode=DISPLAY_LABELS[e.target.value]?e.target.value:'note';applyDisplayMode();if(displayMode==='name'||displayMode==='custom'||displayMode==='instrument')openDisplayEditor()};
 $('#displayEditBtn').onclick=openDisplayEditor;
