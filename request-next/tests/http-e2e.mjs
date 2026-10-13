@@ -18,6 +18,7 @@ class DB {
    bind(...a){this.args=a;return this;},
    async first(){
     const a=this.args;
+    if(sql.startsWith('SELECT COUNT(*) AS n FROM posts'))return {n:db.posts.length};
     if(sql.startsWith('SELECT COUNT(*)'))return {n:db.rate.filter(x=>x.key===a[0]&&x.created_at>a[1]).length};
     if(sql.includes('FROM posts WHERE id='))return db.posts.find(x=>x.id===a[0])||null;
     throw Error('Unexpected SELECT first: '+sql);
@@ -165,6 +166,22 @@ try{
  await page.locator('#refresh').click();
  await page.waitForFunction(()=>document.querySelector('#lockedFeed').textContent.includes('공개 허용된 잠금 쪽지'));
  console.log('PASS HTTP: locked metadata only after admin approval; never leaks private body');
+
+ // A single synthetic, private receipt stays invisible and is purged by the UI.
+ // Clear the test-only counter: the earlier three deliberately scripted posts
+ // already consumed its local 3-post/10-minute quota.
+ db.rate=[];
+ const existingIds=db.posts.map(p=>p.id).sort(),existingFiles=files.map.size;
+ await page.locator('details.admin-section > summary').click();
+ await page.locator('#adminKey').fill(key);
+ await page.locator('#adminLoad').click();
+ await page.locator('#selfTestPanel').waitFor({state:'visible'});
+ await page.locator('#adminSelfTest').click();
+ await page.waitForFunction(()=>document.querySelector('#selfTestStatus').textContent.includes('검증 통과'),null,{timeout:20000});
+ assert.match(await page.locator('#selfTestStatus').innerText(),/시험 글과 파일을 삭제했어요/);
+ assert.deepEqual(db.posts.map(p=>p.id).sort(),existingIds);
+ assert.equal(files.map.size,existingFiles);
+ console.log('PASS REAL HTTP: admin one-click diagnostic verifies DB, file, permissions, reply and cleanup without leftover posts');
 
  await page.screenshot({path:'habom-real-http-390.png',fullPage:true});
  console.log('PASS HTTP INTEGRATION: browser/server/read/write/permissions/reply/delete');
