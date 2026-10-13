@@ -1,8 +1,9 @@
 [build]
+  command = "node netlify/build-verify.mjs"
   publish = "site"
   functions = "netlify/functions"
 
 # Functions use Netlify custom URL /api/*, so no client-side CORS secrets.
-# Publishing this config alone does not provision or deploy a server.
+# Staging build gate runs on the separate private Netlify project, without publishing until verified.
 [functions]
   node_bundler = "esbuild"
