@@ -56,7 +56,7 @@ jobs:
            ['Clinician statement, observation and hypothesis allowed',contract.includes("'studentReport'")&&contract.includes("'parentReport'")&&contract.includes("'workingHypothesis'")],
            ['v15 clinician fields validated and saved encrypted',backend.includes('validateSessionEntry(b.entry)')&&backend.includes("path==='session-notes'")],
            ['Share withdrawal endpoint present',backend.includes("path==='unshare'")&&secureUi.includes("api('unshare'")],
-           ['Drive copies pending status and cleanup route',backend.includes("path==='drive/cleanup'")&&backend.includes("remoteCopyStatus='pending'")],
+           ['Drive copies pending status and cleanup route',backend.includes("path==='drive/cleanup'")&&backend.includes("?'deleted':'pending'")],
            ['Backups blocked unless explicitly enabled',backend.includes("drivePolicyEnabled(env('DRIVE_BACKUP_ENABLED'))")],
            ['Public v15 demo attached to production secure API',!frontend.includes('window.ILDAN_PREVIEW=true')]
           ];
