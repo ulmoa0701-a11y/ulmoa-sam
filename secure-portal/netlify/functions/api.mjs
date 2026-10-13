@@ -259,7 +259,7 @@ try{
   const sealed=seal(JSON.stringify(entry),key);await db.query('INSERT INTO portal_session_notes(student_id,therapist_id,nonce,auth_tag,encrypted_payload) VALUES($1,$2,$3,$4,$5)',[studentId,u.id,sealed.nonce,sealed.auth_tag,sealed.encrypted_payload]);return json({ok:true},201);
  }
  if(path==='drive/status'&&req.method==='GET'){
-  if(u.role!=='therapist')return fail('치료사만 연결할 수 있습니다.',403);const r=await db.query('SELECT folder_id FROM portal_oauth WHERE therapist_id=$1',[u.id]);return json({connected:!!r.rows.length,configured:safeGoogleConfig(),folderUrl:r.rows[0]?`https://drive.google.com/drive/folders/${encodeURIComponent(r.rows[0].folder_id)}`:null});
+  if(u.role!=='therapist')return fail('치료사만 연결할 수 있습니다.',403);const r=await db.query('SELECT folder_id FROM portal_oauth WHERE therapist_id=$1',[u.id]);return json({connected:!!r.rows.length,configured:safeGoogleConfig(),backupEnabled:drivePolicyEnabled(env('DRIVE_BACKUP_ENABLED')),folderUrl:r.rows[0]?`https://drive.google.com/drive/folders/${encodeURIComponent(r.rows[0].folder_id)}`:null});
  }
  if(path==='drive/start'&&req.method==='GET'){
   if(u.role!=='therapist')return fail('치료사 전용입니다.',403);if(!safeGoogleConfig())return fail('관리자 구글 OAuth 설정이 아직 없습니다.',503);const state=randomToken(32);await db.query("INSERT INTO portal_oauth_states(state_hash,therapist_id,expires_at) VALUES ($1,$2,NOW()+INTERVAL '10 minutes')",[digest(state),u.id]);const params=new URLSearchParams({client_id:env('GOOGLE_CLIENT_ID'),redirect_uri:env('APP_ORIGIN')+'/api/drive/callback',response_type:'code',scope:'https://www.googleapis.com/auth/drive.file',access_type:'offline',prompt:'consent',state});return Response.redirect('https://accounts.google.com/o/oauth2/v2/auth?'+params,302);
