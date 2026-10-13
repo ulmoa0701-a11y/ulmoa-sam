@@ -45,7 +45,7 @@ async function sendForm(ev){
  data.set('consent',$('#consent').checked?'true':'false');
  sending=true;syncSend();submit.textContent='쪽지를 전하는 중…';
  try{
-  const response=await fetch('./api/posts'.replace('./api','/api'),{method:'POST',body:data,credentials:'omit',cache:'no-store'});
+  const response=await fetch('./api/posts'.replace('./api','/api'),{method:'POST',body:data,credentials:'same-origin',cache:'no-store'});
   const result=await response.json();
   if(!response.ok||!result.ok)throw Error(result.error||'등록하지 못했어요.');
   latestReceipt=result.id+'.'+result.receipt;
@@ -85,7 +85,7 @@ async function loadFeed(){
  const pub=$('#publicFeed'),locked=$('#lockedFeed');
  pub.replaceChildren(el('p','글을 불러오는 중…','muted'));
  try{
-  const r=await fetch('/api/posts',{credentials:'omit',cache:'no-store'});
+  const r=await fetch('/api/posts',{credentials:'same-origin',cache:'no-store'});
   if(!r.ok)throw Error('server not ready');
   const d=await r.json();pub.replaceChildren();locked.replaceChildren();
   if(!Array.isArray(d.posts)||!Array.isArray(d.locked))throw Error('invalid response');
@@ -106,7 +106,7 @@ async function seeMine(ev){
  const result=$('#mineResult');result.hidden=true;result.replaceChildren();setStatus($('#mineStatus'),'조회 중…');
  if(!/^[a-f0-9-]{36}$/.test(id)||!/^[a-f0-9]{64}$/.test(code)){setStatus($('#mineStatus'),'글 번호나 확인 코드를 확인해 주세요.','error');return;}
  try{
-  const r=await fetch('/api/mine/'+encodeURIComponent(id),{headers:{'X-Receipt-Token':code},credentials:'omit',cache:'no-store'});
+  const r=await fetch('/api/mine/'+encodeURIComponent(id),{headers:{'X-Receipt-Token':code},credentials:'same-origin',cache:'no-store'});
   if(!r.ok)throw Error('글 번호 또는 확인 코드가 맞지 않습니다.');
   const d=await r.json(),p=d.post;
   result.append(postCard({...p,title:p.title,body:p.body,displayName:p.displayName,createdAt:p.createdAt}));
@@ -123,7 +123,7 @@ async function seeMine(ev){
    remove.disabled=true;
    try{
     const response=await fetch('/api/mine/'+encodeURIComponent(id),{
-     method:'DELETE',headers:{'X-Receipt-Token':code},credentials:'omit',cache:'no-store'
+     method:'DELETE',headers:{'X-Receipt-Token':code},credentials:'same-origin',cache:'no-store'
     });
     if(!response.ok)throw Error('쪽지를 삭제하지 못했어요.');
     result.replaceChildren();result.hidden=true;
@@ -139,7 +139,7 @@ async function seeMine(ev){
 $('#mineForm').addEventListener('submit',seeMine);
 async function download(url,headers,name){
  try{
-  const r=await fetch(url,{headers,credentials:'omit',cache:'no-store'});
+  const r=await fetch(url,{headers,credentials:'same-origin',cache:'no-store'});
   if(!r.ok)throw Error('파일을 내려받지 못했어요.');
   const blob=await r.blob(),a=document.createElement('a'),href=URL.createObjectURL(blob);
   a.href=href;a.download=name||'attachment';document.body.append(a);a.click();a.remove();
@@ -150,7 +150,7 @@ $('#adminLoad').addEventListener('click',async()=>{
  const k=$('#adminKey').value.trim();const place=$('#adminPosts');
  if(k.length<32){setStatus($('#adminStatus'),'운영자 키를 확인해 주세요.','error');return;}
  try{
-  const r=await fetch('/api/admin/posts',{headers:{Authorization:'Bearer '+k},credentials:'omit',cache:'no-store'});
+  const r=await fetch('/api/admin/posts',{headers:{Authorization:'Bearer '+k},credentials:'same-origin',cache:'no-store'});
   if(!r.ok)throw Error('운영자 인증에 실패했습니다.');
   const data=await r.json();adminKey=k;$('#adminKey').value='';
   place.replaceChildren();
@@ -178,7 +178,7 @@ function renderAdmin(p){
  save.addEventListener('click',async()=>{
    save.disabled=true;
    try{
-    const r=await fetch('/api/admin/posts/'+p.id,{method:'POST',headers:{Authorization:'Bearer '+adminKey,'Content-Type':'application/json'},body:JSON.stringify({status:statusSelect.value,reply:replyBox.value,publicTitle:titleInput.value,metadataApproved:approve.checked,attachmentApproved:attachApprove.checked}),credentials:'omit',cache:'no-store'});
+    const r=await fetch('/api/admin/posts/'+p.id,{method:'POST',headers:{Authorization:'Bearer '+adminKey,'Content-Type':'application/json'},body:JSON.stringify({status:statusSelect.value,reply:replyBox.value,publicTitle:titleInput.value,metadataApproved:approve.checked,attachmentApproved:attachApprove.checked}),credentials:'same-origin',cache:'no-store'});
     if(!r.ok){let d=await r.json();throw Error(d.error||'저장 실패');}
     save.textContent='저장 완료';await loadFeed();
    }catch(err){setStatus($('#adminStatus'),err.message,'error');}
