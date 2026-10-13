@@ -9,7 +9,7 @@ import {createNetlifyEnv} from '../adapter.mjs';
 
 export const config={
  path:'/api/*',
- method:['GET','POST']
+ method:['GET','POST','DELETE']
 };
 export default async function handler(req,context){
  try{
