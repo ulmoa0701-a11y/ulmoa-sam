@@ -15,11 +15,15 @@ const server=http.createServer((req,res)=>{
 });
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const browser=await chromium.launch({executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--autoplay-policy=no-user-gesture-required']});
-const outputs=[],types=['interlude','music'];
+const outputs=[],types=['interlude','music','kids','soft'];
 try{
  const page=await browser.newPage({acceptDownloads:true,viewport:{width:1280,height:900}});
  await page.goto('http://127.0.0.1:'+server.address().port+'/boomwhacker/?song=twinkle',{waitUntil:'networkidle'});
  if(await page.locator('#introMode option[value="voice"]').count())throw Error('Voice choice still present');
+ await page.waitForFunction(()=>pianoLoadState==='ready'||pianoLoadState==='unavailable',null,{timeout:12000});
+ const loaded=await page.evaluate(()=>({state:pianoLoadState,seconds:pianoBuffer?.duration??0}));
+ if(loaded.state!=='ready'||loaded.seconds<38)throw Error('Real piano samples not decoded '+JSON.stringify(loaded));
+ console.log('ACOUSTIC_PIANO_LOADED='+JSON.stringify(loaded));
  for(const bpmValue of [66,100,140]){
   await page.locator('#tempo').evaluate((el,value)=>{el.value=String(value);el.dispatchEvent(new Event('input',{bubbles:true}))},bpmValue);
   for(const mode of types){
@@ -31,8 +35,15 @@ try{
     const output=ac.createGain();
     output.gain.value=.72;output.connect(ac.destination);
     if(plan.durationMs<6500||plan.bars%2)throw Error('Introduction is too short or not an even-bar phrase');
-    if(mode==='interlude')scheduleInterludeMusic(ac,output,delay,beatMs(),plan.meter);
-    else scheduleRhythmGuide(ac,output,delay,plan.beats,beatMs(),plan.meter);
+    let playedPiano=0;
+    const original=sampledPiano;
+    sampledPiano=function(...args){const played=original(...args);if(played)playedPiano++;return played};
+    try{
+     if(mode==='interlude')scheduleInterludeMusic(ac,output,delay,beatMs(),plan.meter);
+     else if(mode==='music')scheduleRhythmGuide(ac,output,delay,plan.beats,beatMs(),plan.meter);
+     else{mrStyle=mode;scheduleBuiltinMr(ac,output,delay,0,.70)}
+    }finally{sampledPiano=original}
+    if(mode!=='music'&&playedPiano<8)throw Error('Piano sample not used in '+mode+'; '+playedPiano);
     const samples=(await ac.startRendering()).getChannelData(0);
     const data=new ArrayBuffer(samples.length*2+44),view=new DataView(data);
     const text=(offset,s)=>{for(let i=0;i<s.length;i++)view.setUint8(offset+i,s.charCodeAt(i))};
@@ -51,7 +62,7 @@ try{
     const href=URL.createObjectURL(blob),link=document.createElement('a');
     link.href=href;link.download=filename;document.body.appendChild(link);link.click();link.remove();
     setTimeout(()=>URL.revokeObjectURL(href),5000);
-    return {mode,bpm,beats:plan.beats,meter:plan.meter,duration:plan.durationMs,
+    return {mode,bpm,beats:plan.beats,meter:plan.meter,duration:plan.durationMs,pianoSampleNotes:playedPiano,
       peak:Number(peak.toFixed(4)),rms:Number(Math.sqrt(sum/samples.length).toFixed(4))};
    },{mode,filename,bpm:bpmValue});
    const dl=await downloadPromise;
@@ -64,4 +75,4 @@ try{
  }
  fs.writeFileSync(path.join(dir,'measurements.json'),JSON.stringify(outputs,null,2));
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}
-if(outputs.length!==6)process.exitCode=1;
+if(outputs.length!==12)process.exitCode=1;

@@ -81,16 +81,16 @@ async function basicCase(name,width,height){
   await page.locator('#introMode').evaluate(el=>{el.value='music';el.dispatchEvent(new Event('change',{bubbles:true}))});
   check(await page.locator('#melodySelect').count()===1,`${name}: melody selector missing`);
   check(await page.locator('#melodySelect option').count()===4,`${name}: melody selector should have 4 choices`);
-  check((await page.locator('#melodySelect').inputValue())==='boom',`${name}: default melody should be Boomwhacker`);
+  check((await page.locator('#melodySelect').inputValue())==='piano',`${name}: default melody should be acoustic piano`);
   check(await page.locator('#melodyVolume').count()===1,`${name}: melody volume control missing`);
-  check((await page.locator('#melodyVolume').inputValue())==='65',`${name}: default melody volume should be 65%`);
+  check((await page.locator('#melodyVolume').inputValue())==='70',`${name}: default melody volume should be 70%`);
   check(await page.locator('#mixModes button').count()===3,`${name}: mix mode should have 3 choices`);
   check(await page.locator('#mixModes button.on').getAttribute('data-mix')==='both',`${name}: auto-MR should play on the song downbeat by default`);
   check(await page.locator('#mrFile').count()===1,`${name}: MR file input missing`);
   check(await page.locator('#mrVolume').count()===1,`${name}: MR volume control missing`);
-  check((await page.locator('#mrVolume').inputValue())==='100',`${name}: default MR volume should be 100%`);
-  check((await page.locator('#melodyPct').innerText())==='65%',`${name}: melody volume label should start at 65%`);
-  check((await page.locator('#mrPct').innerText())==='100%',`${name}: MR volume label should start at 100%`);
+  check((await page.locator('#mrVolume').inputValue())==='70',`${name}: default MR volume should be 70%`);
+  check((await page.locator('#melodyPct').innerText())==='70%',`${name}: melody volume label should start at 70%`);
+  check((await page.locator('#mrPct').innerText())==='70%',`${name}: MR volume label should start at 70%`);
   check(await page.locator('#watermarkOpt').isChecked(),`${name}: watermark should default on`);
   check(await page.locator('#creditOpt').isChecked(),`${name}: intro/outro should default on`);
   const videoInfo=await page.evaluate(()=>({supported:window.__boomVideoQA?.supported(),mime:window.__boomVideoQA?.mime(),brand:window.__boomVideoQA?.brand(),colors:window.__boomVideoQA?.colors(),melody:window.__boomVideoQA?.melody(),mix:window.__boomVideoQA?.mix(),display:window.__boomVideoQA?.display(),lyrics:window.__boomVideoQA?.lyrics(),preview:window.__boomVideoQA?.preview()}));
@@ -98,7 +98,7 @@ async function basicCase(name,width,height){
   check(String(videoInfo.mime||'').startsWith('video/webm'),`${name}: WebM recorder mime missing`);
   check(videoInfo.brand?.brand==='울모아쌤'&&videoInfo.brand?.handle==='@ulmoa__sam',`${name}: video brand metadata wrong`);
   check(videoInfo.colors?.도==='#EB2427'&&videoInfo.colors?.레==='#F6851F'&&videoInfo.colors?.미==='#FBED1B'&&videoInfo.colors?.파==='#73C84A'&&videoInfo.colors?.솔==='#00A39A'&&videoInfo.colors?.라==='#4B4AA8'&&videoInfo.colors?.시==='#D83A9B',`${name}: Boomwhacker color mapping wrong`);
-  check(videoInfo.melody?.mode==='boom'&&Object.keys(videoInfo.melody?.options||{}).length===4&&Math.abs(videoInfo.melody?.volume-.65)<.001,`${name}: melody QA metadata wrong`);
+  check(videoInfo.melody?.mode==='piano'&&Object.keys(videoInfo.melody?.options||{}).length===4&&Math.abs(videoInfo.melody?.volume-.70)<.001,`${name}: melody QA metadata wrong`);
   check(videoInfo.mix?.mode==='both'&&Object.keys(videoInfo.mix?.options||{}).length===3&&videoInfo.mix?.mrReady===true&&videoInfo.mix?.mrKind==='auto'&&!videoInfo.mix?.mrLoaded,`${name}: mix QA metadata wrong`);
   check(videoInfo.display?.mode==='note'&&Object.keys(videoInfo.display?.options||{}).length===4&&videoInfo.display?.labels?.[0]==='도',`${name}: display QA metadata wrong`);
   check((videoInfo.lyrics?.items?.length||0)>5,`${name}: continuous lyric window missing`);
@@ -206,7 +206,7 @@ async function basicCase(name,width,height){
   await page.locator('#melodySelect').selectOption('boom');
   await page.locator('#melodyVolume').evaluate(el=>{el.value='30';el.dispatchEvent(new Event('input',{bubbles:true}))});
   check(Math.abs((await page.evaluate(()=>window.__boomVideoQA.melody().volume))-.3)<.001,`${name}: melody volume slider failed`);
-  await page.locator('#melodyVolume').evaluate(el=>{el.value='65';el.dispatchEvent(new Event('input',{bubbles:true}))});
+  await page.locator('#melodyVolume').evaluate(el=>{el.value='70';el.dispatchEvent(new Event('input',{bubbles:true}))});
   if(width<=800)await page.locator('#mobileSettingsClose').click();
 
   await page.locator('#displayModeSelect').selectOption('instrument');
@@ -457,7 +457,13 @@ for(const [label,w,h] of [['mobile-score-immediate',390,844],['desktop-score-imm
   check(started.active&&started.countBeats===0&&started.beats>=4,
      label+': guided start must not add countdown '+JSON.stringify(started));
    await page.waitForFunction(()=>!introActive&&playing,null,{timeout:16000});
-   await page.waitForTimeout(130);
+   // Visual handoff now arms a little before the real downbeat, so wait
+   // for the AUDIO clock to reach note 1, not an arbitrary 130 ms delay.
+   await page.waitForFunction(()=>{
+     const t=window.__boomVideoQA.scoreTiming();
+     return playing&&t.elapsed>=t.firstScoreBeatMs+12
+       &&!!document.querySelector('#scoreStageGrid .scoreActive');
+   },null,{timeout:3500});
   const first=await page.evaluate(()=>({
     timing:window.__boomVideoQA.scoreTiming(),active:[...document.querySelectorAll('#scoreStageGrid .scoreActive')].map(e=>Number(e.dataset.eventIndex)),
     side:[...document.querySelectorAll('#scoreRows .scoreActive')].map(e=>[...e.parentElement.children].indexOf(e)),
@@ -541,7 +547,7 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   check(halfMr.peak>.11&&halfMr.energy>autoBalance.melody.energy*.55,'mr: automatic MR should remain clearly audible around 50% '+JSON.stringify({halfMr,autoBalance}));
   report.push({name:'autoMrBalance',autoBalance,halfMr});
   check(defaultMr.mrReady===true&&defaultMr.mrKind==='auto'&&!defaultMr.mrLoaded,'mr: built-in automatic MR is not ready by default');
-  check((await page.locator('#mrStatus').innerText()).includes('기본 자동 MR'),'mr: built-in MR status is not visible');
+  check((await page.locator('#mrStatus').innerText()).includes('자동 MR 준비됨'),'mr: automatic backing status is not visible');
   await page.locator('#mixModes button[data-mix="both"]').click();
   await page.locator('#startBtn').click();
   await page.waitForTimeout(120);
