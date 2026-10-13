@@ -239,7 +239,7 @@ function mount({host,byId,situations,openTerm}){
      }
      card.append(controls);deck.append(card);
    }
-   host.append(intro,deck,el("p","gcat-game-note","이야기·단서·반응은 모두 만든 예시예요. 실제 아이의 행동 원인이나 지원 효과를 예측하지 않으며, 진단이나 처방을 대신하지 않습니다. 답을 맞히거나 점수를 매기지 않고, 이용 내용도 저장·전송하지 않아요."));
+   host.append(intro,deck,el("p","gcat-game-note","이야기·단서·반응은 모두 가상으로 만든 예시예요. 실제 아이의 행동 원인이나 지원 효과를 예측하지 않으며, 진단이나 처방을 대신하지 않습니다. 답을 맞히거나 점수를 매기지 않고, 이용 내용도 저장·전송하지 않아요."));
  }
  function begin(mode,level){
    const key=mode+":"+level, pool=CASES.filter(c=>c.level===level),prev=previousByMode.get(key)||[];
