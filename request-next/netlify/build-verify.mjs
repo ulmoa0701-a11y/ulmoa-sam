@@ -1,0 +1,122 @@
+/*
+ * Habom isolated staging deployment gate.
+ * Runs automatically in Netlify Builds using real Netlify Database and
+ * deploy-scoped Blobs (builds cannot safely write to site-wide stores).
+ * NEVER uploads user content. Every synthetic record is deleted in finally.
+ */
+import {getDatabase} from '@netlify/database';
+import {getDeployStore} from '@netlify/blobs';
+import {createHash,randomUUID} from 'node:crypto';
+import worker from '../src/worker.js';
+import {createNetlifyEnv} from './adapter.mjs';
+
+const EXPECTED_SITE='f9c910bc-97fe-482e-8b84-dc2ba8584907';
+const EXPECTED_BRANCH='feature/habom-unified-secure-20261012';
+const noSecrets=(e)=>e instanceof Error?e.name:'UnknownError';
+const assert=(test,description)=>{if(!test)throw Error('check failed: '+description);};
+async function check(){
+ if(process.env.NETLIFY!=='true')throw Error('Only run this gate in Netlify Builds');
+ if(process.env.SITE_ID!==EXPECTED_SITE)throw Error('Refusing build check outside the isolated Habom Netlify project');
+ if(process.env.CONTEXT!=='production'||process.env.BRANCH!==EXPECTED_BRANCH){
+  console.log('HABOM BUILD GATE: skip outside isolated staging production branch');
+  return;
+ }
+ const database=getDatabase();
+ const blobs=getDeployStore({name:'habom-build-check-files',consistency:'strong'});
+ const adminKey=process.env.HABOM_ADMIN_KEY||'',rateSalt=process.env.HABOM_RATE_SALT||'';
+ const env=createNetlifyEnv({database,files:blobs,adminKey,rateSalt});
+ const ip='build-check-'+randomUUID();
+ const rateHash=createHash('sha256').update(rateSalt+':'+ip).digest('hex');
+ let id=null,receipt=null,attachedKey=null,successful=false;
+ const request=async(path,options={})=>{
+  const req=new Request('https://habom-build-check.invalid'+path,{
+   ...options,
+   headers:{'cf-connecting-ip':ip,...(options.headers||{})}
+  });
+  return worker.fetch(req,env);
+ };
+ try{
+  let res=await request('/api/health');
+  assert(res.status===200,'real DB health');
+  let d=await res.json();assert(d.ok&&d.database==='ready','real DB response');
+  console.log('HABOM BUILD GATE: real PostgreSQL query passed');
+
+  const marker='HABOM_BUILD_'+randomUUID().replace(/-/g,'');
+  const form=new FormData();
+  for(const [k,v] of Object.entries({
+   visibility:'hidden',category:'질문',title:'자동점검 쪽지',
+   body:marker,nickname:'자동검증',anonymous:'false',role:'',
+   consent:'true',website:''
+  }))form.set(k,v);
+  form.set('attachment',new File(['%PDF-1.4\n'],'test.pdf',{type:'application/pdf'}));
+  res=await request('/api/posts',{method:'POST',body:form});
+  assert(res.status===201,'insert private test message and deploy-scoped PDF');
+  d=await res.json();
+  id=d.id;receipt=d.receipt;
+  assert(/^[a-f0-9-]{36}$/.test(id)&&/^[a-f0-9]{64}$/.test(receipt),'valid author receipt');
+  console.log('HABOM BUILD GATE: private post + PDF stored in real Netlify services');
+
+  res=await request('/api/posts');
+  assert(res.status===200,'public feed');
+  const feed=await res.text();
+  assert(!feed.includes(id)&&!feed.includes(marker)&&!feed.includes(receipt),'private post not exposed publicly');
+  assert((await request('/api/mine/'+id)).status===403,'reject missing receipt');
+  assert((await request('/api/mine/'+id,{headers:{'X-Receipt-Token':'0'.repeat(64)}})).status===403,'reject wrong receipt');
+  res=await request('/api/mine/'+id,{headers:{'X-Receipt-Token':receipt}});
+  assert(res.status===200,'accept correct receipt');
+  d=await res.json();assert(d.post.body===marker,'private text round trip');
+
+  assert((await request('/api/mine/'+id+'/file')).status===403,'reject unauthorized file read');
+  assert((await request('/api/public/'+id+'/file')).status===404,'hide private file on public route');
+  res=await request('/api/mine/'+id+'/file',{headers:{'X-Receipt-Token':receipt}});
+  assert(res.status===200,'read authorized private file');
+  assert((await res.text())==='%PDF-1.4\n','private PDF bytes round trip');
+
+  // Remember the synthetic blob key solely for verification after removal.
+  const rows=await database.sql.unsafe('SELECT attachment_key FROM posts WHERE id=$1',[id]);
+  attachedKey=rows[0]?.attachment_key||null;
+  assert(attachedKey?.startsWith('private/'+id+'/'),'test attachment key isolation');
+  console.log('HABOM BUILD GATE: public/private access controls and PDF bytes passed');
+
+  const denied=await request('/api/admin/posts');
+  assert(denied.status===403,'unauthorized admin denied');
+  res=await request('/api/admin/posts/'+id,{
+   method:'POST',
+   headers:{Authorization:'Bearer '+adminKey,'Content-Type':'application/json'},
+   body:JSON.stringify({
+    status:'답변 완료',reply:'자동점검 답장',publicTitle:'비밀글입니다',
+    metadataApproved:false,attachmentApproved:false
+   })
+  });
+  assert(res.status===200,'admin reply stored');
+  res=await request('/api/mine/'+id,{headers:{'X-Receipt-Token':receipt}});
+  d=await res.json();
+  assert(d.post.reply==='자동점검 답장','author can see reply');
+  assert(!(await (await request('/api/posts')).text()).includes(marker),'private reply remains hidden');
+  console.log('HABOM BUILD GATE: admin-authenticated reply and author read passed');
+  successful=true;
+ }finally{
+  let cleanupFailure=null;
+  if(id){
+   try{
+    if(receipt){
+     const removed=await request('/api/mine/'+id,{method:'DELETE',headers:{'X-Receipt-Token':receipt}});
+     assert(removed.status===200,'author deletion accepted');
+    }else{
+     // A 201 without receipt should not occur; clean synthetic row anyway.
+     if(attachedKey)await blobs.delete(attachedKey);
+     await database.sql.unsafe('DELETE FROM posts WHERE id=$1',[id]);
+    }
+    const verify=await database.sql.unsafe('SELECT COUNT(*)::int AS n FROM posts WHERE id=$1',[id]);
+    assert(verify[0]?.n===0,'synthetic database record removed');
+    if(attachedKey)assert(await blobs.get(attachedKey,{type:'blob',consistency:'strong'})===null,'synthetic PDF removed');
+   }catch(e){cleanupFailure=e;}
+  }
+  try{await database.sql.unsafe('DELETE FROM rate_limits WHERE key=$1',[rateHash]);}
+  catch(e){cleanupFailure=cleanupFailure||e;}
+  if(cleanupFailure)throw Error('cleanup failed ('+noSecrets(cleanupFailure)+')');
+  if(successful)console.log('HABOM BUILD GATE: ALL PASS; synthetic post/PDF/rate-key deleted');
+ }
+}
+try{await check();}
+catch(e){console.error('HABOM BUILD GATE FAILED: '+(e instanceof Error?e.message:'unknown'));process.exitCode=1;}
