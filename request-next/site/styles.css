@@ -87,3 +87,10 @@ body{background:#f8f9f4}
 .staging-notice{border:1px solid #e2d6bd;background:#fff8e8;color:#735837;padding:12px 14px;border-radius:11px;font-size:12px;line-height:1.7;margin:14px 0 0;word-break:keep-all}
 .staging-notice strong{color:#79502a}
 .submit:disabled{opacity:.55;box-shadow:none;cursor:not-allowed;transform:none}
+
+/* Production staging diagnostic is visible only after a successful admin authentication. */
+.self-test-panel{margin:16px 0;padding:15px;border:1px solid #d8e7d5;background:#f6faf3;border-radius:12px}
+.self-test-panel p{margin:0 0 8px}
+.self-test-panel p.muted{line-height:1.65;font-size:12px}
+.self-test-panel button{margin:4px 0 8px}
+.self-test-panel .status{overflow-wrap:anywhere}
