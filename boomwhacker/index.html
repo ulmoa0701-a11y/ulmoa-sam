@@ -1100,14 +1100,13 @@ function loadGuideVoices(){
   try{
    const packs={};
    for(const style of ['bright','soft']){
-    packs[style]=[];
-    for(const syllable of GUIDE_SYLLABLES){
+    packs[style]=await Promise.all(GUIDE_SYLLABLES.map(async syllable=>{
      const res=await fetch('./voice/'+style+'-'+syllable+'.wav');
      if(!res.ok)throw Error('Voice asset unavailable: '+res.status);
      const wave=await decoder.decodeAudioData(await res.arrayBuffer());
      if(wave.duration<.07||wave.duration>.60)throw Error('Voice cue duration out of bounds');
-     packs[style].push(wave);
-    }
+     return wave;
+    }));
    }
    guideVoiceBuffers=packs;guideVoiceState='ready';
    return true;
@@ -1117,7 +1116,10 @@ function loadGuideVoices(){
  return guideVoicePromise;
 }
 function scheduleVoiceGuide(ac,dest,start,beats,intervalMs,meter){
- scheduleRhythmGuide(ac,dest,start,beats,intervalMs,meter);
+ // Spoken syllables lead, with a quieter click to anchor the pulse.
+ const metronome=ac.createGain();
+ metronome.gain.setValueAtTime(.28,start);metronome.connect(dest);
+ scheduleRhythmGuide(ac,metronome,start,beats,intervalMs,meter);
  const cues=guideVoiceBuffers?.[guideVoiceStyle];
  if(!cues||cues.length!==4)return false;
  for(let i=0;i<beats;i++){
@@ -1355,6 +1357,7 @@ function startIntro(){
   $('#playBtn').textContent='Ⅱ';$('#startBtn').textContent='취소';
   introRaf=requestAnimationFrame(introFrame);
 }
+let pendingVoiceStart=0;
 function toggle(){
   if(introActive){reset();return}
   if(playing){
@@ -1363,10 +1366,25 @@ function toggle(){
     return;
   }
   if(elapsed>=totalMs){elapsed=0;hasStartedSong=false}
-  if(!hasStartedSong&&introMode!=='instant'){startIntro();return}
+  if(!hasStartedSong&&introMode!=='instant'){
+    if(introMode==='voice'&&sound&&guideVoiceState==='loading'){
+      // Preserve a user-initiated audio context and defer playback
+      // until all count-in WAVs have been decoded on slow connections.
+      audio();const ticket=++pendingVoiceStart;
+      $('#startBtn').textContent='🎤 목소리 준비 중';
+      $('#introHelp').textContent='목소리를 불러오는 중이에요. 준비되면 자동으로 시작해요.';
+      loadGuideVoices().then(()=>{
+        if(ticket!==pendingVoiceStart||introMode!=='voice'||introActive||playing||hasStartedSong)return;
+        startIntro();
+      });
+      return;
+    }
+    startIntro();return;
+  }
   beginPlayback();
 }
 function reset(){
+  ++pendingVoiceStart;
   stopIntro();playing=false;hasStartedSong=false;stopMr();stopLeadIn();stopSongMelody();audioRenderSongStartAt=0;introAudioStartAt=0;introScheduledMr=false;cancelAnimationFrame(raf);
   elapsed=0;lastTs=0;draw();updateTime();updateLyricTrack(true);
   $('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작';
