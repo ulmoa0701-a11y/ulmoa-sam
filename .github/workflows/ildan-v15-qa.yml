@@ -4,6 +4,7 @@ on:
     branches:
       - main
       - feature/ildan-sseobom-v15-clinical-qa-20261012
+      - feature/ildan-v15-compact-student-form-20261013
     paths:
       - 'test/ildan-sseobom/design-v15/**'
       - 'test/ildan-sseobom/v15-qa.html'
@@ -38,7 +39,8 @@ jobs:
           assert(!page.includes('v.length>90?v.slice(0,90)'),'truncated share content removed');
           assert(page.includes("path==='unshare'"),'revoke implemented');
           assert(page.includes('PREVIEW_DRAFT_PREFIX'),'session draft prototype present');
-          assert(page.includes("['note','date','time'].includes(x.value)"),'quick-mode shared fields constrained');
+          assert(page.includes("['note','date','time','place'].includes(x.value)"),'quick-mode shared fields constrained to visible entries');
+          assert(page.includes('class="student-place-field"'),'location field is within compact metadata row');
           assert(!v14.includes('PREVIEW_DRAFT_PREFIX'),'legacy v14 remains unmodified');
           console.log('PASS: JavaScript syntax and privacy guardrails');
           JS
