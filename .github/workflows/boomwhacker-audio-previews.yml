@@ -1,10 +1,9 @@
-name: Boomwhacker audible samples QA
+name: Boomwhacker instrumental intro audio QA
 on:
   pull_request:
     paths:
       - 'boomwhacker/start-audio-preview-e2e.mjs'
       - 'boomwhacker/index.html'
-      - 'boomwhacker/voice/**'
       - '.github/workflows/boomwhacker-audio-previews.yml'
 permissions:
   contents: read
@@ -19,11 +18,11 @@ jobs:
           node-version: '22'
       - name: Install free browser driver
         run: npm install --no-save --ignore-scripts --no-audit --no-fund playwright-core@1.56.1
-      - name: Render exact prelude/rhythm/voice into eight 66/100 BPM playable WAV files
+      - name: Render the longer instrumental prelude and beat guide at 66/100/140 BPM
         run: node boomwhacker/start-audio-preview-e2e.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: boomwhacker-musical-voice-previews
+          name: boomwhacker-instrumental-previews
           path: boomwhacker/audio-preview-artifacts
           if-no-files-found: error
