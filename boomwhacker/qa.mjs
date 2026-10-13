@@ -324,11 +324,8 @@ async function basicCase(name,width,height){
     await page.locator('#resetBtn').click();
     check(!(await page.locator('#introOverlay').isVisible()),name+': '+selected+' reset failed');
   }
-  await page.locator('#introMode').evaluate(el=>{el.value='count';el.dispatchEvent(new Event('change',{bubbles:true}))});
-  await page.locator(width<=800?'#playBtn':'#startBtn').click();
-  const oldCount=await page.evaluate(()=>window.__boomVideoQA.intro());
-  check(oldCount.active&&oldCount.durationMs===3000,name+': prior 3-second count broken');
-  await page.locator('#resetBtn').click();
+  check(await page.locator('#introMode option[value="count"]').count()===0,name+': obsolete numeric countdown option remains');
+  check(await page.locator('#introMode option[value="voice"]').count()===0,name+': obsolete spoken countdown option remains');
   await page.locator('#introMode').evaluate(el=>{el.value='instant';el.dispatchEvent(new Event('change',{bubbles:true}))});
   await page.locator(width<=800?'#playBtn':'#startBtn').click();
   check(await page.evaluate(()=>playing&&!introActive),name+': immediate start broken');
