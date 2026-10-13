@@ -56,7 +56,7 @@ async function storePost(req,env){
  if(!MODES.has(mode)||!KINDS.has(cat)||!body||!nickname)return reply({error:'필수 항목을 확인해 주세요.'},400);
  if(!validLink(link))return reply({error:'http 또는 https 링크만 사용할 수 있어요.'},400);
  if(mode==='public'&&isSensitive([title,body,nickname].join(' ')))return reply({error:'공개글에는 연락처·개인정보를 포함하지 말아 주세요.'},400);
- if((email||phone)&&!consent)return reply({error:'연락처 수집 동의가 필요합니다.'},400);
+ if(mode!=='public'&&!consent)return reply({error:'비공개 글 보관·이용 동의가 필요합니다.'},400);
  if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return reply({error:'이메일을 확인해 주세요.'},400);
  const upload=f.get('attachment');
  let mime='',fileName='',fileKey=null;
@@ -128,6 +128,13 @@ export default {
  async fetch(request,env){
   const url=new URL(request.url);
   try{
+   // Same-origin writes only: prevent unsolicited cross-site form submissions.
+   const origin=request.headers.get('origin');
+   const fetchSite=request.headers.get('sec-fetch-site');
+   if(request.method!=='GET'&&request.method!=='HEAD'&&
+     ((origin&&origin!==url.origin)||fetchSite==='cross-site')){
+     return reply({error:'요청 출처를 확인할 수 없습니다.'},403);
+   }
    if(!url.pathname.startsWith('/api/'))return env.ASSETS.fetch(request);
    if(request.method==='GET'&&url.pathname==='/api/posts')return readPosts(env);
    if(request.method==='POST'&&url.pathname==='/api/posts')return storePost(request,env);
