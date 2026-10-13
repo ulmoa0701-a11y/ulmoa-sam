@@ -1217,7 +1217,7 @@ const INTERLUDE_COUNTDOWN_BEATS=0;
 function instrumentalPreludePlan(){
  const meter=[2,3,4].includes(Number(currentSong.timeN))?Number(currentSong.timeN):4;
  const beat=beatMs(),barMs=meter*beat;
- // For Twinkle Twinkle, the prelude is EXACTLY its first eight written
+ // For Twinkle Twinkle, the prelude is EXACTLY its last eight written
  // bars: C C G G | A A G(2) | F F E E | D D C(2).
  // The song then starts again from C C G G; do not invent a separate tune.
  if(isTwinkleScore()){
@@ -1261,17 +1261,26 @@ function schedulePreludeMallet(ac,dest,hz,when,amp,beat){
 function scheduleInterludeMusic(ac,dest,start,intervalMs,meter){
  const plan=instrumentalPreludePlan(),beat=intervalMs/1000;
  // Play the ACTUAL score at the exact same rhythm before the playing screen.
- // First 8 bars = 도도솔솔 라라솔 파파미미 레레도 (including held notes).
+ // Last 8 bars = 도도솔솔 라라솔 파파미미 레레도 (including held notes).
  // Never double the song audio: live MR and first playing note start AFTER it.
  if(isTwinkleScore()){
-   const melody=ac.createGain();
-   melody.gain.setValueAtTime(.98,start);
-   melody.connect(dest);
-   const origin=firstNoteMs();
-   for(const e of events){
-     if(e.measure>=8)break;
+   const melody=ac.createGain(),backing=ac.createGain();
+   melody.gain.setValueAtTime(.91,start);melody.connect(dest);
+   backing.gain.setValueAtTime(.50,start);backing.connect(dest);
+   // Most nursery piano intros replay their final recognizable phrase:
+   // here the final 8 bars repeat the same notes as the first 8 bars.
+   const firstMeasure=(currentSong.measures||[]).length-8;
+   const scorePhrase=events.filter(e=>e.measure>=firstMeasure);
+   const origin=scorePhrase[0]?.start??firstNoteMs();
+   for(const e of scorePhrase){
      if(e.note==='쉼'||!FREQ[e.note])continue;
-     scheduleMelodyTone(ac,melody,e.note,start+(e.start-origin)/1000,'piano',.95,e.dur);
+     scheduleMelodyTone(ac,melody,e.note,start+(e.start-origin)/1000,'piano',.90,e.dur);
+   }
+   for(let bar=0;bar<8;bar++){
+     const es=scorePhrase.filter(e=>e.measure===firstMeasure+bar);
+     if(!es.length)continue;
+     const t=start+(es[0].start-origin)/1000;
+     backingMeasure(ac,backing,chordForMeasure(firstMeasure+bar),t,intervalMs,2,'soft');
    }
    return plan;
  }
