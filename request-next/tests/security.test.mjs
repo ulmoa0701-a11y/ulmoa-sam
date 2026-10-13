@@ -28,6 +28,7 @@ class MockDB {
         db.posts.push(post);return {success:true};
       }
       if(sql.startsWith('INSERT INTO rate_limits')){db.rate.push({key:a[0],created_at:a[1]});return {success:true};}
+      if(sql.startsWith('DELETE FROM posts')){db.posts=db.posts.filter(p=>p.id!==a[0]);return {success:true};}
       if(sql.startsWith('UPDATE posts')){
         const row=db.posts.find(x=>x.id===a[6]);assert.ok(row);
         [row.status,row.reply,row.replied_at,row.metadata_approved,row.public_title,row.attachment_approved]=a.slice(0,6);return {success:true};
@@ -124,4 +125,19 @@ test('all private content requires affirmative consent and rejects cross-site wr
  assert.equal(fetchSiteBlock.status,403);
  const allowed=await call(env,'/api/posts','POST',form('public'),{'Origin':'https://example.test'});
  assert.equal(allowed.status,201);
+});
+
+
+test('only receipt holder can delete a v2 post and its file',async()=>{
+ const env=makeEnv(),data=form('hidden');
+ data.set('attachment',new File([new Uint8Array([37,80,68,70,45,49])],'note.pdf',{type:'application/pdf'}));
+ const post=await create(env,data);assert.equal(post.status,201);
+ const id=post.data.id,token=post.data.receipt;
+ assert.equal(env.DB.posts.length,1);assert.equal(env.FILES.map.size,1);
+ assert.equal((await call(env,'/api/mine/'+id,'DELETE')).status,403);
+ assert.equal((await call(env,'/api/mine/'+id,'DELETE',null,{'X-Receipt-Token':'f'.repeat(64)})).status,403);
+ assert.equal(env.DB.posts.length,1);
+ assert.equal((await call(env,'/api/mine/'+id,'DELETE',null,{'X-Receipt-Token':token})).status,200);
+ assert.equal(env.DB.posts.length,0);assert.equal(env.FILES.map.size,0);
+ assert.equal((await call(env,'/api/mine/'+id,'GET',null,{'X-Receipt-Token':token})).status,403);
 });
