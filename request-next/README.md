@@ -42,3 +42,16 @@
 ### 개발판 QA
 CI 보안 테스트는 자체 D1/R2 모의 환경의 **단위 테스트**이며, 실제 배포 DB·접속 제어·파일 저장 운영 테스트를 대신하지 않음. 브라우저 QA 역시 테스트 모의 API를 사용하므로 실제 저장 성공을 보증하지 않음.
 
+
+## 2026-10-13 보안 강화 및 격리 실통신 검증
+- 기존 쪽지/메모형 UI와 기존 공개본은 유지, 신규 기능은 개발 브랜치에만 적용.
+- Netlify 함수에서 스팸 제한용 IP는 사용자가 보낸 헤더 대신 신뢰되는 Netlify Context IP를 사용.
+- 비밀글 보관 동의는 연락처 유무와 관계없이 필수; 동의 없으면 API가 거부.
+- POST/DELETE 교차 출처 요청 차단, 작성자용 확인 코드 검증 후 본인 글과 첨부 삭제 구현. 기존 Google Apps Script/Jotform 데이터에는 영향 없음.
+- request-next/tests/http-e2e.mjs: Chrome에서 실제 HTTP 요청으로 공개/비밀/잠금 작성·PDF·관리자 답변·본인 열람·삭제·비공개 데이터 미노출 검증.
+- request-next/tests/postgres-integration.test.mjs: GitHub Actions 임시 PostgreSQL 16에 실제 스키마를 생성하여 SQL 바인딩, 공개/비밀 저장 및 삭제 검증.
+- 통과한 GitHub Actions 6개 job: https://github.com/ulmoa0701-a11y/ulmoa-sam/actions/runs/38342014695
+- 외부 Netlify 배포 전 요건: GitHub 개발 브랜치 연결, base directory request-next 지정, 환경비밀 HABOM_ADMIN_KEY·HABOM_RATE_SALT 설정, Database 프로비저닝, private Blobs 연결, SSO 스테이징의 최종 개인정보 검증, 보유기간 및 개인정보 처리방침 확정, 기존 글 데이터 이관.
+- 현재 Netlify 연결 도구에는 GitHub 저장소 링크/환경변수 수정/배포 실행 기능이 없음. 원격 PC 도구 월 호출 한도는 0%. 실제 외부 서버 배포는 하지 않음.
+- Netlify Free 사용은 현금 결제 0원이지만 월 300크레딧을 소비하고 무료 한도 도달 시 같은 팀의 다른 앱도 영향받을 수 있음.
+- 공식 플랜: https://docs.netlify.com/manage/accounts-and-billing/billing/billing-for-credit-based-plans/credit-based-pricing-plans/
