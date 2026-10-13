@@ -7,7 +7,7 @@
 import {writeFile} from 'node:fs/promises';
 import {getDatabase} from '@netlify/database';
 import {getDeployStore} from '@netlify/blobs';
-import {createHash,randomUUID} from 'node:crypto';
+import {createHash,randomUUID,randomBytes} from 'node:crypto';
 import worker from '../src/worker.js';
 import {createNetlifyEnv} from './adapter.mjs';
 
@@ -23,7 +23,11 @@ async function check(){
  }
  const database=getDatabase();
  const blobs=getDeployStore({name:'habom-build-check-files',consistency:'strong'});
- const adminKey=process.env.HABOM_ADMIN_KEY||'',rateSalt=process.env.HABOM_RATE_SALT||'';
+ // Production must use its real locked-down configuration; preview builds use
+ // generated, never-persisted dummy keys so no real admin secret is copied to PRs.
+ const preview=process.env.CONTEXT!=='production';
+ const adminKey=preview?randomBytes(32).toString('hex'):(process.env.HABOM_ADMIN_KEY||'');
+ const rateSalt=preview?randomBytes(32).toString('hex'):(process.env.HABOM_RATE_SALT||'');
  const env=createNetlifyEnv({database,files:blobs,adminKey,rateSalt});
  const ip='build-check-'+randomUUID();
  const rateHash=createHash('sha256').update(rateSalt+':'+ip).digest('hex');
