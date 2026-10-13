@@ -297,10 +297,10 @@ async function basicCase(name,width,height){
   check(!(await page.locator('#scoreStage').isVisible()),`${name}: falling mode must hide expanded score`);
   await page.locator('#resetBtn').click();
   // Three guide choices share one musical timebase and show balls during sound.
-  check(await page.locator('#introMode option[value="voice"]').count()===1,name+': spoken choice missing');
+  check(await page.locator('#introMode option[value="voice"]').count()===0,name+': removed spoken guide returned');
   check(await page.locator('#introMode option[value="music"]').count()===1,name+': beat guide missing');
   check(await page.locator('#introMode option[value="interlude"]').count()===1,name+': musical intro missing');
-  for(const selected of ['interlude','music','voice']){
+  for(const selected of ['interlude','music']){
     await page.locator('#introMode').evaluate((el,mode)=>{el.value=mode;el.dispatchEvent(new Event('change',{bubbles:true}))},selected);
     await page.locator(width<=800?'#playBtn':'#startBtn').click();
     const started=await page.evaluate(()=>({
@@ -308,12 +308,11 @@ async function basicCase(name,width,height){
       firstBallOffset:instrumentalPreludePlan().firstBallOffsetMs,firstNoteMs:firstNoteMs(),firstBeat:document.querySelector('#introPulse').innerText
     }));
     check(started.active&&started.mode===selected&&started.countBeats===0&&started.previewBeats===started.expected
-       &&started.beats===started.expected&&started.durationMs>=started.firstNoteMs&&started.firstBallOffset>=0,
+       &&started.beats===started.expected&&started.durationMs>=6500&&started.firstBallOffset>=0,
        name+': '+selected+' guide not beat-aligned '+JSON.stringify(started));
     check(await page.locator('#introOverlay').evaluate(el=>el.classList.contains('preludePlaying')),
        name+': '+selected+' hides descending balls');
     if(selected==='music')check(started.firstBeat==='쿵',name+': no strong first beat');
-    if(selected==='voice')check(started.firstBeat==='하나',name+': count must start with 하나');
     const descending=await page.evaluate(()=>{
       const p=instrumentalPreludePlan(),offset=p.firstBallOffsetMs+Math.min(740,firstNoteMs()/2);
       const origin=introAudioStartAt;introAudioStartAt=audioCtx.currentTime-offset/1000;
@@ -325,11 +324,8 @@ async function basicCase(name,width,height){
     await page.locator('#resetBtn').click();
     check(!(await page.locator('#introOverlay').isVisible()),name+': '+selected+' reset failed');
   }
-  await page.locator('#introMode').evaluate(el=>{el.value='count';el.dispatchEvent(new Event('change',{bubbles:true}))});
-  await page.locator(width<=800?'#playBtn':'#startBtn').click();
-  const oldCount=await page.evaluate(()=>window.__boomVideoQA.intro());
-  check(oldCount.active&&oldCount.durationMs===3000,name+': prior 3-second count broken');
-  await page.locator('#resetBtn').click();
+  check(await page.locator('#introMode option[value="count"]').count()===0,name+': obsolete numeric countdown option remains');
+  check(await page.locator('#introMode option[value="voice"]').count()===0,name+': obsolete spoken countdown option remains');
   await page.locator('#introMode').evaluate(el=>{el.value='instant';el.dispatchEvent(new Event('change',{bubbles:true}))});
   await page.locator(width<=800?'#playBtn':'#startBtn').click();
   check(await page.evaluate(()=>playing&&!introActive),name+': immediate start broken');
