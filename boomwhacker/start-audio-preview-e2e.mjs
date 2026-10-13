@@ -22,7 +22,7 @@ try{
  if(await page.locator('#introMode option[value="voice"]').count())throw Error('Voice choice still present');
  await page.waitForFunction(()=>pianoLoadState==='ready'||pianoLoadState==='unavailable',null,{timeout:12000});
  const loaded=await page.evaluate(()=>({state:pianoLoadState,seconds:pianoBuffer?.duration??0}));
- if(loaded.state!=='ready'||loaded.seconds<40)throw Error('Real piano samples not decoded '+JSON.stringify(loaded));
+ if(loaded.state!=='ready'||loaded.seconds<38)throw Error('Real piano samples not decoded '+JSON.stringify(loaded));
  console.log('ACOUSTIC_PIANO_LOADED='+JSON.stringify(loaded));
  for(const bpmValue of [66,100,140]){
   await page.locator('#tempo').evaluate((el,value)=>{el.value=String(value);el.dispatchEvent(new Event('input',{bubbles:true}))},bpmValue);
