@@ -56,6 +56,7 @@ with sync_playwright() as pw:
    page.goto('http://127.0.0.1:8990/')
    page.evaluate('() => {'+setup_script+'window.TEST_ROLE='+json.dumps(role)+';}')
    page.set_content(page_html,wait_until='load')
+   page.locator('button[data-login-role="'+role+'"]').click()
    page.locator('#oneLogin').click()
    target='#inviteForm' if role=='therapist' else '#entryForm'
    page.locator(target).wait_for()
