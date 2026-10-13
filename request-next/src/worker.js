@@ -91,6 +91,14 @@ async function readMine(req,env,id,isFile=false){
  if(isFile)return downloadFile(env,row);
  return reply({post:personalPost(row)});
 }
+async function deleteMine(req,env,id){
+ const row=await env.DB.prepare('SELECT * FROM posts WHERE id=?').bind(id).first();
+ if(!row||!(await author(req,row)))return failNoStore();
+ // Only new v2 posts are ever in this DB. Existing GAS/Jotform content remains untouched.
+ if(row.attachment_key)await env.FILES.delete(row.attachment_key);
+ await env.DB.prepare('DELETE FROM posts WHERE id=?').bind(id).run();
+ return reply({ok:true,deleted:true});
+}
 async function downloadFile(env,row){
  if(!row.attachment_key)return reply({error:'첨부파일이 없습니다.'},404);
  const object=await env.FILES.get(row.attachment_key);
@@ -147,6 +155,9 @@ export default {
    if(/^\/api\/mine\/[a-f0-9-]+(?:\/file)?$/.test(url.pathname)&&request.method==='GET'){
     const id=extractId(url),isFile=url.pathname.endsWith('/file');
     return readMine(request,env,id,isFile);
+   }
+   if(/^\/api\/mine\/[a-f0-9-]+$/.test(url.pathname)&&request.method==='DELETE'){
+    return deleteMine(request,env,extractId(url));
    }
    if(url.pathname.startsWith('/api/admin/'))return adminAction(request,env,url);
    return reply({error:'경로가 없습니다.'},404);
