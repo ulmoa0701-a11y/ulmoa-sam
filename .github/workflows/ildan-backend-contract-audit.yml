@@ -34,12 +34,13 @@ jobs:
           cd secure-branch/secure-portal
           node --check netlify/functions/api.mjs
           node --check lib/security.mjs
+          node --check lib/record-contract.mjs
           node --check public/app.js
       - name: Execute existing backend unit tests (no database)
         shell: bash
         run: |
           cd secure-branch/secure-portal
-          node --test tests/security.test.mjs
+          node --test tests/*.test.mjs
       - name: Independent v15 frontend versus backend contract report
         shell: bash
         run: |
@@ -47,16 +48,17 @@ jobs:
           const fs=require('node:fs');
           const frontend=fs.readFileSync('frontend-repo/test/ildan-sseobom/design-v15/index.html','utf8');
           const backend=fs.readFileSync('secure-branch/secure-portal/netlify/functions/api.mjs','utf8');
-          const match=backend.match(/const ENTRY_KEYS\s*=\s*\[([^\]]+)\]/);
-          const keys=match?[...match[1].matchAll(/'([^']+)'/g)].map(m=>m[1]):[];
-          const clinician=backend.match(/for\(const k of \['observation','question','plan'\]\)/);
+          const contract=fs.readFileSync('secure-branch/secure-portal/lib/record-contract.mjs','utf8');
+          const secureUi=fs.readFileSync('secure-branch/secure-portal/public/app.js','utf8');
           const checks=[
-           ['Parent direct quote field childWords',frontend.includes('name="childWords"')&&keys.includes('childWords')],
-           ['Extra source category accepted',backend.includes("'그 밖의 사람에게 들음'")],
-           ['Student/parent/therapist source distinctions supported',backend.includes("'studentReport'")&&backend.includes("'parentReport'")&&backend.includes("'workingHypothesis'")],
-           ['v15 clinician fields saved',!clinician],
-           ['Share withdrawal endpoint implemented',backend.includes("path==='unshare'")],
-           ['Frontend client is wired to actual secure API',!frontend.includes('window.ILDAN_PREVIEW=true')]
+           ['Parent direct quote field childWords accepted',frontend.includes('name="childWords"')&&contract.includes("'childWords'")&&secureUi.includes('name="childWords"')],
+           ['Four caregiver source choices accepted',contract.includes("'그 밖의 사람에게 들음'")&&secureUi.includes('그 밖의 사람에게 들음')],
+           ['Clinician statement, observation and hypothesis allowed',contract.includes("'studentReport'")&&contract.includes("'parentReport'")&&contract.includes("'workingHypothesis'")],
+           ['v15 clinician fields validated and saved encrypted',backend.includes('validateSessionEntry(b.entry)')&&backend.includes("path==='session-notes'")],
+           ['Share withdrawal endpoint present',backend.includes("path==='unshare'")&&secureUi.includes("api('unshare'")],
+           ['Drive copies pending status and cleanup route',backend.includes("path==='drive/cleanup'")&&backend.includes("remoteCopyStatus='pending'")],
+           ['Backups blocked unless explicitly enabled',backend.includes("drivePolicyEnabled(env('DRIVE_BACKUP_ENABLED'))")],
+           ['Public v15 demo attached to production secure API',!frontend.includes('window.ILDAN_PREVIEW=true')]
           ];
           for(const [name,ok] of checks)console.log((ok?'READY':'BLOCKED')+' '+name);
           const blocked=checks.filter(x=>!x[1]).map(x=>x[0]);
@@ -64,7 +66,7 @@ jobs:
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,'보안 서버 기본 단위 테스트는 별도이며, 이 검사는 최신 체험판과 백엔드의 계약/기능 차이를 확인합니다.\n\n');
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,checks.map(([x,ok])=>'- '+(ok?'✅':'⛔')+' '+x).join('\n')+'\n\n');
           if(blocked.length){
-           console.log('RELEASE GATE BLOCKED: '+blocked.length+' known integrations not implemented; DO NOT use real child health data.');
+           console.log('RELEASE GATE BLOCKED: '+blocked.length+' remaining deployment gaps; DO NOT use real child health data.');
            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,'**실사용 금지:** 호환성 미통과 '+blocked.length+'개. 이 워크플로 성공은 문제 발견·보고 성공일 뿐 실운영 승인이 아닙니다.\n');
           }
           JS
