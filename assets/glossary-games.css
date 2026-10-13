@@ -101,3 +101,44 @@
  .glossary-page .gcat-game-takeaway{padding:12px}
  .glossary-page .gcat-game-perspective{padding:11px}
 }
+
+
+/* 선택한 단서·도움에 따라 진행되는 이야기형 게임 */
+.glossary-page .gcat-game-flow-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:9px;margin-top:17px}
+.glossary-page .gcat-game-flow-actions :is(.gcat-game-next,.gcat-game-secondary){flex:1 1 170px;margin:0}
+.glossary-page .gcat-game-evidence,.glossary-page .gcat-game-outcome{
+  padding:18px 19px;border:1.5px solid #badac2;background:linear-gradient(135deg,#eff8ec,#fffdf6);
+  border-radius:15px;margin:16px 0 10px;word-break:keep-all
+}
+.glossary-page .gcat-game-evidence:focus,.glossary-page .gcat-game-outcome:focus{outline:2px solid #589575;outline-offset:3px}
+.glossary-page .gcat-game-outcome{background:linear-gradient(135deg,#fff6e5,#fffefa);border-color:#e8d5ad}
+.glossary-page .gcat-game-evidence-label{display:block;color:#4d7856;font-size:12px;font-weight:800;margin-bottom:9px}
+.glossary-page .gcat-game-outcome .gcat-game-evidence-label{color:#82613c}
+.glossary-page .gcat-game-evidence p,.glossary-page .gcat-game-outcome p{
+  margin:0!important;font-size:17px!important;line-height:1.7!important;color:#3c5543;font-weight:650!important
+}
+.glossary-page .gcat-game-outcome p{color:#574937}
+.glossary-page .gcat-game-interpret{font-size:13.5px!important;color:#627164;line-height:1.65!important;margin:6px 0!important}
+.glossary-page .gcat-game-known-clues{margin:16px 0 12px;padding:13px 15px;background:#f0f7f0;border-left:3px solid #89b797;border-radius:10px}
+.glossary-page .gcat-game-known-clues strong{font-size:12px;color:#467050}
+.glossary-page .gcat-game-known-clues p{font-size:14px!important;line-height:1.6!important;color:#3e5647;margin:8px 0 0!important}
+.glossary-page .gcat-games-root[data-game-stage="supports"] .gcat-game-choice{
+  display:grid;grid-template-columns:28px minmax(0,1fr);column-gap:10px;row-gap:3px;
+}
+.glossary-page .gcat-game-choice-minor{grid-column:2;font-size:12px;line-height:1.55;color:#647466;word-break:keep-all}
+.glossary-page .gcat-game-already-tried{background:#edf6ee;border-color:#a3c8af}
+.glossary-page .gcat-game-already-tried .gcat-game-choice-text:after{content:" · 살펴봄";color:#547960;font-size:11px;font-weight:750}
+.glossary-page .gcat-game-disclaimer-inline{display:block;margin-top:9px;padding:9px 11px;background:#fff;border-radius:9px;font-size:12px;line-height:1.6;color:#766b5a}
+.glossary-page .gcat-game-compare-title{font-size:13px!important;color:#486c4f;margin:14px 0 8px!important}
+.glossary-page .gcat-game-recap-row{display:flex!important;flex-direction:column!important;gap:5px;align-items:stretch}
+.glossary-page .gcat-game-recap-row strong{font-size:14px}
+.glossary-page .gcat-game-recap-row p{margin:0!important;font-size:13px!important;color:#576c5f;line-height:1.55!important}
+.glossary-page .gcat-game-hub-intro p{font-size:14px!important}
+.glossary-page .gcat-game-choices .gcat-game-choice{word-break:keep-all}
+@media(max-width:650px){
+ .glossary-page .gcat-game-flow-actions{flex-direction:column}
+ .glossary-page .gcat-game-flow-actions button{width:100%;flex:0 0 auto;min-height:45px}
+ .glossary-page .gcat-game-evidence,.glossary-page .gcat-game-outcome{padding:15px}
+ .glossary-page .gcat-game-evidence p,.glossary-page .gcat-game-outcome p{font-size:15.5px!important}
+ .glossary-page .gcat-game-scene{font-size:14px!important}
+}
