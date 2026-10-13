@@ -1027,7 +1027,74 @@ function preludeChordForBar(bar,bars){
 }
 function chordForMeasure(mi){if(isTwinkleScore()&&Number.isInteger(mi)&&mi>=0&&mi<TWINKLE_CHORDS.length)return chordByName(TWINKLE_CHORDS[mi]);const weight={};for(const e of events.filter(x=>x.measure===mi&&x.active)){const n=mrBaseNote(e.note);weight[n]=(weight[n]||0)+(Number(e.dur)||1)}let best=MR_CHORDS[0],score=-1;for(const c of MR_CHORDS){let s=0;for(const n of c.tones)s+=weight[n]||0;if(s>score){score=s;best=c}}return best}
 function mrPulse(ac,dest,when,strong=false){const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.setValueAtTime(strong?95:125,when);o.frequency.exponentialRampToValueAtTime(strong?52:78,when+.11);o.connect(g);g.connect(dest);g.gain.setValueAtTime(.0001,when);g.gain.exponentialRampToValueAtTime(strong?.09:.04,when+.006);g.gain.exponentialRampToValueAtTime(.0001,when+.13);o.start(when);o.stop(when+.15)}
-function scheduleBuiltinMr(ac,dest,when,offsetSec=0,volume=mrVolume){const startMs=Math.max(0,Number(offsetSec)||0)*1000,lead=firstNoteMs(),beat=beatMs(),pre=ac.createGain(),comp=ac.createDynamicsCompressor(),master=ac.createGain();pre.gain.setValueAtTime(3.6,when);comp.threshold.setValueAtTime(-18,when);comp.knee.setValueAtTime(10,when);comp.ratio.setValueAtTime(4,when);comp.attack.setValueAtTime(.003,when);comp.release.setValueAtTime(.16,when);master.gain.setValueAtTime(Math.max(.0001,Math.min(1,Number(volume)||0)),when);pre.connect(comp);comp.connect(master);master.connect(dest);const measureIds=[...new Set(events.map(e=>e.measure))];for(const mi of measureIds){const es=events.filter(e=>e.measure===mi);if(!es.length)continue;const ms=Math.min(...es.map(e=>e.start))-lead,nextId=measureIds[measureIds.indexOf(mi)+1],nextEvents=events.filter(e=>e.measure===nextId),me=nextEvents.length?Math.min(...nextEvents.map(e=>e.start))-lead:Math.max(ms+beat*(currentSong.timeN||4),totalMs-lead);if(me<=startMs)continue;const chord=chordForMeasure(mi),beats=Math.max(1,Math.round((me-ms)/beat));for(let b=0;b<beats;b++){const rel=ms+b*beat;if(rel<startMs-1)continue;const t=when+(rel-startMs)/1000,strong=b===0;mrPulse(ac,pre,t,strong);const bass=chord.freqs[0];voiceOsc(ac,pre,bass,'triangle',strong?.11:.055,t,.012,strong?.58:.38,strong?.64:.44);for(const f of chord.freqs.slice(1)){voiceOsc(ac,pre,f,'sine',strong?.06:.032,t,.012,strong?.46:.31,strong?.52:.36)}}}const stopper={stop(){try{master.gain.cancelScheduledValues(ac.currentTime);master.gain.setTargetAtTime(.0001,ac.currentTime,.012)}catch(e){}}};return{src:stopper,g:master}}
+// Score-aligned, voice-led arrangement rather than the former continuous
+// beeps. The same scheduler is used for the live game and exported video.
+function backingNote(ac,dest,hz,when,volume,hold){
+ if(sampledPiano(ac,dest,hz,when,volume,hold))return true;
+ voiceOscHold(ac,dest,hz,'sine',Math.max(.003,volume*.16),when,.009,Math.max(.12,hold));
+ return false;
+}
+function softShaker(ac,dest,when,strength=.08){
+ // Short deterministic filtered noise, not a spoken or synthetic drum voice.
+ const count=Math.round(ac.sampleRate*.065),buffer=ac.createBuffer(1,count,ac.sampleRate);
+ const data=buffer.getChannelData(0);let seed=93137;
+ for(let i=0;i<count;i++){
+  seed=(seed*1664525+1013904223)>>>0;
+  data[i]=((seed/4294967295)*2-1)*Math.pow(1-i/count,2);
+ }
+ const src=ac.createBufferSource(),high=ac.createBiquadFilter(),gain=ac.createGain();
+ src.buffer=buffer;high.type='highpass';high.frequency.value=5200;
+ gain.gain.setValueAtTime(strength,when);
+ src.connect(high);high.connect(gain);gain.connect(dest);src.start(when);
+}
+function backingMeasure(ac,dest,chord,when,intervalMs,beats,style=mrStyle,offsetBeats=0){
+ const unit=intervalMs/1000;
+ const [bass,...upper]=chord.freqs;
+ // Pianists change chord on the bar's strong beat. Bass and harmony have
+ // separate registers and velocities; don't strike every note identically.
+ for(let i=offsetBeats;i<beats;i++){
+  const t=when+i*unit,upbeat=i%2!==0,soft=style==='soft';
+  if(i===0)backingNote(ac,dest,bass,t,.35,Math.min(2.4,unit*beats*.84));
+  else if(i%2===0&&beats>=3)backingNote(ac,dest,bass*1.5,t,.15,unit*.66);
+  if(i===0){
+   backingNote(ac,dest,upper[0],t+.012,.22,Math.min(2.4,unit*beats*.84));
+   backingNote(ac,dest,upper[1],t+.027,.20,Math.min(2.4,unit*beats*.83));
+   backingNote(ac,dest,upper[2],t+.041,.18,Math.min(2.4,unit*beats*.80));
+  }else if(soft){
+   // Light broken-chord movement behind a singing child.
+   backingNote(ac,dest,upper[(i-1)%upper.length],t,.11,unit*.69);
+  }else{
+   // Modern, restrained nursery-pop bounce without busy electronic bleeps.
+   backingNote(ac,dest,upper[(i-1)%upper.length],t,.15,unit*.70);
+   if(upbeat)softShaker(ac,dest,t,.10);
+  }
+ }
+}
+function scheduleBuiltinMr(ac,dest,when,offsetSec=0,volume=mrVolume){
+ const startMs=Math.max(0,Number(offsetSec)||0)*1000,lead=firstNoteMs(),beat=beatMs();
+ const master=ac.createGain(),comp=ac.createDynamicsCompressor(),pre=ac.createGain();
+ pre.gain.setValueAtTime(.87,when);
+ comp.threshold.setValueAtTime(-12,when);comp.knee.setValueAtTime(12,when);
+ comp.ratio.setValueAtTime(2.3,when);comp.attack.setValueAtTime(.007,when);
+ comp.release.setValueAtTime(.24,when);
+ master.gain.setValueAtTime(Math.max(.0001,Math.min(1,Number(volume)||0)),when);
+ pre.connect(comp);comp.connect(master);master.connect(dest);
+ const measureIds=[...new Set(events.map(e=>e.measure))];
+ for(let i=0;i<measureIds.length;i++){
+  const mi=measureIds[i],es=events.filter(e=>e.measure===mi);
+  if(!es.length)continue;
+  const ms=Math.min(...es.map(e=>e.start))-lead,next=events.find(e=>e.measure===measureIds[i+1]);
+  const me=next?next.start-lead:Math.max(ms+beat*(currentSong.timeN||4),totalMs-lead);
+  if(me<=startMs)continue;
+  const beats=Math.max(1,Math.round((me-ms)/beat));
+  const initial=Math.max(0,Math.ceil((startMs-ms-.5)/beat));
+  if(initial>=beats)continue;
+  // Maintain note and MR phase when scrubbing / restarting.
+  backingMeasure(ac,pre,chordForMeasure(mi),when+(ms-startMs)/1000,beat,beats,mrStyle,initial);
+ }
+ const stopper={stop(){try{master.gain.cancelScheduledValues(ac.currentTime);master.gain.setTargetAtTime(.0001,ac.currentTime,.012)}catch(e){}}};
+ return{src:stopper,g:master};
+}
 function scheduleMrTrack(ac,dest,when,offsetSec=0,volume=mrVolume){return mrBuffer?scheduleMrBuffer(ac,dest,when,offsetSec,volume):scheduleBuiltinMr(ac,dest,when,offsetSec,volume)}
 function syncLiveMr(){stopMr();if(!playing||!sound||!wantsMr())return;audio();if(!audioCtx)return;const lead=firstNoteMs(),delay=Math.max(0,lead-elapsed)/1000,offset=Math.max(0,elapsed-lead)/1000,scheduled=scheduleMrTrack(audioCtx,audioCtx.destination,audioCtx.currentTime+delay,offset,mrVolume);if(scheduled)audioRenderSongStartAt=audioCtx.currentTime+(lead-elapsed)/1000;if(scheduled){mrSource=scheduled.src;mrGain=scheduled.g}}
 function audioMixLabel(){const mr=mrBuffer?'내 MR':'자동 MR';if(mixMode==='mr')return mr;if(mixMode==='both'){const m=melodyMode==='none'?'멜로디 없음':MELODY_LABELS[melodyMode];return m+' + '+mr}return melodyMode==='none'?'멜로디 없음':MELODY_LABELS[melodyMode]}
