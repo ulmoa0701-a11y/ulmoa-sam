@@ -1178,11 +1178,11 @@ function frame(ts){if(!playing)return;queueUpcomingMelody();if(!lastTs)lastTs=ts
  else elapsed+=ts-lastTs;
  lastTs=ts;if(elapsed>=totalMs){if(repeat){elapsed=playView==='score'?scoreStartMs()-.5:0;prev=elapsed;stopLeadIn();syncLiveMr();syncLiveSongMelody()}else{elapsed=totalMs;playing=false;hasStartedSong=false;stopMr();stopLeadIn();stopFirstMelody();stopSongMelody();audioRenderSongStartAt=0;$('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작'}}for(const e of events)if(e.active&&e.start>prev&&e.start<=elapsed){let b=[...document.querySelectorAll('.tube')].find(x=>x.dataset.note===e.note);if(songMelodyGain){if(b){b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),100)}}else tone(e.note,b,e.dur)}draw();updateTime();updateLyricTrack();if(playing)raf=requestAnimationFrame(frame)}
 function stopFirstMelody(){if(introFirstMelodyGain&&audioCtx)try{introFirstMelodyGain.gain.cancelScheduledValues(audioCtx.currentTime);introFirstMelodyGain.gain.setValueAtTime(0,audioCtx.currentTime)}catch(e){}introFirstMelodyGain=null;introFirstMelodyScheduled=false}
-function stopIntro(keepFirstMelody=false){if(!keepFirstMelody)stopFirstMelody();
+function stopIntro(keepFirstMelody=false,keepAudioTail=false){if(!keepFirstMelody)stopFirstMelody();
   introActive=false;
   cancelAnimationFrame(introRaf);introRaf=0;
   clearTimeout(introHideTimer);introHideTimer=0;
-  if(introGain&&audioCtx){try{introGain.gain.cancelScheduledValues(audioCtx.currentTime);introGain.gain.setValueAtTime(0,audioCtx.currentTime)}catch(e){}}
+  if(introGain&&audioCtx&&!keepAudioTail){try{introGain.gain.cancelScheduledValues(audioCtx.currentTime);introGain.gain.setValueAtTime(0,audioCtx.currentTime)}catch(e){}}
   introGain=null;
   $('#introOverlay').classList.remove('show','starting','finalCount','launchCue','preludePlaying');
 }
@@ -1443,12 +1443,18 @@ function introFrame(now){
     elapsed=firstNoteMs()-(introPreviewBeats*step-preludeElapsed);
   }else elapsed=-Math.max(0,introDurationMs-progress);
   draw();
-  if(progress>=introDurationMs){
+  // Hand the VISUAL timeline to the song frame before the first downbeat,
+  // while preserving the scheduled final prelude notes and MR audio clock.
+  // Waiting until the audio downbeat to switch animation used to create
+  // ~100ms of first-note visual delay on an otherwise correctly timed song.
+  const guided=isGuidedStartMode(),visualRunway=guided?Math.min(160,beatMs()*.30):0;
+  if(progress>=introDurationMs-visualRunway){
     const scheduled=introScheduledMr;
-    stopIntro(isGuidedStartMode());
-    elapsed=isGuidedStartMode()?firstNoteMs():(playView==='score'?scoreStartMs()-.5:0);
+    stopIntro(guided,guided&&progress<introDurationMs);
+    elapsed=guided?firstNoteMs()-(introDurationMs-progress):
+       (playView==='score'?scoreStartMs()-.5:0);
     introScheduledMr=scheduled;
-    beginPlayback(isGuidedStartMode());
+    beginPlayback(guided);
     draw();
   }else introRaf=requestAnimationFrame(introFrame);
 }
