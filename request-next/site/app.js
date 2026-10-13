@@ -34,8 +34,8 @@ async function sendForm(ev){
  ev.preventDefault();setStatus(status,'');
  if(!form.reportValidity())return;
  const mode=$('input[name="visibility"]:checked').value;
- if(mode!=='public'&&($('#email').value.trim()||$('#phone').value.trim())&&!$('#consent').checked){
-   setStatus(status,'연락처 수집·이용 동의를 선택해 주세요.','error');$('#consent').focus();return;
+ if(mode!=='public'&&!$('#consent').checked){
+   setStatus(status,'비공개 쪽지 보관·이용 동의를 선택해 주세요.','error');$('#consent').focus();return;
  }
  const file=$('#attachment').files[0];
  if(file&&file.size>4*1024*1024){setStatus(status,'첨부파일은 4MB 이하여야 해요.','error');return;}
