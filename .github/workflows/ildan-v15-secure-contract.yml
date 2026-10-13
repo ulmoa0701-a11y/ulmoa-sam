@@ -1,0 +1,49 @@
+name: Ildan v15 Secure Contract + Revocation QA
+on:
+  push:
+    branches:
+      - feature/ildan-secure-v15-api-20261013
+      - feature/ildan-secure-auth-20261010
+    paths:
+      - 'secure-portal/**'
+      - '.github/workflows/ildan-v15-secure-contract.yml'
+  pull_request:
+    paths:
+      - 'secure-portal/**'
+      - '.github/workflows/ildan-v15-secure-contract.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check-secure-portal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check API and pure contract JavaScript syntax
+        shell: bash
+        run: |
+          node --check secure-portal/netlify/functions/api.mjs
+          node --check secure-portal/lib/record-contract.mjs
+          node --check secure-portal/lib/security.mjs
+          node --check secure-portal/public/app.js
+      - name: Run real Node test runner including v15 field, selective share, risk and Drive policy
+        shell: bash
+        run: |
+          cd secure-portal
+          node --test tests/*.test.mjs
+      - name: Enforce hard limits on real-use claims
+        shell: bash
+        run: |
+          node <<'JS'
+          const fs=require('node:fs'),assert=require('node:assert/strict');
+          const api=fs.readFileSync('secure-portal/netlify/functions/api.mjs','utf8');
+          const contract=fs.readFileSync('secure-portal/lib/record-contract.mjs','utf8');
+          assert(api.includes("path==='unshare'&&req.method==='POST'"));
+          assert(api.includes("path==='drive/cleanup'&&req.method==='POST'"));
+          assert(api.includes('drivePolicyEnabled(env(\'DRIVE_BACKUP_ENABLED\'))'));
+          assert(api.includes('validateSessionEntry(b.entry)'));
+          assert(contract.includes("'childWords'")&&contract.includes("'workingHypothesis'"));
+          assert(fs.readFileSync('secure-portal/README.md','utf8').includes('실제 아동 상담정보'));
+          console.log('PASS server code checks; this does not authorize clinical deployment.');
+          JS
