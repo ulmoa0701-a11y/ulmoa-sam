@@ -141,3 +141,16 @@ test('only receipt holder can delete a v2 post and its file',async()=>{
  assert.equal(env.DB.posts.length,0);assert.equal(env.FILES.map.size,0);
  assert.equal((await call(env,'/api/mine/'+id,'GET',null,{'X-Receipt-Token':token})).status,403);
 });
+
+test('read-only health checks database without exposing posts or secrets',async()=>{
+ const env=makeEnv();
+ const created=await create(env,form('hidden',{body:'SENSITIVE-HEALTH-TEST-NOT-PUBLIC'}));
+ assert.equal(created.status,201);
+ const health=await call(env,'/api/health');
+ assert.equal(health.status,200);
+ const data=await health.json();
+ assert.deepEqual(data,{ok:true,service:'habom',database:'ready'});
+ const raw=JSON.stringify(data);
+ assert.ok(!raw.includes('SENSITIVE-HEALTH-TEST-NOT-PUBLIC'));
+ assert.ok(!raw.includes(created.data.receipt));
+});
