@@ -723,6 +723,94 @@ main:has(#parentCalendar:not([hidden])){padding-top:14px}
 .parent-guide summary span{color:#486174}
 .privacy-panel .checkbox span small{color:#405f50}
 .empty-state{color:#465a70}
+
+/* v15 compact journaling layout (2026-10-13). Scope exclusively to student form.
+   Keep clinician, caregiver, consent/dialog semantics and existing input names intact. */
+body:has(.student-journal) .workspace-shell:not(.therapist-shell){
+  grid-template-columns:205px minmax(0,1fr);gap:14px
+}
+body:has(.student-journal) .workspace-section[data-workspace-view="write"] .editor-paper{
+  padding:15px 20px 19px
+}
+body:has(.student-journal) .workspace-section[data-workspace-view="write"] .editor-paper>.tag{margin-bottom:1px}
+body:has(.student-journal) .workspace-section[data-workspace-view="write"] .editor-paper>h2{margin:1px 0 3px}
+body:has(.student-journal) .workspace-section[data-workspace-view="write"] .editor-paper>p{margin:0 0 10px;line-height:1.45}
+.student-journal{gap:10px}
+.student-journal .student-mode-header{margin:0}
+.student-journal .student-mode-title{margin:0 0 5px}
+.student-journal .journal-mode-switch{display:flex;flex-wrap:wrap;gap:7px}
+.student-journal .journal-mode-btn,
+.student-journal .journal-mode-btn.active{
+  flex:0 1 auto;display:flex;flex-direction:row;align-items:center;gap:8px;
+  min-height:46px;padding:8px 12px;box-shadow:none
+}
+.student-journal .journal-mode-btn strong{font-size:14px}
+.student-journal .journal-mode-btn small{font-size:12px;white-space:normal}
+.student-journal .student-mode-hint{margin:4px 0 0!important;font-size:12px!important}
+.student-journal .student-info-card,
+.student-journal[data-journal-mode="quick"] .student-info-card{
+  padding:9px 12px 10px;margin:0;background:#f8fafc
+}
+.student-journal .student-datetime-heading,
+.student-journal[data-journal-mode="quick"] .student-datetime-heading{margin-bottom:5px}
+.student-journal .student-datetime-heading strong{font-size:14px}
+.student-journal .student-datetime-grid{
+  display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.83fr) minmax(0,1fr);
+  gap:10px;align-items:end
+}
+.student-journal .student-datetime-grid label,
+.student-journal .student-extra-grid label{min-width:0;gap:4px;font-size:13px;line-height:1.3}
+.student-journal .student-datetime-grid label small{font-size:11px}
+.student-journal .student-datetime-grid input,
+.student-journal .student-extra-grid input{
+  width:100%;min-width:0;min-height:42px;height:42px;padding:8px 10px;
+  font-size:15px;border-radius:9px
+}
+.student-journal .student-datetime-hint{margin:4px 0 0!important;font-size:11px!important}
+.student-journal .student-extra-grid{grid-template-columns:minmax(0,1fr);margin:0 0 7px;gap:0}
+.student-journal .form-switcher{gap:6px}
+.student-journal .form-switcher .format-btn{min-height:40px;padding:7px 12px}
+.student-journal #textPanel textarea[name="note"]{
+  min-height:104px;height:112px;max-height:65vh;resize:vertical;
+  padding:10px 12px;line-height:1.55
+}
+.student-journal[data-journal-mode="quick"] #textPanel textarea[name="note"]{
+  min-height:88px;height:102px;resize:vertical
+}
+.student-journal .student-note-label{gap:5px;font-size:15px}
+.student-journal .student-mode-advanced{min-width:0}
+.student-journal .student-mode-advanced:has(>details.optional-fields){display:grid;gap:5px}
+.student-journal .optional-fields{margin:0;border-radius:10px}
+.student-journal .optional-fields>summary{
+  min-height:43px;padding:9px 12px;gap:8px;font-size:14px;line-height:1.35
+}
+.student-journal .optional-fields>summary::after{font-size:18px}
+.student-journal .optional-fields summary small{font-size:11px;white-space:normal}
+.student-journal .optional-fields>.optional-wrap{margin:0 12px 12px;gap:10px}
+.student-journal .student-share{margin-top:1px}
+@media(max-width:1090px){
+ .student-journal .student-datetime-grid{
+   grid-template-columns:minmax(0,1.16fr) minmax(0,.84fr);gap:8px
+ }
+ .student-journal .student-place-field{grid-column:1/-1}
+}
+@media(max-width:740px){
+ body:has(.student-journal) .workspace-shell:not(.therapist-shell){display:block}
+ body:has(.student-journal) .workspace-section[data-workspace-view="write"] .editor-paper{padding:12px 13px 15px}
+ .student-journal .student-datetime-grid{grid-template-columns:minmax(0,1.16fr) minmax(0,.84fr);gap:7px}
+ .student-journal .student-place-field{grid-column:1/-1}
+ .student-journal .journal-mode-btn,.student-journal .journal-mode-btn.active{min-height:44px;padding:7px 10px}
+ .student-journal .journal-mode-btn small{display:none}
+ .student-journal .student-info-card,.student-journal[data-journal-mode="quick"] .student-info-card{padding:9px}
+ .student-journal #textPanel textarea[name="note"]{min-height:96px;height:106px}
+ .student-journal[data-journal-mode="quick"] #textPanel textarea[name="note"]{min-height:88px;height:98px}
+ .student-journal .optional-fields>summary{min-height:44px;padding:9px}
+}
+@media(max-width:355px){
+ .student-journal .student-datetime-grid{grid-template-columns:minmax(0,1fr)}
+ .student-journal .student-place-field{grid-column:auto}
+ .student-journal .student-datetime-grid input{min-height:42px}
+}
 </style></head><body><div class="previewbar" id="previewInfo"><strong>🧪 일단써봄 v15</strong> · 간편·자세히 기록 · 가상 데이터만 사용 · 체험 내용은 이 브라우저 세션에 임시 보관될 수 있음 · 실제 로그인/Google 저장 미연결 · 실명·상담 내용 입력 금지
 </div>
 <header><div class="topwrap"><a class="brand" href="#" aria-label="일단써봄 홈"><span class="brand-code">&lt;/&gt;</span> 일단<span>써봄</span><small>work • think • play</small></a><div id="account" class="account"></div></div></header>
@@ -947,13 +1035,13 @@ function dataForm(role){
  <button class="button entry-save" id="saveEntry">내 관찰 메모 저장</button><p class="parent-nudge">보호자는 관찰하거나 전해 들은 사실만 남기면 됩니다. 기록하지 않는 날도 괜찮습니다. 진단이나 원인 판단은 하지 않아도 됩니다. 실시간 상담·응급 연락창이 아닙니다.</p></form>`;
  return `<form class="form entry-v5 student-journal" id="entryForm" data-journal-mode="quick">
  <div class="student-mode-header"><div class="student-mode-title">어떤 방식으로 남길까?</div><div class="journal-mode-switch" role="group" aria-label="기록 상세 정도 선택"><button class="journal-mode-btn active" type="button" data-journal-mode="quick" aria-pressed="true"><strong>⚡ 간편 기록</strong><small>한두 줄이면 끝</small></button><button class="journal-mode-btn" type="button" data-journal-mode="detail" aria-pressed="false"><strong>▤ 자세히 기록</strong><small>필요한 만큼 더 쓰기</small></button></div><p class="student-mode-hint" id="journalModeHint" aria-live="polite">한 줄만 남겨도 돼. 나머지는 선택이야.</p></div>
- <section class="student-info-card" aria-label="일기 날짜와 시간">
- <div class="student-datetime-heading"><strong>언제의 기록이야?</strong><button type="button" id="studentSetNow" class="student-now-btn" aria-label="날짜와 시간을 현재 시각으로 설정">↻ 지금으로 설정</button></div>
- <div class="student-datetime-grid"><label>날짜<input name="date" type="date" max="${todayLocal()}" value="${todayLocal()}"></label><label>시간 <small>(선택)</small><input name="time" type="time" value="${nowLocalTime()}"></label></div>
+ <section class="student-info-card" aria-label="기록 날짜, 시간, 장소">
+ <div class="student-datetime-heading"><strong>언제, 어디에서?</strong><button type="button" id="studentSetNow" class="student-now-btn" aria-label="날짜와 시간을 현재 시각으로 설정">↻ 지금으로 설정</button></div>
+ <div class="student-datetime-grid"><label class="student-date-field">날짜<input name="date" type="date" max="${todayLocal()}" value="${todayLocal()}"></label><label class="student-time-field">시간 <small>(선택)</small><input name="time" type="time" value="${nowLocalTime()}"></label><label class="student-place-field">장소 <small>(선택)</small><input name="place" maxlength="100" placeholder="기억나는 곳만"></label></div>
  <p class="student-datetime-hint">현재 날짜·시간 자동 입력 · 필요하면 직접 변경할 수 있어.</p>
  </section>
  <div class="student-mode-advanced">
- <div class="student-extra-grid"><label>제목 <small>(선택)</small><input name="title" maxlength="80" placeholder="제목 없이 써도 돼"></label><label>장소 <small>(선택)</small><input name="place" maxlength="100" placeholder="기억나는 곳만"></label></div>
+ <div class="student-extra-grid"><label>제목 <small>(선택)</small><input name="title" maxlength="80" placeholder="제목 없이 써도 돼"></label></div>
  <div class="form-switcher" role="group" aria-label="기록 방식"><button type="button" class="format-btn active" data-format="text" aria-pressed="true">✎ 글쓰기</button><button type="button" class="format-btn" data-format="draw" aria-pressed="false">◇ 그림 그리기</button></div></div>
  <div id="textPanel"><label class="student-note-label">하고 싶은 이야기 <small>(짧아도 좋아)</small><textarea name="note" maxlength="4000" rows="5" placeholder="오늘 있었던 일, 좋은 일, 고민, 그냥 생각나는 말... 자유롭게."></textarea></label></div>
  <div class="student-mode-advanced">
@@ -1051,7 +1139,7 @@ function wireEntryForm(isParent){
   if(isParent)return;
   const entry=gatherEntry(f,'student');
   f.querySelectorAll('input[name="shareField"]').forEach(x=>{
-   const mode=f.dataset.journalMode||'quick';const available=!!entry[x.value]&&(mode==='detail'||['note','date','time'].includes(x.value));x.disabled=!available;if(!available)x.checked=false;
+   const mode=f.dataset.journalMode||'quick';const available=!!entry[x.value]&&(mode==='detail'||['note','date','time','place'].includes(x.value));x.disabled=!available;if(!available)x.checked=false;
    x.closest('label')?.classList.toggle('is-unavailable',!available);
   });
   const count=selectedKeys().length;const caption=$('studentShareCount');
