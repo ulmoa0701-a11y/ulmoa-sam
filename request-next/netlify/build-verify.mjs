@@ -17,8 +17,8 @@ const assert=(test,description)=>{if(!test)throw Error('check failed: '+descript
 async function check(){
  if(process.env.NETLIFY!=='true')throw Error('Only run this gate in Netlify Builds');
  if(process.env.SITE_ID!==EXPECTED_SITE)throw Error('Refusing build check outside the isolated Habom Netlify project');
- if(process.env.CONTEXT!=='production'||process.env.BRANCH!==EXPECTED_BRANCH){
-  console.log('HABOM BUILD GATE: skip outside isolated staging production branch');
+ if(!['production','deploy-preview','branch-deploy'].includes(process.env.CONTEXT)||process.env.BRANCH!==EXPECTED_BRANCH){
+  console.log('HABOM BUILD GATE: skip outside the designated isolated staging Git branch');
   return;
  }
  const database=getDatabase();
