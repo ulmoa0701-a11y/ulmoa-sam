@@ -38,6 +38,8 @@ jobs:
       - name: Run real Chrome synthetic secure user-role UI tests
         shell: bash
         run: |
+          python3 -m http.server 8990 --bind 127.0.0.1 --directory secure-portal/public >/tmp/ildan-secure-ui-server.log 2>&1 &
+          sleep 2
           export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           if [ -z "$CHROME_BIN" ]; then echo 'Chrome missing'; exit 1; fi
           python3 secure-portal/tests/v15_ui_secure_qa.py
