@@ -1,0 +1,123 @@
+name: Heart Score Alternative OMR Engine A/B (PR experiment only)
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/heart-score-engine-benchmark.yml'
+      - 'heart-score/qa/compare-musicxml-engines.py'
+      - 'heart-score/qa/render-typeset-score-e2e.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare-free-engines:
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [oemer, homr]
+    runs-on: ubuntu-latest
+    timeout-minutes: 32
+    env:
+      OMP_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+      TOKENIZERS_PARALLELISM: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Generate exactly identical independent music score test images
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix heart-score/qa --ignore-scripts --no-audit --no-fund
+          npm install --prefix heart-score/qa --no-save --ignore-scripts --no-audit --no-fund vexflow@5.0.0 @vexflow-fonts/bravura@1.0.2 @vexflow-fonts/academico@1.0.1
+          npx --prefix heart-score/qa playwright install chromium
+          node heart-score/qa/render-typeset-score-e2e.cjs heart-score/qa/.engine-bench > /tmp/score-render.log
+          test -s heart-score/qa/.engine-bench/typeset-normal-19.png
+          test -s heart-score/qa/.engine-bench/typeset-lowres-19.jpg
+          python -m py_compile heart-score/qa/compare-musicxml-engines.py
+      - name: Install free CPU-only candidate (no private pictures or paid APIs)
+        id: install
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          if [[ "${{ matrix.engine }}" == "oemer" ]]; then
+            python -m pip install 'numpy==1.26.4' 'opencv-python-headless==4.10.0.84' 'onnxruntime==1.20.1' 'scipy==1.13.1' 'scikit-learn==1.5.2' 'matplotlib<3.10' 'pillow<12' 'typing-extensions'
+            python -m pip install --no-deps 'oemer==0.1.8'
+            oemer --help | head -35
+          else
+            python -m pip install uv
+            uvx --from 'homr[cpu]' homr --help | head -35
+          fi
+      - name: Run actual OCR/OMR on same clean and degraded source
+        shell: bash
+        run: |
+          # Actions invokes bash -e by default; disable abort-on-nonzero
+          # so a failed engine becomes a measured failure with trace logs.
+          set +e
+          set -uo pipefail
+          mkdir -p heart-score/qa/.engine-bench/results
+          echo "ENGINE=${{ matrix.engine }} INSTALL_OUTCOME=${{ steps.install.outcome }}" | tee heart-score/qa/.engine-bench/results/environment.txt
+          if [[ "${{ steps.install.outcome }}" != "success" ]]; then
+            printf '{"engine":"%s","status":"installation_failed","accuracy":"not_measured"}\n' "${{ matrix.engine }}" > heart-score/qa/.engine-bench/results/install-failed.json
+            exit 0
+          fi
+          for variant in normal lowres tilted; do
+            case "$variant" in
+              normal) input=heart-score/qa/.engine-bench/typeset-normal-19.png;;
+              lowres) input=heart-score/qa/.engine-bench/typeset-lowres-19.jpg;;
+              tilted) input=heart-score/qa/.engine-bench/typeset-tilted-19.jpg;;
+            esac
+            outdir="heart-score/qa/.engine-bench/results/$variant"
+            mkdir -p "$outdir"
+            # Run inside an isolated output directory. Do not upload model weights.
+            echo "START ${{ matrix.engine }} $variant"
+            if [[ "${{ matrix.engine }}" == "oemer" ]]; then
+              (cd "$outdir" && timeout 480s oemer "$GITHUB_WORKSPACE/$input") > "$outdir/engine.log" 2>&1
+            else
+              timeout 480s uvx --from 'homr[cpu]' homr "$input" > "$outdir/engine.log" 2>&1
+            fi
+            status=$?
+            # Prevent accidental re-use of normal MusicXML for a low-resolution file.
+            stem=$(basename "${input%.*}")
+            xml=$(find "$(dirname "$input")" "$outdir" -maxdepth 2 -type f \( -name "${stem}*.musicxml" -o -name "${stem}*.mxl" -o -name "${stem}*.xml" \) -print -quit)
+            if [[ -z "$xml" ]]; then
+              xml=$(find "$outdir" -maxdepth 2 -type f \( -name "*.musicxml" -o -name "*.mxl" -o -name "*.xml" \) -print -quit)
+            fi
+            if [[ -n "$xml" ]]; then
+              python heart-score/qa/compare-musicxml-engines.py --truth heart-score/qa/doremi-ground-truth.json --xml "$xml" --engine "${{ matrix.engine }}" --variant "$variant" --output "$outdir/compare.json" || true
+            else
+              printf '{"engine":"%s","variant":"%s","status":"no_musicxml","processExit":%s,"accuracy":"not_measured"}\n' "${{ matrix.engine }}" "$variant" "$status" > "$outdir/compare.json"
+              echo "NO_MUSICXML engine=${{ matrix.engine }} variant=$variant exit=$status"
+              tail -30 "$outdir/engine.log"
+            fi
+          done
+      - name: Validate homr MusicXML inside existing heart editor
+        if: matrix.engine == 'homr'
+        shell: bash
+        run: |
+          file=heart-score/qa/.engine-bench/typeset-lowres-19.musicxml
+          if test -s "$file"; then
+            node heart-score/qa/omr-musicxml-interop.cjs --musicxml "$file" --output heart-score/qa/.engine-bench/results/interop-homr-lowres.json
+          else
+            echo 'NO_HOMR_MUSICXML_TO_IMPORT'
+            exit 1
+          fi
+      - name: Preserve comparison and failures (synthetic only)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: free-omr-benchmark-${{ matrix.engine }}
+          path: |
+            heart-score/qa/.engine-bench/results/**/*.json
+            heart-score/qa/.engine-bench/results/**/*.log
+            heart-score/qa/.engine-bench/results/*.json
+            heart-score/qa/.engine-bench/results/*.txt
+          include-hidden-files: true
+          if-no-files-found: warn
