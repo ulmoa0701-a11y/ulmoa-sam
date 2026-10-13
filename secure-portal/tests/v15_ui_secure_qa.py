@@ -65,6 +65,7 @@ with sync_playwright() as pw:
     assert page.locator('input[name="share"]').is_checked() is False
     page.locator('textarea[name="note"]').fill('가상 학생의 자유 기록 '+'안전한 글. '*20+'끝')
     page.locator('button[data-journal-mode="detail"]').click()
+    page.locator('details.student-reflect > summary').click()
     page.locator('textarea[name="thought"]').fill('상세 비공개 생각')
     page.locator('button[data-journal-mode="quick"]').click()
     page.locator('input[name="share"]').check()
