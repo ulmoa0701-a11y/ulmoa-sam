@@ -45,11 +45,10 @@ try{
    if(mobile)await page.locator('#mobileSettingsClose').click();
    const plan=await page.evaluate(()=>instrumentalPreludePlan());
    result.preludePlan=plan;
-   if(plan.bars<1||plan.durationMs<info.firstNote||plan.firstBallOffsetMs<0||
+   if(plan.bars<2||plan.bars%2||plan.durationMs<6500||plan.durationMs<info.firstNote||plan.firstBallOffsetMs<0||
       plan.firstBallOffsetMs>=plan.durationMs)
      throw Error('Instrumental intro too short for falling-note runway '+JSON.stringify(plan));
-   // For a Small Star fixture the intro must NOT emit the note pitches
-   // 도·도·솔·솔·라·라·솔. It is chord/bass/percussion only.
+   // The intro is a separate full musical phrase, not the opening melody.
    const audioProbe=await page.evaluate(async()=>{
     const plan=instrumentalPreludePlan(),beat=beatMs();
     const ac=new OfflineAudioContext(1,Math.ceil(44100*plan.durationMs/1000)+44100,44100);
@@ -61,6 +60,21 @@ try{
     return{bars:built.bars,introStart:power(start+.05,start+.26),lastPreludeBeat:power(last+.04,last+.23)};
    });
    result.audioProbe=audioProbe;
+   result.preludeLengthByMeter=await page.evaluate(()=>{
+     const priorSong=currentSong,priorBpm=bpm,checks=[];
+     for(const meter of [2,3,4]){
+       currentSong={...priorSong,timeN:meter};
+       for(const tempo of [35,66,100,140]){
+         bpm=tempo;
+         const p=instrumentalPreludePlan();
+         checks.push({meter,tempo,bars:p.bars,ms:Math.round(p.durationMs),offset:Math.round(p.firstBallOffsetMs)});
+       }
+     }
+     currentSong=priorSong;bpm=priorBpm;
+     return checks;
+   });
+   if(result.preludeLengthByMeter.some(p=>p.bars<2||p.bars%2!==0||p.ms<6500||p.offset<0))
+     throw Error('Musical intro timing outside target '+JSON.stringify(result.preludeLengthByMeter));
    // Rendering sound energy alone does not prove perceptual clarity; check
    // an actual strong/weak cue waveform across three classroom tempos.
    result.preludePulseProbe=await page.evaluate(async()=>{
@@ -84,7 +98,7 @@ try{
    if(result.preludePulseProbe.some(x=>x.strong<55||x.weak<20||x.ratio<1.8))
      throw Error('Instrumental prelude strong/weak pulse is too faint or insufficiently contrasted '+JSON.stringify(result.preludePulseProbe));
    if(audioProbe.introStart<15||audioProbe.lastPreludeBeat<15)
-     throw Error('Must hear countdown THEN actual instrumental intro '+JSON.stringify(audioProbe));
+     throw Error('Musical introduction silent or cut off '+JSON.stringify(audioProbe));
    result.musicality=await page.evaluate(async()=>{
      const originalSong=currentSong,oldBpm=bpm;
      currentSong=clone(twinkle);bpm=66;build();
@@ -165,8 +179,7 @@ try{
    await page.locator('#resetBtn').click();
    result.reset=await page.evaluate(()=>({playing,introActive,leadGain:!!leadInGain}));
    if(result.reset.playing||result.reset.introActive||result.reset.leadGain)throw Error('Lead was not safely cancelled');
-   // These are THREE genuinely distinct start options, not renamed
-   // countdowns. Probe the strong/weak beat audio and Korean speech calls.
+   // Confirm the instrumental and beat-only cues are real sounds (no voice).
    result.beatProbe=await page.evaluate(async()=>{
      const beat=beatMs(),plan=instrumentalPreludePlan();
      const ac=new OfflineAudioContext(1,Math.ceil(44100*plan.durationMs/1000)+44100,44100);
@@ -177,45 +190,18 @@ try{
    });
    if(result.beatProbe.strong<=20||result.beatProbe.weak<=15)
      throw Error('Strong/weak beat guide produces no audible sound '+JSON.stringify(result.beatProbe));
-   // Recorded static syllables should be available and consistently decoded,
-   // rather than asserting that the old robotic browser TTS was called.
-   await page.waitForFunction(()=>guideVoiceState==='ready',null,{timeout:13000});
-   result.voiceAssetProbe=await page.evaluate(async()=>{
-     const plan=instrumentalPreludePlan(),ac=new OfflineAudioContext(1,44100*5,44100);
-     const scheduled=scheduleVoiceGuide(ac,ac.destination,.08,plan.beats,beatMs(),plan.meter);
-     const samples=(await ac.startRendering()).getChannelData(0);
-     const first=Math.floor(.09*44100),last=Math.floor(.34*44100);
-     let energy=0;for(let i=first;i<last;i++)energy+=Math.abs(samples[i]);
-     return{ready:guideVoiceState,style:guideVoiceStyle,
-       samples:guideVoiceBuffers?.[guideVoiceStyle]?.map(s=>Math.round(s.duration*1000)),
-       scheduled,energy:Math.round(energy)};
-   });
-   if(result.voiceAssetProbe.ready!=='ready'||!result.voiceAssetProbe.scheduled||
-       result.voiceAssetProbe.samples?.length!==4||result.voiceAssetProbe.energy<50)
-     throw Error('Recorded Korean guide samples were not decoded or scheduled '+JSON.stringify(result.voiceAssetProbe));
-   for(const mode of ['music','voice']){
+   for(const mode of ['music']){
      if(mobile)await page.locator('#mobileSettingsBtn').click();
      await page.locator('#introMode').selectOption(mode);
      if(mobile)await page.locator('#mobileSettingsClose').click();
      await page.locator(mobile?'#playBtn':'#startBtn').click();
      const started=await page.evaluate(()=>({count:introCountBeats,preview:introPreviewBeats,beats:introBeats,
        expected:instrumentalPreludePlan().beats,pulse:document.querySelector('#introPulse').innerText,
-       voiceState:guideVoiceState,voiceStyle:guideVoiceStyle,voiceCount:guideVoiceBuffers?.[guideVoiceStyle]?.length||0,lastVoiceBeat:guideLastVoiceBeat,state:$('#introHelp').textContent}));
+       state:$('#introHelp').textContent}));
      if(started.count!==0||started.preview!==started.expected||started.beats!==started.expected)
        throw Error('Mode not synchronized to musical plan '+JSON.stringify({mode,started}));
      if(mode==='music'&&started.pulse!=='쿵')
        throw Error('Rhythm mode must show strong first beat '+JSON.stringify(started));
-     if(mode==='voice'&&(started.pulse!=='하나'||started.voiceState!=='ready'||started.voiceCount!==4||started.lastVoiceBeat!==0))
-       throw Error('Recorded Korean count-in not ready on first beat '+JSON.stringify(started));
-     if(mode==='voice'){
-       await page.evaluate(()=>{
-         const beat=beatMs(),original=introAudioStartAt;
-         introAudioStartAt=audioCtx.currentTime-(beat+30)/1000;
-         introFrame(performance.now());introAudioStartAt=original;
-       });
-       result.speech=await page.evaluate(()=>({lastBeat:guideLastVoiceBeat,pulse:document.querySelector('#introPulse').innerText}));
-       if(result.speech.lastBeat!==1||result.speech.pulse!=='둘')throw Error('Recorded guide did not progress to second beat '+JSON.stringify(result.speech));
-     }
      await page.locator('#resetBtn').click();
    }
    if(mobile)await page.locator('#mobileSettingsBtn').click();
