@@ -50,7 +50,7 @@ const call=async(path,body,method='POST')=>{
 const reset=({withDrive=false,connected=false}={})=>{
  actor=student;deletes=0;queryLog=[];savedClinician=null;
  record={id:uuid,author_id:student.id,therapist_id:therapist.id,shared_at:new Date(),shared_nonce:'n',shared_auth_tag:'tag',encrypted_shared_payload:'encrypted',drive_file_id:withDrive?'google-file-1':null};
- oauth=connected?{encrypted_refresh_token:'',...seal('offline-mock-refresh-token',key),folder_id:'folder'}:null;
+ const encrypted=seal('offline-mock-refresh-token',key);oauth=connected?{encrypted_refresh_token:encrypted.encrypted_payload,nonce:encrypted.nonce,auth_tag:encrypted.auth_tag,folder_id:'folder'}:null;
 };
 
 test('author share cancellation clears shared keys atomically but retains their private record',async()=>{
