@@ -117,11 +117,11 @@ try{
        };
        scheduleInterludeMusic(checkAC,checkAC.destination,.15,beatMs(),2);
      }finally{scheduleMelodyTone=voiceOriginal}
-     const phraseScore=events.filter(e=>e.measure<8&&e.note!=='쉼'&&FREQ[e.note]);
+     const phraseScore=events.filter(e=>e.measure>=currentSong.measures.length-8&&e.note!=='쉼'&&FREQ[e.note]);
      const preludeErrors=sequence.flatMap((note,i)=>{
        const fromScore=phraseScore[i];
        if(!fromScore)return ['Unexpected extra note '+i];
-       const expectedAt=.15+(fromScore.start-firstNoteMs())/1000;
+       const expectedAt=.15+(fromScore.start-phraseScore[0].start)/1000;
        return note.pitch!==fromScore.note||Math.abs(note.time-expectedAt)>.0001||
          Math.abs(note.duration-fromScore.dur)>.01||note.instrument!=='piano'?
          ['Note '+i+' does not match exact Small Star score']: [];
@@ -130,7 +130,7 @@ try{
      const exactSequence=sequence.map(n=>n.pitch).join(',')===expectedPitches.join(',');
      const firstPhraseBeats=twinklePrelude.beats;
      const firstScoreNoteAt=.15+twinklePrelude.durationMs/1000;
-     const finalPreludeRelease=.15+(phraseScore.at(-1).start-firstNoteMs()+phraseScore.at(-1).dur)/1000;
+     const finalPreludeRelease=.15+(phraseScore.at(-1).start-phraseScore[0].start+phraseScore.at(-1).dur)/1000;
      if(!exactSequence||preludeErrors.length||phraseScore.length!==14||firstPhraseBeats!==16||
         twinklePrelude.bars!==8||Math.abs(firstScoreNoteAt-finalPreludeRelease)>.001)
        throw Error('Small Star exact melody/restart timing error '+JSON.stringify({sequence,preludeErrors,twinklePrelude,firstScoreNoteAt,finalPreludeRelease}));
