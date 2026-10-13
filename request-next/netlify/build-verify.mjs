@@ -4,6 +4,7 @@
  * deploy-scoped Blobs (builds cannot safely write to site-wide stores).
  * NEVER uploads user content. Every synthetic record is deleted in finally.
  */
+import {writeFile} from 'node:fs/promises';
 import {getDatabase} from '@netlify/database';
 import {getDeployStore} from '@netlify/blobs';
 import {createHash,randomUUID} from 'node:crypto';
@@ -18,8 +19,7 @@ async function check(){
  if(process.env.NETLIFY!=='true')throw Error('Only run this gate in Netlify Builds');
  if(process.env.SITE_ID!==EXPECTED_SITE)throw Error('Refusing build check outside the isolated Habom Netlify project');
  if(!['production','deploy-preview','branch-deploy'].includes(process.env.CONTEXT)||process.env.BRANCH!==EXPECTED_BRANCH){
-  console.log('HABOM BUILD GATE: skip outside the designated isolated staging Git branch');
-  return;
+  throw Error('Unexpected branch or Netlify context: build gate refuses to skip on this dedicated project');
  }
  const database=getDatabase();
  const blobs=getDeployStore({name:'habom-build-check-files',consistency:'strong'});
@@ -117,6 +117,17 @@ async function check(){
   if(cleanupFailure)throw Error('cleanup failed ('+noSecrets(cleanupFailure)+')');
   if(successful)console.log('HABOM BUILD GATE: ALL PASS; synthetic post/PDF/rate-key deleted');
  }
+ if(!successful)throw Error('Diagnostics incomplete');
 }
-try{await check();}
+try{
+ await check();
+ // Visible only behind the existing Netlify SSO protection. Contains no secrets.
+ await writeFile('site/build-gate-proof.json',JSON.stringify({
+  status:'passed',database:'real Netlify PostgreSQL',
+  attachments:'deploy-scoped Netlify Blobs',
+  checks:['hidden post','receipt security','private PDF bytes','admin reply','full cleanup'],
+  version:1,context:process.env.CONTEXT||'unknown',site:EXPECTED_SITE
+ },null,2));
+ console.log('HABOM BUILD GATE: non-sensitive deployment proof emitted');
+}
 catch(e){console.error('HABOM BUILD GATE FAILED: '+(e instanceof Error?e.message:'unknown'));process.exitCode=1;}
