@@ -1,9 +1,8 @@
 [build]
-  command = "node netlify/diagnose-env.mjs"
   publish = "site"
   functions = "netlify/functions"
 
 # Functions use Netlify custom URL /api/*, so no client-side CORS secrets.
-# Staging build gate runs on the separate private Netlify project, without publishing until verified.
+# The isolated testing site remains SSO-protected; live data checks require authenticated validation.
 [functions]
   node_bundler = "esbuild"
