@@ -2,6 +2,7 @@ import { getDatabase } from '@netlify/database';
 import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from '@simplewebauthn/server';
 import { nickname, randomToken, digest, encryptionKey, seal, open, canSeeRecord, escapeCSV, isSafeOrigin } from '../../lib/security.mjs';
+import {validateEntry, sharedSelection, validateSessionEntry, drivePolicyEnabled} from '../../lib/record-contract.mjs';
 
 const env=(name)=>typeof Netlify!=='undefined'?Netlify.env.get(name):process.env[name];
 const json=(data,status=200,headers={})=>Response.json(data,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...headers}});
@@ -17,29 +18,6 @@ const getToken=req=>{const cookies=req.headers.get('cookie')??'';const hit=cooki
 const publicUser=(u)=>({id:u.id,nickname:u.nickname,displayName:u.display_name,role:u.role,therapistId:u.therapist_id,studentId:u.student_id});
 async function identity(db,req){const token=getToken(req);if(token.length<30)return null;const {rows}=await db.query('SELECT u.* FROM portal_sessions s JOIN portal_users u ON u.id=s.user_id WHERE s.token_hash=$1 AND s.expires_at>NOW()',[digest(token)]);return rows[0]??null;}
 async function newSession(db,user,req){const token=randomToken(32),age=['admin','therapist'].includes(user.role)?43200:604800;await db.query('INSERT INTO portal_sessions(token_hash,user_id,expires_at) VALUES ($1,$2,NOW()+($3::integer * interval \'1 second\'))',[digest(token),user.id,age]);return json({user:publicUser(user)},200,{'Set-Cookie':sessionCookie(token,age,req)});}
-const ENTRY_KEYS=['date','event','thought','next','observation','message','note','category','mood','energy','body','action','response','impact','sketch','time','context','origin','place','signals','after','title','experience','experienceImpact'];
-function validateEntry(e){
- if(!e||Array.isArray(e)||typeof e!=='object')throw new Error('기록 내용을 확인해 주세요.');
- const obj={};for(const k of ENTRY_KEYS){if(e[k]===undefined||e[k]===null)continue;if(typeof e[k]!=='string')throw new Error('문자 기록만 입력할 수 있어요.');const max=k==='sketch'?5500:k==='note'?4000:k==='title'?80:k==='experience'?900:k==='experienceImpact'?500:k==='place'?100:k==='signals'?120:k==='after'?600:1200;const value=clean(e[k],max);if(value)obj[k]=value;}
- if(obj.date){
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(obj.date)||Number.isNaN(Date.parse(obj.date+'T00:00:00Z'))||new Date(obj.date+'T00:00:00Z').toISOString().slice(0,10)!==obj.date)throw new Error('관찰 날짜를 확인해 주세요.');
- }
- if(obj.time&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(obj.time))throw new Error('관찰 시간을 확인해 주세요.');
- if(obj.origin&&!['직접 관찰','아이가 말함','가족에게 들음'].includes(obj.origin))throw new Error('정보 출처를 확인해 주세요.');
- if(obj.signals){const types=obj.signals.split(' / '),allowed=['몸 움직임','소리·말','여러 번 한 행동','그 밖의 모습'];if(types.length>4||new Set(types).size!==types.length||types.some(v=>!allowed.includes(v)))throw new Error('관찰 모습 분류를 확인해 주세요.');}
- if(!Object.values(obj).some(Boolean))throw new Error('기록을 한 가지 이상 입력해 주세요.');
- if(obj.sketch){let paths;try{paths=JSON.parse(obj.sketch)}catch{throw new Error('그림 내용이 올바르지 않습니다.')}if(!Array.isArray(paths)||paths.length>240)throw new Error('그림 내용이 너무 큽니다.');let points=0;for(const stroke of paths){if(!Array.isArray(stroke)||stroke.length>240)throw new Error('그림 내용이 올바르지 않습니다.');points+=stroke.length;for(const p of stroke){if(!Array.isArray(p)||p.length!==2||!p.every(Number.isInteger)||p[0]<0||p[0]>760||p[1]<0||p[1]>380)throw new Error('그림 내용이 올바르지 않습니다.')}}if(points>240)throw new Error('그림 내용이 너무 큽니다.');}
- if(JSON.stringify(obj).length>14000)throw new Error('기록이 너무 깁니다.');return obj;
-}
-function sharedSelection(entry,requested,isParent=false){
- if(!Array.isArray(requested)||requested.length<1||requested.length>ENTRY_KEYS.length||requested.some(k=>typeof k!=='string'||!ENTRY_KEYS.includes(k)))throw new Error('공유할 항목을 선택해 주세요.');
- const selected={};for(const k of new Set(requested)){if(entry[k])selected[k]=entry[k]}
- if(!Object.keys(selected).some(k=>!['date','time','origin','place','signals','title'].includes(k)))throw new Error('공유할 관찰 내용이나 전달사항을 선택해 주세요.');
- if(isParent&&entry.date)selected.date=entry.date;
- if(isParent&&entry.time)selected.time=entry.time;
- if(isParent&&selected.observation){if(entry.place)selected.place=entry.place;if(entry.signals)selected.signals=entry.signals;}
- return selected;
-}
 function unpackShared(record,key){if(!record.shared_nonce||!record.shared_auth_tag||!record.encrypted_shared_payload)throw new Error('공유 범위가 없는 기록입니다.');return JSON.parse(open({...record,nonce:record.shared_nonce,auth_tag:record.shared_auth_tag,encrypted_payload:record.encrypted_shared_payload},key));}
 
 async function listRecords(db,u,key){let rows=[];
@@ -65,8 +43,24 @@ async function folderFor(access){const resp=await fetch('https://www.googleapis.
 async function uploadDrive(access,folderId,record,entry){const meta={name:`ildan_${record.id}.json`,mimeType:'application/json',parents:[folderId]};const content=JSON.stringify({recordId:record.id,studentNickname:record.student,authorNickname:record.writer,kind:record.kind,createdAt:record.created_at,entry},null,2);const boundary=`ildan_${randomToken(12)}`;const body=`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta)}\r\n--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${content}\r\n--${boundary}--`;
  const resp=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{Authorization:`Bearer ${access}`,'Content-Type':`multipart/related; boundary=${boundary}`},body});const out=await resp.json();if(!resp.ok||!out.id)throw new Error('구글 드라이브 저장 실패');return out.id;
 }
+// Best-effort external copy deletion. Failure never restores therapist read access.
+// Drive may contain independently downloaded/shared copies outside this API's control.
+async function removeDriveCopy(db,recordId,therapistId,fileId,key){
+ try{
+  if(!safeGoogleConfig())return false;
+  const oauth=(await db.query('SELECT * FROM portal_oauth WHERE therapist_id=$1',[therapistId])).rows[0];
+  if(!oauth)return false;
+  const refresh=open({...oauth,encrypted_payload:oauth.encrypted_refresh_token},key);
+  const access=await googleAccess(refresh);
+  const resp=await fetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(fileId),{method:'DELETE',headers:{Authorization:'Bearer '+access}});
+  if(!(resp.ok||resp.status===404))return false;
+  await db.query('UPDATE portal_records SET drive_file_id=NULL WHERE id=$1 AND therapist_id=$2 AND drive_file_id=$3 AND shared_at IS NULL',[recordId,therapistId,fileId]);
+  return true;
+ }catch(e){console.error('Google Drive copy deletion requires follow-up',e?.name||'error');return false;}
+}
 async function autoBackup(db,recordId,therapistId,key){
  try{
+  if(!drivePolicyEnabled(env('DRIVE_BACKUP_ENABLED')))return false;
   if(!safeGoogleConfig())return false;
   const oauth=(await db.query('SELECT * FROM portal_oauth WHERE therapist_id=$1',[therapistId])).rows[0];if(!oauth)return false;
   const record=(await db.query(`SELECT r.*,a.nickname writer,s.nickname student FROM portal_records r JOIN portal_users a ON a.id=r.author_id JOIN portal_users s ON s.id=r.student_id WHERE r.id=$1 AND r.therapist_id=$2 AND s.therapist_id=$2 AND r.shared_at IS NOT NULL AND r.encrypted_shared_payload IS NOT NULL AND r.drive_file_id IS NULL`,[recordId,therapistId])).rows[0];if(!record)return false;
@@ -226,6 +220,31 @@ try{
   }catch(e){await c.query('ROLLBACK');throw e}finally{c.release()}
   const driveSynced=await autoBackup(db,out.id,out.therapistId,key);return json({ok:true,shared:true,driveSynced});
  }
+ if(path==='unshare'&&req.method==='POST'){
+  if(!['student','parent'].includes(u.role))return fail('작성자만 공유를 취소할 수 있습니다.',403);
+  const b=await safeBody(req),id=String(b.recordId??'');
+  if(!/^[0-9a-f]{8}-[0-9a-f-]{27,36}$/i.test(id))return fail('올바른 기록 번호를 확인해 주세요.',400);
+  const c=await db.connect();let driveFileId=null,therapistId=null;
+  try{
+   await c.query('BEGIN');
+   const rs=await c.query('SELECT id,therapist_id,shared_at,drive_file_id FROM portal_records WHERE id=$1 AND author_id=$2 FOR UPDATE',[id,u.id]);
+   const rec=rs.rows[0];if(!rec){await c.query('ROLLBACK');return fail('내 기록이 아닙니다.',403);}
+   driveFileId=rec.drive_file_id;therapistId=rec.therapist_id;
+   // Revoke the therapist's server-side access immediately. Keep private encrypted_payload for the author.
+   await c.query('UPDATE portal_records SET shared_at=NULL,shared_nonce=NULL,shared_auth_tag=NULL,encrypted_shared_payload=NULL WHERE id=$1 AND author_id=$2',[id,u.id]);
+   await c.query('COMMIT');
+  }catch(e){await c.query('ROLLBACK');throw e}finally{c.release();}
+  let remoteCopyStatus='not_synced';
+  if(driveFileId)remoteCopyStatus=await removeDriveCopy(db,id,therapistId,driveFileId,key)?'deleted':'pending';
+  return json({ok:true,serverAccessRevoked:true,remoteCopyStatus,
+   notice:remoteCopyStatus==='pending'?'서버 공유는 취소되었습니다. Google Drive 사본 삭제는 아직 확인되지 않았으며 관리자의 후속 확인이 필요합니다.':'서버 공유가 취소되었습니다. 별도로 전달·다운로드된 복사본은 회수할 수 없습니다.'});
+ }
+ if(path==='drive/cleanup'&&req.method==='POST'){
+  if(u.role!=='therapist')return fail('치료사 전용입니다.',403);
+  const q=await db.query('SELECT id,drive_file_id FROM portal_records WHERE therapist_id=$1 AND shared_at IS NULL AND drive_file_id IS NOT NULL ORDER BY created_at LIMIT 20',[u.id]);
+  let deleted=0;for(const r of q.rows)if(await removeDriveCopy(db,r.id,u.id,r.drive_file_id,key))deleted++;
+  return json({attempted:q.rows.length,deleted,pending:q.rows.length-deleted,remainingMayExist:q.rows.length===20});
+ }
  if(path==='session-notes'&&req.method==='GET'){
   if(u.role!=='therapist')return fail('치료사 전용 메모입니다.',403);
   const rs=await db.query(`SELECT n.*,s.nickname AS student_nickname FROM portal_session_notes n JOIN portal_users s ON s.id=n.student_id WHERE n.therapist_id=$1 AND s.therapist_id=$1 ORDER BY n.created_at DESC LIMIT 150`,[u.id]);
@@ -236,8 +255,7 @@ try{
   const b=await safeBody(req);const studentId=String(b.studentId??'');
   if(!(await db.query("SELECT 1 FROM portal_users WHERE id=$1 AND role='student' AND therapist_id=$2",[studentId,u.id])).rows.length)return fail('담당 학생만 선택할 수 있습니다.',403);
   if(!b.entry||typeof b.entry!=='object'||Array.isArray(b.entry))return fail('메모를 확인해 주세요.');
-  const entry={};for(const k of ['observation','question','plan']){if(b.entry[k]!==undefined){if(typeof b.entry[k]!=='string')return fail('올바르지 않은 메모 내용입니다.');entry[k]=clean(b.entry[k],1200)}}
-  if(!Object.values(entry).some(Boolean))return fail('메모를 하나 이상 작성해 주세요.');
+  const entry=validateSessionEntry(b.entry);
   const sealed=seal(JSON.stringify(entry),key);await db.query('INSERT INTO portal_session_notes(student_id,therapist_id,nonce,auth_tag,encrypted_payload) VALUES($1,$2,$3,$4,$5)',[studentId,u.id,sealed.nonce,sealed.auth_tag,sealed.encrypted_payload]);return json({ok:true},201);
  }
  if(path==='drive/status'&&req.method==='GET'){
@@ -251,7 +269,7 @@ try{
   const resp=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({code,client_id:env('GOOGLE_CLIENT_ID'),client_secret:env('GOOGLE_CLIENT_SECRET'),redirect_uri:env('APP_ORIGIN')+'/api/drive/callback',grant_type:'authorization_code'})});const tok=await resp.json();if(!resp.ok||!tok.refresh_token||!tok.access_token)return fail('구글 재인증이 필요합니다.',400);const folder=await folderFor(tok.access_token);const s=seal(tok.refresh_token,key);await db.query(`INSERT INTO portal_oauth(therapist_id,encrypted_refresh_token,nonce,auth_tag,folder_id) VALUES($1,$2,$3,$4,$5) ON CONFLICT(therapist_id) DO UPDATE SET encrypted_refresh_token=EXCLUDED.encrypted_refresh_token,nonce=EXCLUDED.nonce,auth_tag=EXCLUDED.auth_tag,folder_id=EXCLUDED.folder_id`,[u.id,s.encrypted_payload,s.nonce,s.auth_tag,folder]);return Response.redirect(env('APP_ORIGIN')+'/?drive=connected',302);
  }
  if(path==='drive/sync'&&req.method==='POST'){
-  if(u.role!=='therapist')return fail('치료사 전용입니다.',403);const o=await db.query('SELECT * FROM portal_oauth WHERE therapist_id=$1',[u.id]);if(!o.rows.length)return fail('담당 치료사의 구글 계정을 먼저 연결해야 합니다.',409);const token=open({...o.rows[0],encrypted_payload:o.rows[0].encrypted_refresh_token},key),access=await googleAccess(token);
+  if(u.role!=='therapist')return fail('치료사 전용입니다.',403);if(!drivePolicyEnabled(env('DRIVE_BACKUP_ENABLED')))return fail('보존·삭제 정책 검증 전에는 Google Drive 자동 동기화를 사용할 수 없습니다.',503);const o=await db.query('SELECT * FROM portal_oauth WHERE therapist_id=$1',[u.id]);if(!o.rows.length)return fail('담당 치료사의 구글 계정을 먼저 연결해야 합니다.',409);const token=open({...o.rows[0],encrypted_payload:o.rows[0].encrypted_refresh_token},key),access=await googleAccess(token);
   const q=await db.query(`SELECT r.*,a.nickname writer,s.nickname student FROM portal_records r JOIN portal_users a ON a.id=r.author_id JOIN portal_users s ON s.id=r.student_id WHERE r.therapist_id=$1 AND s.therapist_id=$1 AND r.shared_at IS NOT NULL AND r.encrypted_shared_payload IS NOT NULL AND r.drive_file_id IS NULL ORDER BY r.created_at LIMIT 20`,[u.id]);let synced=0;
   for(const r of q.rows){const entry=unpackShared(r,key);const fileid=await uploadDrive(access,o.rows[0].folder_id,r,entry);await db.query('UPDATE portal_records SET drive_file_id=$1 WHERE id=$2 AND therapist_id=$3',[fileid,r.id,u.id]);synced++;}return json({synced,remainingMayExist:q.rows.length===20});
  }
