@@ -17,6 +17,29 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const browser=await chromium.launch({executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--autoplay-policy=no-user-gesture-required']});
 const outputs=[],types=['interlude','music','kids','soft'];
 try{
+ // Simulate a child pressing Play before a slow mobile data connection
+ // has delivered the real piano. Never silently play synthetic fallback.
+ const delayed=await browser.newPage({viewport:{width:390,height:844}});
+ await delayed.route('**/audio/mats-helgesson-piano.mp3',async route=>{
+   await new Promise(done=>setTimeout(done,1600));await route.continue();
+ });
+ await delayed.goto('http://127.0.0.1:'+server.address().port+'/boomwhacker/?song=twinkle',{waitUntil:'domcontentloaded'});
+ await delayed.locator('#playBtn').click();
+ const early=await delayed.evaluate(()=>({
+   waiting:pianoStartPending,loaded:pianoLoadState,playing,introActive,
+   text:document.querySelector('#startBtn').textContent
+ }));
+ if(!early.waiting||early.loaded!=='loading'||early.playing||early.introActive||!early.text.includes('준비 중'))
+   throw Error('Piano audio started BEFORE sample load '+JSON.stringify(early));
+ await delayed.waitForFunction(()=>pianoLoadState==='ready'&&introActive&&!pianoStartPending,null,{timeout:14000});
+ const resumed=await delayed.evaluate(()=>({
+   ready:pianoLoadState,playing,introActive,waiting:pianoStartPending,
+   sampleSeconds:pianoBuffer?.duration??0
+ }));
+ if(resumed.ready!=='ready'||!resumed.introActive||resumed.waiting||resumed.sampleSeconds<38)
+   throw Error('Piano audio failed to start AFTER decode '+JSON.stringify(resumed));
+ console.log('BOOM_SLOW_MOBILE_PIANO='+JSON.stringify({early,resumed}));
+ await delayed.close();
  const page=await browser.newPage({acceptDownloads:true,viewport:{width:1280,height:900}});
  await page.goto('http://127.0.0.1:'+server.address().port+'/boomwhacker/?song=twinkle',{waitUntil:'networkidle'});
  if(await page.locator('#introMode option[value="voice"]').count())throw Error('Voice choice still present');
