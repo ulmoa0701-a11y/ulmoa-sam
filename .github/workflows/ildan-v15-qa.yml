@@ -39,7 +39,7 @@ jobs:
           assert(!page.includes('v.length>90?v.slice(0,90)'),'truncated share content removed');
           assert(page.includes("path==='unshare'"),'revoke implemented');
           assert(page.includes('PREVIEW_DRAFT_PREFIX'),'session draft prototype present');
-          assert(page.includes("['note','date','time','place'].includes(x.value)"),'quick-mode shared fields constrained to visible entries');
+          assert(page.includes("['note','date','time','place','mood'].includes(x.value)"),'quick-mode shared fields constrained to visible entries including optional mood');
           assert(page.includes('class="student-place-field"'),'location field is within compact metadata row');
           assert(!v14.includes('PREVIEW_DRAFT_PREFIX'),'legacy v14 remains unmodified');
           console.log('PASS: JavaScript syntax and privacy guardrails');

@@ -811,6 +811,65 @@ body:has(.student-journal) .workspace-section[data-workspace-view="write"] .edit
  .student-journal .student-place-field{grid-column:auto}
  .student-journal .student-datetime-grid input{min-height:42px}
 }
+
+/* Student quick mood selection + optional examples; caregiver layout aligned to student. */
+.student-journal .student-emotion-quick{border:1px solid #d4deed;background:#fbfcff;border-radius:12px;padding:10px 12px;min-width:0}
+.student-journal .student-emotion-title{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;margin-bottom:7px}
+.student-journal .student-emotion-title strong{font-size:14px;color:#223a51}
+.student-journal .student-emotion-title small{font-size:11px;color:#4b6075;font-weight:500}
+.student-journal .emotion-quick-body{display:grid;gap:7px}
+.student-journal .emotion-quick-body>.emotion-grid{display:flex;flex-wrap:wrap;gap:5px}
+.student-journal .emotion-quick-body>.emotion-grid>.emotion-chip{min-width:0;margin:0}
+.student-journal .emotion-quick-body>.emotion-grid>.emotion-chip span{padding:6px 10px;min-height:33px;display:flex;align-items:center;font-size:13px;white-space:nowrap}
+.student-journal .emotion-quick-body>.emotion-more{margin:0}
+.student-journal .emotion-quick-body>.emotion-more>summary,
+.student-journal .emotion-extra-optional>summary{font-size:12px;color:#405b78;padding:5px 2px;cursor:pointer}
+.student-journal .emotion-extra-optional{border-top:1px dashed #d5dfed}
+.student-journal .emotion-extra-fields{display:grid;gap:8px;padding:8px 0 1px}
+.student-journal .emotion-extra-fields input,.student-journal .emotion-extra-fields select{min-height:42px}
+.student-journal .emotion-quick-body>.emotion-more>summary span,.student-journal .emotion-extra-fields label small{color:#42576c!important}
+.entry-examples{border:1px dashed #c7d8eb;border-radius:10px;background:#fbfdff;margin:0;overflow:hidden}
+.entry-examples>summary{cursor:pointer;min-height:36px;padding:7px 12px;color:#405975;font-weight:650;font-size:13px}
+.entry-examples>summary small{font-weight:450;font-size:11px;color:#536b7e;margin-left:8px}
+.entry-examples-body{padding:0 12px 10px;display:grid;gap:5px;color:#435a70;font-size:13px;line-height:1.5}
+.entry-examples-body p{margin:3px 0!important;line-height:1.5!important;font-size:13px!important}
+.entry-examples .example-lines{padding:6px 10px;background:#f1f6fd;border-left:3px solid #b3c9e9;border-radius:6px}
+.parent-easy-form{gap:10px}
+.parent-easy-form .parent-when{
+ display:grid;grid-template-columns:minmax(0,1.18fr) minmax(0,.83fr) minmax(0,1fr);gap:9px;align-items:end;
+ padding:10px 12px;border:1px solid #d9e4ed;border-radius:12px;background:#f8fafc
+}
+.parent-easy-form .parent-when label{min-width:0;gap:4px;font-size:13px;line-height:1.3}
+.parent-easy-form .parent-when input{min-width:0;width:100%;min-height:42px;height:42px;padding:8px 9px;font-size:15px;border-radius:9px}
+.parent-easy-form .parent-date-hint{margin:-4px 0 0!important;font-size:11px!important;color:#486078!important}
+.parent-easy-form>.parent-main-label{gap:5px;font-size:14px}
+.parent-easy-form>.parent-main-label textarea{min-height:96px;height:106px;max-height:55vh;resize:vertical;padding:10px 12px;line-height:1.5}
+.parent-easy-form>.parent-source-field{gap:4px;font-size:13px}
+.parent-easy-form>.parent-source-field select{min-height:42px;padding:8px 10px;font-size:14px}
+.parent-easy-form .parent-fact-note{margin:0!important;font-size:12px}
+.parent-easy-form>details.parent-more,.parent-easy-form>details.parent-type-optional,.parent-easy-form>details.parent-guide{margin:0;border-radius:10px}
+.parent-easy-form>details>summary{min-height:43px;padding:9px 12px;font-size:13px}
+.parent-easy-form>details>summary small{font-size:11px}
+body:has(.parent-easy-form) .workspace-shell:not(.therapist-shell){grid-template-columns:205px minmax(0,1fr);gap:14px}
+body:has(.parent-easy-form) .workspace-section[data-workspace-view="write"] .editor-paper{padding:15px 20px 19px}
+body:has(.parent-easy-form) .editor-paper>.tag{margin-bottom:1px}
+body:has(.parent-easy-form) .editor-paper>h2{margin:2px 0 3px}
+body:has(.parent-easy-form) .editor-paper>p{margin:0 0 10px;line-height:1.45}
+@media(max-width:1090px){
+ .parent-easy-form .parent-when{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)}
+ .parent-easy-form .parent-when .parent-location{grid-column:1/-1}
+}
+@media(max-width:740px){
+ body:has(.parent-easy-form) .workspace-shell:not(.therapist-shell){display:block}
+ body:has(.parent-easy-form) .workspace-section[data-workspace-view="write"] .editor-paper{padding:12px 13px 15px}
+ .parent-easy-form .parent-when{grid-template-columns:minmax(0,1.16fr) minmax(0,.84fr);gap:7px;padding:9px}
+ .parent-easy-form .parent-when .parent-location{grid-column:1/-1}
+ .student-journal .emotion-quick-body>.emotion-grid>.emotion-chip span{padding:6px 8px}
+}
+@media(max-width:355px){
+ .parent-easy-form .parent-when{grid-template-columns:minmax(0,1fr)}
+ .parent-easy-form .parent-when .parent-location{grid-column:auto}
+}
 </style></head><body><div class="previewbar" id="previewInfo"><strong>🧪 일단써봄 v15</strong> · 간편·자세히 기록 · 가상 데이터만 사용 · 체험 내용은 이 브라우저 세션에 임시 보관될 수 있음 · 실제 로그인/Google 저장 미연결 · 실명·상담 내용 입력 금지
 </div>
 <header><div class="topwrap"><a class="brand" href="#" aria-label="일단써봄 홈"><span class="brand-code">&lt;/&gt;</span> 일단<span>써봄</span><small>work • think • play</small></a><div id="account" class="account"></div></div></header>
@@ -1001,14 +1060,14 @@ function renderParentCalendar(){
  root.querySelector('[data-cal-new]').onclick=()=>{if(parentCalendarDate>todayLocal())return;activateWorkspace('write');const dt=$('entryForm')?.elements?.date;if(dt){dt.value=parentCalendarDate;dt.focus()}};
 }
 
-const STUDENT_EMOTIONS=["기쁨", "편안함", "설렘", "뿌듯함", "즐거움", "걱정", "답답함", "짜증"];
+const STUDENT_EMOTIONS=["기쁨", "편안함", "설렘", "뿌듯함", "즐거움", "걱정", "답답함", "짜증", "잘 모르겠음"];
 const STUDENT_MORE_EMOTIONS={"기분 좋은 순간": ["신남", "만족감", "고마움", "홀가분함", "안도감", "평온함", "기대감", "자신감", "뭉클함", "흥미로움"], "복잡하고 힘든 순간": ["긴장됨", "불안함", "초조함", "속상함", "서운함", "억울함", "화남", "슬픔", "외로움", "두려움", "부담스러움", "후회", "당황함", "혼란스러움", "실망함", "부끄러움", "질투", "막막함"], "그 밖의 느낌": ["피곤함", "지루함", "무덤덤함", "궁금함", "어색함", "귀찮음", "복잡함", "잘 모르겠음"]};
 function dataForm(role){
  if(role==='parent')return `<form class="form entry-v5 parent-easy-form" id="entryForm">
- <div class="parent-when"><label class="parent-date-field">일이 있었던 날짜 <input name="date" type="date" value="${todayLocal()}" max="${todayLocal()}" required></label><label class="parent-time-field">시간 <small>(선택)</small><input name="time" type="time"></label></div>
- <p class="parent-date-hint">정확한 시간이 기억나지 않으면 비워 두세요. 기록을 작성한 시각은 자동으로 남아요.</p>
- <label class="parent-location">장소 <small>(선택)</small><input name="place" maxlength="100" placeholder="기억나는 장소만 적어 주세요."></label>
+ <div class="parent-when"><label class="parent-date-field">일이 있었던 날짜 <input name="date" type="date" value="${todayLocal()}" max="${todayLocal()}" required></label><label class="parent-time-field">시간 <small>(선택)</small><input name="time" type="time"></label><label class="parent-location">장소 <small>(선택)</small><input name="place" maxlength="100" placeholder="기억나는 장소만 적어 주세요."></label></div>
+ <p class="parent-date-hint">정확한 시간이 기억나지 않으면 비워 두셔도 돼요. 작성 시각은 별도로 자동 기록됩니다.</p>
  <label class="parent-main-label">어떤 일을 보거나 들으셨나요? <small>필수 · 360자 이내</small><textarea name="observation" maxlength="360" rows="3" required placeholder="기억나는 사실만 간단히. 원인이나 진단을 추측하지 않아도 됩니다."></textarea></label>
+ <details class="entry-examples parent-examples"><summary>✎ 관찰 메모 예시 보기 <small>필요할 때만</small></summary><div class="entry-examples-body"><p>아래는 가상의 상황이에요. 실제로 확인한 내용만 적어 주세요.</p><div class="example-lines"><p><b>직접 본 일:</b> “책을 펼쳤다가 잠시 덮고 물을 마셨습니다.”</p><p><b>아이에게 들은 말:</b> “잠깐 쉬고 싶어요.”</p><p><b>확인하지 않은 추측:</b> “일부러 피하려고 한 것 같다”는 관찰 사실에 넣지 않아요.</p></div><p>모든 일을 기록할 필요는 없고, 한 가지 사실만 남겨도 충분합니다.</p></div></details>
  <label class="parent-source-field">이 내용은 어떻게 알게 되었나요? <small>선택 · 정확한 출처가 아니면 비워 두세요.</small><select name="origin"><option value="">출처를 선택하지 않음</option><option value="직접 관찰">직접 보거나 들었어요</option><option value="아이가 말함">아이에게 들었어요</option><option value="가족에게 들음">다른 가족에게 들었어요</option><option value="그 밖의 사람에게 들음">그 밖의 사람에게 들었어요</option></select></label>
  <p class="parent-fact-note">아이의 마음이나 의도를 단정하지 않아도 됩니다. 일부러 행동을 관찰하거나 횟수를 셀 필요도 없어요.</p>
  <details class="optional-fields parent-more"><summary>당시 상황과 앞뒤 내용 더 남기기 <small>선택</small></summary><div class="optional-wrap">
@@ -1044,12 +1103,14 @@ function dataForm(role){
  <div class="student-extra-grid"><label>제목 <small>(선택)</small><input name="title" maxlength="80" placeholder="제목 없이 써도 돼"></label></div>
  <div class="form-switcher" role="group" aria-label="기록 방식"><button type="button" class="format-btn active" data-format="text" aria-pressed="true">✎ 글쓰기</button><button type="button" class="format-btn" data-format="draw" aria-pressed="false">◇ 그림 그리기</button></div></div>
  <div id="textPanel"><label class="student-note-label">하고 싶은 이야기 <small>(짧아도 좋아)</small><textarea name="note" maxlength="4000" rows="5" placeholder="오늘 있었던 일, 좋은 일, 고민, 그냥 생각나는 말... 자유롭게."></textarea></label></div>
+ <details class="entry-examples student-examples"><summary>✎ 어떻게 적을까? 짧은 예시 보기 <small>필요할 때만</small></summary><div class="entry-examples-body"><p>이건 가상의 예시야. 따라 쓸 필요 없이 네 이야기만 남기면 돼.</p><div class="example-lines"><p>“오늘 친구랑 점심시간에 이야기했어.”</p><p>“집에 와서 조금 쉬었어. 오늘 기분은 잘 모르겠어.”</p><p>“지금은 글보다 기분만 선택하고 싶어.”</p></div><p>한두 줄, 감정만, 또는 아무것도 적지 않아도 괜찮아.</p></div></details>
+ <section class="student-emotion-quick" id="stateDetails" aria-label="그때의 감정 선택"><div class="student-emotion-title"><strong>그때 어떤 기분이었어?</strong> <small>선택 · 여러 개 또는 선택 안 함</small></div><div class="emotion-quick-body"><div class="emotion-grid" aria-label="감정 선택">${STUDENT_EMOTIONS.map(w=>`<label class="emotion-chip"><input name="emotionChoice" type="checkbox" value="${w}"><span>${w}</span></label>`).join('')}</div>
+ <details class="emotion-more"><summary>다른 감정도 보기 <span>+ ${Object.values(STUDENT_MORE_EMOTIONS).flat().length}개</span></summary>${Object.entries(STUDENT_MORE_EMOTIONS).map(([group,words])=>`<div class="emotion-group"><p>${group}</p><div class="emotion-grid">${words.filter(w=>!STUDENT_EMOTIONS.includes(w)).map(w=>`<label class="emotion-chip"><input name="emotionChoice" type="checkbox" value="${w}"><span>${w}</span></label>`).join('')}</div></div>`).join('')}</details>
+ <details class="emotion-extra-optional"><summary>내 말로 표현하거나 컨디션도 남기기 <small>(선택)</small></summary><div class="emotion-extra-fields"><label>내 말로 표현하기 <small>(선택)</small><input name="emotionOther" maxlength="100" placeholder="위에 없는 감정이나 내 표현"></label><label>컨디션 <small>(선택)</small><select name="energy"><option value="">선택하지 않음</option><option>괜찮음</option><option>기운 있음</option><option>조금 피곤함</option><option>많이 피곤함</option><option>잘 모르겠음</option></select></label></div></details></div></section>
  <div class="student-mode-advanced">
  <div id="drawPanel" hidden><div class="sketch-board"><canvas id="noteCanvas" width="760" height="380" aria-label="마우스나 손가락으로 그리는 그림 메모"></canvas></div><div class="sketch-actions"><span>손가락이나 마우스로 그릴 수 있어.</span><button type="button" id="undoStroke" class="button-ghost">↶ 되돌리기</button><button type="button" id="clearSketch" class="button-ghost">지우기</button></div></div>
  
- <details class="optional-fields student-emotion-details" id="stateDetails"><summary>그때의 감정도 남길까? <small>선택 · 여러 개 가능</small></summary><div class="optional-wrap"><p class="emotion-helper">하나만 고르지 않아도 돼. 감정이 섞였거나 잘 모르겠어도 괜찮아.</p><div class="emotion-grid" aria-label="감정 선택">${STUDENT_EMOTIONS.map(w=>`<label class="emotion-chip"><input name="emotionChoice" type="checkbox" value="${w}"><span>${w}</span></label>`).join('')}</div>
- <details class="emotion-more"><summary>다른 감정도 보기 <span>+ ${Object.values(STUDENT_MORE_EMOTIONS).flat().length}개</span></summary>${Object.entries(STUDENT_MORE_EMOTIONS).map(([group,words])=>`<div class="emotion-group"><p>${group}</p><div class="emotion-grid">${words.map(w=>`<label class="emotion-chip"><input name="emotionChoice" type="checkbox" value="${w}"><span>${w}</span></label>`).join('')}</div></div>`).join('')}</details>
- <label>내 말로 표현하기 <small>(선택)</small><input name="emotionOther" maxlength="100" placeholder="위에 없는 감정이나 내 표현"></label><label>컨디션 <small>(선택)</small><select name="energy"><option value="">선택하지 않음</option><option>괜찮음</option><option>기운 있음</option><option>조금 피곤함</option><option>많이 피곤함</option><option>잘 모르겠음</option></select></label></div></details>
+
  <details class="optional-fields student-experience"><summary>몸의 움직임·소리나 반복된 일이 있었어? <small>선택 · 그냥 넘어가도 돼</small></summary><div class="optional-wrap"><p class="experience-helper">틱인지 강박인지 구분할 필요 없어. 내가 직접 경험한 일을 내 말로 남기고 싶을 때만 써. 기록하지 않아도 괜찮아.</p><label>어떤 일이 있었어? <small>(선택)</small><textarea name="experience" maxlength="900" rows="3" placeholder="움직임, 소리, 반복하고 싶었던 일, 떠오른 생각 등 내가 겪은 일을 자유롭게"></textarea></label><label>일상에서 달라진 점이나 불편한 점이 있었어? <small>(선택)</small><textarea name="experienceImpact" maxlength="500" rows="2" placeholder="특별히 달라진 일이 없었다면 비워 둬도 돼."></textarea></label><p class="experience-footer">횟수를 세거나 정확하게 분석할 필요는 없어. 나만 보관하고 싶으면 공유를 선택하지 않으면 돼.</p></div></details>
  <details class="optional-fields student-reflect"><summary>좀 더 적고 싶다면 <small>선택 · 정답 없음</small></summary><div class="optional-wrap"><label>떠오른 생각이나 이미지<textarea name="thought" maxlength="1200" placeholder="쓰고 싶은 내용이 있으면 적어도 돼."></textarea></label><label>몸에서 느낀 점<textarea name="body" maxlength="1000" placeholder="특별한 느낌이 없다면 비워 둬도 돼."></textarea></label><label>내가 했던 일이나 해보고 싶은 일<textarea name="action" maxlength="1000" placeholder="꼭 해결책을 적을 필요는 없어."></textarea></label></div></details>
  </div>
@@ -1115,8 +1176,18 @@ function restorePreviewDraft(form,role){
  try{
   const raw=sessionStorage.getItem(PREVIEW_DRAFT_PREFIX+role);if(!raw)return false;
   const draft=JSON.parse(raw);if(!draft||!Array.isArray(draft.values)||Date.now()-draft.savedAt>12*3600000){sessionStorage.removeItem(PREVIEW_DRAFT_PREFIX+role);return false;}
-  const els=[...form.querySelectorAll('[name]')];
-  draft.values.forEach((item,i)=>{const el=els[i];if(!el||el.name!==item.name)return;if(el.type==='checkbox'||el.type==='radio')el.checked=!!item.checked;else el.value=String(item.value||'')});
+  // Match by semantic field identity, not DOM position: adding the quick mood/parent rows
+  // must not silently discard an older draft in the current preview browser session.
+  const used=new Set();
+  [...form.querySelectorAll('[name]')].forEach(el=>{
+   const isChoice=el.type==='checkbox'||el.type==='radio';
+   const idx=draft.values.findIndex((item,i)=>!used.has(i)&&item.name===el.name&&
+     (isChoice?item.value===el.value:(item.type||'')===el.type));
+   if(idx<0)return;
+   used.add(idx);const item=draft.values[idx];
+   if(isChoice)el.checked=!!item.checked;
+   else el.value=String(item.value??'');
+  });
   if(role==='student'){
    sketchStrokes=Array.isArray(draft.sketch)?draft.sketch.slice(0,240):[];
    const mode=draft.mode==='detail'?'detail':'quick';form.dataset.journalMode=mode;
@@ -1139,7 +1210,7 @@ function wireEntryForm(isParent){
   if(isParent)return;
   const entry=gatherEntry(f,'student');
   f.querySelectorAll('input[name="shareField"]').forEach(x=>{
-   const mode=f.dataset.journalMode||'quick';const available=!!entry[x.value]&&(mode==='detail'||['note','date','time','place'].includes(x.value));x.disabled=!available;if(!available)x.checked=false;
+   const mode=f.dataset.journalMode||'quick';const available=!!entry[x.value]&&(mode==='detail'||['note','date','time','place','mood'].includes(x.value));x.disabled=!available;if(!available)x.checked=false;
    x.closest('label')?.classList.toggle('is-unavailable',!available);
   });
   const count=selectedKeys().length;const caption=$('studentShareCount');
@@ -1158,7 +1229,7 @@ function wireEntryForm(isParent){
     modeButtons.forEach(b=>{const active=b===modeButton;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
     if(mode==='quick'&&$('drawPanel')&&!$('drawPanel').hidden){f.querySelector('[data-format="text"]')?.click();}
     if(journalModeHint)journalModeHint.textContent=mode==='quick'?'한 줄만 남겨도 돼. 나머지는 선택이야.':'감정·장소·그림·내 경험도 원하는 만큼 추가해 봐.';
-    const extra=mode==='quick'&&['title','place','energy','thought','body','action','experience','experienceImpact'].some(k=>!!formValue(f,k));
+    const extra=mode==='quick'&&['title','energy','thought','body','action','experience','experienceImpact'].some(k=>!!formValue(f,k));
     const summary=$('journalHiddenNotice');if(summary)summary.hidden=!extra;
     updateStudentShare();
   }));
