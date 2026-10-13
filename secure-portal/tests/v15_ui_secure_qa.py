@@ -58,7 +58,7 @@ with sync_playwright() as pw:
    page.set_content(page_html,wait_until='load')
    page.locator('button[data-login-role="'+role+'"]').click()
    page.locator('#oneLogin').click()
-   target='#inviteForm' if role=='therapist' else '#entryForm'
+   target='#inboxResults' if role=='therapist' else '#entryForm'
    page.locator(target).wait_for()
    assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth+3'),('overflow',role,width)
    if role=='student':
