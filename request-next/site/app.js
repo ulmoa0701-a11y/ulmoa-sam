@@ -153,11 +153,12 @@ $('#adminLoad').addEventListener('click',async()=>{
   const r=await fetch('/api/admin/posts',{headers:{Authorization:'Bearer '+k},credentials:'same-origin',cache:'no-store'});
   if(!r.ok)throw Error('운영자 인증에 실패했습니다.');
   const data=await r.json();adminKey=k;$('#adminKey').value='';
+  $('#selfTestPanel').hidden=false;
   place.replaceChildren();
   if(!data.posts.length)place.append(el('p','접수된 글이 없습니다.','muted'));
   data.posts.forEach(renderAdmin);
   setStatus($('#adminStatus'),'운영자 목록을 불러왔어요.','ok');
- }catch(err){adminKey='';setStatus($('#adminStatus'),err.message,'error');}
+ }catch(err){adminKey='';$('#selfTestPanel').hidden=true;setStatus($('#adminStatus'),err.message,'error');}
 });
 function renderAdmin(p){
  const wrapper=el('article',undefined,'admin-post');
@@ -186,6 +187,107 @@ function renderAdmin(p){
  });
  wrapper.append(edit);$('#adminPosts').append(wrapper);
 }
+
+/* A deliberately explicit, admin-only production-staging diagnostic.
+ * Test input is synthetic; one private post and an 8-byte dummy PDF are purged
+ * in finally. No secret, receipt or personal details are written to UI/logs.
+ */
+$('#adminSelfTest').addEventListener('click',async()=>{
+ const button=$('#adminSelfTest'),place=$('#selfTestStatus');
+ if(!adminKey){setStatus(place,'먼저 운영자 인증을 해주세요.','error');return;}
+ button.disabled=true;
+ let created=null,passes=0,problem='',cleanupError='';
+ const label=(message)=>setStatus(place,message);
+ const checked=(ok,message)=>{
+  if(!ok)throw Error(message);
+  passes++;
+ };
+ const api=async(url,options={})=>fetch(url,{cache:'no-store',credentials:'same-origin',...options});
+ try{
+  label('1/6 · 데이터베이스 응답 확인 중…');
+  const health=await api('/api/health');
+  checked(health.status===200,'데이터베이스 조회가 실패했어요.');
+  const healthData=await health.json();
+  checked(healthData.ok===true&&healthData.database==='ready','데이터베이스 응답을 확인할 수 없어요.');
+
+  const marker='HABOM_TEST_'+crypto.randomUUID().replace(/-/g,'');
+  const payload=new FormData();
+  for(const [k,v] of Object.entries({
+   visibility:'hidden',category:'질문',title:'자동 검증 중인 쪽지',
+   body:marker,nickname:'자동검증',anonymous:'false',role:'',
+   consent:'true',website:''
+  }))payload.set(k,v);
+  payload.set('attachment',new File(['%PDF-1.4\n'],'autocheck.pdf',{type:'application/pdf'}));
+  label('2/6 · 가상 비공개 쪽지 저장 중…');
+  const createdResponse=await api('/api/posts',{method:'POST',body:payload});
+  if(!createdResponse.ok){
+   const err=await createdResponse.json().catch(()=>({}));
+   throw Error('시험 글을 저장하지 못했어요 ('+createdResponse.status+'). '+(err.error||''));
+  }
+  created=await createdResponse.json();
+  checked(created.ok===true&&/^[a-f0-9-]{36}$/.test(created.id)&&/^[a-f0-9]{64}$/.test(created.receipt),'접수 확인 코드를 받지 못했어요.');
+  const path='/api/mine/'+encodeURIComponent(created.id);
+  const receiptHeader={'X-Receipt-Token':created.receipt};
+
+  label('3/6 · 비밀글 공개 차단 및 본인 확인 중…');
+  const feed=await api('/api/posts');
+  checked(feed.status===200,'공개 목록 조회 오류');
+  const feedText=await feed.text();
+  checked(!feedText.includes(marker)&&!feedText.includes(created.id),'비밀글이 공개 목록에 노출됐어요.');
+  const denied=await api(path);
+  checked(denied.status===403,'확인 코드 없는 접근이 허용됐어요.');
+  const owned=await api(path,{headers:receiptHeader});
+  checked(owned.status===200,'작성자 확인 코드로 조회할 수 없어요.');
+  const ownedData=await owned.json();
+  checked(ownedData.post?.body===marker,'저장된 비밀글 내용이 맞지 않아요.');
+
+  label('4/6 · 비공개 PDF 접근 권한 확인 중…');
+  checked((await api(path+'/file')).status===403,'비공개 파일에 무단 접근이 가능해요.');
+  checked((await api('/api/public/'+created.id+'/file')).status===404,'비공개 파일이 공개 경로에서 보입니다.');
+  const file=await api(path+'/file',{headers:receiptHeader});
+  checked(file.status===200,'작성자가 첨부파일을 받을 수 없어요.');
+  checked((await file.text())==='%PDF-1.4\n','다운로드 파일 내용이 일치하지 않아요.');
+
+  label('5/6 · 운영자 답변과 작성자 재조회 중…');
+  const adminReply=await api('/api/admin/posts/'+created.id,{
+   method:'POST',headers:{Authorization:'Bearer '+adminKey,'Content-Type':'application/json'},
+   body:JSON.stringify({status:'답변 완료',reply:'자동검증 답장',publicTitle:'비밀글입니다',metadataApproved:false,attachmentApproved:false})
+  });
+  checked(adminReply.status===200,'운영자 답변을 저장할 수 없어요.');
+  const ownedAgain=await api(path,{headers:receiptHeader});
+  checked(ownedAgain.status===200,'답변 이후 작성자 조회 실패');
+  const replyData=await ownedAgain.json();
+  checked(replyData.post?.reply==='자동검증 답장','저장한 답변을 다시 읽을 수 없어요.');
+
+  label('6/6 · 시험 쪽지와 첨부파일 삭제 중…');
+ }catch(err){
+  problem=err instanceof Error?err.message:'알 수 없는 오류가 발생했어요.';
+ }finally{
+  if(created?.id&&created?.receipt){
+   try{
+    const path='/api/mine/'+encodeURIComponent(created.id);
+    const options={method:'DELETE',headers:{'X-Receipt-Token':created.receipt}};
+    let removed=await api(path,options);
+    if(!removed.ok)removed=await api(path,options);
+    if(!removed.ok)throw Error('삭제 요청 실패 ('+removed.status+')');
+    const verify=await api(path,{headers:{'X-Receipt-Token':created.receipt}});
+    if(verify.status!==403)throw Error('삭제 후 재조회가 차단되지 않았습니다.');
+    passes++;
+   }catch(err){
+    cleanupError='시험 쪽지 삭제 확인 실패: '+(err instanceof Error?err.message:'알 수 없는 오류');
+   }
+  }
+  button.disabled=false;
+  await loadFeed();
+  const succeeded=!problem&&!cleanupError;
+  if(succeeded){
+   setStatus(place,'검증 통과 · '+passes+'개 항목 확인. 시험 글과 파일을 삭제했어요.','ok');
+  }else{
+   setStatus(place,'검증 미통과 · '+[problem,cleanupError].filter(Boolean).join(' / ')+(cleanupError?' (운영자 목록에서 시험 글을 확인해 주세요.)':''),'error');
+  }
+ }
+});
+
 if(location.hash.startsWith('#mine=')){try{prefill(decodeURIComponent(location.hash.slice(6)));}catch{}}
 loadFeed();
 })();
