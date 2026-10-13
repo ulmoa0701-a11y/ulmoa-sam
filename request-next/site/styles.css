@@ -79,3 +79,7 @@ body{background:#f8f9f4}
 }
 @media(max-width:350px){.hero-envelope{display:none}.heading h1{font-size:28px}.prompt-chip{padding:7px 10px}}
 @media(prefers-reduced-motion:reduce){.prompt-chip:active,.submit:active{transform:none}}
+
+/* 작성자 전용 삭제: 편집 폼과 혼동되지 않는 보조 동작 */
+.delete-own{display:block;margin:20px 0 5px;background:#fff;border:1px solid #e3c4ba;border-radius:9px;color:#a44436;min-height:40px;padding:9px 14px;font:inherit;font-size:13px;cursor:pointer}
+.delete-own:disabled{opacity:.6;cursor:wait}
