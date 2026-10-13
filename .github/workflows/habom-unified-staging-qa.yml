@@ -143,3 +143,14 @@ jobs:
           npx esbuild netlify/functions/board.mjs --bundle --platform=node --external:@netlify/database --external:@netlify/blobs --outfile=/tmp/habom-netlify-board.mjs
       - name: Verify real transactional database behaviour
         run: node --test request-next/tests/postgres-integration.test.mjs
+
+  staging-privacy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Confirm deployed Netlify testing site requires authentication
+        run: node request-next/tests/staging-privacy.mjs
