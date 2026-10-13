@@ -1362,7 +1362,17 @@ function introSound(beats,intervalMs){
   if(first&&wantsMelody()&&melodyMode!=='none'){
    const gain=ac.createGain();gain.connect(ac.destination);
    introFirstMelodyScheduled=scheduleMelodyTone(ac,gain,first.note,songStart,melodyMode,melodyVolume,first.dur);
-   if(introFirstMelodyScheduled){introFirstMelodyGain=gain;songAudioStartAt=songStart;nextMelodyNoteIndex=firstIndex+1}
+   if(introFirstMelodyScheduled){
+    introFirstMelodyGain=gain;songAudioStartAt=songStart;
+    // Pre-schedule the opening phrase while still in the introduction.
+    // rAF/browser UI work around the exact hand-off cannot delay note 2.
+    nextMelodyNoteIndex=firstIndex+1;
+    for(let i=firstIndex+1;i<Math.min(events.length,firstIndex+11);i++){
+     const e=events[i];
+     if(e.active)scheduleMelodyTone(ac,gain,e.note,songStart+(e.start-firstNoteMs())/1000,melodyMode,melodyVolume,e.dur);
+     nextMelodyNoteIndex=i+1;
+    }
+   }
   }
   return;
  }
@@ -1407,12 +1417,12 @@ function beginPlayback(fromInstrumentalPrelude=false){
   // Keep both melody and MR on the shared song audio clock.
   if(!(fromInstrumentalPrelude&&introScheduledMr))syncLiveMr();
   if(fromInstrumentalPrelude&&introFirstMelodyGain&&introFirstMelodyScheduled){
-   const originalAudioStart=songAudioStartAt;
+   const originalAudioStart=songAudioStartAt,alreadyScheduledThrough=nextMelodyNoteIndex;
    stopSongMelody();
    songMelodyGain=introFirstMelodyGain;
    introFirstMelodyGain=null;introFirstMelodyScheduled=false;
    songAudioStartAt=originalAudioStart;audioRenderSongStartAt=originalAudioStart;
-   nextMelodyNoteIndex=events.findIndex(e=>e.active)+1;
+   nextMelodyNoteIndex=alreadyScheduledThrough;
   }else syncLiveSongMelody();
   introScheduledMr=false;
   queueUpcomingMelody();
