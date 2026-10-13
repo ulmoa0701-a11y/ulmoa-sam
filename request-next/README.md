@@ -55,3 +55,13 @@ CI 보안 테스트는 자체 D1/R2 모의 환경의 **단위 테스트**이며,
 - 현재 Netlify 연결 도구에는 GitHub 저장소 링크/환경변수 수정/배포 실행 기능이 없음. 원격 PC 도구 월 호출 한도는 0%. 실제 외부 서버 배포는 하지 않음.
 - Netlify Free 사용은 현금 결제 0원이지만 월 300크레딧을 소비하고 무료 한도 도달 시 같은 팀의 다른 앱도 영향받을 수 있음.
 - 공식 플랜: https://docs.netlify.com/manage/accounts-and-billing/billing/billing-for-credit-based-plans/credit-based-pricing-plans/
+
+
+## 2026-10-13 실제 Netlify 운영자 검증 절차
+- 확인된 기본 인프라: SSO 전용 staging Netlify 자동 배포, /api/health 정상 JSON(운영자 브라우저 확인), 실제 PostgreSQL 마이그레이션 완료. 환경변수 HABOM_ADMIN_KEY/HABOM_RATE_SALT는 Netlify UI에서 secret 등록 확인; 값 자체는 공유하거나 소스에 보관하지 않는다.
+- staging https://habom-unified-private-staging.netlify.app/ 에서 운영자 관리 details 펼치기 → 첫 번째로 생성해 Netlify HABOM_ADMIN_KEY에 넣은 값을 운영자 키에 직접 입력 → 글 관리 열기 → 인증 성공 후 나타나는 테스트 한 번 실행하기 누르기.
+- 이 버튼은 API /api/health, POST /api/posts (완전 비공개 가상 글+소형 PDF), GET public feed 비노출 확인, GET mine 무단/정상 접근, PDF 무단/정상 접근, 운영자 답변 POST, 작성자 답변 재조회, DELETE 후 403 확인 순서로 동작한다. 키와 receipt는 화면/로그에 기록하지 않는다.
+- 테스트는 관리자 인증 시에만 노출되고 사용자가 직접 눌러야 시작된다. 테스트 1건은 10분간 3건 작성 제한에 포함된다. 실패해도 finally에서 생성된 시험 글 삭제를 재시도하며, 실패하면 명시적 경고를 보여준다.
+- 이전 프론트엔드의 credentials: omit를 credentials: same-origin으로 수정하여 Netlify 비공개 스테이징 로그인 세션을 API 요청에 전달한다. 교차 출처 요청은 허용하지 않는다.
+- 실제 API에 로그인된 사용자의 수동 시험은 남아 있으며, 자동 CI의 임시 저장소 테스트만으로 실제 Netlify Blobs/DB 완전 통과를 주장하지 않는다.
+- [2026-10-13 QA 7 jobs](https://github.com/ulmoa0701-a11y/ulmoa-sam/actions/runs/38397619560) 통과. 실제 Netlify 배포 commit 25af56aa80715c0a5c286cf2c5dda1f3c5e08226 ready.
