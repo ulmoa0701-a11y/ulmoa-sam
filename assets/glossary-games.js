@@ -91,154 +91,337 @@ const CASES=[
     talk:"목표는 그대로 두고 안내 방법을 바꾸면 참여가 어떻게 달라질까요?",
     guard:"시각 자료가 도움 된다는 사실만으로 청각처리 문제나 특정 장애를 추정할 수 없어요."}
 ];
-const MODE={
- observe:{title:"행동의 단서 찾기",tag:"관찰 돋보기",desc:"한 장면을 여러 각도에서 살펴봐요.",intro:"어떤 점이 궁금하세요?",icon:"🔎",choices:"look"},
- support:{title:"도움 방법 생각하기",tag:"도움 주머니",desc:"상황에 따라 달라질 수 있는 지원 방법을 비교해봐요.",intro:"어떤 방법을 먼저 생각해볼까요?",icon:"🌱",choices:"help"}
+/* 모든 발견과 반응은 이 사이트에서 만든 가상 이야기의 추가 장면이다.
+   실제 아이의 행동이나 지원 효과를 예측하는 근거가 아니다. */
+const STORY_BRANCHES={
+ noise:{clues:[
+  "이 가상 장면에서 TV 소리를 끄자 아이가 그림으로 다시 시선을 돌렸어요.",
+  "좋아하는 만들기에서도 갑자기 문이 닫히는 소리가 나면 손을 멈췄어요.",
+  "같은 그림 활동도 늦은 오후에는 조용할 때 자주 멈췄어요."
+ ],outcomes:[
+  "주변 소리를 줄인 뒤 다시 그리기 시작했지만, 잠시 후에는 다른 소리에도 반응했어요.",
+  "그림 그리는 시간을 짧게 나눴더니 다음 활동까지 이어갔지만, 소리에 대한 반응은 남아 있었어요.",
+  "한 가지씩 그림으로 안내하니 다음 행동을 시작했어요. 다만 소리가 왜 방해됐는지는 알 수 없었어요."
+ ]},
+ instructions:{clues:[
+  "‘가방 놓아줘’라고 한 가지만 말했을 때는 곧바로 행동했어요.",
+  "‘손 씻기’라는 말을 물었더니 뜻은 알지만 다음 순서를 말하기 어려워했어요.",
+  "TV가 켜진 상태에서는 같은 짧은 지시도 여러 번 물어봤어요."
+ ],outcomes:[
+  "한 번에 한 가지를 말하자 이어서 해냈지만, 길어진 지시에서는 다시 한 단계를 놓쳤어요.",
+  "그림으로 순서를 보여주니 다음 행동을 확인했어요. 혼자서도 계속 사용할지는 더 살펴봐야 해요.",
+  "실제로 무엇을 해야 하는지 보여달라고 하니 첫 단계는 이해했지만 두 번째에서는 망설였어요."
+ ]},
+ change:{clues:[
+  "바뀔 규칙을 1분 전 알려주자 이전보다 차분하게 참여했어요.",
+  "새 규칙을 그림으로 설명하자 이해했지만 여전히 원래 놀이를 하고 싶어했어요.",
+  "가장 좋아하던 차례가 끝나는 순간에 특히 속상해했어요."
+ ],outcomes:[
+  "미리 알려주니 새 규칙을 잠시 시도했지만, 예상보다 빨리 변경되면 다시 당황했어요.",
+  "규칙을 한 가지만 바꾸자 시작할 수 있었어요. 다른 변화를 받아들이는지는 알 수 없어요.",
+  "속상함을 들어주자 마음을 표현했어요. 이후 어떤 선택이 편했는지는 더 확인해봐야 해요."
+ ]},
+ story:{clues:[
+  "사진을 보여주니 먼저 일어난 일을 가리킬 수 있었어요.",
+  "사건을 그림으로 고를 수는 있지만 문장으로 이어 말할 때 멈췄어요.",
+  "짧은 질문에는 답했지만 질문을 여러 개 이어 하면 말이 짧아졌어요."
+ ],outcomes:[
+  "사진 세 장으로 순서를 정하자 사건을 짚었어요. 문장 설명은 여전히 도움이 필요했어요.",
+  "한 가지 질문부터 시작하니 짧게 답했지만 긴 이야기는 이어지지 않았어요.",
+  "충분히 기다리자 다음 문장을 말했어요. 모든 상황에서 기다림만으로 충분하진 않을 수 있어요."
+ ]},
+ asking:{clues:[
+  "손을 잡고 물통 앞으로 가서 뚜껑을 가리켰어요.",
+  "원하는 것을 그림으로 고를 때도 있었고 손짓을 쓸 때도 있었어요.",
+  "어른이 손짓을 알아듣고 도와주자 같은 방법으로 다시 요청했어요."
+ ],outcomes:[
+  "손짓의 뜻을 확인하고 반응하니 물통을 가리키며 다시 요청했어요.",
+  "그림과 손짓을 함께 두니 이번에는 그림을 택했지만 다른 때에는 손짓을 썼어요.",
+  "익숙한 도움 요청 상황에서는 스스로 그림을 골랐어요. 다른 장소에서의 사용은 확인이 필요해요."
+ ]},
+ reading:{clues:[
+  "글자를 읽을 때 몇 낱말을 빠뜨렸어요.",
+  "같은 내용을 쉬운 말로 들었을 때 등장인물은 정확히 알려줬어요.",
+  "‘누가?’에는 답했지만 ‘왜?’라는 질문에는 장면을 다시 봐야 했어요."
+ ],outcomes:[
+  "한 문장을 나누어 읽자 누가 나오는지는 설명했지만 이유는 여전히 어려워했어요.",
+  "그림을 보며 사건을 짚으니 순서는 떠올렸지만 글 내용의 숨은 뜻은 더 확인해야 했어요.",
+  "문장 속 단서를 함께 찾자 이유를 추측했어요. 단서를 혼자 찾는지는 아직 알 수 없어요."
+ ]},
+ refusal:{clues:[
+  "쓰기 양이 적고 쉬운 날에는 활동을 시작했어요.",
+  "‘두 줄 쓰기’라고 안내한 직후 자리를 벗어난 날이 있었고, 돌아온 뒤에는 활동이 끝났어요.",
+  "손이 아프다고 말한 날에도 같은 모습이 있었어요."
+ ],outcomes:[
+  "첫 글자만 써보자고 하니 시작했지만 긴 글쓰기에서는 다시 멈췄어요.",
+  "도움 요청 그림을 준비하자 이번에는 그림을 보여줬어요. 자리 이탈이 줄어들지는 더 살펴봐야 해요.",
+  "며칠의 상황을 나눠 적자 과제 길이와 피로 여부가 달랐어요. 행동 이유가 하나로 확정되진 않았어요."
+ ]},
+ context:{clues:[
+  "표정과 말투를 함께 보자 농담임을 알아차린 장면도 있었어요.",
+  "같은 문장을 실제와 다른 뜻으로 쓴 경험은 별로 없다고 했어요.",
+  "‘무슨 뜻이야?’라고 물으면 침묵했지만 보기 두 개를 주면 고를 수 있었어요."
+ ],outcomes:[
+  "다른 장면 두 개에서 같은 말을 들으니 뜻이 달라질 수 있음을 알아차렸어요.",
+  "중요한 안내를 직접적으로 말하자 바로 행동했지만 농담을 이해하는 문제와는 별개였어요.",
+  "말투 그림을 함께 보자 한 장면을 해석했지만 새로운 상황에도 적용할지는 알 수 없었어요."
+ ]},
+ planning:{clues:[
+  "‘첫 줄 쓰기’라고 알려주면 시작할 수 있었어요.",
+  "문제 세 개는 할 수 있지만 열 개를 한 번에 보면 시작을 미뤘어요.",
+  "주변에서 다른 활동이 진행되면 무엇을 할지 다시 물었어요."
+ ],outcomes:[
+  "첫 단계를 보여주니 시작했어요. 이어서 순서를 정하는 것은 다시 도움이 필요했어요.",
+  "순서표를 보며 두 단계를 마쳤지만 긴 활동 전체를 혼자 하지는 못했어요.",
+  "준비물과 목표를 함께 확인하자 시작했어요. 다음 날에도 같은지는 더 살펴봐야 해요."
+ ]},
+ express:{clues:[
+  "물이 필요할 때 물 그림을 직접 찾아 눌렀어요.",
+  "그림이 너무 많을 때는 원하는 그림을 찾는 데 시간이 걸렸어요.",
+  "그림을 보여줬을 때 어른이 바로 이해한 경우와 놓친 경우가 있었어요."
+ ],outcomes:[
+  "그림 요청에 바로 반응하자 같은 그림을 다시 활용했어요. 말 사용 변화는 이 장면만으로 알 수 없어요.",
+  "자주 쓰는 그림을 앞쪽에 두니 더 빨리 선택했지만 새로운 그림은 아직 찾기 어려워했어요.",
+  "말과 그림 중 편한 방법을 고르게 하니 이번에는 그림을 택했어요. 다른 때는 달라질 수 있어요."
+ ]},
+ recall:{clues:[
+  "첫 글자를 말해주니 그 단어를 금방 떠올렸어요.",
+  "처음 배울 때 뜻을 설명할 수 있었지만 한참 후에는 망설였어요.",
+  "대답을 재촉하지 않고 잠시 기다리면 스스로 말하는 경우가 있었어요."
+ ],outcomes:[
+  "생각할 시간을 주자 단어를 떠올렸지만 모든 단어에서 같지는 않았어요.",
+  "첫 글자 단서를 주자 답했어요. 다른 단서 없이도 떠올릴지는 더 살펴봐야 해요.",
+  "다음 날 다시 떠올려 보니 일부는 기억했고 일부는 힌트가 필요했어요."
+ ]},
+ access:{clues:[
+  "말로만 알려줄 때는 순서를 두 번 물었고 그림이 있을 때는 한 번 보고 시작했어요.",
+  "그림으로 보여줘도 단계가 많아지면 중간에 멈췄어요.",
+  "원하는 그림을 고를 수 있었지만 모든 그림을 이해하는 것은 아니었어요."
+ ],outcomes:[
+  "말과 그림을 함께 보여주자 첫 단계를 시작했지만 긴 활동에서 다시 순서를 놓쳤어요.",
+  "복잡한 일을 작은 단계로 나누니 다음 단계를 스스로 찾아봤어요. 도움의 양은 다시 조정해야 해요.",
+  "선호하는 그림을 골라 안내하니 참여했어요. 그림이 항상 최선의 방법이라는 뜻은 아니에요."
+ ]}
 };
-const LEVEL={start:"익숙한 장면 5개",more:"조금 더 생각할 장면 5개"};
-function e(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;}
-function mix(input){const a=input.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+const MODE={
+ observe:{title:"모아의 단서 찾기",tag:"단서 찾기",desc:"궁금한 단서를 열어보고, 상황을 새롭게 이해해봐요.",icon:"🔎"},
+ support:{title:"모아의 도움 실험실",tag:"방법 실험",desc:"새로 발견한 단서를 바탕으로 도움 방법을 비교해봐요.",icon:"🌱"}
+};
+const LEVEL={start:"익숙한 장면 3개",more:"조금 더 생각할 장면 3개"};
+function el(tag,cls,value){const n=document.createElement(tag);if(cls)n.className=cls;if(value!==undefined)n.textContent=value;return n;}
+function shuffle(a){const b=a.slice();for(let i=b.length-1;i>0;i--){const k=Math.floor(Math.random()*(i+1));[b[i],b[k]]=[b[k],b[i]];}return b;}
 function mount({host,byId,situations,openTerm}){
  if(!host)return null;
- const scenes=new Map(situations.map(s=>[s.id,s]));
+ const scenarioById=new Map(situations.map(s=>[s.id,s]));
  for(const c of CASES){
-   if(!scenes.has(c.scene)||!byId.has(c.term)||!["start","more"].includes(c.level)||c.look.length!==3||c.help.length!==3||!c.guard||!c.talk)throw Error("상황 학습 자료 확인: "+c.id);
+   const branch=STORY_BRANCHES[c.id];
+   if(!scenarioById.has(c.scene)||!byId.has(c.term)||!branch||branch.clues.length!==3||branch.outcomes.length!==3||c.look.length!==3||c.help.length!==3)throw Error("상황 이야기 내용 누락: "+c.id);
  }
  let round=null;
- const lastByMode=new Map();
- const button=(text,cl,fn)=>{const b=e("button",cl,text);b.type="button";b.addEventListener("click",fn);return b;};
- const title=text=>{const h=e("h3","gcat-game-title",text);h.tabIndex=-1;return h;};
- const focusTitle=()=>host.querySelector(".gcat-game-title")?.focus({preventScroll:true});
+ const previousByMode=new Map();
+ const button=(str,cls,action)=>{const b=el("button",cls,str);b.type="button";b.addEventListener("click",action);return b;};
+ const heading=str=>{const h=el("h3","gcat-game-title",str);h.tabIndex=-1;return h;};
+ const focusHeading=()=>host.querySelector(".gcat-game-title")?.focus({preventScroll:true});
+ const stage=name=>{host.dataset.gameStage=name;host.dataset.gameMode=round?round.mode:"hub";host.replaceChildren();};
  function hub(){
-   round=null;host.dataset.gameStage="hub";delete host.dataset.gameMode;host.replaceChildren();
-   const intro=e("div","gcat-game-hub-intro");
-   intro.append(title("모아와 함께 상황을 살펴봐요"),e("p",null,"무엇이 정답인지 시험 보지 않아요. 아이의 모습을 여러 관점에서 보고, 궁금한 점을 하나씩 찾아봐요."));
-   const deck=e("div","gcat-game-deck");
+   round=null;stage("hub");
+   const intro=el("div","gcat-game-hub-intro");
+   intro.append(heading("모아와 함께 이야기를 살펴봐요"),el("p",null,"이번에는 직접 단서를 찾아보세요. 알게 된 정보에 따라 생각도 달라질 수 있어요."));
+   const deck=el("div","gcat-game-deck");
    for(const mode of ["observe","support"]){
-     const item=MODE[mode],card=e("article","gcat-game-mode-card");
-     card.dataset.learningMode=mode;
-     card.append(e("span","gcat-game-mode-icon",item.icon+" "+item.tag),e("h4",null,item.title),e("p",null,item.desc));
-     const actions=e("div","gcat-game-mode-actions");
+     const m=MODE[mode],card=el("article","gcat-game-mode-card");card.dataset.learningMode=mode;
+     card.append(el("span","gcat-game-mode-icon",m.icon+" "+m.tag),el("h4",null,m.title),el("p",null,m.desc));
+     const controls=el("div","gcat-game-mode-actions");
      for(const level of ["start","more"]){
-       const b=button(LEVEL[level],"gcat-game-start"+(level==="more"?" secondary":""),()=>start(mode,level));
-       b.dataset.gameStart=mode;b.dataset.level=level;actions.append(b);
+       const b=button(LEVEL[level],"gcat-game-start"+(level==="more"?" secondary":""),()=>begin(mode,level));
+       b.dataset.gameStart=mode;b.dataset.level=level;controls.append(b);
      }
-     card.append(actions);deck.append(card);
+     card.append(controls);deck.append(card);
    }
-   host.append(intro,deck,e("p","gcat-game-note","이 게임은 가상의 교육용 사례를 살펴보는 활동이에요. 선택은 검사 결과나 양육 능력을 평가하지 않으며, 특정 아동의 진단·행동 원인·치료 방법을 정하지 않습니다. 선택 내용은 저장·전송하지 않아요."));
+   host.append(intro,deck,el("p","gcat-game-note","이야기·단서·반응은 모두 만든 예시예요. 실제 아이의 행동 원인이나 지원 효과를 예측하지 않으며, 진단이나 처방을 대신하지 않습니다. 답을 맞히거나 점수를 매기지 않고, 이용 내용도 저장·전송하지 않아요."));
  }
- function start(mode,level){
-   const key=mode+":"+level;
-   const bank=CASES.filter(c=>c.level===level);
-   const previous=lastByMode.get(key)||[];
-   const fresh=mix(bank.filter(c=>!previous.includes(c.id)));
-   const rest=mix(bank.filter(c=>previous.includes(c.id)));
-   const items=[...fresh,...rest].slice(0,5);
-   lastByMode.set(key,items.map(c=>c.id));
-   round={mode,level,items,index:0,selected:null,order:new Map(),notes:[]};
-   show();
-   focusTitle();
+ function begin(mode,level){
+   const key=mode+":"+level, pool=CASES.filter(c=>c.level===level),prev=previousByMode.get(key)||[];
+   const items=shuffle(pool.filter(c=>!prev.includes(c.id))).concat(shuffle(pool.filter(c=>prev.includes(c.id)))).slice(0,3);
+   previousByMode.set(key,items.map(x=>x.id));
+   round={mode,level,items,pos:0,phase:mode==="observe"?"clues":"supports",opened:[],justOpened:0,selectedHelp:null,tried:[],memo:[],order:new Map()};
+   render();focusHeading();
  }
- function show(){
-   if(!round)return;
-   const c=round.items[round.index],scene=scenes.get(c.scene),mode=MODE[round.mode];
-   host.dataset.gameStage=round.selected===null?"question":"reflect";
-   host.dataset.gameMode=round.mode;host.replaceChildren();
-   const progress=e("div","gcat-game-progress");
-   progress.append(e("span",null,mode.title+" · "+(round.level==="start"?"익숙한 장면":"더 생각하기")),
-     e("strong",null,(round.index+1)+" / "+round.items.length));host.append(progress);
-   const bar=e("div","gcat-game-progress-bar"),fill=e("span");
-   fill.style.width=((round.index+1)/round.items.length*100)+"%";bar.append(fill);host.append(bar);
-   const card=e("section","gcat-game-question");card.dataset.gameQuestion=c.id;
-   card.append(e("span","gcat-game-kicker",round.mode==="observe"?"모아의 관찰 돋보기":"모아의 도움 주머니"),
-     e("p","gcat-game-scene",scene.title+" — "+scene.scene),title(round.mode==="observe"?c.ask:mode.intro));
-   const hint=e("p","gcat-game-hint",round.mode==="observe"?"모두 살펴볼 가치가 있는 관점이에요. 지금 가장 궁금한 것부터 골라봐요.":"상황에 따라 도움이 달라질 수 있어요. 먼저 생각나는 방법을 골라봐요.");
-   card.append(hint);
-   const choices=e("div","gcat-game-choices"),values=c[mode.choices];
-   if(!round.order.has(c.id))round.order.set(c.id,mix([0,1,2]));
-   for(const [position,index] of round.order.get(c.id).entries()){
-     const o=values[index];
-     const b=button("","gcat-game-choice",()=>choose(index));
-     b.dataset.choiceIndex=String(index);b.dataset.gameChoice="true";
-     b.setAttribute("aria-pressed",String(round.selected===index));
-     b.append(e("span","gcat-game-choice-number",String(position+1)),e("span","gcat-game-choice-text",o[0]));
-     if(round.selected!==null){
-       b.disabled=true;
-       if(round.selected===index)b.classList.add("selected");
-     }
-     choices.append(b);
+ function current(){
+   const c=round.items[round.pos];
+   return {c,scene:scenarioById.get(c.scene),extra:STORY_BRANCHES[c.id]};
+ }
+ function resetCase(){
+   round.phase=round.mode==="observe"?"clues":"supports";
+   round.opened=[];round.justOpened=0;round.selectedHelp=null;round.tried=[];
+ }
+ function commonHeader(){
+   const m=MODE[round.mode],{scene}=current();
+   const status=el("div","gcat-game-progress");
+   status.append(el("span",null,m.title+" · "+(round.level==="start"?"익숙한 장면":"더 생각하기")),el("strong",null,(round.pos+1)+" / "+round.items.length));
+   host.append(status);
+   const bar=el("div","gcat-game-progress-bar"),fill=el("span");
+   fill.style.width=((round.pos+1)/round.items.length*100)+"%";bar.append(fill);host.append(bar);
+   const question=el("section","gcat-game-question");
+   question.dataset.gameQuestion=current().c.id;
+   question.append(el("span","gcat-game-kicker","가상의 생활 장면"),el("p","gcat-game-scene",scene.title+" — "+scene.scene));
+   return question;
+ }
+ function helperNote(text){
+   return el("p","gcat-game-hint",text);
+ }
+ function clueButtons(card){
+   const {c}=current(),grid=el("div","gcat-game-choices");
+   const remaining=[0,1,2].filter(i=>!round.opened.includes(i));
+   if(!round.order.has(c.id))round.order.set(c.id,shuffle([0,1,2]));
+   for(const idx of round.order.get(c.id).filter(i=>remaining.includes(i))){
+     const b=button("","gcat-game-choice",()=>uncover(idx));
+     b.dataset.clueIndex=String(idx);
+     b.append(el("span","gcat-game-choice-number","?"),el("span","gcat-game-choice-text",c.look[idx][0]));
+     grid.append(b);
    }
-   card.append(choices);
-   if(round.selected===null){
-     const all=button("하나만 고르기 어렵다면 · 모두 살펴보기","gcat-game-skip",()=>choose(-1));
-     all.dataset.gameExploreAll="true";card.append(all);
-   }else{
-     const fb=e("section","gcat-game-feedback");
-     fb.dataset.gameFeedback="true";fb.setAttribute("aria-live","polite");
-     fb.append(e("strong",null,"이렇게도 볼 수 있어요."),e("p","gcat-game-why",round.mode==="observe"?"각각 다른 정보를 알려줄 수 있는 관점이에요. 어느 하나만으로 이유를 확정하지 않아요.":"방법마다 적절한 상황이 달라요. 아이의 반응을 살피며 조정할 수 있어요."));
-     const perspectives=e("div","gcat-game-perspectives");
-     for(const index of round.order.get(c.id)){
-       const option=values[index],picked=index===round.selected;
-       const section=e("div","gcat-game-perspective"+(picked?" selected":""));
-       section.append(e("strong",null,(picked?"내가 고른 관점 · ":"")+option[0]),e("p",null,option[1]));
-       perspectives.append(section);
-     }
-     fb.append(perspectives);
-     const note=e("div","gcat-game-takeaway");
-     note.append(e("strong",null,"이런 점도 살펴봐요"),e("p",null,c.follow),
-       e("strong",null,"이렇게 이야기할 수도 있어요"),e("p",null,c.talk),
-       e("p","gcat-game-caution",c.guard));
-     fb.append(note);
-     const more=e("details","gcat-game-reference");
-     more.append(e("summary",null,"관련 개념과 참고자료는 궁금할 때만 보기"));
-     const detail=e("div","gcat-game-reference-links");
-     const ref=button("관련 개념·그림 알아보기 ↗","gcat-game-ref",()=>openTerm(c.term,ref));
-     ref.dataset.gameTermId=c.term;detail.append(ref);
-     if(scene.source&&scene.source[1]){
-       const link=e("a","gcat-game-source",scene.source[0]+" ↗");
-       link.href=scene.source[1];link.target="_blank";link.rel="noopener noreferrer";detail.append(link);
-     }
-     more.append(detail);fb.append(more);card.append(fb);
-     const next=button(round.index+1===round.items.length?"돌아보기 →":"다음 장면 →","gcat-game-next",advance);
-     next.dataset.gameNext="true";card.append(next);
+   card.append(grid);
+ }
+ function uncover(idx){
+   if(!round||round.opened.includes(idx)||round.opened.length>=2)return;
+   round.opened.push(idx);round.justOpened=idx;round.phase="evidence";render();host.querySelector(".gcat-game-evidence")?.focus({preventScroll:true});
+ }
+ function clueQuestion(){
+   const card=commonHeader(),{c}=current();
+   card.append(heading(c.ask),helperNote("궁금한 것을 누르면 이 가상 이야기의 새로운 단서가 열려요."));
+   clueButtons(card);
+   if(round.mode==="support"){
+     card.append(button("지금 단서로 도움 방법 비교하기 →","gcat-game-secondary",()=>{round.phase="supports";render();focusHeading();}));
    }
    host.append(card);
  }
- function choose(index){
-   if(!round||round.selected!==null)return;
-   const c=round.items[round.index],choice=c[MODE[round.mode].choices];
-   round.selected=index;
-   round.notes.push({id:c.id,scene:scenes.get(c.scene).title,chosen:index===-1?"여러 관점 모두 살펴보기":choice[index][0]});
-   show();
-   const fb=host.querySelector(".gcat-game-feedback");if(fb){fb.tabIndex=-1;fb.focus({preventScroll:true});}
+ function evidence(){
+   const card=commonHeader(),{c,extra}=current(),idx=round.justOpened;
+   card.append(heading("새로운 단서를 발견했어요!"));
+   const discovery=el("section","gcat-game-evidence");
+   discovery.tabIndex=-1;discovery.setAttribute("role","status");
+   discovery.append(el("span","gcat-game-evidence-label","발견한 단서 · "+c.look[idx][0]),el("p",null,extra.clues[idx]));
+   card.append(discovery,el("p","gcat-game-interpret",c.look[idx][1]));
+   const footer=el("div","gcat-game-flow-actions");
+   if(round.opened.length<2){
+     footer.append(button("다른 단서도 확인하기","gcat-game-secondary",()=>{round.phase="clues";render();focusHeading();}));
+   }
+   footer.append(button("이제 도움 방법 생각하기 →","gcat-game-next",()=>{round.phase="supports";render();focusHeading();}));
+   card.append(footer);host.append(card);
+ }
+ function supportList(card){
+   const {c}=current(),list=el("div","gcat-game-choices");
+   if(!round.order.has(c.id+":supports"))round.order.set(c.id+":supports",shuffle([0,1,2]));
+   for(const idx of round.order.get(c.id+":supports")){
+     const [label,meaning]=c.help[idx];
+     const b=button("","gcat-game-choice",()=>tryHelp(idx));
+     b.dataset.supportIndex=String(idx);
+     b.append(el("span","gcat-game-choice-number","→"),el("span","gcat-game-choice-text",label),el("span","gcat-game-choice-minor",meaning));
+     if(round.tried.includes(idx))b.classList.add("gcat-game-already-tried");
+     list.append(b);
+   }
+   card.append(list);
+ }
+ function supportQuestion(){
+   const card=commonHeader(),{c,extra}=current();
+   card.append(heading("어떤 도움을 먼저 시도해볼까요?"));
+   const fact=el("section","gcat-game-known-clues");
+   fact.append(el("strong",null,round.opened.length?"찾아본 단서":"시작할 때 알 수 있는 추가 단서"));
+   const used=round.opened.length?round.opened:[0];
+   for(const i of used)fact.append(el("p",null,extra.clues[i]));
+   card.append(fact,helperNote("방법마다 살펴볼 점이 달라요. 선택한 뒤 가상 이야기의 다음 장면을 비교해봐요."));
+   supportList(card);
+   const footer=el("div","gcat-game-flow-actions");
+   if(round.opened.length<2){
+     footer.append(button("먼저 다른 단서 찾아보기","gcat-game-secondary",()=>{round.phase="clues";render();focusHeading();}));
+   }
+   card.append(footer);host.append(card);
+ }
+ function tryHelp(idx){
+   if(!round)return;
+   round.selectedHelp=idx;
+   if(!round.tried.includes(idx))round.tried.push(idx);
+   round.phase="outcome";render();host.querySelector(".gcat-game-outcome")?.focus({preventScroll:true});
+ }
+ function outcome(){
+   const card=commonHeader(),{c,extra,scene}=current(),idx=round.selectedHelp;
+   card.append(heading("방법을 골랐더니, 이야기가 이어졌어요"));
+   const result=el("section","gcat-game-outcome");result.tabIndex=-1;result.setAttribute("role","status");
+   result.append(el("span","gcat-game-evidence-label","내가 선택한 방법 · "+c.help[idx][0]),
+     el("p",null,extra.outcomes[idx]));
+   card.append(result);
+   const lesson=el("div","gcat-game-takeaway");
+   lesson.append(el("strong",null,"이 장면에서 새로 생각해볼 점"),el("p",null,c.help[idx][1]),
+     el("p","gcat-game-caution",c.guard),
+     el("span","gcat-game-disclaimer-inline","위 반응은 만든 이야기예요. 실제로 이렇게 된다는 뜻이 아니며, 아이의 반응을 직접 관찰해야 해요."));
+   card.append(lesson);
+   if(round.tried.length>1){
+     const compare=el("div","gcat-game-perspectives");
+     compare.append(el("strong","gcat-game-compare-title","선택해본 방법 비교"));
+     for(const k of round.tried){
+       const item=el("div","gcat-game-perspective");
+       item.append(el("strong",null,c.help[k][0]),el("p",null,extra.outcomes[k]));compare.append(item);
+     }
+     card.append(compare);
+   }
+   const footer=el("div","gcat-game-flow-actions");
+   if(round.tried.length<2){
+     footer.append(button("다른 방법도 비교하기","gcat-game-secondary",()=>{round.phase="supports";render();focusHeading();}));
+   }
+   footer.append(button(round.pos===round.items.length-1?"함께 정리하기 →":"다음 장면으로 →","gcat-game-next",advance));
+   card.append(footer);
+   const more=el("details","gcat-game-reference");
+   more.append(el("summary",null,"관련 개념·참고자료는 궁금할 때만 보기"));
+   const links=el("div","gcat-game-reference-links");
+   const ref=button("관련 용어·그림 살펴보기 ↗","gcat-game-ref",()=>openTerm(c.term,ref));
+   ref.dataset.gameTermId=c.term;links.append(ref);
+   if(scene.source?.[1]){
+     const link=el("a","gcat-game-source",scene.source[0]+" ↗");link.href=scene.source[1];
+     link.target="_blank";link.rel="noopener noreferrer";links.append(link);
+   }
+   more.append(links);card.append(more);host.append(card);
  }
  function advance(){
-   if(!round||round.selected===null)return;
-   round.index++;round.selected=null;
-   if(round.index===round.items.length){done();return;}
-   show();focusTitle();
+   if(!round||round.phase!=="outcome")return;
+   const {c,extra}=current();
+   round.memo.push({title:scenarioById.get(c.scene).title,clue:extra.clues[round.opened[0]??0],help:c.help[round.selectedHelp][0],question:c.follow,talk:c.talk});
+   round.pos++;
+   if(round.pos>=round.items.length){done();return;}
+   resetCase();render();focusHeading();
  }
  function done(){
-   host.dataset.gameStage="done";host.dataset.gameMode=round.mode;host.replaceChildren();
-   const box=e("section","gcat-game-done");
-   box.append(e("span","gcat-game-kicker","오늘의 관찰 여행 끝"),title(round.items.length+"가지 장면을 살펴봤어요."),
-     e("p","gcat-game-score","몇 개 맞혔는지보다, 어떤 점이 더 궁금해졌는지가 중요해요."),
-     e("p","gcat-game-remark","내가 골랐던 관점들을 다시 볼까요? 정답이나 평가 점수는 남지 않아요."));
-   const recap=e("div","gcat-game-recap");
-   for(const entry of round.notes){
-     const item=e("div","gcat-game-recap-row");
-     item.append(e("strong",null,entry.scene),e("span",null,entry.chosen));recap.append(item);
+   stage("done");
+   const block=el("section","gcat-game-done");
+   block.append(el("span","gcat-game-kicker","모아의 탐색 노트"),
+      heading("단서가 늘어나니 생각도 달라졌나요?"),
+      el("p","gcat-game-score",round.items.length+"가지 가상 장면을 함께 살펴봤어요."),
+      el("p","gcat-game-remark","정답이나 점수는 없어요. 기억할 만한 관찰 질문을 남겨볼까요?"));
+   const recaps=el("div","gcat-game-recap");
+   for(const x of round.memo){
+     const item=el("div","gcat-game-recap-row");
+     item.append(el("strong",null,x.title),el("p",null,"찾아본 단서: "+x.clue),
+       el("p",null,"생각해본 도움: "+x.help),el("p",null,"나중에 확인할 점: "+x.question));
+     recaps.append(item);
    }
-   box.append(recap);
-   const controls=e("div","gcat-game-finish-actions");
-   const mode=round.mode,level=round.level;
-   const replay=button("다른 장면 살펴보기","gcat-game-next",()=>start(mode,level));
-   replay.dataset.gameReplay="true";controls.append(replay);
-   controls.append(button("다른 활동 골라보기","gcat-game-secondary",()=>{hub();focusTitle();}));
-   box.append(controls);host.append(box);focusTitle();
+   block.append(recaps);
+   const actions=el("div","gcat-game-finish-actions");
+   const {mode,level}=round;
+   const replay=button("새로운 장면 3개 만나기","gcat-game-next",()=>begin(mode,level));
+   replay.dataset.gameReplay="true";actions.append(replay);
+   actions.append(button("다른 활동 고르기","gcat-game-secondary",()=>{hub();focusHeading();}));
+   block.append(actions);host.append(block);focusHeading();
+ }
+ function render(){
+   if(round===null){hub();return;}
+   stage(round.phase);
+   if(round.phase==="clues")clueQuestion();
+   else if(round.phase==="evidence")evidence();
+   else if(round.phase==="supports")supportQuestion();
+   else if(round.phase==="outcome")outcome();
  }
  hub();
- return {reset:hub,counts:{cases:CASES.length,activities:CASES.length*2}};
+ return {reset:hub};
 }
 window.HabomGlossaryGames={mount,counts:{cases:CASES.length,activities:CASES.length*2}};
 })();
