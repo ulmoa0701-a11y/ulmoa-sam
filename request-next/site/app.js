@@ -113,7 +113,24 @@ async function seeMine(ev){
    button.addEventListener('click',()=>download('/api/mine/'+encodeURIComponent(id)+'/file',{'X-Receipt-Token':code},p.attachmentName));
    result.append(button);
   }
-  result.hidden=false;setStatus($('#mineStatus'),'내 글을 확인했어요.','ok');
+  const remove=el('button','이 쪽지 삭제하기','delete-own');
+  remove.type='button';
+  remove.addEventListener('click',async()=>{
+   if(!window.confirm('이 쪽지와 첨부파일을 삭제할까요? 삭제하면 복구할 수 없어요.'))return;
+   remove.disabled=true;
+   try{
+    const response=await fetch('/api/mine/'+encodeURIComponent(id),{
+     method:'DELETE',headers:{'X-Receipt-Token':code},credentials:'omit',cache:'no-store'
+    });
+    if(!response.ok)throw Error('쪽지를 삭제하지 못했어요.');
+    result.replaceChildren();result.hidden=true;
+    $('#mineForm').reset();
+    setStatus($('#mineStatus'),'쪽지와 첨부파일을 삭제했어요.','ok');
+    await loadFeed();
+   }catch(err){setStatus($('#mineStatus'),err.message,'error');remove.disabled=false;}
+  });
+  result.append(remove);
+  result.hidden=false;setStatus($('#mineStatus'),'내 쪽지를 확인했어요.','ok');
  }catch(err){setStatus($('#mineStatus'),err.message,'error');}
 }
 $('#mineForm').addEventListener('submit',seeMine);
