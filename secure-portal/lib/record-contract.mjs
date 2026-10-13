@@ -47,9 +47,7 @@ export function sharedSelection(entry,requested,isParent=false){
  if(!Object.keys(selected).some(k=>!['date','time','origin','place','signals','title'].includes(k)))throw new Error('공유할 관찰 내용이나 전달사항을 선택해 주세요.');
  // Preserve the existing parent consent copy: observation date/time and, only when observation shared,
  // place and observation tags accompany the entry. Never attach free-text or unselected child words.
- if(isParent&&entry.date)selected.date=entry.date;
- if(isParent&&entry.time)selected.time=entry.time;
- if(isParent&&selected.observation){if(entry.place)selected.place=entry.place;if(entry.signals)selected.signals=entry.signals;}
+ if(isParent&&selected.observation){if(entry.date)selected.date=entry.date;if(entry.time)selected.time=entry.time;if(entry.place)selected.place=entry.place;if(entry.signals)selected.signals=entry.signals;}
  return {...selected};
 }
 export function validateSessionEntry(raw){
