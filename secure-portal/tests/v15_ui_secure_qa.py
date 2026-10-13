@@ -106,6 +106,7 @@ with sync_playwright() as pw:
     page.locator('[data-workspace-target="session"]').click()
     page.locator('textarea[name="studentReport"]').fill('가상 학생 진술')
     page.locator('textarea[name="parentReport"]').fill('가상 보호자 보고')
+    page.locator('details.clinician-extra').first.locator('summary').click()
     page.locator('textarea[name="workingHypothesis"]').fill('잠정 가설')
     page.locator('#sessionForm button[type="submit"]').click()
     page.wait_for_function('window.__caseSessions.length===1')
