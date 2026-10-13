@@ -701,3 +701,55 @@
  .brain-page.brain-class-mode .hemi-ability-copy b{font-size:16px}
  .brain-page.brain-class-mode .hemi-ability-copy small{font-size:13px}
 }
+
+/* 2026-10-13: activities replace low-value binary quizzes. No scoring or brain training claims. */
+.brain-page .hemi-activity-guide{
+ margin:14px 0 0; padding:17px 18px; border-radius:20px;
+ background:#fffdf6; border:1px solid #e5dfc8;color:#334f40;
+}
+.brain-page .hemi-activity-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.brain-page .hemi-activity-label{font:800 12px var(--brain-font-body);color:#47735a}
+.brain-page .hemi-activity-heading h3{font-family:var(--brain-font-heading);font-size:21px;line-height:1.4;font-weight:600;margin:4px 0!important;color:#405a43}
+.brain-page .hemi-activity-heading>p{font-size:13px;line-height:1.55;margin:0!important;color:#425f4d;max-width:390px;word-break:keep-all}
+.brain-page .hemi-activity-main{margin-top:13px;padding:14px;border:1px solid #dce8dd;border-radius:15px;background:#fff}
+.brain-page .hemi-activity-main h4{margin:0!important;font:600 19px/1.4 var(--brain-font-heading);color:#305940;word-break:keep-all}
+.brain-page .hemi-activity-aim{margin:5px 0 10px!important;font-size:14px;color:#425d4c;line-height:1.6;word-break:keep-all}
+.brain-page .hemi-activity-prep{font-size:13px;line-height:1.55;color:#365a42;background:#edf6ee;padding:9px 11px;margin:0 0 13px!important;border-radius:10px}
+.brain-page .hemi-activity-prep strong{margin-right:9px}
+.brain-page .hemi-activity-main h5{margin:0 0 10px!important;font:600 16px/1.4 var(--brain-font-heading);color:#365942}
+.brain-page .hemi-activity-steps{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.brain-page .hemi-activity-steps li{min-width:0;border:1px solid #dce7dd;background:#f9fcf9;border-radius:12px;padding:11px 12px;line-height:1.55}
+.brain-page .hemi-activity-steps strong{display:block;color:#305e45;font-size:14px;margin-bottom:5px;word-break:keep-all}
+.brain-page .hemi-activity-steps strong:before{content:'✓';display:inline-grid;place-items:center;margin-right:7px;background:#e2f0e4;color:#316b4b;width:20px;height:20px;border-radius:50%;font-size:12px}
+.brain-page .hemi-activity-steps p{font-size:13px;line-height:1.55;color:#3f5a49;margin:0!important;word-break:keep-all}
+.brain-page .hemi-activity-options{margin-top:10px;border:1px solid #d9e6db;border-radius:12px;background:#f8fcf8}
+.brain-page .hemi-activity-options summary{cursor:pointer;list-style:none;padding:13px 14px;min-height:47px;display:flex;align-items:center;justify-content:space-between;gap:8px;font:800 14px/1.5 var(--brain-font-body);color:#315a42;word-break:keep-all}
+.brain-page .hemi-activity-options summary::-webkit-details-marker{display:none}
+.brain-page .hemi-activity-options summary:after{content:'⌄';font-size:19px}
+.brain-page .hemi-activity-options[open] summary:after{content:'⌃'}
+.brain-page .hemi-activity-options summary span{font-size:12px;color:#446852;font-weight:600}
+.brain-page .hemi-activity-options-inner{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;border-top:1px solid #dce9df;padding:12px}
+.brain-page .hemi-activity-options-inner>div{background:#fff;border:1px solid #e3eae2;border-radius:10px;padding:10px;min-width:0}
+.brain-page .hemi-activity-options-inner strong{color:#345e46;font-size:13px}
+.brain-page .hemi-activity-options-inner p{font-size:12.5px;line-height:1.6;color:#405848;margin:5px 0 0!important;word-break:keep-all}
+.brain-page .hemi-activity-why{font-size:13px;line-height:1.6;margin:12px 0 0!important;color:#2e5c42;padding:10px 12px;border-radius:11px;background:#eaf5ed;word-break:keep-all}
+.brain-page .hemi-activity-safety{font-size:12.5px;line-height:1.6;margin:8px 0 0!important;color:#555c44;word-break:keep-all}
+.brain-page .hemi-activity-disclaimer{font-size:12px;line-height:1.6;margin:11px 0 0!important;color:#4c6753;word-break:keep-all}
+.brain-page .hemi-activity-options summary:focus-visible{outline:3px solid #246842;outline-offset:2px}
+@media(max-width:760px){
+ .brain-page .hemi-activity-guide{margin-top:11px;padding:12px 10px;border-radius:15px}
+ .brain-page .hemi-activity-heading h3{font-size:19px}
+ .brain-page .hemi-activity-heading>p{font-size:12.5px}
+ .brain-page .hemi-activity-main{padding:11px}
+ .brain-page .hemi-activity-main h4{font-size:17px}
+ .brain-page .hemi-activity-aim{font-size:13px}
+ .brain-page .hemi-activity-steps{grid-template-columns:1fr;gap:7px}
+ .brain-page .hemi-activity-steps li{padding:9px 10px}
+ .brain-page .hemi-activity-steps strong{font-size:13px;margin-bottom:2px}
+ .brain-page .hemi-activity-steps p{font-size:12.5px}
+ .brain-page .hemi-activity-options summary{font-size:13px;flex-wrap:wrap}
+ .brain-page .hemi-activity-options summary span{font-size:11.5px}
+ .brain-page .hemi-activity-options-inner{grid-template-columns:1fr;gap:6px;padding:9px}
+ .brain-page .hemi-activity-options-inner>div{padding:9px}
+ .brain-page .hemi-activity-why{font-size:12.5px}
+}
