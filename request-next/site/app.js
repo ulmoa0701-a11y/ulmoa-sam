@@ -9,7 +9,8 @@ const form=$('#postForm'), anon=$('#anonymous'),nick=$('#nickname'),secret=$('#s
 const status=$('#formStatus'),submit=$('#sendButton');
 const receiptPanel=$('#receiptPanel'),receiptCode=$('#receiptCode');
 const memo=$('#body'),memoCount=$('#memoCount'),category=$('#category');
-let adminKey='',latestReceipt='';
+let adminKey='',latestReceipt='',serverReady=false,sending=false;
+function syncSend(){submit.disabled=!serverReady||sending;}
 function updateCount(){memoCount.textContent=memo.value.length.toLocaleString('ko-KR')+' / 2,000';}
 memo.addEventListener('input',updateCount);
 document.querySelectorAll('.prompt-chip').forEach(chip=>chip.addEventListener('click',()=>{
@@ -17,7 +18,7 @@ document.querySelectorAll('.prompt-chip').forEach(chip=>chip.addEventListener('c
   if(!memo.value.trim()){memo.value=chip.dataset.start||'';memo.dispatchEvent(new Event('input',{bubbles:true}));}
   memo.focus();memo.setSelectionRange(memo.value.length,memo.value.length);
 }));
-updateCount();
+updateCount();syncSend();
 function setStatus(el,msg,kind){el.textContent=msg;el.className='status'+(kind?' '+kind:'');}
 function el(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
 function selectMode(){
@@ -42,7 +43,7 @@ async function sendForm(ev){
  const data=new FormData(form);
  data.set('anonymous',anon.checked?'true':'false');
  data.set('consent',$('#consent').checked?'true':'false');
- submit.disabled=true;submit.textContent='쪽지를 전하는 중…';
+ sending=true;syncSend();submit.textContent='쪽지를 전하는 중…';
  try{
   const response=await fetch('./api/posts'.replace('./api','/api'),{method:'POST',body:data,credentials:'omit',cache:'no-store'});
   const result=await response.json();
@@ -55,7 +56,7 @@ async function sendForm(ev){
   form.reset();syncAnon();selectMode();updateCount();
   await loadFeed();
  }catch(err){setStatus(status,err.message||'연결을 확인해 주세요.','error');}
- finally{submit.disabled=false;submit.innerHTML='<span aria-hidden="true">✉</span> 쪽지 보내기';}
+ finally{sending=false;syncSend();submit.innerHTML='<span aria-hidden="true">✉</span> 쪽지 보내기';}
 }
 form.addEventListener('submit',sendForm);
 function receiptUrl(){return location.origin+location.pathname+'#mine='+encodeURIComponent(latestReceipt);}
@@ -88,12 +89,14 @@ async function loadFeed(){
   if(!r.ok)throw Error('server not ready');
   const d=await r.json();pub.replaceChildren();locked.replaceChildren();
   if(!Array.isArray(d.posts)||!Array.isArray(d.locked))throw Error('invalid response');
+  serverReady=true;syncSend();
   if(!d.posts.length)pub.append(el('p','아직 공개된 쪽지가 없어요. 첫 번째 쪽지를 남겨보세요.','muted'));
   else d.posts.forEach(p=>pub.append(postCard(p)));
   if(!d.locked.length)locked.append(el('p','공개가 승인된 잠금글이 없어요.','muted'));
   else d.locked.forEach(p=>locked.append(postCard(p,true)));
  }catch{
-  pub.replaceChildren(el('p','게시판 서버에 아직 연결되지 않았어요. 현재 개발판에서는 글을 받을 수 없습니다.','muted'));
+  serverReady=false;syncSend();
+  pub.replaceChildren(el('p','쪽지 접수 준비 중입니다. 서버가 연결되기 전까지는 글을 받지 않아요.','muted'));
   locked.replaceChildren(el('p','잠금글 목록을 불러올 수 없습니다.','muted'));
  }
 }
