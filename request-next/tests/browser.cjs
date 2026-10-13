@@ -73,7 +73,7 @@ const assert=require('node:assert/strict');
   await page.locator('#body').fill('안전성 검사: 실제 전송 없음');
   await page.locator('#nickname').fill('가상 이용자');
   await page.locator('#sendButton').click();
-  assert.match(await page.locator('#formStatus').innerText(),/연락처 수집·이용 동의/);
+  assert.match(await page.locator('#formStatus').innerText(),/비공개 쪽지 보관·이용 동의/);
   console.log('PASS personas: parent, special educator, music/speech/cognitive therapist, child, keyboard, privacy-sensitive visitor');
   await page.close();
  }finally{await browser.close();}
