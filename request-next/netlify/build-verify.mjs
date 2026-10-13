@@ -17,10 +17,21 @@ let diagnosticStage='startup';
 const noSecrets=(e)=>e instanceof Error?e.name:'UnknownError';
 const assert=(test,description)=>{if(!test)throw Error('check failed: '+description);};
 async function check(){
- if(process.env.NETLIFY!=='true')throw Error('Only run this gate in Netlify Builds');
- if(process.env.SITE_ID!==EXPECTED_SITE)throw Error('Refusing build check outside the isolated Habom Netlify project');
- if(!['production','deploy-preview','branch-deploy'].includes(process.env.CONTEXT)||process.env.BRANCH!==EXPECTED_BRANCH){
-  throw Error('Unexpected branch or Netlify context: build gate refuses to skip on this dedicated project');
+ if(process.env.NETLIFY!=='true'){
+  diagnosticStage='env-netlify-flag';
+  throw Error('Netlify build environment flag missing');
+ }
+ if(process.env.SITE_ID!==EXPECTED_SITE){
+  diagnosticStage='env-site-id';
+  throw Error('Unexpected site identity');
+ }
+ if(!['production','deploy-preview','branch-deploy'].includes(process.env.CONTEXT)){
+  diagnosticStage='env-context';
+  throw Error('Unexpected Netlify context');
+ }
+ if(process.env.BRANCH!==EXPECTED_BRANCH){
+  diagnosticStage='env-branch';
+  throw Error('Unexpected Netlify source branch');
  }
  diagnosticStage='database-client';
  const database=getDatabase();
