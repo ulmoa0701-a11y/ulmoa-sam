@@ -12,6 +12,29 @@ async function run(){
   await until(()=>d().getElementById('oneLogin'));
   enter('student');await until(()=>d().getElementById('entryForm'));
   ok(d().getElementById('entryForm').dataset.journalMode==='quick','간편 기록 기본');
+  const form=d().getElementById('entryForm'),row=form.querySelector('.student-datetime-grid');
+  const date=form.querySelector('input[name="date"]'),time=form.querySelector('input[name="time"]'),place=form.querySelector('input[name="place"]');
+  ok(!!date&&!!time&&!!place,'날짜·시간·장소 세 항목 실제 입력 필드');
+  ok(place.closest('.student-datetime-grid')===row,'장소가 날짜·시간과 같은 줄을 이루는 컨테이너로 이동');
+  ok(form.querySelectorAll('input[name="place"]').length===1,'장소 중복 입력 없음');
+  const dc=date.getBoundingClientRect(),tc=time.getBoundingClientRect(),pc=place.getBoundingClientRect();
+  if(w().innerWidth>=1091){
+   ok(Math.abs(dc.top-tc.top)<4&&Math.abs(tc.top-pc.top)<4,'넓은 화면에서 날짜·시간·장소 한 줄 배치');
+   ok(dc.right<=tc.left&&tc.right<=pc.left,'넓은 화면에서 세 필드 겹침 없음');
+  }else if(w().innerWidth>355){
+   ok(Math.abs(dc.top-tc.top)<4&&pc.top>tc.bottom-2,'작은 화면은 날짜·시간 두 칸, 장소 다음 줄');
+  }else ok(dc.top<tc.top&&tc.top<pc.top,'좁은 화면은 한 칸씩 배치');
+  ok(d().documentElement.scrollWidth<=w().innerWidth+3,'학생 입력 폼 화면 가로 넘침 없음');
+  input(place,'가상의 장소');
+  const sharePlace=form.querySelector('input[name="shareField"][value="place"]');
+  ok(sharePlace&&!sharePlace.disabled,'간편 모드에 보이는 장소를 공유 항목으로 선택 가능');
+  form.querySelector('[data-journal-mode="detail"]').click();
+  ok(form.querySelector('.student-extra-grid input[name="title"]')!==null,'자세히 모드에서 제목이 단독 줄');
+  ok(form.querySelectorAll('input[name="place"]').length===1,'모드 전환 시 장소 중복 없음');
+  ok(place.value==='가상의 장소','모드 전환 시 장소 내용 유지');
+  form.querySelector('[data-journal-mode="quick"]').click();
+  ok(place.value==='가상의 장소','간편 모드로 돌아가도 장소 내용 유지');
+
   ok(d().querySelector('[data-workspace-target="coding"]')===null,'코딩 실험실 기본 메뉴에서 분리');
   const note='가상 메모: '+('반복 검토를 유발하지 않는 자유로운 문장 연습. '.repeat(9))+'끝까지 보이는 내용';
   input(d().querySelector('textarea[name="note"]'),note);
