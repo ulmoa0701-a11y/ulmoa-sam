@@ -761,3 +761,22 @@
  .brain-page .hemi-activity-options summary span{display:none}
  .brain-page .hemi-activity-options summary:after{flex:0 0 auto;align-self:center}
 }
+
+
+/* 2026-10-13: connect feature explanations to an actual nearby activity. */
+.brain-page .hemi-topic-footer{gap:8px;flex-wrap:wrap}
+.brain-page .hemi-topic-to-activity{
+  min-height:44px;padding:9px 16px;border:1.5px solid #548d67;
+  border-radius:99px;background:#e7f5e9;color:#245637;font-family:var(--brain-font-body);
+  font-size:13px;font-weight:850;line-height:1.4;cursor:pointer;word-break:keep-all
+}
+.brain-page .hemi-topic-to-activity:hover{background:#d7eedc}
+.brain-page .hemi-topic-to-activity:focus-visible{outline:3px solid #245637;outline-offset:2px}
+.brain-page #hemiActivityGuide{scroll-margin-top:85px}
+.brain-page #hemiActivityHeading:focus{outline:none}
+.brain-page #hemiActivityHeading:focus-visible{outline:3px solid #245637;outline-offset:4px}
+@media(max-width:760px){
+ .brain-page .hemi-topic-footer{gap:7px}
+ .brain-page .hemi-topic-to-activity{width:100%;min-height:46px;font-size:13px}
+ .brain-page #hemiActivityGuide{scroll-margin-top:75px}
+}

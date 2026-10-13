@@ -274,6 +274,13 @@
  document.getElementById('hemiReadOverview')?.addEventListener('click',event=>{
   readText('좌뇌와 우뇌는 조금 더 많이 맡는 일이 있지만, 둘 다 함께 일해요. 이 설명은 교육용이며 좌뇌형 우뇌형을 판단하는 검사가 아니에요.',event.currentTarget);
  });
+ // A detailed brain function leads to an everyday activity. None of these
+ // activities isolates one hemisphere or measures neurological ability.
+ const relatedActivityByTopic={
+   speech:'talk',phonics:'read',syntax:'read','right-hand':'ball',
+   space:'map',intonation:'feeling',attention:'bag','left-hand':'draw'
+ };
+ let pendingActivityNavigation=false;
  const topicDialog=document.getElementById('hemiTopicDialog');
  const topicOpeners=[...document.querySelectorAll('[data-hemi-topic]')];
  const topicUI={
@@ -326,12 +333,35 @@
  topicOpeners.forEach(b=>b.addEventListener('click',()=>openTopic(b.dataset.hemiTopic,b)));
  document.getElementById('hemiTopicClose')?.addEventListener('click',()=>topicDialog?.close());
  document.getElementById('hemiTopicDone')?.addEventListener('click',()=>topicDialog?.close());
+ document.getElementById('hemiTopicToActivity')?.addEventListener('click',()=>{
+   const scene=relatedActivityByTopic[topicDialog?.dataset.topic];
+   const selector=scene&&document.querySelector('[data-brain-scene="'+scene+'"]');
+   if(!selector||!topicDialog?.open)return;
+   // Clicking the existing scene selector refreshes both the explanation
+   // and its matching independent, structured activity-guide.js content.
+   selector.click();
+   pendingActivityNavigation=true;
+   topicDialog.close();
+ });
  topicDialog?.addEventListener('click',e=>{if(e.target===topicDialog)topicDialog.close();});
  document.getElementById('hemiTopicRead')?.addEventListener('click',event=>{
   const topic=topicData[topicDialog?.dataset.topic];
   if(topic)readText(topic.title+'. '+topic.intro+' 예를 들면 '+topic.examples[0],event.currentTarget);
  });
- topicDialog?.addEventListener('close',()=>{speechReset();if(topicOpener?.isConnected)topicOpener.focus();topicOpener=null;});
+ topicDialog?.addEventListener('close',()=>{
+   speechReset();
+   if(pendingActivityNavigation){
+     pendingActivityNavigation=false;
+     const guide=document.getElementById('hemiActivityGuide');
+     const heading=document.getElementById('hemiActivityHeading');
+     if(guide){
+       const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+       guide.scrollIntoView({behavior:reduce?'instant':'smooth',block:'start'});
+     }
+     heading?.focus({preventScroll:true});
+   }else if(topicOpener?.isConnected){topicOpener.focus();}
+   topicOpener=null;
+ });
  // Familiar situations connect the comparison to daily life without assigning
  // an entire activity exclusively to one half of the brain.
  const sceneData={

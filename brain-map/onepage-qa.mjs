@@ -178,6 +178,27 @@ try{
   assert.equal(await page.locator('#hemiTopicDialog').isVisible(),true,'keyboard Enter opens subtopic');
   await page.locator('#hemiTopicClose').click();
   assert.equal(await page.locator('#hemiTopicDialog').isHidden(),true,'X closes modal');
+  // A concept explanation must lead to a related, usable practice guide.
+  for(const [topic,scene,label] of [
+    ['speech','talk','하루 이야기'],
+    ['phonics','read','읽고 위치'],
+    ['right-hand','ball','공을 굴리고'],
+    ['space','map','물건의 자리'],
+    ['intonation','feeling','말투와 상황'],
+    ['attention','bag','가방 챙기는'],
+    ['left-hand','draw','그림에서 위치']
+  ]){
+    await page.locator('[data-hemi-topic="'+topic+'"]').click();
+    assert.equal(await page.locator('#hemiTopicDialog').isVisible(),true);
+    await page.locator('#hemiTopicToActivity').click();
+    assert.equal(await page.locator('#hemiTopicDialog').isHidden(),true,'topic to practice closes modal');
+    assert.equal(await page.locator('[data-brain-scene="'+scene+'"]').getAttribute('aria-pressed'),'true','selects related scene: '+topic);
+    assert.match(await page.locator('#hemiActivityTitle').innerText(),new RegExp(label),'showing matching activity: '+topic);
+    assert.equal(await page.locator('#hemiActivitySteps > li').count(),3,'three usable activity steps: '+topic);
+    await page.waitForFunction(()=>document.activeElement?.id==='hemiActivityHeading',null,{timeout:2500});
+  }
+  assert.equal(await page.locator('#hemiTopicDialog').isHidden(),true);
+  await page.locator('[data-brain-scene="talk"]').click();
   const detailSummary=page.locator('[data-hemi-topic="speech"]');
   assert.match(await detailSummary.innerText(),/자세히 보기/,'cards clearly signal further details');
   // Classroom view is an explicit reversible display preference, no persistence.
@@ -194,6 +215,9 @@ try{
   assert.match(await page.locator('.hemi-teacher-steps').innerText(),/진단하지/);
   await page.locator('.hemi-teacher-notes summary').click();
   assert.equal(await page.locator('#hemiQuizQuestion, #hemiPracticeMode, #hemiQuizProgress').count(),0,'no simplistic brain quiz');
+  assert.equal(await page.locator('#hemiTopicToActivity').count(),1,'related activity action available');
+  assert.equal(await page.locator('.hemi-study-sources').innerText().then(t=>t.includes('인출 연습')),false,'no obsolete quiz rationale');
+  assert.match(await page.locator('.hemi-activity-disclaimer').innerText(),/검증된 프로그램은 아니에요/,'activities have scientific limitations');
   assert.equal(await page.locator('#hemiActivityGuide').isVisible(),true,'activity guide shown');
   assert.equal(await page.locator('#hemiActivitySteps > li').count(),3);
   assert.equal(await page.locator('#hemiActivityOptions').getAttribute('open'),null);
