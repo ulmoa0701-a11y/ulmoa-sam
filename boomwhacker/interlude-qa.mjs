@@ -45,7 +45,7 @@ try{
    if(mobile)await page.locator('#mobileSettingsClose').click();
    const plan=await page.evaluate(()=>instrumentalPreludePlan());
    result.preludePlan=plan;
-   if(plan.bars<2||plan.durationMs<info.firstNote||plan.firstBallOffsetMs<0||
+   if(plan.bars<1||plan.durationMs<info.firstNote||plan.firstBallOffsetMs<0||
       plan.firstBallOffsetMs>=plan.durationMs)
      throw Error('Instrumental intro too short for falling-note runway '+JSON.stringify(plan));
    // For a Small Star fixture the intro must NOT emit the note pitches
@@ -177,15 +177,22 @@ try{
    });
    if(result.beatProbe.strong<=20||result.beatProbe.weak<=15)
      throw Error('Strong/weak beat guide produces no audible sound '+JSON.stringify(result.beatProbe));
-   await page.evaluate(()=>{
-     window.__spokenBeats=[];
-     Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
-       cancel(){},getVoices(){return []},
-       speak(utterance){window.__spokenBeats.push({text:utterance.text,lang:utterance.lang,rate:utterance.rate})}
-     }});
-     if(!window.SpeechSynthesisUtterance)
-       window.SpeechSynthesisUtterance=function(text){this.text=text};
+   // Recorded static syllables should be available and consistently decoded,
+   // rather than asserting that the old robotic browser TTS was called.
+   await page.waitForFunction(()=>guideVoiceState==='ready',null,{timeout:13000});
+   result.voiceAssetProbe=await page.evaluate(async()=>{
+     const plan=instrumentalPreludePlan(),ac=new OfflineAudioContext(1,44100*5,44100);
+     const scheduled=scheduleVoiceGuide(ac,ac.destination,.08,plan.beats,beatMs(),plan.meter);
+     const samples=(await ac.startRendering()).getChannelData(0);
+     const first=Math.floor(.09*44100),last=Math.floor(.34*44100);
+     let energy=0;for(let i=first;i<last;i++)energy+=Math.abs(samples[i]);
+     return{ready:guideVoiceState,style:guideVoiceStyle,
+       samples:guideVoiceBuffers?.[guideVoiceStyle]?.map(s=>Math.round(s.duration*1000)),
+       scheduled,energy:Math.round(energy)};
    });
+   if(result.voiceAssetProbe.ready!=='ready'||!result.voiceAssetProbe.scheduled||
+       result.voiceAssetProbe.samples?.length!==4||result.voiceAssetProbe.energy<50)
+     throw Error('Recorded Korean guide samples were not decoded or scheduled '+JSON.stringify(result.voiceAssetProbe));
    for(const mode of ['music','voice']){
      if(mobile)await page.locator('#mobileSettingsBtn').click();
      await page.locator('#introMode').selectOption(mode);
@@ -193,21 +200,21 @@ try{
      await page.locator(mobile?'#playBtn':'#startBtn').click();
      const started=await page.evaluate(()=>({count:introCountBeats,preview:introPreviewBeats,beats:introBeats,
        expected:instrumentalPreludePlan().beats,pulse:document.querySelector('#introPulse').innerText,
-       spoken:window.__spokenBeats.slice(),speechAvailable:guideSpeechAvailable,lastVoiceBeat:guideLastVoiceBeat,hasSynth:typeof window.speechSynthesis,hasUtter:typeof window.SpeechSynthesisUtterance,state:$('#introHelp').textContent}));
+       voiceState:guideVoiceState,voiceStyle:guideVoiceStyle,voiceCount:guideVoiceBuffers?.[guideVoiceStyle]?.length||0,lastVoiceBeat:guideLastVoiceBeat,state:$('#introHelp').textContent}));
      if(started.count!==0||started.preview!==started.expected||started.beats!==started.expected)
        throw Error('Mode not synchronized to musical plan '+JSON.stringify({mode,started}));
      if(mode==='music'&&started.pulse!=='쿵')
        throw Error('Rhythm mode must show strong first beat '+JSON.stringify(started));
-     if(mode==='voice'&&(started.pulse!=='하나'||started.spoken.at(-1)?.text!=='하나'||started.spoken.at(-1)?.lang!=='ko-KR'))
-       throw Error('Spoken mode must REALLY request Korean 하나 '+JSON.stringify(started));
+     if(mode==='voice'&&(started.pulse!=='하나'||started.voiceState!=='ready'||started.voiceCount!==4||started.lastVoiceBeat!==0))
+       throw Error('Recorded Korean count-in not ready on first beat '+JSON.stringify(started));
      if(mode==='voice'){
        await page.evaluate(()=>{
          const beat=beatMs(),original=introAudioStartAt;
          introAudioStartAt=audioCtx.currentTime-(beat+30)/1000;
          introFrame(performance.now());introAudioStartAt=original;
        });
-       result.speech=await page.evaluate(()=>window.__spokenBeats.slice());
-       if(result.speech.at(-1)?.text!=='둘')throw Error('Spoken mode did not advance to 둘 '+JSON.stringify(result.speech));
+       result.speech=await page.evaluate(()=>({lastBeat:guideLastVoiceBeat,pulse:document.querySelector('#introPulse').innerText}));
+       if(result.speech.lastBeat!==1||result.speech.pulse!=='둘')throw Error('Recorded guide did not progress to second beat '+JSON.stringify(result.speech));
      }
      await page.locator('#resetBtn').click();
    }

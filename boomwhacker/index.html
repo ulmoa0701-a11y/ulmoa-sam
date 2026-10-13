@@ -527,13 +527,14 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
 <div class="sec"><div class="label">연주 속도</div><div class="speed"><span>천천히</span><input id="tempo" type="range" min="35" max="140" value="66" aria-label="연주 속도 BPM"><span class="bpm" id="bpmLabel">66 BPM</span></div></div>
 <div class="sec"><div class="label">시작 안내 · 세 가지 중 선택</div>
 <select id="introMode" class="introModeSelect sampleSelect" aria-label="연주 시작 안내 방식">
-<option value="interlude">🎶 음악 전주 · 반주와 함께</option>
+<option value="interlude">🎹 선율 전주 · 노래처럼 준비</option>
 <option value="music">🥁 박자 안내 · 쿵 짝</option>
-<option value="voice">🗣️ 말로 세기 · 하나 둘</option>
+<option value="voice">🗣️ 한국어 목소리 · 하나 둘</option>
 <option value="instant">⏩ 바로 시작 · 안내 없이</option>
 <option value="count" hidden>이전 3초 세기</option>
 </select>
-<div id="introHelp" class="hint" aria-live="polite">전주를 들으며 박자를 느껴요. 공은 전주 중에 내려옵니다.</div>
+<div id="introHelp" class="hint" aria-live="polite">짧은 악기 선율과 박자에 맞춰 시작해요.</div>
+<div id="voiceStyleBox" style="display:none;margin-top:8px"><label for="voiceStyle" class="label">안내 음성</label><select id="voiceStyle" class="sampleSelect" aria-label="음성 스타일 선택"><option value="bright">밝고 또렷한 음성</option><option value="soft">차분한 음성</option></select><div class="hint">미리 제작한 한국어 음성을 사용합니다. 실제 어린이 녹음은 아닙니다.</div></div>
 </div>
 <div class="sec"><div class="label">멜로디 가이드</div><select id="melodySelect" class="sampleSelect" aria-label="멜로디 음색 선택"><option value="none">멜로디 없음</option><option value="piano">🎹 피아노 느낌</option><option value="xylophone">✨ 실로폰 느낌</option><option value="boom" selected>🥁 붐웨커 느낌</option></select><div class="mrVol"><span class="label" style="margin:0">멜로디 음량</span><input id="melodyVolume" type="range" min="0" max="100" value="65"><span id="melodyPct" class="mrPct">65%</span></div><div class="hint">연주할 때와 저장되는 영상에 같은 멜로디 음색·음량이 들어가요.</div></div>
 <div class="sec"><div class="label">소리 조합</div><div class="seg" id="mixModes"><button data-mix="melody">멜로디만</button><button data-mix="both" class="on">멜로디+MR</button><button data-mix="mr">MR만</button></div><div style="margin-top:9px"><input id="mrFile" class="mrFile" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg" aria-label="MR 파일 선택"></div><div class="mrVol"><span class="label" style="margin:0">MR 볼륨</span><input id="mrVolume" type="range" min="0" max="100" value="100"><span id="mrPct" class="mrPct">100%</span></div><div id="mrStatus" class="hint mrStatus ok">기본 자동 MR 준비됨 · 파일 없이 바로 사용할 수 있어요. 내 MR 파일은 선택사항이에요.</div></div>
@@ -1078,40 +1079,57 @@ function scheduleInterludeAccompaniment(ac,dest,start,beats,intervalMs,meter){
 function isGuidedStartMode(){return introMode==='interlude'||introMode==='music'||introMode==='voice'}
 function guideNumber(beatIndex){return ['하나','둘','셋','넷'][beatIndex%Math.max(1,introMeter)]||'하나'}
 function introHelpText(){
- if(introMode==='interlude')return '쿵·짝 박자가 들리는 짧은 전주예요. 공을 따라가면 첫 음에서 바로 시작해요.';
+ if(introMode==='interlude')return '짧은 악기 선율과 박자가 흐르다가 첫 공에서 바로 연주가 시작돼요.';
  if(introMode==='music')return '첫 박은 쿵, 다음 박은 짝. 같은 박자로 공이 내려와요.';
- if(introMode==='voice')return '하나·둘을 소리로 세어 줘요. 한국어 음성은 기기에 따라 다르고, 음성이 없으면 박자 소리로 안내해요. 영상에는 박자 소리만 저장돼요.';
+ if(introMode==='voice')return guideVoiceState==='ready'?'기기 합성음 대신 일정한 한국어 음성으로 하나·둘을 들려줘요.':'음성 파일을 준비 중이에요. 준비 전에는 박자 소리로 안내해요.';
  if(introMode==='instant')return '시작 안내 없이 곧바로 공이 내려와요.';
  return '기존 3초 숫자 카운트다운';
 }
-function updateIntroHelp(){const node=$('#introHelp');if(node)node.textContent=introHelpText()}
-function stopGuideSpeech(){
- if(typeof speechSynthesis!=='undefined')try{speechSynthesis.cancel()}catch(e){}
- guideLastVoiceBeat=-1;
+function updateIntroHelp(){const node=$('#introHelp');if(node)node.textContent=introHelpText();const controls=$('#voiceStyleBox');if(controls)controls.style.display=introMode==='voice'?'block':'none'}
+// Stable, pre-rendered Korean cues replace browser-native TTS.
+let guideVoiceState='loading',guideVoiceBuffers=null,guideVoiceStyle='bright',guideVoicePromise=null;
+const GUIDE_SYLLABLES=['hana','dul','set','net'];
+function stopGuideSpeech(){guideLastVoiceBeat=-1;}
+function speakGuideBeat(i){guideLastVoiceBeat=i;}
+function loadGuideVoices(){
+ if(guideVoicePromise)return guideVoicePromise;
+ const AC=window.AudioContext||window.webkitAudioContext;
+ if(!AC){guideVoiceState='unavailable';updateIntroHelp();return Promise.resolve(false)}
+ guideVoicePromise=(async()=>{
+  const decoder=new AC();
+  try{
+   const packs={};
+   for(const style of ['bright','soft']){
+    packs[style]=await Promise.all(GUIDE_SYLLABLES.map(async syllable=>{
+     const res=await fetch('./voice/'+style+'-'+syllable+'.wav');
+     if(!res.ok)throw Error('Voice asset unavailable: '+res.status);
+     const wave=await decoder.decodeAudioData(await res.arrayBuffer());
+     if(wave.duration<.07||wave.duration>.60)throw Error('Voice cue duration out of bounds');
+     return wave;
+    }));
+   }
+   guideVoiceBuffers=packs;guideVoiceState='ready';
+   return true;
+  }catch(err){guideVoiceBuffers=null;guideVoiceState='unavailable';return false}
+  finally{await decoder.close().catch(()=>{});updateIntroHelp()}
+ })();
+ return guideVoicePromise;
 }
-function speakGuideBeat(i){
- if(introMode!=='voice'||!sound||guideLastVoiceBeat===i)return;
- guideLastVoiceBeat=i;
- if(typeof window.speechSynthesis==='undefined'||typeof window.SpeechSynthesisUtterance==='undefined'){
-  guideSpeechAvailable=false;return;
+function scheduleVoiceGuide(ac,dest,start,beats,intervalMs,meter){
+ // Spoken syllables lead, with a quieter click to anchor the pulse.
+ const metronome=ac.createGain();
+ metronome.gain.setValueAtTime(.28,start);metronome.connect(dest);
+ scheduleRhythmGuide(ac,metronome,start,beats,intervalMs,meter);
+ const cues=guideVoiceBuffers?.[guideVoiceStyle];
+ if(!cues||cues.length!==4)return false;
+ for(let i=0;i<beats;i++){
+  const when=start+i*intervalMs/1000,src=ac.createBufferSource(),gain=ac.createGain();
+  src.buffer=cues[i%meter];
+  src.playbackRate.setValueAtTime(Math.max(1,src.buffer.duration/(intervalMs/1000*.80)),when);
+  gain.gain.setValueAtTime(.85,when);
+  src.connect(gain);gain.connect(dest);src.start(when);
  }
- try{
-  // Native, free Korean TTS. Keep the audible metronome independent,
-  // because speech engines cannot promise millisecond-exact onset.
-  const synth=window.speechSynthesis;
-  synth.cancel();
-  const utterance=new SpeechSynthesisUtterance(guideNumber(i));
-  utterance.lang='ko-KR';utterance.rate=Math.min(1.65,Math.max(1,125/Math.max(50,bpm)));
-  utterance.pitch=1.12;utterance.volume=.95;
-  const voices=synth.getVoices?.()||[];
-  const kr=voices.filter(v=>/^ko([-_]|$)/i.test(v.lang||''));
-  if(kr.length){
-   utterance.voice=kr.find(v=>/female|여성|yuna|sora|seoyeon|sunhi/i.test(v.name))||kr[0];
-  }
-  utterance.onerror=()=>{guideSpeechAvailable=false;const hint=$('#introHelp');if(hint)hint.textContent='이 기기에서는 말소리가 재생되지 않아 박자 소리로 안내하고 있어요.'};
-  synth.speak(utterance);
-  guideSpeechAvailable=true;
- }catch(e){guideSpeechAvailable=false}
+ return true;
 }
 function scheduleRhythmGuide(ac,dest,start,beats,intervalMs,meter){
  for(let i=0;i<beats;i++){
@@ -1127,7 +1145,7 @@ function scheduleRhythmGuide(ac,dest,start,beats,intervalMs,meter){
 const INTERLUDE_COUNTDOWN_BEATS=3;
 function instrumentalPreludePlan(){
  const meter=[2,3,4].includes(Number(currentSong.timeN))?Number(currentSong.timeN):4;
- const beat=beatMs(),bars=Math.max(2,Math.ceil((firstNoteMs()+100)/(meter*beat)));
+ const beat=beatMs(),bars=Math.max(1,Math.ceil((firstNoteMs()+100)/(meter*beat)));
  return{meter,bars,beats:meter*bars,durationMs:meter*bars*beat,countdownBeats:INTERLUDE_COUNTDOWN_BEATS,
    firstBallOffsetMs:meter*bars*beat-firstNoteMs()};
 }
@@ -1139,27 +1157,44 @@ function schedulePreludeBeat(ac,dest,when,strong){
   voiceOsc(ac,dest,strong?196:880,strong?'triangle':'sine',strong?.25:.115,when,.004,strong?.14:.085,strong?.19:.12);
   voiceOsc(ac,dest,strong?1046.50:1318.51,'sine',strong?.07:.047,when,.002,.045,.063);
 }
+// Intentionally composed tonic -> dominant prelude, not random chord blips.
+// A short familiar musical gesture leads directly into the song's first beat.
+function preludeLeadNote(bar,pos,meter,bars){
+ const finalBar=bar===bars-1;
+ const dominant=finalBar&&(bars>1||pos>=Math.ceil(meter/2));
+ const tonic=chordForMeasure(0);
+ const chord=dominant?preludeChordForBar(bars-1,Math.max(2,bars)):tonic;
+ const f=chord.freqs.slice(1);
+ const tones=meter===2?(dominant?[f[1],f[0]]:[f[0],f[1]]):
+   meter===3?(dominant?[f[1],f[2],f[0]]:[f[0],f[1],f[2]]):
+   (dominant?[f[1],f[2],f[1],f[0]]:[f[0],f[1],f[2],f[1]]);
+ return {freq:tones[pos%tones.length],chord,dominant};
+}
+function schedulePreludeMallet(ac,dest,hz,when,amp,beat){
+ const d=Math.min(.7,Math.max(.18,beat*.88));
+ voiceOsc(ac,dest,hz,'triangle',amp,when,.007,d*.73,d);
+ voiceOsc(ac,dest,hz,'sine',amp*.24,when,.003,d*.44,d*.68,2);
+ voiceOsc(ac,dest,hz,'sine',amp*.08,when,.004,d*.30,d*.50,3);
+}
 function scheduleInterludeMusic(ac,dest,start,intervalMs,meter){
- const p=instrumentalPreludePlan(),beat=intervalMs/1000;
- const chords=ac.createGain(),arpeggio=ac.createGain(),percussion=ac.createGain();
- chords.gain.setValueAtTime(.50,start);chords.connect(dest);
- arpeggio.gain.setValueAtTime(.84,start);arpeggio.connect(dest);
- percussion.gain.setValueAtTime(.95,start);percussion.connect(dest);
- for(let i=0;i<p.beats;i++){
-  const bar=Math.floor(i/meter),pos=i%meter,time=start+i*beat;
-  const chord=preludeChordForBar(bar,p.bars),freqs=chord.freqs;
-  schedulePreludeBeat(ac,percussion,time,pos===0);
-  voiceOsc(ac,chords,freqs[0],'triangle',pos===0?.15:.086,time,.013,Math.max(.14,beat*.64),Math.max(.19,beat*.78));
-  const upper=freqs.slice(1);
-  for(let j=0;j<upper.length;j++)
-   voiceOsc(ac,chords,upper[j],'sine',pos===0?.035:.020,time,.014,Math.max(.12,beat*.5),Math.max(.17,beat*.69));
-  if(upper.length){
-   const note=upper[(i+bar)%upper.length],offset=(pos%2===0?0:.20)*beat;
-   voiceOsc(ac,arpeggio,note,'triangle',.11,time+offset,.009,Math.max(.10,beat*.54),Math.max(.16,beat*.72)+offset);
+ const plan=instrumentalPreludePlan(),beat=intervalMs/1000;
+ const tune=ac.createGain(),chords=ac.createGain(),percussion=ac.createGain();
+ tune.gain.setValueAtTime(.95,start);tune.connect(dest);
+ chords.gain.setValueAtTime(.55,start);chords.connect(dest);
+ percussion.gain.setValueAtTime(.72,start);percussion.connect(dest);
+ for(let i=0;i<plan.beats;i++){
+  const bar=Math.floor(i/meter),position=i%meter,when=start+i*beat;
+  const {freq,chord}=preludeLeadNote(bar,position,meter,plan.bars);
+  schedulePreludeBeat(ac,percussion,when,position===0);
+  schedulePreludeMallet(ac,tune,freq,when,position===0?.30:.25,beat);
+  if(position===0||(plan.bars===1&&position===Math.ceil(meter/2))){
+   const duration=Math.min(1.8,(meter-position)*beat*.92);
+   voiceOscHold(ac,chords,chord.freqs[0],'triangle',.115,when,.014,duration);
+   for(const hz of chord.freqs.slice(1))
+    voiceOscHold(ac,chords,hz,'sine',.027,when,.015,duration*.85);
   }
-  if(i===p.beats-1)voiceOsc(ac,percussion,783.99,'sine',.07,time,.007,.15,.20);
  }
- return p;
+ return plan;
 }
 function scheduleInterludeCountdown(ac,dest,start,intervalMs){
  for(let i=0;i<INTERLUDE_COUNTDOWN_BEATS;i++){
@@ -1204,6 +1239,7 @@ function introSound(beats,intervalMs){
   const p=instrumentalPreludePlan(),songStart=start+p.durationMs/1000;
   audioRenderSongStartAt=songStart;
   if(introMode==='interlude')scheduleInterludeMusic(ac,master,start,intervalMs,p.meter);
+  else if(introMode==='voice')scheduleVoiceGuide(ac,master,start,p.beats,intervalMs,p.meter);
   else scheduleRhythmGuide(ac,master,start,p.beats,intervalMs,p.meter);
   master.gain.setValueAtTime(.85,Math.max(start,songStart-.06));
   master.gain.linearRampToValueAtTime(.0001,songStart);
@@ -1321,6 +1357,7 @@ function startIntro(){
   $('#playBtn').textContent='Ⅱ';$('#startBtn').textContent='취소';
   introRaf=requestAnimationFrame(introFrame);
 }
+let pendingVoiceStart=0;
 function toggle(){
   if(introActive){reset();return}
   if(playing){
@@ -1329,10 +1366,25 @@ function toggle(){
     return;
   }
   if(elapsed>=totalMs){elapsed=0;hasStartedSong=false}
-  if(!hasStartedSong&&introMode!=='instant'){startIntro();return}
+  if(!hasStartedSong&&introMode!=='instant'){
+    if(introMode==='voice'&&sound&&guideVoiceState==='loading'){
+      // Preserve a user-initiated audio context and defer playback
+      // until all count-in WAVs have been decoded on slow connections.
+      audio();const ticket=++pendingVoiceStart;
+      $('#startBtn').textContent='🎤 목소리 준비 중';
+      $('#introHelp').textContent='목소리를 불러오는 중이에요. 준비되면 자동으로 시작해요.';
+      loadGuideVoices().then(()=>{
+        if(ticket!==pendingVoiceStart||introMode!=='voice'||introActive||playing||hasStartedSong)return;
+        startIntro();
+      });
+      return;
+    }
+    startIntro();return;
+  }
   beginPlayback();
 }
 function reset(){
+  ++pendingVoiceStart;
   stopIntro();playing=false;hasStartedSong=false;stopMr();stopLeadIn();stopSongMelody();audioRenderSongStartAt=0;introAudioStartAt=0;introScheduledMr=false;cancelAnimationFrame(raf);
   elapsed=0;lastTs=0;draw();updateTime();updateLyricTrack(true);
   $('#playBtn').textContent='▶';$('#startBtn').textContent='▶ 연주 시작';
@@ -1438,6 +1490,7 @@ async function exportVideo(){
    if(prepBeats){const gm=ac.createGain();gm.gain.setValueAtTime(.5,ac.currentTime);gm.connect(dest);
     const meter=[2,3,4].includes(Number(currentSong.timeN))?Number(currentSong.timeN):4;
     if(introMode==='interlude')scheduleInterludeMusic(ac,gm,ac.currentTime+intro/1000,beatMs(),meter);
+    else if(introMode==='voice')scheduleVoiceGuide(ac,gm,ac.currentTime+intro/1000,prepBeats,beatMs(),meter);
     else scheduleRhythmGuide(ac,gm,ac.currentTime+intro/1000,prepBeats,beatMs(),meter);
    }
    if(wantsMelody()&&melodyMode!=='none')for(const e of events)if(e.active)
@@ -1506,7 +1559,7 @@ async function exportVideo(){
 }
 window.__boomVideoQA={scoreTiming:()=>({view:playView,firstScoreBeatMs:scoreStartMs(),elapsed,playing,introActive,firstEvent:events[0]?{note:events[0].note,start:events[0].start,duration:events[0].dur}:null,secondEvent:events[1]?{note:events[1].note,start:events[1].start,duration:events[1].dur}:null,visibleTime:$('#timeLabel').textContent}),print:()=>({pngCanvas:scoreSheetCanvas().width+'x'+scoreSheetCanvas().height,pdfPageCount:Math.max(1,Math.ceil(events.length/PRINT_PAGE_NOTES)),pdfBytes:scorePdfBytes([scoreSheetCanvas(0,Math.min(events.length,PRINT_PAGE_NOTES),true)]).size}),view:()=>({mode:playView,active:activeScoreIndex(elapsed),scoreTiles:$('#scoreStageGrid').children.length,sideTiles:$('#scoreRows').children.length,elapsed}),supported:()=>videoSupported(),mime:()=>videoMime(),brand:()=>({brand:VIDEO_BRAND,handle:VIDEO_HANDLE,copy:VIDEO_COPY}),colors:()=>({...COLORS}),melody:()=>({mode:melodyMode,label:MELODY_LABELS[melodyMode],options:{...MELODY_LABELS},volume:melodyVolume}),fall:()=>({leadMs:FIRST_NOTE_LEAD_MS,travelMs:FALL_TRAVEL_MS,firstNoteMs:firstNoteMs(),spawnDelayMs:firstNoteMs()-FALL_TRAVEL_MS,elapsed,playing}),tempo:()=>({bpm,sourceBpm:currentSong.bpm,min:MIN_TEMPO,max:MAX_TEMPO,comfortable:comfortableTempo(currentSong),custom:tempoPrefs[tempoKey(currentSong)]??null,beatMs:beatMs()}),intro:()=>({mode:introMode,active:introActive,started:hasStartedSong,durationMs:introDurationMs,beats:introBeats,meter:introMeter,previewBeats:introPreviewBeats,countBeats:introCountBeats,lastBeat:introLastBeat,progressMs:introActive?Math.max(0,performance.now()-introStartPerf):0}),mix:()=>({mode:mixMode,label:MIX_LABELS[mixMode],options:{...MIX_LABELS},mrReady:true,mrKind:mrBuffer?'file':'auto',mrLoaded:!!mrBuffer,mrName,mrVolume,melodyVolume}),display:()=>({mode:displayMode,label:DISPLAY_LABELS[displayMode],options:{...DISPLAY_LABELS},labels:ORDER.map(displayLabel),names:[...childLabels],custom:[...customLabels],instruments:[...instrumentIds],instrumentLibrary:instrumentLibrary.map(x=>({...x}))}),lyrics:()=>lyricWindowAt(Math.min(2600,totalMs/2)),preview:()=>{const c=videoCanvas(),x=c.getContext('2d');videoScene(x,Math.min(1500,totalMs/2));return {w:c.width,h:c.height,data:c.toDataURL('image/png').slice(0,40)}}};
 
-function init(){document.body.dataset.displayMode=displayMode;syncSongUI();choosePlayView(playView);$('#melodySelect').value=melodyMode;$('#introMode').value=introMode;updateIntroHelp();$('#displayModeSelect').value=displayMode;$('#displayEditBtn').classList.toggle('show',displayMode==='name'||displayMode==='custom'||displayMode==='instrument');$('#displayEditBtn').textContent=displayMode==='name'?'✎ 이름':displayMode==='instrument'?'✎ 악기':'✎ 설정'}
+function init(){document.body.dataset.displayMode=displayMode;loadGuideVoices();syncSongUI();choosePlayView(playView);$('#melodySelect').value=melodyMode;$('#introMode').value=introMode;updateIntroHelp();$('#displayModeSelect').value=displayMode;$('#displayEditBtn').classList.toggle('show',displayMode==='name'||displayMode==='custom'||displayMode==='instrument');$('#displayEditBtn').textContent=displayMode==='name'?'✎ 이름':displayMode==='instrument'?'✎ 악기':'✎ 설정'}
 $('#playViewSelect').onchange=e=>choosePlayView(e.target.value);
 $('#scorePngBtn').onclick=()=>downloadScore('png');
 $('#scorePdfBtn').onclick=()=>downloadScore('pdf');
@@ -1524,7 +1577,8 @@ $('#displayModal').onclick=e=>{if(e.target===$('#displayModal'))closeDisplayEdit
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#displayModal').classList.contains('open'))closeDisplayEditor()});
 $('#sampleSelect').onchange=e=>{if(e.target.value)chooseSample(e.target.value)};
 $('#levels').onclick=e=>{let b=e.target.closest('button');if(!b)return;level=Number(b.dataset.level);document.querySelectorAll('#levels button').forEach(x=>x.classList.toggle('on',x===b));renderLanes();build();reset()};
-$('#introMode').onchange=e=>{introMode=['music','interlude','voice','count','instant'].includes(e.target.value)?e.target.value:'interlude';try{localStorage.setItem('ulmoaBoomIntroMode',introMode)}catch(err){};reset();updateIntroHelp()};
+$('#introMode').onchange=e=>{introMode=['music','interlude','voice','count','instant'].includes(e.target.value)?e.target.value:'interlude';try{localStorage.setItem('ulmoaBoomIntroMode',introMode)}catch(err){};reset();updateIntroHelp();if(introMode==='voice')loadGuideVoices()};
+$('#voiceStyle').onchange=e=>{guideVoiceStyle=['bright','soft'].includes(e.target.value)?e.target.value:'bright';reset()};
 $('#tempo').oninput=e=>{bpm=Math.max(MIN_TEMPO,Math.min(MAX_TEMPO,Number(e.target.value)||66));tempoPrefs[tempoKey(currentSong)]=bpm;try{localStorage.setItem('ulmoaBoomTempoPrefs',JSON.stringify(tempoPrefs))}catch(err){};$('#bpmLabel').textContent=bpm+' BPM';$('#songMeta').textContent=`${currentSong.timeN||4}/${currentSong.timeD||4} · ${bpm} BPM`;build();reset();saveLast()};
 $('#repeatBtn').onclick=()=>{repeat=!repeat;on($('#repeatBtn'),repeat)};$('#soundBtn').onclick=()=>{sound=!sound;on($('#soundBtn'),sound);$('#soundBtn').textContent=sound?'🔊 소리':'🔇 소리';if(!sound&&introGain&&audioCtx){introGain.gain.setValueAtTime(0,audioCtx.currentTime);stopMr();stopFirstMelody();introScheduledMr=false};if(!sound){stopMr();stopSongMelody();stopFirstMelody()}else if(playing){syncLiveMr();syncLiveSongMelody()}};$('#lyricBtn').onclick=()=>{lyrics=!lyrics;on($('#lyricBtn'),lyrics);renderScore();updateLyricTrack(true)};
 async function setClassFullscreen(enable){document.body.classList.toggle('fullscreen',!!enable);on($('#fullBtn'),!!enable);$('#fullBtn').textContent=enable?'수업 전체화면 중':'수업 전체화면';try{if(enable&&document.documentElement.requestFullscreen&&!document.fullscreenElement)await document.documentElement.requestFullscreen();else if(!enable&&document.fullscreenElement)await document.exitFullscreen()}catch(e){}setTimeout(()=>{draw();updateLyricTrack(true)},100)};
