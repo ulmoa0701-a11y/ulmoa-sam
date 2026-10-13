@@ -15,32 +15,12 @@ const server=http.createServer((req,res)=>{
 });
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const browser=await chromium.launch({executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--autoplay-policy=no-user-gesture-required']});
-const outputs=[],types=['interlude','music','bright','soft'];
+const outputs=[],types=['interlude','music'];
 try{
- // Real slow-network simulation: tapping play before all voice WAVs
- // have decoded must wait, not silently turn into a different cue mode.
- const delayed=await browser.newPage({viewport:{width:1280,height:900}});
- await delayed.route('**/voice/*.wav',async route=>{
-   await new Promise(resolve=>setTimeout(resolve,900));
-   await route.continue();
- });
- await delayed.goto('http://127.0.0.1:'+server.address().port+'/boomwhacker/',{waitUntil:'domcontentloaded'});
- await delayed.locator('#introMode').selectOption('voice');
- await delayed.locator('#startBtn').click();
- const pending=await delayed.evaluate(()=>({state:guideVoiceState,active:introActive,text:document.querySelector('#startBtn').textContent}));
- if(pending.state!=='loading'||pending.active||!pending.text.includes('준비 중'))
-   throw Error('Slow network voice start not deferred '+JSON.stringify(pending));
- await delayed.waitForFunction(()=>introActive&&guideVoiceState==='ready',null,{timeout:12000});
- const resumed=await delayed.evaluate(()=>({active:introActive,state:guideVoiceState,mode:introMode,scheduled:!!introGain}));
- if(!resumed.active||resumed.state!=='ready'||resumed.mode!=='voice'||!resumed.scheduled)
-   throw Error('Voice did not start after slow network load '+JSON.stringify(resumed));
- console.log('BOOM_SLOW_VOICE_QA='+JSON.stringify({pending,resumed}));
- await delayed.close();
  const page=await browser.newPage({acceptDownloads:true,viewport:{width:1280,height:900}});
  await page.goto('http://127.0.0.1:'+server.address().port+'/boomwhacker/?song=twinkle',{waitUntil:'networkidle'});
- const voiceOK=await page.evaluate(()=>loadGuideVoices());
- if(!voiceOK)throw Error('Korean voice samples missing; preview cannot silently fall back');
- for(const bpmValue of [66,100]){
+ if(await page.locator('#introMode option[value="voice"]').count())throw Error('Voice choice still present');
+ for(const bpmValue of [66,100,140]){
   await page.locator('#tempo').evaluate((el,value)=>{el.value=String(value);el.dispatchEvent(new Event('input',{bubbles:true}))},bpmValue);
   for(const mode of types){
    const filename='boomwhacker-'+bpmValue+'bpm-'+mode+'.wav';
@@ -50,13 +30,9 @@ try{
     const ac=new OfflineAudioContext(1,Math.ceil(rate*(plan.durationMs/1000+.85)),rate);
     const output=ac.createGain();
     output.gain.value=.72;output.connect(ac.destination);
-    let ok=true;
+    if(plan.durationMs<6500||plan.bars%2)throw Error('Introduction is too short or not an even-bar phrase');
     if(mode==='interlude')scheduleInterludeMusic(ac,output,delay,beatMs(),plan.meter);
-    else if(mode==='music')scheduleRhythmGuide(ac,output,delay,plan.beats,beatMs(),plan.meter);
-    else{
-     guideVoiceStyle=mode;ok=scheduleVoiceGuide(ac,output,delay,plan.beats,beatMs(),plan.meter);
-    }
-    if(!ok)throw Error('Recorded Korean speech buffers not scheduled');
+    else scheduleRhythmGuide(ac,output,delay,plan.beats,beatMs(),plan.meter);
     const samples=(await ac.startRendering()).getChannelData(0);
     const data=new ArrayBuffer(samples.length*2+44),view=new DataView(data);
     const text=(offset,s)=>{for(let i=0;i<s.length;i++)view.setUint8(offset+i,s.charCodeAt(i))};
@@ -88,4 +64,4 @@ try{
  }
  fs.writeFileSync(path.join(dir,'measurements.json'),JSON.stringify(outputs,null,2));
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}
-if(outputs.length!==8)process.exitCode=1;
+if(outputs.length!==6)process.exitCode=1;
