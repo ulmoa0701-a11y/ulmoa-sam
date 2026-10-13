@@ -236,7 +236,7 @@
  // Browser's local voice only. No recording, network transcription, user profile
  // or auto-play. Voice quality depends on system; lack of Korean voice is disclosed.
  const speechStatus=document.getElementById('hemiSpeechStatus');
- const readButtons=['hemiReadOverview','hemiTopicRead','hemiReadScene','hemiReadQuiz']
+ const readButtons=['hemiReadOverview','hemiTopicRead','hemiReadScene']
    .map(id=>document.getElementById(id)).filter(Boolean);
  const canSpeak=typeof window.speechSynthesis!=='undefined'&&typeof window.SpeechSynthesisUtterance==='function';
  let speakingButton=null,activeUtterance=null;
@@ -344,19 +344,6 @@
   bag:{title:'🎒 가방을 챙길 때',body:'“필통→책→물통” 순서를 기억하고 물건의 위치를 찾고 가방에 넣어요. 기억·공간 파악·손 움직임이 함께해요.'},
   feeling:{title:'🙂 친구 기분을 살필 때',body:'“정말 잘했네!”라는 말도 기쁜 목소리인지 비꼬는 말투인지 살펴요. 말뜻뿐 아니라 억양·표정·상황을 함께 고려해야 해요.'}
  };
- const scenePractice={
-  talk:'가까운 사람에게 오늘 있었던 일을 한 문장으로 말하고, 표정과 목소리도 살펴요.',
-  read:'“고양이가 의자 밑에 있어요”를 읽고 고양이가 어디 있는지 그림이나 손짓으로 나타내요.',
-  map:'지금 있는 자리에서 창문과 문이 어느 방향에 있는지 손으로 가리켜요.',
-  ball:'부드러운 공이나 손수건을 천천히 주고받으며 눈과 손이 함께 움직이는지 살펴요.',
-  music:'좋아하는 노래 한 줄을 부르며 가사·박자·목소리 높낮이를 하나씩 찾아봐요.',
-  draw:'종이에 집과 나무를 그리고 “나무를 집 왼쪽에 그렸어”처럼 위치를 말해요.',
-  bag:'필통·책·물통을 하나씩 찾아 가방에 넣고, 어떤 순서로 넣었는지 말해요.',
-  feeling:'“괜찮아”를 밝게, 조용하게 두 번 말해 봐요. 말투만으로 기분을 확신하지는 않아요.'
- };
- const practiceButton=document.getElementById('hemiTryScene');
- const practiceText=document.getElementById('hemiSceneAction');
- const quizRead=document.getElementById('hemiReadQuiz');
  const sceneButtons=[...document.querySelectorAll('[data-brain-scene]')];
  const sceneTitle=document.getElementById('hemiSceneTitle');
  const sceneText=document.getElementById('hemiSceneText');
@@ -365,114 +352,14 @@
   sceneButtons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.brainScene===key)));
   sceneTitle.textContent=sceneData[key].title;
   sceneText.textContent=sceneData[key].body;
-  if(practiceText)practiceText.hidden=true;
-  if(practiceButton)practiceButton.setAttribute('aria-expanded','false');
   speechReset();
   selectSide('both');
  }
  sceneButtons.forEach(b=>b.addEventListener('click',()=>selectScene(b.dataset.brainScene)));
- practiceButton?.addEventListener('click',()=>{
-  const chosen=sceneButtons.find(b=>b.getAttribute('aria-pressed')==='true')?.dataset.brainScene||'talk';
-  const opening=practiceText.hidden;
-  practiceText.hidden=!opening;
-  if(opening)practiceText.textContent='직접 해보기 · '+scenePractice[chosen];
-  practiceButton.setAttribute('aria-expanded',String(opening));
- });
  document.getElementById('hemiReadScene')?.addEventListener('click',event=>{
   readText(sceneTitle.textContent+'. '+sceneText.textContent,event.currentTarget);
  });
  selectScene('talk');
- // Three short questions at a time, with three rotating sets. These are
- // recall prompts, not a hemisphere/personality test.
- const questionSets=[
-  [
-   {q:'말과 문장을 만드는 데 상대적으로 더 많이 참여하는 쪽은?',options:['좌뇌','우뇌'],answer:0,
-    good:'맞아요! 많은 사람에게서 좌뇌의 언어 관련 영역이 더 크게 참여해요. 우뇌도 함께해요.',
-    review:'많은 사람에게서는 좌뇌가 상대적으로 더 관여해요. 우뇌도 언어 활동에 함께 참여해요.'},
-   {q:'말투에 담긴 감정의 단서를 알아차리는 데 상대적으로 더 관여하는 쪽은?',options:['좌뇌','우뇌'],answer:1,
-    good:'맞아요! 우뇌가 상대적으로 더 관여할 수 있어요. 양쪽 뇌가 함께 듣고 이해해요.',
-    review:'말투의 감정 단서에는 우뇌가 상대적으로 더 관여할 수 있어요. 좌뇌도 함께해요.'},
-   {q:'책을 읽거나 공놀이할 때 우리 뇌는 어떻게 일할까요?',options:['한쪽만 일해요','양쪽이 함께해요'],answer:1,
-    good:'맞아요! 양쪽 뇌와 여러 영역이 한 팀으로 일해요.',
-    review:'책 읽기와 공놀이는 여러 기능이 필요한 활동이에요. 양쪽 뇌가 함께 일해요.'}
-  ],
-  [
-   {q:'왼손을 움직일 때 주로 관여하는 운동 영역은 어느 쪽에 있을까요?',options:['좌뇌','우뇌'],answer:1,
-    good:'맞아요! 왼손 움직임은 반대쪽인 우뇌 운동 영역이 주로 조절해요. 다른 영역도 협력해요.',
-    review:'왼손은 반대쪽인 우뇌 운동 영역이 주로 조절해요. 그렇다고 우뇌만 쓰는 건 아니에요.'},
-   {q:'“괜찮아”라는 말에서 친구 기분을 짐작하려면?',options:['말뜻만 살펴요','말투·표정·상황도 살펴요'],answer:1,
-    good:'맞아요! 같은 말도 말투와 상황에 따라 다르게 느껴져요. 여러 영역이 함께 처리해요.',
-    review:'말뜻만으로는 알기 어려워요. 말투·표정·상황 같은 단서도 함께 살펴요.'},
-   {q:'좌뇌와 우뇌 사이에서 정보를 주고받는 데 중요한 연결 통로는?',options:['뇌량','두 반구는 연결되지 않아요'],answer:0,
-    good:'맞아요! 뇌량은 좌우 뇌 사이에 정보를 전달하는 중요한 신경섬유 다발이에요.',
-    review:'뇌량이라는 신경섬유 다발이 좌우 뇌를 이어줘요. 뇌 속에 있어서 바깥 그림에는 보이지 않아요.'}
-  ],
-  [
-   {q:'물건의 위치·방향을 살필 때 상대적으로 더 관여할 수 있는 쪽은?',options:['좌뇌','우뇌'],answer:1,
-    good:'맞아요! 공간 처리의 일부는 우뇌가 상대적으로 더 관여하는 경향이 있어요. 좌뇌도 함께해요.',
-    review:'공간 파악의 일부는 우뇌가 상대적으로 더 관여할 수 있어요. 좌뇌도 참여해요.'},
-   {q:'그림을 그리고 노래를 부를 때는?',options:['우뇌만 일해요','여러 뇌 영역이 함께해요'],answer:1,
-    good:'맞아요! 미술·음악·창의력도 한쪽 반구만 담당하는 일이 아니에요.',
-    review:'미술과 음악에는 보기·듣기·기억·움직임 등이 필요해요. 양쪽 뇌가 협력해요.'},
-   {q:'오른손잡이이고 수학을 좋아하면 좌뇌형일까요?',options:['네, 좌뇌형이에요','아니요, 그렇게 나눌 수 없어요'],answer:1,
-    good:'맞아요! 손잡이나 잘하는 과목으로 사람을 좌뇌형·우뇌형으로 나누지 않아요.',
-    review:'손잡이와 좋아하는 과목만으로 좌뇌형·우뇌형을 정하는 것은 과학적으로 뒷받침되지 않아요.'}
-  ]
- ];
- // Optional situation-transfer questions. Never treated as assessment or score.
- const transferQuestions=[
-  {q:'민지가 “괜찮아”라고 했지만 표정이 어두워요. 어떤 방법이 좋을까요?',options:['우뇌만 보면 알아요','말뜻·말투·표정·상황을 함께 살펴요'],answer:1,
-   good:'맞아요! 상대의 마음은 한 단서로 단정할 수 없고, 여러 뇌 영역의 처리가 함께 필요해요.',
-   review:'감정은 목소리 하나로 판단할 수 없어요. 상황과 표정, 말뜻을 함께 살펴요.'},
-  {q:'친구가 공을 던져 주었어요. 공을 잡는 데 필요한 일은?',options:['눈으로 보고 몸을 맞춰 움직이기','오른쪽 뇌만 쓰기'],answer:0,
-   good:'맞아요! 위치를 보고 움직임을 조절하는 여러 영역이 함께해요.',
-   review:'공을 잡으려면 보고, 위치를 파악하고, 움직임을 조절해야 해요. 양쪽 뇌가 협력해요.'},
-  {q:'글씨 쓰기가 어려운 아이를 보고 “좌뇌가 약하다”고 말해도 될까요?',options:['그렇게 단정할 수 없어요','네, 한쪽 뇌 때문이에요'],answer:0,
-   good:'맞아요! 쓰기에는 시각·운동·언어 등 다양한 기능이 필요하며, 이 뇌지도로 개인을 평가할 수 없어요.',
-   review:'이 뇌지도만으로 원인을 판단할 수 없어요. 여러 요인을 함께 살펴야 해요.'}
- ];
- const practiceModeButton=document.getElementById('hemiPracticeMode');
- let transferMode=false;
- const qText=document.getElementById('hemiQuizQuestion');
- const qProgress=document.getElementById('hemiQuizProgress');
- const qButtons=[...document.querySelectorAll('[data-hemi-answer]')];
- const qResponse=document.getElementById('hemiQuizResponse');
- const qNext=document.getElementById('hemiQuizNext');
- let qIndex=0,roundIndex=0,answered=false;
- const questions=()=>transferMode?transferQuestions:questionSets[roundIndex];
- practiceModeButton?.addEventListener('click',()=>{
-   transferMode=!transferMode;qIndex=0;roundIndex=0;
-   practiceModeButton.setAttribute('aria-pressed',String(transferMode));
-   practiceModeButton.textContent=transferMode?'↩ 기본 문제로 돌아가기':'🧩 생활 문제로 연습';
-   showQuestion();
- });
- function showQuestion(){
-  const q=questions()[qIndex];answered=false;speechReset();
-  qText.textContent=q.q;qProgress.textContent=(qIndex+1)+' / '+questions().length;
-  qButtons.forEach((b,i)=>{b.textContent=q.options[i];b.disabled=false;b.setAttribute('aria-pressed','false');b.removeAttribute('data-correct');});
-  qResponse.hidden=true;qResponse.textContent='';qNext.hidden=true;
- }
- qButtons.forEach(button=>button.addEventListener('click',()=>{
-  if(answered)return;
-  answered=true;
-  const answer=Number(button.dataset.hemiAnswer),q=questions()[qIndex],correct=answer===q.answer;
-  qButtons.forEach((b,i)=>{b.disabled=true;b.setAttribute('aria-pressed',String(i===answer));if(i===q.answer)b.setAttribute('data-correct','true');});
-  qResponse.hidden=false;
-  qResponse.textContent=(correct?'✓ ':'💡 ')+(correct?q.good:q.review);
-  qResponse.dataset.result=correct?'right':'review';
-  qNext.hidden=false;
-  qNext.textContent=qIndex===questions().length-1?(transferMode?'생활 문제 다시 풀기':'다른 3문제 →'):'다음 문제 →';
- }));
- quizRead?.addEventListener('click',event=>{
-  readText(qText.textContent+'. '+qButtons.map((b,i)=>(i+1)+'번 '+b.textContent).join('. '),event.currentTarget);
- });
- qNext?.addEventListener('click',()=>{
-  if(qIndex===questions().length-1){if(!transferMode)roundIndex=(roundIndex+1)%questionSets.length;qIndex=0;}
-  else qIndex+=1;
-  showQuestion();
-  qText?.focus?.();
- });
- showQuestion();
  selectSide('both');
  chooseView(location.hash==='#hemispheres'?'hemispheres':'lobes',false);
  window.addEventListener('hashchange',()=>chooseView(location.hash==='#hemispheres'?'hemispheres':'lobes',false));

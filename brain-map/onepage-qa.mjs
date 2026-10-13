@@ -193,20 +193,15 @@ try{
   await page.locator('.hemi-teacher-notes summary').click();
   assert.match(await page.locator('.hemi-teacher-steps').innerText(),/진단하지/);
   await page.locator('.hemi-teacher-notes summary').click();
-  if(name==='desktop'||name==='mobile'){
-    const sceneAction=page.locator('#hemiTryScene');
-    await sceneAction.click();
-    assert.equal(await page.locator('#hemiSceneAction').isVisible(),true,'hands-on action must be shown');
-    assert.match(await page.locator('#hemiSceneAction').innerText(),/직접 해보기/);
-    await page.locator('[data-brain-scene="ball"]').click();
-    assert.equal(await page.locator('#hemiSceneAction').isHidden(),true,'switching scenes clears stale activity');
-    await page.locator('[data-brain-scene="talk"]').click();
-  }
+  assert.equal(await page.locator('#hemiQuizQuestion, #hemiPracticeMode, #hemiQuizProgress').count(),0,'no simplistic brain quiz');
+  assert.equal(await page.locator('#hemiActivityGuide').isVisible(),true,'activity guide shown');
+  assert.equal(await page.locator('#hemiActivitySteps > li').count(),3);
+  assert.equal(await page.locator('#hemiActivityOptions').getAttribute('open'),null);
   const listening=page.locator('#hemiReadOverview');
   assert.equal(await listening.count(),1,'optional spoken summary available');
   assert.equal(await page.locator('#hemiTopicRead').count(),1,'topic speech entry is accessible');
   assert.equal(await page.locator('#hemiReadScene').count(),1);
-  assert.equal(await page.locator('#hemiReadQuiz').count(),1);
+  assert.equal(await page.locator('#hemiReadQuiz').count(),0);
   await page.locator('#leftStudyTitle').click();
   assert.equal(await page.locator('#leftStudyTitle').getAttribute('aria-pressed'),'true');
   assert.match(await page.locator('#hemiFocus').innerText(),/좌뇌를 살펴/);
@@ -229,67 +224,24 @@ try{
   assert.equal(await page.locator('#hemiTogether').getAttribute('aria-pressed'),'true','daily scenes reinforce both hemispheres');
   await page.locator('[data-brain-scene="read"]').click();
   assert.match(await page.locator('#hemiSceneText').innerText(),/글자 모양/);
-  assert.equal(await page.locator('#hemiQuizProgress').innerText(),'1 / 3');
-  await page.locator('[data-hemi-answer="0"]').click();
-  assert.equal(await page.locator('#hemiQuizResponse').isVisible(),true);
-  assert.match(await page.locator('#hemiQuizResponse').innerText(),/우뇌도 함께/);
-  assert.equal(await page.locator('[data-hemi-answer="1"]').isDisabled(),true);
-  await page.locator('#hemiQuizNext').click();
-  assert.equal(await page.locator('#hemiQuizProgress').innerText(),'2 / 3');
-  await page.locator('[data-hemi-answer="0"]').click();
-  assert.equal(await page.locator('#hemiQuizResponse').getAttribute('data-result'),'review');
-  assert.match(await page.locator('#hemiQuizResponse').innerText(),/우뇌가 상대적으로/);
-  await page.locator('#hemiQuizNext').click();
-  assert.equal(await page.locator('#hemiQuizProgress').innerText(),'3 / 3');
-  await page.locator('[data-hemi-answer="1"]').click();
-  assert.match(await page.locator('#hemiQuizResponse').innerText(),/양쪽 뇌/);
-  assert.equal(await page.locator('#hemiQuizNext').innerText(),'다른 3문제 →');
-  await page.locator('#hemiQuizNext').click();
-  assert.equal(await page.locator('#hemiQuizProgress').innerText(),'1 / 3');
-  assert.match(await page.locator('#hemiQuizQuestion').innerText(),/왼손을 움직일 때/,'new recall set must differ');
-  assert.equal(await page.locator('#hemiQuizResponse').isHidden(),true);
-  await page.locator('[data-hemi-answer="1"]').click();
-  assert.match(await page.locator('#hemiQuizResponse').innerText(),/우뇌 운동 영역/);
-  await page.locator('#hemiQuizNext').click();
-  assert.match(await page.locator('#hemiQuizQuestion').innerText(),/친구 기분/);
-  await page.locator('[data-hemi-answer="0"]').click();
-  assert.equal(await page.locator('#hemiQuizResponse').getAttribute('data-result'),'review');
-  await page.locator('#hemiQuizNext').click();
-  assert.match(await page.locator('#hemiQuizQuestion').innerText(),/연결 통로/);
-  await page.locator('[data-hemi-answer="0"]').click();
-  assert.match(await page.locator('#hemiQuizResponse').innerText(),/뇌량/);
-  await page.locator('#hemiQuizNext').click();
-  assert.match(await page.locator('#hemiQuizQuestion').innerText(),/물건의 위치/);
-  await page.locator('[data-hemi-answer="1"]').click();
-  await page.locator('#hemiQuizNext').click();
-  assert.match(await page.locator('#hemiQuizQuestion').innerText(),/그림을 그리고/);
-  await page.locator('[data-hemi-answer="1"]').click();
-  await page.locator('#hemiQuizNext').click();
-  assert.match(await page.locator('#hemiQuizQuestion').innerText(),/오른손잡이/);
-  await page.locator('[data-hemi-answer="1"]').click();
-  await page.locator('#hemiQuizNext').click();
-  assert.match(await page.locator('#hemiQuizQuestion').innerText(),/말과 문장을 만드는/,'all three groups rotate');
-  assert.equal(await page.locator('#hemiQuizProgress').innerText(),'1 / 3');
-  const apply=page.locator('#hemiPracticeMode');
-  await apply.click();
-  assert.equal(await apply.getAttribute('aria-pressed'),'true');
-  assert.match(await page.locator('#hemiQuizQuestion').innerText(),/민지가/,'real-life practice question');
-  await page.locator('[data-hemi-answer="1"]').click();
-  assert.match(await page.locator('#hemiQuizResponse').innerText(),/여러 뇌 영역/);
-  await page.locator('#hemiQuizNext').click();
-  assert.match(await page.locator('#hemiQuizQuestion').innerText(),/공을 잡는/);
-  await page.locator('[data-hemi-answer="0"]').click();
-  await page.locator('#hemiQuizNext').click();
-  assert.match(await page.locator('#hemiQuizQuestion').innerText(),/글씨 쓰기/);
-  await page.locator('[data-hemi-answer="0"]').click();
-  assert.equal(await page.locator('#hemiQuizNext').innerText(),'생활 문제 다시 풀기');
-  await apply.click();
-  assert.equal(await apply.getAttribute('aria-pressed'),'false');
-  assert.match(await page.locator('#hemiQuizQuestion').innerText(),/말과 문장을 만드는/,'switching back resets basic exercise');
+  assert.match(await page.locator('#hemiActivityTitle').innerText(),/읽고 위치/);
+  assert.match(await page.locator('#hemiActivityPrep').innerText(),/문장/);
+  await page.locator('#hemiActivityOptions summary').click();
+  assert.equal(await page.locator('#hemiActivityOptions').getAttribute('open'),'');
+  for(const id of ['hemiActivityEasy','hemiActivityChallenge','hemiActivityObserve']){
+    assert.ok((await page.locator('#'+id).innerText()).length>25,'guide needs usable detail '+id);
+  }
+  await page.locator('#hemiActivityOptions summary').click();
   for(const scene of ['talk','read','map','ball','music','draw','bag','feeling']){
     await page.locator('[data-brain-scene="'+scene+'"]').click();
     assert.equal(await page.locator('[data-brain-scene="'+scene+'"]').getAttribute('aria-pressed'),'true');
     assert.ok((await page.locator('#hemiSceneText').innerText()).length>35,'scene details should be concrete: '+scene);
+    assert.equal(await page.locator('#hemiActivitySteps > li').count(),3,'step instructions for '+scene);
+    assert.ok((await page.locator('#hemiActivityPrep').innerText()).length>12,'materials for '+scene);
+    assert.ok((await page.locator('#hemiActivityAim').innerText()).length>15,'goal for '+scene);
+    assert.ok((await page.locator('#hemiActivityWhy').innerText()).length>25,'functional rationale for '+scene);
+    assert.ok((await page.locator('#hemiActivityNote').innerText()).length>25,'safe caveat for '+scene);
+    assert.equal(await page.locator('#hemiActivityOptions').getAttribute('open'),null,'fold between scenes');
   }
   await page.locator('[data-brain-scene="talk"]').click();
   assert.equal(await page.locator('.hemi-more-facts').getAttribute('open'),null,'extra science detail stays folded by default');
@@ -304,18 +256,17 @@ try{
   await page.locator('.hemi-study-sources summary').click();
   const lessonFit=await page.evaluate(()=>({
     scenes:[...document.querySelectorAll('.hemi-team-examples button')].map(e=>{const b=e.getBoundingClientRect();return {w:b.width,h:b.height,left:b.left,right:b.right};}),
-    quiz:[...document.querySelectorAll('.hemi-quiz-options button')].map(e=>{const b=e.getBoundingClientRect();return {w:b.width,h:b.height,left:b.left,right:b.right};}),
-    answerText:parseFloat(getComputedStyle(document.querySelector('.hemi-quiz-options button')).fontSize),
-    sceneText:parseFloat(getComputedStyle(document.getElementById('hemiSceneText')).fontSize)
+    activity:document.querySelector('#hemiActivityGuide').getBoundingClientRect().toJSON(),
+    stepFont:parseFloat(getComputedStyle(document.querySelector('.hemi-activity-steps p')).fontSize),
+    sceneText:parseFloat(getComputedStyle(document.querySelector('#hemiSceneText')).fontSize)
   }));
   assert.ok(lessonFit.scenes.every(x=>x.h>=44&&x.left>=0&&x.right<=width+1),'scene touch size or clipping: '+JSON.stringify(lessonFit));
-  assert.ok(lessonFit.quiz.every(x=>x.h>=44&&x.left>=0&&x.right<=width+1),'quiz touch size or clipping: '+JSON.stringify(lessonFit));
-  assert.ok(lessonFit.answerText>=13 && lessonFit.sceneText>=12.5,'lesson typography too small: '+JSON.stringify(lessonFit));
+  assert.ok(lessonFit.activity.width>=250&&lessonFit.activity.left>=0&&lessonFit.activity.right<=width+1,
+    'activity guide clipped: '+JSON.stringify(lessonFit.activity));
+  assert.ok(lessonFit.stepFont>=12.5 && lessonFit.sceneText>=12.5,'activity text too small: '+JSON.stringify(lessonFit));
   if(name==='desktop'||name==='mobile'){
-    const storyPreview=await page.locator('.hemi-team').screenshot({type:'jpeg',quality:60,animations:'disabled'});
-    console.log('BRAIN_SCENE_PREVIEW_'+name+'='+storyPreview.toString('base64'));
-    const recallPreview=await page.locator('.hemi-quick-check').screenshot({type:'jpeg',quality:60,animations:'disabled'});
-    console.log('BRAIN_RECALL_PREVIEW_'+name+'='+recallPreview.toString('base64'));
+    const guidePreview=await page.locator('.hemi-activity-guide').screenshot({type:'jpeg',quality:60,animations:'disabled'});
+    console.log('BRAIN_ACTIVITY_PREVIEW_'+name+'='+guidePreview.toString('base64'));
   }
   const compareFit=await page.evaluate(()=>({
     pageWidth:document.documentElement.scrollWidth,
