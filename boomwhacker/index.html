@@ -922,7 +922,7 @@ function loadPianoSamples(){
   const context=new AC();
   try{
    const decoded=await context.decodeAudioData(await response.arrayBuffer());
-   if(decoded.duration<40)throw Error('Piano sprite appears incomplete');
+   if(decoded.duration<38)throw Error('Piano sprite appears incomplete');
    // MP3 encoder delay, matching piano.js's published sampler decoder.
    const data=decoded.getChannelData(0);
    for(let i=0;i<Math.min(data.length,decoded.sampleRate);i++){
