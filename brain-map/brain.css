@@ -753,3 +753,11 @@
  .brain-page .hemi-activity-options-inner>div{padding:9px}
  .brain-page .hemi-activity-why{font-size:12.5px}
 }
+
+@media(max-width:760px){
+ .brain-page .hemi-activity-options summary{
+   display:flex;flex-wrap:nowrap!important;justify-content:space-between;align-items:center;gap:7px;
+ }
+ .brain-page .hemi-activity-options summary span{display:none}
+ .brain-page .hemi-activity-options summary:after{flex:0 0 auto;align-self:center}
+}
