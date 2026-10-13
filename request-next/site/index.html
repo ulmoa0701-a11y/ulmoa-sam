@@ -149,6 +149,12 @@
       <label for="adminKey">운영자 키</label><input id="adminKey" type="password" autocomplete="off">
       <button type="button" id="adminLoad" class="secondary">글 관리 열기</button>
       <p class="status" id="adminStatus" role="status"></p>
+      <div class="self-test-panel" id="selfTestPanel" hidden>
+        <p><strong>실제 서버 자동 검증</strong></p>
+        <p class="muted">가상의 완전 비공개 쪽지와 작은 PDF를 잠깐 저장해 비공개 권한·답장·첨부·삭제를 확인한 뒤 자동으로 지워요. 실제 이용자 데이터는 건드리지 않습니다.</p>
+        <button type="button" id="adminSelfTest" class="secondary">테스트 한 번 실행하기</button>
+        <p class="status" id="selfTestStatus" role="status" aria-live="polite"></p>
+      </div>
       <div id="adminPosts"></div>
     </details>
     <footer>일단 해봄 · 울모아쌤</footer>
