@@ -142,6 +142,30 @@ try{
  assert.deepEqual(errors,[],'browser has runtime errors');
  console.log('PASS HTTP: author deletion irreversibly removes private post and attachment');
 
+ await page.locator('input[value="list"]').check();
+ await page.locator('#nickname').fill('가상 작성자');
+ await page.locator('#body').fill('LOCKED_PRIVATE_BODY_ONLY');
+ await page.locator('#consent').check();
+ await page.locator('#sendButton').click();
+ await page.waitForFunction(previous=>document.querySelector('#receiptCode').value!==previous,secretReceipt);
+ const lockedReceipt=await page.locator('#receiptCode').inputValue();
+ const lockedId=lockedReceipt.split('.')[0];
+ const beforeApproval=await (await fetch(base+'/api/posts')).text();
+ assert.ok(!beforeApproval.includes('LOCKED_PRIVATE_BODY_ONLY'));
+ assert.ok(!beforeApproval.includes(lockedId));
+ const approved=await fetch(base+'/api/admin/posts/'+lockedId,{
+  method:'POST',headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},
+  body:JSON.stringify({status:'확인 중',reply:'',publicTitle:'공개 허용된 잠금 쪽지',metadataApproved:true,attachmentApproved:false})
+ });
+ assert.equal(approved.status,200);
+ const afterApproval=await (await fetch(base+'/api/posts')).text();
+ assert.ok(afterApproval.includes('공개 허용된 잠금 쪽지'));
+ assert.ok(!afterApproval.includes('LOCKED_PRIVATE_BODY_ONLY'));
+ assert.ok(!afterApproval.includes('가상 작성자'));
+ await page.locator('#refresh').click();
+ await page.waitForFunction(()=>document.querySelector('#lockedFeed').textContent.includes('공개 허용된 잠금 쪽지'));
+ console.log('PASS HTTP: locked metadata only after admin approval; never leaks private body');
+
  await page.screenshot({path:'habom-real-http-390.png',fullPage:true});
  console.log('PASS HTTP INTEGRATION: browser/server/read/write/permissions/reply/delete');
 }finally{
