@@ -541,7 +541,7 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   check(halfMr.peak>.11&&halfMr.energy>autoBalance.melody.energy*.55,'mr: automatic MR should remain clearly audible around 50% '+JSON.stringify({halfMr,autoBalance}));
   report.push({name:'autoMrBalance',autoBalance,halfMr});
   check(defaultMr.mrReady===true&&defaultMr.mrKind==='auto'&&!defaultMr.mrLoaded,'mr: built-in automatic MR is not ready by default');
-  check((await page.locator('#mrStatus').innerText()).includes('기본 자동 MR'),'mr: built-in MR status is not visible');
+  check((await page.locator('#mrStatus').innerText()).includes('자동 MR 준비됨'),'mr: automatic backing status is not visible');
   await page.locator('#mixModes button[data-mix="both"]').click();
   await page.locator('#startBtn').click();
   await page.waitForTimeout(120);
