@@ -362,26 +362,31 @@ const path=require("node:path");
       assert.equal(await page.locator("#gcatTermPanel").isVisible(),true,"original glossary mode restored");
       assert.equal(await page.locator(".study-note").count(),42,"no original note lost on view switching");
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,"no horizontal scrolling on final restored view");
-      // 알아봄 게임은 어휘 시험이 아니라 상황을 여러 관점에서 보는 활동.
-      assert.equal(await page.locator("#gcatGamesFromTerms").count(),1,"glossary has optional scene activities");
-      assert.equal(await page.locator("#gcatGamesFromSituations").count(),1,"situations invite observation play");
+      // 회귀 검증: 기존 용어사전·상황자료를 유지하면서 이야기가 선택에 따라 달라져야 한다.
+      assert.equal(await page.locator("#gcatGamesFromTerms").count(),1,"original glossary game link");
+      assert.equal(await page.locator("#gcatGamesFromSituations").count(),1,"situation game link");
       await page.goto(new URL("?view=games",base).href,{waitUntil:"networkidle",timeout:90000});
-      assert.equal(await page.locator("#gcatGamesPanel").isVisible(),true,"learning activities load on direct URL");
-      assert.deepEqual(await page.locator(".gcat-game-mode-card").evaluateAll(cards=>cards.map(c=>c.dataset.learningMode)),["observe","support"],"observation first, supports second");
-      assert.deepEqual(await page.evaluate(()=>window.HabomGlossaryGames.counts),{cases:12,activities:24},"24 non-exam activities");
+      assert.equal(await page.locator("#gcatGamesPanel").isVisible(),true,"direct game deep link");
+      assert.deepEqual(await page.locator(".gcat-game-mode-card").evaluateAll(cs=>cs.map(x=>x.dataset.learningMode)),["observe","support"],"two different games");
+      assert.deepEqual(await page.evaluate(()=>window.HabomGlossaryGames.counts),{cases:12,activities:24},"12 scenes in 2 activity paths");
       await page.locator('[data-game-start="observe"][data-level="start"]').click();
-      assert.equal(await page.locator(".gcat-game-choice").count(),3,"case has three inquiry perspectives");
-      assert.equal(await page.locator("[data-game-answer]").count(),0,"no single correct answer");
-      await page.locator(".gcat-game-choice").first().click();
-      assert.equal(await page.locator(".gcat-game-perspective").count(),3,"all three perspectives explained");
-      assert.equal(await page.locator(".gcat-game-source").count(),1,"original case reference available optionally");
-      await page.locator("[data-game-next=true]").click();
-      assert.equal(await page.locator(".gcat-game-question").count(),1,"advances without quiz score");
+      assert.equal(await page.locator("#gcatGamesRoot").getAttribute("data-game-stage"),"clues","discover a clue first");
+      assert.equal(await page.locator("[data-clue-index]").count(),3,"three clue choices");
+      await page.locator("[data-clue-index]").first().click();
+      assert.equal(await page.locator("#gcatGamesRoot").getAttribute("data-game-stage"),"evidence","new fictional evidence revealed");
+      assert((await page.locator(".gcat-game-evidence p").innerText()).length>20,"new information changes story");
+      await page.locator(".gcat-game-flow-actions .gcat-game-next").click();
+      assert.equal(await page.locator("#gcatGamesRoot").getAttribute("data-game-stage"),"supports","now choose how to help");
+      await page.locator("[data-support-index]").first().click();
+      assert.equal(await page.locator("#gcatGamesRoot").getAttribute("data-game-stage"),"outcome","support branch reveals hypothetical response");
+      assert.equal(await page.locator("[data-game-answer]").count(),0,"no scored choices or diagnoses");
+      await page.locator(".gcat-game-reference summary").click();
+      assert.equal(await page.locator(".gcat-game-source").isVisible(),true,"reference available by choice");
       await page.locator("#gcatGamesBack").click();
-      assert.equal(await page.locator("#gcatSituationPanel").isVisible(),true,"original scenario gallery restored");
-      assert.equal(await page.locator(".study-note").count(),42,"42 original note sources preserved");
-      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,"no viewport overflow");
-      console.log(p.name+": PASS first-visit learning, 32 images, 42 glossary terms, 12 situations, 5 maps, two non-graded situational activities and responsive QA");
+      assert.equal(await page.locator("#gcatSituationPanel").isVisible(),true,"original learning restored");
+      assert.equal(await page.locator(".study-note").count(),42,"existing 42 notes retained");
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,"no horizontal overflow");
+      console.log(p.name+": PASS first-visit learning, 32 images, 42 glossary terms, 12 situations, 5 maps, interactive clue exploration, hypothetical help branches and responsive QA");
       await page.close();
     }
   }finally{await browser.close();}
