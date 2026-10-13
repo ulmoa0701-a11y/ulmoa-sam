@@ -15,6 +15,7 @@ function fixture(){
    }));return [];
   }
   if(query.startsWith('INSERT INTO rate_limits'))return [];
+  if(query.startsWith('DELETE FROM posts')){const ix=posts.findIndex(p=>p.id===args[0]);if(ix>=0)posts.splice(ix,1);return [];}
   if(query.startsWith("SELECT id,category,title,body,link,display_name,role,created_at,reply,replied_at,attachment_key,attachment_approved FROM posts")){
    return posts.filter(p=>p.visibility==='public');
   }
@@ -88,4 +89,17 @@ test('Netlify adapter fails closed if the database, blob store or secrets are ab
  assert.throws(()=>createNetlifyEnv({database:fixtureData.db,files:fixtureData.blobs,adminKey:'short',rateSalt:salt}),/Required secrets/);
  assert.throws(()=>createNetlifyEnv({database:null,files:fixtureData.blobs,adminKey:key,rateSalt:salt}),/database unavailable/);
  assert.throws(()=>createNetlifyEnv({database:fixtureData.db,files:null,adminKey:key,rateSalt:salt}),/blob store unavailable/);
+});
+
+
+test('Netlify author deletion is denied without receipt and purges private blob',async()=>{
+ const x=fixture(),env=createNetlifyEnv({database:x.db,files:x.blobs,adminKey:key,rateSalt:salt});
+ const body=form('hidden');body.set('attachment',new File([new Uint8Array([37,80,68,70,45,49])],'sensitive.pdf',{type:'application/pdf'}));
+ const v=await request(env,'/api/posts','POST',body);assert.equal(v.status,201);const p=JSON.parse(v.text);
+ assert.equal(x.posts.length,1);
+ assert.equal(x.blobs.get instanceof Function,true);
+ assert.equal((await request(env,'/api/mine/'+p.id,'DELETE')).status,403);
+ assert.equal((await request(env,'/api/mine/'+p.id,'DELETE',undefined,{'X-Receipt-Token':p.receipt})).status,200);
+ assert.equal(x.posts.length,0);
+ assert.equal((await request(env,'/api/mine/'+p.id,'GET',undefined,{'X-Receipt-Token':p.receipt})).status,403);
 });
