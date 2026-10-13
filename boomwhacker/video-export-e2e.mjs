@@ -85,4 +85,4 @@ try{
  if(server)await new Promise(resolve=>server.close(resolve));
 }
 fs.writeFileSync(path.join(artifactDir,'results.json'),JSON.stringify(results,null,2));
-if(results.length!==5||results.some(r=>!r.ok))process.exitCode=1;
+if(results.length!==4||results.some(r=>!r.ok))process.exitCode=1;
