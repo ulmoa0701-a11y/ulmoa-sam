@@ -1,5 +1,5 @@
 [build]
-  command = "node netlify/build-verify.mjs"
+  command = "node netlify/diagnose-env.mjs"
   publish = "site"
   functions = "netlify/functions"
 
