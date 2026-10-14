@@ -1,0 +1,55 @@
+/* The five gardens share one finder; original game engines and URLs remain unchanged. */
+html{scroll-behavior:smooth;scroll-padding-top:20px}
+body.gardens-page{margin:0;background:#f8faf5;color:#2b3f3c;font-family:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo",sans-serif;word-break:keep-all}
+.gardens-main{width:min(1190px,calc(100% - 36px));margin:0 auto;padding:20px 0 90px}
+.garden-back{display:inline-flex;align-items:center;text-decoration:none;color:#507168;font-size:13px;font-weight:750;min-height:40px;margin:4px 0 15px}
+.garden-hero{display:grid;grid-template-columns:minmax(0,1fr) 180px;align-items:center;gap:22px;padding:35px 45px;border-radius:26px;background:linear-gradient(125deg,#ebf5ec,#fffaf1);border:1px solid #e0e9d9;overflow:hidden}
+.garden-hero img{max-width:100%;width:180px;height:auto;object-fit:contain}
+.garden-kicker{font-size:13px;font-weight:800;color:#577669;margin:0 0 9px}
+.garden-hero h1{font-family:"Gowun Dodum","Pretendard Variable",Pretendard,sans-serif!important;font-size:clamp(33px,4vw,47px);color:#2c5144;font-weight:700!important;margin:0 0 13px;line-height:1.27;letter-spacing:-.045em}
+.garden-hero h1 em{font-style:normal;color:#507d5e;font-family:inherit!important}
+.garden-lead{font-size:clamp(14px,1.45vw,17px);line-height:1.73;color:#526a62;margin:0}
+.garden-jumps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:21px 0}
+.garden-jump{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"icon title" "icon arrow";align-items:center;column-gap:9px;row-gap:3px;padding:14px 12px;min-height:90px;background:#fff;border:1.5px solid #dfe9e1;border-radius:16px;text-decoration:none;color:#2e4a41;transition:transform .15s,border-color .15s}
+.garden-jump:hover,.garden-jump:focus-visible{border-color:#9fbeaa;background:#f6fbf6;transform:translateY(-2px)}
+.jump-symbol{grid-area:icon;font-size:27px;line-height:1}
+.garden-jump>span:nth-child(2){grid-area:title;display:grid;gap:5px}
+.garden-jump strong{font-size:16px;line-height:1.3;color:#2a493e}
+.garden-jump small{font-size:11px;line-height:1.35;color:#72837b}
+.jump-arrow{grid-area:arrow;display:none}
+.garden-note{background:#fff;padding:15px 19px;border-radius:12px;border:1px solid #e5eae6;color:#607269;font-size:13px;line-height:1.68;margin:12px 0 45px}
+.garden-note strong{color:#365d4b}
+.garden-section{scroll-margin-top:22px;margin:0 0 46px;padding:29px 29px 30px;background:#fff;border:1px solid #e4eae4;border-radius:22px;box-shadow:0 7px 24px rgba(32,60,45,.025)}
+.garden-section-heading{display:flex;align-items:end;justify-content:space-between;gap:22px;margin:0 0 22px}
+.garden-label{display:flex;align-items:center;gap:13px}
+.garden-symbol{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:16px;font-size:29px;background:#eef6ed;flex:none}
+#thinking .garden-symbol{background:#f2eeff}
+#learning .garden-symbol{background:#fff4e3}
+#music .garden-symbol{background:#eaf1ff}
+#heart .garden-symbol{background:#fff0f1}
+.garden-overline{color:#648073;font-size:12px;font-weight:750}
+.garden-section h2{font-family:"Gowun Dodum","Pretendard Variable",Pretendard,sans-serif!important;font-weight:700!important;color:#273e39;letter-spacing:-.035em;font-size:29px;line-height:1.3;margin:3px 0 0}
+.garden-intro{margin:0;max-width:465px;font-size:14px;line-height:1.7;color:#63776c}
+.plays{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.play-card{display:flex;gap:11px;align-items:center;position:relative;border:1px solid #e4eae7;background:#fbfdfb;border-radius:13px;padding:13px;min-height:103px;min-width:0;color:#2d443f;text-decoration:none;transition:border-color .15s,box-shadow .15s}
+.play-card:hover,.play-card:focus-visible{border-color:#aacdb6;background:#fff;box-shadow:0 8px 20px #294d3920}
+.play-card-illustration{display:flex;align-items:center;justify-content:center;flex:none;width:64px;height:65px;border-radius:13px;background:#eaf4ed;overflow:hidden}
+.play-card-illustration img{display:block;width:100%;height:100%;object-fit:contain}
+.play-emoji{font-size:30px}
+.play-card-body{display:grid;align-content:center;gap:4px;min-width:0;flex:1}
+.play-card-body strong{font-size:15px;line-height:1.35;color:#2a473d}
+.play-card-body small{font-size:12px;line-height:1.47;color:#637771}
+.play-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}
+.play-tags em{font-size:10px;line-height:1.25;color:#668273;background:#eef4ee;padding:3px 5px;border-radius:5px;font-style:normal}
+.play-arrow{color:#76a68e;font-size:16px;align-self:flex-start}
+.garden-notice{font-size:13px;line-height:1.8;color:#785d50;background:#fff8ef;border:1px solid #f1e5d0;padding:13px 15px;border-radius:12px;margin:0 0 18px}
+.garden-bottom-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.garden-bottom-links a{font-size:13px;display:inline-flex;padding:10px 13px;border-radius:999px;color:#466c5b;text-decoration:none;background:#edf6f0;border:1px solid #ddece0;font-weight:730}
+.garden-bottom-links a:hover,.garden-bottom-links a:focus-visible{background:#e1eee4;text-decoration:underline}
+.garden-footer{display:flex;gap:12px;justify-content:space-between;align-items:center;padding:12px 3px 30px;font-size:13px;color:#647971}
+.garden-footer a{color:#437056;font-weight:700;text-decoration:none}
+.gardens-main a:focus-visible{outline:3px solid #629e80;outline-offset:3px}
+@media(max-width:1100px){.garden-jumps{grid-template-columns:repeat(3,minmax(0,1fr))}.plays{grid-template-columns:repeat(2,minmax(0,1fr))}.garden-section-heading{align-items:start;flex-direction:column;gap:8px}.garden-intro{max-width:none}}
+@media(max-width:650px){.gardens-main{width:calc(100% - 24px);padding-top:10px}.garden-hero{padding:23px 21px;grid-template-columns:minmax(0,1fr) 88px;gap:4px;border-radius:18px}.garden-hero img{width:88px}.garden-hero h1{font-size:29px}.garden-hero h1 em{display:inline-block}.garden-kicker{font-size:11px}.garden-lead{font-size:13px}.garden-lead br{display:none}.garden-jumps{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:13px 0}.garden-jump{min-height:73px;padding:10px;gap:6px}.jump-symbol{font-size:24px}.garden-jump strong{font-size:14px}.garden-jump small{font-size:11px}.garden-note{font-size:12px;padding:12px;margin-bottom:27px}.garden-section{padding:19px 13px 21px;border-radius:15px;margin-bottom:24px}.garden-section h2{font-size:24px}.garden-symbol{width:43px;height:43px;font-size:25px}.garden-label{gap:9px}.garden-overline{font-size:11px}.garden-intro{font-size:13px}.plays{grid-template-columns:minmax(0,1fr);gap:8px}.play-card{min-height:91px;padding:10px;gap:10px}.play-card-illustration{width:62px;height:62px}.play-card-body strong{font-size:14px}.play-card-body small{font-size:12px}.garden-footer{flex-direction:column;align-items:flex-start}}
+@media(max-width:360px){.garden-hero{grid-template-columns:1fr}.garden-hero img{display:none}.garden-jumps{gap:6px}.garden-jump{padding:9px 7px}.garden-jump strong{font-size:13px}.garden-jump small{font-size:10px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.garden-jump,.play-card{transition:none}}
