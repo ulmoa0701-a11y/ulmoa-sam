@@ -148,7 +148,10 @@ export default {
    // Health check executes a real DB query without revealing private records or secrets.
    if(request.method==='GET'&&url.pathname==='/api/health'){
      await env.DB.prepare('SELECT COUNT(*) AS n FROM posts').first();
-     return reply({ok:true,service:'habom',database:'ready'});
+     const check=await env.DB.prepare('SELECT result,stage,persisted_across_deploys FROM habom_runtime_checks WHERE id=?').bind('latest').first();
+     return reply({ok:true,service:'habom',database:'ready',liveCheck:check?{
+       status:check.result,stage:check.stage,retainedAcrossDeploys:check.persisted_across_deploys===1
+     }:{status:'pending'}});
    }
    if(request.method==='GET'&&url.pathname==='/api/posts')return readPosts(env);
    if(request.method==='POST'&&url.pathname==='/api/posts')return storePost(request,env);
