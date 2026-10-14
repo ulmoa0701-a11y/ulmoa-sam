@@ -1,6 +1,7 @@
 -- 일단써봄 Supabase development schema. DO NOT apply to a clinical production project until independent review.
 -- All personal journal content must be AES-GCM encrypted BEFORE insertion by the server-side Edge Function.
 -- Apply on an isolated NEW Supabase project. Never expose a service-role secret to the browser.
+CREATE SCHEMA IF NOT EXISTS extensions;
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 
 CREATE TABLE IF NOT EXISTS public.ildan_members (
