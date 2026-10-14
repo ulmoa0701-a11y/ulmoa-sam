@@ -69,6 +69,9 @@ function updatePracticeControls(){
 }
 
 const previewExamples={
+ rulePost:`<div class="pv-instruction">바람에 따라 배달 규칙이 바뀌어요</div><div class="pv-options emoji"><span>✉️⭐</span><span>→</span><span>📮🟨</span><span>📮🍀</span></div><div class="pv-hint">지금 규칙이 색깔인지 그림인지 먼저 확인해요.</div>`,
+ mirrorPond:`<div class="pv-instruction">거울에 비친 그림은 어떻게 달라질까요?</div><div class="pv-options emoji"><span>🐸</span><span>🌼</span><span>↔</span><span>🌼</span><span>🐸</span></div><div class="pv-hint">모양의 위치를 머릿속으로 바꾸어 봐요.</div>`,
+ sceneDetect:`<div class="pv-instruction">첫 장면을 기억하고 달라진 곳을 찾아요</div><div class="pv-options emoji"><span>🌳</span><span>🐰</span><span>→</span><span>🌳</span><span>🐱</span></div><div class="pv-hint">시간 제한 없이 충분히 본 뒤 선택해요.</div>`,
  slowScan:`<div class="pv-instruction">잎과 돌 사이에서 꽃을 찾아요</div><div class="pv-options emoji"><span>🍃</span><span class="preview-pulse">🌼</span><span>🌱</span><span class="preview-pulse">🌼</span></div>`,
  slowPlace:`<div class="pv-instruction">같은 위치에 꽃을 심어요</div><div class="pv-options emoji"><span>🌼</span><span>▫</span><span>→</span><span class="preview-pulse">🌼</span><span>▫</span></div>`,
  slowBlock:`<div class="pv-instruction">블록이 맞닿는 자리를 살펴요</div><div class="pv-options emoji"><span>🧱</span><span>🧱</span><span>→</span><span class="preview-pulse">🧱</span><span>🧱</span></div>`,
