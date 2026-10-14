@@ -1116,9 +1116,11 @@ function softShaker(ac,dest,when,strength=.08){
 // a dissonant accompaniment on a beginner's melody.
 function safeBackingHold(chord,measureIndex,barStartAt,at,requestedSeconds){
  if(!Number.isInteger(measureIndex)||measureIndex<0)return requestedSeconds;
- const written=events.filter(e=>e.measure===measureIndex&&e.note!=='쉼');
+ const measureEvents=events.filter(e=>e.measure===measureIndex);
+ const written=measureEvents.filter(e=>e.note!=='쉼');
  if(!written.length)return requestedSeconds;
- const absoluteStart=written[0].start+(at-barStartAt)*1000;
+ // The bar clock starts at its rest as well, not its first sounded note.
+ const absoluteStart=measureEvents[0].start+(at-barStartAt)*1000;
  const absoluteEnd=absoluteStart+requestedSeconds*1000;
  let safeUntil=absoluteEnd;
  for(const note of written){
