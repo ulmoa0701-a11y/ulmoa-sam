@@ -172,6 +172,46 @@ async function basicCase(name,width,height){
   await page.locator('#levels button[data-level="8"]').click();
   check(await page.locator('.tube:not(.inactive)').count()===8,`${name}: 8-note mode active tube count wrong`);
 
+  // Users choose a subset; the full original notes, downbeat and MR stay unchanged.
+  const fullSong=await page.evaluate(()=>({
+    original:events.map(e=>[e.note,e.start,e.dur]),chords:playbackMeasures.map((_,i)=>chordForMeasure(i).name),first:firstNoteMs()
+  }));
+  await page.locator('#levels button[data-level="custom"]').click();
+  check(await page.locator('#customNoteDialog').isVisible(),name+': custom picker did not open');
+  check(await page.locator('#customNoteChoices button').count()===8,name+': picker does not show all eight pitches');
+  for(const note of ['도','미','레'])await page.locator('#customNoteChoices button[data-note="'+note+'"]').click();
+  check((await page.locator('#customNoteStatus').innerText()).includes('2개'),name+': picker note count wrong');
+  await page.locator('#customNoteApply').click();
+  const custom=await page.evaluate(()=>({
+    ...window.__boomVideoQA.noteSelection(),chords:playbackMeasures.map((_,i)=>chordForMeasure(i).name),
+    first:firstNoteMs(),local:JSON.parse(localStorage.getItem('ulmoaBoomCustomNotes')||'null'),
+    label:document.querySelector('#rangeNote')?.textContent,fileName:scoreFileName('pdf')
+  }));
+  check(custom.level==='custom'&&custom.selected.join(',')==='레,솔',name+': wrong custom selected notes '+JSON.stringify(custom));
+  check((await page.locator('.tube:not(.inactive)').count())===2,name+': custom mode active tubes not exactly two');
+  check(custom.activeBalls===await page.evaluate(()=>events.filter(e=>e.note==='레'||e.note==='솔').length),name+': custom ball count wrong');
+  check(JSON.stringify(custom.original)===JSON.stringify(fullSong.original),name+': custom selection altered melody or note timing');
+  check(JSON.stringify(custom.chords)===JSON.stringify(fullSong.chords)&&custom.first===fullSong.first,
+    name+': custom selection altered MR harmony or first beat');
+  check(custom.local?.join(',')==='레,솔',name+': custom choice wasn't saved');
+  check(custom.label.includes('원곡 전체 그대로')&&custom.fileName.includes('직접선택-레-솔'),
+    name+': custom-note explanation or PDF filename missing');
+  await page.locator('#levels button[data-level="custom"]').click();
+  check(await page.locator('#customNoteChoices button[data-note="솔"]').getAttribute('aria-pressed')==='true',
+    name+': reopening custom picker lost saved choice');
+  await page.locator('#customNoteChoices button[data-note="솔"]').click();
+  await page.locator('#customNoteChoices button[data-note="레"]').click();
+  check((await page.locator('#customNoteStatus').innerText()).includes('최소 1개'),
+    name+': custom picker should prevent zero selected notes');
+  await page.locator('#customNoteCancel').click();
+  check((await page.evaluate(()=>window.__boomVideoQA.noteSelection().selected.join(',')))==='레,솔',
+    name+': cancelling a new edit changed saved custom notes');
+  await page.locator('#levels button[data-level="8"]').click();
+  check(await page.locator('.tube:not(.inactive)').count()===8,name+': 8-note preset failed after custom');
+  check((await page.evaluate(()=>window.__boomVideoQA.noteSelection().saved.join(',')))==='레,솔',
+    name+': switching to a preset deleted custom selection');
+
+
   await page.locator('#sampleSelect').selectOption('moa-signal');
   check((await page.locator('#songTitle').innerText())==='모아의 출발 신호',`${name}: revised start cue title not applied`);
   check(await page.evaluate(()=>currentSong.measures[1].map(x=>x.lyric).join('')==='출발!'),`${name}: start cue lyric and melody syllables don't agree`);
