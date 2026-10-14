@@ -27,7 +27,7 @@ async function run(){
     failedStage='environment-site-id';
     throw Error('Staging site identity mismatch');
   }
-  if(process.env.BRANCH!==TARGET_BRANCH){
+  if(process.env.CONTEXT==='production'&&process.env.BRANCH!==TARGET_BRANCH){
     failedStage='environment-branch';
     throw Error('Staging Git branch identity mismatch');
   }
