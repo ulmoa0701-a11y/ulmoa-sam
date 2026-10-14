@@ -60,10 +60,11 @@ async function inviteLanding(){
   const meta=await publicInviteApi('invite-preview',code);
   $('inviteRoleTitle').textContent=(inviteRoles[meta.role]||'사용자')+' 전용 초대입니다.';
   $('inviteIntro').textContent='초대 링크를 받은 사람이 직접 처음 등록한 뒤에는 자신의 기록만 볼 수 있어요.';
-  $('inviteStatus').textContent=canUsePasskey()
-   ?'지원되는 기기로 확인됐어요. 최초 등록 시 기기 인증이 필요합니다.'
-   :'이 브라우저는 기기 인증을 지원하지 않을 수 있어요. 링크를 복사해 기본 브라우저에서 열어 주세요.';
-  $('inviteAccept').disabled=!canUsePasskey();
+  $('inviteStatus').textContent=!meta.registrationOpen
+   ?'현재 최초 등록 기능을 안전 점검 중입니다. 링크 확인만 가능하며 등록은 아직 열리지 않았습니다.'
+   :canUsePasskey()?'기기 인증을 진행할 수 있어요. 등록하기를 누르면 1회용 링크가 사용됩니다.'
+    :'이 브라우저에서는 기기 인증이 지원되지 않을 수 있어요. 기본 브라우저에서 열어 주세요.';
+  $('inviteAccept').disabled=!meta.registrationOpen||!canUsePasskey();
   $('inviteAccept').onclick=()=>loading($('inviteAccept'),async()=>{
     const r=await publicInviteApi('invite-register',code);
     const authResult=await supabase.auth.verifyOtp({token_hash:r.tokenHash,type:'magiclink'});
