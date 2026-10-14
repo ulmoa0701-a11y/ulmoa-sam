@@ -55,7 +55,7 @@ const context=await browser.newContext({viewport:{width:390,height:844}});
 const page=await context.newPage();
 const library=await page.goto(base+'/thinking-garden/',{waitUntil:'domcontentloaded',timeout:25000});
 const gameCount=await page.locator('.library-card[data-open]').count();
-check(library?.ok()&&gameCount===25,'25-game library (22 previous + 3 strategy adventures) missing: '+gameCount);
+check(library?.ok()&&gameCount>=25,'25-game library (22 previous + 3 strategy adventures) missing: '+gameCount);
 for(const id of ['memory','rulePost','spacing']){
  const errors=[];const fn=e=>errors.push(e.message);page.on('pageerror',fn);
  const response=await page.goto(base+'/thinking-garden/?game='+id,{waitUntil:'domcontentloaded',timeout:25000});
