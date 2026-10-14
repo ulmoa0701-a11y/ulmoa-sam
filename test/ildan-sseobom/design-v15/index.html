@@ -870,6 +870,38 @@ body:has(.parent-easy-form) .editor-paper>p{margin:0 0 10px;line-height:1.45}
  .parent-easy-form .parent-when{grid-template-columns:minmax(0,1fr)}
  .parent-easy-form .parent-when .parent-location{grid-column:auto}
 }
+
+/* Parent voluntary quick/detail and ABC notes. Accessibility-friendly simple form. */
+.parent-easy-form .parent-mode-header{display:grid;gap:5px;margin-bottom:1px}
+.parent-easy-form .parent-mode-header .journal-mode-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.parent-easy-form .parent-mode-header .journal-mode-btn{
+ display:grid;align-content:center;gap:2px;text-align:left;min-height:56px;border:1px solid #b7c8dc;
+ border-radius:11px;background:#fff;color:#273e57;padding:8px 11px;min-width:0
+}
+.parent-easy-form .parent-mode-header .journal-mode-btn.active{
+ color:#2d4c9d;border:2px solid #647fcb;background:#eff4ff;padding:7px 10px
+}
+.parent-easy-form .parent-mode-header .journal-mode-btn strong{font-size:14px;line-height:1.3}
+.parent-easy-form .parent-mode-header .journal-mode-btn small{font-size:11px;font-weight:500;color:#496278;line-height:1.35}
+.parent-easy-form .parent-mode-advanced{display:grid;gap:8px;min-width:0}
+.parent-easy-form[data-parent-mode="quick"] .parent-mode-advanced{display:none!important}
+.parent-easy-form .abc-observation{border:1px solid #d2dfec;background:#fbfdff;border-radius:11px;margin:0}
+.parent-easy-form .abc-observation>summary{padding:10px 12px;font-size:14px;min-height:44px}
+.student-journal .abc-observation{border:1px solid #d2dfec;background:#fbfdff;border-radius:11px;margin:0}
+.student-journal .abc-observation>summary{padding:10px 12px;font-size:14px;min-height:44px}
+.abc-observation .optional-wrap{display:grid;gap:9px;margin:0 12px 12px!important}
+.abc-observation .optional-wrap label{display:grid;gap:5px;font-size:14px}
+.abc-observation .optional-wrap textarea{min-height:72px;height:80px;padding:9px 11px;resize:vertical;font-size:15px}
+.abc-observation .abc-help,.abc-observation .abc-behavior-guide{
+ margin:3px 0!important;font-size:12px!important;line-height:1.55!important;color:#405c70!important
+}
+.abc-observation .abc-behavior-guide{padding:9px 10px;background:#f0f6fd;border-left:3px solid #9fbaeb;border-radius:5px}
+@media(max-width:740px){
+ .parent-easy-form .parent-mode-header .journal-mode-btn{padding:8px;min-height:54px}
+ .parent-easy-form .parent-mode-header .journal-mode-btn.active{padding:7px}
+ .parent-easy-form .parent-mode-header .journal-mode-btn strong{font-size:13px}
+ .parent-easy-form .parent-mode-header .journal-mode-btn small{font-size:10px}
+}
 </style></head><body><div class="previewbar" id="previewInfo"><strong>🧪 일단써봄 v15</strong> · 간편·자세히 기록 · 가상 데이터만 사용 · 체험 내용은 이 브라우저 세션에 임시 보관될 수 있음 · 실제 로그인/Google 저장 미연결 · 실명·상담 내용 입력 금지
 </div>
 <header><div class="topwrap"><a class="brand" href="#" aria-label="일단써봄 홈"><span class="brand-code">&lt;/&gt;</span> 일단<span>써봄</span><small>work • think • play</small></a><div id="account" class="account"></div></div></header>
@@ -1181,7 +1213,7 @@ function savePreviewDraft(form,role){
  if(!window.ILDAN_PREVIEW)return;
  try{
   const values=[...form.querySelectorAll('[name]')].map(el=>({name:el.name,value:el.value,type:el.type,checked:el.checked}));
-  sessionStorage.setItem(PREVIEW_DRAFT_PREFIX+role,JSON.stringify({savedAt:Date.now(),mode:form.dataset.journalMode||'quick',values,sketch:role==='student'?sketchStrokes:[]}));
+  sessionStorage.setItem(PREVIEW_DRAFT_PREFIX+role,JSON.stringify({savedAt:Date.now(),mode:form.dataset.journalMode||'quick',parentMode:form.dataset.parentMode||'quick',values,sketch:role==='student'?sketchStrokes:[]}));
  }catch(_){}
 }
 function restorePreviewDraft(form,role){
@@ -1207,6 +1239,10 @@ function restorePreviewDraft(form,role){
    form.querySelectorAll('[data-journal-mode]').forEach(b=>{const on=b.dataset.journalMode===mode;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on))});
    const hint=document.getElementById('journalModeHint');if(hint)hint.textContent=mode==='quick'?'한 줄만 남겨도 돼. 나머지는 선택이야.':'감정·장소·그림·내 경험도 원하는 만큼 추가해 봐.';
   }
+  if(role==='parent'){
+   const mode=draft.parentMode==='detail'?'detail':'quick';form.dataset.parentMode=mode;
+   form.querySelectorAll('button[data-parent-mode]').forEach(b=>{const active=b.dataset.parentMode===mode;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))});
+  }
   return true;
  }catch(_){return false}
 }
@@ -1219,6 +1255,30 @@ function wireEntryForm(isParent){
  f.addEventListener('input',persist);f.addEventListener('change',persist);
  if(restored)toast('이 브라우저에서 작성 중이던 체험 내용을 복구했어.');
  const selectedKeys=()=>[...f.querySelectorAll('input[name="shareField"]:checked')].map(x=>x.value);
+ const updateParentShare=()=>{
+  if(!isParent)return;
+  const detailsVisible=f.dataset.parentMode==='detail',entry=gatherEntry(f,'parent');
+  f.querySelectorAll('input[name="shareField"]').forEach(x=>{
+   const visible=detailsVisible||['observation','origin'].includes(x.value);
+   if(!visible)x.checked=false;
+   x.disabled=!visible||!entry[x.value];
+   x.closest('label')?.classList.toggle('is-unavailable',x.disabled);
+  });
+ };
+ const parentModeButtons=[...f.querySelectorAll('button[data-parent-mode]')];
+ if(isParent){
+  const sync=()=>{
+   const mode=f.dataset.parentMode==='detail'?'detail':'quick';
+   parentModeButtons.forEach(b=>{const active=b.dataset.parentMode===mode;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
+   const hint=f.querySelector('#parentModeHint');if(hint)hint.textContent=mode==='detail'?'기록하고 싶은 상황만 추가해요. ABC도 선택 사항입니다.':'기억나는 사실 한 가지만 남겨도 충분합니다.';
+   updateParentShare();
+  };
+  parentModeButtons.forEach(btn=>btn.addEventListener('click',()=>{f.dataset.parentMode=btn.dataset.parentMode;sync();f.dispatchEvent(new Event('change',{bubbles:true}))}));
+  f.addEventListener('input',updateParentShare);
+  f.addEventListener('change',updateParentShare);
+  sync();
+ }
+
  const updateStudentShare=()=>{
   if(isParent)return;
   const entry=gatherEntry(f,'student');
