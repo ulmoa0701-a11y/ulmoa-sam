@@ -158,10 +158,10 @@ const STUDENT_MORE_EMOTIONS={"기분 좋은 순간": ["신남", "만족감", "�
 function dataForm(role){
  if(role==='parent')return `<form class="form entry-v5 parent-easy-form" id="entryForm" data-parent-mode="quick">
  <div class="parent-mode-header"><div class="journal-mode-switch" role="group" aria-label="보호자 기록 방식"><button type="button" class="journal-mode-btn active" data-parent-mode="quick" aria-pressed="true"><strong>간편 기록</strong><small>하나만 남겨도 돼요</small></button><button type="button" class="journal-mode-btn" data-parent-mode="detail" aria-pressed="false"><strong>자세히 기록</strong><small>상황과 앞뒤를 살펴봐요</small></button></div><p id="parentModeHint" class="student-mode-hint" aria-live="polite">기억나는 사실 한 가지만 남겨도 충분합니다.</p></div>
- <div class="parent-when"><label class="parent-date-field">일이 있었던 날짜 <input name="date" type="date" value="${todayLocal()}" max="${todayLocal()}" required></label><label class="parent-time-field">시간 <small>(선택)</small><input name="time" type="time"></label></div>
- <p class="parent-date-hint">정확한 시간이 기억나지 않으면 비워 두세요. 기록을 작성한 시각은 자동으로 남아요.</p>
- <label class="parent-location">장소 <small>(선택)</small><input name="place" maxlength="100" placeholder="기억나는 장소만 적어 주세요."></label>
+ <div class="parent-when"><label class="parent-date-field">일이 있었던 날짜 <input name="date" type="date" value="${todayLocal()}" max="${todayLocal()}" required></label><label class="parent-time-field">시간 <small>(선택)</small><input name="time" type="time"></label><label class="parent-location">장소 <small>(선택)</small><input name="place" maxlength="100" placeholder="기억나는 장소만 적어 주세요."></label></div>
+ <p class="parent-date-hint">정확한 시간이 기억나지 않으면 비워 두셔도 돼요. 작성 시각은 별도로 자동 기록됩니다.</p>
  <label class="parent-main-label">어떤 일을 보거나 들으셨나요? <small>필수 · 360자 이내</small><textarea name="observation" maxlength="360" rows="3" required placeholder="기억나는 사실만 간단히. 원인이나 진단을 추측하지 않아도 됩니다."></textarea></label>
+ <details class="entry-examples parent-examples"><summary>✎ 관찰 메모 예시 보기 <small>필요할 때만</small></summary><div class="entry-examples-body"><p>아래는 가상의 상황이에요. 실제로 확인한 내용만 적어 주세요.</p><div class="example-lines"><p><b>직접 본 일:</b> “책을 펼쳤다가 잠시 덮고 물을 마셨습니다.”</p><p><b>아이에게 들은 말:</b> “잠깐 쉬고 싶어요.”</p><p><b>확인하지 않은 추측:</b> “일부러 피하려고 한 것 같다”는 관찰 사실에 넣지 않아요.</p></div><p>모든 일을 기록할 필요는 없고, 한 가지 사실만 남겨도 충분합니다.</p></div></details>
  <label class="parent-source-field">이 내용은 어떻게 알게 되었나요? <small>선택 · 정확한 출처가 아니면 비워 두세요.</small><select name="origin"><option value="">출처를 선택하지 않음</option><option value="직접 관찰">직접 보거나 들었어요</option><option value="아이가 말함">아이에게 들었어요</option><option value="가족에게 들음">다른 가족에게 들었어요</option><option value="그 밖의 사람에게 들음">그 밖의 사람에게 들었어요</option></select></label>
  <p class="parent-fact-note">아이의 마음이나 의도를 단정하지 않아도 됩니다. 일부러 행동을 관찰하거나 횟수를 셀 필요도 없어요.</p>
  <div class="parent-mode-advanced">
@@ -194,21 +194,23 @@ function dataForm(role){
  <button class="button entry-save" id="saveEntry">내 관찰 메모 저장</button><p class="parent-nudge">보호자는 관찰하거나 전해 들은 사실만 남기면 됩니다. 기록하지 않는 날도 괜찮습니다. 진단이나 원인 판단은 하지 않아도 됩니다. 실시간 상담·응급 연락창이 아닙니다.</p></form>`;
  return `<form class="form entry-v5 student-journal" id="entryForm" data-journal-mode="quick">
  <div class="student-mode-header"><div class="student-mode-title">어떤 방식으로 남길까?</div><div class="journal-mode-switch" role="group" aria-label="기록 상세 정도 선택"><button class="journal-mode-btn active" type="button" data-journal-mode="quick" aria-pressed="true"><strong>⚡ 간편 기록</strong><small>한두 줄이면 끝</small></button><button class="journal-mode-btn" type="button" data-journal-mode="detail" aria-pressed="false"><strong>▤ 자세히 기록</strong><small>필요한 만큼 더 쓰기</small></button></div><p class="student-mode-hint" id="journalModeHint" aria-live="polite">한 줄만 남겨도 돼. 나머지는 선택이야.</p></div>
- <section class="student-info-card" aria-label="일기 날짜와 시간">
- <div class="student-datetime-heading"><strong>언제의 기록이야?</strong><button type="button" id="studentSetNow" class="student-now-btn" aria-label="날짜와 시간을 현재 시각으로 설정">↻ 지금으로 설정</button></div>
- <div class="student-datetime-grid"><label>날짜<input name="date" type="date" max="${todayLocal()}" value="${todayLocal()}"></label><label>시간 <small>(선택)</small><input name="time" type="time" value="${nowLocalTime()}"></label></div>
+ <section class="student-info-card" aria-label="기록 날짜, 시간, 장소">
+ <div class="student-datetime-heading"><strong>언제, 어디에서?</strong><button type="button" id="studentSetNow" class="student-now-btn" aria-label="날짜와 시간을 현재 시각으로 설정">↻ 지금으로 설정</button></div>
+ <div class="student-datetime-grid"><label class="student-date-field">날짜<input name="date" type="date" max="${todayLocal()}" value="${todayLocal()}"></label><label class="student-time-field">시간 <small>(선택)</small><input name="time" type="time" value="${nowLocalTime()}"></label><label class="student-place-field">장소 <small>(선택)</small><input name="place" maxlength="100" placeholder="기억나는 곳만"></label></div>
  <p class="student-datetime-hint">현재 날짜·시간 자동 입력 · 필요하면 직접 변경할 수 있어.</p>
  </section>
  <div class="student-mode-advanced">
- <div class="student-extra-grid"><label>제목 <small>(선택)</small><input name="title" maxlength="80" placeholder="제목 없이 써도 돼"></label><label>장소 <small>(선택)</small><input name="place" maxlength="100" placeholder="기억나는 곳만"></label></div>
+ <div class="student-extra-grid"><label>제목 <small>(선택)</small><input name="title" maxlength="80" placeholder="제목 없이 써도 돼"></label></div>
  <div class="form-switcher" role="group" aria-label="기록 방식"><button type="button" class="format-btn active" data-format="text" aria-pressed="true">✎ 글쓰기</button><button type="button" class="format-btn" data-format="draw" aria-pressed="false">◇ 그림 그리기</button></div></div>
  <div id="textPanel"><label class="student-note-label">하고 싶은 이야기 <small>(짧아도 좋아)</small><textarea name="note" maxlength="4000" rows="5" placeholder="오늘 있었던 일, 좋은 일, 고민, 그냥 생각나는 말... 자유롭게."></textarea></label></div>
+ <details class="entry-examples student-examples"><summary>✎ 어떻게 적을까? 짧은 예시 보기 <small>필요할 때만</small></summary><div class="entry-examples-body"><p>이건 가상의 예시야. 따라 쓸 필요 없이 네 이야기만 남기면 돼.</p><div class="example-lines"><p>“오늘 친구랑 점심시간에 이야기했어.”</p><p>“집에 와서 조금 쉬었어. 오늘 기분은 잘 모르겠어.”</p><p>“지금은 글보다 기분만 선택하고 싶어.”</p></div><p>한두 줄, 감정만, 또는 아무것도 적지 않아도 괜찮아.</p></div></details>
+ <section class="student-emotion-quick" id="stateDetails" aria-label="그때의 감정 선택"><div class="student-emotion-title"><strong>그때 어떤 기분이었어?</strong> <small>선택 · 여러 개 또는 선택 안 함</small></div><div class="emotion-quick-body"><div class="emotion-grid" aria-label="감정 선택">${STUDENT_EMOTIONS.map(w=>`<label class="emotion-chip"><input name="emotionChoice" type="checkbox" value="${w}"><span>${w}</span></label>`).join('')}</div>
+ <details class="emotion-more"><summary>다른 감정도 보기 <span>+ ${Object.values(STUDENT_MORE_EMOTIONS).flat().length}개</span></summary>${Object.entries(STUDENT_MORE_EMOTIONS).map(([group,words])=>`<div class="emotion-group"><p>${group}</p><div class="emotion-grid">${words.filter(w=>!STUDENT_EMOTIONS.includes(w)).map(w=>`<label class="emotion-chip"><input name="emotionChoice" type="checkbox" value="${w}"><span>${w}</span></label>`).join('')}</div></div>`).join('')}</details>
+ <details class="emotion-extra-optional"><summary>내 말로 표현하거나 컨디션도 남기기 <small>(선택)</small></summary><div class="emotion-extra-fields"><label>내 말로 표현하기 <small>(선택)</small><input name="emotionOther" maxlength="100" placeholder="위에 없는 감정이나 내 표현"></label><label>컨디션 <small>(선택)</small><select name="energy"><option value="">선택하지 않음</option><option>괜찮음</option><option>기운 있음</option><option>조금 피곤함</option><option>많이 피곤함</option><option>잘 모르겠음</option></select></label></div></details></div></section>
  <div class="student-mode-advanced">
  <div id="drawPanel" hidden><div class="sketch-board"><canvas id="noteCanvas" width="760" height="380" aria-label="마우스나 손가락으로 그리는 그림 메모"></canvas></div><div class="sketch-actions"><span>손가락이나 마우스로 그릴 수 있어.</span><button type="button" id="undoStroke" class="button-ghost">↶ 되돌리기</button><button type="button" id="clearSketch" class="button-ghost">지우기</button></div></div>
  
- <details class="optional-fields student-emotion-details" id="stateDetails"><summary>그때의 감정도 남길까? <small>선택 · 여러 개 가능</small></summary><div class="optional-wrap"><p class="emotion-helper">하나만 고르지 않아도 돼. 감정이 섞였거나 잘 모르겠어도 괜찮아.</p><div class="emotion-grid" aria-label="감정 선택">${STUDENT_EMOTIONS.map(w=>`<label class="emotion-chip"><input name="emotionChoice" type="checkbox" value="${w}"><span>${w}</span></label>`).join('')}</div>
- <details class="emotion-more"><summary>다른 감정도 보기 <span>+ ${Object.values(STUDENT_MORE_EMOTIONS).flat().length}개</span></summary>${Object.entries(STUDENT_MORE_EMOTIONS).map(([group,words])=>`<div class="emotion-group"><p>${group}</p><div class="emotion-grid">${words.map(w=>`<label class="emotion-chip"><input name="emotionChoice" type="checkbox" value="${w}"><span>${w}</span></label>`).join('')}</div></div>`).join('')}</details>
- <label>내 말로 표현하기 <small>(선택)</small><input name="emotionOther" maxlength="100" placeholder="위에 없는 감정이나 내 표현"></label><label>컨디션 <small>(선택)</small><select name="energy"><option value="">선택하지 않음</option><option>괜찮음</option><option>기운 있음</option><option>조금 피곤함</option><option>많이 피곤함</option><option>잘 모르겠음</option></select></label></div></details>
+
  <details class="optional-fields student-experience"><summary>몸의 움직임·소리나 반복된 일이 있었어? <small>선택 · 그냥 넘어가도 돼</small></summary><div class="optional-wrap"><p class="experience-helper">틱인지 강박인지 구분할 필요 없어. 내가 직접 경험한 일을 내 말로 남기고 싶을 때만 써. 기록하지 않아도 괜찮아.</p><label>어떤 일이 있었어? <small>(선택)</small><textarea name="experience" maxlength="900" rows="3" placeholder="움직임, 소리, 반복하고 싶었던 일, 떠오른 생각 등 내가 겪은 일을 자유롭게"></textarea></label><label>일상에서 달라진 점이나 불편한 점이 있었어? <small>(선택)</small><textarea name="experienceImpact" maxlength="500" rows="2" placeholder="특별히 달라진 일이 없었다면 비워 둬도 돼."></textarea></label><p class="experience-footer">횟수를 세거나 정확하게 분석할 필요는 없어. 나만 보관하고 싶으면 공유를 선택하지 않으면 돼.</p></div></details>
  <details class="optional-fields abc-observation student-abc"><summary>그전에 → 그때 → 그다음 (ABC) <small>선택 · 그냥 넘어가도 돼</small></summary><div class="optional-wrap">
  <p class="abc-help">친구와 놀았던 일, 재미있었던 일, 힘들었던 일 등 어떤 상황이라도 좋아. 정답이나 원인을 찾는 활동은 아니야.</p>
@@ -297,7 +299,7 @@ function wireEntryForm(isParent){
   if(isParent)return;
   const entry=gatherEntry(f,'student');
   f.querySelectorAll('input[name="shareField"]').forEach(x=>{
-   const mode=f.dataset.journalMode||'quick';const available=!!entry[x.value]&&(mode==='detail'||['note','date','time'].includes(x.value));x.disabled=!available;if(!available)x.checked=false;
+   const mode=f.dataset.journalMode||'quick';const available=!!entry[x.value]&&(mode==='detail'||['note','date','time','place','mood'].includes(x.value));x.disabled=!available;if(!available)x.checked=false;
    x.closest('label')?.classList.toggle('is-unavailable',!available);
   });
   const count=selectedKeys().length;const caption=$('studentShareCount');
@@ -314,7 +316,7 @@ function wireEntryForm(isParent){
     modeButtons.forEach(b=>{const active=b===modeButton;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
     if(mode==='quick'&&$('drawPanel')&&!$('drawPanel').hidden){f.querySelector('[data-format="text"]')?.click();}
     if(journalModeHint)journalModeHint.textContent=mode==='quick'?'한 줄만 남겨도 돼. 나머지는 선택이야.':'감정·장소·그림·내 경험도 원하는 만큼 추가해 봐.';
-    const extra=mode==='quick'&&['title','place','energy','thought','body','action','experience','experienceImpact'].some(k=>!!formValue(f,k));
+    const extra=mode==='quick'&&['title','energy','thought','body','action','experience','experienceImpact','abcBefore','abcBehavior','abcAfter'].some(k=>!!formValue(f,k));
     const summary=$('journalHiddenNotice');if(summary)summary.hidden=!extra;
     updateStudentShare();
   }));
