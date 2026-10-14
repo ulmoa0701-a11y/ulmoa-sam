@@ -57,3 +57,24 @@ test('no Google Drive transmission without explicit server opt-in',()=>{
  assert.equal(drivePolicyEnabled('false'),false);
  assert.equal(drivePolicyEnabled('true'),true);
 });
+
+test('optional ABC data for ordinary daily events persists without claiming causality',()=>{
+ const entry=validateEntry({date:'2026-10-14',note:'오늘 재미있었다',abcBefore:'점심을 먹었음',abcBehavior:'친구가 같이 놀자고 함',abcAfter:'같이 걸어감'});
+ assert.equal(entry.abcBefore,'점심을 먹었음');
+ assert.equal(entry.abcBehavior,'친구가 같이 놀자고 함');
+ assert.equal(entry.abcAfter,'같이 걸어감');
+ assert.equal('diagnosis' in entry,false);
+ const shared=sharedSelection(entry,['note'],false);
+ assert.deepEqual(shared,{note:'오늘 재미있었다'});
+ assert.equal(shared.abcBefore,undefined);
+});
+test('user explicitly choosing ABC items may share only selected ABC fields',()=>{
+ const entry=validateEntry({abcBefore:'전',abcBehavior:'중',abcAfter:'후',note:'비공개'});
+ assert.deepEqual(sharedSelection(entry,['abcBefore','abcAfter'],false),{abcBefore:'전',abcAfter:'후'});
+ assert.throws(()=>validateEntry({abcBehavior:{prediction:'certain'}}));
+ assert.equal(validateEntry({abcBefore:'x'.repeat(800)}).abcBefore.length,500);
+});
+test('caregiver context and after fields remain distinct alongside direct observation',()=>{
+ const record=validateEntry({observation:'책을 읽었음',context:'외출 전',after:'산책',origin:'직접 관찰'});
+ assert.deepEqual(sharedSelection(record,['observation','after'],true),{observation:'책을 읽었음',after:'산책'});
+});
