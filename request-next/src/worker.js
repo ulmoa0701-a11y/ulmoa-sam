@@ -126,6 +126,14 @@ async function adminAction(req,env,url){
      .bind(status,replyText,replyText?new Date().toISOString():null,approved,title,body.attachmentApproved===true?1:0,id).run();
    return reply({ok:true});
  }
+ if(req.method==='DELETE'&&/^\/api\/admin\/posts\/[a-f0-9-]+$/.test(url.pathname)){
+   const id=url.pathname.split('/').pop();
+   const row=await env.DB.prepare('SELECT * FROM posts WHERE id=?').bind(id).first();
+   if(!row)return reply({error:'글을 찾지 못했습니다.'},404);
+   if(row.attachment_key)await env.FILES.delete(row.attachment_key);
+   await env.DB.prepare('DELETE FROM posts WHERE id=?').bind(id).run();
+   return reply({ok:true,deleted:true});
+ }
  if(req.method==='GET'&&/^\/api\/admin\/posts\/[a-f0-9-]+\/file$/.test(url.pathname)){
   const id=url.pathname.split('/')[4];
   const row=await env.DB.prepare('SELECT * FROM posts WHERE id=?').bind(id).first();
