@@ -7,6 +7,7 @@ function fixture(){
  const posts=[]; const files=new Map();const sqlCalls=[];
  const database={sql:{unsafe:async(query,args)=>{
   sqlCalls.push({query,args});
+  if(query.includes('FROM habom_runtime_checks'))return [];
   if(query.startsWith('SELECT COUNT(*)'))return [{n:0}];
   if(query.startsWith('INSERT INTO posts')){
    const names=query.match(/INSERT INTO posts \(([^)]+)\)/)[1].split(',').map(x=>x.trim());
