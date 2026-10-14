@@ -66,11 +66,17 @@ with sync_playwright() as pw:
     assert page.locator('input[name="share"]').is_checked() is False
     page.locator('textarea[name="note"]').fill('가상 학생의 자유 기록 '+'안전한 글. '*20+'끝')
     page.locator('button[data-journal-mode="detail"]').click()
+    assert page.locator('textarea[name="abcBefore"]').count()==1
+    page.locator('details.student-abc > summary').click()
+    page.locator('textarea[name="abcBefore"]').fill('가상 학생 A')
+    page.locator('textarea[name="abcBehavior"]').fill('가상 학생 B')
+    page.locator('textarea[name="abcAfter"]').fill('가상 학생 C')
     page.locator('details.student-reflect > summary').click()
     page.locator('textarea[name="thought"]').fill('상세 비공개 생각')
     page.locator('button[data-journal-mode="quick"]').click()
     page.locator('input[name="share"]').check()
     assert page.locator('input[name="shareField"][value="thought"]').is_disabled()
+    assert page.locator('input[name="shareField"][value="abcBefore"]').is_disabled()
     page.locator('input[name="shareField"][value="note"]').check()
     page.locator('#saveEntry').click()
     page.locator('#shareReviewDialog').wait_for(state='visible')
@@ -83,7 +89,18 @@ with sync_playwright() as pw:
     page.wait_for_function('window.__caseRecords.length===1 && !window.__caseRecords[0].shared')
     cases.append(f'{width}:student choice, full-text consent, unshare')
    elif role=='parent':
+    assert page.locator('#entryForm').get_attribute('data-parent-mode')=='quick'
     assert page.locator('select[name="origin"]').count()==1
+    assert page.locator('textarea[name="context"]').count()==1
+    assert page.locator('textarea[name="after"]').count()==1
+    page.locator('button[data-parent-mode="detail"]').click()
+    page.locator('details.parent-abc > summary').click()
+    page.locator('textarea[name="context"]').fill('가상 ABC A')
+    page.locator('textarea[name="after"]').fill('가상 ABC C')
+    page.locator('button[data-parent-mode="quick"]').click()
+    assert page.locator('textarea[name="context"]').input_value()=='가상 ABC A'
+    assert page.locator('input[name="shareField"][value="context"]').is_disabled()
+    page.locator('button[data-parent-mode="detail"]').click()
     assert page.locator('textarea[name="childWords"]').count()==1
     assert not page.locator('textarea[name="childWords"]').is_visible()
     page.locator('textarea[name="observation"]').fill('가상 보호자 관찰')
