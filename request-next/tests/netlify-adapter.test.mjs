@@ -17,12 +17,12 @@ function fixture(){
   if(query.startsWith('INSERT INTO rate_limits'))return [];
   if(query.startsWith('DELETE FROM posts')){const ix=posts.findIndex(p=>p.id===args[0]);if(ix>=0)posts.splice(ix,1);return [];}
   if(query.startsWith("SELECT id,category,title,body,link,display_name,role,created_at,reply,replied_at,attachment_key,attachment_approved FROM posts")){
-   return posts.filter(p=>p.visibility==='public');
+   return posts.filter(p=>p.visibility==='public'&&p.metadata_approved===1);
   }
   if(query.startsWith("SELECT id,category,public_title,display_name,created_at,status,attachment_key,reply FROM posts")){
    return posts.filter(p=>p.visibility==='list'&&p.metadata_approved===1);
   }
-  if(query.startsWith('SELECT attachment_key,attachment_name,attachment_approved,visibility FROM posts WHERE id=')){
+  if(query.startsWith('SELECT attachment_key,attachment_name,metadata_approved,attachment_approved,visibility FROM posts WHERE id=')){
    const row=posts.find(p=>p.id===args[0]);return row?[row]:[];
   }
   if(query.startsWith('SELECT * FROM posts WHERE id=')){
@@ -61,7 +61,13 @@ test('Netlify adapter handles one DB for public and private but returns no secre
  const receipt=JSON.parse(b.text);
  const feed=await request(env,'/api/posts');
  assert.equal(feed.status,200);
- assert.ok(feed.text.includes('공개 메모'));
+ assert.ok(!feed.text.includes('공개 메모'),'unapproved public note must be private');
+ const approved=await request(env,'/api/admin/posts/'+JSON.parse(a.text).id,'POST',
+   JSON.stringify({status:'접수',reply:'',publicTitle:'',metadataApproved:true,attachmentApproved:false}),
+   {Authorization:'Bearer '+key,'Content-Type':'application/json'});
+ assert.equal(approved.status,200);
+ const visible=await request(env,'/api/posts');
+ assert.ok(visible.text.includes('공개 메모'));
  assert.ok(!feed.text.includes('PRIVATE MESSAGE CONTENT'));
  assert.ok(!feed.text.includes('hidden@example.test'));
  assert.ok(!feed.text.includes(receipt.receipt));
