@@ -78,8 +78,8 @@ for(const plan of plans){
        headerWidth:first?.scrollWidth,headerClientWidth:first?.clientWidth,
        resourceTabs:document.querySelectorAll('[data-garden-view]').length,
        gameCards:document.querySelectorAll('.library-card,.game-card').length,
-       originalCognitiveCards:document.querySelectorAll('.library-card[data-open]').length,
-       expeditionCognitiveCards:document.querySelectorAll('.library-card[href="games/slow-look/"]').length,
+       originalCognitiveCards:document.querySelectorAll('.library-card[data-open]:not([data-open="slowLook"])').length,
+       expeditionCognitiveCards:document.querySelectorAll('.library-card[data-open="slowLook"]').length,
        bodyHeight:document.documentElement.scrollHeight
       };
    });
