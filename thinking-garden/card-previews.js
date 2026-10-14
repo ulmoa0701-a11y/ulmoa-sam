@@ -22,7 +22,12 @@
     inside: `<div class="cp-mission">울타리 안에만 별을 심어요</div><div class="cp-field"><div><i>⭐</i><i>⭐</i><i>⭐</i></div></div>`,
     targets: `<div class="cp-mission">동그라미를 하나씩 모두 깨워요</div><div class="cp-targets"><i class="awake">🌼</i><i>○</i><i>○</i><i class="awake">🌼</i><i>○</i><i>○</i></div>`,
     paint: `<div class="cp-mission">정원길 안쪽을 쓱싹 채워요</div><div class="cp-paint">${Array.from({length:18}, (_, i) => `<i class="${i < 9 ? 'painted' : ''}"></i>`).join('')}</div>`,
-    slowLook: `<div class="cp-mission">눈으로 보고 · 생각한 뒤에 말해요</div><div class="cp-targets"><i class="awake">🌼</i><i>□</i><i class="awake">🌱</i><i>→</i><i class="awake">🌼</i><i>🌱</i></div><div class="cp-arrow">샘과 함께 6가지 탐험 🌿</div>`,
+    slowScan: `<div class="cp-mission">🌼 꽃을 빠뜨리지 않고 찾아요</div><div class="cp-choice-row"><span>🍃</span><span class="is-good">🌼</span><span>🌱</span><span class="is-good">🌼</span><span>🪨</span></div>`,
+    slowPlace: `<div class="cp-mission">같은 위치에 꽃을 심어요</div><div class="cp-choice-row"><span>🌼</span><span>▫</span><span>▫</span><span>→</span><span class="is-good">🌼</span></div>`,
+    slowBlock: `<div class="cp-mission">같은 블록 모양의 정원을 만들어요</div><div class="cp-choice-row"><span>🧱</span><span>🧱</span><span>→</span><span class="is-good">🧱</span><span>🧱</span></div>`,
+    slowName: `<div class="cp-mission">보고 생각한 뒤 말해요</div><div class="cp-choice-row"><span>🐰</span><span>🐶</span><span>🐱</span></div>`,
+    slowMemory: `<div class="cp-mission">어느 칸에 꽃이 피었을까요?</div><div class="cp-sequence"><i>🌼</i><i>▫</i><i>🌸</i><i>▫</i></div><div class="cp-arrow">잠깐 기억해요 ↓</div><div class="cp-slots"><i>?</i><i>?</i><i>?</i><i>?</i></div>`,
+    slowEveryday: `<div class="cp-mission">가방에 넣을 연필을 찾아요</div><div class="cp-choice-row"><span>📖</span><span class="is-good">✏️</span><span>📏</span><span>🧽</span></div>`,
     water: `<div class="cp-mission">시든 꽃에만 물을 주세요</div><div class="cp-choice-row"><span>🌷<small>✓</small></span><span class="is-good">🥀<small>💧</small></span><span>🌻<small>✓</small></span><span class="is-good">🥀<small>💧</small></span></div>`
   };
 
