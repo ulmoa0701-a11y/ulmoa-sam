@@ -1,0 +1,55 @@
+/* Three native story games for the cognitive garden.
+   All rules scoped to strategy-quest so other games retain their layouts. */
+.strategy-quest{color:#31473d;max-width:960px;margin:8px auto 18px;padding:16px 22px 26px;border:2px solid #e1eacb;border-radius:29px;background:#fffdf7f2;box-shadow:0 10px 30px #476a5120;text-align:center}
+.strategy-caption{display:flex;justify-content:space-between;gap:8px;margin:0 0 14px;font-size:12px;font-weight:800;color:#67806b}
+.strategy-caption span{background:#eaf6e7;padding:7px 12px;border-radius:99px}
+.strategy-story-head{margin:6px auto 14px}.strategy-story-head span{font-size:12px;font-weight:850;color:#5c8869}.strategy-story-head h3{font-size:clamp(21px,3vw,26px);margin:8px auto 5px;letter-spacing:-.045em;line-height:1.3}
+.strategy-distress{display:flex;justify-content:center;align-items:center;flex-direction:column;gap:10px;max-width:590px;margin:12px auto;padding:17px;background:linear-gradient(100deg,#fff4d7,#f0f8e8);border:2px solid #e8ebcd;border-radius:23px}
+.strategy-distress small{font-size:14px;color:#678063;font-weight:850}.strategy-distress strong{font-size:clamp(23px,4vw,34px)}
+.strategy-robot{display:flex;align-items:center;justify-content:center;gap:17px;margin:18px auto;max-width:550px;background:#eaf3fc;border:2px solid #d0e4f4;border-radius:21px;padding:13px 18px}
+.strategy-robot-emoji{font-size:49px;line-height:1.2}.strategy-robot small{display:block;font-size:12px;color:#60788d;margin-bottom:5px}.strategy-robot strong{font-size:24px}
+.strategy-prompt{font-size:17px;font-weight:900;color:#3d684d;margin:19px auto 13px}
+.strategy-two-actions,.strategy-friend-grid{display:flex;justify-content:center;gap:13px;flex-wrap:wrap;margin:14px auto}
+.strategy-two-actions button,.strategy-friend-grid button,.strategy-reset button,.strategy-plan-actions button,.strategy-items button,.strategy-room-check button,.strategy-plan-cards button,.strategy-actions button{font:inherit;min-height:48px;border:2px solid #bdd6c1;border-radius:17px;background:white;color:#365745;padding:11px 18px;font-size:15px;font-weight:850;cursor:pointer;touch-action:manipulation}
+.strategy-primary{background:#31775d!important;border-color:#27694f!important;color:white!important;box-shadow:0 5px 0 #1e5f43}
+.strategy-friend-grid button{flex:0 1 125px;min-height:138px;background:#fff;border:2px solid #cfe4c5;box-shadow:0 6px 0 #deecd4}
+.strategy-friend-grid span{display:block;font-size:52px;margin:0 0 5px}.strategy-friend-grid strong{font-size:17px}
+.strategy-reset{padding:18px 16px;margin:18px auto;background:#fff0d9;border:2px solid #f2deaf;border-radius:20px;max-width:620px}
+.strategy-reset h3{margin:0 0 10px;font-size:22px}.strategy-reset p{line-height:1.65;font-size:14px;color:#765f44;margin:8px auto 18px}
+.strategy-feedback{min-height:22px;color:#557059;font-weight:850;font-size:14px;margin:12px 0}
+.strategy-quest button:hover:not(:disabled){filter:brightness(.98);border-color:#84b99b}.strategy-quest button:focus-visible{outline:3px solid #dcb44a;outline-offset:3px}.strategy-quest button:disabled{opacity:.48;cursor:default;box-shadow:none}
+.strategy-actions{margin:8px 0 0}.strategy-actions button{border-style:dashed;background:#f8f8ef}
+.strategy-small-heading{font-size:15px;color:#476d55;font-weight:950;margin:16px 0 11px}
+.strategy-clue{background:#fff5df;border:1px solid #e8dcc3;border-radius:21px;padding:15px 17px;margin:8px auto 17px;max-width:770px}
+.strategy-clue small{display:block;font-size:12px;color:#886c4a;margin-bottom:6px}
+.strategy-clue strong{font-size:clamp(17px,2.4vw,22px);display:block;line-height:1.6;word-break:keep-all}
+.strategy-clue u{color:#307b61;text-underline-offset:4px}.strategy-clue p{color:#79694e;font-size:13px;margin:6px 0}
+.strategy-items{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin:5px auto 20px}.strategy-items button{min-width:90px;font-size:33px;background:#fff;padding:8px 14px;box-shadow:0 5px #eceddf}
+.strategy-items small{display:block;font-size:12px;color:#637968}.strategy-items button[aria-pressed=true]{background:#e4f3db;border-color:#4ba875;box-shadow:inset 0 0 0 1px #4ba875}
+.strategy-room-grid{margin:6px auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:12px;width:min(100%,390px);aspect-ratio:1;background:linear-gradient(125deg,#d9d0bb,#eee5d1);border:4px solid #c8b99b;border-radius:22px}
+.strategy-room-square{display:flex;flex-direction:column;justify-content:center;align-items:center;min-width:0;min-height:0;background:#fffcf7;border:2px solid #e3ddc9;border-radius:13px;font:inherit;font-size:clamp(20px,4.2vw,40px);cursor:pointer;padding:5px}
+.strategy-room-square.center{background:#d5ebf5;border-color:#b7d5e3;cursor:default}
+.strategy-room-square.chosen{background:#d6f3dd;border-color:#43a66f;box-shadow:inset 0 0 0 2px #74cb9d}.strategy-room-square.row-help{border-color:#91be96}
+.strategy-room-square small{font-size:11px;font-weight:750;color:#667f6d;margin-top:4px}
+.strategy-room-square:disabled{opacity:1;cursor:default;background:#edf4ec}
+.strategy-room-check{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:13px;margin:18px auto 3px}.strategy-room-check span{font-size:13px;color:#69806b;font-weight:900}
+.strategy-helptext{font-size:13px;color:#567a5b;background:#f0f7ec;border-radius:12px;padding:8px;margin:13px auto;max-width:580px}
+.strategy-festival-banner{font-size:32px;line-height:1.6;background:linear-gradient(110deg,#f9edcc,#e1f4e0,#d9effa);border-radius:18px;margin:10px auto 18px;max-width:650px}
+.strategy-evidence{max-width:770px;margin:14px auto 17px;background:#eef6eb;border:1px solid #d6e9d5;border-radius:19px;padding:15px}
+.strategy-evidence>strong{font-size:14px;display:block;text-align:left;margin:0 0 8px;color:#416b51}
+.strategy-witness{display:flex;align-items:center;gap:11px;padding:6px 8px;background:#fff;border-radius:12px;text-align:left;margin:7px 0;min-height:50px}
+.strategy-witness span{font-size:28px;flex:0 0 34px}.strategy-witness p{font-size:14px;font-weight:700;color:#456452;margin:0;line-height:1.5;word-break:keep-all}
+.strategy-order-slots{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin:7px auto 18px}
+.strategy-order-slot{display:flex;flex:1 1 100px;max-width:155px;min-height:112px;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#fff;border:2px dashed #bed4b9;border-radius:17px;padding:7px}
+.strategy-order-slot small{font-size:12px;color:#709074}.strategy-order-slot span{font-size:32px}.strategy-order-slot strong{font-size:12px;color:#4d694f}
+.strategy-plan-cards{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin:10px auto}
+.strategy-plan-cards button{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:94px;flex:0 1 135px;min-height:116px;padding:13px 9px;background:#fffdf6}
+.strategy-plan-cards button span{font-size:38px}.strategy-plan-cards button strong{font-size:13px}
+.strategy-plan-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:9px;margin:19px auto 9px}
+.strategy-teacher{max-width:660px;border:1px dashed #d2e0ca;background:#fffffb;border-radius:15px;padding:10px 13px;text-align:left;margin:16px auto 0;font-size:13px;color:#64766b}
+.strategy-teacher summary{font-weight:900;cursor:pointer;color:#577260}.strategy-teacher p{margin:7px 0;line-height:1.5}
+.strategy-done{background:linear-gradient(140deg,#fff1d8,#e7f5df);padding:20px;border-radius:22px;margin:9px auto 20px;max-width:650px}
+.strategy-done span{font-size:45px}.strategy-done h3{font-size:22px;margin:8px 0}.strategy-done p{font-size:15px}
+.strategy-results{margin:12px auto;max-width:650px}.strategy-result{color:#536f5a;font-size:14px;font-weight:900}.strategy-observations{font-size:12px;line-height:1.7;padding:10px;border-radius:10px;background:#f1f8ed;margin:10px auto}.strategy-export{background:#307659!important;color:white!important;border-radius:13px;border:0;padding:11px 19px;font-weight:850;cursor:pointer}.strategy-teacher small{display:block;margin:9px 0;font-size:12px}
+@media(max-width:600px){.strategy-quest{border-radius:20px;padding:12px 8px 19px}.strategy-story-head h3{font-size:20px}.strategy-two-actions{gap:7px}.strategy-two-actions button{flex:1 1 42%;font-size:13px;padding:8px}.strategy-friend-grid button{flex:1 1 28%;min-height:115px}.strategy-friend-grid span{font-size:36px}.strategy-robot-emoji{font-size:36px}.strategy-robot strong{font-size:19px}.strategy-distress strong{font-size:23px}.strategy-clue strong{font-size:17px}.strategy-room-grid{width:min(100%,315px);padding:6px;gap:4px}.strategy-room-square{font-size:28px;border-width:1px}.strategy-items button{font-size:25px;min-width:77px}.strategy-order-slot{flex:1 1 21%;min-width:72px;max-width:115px;min-height:95px}.strategy-order-slot span{font-size:25px}.strategy-plan-cards button{flex-basis:45%;min-height:100px}.strategy-witness p{font-size:12px}.strategy-festival-banner{font-size:22px}.strategy-plan-actions button{font-size:12px;padding:9px 11px}}
+@media(prefers-reduced-motion:reduce){.strategy-quest *{animation:none!important;transition:none!important}}
