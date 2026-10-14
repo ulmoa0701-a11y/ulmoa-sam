@@ -1,0 +1,116 @@
+/* Three reusable educational mini-adventures. A new game opens directly from its garden card. */
+:root{font-family:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;background:#f7faf4;color:#2e413b}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}body{margin:0;word-break:keep-all}button,a{font-family:inherit}button{cursor:pointer}
+[hidden]{display:none!important}
+.mission-app{width:min(890px,calc(100% - 30px));margin:0 auto;padding:16px 0 65px}
+.mission-header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:0 0 18px}
+.mission-header a{text-decoration:none;color:#386c58}
+.back-link,.sound-toggle{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:1px solid #dbe9df;border-radius:13px;padding:10px 13px;background:#fff;font-size:13px;font-weight:750}
+.sound-toggle{color:#4c6b60}.sound-toggle[aria-pressed="true"]{background:#edf6ed;color:#235e42}
+.site-wordmark{font-size:clamp(15px,2.5vw,19px);font-weight:850;letter-spacing:-.03em}
+.mission-banner{position:relative;overflow:hidden;min-height:190px;padding:28px 185px 26px 32px;background:linear-gradient(120deg,#eaf6e9,#fff6e9);border:1px solid #dfeadd;border-radius:23px;margin:0 0 17px}
+.mission-banner h1,.panel h2{font-family:"Gowun Dodum","Pretendard Variable",Pretendard,sans-serif!important;letter-spacing:-.045em;line-height:1.31}
+.mission-banner h1{font-size:clamp(29px,4.5vw,39px);color:#305b47;margin:7px 0}
+.mission-badge{color:#4e815f;font-size:13px;font-weight:800}
+.mission-banner p{color:#637c6e;font-size:15px;line-height:1.65;margin:0}
+.mission-banner img{position:absolute;bottom:5px;right:22px;width:min(25%,132px);height:auto;object-fit:contain;filter:drop-shadow(0 10px 8px #32553b15)}
+.panel{border:1px solid #dfe9df;background:#fff;box-shadow:0 12px 28px #2c5f3b08;border-radius:22px;padding:28px}
+.panel h2{color:#293f39;font-size:clamp(23px,3.3vw,30px);margin:8px 0 12px}
+.small-label,.scene-label{font-size:12px;font-weight:800;color:#679079;margin:0}
+.intro-text{font-size:16px;color:#53675f;line-height:1.73;margin:0 0 22px}
+.level-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.level-card{position:relative;display:grid;gap:9px;text-align:left;padding:17px 15px;min-height:112px;background:#fbfdfb;color:#2c4e3b;border:2px solid #deebe0;border-radius:15px}
+.level-card strong{font-size:19px}.level-card small{line-height:1.5;color:#6a7e71;font-size:12px}
+.level-card span{position:absolute;right:11px;top:12px;font-size:15px;color:#739886}
+.level-card.chosen{border-color:#519e70;background:#f0f9ed;box-shadow:0 0 0 2px #eff9f0 inset}
+.intro-foot{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-top:26px}
+.intro-foot p{font-size:13px;color:#74877c;line-height:1.5;margin:0}
+.primary-action,.secondary-action,.text-action{min-height:46px;padding:12px 19px;border-radius:12px;font-weight:850;font-size:14px;border:1px solid transparent}
+.primary-action{background:#377b5f;color:#fff;box-shadow:0 3px 0 #235c42}
+.primary-action:hover{background:#266a4e}
+.secondary-action{background:#f3f8f3;border-color:#d7e5db;color:#416855}
+.text-action{background:transparent;border-color:transparent;color:#5d806e}
+.play-toolbar{display:flex;align-items:center;gap:15px;justify-content:space-between}
+.play-toolbar>span{font-size:14px;font-weight:800;color:#567864;white-space:nowrap}
+.progress-track{flex:1;height:9px;max-width:460px;background:#ebf1ea;border-radius:50px;overflow:hidden}
+#progressFill{height:100%;width:0;background:linear-gradient(90deg,#67b58b,#89bd6b);border-radius:50px;transition:width .3s}
+.scene-head{margin:15px 0 20px}.scene-head p:last-child{margin:4px 0 0;color:#658074;font-size:14px;line-height:1.65}
+.game-area{min-height:235px;display:grid;gap:15px}.game-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:9px;margin:16px 0 0}
+.game-actions:empty{display:none}.feedback{min-height:25px;color:#ab663c;font-weight:730;line-height:1.6;text-align:center;font-size:14px;margin:15px 0 0}
+.feedback:empty{visibility:hidden}.feedback.good{color:#32784f}
+.currency-stage{display:grid;justify-items:center;padding:24px 12px 13px;border-radius:18px;background:#f9fcf8}
+.currency-stage p{font-size:14px;color:#607969}
+.currency-large .currency{transform:scale(1.3);margin:13px 0 21px}
+.currency{display:inline-flex;vertical-align:middle;align-items:center;justify-content:center;gap:3px;flex-direction:column;flex:none;color:#293d3a;border:3px solid #b8c3c0;font-size:12px;font-weight:750;line-height:1.08}
+.currency strong{font-size:19px}.currency small{font-size:10px}
+.currency.coin{border-radius:50%;background:radial-gradient(circle,#f9f7d7,#dbcba0);width:78px;height:78px;box-shadow:inset 0 0 0 3px #fff8bf}
+.currency.coin.value-500{background:radial-gradient(circle,#f9fcff,#c9d2d6);border-color:#9baeb6}
+.currency.paper{width:100px;height:65px;border-radius:10px;background:linear-gradient(110deg,#e3f2e1,#c3e3c8);border-color:#9ec4ad}
+.currency.paper.value-5000{background:linear-gradient(110deg,#f9ead3,#f4d7a5);border-color:#e1b97d}
+.choice-grid,.emotion-options,.response-options,.list-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.choice,.list-choice{border:2px solid #dce7dc;border-radius:14px;background:#fff;color:#385847;font-size:17px;font-weight:750;line-height:1.5;padding:17px 11px;min-height:72px;transition:background .15s,border-color .15s}
+.choice:hover,.list-choice:hover{border-color:#9dccaa;background:#f6fbf4}
+.money-target,.money-cart{border-radius:18px;background:#eff7ef;padding:18px;text-align:center}
+.money-target small,.money-cart small{display:block;font-weight:750;color:#608576;font-size:13px}
+.money-target strong,.money-cart strong{display:block;font-size:clamp(27px,5vw,35px);color:#316c4e;padding-top:5px}
+.money-cart{background:#faf9f2;border:1px dashed #e4dcb9}
+.cart-pieces{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;margin-top:13px;min-height:50px}
+.cart-pieces .currency{width:61px;height:61px}.cart-pieces .currency.paper{width:81px;height:55px}.cart-pieces .currency strong{font-size:15px}
+.empty-cart{color:#8a9185;font-size:13px}.tiny-instruction{margin:4px 0 0;text-align:center;font-size:13px;font-weight:750;color:#587666}
+.item-banner{margin:0 0 7px;color:#66816d;font-size:16px;font-weight:800}
+.money-palette{display:flex;flex-wrap:wrap;justify-content:center;gap:14px}
+.money-pick{padding:11px 13px;min-width:116px;min-height:105px;border:2px solid #d5e7dc;border-radius:15px;background:#fff}
+.money-pick:hover{background:#f4fbf4;border-color:#74b991}
+.bag-scene{background:#eff7f0;border:1px solid #d7eadb;border-radius:18px;text-align:center;padding:26px 14px}
+.bag-icon{font-size:45px;display:block}.bag-scene p{font-size:15px;color:#64846d;font-weight:700}
+.item-line{display:flex;flex-wrap:wrap;justify-content:center;gap:9px}
+.item-chip{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:10px 8px;border-radius:12px;background:#fff;border:1px solid #dfe9de;min-width:72px;min-height:81px}
+.item-chip>span{font-size:28px}.item-chip b{font-size:13px;color:#4c6256}
+.change-note{display:flex;align-items:center;justify-content:center;gap:11px;padding:19px;border-radius:15px;background:#fff5df;border:1px solid #efdfbd;text-align:center;font-size:16px;line-height:1.65;color:#7a5e35}
+.change-note>span{font-size:27px}
+.list-options{grid-template-columns:1fr}.list-choice{display:flex;justify-content:space-between;align-items:center;gap:7px;text-align:left;padding:11px}
+.list-choice>span:first-child{min-width:49px;font-size:13px;color:#668774}
+.list-choice .item-line{flex:1;justify-content:flex-start;gap:6px}
+.list-choice .item-chip{min-width:59px;min-height:69px;padding:7px 4px}
+.list-choice .item-chip>span{font-size:22px}
+.list-choice .item-chip b{font-size:12px}
+.story-card{display:flex;align-items:center;gap:20px;min-height:150px;padding:24px;border-radius:18px;background:#f7f4ff;border:1px solid #e5def3}
+.story-card p{font-size:clamp(16px,2.4vw,19px);font-weight:800;line-height:1.75;color:#514c65}
+.story-icon{font-size:53px;flex:none}
+.story-card.small{min-height:100px;padding:17px}.story-card.small .story-icon{font-size:35px}
+.story-card.small p{font-size:14px;font-weight:700}
+.emotion-options .choice,.response-options .choice{text-align:left;font-size:15px}
+.emotion-options,.response-options{grid-template-columns:1fr}
+.response-options .choice{min-height:60px}
+.selected-feeling{font-size:14px;color:#677962;margin:4px 0 0}
+.reflect-note{background:#f6fafa;border:1px solid #dbeeea;text-align:center;border-radius:19px;padding:28px 19px;color:#3d675b;display:grid;gap:12px;justify-items:center}
+.reflect-note>span{font-size:41px}.reflect-note strong{font-size:20px}.reflect-note p{font-size:16px;line-height:1.7;margin:0}.reflect-note small{font-size:13px;color:#73847c;line-height:1.6}
+.result-panel{text-align:center;padding:36px 25px}.result-emoji{font-size:55px}.result-panel p{line-height:1.8;color:#6a796f}
+.result-actions{display:flex;align-items:center;justify-content:center;gap:13px;flex-wrap:wrap;margin-top:23px}
+.result-actions a{text-decoration:none;display:inline-flex;align-items:center}
+.footer-note{font-size:12px;line-height:1.6;color:#789083;text-align:center;margin:23px 0}
+button:focus-visible,a:focus-visible{outline:3px solid #4b9c70;outline-offset:3px}
+@media(max-width:650px){
+ .mission-app{width:calc(100% - 20px);padding:8px 0 50px}
+ .mission-header{padding-bottom:9px;gap:5px}.back-link,.sound-toggle{padding:9px;font-size:11px}.site-wordmark{font-size:14px}
+ .mission-banner{min-height:160px;padding:23px 105px 20px 18px;border-radius:16px;margin-bottom:10px}
+ .mission-banner img{width:88px;right:9px}.mission-banner h1{font-size:27px}
+ .mission-banner p{font-size:13px}.mission-badge{font-size:11px}
+ .panel{padding:17px 12px;border-radius:17px}.panel h2{font-size:23px}
+ .intro-text{font-size:14px;margin-bottom:15px}.level-list{grid-template-columns:1fr;gap:8px}
+ .level-card{min-height:64px;padding:12px 16px;gap:4px}.level-card strong{font-size:16px}.level-card small{font-size:12px}
+ .intro-foot{flex-direction:column;align-items:stretch;margin-top:18px}.intro-foot p{text-align:center}.primary-action{width:100%}
+ .choice-grid{grid-template-columns:1fr;gap:8px}.choice{min-height:57px;font-size:16px}
+ .play-toolbar{gap:8px}.play-toolbar>span{font-size:12px}.text-action{font-size:12px;min-height:44px;padding:8px 4px}
+ .game-area{min-height:200px;gap:12px}.item-chip{min-width:58px;min-height:69px;padding:8px 4px}.item-chip>span{font-size:23px}.item-chip b{font-size:12px}
+ .money-target,.money-cart{padding:13px}.money-pick{min-width:89px;min-height:94px;padding:8px}.money-palette{gap:6px}
+ .money-pick .currency{transform:scale(.83)}.money-pick .currency.paper{width:96px}
+ .list-choice{flex-direction:column;align-items:start}.list-choice .item-line{justify-content:center}
+ .list-choice .item-chip{min-width:50px;padding:5px 3px}
+ .list-choice .item-chip b{font-size:11px}
+ .story-card{padding:16px;gap:12px}.story-card p{font-size:15px}.story-icon{font-size:35px}
+ .game-actions{gap:7px}.game-actions button{font-size:12px;min-height:44px;padding:9px 12px}.game-actions .primary-action{width:auto;flex:1}
+}
+@media(max-width:365px){.mission-banner{padding-right:82px}.mission-banner img{width:73px}.mission-banner h1{font-size:23px}.list-choice .item-chip{min-width:46px}.list-choice .item-chip b{font-size:10px}.play-toolbar{gap:5px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
