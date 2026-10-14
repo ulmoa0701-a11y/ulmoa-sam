@@ -4,6 +4,7 @@ on:
     branches:
       - feature/ildan-supabase-secure-auth-20261014
       - feature/ildan-supabase-live-staging-20261014
+      - feature/ildan-invite-link-passkey-20261015
     paths:
       - 'secure-portal/supabase/**'
       - 'secure-portal/lib/record-contract.mjs'
@@ -67,7 +68,9 @@ jobs:
             -f secure-portal/supabase/tests/00_stub_supabase_auth.sql \
             -f secure-portal/supabase/migrations/20261014000100_ildan_secure_roles.sql \
             -f secure-portal/supabase/migrations/20261014000200_private_record_author_only.sql \
-            -f secure-portal/supabase/tests/01_role_isolation.sql
+            -f secure-portal/supabase/tests/01_role_isolation.sql \
+            -f secure-portal/supabase/migrations/20261015000100_email_free_one_time_invite.sql \
+            -f secure-portal/supabase/tests/02_invite_link_role_sql.sql
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
