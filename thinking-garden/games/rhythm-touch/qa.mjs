@@ -157,7 +157,7 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
    name+': legacy music-category URL did not redirect into music garden');
  await page.locator('.other-garden').click();
  await page.waitForURL('**/thinking-garden/');
- check(await page.locator('.library-card').count()===14 && await page.locator('.library-card[data-open]:not([data-open="slowLook"])').count()===13 && await page.locator('.library-card[data-open="slowLook"]').count()===1,name+': preserve 13 original cognitive games plus 1 new expedition');
+ check(await page.locator('.library-card').count()===19 && await page.locator('.library-card[data-open]:not([data-open^="slow"])').count()===13 && await page.locator('.library-card[data-open^="slow"]').count()===1,name+': preserve 13 original cognitive games plus 6 new independent activities');
  check(await page.locator('.library-card.music').count()===0&&
    await page.locator('.category-tab[data-category="music"]').count()===0,
    name+': music game cards must not be mixed into cognitive garden');
