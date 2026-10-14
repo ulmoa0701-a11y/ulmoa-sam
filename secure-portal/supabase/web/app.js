@@ -4,14 +4,84 @@ let activeView='write';
 const sanitize=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 const hint=(s)=>`<div class="callout">${s}</div>`;
 function toast(s){$('toast').textContent=s;$('toast').classList.add('visible');setTimeout(()=>$('toast').classList.remove('visible'),3400)}
-import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/+esm';
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.105.0/+esm';
 const CFG=window.ILDAN_SUPABASE_CONFIG||{};
 const configured=Boolean(/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(CFG.url||'')
  && /^sb_publishable_|^eyJ/.test(CFG.publishableKey||'')
  && /^https:\/\/[a-z0-9-]+\.supabase\.co\/functions\/v1\/ildan-api$/.test(CFG.apiUrl||''));
 const supabase=configured?createClient(CFG.url,CFG.publishableKey,{
- auth:{persistSession:true,storage:window.sessionStorage,autoRefreshToken:true,detectSessionInUrl:false}
+ auth:{persistSession:true,storage:window.sessionStorage,autoRefreshToken:true,detectSessionInUrl:false,experimental:{passkey:true}}
 }):null;
+
+const invitationParams=new URLSearchParams(location.hash.replace(/^#/,''));
+let activeInvite=/^[0-9a-f]{64}$/.test(invitationParams.get('invite')||'')?invitationParams.get('invite'):null;
+const inviteRoles={student:'학생',parent:'보호자'};
+const canUsePasskey=()=>window.isSecureContext&&!!window.PublicKeyCredential&&!!navigator.credentials?.get;
+function invitationUrl(code){
+ if(!/^[0-9a-f]{64}$/.test(code))throw Error('초대코드가 유효하지 않습니다.');
+ const url=new URL(location.href);
+ url.search='';url.hash='invite='+code;
+ return url.href;
+}
+async function publicInviteApi(path,code){
+ if(!supabase)throw Error('Supabase 연결 정보를 확인할 수 없습니다.');
+ const result=await fetch(CFG.apiUrl+'/'+path,{
+  method:'POST',mode:'cors',credentials:'omit',referrerPolicy:'no-referrer',
+  headers:{'Content-Type':'application/json',apikey:CFG.publishableKey},
+  body:JSON.stringify({code})
+ });
+ const data=await result.json().catch(()=>({}));
+ if(!result.ok)throw Error(data.error||'초대 링크를 확인할 수 없습니다.');
+ return data;
+}
+async function inviteLanding(){
+ header();
+ const code=activeInvite;
+ if(!code){loginScreen();return;}
+ app.innerHTML=`<section class="login-page invite-landing" aria-label="일단써봄 초대 링크">
+  <div class="login-heading"><span class="eyebrow">WELCOME / 초대 링크</span>
+  <h1>내 공간에<br><em>들어가기.</em></h1>
+  <p>학생과 보호자의 기록 공간은 서로 분리돼 있어요.</p></div>
+  <section class="login-window"><div class="login-body">
+   <h2 id="inviteRoleTitle">초대 링크를 확인하고 있어요.</h2>
+   <p id="inviteIntro" class="muted">이 화면을 열었다고 바로 등록되지는 않아요.</p>
+   <p class="callout">처음 한 번 기기를 등록하면 이후 같은 브라우저에서는 간편하게 접속할 수 있어요.
+   카카오톡에서 열려도 괜찮지만, 기기 인증이 지원되지 않으면 크롬·삼성 인터넷·사파리에서 열어 주세요.</p>
+   <div class="buttons"><button class="button" id="inviteAccept" disabled>기기 등록하고 시작</button>
+     <button class="button-ghost" id="inviteCopy" type="button">다른 브라우저에서 열 링크 복사</button></div>
+   <p id="inviteStatus" class="muted" role="status" aria-live="polite"></p>
+   <p class="muted">보호자 링크를 학생에게 전달해도 학생 화면이 되지는 않아요.
+     링크는 한 번만 등록할 수 있으며, 분실 시 치료사에게 다시 발급받아야 합니다.</p>
+  </div></section></section>`;
+ $('inviteCopy').onclick=()=>navigator.clipboard.writeText(invitationUrl(code))
+  .then(()=>toast('링크를 복사했습니다. 기본 브라우저에 붙여 넣어 주세요.'))
+  .catch(()=>toast('이 브라우저에서는 복사가 제한됩니다. 브라우저 메뉴에서 링크 복사를 이용해 주세요.'));
+ try{
+  const meta=await publicInviteApi('invite-preview',code);
+  $('inviteRoleTitle').textContent=(inviteRoles[meta.role]||'사용자')+' 전용 초대입니다.';
+  $('inviteIntro').textContent='초대 링크를 받은 사람이 직접 처음 등록한 뒤에는 자신의 기록만 볼 수 있어요.';
+  $('inviteStatus').textContent=!meta.registrationOpen
+   ?'현재 최초 등록 기능을 안전 점검 중입니다. 링크 확인만 가능하며 등록은 아직 열리지 않았습니다.'
+   :canUsePasskey()?'기기 인증을 진행할 수 있어요. 등록하기를 누르면 1회용 링크가 사용됩니다.'
+    :'이 브라우저에서는 기기 인증이 지원되지 않을 수 있어요. 기본 브라우저에서 열어 주세요.';
+  $('inviteAccept').disabled=!meta.registrationOpen||!canUsePasskey();
+  $('inviteAccept').onclick=()=>loading($('inviteAccept'),async()=>{
+    const r=await publicInviteApi('invite-register',code);
+    const authResult=await supabase.auth.verifyOtp({token_hash:r.tokenHash,type:'magiclink'});
+    if(authResult.error)throw Error('최초 로그인 처리에 실패했습니다. 담당 치료사에게 문의해 주세요.');
+    activeInvite=null;history.replaceState(null,'',location.pathname+location.search);
+    const passkeyResult=await supabase.auth.registerPasskey();
+    if(passkeyResult.error){
+      toast('기기 인증 등록에 실패했어요. 다른 기기로 접속하려면 담당 치료사에게 도움을 요청해 주세요.');
+      await refreshAuth();return;
+    }
+    toast('기기 인증을 등록했어요. 이제 내 기록 공간으로 들어갑니다.');
+    await refreshAuth();
+  });
+ }catch(e){$('inviteRoleTitle').textContent='초대 링크를 사용할 수 없습니다.';
+   $('inviteStatus').textContent=e.message;$('inviteAccept').disabled=true;
+ }
+}
 async function api(path,{method='GET',body}={}){
  if(!supabase)throw Error('Supabase 계정 연결 전입니다. 실제 정보를 입력할 수 없습니다.');
  const {data:{session},error}=await supabase.auth.getSession();
@@ -62,7 +132,10 @@ function rolePicker(){return `<div class="role-picker" role="group" aria-label="
 function loginScreen(){
  app.innerHTML=`<section class="login-page"><div class="login-heading"><span class="eyebrow">일단써봄 / PRIVATE</span><h1>내 기록 공간에<br><em>로그인하기.</em></h1><p>기록 화면은 로그인한 계정의 실제 역할에 따라 열립니다. 화면에서 역할을 임의로 바꿀 수 없어요.</p></div>
  <div class="login-layout"><section class="login-window"><div class="login-body">
- <h2>이메일로 로그인 코드 받기</h2>
+ <h2>일단써봄 로그인</h2>
+ <div class="buttons"><button class="button" type="button" id="loginPasskey">기기 인증으로 로그인</button></div>
+ <p class="muted">학생·보호자는 치료사가 보낸 링크로 최초 등록하면, 다음부터 이 버튼으로 로그인할 수 있습니다.</p>
+ <details class="email-doctor-only"><summary>치료사 계정 · 이메일 인증으로 로그인</summary><div>
  <p class="muted">학생·보호자·치료사 각각 별도 계정이 필요합니다. 인증코드는 실제 운영 환경 설정이 끝난 후 이용할 수 있습니다.</p>
  ${configured?'<p class="muted">인증 이메일이 오지 않으면 담당 운영자에게 문의해 주세요.</p>':'<p class="callout">아직 Supabase 프로젝트가 연결되지 않은 개발용 화면입니다. 실제 개인정보를 입력하면 안 됩니다.</p>'}
  <form id="emailRequestForm" class="form"><label>이메일 주소<input type="email" name="email" autocomplete="email" required placeholder="본인이 사용하는 이메일"></label>
@@ -70,9 +143,16 @@ function loginScreen(){
  <form id="emailVerifyForm" class="form" hidden><label>이메일 주소<input name="email" type="email" readonly></label>
  <label>이메일로 받은 6자리 코드<input name="token" pattern="[0-9]{6}" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required></label>
  <button type="submit" class="button">코드 확인하고 로그인</button></form>
+ </div></details>
  <p class="muted">실제 아동·상담 기록을 저장하려면 기관의 개인정보·법정대리인 동의 및 보안 검증이 먼저 필요합니다.</p>
  </div></section></div></section>`;
- const request=$('emailRequestForm'),verify=$('emailVerifyForm');
+ $('loginPasskey').disabled=!configured||!canUsePasskey();
+ $('loginPasskey').onclick=()=>loading($('loginPasskey'),async()=>{
+  const {error}=await supabase.auth.signInWithPasskey();
+  if(error)throw Error('기기 인증이 되지 않았습니다. 기기 등록 여부나 브라우저 지원을 확인해 주세요.');
+  await refreshAuth();
+ });
+  const request=$('emailRequestForm'),verify=$('emailVerifyForm');
  request.onsubmit=e=>{e.preventDefault();const email=formValue(request,'email');loading(request.querySelector('button'),async()=>{
   const {error}=await supabase.auth.signInWithOtp({email,options:{shouldCreateUser:true}});
   if(error)throw Error('로그인 코드 전송에 실패했습니다. 관리자에게 문의해 주세요.');
@@ -100,7 +180,7 @@ function enrollmentScreen(){
 async function refreshAuth(){
  if(!supabase){me=null;render();return;}
  const {data:{session}}=await supabase.auth.getSession();
- if(!session){me=null;render();return;}
+ if(!session){me=null;if(activeInvite)await inviteLanding();else render();return;}
  try{me=(await api('me')).user;activeView=me.role==='therapist'?'inbox':'write';render();}
  catch{me=null;header();enrollmentScreen();}
 }
@@ -547,8 +627,8 @@ async function therapistHome(){const r=await Promise.all([api('students'),api('d
  </div>
 </details>
 <div class="clinician-save-row"><button class="button" type="submit">치료사 메모 보관</button><p>모든 항목은 선택입니다. 별도의 임상 평가·동의 절차와 치료기록을 대신하지 않습니다.</p></div>
-</form><div id="sessionSaved"></div></section><section class="panel" data-workspace-view="accounts"><span class="tag">02 / ACCOUNTS</span><h2>학생·학부모 초대하기</h2><p>초대코드를 전달해 담당 학생·학부모를 연결해요.</p><form id="inviteForm" class="form"><label>초대할 사람<select name="role" id="inviteRole"><option value="student">학생</option><option value="parent">학부모</option></select></label><label id="studentPicker" class="hidden">연결할 학생<select name="studentId">${students.map(s=>`<option value="${sanitize(s.id)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><button class="button">7일짜리 초대코드 만들기</button></form><div id="inviteOutput"></div></section><section class="panel" data-workspace-view="accounts"><span class="tag">02 / ACCOUNT HELP</span><h2>계정 접근 도움말</h2><p>이메일 인증이 되지 않으면 담당 운영자에게 문의해 주세요. 계정은 역할별로 구분됩니다.</p><label>대상 계정<select id="resetUser">${accounts.map(a=>`<option value="${sanitize(a.id)}">${sanitize(a.nickname)} · ${a.role==='student'?'학생':'학부모'}</option>`).join('')}</select></label><div class="buttons"><button id="resetIssue" class="button-ghost" ${accounts.length?'':'disabled'}>재설정 코드 발급</button></div><div id="resetOutput"></div></section><section class="panel full" data-workspace-view="drive"><span class="tag">03 / GOOGLE DRIVE</span><h2>Google Drive</h2><p>${drive.connected?'내 구글 계정이 연결돼 있습니다.':'구글 계정 연결 전입니다. 학생 기록은 아직 자동 업로드되지 않습니다.'}</p><div class="buttons"><button id="googleConnect" class="button-ghost" ${drive.configured&&drive.backupEnabled?'':'disabled'}>${drive.connected?'구글 계정 다시 연결':'내 구글 계정 연결'}</button><button id="driveSync" class="button" ${drive.connected&&drive.backupEnabled?'':'disabled'}>공유 기록 백업</button>${drive.folderUrl?`<a class="button-ghost" href="${sanitize(drive.folderUrl)}" target="_blank" rel="noopener noreferrer">내 드라이브 폴더 열기 ↗</a>`:''}</div>${!drive.backupEnabled?hint('보존·삭제·동의 및 사본 처리 정책 검증 전까지 Google Drive 백업이 비활성화되어 있습니다. 서버 공유를 취소해도 기존 다운로드 파일은 자동으로 회수되지 않습니다.'):!drive.configured?hint('구글 OAuth 관리자 설정이 아직 끝나지 않았습니다.'):''}<p>삭제 확인이 필요한 사본은 치료사의 기록 관리자에게 문의하세요.</p></section></div></div></div>`;
-attachShares();bindWorkspace();paintSketches();initSessionNotes();const rerenderInbox=()=>{const name=$('filterStudent').value,kind=$('filterKind').value;const list=records.filter(r=>(name==='all'||r.student===name)&&(kind==='all'||r.kind===kind));$('inboxResults').innerHTML=recordCards(list);paintSketches();};$('filterStudent').onchange=rerenderInbox;$('filterKind').onchange=rerenderInbox;$('refresh').onclick=()=>dashboard();$('csv').onclick=exportCSV;$('inviteRole').onchange=()=>{$('studentPicker').classList.toggle('hidden',$('inviteRole').value!=='parent')};$('inviteForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;loading(f.querySelector('button'),async()=>{const out=await api('invites',{method:'POST',body:{role:formValue(f,'role'),studentId:formValue(f,'studentId')}});const div=$('inviteOutput');div.innerHTML='<p class="muted">초대코드는 한 번만 사용할 수 있으며 48시간 뒤 만료됩니다. 개인적인 방법으로 전달하세요.</p><textarea id="inviteCode" readonly></textarea><button class="button-ghost" type="button" id="copyCode">초대코드 복사</button>';$('inviteCode').value=out.invite;$('copyCode').onclick=()=>{navigator.clipboard.writeText(out.invite).then(()=>toast('초대코드를 복사했어요.'))}})};
+</form><div id="sessionSaved"></div></section><section class="panel" data-workspace-view="accounts"><span class="tag">02 / ACCOUNTS</span><h2>학생·학부모 초대하기</h2><p>초대코드를 전달해 담당 학생·학부모를 연결해요.</p><form id="inviteForm" class="form"><label>초대할 사람<select name="role" id="inviteRole"><option value="student">학생</option><option value="parent">학부모</option></select></label><label id="studentPicker" class="hidden">연결할 학생<select name="studentId">${students.map(s=>`<option value="${sanitize(s.id)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><button class="button">초대 링크 만들기</button></form><div id="inviteOutput"></div></section><section class="panel" data-workspace-view="accounts"><span class="tag">02 / ACCOUNT HELP</span><h2>계정 접근 도움말</h2><p>이메일 인증이 되지 않으면 담당 운영자에게 문의해 주세요. 계정은 역할별로 구분됩니다.</p><label>대상 계정<select id="resetUser">${accounts.map(a=>`<option value="${sanitize(a.id)}">${sanitize(a.nickname)} · ${a.role==='student'?'학생':'학부모'}</option>`).join('')}</select></label><div class="buttons"><button id="resetIssue" class="button-ghost" ${accounts.length?'':'disabled'}>재설정 코드 발급</button></div><div id="resetOutput"></div></section><section class="panel full" data-workspace-view="drive"><span class="tag">03 / GOOGLE DRIVE</span><h2>Google Drive</h2><p>${drive.connected?'내 구글 계정이 연결돼 있습니다.':'구글 계정 연결 전입니다. 학생 기록은 아직 자동 업로드되지 않습니다.'}</p><div class="buttons"><button id="googleConnect" class="button-ghost" ${drive.configured&&drive.backupEnabled?'':'disabled'}>${drive.connected?'구글 계정 다시 연결':'내 구글 계정 연결'}</button><button id="driveSync" class="button" ${drive.connected&&drive.backupEnabled?'':'disabled'}>공유 기록 백업</button>${drive.folderUrl?`<a class="button-ghost" href="${sanitize(drive.folderUrl)}" target="_blank" rel="noopener noreferrer">내 드라이브 폴더 열기 ↗</a>`:''}</div>${!drive.backupEnabled?hint('보존·삭제·동의 및 사본 처리 정책 검증 전까지 Google Drive 백업이 비활성화되어 있습니다. 서버 공유를 취소해도 기존 다운로드 파일은 자동으로 회수되지 않습니다.'):!drive.configured?hint('구글 OAuth 관리자 설정이 아직 끝나지 않았습니다.'):''}<p>삭제 확인이 필요한 사본은 치료사의 기록 관리자에게 문의하세요.</p></section></div></div></div>`;
+attachShares();bindWorkspace();paintSketches();initSessionNotes();const rerenderInbox=()=>{const name=$('filterStudent').value,kind=$('filterKind').value;const list=records.filter(r=>(name==='all'||r.student===name)&&(kind==='all'||r.kind===kind));$('inboxResults').innerHTML=recordCards(list);paintSketches();};$('filterStudent').onchange=rerenderInbox;$('filterKind').onchange=rerenderInbox;$('refresh').onclick=()=>dashboard();$('csv').onclick=exportCSV;$('inviteRole').onchange=()=>{$('studentPicker').classList.toggle('hidden',$('inviteRole').value!=='parent')};$('inviteForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;loading(f.querySelector('button'),async()=>{const out=await api('invites',{method:'POST',body:{role:formValue(f,'role'),studentId:formValue(f,'studentId')}});const div=$('inviteOutput');div.innerHTML='<p class="muted">학생 또는 보호자 전용 링크입니다. 48시간 후 만료되며 처음 등록에 한 번만 사용됩니다. 카카오톡으로 개별 전달해 주세요.</p><textarea id="inviteCode" readonly></textarea><button class="button-ghost" type="button" id="copyCode">초대 링크 복사</button>';$('inviteCode').value=invitationUrl(out.invite);$('copyCode').onclick=()=>{navigator.clipboard.writeText(invitationUrl(out.invite)).then(()=>toast('링크를 복사했어요. 카카오톡으로 전달해 주세요.')).catch(()=>toast('복사가 차단돼 있습니다. 링크를 길게 눌러 복사해 주세요.'))}})};
 $('resetIssue').disabled=true;$('googleConnect').onclick=()=>{location.assign('/api/drive/start')};$('driveSync').onclick=e=>loading(e.target,async()=>{const x=await api('drive/sync',{method:'POST'});toast(`${x.synced}건을 담당 치료사의 드라이브에 백업했습니다.`);await dashboard()});}
 function adminHome(){app.innerHTML=hero('계정 운영','최초 관리자 계정은 기록을 읽을 수 없습니다. 치료사 초대만 발급할 수 있어요.')+`<div class="panel"><h2>치료사 초대코드 발급</h2><p>치료사도 학생·학부모와 같은 패스키 방식으로 등록합니다.</p><button id="inviteTherapist" class="button">치료사 초대코드 만들기</button><div id="adminInvite"></div></div>`;$('inviteTherapist').onclick=e=>loading(e.target,async()=>{const r=await api('invites',{method:'POST',body:{role:'therapist'}});const d=$('adminInvite');d.innerHTML='<p>코드를 복사해 치료사에게 개별 전달하세요. 7일간 유효합니다.</p><textarea readonly id="adminCode"></textarea>';$('adminCode').value=r.invite;})}
 async function dashboard(){header();records=me.role==='admin'?[]:(await api('records')).records??[];if(me.role==='therapist')await therapistHome();else if(me.role==='admin')adminHome();else studentHome();}
