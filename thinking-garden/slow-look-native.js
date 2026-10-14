@@ -37,7 +37,7 @@ function render(id,d) {
  const {state,area,missionText,missionSub,guide,say,flash,addSeeds,sfx,nextRound}=d;
  const s=state.slowLook;
  if(!s || !isNew(id))return;
- if(s.activeRound!==state.round){s.activeRound=state.round;s.selected=new Set();s.attempts=0;s.firstCorrect=null;s.hint=false;s.finished=false;}
+ if(s.activeRound!==state.round){s.activeRound=state.round;s.selected=new Set();s.attempts=0;s.firstCorrect=null;s.hint=false;s.finished=false;s.nameReady=false;s.memoryHidden=-1;}
  const round=state.round;
  const cues={guide:'눈으로 보고, 생각하고, 준비되면 표현해요.',wait:'천천히 살펴볼 시간을 가져요.',self:'스스로 확인한 뒤 준비되면 시작해요.'};
  guide.src=id==='slowMemory'?'assets/friend-ru.png':id==='slowScan'?'assets/friend-hong.png':'assets/friend-saem.png';
@@ -54,7 +54,7 @@ function render(id,d) {
  const itemIndex=nameSequence[round%6];
  const pool=s.kind==='color'?colors:animals;
  const item=pool[itemIndex];
- const targetObject=objects[(round*2+1)%objects.length];
+ const targetObject=[...objects[(round*2+1)%objects.length]];
  const objectArr=Array.from({length:Math.max(6,cells)},(_,i)=>objects[(i*5+round+i%3)%objects.length]);
  let scanTargets=new Set();
  if(id==='slowScan'){const rows=[[0,0],[0,n-1],[n-1,0],[n-1,n-1],[1,1],[2,1]];rows.slice(0,s.level+1).forEach(([r,c])=>scanTargets.add(((r+round)%n)+','+((c+round*2)%n)));}
@@ -95,7 +95,7 @@ function render(id,d) {
  if(id!=='slowName'&&(id!=='slowMemory'||s.memoryHidden===round))html+='<div class="slow-actions"><button type="button" class="slow-primary" data-slow="check">확인했어요 ✓</button><button type="button" class="slow-secondary" data-slow="skip">쉬어가기</button></div>';
  html+='<div class="slow-feedback" role="status" aria-live="polite"></div>'+teacher;
  const root=el(html),feed=root.querySelector('.slow-feedback');
- if(!s.nameReady&&id==='slowName')s.nameReady=false;
+ 
  function finish(outcome,note){
   if(s.finished)return;
   s.finished=true;const correct=outcome===true;
