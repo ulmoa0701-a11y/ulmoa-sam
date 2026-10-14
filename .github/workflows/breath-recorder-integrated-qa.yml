@@ -1,0 +1,88 @@
+name: Breath and Recorder Integrated QA
+on:
+  pull_request:
+    paths:
+      - 'breath-garden/**'
+      - 'thinking-garden/recorder/index.html'
+      - 'qa/breath-recorder-integrated-qa.mjs'
+      - '.github/workflows/breath-recorder-integrated-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'breath-garden/**'
+      - 'thinking-garden/recorder/index.html'
+      - 'qa/breath-recorder-integrated-qa.mjs'
+      - '.github/workflows/breath-recorder-integrated-qa.yml'
+  workflow_dispatch:
+jobs:
+  staging-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify JavaScript syntax
+        run: node --check breath-garden/app-v6.js && node --check qa/breath-recorder-integrated-qa.mjs
+      - name: Install browser tooling
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Find Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Start site
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/breath-recorder-qa.log 2>&1 &
+          for i in {1..40}; do curl -fsS http://127.0.0.1:8765/breath-garden/ >/dev/null && exit 0; sleep 0.4; done
+          cat /tmp/breath-recorder-qa.log
+          exit 1
+      - name: Desktop and mobile interaction smoke
+        run: node qa/breath-recorder-integrated-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: breath-recorder-staging-screenshots
+          path: qa/breath-recorder-artifacts/staging
+          if-no-files-found: warn
+  published-pages:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: staging-ui
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Wait for actual Pages content (not GitHub source)
+        run: |
+          for i in {1..48}; do
+            curl -fsSL 'https://ulmoa0701-a11y.github.io/ulmoa-sam/breath-garden/' -o /tmp/live-breath.html &&
+            curl -fsSL 'https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/recorder/' -o /tmp/live-recorder.html &&
+            grep -q 'app-v6.js?v=7' /tmp/live-breath.html &&
+            grep -q 'calmEnough' /tmp/live-breath.html &&
+            grep -q 'rec-route-heading' /tmp/live-recorder.html && exit 0
+            sleep 10
+          done
+          echo 'GitHub Pages content did not reach expected version' >&2
+          exit 1
+      - name: Install browser tooling
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Find Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Check LIVE desktop and mobile pages
+        env:
+          LIVE_TEST: '1'
+          TEST_BASE_URL: 'https://ulmoa0701-a11y.github.io/ulmoa-sam'
+        run: node qa/breath-recorder-integrated-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: breath-recorder-live-screenshots
+          path: qa/breath-recorder-artifacts/live
+          if-no-files-found: warn

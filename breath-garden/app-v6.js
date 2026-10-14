@@ -11,7 +11,7 @@ const el={
  voicePreview:$('voicePreview'),previewBtn:$('previewBtn'),mute:$('muteBtn'),
  modeTitle:$('modeTitle'),modeEmoji:$('modeEmoji'),back:$('backHome'),restart:$('restart'),
  strengthScene:$('strengthScene'),longScene:$('longScene'),beatScene:$('beatScene'),calmScene:$('calmScene'),scene:$('scene'),
- calmCircle:$('calmCircle'),calmArt:$('calmArt'),calmCue:$('calmCue'),calmRound:$('calmRound'),
+ calmCircle:$('calmCircle'),calmArt:$('calmArt'),calmCue:$('calmCue'),calmRound:$('calmRound'),calmGarden:$('calmGarden'),calmDecor:$('calmDecor'),calmEnough:$('calmEnough'),longProgress:$('longProgress'),
  feather:$('feather'),windLine:$('windLine'),balloon:$('balloon'),duration:$('duration'),
  sceneGoal:$('sceneGoal'),flowerResult:$('flowerResult'),pinwheelWheel:$('pinwheelWheel'),candleFlame:$('candleFlame'),
  strengthStages:[$('featherStage'),$('flowerStage'),$('pinwheelStage'),$('candleStage')],
@@ -35,11 +35,11 @@ const ACTS=[
  {title:'촛불',icon:'🕯️',blows:2,hold:1.10,tip:'촛불은 그대로, 불꽃만 살랑!',goal:'🕯️ 불꽃만 살짝 흔들어 봐요',earned:'불꽃이 살짝 흔들렸어!'}
 ];
 const CALM={
- flower:{icon:'🌷',title:'꽃향기 호흡',inhale:3000,exhale:4000,inhaleText:'코로 꽃향기 맡기',exhaleText:'입으로 후~ 내쉬기'},
- balloon:{icon:'🎈',title:'풍선 배 호흡',inhale:3000,exhale:5000,inhaleText:'배를 편안하게 부풀려요',exhaleText:'배가 천천히 내려가요'},
- star:{icon:'⭐',title:'별빛 호흡',inhale:2500,exhale:3500,inhaleText:'별빛을 따라 들이쉬어요',exhaleText:'반짝이며 천천히 내쉬어요'},
- wave:{icon:'🌊',title:'파도 호흡',inhale:3000,exhale:4500,inhaleText:'파도가 다가올 때 들이쉬어요',exhaleText:'파도가 멀어질 때 천천히 내쉬어요'},
- leaf:{icon:'🍃',title:'나뭇잎 호흡',inhale:2500,exhale:4500,inhaleText:'나뭇잎이 올라갈 때 들이쉬어요',exhaleText:'나뭇잎이 내려올 때 천천히 내쉬어요'}
+ flower:{icon:'🌷',decor:'🌷　🕯️',title:'꽃향기와 촛불',inhale:3000,exhale:4000,inhaleText:'꽃향기를 맡는 것처럼 편안히 들이쉬어요',exhaleText:'촛불이 흔들릴 만큼 살살 내쉬어요'},
+ balloon:{icon:'🎈',decor:'🎈　🎈',title:'풍선 배 호흡',inhale:3000,exhale:5000,inhaleText:'배를 편안하게 부풀려요',exhaleText:'배가 천천히 내려가요'},
+ star:{icon:'⭐',decor:'✨　⭐　✨',title:'별빛 호흡',inhale:2500,exhale:3500,inhaleText:'별빛을 따라 들이쉬어요',exhaleText:'반짝이며 천천히 내쉬어요'},
+ wave:{icon:'🌊',decor:'🌊　🐚　🌊',title:'파도 호흡',inhale:3000,exhale:4500,inhaleText:'파도가 다가올 때 들이쉬어요',exhaleText:'파도가 멀어질 때 천천히 내쉬어요'},
+ leaf:{icon:'🍃',decor:'🍂　🍃　🍂',title:'나뭇잎 호흡',inhale:2500,exhale:4500,inhaleText:'나뭇잎이 올라갈 때 들이쉬어요',exhaleText:'나뭇잎이 내려올 때 천천히 내쉬어요'}
 };
 const S={
  screen:'home',mode:'strength',playing:false,demo:false,muted:false,
@@ -47,8 +47,8 @@ const S={
  calibratingUntil:0,calibration:[],noiseFloor:.006,reference:.22,hasReference:false,
  raw:0,level:0,band:'idle',voice:false,voiceURI:'auto',voices:[],sensitivity:3,
  displayBand:'idle',pendingBand:'idle',pendingBandFor:0,voiceEvidence:0,inputPercent:0,diagnosticFrames:0,
- holdTarget:2,holdTime:0,gapTime:0,windAngle:0,
- autoTimer:0,autoRaf:0,autoEndAt:0,calmPreset:'flower',calmRunning:false,calmPaused:false,calmStartedAt:0,calmElapsed:0,calmCycles:3,
+ holdTarget:2,holdTime:0,gapTime:0,windAngle:0,longCompleted:0,longAwaitRelease:false,longReleasedFor:0,longRest:0,longCelebrating:false,readyUntil:0,
+ autoTimer:0,autoRaf:0,autoEndAt:0,calmPreset:'flower',calmRunning:false,calmPaused:false,calmStartedAt:0,calmElapsed:0,calmCycles:3,calmCompleted:0,calmEarly:false,calmCueKey:'',
  actIndex:0,blowCount:0,blowHold:0,needsRelease:false,releaseTime:0,intermission:false,
  bpmPeriod:1900,beatStart:0,beatScore:0,beatHold:0,lastSlot:-1,slotCredited:false,beatReady:false
 };
@@ -114,8 +114,8 @@ function stopAll(){
  el.micDetail.textContent='마이크 미연결 · 녹음·업로드·저장 없음';
 }
 function resetRuntime(){
- S.holdTime=0;S.gapTime=0;S.actIndex=0;S.blowCount=0;S.blowHold=0;S.needsRelease=false;S.releaseTime=0;S.intermission=false;
- S.windAngle=0;S.calmElapsed=0;S.calmRunning=false;S.calmPaused=false;S.calmStartedAt=0;
+ S.holdTime=0;S.gapTime=0;S.longCompleted=0;S.longAwaitRelease=false;S.longReleasedFor=0;S.longRest=0;S.longCelebrating=false;S.readyUntil=0;S.actIndex=0;S.blowCount=0;S.blowHold=0;S.needsRelease=false;S.releaseTime=0;S.intermission=false;
+ S.windAngle=0;S.calmCompleted=0;S.calmEarly=false;S.calmCueKey='';S.calmElapsed=0;S.calmRunning=false;S.calmPaused=false;S.calmStartedAt=0;
  el.nextOverlay.hidden=true;el.holdFill.style.width='0%';
  S.beatScore=0;S.beatHold=0;S.beatStart=0;S.lastSlot=-1;S.slotCredited=false;S.beatReady=false;S.band='idle';S.level=0;S.displayBand='idle';S.pendingBand='idle';S.pendingBandFor=0;S.voiceEvidence=0;
  el.meterFill.style.width='0%';el.duration.innerHTML='0.0 <small>초</small>';
@@ -154,6 +154,7 @@ function updateStrengthVisual(level,dt=0){
  }
 }
 function renderMode(){
+ el.calmEnough.hidden=S.mode!=='calm';
  el.modeTitle.textContent=({strength:'바람의 힘',long:'오래 후~',beat:'박자 바람',calm:'숨 고르기'})[S.mode];
  el.modeEmoji.textContent=({strength:'🪶',long:'🎈',beat:'🎶',calm:'🌷'})[S.mode];
  el.scene.dataset.mode=S.mode;el.play.dataset.mode=S.mode;
@@ -178,6 +179,7 @@ function renderMode(){
   el.targetDuration.textContent=S.holdTarget+'초 동안 부드럽게!';
   el.mainHint.textContent='코로 편안히 숨을 들이쉬고, 후~';
   el.duration.innerHTML=S.holdTime.toFixed(1)+' <small>초</small>';
+  el.longProgress.textContent='🌱 '+(S.longCompleted+1)+' / 2번 도전';
  }else if(S.mode==='beat'){
   el.flowTrack.hidden=true;el.breathTask.hidden=true;el.holdTrack.hidden=true;
   el.mainHint.textContent='준비 → 후~! 빛나는 박자에 맞춰!';
@@ -186,7 +188,8 @@ function renderMode(){
   el.flowTrack.hidden=true;el.breathTask.hidden=true;el.holdTrack.hidden=true;
   const cfg=CALM[S.calmPreset];
   el.mainHint.textContent=cfg.title+' · 편안하게 '+S.calmCycles+'번';
-  el.calmArt.textContent=cfg.icon;el.calmCue.textContent='편안히 준비!';
+  el.calmArt.textContent=cfg.icon;el.calmDecor.textContent=cfg.decor;el.calmScene.dataset.preset=S.calmPreset;el.calmScene.dataset.phase='ready';el.calmCue.textContent='편안히 준비!';
+  el.calmGarden.textContent=Array.from({length:S.calmCycles},(_,i)=>i<S.calmCompleted?'🌼':'○').join(' ');
   el.calmRound.textContent='1 / '+S.calmCycles;
  }
  el.autoFlowTip.textContent=S.mode==='strength'?'🌼 꽃을 다 모으면 다음 놀이로 자동 이동해요.':S.mode==='calm'?'🌷 마이크 없이 그림을 따라해요. 힘들면 언제든 쉬어요.':'🌿 시작한 뒤에는 목표까지 이어져요.';
@@ -198,8 +201,8 @@ function chooseMode(mode){
 }
 function finish(){
  stopAll();show('win');
- const titles={strength:'바람꽃이 활짝!',long:'길게 후~ 성공!',beat:'박자 바람 성공!',calm:'숨 고르기 완료!'};
- el.winTitle.textContent=titles[S.mode];el.winDescription.textContent=S.mode==='long'?S.holdTarget+'초 동안 편안히 내쉬었어!':S.mode==='beat'?'네 번의 박자에 맞춰 불었어!':S.mode==='calm'?S.calmCycles+'번 숨을 고르는 시간을 가졌어. 편안했다면 충분해.':'깃털 보내기·꽃 피우기·바람개비 돌리기·불꽃 흔들기를 모두 해냈어!';
+ const titles={strength:'바람꽃이 활짝!',long:'길게 후~ 두 번 성공!',beat:'박자 바람 성공!',calm:S.calmEarly?'오늘은 여기까지!':'숨 고르기 완료!'};
+ el.winTitle.textContent=titles[S.mode];el.winDescription.textContent=S.mode==='long'?S.holdTarget+'초 바람 신호를 두 번 이어봤어!':S.mode==='beat'?'네 번의 박자에 맞춰 불었어!':S.mode==='calm'?(S.calmEarly?'편안히 따라가다가 여기에서 멈췄어. 충분해!':'그림을 따라 '+S.calmCycles+'번 호흡 리듬을 살펴봤어.'):'깃털 보내기·꽃 피우기·바람개비 돌리기·불꽃 흔들기를 모두 해냈어!';
  speech('야호! 참 잘했어!',true);
 }
 function rms(a){let sum=0;for(let i=0;i<a.length;i++)sum+=a[i]*a[i];return Math.sqrt(sum/a.length)}
@@ -307,22 +310,44 @@ function strengthTick(band,dt){
  }
 }
 function longTick(band,dt){
- if(band==='good'){
-  S.gapTime=0;S.holdTime+=dt;
-  el.statusNote.textContent='💚 좋아, 그 바람으로 쭉~';
- }else if(['idle','weak','voice'].includes(band)){
-  S.gapTime+=dt;
-  if(S.gapTime>.42){
-   S.holdTime=0;
-   el.statusNote.textContent='🌱 괜찮아! 다시 천천히 시작!';
+ // 두 번의 편안한 시도 사이에는 바람을 멈추고 쉬는 시간이 있습니다.
+ if(S.longCelebrating)return;
+ if(S.longAwaitRelease){
+  S.longRest+=dt;
+  S.longReleasedFor=['idle','weak','voice'].includes(band)?S.longReleasedFor+dt:0;
+  el.statusNote.textContent='🌼 첫 번째 성공! 바람을 멈추고 잠깐 쉬어요.';
+  el.longProgress.textContent='🌼 1 / 2 완료 · 쉬는 중';
+  if(S.longRest>=1.5&&S.longReleasedFor>=.4){
+   S.longAwaitRelease=false;S.holdTime=0;S.gapTime=0;
+   el.duration.innerHTML='0.0 <small>초</small>';
+   el.longProgress.textContent='🌱 2 / 2번 도전';
+   el.statusNote.textContent='🌬️ 준비되면 두 번째 후~!';
   }
+  return;
+ }
+ if(band==='good'){
+  S.gapTime=0;S.holdTime+=dt;el.statusNote.textContent='💚 좋아, 그 바람으로 쭉~';
+ }else if(['idle','weak','voice'].includes(band)){
+  S.gapTime+=dt;if(S.gapTime>.42){S.holdTime=0;el.statusNote.textContent='🌱 괜찮아! 다시 천천히 시작!'}
  }else{
-  S.gapTime+=dt;
-  if(S.gapTime>.45)S.holdTime=0;
+  S.gapTime+=dt;if(S.gapTime>.45)S.holdTime=0;
   el.statusNote.textContent='🌿 힘을 살짝 줄이면서 이어봐!';
  }
  el.duration.innerHTML=Math.min(S.holdTime,S.holdTarget).toFixed(1)+' <small>초</small>';
- if(S.holdTime>=S.holdTarget)finish();
+ if(S.holdTime>=S.holdTarget){
+  S.longCompleted++;
+  if(S.longCompleted===1){
+   S.longAwaitRelease=true;S.longRest=0;S.longReleasedFor=0;
+   el.longProgress.textContent='🌼 1 / 2 완료 · 쉬는 중';
+  }else{
+   S.longCelebrating=true;S.playing=false;
+   el.longProgress.textContent='🌼 🌼 두 번 모두 성공!';
+   el.statusNote.textContent='🎉 두 번 성공! 잠시 후 완성 화면이 나와요.';
+   if(S.microphone)for(const t of S.microphone.getAudioTracks?.()||[])t.enabled=false;
+   const token=S.token;
+   S.autoTimer=setTimeout(()=>{S.autoTimer=0;if(S.screen==='play'&&S.mode==='long'&&S.token===token)finish()},2800);
+  }
+ }
 }
 function beatTick(band,dt,now){
  // One 0.85–1.15s visible exhale window, followed by a clearly visible rest window.
@@ -358,6 +383,8 @@ function calmTick(now){
  const cfg=CALM[S.calmPreset],span=cfg.inhale+cfg.exhale;
  const elapsed=Math.max(0,now-S.calmStartedAt);
  const cycle=Math.floor(elapsed/span);
+ S.calmCompleted=Math.min(cycle,S.calmCycles);
+ el.calmGarden.textContent=Array.from({length:S.calmCycles},(_,i)=>i<S.calmCompleted?'🌼':'○').join(' ');
  if(cycle>=S.calmCycles){
   S.calmRunning=false;finish();return;
  }
@@ -365,7 +392,9 @@ function calmTick(now){
  const remainder=inhale?cfg.inhale-phase:span-phase;
  const progress=inhale?phase/cfg.inhale:1-(phase-cfg.inhale)/cfg.exhale;
  el.calmCircle.style.transform='scale('+(0.78+progress*.23).toFixed(3)+')';
- el.calmCircle.dataset.phase=inhale?'in':'out';
+ el.calmCircle.dataset.phase=inhale?'in':'out';el.calmScene.dataset.phase=inhale?'in':'out';
+ const cueKey=cycle+':'+(inhale?'in':'out');
+ if(S.calmCueKey!==cueKey){S.calmCueKey=cueKey;speech(inhale?'편안히 들이쉬어요':'천천히 내쉬어요');}
  el.calmArt.textContent=cfg.icon;
  el.calmCue.textContent=(inhale?'들이쉬기':'내쉬기')+' '+Math.max(1,Math.ceil(remainder/1000));
  el.calmRound.textContent=(cycle+1)+' / '+S.calmCycles;
@@ -388,6 +417,7 @@ function startOrPauseCalm(){
   S.calmElapsed=0;S.calmStartedAt=performance.now()+700;
  }
  S.calmRunning=true;S.calmPaused=false;S.lastFrame=0;
+ if(!S.calmElapsed)S.calmCueKey='';
  el.micButton.textContent='⏸ 잠깐 쉬기';
  el.statusNote.textContent='편안한 자세로 그림을 따라해요.';
  el.runningTip.hidden=false;el.play.classList.add('is-running');
@@ -462,6 +492,7 @@ function tick(now){
   // Anchor the beat clock after mic warm-up, not when permission dialog opens.
   if(S.mode==='beat')S.beatStart=now+800;
  }
+ if(S.playing&&now<S.readyUntil){renderLevel(0,'idle');el.statusNote.textContent='🌱 그림을 보고 준비해요. 잠시 후 후~!';S.frame=requestAnimationFrame(tick);return}
  let level=0,voiced=false;
  if(S.demo){
   level=.1+.46*(.5+.5*Math.sin(now/550));
@@ -505,7 +536,7 @@ async function startMic(){
   const analyser=context.createAnalyser();analyser.fftSize=2048;analyser.smoothingTimeConstant=0;
   context.createMediaStreamSource(mic).connect(analyser);
   S.analyser=analyser;S.samples=new Float32Array(analyser.fftSize);
-  S.playing=true;S.demo=false;S.calibratingUntil=performance.now()+800;S.lastFrame=0;S.calibration=[];
+  S.playing=true;S.demo=false;S.calibratingUntil=performance.now()+800;S.readyUntil=S.calibratingUntil+1800;S.lastFrame=0;S.calibration=[];
   el.runningTip.hidden=false;el.play.classList.add('is-running');
   S.noiseFloor=.006;S.reference=.22;S.hasReference=false;S.level=0;S.displayBand='idle';S.pendingBand='idle';S.pendingBandFor=0;S.voiceEvidence=0;S.diagnosticFrames=0;
   if(S.mode==='beat')S.beatStart=0;
@@ -544,14 +575,15 @@ el.voicePreview.addEventListener('click',speakPreview);
 el.previewBtn.addEventListener('click',speakPreview);
 el.mute.addEventListener('click',()=>{S.muted=!S.muted;el.mute.textContent=S.muted?'🔇':'♫';if(S.muted)try{window.speechSynthesis?.cancel()}catch(e){}});
 el.durationBtns.forEach(btn=>btn.addEventListener('click',()=>{
- S.holdTarget=Number(btn.dataset.seconds);el.durationBtns.forEach(x=>x.classList.toggle('selected',x===btn));S.holdTime=0;S.gapTime=0;renderMode()
+ S.holdTarget=Number(btn.dataset.seconds);el.durationBtns.forEach(x=>x.classList.toggle('selected',x===btn));S.holdTime=0;S.gapTime=0;S.longCompleted=0;S.longAwaitRelease=false;S.longReleasedFor=0;S.longRest=0;S.longCelebrating=false;renderMode()
 }));
+el.calmEnough.addEventListener('click',()=>{S.calmEarly=true;finish()});
 el.calmRoundBtns.forEach(btn=>btn.addEventListener('click',()=>{
  const wasRunning=S.calmRunning;
  S.calmCycles=Number(btn.dataset.rounds)||3;
  el.calmRoundBtns.forEach(x=>x.classList.toggle('selected',x===btn));
  if(S.frame){cancelAnimationFrame(S.frame);S.frame=0}
- S.calmElapsed=0;S.calmRunning=false;S.calmPaused=false;
+ S.calmElapsed=0;S.calmRunning=false;S.calmPaused=false;S.calmCompleted=0;S.calmEarly=false;S.calmCueKey='';
  renderMode();
  // An active exercise restarts automatically when a teacher changes its repetitions.
  // The child never needs a second, unexplained Start tap.
@@ -562,7 +594,7 @@ el.calmBtns.forEach(btn=>btn.addEventListener('click',()=>{
  S.calmPreset=CALM[btn.dataset.calm]?btn.dataset.calm:'flower';
  el.calmBtns.forEach(x=>x.classList.toggle('selected',x===btn));
  if(S.frame){cancelAnimationFrame(S.frame);S.frame=0}
- S.calmElapsed=0;S.calmRunning=false;S.calmPaused=false;
+ S.calmElapsed=0;S.calmRunning=false;S.calmPaused=false;S.calmCompleted=0;S.calmEarly=false;S.calmCueKey='';
  renderMode();startOrPauseCalm();
 }));
 el.beatBtns.forEach(btn=>btn.addEventListener('click',()=>{
