@@ -63,10 +63,13 @@ jobs:
               if(!wrapper.classList.contains('hb-show-subcategory'))issues.push('category panel did not open');
               if(nav.querySelector('details.hb-menu[open]'))issues.push('native details expanded on mobile');
               const gardenGroups=[...nav.querySelectorAll('.hb-mobile-game-section')];
-              if(gardenGroups.length<3)issues.push('nested garden groups not visible (expected cognitive, music and breath)');
+              if(gardenGroups.length!==5)issues.push('five garden groups missing: '+gardenGroups.length);
               const parentNames=gardenGroups.map(g=>g.querySelector('.hb-game-parent')?.textContent||'');
-              if(!parentNames[0]?.includes('생각정원')||!parentNames[1]?.includes('음악정원')||!parentNames.some(x=>x.includes('바람놀이터')))issues.push('garden hierarchy misnamed');
-              if(gardenGroups[0]?.querySelectorAll('.hb-game-child').length!==4||gardenGroups[1]?.querySelectorAll('.hb-game-child').length!==2||!gardenGroups.some(g=>g.textContent.includes('바람놀이터')&&g.querySelectorAll('.hb-game-child').length===3))issues.push('garden category counts incorrect');
+              const expectedGardens=['인지정원','생각정원','학습정원','음악정원','마음정원'];
+              expectedGardens.forEach((name,i)=>{if(!parentNames[i]?.includes(name))issues.push('garden order/name mismatch: '+name)});
+              const expectedChildCounts=[4,2,3,2,3];
+              expectedChildCounts.forEach((count,i)=>{if(gardenGroups[i]?.querySelectorAll('.hb-game-child').length!==count)issues.push('garden sublinks incorrect: '+expectedGardens[i])});
+              if(gardenGroups.some(g=>!g.querySelector('.hb-game-parent')?.getAttribute('href')?.includes('gardens/#')))issues.push('garden heading does not open the shared finder');
               if(gardenGroups.some(g=>!g.querySelector('.hb-game-parent')||getComputedStyle(g).display==='none'))issues.push('nested groups hidden');
               const menuTile=nav.querySelector('.hb-nav-links > .hb-menu');
               if(menuTile&&getComputedStyle(menuTile).display!=='none')issues.push('grid remains visible behind subcategory');
