@@ -52,7 +52,7 @@ function nextAction(message){
  $('gameActions').innerHTML='<button type="button" data-action="next" class="primary-action">'+(state.index===roundMax-1?'오늘 놀이 마치기':'다음 미션 →')+'</button>';
  if(message)feedback(message,true);
 }
-function advance(){state.index++;state.locked=false;state.selected=[];state.stage='';state.options=[];
+function advance(){state.index++;state.locked=false;state.selected=[];state.stage='';state.options=[];state.attempts=0;
  if(state.index>=roundMax){finish();return}draw();
 }
 function finish(){
