@@ -269,6 +269,30 @@ function confirmSharedEntry(fields,entry){
 function wireEntryForm(isParent){
  const f=$('entryForm'),button=$('saveEntry'),share=f.elements.share,area=$('sharePicker');
  const selectedKeys=()=>[...f.querySelectorAll('input[name="shareField"]:checked')].map(x=>x.value);
+ const updateParentShare=()=>{
+  if(!isParent)return;
+  const detailsVisible=f.dataset.parentMode==='detail',entry=gatherEntry(f,'parent');
+  f.querySelectorAll('input[name="shareField"]').forEach(x=>{
+   const visible=detailsVisible||['observation','origin'].includes(x.value);
+   if(!visible)x.checked=false;
+   x.disabled=!visible||!entry[x.value];
+   x.closest('label')?.classList.toggle('is-unavailable',x.disabled);
+  });
+ };
+ const parentModeButtons=[...f.querySelectorAll('button[data-parent-mode]')];
+ if(isParent){
+  const sync=()=>{
+   const mode=f.dataset.parentMode==='detail'?'detail':'quick';
+   parentModeButtons.forEach(b=>{const active=b.dataset.parentMode===mode;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
+   const hint=f.querySelector('#parentModeHint');if(hint)hint.textContent=mode==='detail'?'기록하고 싶은 상황만 추가해요. ABC도 선택 사항입니다.':'기억나는 사실 한 가지만 남겨도 충분합니다.';
+   updateParentShare();
+  };
+  parentModeButtons.forEach(btn=>btn.addEventListener('click',()=>{f.dataset.parentMode=btn.dataset.parentMode;sync();f.dispatchEvent(new Event('change',{bubbles:true}))}));
+  f.addEventListener('input',updateParentShare);
+  f.addEventListener('change',updateParentShare);
+  sync();
+ }
+
  const updateStudentShare=()=>{
   if(isParent)return;
   const entry=gatherEntry(f,'student');
