@@ -1,0 +1,54 @@
+name: Five Gardens Browser QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'gardens/**'
+      - 'assets/habom-navigation.js'
+      - 'assets/habom-navigation.css'
+      - 'assets/habom-five-gardens-home.css'
+      - 'thinking-garden/index.html'
+      - 'thinking-garden/app.js'
+      - 'index.html'
+      - 'qa/five-gardens-qa.mjs'
+      - '.github/workflows/five-gardens-qa.yml'
+  pull_request:
+    paths:
+      - 'gardens/**'
+      - 'assets/habom-navigation.js'
+      - 'assets/habom-navigation.css'
+      - 'thinking-garden/index.html'
+      - 'qa/five-gardens-qa.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  five-garden-navigation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chrome automation
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Find Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Start local test website
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/five-gardens-server.log 2>&1 &
+          for i in {1..40}; do curl -fsS http://127.0.0.1:8765/gardens/ >/dev/null && exit 0; sleep 0.25; done
+          cat /tmp/five-gardens-server.log
+          exit 1
+      - name: Check five gardens and original game links
+        run: node qa/five-gardens-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: five-gardens-screenshots
+          path: qa/five-gardens-artifacts
+          if-no-files-found: warn
