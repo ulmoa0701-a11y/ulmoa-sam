@@ -135,3 +135,17 @@
 .next-overlay .next-countdown{font-size:clamp(19px,3.5vw,25px);padding:13px 19px}
 #nextOverlay:not([hidden])~.control-area #micButton{display:none}
 @media(max-width:520px){.play-screen.is-running:not([data-mode=calm]) #micButton{min-height:38px;font-size:13px;padding:6px 13px}.running-tip{font-size:11px}.next-reassure{font-size:12px}}
+
+/* V7: each breathing scene behaves distinctly and early exit stays available. */
+.long-progress{font-size:clamp(18px,3vw,24px);color:#397753;font-weight:900;background:#fff9d9;border:2px solid #f4dc93;padding:7px 16px;border-radius:999px;position:relative;z-index:2;align-self:center}
+.calm-decor{position:absolute;top:13%;left:50%;transform:translateX(-50%);font-size:clamp(27px,5vw,50px);white-space:nowrap;letter-spacing:.08em;pointer-events:none;transition:transform 1s ease;opacity:.92}
+.calm-scene[data-preset=flower] .calm-decor{top:10%}.calm-scene[data-preset=balloon] .calm-decor{top:12%}.calm-scene[data-preset=star] .calm-decor{top:9%}.calm-scene[data-preset=wave] .calm-decor{top:18%}.calm-scene[data-preset=leaf] .calm-decor{top:8%}
+.calm-scene[data-preset=balloon][data-phase=in] .calm-decor{transform:translateX(-50%) scale(1.25)}.calm-scene[data-preset=balloon][data-phase=out] .calm-decor{transform:translateX(-50%) scale(.85)}
+.calm-scene[data-preset=wave][data-phase=in] .calm-decor{transform:translateX(-65%)}.calm-scene[data-preset=wave][data-phase=out] .calm-decor{transform:translateX(-35%)}
+.calm-scene[data-preset=leaf][data-phase=in] .calm-decor{transform:translate(-50%,-12px) rotate(-8deg)}.calm-scene[data-preset=leaf][data-phase=out] .calm-decor{transform:translate(-50%,14px) rotate(8deg)}
+.calm-scene[data-preset=star][data-phase=in] .calm-decor{transform:translateX(-50%) scale(1.15)}.calm-scene[data-preset=star][data-phase=out] .calm-decor{transform:translateX(-50%) scale(.9)}
+.calm-garden{position:absolute;bottom:18%;left:50%;transform:translateX(-50%);background:#fffdf4;border:2px solid #b9dfc2;border-radius:999px;padding:6px 15px;font-size:clamp(18px,3vw,24px);white-space:nowrap;font-weight:900;color:#34704d}
+.calm-round{bottom:5%}.calm-enough{align-self:center;border:2px solid #c9dcd0;border-radius:15px;padding:8px 18px;background:#fffdf7;color:#51775f;font-weight:900;font-size:clamp(14px,2vw,17px)}
+.calm-enough[hidden]{display:none!important}.play-screen[data-mode=calm] #calmEnough{display:block}.play-screen[data-mode=calm] .calm-circle{border-width:7px}
+@media(max-width:520px){.calm-decor{top:8%;font-size:28px}.calm-garden{bottom:20%;font-size:17px;padding:5px 11px}.long-progress{font-size:16px;padding:5px 10px}}
+@media(prefers-reduced-motion:reduce){.calm-decor,.calm-circle{transition:none!important}}
