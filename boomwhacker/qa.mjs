@@ -709,12 +709,8 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
  await page.goto(BASE,{waitUntil:'networkidle'});
  await page.locator('#mobileSettingsBtn').click();
  await page.locator('#levels button[data-level="custom"]').click();
- for(const n of ['도','미','솔'])await page.locator('#customNoteChoices button[data-note="'+n+'"]').click().catch(()=>{});
- // If just one remains, remove that note only after adding the new selection.
  await page.locator('#customNoteChoices button[data-note="높은도"]').click();
- await page.locator('#customNoteChoices button[data-note="도"]').click();
- await page.locator('#customNoteChoices button[data-note="미"]').click();
- await page.locator('#customNoteChoices button[data-note="솔"]').click();
+ for(const n of ['도','미','솔'])await page.locator('#customNoteChoices button[data-note="'+n+'"]').click();
  await page.locator('#customNoteApply').click();
  const before=await page.evaluate(()=>window.__boomVideoQA.noteSelection());
  check(before.level==='custom'&&before.selected.join(',')==='높은도','persistence: picking just high C failed '+JSON.stringify(before));
