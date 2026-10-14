@@ -14,7 +14,7 @@ class MockDB {
       throw Error('unexpected first: '+sql);
     },
     async all(){
-      if(sql.includes("visibility='public'"))return {results:db.posts.filter(x=>x.visibility==='public').reverse()};
+      if(sql.includes("visibility='public'"))return {results:db.posts.filter(x=>x.visibility==='public'&&x.metadata_approved===1).reverse()};
       if(sql.includes("visibility='list'"))return {results:db.posts.filter(x=>x.visibility==='list'&&x.metadata_approved===1).reverse()};
       if(sql.includes('FROM posts ORDER BY'))return {results:[...db.posts].reverse()};
       throw Error('unexpected all: '+sql);
@@ -70,9 +70,15 @@ test('public and secret posts remain server-separated, no secret data in feed',a
  const c=await create(env,form('hidden',{email:'hidden@example.test',consent:'true'}));assert.equal(c.status,201);
  const feed=await call(env,'/api/posts');assert.equal(feed.status,200);
  const raw=await feed.text();const obj=JSON.parse(raw);
- assert.equal(obj.posts.length,1);assert.equal(obj.locked.length,0);
+ assert.equal(obj.posts.length,0);assert.equal(obj.locked.length,0);
+ assert.ok(!raw.includes('안녕하세요'),'unapproved public post must not appear');
+ const approve=await call(env,'/api/admin/posts/'+a.data.id,'POST',{status:'확인 중',reply:'',publicTitle:'',metadataApproved:true,attachmentApproved:false},adminHeaders());
+ assert.equal(approve.status,200);
+ const approvedFeed=await call(env,'/api/posts'),after=await approvedFeed.json();
+ assert.equal(after.posts.length,1);
+ assert.equal(after.posts[0].body,'안녕하세요');
  for(const secret of [privateText,'private@example.test','hidden@example.test',b.data.receipt,c.data.receipt])assert.ok(!raw.includes(secret),'feed leaked '+secret);
- assert.equal(obj.posts[0].body,'안녕하세요');
+ assert.equal(after.posts[0].body,'안녕하세요');
  const unauthorized=await call(env,'/api/mine/'+b.data.id);assert.equal(unauthorized.status,403);
  const wrong=await call(env,'/api/mine/'+b.data.id,'GET',null,{'X-Receipt-Token':c.data.receipt});assert.equal(wrong.status,403);
  const authorized=await call(env,'/api/mine/'+b.data.id,'GET',null,{'X-Receipt-Token':b.data.receipt});
@@ -103,6 +109,8 @@ test('private attachment remains inaccessible without token; public attachment n
  const right=await call(env,'/api/mine/'+a.data.id+'/file','GET',null,{'X-Receipt-Token':a.data.receipt});
  assert.equal(right.status,200);assert.equal(right.headers.get('Content-Type'),'application/octet-stream');
  await call(env,'/api/admin/posts/'+a.data.id,'POST',{status:'접수',reply:'',publicTitle:'',metadataApproved:false,attachmentApproved:true},adminHeaders());
+ assert.equal((await call(env,'/api/public/'+a.data.id+'/file')).status,404,'file must remain hidden until public message approved');
+ await call(env,'/api/admin/posts/'+a.data.id,'POST',{status:'확인 중',reply:'',publicTitle:'',metadataApproved:true,attachmentApproved:true},adminHeaders());
  const nowPublic=await call(env,'/api/public/'+a.data.id+'/file');assert.equal(nowPublic.status,200);
 });
 
