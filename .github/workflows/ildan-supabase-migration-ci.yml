@@ -37,6 +37,25 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate existing record contract with synthetic Node tests
         run: node --test secure-portal/tests/security.test.mjs secure-portal/tests/v15-contract.test.mjs
+      - name: Verify staged frontend JavaScript syntax and shared validation parity
+        shell: bash
+        run: |
+          node --check secure-portal/supabase/web/app.js
+          cmp secure-portal/lib/record-contract.mjs secure-portal/supabase/functions/_shared/record-contract.mjs
+          node <<'JS'
+          const fs=require('fs'),assert=require('node:assert/strict');
+          const js=fs.readFileSync('secure-portal/supabase/web/app.js','utf8');
+          const html=fs.readFileSync('secure-portal/supabase/web/index.html','utf8');
+          const cfg=fs.readFileSync('secure-portal/supabase/web/config.js','utf8');
+          assert(js.includes("supabase.auth.verifyOtp"));
+          assert(js.includes("api('claim-invite'"));
+          assert(!js.includes("api('passkeys/login/verify'"));
+          assert(js.includes("credentials:'omit'"));
+          assert(html.includes('실제 학생·보호자 상담정보 입력 금지'));
+          assert(!cfg.includes('RECORD_ENCRYPTION_KEY:'));
+          assert(!cfg.includes('SUPABASE_SERVICE_ROLE_KEY:'));
+          console.log('PASS staged user role login and no-secret frontend configuration');
+          JS
       - name: Run PostgreSQL RLS, guardian/staff isolation, forged insert and invite replay tests
         env:
           PGPASSWORD: postgres
