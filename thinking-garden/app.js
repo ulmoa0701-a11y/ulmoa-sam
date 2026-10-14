@@ -18,6 +18,7 @@ const meta={
  inside:{title:'정원 안에 별 심기',kicker:'샘의 별밭',theme:'spacing',friend:'assets/friend-saem.png'},
  targets:{title:'하나씩 깨우기',kicker:'샘의 톡톡정원',theme:'spacing',friend:'assets/friend-saem.png'},
  paint:{title:'정원길 쓱싹 칠하기',kicker:'샘의 색칠길',theme:'spacing',friend:'assets/friend-saem.png'},
+ slowLook:{title:'차근차근 탐험단',kicker:'샘과 모아의 확인정원',theme:'spacing',friend:'assets/friend-saem.png'},
  water:{title:'시든 꽃 깨우기',kicker:'홍의 물방울정원',theme:'find',friend:'assets/friend-hong.png'}
 };
 
@@ -85,7 +86,7 @@ function openPreview(id){
   $('#introPreview').innerHTML=previewExamples[id]||'<div class="pv-instruction">게임 예시를 보고 시작해요.</div>';
   const isPractice=LITERACY_GAMES.has(id);
   $('#literacyPracticeControls').hidden=!isPractice;
-  $('#previewRoundInfo').textContent='실제 게임은 5스테이지로 진행돼요.';
+  $('#previewRoundInfo').textContent=id==='slowLook'?'6가지 활동 중 하나를 골라 4~6문제씩 진행해요.':'실제 게임은 5스테이지로 진행돼요.';
   if(isPractice)updatePracticeControls();
   show('intro');
 }
@@ -227,7 +228,7 @@ $$('#literacyPracticeControls [data-level]').forEach(b=>b.addEventListener('clic
 $$('#literacyPracticeControls [data-count]').forEach(b=>b.addEventListener('click',()=>{
  state.practiceCount=Number(b.dataset.count);updatePracticeControls();
 }));
-$('#introStart').addEventListener('click',()=>{if(state.previewGame==='rescue'){location.href='games/rescue/';return}if(state.previewGame)startGame(state.previewGame)});
+$('#introStart').addEventListener('click',()=>{if(state.previewGame==='slowLook'){location.href='games/slow-look/';return}if(state.previewGame==='rescue'){location.href='games/rescue/';return}if(state.previewGame)startGame(state.previewGame)});
 $('#introBack').addEventListener('click',goHome);
 $('#introList').addEventListener('click',goHome);
 $$('[data-go="home"]').forEach(b=>b.addEventListener('click',goHome));
