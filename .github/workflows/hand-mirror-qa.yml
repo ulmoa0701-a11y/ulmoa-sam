@@ -1,0 +1,92 @@
+name: Cognitive Hand Mirror QA
+on:
+  pull_request:
+    paths:
+      - 'thinking-garden/games/hand-mirror/**'
+      - 'thinking-garden/index.html'
+      - 'thinking-garden/app.js'
+      - 'qa/hand-mirror-qa.mjs'
+      - '.github/workflows/hand-mirror-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'thinking-garden/games/hand-mirror/**'
+      - 'thinking-garden/index.html'
+      - 'thinking-garden/app.js'
+      - 'qa/hand-mirror-qa.mjs'
+      - '.github/workflows/hand-mirror-qa.yml'
+  workflow_dispatch:
+jobs:
+  staging:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify JS syntax
+        run: |
+          node --check thinking-garden/games/hand-mirror/core.js
+          node --check thinking-garden/games/hand-mirror/app.js
+          node --check qa/hand-mirror-qa.mjs
+      - name: Browser tooling
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Find Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Serve game
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/hand-mirror-qa.log 2>&1 &
+          for i in {1..45}; do curl -fsS http://127.0.0.1:8765/thinking-garden/games/hand-mirror/ >/dev/null && exit 0; sleep 0.4; done
+          cat /tmp/hand-mirror-qa.log
+          exit 1
+      - name: Desktop and mobile gesture-game browser test
+        run: node qa/hand-mirror-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hand-mirror-staging-screenshots
+          path: qa/hand-mirror-artifacts/staging
+          if-no-files-found: warn
+  live:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Wait for published GitHub Pages game and garden card
+        run: |
+          for i in {1..48}; do
+            curl -fsSL 'https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/' -o /tmp/live-garden.html &&
+            curl -fsSL 'https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/hand-mirror/' -o /tmp/live-handmirror.html &&
+            grep -q 'data-open="handMirror"' /tmp/live-garden.html &&
+            grep -q '반짝손 따라하기' /tmp/live-handmirror.html && exit 0
+            sleep 10
+          done
+          echo "Latest hand mirror game not published" >&2
+          exit 1
+      - name: Browser tooling
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Find Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Desktop and mobile game tests against live Pages
+        env:
+          TEST_BASE_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam
+          LIVE_TEST: '1'
+        run: node qa/hand-mirror-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hand-mirror-live-screenshots
+          path: qa/hand-mirror-artifacts/live
+          if-no-files-found: warn
