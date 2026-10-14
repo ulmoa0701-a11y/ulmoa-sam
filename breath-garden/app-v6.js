@@ -383,6 +383,8 @@ function calmTick(now){
  const cfg=CALM[S.calmPreset],span=cfg.inhale+cfg.exhale;
  const elapsed=Math.max(0,now-S.calmStartedAt);
  const cycle=Math.floor(elapsed/span);
+ S.calmCompleted=Math.min(cycle,S.calmCycles);
+ el.calmGarden.textContent=Array.from({length:S.calmCycles},(_,i)=>i<S.calmCompleted?'🌼':'○').join(' ');
  if(cycle>=S.calmCycles){
   S.calmRunning=false;finish();return;
  }
@@ -390,7 +392,9 @@ function calmTick(now){
  const remainder=inhale?cfg.inhale-phase:span-phase;
  const progress=inhale?phase/cfg.inhale:1-(phase-cfg.inhale)/cfg.exhale;
  el.calmCircle.style.transform='scale('+(0.78+progress*.23).toFixed(3)+')';
- el.calmCircle.dataset.phase=inhale?'in':'out';
+ el.calmCircle.dataset.phase=inhale?'in':'out';el.calmScene.dataset.phase=inhale?'in':'out';
+ const cueKey=cycle+':'+(inhale?'in':'out');
+ if(S.calmCueKey!==cueKey){S.calmCueKey=cueKey;speech(inhale?'편안히 들이쉬어요':'천천히 내쉬어요');}
  el.calmArt.textContent=cfg.icon;
  el.calmCue.textContent=(inhale?'들이쉬기':'내쉬기')+' '+Math.max(1,Math.ceil(remainder/1000));
  el.calmRound.textContent=(cycle+1)+' / '+S.calmCycles;
@@ -413,6 +417,7 @@ function startOrPauseCalm(){
   S.calmElapsed=0;S.calmStartedAt=performance.now()+700;
  }
  S.calmRunning=true;S.calmPaused=false;S.lastFrame=0;
+ if(!S.calmElapsed)S.calmCueKey='';
  el.micButton.textContent='⏸ 잠깐 쉬기';
  el.statusNote.textContent='편안한 자세로 그림을 따라해요.';
  el.runningTip.hidden=false;el.play.classList.add('is-running');
@@ -572,12 +577,13 @@ el.mute.addEventListener('click',()=>{S.muted=!S.muted;el.mute.textContent=S.mut
 el.durationBtns.forEach(btn=>btn.addEventListener('click',()=>{
  S.holdTarget=Number(btn.dataset.seconds);el.durationBtns.forEach(x=>x.classList.toggle('selected',x===btn));S.holdTime=0;S.gapTime=0;S.longCompleted=0;S.longAwaitRelease=false;S.longReleasedFor=0;S.longRest=0;S.longCelebrating=false;renderMode()
 }));
+el.calmEnough.addEventListener('click',()=>{S.calmEarly=true;finish()});
 el.calmRoundBtns.forEach(btn=>btn.addEventListener('click',()=>{
  const wasRunning=S.calmRunning;
  S.calmCycles=Number(btn.dataset.rounds)||3;
  el.calmRoundBtns.forEach(x=>x.classList.toggle('selected',x===btn));
  if(S.frame){cancelAnimationFrame(S.frame);S.frame=0}
- S.calmElapsed=0;S.calmRunning=false;S.calmPaused=false;
+ S.calmElapsed=0;S.calmRunning=false;S.calmPaused=false;S.calmCompleted=0;S.calmEarly=false;S.calmCueKey='';
  renderMode();
  // An active exercise restarts automatically when a teacher changes its repetitions.
  // The child never needs a second, unexplained Start tap.
@@ -588,7 +594,7 @@ el.calmBtns.forEach(btn=>btn.addEventListener('click',()=>{
  S.calmPreset=CALM[btn.dataset.calm]?btn.dataset.calm:'flower';
  el.calmBtns.forEach(x=>x.classList.toggle('selected',x===btn));
  if(S.frame){cancelAnimationFrame(S.frame);S.frame=0}
- S.calmElapsed=0;S.calmRunning=false;S.calmPaused=false;
+ S.calmElapsed=0;S.calmRunning=false;S.calmPaused=false;S.calmCompleted=0;S.calmEarly=false;S.calmCueKey='';
  renderMode();startOrPauseCalm();
 }));
 el.beatBtns.forEach(btn=>btn.addEventListener('click',()=>{
