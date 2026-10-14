@@ -52,7 +52,7 @@ async function sendForm(ev){
   receiptCode.value=latestReceipt;
   receiptPanel.hidden=false;
   receiptPanel.scrollIntoView({block:'start',behavior:'smooth'});
-  setStatus(status,'쪽지가 도착했어요. 내 쪽지를 다시 확인할 수 있도록 코드를 보관해 주세요.','ok');
+  setStatus(status,mode==='public'?'쪽지가 도착했어요. 내용은 운영자 검토 후 공개돼요. 확인 코드를 보관해 주세요.':'쪽지가 도착했어요. 내 쪽지를 다시 확인할 수 있도록 코드를 보관해 주세요.','ok');
   form.reset();syncAnon();selectMode();updateCount();
   await loadFeed();
  }catch(err){setStatus(status,err.message||'연결을 확인해 주세요.','error');}
@@ -78,7 +78,7 @@ function postCard(p,locked=false){
   if(p.link){try{const u=new URL(p.link);if(['https:','http:'].includes(u.protocol)){const a=el('a','관련 링크 ↗');a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';card.append(a);}}catch{}}
   if(p.reply){const answer=el('div',undefined,'answer');answer.append(el('strong','울모아쌤의 답장'),el('p',p.reply,'post-text'));card.append(answer);}
  }else{card.append(el('p','본문과 첨부파일은 공개되지 않습니다. · '+p.status+(p.hasReply?' · 답변 완료':''),'muted'));}
- if(p.hasAttachment){if(locked)card.append(el('span',' · 📎 첨부 있음','muted'));else{const a=el('a','📎 승인된 첨부파일 받기');a.href='/api/public/'+encodeURIComponent(p.id)+'/file';a.rel='noopener noreferrer';card.append(a);}}
+ if(p.hasAttachment){if(locked)card.append(el('span',' · 📎 첨부 있음','muted'));else if(!p.visibility){const a=el('a','📎 승인된 첨부파일 받기');a.href='/api/public/'+encodeURIComponent(p.id)+'/file';a.rel='noopener noreferrer';card.append(a);}}
  return card;
 }
 async function loadFeed(){
@@ -169,9 +169,9 @@ function renderAdmin(p){
  for(const s of ['접수','확인 중','답변 완료']){const o=el('option',s);o.value=s;statusSelect.append(o);}statusSelect.value=p.status;
  const replyBox=el('textarea');replyBox.placeholder='운영자 답변';replyBox.maxLength=1200;replyBox.value=p.reply||'';
  const titleInput=el('input');titleInput.placeholder='잠금글 목록용 제목';titleInput.maxLength=70;titleInput.value=p.publicTitle||'비밀글입니다';
- const approve=el('input');approve.type='checkbox';approve.checked=p.metadataApproved;approve.disabled=p.visibility!=='list';
+ const approve=el('input');approve.type='checkbox';approve.checked=p.metadataApproved;approve.disabled=p.visibility==='hidden';
  const attachApprove=el('input');attachApprove.type='checkbox';attachApprove.checked=p.attachmentApproved;
- const approveLabel=el('label',' 잠금글 목록 공개 승인');approveLabel.prepend(approve);
+ const approveLabel=el('label',' 공개 승인 (공개글 본문 · 잠금글 목록)');approveLabel.prepend(approve);
  const attachLabel=el('label',' 공개글 첨부파일 별도 공개 승인');attachLabel.prepend(attachApprove);
  const save=el('button','답변·상태 저장');save.type='button';
  edit.append(el('label','상태'),statusSelect,el('label','답변'),replyBox,el('label','승인된 제목'),titleInput,approveLabel,attachLabel,save);
