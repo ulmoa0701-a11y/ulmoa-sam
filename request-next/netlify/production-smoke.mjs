@@ -119,6 +119,8 @@ async function run(){
     attachment:'deploy-scoped Blob (production persistent store requires separate browser test)',
     checks:'private post, file bytes, forbidden access, admin reply, cleanup'
   }));
+  if(process.env.CONTEXT==='deploy-preview')
+    await writeFile('netlify/functions/habom-check-success.mjs',"export default ()=>new Response('Synthetic test cleaned');");
   console.log('HABOM LIVE DB & DEPLOY-SCOPED BLOB INTEGRATION: VERIFIED; TEST DATA REMOVED');
 }
 try{await run()}catch(error){
@@ -133,6 +135,9 @@ try{await run()}catch(error){
     expectedBranch:process.env.BRANCH===TARGET_BRANCH,
     secretKeysPresent:process.env.CONTEXT==='deploy-preview'?'not-needed':!!process.env.HABOM_ADMIN_KEY&&!!process.env.HABOM_RATE_SALT
   }));
-  // Don't mask the failure as approval; UI stays in private test mode.
-  // This one diagnostic deployment can complete so the stage can be inspected.
+  // A synthetic no-data function shows the safe failure stage in Netlify's
+  // read-only deploy metadata, without exposing secret keys or DB contents.
+  if(process.env.CONTEXT==='deploy-preview')
+    await writeFile('netlify/functions/habom-check-failed-'+failedStage+'.mjs',"export default ()=>new Response('Build probe did not pass');");
+  else process.exitCode=1;
 }
