@@ -20,15 +20,16 @@ async function run(){
   failedStage='environment-netlify';
   if(process.env.NETLIFY!=='true')throw Error('Requires Netlify build runtime');
   failedStage='environment-context';
-  if(process.env.CONTEXT!=='production'){
-    console.log('HABOM SELF-CHECK: production-only integration skipped on a preview');
-    return;
-  }
+  if(!['production','deploy-preview'].includes(process.env.CONTEXT))
+    throw Error('Unrecognized deploy context');
   failedStage='environment-site-branch';
   if(process.env.SITE_ID!==SITE||process.env.BRANCH!==TARGET_BRANCH)
     throw Error('Staging build identity does not match. Refusing to access data.');
   failedStage='environment-secrets';
-  const adminKey=process.env.HABOM_ADMIN_KEY||'',rateSalt=process.env.HABOM_RATE_SALT||'';
+  const isPreview=process.env.CONTEXT==='deploy-preview';
+  // Fresh keys are scoped to this build; the real admin key is never needed in PRs.
+  const adminKey=isPreview?randomBytes(32).toString('hex'):(process.env.HABOM_ADMIN_KEY||'');
+  const rateSalt=isPreview?randomBytes(32).toString('hex'):(process.env.HABOM_RATE_SALT||'');
   assert(adminKey.length>=32&&rateSalt.length>=32,'production environment variables');
   failedStage='database-client';
   const database=getDatabase();
@@ -114,7 +115,7 @@ async function run(){
   failedStage='final-verification';
   assert(verified,'all production database + deploy-scoped Blob tests');
   await writeFile('site/integration-verified.json',JSON.stringify({
-    verified:true,environment:'isolated-staging-production-build',database:'real Netlify PostgreSQL',
+    verified:true,environment:'isolated-staging-build',database:'real Netlify PostgreSQL',
     attachment:'deploy-scoped Blob (production persistent store requires separate browser test)',
     checks:'private post, file bytes, forbidden access, admin reply, cleanup'
   }));
@@ -130,7 +131,7 @@ try{await run()}catch(error){
     contextIsProduction:process.env.CONTEXT==='production',
     expectedSite:process.env.SITE_ID===SITE,
     expectedBranch:process.env.BRANCH===TARGET_BRANCH,
-    secretKeysPresent:!!process.env.HABOM_ADMIN_KEY&&!!process.env.HABOM_RATE_SALT
+    secretKeysPresent:process.env.CONTEXT==='deploy-preview'?'not-needed':!!process.env.HABOM_ADMIN_KEY&&!!process.env.HABOM_RATE_SALT
   }));
   // Don't mask the failure as approval; UI stays in private test mode.
   // This one diagnostic deployment can complete so the stage can be inspected.
