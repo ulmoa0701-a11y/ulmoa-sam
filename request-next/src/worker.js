@@ -81,7 +81,7 @@ async function storePost(req,env){
  return reply({ok:true,id,receipt:secret,createdAt:created},201);
 }
 async function readPosts(env){
- const pub=await env.DB.prepare("SELECT id,category,title,body,link,display_name,role,created_at,reply,replied_at,attachment_key,attachment_approved FROM posts WHERE visibility='public' ORDER BY created_at DESC LIMIT 40").all();
+ const pub=await env.DB.prepare("SELECT id,category,title,body,link,display_name,role,created_at,reply,replied_at,attachment_key,attachment_approved FROM posts WHERE visibility='public' AND metadata_approved=1 ORDER BY created_at DESC LIMIT 40").all();
  const locks=await env.DB.prepare("SELECT id,category,public_title,display_name,created_at,status,attachment_key,reply FROM posts WHERE visibility='list' AND metadata_approved=1 ORDER BY created_at DESC LIMIT 40").all();
  return reply({posts:pub.results.map(publicPost),locked:locks.results.map(r=>({id:r.id,category:r.category,title:r.public_title,maskedName:mask(r.display_name),date:r.created_at.slice(0,10),status:r.status,hasAttachment:!!r.attachment_key,hasReply:!!r.reply}))});
 }
@@ -118,7 +118,8 @@ async function adminAction(req,env,url){
    if(!row)return reply({error:'글을 찾지 못했습니다.'},404);
    let body;try{body=await req.json();}catch{return reply({error:'잘못된 형식입니다.'},400);}
    const status=txt(body.status,20),replyText=txt(body.reply,1200),title=txt(body.publicTitle,70)||'비밀글입니다';
-   const approved=row.visibility==='list'&&body.metadataApproved===true?1:0;
+   // All public content is moderated before being visible; hidden stays hidden.
+   const approved=['public','list'].includes(row.visibility)&&body.metadataApproved===true?1:0;
    if(!['접수','확인 중','답변 완료'].includes(status))return reply({error:'상태를 확인해 주세요.'},400);
    if(isSensitive(title))return reply({error:'공개용 제목에 개인정보를 포함할 수 없습니다.'},400);
    await env.DB.prepare('UPDATE posts SET status=?,reply=?,replied_at=?,metadata_approved=?,public_title=?,attachment_approved=? WHERE id=?')
@@ -153,8 +154,8 @@ export default {
    if(request.method==='POST'&&url.pathname==='/api/posts')return storePost(request,env);
    if(/^\/api\/public\/[a-f0-9-]+\/file$/.test(url.pathname)&&request.method==='GET'){
     const id=url.pathname.split('/')[3];
-    const row=await env.DB.prepare("SELECT attachment_key,attachment_name,attachment_approved,visibility FROM posts WHERE id=?").bind(id).first();
-    if(!row||row.visibility!=='public'||row.attachment_approved!==1)return reply({error:'공개할 수 없는 파일입니다.'},404);
+    const row=await env.DB.prepare("SELECT attachment_key,attachment_name,metadata_approved,attachment_approved,visibility FROM posts WHERE id=?").bind(id).first();
+    if(!row||row.visibility!=='public'||row.metadata_approved!==1||row.attachment_approved!==1)return reply({error:'공개할 수 없는 파일입니다.'},404);
     return downloadFile(env,row);
    }
    if(/^\/api\/mine\/[a-f0-9-]+(?:\/file)?$/.test(url.pathname)&&request.method==='GET'){
