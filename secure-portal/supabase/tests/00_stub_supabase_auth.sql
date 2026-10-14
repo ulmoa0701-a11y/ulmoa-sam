@@ -13,5 +13,5 @@ $$;
 
 -- Supabase Auth's JWT role stub for isolated PostgreSQL role-enforcement tests.
 CREATE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE AS $$
- SELECT current_user::text
+ SELECT nullif(current_setting('request.jwt.claim.role',true),'')
 $$;
