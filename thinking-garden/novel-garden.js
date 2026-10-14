@@ -26,7 +26,7 @@ function setup(id,config={}){return {id,level:Math.min(3,Math.max(1,Number(confi
 function rounds(){return 5}
 function makePackages(round){
  const pairs=[[0,1],[1,0],[0,0],[1,1],[0,1],[1,0]];
- return Array.from({length:3},(_,i)=>{const [color,stamp]=pairs[(round*3+i*2+round%3)%pairs.length];return {color,stamp};});
+ return Array.from({length:3},(_,i)=>{const [color,stamp]=pairs[(round*3+i+round%3)%pairs.length];return {color,stamp};});
 }
 function makeRound(id,round,level){
  if(id==='rulePost')return {rule:round===0?'color':round%2?'stamp':'color',packages:makePackages(round),parcel:0,rightFirst:0,shipped:[],lastRule:round===0?null:(round-1)%2?'stamp':'color'};
@@ -115,7 +115,7 @@ function render(id,d){
   const button=document.createElement('button');button.className='novel-main-button';button.type='button';button.dataset.novelAction='next';button.textContent=round+1===state.roundTotal?'탐험 결과 보기 →':'다음 이야기로 →';root.appendChild(button);
  }
  function failure(message,oldRuleInterference=false){
-  if(s.firstCorrect===null)s.firstCorrect=false;
+  s.firstCorrect=false;
   s.retries++;s.mistakes++;
   if(oldRuleInterference)s.switchedMistakes++;
   if(s.retries>=3){feedback.textContent='같은 문제가 계속 헷갈린다면 여기까지 하고 잠시 쉬어갈 수 있어요.';recovery.hidden=false;return;}
