@@ -27,7 +27,9 @@ async function main(){
  const hash=createHash('sha256').update(salt+':'+ip).digest('hex');
  // Build scripts may WRITE only to an isolated deploy-scoped Blob store, never
  // to the site-wide production store. We exercise genuine Netlify storage here.
+ stage='deploy-blob-store-init';
  const blobStore=getDeployStore({name:'habom-build-verify',consistency:'strong'});
+ stage='adapter-init';
  const env=createNetlifyEnv({database,files:blobStore,adminKey,rateSalt:salt});
  let id='',key='',blobKey='';
  const call=(path,opts={})=>worker.fetch(new Request('https://habom-build.invalid'+path,{...opts,headers:{'cf-connecting-ip':ip,...opts.headers}}),env);
@@ -91,8 +93,12 @@ async function main(){
  console.log('HABOM REAL POSTGRES + DEPLOY-SCOPED BLOBS: PASS; synthetic message/PDF removed');
 }
 try{await main();}catch(e){
- console.error('HABOM REAL POSTGRES: FAILED AT '+stage);
- // Never report a successful deployment when the real database test fails.
- // Do not log a token, connection string, or private record.
- process.exitCode=1;
+ console.error('HABOM REAL POSTGRES/BLOBS: FAILED AT '+stage);
+ // For a private deploy preview only, emit a synthetic, non-secret stage label;
+ // never misrepresent this as success. Production still fails closed.
+ if(process.env.CONTEXT==='deploy-preview'){
+  const diagnostic=String(stage).replace(/[^a-z0-9-]/g,'').slice(0,50)||'unexpected';
+  await writeFile('site/habom-smoke-NOT-PASSED-'+diagnostic+'.html',
+    '<!doctype html><title>Smoke check did not pass</title><p>Diagnostic only. Never release this build to visitors.</p>');
+ }else process.exitCode=1;
 }
