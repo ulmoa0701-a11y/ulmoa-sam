@@ -15,9 +15,14 @@ export default async function handler(req,context){
  try{
   const adminKey=Netlify.env.get('HABOM_ADMIN_KEY');
   const rateSalt=Netlify.env.get('HABOM_RATE_SALT');
-  const live=context.deploy?.published===true;
-  // Never let preview uploads write to the production file store.
-  const files=live?getStore({name:'habom-private-files',consistency:'strong'})
+  // Production uploads must survive redeploys. Previews must NEVER touch
+  // production files. Netlify context.deploy.context is the actual deploy type.
+  const deployContext=context.deploy?.context;
+  if(!['production','deploy-preview','branch-deploy'].includes(deployContext)){
+    throw Error('Unknown Netlify deployment context; declining file access');
+  }
+  const files=deployContext==='production'
+    ?getStore({name:'habom-private-files',consistency:'strong'})
     :getDeployStore({name:'habom-private-files',consistency:'strong'});
   const env=createNetlifyEnv({database:getDatabase(),files,adminKey,rateSalt});
   // Only Netlify's trusted Context IP may drive per-visitor throttling.
