@@ -7,25 +7,29 @@
   const U=(p)=>root+p;
   const groups=[
     {id:'games',name:'게임',icon:'🎮',sections:[
-      {name:'모아의 생각정원',icon:'🧠',desc:'인지게임 · 13개',href:U('thinking-garden/'),links:[
-        ['시각·주의','조건찾기 · 시각탐색',U('thinking-garden/?category=visual#gardenMap')],
-        ['기억·집행','순서 · 기억 · 억제',U('thinking-garden/?category=memory#gardenMap')],
-        ['읽기·쓰기','맞춤법 · 띄어쓰기',U('thinking-garden/?category=literacy#gardenMap')],
-        ['공간·구성','눈–손 협응',U('thinking-garden/?category=space#gardenMap')]]},
-      {name:'모아의 음악정원',icon:'🎵',desc:'음악게임 · 2개',href:U('music-garden/'),links:[
-        ['박자 맞추기','박자꽃 톡톡!',U('thinking-garden/games/rhythm-touch/')],
-        ['리코더 연습','리코더 마법정원',U('thinking-garden/recorder/')]]},
-      {name:'모아의 바람놀이터',icon:'🌬️',desc:'호흡·바람게임 · 3개',href:U('breath-garden/'),links:[
-        ['바람의 힘','세기와 색 조절',U('breath-garden/?mode=strength')],
-        ['오래 후~','2~5초 유지하기',U('breath-garden/?mode=long')],
+      {name:'모아의 인지정원',icon:'👀',desc:'기초 인지 · 17개',href:U('gardens/#cognitive'),links:[
+        ['같은 모양 찾기','시각변별 · 기초인지',U('thinking-garden/?game=sameShape')],
+        ['순서 기억하기','기억 · 순서화',U('thinking-garden/?game=memory')],
+        ['신호에 맞춰 멈추기','억제 · 신호대기',U('thinking-garden/?game=calm')],
+        ['블록 위치 맞추기','시공간 · 눈손협응',U('thinking-garden/?game=slowBlock')]]},
+      {name:'모아의 생각정원',icon:'🧩',desc:'추론·규칙 · 2개',href:U('gardens/#thinking'),links:[
+        ['바뀌는 바람우체국','규칙전환 · 인지적 유연성',U('thinking-garden/?game=rulePost')],
+        ['거울연못의 비밀','공간추론 · 회전',U('thinking-garden/?game=mirrorPond')]]},
+      {name:'모아의 학습정원',icon:'✏️',desc:'읽기·생활 · 3개',href:U('gardens/#learning'),links:[
+        ['띄어쓰기 다리 놓기','문장 · 어절',U('thinking-garden/?game=spacing')],
+        ['고장 난 간판 고치기','맞춤법 · 표현',U('thinking-garden/?game=spelling')],
+        ['가방 준비 탐험','생활학습 · 준비물',U('thinking-garden/?game=slowEveryday')]]},
+      {name:'모아의 음악정원',icon:'🎵',desc:'리듬·리코더 · 2개',href:U('gardens/#music'),links:[
+        ['박자꽃 톡톡!','리듬 · 박자',U('thinking-garden/games/rhythm-touch/')],
+        ['리코더 마법정원','운지 · 음악놀이',U('thinking-garden/recorder/')]]},
+      {name:'모아의 마음정원',icon:'💛',desc:'호흡부터 · 3가지',href:U('gardens/#heart'),links:[
+        ['바람의 힘','바람 세기 조절',U('breath-garden/?mode=strength')],
+        ['오래 후~','바람 이어가기',U('breath-garden/?mode=long')],
         ['박자 바람','박자에 맞춰 불기',U('breath-garden/?mode=beat')]]}
     ]},
-    {id:'music',name:'음악·악보',icon:'🎵',items:[
-      ['모아의 음악정원','음악게임 2가지 골라보기',U('music-garden/')],
+    {id:'music',name:'음악도구',icon:'🎼',items:[
       ['하트색깔악보 Studio','악보 직접 만들기',U('heart-score/')],
       ['붐웨커 Studio','색깔 건반·연주',U('boomwhacker/')],
-      ['박자 맞추기','박자꽃 톡톡 게임',U('thinking-garden/games/rhythm-touch/')],
-      ['리코더 운지','손가락 연습 게임',U('thinking-garden/recorder/')],
       ['완성된 색깔악보','PNG·PDF 자료',U('materials/#musicShelf')]]},
     {id:'materials',name:'활동지',icon:'📂',items:[
       ['자료실 전체','인쇄·다운로드 자료',U('materials/')],
@@ -135,11 +139,15 @@
   document.addEventListener('click',(e)=>{if(!nav.contains(e.target)){closeMenus();closeMobile()}});
   document.addEventListener('keydown',(e)=>{if(e.key==='Escape'){closeMenus();closeMobile()}});
   const known=[
-    ['모아의 생각정원','인지게임 시각탐색 주의 집중 기억 읽기 쓰기 공간',U('thinking-garden/')],
-    ['모아의 음악정원','음악게임 리듬 박자 리코더 운지 악기 음악놀이',U('music-garden/')],
-    ['시각·주의 게임','조건찾기 주의 시각탐색 집중력',U('thinking-garden/?category=visual#gardenMap')],
-    ['기억·집행 게임','작업기억 순서기억 집행기능 억제',U('thinking-garden/?category=memory#gardenMap')],
-    ['읽기·쓰기 게임','띄어쓰기 맞춤법 문해',U('thinking-garden/?category=literacy#gardenMap')],
+    ['모아의 다섯 정원','게임 정원 인지 생각 학습 음악 마음 전체 모아',U('gardens/')],
+    ['모아의 인지정원','기초인지 시지각 주의 기억 억제 눈손협응',U('gardens/#cognitive')],
+    ['모아의 생각정원','추론 사고 규칙전환 문제해결 공간추론',U('gardens/#thinking')],
+    ['모아의 학습정원','국어 한글 맞춤법 띄어쓰기 생활학습 수학',U('gardens/#learning')],
+    ['모아의 음악정원','음악 리듬 박자 리코더 악기',U('gardens/#music')],
+    ['모아의 마음정원','감정 정서 사회성 관계 바람 호흡 휴식',U('gardens/#heart')],
+    ['시각·주의 게임','조건찾기 주의 시각탐색 집중력',U('gardens/#cognitive')],
+    ['기억·집행 게임','작업기억 순서기억 반응억제',U('gardens/#cognitive')],
+    ['읽기·쓰기 게임','띄어쓰기 맞춤법 한글 문해',U('gardens/#learning')],
     ['하트색깔악보 Studio','악보 계이름 하트 악보 만들기 음악',U('heart-score/')],
     ['붐웨커 Studio','붐웨커 색깔 건반 음악',U('boomwhacker/')],
     ['리코더 운지','리코더 운지 손가락 음악게임',U('thinking-garden/recorder/')],
