@@ -1,6 +1,6 @@
 // Pure validation and sharing contract for the independent, undeployed secure portal.
 // This is not a diagnostic algorithm. Only submitted, explicitly selected fields may be shared.
-export const ENTRY_KEYS=Object.freeze(['date','event','thought','next','observation','message','note','category','mood','energy','body','action','response','impact','sketch','time','context','origin','place','signals','after','title','experience','experienceImpact','childWords']);
+export const ENTRY_KEYS=Object.freeze(['date','event','thought','next','observation','message','note','category','mood','energy','body','action','response','impact','sketch','time','context','origin','place','signals','after','title','experience','experienceImpact','childWords','abcBefore','abcBehavior','abcAfter']);
 export const SESSION_KEYS=Object.freeze(['studentReport','parentReport','observation','question','plan','functionalImpact','familyResponse','workingHypothesis','alternatives','uncertainty','burdenReview','erpReview','erpTarget','erpSafety','cbitReview','cbitTarget','cbitContext']);
 export const ORIGIN_CHOICES=Object.freeze(['직접 관찰','아이가 말함','가족에게 들음','그 밖의 사람에게 들음']);
 export const BURDEN_CHOICES=Object.freeze(['학생이 별다른 부담을 말하지 않음','부담 또는 반복 확인이 보고됨','작성 축소·중단 또는 다른 방법을 합의함']);
@@ -13,7 +13,7 @@ export function validateEntry(e){
  for(const k of ENTRY_KEYS){
   if(e[k]===undefined||e[k]===null)continue;
   if(typeof e[k]!=='string')throw new Error('문자 기록만 입력할 수 있어요.');
-  const max=k==='sketch'?5500:k==='note'?4000:k==='title'?80:k==='experience'?900:k==='experienceImpact'?500:k==='place'?100:k==='signals'?120:k==='after'?600:k==='childWords'?450:1200;
+  const max=k==='sketch'?5500:k==='note'?4000:k==='title'?80:k==='experience'?900:k==='experienceImpact'?500:k==='place'?100:k==='signals'?120:k==='after'?600:k==='childWords'?450:['abcBefore','abcBehavior','abcAfter'].includes(k)?500:1200;
   const val=trim(e[k],max);if(val)out[k]=val;
  }
  if(out.date){
