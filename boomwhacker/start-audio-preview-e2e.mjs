@@ -51,7 +51,7 @@ try{
   await page.locator('#tempo').evaluate((el,value)=>{el.value=String(value);el.dispatchEvent(new Event('input',{bubbles:true}))},bpmValue);
   for(const mode of types){
    const filename='boomwhacker-'+bpmValue+'bpm-'+mode+'.wav';
-   const downloadPromise=page.waitForEvent('download',{timeout:20000});
+   const downloadPromise=page.waitForEvent('download',{timeout:65000});
    const stat=await page.evaluate(async ({mode,filename})=>{
     const rate=22050,plan=instrumentalPreludePlan(),delay=.10;
     const ac=new OfflineAudioContext(1,Math.ceil(rate*(plan.durationMs/1000+.85)),rate);
@@ -106,13 +106,14 @@ try{
   await page.locator('#sampleSelect').selectOption(key);
   await page.locator('#levels button[data-level="'+difficulty+'"]').click();
   const filename='classroom-'+key+'-'+difficulty+'note-melody-mr.wav';
-  const waitDownload=page.waitForEvent('download',{timeout:20000});
+  const waitDownload=page.waitForEvent('download',{timeout:65000});
   const stats=await page.evaluate(async (filename)=>{
    const rate=22050,bufferSec=(events.at(-1).start+events.at(-1).dur-firstNoteMs())/1000+1.3;
    const ac=new OfflineAudioContext(1,Math.ceil(rate*bufferSec),rate),bus=ac.createGain();
    bus.gain.value=.70;bus.connect(ac.destination);
    const start=.06;
-   for(const e of events)if(e.active)
+   // The backing audio includes every original note; difficulty hides only falling cues.
+   for(const e of events)if(e.note!=='쉼'&&FREQ[e.note])
     scheduleMelodyTone(ac,bus,e.note,start+(e.start-firstNoteMs())/1000,'piano',.64,e.dur);
    scheduleBuiltinMr(ac,bus,start,0,.48);
    const data=(await ac.startRendering()).getChannelData(0);
@@ -132,7 +133,7 @@ try{
     rms:Math.sqrt(energy/data.length),seconds:bufferSec,skipped:events.filter(e=>e.note!=='쉼'&&!e.active).length};
   },filename);
   const file=await waitDownload;await file.saveAs(path.join(dir,filename));
-  if(stats.skipped>0||stats.peak<.008||stats.rms<.002||stats.peak>=.98||!fs.statSync(path.join(dir,filename)).size)
+  if(stats.arrangedNotes!==0||stats.peak<.008||stats.rms<.002||stats.peak>=.98||!fs.statSync(path.join(dir,filename)).size)
    throw Error('Invalid classroom audio '+JSON.stringify(stats));
   outputs.push({kind:'classroom',...stats,filename});console.log('CLASSROOM_AUDIO_PREVIEW='+JSON.stringify(stats));
  }

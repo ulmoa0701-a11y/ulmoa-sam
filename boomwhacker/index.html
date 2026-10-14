@@ -546,7 +546,7 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
 <div class="mobileSheetHeader"><strong>연주 설정</strong><button id="mobileSettingsClose" class="mobileSheetClose" type="button" aria-label="설정 닫기">닫기 ✕</button></div>
 <div class="sec"><div class="label">현재 곡</div><div class="songTitle" id="songTitle">작은별</div><div class="meta" id="songMeta">2/4 · 92 BPM</div></div>
 <div class="sec"><div class="label">샘플곡 바로 불러오기</div><select id="sampleSelect" class="sampleSelect" aria-label="샘플곡 선택"></select><div class="hint">하트악보의 샘플곡을 같은 음·리듬·가사로 불러옵니다.</div></div>
-<div class="sec"><div class="label">연습 음 범위</div><div class="seg" id="levels"><button data-level="3">3음</button><button data-level="5">5음</button><button data-level="8" class="on">8음</button></div><div class="hint">3·5음은 원곡의 음을 쉬운 음으로 바꾼 <strong>연습 편곡</strong>이에요. 원곡 그대로는 8음에서 확인할 수 있어요.</div><div id="rangeNote" class="rangeNote"></div>
+<div class="sec"><div class="label">연습 음 범위</div><div class="seg" id="levels"><button data-level="3">3음</button><button data-level="5">5음</button><button data-level="8" class="on">8음</button></div><div class="hint">노래와 MR은 모든 음을 원곡대로 재생해요. 3·5·8음은 <strong>화면에 내려오는 공만</strong> 선택합니다.</div><div id="rangeNote" class="rangeNote"></div>
 <div class="lessonTools"><label for="practiceSection">🎵 연주할 부분</label><select id="practiceSection" class="sampleSelect" aria-label="연습 구간 선택"><option value="all">전체 노래</option></select><p id="practiceSectionHelp" class="hint" aria-live="polite">전체 노래 또는 4마디씩 골라서 연습해요.</p></div></div>
 <div class="sec"><div class="toggles"><button id="repeatBtn" class="toggle on">↻ 반복</button><button id="soundBtn" class="toggle on">🔊 소리</button><button id="lyricBtn" class="toggle on">가사 표시</button><button id="fullBtn" class="toggle">수업 전체화면</button></div></div>
 <div class="sec playSec"><button id="startBtn" class="primary">▶ 연주 시작</button><button id="restartBtn" class="ghost">↺ 처음부터</button><div class="hint">화면 아래 색 막대를 직접 눌러도 소리가 납니다.</div></div>
@@ -599,7 +599,7 @@ const DEFAULT_INSTRUMENT_LIBRARY=[
 const DEFAULT_INSTRUMENT_IDS=['drum','maracas','bell','djembe','keys','trumpet','guitar','ukulele'];
 const DISPLAY_LABELS={note:'계이름',name:'아이 이름',instrument:'악기 그림',custom:'직접 입력'};
 const ALLOWED={3:new Set(['도','미','솔']),5:new Set(['도','레','미','솔','라']),8:new Set(ORDER)};
-const FREQ={도:261.63,레:293.66,미:329.63,파:349.23,솔:392,라:440,시:493.88,'높은도':523.25};
+const FREQ={도:261.63,'도#':277.18,레:293.66,'레#':311.13,미:329.63,파:349.23,'파#':369.99,솔:392,'솔#':415.30,라:440,'라#':466.16,'시♭':466.16,시:493.88,'높은도':523.25,'높은도#':554.37,'높은레':587.33,'높은레#':622.25,'높은미':659.25,'높은파':698.46,'높은파#':739.99,'높은솔':783.99};
 const MELODY_LABELS={none:'멜로디 없음',piano:'피아노',xylophone:'실로폰',boom:'붐웨커'};
 const MIX_LABELS={melody:'멜로디만',both:'멜로디 + MR',mr:'MR만'};
 const MR_CHORDS=[
@@ -634,8 +634,8 @@ const butterflyF=transpose(butterfly,'butterfly-f','나비야 · F장조',{'도'
 
 // Short, newly composed C-major classroom motifs (melodies, rhythms and lyrics),
 // not copies of commercial songs. 3/5 notes can be played in their entirety.
-const moaSignal=song('moa-signal','모아의 출동 신호',108,2,4,[
- [E('도',.5,'준'),E('미',.5,'비'),E('솔',1,'해')],[E('솔',.5,'출'),E('미',.5,'동'),E('도',1,'!')],
+const moaSignal=song('moa-signal','모아의 출발 신호',108,2,4,[
+ [E('도',.5,'준'),E('미',.5,'비'),E('솔',1,'해')],[E('솔',.5,'출'),E('미',.5,'발'),E('도',1,'!')],
  [E('도',.5,'톡'),E('도',.5,'톡'),E('미',.5,'짝'),E('솔',.5,'짝')],[E('미',1,'시'),E('도',1,'작')],
  [E('도',.5,'함'),E('미',.5,'께'),E('솔',1,'가')],[E('솔',.5,'하'),E('미',.5,'나'),E('도',1,'둘')],
  [E('솔',.5,'쨘'),E('미',.5,'쨘'),E('도',.5,'다'),E('미',.5,'시')],[E('도',2,'작')]
@@ -811,16 +811,8 @@ function updateScoreMotion(){
   }
 }
 function outOfBaseCount(){return events.filter(e=>e.note!=='쉼'&&!ALLOWED[8].has(e.note)).length}
-// The original imported/sample score is never overwritten. A short phrase is
-// selected BEFORE rendering; simplified pitches are explicitly labeled as
-// practice arrangements rather than silently dropping missing lanes.
-const LESSON_PITCHES={'도':0,'도#':1,'레':2,'레#':3,'미':4,'파':5,'파#':6,'솔':7,'솔#':8,'라':9,'라#':10,'시♭':10,'시b':10,'시':11,'높은도':12,'높은레':14,'높은미':16};
-function lessonPitch(note,notes){
- if(notes.includes(note))return note;
- const n=LESSON_PITCHES[String(note||'').replace('♯','#')];
- if(!Number.isFinite(n))return note; // Do not fabricate unknown imported notes.
- return notes.map(x=>({note:x,dist:Math.abs(LESSON_PITCHES[x]-n)})).sort((a,b)=>a.dist-b.dist||LESSON_PITCHES[b.note]-LESSON_PITCHES[a.note])[0].note;
-}
+// Keep ALL pitches/durations in the backing track and audible melody.
+// The practice level filters only the falling-note cues and playable tubes.
 function refreshPracticeSections(){
  const box=$('#practiceSection');if(!box)return;
  const count=(currentSong.measures||[]).length,options=[['all','전체 노래']];
@@ -836,15 +828,8 @@ function effectiveScore(){
  const all=currentSong.measures||[],start=practiceSection==='all'?0:Math.max(0,Math.min(all.length-1,Number(practiceSection)||0));
  scoreStartBar=start;
  const chosen=practiceSection==='all'?all:all.slice(start,start+4);
- const knownSample=!!findSample(currentSong.key)&&!loadedFromTransfer;
- const target=ALLOWED[level];arrangedNotes=0;
- return chosen.map(bar=>bar.map(item=>{
-  const note=canonical(item.note);
-  if(note==='쉼'||target.has(note)||!knownSample||level===8)return {...item};
-  const easy=lessonPitch(note,ORDER.filter(n=>target.has(n)));
-  if(easy!==note)arrangedNotes++;
-  return {...item,note:easy};
- }));
+ arrangedNotes=0;
+ return chosen.map(bar=>bar.map(item=>({...item})));
 }
 function build(){events=[];scorePaintIndex=-999;playbackMeasures=effectiveScore();let t=FIRST_NOTE_LEAD_MS,u=beatMs(),eventIndex=0;for(const [mi,m] of playbackMeasures.entries())for(const e of m){let d=Math.max(.125,Number(e.dur)||1),n=canonical(e.note);events.push({note:n,lyric:e.lyric||'',start:t,dur:d*u,active:n!=='쉼'&&ALLOWED[level].has(n),supported:n==='쉼'||ALLOWED[8].has(n),measure:mi,index:eventIndex++});t+=d*u}totalMs=t+u*1.5;lastLyricKey='';renderScore();updateTime();updateLyricTrack(true);updateRangeInfo()}
 function buildSampleSelect(){const s=$('#sampleSelect');s.innerHTML='<option value="">현재/가져온 곡</option>';for(const group of ['동요','오리지널','수업용']){const g=document.createElement('optgroup');g.label=group;for(const x of SAMPLES.filter(v=>v.category===group)){const o=document.createElement('option');o.value=x.key;o.textContent=x.title;g.appendChild(o)}s.appendChild(g)}s.value=currentSampleKey||'';const mobile=$('#mobileSongSelect');if(mobile){mobile.innerHTML=s.innerHTML;mobile.value=s.value}}
@@ -891,7 +876,7 @@ function scoreSheetCanvas(start=0,count=events.length,paged=false){
   ctx.textAlign='right';ctx.fillText('총 '+events.length+'개 음표',PRINT_W-62,canvas.height-33);
   return canvas;
 }
-function lessonFileSuffix(){return (level===8?'':'_'+level+'음연습편곡')+(practiceSection==='all'?'':'_'+(scoreStartBar+1)+'-'+(scoreStartBar+playbackMeasures.length)+'마디')}
+function lessonFileSuffix(){return (level===8?'':'_'+level+'음공만')+(practiceSection==='all'?'':'_'+(scoreStartBar+1)+'-'+(scoreStartBar+playbackMeasures.length)+'마디')}
 function scoreFileName(ext){return safeVideoName(currentSong.title)+lessonFileSuffix()+'_붐웨커_색깔악보.'+ext}
 function saveBlob(blob,name){
   const url=URL.createObjectURL(blob),link=document.createElement('a');
@@ -953,15 +938,13 @@ async function downloadScore(kind){
 }
 
 function updateRangeInfo(){
- let outside=outOfBaseCount(),box=$('#rangeNote');
- const easy=arrangedNotes>0?level+'음 연습 편곡 · 바뀐 음 '+arrangedNotes+'개. 원곡과 멜로디가 다를 수 있어요.':'';
- const importedCaution=loadedFromTransfer&&level<8?'가져온 악보는 원곡 음을 임의로 바꾸지 않아요. 범위 밖 음은 8음에서 확인하거나 먼저 원본 악보를 편집해 주세요.':'';
- box.classList.toggle('show',outside>0||arrangedNotes>0||!!importedCaution);
- box.textContent=outside?'현재 연주할 악보에는 선택된 음 범위 밖 음이 '+outside+'개 있어요. 다른 음으로 바꾸지 않고 회색으로 표시하며 재생에서 제외합니다.':(easy||importedCaution);
+ const invisible=events.filter(e=>e.note!=='쉼'&&!e.active).length,box=$('#rangeNote');
+ const out=outOfBaseCount();
+ box.classList.toggle('show',invisible>0);
+ box.textContent=invisible?level+'음 모드 · 공은 해당 음 '+events.filter(e=>e.active).length+'개만 내려옵니다. 나머지 '+invisible+'개 음도 원곡 멜로디와 MR에서 그대로 들려요.':'';
  const part=practiceSection==='all'?'전체 노래':(scoreStartBar+1)+'~'+(scoreStartBar+playbackMeasures.length)+'마디 연습';
- $('#practiceSectionHelp').textContent=part+(arrangedNotes?' · 원곡을 쉬운 음으로 바꾼 연습 편곡':' · 짧게 연습한 뒤 전체곡도 연주할 수 있어요');
- if(outside)$('#stageStatus').textContent='범위 밖 음 '+outside+'개';
- else if(arrangedNotes)$('#stageStatus').textContent=level+'음 연습 편곡';
+ $('#practiceSectionHelp').textContent=part+' · 모든 음의 노래는 그대로, 공만 '+level+'음 선택';
+ if(events.some(e=>e.note!=='쉼'&&!FREQ[e.note]))$('#stageStatus').textContent='일부 특수 음표는 소리 확인 필요';
  else if(loadedFromTransfer)$('#stageStatus').textContent='하트악보에서 가져옴';
  else $('#stageStatus').textContent=practiceSection==='all'?'준비':part;
 }
@@ -1117,7 +1100,8 @@ function scheduleMelodyTone(ac,dest,n,when,mode=melodyMode,volume=melodyVolume,n
 }
 function wantsMelody(){return mixMode==='melody'||mixMode==='both'}
 function wantsMr(){return mixMode==='mr'||mixMode==='both'}
-function firstNoteMs(){const e=events.find(x=>x.active);return e?e.start:FIRST_NOTE_LEAD_MS}
+// Song timing must not move when an early pitch has no falling ball.
+function firstNoteMs(){return events[0]?.start??FIRST_NOTE_LEAD_MS}
 function stopMr(){if(mrSource){try{mrSource.onended=null;mrSource.stop()}catch(e){}}mrSource=null;mrGain=null}
 function scheduleMrBuffer(ac,dest,when,offsetSec=0,volume=mrVolume){if(!mrBuffer)return null;const offset=Math.max(0,Number(offsetSec)||0);if(offset>=mrBuffer.duration)return null;const src=ac.createBufferSource(),g=ac.createGain();src.buffer=mrBuffer;g.gain.setValueAtTime(Math.max(0,Math.min(1,Number(volume)||0)),when);src.connect(g);g.connect(dest);src.start(when,offset);return{src,g}}
 function mrBaseNote(n){return String(n||'').replace(/^높은|^낮은/g,'').replace(/♯/g,'#')}
@@ -1131,7 +1115,7 @@ const TWINKLE_CHORDS=[
 ];
 function isTwinkleScore(){
  const m=playbackMeasures;
- return level===8&&practiceSection==='all'&&(currentSong.key==='twinkle'||currentSong.title==='작은별')
+ return practiceSection==='all'&&(currentSong.key==='twinkle'||currentSong.title==='작은별')
     &&m.length>=8&&m[0]?.[0]?.note==='도'&&m[1]?.[0]?.note==='솔';
 }
 function chordByName(name){return MR_CHORDS.find(x=>x.name===name)||MR_CHORDS[0]}
@@ -1168,7 +1152,7 @@ function transposedChord(chord,change){
 }
 function chordForMeasure(mi){
  const key=String(currentSong.key||'');
- const rawHarmony=level===8&&arrangedNotes===0;
+ const rawHarmony=arrangedNotes===0;
  const originalBar=scoreStartBar+mi;
  const transposition=rawHarmony?BUTTERFLY_TRANSPOSITIONS[key]:null;
  if(transposition){
@@ -1323,7 +1307,7 @@ function queueUpcomingMelody(){
  const limit=audioCtx.currentTime+AUDIO_LOOKAHEAD_SEC;
  while(nextMelodyNoteIndex>=0&&nextMelodyNoteIndex<events.length){
   const e=events[nextMelodyNoteIndex];
-  if(!e.active){nextMelodyNoteIndex++;continue}
+  if(e.note==='쉼'||!FREQ[e.note]){nextMelodyNoteIndex++;continue}
   const when=songAudioStartAt+(e.start-firstNoteMs())/1000;
   if(when>limit)break;
   scheduleMelodyTone(audioCtx,songMelodyGain,e.note,
@@ -1339,7 +1323,7 @@ function syncLiveSongMelody(){
  songAudioStartAt=audioCtx.currentTime+(firstNoteMs()-elapsed)/1000;
  audioRenderSongStartAt=songAudioStartAt;
  const gain=audioCtx.createGain();gain.connect(audioCtx.destination);songMelodyGain=gain;
- let next=events.findIndex(e=>e.active&&e.start+e.dur>elapsed+.5);
+ let next=events.findIndex(e=>e.note!=='쉼'&&FREQ[e.note]&&e.start+e.dur>elapsed+.5);
  if(next<0)return;
  const e=events[next],past=Math.max(0,elapsed-e.start);
  const at=Math.max(audioCtx.currentTime+.006,
@@ -1560,7 +1544,7 @@ function introSound(beats,intervalMs){
    const scheduled=scheduleMrTrack(ac,ac.destination,songStart,0,mrVolume);
    if(scheduled){mrSource=scheduled.src;mrGain=scheduled.g;introScheduledMr=true}
   }
-  const firstIndex=events.findIndex(e=>e.active),first=events[firstIndex];
+  const firstIndex=events.findIndex(e=>e.note!=='쉼'&&FREQ[e.note]),first=events[firstIndex];
   if(first&&wantsMelody()&&melodyMode!=='none'){
    const gain=ac.createGain();gain.connect(ac.destination);
    introFirstMelodyScheduled=scheduleMelodyTone(ac,gain,first.note,songStart,melodyMode,melodyVolume,first.dur);
@@ -1571,7 +1555,7 @@ function introSound(beats,intervalMs){
     nextMelodyNoteIndex=firstIndex+1;
     for(let i=firstIndex+1;i<Math.min(events.length,firstIndex+11);i++){
      const e=events[i];
-     if(e.active)scheduleMelodyTone(ac,gain,e.note,songStart+(e.start-firstNoteMs())/1000,melodyMode,melodyVolume,e.dur);
+     if(e.note!=='쉼'&&FREQ[e.note])scheduleMelodyTone(ac,gain,e.note,songStart+(e.start-firstNoteMs())/1000,melodyMode,melodyVolume,e.dur);
      nextMelodyNoteIndex=i+1;
     }
    }
@@ -1821,7 +1805,7 @@ async function exportVideo(){
     if(introMode==='interlude')scheduleInterludeMusic(ac,gm,ac.currentTime+intro/1000,beatMs(),meter);
     else scheduleRhythmGuide(ac,gm,ac.currentTime+intro/1000,prepBeats,beatMs(),meter);
    }
-   if(wantsMelody()&&melodyMode!=='none')for(const e of events)if(e.active)
+   if(wantsMelody()&&melodyMode!=='none')for(const e of events)if(e.note!=='쉼'&&FREQ[e.note])
     scheduleMelodyTone(ac,dest,e.note,base+(e.start-(isGuidedStartMode()?firstSongNote:0))/1000,melodyMode,melodyVolume,e.dur);
    if(wantsMr())scheduleMrTrack(ac,dest,base+(isGuidedStartMode()?0:firstSongNote/1000),0,mrVolume);
   }

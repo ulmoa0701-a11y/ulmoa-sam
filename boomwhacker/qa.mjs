@@ -172,13 +172,16 @@ async function basicCase(name,width,height){
   await page.locator('#levels button[data-level="8"]').click();
   check(await page.locator('.tube:not(.inactive)').count()===8,`${name}: 8-note mode active tube count wrong`);
 
+  await page.locator('#sampleSelect').selectOption('moa-signal');
+  check((await page.locator('#songTitle').innerText())==='모아의 출발 신호',`${name}: revised start cue title not applied`);
+  check(await page.evaluate(()=>currentSong.measures[1].map(x=>x.lyric).join('')==='출발!'),`${name}: start cue lyric and melody syllables don't agree`);
   await page.locator('#sampleSelect').selectOption('bear');
   check((await page.locator('#songTitle').innerText())==='곰 세 마리',`${name}: bear sample did not load`);
   check(await page.locator('.beat').count()>20,`${name}: bear sample score is unexpectedly short`);
   await page.locator('#sampleSelect').selectOption('butterfly-d');
   check((await page.locator('#songTitle').innerText()).includes('D장조'),`${name}: transposed sample did not load`);
   check(await page.locator('.beat.unsupported').count()>0,`${name}: chromatic notes were not marked out of base range`);
-  check((await page.locator('#rangeNote').innerText()).includes('다른 음으로 바꾸지 않고'),`${name}: safe out-of-range explanation missing`);
+  check((await page.locator('#rangeNote').innerText()).includes('나머지')&&(await page.locator('#rangeNote').innerText()).includes('멜로디와 MR'),`${name}: 8-note visual limits should not imply muted original audio`);
   await page.locator('#sampleSelect').selectOption('twinkle');
 
   await page.locator('#tempo').evaluate((el)=>{el.value='80';el.dispatchEvent(new Event('input',{bubbles:true}))});
