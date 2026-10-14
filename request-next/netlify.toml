@@ -1,4 +1,5 @@
 [build]
+  command = "node netlify/production-smoke.mjs"
   publish = "site"
   functions = "netlify/functions"
 
