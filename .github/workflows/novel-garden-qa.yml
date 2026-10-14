@@ -1,0 +1,52 @@
+name: Novel Thinking Garden - three gameplay mechanics QA
+on:
+  pull_request:
+    paths:
+      - 'thinking-garden/**'
+      - 'qa/novel-garden-qa.cjs'
+      - '.github/workflows/novel-garden-qa.yml'
+  push:
+    branches: [main, feat/three-new-thinking-garden-mechanics-20261014]
+    paths:
+      - 'thinking-garden/**'
+      - 'qa/novel-garden-qa.cjs'
+      - '.github/workflows/novel-garden-qa.yml'
+permissions:
+  contents: read
+jobs:
+  native-novel-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Install browser test dependencies
+        run: |
+          npm install --no-save --no-package-lock playwright-core@1.56.1
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Validate new JavaScript code
+        run: |
+          node --check thinking-garden/novel-garden.js
+          node --check thinking-garden/app.js
+          node --check qa/novel-garden-qa.cjs
+      - name: Start site
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/novel-garden-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8765/thinking-garden/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/novel-garden-server.log; exit 1
+      - name: Play all three experiences on desktop and mobile
+        run: node qa/novel-garden-qa.cjs
+      - name: QA screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: novel-garden-qa-screenshots
+          path: qa/novel-garden-screenshots/
+          if-no-files-found: ignore
