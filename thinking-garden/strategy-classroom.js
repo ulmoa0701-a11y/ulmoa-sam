@@ -11,7 +11,7 @@ function relative(origin,target){
 window.StrategyGarden.register('classroomMove',{
  begin(s,r,round){
   const n=r.level===1?2:r.level===2?3:4;
-  const places=r.level===1?simple[round]:advanced[round].slice(0,n);
+  const places=r.level===1?simple[round%5]:advanced[round%5].slice(0,n);
   r.tasks=places.map((pos,i)=>({item:(round+i)%things.length,pos,origin:r.level===3&&i%2===1?places[i-1]:4,reference:r.level===3&&i%2===1?(round+i-1)%things.length:null}));
   r.doneItems={};r.step=0;r.selectedItem=null;r.selectedPos=null;r.phase='arrange';
  },
