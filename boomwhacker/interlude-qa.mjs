@@ -182,6 +182,78 @@ try{
    if(result.allScorePhrasePreludes.some(x=>!x.valid))
      throw Error('A standard song intro does not follow its actual written ending '+JSON.stringify(result.allScorePhrasePreludes));
 
+   // Regression: a scheduled piano accompaniment note must NOT ring
+   // across a written melody note outside its chord. Covers the whole
+   // catalogue, both MR patterns and transposed D/F butterfly pieces.
+   result.harmonySafety=await page.evaluate(()=>{
+     const original={song:currentSong,bpm,level};
+     const realBacking=backingNote,realShaker=softShaker;
+     const reports=[];let played=0;
+     try{
+      level=8;softShaker=()=>{};
+      for(const sample of SAMPLES){
+       currentSong=clone(sample);bpm=100;build();
+       let failures=[],scheduled=0;
+       for(const style of ['soft','kids']){
+        const calls=[];
+        backingNote=(ac,dest,hz,when,volume,hold)=>{
+         calls.push({hz,when,hold});
+         return true;
+        };
+        const ac=new OfflineAudioContext(1,44100,44100),start=.05;
+        const originalStyle=mrStyle;mrStyle=style;
+        try{scheduleBuiltinMr(ac,ac.destination,start,0,.7)}
+        finally{mrStyle=originalStyle}
+        scheduled+=calls.length;
+        for(const playedTone of calls){
+         for(const e of events){
+          if(e.note==='쉼')continue;
+          const chord=chordForMeasure(e.measure);
+          if(chord.tones.includes(mrBaseNote(e.note)))continue;
+          const barNotes=events.filter(n=>n.measure===e.measure);
+          const barStart=start+(barNotes[0].start-firstNoteMs())/1000;
+          const barEnd=barStart+(barNotes.at(-1).start+barNotes.at(-1).dur-barNotes[0].start)/1000;
+          if(playedTone.when<barStart-.0001||playedTone.when>=barEnd)continue;
+          const pitchStart=start+(e.start-firstNoteMs())/1000;
+          const pitchEnd=pitchStart+e.dur/1000;
+          if(playedTone.when<pitchEnd-.001&&playedTone.when+playedTone.hold>pitchStart+.002){
+           failures.push({style,measure:e.measure+1,note:e.note,
+             chord:chord.name,played:playedTone.when,melody:pitchStart,hold:playedTone.hold});
+          }
+         }
+        }
+       }
+       reports.push({song:sample.key,scheduled,failures:failures.slice(0,5)});
+       played+=scheduled;
+      }
+     }finally{
+      backingNote=realBacking;softShaker=realShaker;
+      currentSong=original.song;bpm=original.bpm;level=original.level;build();
+     }
+     return{played,reports};
+   });
+   if(result.harmonySafety.played<100||result.harmonySafety.reports.some(x=>x.failures.length))
+    throw Error('Wrong-chord accompaniment still overlaps a melody note '+JSON.stringify(result.harmonySafety));
+   result.correctedHarmony=await page.evaluate(()=>{
+    const old=currentSong,oldBpm=bpm;
+    try{
+     currentSong=clone(twinkle);bpm=92;build();
+     const star=[9,10,13,14].map(i=>({bar:i+1,note:events.find(e=>e.measure===i).note,chord:chordForMeasure(i).name}));
+     currentSong=clone(bear);build();
+     const bearChord=chordForMeasure(9).name;
+     currentSong=clone(butterflyD);build();
+     const d={chord:chordForMeasure(1),note:mrBaseNote(events.find(e=>e.measure===1).note)};
+     currentSong=clone(butterflyF);build();
+     const f={chord:chordForMeasure(1),note:mrBaseNote(events.find(e=>e.measure===1).note)};
+     return{star,bearChord,d:{name:d.chord.name,notes:d.chord.tones,pitch:d.note},f:{name:f.chord.name,notes:f.chord.tones,pitch:f.note}};
+    }finally{currentSong=old;bpm=oldBpm;build()}
+   });
+   if(result.correctedHarmony.star.map(x=>x.chord).join(',')!=='F,C,F,C'||
+      result.correctedHarmony.bearChord!=='G'||
+      !result.correctedHarmony.d.notes.includes(result.correctedHarmony.d.pitch)||
+      !result.correctedHarmony.f.notes.includes(result.correctedHarmony.f.pitch))
+    throw Error('Known harmonic dissonance was not corrected '+JSON.stringify(result.correctedHarmony));
+
    const mu=result.musicality;
    if(mu.notes.join(',')!=='도,도,솔,솔,라,라,솔'||
       mu.harmonies.join(',')!=='C,C,F,C,F,C,G,C'||
