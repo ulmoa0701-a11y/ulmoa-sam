@@ -13,3 +13,9 @@
 .practice-result-summary strong{display:block;font-size:16px}
 .practice-break button:focus-visible,.practice-session select:focus-visible{outline:3px solid #dcbb4a;outline-offset:3px}
 @media(max-width:620px){.practice-session{gap:6px;padding:9px 12px}.practice-session span{flex-basis:100%}.practice-break{padding:21px 10px}.practice-break p{font-size:13px}}
+
+.basic-observation{margin:14px auto 0;padding:12px 16px;max-width:640px;border-radius:15px;background:#f9fcf5;border:1px dashed #c9dac9;color:#506d57;font-size:13px;text-align:left}
+.basic-observation summary{cursor:pointer;font-size:13px;font-weight:900}
+.basic-observation-items{background:white;padding:12px;line-height:1.7;border-radius:10px;margin:12px 0;font-size:12px}
+.basic-observation-export{min-height:44px;border:2px solid #91ba95;border-radius:11px;padding:9px 14px;background:white;color:#305b43;font-weight:800;cursor:pointer}
+.basic-observation small{font-size:11px;color:#637a67;display:block;margin-top:8px;line-height:1.5}
