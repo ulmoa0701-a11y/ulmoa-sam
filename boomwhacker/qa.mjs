@@ -179,6 +179,7 @@ async function basicCase(name,width,height){
   await page.locator('#levels button[data-level="custom"]').click();
   check(await page.locator('#customNoteDialog').isVisible(),name+': custom picker did not open');
   check(await page.locator('#customNoteChoices button').count()===8,name+': picker does not show all eight pitches');
+  check((await page.locator('#customNoteChoices button[data-note="높은도"] small').innerText()).includes('공'),name+': note choices must preview the number of falling balls');
   for(const note of ['도','미','레'])await page.locator('#customNoteChoices button[data-note="'+note+'"]').click();
   check((await page.locator('#customNoteStatus').innerText()).includes('2개'),name+': picker note count wrong');
   await page.locator('#customNoteApply').click();
@@ -718,6 +719,8 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
  const after=await page.evaluate(()=>window.__boomVideoQA.noteSelection());
  check(after.level==='custom'&&after.selected.join(',')==='높은도','persistence: custom notes/mode did not reload '+JSON.stringify(after));
  check(await page.locator('.tube:not(.inactive)').count()===1,'persistence: saved note did not remain the only active tube');
+ check((await page.locator('#rangeNote').innerText()).includes('선택한 음이 없어서 공이 내려오지 않아요'),
+   'persistence: an empty target song should explain why no balls fall');
  await page.locator('#mobileSongSelect').selectOption('bear');
  const newSong=await page.evaluate(()=>window.__boomVideoQA.noteSelection());
  check(newSong.level==='custom'&&newSong.selected.join(',')==='높은도',
