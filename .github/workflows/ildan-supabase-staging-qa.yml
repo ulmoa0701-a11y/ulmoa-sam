@@ -54,6 +54,11 @@ jobs:
               const r=await fetch(base+ep,{signal:AbortSignal.timeout(15000)});
               if(r.status!==401)throw Error('Unsafe anonymous '+ep+' status '+r.status);
             }
+            const badInvite=await fetch(base+'invite-preview',{method:'POST',headers:{Origin:'https://ulmoa0701-a11y.github.io','Content-Type':'application/json'},body:JSON.stringify({code:'not-valid'}),signal:AbortSignal.timeout(15000)});
+            if(badInvite.status!==400)throw Error('Invalid invite preview was not rejected '+badInvite.status);
+            const unused='0'.repeat(64);
+            const blockedEnrollment=await fetch(base+'invite-register',{method:'POST',headers:{Origin:'https://ulmoa0701-a11y.github.io','Content-Type':'application/json'},body:JSON.stringify({code:unused}),signal:AbortSignal.timeout(15000)});
+            if(blockedEnrollment.status!==503)throw Error('Ungated email-free signup endpoint '+blockedEnrollment.status);
             const invalid=await fetch(base+'me',{headers:{Origin:'https://evil.example'},signal:AbortSignal.timeout(15000)});
             if(invalid.status!==403)throw Error('Cross-site request was not rejected');
             console.log('PASS live backend locked down, anonymous & cross-site requests blocked');
