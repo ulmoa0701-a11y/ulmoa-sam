@@ -505,12 +505,29 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
 }
 #introMode option{font-weight:700}
 @media(min-width:801px){.introModeSelect{width:100%;min-width:0;max-width:100%;font-size:13px;padding:10px 12px}}
-.lessonTools{display:grid;gap:7px;margin-top:13px;padding:10px 11px;border:1px solid #dbe6ef;background:#f8fbff;border-radius:12px}
-.lessonTools label{font-size:13px;font-weight:750;color:#344660}
+.lessonTools{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:6px;margin-top:6px;padding:4px 0;border:0;background:transparent;border-radius:0}
+.lessonTools label{font-size:11px;font-weight:750;color:#344660;white-space:nowrap}
 .lessonTools .hint{margin:0;font-size:12px;line-height:1.55}
-.lessonTools select{width:100%;min-height:40px;font-size:13px}
-.introLengthTools{margin-top:10px}
-@media(max-width:800px){.lessonTools{padding:9px 10px}.lessonTools select{min-height:43px}}
+.lessonTools select{width:100%;min-height:31px;font-size:12px;padding:5px 7px;border-radius:9px}
+.introLengthTools{margin-top:4px}
+@media(max-width:800px){.lessonTools{padding:4px 0}.lessonTools select{min-height:38px}}
+@media(min-width:801px){
+ .controls{padding:9px 12px}
+ .controls .sec+.sec{margin-top:6px;padding-top:6px}
+ .controls .hint:not(.mrStatus):not(.videoStatus){display:none}
+ .controls .label{margin-bottom:3px}
+ .controls .songTitle{font-size:18px}
+ .controls .sampleSelect{padding:6px 9px;border-radius:10px;font-size:12px}
+ .controls .seg button,.controls .toggle{padding:6px 4px;font-size:12px;border-radius:10px}
+ .controls .mrVol{margin-top:4px}
+ .controls .mrFile{padding:4px 6px;font-size:11px}
+ .controls .mrFile::file-selector-button{padding:5px 7px}
+ .controls .playSec{display:grid;grid-template-columns:1.2fr .8fr;gap:5px;align-items:center}
+ .controls .playSec .primary,.controls .playSec .ghost{margin:0;padding:9px 4px;border-radius:11px;font-size:12px}
+ .controls .videoSec .videoBtn{padding:9px;border-radius:11px;font-size:12px}
+ .controls .videoOptions{margin-top:4px;gap:4px}
+ .controls .videoOption{padding:4px;font-size:10px}
+}
 </style>
 <link rel="stylesheet" href="./mobile-layout.css?v=20261009" />
 </head>
