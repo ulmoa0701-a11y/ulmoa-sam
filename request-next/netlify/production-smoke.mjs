@@ -23,8 +23,14 @@ async function run(){
   if(!['production','deploy-preview'].includes(process.env.CONTEXT))
     throw Error('Unrecognized deploy context');
   failedStage='environment-site-branch';
-  if(process.env.SITE_ID!==SITE||process.env.BRANCH!==TARGET_BRANCH)
-    throw Error('Staging build identity does not match. Refusing to access data.');
+  if(process.env.SITE_ID!==SITE){
+    failedStage='environment-site-id';
+    throw Error('Staging site identity mismatch');
+  }
+  if(process.env.BRANCH!==TARGET_BRANCH){
+    failedStage='environment-branch';
+    throw Error('Staging Git branch identity mismatch');
+  }
   failedStage='environment-secrets';
   const isPreview=process.env.CONTEXT==='deploy-preview';
   // Fresh keys are scoped to this build; the real admin key is never needed in PRs.
