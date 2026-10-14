@@ -18,6 +18,7 @@ class DB {
    bind(...a){this.args=a;return this;},
    async first(){
     const a=this.args;
+    if(sql.includes('FROM habom_runtime_checks'))return null;
     if(sql.startsWith('SELECT COUNT(*) AS n FROM posts'))return {n:db.posts.length};
     if(sql.startsWith('SELECT COUNT(*)'))return {n:db.rate.filter(x=>x.key===a[0]&&x.created_at>a[1]).length};
     if(sql.includes('FROM posts WHERE id='))return db.posts.find(x=>x.id===a[0])||null;
