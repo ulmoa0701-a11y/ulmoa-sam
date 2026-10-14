@@ -15,11 +15,11 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  page.on('pageerror',e=>errors.push(e.message));
  const head=await page.goto(base+'/thinking-garden/',{waitUntil:'networkidle'});
  check(head.ok(),name+': thinking garden HTTP error');
- check(await page.locator('#gardenGamePanel .library-card').count()===14 && await page.locator('#gardenGamePanel .library-card[data-open]:not([data-open="slowLook"])').count()===13 && await page.locator('#gardenGamePanel .library-card[data-open="slowLook"]').count()===1,name+': original 13 games must remain alongside expedition');
+ check(await page.locator('#gardenGamePanel .library-card').count()===19 && await page.locator('#gardenGamePanel .library-card[data-open]:not([data-open^="slow"])').count()===13 && await page.locator('#gardenGamePanel .library-card[data-open^="slow"]').count()===1,name+': original 13 games must remain alongside expedition');
  check(await page.locator('[data-garden-view]').count()===3,name+': cognitive views not found');
  check(await page.locator('#gardenGamePanel').isVisible(),name+': cognitive games not default');
  await page.locator('.category-tab[data-category="visual"]').click();
- check(await page.locator('#gardenGamePanel .library-card:visible').count()===5,name+': visual attention filter wrong');
+ check(await page.locator('#gardenGamePanel .library-card:visible').count()===6,name+': visual attention filter wrong');
  await page.locator('[data-garden-view="materials"]').click();
  const visualPdf=page.locator('#gardenResourceCards a[href*="/materials/#cognitiveShelf"]');
  check(await visualPdf.count()>=1,name+': visual attention resource shelf missing');
@@ -34,11 +34,11 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  check(await page.locator('#gardenResourceCards a[href*="/notes/#memo-reading-fluency"]').count()===1,name+': reading-learning source missing');
  await page.locator('.category-tab[data-category="language"]').click();
  await page.locator('[data-garden-view="games"]').click();
- check(await page.locator('[data-garden-view="learn"]').getAttribute('aria-selected')==='true',name+': category with zero games should open existing information');
+ check(await page.locator('#gardenGamePanel .library-card[data-open="slowName"]:visible').count()===1,name+': language category should show naming game');
  check(await page.locator('#gardenResourceCards a[href*="/notes/#memo-receptive-expressive"]').count()===1,name+': language resource missing');
  await page.locator('.category-tab[data-category="visual"]').click();
  await page.locator('[data-garden-view="games"]').click();
- check(await page.locator('#gardenGamePanel .library-card:visible').count()===5,name+': game view not recovered after resources');
+ check(await page.locator('#gardenGamePanel .library-card:visible').count()===6,name+': game view not recovered after resources');
  check(await page.locator('.moa-related-links a[href="../materials/#socialShelf"]').count()===1,name+': social resources disappeared');
  const newLink=page.locator('[data-garden-view="materials"]');
  await newLink.focus();
