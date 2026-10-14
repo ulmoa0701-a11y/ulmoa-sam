@@ -701,6 +701,36 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   report.push({name:'videoProbe',bytes:probe.size,mime:probe.mime});
   await context.close();
 }
+// Persist the user's actual custom selection across reload and song changes.
+{
+ const context=await browser.newContext({viewport:{width:390,height:844}});
+ const page=await context.newPage(),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(BASE,{waitUntil:'networkidle'});
+ await page.locator('#mobileSettingsBtn').click();
+ await page.locator('#levels button[data-level="custom"]').click();
+ for(const n of ['도','미','솔'])await page.locator('#customNoteChoices button[data-note="'+n+'"]').click().catch(()=>{});
+ // If just one remains, remove that note only after adding the new selection.
+ await page.locator('#customNoteChoices button[data-note="높은도"]').click();
+ await page.locator('#customNoteChoices button[data-note="도"]').click();
+ await page.locator('#customNoteChoices button[data-note="미"]').click();
+ await page.locator('#customNoteChoices button[data-note="솔"]').click();
+ await page.locator('#customNoteApply').click();
+ const before=await page.evaluate(()=>window.__boomVideoQA.noteSelection());
+ check(before.level==='custom'&&before.selected.join(',')==='높은도','persistence: picking just high C failed '+JSON.stringify(before));
+ await page.reload({waitUntil:'networkidle'});
+ const after=await page.evaluate(()=>window.__boomVideoQA.noteSelection());
+ check(after.level==='custom'&&after.selected.join(',')==='높은도','persistence: custom notes/mode did not reload '+JSON.stringify(after));
+ check(await page.locator('.tube:not(.inactive)').count()===1,'persistence: saved note did not remain the only active tube');
+ await page.locator('#mobileSongSelect').selectOption('bear');
+ const newSong=await page.evaluate(()=>window.__boomVideoQA.noteSelection());
+ check(newSong.level==='custom'&&newSong.selected.join(',')==='높은도',
+   'persistence: changing songs unexpectedly reset custom note selection');
+ check(errors.length===0,'persistence: page errors '+errors.join(' | '));
+ report.push({name:'customNotePersistence',before,after,newSong:{level:newSong.level,selected:newSong.selected}});
+ await context.close();
+}
+
 await browser.close();
 fs.writeFileSync(`${out}/report.json`,JSON.stringify({failures,report},null,2));
 console.log(JSON.stringify({failures,report},null,2));
