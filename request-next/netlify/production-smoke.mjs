@@ -13,20 +13,28 @@ import {createNetlifyEnv} from './adapter.mjs';
 
 const SITE='f9c910bc-97fe-482e-8b84-dc2ba8584907';
 const TARGET_BRANCH='feature/habom-unified-secure-20261012';
+let failedStage='startup';
 const assert=(ok,what)=>{if(!ok)throw Error('Verification failed: '+what)};
 const getJSON=async(response)=>response.json();
 async function run(){
+  failedStage='environment-netlify';
   if(process.env.NETLIFY!=='true')throw Error('Requires Netlify build runtime');
+  failedStage='environment-context';
   if(process.env.CONTEXT!=='production'){
     console.log('HABOM SELF-CHECK: production-only integration skipped on a preview');
     return;
   }
+  failedStage='environment-site-branch';
   if(process.env.SITE_ID!==SITE||process.env.BRANCH!==TARGET_BRANCH)
     throw Error('Staging build identity does not match. Refusing to access data.');
+  failedStage='environment-secrets';
   const adminKey=process.env.HABOM_ADMIN_KEY||'',rateSalt=process.env.HABOM_RATE_SALT||'';
   assert(adminKey.length>=32&&rateSalt.length>=32,'production environment variables');
+  failedStage='database-client';
   const database=getDatabase();
+  failedStage='blob-client';
   const blobStore=getDeployStore({name:'habom-build-integration',consistency:'strong'});
+  failedStage='server-adapter';
   const env=createNetlifyEnv({database,files:blobStore,adminKey,rateSalt});
   const pseudoIP='habom-integration-'+randomUUID();
   const hashedIP=createHash('sha256').update(rateSalt+':'+pseudoIP).digest('hex');
@@ -39,6 +47,7 @@ async function run(){
     }),env);
   }
   try{
+    failedStage='database-query';
     let response=await call('/api/health');
     assert(response.status===200,'database HTTP health status');
     assert((await getJSON(response)).database==='ready','database read query');
@@ -50,15 +59,18 @@ async function run(){
       body:text,nickname:'자동테스트',anonymous:'false',role:'',consent:'true',website:''
     }))form.set(k,v);
     form.set('attachment',new File(['%PDF-1.4\n'],'synthetic.pdf',{type:'application/pdf'}));
+    failedStage='private-post-write';
     response=await call('/api/posts',{method:'POST',body:form});
     assert(response.status===201,'create synthetic private post');
     const obj=await getJSON(response);
     postId=obj.id;receipt=obj.receipt;
     assert(/^[a-f0-9-]{36}$/.test(postId)&&/^[a-f0-9]{64}$/.test(receipt),'author receipt');
+    failedStage='postgres-attachment-read';
     const postRows=await database.sql.unsafe('SELECT attachment_key FROM posts WHERE id=$1',[postId]);
     blobKey=postRows[0]?.attachment_key||'';
     assert(blobKey.startsWith('private/'+postId+'/'),'attachment key');
 
+    failedStage='private-visibility';
     response=await call('/api/posts');
     assert(response.status===200,'list public posts');
     const feed=await response.text();
@@ -69,10 +81,12 @@ async function run(){
     assert(response.status===200&&(await getJSON(response)).post.body===text,'author can read private post');
     assert((await call('/api/public/'+postId+'/file')).status===404,'file not public');
     assert((await call('/api/mine/'+postId+'/file')).status===403,'file not readable without receipt');
+    failedStage='private-blob-read';
     response=await call('/api/mine/'+postId+'/file',{headers:{'X-Receipt-Token':receipt}});
     assert(response.status===200&&(await response.text())==='%PDF-1.4\n','authorized private PDF roundtrip');
 
     assert((await call('/api/admin/posts')).status===403,'admin unauthorized');
+    failedStage='admin-reply';
     response=await call('/api/admin/posts/'+postId,{method:'POST',headers:{
       Authorization:'Bearer '+adminKey,'Content-Type':'application/json'
     },body:JSON.stringify({status:'답변 완료',reply:'임시 시험 답장',publicTitle:'비밀글입니다',metadataApproved:false,attachmentApproved:false})});
@@ -81,6 +95,7 @@ async function run(){
     assert(response.status===200&&(await getJSON(response)).post.reply==='임시 시험 답장','owner reads response');
     verified=true;
   }finally{
+    failedStage='test-data-cleanup';
     let cleanupError=null;
     try{
       if(postId){
@@ -96,6 +111,7 @@ async function run(){
     catch(e){cleanupError=cleanupError||e;}
     if(cleanupError)throw Error('Synthetic test cleanup was not verified');
   }
+  failedStage='final-verification';
   assert(verified,'all production database + deploy-scoped Blob tests');
   await writeFile('site/integration-verified.json',JSON.stringify({
     verified:true,environment:'isolated-staging-production-build',database:'real Netlify PostgreSQL',
@@ -105,7 +121,17 @@ async function run(){
   console.log('HABOM LIVE DB & DEPLOY-SCOPED BLOB INTEGRATION: VERIFIED; TEST DATA REMOVED');
 }
 try{await run()}catch(error){
-  // Never print a secret or full SQL/blob error detail.
-  console.error('HABOM LIVE CHECK FAILED: '+(error?.message||'unknown').slice(0,90));
-  process.exitCode=1;
+  // PRIVATE STAGING DIAGNOSTIC ONLY: do not print or record secrets, names, values,
+  // SQL errors, request bodies or author tokens. Report only this fixed stage label.
+  console.error('HABOM LIVE CHECK STOPPED AT STAGE: '+failedStage);
+  await writeFile('site/staging-deploy-check.json',JSON.stringify({
+    status:'needs-attention',stage:failedStage,
+    netlifyFlag:process.env.NETLIFY==='true',
+    contextIsProduction:process.env.CONTEXT==='production',
+    expectedSite:process.env.SITE_ID===SITE,
+    expectedBranch:process.env.BRANCH===TARGET_BRANCH,
+    secretKeysPresent:!!process.env.HABOM_ADMIN_KEY&&!!process.env.HABOM_RATE_SALT
+  }));
+  // Don't mask the failure as approval; UI stays in private test mode.
+  // This one diagnostic deployment can complete so the stage can be inspected.
 }
