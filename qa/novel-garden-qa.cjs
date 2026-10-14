@@ -23,6 +23,7 @@ const fs=require('node:fs');
      assert.equal(await page.locator('#introScreen.active').count(),1,'native game intro '+id);
      assert.equal(await page.locator('#slowLookControls:visible').count(),1,'supports configuration');
      await page.screenshot({path:out+'/'+vp.label+'-'+id+'-intro.png'});
+     if(vp.label==='desktop')await page.locator('#slowLevel').selectOption('3');
      await page.locator('#introStart').click();
      assert.equal(await page.locator('#gameScreen.active').count(),1,'native game screen '+id);
      assert.ok(page.url().endsWith('/thinking-garden/'),'must not navigate out of site');
