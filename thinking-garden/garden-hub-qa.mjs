@@ -15,7 +15,7 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  page.on('pageerror',e=>errors.push(e.message));
  const head=await page.goto(base+'/thinking-garden/',{waitUntil:'networkidle'});
  check(head.ok(),name+': thinking garden HTTP error');
- check(await page.locator('#gardenGamePanel .library-card').count()===22 && await page.locator('#gardenGamePanel .library-card[data-open]:not([data-open^="slow"]):not([data-open="rulePost"]):not([data-open="mirrorPond"]):not([data-open="sceneDetect"])').count()===13 && await page.locator('#gardenGamePanel .library-card[data-open^="slow"]').count()===6,name+': original 13 games must remain alongside expedition');
+ check(await page.locator('#gardenGamePanel .library-card').count()===25 && await page.locator('#gardenGamePanel .library-card[data-open]:not([data-open^="slow"]):not([data-open="rulePost"]):not([data-open="mirrorPond"]):not([data-open="sceneDetect"]):not([data-open="resetRescue"]):not([data-open="classroomMove"]):not([data-open="festivalPlan"])').count()===13 && await page.locator('#gardenGamePanel .library-card[data-open^="slow"]').count()===6,name+': original 13 games must remain alongside expedition');
  check(await page.locator('[data-garden-view]').count()===3,name+': cognitive views not found');
  check(await page.locator('#gardenGamePanel').isVisible(),name+': cognitive games not default');
  await page.locator('.category-tab[data-category="visual"]').click();
