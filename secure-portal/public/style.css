@@ -708,3 +708,36 @@ main:has(#parentCalendar:not([hidden])){padding-top:14px}
 .inline-share small{display:block;color:#415d68}
 @media (min-width:900px){.clinician-quick-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:600px){.share-review-dialog{padding:15px}.share-review-actions>button{flex:1 1 100%}}
+
+
+/* Parent voluntary quick/detail and ABC notes. Accessibility-friendly simple form. */
+.parent-easy-form .parent-mode-header{display:grid;gap:5px;margin-bottom:1px}
+.parent-easy-form .parent-mode-header .journal-mode-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.parent-easy-form .parent-mode-header .journal-mode-btn{
+ display:grid;align-content:center;gap:2px;text-align:left;min-height:56px;border:1px solid #b7c8dc;
+ border-radius:11px;background:#fff;color:#273e57;padding:8px 11px;min-width:0
+}
+.parent-easy-form .parent-mode-header .journal-mode-btn.active{
+ color:#2d4c9d;border:2px solid #647fcb;background:#eff4ff;padding:7px 10px
+}
+.parent-easy-form .parent-mode-header .journal-mode-btn strong{font-size:14px;line-height:1.3}
+.parent-easy-form .parent-mode-header .journal-mode-btn small{font-size:11px;font-weight:500;color:#496278;line-height:1.35}
+.parent-easy-form .parent-mode-advanced{display:grid;gap:8px;min-width:0}
+.parent-easy-form[data-parent-mode="quick"] .parent-mode-advanced{display:none!important}
+.parent-easy-form .abc-observation{border:1px solid #d2dfec;background:#fbfdff;border-radius:11px;margin:0}
+.parent-easy-form .abc-observation>summary{padding:10px 12px;font-size:14px;min-height:44px}
+.student-journal .abc-observation{border:1px solid #d2dfec;background:#fbfdff;border-radius:11px;margin:0}
+.student-journal .abc-observation>summary{padding:10px 12px;font-size:14px;min-height:44px}
+.abc-observation .optional-wrap{display:grid;gap:9px;margin:0 12px 12px!important}
+.abc-observation .optional-wrap label{display:grid;gap:5px;font-size:14px}
+.abc-observation .optional-wrap textarea{min-height:72px;height:80px;padding:9px 11px;resize:vertical;font-size:15px}
+.abc-observation .abc-help,.abc-observation .abc-behavior-guide{
+ margin:3px 0!important;font-size:12px!important;line-height:1.55!important;color:#405c70!important
+}
+.abc-observation .abc-behavior-guide{padding:9px 10px;background:#f0f6fd;border-left:3px solid #9fbaeb;border-radius:5px}
+@media(max-width:740px){
+ .parent-easy-form .parent-mode-header .journal-mode-btn{padding:8px;min-height:54px}
+ .parent-easy-form .parent-mode-header .journal-mode-btn.active{padding:7px}
+ .parent-easy-form .parent-mode-header .journal-mode-btn strong{font-size:13px}
+ .parent-easy-form .parent-mode-header .journal-mode-btn small{font-size:10px}
+}
