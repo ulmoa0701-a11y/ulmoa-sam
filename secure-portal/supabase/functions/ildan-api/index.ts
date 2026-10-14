@@ -73,7 +73,7 @@ async function body(request:Request){
 }
 export async function handle(request:Request):Promise<Response>{
  const origin=request.headers.get('origin')||'';
- const allowed=env('PUBLIC_SITE_ORIGIN');
+ const allowed=env('PUBLIC_SITE_ORIGIN')||'https://ulmoa0701-a11y.github.io'; // exact origin; staging only
  if(origin&&(!allowed||origin!==allowed))return resp({error:'허용되지 않은 출처입니다.'},403);
  const corsOrigin=origin&&allowed===origin?origin:'';
  const send=(payload:Obj,status=200)=>resp(payload,status,corsOrigin);
@@ -125,9 +125,20 @@ export async function handle(request:Request):Promise<Response>{
   }
   if(apiName==='records'&&request.method==='GET'){
    if(member.role==='therapist'){
-    const {data,error}=await userDb.from('ildan_records').select('id,author_id,student_id,kind,shared_nonce,shared_ciphertext,created_at').eq('therapist_id',uid).not('shared_at','is',null).order('created_at',{ascending:false}).limit(200);
+    // Direct Data API RLS permits private ciphertext only to its author.
+    // Re-verify student assignment before using the privileged service client,
+    // and fetch ONLY shared ciphertext, never private ciphertext.
+    const {data:assigned,error:assignmentError}=await admin.from('ildan_members')
+      .select('user_id').eq('role','student').eq('therapist_id',uid);
+    if(assignmentError)throw Error('ASSIGNMENT_LOOKUP_FAILED');
+    const studentIds=(assigned||[]).map((x:any)=>x.user_id);
+    if(!studentIds.length)return send({records:[]});
+    const {data,error}=await admin.from('ildan_records')
+      .select('id,author_id,student_id,kind,shared_nonce,shared_ciphertext,created_at')
+      .eq('therapist_id',uid).in('student_id',studentIds)
+      .not('shared_at','is',null).order('created_at',{ascending:false}).limit(200);
     if(error)throw Error('RECORD_LIST_FAILED');
-    const records=await Promise.all((data||[]).map(async(r:any)=>({id:r.id,kind:r.kind,author:'공유 작성자',student:'담당 학생',createdAt:r.created_at,shared:true,entry:await openJSON(r.shared_nonce,r.shared_ciphertext)})));
+    const records=await Promise.all((data||[]).map(async(r:any)=>({id:r.id,kind:r.kind,author:'공유 작성자',student:'담당 학생',studentId:r.student_id,createdAt:r.created_at,shared:true,entry:await openJSON(r.shared_nonce,r.shared_ciphertext)})));
     return send({records});
    }
    const {data,error}=await userDb.from('ildan_records').select('id,kind,private_nonce,private_ciphertext,shared_at,created_at').eq('author_id',uid).order('created_at',{ascending:false}).limit(200);
@@ -135,6 +146,12 @@ export async function handle(request:Request):Promise<Response>{
    const records=await Promise.all((data||[]).map(async(r:any)=>({id:r.id,kind:r.kind,createdAt:r.created_at,shared:!!r.shared_at,author:member.display_alias||member.role,entry:await openJSON(r.private_nonce,r.private_ciphertext)})));
    return send({records});
   }
+  // No clinical records may be collected until operator has audited consent,
+  // email account ownership, retention/deletion and production security.
+  // The default is fail closed; only explicit Edge secret enables writes.
+  if(['records','session-notes','share','unshare','delete-record'].includes(apiName)
+      &&request.method==='POST'&&env('CLINICAL_WRITES_ENABLED')!=='true')
+    return send({error:'개발 검증 중입니다. 실제 기록 저장·공유는 아직 활성화되지 않았습니다.'},503);
   if(apiName==='records'&&request.method==='POST'){
    if(!['student','parent'].includes(member.role))return send({error:'치료사는 학생·보호자 기록을 대신 작성할 수 없습니다.'},403);
    const b=await body(request),entry=validateEntry(b.entry) as Record<string,string>,share=b.share===true;
