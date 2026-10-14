@@ -65,3 +65,8 @@ CI 보안 테스트는 자체 D1/R2 모의 환경의 **단위 테스트**이며,
 - 이전 프론트엔드의 credentials: omit를 credentials: same-origin으로 수정하여 Netlify 비공개 스테이징 로그인 세션을 API 요청에 전달한다. 교차 출처 요청은 허용하지 않는다.
 - 실제 API에 로그인된 사용자의 수동 시험은 남아 있으며, 자동 CI의 임시 저장소 테스트만으로 실제 Netlify Blobs/DB 완전 통과를 주장하지 않는다.
 - [2026-10-13 QA 7 jobs](https://github.com/ulmoa0701-a11y/ulmoa-sam/actions/runs/38397619560) 통과. 실제 Netlify 배포 commit 25af56aa80715c0a5c286cf2c5dda1f3c5e08226 ready.
+
+## 2026-10-14 운영 배포 검증 기록
+- 운영 이벤트 함수의 검사 결과는 이전 배포 기록을 조회하는 빌드 아티팩트 이름으로 식별함. 개인정보/인증값을 기록하지 않음.
+- 미리보기 배포에서 postgres-smoke DB 검증 및 라이브 검증 상태 아티팩트 생성 성공. 미리보기 첫 상태 pending은 최종 통과를 의미하지 않음.
+- 실제 공개 전 SSO 보호 유지 및 운영 런타임 점검 passed 결과 필수.
