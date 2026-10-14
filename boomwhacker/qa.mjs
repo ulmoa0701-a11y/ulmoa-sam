@@ -193,7 +193,7 @@ async function basicCase(name,width,height){
   check(JSON.stringify(custom.original)===JSON.stringify(fullSong.original),name+': custom selection altered melody or note timing');
   check(JSON.stringify(custom.chords)===JSON.stringify(fullSong.chords)&&custom.first===fullSong.first,
     name+': custom selection altered MR harmony or first beat');
-  check(custom.local?.join(',')==='레,솔',name+': custom choice wasn't saved');
+  check(custom.local?.join(',')==='레,솔',name+': custom choice not saved');
   check(custom.label.includes('원곡 전체 그대로')&&custom.fileName.includes('직접선택-레-솔'),
     name+': custom-note explanation or PDF filename missing');
   await page.locator('#levels button[data-level="custom"]').click();
