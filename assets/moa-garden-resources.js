@@ -4,6 +4,7 @@
 const entries={
  cognitive:{
   materials:[
+   {areas:['visual','memory','space','language','life','literacy'],kind:'교사·보호자 활용노트',title:'인지정원 게임 26종 · 수업 관찰과 일상 연결',desc:'적절한 문제 수, 반응이 섞일 때 관찰하는 방법, 게임별 목표와 실제 생활에 적용하는 예시',path:'materials/cognitive-practice/guide.html'},
    {areas:['visual','space','memory','language'],kind:'활동지 · 인쇄/PDF',title:'차근차근 탐험단 · 활동지 16쪽',desc:'시각탐색·공간 위치·블록 구성·색·동물 명명·기억 활동지를 출력하거나 PDF로 저장해요.',path:'materials/slow-look/'},
    {areas:['space','visual','memory'],kind:'학습지 · PDF',title:'차근차근 탐험단 16쪽 PDF 받기',desc:'한 번에 내려받는 인쇄용 전체 학습지. 별도 회원가입이 필요 없어요.',path:'materials/slow-look/worksheets-16p.pdf'},
    {areas:['visual','space'],kind:'활동지 · PDF',title:'차근차근 · 시각변별 활동',desc:'같은 것·다른 것·모양 찾기를 인쇄해서 활용하는 자료',path:'materials/#cognitiveShelf'},
