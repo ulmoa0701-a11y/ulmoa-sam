@@ -163,3 +163,15 @@ test('read-only health checks database without exposing posts or secrets',async(
  assert.ok(!raw.includes('SENSITIVE-HEALTH-TEST-NOT-PUBLIC'));
  assert.ok(!raw.includes(created.data.receipt));
 });
+
+test('moderator-only permanent deletion removes sensitive post and PDF',async()=>{
+ const env=makeEnv(),file=new File([new Uint8Array([37,80,68,70,45,49])],'sample.pdf',{type:'application/pdf'});
+ const data=form('hidden');data.set('attachment',file);
+ const created=await create(env,data);assert.equal(created.status,201);
+ assert.equal(env.FILES.map.size,1);
+ assert.equal((await call(env,'/api/admin/posts/'+created.data.id,'DELETE')).status,403);
+ assert.equal(env.FILES.map.size,1);
+ assert.equal((await call(env,'/api/admin/posts/'+created.data.id,'DELETE',null,adminHeaders())).status,200);
+ assert.equal(env.DB.posts.length,0);assert.equal(env.FILES.map.size,0);
+ assert.equal((await call(env,'/api/mine/'+created.data.id,'GET',null,{'X-Receipt-Token':created.data.receipt})).status,403);
+});
