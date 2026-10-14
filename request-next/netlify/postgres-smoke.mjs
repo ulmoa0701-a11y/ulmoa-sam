@@ -52,6 +52,23 @@ async function main(){
    if(id){await database.sql.unsafe('DELETE FROM posts WHERE id=$1',[id]);const rows=await database.sql.unsafe('SELECT COUNT(*)::int AS n FROM posts WHERE id=$1',[id]);ok(rows[0]?.n===0,'post cleanup');}
   }finally{await database.sql.unsafe('DELETE FROM rate_limits WHERE key=$1',[hash]);}
  }
+ // The deploy-succeeded event tests the *actual runtime* DB and site-wide
+ // private Blob store after publish. Recheck its most recent non-secret verdict
+ // during the NEXT build so the remote verifier can see it in deploy summaries.
+ let verdict='pending',persistent=false,checkStage='not-yet-run';
+ try{
+  const check=await database.sql.unsafe(
+    "SELECT result,stage,persisted_across_deploys FROM habom_runtime_checks WHERE id=$1",['latest']);
+  if(check[0]){
+   verdict=check[0].result==='passed'?'passed':'failed';
+   persistent=check[0].persisted_across_deploys===1;
+   checkStage=String(check[0].stage||'unknown').replace(/[^a-z0-9-]/g,'').slice(0,32);
+  }
+ }catch(_e){console.log('HABOM RUNTIME CHECK: no previous verified event result');}
+ const commit=String(process.env.COMMIT_REF||'unknown').slice(0,10).replace(/[^a-f0-9]/g,'');
+ const report='habom-livecheck-'+verdict+'-'+(persistent?'persistent':'first')+'-'+checkStage+'-'+commit+'.html';
+ await writeFile('site/'+report,'<!doctype html><meta name="robots" content="noindex,nofollow"><title>Server-side verification metadata</title><p>Only non-sensitive status. No user data or passwords.</p>');
+ console.log('HABOM RUNTIME CHECK: previous event result '+verdict+' persistent='+persistent+' stage='+checkStage);
  await writeFile('netlify/functions/habom-real-db-verified.mjs',"export default ()=>new Response('Staging DB validation passed');");
  console.log('HABOM REAL POSTGRES: PASS; test message removed');
 }
