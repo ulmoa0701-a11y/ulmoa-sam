@@ -109,6 +109,7 @@ function openPreview(id){
   $('#introPreview').innerHTML=previewExamples[id]||'<div class="pv-instruction">게임 예시를 보고 시작해요.</div>';
   const isPractice=LITERACY_GAMES.has(id);
   $('#literacyPracticeControls').hidden=!isPractice;
+  const isSlow=window.SlowLookNative?.isNew(id),isNovel=window.NovelGarden?.isNew(id),isStrategy=window.StrategyGarden?.isNew(id);
   const training=isSlow||isNovel||isStrategy;
   $('#slowLookControls').hidden=!training;
   // Do not expose controls intended for one activity in any unrelated game.
@@ -118,7 +119,6 @@ function openPreview(id){
   const teacher=$('#slowTeacherDetails');teacher.hidden=!(isSlow||isStrategy);teacher.open=false;
   $('#previewRoundInfo').textContent=id==='slowName'?'6개 미션 · 충분히 보고 말해요.':(isSlow||isNovel||isStrategy)?'5개 미션 · 서두르지 않아도 돼요.':'실제 게임은 5스테이지로 진행돼요.';
   if(isPractice)updatePracticeControls();
-  const isSlow=window.SlowLookNative?.isNew(id),isNovel=window.NovelGarden?.isNew(id),isStrategy=window.StrategyGarden?.isNew(id),controls=$('#slowLookControls');if(controls)controls.hidden=!(isSlow||isNovel||isStrategy);if(isSlow||isNovel||isStrategy)$('#slowNameOnly').hidden=id!=='slowName';const autoGroup=$('#strategyAutoGroup');if(autoGroup)autoGroup.hidden=!isStrategy;
   show('intro');
 }
 
