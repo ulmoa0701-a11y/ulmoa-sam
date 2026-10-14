@@ -1,0 +1,73 @@
+name: Ildan Supabase Migration Security CI
+on:
+  push:
+    branches:
+      - feature/ildan-supabase-secure-auth-20261014
+    paths:
+      - 'secure-portal/supabase/**'
+      - 'secure-portal/lib/record-contract.mjs'
+      - '.github/workflows/ildan-supabase-migration-ci.yml'
+  pull_request:
+    paths:
+      - 'secure-portal/supabase/**'
+      - 'secure-portal/lib/record-contract.mjs'
+      - '.github/workflows/ildan-supabase-migration-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rls-and-edge-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate existing record contract with synthetic Node tests
+        run: node --test secure-portal/tests/security.test.mjs secure-portal/tests/v15-contract.test.mjs
+      - name: Run PostgreSQL RLS, guardian/staff isolation, forged insert and invite replay tests
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          psql --version
+          psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 \
+            -f secure-portal/supabase/tests/00_stub_supabase_auth.sql \
+            -f secure-portal/supabase/migrations/20261014000100_ildan_secure_roles.sql \
+            -f secure-portal/supabase/tests/01_role_isolation.sql
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Type-check Edge handler in Deno using actual npm imports
+        run: |
+          deno --version
+          deno check secure-portal/supabase/functions/ildan-api/index.ts
+      - name: Reject accidental sensitive data and service secrets in static files
+        shell: bash
+        run: |
+          node <<'JS'
+          const fs=require('fs'),assert=require('node:assert/strict');
+          const src=fs.readFileSync('secure-portal/supabase/functions/ildan-api/index.ts','utf8');
+          const sql=fs.readFileSync('secure-portal/supabase/migrations/20261014000100_ildan_secure_roles.sql','utf8');
+          assert(src.includes('auth.getUser(token)'));
+          assert(src.includes('crypto.subtle.encrypt'));
+          assert(src.includes("apiName==='unshare'"));
+          assert(src.includes("apiName==='claim-invite'"));
+          assert(src.includes("apiName==='session-notes'"));
+          assert(sql.includes('ENABLE ROW LEVEL SECURITY'));
+          assert(sql.includes('REVOKE ALL'));
+          assert(sql.includes('email_confirmed_at IS NOT NULL'));
+          console.log('PASS authenticated Edge auth, AES encryption, RLS and single-use invitations');
+          JS
