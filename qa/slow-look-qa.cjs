@@ -6,49 +6,68 @@ const fs=require('node:fs');
  const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,args:['--no-sandbox','--disable-dev-shm-usage'],headless:true});
  const base=process.env.SLOW_LOOK_BASE||'http://127.0.0.1:8765/';
  const out='qa/slow-look-screenshots';fs.mkdirSync(out,{recursive:true});
- const names=['scan','place','block','name','memory','everyday'];
+ const names=['slowScan','slowPlace','slowBlock','slowName','slowMemory','slowEveryday'];
+ const categories={slowScan:'visual',slowPlace:'space',slowBlock:'space',slowName:'language',slowMemory:'memory',slowEveryday:'life'};
  for(const vp of [{width:390,height:844,label:'mobile'},{width:1280,height:900,label:'desktop'}]){
-  const page=await browser.newPage({viewport:vp,deviceScaleFactor:1});page.setDefaultTimeout(5000);
-  const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(base+'thinking-garden/games/slow-look/',{waitUntil:'load'});
-  await page.locator('.mode').first().waitFor();
-  assert.equal(await page.locator('button.mode').count(),6);
-  await page.screenshot({path:out+'/'+vp.label+'-home.png',fullPage:true});
-  for(const mode of names){
-   await page.locator('[data-action=start][data-mode='+mode+']').click();
-   if(mode==='name')await page.locator('#nameGo').click();
-   assert.match(await page.locator('.taskHead h1').innerText(),/탐험|건축가/);
-   assert.equal(await page.locator('[data-action=finish]').count(),1);
-   if(mode==='name'){
-    await page.locator('[data-action=ready]').click();
-    await page.locator('[data-action=score][data-correct=yes]').click();
-    assert.ok(await page.locator('[data-action=next]').count()===1);
-   } else if(mode==='memory'){
-    await page.locator('[data-action=hideModel]').click();
-    assert.ok(await page.locator('button[data-action=cell]').count()>=9);
-   } else {
-    assert.ok(await page.locator('button[data-action=cell]').count()>0,mode);
-    await page.locator('button[data-action=cell]').first().click();
-    await page.locator('button[data-action=check]').click();
-   }
-   await page.screenshot({path:out+'/'+vp.label+'-'+mode+'.png'});
-   await page.locator('[data-action=finish]').click();
-   assert.ok(await page.locator('.statrow .stat').count()===3);
-   await page.locator('#homeBtn').click();
-   assert.ok(await page.locator('button.mode').count()===6);
-  }
-  assert.deepEqual(errors,[],'Unexpected JS errors '+vp.label);
+  const page=await browser.newPage({viewport:vp,deviceScaleFactor:1});
+  page.setDefaultTimeout(12000);const errors=[];
+  page.on('pageerror',e=>errors.push(e.stack||e.message));
   await page.goto(base+'thinking-garden/',{waitUntil:'load'});
-  assert.ok(await page.locator('button.library-card[data-open="slowLook"]').count()===1);
-  await page.locator('[data-category=space].category-tab').click();
-  assert.ok(await page.locator('button.library-card[data-open="slowLook"]').isVisible());
-  await page.locator('button.library-card[data-open="slowLook"]').click();
-  assert.ok(await page.locator('#introScreen').evaluate(el=>el.classList.contains('active')));
-  assert.match(await page.locator('#introTitle').innerText(),/차근차근 탐험단/);
-  await page.screenshot({path:out+'/'+vp.label+'-garden-preview.png'});
-  await page.locator('#introStart').click();
-  await page.locator('button.mode').first().waitFor();
-  assert.ok(page.url().includes('/games/slow-look/'));
+  assert.equal(await page.locator('#gardenGamePanel .library-card').count(),19);
+  assert.equal(await page.locator('#gardenGamePanel .library-card[data-open^="slow"]').count(),6);
+  for(const mode of names){
+   await page.locator('.category-tab[data-category="'+categories[mode]+'"]').click();
+   const card=page.locator('button.library-card[data-open="'+mode+'"]');
+   assert.ok(await card.isVisible(),mode+' card hidden');
+   assert.ok(await card.locator('.card-live-preview').count()===1,mode+' missing individual illustrated preview');
+   await card.click();
+   assert.equal(await page.locator('#introScreen.active').count(),1,mode+' intro not native');
+   assert.equal(await page.locator('#slowLookControls:visible').count(),1,mode+' training options absent');
+   await page.screenshot({path:out+'/'+vp.label+'-'+mode+'-intro.png'});
+   await page.locator('#introStart').click();
+   assert.equal(await page.locator('#gameScreen.active').count(),1,mode+' game not native');
+   assert.ok(page.url().endsWith('/thinking-garden/'),mode+' navigated away from garden');
+   const rounds=mode==='slowName'?6:5;
+   for(let i=0;i<rounds;i++){
+    assert.ok(await page.locator('#gameArea .slow-task').count()===1,mode+' task missing on round '+i);
+    if(mode==='slowName'){
+      await page.locator('[data-slow="ready"]').click();
+      assert.ok(await page.locator('[data-slow="name-right"]').isVisible());
+      await page.locator('[data-slow="name-right"]').click();
+    }else if(mode==='slowMemory'){
+      await page.locator('[data-slow="hide"]').click();
+      assert.ok(await page.locator('[data-slow="cell"]').count()>0);
+      await page.locator('[data-slow="skip"]').click();
+    }else if(mode==='slowScan'){
+      const flowers=page.locator('.slow-scan button[data-slow="cell"]');
+      const cells=await flowers.count();
+      for(let j=0;j<cells;j++)if((await flowers.nth(j).innerText()).includes('🌼'))await flowers.nth(j).click();
+      await page.locator('[data-slow="check"]').click();
+      assert.ok(await page.locator('[data-slow="next"]').isVisible(),'correct visual search rejected');
+    }else if(mode==='slowPlace'||mode==='slowBlock'){
+      const sample=page.locator('.slow-map-pair .slow-board').first();
+      const cells=sample.locator('.slow-tile');const count=await cells.count();
+      const target=page.locator('.slow-map-pair .slow-board').last().locator('button[data-slow="cell"]');
+      for(let j=0;j<count;j++)if((await cells.nth(j).getAttribute('class')).includes('shown'))await target.nth(j).click();
+      await page.locator('[data-slow="check"]').click();
+      assert.ok(await page.locator('[data-slow="next"]').isVisible(),mode+' correct spatial copy rejected');
+    }else if(mode==='slowEveryday'){
+      await page.locator('.slow-bag [data-slow="cell"]').first().click();
+      await page.locator('[data-slow="check"]').click();
+      if(await page.locator('[data-slow="next"]').count()===0)await page.locator('[data-slow="skip"]').click();
+    }
+    if(i===0)await page.screenshot({path:out+'/'+vp.label+'-'+mode+'-play.png'});
+    await page.locator('[data-slow="next"]').click();
+    if(i===rounds-1)await page.locator('#resultScreen.active').waitFor();
+    else await page.locator('#gameScreen.active .slow-task').waitFor();
+   }
+   assert.equal(await page.locator('#resultScreen .slow-result-extra').count(),1);
+   assert.ok(await page.locator('#resultScreen .slow-teacher-details').count()>=1);
+   await page.screenshot({path:out+'/'+vp.label+'-'+mode+'-result.png'});
+   await page.locator('#resultScreen [data-go="home"]').click();
+   assert.equal(await page.locator('#homeScreen.active').count(),1);
+  }
+  assert.deepEqual(errors,[],vp.label+' JavaScript errors');
   await page.goto(base+'thinking-garden/',{waitUntil:'load'});
   await page.locator('#gardenView-materials').click();
   assert.ok(await page.locator('a.moa-resource-card[href*="slow-look"]').count()>=2);
@@ -56,14 +75,12 @@ const fs=require('node:fs');
   await page.locator('button.book-button[data-download="slow-look/worksheets-16p.pdf"]').click();
   assert.ok(await page.locator('#materialDialog').evaluate(x=>x.open));
   assert.equal(await page.locator('#materialDownload').getAttribute('href'),'slow-look/worksheets-16p.pdf');
-  const link=await page.request.get(base+'materials/slow-look/worksheets-16p.pdf');
-  assert.equal(link.status(),200);
+  assert.equal((await page.request.get(base+'materials/slow-look/worksheets-16p.pdf')).status(),200);
   await page.goto(base+'materials/slow-look/',{waitUntil:'load'});
   assert.equal(await page.locator('.sheet').count(),16);
-  await page.screenshot({path:out+'/'+vp.label+'-worksheets.png'});
-  assert.deepEqual(errors,[],'Unexpected JS errors end '+vp.label);
+  assert.deepEqual(errors,[],vp.label+' final JavaScript errors');
   await page.close();
  }
  await browser.close();
- console.log('PASS 2 viewports, all 6 game modes, worksheet PDF, garden/resources/materials navigation');
+ console.log('PASS six individually previewed native garden games, 5/6 rounds each, PC/mobile, 16-page worksheets');
 })().catch(e=>{console.error(e);process.exit(1)});
