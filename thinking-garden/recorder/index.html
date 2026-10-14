@@ -98,6 +98,22 @@
  .rec-advanced summary{padding:11px;font-size:13px}
  .rec-advanced .rec-next-row{padding:0 8px 8px}
 }
+
+/* V3 child-first recorder entry: remove decoration around the ONE first action;
+   the optional practice routes stay inside a closed details section. */
+.stage:has(#homeScreen:not([hidden]))>.deco-stars,
+.stage:has(#homeScreen:not([hidden]))>.sun,
+.stage:has(#homeScreen:not([hidden]))>.cloud,
+.stage:has(#homeScreen:not([hidden]))>.hill,
+.stage:has(#homeScreen:not([hidden]))>.plant{display:none!important}
+.stage:has(#homeScreen:not([hidden])){background:linear-gradient(160deg,#eff9ec,#f8faf2 60%,#fef8eb)}
+.rec-home .rec-main-start{outline-offset:4px;box-shadow:0 9px 19px #b28c3b30}
+.rec-home .rec-cta-note{font-weight:950;color:#4d795a;text-align:center;line-height:1.45}
+.rec-more:not([open]){background:#ffffffaa;border-color:#e3ece1}
+.rec-more:not([open])>summary{font-size:13px;color:#6c8777}
+.rec-home .rec-breath-link{font-size:12px;line-height:1.45}
+@media(max-width:780px){.rec-home .rec-cta-note{font-size:12px}.rec-home .rec-breath-link{font-size:11px}}
+
 </style>
 </head>
 <body><div class="app">
@@ -108,9 +124,9 @@
  <div class="rec-home">
   <div class="rec-welcome">
    <div class="rec-intro">
-    <span class="eyebrow">🎶 처음이라면 여기부터!</span>
+    <span class="eyebrow">🌱 처음에는 1단계부터!</span>
     <h1>모아의<br><em>리코더 놀이터</em></h1>
-    <p>먼저 그림으로 시·라·솔을 익히고, 손가락을 움직인 다음 진짜 리코더에 도전해요.</p>
+    <p>그림으로 보고 → 손가락으로 익히고 → 진짜 리코더로 이어가요. 시작 버튼 하나면 돼요!</p>
    </div>
    <div class="rec-moa" aria-hidden="true"><img src="../assets/moa-default.png" alt="" onerror="this.style.display='none'"></div>
   </div>
@@ -119,15 +135,15 @@
     <span><b>2</b> 손가락 연습</span><span class="rec-journey-arrow" aria-hidden="true">→</span>
     <span><b>3</b> 소리 내기</span>
   </div>
-  <button type="button" data-start="easy" class="rec-main-start"><span aria-hidden="true">▶</span><span>처음부터 시작!</span><small>시·라·솔 · 리코더 없어도 돼요</small></button>
-  <p class="rec-cta-note">처음이라면 이 버튼 하나로 시작해요. 익숙해지면 아래 다른 연습도 할 수 있어요.</p>
+  <button type="button" data-start="easy" class="rec-main-start"><span aria-hidden="true">▶</span><span>1단계부터 시작!</span><small>악기가 없어도 바로 시작해요</small></button>
+  <p class="rec-cta-note">🌱 처음에는 이것만 누르면 돼요. 끝나면 다음 안내가 나와요.</p>
   <details class="rec-more rec-advanced">
-   <summary>이미 해봤어요! · 다른 연습 고르기 <span aria-hidden="true">⌄</span></summary>
+   <summary>이미 해봤다면 다른 연습 고르기 <span aria-hidden="true">⌄</span></summary>
    <div class="rec-next-row" aria-label="경험자를 위한 연습 선택">
     <button type="button" data-start="normal" class="rec-next-action"><strong>👆 시·라·솔 운지</strong><span>손가락 바꾸기 연습</span></button>
     <button type="button" data-start="real" class="rec-next-action"><strong>🎤 실제 리코더 소리</strong><span>악기 소리 인식</span></button>
    </div>
-   <p class="rec-more-subtitle">이런 놀이도 있어요</p>
+   <p class="rec-more-subtitle">필요할 때 골라 해요 · 카메라나 실제 악기가 필요할 수도 있어요</p>
    <div class="rec-more-grid">
     <a href="finger-adventure/hands/?v=7"><strong>👐 두 손 모험</strong><small>왼손·오른손과 카메라 놀이</small></a>
     <a href="finger-adventure/?v=7"><strong>☝️ 손가락 대모험</strong><small>손가락 움직이기·실제 연주</small></a>
