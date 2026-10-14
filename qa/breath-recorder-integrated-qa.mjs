@@ -40,7 +40,17 @@ async function run(width,height,label) {
  await p.goto(base+'/thinking-garden/recorder/',{waitUntil:'domcontentloaded'});
  assert.equal(await p.locator('.rec-main-start').isVisible(),true);
  assert.equal(await p.locator('.rec-advanced').getAttribute('open'),null,'Optional routes start collapsed');
+ assert.equal(await p.locator('.rec-camera-path .rec-camera-card').count(),2,'Both camera games visible as primary home choices');
+ assert.equal(await p.locator('.rec-camera-path .rec-camera-card').first().isVisible(),true,'Finger camera game visibly accessible without opening menu');
+ assert.equal(await p.locator('.rec-camera-path .rec-camera-card').last().isVisible(),true,'Two hands camera game visibly accessible without opening menu');
+ assert.ok((await p.evaluate(()=>document.documentElement.scrollWidth-innerWidth))<=2,'No home horizontal overflow');
  await p.screenshot({path:output+'/recorder-home-'+label+'.png',fullPage:true});
+ await p.locator('.rec-camera-path .rec-camera-card').first().click();
+ assert.equal(await p.locator('#cameraStart').isVisible(),true,'Finger camera game opens through new home link');
+ await p.goto(base+'/thinking-garden/recorder/',{waitUntil:'domcontentloaded'});
+ await p.locator('.rec-camera-path .rec-camera-card').last().click();
+ assert.equal(await p.locator('#guidedStart').isVisible(),true,'Two-hands camera game opens through new home link');
+ await p.goto(base+'/thinking-garden/recorder/',{waitUntil:'domcontentloaded'});
  await p.locator('.rec-main-start').click();
  assert.equal(await p.locator('#practiceScreen').isVisible(),true);
  await p.locator('#playerRecorder [data-hole="0"]').click();
