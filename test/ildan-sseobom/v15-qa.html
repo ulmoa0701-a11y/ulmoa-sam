@@ -12,6 +12,9 @@ async function run(){
   await until(()=>d().getElementById('oneLogin'));
   enter('student');await until(()=>d().getElementById('entryForm'));
   ok(d().getElementById('entryForm').dataset.journalMode==='quick','간편 기록 기본');
+  ok(d().querySelectorAll('.student-abc textarea').length===3,'학생 ABC 선택 입력 세 항목');
+  ok(d().querySelector('.student-abc').closest('.student-mode-advanced')!==null,'학생 간편 화면에서 ABC를 강요하지 않음');
+
   const moodBlock=d().querySelector('#entryForm .student-emotion-quick');
   ok(!!moodBlock&&moodBlock.getBoundingClientRect().height>35,'간편 기록에 감정 선택이 바로 표시됨');
   ok(d().querySelectorAll('#entryForm input[name="emotionChoice"][value="잘 모르겠음"]').length===1,'잘 모르겠음 감정 선택 중복 없음');
@@ -95,12 +98,26 @@ async function run(){
   d().querySelector('[data-workspace-target="write"]').click();
   await until(()=>d().querySelector('textarea[name="observation"]'));
   const parentForm=d().getElementById('entryForm');
+  ok(parentForm.dataset.parentMode==='quick','학부모 기본 간편 기록');
+  ok(!!parentForm.querySelector('[data-parent-mode="detail"]'),'학부모 자세히 모드 전환');
+  ok(!!parentForm.querySelector('.parent-abc'),'학부모 ABC 보조양식 추가');
+  ok(parentForm.querySelectorAll('textarea[name="context"]').length===1&&parentForm.querySelectorAll('textarea[name="after"]').length===1,'학부모 ABC 입력 중복 방지');
+  parentForm.querySelector('[data-parent-mode="detail"]').click();
+  ok(parentForm.dataset.parentMode==='detail','학부모 자세히 모드 열림');
+  input(parentForm.querySelector('textarea[name="context"]'),'ABC A 가상의 전 상황');
+  input(parentForm.querySelector('textarea[name="after"]'),'ABC C 가상의 직후 상황');
+
   ok(!!parentForm.querySelector('select[name="origin"]'),'정보 출처가 기본 화면에서 선택 가능');
   ok(!parentForm.querySelector('select[name="origin"]').required,'정보 출처도 필수 입력 아님');
   ok(!!parentForm.querySelector('textarea[name="childWords"]'),'직접 들은 학생 표현은 선택형 상세 항목');
   input(parentForm.querySelector('textarea[name="observation"]'),'가상 관찰: 교재를 다시 펼쳤다.');
   input(parentForm.querySelector('select[name="origin"]'),'직접 관찰');
   input(parentForm.querySelector('textarea[name="childWords"]'),'가상 학생의 말: 지금은 쉬고 싶어요');
+
+  parentForm.querySelector('[data-parent-mode="quick"]').click();
+  ok(parentForm.dataset.parentMode==='quick','학부모 간편 모드 복귀');
+  ok(parentForm.querySelector('textarea[name="context"]').value.includes('ABC A'),'간편 모드 변경해도 자세히 입력 유지');
+  parentForm.querySelector('[data-parent-mode="detail"]').click();
   parentForm.querySelector('input[name="share"]').click();
   ok(!!parentForm.querySelector('input[name="shareField"][value="childWords"]'),'아동 실제 발언만 별도로 공유 선택 가능');
   parentForm.querySelector('input[name="shareField"][value="childWords"]').click();
