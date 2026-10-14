@@ -20,6 +20,7 @@ const config={
   levels:[['쉬움','짧고 친숙한 상황'],['보통','서로 다른 입장 생각하기'],['도전','여러 마음이 섞일 수 있는 상황']]}
 };
 const opts=['easy','normal','hard'];let state={game:chosen,level:'easy',index:0,stage:'',correct:0,attempts:0,locked:false,selected:[],chosenFeeling:'',options:[],audio:false};
+let lastSpokenStage='';
 const game=config[chosen];const roundMax=4;
 $('gardenBack').href='../../../gardens/#'+game.hash;
 $('resultGarden').href='../../../gardens/#'+game.hash;
@@ -45,6 +46,7 @@ function setScene(title,desc,label){
  $('roundCount').textContent=(state.index+1)+' / '+roundMax;
  $('progressFill').style.width=(state.index/roundMax*100)+'%';
  $('gameArea').innerHTML='';$('feedback').textContent='';$('feedback').className='feedback';$('gameActions').innerHTML='';
+ const voiceKey=state.index+'/'+(state.stage||'main');if(state.audio&&lastSpokenStage!==voiceKey){lastSpokenStage=voiceKey;speak(title+'. '+desc);}
 }
 function feedback(message,positive=false){$('feedback').textContent=message;$('feedback').className='feedback'+(positive?' good':'');}
 function nextAction(message){
@@ -162,7 +164,7 @@ function drawFeel(){
  }
 }
 function draw(){state.locked=false;if(chosen==='money')drawMoney();else if(chosen==='change')drawChange();else drawFeel()}
-function start(){state.index=0;state.correct=0;state.attempts=0;state.stage='';state.selected=[];state.locked=false;state.options=[];show('play');draw()}
+function start(){state.index=0;state.correct=0;state.attempts=0;state.stage='';state.selected=[];state.locked=false;state.options=[];lastSpokenStage='';show('play');draw()}
 $('startGame').addEventListener('click',start);
 $('exitGame').addEventListener('click',()=>show('intro'));
 $('playAgain').addEventListener('click',start);
