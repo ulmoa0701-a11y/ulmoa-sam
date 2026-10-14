@@ -682,7 +682,7 @@ function renderDisplayEditor(){
  if(displayMode==='instrument'){
   title.textContent='악기 설정';desc.textContent='각 색에 사용할 악기를 골라주세요. 원하는 악기가 없으면 아래에서 직접 추가할 수 있어요.';
   box.innerHTML=ORDER.map((n,i)=>'<label class="displayInputRow"><span class="displayDot" style="background:'+COLORS[n]+'"></span><span class="displayNote">'+esc(noteLabel(n))+'</span><select data-instrument-index="'+i+'" aria-label="'+esc(noteLabel(n))+' 악기">'+instrumentOptions(instrumentIds[i])+'</select></label>').join('')+'<button id="instrumentAddToggle" class="instrumentAddToggle" type="button">＋ 원하는 악기가 없나요? 직접 추가</button><div id="instrumentAddBox" class="instrumentAdd"><input id="newInstrumentIcon" maxlength="8" placeholder="🪈" aria-label="새 악기 아이콘"><input id="newInstrumentName" maxlength="16" placeholder="악기 이름" aria-label="새 악기 이름"><button id="addInstrumentBtn" type="button">추가</button></div><div class="instrumentHint">먼저 위에서 악기를 골라 사용하세요. 직접 추가는 필요할 때만 열면 됩니다.</div>';
-  $('#instrumentAddToggle').onclick=()=>{const box=$('#instrumentAddBox'),open=!box.classList.contains('open');box.classList.toggle('open',open);$('#instrumentAddToggle').textContent=open?'− 직접 추가 닫기':'＋ 원하는 악기가 없나요? 직접 추가';if(open)setTimeout(()=>$('#newInstrumentIcon')?.focus(),20)};
+  $('#instrumentAddToggle').onclick=()=>{const box=$('#instrumentAddBox'),open=!box.classList.contains('open');box.classList.toggle('open',open);$('#instrumentAddToggle').textContent=open?'− 직접 추가 닫기':'＋ 원하는 악기가 없나요? 직접 추가';if(open)$('#newInstrumentIcon')?.focus({preventScroll:true})};
   bindInstrumentAdder();return
  }
  const values=displayMode==='name'?childLabels:customLabels;
