@@ -1,0 +1,90 @@
+name: Slow Look Expedition - printable PDF and browser QA
+on:
+  push:
+    branches:
+      - feat/slow-look-expedition-20261014
+    paths:
+      - '.github/workflows/slow-look-qa.yml'
+      - 'thinking-garden/games/slow-look/**'
+      - 'thinking-garden/index.html'
+      - 'materials/index.html'
+      - 'materials/slow-look/index.html'
+      - 'assets/moa-garden-resources.js'
+      - 'qa/slow-look-qa.cjs'
+  pull_request:
+    paths:
+      - '.github/workflows/slow-look-qa.yml'
+      - 'thinking-garden/games/slow-look/**'
+      - 'thinking-garden/index.html'
+      - 'materials/index.html'
+      - 'materials/slow-look/**'
+      - 'assets/moa-garden-resources.js'
+      - 'qa/slow-look-qa.cjs'
+permissions:
+  contents: write
+jobs:
+  pdf-and-browser-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Korean font support
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk
+      - name: Install browser test library
+        run: |
+          npm install --no-save --no-package-lock playwright-core@1.56.1
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Start static site server
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/slow-look-http.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:8765/materials/slow-look/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/slow-look-http.log
+          exit 1
+      - name: Render 16-page Korean worksheet PDF
+        run: |
+          "$CHROME_BIN" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-extensions \
+            --no-pdf-header-footer --print-to-pdf="$PWD/materials/slow-look/worksheets-16p.pdf" \
+            --virtual-time-budget=4000 http://127.0.0.1:8765/materials/slow-look/ \
+            >/tmp/slow-look-pdf.log 2>&1
+          test -s materials/slow-look/worksheets-16p.pdf
+          python3 -m pip install --quiet pypdf
+          python3 - <<'PY'
+          from pypdf import PdfReader
+          p='materials/slow-look/worksheets-16p.pdf'
+          reader=PdfReader(p)
+          print('PDF pages:',len(reader.pages))
+          assert len(reader.pages)==16, f'Expected 16 pages, got {len(reader.pages)}'
+          assert '차근차근' in ''.join((p.extract_text() or '') for p in reader.pages[:1]), 'Korean PDF text not rendered'
+          PY
+      - name: Test game and website interactions at mobile and desktop size
+        run: node qa/slow-look-qa.cjs
+      - name: Publish generated PDF to feature branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/slow-look-expedition-20261014'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add materials/slow-look/worksheets-16p.pdf
+          if ! git diff --cached --quiet; then
+            git commit -m "docs: publish generated 16-page printable worksheet PDF"
+            git push origin HEAD:feat/slow-look-expedition-20261014
+          fi
+      - name: Attach QA screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: slow-look-browser-qa
+          path: qa/slow-look-screenshots/
+          if-no-files-found: ignore

@@ -4,6 +4,8 @@
 const entries={
  cognitive:{
   materials:[
+   {areas:['visual','space','memory','language'],kind:'활동지 · 인쇄/PDF',title:'차근차근 탐험단 · 활동지 16쪽',desc:'시각탐색·공간 위치·블록 구성·색·동물 명명·기억 활동지를 출력하거나 PDF로 저장해요.',path:'materials/slow-look/'},
+   {areas:['space','visual','memory'],kind:'학습지 · PDF',title:'차근차근 탐험단 16쪽 PDF 받기',desc:'한 번에 내려받는 인쇄용 전체 학습지. 별도 회원가입이 필요 없어요.',path:'materials/slow-look/worksheets-16p.pdf'},
    {areas:['visual','space'],kind:'활동지 · PDF',title:'차근차근 · 시각변별 활동',desc:'같은 것·다른 것·모양 찾기를 인쇄해서 활용하는 자료',path:'materials/#cognitiveShelf'},
    {areas:['space'],kind:'활동지 · PDF',title:'큰 공간에 표시해요',desc:'넓은 영역을 보고 표시하는 기초 시각·공간 활동',path:'materials/#cognitiveShelf'},
    {areas:['memory','visual'],kind:'활용 안내 · PDF',title:'차근차근 활용가이드',desc:'기초활동을 활용할 때 참고하는 기존 안내 자료',path:'materials/#cognitiveShelf'},

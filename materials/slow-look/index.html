@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>차근차근 탐험단 | 활동지 16쪽 — 모아의 생각정원</title>
+<style>
+:root{--ink:#253e4c;--teal:#277b80;--line:#b9ced0;--pale:#edf6f5;--gray:#526b73}
+*{box-sizing:border-box}html{font-family:Pretendard,SUIT,"Noto Sans KR","Malgun Gothic",sans-serif;color:var(--ink)}body{margin:0;background:#ecf2f2}button,a{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible{outline:3px solid #d69f34;outline-offset:3px}
+nav{background:#233e4b;color:white;padding:18px max(15px,calc((100vw - 960px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}nav a{color:white}nav h1{margin:0;font-size:20px}nav small{color:#d2e5e5}nav .actions{display:flex;gap:8px;flex-wrap:wrap}nav button,nav .navbtn{background:#fff;color:#24545d;border:0;border-radius:11px;padding:10px 14px;text-decoration:none;font-weight:750}nav button{background:#d1ebe6}
+.note{max-width:860px;margin:16px auto;padding:15px 19px;background:#fff;border-radius:14px;color:#3d5860;line-height:1.6}.note p{margin:5px 0}.printset{padding:10px 12px 40px}.sheet{width:210mm;height:297mm;overflow:hidden;margin:20px auto;background:#fff;box-shadow:0 4px 30px #2a3b4d20;position:relative;padding:18mm 17mm 17mm;page-break-after:always}.sheetHead{border-bottom:2px solid #c5dbda;padding-bottom:12px;display:flex;justify-content:space-between;align-items:center}.brand{font-size:18px;color:var(--teal);font-weight:850}.pageNum{font-size:12px;color:var(--gray)}.sheet h2{font-size:24px;margin:24px 0 6px}.instruction{font-size:16px;color:#4c656d;margin:0 0 22px}.task{background:#f2f8f6;padding:10px 15px;color:#2a6669;font-weight:750;border-radius:10px;font-size:15px;margin:20px 0}.sheetFooter{position:absolute;bottom:14mm;left:17mm;right:17mm;display:flex;justify-content:space-between;border-top:1px solid #dae6e6;padding-top:9px;font-size:12px;color:#60747a}.sheetFooter span{white-space:nowrap}
+.gridpair{display:flex;justify-content:space-between;gap:12mm;margin:18px 0 32px}.gridblock{flex:1;max-width:72mm;text-align:center;font-weight:750}.gridblock h3{font-size:14px;font-weight:750;margin:8px}.grid{display:grid;grid-template-columns:repeat(var(--cols),1fr);border-top:2px solid #71959d;border-left:2px solid #71959d;aspect-ratio:1}.cell{border-right:2px solid #71959d;border-bottom:2px solid #71959d;display:flex;justify-content:center;align-items:center;font-size:29px;background:white;min-width:0}.cell.on{background:#3d9a9e}.scan{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:13px;margin:38px auto;width:fit-content}.scan span{display:flex;align-items:center;justify-content:center;width:52px;height:52px;font-size:33px}.little{font-size:14px;color:#5a6f76}.remark{border:2px solid #d4e3e3;padding:17px;border-radius:13px;font-size:15px;margin-top:24px;min-height:90px}
+.faces{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:40px auto}.faces div,.colors div{border:2px solid #d1e1df;border-radius:17px;text-align:center;padding:20px 4px;background:#fff}.faces b{font-size:68px;font-weight:400;display:block}.faces em,.colors em{font-size:14px;color:#67777c;font-style:normal;display:block;margin-top:15px}.colors{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin:37px 0}.colors i{display:block;width:98px;height:98px;max-width:90%;border-radius:50%;margin:10px auto;background:var(--color);border:2px solid #708b90}
+.checklist{padding:16px 24px;border:2px solid #d3e2e2;border-radius:15px;margin:25px 0}.checklist p{margin:15px 0;font-size:17px}.checklist .line{display:block;border-bottom:1px solid #9eb4ba;margin-top:13px}.log{width:100%;border-collapse:collapse;margin-top:18px;font-size:15px}.log th,.log td{border:1px solid #b2c8ca;height:45px;padding:8px;text-align:left}.log th{background:#e8f4f3}.tag{font-size:14px;font-weight:750;color:#2c8185}
+@media(max-width:850px){.sheet{width:min(100%,210mm);height:auto;min-height:calc(100vw * 1.414);padding:20px 16px;margin:15px auto}.sheetFooter{left:16px;right:16px;bottom:16px}.cell{font-size:20px}.gridpair{gap:10px}.scan{gap:7px}.scan span{width:38px;height:38px;font-size:27px}.faces b{font-size:43px}.colors i{width:65px;height:65px}}
+@page{size:A4;margin:0}
+@media print{html,body{background:white}nav,.note{display:none!important}.printset{padding:0}.sheet{width:210mm;height:297mm;min-height:0;max-height:297mm;margin:0;box-shadow:none;page-break-after:always;break-after:page;padding:18mm 17mm 17mm}.sheet:last-child{page-break-after:auto;break-after:auto}.cell{font-size:29px}.scan{gap:13px}.scan span{width:52px;height:52px;font-size:33px}.faces b{font-size:68px}.colors i{width:98px;height:98px}}
+</style></head>
+<body><nav><div><h1>📄 차근차근 탐험단 · 활동지</h1><small>모아의 생각정원 · 16쪽 인쇄 자료</small></div><div class="actions"><a class="navbtn" href="../../thinking-garden/">← 생각정원</a><a class="navbtn" href="../../thinking-garden/games/slow-look/">게임하기</a><button id="printButton" type="button">🖨 인쇄 · PDF로 저장</button></div></nav>
+<div class="note"><p><strong>보고 → 생각하고 → 표현하기.</strong> 빠른 정답보다 충분히 확인하고 스스로 선택하는 과정을 연습합니다. 선생님과 아이가 쉬운 활동부터 골라 사용하세요.</p><p>웹 브라우저에서 <strong>인쇄 · PDF로 저장</strong>을 누른 후 프린터에서 ‘PDF로 저장’을 선택하면 전체 16쪽을 저장할 수 있습니다. 점수나 개인정보는 수집하지 않습니다. 진단검사가 아닙니다.</p></div>
+<main class="printset" id="pages"></main>
+<script>
+"use strict";
+const P=document.getElementById('pages');
+const title=['도형 탐험 ①','도형 탐험 ②','같은 칸에 표시하기 ①','같은 칸에 표시하기 ②','위치 탐험 ①','위치 탐험 ②','위치 탐험 ③','블록 건축가 ①','블록 건축가 ②','블록 건축가 ③','동물 이름 탐험','색깔 이름 탐험','잘 보고 말하기','위치 기억 ①','위치 기억 ②','생활 속 탐험과 나의 기록'];
+function sheet(i,instruction,task,body){return '<section class="sheet"><header class="sheetHead"><span class="brand">차근차근 탐험단</span><span class="pageNum">'+String(i).padStart(2,'0')+' / 16</span></header><h2>'+title[i-1]+'</h2><p class="instruction">'+instruction+'</p><div class="task">'+task+'</div>'+body+'<footer class="sheetFooter"><span>이름 ______________　날짜 ______________</span><span>보고 · 생각하고 · 표현하기</span></footer></section>'}
+function grid(n,filled=[]){let have=new Set(filled.join?filled:[]);return '<div class="grid" style="--cols:'+n+'">'+Array.from({length:n*n},(_,i)=>'<div class="cell '+(have.has(i)?'on':'')+'"></div>').join('')+'</div>'}
+function pair(n,patterns){return patterns.map((v,i)=>'<div class="gridpair"><div class="gridblock"><h3>보기 '+(i+1)+'</h3>'+grid(n,v)+'</div><div class="gridblock"><h3>내가 표시할 곳</h3>'+grid(n)+'</div></div>').join('')}
+function scan(n,round,target){return '<p class="little">찾을 동그라미의 개수를 먼저 세어 보세요.</p><div class="scan" style="--cols:'+n+'">'+Array.from({length:n*n},(_,i)=>'<span>'+(((i*7+round*3)%n===0||((i+round*2)%11===0))?'◯':((i+round)%2?'△':'□'))+'</span>').join('')+'</div><p class="remark">찾은 동그라미는 모두 몇 개였나요? ______ 개<br>처음에 놓친 곳이 있다면 다시 확인해도 괜찮아요.</p>'}
+function colors(items){return '<div class="colors">'+items.map(([c])=>'<div><i style="--color:'+c+'"></i><em>이름: __________</em></div>').join('')+'</div>'}
+function animals(items){return '<div class="faces">'+items.map(([n,e])=>'<div><b>'+e+'</b><em>이름: __________</em></div>').join('')+'</div>'}
+const remark='<p class="remark">어려워졌을 때는 잠깐 멈춰도 괜찮아요. 천천히 다시 보고 생각해요.</p>';
+const pages=[
+ sheet(1,'동그라미를 빠뜨리지 않고 표시해요.','시각탐색 · 모양을 하나씩 확인하기',scan(4,0)),
+ sheet(2,'비슷한 모양 사이에서 동그라미를 찾아요.','시각탐색 · 조금 더 넓은 범위를 보기',scan(5,1)),
+ sheet(3,'보기를 보면서 같은 위치에 표시해요.','공간위치 · 원본을 가리지 않아요',pair(3,[[0,4],[2,7]])),
+ sheet(4,'왼쪽을 살펴보고 오른쪽의 같은 칸을 찾아요.','공간위치 · 위아래와 좌우를 비교해요',pair(3,[[0,5,8],[1,3,7]])),
+ sheet(5,'색칠된 두 칸의 위치를 정확하게 옮겨요.','공간위치 · 처음에는 손으로 가리켜도 괜찮아요',pair(3,[[2,3],[1,6]])),
+ sheet(6,'조금 떨어져 있는 세 칸을 옮겨요.','공간위치 · 칸을 하나씩 세어보기',pair(3,[[0,4,8],[2,3,7]])),
+ sheet(7,'칸이 더 많아져도 보기를 확인하며 옮겨요.','공간위치 · 난이도 확장: 4×4',pair(4,[[0,6,13],[2,8,15]])),
+ sheet(8,'두 개의 블록이 놓인 자리를 살펴보고 따라 그려요.','공간관계 · 어느 칸과 맞닿는지 보기',pair(4,[[5,6],[5,9]])),
+ sheet(9,'세 개의 블록으로 모양을 만들어요.','공간관계 · 옆, 위, 아래 관계 확인',pair(4,[[1,5,6],[4,5,9]])),
+ sheet(10,'네 개의 블록을 서두르지 않고 옮겨요.','공간관계 · 그림을 보고 다른 곳에 구성하기',pair(4,[[1,5,6,10],[4,5,9,13]])),
+ sheet(11,'동물 그림을 보고 충분히 생각한 뒤 이름을 말해요.','명명 · 같은 동물을 반복해서 말할 때도 천천히',animals([['강아지','🐶'],['고양이','🐱'],['토끼','🐰'],['곰','🐻'],['돼지','🐷'],['개구리','🐸']])+remark),
+ sheet(12,'색깔을 자세히 보고 이름을 말해요.','명명 · 정확히 보았는지 한 번 더 확인',colors([['#efc15d'],['#448dcc'],['#53a87a'],['#d56e64'],['#946ec0'],['#ef955a']])+remark),
+ sheet(13,'무엇을 보고 어떤 이름으로 말할지 스스로 결정해요.','자기점검 · 보고 → 생각하고 → 말하기',animals([['개구리','🐸'],['강아지','🐶'],['곰','🐻']])+'<div class="checklist"><p>□ 내가 본 대상을 확인했어요.</p><p>□ 서두르지 않고 생각했어요.</p><p>□ 준비된 뒤에 말했어요.</p></div>'),
+ sheet(14,'위치를 기억한 뒤 보기를 가리고 표시해요.','시각적 작업기억 · 먼저 2개만',pair(3,[[1,7],[2,6]])),
+ sheet(15,'잘 기억된다면 세 개에 도전해요.','시각적 작업기억 · 힘들면 보기를 다시 확인',pair(3,[[0,4,6],[2,3,8]])),
+ sheet(16,'실제 물건을 찾을 때도 같은 전략을 써봐요.','생활 적용 · 필요한 것 확인 후 찾아보기','<div class="checklist"><p>□ 찾을 물건의 이름을 들었어요.</p><p>□ 눈으로 왼쪽부터 차근차근 살폈어요.</p><p>□ 찾은 물건을 다시 확인했어요.</p><p>□ 어려울 때 “잠깐 쉬고 다시 해볼게요”라고 말할 수 있어요.</p></div><table class="log"><tr><th>오늘 사용한 활동</th><td></td></tr><tr><th>혼자 정확하게 했나요?</th><td></td></tr><tr><th>어떤 도움이 효과적이었나요?</th><td></td></tr><tr><th>다음에는 무엇을 해볼까요?</th><td></td></tr></table>')
+];
+P.innerHTML=pages.join('');
+document.getElementById('printButton').addEventListener('click',()=>window.print());
+</script></body></html>
