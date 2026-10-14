@@ -254,6 +254,48 @@ try{
       !result.correctedHarmony.f.notes.includes(result.correctedHarmony.f.pitch))
     throw Error('Known harmonic dissonance was not corrected '+JSON.stringify(result.correctedHarmony));
 
+   result.classroom=await page.evaluate(async()=>{
+     const saved={song:currentSong,level,bpm,section:practiceSection,length:introLength,loaded:loadedFromTransfer};
+     const report=[];
+     try{
+      loadedFromTransfer=false;
+      for(const key of ['plane','twinkle','butterfly','moa-signal','moa-space','moa-party','moa-breeze']){
+       currentSong=clone(findSample(key));practiceSection='all';refreshPracticeSections();bpm=92;
+       for(const n of [3,5,8]){
+        level=n;build();
+        const unsupported=events.filter(e=>e.note!=='쉼'&&!e.active);
+        const source=currentSong.measures.flat().filter(e=>e.note!=='쉼').length;
+        const valid=events.filter(e=>e.note!=='쉼').length===source
+           &&(n===8||unsupported.length===0)
+           &&(n===8||events.every(e=>e.note==='쉼'||ALLOWED[n].has(e.note)));
+        report.push({key,level:n,valid,total:events.length,outside:unsupported.length,modified:arrangedNotes});
+       }
+       if(currentSong.measures.length>4){
+        level=5;practiceSection='4';build();
+        report.push({key,exercise:true,valid:playbackMeasures.length===Math.min(4,currentSong.measures.length-4)
+          &&scoreStartBar===4&&events.every(e=>e.measure>=0&&e.measure<4)
+          &&events.filter(e=>e.note!=='쉼'&&!e.active).length===0});
+       }
+      }
+      currentSong=clone(findSample('twinkle'));practiceSection='all';level=8;introLength='full';bpm=92;build();
+      const full=instrumentalPreludePlan();
+      introLength='short';
+      const short=instrumentalPreludePlan();
+      const rate=22050,ac=new OfflineAudioContext(1,Math.ceil(rate*(short.durationMs/1000+.5)),rate);
+      scheduleInterludeMusic(ac,ac.destination,.01,beatMs(),short.meter);
+      const signal=(await ac.startRendering()).getChannelData(0);
+      const energy=signal.reduce((a,x)=>a+Math.abs(x),0);
+      report.push({key:'twinkle',intro:'short',valid:short.durationMs<full.durationMs&&short.durationMs>firstNoteMs()
+        &&short.firstBallOffsetMs>=0&&energy>20,
+        shortBeats:short.beats,fullBeats:full.beats,energy:Math.round(energy)});
+     }finally{
+      currentSong=saved.song;level=saved.level;bpm=saved.bpm;practiceSection=saved.section;introLength=saved.length;loadedFromTransfer=saved.loaded;build();refreshPracticeSections();
+     }
+     return report;
+   });
+   if(result.classroom.some(x=>!x.valid))
+    throw Error('Classroom 3/5-note score, phrase practice or short prelude failed '+JSON.stringify(result.classroom));
+
    const mu=result.musicality;
    if(mu.notes.join(',')!=='도,도,솔,솔,라,라,솔'||
       mu.harmonies.join(',')!=='C,C,F,C,F,C,G,C'||

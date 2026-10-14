@@ -59,7 +59,7 @@ async function basicCase(name,width,height){
   const tubeLabelColors=await page.locator('.tube').evaluateAll(xs=>xs.map(x=>({note:x.dataset.note,color:getComputedStyle(x.querySelector('.tubeLabel')).color})));
   const tubeColorMap=Object.fromEntries(tubeLabelColors.map(x=>[x.note,x.color]));
   check(tubeColorMap['도']==='rgb(235, 36, 39)'&&tubeColorMap['레']==='rgb(246, 133, 31)'&&tubeColorMap['미']==='rgb(251, 237, 27)'&&tubeColorMap['파']==='rgb(115, 200, 74)'&&tubeColorMap['솔']==='rgb(0, 163, 154)'&&tubeColorMap['라']==='rgb(75, 74, 168)'&&tubeColorMap['시']==='rgb(216, 58, 155)',`${name}: pitch-colored note labels are wrong: ${JSON.stringify(tubeColorMap)}`);
-  check(await page.locator('#sampleSelect option').count()===15,`${name}: sample selector should contain current + 14 samples`);
+  check(await page.evaluate(()=>document.querySelectorAll('#sampleSelect option').length===SAMPLES.length+1),`${name}: song list must contain every sample + custom option`);
   check(await page.locator('#videoBtn').count()===1,`${name}: video export button missing`);
   check(await page.locator('#stageFsBtn').count()===1,`${name}: stage fullscreen shortcut missing`);
   check(await page.locator('#stageFsBtn').isVisible(),`${name}: stage fullscreen shortcut is not visible`);
