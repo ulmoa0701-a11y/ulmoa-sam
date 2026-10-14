@@ -67,7 +67,7 @@ jobs:
               const parentNames=gardenGroups.map(g=>g.querySelector('.hb-game-parent')?.textContent||'');
               const expectedGardens=['인지정원','생각정원','학습정원','음악정원','마음정원'];
               expectedGardens.forEach((name,i)=>{if(!parentNames[i]?.includes(name))issues.push('garden order/name mismatch: '+name)});
-              const expectedChildCounts=[4,2,3,2,3];
+              const expectedChildCounts=[4,2,3,3,2];
               expectedChildCounts.forEach((count,i)=>{if(gardenGroups[i]?.querySelectorAll('.hb-game-child').length!==count)issues.push('garden sublinks incorrect: '+expectedGardens[i])});
               if(gardenGroups.some(g=>!g.querySelector('.hb-game-parent')?.getAttribute('href')?.includes('gardens/#')))issues.push('garden heading does not open the shared finder');
               if(gardenGroups.some(g=>!g.querySelector('.hb-game-parent')||getComputedStyle(g).display==='none'))issues.push('nested groups hidden');
