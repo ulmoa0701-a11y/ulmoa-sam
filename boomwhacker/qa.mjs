@@ -172,6 +172,9 @@ async function basicCase(name,width,height){
   await page.locator('#levels button[data-level="8"]').click();
   check(await page.locator('.tube:not(.inactive)').count()===8,`${name}: 8-note mode active tube count wrong`);
 
+  await page.locator('#sampleSelect').selectOption('moa-signal');
+  check((await page.locator('#songTitle').innerText())==='모아의 출발 신호',`${name}: revised start cue title not applied`);
+  check(await page.evaluate(()=>currentSong.measures[1].map(x=>x.lyric).join('')==='출발!'),`${name}: start cue lyric and melody syllables don't agree`);
   await page.locator('#sampleSelect').selectOption('bear');
   check((await page.locator('#songTitle').innerText())==='곰 세 마리',`${name}: bear sample did not load`);
   check(await page.locator('.beat').count()>20,`${name}: bear sample score is unexpectedly short`);
