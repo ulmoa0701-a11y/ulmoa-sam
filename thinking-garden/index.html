@@ -98,9 +98,34 @@
           </div></div>
           <p class="practice-notice" id="practiceNotice">쉬움 · 10문제 · 문제 순서는 매번 달라져요.</p>
         </div>
-        <div class="slow-preview-controls" id="slowLookControls" hidden><div class="slow-preview-fields"><label for="slowLevel">난이도<select id="slowLevel"><option value="1">쉬움 · 2개부터</option><option value="2">보통 · 3개부터</option><option value="3">확장 · 4개부터</option></select></label><label for="slowCue">교사 도움 방식<select id="slowCue"><option value="guide">눈으로 보고 생각하기 안내</option><option value="wait">충분히 기다리기</option><option value="self">스스로 확인하기</option></select></label></div><div class="slow-preview-fields" id="slowNameOnly" hidden><label for="slowKind">이름 탐험 대상<select id="slowKind"><option value="animal">동물</option><option value="color">색깔</option></select></label><label for="slowResponse">대답 방법<select id="slowResponse"><option value="speech">말로 답하기 · 교사 기록</option><option value="point">이름 글자에서 선택하기</option></select></label></div><label id="strategyAutoGroup" class="strategy-auto-control" hidden><input id="strategyAuto" type="checkbox" checked> 오류가 반복되면 다음 미션 도움 자동조절</label><small>빠르게 맞히는 것보다 충분히 살피는 과정을 연습해요. 어려우면 중간에 쉬어갈 수 있어요.</small></div>
+
         <div class="preview-label"><span>👀 게임 예시</span><small id="previewRoundInfo">실제 게임은 5스테이지로 진행돼요.</small></div>
         <div class="preview-stage" id="introPreview"></div>
+        <div class="slow-preview-controls" id="slowLookControls" hidden>
+          <div class="slow-preview-main">
+            <label for="slowLevel">난이도
+              <select id="slowLevel"><option value="1">쉬움</option><option value="2">보통</option><option value="3">확장</option></select>
+            </label>
+            <span class="slow-preview-note">준비되면 바로 시작할 수 있어요. 시간 제한은 없어요.</span>
+          </div>
+          <details class="slow-teacher-details" id="slowTeacherDetails" hidden>
+            <summary>선생님 설정 · 필요한 경우에만</summary>
+            <div class="slow-preview-fields" id="slowCueGroup" hidden>
+              <label for="slowCue">진행 안내
+                <select id="slowCue"><option value="guide">화면·음성 안내</option><option value="wait">생각할 시간 제공</option><option value="self">스스로 확인</option></select>
+              </label>
+            </div>
+            <div class="slow-preview-fields" id="slowNameOnly" hidden>
+              <label for="slowKind">살펴볼 대상
+                <select id="slowKind"><option value="animal">동물</option><option value="color">색깔</option></select>
+              </label>
+              <label for="slowResponse">답하는 방법
+                <select id="slowResponse"><option value="speech">말하기 · 교사 기록</option><option value="point">이름 글자에서 선택하기</option></select>
+              </label>
+            </div>
+            <label id="strategyAutoGroup" class="strategy-auto-control" hidden><input id="strategyAuto" type="checkbox" checked> 오답이 2번 이상 나오면 다음 문제의 난이도를 한 단계 낮춰요. (가능한 경우)</label>
+          </details>
+        </div>
         <div class="intro-actions"><button id="introStart" class="intro-start" type="button">게임 시작 ▶</button><button id="introList" class="intro-list" type="button">다른 게임 보기</button></div>
       </div>
       <div class="intro-friend-wrap"><img id="introFriend" src="assets/moa-discovery.png" alt="게임 안내 캐릭터"><span>준비됐으면 시작!</span></div>
