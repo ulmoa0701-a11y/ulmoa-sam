@@ -741,3 +741,151 @@ main:has(#parentCalendar:not([hidden])){padding-top:14px}
  .parent-easy-form .parent-mode-header .journal-mode-btn strong{font-size:13px}
  .parent-easy-form .parent-mode-header .journal-mode-btn small{font-size:10px}
 }
+
+/* v15 compact journaling layout (2026-10-13). Scope exclusively to student form.
+   Keep clinician, caregiver, consent/dialog semantics and existing input names intact. */
+body:has(.student-journal) .workspace-shell:not(.therapist-shell){
+  grid-template-columns:205px minmax(0,1fr);gap:14px
+}
+body:has(.student-journal) .workspace-section[data-workspace-view="write"] .editor-paper{
+  padding:15px 20px 19px
+}
+body:has(.student-journal) .workspace-section[data-workspace-view="write"] .editor-paper>.tag{margin-bottom:1px}
+body:has(.student-journal) .workspace-section[data-workspace-view="write"] .editor-paper>h2{margin:1px 0 3px}
+body:has(.student-journal) .workspace-section[data-workspace-view="write"] .editor-paper>p{margin:0 0 10px;line-height:1.45}
+.student-journal{gap:10px}
+.student-journal .student-mode-header{margin:0}
+.student-journal .student-mode-title{margin:0 0 5px}
+.student-journal .journal-mode-switch{display:flex;flex-wrap:wrap;gap:7px}
+.student-journal .journal-mode-btn,
+.student-journal .journal-mode-btn.active{
+  flex:0 1 auto;display:flex;flex-direction:row;align-items:center;gap:8px;
+  min-height:46px;padding:8px 12px;box-shadow:none
+}
+.student-journal .journal-mode-btn strong{font-size:14px}
+.student-journal .journal-mode-btn small{font-size:12px;white-space:normal}
+.student-journal .student-mode-hint{margin:4px 0 0!important;font-size:12px!important}
+.student-journal .student-info-card,
+.student-journal[data-journal-mode="quick"] .student-info-card{
+  padding:9px 12px 10px;margin:0;background:#f8fafc
+}
+.student-journal .student-datetime-heading,
+.student-journal[data-journal-mode="quick"] .student-datetime-heading{margin-bottom:5px}
+.student-journal .student-datetime-heading strong{font-size:14px}
+.student-journal .student-datetime-grid{
+  display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.83fr) minmax(0,1fr);
+  gap:10px;align-items:end
+}
+.student-journal .student-datetime-grid label,
+.student-journal .student-extra-grid label{min-width:0;gap:4px;font-size:13px;line-height:1.3}
+.student-journal .student-datetime-grid label small{font-size:11px}
+.student-journal .student-datetime-grid input,
+.student-journal .student-extra-grid input{
+  width:100%;min-width:0;min-height:42px;height:42px;padding:8px 10px;
+  font-size:15px;border-radius:9px
+}
+.student-journal .student-datetime-hint{margin:4px 0 0!important;font-size:11px!important}
+.student-journal .student-extra-grid{grid-template-columns:minmax(0,1fr);margin:0 0 7px;gap:0}
+.student-journal .form-switcher{gap:6px}
+.student-journal .form-switcher .format-btn{min-height:40px;padding:7px 12px}
+.student-journal #textPanel textarea[name="note"]{
+  min-height:104px;height:112px;max-height:65vh;resize:vertical;
+  padding:10px 12px;line-height:1.55
+}
+.student-journal[data-journal-mode="quick"] #textPanel textarea[name="note"]{
+  min-height:88px;height:102px;resize:vertical
+}
+.student-journal .student-note-label{gap:5px;font-size:15px}
+.student-journal .student-mode-advanced{min-width:0}
+.student-journal .student-mode-advanced:has(>details.optional-fields){display:grid;gap:5px}
+.student-journal .optional-fields{margin:0;border-radius:10px}
+.student-journal .optional-fields>summary{
+  min-height:43px;padding:9px 12px;gap:8px;font-size:14px;line-height:1.35
+}
+.student-journal .optional-fields>summary::after{font-size:18px}
+.student-journal .optional-fields summary small{font-size:11px;white-space:normal}
+.student-journal .optional-fields>.optional-wrap{margin:0 12px 12px;gap:10px}
+.student-journal .student-share{margin-top:1px}
+@media(max-width:1090px){
+ .student-journal .student-datetime-grid{
+   grid-template-columns:minmax(0,1.16fr) minmax(0,.84fr);gap:8px
+ }
+ .student-journal .student-place-field{grid-column:1/-1}
+}
+@media(max-width:740px){
+ body:has(.student-journal) .workspace-shell:not(.therapist-shell){display:block}
+ body:has(.student-journal) .workspace-section[data-workspace-view="write"] .editor-paper{padding:12px 13px 15px}
+ .student-journal .student-datetime-grid{grid-template-columns:minmax(0,1.16fr) minmax(0,.84fr);gap:7px}
+ .student-journal .student-place-field{grid-column:1/-1}
+ .student-journal .journal-mode-btn,.student-journal .journal-mode-btn.active{min-height:44px;padding:7px 10px}
+ .student-journal .journal-mode-btn small{display:none}
+ .student-journal .student-info-card,.student-journal[data-journal-mode="quick"] .student-info-card{padding:9px}
+ .student-journal #textPanel textarea[name="note"]{min-height:96px;height:106px}
+ .student-journal[data-journal-mode="quick"] #textPanel textarea[name="note"]{min-height:88px;height:98px}
+ .student-journal .optional-fields>summary{min-height:44px;padding:9px}
+}
+@media(max-width:355px){
+ .student-journal .student-datetime-grid{grid-template-columns:minmax(0,1fr)}
+ .student-journal .student-place-field{grid-column:auto}
+ .student-journal .student-datetime-grid input{min-height:42px}
+}
+
+/* Student quick mood selection + optional examples; caregiver layout aligned to student. */
+.student-journal .student-emotion-quick{border:1px solid #d4deed;background:#fbfcff;border-radius:12px;padding:10px 12px;min-width:0}
+.student-journal .student-emotion-title{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;margin-bottom:7px}
+.student-journal .student-emotion-title strong{font-size:14px;color:#223a51}
+.student-journal .student-emotion-title small{font-size:11px;color:#4b6075;font-weight:500}
+.student-journal .emotion-quick-body{display:grid;gap:7px}
+.student-journal .emotion-quick-body>.emotion-grid{display:flex;flex-wrap:wrap;gap:5px}
+.student-journal .emotion-quick-body>.emotion-grid>.emotion-chip{min-width:0;margin:0}
+.student-journal .emotion-quick-body>.emotion-grid>.emotion-chip span{padding:6px 10px;min-height:33px;display:flex;align-items:center;font-size:13px;white-space:nowrap}
+.student-journal .emotion-quick-body>.emotion-more{margin:0}
+.student-journal .emotion-quick-body>.emotion-more>summary,
+.student-journal .emotion-extra-optional>summary{font-size:12px;color:#405b78;padding:5px 2px;cursor:pointer}
+.student-journal .emotion-extra-optional{border-top:1px dashed #d5dfed}
+.student-journal .emotion-extra-fields{display:grid;gap:8px;padding:8px 0 1px}
+.student-journal .emotion-extra-fields input,.student-journal .emotion-extra-fields select{min-height:42px}
+.student-journal .emotion-quick-body>.emotion-more>summary span,.student-journal .emotion-extra-fields label small{color:#42576c!important}
+.entry-examples{border:1px dashed #c7d8eb;border-radius:10px;background:#fbfdff;margin:0;overflow:hidden}
+.entry-examples>summary{cursor:pointer;min-height:36px;padding:7px 12px;color:#405975;font-weight:650;font-size:13px}
+.entry-examples>summary small{font-weight:450;font-size:11px;color:#536b7e;margin-left:8px}
+.entry-examples-body{padding:0 12px 10px;display:grid;gap:5px;color:#435a70;font-size:13px;line-height:1.5}
+.entry-examples-body p{margin:3px 0!important;line-height:1.5!important;font-size:13px!important}
+.entry-examples .example-lines{padding:6px 10px;background:#f1f6fd;border-left:3px solid #b3c9e9;border-radius:6px}
+.parent-easy-form{gap:10px}
+.parent-easy-form .parent-when{
+ display:grid;grid-template-columns:minmax(0,1.18fr) minmax(0,.83fr) minmax(0,1fr);gap:9px;align-items:end;
+ padding:10px 12px;border:1px solid #d9e4ed;border-radius:12px;background:#f8fafc
+}
+.parent-easy-form .parent-when label{min-width:0;gap:4px;font-size:13px;line-height:1.3}
+.parent-easy-form .parent-when input{min-width:0;width:100%;min-height:42px;height:42px;padding:8px 9px;font-size:15px;border-radius:9px}
+.parent-easy-form .parent-date-hint{margin:-4px 0 0!important;font-size:11px!important;color:#486078!important}
+.parent-easy-form>.parent-main-label{gap:5px;font-size:14px}
+.parent-easy-form>.parent-main-label textarea{min-height:96px;height:106px;max-height:55vh;resize:vertical;padding:10px 12px;line-height:1.5}
+.parent-easy-form>.parent-source-field{gap:4px;font-size:13px}
+.parent-easy-form>.parent-source-field select{min-height:42px;padding:8px 10px;font-size:14px}
+.parent-easy-form .parent-fact-note{margin:0!important;font-size:12px}
+.parent-easy-form>details.parent-more,.parent-easy-form>details.parent-type-optional,.parent-easy-form>details.parent-guide{margin:0;border-radius:10px}
+.parent-easy-form>details>summary{min-height:43px;padding:9px 12px;font-size:13px}
+.parent-easy-form>details>summary small{font-size:11px}
+body:has(.parent-easy-form) .workspace-shell:not(.therapist-shell){grid-template-columns:205px minmax(0,1fr);gap:14px}
+body:has(.parent-easy-form) .workspace-section[data-workspace-view="write"] .editor-paper{padding:15px 20px 19px}
+body:has(.parent-easy-form) .editor-paper>.tag{margin-bottom:1px}
+body:has(.parent-easy-form) .editor-paper>h2{margin:2px 0 3px}
+body:has(.parent-easy-form) .editor-paper>p{margin:0 0 10px;line-height:1.45}
+@media(max-width:1090px){
+ .parent-easy-form .parent-when{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)}
+ .parent-easy-form .parent-when .parent-location{grid-column:1/-1}
+}
+@media(max-width:740px){
+ body:has(.parent-easy-form) .workspace-shell:not(.therapist-shell){display:block}
+ body:has(.parent-easy-form) .workspace-section[data-workspace-view="write"] .editor-paper{padding:12px 13px 15px}
+ .parent-easy-form .parent-when{grid-template-columns:minmax(0,1.16fr) minmax(0,.84fr);gap:7px;padding:9px}
+ .parent-easy-form .parent-when .parent-location{grid-column:1/-1}
+ .student-journal .emotion-quick-body>.emotion-grid>.emotion-chip span{padding:6px 8px}
+}
+@media(max-width:355px){
+ .parent-easy-form .parent-when{grid-template-columns:minmax(0,1fr)}
+ .parent-easy-form .parent-when .parent-location{grid-column:auto}
+}
+
