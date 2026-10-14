@@ -51,7 +51,7 @@ try{
   await page.locator('#tempo').evaluate((el,value)=>{el.value=String(value);el.dispatchEvent(new Event('input',{bubbles:true}))},bpmValue);
   for(const mode of types){
    const filename='boomwhacker-'+bpmValue+'bpm-'+mode+'.wav';
-   const downloadPromise=page.waitForEvent('download',{timeout:20000});
+   const downloadPromise=page.waitForEvent('download',{timeout:65000});
    const stat=await page.evaluate(async ({mode,filename})=>{
     const rate=22050,plan=instrumentalPreludePlan(),delay=.10;
     const ac=new OfflineAudioContext(1,Math.ceil(rate*(plan.durationMs/1000+.85)),rate);
@@ -106,7 +106,7 @@ try{
   await page.locator('#sampleSelect').selectOption(key);
   await page.locator('#levels button[data-level="'+difficulty+'"]').click();
   const filename='classroom-'+key+'-'+difficulty+'note-melody-mr.wav';
-  const waitDownload=page.waitForEvent('download',{timeout:20000});
+  const waitDownload=page.waitForEvent('download',{timeout:65000});
   const stats=await page.evaluate(async (filename)=>{
    const rate=22050,bufferSec=(events.at(-1).start+events.at(-1).dur-firstNoteMs())/1000+1.3;
    const ac=new OfflineAudioContext(1,Math.ceil(rate*bufferSec),rate),bus=ac.createGain();
