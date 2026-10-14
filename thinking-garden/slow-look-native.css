@@ -1,0 +1,45 @@
+/* Native six cognitive garden mini-games: same world, same cards, no separate page. */
+.slow-task{display:grid;justify-items:center;gap:12px;max-width:850px;margin:0 auto;padding:16px 10px 20px;border-radius:24px;background:#ffffffbf}
+.slow-step{margin:5px 0 4px;display:flex;gap:9px;flex-wrap:wrap;justify-content:center}
+.slow-step span{display:inline-flex;padding:7px 11px;border-radius:999px;background:#fff9e9;color:#637261;font-size:13px;font-weight:800;border:1px solid #e5edcf}
+.slow-mission-label{margin:0;font-size:clamp(16px,2.4vw,20px);font-weight:900;letter-spacing:-.03em;color:#355846;text-align:center}
+.slow-board{--side:3;display:grid;grid-template-columns:repeat(var(--side),minmax(0,1fr));width:min(100%,270px);aspect-ratio:1;gap:5px;background:#deebdd;padding:8px;border-radius:19px;border:2px solid #b7d4b9}
+.slow-board.slow-scan,.slow-board.slow-bag{width:min(100%,420px);gap:7px;padding:10px}
+.slow-tile{display:flex;justify-content:center;align-items:center;min-width:0;min-height:0;font-size:clamp(22px,4vw,34px);border:2px solid #d8e7d4;border-radius:12px;background:white;box-shadow:0 2px 6px #2948300b;touch-action:manipulation}
+button.slow-tile{cursor:pointer;transition:background .14s,border-color .14s}
+button.slow-tile:focus-visible,button.slow-primary:focus-visible,button.slow-secondary:focus-visible,.slow-teacher-details button:focus-visible,.slow-name-choice button:focus-visible{outline:3px solid #e7be45;outline-offset:3px}
+.slow-tile.shown{background:#edf8e7;border-color:#b5dcb9}
+.slow-tile.picked{background:#e8f8dc;border-color:#6cae79;box-shadow:inset 0 0 0 2px #8bc98a}
+.slow-map-pair{display:grid;grid-template-columns:1fr 1fr;gap:clamp(8px,3vw,28px);align-items:start;width:100%;max-width:640px}
+.slow-map-pair>div{min-width:0;text-align:center}
+.slow-map-pair b{display:block;font-size:14px;margin-bottom:9px;color:#416a4f}
+.slow-map-pair .slow-board{width:100%;max-width:275px;margin:auto}
+.slow-board.slow-covered{display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:45px;color:#69826d;background:#f2f6e8;min-height:160px}
+.slow-board.slow-covered small{font-size:12px;font-weight:800}
+.slow-name-picture{width:min(100%,340px);min-height:200px;display:flex;justify-content:center;align-items:center;border-radius:24px;border:2px solid #d5e7ce;background:#fff;font-size:112px;line-height:1.1;box-shadow:0 9px 18px #44582c14}
+.slow-color{width:120px;height:120px;border-radius:50%;border:5px solid #fff;box-shadow:0 0 0 3px #9eaf9b}
+.slow-primary,.slow-secondary,.slow-name-choice button,.slow-teacher-choice button,.slow-teacher-details button,.slow-csv{display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:48px;border-radius:16px;border:2px solid #d6e4d3;padding:12px 20px;background:#fff;color:#345546;font-size:15px;font-weight:900;cursor:pointer}
+.slow-primary{border-color:#286c53;background:#2d7258;color:#fff;box-shadow:0 5px 0 #205940}
+.slow-primary:hover{background:#378365}
+.slow-secondary{background:#fff9e8;border-color:#ecdeb0}
+.slow-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.slow-feedback{font-size:15px;color:#4a7358;font-weight:850;text-align:center;min-height:22px;line-height:1.45}
+.slow-teacher-details{width:min(100%,700px);padding:13px 16px;margin:8px auto 0;border:1px dashed #ceddc9;border-radius:18px;background:#ffffffb5;color:#617265;font-size:13px}
+.slow-teacher-details summary{font-weight:850;cursor:pointer;color:#4b6552}
+.slow-teacher-details p{margin:9px 0;font-size:13px;line-height:1.55}
+.slow-teacher-details button{padding:8px 11px;min-height:40px;font-size:12px}
+.slow-teacher-choice,.slow-name-choice{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;text-align:center}
+.slow-teacher-choice p{width:100%;font-size:13px;color:#596d60}
+.slow-teacher-choice button{font-size:13px;padding:9px 14px}
+.slow-name-choice button{font-size:18px}
+.slow-result-extra{margin:10px auto 0;max-width:580px}
+.slow-result-info{font-weight:850;font-size:14px;color:#4c6d56}
+.slow-result-lines{font-size:12px;line-height:1.6;background:#f3f9ed;padding:10px;border-radius:12px;margin-top:10px}
+.slow-preview-controls{margin:14px auto;padding:15px 17px;background:#f5f9ef;border:1px solid #dcebd5;border-radius:18px}
+.slow-preview-controls .slow-preview-fields{display:flex;gap:16px;flex-wrap:wrap;margin:7px 0}
+.slow-preview-controls label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:850;color:#48674e;flex:1 1 150px}
+.slow-preview-controls select{border-radius:12px;border:2px solid #cee0c8;min-height:44px;background:white;padding:8px;font:inherit}
+.slow-preview-controls small{display:block;color:#657465;font-size:12px;line-height:1.5}
+button:disabled.slow-primary,button:disabled.slow-secondary{opacity:.65;cursor:default;box-shadow:none}
+@media(max-width:600px){.slow-task{padding:12px 5px}.slow-map-pair{gap:7px}.slow-map-pair .slow-board{gap:3px;padding:5px;border-width:1px}.slow-tile{font-size:clamp(18px,6vw,27px);border-width:1px;border-radius:9px}.slow-mission-label{font-size:16px}.slow-name-picture{min-height:180px;font-size:86px}.slow-teacher-choice button{flex:1 1 42%}.slow-board.slow-scan,.slow-board.slow-bag{width:min(100%,340px)}.slow-step span{font-size:11px;padding:5px}.slow-primary,.slow-secondary{font-size:13px;padding:10px 12px}.slow-board.slow-covered{min-height:120px;font-size:33px}}
+@media(prefers-reduced-motion:reduce){.slow-tile{transition:none}}

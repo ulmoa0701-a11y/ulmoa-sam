@@ -18,7 +18,12 @@ const meta={
  inside:{title:'정원 안에 별 심기',kicker:'샘의 별밭',theme:'spacing',friend:'assets/friend-saem.png'},
  targets:{title:'하나씩 깨우기',kicker:'샘의 톡톡정원',theme:'spacing',friend:'assets/friend-saem.png'},
  paint:{title:'정원길 쓱싹 칠하기',kicker:'샘의 색칠길',theme:'spacing',friend:'assets/friend-saem.png'},
- slowLook:{title:'차근차근 탐험단',kicker:'샘과 모아의 확인정원',theme:'spacing',friend:'assets/friend-saem.png'},
+ slowScan:{title:'꽃과 단서 찾기',kicker:'홍의 꽃찾기숲',theme:'find',friend:'assets/friend-hong.png'},
+ slowPlace:{title:'정원 지도 따라 놓기',kicker:'샘의 지도정원',theme:'spacing',friend:'assets/friend-saem.png'},
+ slowBlock:{title:'블록 건축가',kicker:'샘의 블록공방',theme:'spacing',friend:'assets/friend-saem.png'},
+ slowName:{title:'친구 이름 탐정',kicker:'샘의 이름탐정숲',theme:'find',friend:'assets/friend-saem.png'},
+ slowMemory:{title:'꽃자리 기억하기',kicker:'루의 꽃기억길',theme:'memory',friend:'assets/friend-ru.png'},
+ slowEveryday:{title:'가방 준비 탐험',kicker:'샘의 생활준비길',theme:'spacing',friend:'assets/friend-saem.png'},
  water:{title:'시든 꽃 깨우기',kicker:'홍의 물방울정원',theme:'find',friend:'assets/friend-hong.png'}
 };
 
@@ -61,6 +66,12 @@ function updatePracticeControls(){
 }
 
 const previewExamples={
+ slowScan:`<div class="pv-instruction">잎과 돌 사이에서 꽃을 찾아요</div><div class="pv-options emoji"><span>🍃</span><span class="preview-pulse">🌼</span><span>🌱</span><span class="preview-pulse">🌼</span></div>`,
+ slowPlace:`<div class="pv-instruction">같은 위치에 꽃을 심어요</div><div class="pv-options emoji"><span>🌼</span><span>▫</span><span>→</span><span class="preview-pulse">🌼</span><span>▫</span></div>`,
+ slowBlock:`<div class="pv-instruction">블록이 맞닿는 자리를 살펴요</div><div class="pv-options emoji"><span>🧱</span><span>🧱</span><span>→</span><span class="preview-pulse">🧱</span><span>🧱</span></div>`,
+ slowName:`<div class="pv-instruction">충분히 보고 생각한 뒤 이름을 말해요</div><div class="pv-options emoji"><span>🐶</span><span>🐰</span><span>🐱</span></div>`,
+ slowMemory:`<div class="pv-instruction">꽃이 있던 자리를 기억해요</div><div class="pv-sequence"><i class="blue"></i><b>→</b><i class="yellow"></i><b>→</b><i class="green"></i></div><div class="pv-hint">보기를 가린 뒤 위치를 표시해요</div>`,
+ slowEveryday:`<div class="pv-instruction">가방에 넣을 물건을 찾아요</div><div class="pv-options emoji"><span>📖</span><span class="preview-pulse">✏️</span><span>🧽</span><span>📏</span></div>`,
  rescue:`<div class="pv-rescue-radio">📡 무전 도착! <b>노란 큰 오리</b></div><div class="pv-rescue-field"><span>🌳</span><span class="duck">🦆</span><span>🌿</span><span>🐷</span><span class="van">🚐</span></div>`,
  memory:`<div class="pv-instruction">순서를 기억해요</div><div class="pv-sequence"><i class="blue"></i><b>→</b><i class="yellow"></i><b>→</b><i class="green"></i></div><div class="pv-hint">충분히 본 뒤 ‘준비됐어요’를 누르면 가려져요</div>`,
  spacing:`<div class="pv-instruction">붙어 있는 문장에서 띄울 곳을 찾아요</div><div class="pv-glued">오늘은학교에가요</div><div class="pv-space-arrow">톡! ↓</div><div class="pv-spaced"><span>오늘은</span><span>학교에</span><span>가요</span></div>`,
@@ -86,8 +97,9 @@ function openPreview(id){
   $('#introPreview').innerHTML=previewExamples[id]||'<div class="pv-instruction">게임 예시를 보고 시작해요.</div>';
   const isPractice=LITERACY_GAMES.has(id);
   $('#literacyPracticeControls').hidden=!isPractice;
-  $('#previewRoundInfo').textContent=id==='slowLook'?'6가지 활동 중 하나를 골라 4~6문제씩 진행해요.':'실제 게임은 5스테이지로 진행돼요.';
+  $('#previewRoundInfo').textContent=window.SlowLookNative?.isNew(id)?(id==='slowName'?'6문제를 차근차근 진행해요.':'5문제를 차근차근 진행해요.'):'실제 게임은 5스테이지로 진행돼요.';
   if(isPractice)updatePracticeControls();
+  const isSlow=window.SlowLookNative?.isNew(id),controls=$('#slowLookControls');if(controls)controls.hidden=!isSlow;if(isSlow)$('#slowNameOnly').hidden=id!=='slowName';
   show('intro');
 }
 
@@ -117,10 +129,10 @@ function sfx(kind='ok'){if(!state.sound)return;try{const C=window.AudioContext||
 function flash(text){toast.textContent=text;toast.classList.add('show');clearTimeout(flash.t);flash.t=setTimeout(()=>toast.classList.remove('show'),1150)}
 function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
 function updateProgress(){const total=state.roundTotal;$('#stageLabel').textContent=`${Math.min(state.round+1,total)} / ${total}`;$('#progressBar').style.width=`${state.round/total*100}%`;const badge=$('#missionBadge');if(badge)badge.textContent=`미션 ${Math.min(state.round+1,total)}` }
-function startGame(id){clearTimers();state.game=id;state.round=0;state.score=0;state.lock=false;state.roundTotal=LITERACY_GAMES.has(id)?state.practiceCount:5;state.practiceRounds=LITERACY_GAMES.has(id)?choosePracticeRounds(id,state.practiceLevel,state.roundTotal):[];const m=meta[id];$('#gameTitle').textContent=m.title;$('#gameKicker').textContent=m.kicker;$('#scoreLabel').textContent='🌱 0';guide.src=m.friend;world.className=`game-world theme-${m.theme}`;show('game');updateProgress();renderRound()}
-function renderRound(){clearTimers();state.lock=false;area.innerHTML='';({rescue:renderFind,memory:renderMemory,spacing:renderSpacing,spelling:renderSpelling,sameShape:renderSameShape,flower:renderFlower,hide:renderHide,path:renderPath,calm:renderCalm,inside:renderInside,targets:renderTargets,paint:renderPaint,water:renderWater}[state.game])()}
+function startGame(id){clearTimers();state.game=id;state.round=0;state.score=0;state.lock=false;const isSlow=window.SlowLookNative?.isNew(id);state.slowLook=isSlow?window.SlowLookNative.setUp(id,{level:$('#slowLevel')?.value,cue:$('#slowCue')?.value,kind:$('#slowKind')?.value,response:$('#slowResponse')?.value}):null;state.roundTotal=isSlow?window.SlowLookNative.rounds(id):LITERACY_GAMES.has(id)?state.practiceCount:5;state.practiceRounds=LITERACY_GAMES.has(id)?choosePracticeRounds(id,state.practiceLevel,state.roundTotal):[];const m=meta[id];$('#gameTitle').textContent=m.title;$('#gameKicker').textContent=m.kicker;$('#scoreLabel').textContent='🌱 0';guide.src=m.friend;world.className=`game-world theme-${m.theme}`;show('game');updateProgress();renderRound()}
+function renderRound(){clearTimers();state.lock=false;area.innerHTML='';if(window.SlowLookNative?.isNew(state.game)){window.SlowLookNative.render(state.game,{state,area,missionText,missionSub,guide,say,flash,addSeeds,sfx,nextRound});return;}({rescue:renderFind,memory:renderMemory,spacing:renderSpacing,spelling:renderSpelling,sameShape:renderSameShape,flower:renderFlower,hide:renderHide,path:renderPath,calm:renderCalm,inside:renderInside,targets:renderTargets,paint:renderPaint,water:renderWater}[state.game])()}
 function nextRound(delay=700){state.lock=true;later(()=>{state.round++;if(state.round>=state.roundTotal)return finishGame();updateProgress();renderRound()},delay)}
-function finishGame(){completed[state.game]=true;localStorage.setItem(STORE.done,JSON.stringify(completed));$('#progressBar').style.width='100%';const m=meta[state.game];$('#resultCharacter').src=m.friend;$('#resultTitle').textContent=state.score>=state.roundTotal*9?'정원이 활짝 깨어났어!':state.score>=state.roundTotal*6?'정원 한 칸 완성!':'끝까지 길을 만들었어!';$('#resultMessage').textContent=LITERACY_GAMES.has(state.game)?`${LEVEL_NAMES[state.practiceLevel]} · ${state.roundTotal}문제를 끝까지 풀었어요!`:`${m.kicker}의 5개 미션을 모두 지나왔어요.`;$('#resultScore').textContent=`🌱 ${state.score}`;later(()=>show('result'),500)}
+function finishGame(){completed[state.game]=true;localStorage.setItem(STORE.done,JSON.stringify(completed));$('#progressBar').style.width='100%';const m=meta[state.game];$('#resultCharacter').src=m.friend;$('#resultTitle').textContent=state.score>=state.roundTotal*9?'정원이 활짝 깨어났어!':state.score>=state.roundTotal*6?'정원 한 칸 완성!':'끝까지 길을 만들었어!';$('#resultMessage').textContent=window.SlowLookNative?.isNew(state.game)?'모아와 함께 차근차근 확인하는 연습을 했어요.':LITERACY_GAMES.has(state.game)?`${LEVEL_NAMES[state.practiceLevel]} · ${state.roundTotal}문제를 끝까지 풀었어요!`:`${m.kicker}의 5개 미션을 모두 지나왔어요.`;$('#resultScore').textContent=`🌱 ${state.score}`;document.querySelector('.slow-result-extra')?.remove();if(state.slowLook)window.SlowLookNative.addSummary(state.slowLook,document.querySelector('.result-garden'));later(()=>show('result'),500)}
 function rewardAt(el){const r=el.getBoundingClientRect(),w=world.getBoundingClientRect(),p=document.createElement('span');p.className='leaf-pop';p.textContent='🌱';p.style.left=`${r.left-w.left+r.width/2}px`;p.style.top=`${r.top-w.top+r.height/2}px`;world.appendChild(p);later(()=>p.remove(),800)}
 function roundGate(parent,label='다음 미션 ▶',delay=500,speech=''){
  state.lock=true;
@@ -228,7 +240,7 @@ $$('#literacyPracticeControls [data-level]').forEach(b=>b.addEventListener('clic
 $$('#literacyPracticeControls [data-count]').forEach(b=>b.addEventListener('click',()=>{
  state.practiceCount=Number(b.dataset.count);updatePracticeControls();
 }));
-$('#introStart').addEventListener('click',()=>{if(state.previewGame==='slowLook'){location.href='games/slow-look/';return}if(state.previewGame==='rescue'){location.href='games/rescue/';return}if(state.previewGame)startGame(state.previewGame)});
+$('#introStart').addEventListener('click',()=>{if(state.previewGame==='rescue'){location.href='games/rescue/';return}if(state.previewGame)startGame(state.previewGame)});
 $('#introBack').addEventListener('click',goHome);
 $('#introList').addEventListener('click',goHome);
 $$('[data-go="home"]').forEach(b=>b.addEventListener('click',goHome));
