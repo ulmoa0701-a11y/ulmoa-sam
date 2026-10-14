@@ -3,164 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow">
-<title>이야기해봄 — 일단 해봄</title>
-<meta name="description" content="질문과 의견, 자료 요청을 공개글이나 비밀글로 남길 수 있는 이야기해봄 공간입니다.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Gamja+Flower&display=swap" rel="stylesheet">
+<meta name="robots" content="noindex,follow">
+<meta http-equiv="refresh" content="0;url=https://habom-unified-private-staging.netlify.app/">
+<meta name="referrer" content="no-referrer">
+<title>이야기해봄 | 일단 해봄</title>
+<meta name="description" content="울모아쌤에게 쪽지를 전해요. 질문·자료 요청·사용 후기를 공개 또는 비밀로 한 곳에서 남길 수 있어요.">
+<link rel="canonical" href="https://habom-unified-private-staging.netlify.app/">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link rel="stylesheet" href="../assets/notebook-subpages.css?v=20261006-community3">
-<link rel="stylesheet" href="../assets/community-board.css?v=20261012-beta-safety1">
-<link rel="stylesheet" href="../assets/habom-brand.css?v=20261010b">
-<link rel="icon" type="image/png" sizes="32x32" href="../assets/habom-favicon-v3-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="../assets/habom-favicon-v3-16.png">
-<link rel="shortcut icon" type="image/x-icon" href="../assets/habom-favicon-v3.ico">
-<link rel="apple-touch-icon" sizes="180x180" href="../assets/habom-favicon-v3-180.png">
-<link rel="stylesheet" href="../assets/habom-navigation.css?v=20261014-five-gardens2">
-<link rel="stylesheet" href="../assets/habom-gamja-font.css?v=20261012-readable2">
+<style>
+:root{color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.7 Pretendard,system-ui,-apple-system,sans-serif;background:#f6f8f4;color:#2f4835}
+main{max-width:560px;margin:14vh auto 0;padding:30px 22px}
+section{padding:26px;border:1px solid #dbe8d8;background:#fff;border-radius:19px;box-shadow:0 9px 26px #426e4810}
+.eyebrow{font-size:13px;color:#66836b;margin:0 0 5px}h1{font-size:28px;margin:0 0 9px}
+p{margin:8px 0 20px;word-break:keep-all}
+a{color:#347250;text-underline-offset:3px}
+a.primary{display:block;text-align:center;text-decoration:none;background:#39744b;color:#fff;border-radius:11px;padding:13px 16px;font-weight:800}
+small{display:block;margin:18px 0 0;color:#687968}
+footer{margin:22px 3px;text-align:center;font-size:13px}
+a:focus-visible{outline:3px solid #8fbaa0;outline-offset:3px}
+</style>
+<script>
+  // Replace rather than append history. The meta refresh remains a fallback.
+  window.location.replace("https://habom-unified-private-staging.netlify.app/");
+</script>
 </head>
-<body class="note-subpage community-page">
-<header class="sub-header">
-  <a class="sub-brand" href="../" aria-label="일단 해봄 홈"><img class="brand-logo" src="../assets/habom-approved-wordmark.webp" width="188" height="63" alt="울모아쌤의 일단 해봄"></a>
-  <nav class="sub-nav"><a href="../#made">써보기</a><a class="mobile-priority" href="../materials/">자료</a><a class="mobile-priority" href="../notes/">노트</a><a class="mobile-priority" href="../brain-map/">뇌지도</a><a class="mobile-priority" href="../info/">정보</a><a href="../about/">소개</a></nav>
-</header>
-<main class="sub-main">
-  <a class="back-link" href="../#share">← 돌아가기</a>
-  <section class="community-mode" aria-labelledby="communityModeHeading">
-    <div class="community-mode-heading">
-      <div>
-        <p class="community-mode-eyebrow">질문 · 자료 요청 · 사용 후기</p>
-        <h1 id="communityModeHeading">이야기해봄</h1>
-      </div>
-      
-    </div>
-    <div class="community-mode-tabs" role="tablist" aria-label="글 공개 범위 선택">
-      <button class="community-mode-tab active" type="button" id="publicPostTab" role="tab" aria-selected="true" aria-controls="publicPostPanel">
-        <span class="community-mode-tab-title"><span aria-hidden="true">💬</span> 공개글</span>
-        <span class="community-mode-tab-note">누구나 볼 수 있어요</span>
-      </button>
-      <button class="community-mode-tab" type="button" id="privatePostTab" role="tab" aria-selected="false" aria-controls="privatePostPanel" tabindex="-1">
-        <span class="community-mode-tab-title"><span aria-hidden="true">🔒</span> 비밀글</span>
-        <span class="community-mode-tab-note">내용은 공개되지 않아요</span>
-      </button>
-    </div>
-    <p class="community-mode-purpose" id="communityModeDescription">궁금한 점, 필요한 자료, 써본 후기를 편하게 남겨주세요. <span>모든 질문에 답하거나 모든 요청을 제작할 수는 없어요.</span></p>
-  </section>
-  <section id="publicPostPanel" role="tabpanel" aria-labelledby="publicPostTab" class="notebook-page community-embed-page community-post-panel">
-    <p class="community-mode-reminder">공개글은 다른 방문자도 볼 수 있어요. 아동 실명, 연락처, 학교·진단·상담 기록 등 개인을 알아볼 수 있는 정보는 쓰지 말아 주세요.</p>
-    <p class="community-provider-note">공개 게시판은 Google Apps Script 기반 외부 서비스로 제공됩니다.</p>
-    <iframe class="community-iframe" title="일단 해봄 공개 소통 게시판" src="https://script.google.com/macros/s/AKfycbyPlQU1RapkSjSMDD_BeCSMnR4NGycAczTWxL1oUxWiganzjJezfhDaI3262kyA5Igrtw/exec" loading="eager"></iframe>
-    <section class="community-locked-list" id="habomLockedPosts" aria-labelledby="habomLockedHeading" hidden>
-      <div class="community-locked-head">
-        <h2 id="habomLockedHeading"><span aria-hidden="true">🔒</span> 잠금글 목록</h2>
-        <span class="community-locked-note">운영자 확인 후 공개된 정보만 표시</span>
-      </div>
-      <div id="habomLockedItems" class="community-locked-items"></div>
-      <p id="habomLockedState" class="community-locked-empty" role="status">목록을 불러오고 있어요.</p>
-    </section>
-  </section>
-  <section id="privatePostPanel" role="tabpanel" aria-labelledby="privatePostTab" class="notebook-page community-embed-page community-private-panel community-post-panel" hidden>
-    <p class="community-mode-reminder community-private-reminder">비밀글도 아동 실명·진단서·상담 기록 등 민감한 정보는 남기지 말아 주세요. 파일은 개인정보를 가린 뒤 첨부해 주세요.</p>
-    <p class="community-provider-note">비밀글은 외부 양식 서비스인 Jotform에서 접수합니다. 선택한 연락처와 첨부파일도 이 서비스에 제출됩니다. <a href="https://www.jotform.com/privacy/" target="_blank" rel="noopener noreferrer">Jotform의 개인정보 처리 안내 ↗</a></p>
-    <div class="community-private-viewport"><iframe id="habomPrivateForm" class="community-private-iframe" title="일단 해봄 비밀글 작성" loading="lazy" data-src="https://form.jotform.com/262832846022052" scrolling="no" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-    <details class="community-private-more"><summary>비밀글·첨부파일 안내</summary><p>답변은 보장되지 않아요. 연락처·PDF·이미지 첨부는 선택사항이며, 연락처가 없으면 개별 답변을 받기 어려워요. 목록 표시를 요청해도 운영자 검토 후 제목·가린 닉네임만 표시할 수 있어요. 완전 비공개로 남길 수도 있어요.</p></details>
-    <p class="community-private-external">양식이 보이지 않는다면 <a href="https://form.jotform.com/262832846022052" target="_blank" rel="noopener noreferrer">비밀글 작성 화면을 새 창에서 열기 <span aria-hidden="true">↗</span></a></p>
-  </section>
+<body>
+<main>
+ <section>
+  <p class="eyebrow">울모아쌤에게 전하는 작은 쪽지</p>
+  <h1>✉ 이야기해봄</h1>
+  <p>통합 게시판으로 이동 중이에요. 이동되지 않으면 아래 링크를 눌러주세요.</p>
+  <a class="primary" href="https://habom-unified-private-staging.netlify.app/">이야기해봄으로 이동 →</a>
+  <small>예전 게시판의 글과 비밀글 양식은 <a href="legacy.html">이전 이야기해봄</a>에서 계속 확인할 수 있어요.</small>
+ </section>
+ <footer><a href="../">← 일단 해봄 메인으로</a></footer>
 </main>
-<footer class="sub-footer"><div><b>일단 해봄</b><span>울모아쌤</span></div><nav class="footer-social"><a href="http://ulmoa.co.kr" target="_blank" rel="noopener">울모아</a><a href="https://www.instagram.com/ulmoa__sam/" target="_blank" rel="noopener">인스타그램</a><a href="https://blog.naver.com/ulmoa" target="_blank" rel="noopener">블로그</a><a href="https://www.threads.com/@ulmoa_sam" target="_blank" rel="noopener">스레드</a></nav></footer>
-<script>
-(function () {
-  "use strict";
-  var iframe = document.querySelector(".community-iframe");
-  if (!iframe) return;
-  window.addEventListener("message", function (event) {
-    var msg = event.data;
-    if (!msg || msg.type !== "habom-community-height-v1") return;
-    var hostname = "";
-    try { hostname = new URL(event.origin).hostname; } catch (ignore) { return; }
-    if (!/(^|\.)googleusercontent\.com$|(^|\.)google\.com$/.test(hostname)) return;
-    var measured = Number(msg.height);
-    if (!Number.isFinite(measured) || measured < 350 || measured > 10000) return;
-    var existing = iframe.offsetHeight;
-    if (Math.abs(existing - measured) < 40) return;
-    var target = Math.max(700, Math.ceil(measured + 16));
-    if (Math.abs(existing - target) > 50) iframe.style.height = target + "px";
-  });
-})();
-</script>
-<script>
-(function () {
-  "use strict";
-  var publicTab = document.getElementById("publicPostTab");
-  var privateTab = document.getElementById("privatePostTab");
-  var publicPanel = document.getElementById("publicPostPanel");
-  var privatePanel = document.getElementById("privatePostPanel");
-  var privateFrame = document.getElementById("habomPrivateForm");
-  var tabs = [publicTab, privateTab];
-  // Jotform embeds report heights about 16px short; reserve a small buffer
-  // so the visitor does not see a second scrollbar inside the form.
-  if (privateFrame && window.MutationObserver) {
-    var lastAdjustedHeight = 0;
-    var formResizeObserver = new MutationObserver(function () {
-      var declared = Number.parseFloat(privateFrame.style.height);
-      if (!Number.isFinite(declared) || declared < 400 || declared > 11000) return;
-      if (Math.abs(declared - lastAdjustedHeight) < 1) return;
-      lastAdjustedHeight = Math.ceil(declared + 28);
-      privateFrame.style.height = lastAdjustedHeight + "px";
-    });
-    formResizeObserver.observe(privateFrame, { attributes: true, attributeFilter: ["style"] });
-  }
-  if (!publicTab || !privateTab || !publicPanel || !privatePanel) return;
-  function activatePrivateEmbedResizer() {
-    if (!privateFrame || !privateFrame.getAttribute("src")) return;
-    if (privateFrame.dataset.resizeReady || !window.jotformEmbedHandler) return;
-    window.jotformEmbedHandler('iframe[id="habomPrivateForm"]', "https://form.jotform.com/");
-    privateFrame.dataset.resizeReady = "true";
-  }
-  // Deferred Jotform loader may become available AFTER an initial #private navigation.
-  // The load event plus a delayed retry cover first navigation and tab changes.
-  window.addEventListener("load", activatePrivateEmbedResizer);
-  window.setTimeout(activatePrivateEmbedResizer, 1200);
-
-  function openMode(mode, shouldFocus) {
-    var isPrivate = mode === "private";
-    var activeTab = isPrivate ? privateTab : publicTab;
-    publicPanel.hidden = isPrivate;
-    privatePanel.hidden = !isPrivate;
-    publicTab.classList.toggle("active", !isPrivate);
-    privateTab.classList.toggle("active", isPrivate);
-    publicTab.setAttribute("aria-selected", String(!isPrivate));
-    privateTab.setAttribute("aria-selected", String(isPrivate));
-    publicTab.tabIndex = isPrivate ? -1 : 0;
-    privateTab.tabIndex = isPrivate ? 0 : -1;
-    if (isPrivate && privateFrame) {
-      if (!privateFrame.getAttribute("src")) privateFrame.src = privateFrame.dataset.src;
-      window.setTimeout(activatePrivateEmbedResizer, 200);
-      window.setTimeout(activatePrivateEmbedResizer, 1200);
-    }
-    if (shouldFocus) activeTab.focus();
-    try { history.replaceState(null, "", isPrivate ? "#private" : "#public"); } catch (ignore) {}
-  }
-  publicTab.addEventListener("click", function () { openMode("public", false); });
-  privateTab.addEventListener("click", function () { openMode("private", false); });
-  tabs.forEach(function (tab, index) {
-    tab.addEventListener("keydown", function (event) {
-      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
-      event.preventDefault();
-      var next = event.key === "Home" ? 0 : event.key === "End" ? 1 : event.key === "ArrowRight" ? (index + 1) % 2 : (index + 1) % 2;
-      openMode(next === 1 ? "private" : "public", true);
-    });
-  });
-  openMode(location.hash === "#private" ? "private" : "public", false);
-  window.addEventListener("hashchange", function () {
-    var mode = location.hash === "#private" ? "private" : location.hash === "#public" ? "public" : null;
-    if (mode) openMode(mode, false);
-  });
-})();
-</script>
-<script src="https://cdn.jotfor.ms/s/umd/latest/for-form-embed-handler.js" defer></script>
-<script src="../assets/habom-locked-posts.js?v=20261011-1" defer></script>
-<script src="../assets/habom-navigation.js?v=20261014-five-gardens1" defer></script>
 </body>
 </html>
