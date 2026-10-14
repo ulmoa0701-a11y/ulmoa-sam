@@ -1,7 +1,8 @@
 \set ON_ERROR_STOP on
 INSERT INTO auth.users(id,email_confirmed_at) VALUES
 ('00000000-0000-4000-8000-000000000008',now()),
-('00000000-0000-4000-8000-000000000009',now());
+('00000000-0000-4000-8000-000000000009',now()),
+('00000000-0000-4000-8000-000000000010',now());
 SET ROLE authenticated;
 SELECT set_config('request.jwt.claim.role','authenticated',false);
 SELECT set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000001',false);
@@ -22,7 +23,7 @@ DO $$BEGIN
  IF public.ildan_claim_invite_for_user(repeat('e',64),'00000000-0000-4000-8000-000000000009')<>'parent' THEN
   RAISE EXCEPTION 'parent role mismatch'; END IF;
  BEGIN
-  PERFORM public.ildan_claim_invite_for_user(repeat('d',64),'00000000-0000-4000-8000-000000000009');
+  PERFORM public.ildan_claim_invite_for_user(repeat('d',64),'00000000-0000-4000-8000-000000000010');
   RAISE EXCEPTION 'replayed clinic invite accepted';
  EXCEPTION WHEN insufficient_privilege THEN NULL; END;
 END$$;
