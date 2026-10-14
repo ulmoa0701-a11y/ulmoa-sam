@@ -38,7 +38,7 @@ async function openJSON(nonce:string,ciphertext:string){
 }
 const requireText=(o:Obj,key:string)=>typeof o[key]==='string'?String(o[key]):'';
 const roles=new Set(['student','parent','therapist']);
-const endpoints=new Set(['me','records','share','unshare','session-notes','students','accounts','invites','claim-invite','delete-record','drive/status','health']);
+const endpoints=new Set(['me','records','share','unshare','session-notes','students','accounts','invites','claim-invite','invite-preview','invite-register','delete-record','drive/status','health']);
 const getRole=async(userDb:any,id:string)=>{
  const {data,error}=await userDb.from('ildan_members').select('user_id,role,therapist_id,student_id,display_alias').eq('user_id',id).maybeSingle();
  if(error)throw Error('ROLE_LOOKUP_FAILED');
@@ -85,6 +85,62 @@ export async function handle(request:Request):Promise<Response>{
  if(!endpoints.has(apiName))return send({error:'경로를 찾을 수 없습니다.'},404);
  if(!['GET','POST'].includes(request.method))return send({error:'지원하지 않는 요청입니다.'},405);
  if(apiName==='health'&&request.method==='GET')return send({ready:!!(env('SUPABASE_URL')&&env('SUPABASE_ANON_KEY')&&env('SUPABASE_SERVICE_ROLE_KEY')&&env('RECORD_ENCRYPTION_KEY')),mode:'not-approved-for-clinical-use'});
+ // Link previews do not consume invitation tokens. Useful in KakaoTalk in-app
+ // browser and externally opened Chrome/Samsung Internet/Safari alike.
+ // Hash fragments in invite URLs are never transmitted by the HTTP request.
+ if(apiName==='invite-preview'&&request.method==='POST'){
+  const b=await body(request),code=requireText(b,'code');
+  if(!/^[0-9a-f]{64}$/.test(code))return send({error:'유효한 초대 링크가 아닙니다.'},400);
+  const {data,error}=await adminDb().from('ildan_invites')
+   .select('role,expires_at').eq('code_digest',await digest(code))
+   .is('used_by',null).gt('expires_at',new Date().toISOString()).maybeSingle();
+  if(error||!data)return send({error:'링크가 만료되었거나 이미 사용되었습니다.'},404);
+  return send({role:data.role,expiresAt:data.expires_at,requiresDeviceSetup:true,
+   notice:'링크를 열었다고 등록되지는 않습니다. 사용자의 확인 후 1회 등록합니다.'});
+ }
+ // Registration is explicitly DISABLED until passkeys and verified guardian
+ // identity, recovery and consent are configured on the real Supabase project.
+ if(apiName==='invite-register'&&request.method==='POST'){
+  if(env('INVITE_REGISTRATION_ENABLED')!=='true')
+   return send({error:'초대 링크 등록은 준비 중입니다. 담당 치료사에게 문의해 주세요.'},503);
+  const b=await body(request),code=requireText(b,'code');
+  if(!/^[0-9a-f]{64}$/.test(code))return send({error:'초대 링크를 다시 확인해 주세요.'},400);
+  if(!env('SUPABASE_SERVICE_ROLE_KEY'))return send({error:'서버 설정 확인이 필요합니다.'},503);
+  const admin=adminDb(),hash=await digest(code);
+  const {data:invite,error:readError}=await admin.from('ildan_invites')
+   .select('role,expires_at').eq('code_digest',hash)
+   .is('used_by',null).gt('expires_at',new Date().toISOString()).maybeSingle();
+  if(readError||!invite)return send({error:'링크가 만료되었거나 이미 등록되었습니다.'},403);
+  // Mint an internal, non-deliverable email identity. It is never an end-user
+  // email address and the random password is NOT shown, stored, or reused.
+  // Only verified passkeys will enable durable passwordless sign-in after signup.
+  const userId=crypto.randomUUID();
+  const email='member-'+userId+'@members.ildan.example';
+  const password=hex(crypto.getRandomValues(new Uint8Array(32)));
+  const {data:created,error:createError}=await admin.auth.admin.createUser({
+   email,password,email_confirm:true,
+   app_metadata:{enrollment:'clinic-invite',role:'unassigned'}
+  });
+  if(createError||!created?.user)return send({error:'계정 생성에 실패했습니다. 담당 치료사에게 문의해 주세요.'},503);
+  const uid=created.user.id;
+  const {data:link,error:linkError}=await admin.auth.admin.generateLink({type:'magiclink',email});
+  const tokenHash=link?.properties?.hashed_token;
+  if(linkError||!tokenHash){
+   await admin.auth.admin.deleteUser(uid).catch(()=>{});
+   return send({error:'기기 등록을 준비하지 못했습니다.'},503);
+  }
+  const {data:claimed,error:claimError}=await admin.rpc('ildan_claim_invite_for_user',{
+   p_code_digest:hash,p_user_id:uid
+  });
+  if(claimError||claimed!==invite.role){
+   await admin.auth.admin.deleteUser(uid).catch(()=>{});
+   return send({error:'이미 사용된 링크이거나 등록이 허용되지 않았습니다.'},403);
+  }
+  return send({ok:true,role:claimed,tokenHash,otpType:'magiclink',
+   mustRegisterPasskey:true,
+   notice:'이 기기에 패스키를 등록해야 나중에 이메일 없이 다시 로그인할 수 있습니다.'});
+ }
+
  try{
   const auth=await getVerifiedAuth(request);
   if(!auth)return send({error:'이메일 인증 로그인이 필요합니다.'},401);
