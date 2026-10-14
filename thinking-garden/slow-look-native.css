@@ -43,3 +43,17 @@ button.slow-tile:focus-visible,button.slow-primary:focus-visible,button.slow-sec
 button:disabled.slow-primary,button:disabled.slow-secondary{opacity:.65;cursor:default;box-shadow:none}
 @media(max-width:600px){.slow-task{padding:12px 5px}.slow-map-pair{gap:7px}.slow-map-pair .slow-board{gap:3px;padding:5px;border-width:1px}.slow-tile{font-size:clamp(18px,6vw,27px);border-width:1px;border-radius:9px}.slow-mission-label{font-size:16px}.slow-name-picture{min-height:180px;font-size:86px}.slow-teacher-choice button{flex:1 1 42%}.slow-board.slow-scan,.slow-board.slow-bag{width:min(100%,340px)}.slow-step span{font-size:11px;padding:5px}.slow-primary,.slow-secondary{font-size:13px;padding:10px 12px}.slow-board.slow-covered{min-height:120px;font-size:33px}}
 @media(prefers-reduced-motion:reduce){.slow-tile{transition:none}}
+
+/* 2026-10-14: Clear, task-first introduction. Fix [hidden] overridden by flex layout. */
+.slow-preview-controls[hidden],.slow-preview-controls [hidden]{display:none!important}
+.slow-preview-controls{margin:12px 0 10px;padding:11px 15px;border-color:#e5eddf;background:#f9fbf5;border-radius:15px}
+.slow-preview-main{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.slow-preview-controls .slow-preview-main label{display:flex;flex:0 0 auto;align-items:center;flex-direction:row;gap:13px;margin:0;font-size:13px;font-weight:900}
+.slow-preview-main select{min-width:136px;min-height:40px;padding:6px 10px}
+.slow-preview-note{color:#657669;font-size:12px;line-height:1.45}
+.slow-preview-controls .slow-teacher-details{margin-top:10px;border-top:1px dashed #dfe9d7;padding-top:10px}
+.slow-preview-controls .slow-teacher-details summary{cursor:pointer;color:#6d7e70;font-size:12px;font-weight:850}
+.slow-preview-controls .slow-teacher-details[open] summary{margin-bottom:9px}
+.slow-preview-controls .slow-teacher-details .slow-preview-fields{margin:8px 0}
+.slow-preview-controls .strategy-auto-control{display:flex;flex-direction:row;align-items:center;gap:8px;line-height:1.6;margin:9px 0 4px;padding:9px 11px}
+@media(max-width:600px){.slow-preview-controls{padding:9px 10px;margin:10px 0}.slow-preview-main{gap:7px}.slow-preview-note{font-size:11px}.slow-preview-controls .slow-preview-main label{gap:7px}.slow-preview-main select{min-width:100px}}
