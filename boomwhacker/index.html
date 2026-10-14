@@ -873,7 +873,8 @@ function scoreSheetCanvas(start=0,count=events.length,paged=false){
   ctx.textAlign='right';ctx.fillText('총 '+events.length+'개 음표',PRINT_W-62,canvas.height-33);
   return canvas;
 }
-function scoreFileName(ext){return safeVideoName(currentSong.title)+'_붐웨커_색깔악보.'+ext}
+function lessonFileSuffix(){return (level===8?'':'_'+level+'음연습편곡')+(practiceSection==='all'?'':'_'+(scoreStartBar+1)+'-'+(scoreStartBar+playbackMeasures.length)+'마디')}
+function scoreFileName(ext){return safeVideoName(currentSong.title)+lessonFileSuffix()+'_붐웨커_색깔악보.'+ext}
 function saveBlob(blob,name){
   const url=URL.createObjectURL(blob),link=document.createElement('a');
   link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove();
@@ -936,8 +937,9 @@ async function downloadScore(kind){
 function updateRangeInfo(){
  let outside=outOfBaseCount(),box=$('#rangeNote');
  const easy=arrangedNotes>0?level+'음 연습 편곡 · 바뀐 음 '+arrangedNotes+'개. 원곡과 멜로디가 다를 수 있어요.':'';
- box.classList.toggle('show',outside>0||arrangedNotes>0);
- box.textContent=outside?'현재 연주할 악보에는 8음 범위 밖 음이 '+outside+'개 있어요. 다른 음으로 바꾸지 않고 회색으로 표시하며 재생에서 제외합니다.':easy;
+ const importedCaution=loadedFromTransfer&&level<8?'가져온 악보는 원곡 음을 임의로 바꾸지 않아요. 범위 밖 음은 8음에서 확인하거나 먼저 원본 악보를 편집해 주세요.':'';
+ box.classList.toggle('show',outside>0||arrangedNotes>0||!!importedCaution);
+ box.textContent=outside?'현재 연주할 악보에는 선택된 음 범위 밖 음이 '+outside+'개 있어요. 다른 음으로 바꾸지 않고 회색으로 표시하며 재생에서 제외합니다.':(easy||importedCaution);
  const part=practiceSection==='all'?'전체 노래':(scoreStartBar+1)+'~'+(scoreStartBar+playbackMeasures.length)+'마디 연습';
  $('#practiceSectionHelp').textContent=part+(arrangedNotes?' · 원곡을 쉬운 음으로 바꾼 연습 편곡':' · 짧게 연습한 뒤 전체곡도 연주할 수 있어요');
  if(outside)$('#stageStatus').textContent='범위 밖 음 '+outside+'개';
@@ -1846,7 +1848,7 @@ async function exportVideo(){
   const ext=mime.startsWith('video/mp4')?'mp4':'webm';
   videoDownloadUrl=URL.createObjectURL(blob);
   link.href=videoDownloadUrl;
-  link.download=safeVideoName(currentSong.title)+'_붐웨커_울모아쌤.'+ext;
+  link.download=safeVideoName(currentSong.title)+lessonFileSuffix()+'_붐웨커_울모아쌤.'+ext;
   link.textContent='⬇ 영상 다시 다운로드 ('+ext.toUpperCase()+')';
   link.classList.add('show');
   // Some mobile browsers block delayed automatic downloads. The permanent
