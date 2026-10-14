@@ -3,7 +3,7 @@
 // Supabase private service-role token NEVER leaves this server. RLS and explicit
 // membership checks both matter: admin client BYPASSES RLS.
 import {createClient} from 'npm:@supabase/supabase-js@2';
-import {validateEntry,sharedSelection,validateSessionEntry} from '../../../lib/record-contract.mjs';
+import {validateEntry,sharedSelection,validateSessionEntry} from '../_shared/record-contract.mjs';
 
 const encoder=new TextEncoder(),decoder=new TextDecoder();
 const env=(s:string)=>Deno.env.get(s)||'';
