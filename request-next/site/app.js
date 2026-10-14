@@ -185,6 +185,22 @@ function renderAdmin(p){
    }catch(err){setStatus($('#adminStatus'),err.message,'error');}
    finally{save.disabled=false;}
  });
+ const remove=el('button','글과 첨부파일 삭제','delete-own');remove.type='button';
+ remove.addEventListener('click',async()=>{
+   if(!window.confirm('이 글과 모든 첨부파일을 영구 삭제할까요? 이 작업은 되돌릴 수 없어요.'))return;
+   remove.disabled=true;
+   try{
+     const res=await fetch('/api/admin/posts/'+encodeURIComponent(p.id),{
+       method:'DELETE',headers:{Authorization:'Bearer '+adminKey},
+       credentials:'same-origin',cache:'no-store'
+     });
+     if(!res.ok)throw Error('삭제하지 못했어요.');
+     wrapper.remove();
+     setStatus($('#adminStatus'),'선택한 글과 첨부파일을 삭제했어요.','ok');
+     await loadFeed();
+   }catch(err){setStatus($('#adminStatus'),err.message||'삭제 오류','error');remove.disabled=false;}
+ });
+ edit.append(remove);
  wrapper.append(edit);$('#adminPosts').append(wrapper);
 }
 
