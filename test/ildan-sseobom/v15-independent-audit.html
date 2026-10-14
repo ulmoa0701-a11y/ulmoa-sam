@@ -80,6 +80,18 @@ async function run(){
   check(!D().querySelector('textarea[name="childWords"]').required,'아동 발언은 선택 사항');
   check(!D().querySelector('details.parent-more').open,'앞뒤 상황은 접힌 추가 항목');
   check(!D().getElementById('entryForm').elements.share.checked,'보호자 공유 기본 해제');
+  const parentForm=D().getElementById('entryForm');
+  check(parentForm.dataset.parentMode==='quick','보호자 간편 기록 기본');
+  check(parentForm.querySelectorAll('textarea[name="context"]').length===1&&parentForm.querySelectorAll('textarea[name="after"]').length===1,'학부모 ABC 기존 입력 필드 재사용, 중복 없음');
+  parentForm.querySelector('[data-parent-mode="detail"]').click();
+  setField(parentForm.elements.context,'선택형 ABC A: 숙제 전 책을 펼쳤음');
+  setField(parentForm.elements.after,'선택형 ABC C: 쉬었다가 다시 놀이함');
+  check(parentForm.dataset.parentMode==='detail','보호자 자세히 기록 전환');
+  parentForm.querySelector('[data-parent-mode="quick"]').click();
+  check(parentForm.elements.context.value.includes('ABC A'),'간편 모드 복귀에도 ABC 개인기록 유지');
+  check(parentForm.querySelector('input[name="shareField"][value="context"]').disabled,'간편 모드에서 숨긴 ABC는 선택 공유 불가');
+  parentForm.querySelector('[data-parent-mode="detail"]').click();
+
   await until(()=>!D().getElementById('saveEntry').disabled);
   setField(D().querySelector('[name="date"]'),'2026-10-01');
   setField(D().querySelector('textarea[name="observation"]'),'보호자 직접 본 사실');
