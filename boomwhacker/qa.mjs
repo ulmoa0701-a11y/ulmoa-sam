@@ -172,6 +172,47 @@ async function basicCase(name,width,height){
   await page.locator('#levels button[data-level="8"]').click();
   check(await page.locator('.tube:not(.inactive)').count()===8,`${name}: 8-note mode active tube count wrong`);
 
+  // Users choose a subset; the full original notes, downbeat and MR stay unchanged.
+  const fullSong=await page.evaluate(()=>({
+    original:events.map(e=>[e.note,e.start,e.dur]),chords:playbackMeasures.map((_,i)=>chordForMeasure(i).name),first:firstNoteMs()
+  }));
+  await page.locator('#levels button[data-level="custom"]').click();
+  check(await page.locator('#customNoteDialog').isVisible(),name+': custom picker did not open');
+  check(await page.locator('#customNoteChoices button').count()===8,name+': picker does not show all eight pitches');
+  check((await page.locator('#customNoteChoices button[data-note="높은도"] small').innerText()).includes('공'),name+': note choices must preview the number of falling balls');
+  for(const note of ['도','미','레'])await page.locator('#customNoteChoices button[data-note="'+note+'"]').click();
+  check((await page.locator('#customNoteStatus').innerText()).includes('2개'),name+': picker note count wrong');
+  await page.locator('#customNoteApply').click();
+  const custom=await page.evaluate(()=>({
+    ...window.__boomVideoQA.noteSelection(),chords:playbackMeasures.map((_,i)=>chordForMeasure(i).name),
+    first:firstNoteMs(),local:JSON.parse(localStorage.getItem('ulmoaBoomCustomNotes')||'null'),
+    label:document.querySelector('#rangeNote')?.textContent,fileName:scoreFileName('pdf')
+  }));
+  check(custom.level==='custom'&&custom.selected.join(',')==='레,솔',name+': wrong custom selected notes '+JSON.stringify(custom));
+  check((await page.locator('.tube:not(.inactive)').count())===2,name+': custom mode active tubes not exactly two');
+  check(custom.activeBalls===await page.evaluate(()=>events.filter(e=>e.note==='레'||e.note==='솔').length),name+': custom ball count wrong');
+  check(JSON.stringify(custom.original)===JSON.stringify(fullSong.original),name+': custom selection altered melody or note timing');
+  check(JSON.stringify(custom.chords)===JSON.stringify(fullSong.chords)&&custom.first===fullSong.first,
+    name+': custom selection altered MR harmony or first beat');
+  check(custom.local?.join(',')==='레,솔',name+': custom choice not saved');
+  check(custom.label.includes('원곡 전체 그대로')&&custom.fileName.includes('직접선택-레-솔'),
+    name+': custom-note explanation or PDF filename missing');
+  await page.locator('#levels button[data-level="custom"]').click();
+  check(await page.locator('#customNoteChoices button[data-note="솔"]').getAttribute('aria-pressed')==='true',
+    name+': reopening custom picker lost saved choice');
+  await page.locator('#customNoteChoices button[data-note="솔"]').click();
+  await page.locator('#customNoteChoices button[data-note="레"]').click();
+  check((await page.locator('#customNoteStatus').innerText()).includes('최소 1개'),
+    name+': custom picker should prevent zero selected notes');
+  await page.locator('#customNoteCancel').click();
+  check((await page.evaluate(()=>window.__boomVideoQA.noteSelection().selected.join(',')))==='레,솔',
+    name+': cancelling a new edit changed saved custom notes');
+  await page.locator('#levels button[data-level="8"]').click();
+  check(await page.locator('.tube:not(.inactive)').count()===8,name+': 8-note preset failed after custom');
+  check((await page.evaluate(()=>window.__boomVideoQA.noteSelection().saved.join(',')))==='레,솔',
+    name+': switching to a preset deleted custom selection');
+
+
   await page.locator('#sampleSelect').selectOption('moa-signal');
   check((await page.locator('#songTitle').innerText())==='모아의 출발 신호',`${name}: revised start cue title not applied`);
   check(await page.evaluate(()=>currentSong.measures[1].map(x=>x.lyric).join('')==='출발!'),`${name}: start cue lyric and melody syllables don't agree`);
@@ -661,6 +702,34 @@ for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412
   report.push({name:'videoProbe',bytes:probe.size,mime:probe.mime});
   await context.close();
 }
+// Persist the user's actual custom selection across reload and song changes.
+{
+ const context=await browser.newContext({viewport:{width:390,height:844}});
+ const page=await context.newPage(),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(BASE,{waitUntil:'networkidle'});
+ await page.locator('#mobileSettingsBtn').click();
+ await page.locator('#levels button[data-level="custom"]').click();
+ await page.locator('#customNoteChoices button[data-note="높은도"]').click();
+ for(const n of ['도','미','솔'])await page.locator('#customNoteChoices button[data-note="'+n+'"]').click();
+ await page.locator('#customNoteApply').click();
+ const before=await page.evaluate(()=>window.__boomVideoQA.noteSelection());
+ check(before.level==='custom'&&before.selected.join(',')==='높은도','persistence: picking just high C failed '+JSON.stringify(before));
+ await page.reload({waitUntil:'networkidle'});
+ const after=await page.evaluate(()=>window.__boomVideoQA.noteSelection());
+ check(after.level==='custom'&&after.selected.join(',')==='높은도','persistence: custom notes/mode did not reload '+JSON.stringify(after));
+ check(await page.locator('.tube:not(.inactive)').count()===1,'persistence: saved note did not remain the only active tube');
+ check((await page.locator('#rangeNote').innerText()).includes('선택한 음이 없어서 공이 내려오지 않아요'),
+   'persistence: an empty target song should explain why no balls fall');
+ await page.locator('#mobileSongSelect').selectOption('bear');
+ const newSong=await page.evaluate(()=>window.__boomVideoQA.noteSelection());
+ check(newSong.level==='custom'&&newSong.selected.join(',')==='높은도',
+   'persistence: changing songs unexpectedly reset custom note selection');
+ check(errors.length===0,'persistence: page errors '+errors.join(' | '));
+ report.push({name:'customNotePersistence',before,after,newSong:{level:newSong.level,selected:newSong.selected}});
+ await context.close();
+}
+
 await browser.close();
 fs.writeFileSync(`${out}/report.json`,JSON.stringify({failures,report},null,2));
 console.log(JSON.stringify({failures,report},null,2));
