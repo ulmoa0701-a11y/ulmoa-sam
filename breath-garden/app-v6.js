@@ -547,12 +547,16 @@ el.durationBtns.forEach(btn=>btn.addEventListener('click',()=>{
  S.holdTarget=Number(btn.dataset.seconds);el.durationBtns.forEach(x=>x.classList.toggle('selected',x===btn));S.holdTime=0;S.gapTime=0;renderMode()
 }));
 el.calmRoundBtns.forEach(btn=>btn.addEventListener('click',()=>{
+ const wasRunning=S.calmRunning;
  S.calmCycles=Number(btn.dataset.rounds)||3;
  el.calmRoundBtns.forEach(x=>x.classList.toggle('selected',x===btn));
  if(S.frame){cancelAnimationFrame(S.frame);S.frame=0}
  S.calmElapsed=0;S.calmRunning=false;S.calmPaused=false;
  renderMode();
- el.statusNote.textContent='🌱 준비되면 숨놀이를 시작해요.';
+ // An active exercise restarts automatically when a teacher changes its repetitions.
+ // The child never needs a second, unexplained Start tap.
+ if(wasRunning)startOrPauseCalm();
+ else el.statusNote.textContent='🌱 준비되면 숨놀이를 시작해요.';
 }));
 el.calmBtns.forEach(btn=>btn.addEventListener('click',()=>{
  S.calmPreset=CALM[btn.dataset.calm]?btn.dataset.calm:'flower';
