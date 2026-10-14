@@ -247,3 +247,16 @@
 /* Third independently navigable game collection, not nested in recorder/music. */
 .hb-nav .hb-game-section:nth-child(3){background:#eef8fb;border-color:#cbe7e4}
 .hb-nav .hb-menu-games .hb-dropdown{max-height:min(78dvh,680px);overflow-y:auto;overscroll-behavior:contain}
+
+/* five-gardens-navigation-20261014 */
+/* Five gardens fit in the desktop dropdown without clipping below the viewport. */
+@media(min-width:1200px){
+ .hb-nav .hb-menu-games .hb-dropdown{width:360px;max-height:min(74dvh,640px);overflow-y:auto;overscroll-behavior:contain}
+ .hb-nav .hb-menu-games .hb-game-section{min-width:0}
+}
+/* The fifth garden uses a calmer accent and all section links remain keyboard reachable. */
+.hb-nav .hb-game-section:nth-child(3){background:#fffcf5;border-color:#f0e6ce}
+.hb-nav .hb-game-section:nth-child(4){background:#f6f9ff;border-color:#dfe7f5}
+.hb-nav .hb-game-section:nth-child(5){background:#fff8f8;border-color:#f0e3e1}
+.hb-nav .hb-game-parent:focus-visible{outline:3px solid #78b6a3;outline-offset:2px}
+@media(max-width:1199px){.hb-nav .hb-mobile-subgrid.hb-mobile-game-groups{max-height:calc(66dvh - 92px);overflow-y:auto;overscroll-behavior:contain}}
