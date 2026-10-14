@@ -137,7 +137,7 @@ export async function handle(request:Request):Promise<Response>{
   }
   if(apiName==='records'&&request.method==='POST'){
    if(!['student','parent'].includes(member.role))return send({error:'치료사는 학생·보호자 기록을 대신 작성할 수 없습니다.'},403);
-   const b=await body(request),entry=validateEntry(b.entry),share=b.share===true;
+   const b=await body(request),entry=validateEntry(b.entry) as Record<string,string>,share=b.share===true;
    if(member.role==='parent'&&(!entry.date||!entry.observation))return send({error:'관찰 날짜와 확인한 사실이 필요합니다.'},400);
    const studentId=member.role==='student'?uid:member.student_id;
    if(!studentId||!member.therapist_id||!(await checkStudent(admin,studentId,member.therapist_id)))return send({error:'담당 학생 연결을 확인할 수 없습니다.'},403);
@@ -201,7 +201,7 @@ export async function handle(request:Request):Promise<Response>{
   if(apiName==='session-notes'&&request.method==='POST'){
    const b=await body(request),studentId=requireText(b,'studentId');
    if(!(await checkStudent(admin,studentId,uid)))return send({error:'담당 학생만 선택할 수 있습니다.'},403);
-   const entry=validateSessionEntry(b.entry),sealed=await sealJSON(entry);
+   const entry=validateSessionEntry(b.entry) as Record<string,string>,sealed=await sealJSON(entry);
    const {error}=await admin.from('ildan_session_notes').insert({therapist_id:uid,student_id:studentId,nonce:sealed.nonce,ciphertext:sealed.ciphertext});
    if(error)throw Error('NOTE_SAVE_FAILED');
    return send({ok:true},201);
