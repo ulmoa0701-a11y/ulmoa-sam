@@ -25,7 +25,7 @@ for(const width of [360,390,1366]){
  });
  check(response?.ok(),width+' portal HTTP failed');
  check(data.sections===5,width+' missing garden sections '+data.sections);
- check(data.counts.join(',')==='20,3,3,3,2',width+' incorrect garden game counts '+data.counts);
+ check(data.counts.join(',')==='21,3,4,3,3',width+' incorrect garden game counts '+data.counts);
  check(data.anchors.every(Boolean),width+' missing jump anchor');
  const musicBeat=await page.locator('#music .play-card[href*="mode=beat"]').count();
  const heartBeat=await page.locator('#heart .play-card[href*="mode=beat"]').count();
