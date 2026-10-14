@@ -310,22 +310,44 @@ function strengthTick(band,dt){
  }
 }
 function longTick(band,dt){
- if(band==='good'){
-  S.gapTime=0;S.holdTime+=dt;
-  el.statusNote.textContent='💚 좋아, 그 바람으로 쭉~';
- }else if(['idle','weak','voice'].includes(band)){
-  S.gapTime+=dt;
-  if(S.gapTime>.42){
-   S.holdTime=0;
-   el.statusNote.textContent='🌱 괜찮아! 다시 천천히 시작!';
+ // 두 번의 편안한 시도 사이에는 바람을 멈추고 쉬는 시간이 있습니다.
+ if(S.longCelebrating)return;
+ if(S.longAwaitRelease){
+  S.longRest+=dt;
+  S.longReleasedFor=['idle','weak','voice'].includes(band)?S.longReleasedFor+dt:0;
+  el.statusNote.textContent='🌼 첫 번째 성공! 바람을 멈추고 잠깐 쉬어요.';
+  el.longProgress.textContent='🌼 1 / 2 완료 · 쉬는 중';
+  if(S.longRest>=1.5&&S.longReleasedFor>=.4){
+   S.longAwaitRelease=false;S.holdTime=0;S.gapTime=0;
+   el.duration.innerHTML='0.0 <small>초</small>';
+   el.longProgress.textContent='🌱 2 / 2번 도전';
+   el.statusNote.textContent='🌬️ 준비되면 두 번째 후~!';
   }
+  return;
+ }
+ if(band==='good'){
+  S.gapTime=0;S.holdTime+=dt;el.statusNote.textContent='💚 좋아, 그 바람으로 쭉~';
+ }else if(['idle','weak','voice'].includes(band)){
+  S.gapTime+=dt;if(S.gapTime>.42){S.holdTime=0;el.statusNote.textContent='🌱 괜찮아! 다시 천천히 시작!'}
  }else{
-  S.gapTime+=dt;
-  if(S.gapTime>.45)S.holdTime=0;
+  S.gapTime+=dt;if(S.gapTime>.45)S.holdTime=0;
   el.statusNote.textContent='🌿 힘을 살짝 줄이면서 이어봐!';
  }
  el.duration.innerHTML=Math.min(S.holdTime,S.holdTarget).toFixed(1)+' <small>초</small>';
- if(S.holdTime>=S.holdTarget)finish();
+ if(S.holdTime>=S.holdTarget){
+  S.longCompleted++;
+  if(S.longCompleted===1){
+   S.longAwaitRelease=true;S.longRest=0;S.longReleasedFor=0;
+   el.longProgress.textContent='🌼 1 / 2 완료 · 쉬는 중';
+  }else{
+   S.longCelebrating=true;S.playing=false;
+   el.longProgress.textContent='🌼 🌼 두 번 모두 성공!';
+   el.statusNote.textContent='🎉 두 번 성공! 잠시 후 완성 화면이 나와요.';
+   if(S.microphone)for(const t of S.microphone.getAudioTracks?.()||[])t.enabled=false;
+   const token=S.token;
+   S.autoTimer=setTimeout(()=>{S.autoTimer=0;if(S.screen==='play'&&S.mode==='long'&&S.token===token)finish()},2800);
+  }
+ }
 }
 function beatTick(band,dt,now){
  // One 0.85–1.15s visible exhale window, followed by a clearly visible rest window.
