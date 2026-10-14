@@ -7,7 +7,7 @@ const dir='qa/practice-session-screenshots';fs.mkdirSync(dir,{recursive:true});
 const ids=['memory','sameShape','flower','hide','path','calm','inside','targets','paint','water','slowScan','slowPlace','slowBlock','slowName','slowMemory','slowEveryday','resetRescue','classroomMove','festivalPlan','rulePost','mirrorPond','sceneDetect'];
 for(const size of [{label:'mobile',width:390,height:844},{label:'desktop',width:1280,height:900}]){
 const page=await browser.newPage({viewport:{width:size.width,height:size.height}});page.setDefaultTimeout(12000);const errors=[];page.on('pageerror',e=>errors.push(String(e)));
-await page.goto(base,{waitUntil:'load'});assert.equal(await page.locator('.library-card').count(),25);
+await page.goto(base,{waitUntil:'load'});assert.ok(await page.locator('.library-card').count()>=25,'previous cognitive games must remain');
 for(const id of ids){
 await page.evaluate(x=>openPreview(x),id);
 assert.equal(await page.locator('#extendedPracticeControls:visible').count(),1,id+' selector missing');
