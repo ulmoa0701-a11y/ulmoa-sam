@@ -66,6 +66,12 @@ function updatePracticeControls(){
 }
 
 const previewExamples={
+ slowScan:`<div class="pv-instruction">잎과 돌 사이에서 꽃을 찾아요</div><div class="pv-options emoji"><span>🍃</span><span class="preview-pulse">🌼</span><span>🌱</span><span class="preview-pulse">🌼</span></div>`,
+ slowPlace:`<div class="pv-instruction">같은 위치에 꽃을 심어요</div><div class="pv-options emoji"><span>🌼</span><span>▫</span><span>→</span><span class="preview-pulse">🌼</span><span>▫</span></div>`,
+ slowBlock:`<div class="pv-instruction">블록이 맞닿는 자리를 살펴요</div><div class="pv-options emoji"><span>🧱</span><span>🧱</span><span>→</span><span class="preview-pulse">🧱</span><span>🧱</span></div>`,
+ slowName:`<div class="pv-instruction">충분히 보고 생각한 뒤 이름을 말해요</div><div class="pv-options emoji"><span>🐶</span><span>🐰</span><span>🐱</span></div>`,
+ slowMemory:`<div class="pv-instruction">꽃이 있던 자리를 기억해요</div><div class="pv-sequence"><i class="blue"></i><b>→</b><i class="yellow"></i><b>→</b><i class="green"></i></div><div class="pv-hint">보기를 가린 뒤 위치를 표시해요</div>`,
+ slowEveryday:`<div class="pv-instruction">가방에 넣을 물건을 찾아요</div><div class="pv-options emoji"><span>📖</span><span class="preview-pulse">✏️</span><span>🧽</span><span>📏</span></div>`,
  rescue:`<div class="pv-rescue-radio">📡 무전 도착! <b>노란 큰 오리</b></div><div class="pv-rescue-field"><span>🌳</span><span class="duck">🦆</span><span>🌿</span><span>🐷</span><span class="van">🚐</span></div>`,
  memory:`<div class="pv-instruction">순서를 기억해요</div><div class="pv-sequence"><i class="blue"></i><b>→</b><i class="yellow"></i><b>→</b><i class="green"></i></div><div class="pv-hint">충분히 본 뒤 ‘준비됐어요’를 누르면 가려져요</div>`,
  spacing:`<div class="pv-instruction">붙어 있는 문장에서 띄울 곳을 찾아요</div><div class="pv-glued">오늘은학교에가요</div><div class="pv-space-arrow">톡! ↓</div><div class="pv-spaced"><span>오늘은</span><span>학교에</span><span>가요</span></div>`,
