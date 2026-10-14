@@ -1127,7 +1127,7 @@ function backingMeasure(ac,dest,chord,when,intervalMs,beats,style=mrStyle,offset
 function scheduleBuiltinMr(ac,dest,when,offsetSec=0,volume=mrVolume){
  const startMs=Math.max(0,Number(offsetSec)||0)*1000,lead=firstNoteMs(),beat=beatMs();
  const master=ac.createGain(),comp=ac.createDynamicsCompressor(),pre=ac.createGain();
- pre.gain.setValueAtTime(.87,when);
+ pre.gain.setValueAtTime(1.08,when);
  comp.threshold.setValueAtTime(-12,when);comp.knee.setValueAtTime(12,when);
  comp.ratio.setValueAtTime(2.3,when);comp.attack.setValueAtTime(.007,when);
  comp.release.setValueAtTime(.24,when);
