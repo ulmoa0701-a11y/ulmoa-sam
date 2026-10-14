@@ -112,7 +112,8 @@ try{
    const ac=new OfflineAudioContext(1,Math.ceil(rate*bufferSec),rate),bus=ac.createGain();
    bus.gain.value=.70;bus.connect(ac.destination);
    const start=.06;
-   for(const e of events)if(e.active)
+   // The backing audio includes every original note; difficulty hides only falling cues.
+   for(const e of events)if(e.note!=='쉼'&&FREQ[e.note])
     scheduleMelodyTone(ac,bus,e.note,start+(e.start-firstNoteMs())/1000,'piano',.64,e.dur);
    scheduleBuiltinMr(ac,bus,start,0,.48);
    const data=(await ac.startRendering()).getChannelData(0);
@@ -132,7 +133,7 @@ try{
     rms:Math.sqrt(energy/data.length),seconds:bufferSec,skipped:events.filter(e=>e.note!=='쉼'&&!e.active).length};
   },filename);
   const file=await waitDownload;await file.saveAs(path.join(dir,filename));
-  if(stats.skipped>0||stats.peak<.008||stats.rms<.002||stats.peak>=.98||!fs.statSync(path.join(dir,filename)).size)
+  if(stats.arrangedNotes!==0||stats.peak<.008||stats.rms<.002||stats.peak>=.98||!fs.statSync(path.join(dir,filename)).size)
    throw Error('Invalid classroom audio '+JSON.stringify(stats));
   outputs.push({kind:'classroom',...stats,filename});console.log('CLASSROOM_AUDIO_PREVIEW='+JSON.stringify(stats));
  }
