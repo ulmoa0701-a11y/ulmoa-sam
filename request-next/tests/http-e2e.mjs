@@ -24,7 +24,7 @@ class DB {
     throw Error('Unexpected SELECT first: '+sql);
    },
    async all(){
-    if(sql.includes("visibility='public'"))return {results:db.posts.filter(x=>x.visibility==='public')};
+    if(sql.includes("visibility='public'"))return {results:db.posts.filter(x=>x.visibility==='public'&&x.metadata_approved===1)};
     if(sql.includes("visibility='list'"))return {results:db.posts.filter(x=>x.visibility==='list'&&x.metadata_approved===1)};
     if(sql.includes('FROM posts ORDER BY'))return {results:db.posts};
     throw Error('Unexpected SELECT all: '+sql);
@@ -92,8 +92,15 @@ try{
  await page.locator('#body').fill('실제 HTTP로 등록한 공개 쪽지');
  await page.locator('#sendButton').click();
  await page.locator('#receiptCode').waitFor({state:'visible'});
- await page.waitForFunction(()=>document.querySelector('#publicFeed').textContent.includes('실제 HTTP로 등록한 공개 쪽지'));
  const publicReceipt=await page.locator('#receiptCode').inputValue();
+ const publicId=publicReceipt.split('.')[0];
+ assert.ok(!(await (await fetch(base+'/api/posts')).text()).includes('실제 HTTP로 등록한 공개 쪽지'),'pending note must not be exposed');
+ const publicApprove=await fetch(base+'/api/admin/posts/'+publicId,{method:'POST',headers:{
+  Authorization:'Bearer '+key,'Content-Type':'application/json'
+ },body:JSON.stringify({status:'확인 중',reply:'',publicTitle:'',metadataApproved:true,attachmentApproved:false})});
+ assert.equal(publicApprove.status,200);
+ await page.locator('#refresh').click();
+ await page.waitForFunction(()=>document.querySelector('#publicFeed').textContent.includes('실제 HTTP로 등록한 공개 쪽지'));
  assert.match(publicReceipt,/^[a-f0-9-]{36}\.[a-f0-9]{64}$/);
  assert.equal(db.posts.length,1);
  console.log('PASS HTTP: public post goes through real form, server, database and feed');
