@@ -53,3 +53,13 @@
 .strategy-results{margin:12px auto;max-width:650px}.strategy-result{color:#536f5a;font-size:14px;font-weight:900}.strategy-observations{font-size:12px;line-height:1.7;padding:10px;border-radius:10px;background:#f1f8ed;margin:10px auto}.strategy-export{background:#307659!important;color:white!important;border-radius:13px;border:0;padding:11px 19px;font-weight:850;cursor:pointer}.strategy-teacher small{display:block;margin:9px 0;font-size:12px}
 @media(max-width:600px){.strategy-quest{border-radius:20px;padding:12px 8px 19px}.strategy-story-head h3{font-size:20px}.strategy-two-actions{gap:7px}.strategy-two-actions button{flex:1 1 42%;font-size:13px;padding:8px}.strategy-friend-grid button{flex:1 1 28%;min-height:115px}.strategy-friend-grid span{font-size:36px}.strategy-robot-emoji{font-size:36px}.strategy-robot strong{font-size:19px}.strategy-distress strong{font-size:23px}.strategy-clue strong{font-size:17px}.strategy-room-grid{width:min(100%,315px);padding:6px;gap:4px}.strategy-room-square{font-size:28px;border-width:1px}.strategy-items button{font-size:25px;min-width:77px}.strategy-order-slot{flex:1 1 21%;min-width:72px;max-width:115px;min-height:95px}.strategy-order-slot span{font-size:25px}.strategy-plan-cards button{flex-basis:45%;min-height:100px}.strategy-witness p{font-size:12px}.strategy-festival-banner{font-size:22px}.strategy-plan-actions button{font-size:12px;padding:9px 11px}}
 @media(prefers-reduced-motion:reduce){.strategy-quest *{animation:none!important;transition:none!important}}
+
+/* Discoverability without deleting or hiding earlier materials permanently. */
+.library-experience{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:4px 0 15px}
+.experience-tab{border:1px solid #cfddc7;border-radius:999px;background:#fffefa;color:#4b6652;padding:10px 16px;min-height:44px;font:inherit;font-size:14px;font-weight:850;cursor:pointer}
+.experience-tab b{font-size:12px;opacity:.65;margin-left:2px}
+.experience-tab.active,.experience-tab[aria-pressed="true"]{background:#deefdc;color:#326346;border-color:#9dc7a0}
+.experience-tab:focus-visible{outline:3px solid #d6b14d;outline-offset:3px}
+.strategy-auto-control{display:flex;align-items:center;gap:8px;margin:12px 0;padding:10px 12px;background:#f0f8e9;border-radius:13px;font-size:13px;font-weight:850;color:#42674f}
+.strategy-auto-control[hidden]{display:none}.strategy-auto-control input{appearance:auto;width:20px;height:20px;accent-color:#398664;flex:0 0 auto}
+@media(max-width:600px){.library-experience{gap:6px}.experience-tab{font-size:12px;padding:9px 10px}.strategy-auto-control{font-size:12px}}
