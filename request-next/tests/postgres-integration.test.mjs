@@ -16,6 +16,7 @@ test('temporary PostgreSQL schema works through Netlify adapter for public/priva
  try{
    const migration=resolve(dirname(fileURLToPath(import.meta.url)),'../netlify/database/migrations/20261012160000_create_habom_posts.sql');
    await client.query(await readFile(migration,'utf8'));
+   await client.query(await readFile(resolve(dirname(fileURLToPath(import.meta.url)),'../netlify/database/migrations/20261014113000_runtime_checks.sql'),'utf8'));
    const database={sql:{unsafe:async(sql,params)=>{const res=await client.query(sql,params);return res.rows;}}};
    const blobs=new Map();
    const files={
