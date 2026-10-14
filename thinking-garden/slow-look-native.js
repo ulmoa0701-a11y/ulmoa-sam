@@ -55,7 +55,7 @@ function render(id,d) {
  const pool=s.kind==='color'?colors:animals;
  const item=pool[itemIndex];
  const targetObject=[...objects[(round*2+1)%objects.length]];
- const objectArr=Array.from({length:Math.max(6,cells)},(_,i)=>objects[(i*5+round+i%3)%objects.length]);
+ let objectArr=Array.from({length:Math.max(6,cells)},(_,i)=>objects[(i*5+round+i%3)%objects.length]);
  let scanTargets=new Set();
  if(id==='slowScan'){const rows=[[0,0],[0,n-1],[n-1,0],[n-1,n-1],[1,1],[2,1]];rows.slice(0,s.level+1).forEach(([r,c])=>scanTargets.add(((r+round)%n)+','+((c+round*2)%n)));}
  let objectTargets=new Set();
