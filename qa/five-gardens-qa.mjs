@@ -55,7 +55,7 @@ const context=await browser.newContext({viewport:{width:390,height:844}});
 const page=await context.newPage();
 const library=await page.goto(base+'/thinking-garden/',{waitUntil:'domcontentloaded',timeout:25000});
 const gameCount=await page.locator('.library-card[data-open]').count();
-check(library?.ok()&&gameCount===22,'legacy 22-game library missing: '+gameCount);
+check(library?.ok()&&gameCount===25,'25-game library (22 previous + 3 strategy adventures) missing: '+gameCount);
 for(const id of ['memory','rulePost','spacing']){
  const errors=[];const fn=e=>errors.push(e.message);page.on('pageerror',fn);
  const response=await page.goto(base+'/thinking-garden/?game='+id,{waitUntil:'domcontentloaded',timeout:25000});
@@ -71,4 +71,4 @@ check(homeNames.join('|')==='인지정원|생각정원|학습정원|음악정원
 await context.close();await browser.close();
 fs.writeFileSync(path.join(artifacts,'report.json'),JSON.stringify({failures},null,2));
 if(failures.length){console.error('FIVE-GARDENS QA FAILED: '+JSON.stringify(failures));process.exit(1)}
-console.log('PASS: five garden sections 17/2/3/2/3, 22 original games, deep links, desktop/mobile navigation and homepage shortcuts');
+console.log('PASS: five garden sections 17/2/3/2/3, 22 preserved games + 3 new strategy adventures, deep links, desktop/mobile navigation and homepage shortcuts');
