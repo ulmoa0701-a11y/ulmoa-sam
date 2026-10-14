@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="../assets/moa-garden-resources.css?v=20261012-resources1">
 <link rel="stylesheet" href="card-previews.css?v=20261006-rescue6">
 <link rel="stylesheet" href="slow-look-native.css?v=20261014-native1">
+<link rel="stylesheet" href="novel-garden.css?v=20261014-newmechanics1">
 <link rel="stylesheet" href="literacy-practice.css?v=20261010-levels1">
 <link rel="stylesheet" href="../assets/habom-gamja-font.css?v=20261012-readable2">
 </head>
@@ -18,14 +19,14 @@
 <section class="screen active" id="homeScreen">
   <div class="library-hero"><div><span class="hero-tag">인지 · 주의 · 기억 · 읽기쓰기</span><h1>오늘 연습할 힘을<br><em>골라서 게임해요.</em></h1><p>영역 → 세부주제 → 게임 순서로 찾고,<br>게임 안에서는 모아와 친구들의 모험이 이어집니다.</p><div class="garden-hero-actions"><button class="hero-start" id="scrollToGarden">인지게임 고르기 ↓</button><a class="garden-music-link" href="../music-garden/">🎵 음악게임은 음악정원 →</a></div></div><img src="assets/moa-discovery.png" alt="모아"></div>
   <section class="game-library" id="gardenMap" aria-label="게임 라이브러리">
-    <div class="library-heading"><div><small>영역별 게임</small><h2>인지·학습 살펴보기</h2><p>먼저 분야를 고른 뒤, 게임·활동지·관련 설명을 바로 살펴볼 수 있어요.</p></div><div class="garden-progress" id="gardenProgress">완료한 게임 0 / 19</div></div>
+    <div class="library-heading"><div><small>영역별 게임</small><h2>인지·학습 살펴보기</h2><p>먼저 분야를 고른 뒤, 게임·활동지·관련 설명을 바로 살펴볼 수 있어요.</p></div><div class="garden-progress" id="gardenProgress">완료한 게임 0 / 22</div></div>
     <div class="category-tabs" role="tablist" aria-label="영역 선택">
-      <button class="category-tab active" data-category="all">전체 <b>19</b></button>
-      <button class="category-tab" data-category="visual">👀 시각·주의 <b>6</b></button>
-      <button class="category-tab" data-category="memory">🧠 기억·집행 <b>4</b></button>
+      <button class="category-tab active" data-category="all">전체 <b>22</b></button>
+      <button class="category-tab" data-category="visual">👀 시각·주의 <b>7</b></button>
+      <button class="category-tab" data-category="memory">🧠 기억·집행 <b>5</b></button>
       <button class="category-tab" data-category="literacy">✍️ 읽기·쓰기 <b>2</b></button>
       <button class="category-tab" data-category="language">💬 언어·추론 <b>1</b></button>
-      <button class="category-tab" data-category="space">🧩 공간·구성 <b>5</b></button>
+      <button class="category-tab" data-category="space">🧩 공간·구성 <b>6</b></button>
       <button class="category-tab" data-category="life">🔢 수·생활학습 <b>1</b></button>
     </div>
     <div class="garden-format-tabs" role="tablist" aria-label="콘텐츠 종류 선택">
@@ -47,6 +48,9 @@
       <button class="library-card memory" data-open="calm" data-category="memory" data-subtopic="focus"><span class="card-category">기억·집행 › 주의·억제</span><img src="assets/friend-ru.png" alt=""><div><h3>초록불에 톡!</h3><p>빨간불에는 기다리고 초록불이 켜지면 모아를 안전하게 건너게 해요.</p><span class="skill-tags"><i>반응억제</i><i>신호대기</i></span><strong>예시 보고 시작 →</strong></div></button>
       <button class="library-card space" data-open="inside" data-category="space" data-subtopic="spacebasic"><span class="card-category">공간·구성 › 눈손협응</span><img src="assets/friend-saem.png" alt=""><div><h3>정원 안에 별 심기</h3><p>정해진 울타리 안을 눌러 별을 심어요.</p><span class="skill-tags"><i>공간경계</i><i>눈손협응</i></span><strong>예시 보고 시작 →</strong></div></button>
       <button class="library-card space" data-open="targets" data-category="space" data-subtopic="spacebasic"><span class="card-category">공간·구성 › 눈손협응</span><img src="assets/friend-saem.png" alt=""><div><h3>하나씩 깨우기</h3><p>여러 동그라미를 빠뜨리지 않고 하나씩 깨워요.</p><span class="skill-tags"><i>눈손협응</i><i>누락방지</i></span><strong>예시 보고 시작 →</strong></div></button>
+       <button class="library-card memory" data-open="rulePost" data-category="memory" data-subtopic="focus"><span class="card-category">기억·집행 › 규칙 바꾸기</span><img src="assets/friend-saem.png" alt=""><div><h3>바뀌는 바람우체국</h3><p>우체국의 배달 규칙이 바뀌어요. 이전 규칙 대신 지금 규칙을 확인해요.</p><span class="skill-tags"><i>인지적 유연성</i><i>규칙전환</i><i>오류회복</i></span><strong>예시 보고 시작 →</strong></div></button>
+       <button class="library-card space" data-open="mirrorPond" data-category="space" data-subtopic="spacebasic"><span class="card-category">공간·구성 › 거울·회전</span><img src="assets/friend-ru.png" alt=""><div><h3>거울연못의 비밀</h3><p>연못 속 반전된 그림을 찾아요. 좌우·위아래·회전이 달라져요.</p><span class="skill-tags"><i>공간변환</i><i>좌우·방향</i><i>심상</i></span><strong>예시 보고 시작 →</strong></div></button>
+       <button class="library-card visual" data-open="sceneDetect" data-category="visual" data-subtopic="focus"><span class="card-category">시각·주의 › 변화탐지</span><img src="assets/friend-hong.png" alt=""><div><h3>숲속 장면 탐정</h3><p>숲속 장면이 달라졌어요. 어느 자리에 변화가 있었는지 찾아요.</p><span class="skill-tags"><i>변화탐지</i><i>시각기억</i><i>재확인</i></span><strong>예시 보고 시작 →</strong></div></button>
        <button class="library-card visual" data-open="slowScan" data-category="visual" data-subtopic="basicfind"><span class="card-category">시각·주의 › 시각탐색</span><img src="assets/friend-hong.png" alt=""><div><h3>꽃과 단서 찾기</h3><p>잎과 돌 사이에서 꽃을 빠뜨리지 않고 찾아요.</p><span class="skill-tags"><i>시각탐색</i><i>선택주의</i><i>자기점검</i></span><strong>예시 보고 시작 →</strong></div></button>
        <button class="library-card space" data-open="slowPlace" data-category="space" data-subtopic="spacebasic"><span class="card-category">공간·구성 › 위치찾기</span><img src="assets/friend-saem.png" alt=""><div><h3>정원 지도 따라 놓기</h3><p>보기에 있는 꽃의 위치를 살피고 같은 자리에 심어요.</p><span class="skill-tags"><i>공간위치</i><i>시각분석</i><i>눈손협응</i></span><strong>예시 보고 시작 →</strong></div></button>
        <button class="library-card space" data-open="slowBlock" data-category="space" data-subtopic="spacebasic"><span class="card-category">공간·구성 › 모형구성</span><img src="assets/friend-saem.png" alt=""><div><h3>블록 건축가</h3><p>샘과 함께 블록이 맞닿는 자리를 찾아 정원을 완성해요.</p><span class="skill-tags"><i>패턴블록</i><i>공간관계</i><i>시각구성</i></span><strong>예시 보고 시작 →</strong></div></button>
@@ -103,7 +107,8 @@
 </main></div>
 <script src="literacy-banks.js?v=20261010-levels1"></script>
 <script src="slow-look-native.js?v=20261014-native1"></script>
-<script src="app.js?v=20261014-native1"></script>
+<script src="novel-garden.js?v=20261014-newmechanics1"></script>
+<script src="app.js?v=20261014-newmechanics1"></script>
 <script src="card-previews.js?v=20261006-rescue6"></script>
 <script src="../assets/moa-garden-resources.js?v=20261012-resources1"></script>
 </body></html>
