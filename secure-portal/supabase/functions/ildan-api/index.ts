@@ -149,7 +149,7 @@ export async function handle(request:Request):Promise<Response>{
   // No clinical records may be collected until operator has audited consent,
   // email account ownership, retention/deletion and production security.
   // The default is fail closed; only explicit Edge secret enables writes.
-  if(['records','session-notes','share','unshare','delete-record'].includes(apiName)
+  if(['records','session-notes','share'].includes(apiName)
       &&request.method==='POST'&&env('CLINICAL_WRITES_ENABLED')!=='true')
     return send({error:'개발 검증 중입니다. 실제 기록 저장·공유는 아직 활성화되지 않았습니다.'},503);
   if(apiName==='records'&&request.method==='POST'){
