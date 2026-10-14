@@ -30,7 +30,7 @@ for(const width of [360,390,1366]){
  const musicBeat=await page.locator('#music .play-card[href*="mode=beat"]').count();
  const heartBeat=await page.locator('#heart .play-card[href*="mode=beat"]').count();
  check(musicBeat===1&&heartBeat===0,width+' rhythm breath wrongly classified');
- check(data.gameRefs.length===21&&new Set(data.gameRefs).size===21,width+' game registry has duplicates or omissions');
+ check(data.gameRefs.length===24&&new Set(data.gameRefs).size===24,width+' game registry has duplicates or omissions');
  check(data.overflow<=3,width+' horizontal overflow '+data.overflow);
  check(data.navPresent,width+' shared navigation missing');
  if(width===390){
