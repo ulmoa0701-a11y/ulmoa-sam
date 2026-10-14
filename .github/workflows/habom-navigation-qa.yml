@@ -60,6 +60,7 @@ jobs:
           parents=(base/'parents/index.html').read_text(encoding='utf-8')
           for name in ['speech','attention','emotion','social','daily','school','observation']:
               assert 'id="'+name+'"' in parents,name
-          assert 'window.print()' in parents
+          parents_script=(base/'assets/habom-parents-notes.js').read_text(encoding='utf-8')
+          assert 'window.print()' in parents_script, 'parent note print handler missing'
           print(f'PASS: {len(pages)} pages, {len(destinations)} menu destinations, mobile navigation and search')
           PY
