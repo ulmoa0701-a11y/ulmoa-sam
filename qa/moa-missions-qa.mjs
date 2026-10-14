@@ -6,7 +6,7 @@ const {chromium}=require('playwright-core');
 const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',args:['--no-sandbox']});
 const failures=[];
 const verify=(condition,msg)=>{if(!condition)failures.push(msg)};
-const base='http://127.0.0.1:8765';
+const base=process.env.TEST_BASE_URL||'http://127.0.0.1:8765';
 const artifactDir='qa/moa-missions-artifacts';
 fs.mkdirSync(artifactDir,{recursive:true});
 async function testGame(game,width,level){
@@ -16,7 +16,7 @@ async function testGame(game,width,level){
  try{
   const response=await page.goto(base+'/thinking-garden/games/moa-missions/?game='+game,{waitUntil:'domcontentloaded',timeout:25000});
   verify(response?.ok(),game+' failed HTTP');
-  verify((await page.locator('#gameTitle').textContent()).length>5,game+' title missing');
+  verify((await page.locator('#gameTitle').textContent()).includes(({money:'화폐',change:'준비물',feel:'마음'})[game]),game+' selected game title mismatched query');
   verify(await page.locator('.level-card').count()===3,game+' level buttons missing');
   await page.locator('.level-card[data-level="'+level+'"]').click();
   verify(await page.locator('.level-card[data-level="'+level+'"]').getAttribute('aria-pressed')==='true',game+' level is not selectable');
