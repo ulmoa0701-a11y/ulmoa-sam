@@ -1,0 +1,4 @@
+[functions.ildan-api]
+# This handler validates a signed Supabase Auth token via auth.getUser() itself.
+# Required so preflight OPTIONS and unauthenticated /health work. All data routes fail closed.
+verify_jwt = false
