@@ -250,6 +250,7 @@ function renderSpelling(){const q=state.practiceRounds[state.round],shops=[['모
 $$('[data-open]').forEach(b=>b.addEventListener('click',()=>{
  if(b.dataset.open==='rescue'){location.href='games/rescue/';return}
  if(b.dataset.open==='recorder'){location.href='recorder/';return}
+ if(b.dataset.open==='handMirror'){location.href='games/hand-mirror/';return}
  if(b.dataset.open==='rhythmTouch'){location.href='games/rhythm-touch/';return}
  openPreview(b.dataset.open)
 }));
