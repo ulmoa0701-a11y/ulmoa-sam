@@ -8,7 +8,7 @@ const fs=require('node:fs');
  const out='qa/slow-look-screenshots';fs.mkdirSync(out,{recursive:true});
  const names=['scan','place','block','name','memory','everyday'];
  for(const vp of [{width:390,height:844,label:'mobile'},{width:1280,height:900,label:'desktop'}]){
-  const page=await browser.newPage({viewport:vp,deviceScaleFactor:1});
+  const page=await browser.newPage({viewport:vp,deviceScaleFactor:1});page.setDefaultTimeout(5000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(base+'thinking-garden/games/slow-look/',{waitUntil:'load'});
   await page.locator('.mode').first().waitFor();
@@ -16,10 +16,10 @@ const fs=require('node:fs');
   await page.screenshot({path:out+'/'+vp.label+'-home.png',fullPage:true});
   for(const mode of names){
    await page.locator('[data-action=start][data-mode='+mode+']').click();
+   if(mode==='name')await page.locator('#nameGo').click();
    assert.match(await page.locator('.taskHead h1').innerText(),/탐험|건축가/);
    assert.equal(await page.locator('[data-action=finish]').count(),1);
    if(mode==='name'){
-    await page.locator('#nameGo').click();
     await page.locator('[data-action=ready]').click();
     await page.locator('[data-action=score][data-correct=yes]').click();
     assert.ok(await page.locator('[data-action=next]').count()===1);
