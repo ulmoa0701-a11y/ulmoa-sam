@@ -11,7 +11,7 @@ const fs=require('node:fs');
    const page=await browser.newPage({viewport:vp,deviceScaleFactor:1});page.setDefaultTimeout(12000);
    const errors=[];page.on('pageerror',e=>errors.push(String(e)));
    await page.goto(base,{waitUntil:'load'});
-   assert.equal(await page.locator('#gardenGamePanel .library-card').count(),22,'22 independently accessible games');
+   assert.equal(await page.locator('#gardenGamePanel .library-card').count(),25,'25 independently accessible games');
    assert.equal(await page.locator('button.library-card[data-open^="slow"]').count(),6,'six original newer games retained');
    for(let m=0;m<modes.length;m++){
      const id=modes[m];
