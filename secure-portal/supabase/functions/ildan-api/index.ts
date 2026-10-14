@@ -38,7 +38,7 @@ async function openJSON(nonce:string,ciphertext:string){
 }
 const requireText=(o:Obj,key:string)=>typeof o[key]==='string'?String(o[key]):'';
 const roles=new Set(['student','parent','therapist']);
-const endpoints=new Set(['me','records','unshare','session-notes','students','accounts','invites','claim-invite','delete-record','drive/status','health']);
+const endpoints=new Set(['me','records','share','unshare','session-notes','students','accounts','invites','claim-invite','delete-record','drive/status','health']);
 const getRole=async(userDb:any,id:string)=>{
  const {data,error}=await userDb.from('ildan_members').select('user_id,role,therapist_id,student_id,display_alias').eq('user_id',id).maybeSingle();
  if(error)throw Error('ROLE_LOOKUP_FAILED');
@@ -152,6 +152,25 @@ export async function handle(request:Request):Promise<Response>{
    }).select('id,created_at').single();
    if(error)throw Error('RECORD_SAVE_FAILED');
    return send({record:{id:data.id,createdAt:data.created_at,shared:!!shared}},201);
+  }
+  if(apiName==='share'&&request.method==='POST'){
+   if(!['student','parent'].includes(member.role))return send({error:'작성자만 공유할 수 있습니다.'},403);
+   const b=await body(request),id=requireText(b,'recordId');
+   if(!/^[0-9a-f-]{36}$/i.test(id))return send({error:'기록 번호를 확인해 주세요.'},400);
+   const {data:existing,error:readError}=await admin.from('ildan_records').select('id,kind,private_nonce,private_ciphertext,shared_at')
+     .eq('id',id).eq('author_id',uid).maybeSingle();
+   if(readError||!existing)return send({error:'내 기록만 공유할 수 있습니다.'},403);
+   if(existing.shared_at)return send({error:'이미 공유한 기록입니다.'},409);
+   if(existing.kind!==member.role)return send({error:'작성자 역할이 맞지 않습니다.'},403);
+   const entry=await openJSON(existing.private_nonce,existing.private_ciphertext);
+   const selected=sharedSelection(entry,b.sharedFields,member.role==='parent');
+   const sealed=await sealJSON(selected);
+   const {data,error}=await admin.from('ildan_records').update({
+    shared_at:new Date().toISOString(),shared_nonce:sealed.nonce,shared_ciphertext:sealed.ciphertext
+   }).eq('id',id).eq('author_id',uid).is('shared_at',null).select('id');
+   if(error)throw Error('SHARE_FAILED');
+   if(!data?.length)return send({error:'공유 상태가 변경됐습니다. 새로고침해 주세요.'},409);
+   return send({ok:true,shared:true,driveSynced:false});
   }
   if(apiName==='unshare'&&request.method==='POST'){
    if(!['student','parent'].includes(member.role))return send({error:'작성자만 철회할 수 있습니다.'},403);
