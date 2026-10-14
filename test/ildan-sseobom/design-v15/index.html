@@ -1005,7 +1005,7 @@ function bindWorkspace(){
  }));
  activateWorkspace(activeView);
 }
-const NOTE_LABELS={studentReport:'학생이 직접 말한 내용',parentReport:'보호자가 전한 내용',functionalImpact:'일상에서 확인된 영향',familyResponse:'가족·주변의 반응',workingHypothesis:'잠정적 이해·가설',alternatives:'다른 설명 가능성',uncertainty:'아직 확인되지 않은 점',burdenReview:'기록 사용 부담 검토',erpReview:'ERP 회기 검토 여부',erpTarget:'ERP 치료 목표·계획 (치료사 전용)',erpSafety:'ERP 실행 후 경과·안전 검토',cbitReview:'CBIT 회기 검토 여부',cbitTarget:'CBIT 치료 목표·계획 (치료사 전용)',cbitContext:'틱 관련 맥락·기능적 영향',note:'자유 기록',mood:'오늘의 상태',energy:'컨디션',thought:'떠오른 생각',body:'몸의 느낌',action:'해본 일',sketch:'그림',observation:'관찰한 사실',response:'주변 사람의 말·행동',impact:'일상에서 확인된 변화',message:'전달사항',childWords:'아이가 실제로 한 말',event:'있었던 일',next:'다음 시도',date:'기록 날짜',time:'기록 시간',context:'당시 상황',origin:'정보 출처',title:'제목',experience:'내가 겪은 움직임·소리·반복행동',experienceImpact:'그때 생활에 있었던 변화',place:'장소',signals:'관찰한 모습(선택)',after:'이후에 이어진 일'};
+const NOTE_LABELS={studentReport:'학생이 직접 말한 내용',parentReport:'보호자가 전한 내용',functionalImpact:'일상에서 확인된 영향',familyResponse:'가족·주변의 반응',workingHypothesis:'잠정적 이해·가설',alternatives:'다른 설명 가능성',uncertainty:'아직 확인되지 않은 점',burdenReview:'기록 사용 부담 검토',erpReview:'ERP 회기 검토 여부',erpTarget:'ERP 치료 목표·계획 (치료사 전용)',erpSafety:'ERP 실행 후 경과·안전 검토',cbitReview:'CBIT 회기 검토 여부',cbitTarget:'CBIT 치료 목표·계획 (치료사 전용)',cbitContext:'틱 관련 맥락·기능적 영향',note:'자유 기록',mood:'오늘의 상태',energy:'컨디션',thought:'떠오른 생각',body:'몸의 느낌',action:'해본 일',sketch:'그림',observation:'관찰한 사실',response:'주변 사람의 말·행동',impact:'일상에서 확인된 변화',message:'전달사항',childWords:'아이가 실제로 한 말',event:'있었던 일',next:'다음 시도',date:'기록 날짜',time:'기록 시간',context:'당시 상황',origin:'정보 출처',title:'제목',experience:'내가 겪은 움직임·소리·반복행동',experienceImpact:'그때 생활에 있었던 변화',place:'장소',signals:'관찰한 모습(선택)',after:'이후에 이어진 일',abcBefore:'그전에 있었던 일 (A)',abcBehavior:'그때 실제로 한 말·행동 (B)',abcAfter:'그 직후에 있었던 일 (C)'};
 function todayLocal(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
 function nowLocalTime(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${p(d.getHours())}:${p(d.getMinutes())}`;}
 
@@ -1063,17 +1063,23 @@ function renderParentCalendar(){
 const STUDENT_EMOTIONS=["기쁨", "편안함", "설렘", "뿌듯함", "즐거움", "걱정", "답답함", "짜증", "잘 모르겠음"];
 const STUDENT_MORE_EMOTIONS={"기분 좋은 순간": ["신남", "만족감", "고마움", "홀가분함", "안도감", "평온함", "기대감", "자신감", "뭉클함", "흥미로움"], "복잡하고 힘든 순간": ["긴장됨", "불안함", "초조함", "속상함", "서운함", "억울함", "화남", "슬픔", "외로움", "두려움", "부담스러움", "후회", "당황함", "혼란스러움", "실망함", "부끄러움", "질투", "막막함"], "그 밖의 느낌": ["피곤함", "지루함", "무덤덤함", "궁금함", "어색함", "귀찮음", "복잡함", "잘 모르겠음"]};
 function dataForm(role){
- if(role==='parent')return `<form class="form entry-v5 parent-easy-form" id="entryForm">
+ if(role==='parent')return `<form class="form entry-v5 parent-easy-form" id="entryForm" data-parent-mode="quick">
+ <div class="parent-mode-header"><div class="journal-mode-switch" role="group" aria-label="보호자 기록 방식"><button type="button" class="journal-mode-btn active" data-parent-mode="quick" aria-pressed="true"><strong>간편 기록</strong><small>하나만 남겨도 돼요</small></button><button type="button" class="journal-mode-btn" data-parent-mode="detail" aria-pressed="false"><strong>자세히 기록</strong><small>상황과 앞뒤를 살펴봐요</small></button></div><p id="parentModeHint" class="student-mode-hint" aria-live="polite">기억나는 사실 한 가지만 남겨도 충분합니다.</p></div>
  <div class="parent-when"><label class="parent-date-field">일이 있었던 날짜 <input name="date" type="date" value="${todayLocal()}" max="${todayLocal()}" required></label><label class="parent-time-field">시간 <small>(선택)</small><input name="time" type="time"></label><label class="parent-location">장소 <small>(선택)</small><input name="place" maxlength="100" placeholder="기억나는 장소만 적어 주세요."></label></div>
  <p class="parent-date-hint">정확한 시간이 기억나지 않으면 비워 두셔도 돼요. 작성 시각은 별도로 자동 기록됩니다.</p>
  <label class="parent-main-label">어떤 일을 보거나 들으셨나요? <small>필수 · 360자 이내</small><textarea name="observation" maxlength="360" rows="3" required placeholder="기억나는 사실만 간단히. 원인이나 진단을 추측하지 않아도 됩니다."></textarea></label>
  <details class="entry-examples parent-examples"><summary>✎ 관찰 메모 예시 보기 <small>필요할 때만</small></summary><div class="entry-examples-body"><p>아래는 가상의 상황이에요. 실제로 확인한 내용만 적어 주세요.</p><div class="example-lines"><p><b>직접 본 일:</b> “책을 펼쳤다가 잠시 덮고 물을 마셨습니다.”</p><p><b>아이에게 들은 말:</b> “잠깐 쉬고 싶어요.”</p><p><b>확인하지 않은 추측:</b> “일부러 피하려고 한 것 같다”는 관찰 사실에 넣지 않아요.</p></div><p>모든 일을 기록할 필요는 없고, 한 가지 사실만 남겨도 충분합니다.</p></div></details>
  <label class="parent-source-field">이 내용은 어떻게 알게 되었나요? <small>선택 · 정확한 출처가 아니면 비워 두세요.</small><select name="origin"><option value="">출처를 선택하지 않음</option><option value="직접 관찰">직접 보거나 들었어요</option><option value="아이가 말함">아이에게 들었어요</option><option value="가족에게 들음">다른 가족에게 들었어요</option><option value="그 밖의 사람에게 들음">그 밖의 사람에게 들었어요</option></select></label>
  <p class="parent-fact-note">아이의 마음이나 의도를 단정하지 않아도 됩니다. 일부러 행동을 관찰하거나 횟수를 셀 필요도 없어요.</p>
+ <div class="parent-mode-advanced">
+ <details class="optional-fields abc-observation parent-abc"><summary>상황을 ABC로 살펴보기 <small>선택 · 일반 생활도 가능</small></summary><div class="optional-wrap">
+ <p class="abc-help">ABC는 문제행동만을 기록하는 표가 아니에요. 일상에서 일어난 일을 전후 순서대로 관찰할 때 도움이 되는 보조 양식입니다. 빈칸은 비워 두어도 되고 원인을 추측할 필요도 없습니다.</p>
+ <label>A · 그전에 어떤 상황이 있었나요? <small>활동·대화·주변 환경 등 직접 알게 된 내용</small><textarea name="context" maxlength="450" rows="2" placeholder="예: 가족이 외출 준비를 하고 있었어요."></textarea></label>
+ <p class="abc-behavior-guide"><b>B · 그때 일어난 일</b>은 위의 ‘어떤 일을 보거나 들으셨나요?’ 칸에 적은 내용을 그대로 사용합니다. 두 번 쓸 필요 없어요.</p>
+ <label>C · 그 직후에는 어떻게 되었나요? <small>이어진 사건이나 주변의 반응을 사실대로</small><textarea name="after" maxlength="450" rows="2" placeholder="예: 아이가 신발을 신고 밖으로 나갔어요."></textarea></label>
+ <p class="abc-help">관찰 기록만으로 행동의 원인·기능이나 진단을 결론 내리지 않습니다.</p></div></details>
  <details class="optional-fields parent-more"><summary>당시 상황과 앞뒤 내용 더 남기기 <small>선택</small></summary><div class="optional-wrap">
- <label>그전에 또는 그때 어떤 상황이 있었나요?<small>하고 있던 활동, 앞서 일어난 일, 주변 환경, 사람들과의 대화·요청 등 기억나는 사실이면 됩니다.</small><textarea name="context" maxlength="450" rows="2" placeholder="특별한 일이 없거나 기억나지 않으면 비워 두세요."></textarea></label>
  <label>그때 주변 사람이 한 말이나 행동이 있었나요? <small>선택</small><textarea name="response" maxlength="450" rows="2" placeholder="직접 보거나 들은 말과 행동만 적어 주세요."></textarea></label>
- <label>그 뒤에 어떤 일이 이어졌나요? <small>선택</small><textarea name="after" maxlength="450" rows="2" placeholder="이후에 보거나 들은 일이 있다면 적어 주세요."></textarea></label>
  <label>그 뒤 일상에서 확인된 변화가 있나요? <small>선택</small><textarea name="impact" maxlength="450" rows="2" placeholder="없거나 확인하지 못했다면 비워 두어도 됩니다."></textarea></label>
  <label>아이의 말을 그대로 기억하고 계신가요? <small>선택 · 직접 들은 표현만</small><textarea name="childWords" maxlength="450" rows="2" placeholder="예: \"지금은 쉬고 싶어.\" 정확히 기억나지 않으면 비워 두세요."></textarea></label>
  <label>치료사에게 별도로 전할 말 <small>선택 · 160자 이내</small><textarea name="message" maxlength="160" rows="2" placeholder="전할 내용이 없다면 비워 두세요."></textarea></label>
@@ -1087,6 +1093,7 @@ function dataForm(role){
  <p>그 일이 어떤 행동의 원인이라고 단정할 필요는 없고, 기억나지 않거나 확인하지 못한 내용은 비워 두어도 됩니다. 아이가 했던 말과 보호자가 추측한 생각은 서로 다릅니다.</p>
  <p class="parent-guide-tail">특정 행동을 일부러 찾아보거나 횟수를 계속 셀 필요는 없어요. 기록이 없는 날은 아무 일이 없었다는 뜻이 아니에요.</p>
  </div></details>
+ </div><!-- /parent-mode-advanced -->
  <div class="privacy-panel parent-privacy"><label class="checkbox"><input type="checkbox" name="share"><span>담당 치료사에게 전달하기<small>선택하지 않으면 내 기록에만 남아요.</small></span></label><div id="sharePicker" class="share-picker" hidden>
  <p>관찰 내용을 공유하면 날짜·시간·장소·선택한 표시도 함께 전달돼요. 아래 추가 항목은 직접 고른 것만 보냅니다.</p>
  ${['observation','origin','context','childWords','response','after','impact','message'].map(k=>`<label><input type="checkbox" name="shareField" value="${k}" ${k==='observation'?'checked':''}><span>${NOTE_LABELS[k]}</span></label>`).join('')}
@@ -1112,16 +1119,22 @@ function dataForm(role){
  
 
  <details class="optional-fields student-experience"><summary>몸의 움직임·소리나 반복된 일이 있었어? <small>선택 · 그냥 넘어가도 돼</small></summary><div class="optional-wrap"><p class="experience-helper">틱인지 강박인지 구분할 필요 없어. 내가 직접 경험한 일을 내 말로 남기고 싶을 때만 써. 기록하지 않아도 괜찮아.</p><label>어떤 일이 있었어? <small>(선택)</small><textarea name="experience" maxlength="900" rows="3" placeholder="움직임, 소리, 반복하고 싶었던 일, 떠오른 생각 등 내가 겪은 일을 자유롭게"></textarea></label><label>일상에서 달라진 점이나 불편한 점이 있었어? <small>(선택)</small><textarea name="experienceImpact" maxlength="500" rows="2" placeholder="특별히 달라진 일이 없었다면 비워 둬도 돼."></textarea></label><p class="experience-footer">횟수를 세거나 정확하게 분석할 필요는 없어. 나만 보관하고 싶으면 공유를 선택하지 않으면 돼.</p></div></details>
+ <details class="optional-fields abc-observation student-abc"><summary>그전에 → 그때 → 그다음 (ABC) <small>선택 · 그냥 넘어가도 돼</small></summary><div class="optional-wrap">
+ <p class="abc-help">친구와 놀았던 일, 재미있었던 일, 힘들었던 일 등 어떤 상황이라도 좋아. 정답이나 원인을 찾는 활동은 아니야.</p>
+ <label>A · 그전에는 무슨 일이 있었어?<textarea name="abcBefore" maxlength="500" rows="2" placeholder="예: 쉬는 시간에 친구를 만났어."></textarea></label>
+ <label>B · 그때 어떤 말이나 행동이 있었어?<textarea name="abcBehavior" maxlength="500" rows="2" placeholder="예: 같이 놀자고 이야기했어."></textarea></label>
+ <label>C · 바로 다음에는 어떤 일이 있었어?<textarea name="abcAfter" maxlength="500" rows="2" placeholder="예: 같이 운동장에 갔어."></textarea></label>
+ <p class="abc-help">기억이 안 나면 비워 둬도 괜찮아. ABC를 썼다고 꼭 공유해야 하는 건 아니야.</p></div></details>
  <details class="optional-fields student-reflect"><summary>좀 더 적고 싶다면 <small>선택 · 정답 없음</small></summary><div class="optional-wrap"><label>떠오른 생각이나 이미지<textarea name="thought" maxlength="1200" placeholder="쓰고 싶은 내용이 있으면 적어도 돼."></textarea></label><label>몸에서 느낀 점<textarea name="body" maxlength="1000" placeholder="특별한 느낌이 없다면 비워 둬도 돼."></textarea></label><label>내가 했던 일이나 해보고 싶은 일<textarea name="action" maxlength="1000" placeholder="꼭 해결책을 적을 필요는 없어."></textarea></label></div></details>
  </div>
  <p id="journalHiddenNotice" class="journal-hidden-notice" hidden>자세히 기록에서 작성한 내용도 함께 보관돼. 다시 보려면 자세히 기록을 선택해.</p>
  <div class="privacy-panel student-share"><label class="checkbox"><input type="checkbox" name="share"><span>담당 치료사에게 기록 공유하기<small>기본 비공개 · 공유 내용은 직접 고를 수 있어.</small></span></label>
  <div id="sharePicker" class="share-picker" hidden><div class="student-share-bar"><strong>보낼 항목 선택</strong><div class="student-share-actions"><button type="button" class="button-ghost" id="studentSelectAll">전체 선택</button><button type="button" class="button-ghost" id="studentClearAll">선택 해제</button></div></div>
- ${['title','date','time','place','note','sketch','mood','energy','thought','body','action','experience','experienceImpact'].map(k=>`<label class="student-share-field"><input type="checkbox" name="shareField" value="${k}"><span>${NOTE_LABELS[k]}</span></label>`).join('')}<p id="studentShareCount" aria-live="polite">보낼 항목을 선택해 줘. 작성하지 않은 항목은 선택되지 않아.</p><p>선택하지 않은 내용은 치료사에게 보내지 않아. 전송 전에 확인할 수 있어.</p></div></div>
+ ${['title','date','time','place','note','sketch','mood','energy','thought','body','action','experience','experienceImpact','abcBefore','abcBehavior','abcAfter'].map(k=>`<label class="student-share-field"><input type="checkbox" name="shareField" value="${k}"><span>${NOTE_LABELS[k]}</span></label>`).join('')}<p id="studentShareCount" aria-live="polite">보낼 항목을 선택해 줘. 작성하지 않은 항목은 선택되지 않아.</p><p>선택하지 않은 내용은 치료사에게 보내지 않아. 전송 전에 확인할 수 있어.</p></div></div>
  <button class="button entry-save" id="saveEntry">🔒 내 기록 저장</button><p class="student-save-note">매일 쓰지 않아도 괜찮아. 기록을 정확하게 쓰려 애쓸 필요도 없어. 실시간 상담·응급 연락창이 아니야. 체험판의 작성 중 내용은 이 브라우저 세션에만 임시 저장돼.</p>
  </form>`;
 }function gatherEntry(f,role){
- const fields=role==='parent'?['date','time','place','observation','origin','context','childWords','response','after','impact','message']:['date','time','place','title','note','energy','thought','body','action','experience','experienceImpact'];
+ const fields=role==='parent'?['date','time','place','observation','origin','context','childWords','response','after','impact','message']:['date','time','place','title','note','energy','thought','body','action','experience','experienceImpact','abcBefore','abcBehavior','abcAfter'];
  const entry={};fields.forEach(k=>{const value=formValue(f,k);if(value)entry[k]=value});
  if(role==='parent'){
   const kinds=[...f.querySelectorAll('input[name="signalChoice"]:checked')].map(x=>x.value);
@@ -1229,7 +1242,7 @@ function wireEntryForm(isParent){
     modeButtons.forEach(b=>{const active=b===modeButton;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
     if(mode==='quick'&&$('drawPanel')&&!$('drawPanel').hidden){f.querySelector('[data-format="text"]')?.click();}
     if(journalModeHint)journalModeHint.textContent=mode==='quick'?'한 줄만 남겨도 돼. 나머지는 선택이야.':'감정·장소·그림·내 경험도 원하는 만큼 추가해 봐.';
-    const extra=mode==='quick'&&['title','energy','thought','body','action','experience','experienceImpact'].some(k=>!!formValue(f,k));
+    const extra=mode==='quick'&&['title','energy','thought','body','action','experience','experienceImpact','abcBefore','abcBehavior','abcAfter'].some(k=>!!formValue(f,k));
     const summary=$('journalHiddenNotice');if(summary)summary.hidden=!extra;
     updateStudentShare();
   }));
@@ -1241,7 +1254,7 @@ function wireEntryForm(isParent){
   updateStudentShare();
  }
  f.onsubmit=async e=>{e.preventDefault();const entry=gatherEntry(f,me.role);
-  const meaningful=isParent?!!entry.observation:['note','sketch','mood','energy','thought','body','action','experience','experienceImpact'].some(k=>!!entry[k]);
+  const meaningful=isParent?!!entry.observation:['note','sketch','mood','energy','thought','body','action','experience','experienceImpact','abcBefore','abcBehavior','abcAfter'].some(k=>!!entry[k]);
   if(!meaningful){toast(isParent?'직접 보거나 들은 일을 한 문장만 적어 주세요.':'일기, 그림, 감정 등 한 가지 이상 남겨줘.');return;}
   if(isParent&&!entry.date){toast('일이 있었던 날짜를 선택해 주세요.');return;}
   const sharedFields=share.checked?selectedKeys().filter(k=>entry[k]):[];
