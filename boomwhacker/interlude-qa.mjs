@@ -145,6 +145,43 @@ try{
      currentSong=originalSong;bpm=oldBpm;build();
      return{harmonies,preludeHarmony,notes,noteDuration,start,tail,twinklePrelude:{beats:firstPhraseBeats,bars:twinklePrelude.bars,source:twinklePrelude.source,sequence:sequence.map(n=>n.pitch),durationMs:twinklePrelude.durationMs,restartAtMs:Math.round(firstScoreNoteAt*1000),errors:preludeErrors}};
    });
+   // Every built-in song must now introduce its real final score phrase,
+   // with notated pitches/onsets and a synchronized first downbeat.
+   result.allScorePhrasePreludes=await page.evaluate(()=>{
+     const originalSong=currentSong,originalBpm=bpm,originalLevel=level;
+     const realTone=scheduleMelodyTone,report=[];
+     try{
+       level=8;
+       for(const key of ['plane','butterfly','rabbit','same','bicycle','bear','school-bell','spring-outing','hometown-spring']){
+         currentSong=clone(findSample(key));bpm=92;build();
+         const plan=instrumentalPreludePlan(),actual=[];
+         scheduleMelodyTone=function(...args){
+           actual.push({note:args[2],time:args[3],duration:args[6],mode:args[4]});
+           return true;
+         };
+         const ac=new OfflineAudioContext(1,44100,44100),start=.05;
+         scheduleInterludeMusic(ac,ac.destination,start,beatMs(),plan.meter);
+         const phrase=events.filter(e=>e.measure>=plan.firstMeasure);
+         const origin=phrase[0]?.start??firstNoteMs();
+         const expected=[];
+         for(let rep=0;rep<plan.repeats;rep++)for(const e of phrase){
+           if(e.note==='쉼'||!FREQ[e.note])continue;
+           expected.push({note:e.note,time:start+rep*plan.phraseDurationMs/1000+(e.start-origin)/1000,
+             duration:e.dur});
+         }
+         const valid=plan.source==='score-ending'&&plan.durationMs>=6500&&plan.bars%2===0
+          &&plan.firstBallOffsetMs>=0&&actual.length===expected.length
+          &&actual.every((n,i)=>n.note===expected[i]?.note&&Math.abs(n.time-expected[i].time)<.0002
+           &&Math.abs(n.duration-expected[i].duration)<.0002&&n.mode==='piano');
+         report.push({key,valid,source:plan.source,bars:plan.bars,repeats:plan.repeats,
+           notes:actual.length,ms:Math.round(plan.durationMs)});
+       }
+     }finally{scheduleMelodyTone=realTone;currentSong=originalSong;bpm=originalBpm;level=originalLevel;build()}
+     return report;
+   });
+   if(result.allScorePhrasePreludes.some(x=>!x.valid))
+     throw Error('A standard song intro does not follow its actual written ending '+JSON.stringify(result.allScorePhrasePreludes));
+
    const mu=result.musicality;
    if(mu.notes.join(',')!=='도,도,솔,솔,라,라,솔'||
       mu.harmonies.join(',')!=='C,C,F,C,F,C,G,C'||
@@ -194,8 +231,11 @@ try{
    await page.waitForFunction(()=>!introActive&&playing,null,{timeout:16000});
    result.handoff=await page.evaluate(()=>({introActive,playing,mrScheduled:!!mrSource,mix:mixMode,elapsed,firstNote:firstNoteMs(),leadGain:!!leadInGain}));
    result.audioClock=await page.evaluate(()=>window.__musicClock);
-   const scheduledNote=result.audioClock.find(x=>x.type==='melody');
    const scheduledMr=result.audioClock.find(x=>x.type==='mr');
+   // The prelude now legitimately contains real score melody notes.
+   // Compare the first MAIN-SONG note at/after the MR downbeat, not the
+   // first note of the instrumental introduction.
+   const scheduledNote=result.audioClock.find(x=>x.type==='melody'&&scheduledMr&&x.when>=scheduledMr.when-.003);
    if(!scheduledNote||!scheduledMr||scheduledNote.pitch!=='도'||
       Math.abs(scheduledNote.when-scheduledMr.when)>.003||
       Math.abs(scheduledNote.noteDur-result.info.beat)>5)

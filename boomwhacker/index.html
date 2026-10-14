@@ -682,7 +682,7 @@ function renderDisplayEditor(){
  if(displayMode==='instrument'){
   title.textContent='악기 설정';desc.textContent='각 색에 사용할 악기를 골라주세요. 원하는 악기가 없으면 아래에서 직접 추가할 수 있어요.';
   box.innerHTML=ORDER.map((n,i)=>'<label class="displayInputRow"><span class="displayDot" style="background:'+COLORS[n]+'"></span><span class="displayNote">'+esc(noteLabel(n))+'</span><select data-instrument-index="'+i+'" aria-label="'+esc(noteLabel(n))+' 악기">'+instrumentOptions(instrumentIds[i])+'</select></label>').join('')+'<button id="instrumentAddToggle" class="instrumentAddToggle" type="button">＋ 원하는 악기가 없나요? 직접 추가</button><div id="instrumentAddBox" class="instrumentAdd"><input id="newInstrumentIcon" maxlength="8" placeholder="🪈" aria-label="새 악기 아이콘"><input id="newInstrumentName" maxlength="16" placeholder="악기 이름" aria-label="새 악기 이름"><button id="addInstrumentBtn" type="button">추가</button></div><div class="instrumentHint">먼저 위에서 악기를 골라 사용하세요. 직접 추가는 필요할 때만 열면 됩니다.</div>';
-  $('#instrumentAddToggle').onclick=()=>{const box=$('#instrumentAddBox'),open=!box.classList.contains('open');box.classList.toggle('open',open);$('#instrumentAddToggle').textContent=open?'− 직접 추가 닫기':'＋ 원하는 악기가 없나요? 직접 추가';if(open)setTimeout(()=>$('#newInstrumentIcon')?.focus(),20)};
+  $('#instrumentAddToggle').onclick=()=>{const box=$('#instrumentAddBox'),open=!box.classList.contains('open');box.classList.toggle('open',open);$('#instrumentAddToggle').textContent=open?'− 직접 추가 닫기':'＋ 원하는 악기가 없나요? 직접 추가';if(open)$('#newInstrumentIcon')?.focus({preventScroll:true})};
   bindInstrumentAdder();return
  }
  const values=displayMode==='name'?childLabels:customLabels;
@@ -1031,7 +1031,45 @@ function preludeChordForBar(bar,bars){
  if(bar===0||bars<=2)return tonic;
  return bar%2===0?tonic:chordForMeasure(Math.min(bar,(currentSong.measures||[]).length-1));
 }
-function chordForMeasure(mi){if(isTwinkleScore()&&Number.isInteger(mi)&&mi>=0&&mi<TWINKLE_CHORDS.length)return chordByName(TWINKLE_CHORDS[mi]);const weight={};for(const e of events.filter(x=>x.measure===mi&&x.active)){const n=mrBaseNote(e.note);weight[n]=(weight[n]||0)+(Number(e.dur)||1)}let best=MR_CHORDS[0],score=-1;for(const c of MR_CHORDS){let s=0;for(const n of c.tones)s+=weight[n]||0;if(s>score){score=s;best=c}}return best}
+// Phrase-aware, hand-reviewed major-key progressions for the standard
+// C-major nursery scores. Imported music retains note-based fallback.
+const SONG_CHORD_CHARTS={
+ plane:['C','C','G','C','C','C','G','C'],
+ butterfly:['C','G','C','C','C','G','C','C','G','G','C','C','C','G','C','C'],
+ rabbit:['C','C','C','C','G','G','C','C','C','C','C','C','G','G','G','C'],
+ same:['C','C','F','C','F','C','G','C'],
+ school_bell:['C','C','C','G','C','C','G','C'],
+ bear:['C','C','C','C','C','G','C','G','C','F','C','C']
+};
+function chordForMeasure(mi){
+ if(isTwinkleScore()&&Number.isInteger(mi)&&mi>=0&&mi<TWINKLE_CHORDS.length)
+  return chordByName(TWINKLE_CHORDS[mi]);
+ const chart=SONG_CHORD_CHARTS[String(currentSong.key||'').replace(/-/g,'_')];
+ if(chart&&chart.length===(currentSong.measures||[]).length&&chart[mi])
+  return chordByName(chart[mi]);
+ // For custom/imported music, inspect the written melody rather than
+ // active game lanes (3/5-note practice must not change the harmony).
+ const weight={};
+ for(const e of events.filter(x=>x.measure===mi&&x.note!=='쉼')){
+  const n=mrBaseNote(e.note);
+  weight[n]=(weight[n]||0)+Math.max(.125,Number(e.dur)||1);
+ }
+ const previous=mi>0?events.filter(x=>x.measure===mi-1&&x.note!=='쉼'):[];
+ const previousPitches=new Set(previous.map(e=>mrBaseNote(e.note)));
+ let best=MR_CHORDS[0],bestScore=-Infinity;
+ for(const candidate of MR_CHORDS){
+  let score=0;
+  for(const [note,dur] of Object.entries(weight))
+   score+=candidate.tones.includes(note)?dur*2.2:-dur*.95;
+  if(mi>0&&candidate.tones.some(n=>previousPitches.has(n)))score+=.17;
+  // Avoid arbitrary relative-minor swaps when the bar contains only
+  // one ambiguous note. This is a conservative fallback, not an
+  // assertion of an inferred key signature.
+  if(candidate.name==='C')score+=.12;
+  if(score>bestScore){best=candidate;bestScore=score}
+ }
+ return best;
+}
 function mrPulse(ac,dest,when,strong=false){const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.setValueAtTime(strong?95:125,when);o.frequency.exponentialRampToValueAtTime(strong?52:78,when+.11);o.connect(g);g.connect(dest);g.gain.setValueAtTime(.0001,when);g.gain.exponentialRampToValueAtTime(strong?.09:.04,when+.006);g.gain.exponentialRampToValueAtTime(.0001,when+.13);o.start(when);o.stop(when+.15)}
 // Score-aligned, voice-led arrangement rather than the former continuous
 // beeps. The same scheduler is used for the live game and exported video.
@@ -1053,33 +1091,43 @@ function softShaker(ac,dest,when,strength=.08){
  gain.gain.setValueAtTime(strength,when);
  src.connect(high);high.connect(gain);gain.connect(dest);src.start(when);
 }
-function backingMeasure(ac,dest,chord,when,intervalMs,beats,style=mrStyle,offsetBeats=0){
- const unit=intervalMs/1000;
+function backingMeasure(ac,dest,chord,when,intervalMs,beats,style=mrStyle,offsetBeats=0,ending=false){
+ const unit=intervalMs/1000,soft=style==='soft';
  const [bass,...upper]=chord.freqs;
- // Pianists change chord on the bar's strong beat. Bass and harmony have
- // separate registers and velocities; don't strike every note identically.
  for(let i=offsetBeats;i<beats;i++){
-  const t=when+i*unit,upbeat=i%2!==0,soft=style==='soft';
-  if(i===0)backingNote(ac,dest,bass,t,.35,Math.min(2.4,unit*beats*.84));
-  else if(i%2===0&&beats>=3)backingNote(ac,dest,bass*1.5,t,.15,unit*.66);
-  if(i===0){
-   backingNote(ac,dest,upper[0],t+.012,.22,Math.min(2.4,unit*beats*.84));
-   backingNote(ac,dest,upper[1],t+.027,.20,Math.min(2.4,unit*beats*.83));
-   backingNote(ac,dest,upper[2],t+.041,.18,Math.min(2.4,unit*beats*.80));
+  const t=when+i*unit,downbeat=i===0,last=i===beats-1;
+  if(downbeat){
+   // Low left hand on the strong beat; light, staggered right hand
+   // so accompaniment doesn't hit as a repeated four-note block.
+   backingNote(ac,dest,bass,t,soft?.24:.27,Math.min(2.6,unit*beats*.88));
+   backingNote(ac,dest,upper[0],t+.018,soft?.12:.14,Math.min(1.6,unit*1.75));
+   backingNote(ac,dest,upper[1],t+.066,soft?.10:.12,Math.min(1.5,unit*1.65));
+   if(soft)backingNote(ac,dest,upper[2],t+.105,.075,Math.min(1.4,unit*1.5));
   }else if(soft){
-   // Light broken-chord movement behind a singing child.
-   backingNote(ac,dest,upper[(i-1)%upper.length],t,.11,unit*.69);
+   // Gentle piano: single moving inner voice rather than a fresh triad.
+   if(!ending||!last)
+    backingNote(ac,dest,upper[(i+1)%upper.length],t+.012,.085,unit*.76);
   }else{
-   // Modern, restrained nursery-pop bounce without busy electronic bleeps.
-   backingNote(ac,dest,upper[(i-1)%upper.length],t,.15,unit*.70);
-   if(upbeat)softShaker(ac,dest,t,.10);
+   // Light nursery-pop pulse, distinct in 2/4, 3/4 and 4/4.
+   if(beats>=4&&i===2){
+    backingNote(ac,dest,bass*1.5,t,.105,unit*.72);
+    backingNote(ac,dest,upper[1],t+.02,.09,unit*.70);
+   }else{
+    if(!ending||!last){
+     backingNote(ac,dest,upper[beats===3?(i===1?1:2):(i%2?2:1)],t+.016,.12,unit*.70);
+     if(i%2===1)backingNote(ac,dest,upper[0],t+.05,.065,unit*.53);
+    }
+   }
+   if(i%2===1&&!ending&&unit<1.15)
+    softShaker(ac,dest,t+.012,.037);
   }
  }
 }
+
 function scheduleBuiltinMr(ac,dest,when,offsetSec=0,volume=mrVolume){
  const startMs=Math.max(0,Number(offsetSec)||0)*1000,lead=firstNoteMs(),beat=beatMs();
  const master=ac.createGain(),comp=ac.createDynamicsCompressor(),pre=ac.createGain();
- pre.gain.setValueAtTime(.87,when);
+ pre.gain.setValueAtTime(1.08,when);
  comp.threshold.setValueAtTime(-12,when);comp.knee.setValueAtTime(12,when);
  comp.ratio.setValueAtTime(2.3,when);comp.attack.setValueAtTime(.007,when);
  comp.release.setValueAtTime(.24,when);
@@ -1096,7 +1144,7 @@ function scheduleBuiltinMr(ac,dest,when,offsetSec=0,volume=mrVolume){
   const initial=Math.max(0,Math.ceil((startMs-ms-.5)/beat));
   if(initial>=beats)continue;
   // Maintain note and MR phase when scrubbing / restarting.
-  backingMeasure(ac,pre,chordForMeasure(mi),when+(ms-startMs)/1000,beat,beats,mrStyle,initial);
+  backingMeasure(ac,pre,chordForMeasure(mi),when+(ms-startMs)/1000,beat,beats,mrStyle,initial,i===measureIds.length-1);
  }
  const stopper={stop(){try{master.gain.cancelScheduledValues(ac.currentTime);master.gain.setTargetAtTime(.0001,ac.currentTime,.012)}catch(e){}}};
  return{src:stopper,g:master};
@@ -1217,26 +1265,42 @@ function scheduleRhythmGuide(ac,dest,start,beats,intervalMs,meter){
   if(strong)voiceOsc(ac,dest,196,'triangle',.17,time,.009,.22,.28);
  }
 }
-// A real instrumental introduction, NOT a replay of the opening tune.
+// Actual score-phrase introduction: the familiar ending leads into the song's opening.
 // The note balls travel during its last 3.1 seconds to the first downbeat.
 const INTERLUDE_COUNTDOWN_BEATS=0;
 function instrumentalPreludePlan(){
  const meter=[2,3,4].includes(Number(currentSong.timeN))?Number(currentSong.timeN):4;
- const beat=beatMs(),barMs=meter*beat;
- // For Twinkle Twinkle, the prelude is EXACTLY its last eight written
- // bars: C C G G | A A G(2) | F F E E | D D C(2).
- // The song then starts again from C C G G; do not invent a separate tune.
- if(isTwinkleScore()){
-   const bars=8,beats=16;
-   return{meter,bars,beats,durationMs:beats*beat,countdownBeats:INTERLUDE_COUNTDOWN_BEATS,
-     firstBallOffsetMs:beats*beat-firstNoteMs(),source:'score-opening'};
+ const beat=beatMs(),all=currentSong.measures||[];
+ // Eight written bars for Twinkle (the requested do-do-sol-sol ending).
+ // For other songs, choose a COMPLETE final phrase of the real score,
+ // rather than inventing an unrelated synthesized arpeggio.
+ const twinkleScore=isTwinkleScore();
+ const n=all.length;
+ let phraseBars=twinkleScore?8:Math.max(1,Math.min(n,meter===2?8:4));
+ if(!twinkleScore&&phraseBars>2&&phraseBars%2)phraseBars--;
+ const measureStart=mi=>events.find(e=>e.measure===mi)?.start;
+ const scoreEnd=events.length?events.at(-1).start+events.at(-1).dur:firstNoteMs()+meter*beat;
+ const phraseLength=bars=>{
+  const t=measureStart(Math.max(0,n-bars));
+  return Math.max(beat,scoreEnd-(t??firstNoteMs()));
+ };
+ if(!twinkleScore){
+  while(phraseBars>2&&phraseLength(phraseBars)>15000)phraseBars-=2;
+  while(phraseBars+2<=n&&phraseLength(phraseBars)<Math.max(6500,firstNoteMs()+150))phraseBars+=2;
  }
- // Other song types retain the proven complete even-bar introduction.
- const minimumMs=Math.max(6500,firstNoteMs()+100);
- let bars=Math.max(2,Math.ceil(minimumMs/barMs));
- if(bars%2!==0)bars++;
- return{meter,bars,beats:meter*bars,durationMs:meter*bars*beat,countdownBeats:INTERLUDE_COUNTDOWN_BEATS,
-   firstBallOffsetMs:meter*bars*beat-firstNoteMs(),source:'general'};
+ const firstMeasure=Math.max(0,n-phraseBars);
+ const phraseDurationMs=phraseLength(phraseBars);
+ let repeats=1;
+ const minMs=Math.max(6500,firstNoteMs()+150);
+ while(repeats*phraseDurationMs<minMs)repeats++;
+ // Keep visible phrase indicators in complete paired bars for tiny
+ // uploaded one-measure exercises; there is no fabricated tune.
+ if(phraseBars*repeats%2)repeats++;
+ const beats=Math.max(1,Math.ceil(phraseDurationMs*repeats/beat-.000001));
+ const bars=phraseBars*repeats;
+ return{meter,bars,beats,durationMs:beats*beat,countdownBeats:INTERLUDE_COUNTDOWN_BEATS,
+  firstBallOffsetMs:beats*beat-firstNoteMs(),source:twinkleScore?'score-opening':'score-ending',
+  firstMeasure,phraseBars,phraseDurationMs,repeats};
 }
 // Give phones and tablets a mid/high-frequency attack: a 50-90 Hz kick
 // alone can disappear on their small speakers. This is a beat cue,
@@ -1265,45 +1329,28 @@ function schedulePreludeMallet(ac,dest,hz,when,amp,beat){
  voiceOsc(ac,dest,hz,'sine',amp*.08,when,.004,d*.30,d*.50,3);
 }
 function scheduleInterludeMusic(ac,dest,start,intervalMs,meter){
- const plan=instrumentalPreludePlan(),beat=intervalMs/1000;
- // Play the ACTUAL score at the exact same rhythm before the playing screen.
- // Last 8 bars = 도도솔솔 라라솔 파파미미 레레도 (including held notes).
- // Never double the song audio: live MR and first playing note start AFTER it.
- if(isTwinkleScore()){
-   const melody=ac.createGain(),backing=ac.createGain();
-   melody.gain.setValueAtTime(.91,start);melody.connect(dest);
-   backing.gain.setValueAtTime(.50,start);backing.connect(dest);
-   // Most nursery piano intros replay their final recognizable phrase:
-   // here the final 8 bars repeat the same notes as the first 8 bars.
-   const firstMeasure=(currentSong.measures||[]).length-8;
-   const scorePhrase=events.filter(e=>e.measure>=firstMeasure);
-   const origin=scorePhrase[0]?.start??firstNoteMs();
-   for(const e of scorePhrase){
-     if(e.note==='쉼'||!FREQ[e.note])continue;
-     scheduleMelodyTone(ac,melody,e.note,start+(e.start-origin)/1000,'piano',.90,e.dur);
-   }
-   for(let bar=0;bar<8;bar++){
-     const es=scorePhrase.filter(e=>e.measure===firstMeasure+bar);
-     if(!es.length)continue;
-     const t=start+(es[0].start-origin)/1000;
-     backingMeasure(ac,backing,chordForMeasure(firstMeasure+bar),t,intervalMs,2,'soft');
-   }
-   return plan;
- }
- const tune=ac.createGain(),chords=ac.createGain(),percussion=ac.createGain();
- tune.gain.setValueAtTime(.95,start);tune.connect(dest);
- chords.gain.setValueAtTime(.55,start);chords.connect(dest);
- percussion.gain.setValueAtTime(.72,start);percussion.connect(dest);
- for(let i=0;i<plan.beats;i++){
-  const bar=Math.floor(i/meter),position=i%meter,when=start+i*beat;
-  const {freq,chord}=preludeLeadNote(bar,position,meter,plan.bars);
-  schedulePreludeBeat(ac,percussion,when,position===0);
-  schedulePreludeMallet(ac,tune,freq,when,position===0?.30:.25,beat);
-  if(position===0||(plan.bars===1&&position===Math.ceil(meter/2))){
-   const duration=Math.min(1.8,(meter-position)*beat*.92);
-   voiceOscHold(ac,chords,chord.freqs[0],'triangle',.115,when,.014,duration);
-   for(const hz of chord.freqs.slice(1))
-    voiceOscHold(ac,chords,hz,'sine',.027,when,.015,duration*.85);
+ const plan=instrumentalPreludePlan();
+ const melody=ac.createGain(),backing=ac.createGain();
+ melody.gain.setValueAtTime(.88,start);melody.connect(dest);
+ backing.gain.setValueAtTime(.43,start);backing.connect(dest);
+ const scorePhrase=events.filter(e=>e.measure>=plan.firstMeasure);
+ const origin=scorePhrase[0]?.start??firstNoteMs();
+ for(let repeatIndex=0;repeatIndex<plan.repeats;repeatIndex++){
+  const phraseStart=start+repeatIndex*plan.phraseDurationMs/1000;
+  for(const e of scorePhrase){
+   if(e.note==='쉼'||!FREQ[e.note])continue;
+   // Follow actual note durations and rests, including held endings.
+   scheduleMelodyTone(ac,melody,e.note,phraseStart+(e.start-origin)/1000,'piano',.87,e.dur);
+  }
+  for(let mi=plan.firstMeasure;mi<(currentSong.measures||[]).length;mi++){
+   const barEvents=scorePhrase.filter(e=>e.measure===mi);
+   if(!barEvents.length)continue;
+   const first=barEvents[0],last=barEvents.at(-1);
+   const barLength=last.start+last.dur-first.start;
+   const writtenBeats=Math.max(1,Math.round(barLength/intervalMs));
+   const at=phraseStart+(first.start-origin)/1000;
+   const isEnding=repeatIndex===plan.repeats-1&&mi===(currentSong.measures||[]).length-1;
+   backingMeasure(ac,backing,chordForMeasure(mi),at,intervalMs,writtenBeats,'soft',0,isEnding);
   }
  }
  return plan;
