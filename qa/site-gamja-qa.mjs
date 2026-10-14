@@ -78,8 +78,9 @@ for(const plan of plans){
        headerWidth:first?.scrollWidth,headerClientWidth:first?.clientWidth,
        resourceTabs:document.querySelectorAll('[data-garden-view]').length,
        gameCards:document.querySelectorAll('.library-card,.game-card').length,
-       originalCognitiveCards:document.querySelectorAll('.library-card[data-open]:not([data-open^="slow"]):not([data-open="rulePost"]):not([data-open="mirrorPond"]):not([data-open="sceneDetect"])').length,
-        novelCognitiveCards:document.querySelectorAll('.library-card[data-open="rulePost"],.library-card[data-open="mirrorPond"],.library-card[data-open="sceneDetect"]').length,
+       originalCognitiveCards:document.querySelectorAll('.library-card[data-open]:not([data-open^="slow"]):not([data-open="rulePost"]):not([data-open="mirrorPond"]):not([data-open="sceneDetect"]):not([data-open="resetRescue"]):not([data-open="classroomMove"]):not([data-open="festivalPlan"])').length,
+        strategyCognitiveCards:document.querySelectorAll('.library-card[data-open="resetRescue"],.library-card[data-open="classroomMove"],.library-card[data-open="festivalPlan"]').length,
+         novelCognitiveCards:document.querySelectorAll('.library-card[data-open="rulePost"],.library-card[data-open="mirrorPond"],.library-card[data-open="sceneDetect"]').length,
        expeditionCognitiveCards:document.querySelectorAll('.library-card[data-open^="slow"]').length,
        bodyHeight:document.documentElement.scrollHeight
       };
@@ -133,7 +134,7 @@ for(const plan of plans){
    if(['/', '/thinking-garden/','/music-garden/'].includes(p)){
      assert(reading.scrollWidth<=plan.width+3,plan.name+' '+p+': unexpected horizontal overflow '+reading.scrollWidth);
    }
-   if(p==='/thinking-garden/')assert(reading.gameCards===22&&reading.originalCognitiveCards===13&&reading.expeditionCognitiveCards===6&&reading.novelCognitiveCards===3&&reading.resourceTabs===3,plan.name+': 13 legacy games + 1 new expedition and 3 tabs must remain');
+   if(p==='/thinking-garden/')assert(reading.gameCards===25&&reading.originalCognitiveCards===13&&reading.expeditionCognitiveCards===6&&reading.novelCognitiveCards===3&&reading.strategyCognitiveCards===3&&reading.resourceTabs===3,plan.name+': 13 legacy games + 1 new expedition and 3 tabs must remain');
    if(p==='/music-garden/')assert(reading.gameCards===2&&reading.resourceTabs===3,plan.name+': existing music games/tabs changed');
    if(plan.name==='mobile360'||(plan.name==='mobile390'&&['/','/notes/','/materials/','/thinking-garden/','/music-garden/','/brain-map/'].includes(p))||(['desktop1366','desktop1600'].includes(plan.name)&&['/','/thinking-garden/','/music-garden/','/about/'].includes(p))){
     const screenshot=await page.screenshot({path:path.join(out,plan.name+'-'+(p==='/'?'home':p.split('/')[1])+'.png'),fullPage:true,timeout:12000});
