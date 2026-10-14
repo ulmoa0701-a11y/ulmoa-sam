@@ -7,7 +7,7 @@
 <meta name="description" content="초등 저학년을 위한 리코더 운지 연습 게임. 화면에서 작은 성공을 경험하고 실제 악기로 이어가요.">
 <style>
 :root{--ink:#243b37;--green:#31765f;--forest:#21664e;--cream:#f8faf1;--mint:#e1f5df;--yellow:#ffe28b;--rose:#ff858c;--blue:#d8effa}
-*{box-sizing:border-box}html{font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}body{margin:0;min-height:100dvh;background:#ecf5e7;color:var(--ink)}button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible,a:focus-visible{outline:4px solid #f49c55;outline-offset:3px}button:disabled{cursor:not-allowed;opacity:.45}h1,h2,h3,p{margin:0}a{color:inherit}
+*{box-sizing:border-box}html{font-family:'Pretendard','SUIT',system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif}body{margin:0;min-height:100dvh;background:#ecf5e7;color:var(--ink)}button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible,a:focus-visible{outline:4px solid #f49c55;outline-offset:3px}button:disabled{cursor:not-allowed;opacity:.45}h1,h2,h3,p{margin:0}a{color:inherit}
 .app{max-width:1200px;margin:auto;min-height:100dvh;display:flex;flex-direction:column;padding:14px 18px 20px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative;z-index:4}.brand{text-decoration:none;display:inline-flex;align-items:center;gap:10px;font-weight:900;font-size:clamp(14px,1.8vw,19px)}.brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:13px;background:#fff;box-shadow:0 3px 0 #bad8c2}.top-right{display:flex;gap:7px;align-items:center}.pill{border:2px solid #cfe4c8;background:white;border-radius:999px;padding:9px 13px;color:#35654f;font-weight:850;font-size:13px;box-shadow:0 3px 0 #cfe0c9}
 .stage{position:relative;flex:1;min-height:560px;border-radius:32px;overflow:hidden;background:linear-gradient(180deg,#a9dfff 0%,#d8f2fd 38%,#ecf9e9 65%,#d2ecc7 100%);box-shadow:0 13px 32px #36765d22,inset 0 0 0 3px #fff8;isolation:isolate}
@@ -114,6 +114,11 @@
 .rec-home .rec-breath-link{font-size:12px;line-height:1.45}
 @media(max-width:780px){.rec-home .rec-cta-note{font-size:12px}.rec-home .rec-breath-link{font-size:11px}}
 
+
+/* V4 learner-first grouping and typography */
+.rec-route-heading{font-family:'MaruBuri','Noto Serif KR',serif;font-size:clamp(14px,1.9vw,17px);font-weight:800;color:#326951;padding:9px 14px 6px;margin:0}
+.rec-advanced .rec-next-row{padding-bottom:9px}
+@media(max-width:520px){.rec-route-heading{font-size:14px;padding:7px 10px 4px}}
 </style>
 </head>
 <body><div class="app">
@@ -136,14 +141,14 @@
     <span><b>3</b> 소리 내기</span>
   </div>
   <button type="button" data-start="easy" class="rec-main-start"><span aria-hidden="true">▶</span><span>1단계부터 시작!</span><small>악기가 없어도 바로 시작해요</small></button>
-  <p class="rec-cta-note">🌱 처음에는 이것만 누르면 돼요. 끝나면 다음 안내가 나와요.</p>
+  <p class="rec-cta-note">🌱 처음에는 이 버튼 하나! 운지가 맞으면 꽃이 피고 다음 문제로 이어져요.</p>
   <details class="rec-more rec-advanced">
-   <summary>이미 해봤다면 다른 연습 고르기 <span aria-hidden="true">⌄</span></summary>
-   <div class="rec-next-row" aria-label="경험자를 위한 연습 선택">
+   <summary>🎵 하고 싶은 활동 바로 고르기 <span aria-hidden="true">⌄</span></summary>
+   <h2 class="rec-route-heading">① 손가락 · 소리 연습</h2><div class="rec-next-row" aria-label="경험자를 위한 연습 선택">
     <button type="button" data-start="normal" class="rec-next-action"><strong>👆 시·라·솔 운지</strong><span>손가락 바꾸기 연습</span></button>
     <button type="button" data-start="real" class="rec-next-action"><strong>🎤 실제 리코더 소리</strong><span>악기 소리 인식</span></button>
    </div>
-   <p class="rec-more-subtitle">필요할 때 골라 해요 · 카메라나 실제 악기가 필요할 수도 있어요</p>
+   <h2 class="rec-route-heading">② 더 다양한 놀이</h2><p class="rec-more-subtitle">각 놀이를 누르면 기존 게임으로 이동해요. 카메라 기능은 선택 사항이에요.</p>
    <div class="rec-more-grid">
     <a href="finger-adventure/hands/?v=7"><strong>👐 두 손 모험</strong><small>왼손·오른손과 카메라 놀이</small></a>
     <a href="finger-adventure/?v=7"><strong>☝️ 손가락 대모험</strong><small>손가락 움직이기·실제 연주</small></a>
@@ -180,18 +185,24 @@
 const NOTES={si:{label:'시',freq:987.77,holes:[0,1]},la:{label:'라',freq:880,holes:[0,1,2]},sol:{label:'솔',freq:783.99,holes:[0,1,2,3]}};
 const $=id=>document.getElementById(id);
 const state={screen:'home',level:'easy',round:0,sequence:[],selected:new Set(),success:false,stars:0,realTries:0,goal:'si',hintShown:true,muted:false};
+ let progressTimer=0,probeTimer=0;
+ const clearAdvance=()=>{if(progressTimer)clearTimeout(progressTimer);if(probeTimer)clearTimeout(probeTimer);progressTimer=0;probeTimer=0};
 let ctx=null,stream=null,analyser=null,frameId=0,lastGood=0,goodCount=0,smoothedFrequency=0;
 const labels=['뒤 엄지','앞 1번 검지','앞 2번 중지','앞 3번 약지','앞 4번','앞 5번','앞 6번','앞 7번'];
-function show(name){state.screen=name;document.querySelectorAll('.screen').forEach(el=>el.hidden=(el.id!==name+'Screen'));if(name!=='microphone')stopMic();window.scrollTo({top:0,behavior:'instant'});}
+function show(name){if(name==='home'||name==='finish')clearAdvance();state.screen=name;document.querySelectorAll('.screen').forEach(el=>el.hidden=(el.id!==name+'Screen'));if(name!=='microphone')stopMic();window.scrollTo({top:0,behavior:'instant'});}
 function recorder(el,covered,interactive=false){const selected=new Set(covered);el.innerHTML='<div class="mouth"></div><div class="body-flute"></div><div class="holes">'+Array.from({length:8},(_,i)=>'<button type="button" class="hole '+(selected.has(i)?'on ':'')+(interactive?'clickable':'guide')+'" data-hole="'+i+'" aria-label="'+labels[i]+' '+(selected.has(i)?'막힘':'열림')+'" aria-pressed="'+selected.has(i)+'" '+(!interactive?'tabindex="-1" aria-hidden="true"':'')+'>'+(i===0?'0':i<4?i:'')+'</button>').join('')+'</div>';}
 function currentNote(){return NOTES[state.goal];}
-function speak(str){if(!('speechSynthesis' in window))return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(str);u.lang='ko-KR';u.rate=.85;u.pitch=1.08;speechSynthesis.speak(u);}catch(e){}}
+function speak(str){if(state.muted||!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window))return;
+ const voices=window.speechSynthesis.getVoices().filter(v=>/^ko(?:-|$)/i.test(String(v.lang).replace('_','-'))&&/(google|구글)/i.test(String(v.name)+' '+String(v.voiceURI)));
+ if(!voices.length){setMessage('🔇 이 기기에는 Google 한국어 음성이 없어요. 화면 안내를 따라해요.');return;}
+ const voice=voices.sort((a,b)=>Number(b.localService===false)-Number(a.localService===false))[0];
+ try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(str);u.lang='ko-KR';u.voice=voice;u.rate=1;u.pitch=1;speechSynthesis.speak(u)}catch(e){}}
 function beep(freq=660,duration=.13){if(state.muted)return;try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return;const audio=new A(),o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.value=freq;g.gain.setValueAtTime(.0001,audio.currentTime);g.gain.exponentialRampToValueAtTime(.08,audio.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+duration);o.connect(g).connect(audio.destination);o.start();o.stop(audio.currentTime+duration+.02);o.onended=()=>audio.close();}catch(e){}}
 function setMessage(msg){$('feedback').textContent=msg;}
-function start(level){stopMic();state.level=level;state.round=0;state.stars=0;state.realTries=0;state.success=false;
+function start(level){clearAdvance();stopMic();state.level=level;state.round=0;state.stars=0;state.realTries=0;state.success=false;
 state.sequence=level==='easy'?['si','si','la','si','la','sol']:['si','la','si','sol','la','sol','si','la','sol','si'];
 nextRound(true);}
-function nextRound(first=false){if(!first)state.round++;if(state.round>=state.sequence.length){finish();return;}state.goal=state.sequence[state.round];state.selected=new Set();state.success=false;state.hintShown=(state.level==='easy'||state.round===0);renderPractice();show('practice');}
+function nextRound(first=false){clearAdvance();if(!first)state.round++;if(state.round>=state.sequence.length){finish();return;}state.goal=state.sequence[state.round];state.selected=new Set();state.success=false;state.hintShown=(state.level==='easy'||state.round===0);renderPractice();show('practice');}
 function renderPractice(){const n=currentNote(),total=state.sequence.length;
 $('roundTitle').textContent='🌱 '+(state.round+1)+' / '+total;$('stars').textContent='⭐ '+state.stars;$('progressFill').style.width=Math.round(state.round/total*100)+'%';
 $('missionTag').textContent=state.level==='easy'?'그림 따라하기':'운지 바꾸기';$('missionName').textContent=n.label+' 손가락 만들기';$('missionSub').textContent='뒤 엄지 구멍도 꼭 살펴봐!';
@@ -201,8 +212,13 @@ recorder($('playerRecorder'),state.selected,true);
 $('checkBtn').hidden=state.success;$('nextBtn').hidden=!state.success;$('hintBtn').hidden=state.success;
 setMessage(state.success?'멋져! 이제 다음 모험으로 가자!':'그림처럼 동그라미를 눌러봐!');
 }
-function check(){if(state.success)return;const wanted=new Set(currentNote().holes),chosen=state.selected;
-if(wanted.size===chosen.size&&[...wanted].every(x=>chosen.has(x))){state.success=true;state.stars++;beep(880,.22);renderPractice();setMessage('✨ 좋아! '+currentNote().label+' 손가락 완성!');return;}
+function celebrate(){
+ if(state.success)return;clearAdvance();state.success=true;state.stars++;beep(880,.22);renderPractice();
+ setMessage('🌼 '+currentNote().label+' 손가락 완성! '+(state.level==='easy'?'잠시 후 다음 문제로 가요.':'다음 버튼을 눌러 이어가요.'));
+ if(state.level==='easy'){progressTimer=setTimeout(()=>{progressTimer=0;if(state.screen==='practice'&&state.success)advance()},4500)}
+ }
+ function check(){if(state.success)return;const wanted=new Set(currentNote().holes),chosen=state.selected;
+if(wanted.size===chosen.size&&[...wanted].every(x=>chosen.has(x))){celebrate();return;}
 const missing=[...wanted].filter(x=>!chosen.has(x)),extra=[...chosen].filter(x=>!wanted.has(x));
 state.hintShown=true;renderPractice();if(missing.includes(0))setMessage('엄지손가락! 리코더 뒤 구멍도 막아보자.');
 else if(missing.length)setMessage(labels[missing[0]]+' 구멍이 아직 열려 있어!');
@@ -212,7 +228,15 @@ function advance(){if(!state.success)return;if((state.round+1)%3===0&&state.roun
 function openBridge(){const n=currentNote();$('bridgeNote').textContent=n.label;recorder($('bridgeRecorder'),n.holes,false);show('bridge');}
 function bridgeAnswer(did){if(did){state.realTries++;beep(740,.19);}nextRound();}
 function finish(){try{const key='moa-garden:completed';const done=JSON.parse(localStorage.getItem(key)||'{}');done.recorder=true;localStorage.setItem(key,JSON.stringify(done));}catch(e){}$('resultSummary').textContent='화면에서 '+state.stars+'개 미션을 해냈어!';$('physicalSummary').textContent=state.realTries?'진짜 리코더도 '+state.realTries+'번 잡아봤네!':'진짜 리코더는 하고 싶을 때 도전하면 돼!';$('progressFill').style.width='100%';show('finish');beep(950,.25);}
-function toggleHole(e){const b=e.target.closest('[data-hole]');if(!b||!b.classList.contains('clickable')||state.success)return;const i=Number(b.dataset.hole);state.selected.has(i)?state.selected.delete(i):state.selected.add(i);recorder($('playerRecorder'),state.selected,true);beep(380+i*60,.055);}
+function toggleHole(e){const b=e.target.closest('[data-hole]');if(!b||!b.classList.contains('clickable')||state.success)return;
+ const i=Number(b.dataset.hole);state.selected.has(i)?state.selected.delete(i):state.selected.add(i);
+ recorder($('playerRecorder'),state.selected,true);beep(380+i*60,.055);
+ if(probeTimer)clearTimeout(probeTimer);
+ if(state.level==='easy')probeTimer=setTimeout(()=>{
+  probeTimer=0;const wanted=new Set(currentNote().holes);
+  if(state.screen==='practice'&&!state.success&&wanted.size===state.selected.size&&[...wanted].every(x=>state.selected.has(x)))celebrate();
+ },650);
+}
 function setTarget(id){state.goal=id;document.querySelectorAll('[data-note]').forEach(b=>b.classList.toggle('active',b.dataset.note===id));recorder($('micRecorder'),currentNote().holes,false);smoothedFrequency=0;lastGood=0;goodCount=0;$('flowerPlot').classList.remove('bloom');const m=$('micStatus');m.classList.remove('error');m.innerHTML='🎵 '+currentNote().label+' 소리를 만들어보자!';}
 function micPage(){show('microphone');setTarget('si');$('micStart').hidden=false;$('micStop').hidden=true;}
 function stopMic(){if(frameId)cancelAnimationFrame(frameId);frameId=0;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}if(ctx){ctx.close().catch(()=>{});ctx=null;}analyser=null;goodCount=0;lastGood=0;$('micStart').hidden=false;$('micStop').hidden=true;}
