@@ -56,9 +56,8 @@ async function main(){
  console.log('HABOM REAL POSTGRES: PASS; test message removed');
 }
 try{await main();}catch(e){
- console.error('HABOM REAL POSTGRES: DIAGNOSTIC STAGE '+stage);
- // Temporary diagnostic on isolated, SSO-only production site.
- if(process.env.CONTEXT==='production'){
-  await writeFile('netlify/functions/habom-db-failed-'+stage+'.mjs',"export default ()=>new Response('Staging smoke did not pass');");
- }else process.exitCode=1;
+ console.error('HABOM REAL POSTGRES: FAILED AT '+stage);
+ // Never report a successful deployment when the real database test fails.
+ // Do not log a token, connection string, or private record.
+ process.exitCode=1;
 }
