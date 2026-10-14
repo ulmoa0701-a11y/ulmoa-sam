@@ -1,0 +1,64 @@
+/* New 2026-10 cognitive garden experiences, scoped to native garden game area. */
+.novel-quest{max-width:940px;margin:8px auto;padding:18px 18px 25px;background:#fffcf4f0;border:2px solid #e7ebd7;border-radius:28px;text-align:center;box-shadow:0 12px 34px rgba(61,83,53,.08);color:#2c4437}
+.novel-sequence{display:inline-flex;padding:8px 17px;background:#e9f6e5;border-radius:999px;font-size:13px;font-weight:800;color:#4a7552;line-height:1.3;margin-bottom:13px}
+.novel-rule-banner{max-width:690px;margin:0 auto 18px;background:linear-gradient(125deg,#fff5d5,#ebf7e8);border:1px solid #e6eac5;border-radius:20px;padding:15px 20px}
+.novel-rule-banner span{font-size:13px;font-weight:800;color:#6e835c;display:block}
+.novel-rule-banner strong{display:block;font-size:clamp(20px,3vw,26px);letter-spacing:-.045em;margin:5px 0;color:#315742}
+.novel-rule-banner p{margin:0;font-size:13px;color:#6b765a}
+.novel-airmail{display:grid;justify-items:center;gap:8px;margin:10px auto 20px}.novel-post-progress{font-size:13px;color:#69806b;font-weight:800}
+.novel-parcel{width:175px;height:133px;background:var(--stamp,#f5d063);border:4px solid #fff;box-shadow:0 8px 0 #ceb589,0 10px 25px #47634e29;border-radius:20px;display:grid;place-items:center;align-content:center;gap:3px;position:relative;transform:rotate(-2deg)}
+.novel-parcel:after{content:"";position:absolute;top:0;bottom:0;left:43%;width:25px;background:#ffffff7b}
+.novel-post-shape{font-size:53px;line-height:1.1;position:relative;z-index:2;filter:drop-shadow(0 2px 2px #0002)}
+.novel-parcel small{background:#fff9;padding:4px 10px;border-radius:99px;z-index:2;font-weight:850;font-size:11px;color:#41634b}
+.novel-letterboxes{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;max-width:690px;margin:0 auto 15px}
+.novel-mailbox{flex:1 1 175px;max-width:300px;min-height:148px;border:3px solid #bfdaca;background:linear-gradient(180deg,#e0f3f1 0%,#fff 100%);border-radius:23px;padding:13px;box-shadow:0 7px 0 #bfd7c0;cursor:pointer}
+.novel-mailbox:nth-child(2){background:linear-gradient(180deg,#e3edff,#fff)}
+.novel-mailbox span{font-size:38px;display:block}.novel-mailbox strong{display:block;font-size:17px;margin:5px 0}.novel-mailbox small{display:block;color:#517966;font-size:12px}
+.novel-change-note{background:#fff0dd;border-radius:12px;padding:8px 12px;font-size:13px;color:#856236;max-width:430px;margin:10px auto}
+.novel-mirror-scene{display:flex;justify-content:center;align-items:center;gap:24px;background:linear-gradient(180deg,#dff4fc,#e1f4d5);border-radius:23px;padding:22px 18px;margin:0 auto 15px;max-width:680px}
+.novel-mirror-scene>div{display:grid;justify-items:center;gap:8px;font-size:13px}
+.novel-mirror-line{font-size:43px;color:#6a9ebe;text-shadow:0 0 15px white}
+.novel-water{width:180px;min-height:162px;border-radius:40% 55% 44% 55%;border:6px double #86c8dd;background:#b7e4f3;display:flex!important;justify-content:center;align-content:center;flex-direction:column;font-size:14px!important;padding:10px;color:#336987}
+.novel-water span{font-size:12px}
+.novel-pond-grid{display:grid;grid-template-columns:repeat(2,54px);gap:8px;background:#dcefee;padding:12px;border-radius:24px;width:max-content;border:2px solid #b4d2d2;box-shadow:inset 0 -6px #b4d2d26d}
+.novel-pad{border-radius:42% 57% 50% 44%;background:#9ec88a;min-height:52px;display:flex;justify-content:center;align-items:center;box-shadow:0 4px 0 #70ad7b;font-size:25px}
+.novel-empty{opacity:.25}
+.novel-choose-label{font-size:15px;font-weight:900;color:#44664f;margin:13px}
+.novel-pond-choices{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:0 auto 15px}
+.novel-pond-choices>button{min-width:146px;flex:0 1 178px;display:grid;justify-items:center;gap:10px;background:white;border:2px solid #d2e9df;border-radius:21px;padding:13px 10px;box-shadow:0 7px 0 #d0e6d7;cursor:pointer}
+.novel-pond-choices .novel-pond-grid{grid-template-columns:repeat(2,42px);gap:6px;padding:8px;border-radius:18px}
+.novel-pond-choices .novel-pad{min-height:42px;font-size:22px}
+.novel-pond-choices b{font-size:13px;color:#51745b}
+.novel-story-scene{max-width:790px;margin:0 auto 15px;padding:9px;background:#fff;border:3px solid #e3eddc;border-radius:28px}
+.novel-landscape{position:relative;min-height:258px;border-radius:21px;background:linear-gradient(#d9f1ff 0%,#d9f1ff 58%,#ceeaa5 58%,#a8d782 100%);overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:19px}
+.novel-skydecor{position:absolute;top:9px;left:6%;right:6%;font-size:25px;letter-spacing:16px}
+.novel-story-objects{display:flex;justify-content:space-around;align-items:end;gap:5px;margin:23px 0 0;position:relative;z-index:1}
+.novel-story-object{flex:1;display:flex;justify-content:center;align-items:center;font-size:clamp(29px,5vw,62px);border:0;background:#ffffffb0;border-radius:18px;min-height:88px;padding:7px;max-width:122px;box-shadow:0 5px #b4cc8d}
+button.novel-story-object{cursor:pointer;outline-offset:3px}
+.novel-ground{font-size:16px;color:#578943;text-align:center;margin-top:14px}
+.novel-main-button,.novel-side-button,.novel-recovery button,.novel-teacher button{font:inherit;min-height:46px;border-radius:14px;cursor:pointer;padding:11px 17px;font-size:14px;font-weight:850}
+.novel-main-button{background:#2d7659;color:white;border:2px solid #1c6144;box-shadow:0 5px #1c6144}
+.novel-side-button,.novel-teacher button{background:#fff;border:2px solid #bcd6bf;color:#4a6854}
+.novel-feedback{font-size:15px;color:#446c50;min-height:22px;margin:10px auto 4px;font-weight:800}
+.novel-recovery{background:#fff1d8;border-radius:16px;border:1px solid #f0dcb1;max-width:550px;padding:12px;margin:12px auto}
+.novel-recovery[hidden]{display:none}.novel-recovery p{margin:0 0 8px;color:#78613d;font-size:13px}
+.novel-recovery button{background:white;color:#6b5632;border:1px solid #dec398}
+.novel-bottom-actions{margin-top:14px}.novel-bottom-actions button{border-style:dashed}
+.novel-quest button:focus-visible{outline:3px solid #d6aa38;outline-offset:3px}
+.novel-teacher{max-width:650px;border:1px dashed #cadecd;background:#fff9;border-radius:13px;padding:11px;text-align:left;margin:15px auto 0;font-size:12px;line-height:1.55;color:#667468}
+.novel-teacher summary{font-weight:850;cursor:pointer}.novel-teacher p{margin:6px 0}
+.novel-peek{padding:12px;border-radius:20px;background:#fff;border:2px solid #dceacb;max-width:640px;margin:14px auto}.novel-peek-row{font-size:27px;margin:8px}.novel-peek button{font-size:12px}
+.novel-scene-tools{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}.novel-scene-tools small{color:#627468}
+.novel-result-lead{font-size:14px;color:#53745a;font-weight:850}.novel-results .novel-teacher{text-align:center}
+.novel-log{font-size:12px;padding:11px;border-radius:12px;background:#f0f8ed;margin:11px auto}
+.novel-results small{display:block;margin-top:6px;color:#768175}
+@media(max-width:620px){
+ .novel-quest{padding:11px 7px 15px;border-radius:18px}
+ .novel-rule-banner{padding:10px 9px}
+ .novel-letterboxes{gap:7px}.novel-mailbox{flex-basis:42%;min-width:0;min-height:126px;padding:10px 5px}.novel-mailbox span{font-size:30px}.novel-mailbox strong{font-size:14px}
+ .novel-mirror-scene{gap:7px;padding:10px 6px}.novel-mirror-line{font-size:25px}.novel-water{width:105px;min-height:112px;font-size:11px!important}.novel-water span{font-size:10px}
+ .novel-pond-grid{grid-template-columns:repeat(2,35px);gap:4px;padding:6px}.novel-pad{min-height:33px;font-size:18px}
+ .novel-pond-choices{gap:6px;flex-wrap:nowrap}.novel-pond-choices>button{min-width:0;flex:1 1 30%;padding:8px 3px}.novel-pond-choices .novel-pond-grid{grid-template-columns:repeat(2,26px);gap:3px;padding:5px}.novel-pond-choices .novel-pad{min-height:26px;font-size:13px}
+ .novel-landscape{min-height:200px;padding:10px}.novel-story-object{font-size:clamp(25px,7vw,40px);min-height:73px;padding:3px}.novel-skydecor{font-size:19px}
+}
+@media(prefers-reduced-motion:reduce){.novel-quest *{scroll-behavior:auto!important;animation:none!important}}
