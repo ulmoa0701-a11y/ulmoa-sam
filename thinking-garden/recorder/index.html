@@ -119,6 +119,20 @@
 .rec-route-heading{font-family:'MaruBuri','Noto Serif KR',serif;font-size:clamp(14px,1.9vw,17px);font-weight:800;color:#326951;padding:9px 14px 6px;margin:0}
 .rec-advanced .rec-next-row{padding-bottom:9px}
 @media(max-width:520px){.rec-route-heading{font-size:14px;padding:7px 10px 4px}}
+/* Camera games are visible choices, not hidden behind advanced menu. */
+.rec-camera-path{width:100%;background:#ffffffd8;border:2px solid #b6dcc6;border-radius:19px;padding:13px 15px;box-shadow:0 5px 15px #3a7c5512}
+.rec-camera-title{display:flex;align-items:baseline;flex-wrap:wrap;gap:7px 14px;margin-bottom:10px}
+.rec-camera-title strong{font-family:'MaruBuri','Noto Serif KR',serif;font-size:17px;color:#245b46}
+.rec-camera-title span{font-size:12px;font-weight:750;color:#537a67}
+.rec-camera-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.rec-camera-card{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:13px 14px;border-radius:15px;background:#f1f9ed;border:2px solid #d0e7d2;text-decoration:none;transition:background .16s,transform .16s}
+.rec-camera-card:first-child{background:#fff4da;border-color:#f3d996}
+.rec-camera-card:hover{transform:translateY(-2px);background:#e8f6e6}
+.rec-camera-card strong{display:block;color:#32634d;font-size:17px;font-weight:950;line-height:1.35}
+.rec-camera-card small{display:block;color:#5f786a;font-size:12px;font-weight:730;margin-top:4px;line-height:1.45}
+.rec-camera-card .rec-camera-arrow{font-weight:1000;color:#337453;font-size:20px}
+@media(max-width:780px){.rec-camera-path{padding:10px}.rec-camera-title{margin-bottom:7px}.rec-camera-title strong{font-size:15px}.rec-camera-title span{font-size:11px}.rec-camera-links{gap:7px}.rec-camera-card{padding:9px 10px;gap:2px}.rec-camera-card strong{font-size:14px}.rec-camera-card small{font-size:11px}.rec-camera-card .rec-camera-arrow{font-size:16px}}
+@media(max-width:370px){.rec-camera-links{grid-template-columns:1fr}.rec-camera-card{padding:8px 11px}}
 </style>
 </head>
 <body><div class="app">
@@ -141,17 +155,22 @@
     <span><b>3</b> 소리 내기</span>
   </div>
   <button type="button" data-start="easy" class="rec-main-start"><span aria-hidden="true">▶</span><span>1단계부터 시작!</span><small>악기가 없어도 바로 시작해요</small></button>
-  <p class="rec-cta-note">🌱 처음에는 이 버튼 하나! 운지가 맞으면 꽃이 피고 다음 문제로 이어져요.</p>
+  <p class="rec-cta-note">🌱 그림부터 연습하려면 위 버튼, 카메라로 놀려면 아래 게임을 골라요.</p>
+  <section class="rec-camera-path" aria-label="카메라로 하는 리코더 게임">
+   <div class="rec-camera-title"><strong>📷 카메라로 하는 리코더 게임</strong><span>손을 카메라에 비추며 놀아요 · 권한은 시작할 때 요청해요</span></div>
+   <div class="rec-camera-links">
+    <a class="rec-camera-card" href="finger-adventure/"><span><strong>☝️ 손가락 대모험</strong><small>리코더 그림의 구멍에 손가락 가져가기</small></span><span class="rec-camera-arrow" aria-hidden="true">→</span></a>
+    <a class="rec-camera-card" href="finger-adventure/hands/"><span><strong>👐 두 손 모험</strong><small>왼손·오른손·양손 카메라 놀이</small></span><span class="rec-camera-arrow" aria-hidden="true">→</span></a>
+   </div>
+  </section>
   <details class="rec-more rec-advanced">
    <summary>🎵 하고 싶은 활동 바로 고르기 <span aria-hidden="true">⌄</span></summary>
    <h2 class="rec-route-heading">① 손가락 · 소리 연습</h2><div class="rec-next-row" aria-label="경험자를 위한 연습 선택">
     <button type="button" data-start="normal" class="rec-next-action"><strong>👆 시·라·솔 운지</strong><span>손가락 바꾸기 연습</span></button>
     <button type="button" data-start="real" class="rec-next-action"><strong>🎤 실제 리코더 소리</strong><span>악기 소리 인식</span></button>
    </div>
-   <h2 class="rec-route-heading">② 더 다양한 놀이</h2><p class="rec-more-subtitle">각 놀이를 누르면 기존 게임으로 이동해요. 카메라 기능은 선택 사항이에요.</p>
+   <h2 class="rec-route-heading">② 소리 게임</h2><p class="rec-more-subtitle">카메라 게임은 첫 화면에서 바로 고를 수 있어요.</p>
    <div class="rec-more-grid">
-    <a href="finger-adventure/hands/?v=7"><strong>👐 두 손 모험</strong><small>왼손·오른손과 카메라 놀이</small></a>
-    <a href="finger-adventure/?v=7"><strong>☝️ 손가락 대모험</strong><small>손가락 움직이기·실제 연주</small></a>
     <a href="step-by-step/"><strong>🌷 소리꽃 정원</strong><small>시·라·솔 실제 소리 놀이</small></a>
    </div>
   </details>
