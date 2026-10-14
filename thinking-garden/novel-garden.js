@@ -29,7 +29,10 @@ function makePackages(round){
  return Array.from({length:3},(_,i)=>{const [color,stamp]=pairs[(round*3+i+round%3)%pairs.length];return {color,stamp};});
 }
 function makeRound(id,round,level){
- if(id==='rulePost')return {rule:round===0?'color':round%2?'stamp':'color',packages:makePackages(round),parcel:0,rightFirst:0,shipped:[],lastRule:round===0?null:(round-1)%2?'stamp':'color'};
+ if(id==='rulePost'){
+  const schedule=level===1?['color','color','stamp','stamp','color']:level===2?['color','stamp','color','stamp','color']:['stamp','color','stamp','color','stamp'];
+  return {rule:schedule[round],packages:makePackages(round),parcel:0,rightFirst:0,shipped:[],lastRule:round===0?null:schedule[round-1]};
+ }
  if(id==='mirrorPond'){
   const operation=level===1?'horizontal':level===2?(round>=3?'vertical':'horizontal'):['horizontal','vertical','rotate','horizontal','rotate'][round];
   const source=sourceSets[round%5];
@@ -82,7 +85,7 @@ function render(id,d){
   parts.push('<div class="novel-rule-banner"><span>📯 지금 배달 규칙</span><strong>'+(isColor?'색깔을 보고 배달하기':'그림을 보고 배달하기')+'</strong><p>'+(isColor?'소포 그림은 잠시 잊고 색깔만 살펴봐요.':'소포 색깔은 잠시 잊고 그림만 살펴봐요.')+'</p></div>');
   parts.push('<div class="novel-airmail"><div class="novel-post-progress">보낸 소포 '+data.parcel+' / 3</div><div class="novel-parcel" style="--stamp:'+colors[parcel.color].color+'"><span class="novel-post-shape">'+stamps[parcel.stamp]+'</span><small>오늘의 소포</small></div></div>');
   parts.push('<div class="novel-letterboxes">'+labels.map((t,i)=>'<button type="button" class="novel-mailbox" data-novel-action="deliver" data-idx="'+i+'"><span>'+icons[i]+'</span><strong>'+t+'</strong><small>이곳으로 배달하기 →</small></button>').join('')+'</div>');
-  if(round>0)parts.push('<p class="novel-change-note">💨 바람이 불었어요! 전 단계와 규칙이 같은지 다시 확인해요.</p>');
+  if(data.lastRule!==null&&data.rule!==data.lastRule)parts.push('<p class="novel-change-note">💨 바람이 불었어요! 규칙이 바뀌었는지 다시 확인해요.</p>');
  }else if(id==='mirrorPond'){
   const task=transformCopy[data.operation];
   parts.push('<div class="novel-rule-banner"><span>🪞 연못의 마법</span><strong>'+task.short+'</strong><p>'+task.description+'</p></div>');
@@ -137,6 +140,7 @@ function render(id,d){
    if(index===correct){
     if(s.firstCorrect===null)s.firstCorrect=true;
     data.shipped.push(p);data.parcel++;
+    if(level===3&&data.parcel===1){data.lastRule=data.rule;data.rule=data.rule==='color'?'stamp':'color';}
     if(data.parcel===data.packages.length){success(s.retries?'규칙 확인 후 3개 배달':'첫 시도로 3개 배달');return;}
     s.awaitingPause=false;render(id,d);return;
    }
