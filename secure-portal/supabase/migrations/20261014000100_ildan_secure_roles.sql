@@ -93,7 +93,7 @@ CREATE POLICY ildan_record_read ON public.ildan_records FOR SELECT TO authentica
    AND shared_ciphertext IS NOT NULL
    AND EXISTS (
     SELECT 1 FROM public.ildan_members m
-    WHERE m.user_id=student_id AND m.role='student' AND m.therapist_id=(select auth.uid())
+    WHERE m.user_id=ildan_records.student_id AND m.role='student' AND m.therapist_id=(select auth.uid())
    )
   )
  );
@@ -102,7 +102,7 @@ CREATE POLICY ildan_note_therapist_read ON public.ildan_session_notes FOR SELECT
  USING (
   therapist_id=(select auth.uid()) AND EXISTS (
    SELECT 1 FROM public.ildan_members m
-   WHERE m.user_id=student_id AND m.role='student' AND m.therapist_id=(select auth.uid())
+   WHERE m.user_id=ildan_session_notes.student_id AND m.role='student' AND m.therapist_id=(select auth.uid())
   )
  );
 
