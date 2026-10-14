@@ -1,0 +1,86 @@
+/* 차근차근 탐험단 — 모아의 생각정원과 동일한 시각 언어
+   자체 게임 로직은 유지하고 UI만 적용. 아동용 과제에는 불필요한 장식 배제. */
+:root{--ink:#293b33;--teal:#397f6e;--pale:#eaf5e6;--cream:#fffdf7;--bg:#f8f5ec;--line:#cbdcc6;--soft:#627464;--coral:#edb291;--gold:#fbd672}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:"Pretendard Variable",Pretendard,SUIT,"Malgun Gothic",sans-serif}
+header.garden-topbar{position:relative;z-index:10;min-height:72px;padding:10px clamp(18px,4vw,62px);background:rgba(255,253,247,.96);color:var(--ink);border-bottom:1px solid #e2e9de;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.garden-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-weight:900;font-size:18px}
+.garden-brand img{width:46px;height:46px;object-fit:contain}
+.garden-brand small{margin:2px 0 0;color:#718276;font-size:12px;font-weight:650}
+.garden-crumbs{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.garden-crumbs a,.garden-crumbs button{color:#395449;text-decoration:none;border:1px solid #d3e1ce;background:#fff;padding:10px 14px;min-height:44px;border-radius:15px;font-weight:800;font-size:13px}
+.garden-crumbs a:hover,.garden-crumbs button:hover{background:#ecf6e8}
+main{max-width:1160px;padding:0 18px 54px;margin:0 auto}
+.garden-intro-hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(170px,34%);align-items:center;gap:16px;margin:24px 0 18px;padding:30px clamp(20px,4vw,48px);border-radius:34px;min-height:215px;background:linear-gradient(115deg,#fff0d4 0%,#f3fae9 57%,#e6f5fc 100%);overflow:hidden}
+.garden-intro-hero:before{content:"";position:absolute;right:-36px;top:-66px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.30)}
+.garden-intro-copy{z-index:1}
+.garden-tag{display:inline-flex;padding:6px 13px;border-radius:999px;background:#fff;color:#3e815e;border:1px solid #c7e6c7;font-size:12px;font-weight:900}
+.garden-intro-hero h1{font-size:clamp(30px,4.5vw,46px);line-height:1.18;letter-spacing:-.06em;color:#2b493a;margin:15px 0 9px}
+.garden-intro-hero p{max-width:500px;line-height:1.65;font-size:15px;margin:0;color:#526b59;word-break:keep-all}
+.garden-hero-friends{position:relative;height:185px;display:flex;align-items:flex-end;justify-content:center;gap:0}
+.garden-hero-friends img{object-fit:contain;filter:drop-shadow(0 9px 11px rgba(61,89,53,.14))}
+.garden-hero-friends img:first-child{width:min(57%,155px);max-height:175px;position:relative;z-index:2;transform:rotate(-5deg)}
+.garden-hero-friends img:last-child{width:min(53%,144px);max-height:165px;margin-left:-17px;transform:rotate(4deg)}
+.garden-hero-friends:after{content:"🌼　🌱　🌷";position:absolute;bottom:-13px;left:20%;font-size:25px}
+.garden-intro-settings{padding:16px 20px;background:#fff;border:1px solid #e4eadf;border-radius:22px;margin:0 0 22px;box-shadow:0 7px 20px rgba(50,70,46,.05)}
+.garden-section-title{font-size:22px;font-weight:900;margin:5px 0 8px;letter-spacing:-.04em}
+.garden-section-caption{font-size:13px;color:#657467;margin:0 0 15px}
+.panel{background:transparent;border:0;border-radius:0;box-shadow:none;padding:0}
+.settings{margin:0;gap:12px}.field{flex:1 1 190px}.field label{font-size:13px;color:#587263}.field select{height:50px;border:2px solid #d5e3d2;border-radius:14px;font-weight:750;color:var(--ink)}
+.modes{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.mode{position:relative;background:#fffdf8;border:2px solid #e3eddd;border-radius:25px;min-height:205px;padding:16px 20px 18px;overflow:hidden;box-shadow:0 10px 25px rgba(63,86,57,.08);text-align:left;transition:border-color .2s,transform .2s,box-shadow .2s}
+.mode:hover,.mode:focus-visible{transform:translateY(-3px);border-color:#9ecc95;box-shadow:0 14px 25px rgba(63,86,57,.13);background:#fff}
+.mode .sym{display:flex;align-items:center;justify-content:center;width:66px;height:62px;border-radius:19px;margin:4px 0 12px;background:#eaf5e5;color:#4e9375;font-size:36px}
+.mode[data-mode=place] .sym,.mode[data-mode=block] .sym{background:#e6f2fd}
+.mode[data-mode=memory] .sym{background:#efebff}
+.mode[data-mode=name] .sym{background:#fff0d9}
+.mode strong{font-size:21px;letter-spacing:-.045em}.mode small{font-size:14px;line-height:1.5;color:#64766c}
+.mode:after{content:"탐험하기 →";display:block;font-size:12px;margin-top:14px;font-weight:900;color:#4a9565}
+.garden-note{background:#f3f7ed;padding:15px 19px;border-radius:16px;color:#607466;font-size:13px;line-height:1.6;margin:23px 0 0}
+.footerline{margin:10px 0;text-align:center;color:#6b7d6e;font-size:12px}
+.footerline a{color:#427b64}
+.play-shell{position:relative;margin:20px 0 30px;background:linear-gradient(180deg,#dff3fb 0%,#dff3fb 32%,#eff6d6 33%,#eef4dc 100%);border:5px solid #fff;border-radius:34px;padding:24px clamp(12px,3vw,36px) 34px;box-shadow:0 20px 42px rgba(54,77,57,.14);overflow:hidden}
+.play-shell:before{content:"";position:absolute;right:14%;top:17px;width:75px;height:28px;border-radius:50px;background:#fff;box-shadow:35px 9px 0 8px #ffffffba;opacity:.85;pointer-events:none}
+.play-shell>*{position:relative;z-index:1}
+.tagline{max-width:1080px;margin:12px auto;gap:10px}
+.tagline .crumb{font-size:14px;font-weight:900;color:#49735c}
+.progress span{width:33px;height:10px;background:#cddfcd}
+.progress .done{background:#85c981}.progress .active{background:#f5c95f}
+.task-card{background:#ffffffec;border:1px solid #edf0e5;border-radius:28px;box-shadow:0 10px 32px rgba(47,76,58,.1);padding:clamp(17px,3vw,28px)}
+.taskHead h1{font-size:clamp(24px,4vw,32px);margin-bottom:5px}.taskHead p{font-size:14px;color:#65746a;line-height:1.5}
+.btn{border-radius:16px;border:2px solid #d6e3d3;min-height:48px;color:var(--ink);background:#fff}
+.btn.primary{background:#2c6550;color:white;border-color:#2c6550;box-shadow:0 6px 0 #214735}
+.btn.ghost{background:#f0f6ed;border-color:#e8f0e2;color:#526958}
+.btn.warn{background:#fff6dd;border-color:#efdfac;color:#7e643c}
+.btn:hover:not(:disabled){filter:brightness(1.02)}
+.tip{background:#f6f9e9;color:#42634f;border:1px solid #e5efdb;border-radius:16px;padding:13px 16px;font-size:15px;line-height:1.5}
+.guide-line{display:flex;align-items:center;gap:12px;margin:15px auto 10px;max-width:760px}
+.guide-line img{width:75px;height:75px;flex:0 0 75px;object-fit:contain;filter:drop-shadow(0 5px 6px #394c3c26)}
+.guide-bubble{position:relative;background:#fff;border:2px solid #d9eaca;border-radius:20px;padding:14px 19px;color:#355943;font-size:16px;font-weight:850;line-height:1.4;flex:1}
+.guide-bubble:before{content:"";position:absolute;left:-9px;top:22px;width:14px;height:14px;background:#fff;border-left:2px solid #d9eaca;border-bottom:2px solid #d9eaca;transform:rotate(45deg)}
+.stage{border-radius:25px;background:#ffffffd4;padding:22px 13px;max-width:900px;min-height:280px;margin:10px auto 0}
+.lab{font-size:17px;font-weight:900;color:#397e63;margin-bottom:14px}
+.board{width:min(34vw,260px)}.board.large{width:min(66vw,365px)}
+.tile{border:1.5px solid #9ab4aa}
+.tile.square-on{background:#70b88f}.tile.user-on{background:#a7d6bc}
+.tile.targetmark{outline-color:#e8ba53}
+.tile.selected:after{color:#37835f}
+.name-card{background:#fff;box-shadow:0 8px 26px rgba(50,70,50,.07);border:3px solid #dbe9d6}
+.promptbox{background:#eef8e8;color:#47765a}
+.stepmarks span.now{background:#dcf1d7;color:#37744e}
+.choice{border:2px solid #dae8d4;border-radius:15px}
+.actions .btn{min-height:52px}
+.teacher{margin-top:23px;border:1px dashed #d3e0cc;background:#fffaf1;border-radius:16px;font-size:13px;color:#5c7060}
+.teacher summary{font-weight:800;cursor:pointer}
+.feedback{border-color:#c7e5c6;background:#f4fbef;border-radius:18px}
+.statrow{gap:12px}.stat{background:#f0f8ed;border-radius:19px}
+.stat .n,.summarynum{color:#347953}
+.history{border-radius:15px;background:#fff}
+.result-art{display:block;width:118px;height:118px;object-fit:contain;margin:6px auto}
+.result-hero{text-align:center;background:linear-gradient(145deg,#fff1d9,#eaf8df);border-radius:26px;padding:14px 20px 18px;margin-bottom:18px}
+.result-hero h1{font-size:30px;margin:4px 0}.result-hero p{margin:0;color:#657266}
+#msg{max-width:870px;margin:auto}
+@media(max-width:760px){header.garden-topbar{padding:10px 14px}.garden-brand{font-size:15px}.garden-brand img{width:38px;height:38px}.garden-crumbs a{font-size:12px;padding:9px 10px}main{padding:0 12px 34px}.garden-intro-hero{grid-template-columns:1fr 110px;border-radius:23px;padding:24px 15px;margin-top:14px;gap:7px;min-height:175px}.garden-intro-hero h1{font-size:28px}.garden-intro-hero p{font-size:13px}.garden-hero-friends{height:120px}.garden-hero-friends img:first-child{max-height:108px}.garden-hero-friends img:last-child{max-height:98px}.garden-hero-friends:after{font-size:17px;bottom:-7px;left:2%}.garden-intro-settings{padding:13px 14px}.garden-section-title{font-size:19px}.modes{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.mode{min-height:190px;padding:13px}.mode .sym{width:53px;height:53px;font-size:30px;margin-bottom:10px}.mode strong{font-size:18px}.mode small{font-size:12px}.play-shell{padding:12px 9px 26px;border-width:3px;border-radius:22px;margin:10px 0 20px}.task-card{border-radius:21px;padding:14px 10px}.guide-line{gap:7px}.guide-line img{width:55px;height:55px;flex-basis:55px}.guide-bubble{padding:10px 12px;font-size:13px}.stage{min-height:220px;padding:14px 4px}.board{width:min(39vw,210px)}.board.large{width:min(82vw,355px)}.gridwrap{gap:10px}.tile{border-width:1px}.lab{font-size:13px}.taskHead h1{font-size:23px}.taskHead>.btn{font-size:11px;padding:7px;min-height:42px}.taskHead p{font-size:12px}.actions{gap:7px}.actions .btn{padding:9px;font-size:13px}.stepmarks{gap:5px}.stepmarks span{font-size:11px;padding:6px}.stat .n{font-size:19px}.name-card{min-height:200px}}
+@media(max-width:385px){.garden-intro-hero{grid-template-columns:1fr 90px}.garden-intro-hero h1{font-size:25px}.mode{min-height:193px}.guide-line img{width:44px;height:44px;flex-basis:44px}.board{width:39vw}}
+@media(prefers-reduced-motion:reduce){.mode,.btn{transition:none!important}.mode:hover{transform:none}}
+@media print{header.garden-topbar,.garden-intro-hero,.garden-intro-settings{display:none!important}}
