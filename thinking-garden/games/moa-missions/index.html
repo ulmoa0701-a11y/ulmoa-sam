@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="울모아쌤이 만드는 화폐 놀이, 바뀐 목록 기억놀이, 마음 이야기 게임.">
+<title>모아의 새 미션 · 일단 해봄</title>
+<link rel="stylesheet" href="../../../assets/habom-gamja-font.css?v=20261012-readable2">
+<link rel="stylesheet" href="style.css?v=20261015-missions1">
+</head>
+<body><div class="mission-app">
+<header class="mission-header">
+ <a class="back-link" id="gardenBack" href="../../../gardens/#learning">← <span>정원으로</span></a>
+ <a class="site-wordmark" href="../../../" aria-label="일단 해봄 홈페이지">🌱 일단 해봄</a>
+ <button type="button" class="sound-toggle" id="soundButton" aria-pressed="false" aria-label="안내 소리 켜기">🔇 안내 읽기</button>
+</header>
+<main id="main">
+ <div class="mission-banner"><div class="mission-badge" id="gardenName">✏️ 모아의 학습정원</div><h1 id="gameTitle">모아의 화폐 가게</h1><p id="gameTagline">동전을 알아보고, 필요한 만큼 담아봐요.</p>
+  <img src="../../assets/moa-discovery.png" width="112" height="112" alt="응원하는 모아 캐릭터"></div>
+ <section id="introScreen" class="panel intro-panel" aria-labelledby="introHeading">
+  <p class="small-label">오늘의 미션</p>
+  <h2 id="introHeading">어떤 놀이를 해볼까요?</h2>
+  <p id="introText" class="intro-text"></p>
+  <div class="level-list" id="levelList" role="group" aria-label="단계 고르기"></div>
+  <div class="intro-foot"><p>시간 제한은 없어요. 틀려도 다시 해볼 수 있어요.</p><button type="button" class="primary-action" id="startGame">시작하기 <span aria-hidden="true">→</span></button></div>
+ </section>
+ <section id="playScreen" class="panel play-panel" hidden aria-labelledby="missionHeading">
+  <div class="play-toolbar"><span id="roundCount">1 / 4</span><div class="progress-track" aria-hidden="true"><div id="progressFill"></div></div><button type="button" class="text-action" id="exitGame">처음으로</button></div>
+  <div class="scene-head"><p class="scene-label" id="sceneLabel">도전 1</p><h2 id="missionHeading">준비됐나요?</h2><p id="missionDescription"></p></div>
+  <div id="gameArea" class="game-area"></div>
+  <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+  <div id="gameActions" class="game-actions"></div>
+ </section>
+ <section id="resultScreen" class="panel result-panel" hidden aria-labelledby="resultHeading">
+  <span class="result-emoji" aria-hidden="true">🌼</span><h2 id="resultHeading">오늘의 미션 완료!</h2><p id="resultText"></p>
+  <div class="result-actions"><button id="playAgain" type="button" class="primary-action">다시 해보기</button><a id="resultGarden" href="../../../gardens/#learning" class="secondary-action">다른 게임 찾아보기 →</a></div>
+ </section>
+ <p class="footer-note">이 놀이는 연습용 활동이며 검사·진단·치료 효과를 판정하지 않습니다. 필요하면 아동과 함께 천천히 이야기를 나눠주세요.</p>
+</main></div><script defer src="app.js?v=20261015-missions1"></script></body></html>
