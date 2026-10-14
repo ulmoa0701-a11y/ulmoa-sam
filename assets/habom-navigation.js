@@ -7,7 +7,7 @@
   const U=(p)=>root+p;
   const groups=[
     {id:'games',name:'게임',icon:'🎮',sections:[
-      {name:'모아의 인지정원',icon:'👀',desc:'기초 인지 · 19개',href:U('gardens/#cognitive'),links:[
+      {name:'모아의 인지정원',icon:'👀',desc:'기초 인지 · 20개',href:U('gardens/#cognitive'),links:[
         ['같은 모양 찾기','시각변별 · 기초인지',U('thinking-garden/?game=sameShape')],
         ['순서 기억하기','기억 · 순서화',U('thinking-garden/?game=memory')],
         ['신호에 맞춰 멈추기','억제 · 신호대기',U('thinking-garden/?game=calm')],
