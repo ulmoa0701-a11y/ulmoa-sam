@@ -7,25 +7,28 @@
   const U=(p)=>root+p;
   const groups=[
     {id:'games',name:'게임',icon:'🎮',sections:[
-      {name:'모아의 인지정원',icon:'👀',desc:'기초 인지 · 20개',href:U('gardens/#cognitive'),links:[
+      {name:'모아의 인지정원',icon:'👀',desc:'기초 인지 · 21개',href:U('gardens/#cognitive'),links:[
         ['같은 모양 찾기','시각변별 · 기초인지',U('thinking-garden/?game=sameShape')],
         ['순서 기억하기','기억 · 순서화',U('thinking-garden/?game=memory')],
         ['신호에 맞춰 멈추기','억제 · 신호대기',U('thinking-garden/?game=calm')],
-        ['블록 위치 맞추기','시공간 · 눈손협응',U('thinking-garden/?game=slowBlock')]]},
+        ['블록 위치 맞추기','시공간 · 눈손협응',U('thinking-garden/?game=slowBlock')],
+        ['바뀐 준비물 찾기','작업기억 · 정보 갱신',U('thinking-garden/games/moa-missions/?game=change')]]},
       {name:'모아의 생각정원',icon:'🧩',desc:'추론·규칙 · 3개',href:U('gardens/#thinking'),links:[
         ['바뀌는 바람우체국','규칙전환 · 인지적 유연성',U('thinking-garden/?game=rulePost')],
         ['거울연못의 비밀','공간추론 · 회전',U('thinking-garden/?game=mirrorPond')]]},
-      {name:'모아의 학습정원',icon:'✏️',desc:'읽기·생활 · 3개',href:U('gardens/#learning'),links:[
+      {name:'모아의 학습정원',icon:'✏️',desc:'읽기·생활 · 4개',href:U('gardens/#learning'),links:[
         ['띄어쓰기 다리 놓기','문장 · 어절',U('thinking-garden/?game=spacing')],
         ['고장 난 간판 고치기','맞춤법 · 표현',U('thinking-garden/?game=spelling')],
-        ['가방 준비 탐험','생활학습 · 준비물',U('thinking-garden/?game=slowEveryday')]]},
+        ['가방 준비 탐험','생활학습 · 준비물',U('thinking-garden/?game=slowEveryday')],
+        ['모아의 화폐 가게','화폐 구별 · 금액 만들기',U('thinking-garden/games/moa-missions/?game=money')]]},
       {name:'모아의 음악정원',icon:'🎵',desc:'리듬·리코더 · 3개',href:U('gardens/#music'),links:[
         ['박자꽃 톡톡!','리듬 · 박자',U('thinking-garden/games/rhythm-touch/')],
         ['리코더 마법정원','운지 · 음악놀이',U('thinking-garden/recorder/')],
         ['박자 바람','박자에 맞춰 불기',U('breath-garden/?mode=beat')]]},
-      {name:'모아의 마음정원',icon:'💛',desc:'호흡부터 · 2가지',href:U('gardens/#heart'),links:[
+      {name:'모아의 마음정원',icon:'💛',desc:'감정·호흡 · 3개',href:U('gardens/#heart'),links:[
         ['바람의 힘','바람 세기 조절',U('breath-garden/?mode=strength')],
-        ['오래 후~','바람 이어가기',U('breath-garden/?mode=long')]]}
+        ['오래 후~','바람 이어가기',U('breath-garden/?mode=long')],
+        ['마음 이야기 탐험','감정 이해 · 사회성',U('thinking-garden/games/moa-missions/?game=feel')]]}
     ]},
     {id:'music',name:'음악도구',icon:'🎼',items:[
       ['하트색깔악보 Studio','악보 직접 만들기',U('heart-score/')],
