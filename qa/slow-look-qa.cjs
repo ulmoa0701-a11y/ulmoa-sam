@@ -43,8 +43,6 @@ const fs=require('node:fs');
       const cells=await flowers.count();
       for(let j=0;j<cells;j++)if((await flowers.nth(j).innerText()).includes('🌼'))await flowers.nth(j).click();
       await page.locator('[data-slow="check"]').click();
-      const debug=await page.evaluate(()=>({flowers:[...document.querySelectorAll('.slow-scan button')].map((b,i)=>({i,icon:b.textContent,key:b.dataset.key,selected:b.getAttribute('aria-pressed')})),feedback:document.querySelector('.slow-feedback')?.textContent,buttons:[...document.querySelectorAll('#gameArea button[data-slow]')].map(b=>({action:b.dataset.slow,disabled:b.disabled}))}));
-      console.log('SCAN_DEBUG',vp.label,i,JSON.stringify(debug));
       assert.ok(await page.locator('[data-slow="next"]').isVisible(),'correct visual search rejected');
     }else if(mode==='slowPlace'||mode==='slowBlock'){
       const sample=page.locator('.slow-map-pair .slow-board').first();
@@ -61,7 +59,7 @@ const fs=require('node:fs');
     if(i===0)await page.screenshot({path:out+'/'+vp.label+'-'+mode+'-play.png'});
     await page.locator('[data-slow="next"]').click();
     if(i===rounds-1)await page.locator('#resultScreen.active').waitFor();
-    else await page.locator('#gameScreen.active .slow-task').waitFor();
+    else await page.waitForFunction(expected=>document.querySelector('#stageLabel')?.textContent.trim()===expected, String(i+2)+' / '+rounds);
    }
    assert.equal(await page.locator('#resultScreen .slow-result-extra').count(),1);
    assert.ok(await page.locator('#resultScreen .slow-teacher-details').count()>=1);
