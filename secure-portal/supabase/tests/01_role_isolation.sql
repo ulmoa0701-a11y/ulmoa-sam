@@ -38,14 +38,14 @@ DO $$BEGIN
 END$$;
 SELECT set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000001',false);
 DO $$BEGIN
- IF (SELECT count(*) FROM public.ildan_records)<>1 THEN RAISE EXCEPTION 'therapist not limited to expressly shared records'; END IF;
+ IF (SELECT count(*) FROM public.ildan_records)<>0 THEN RAISE EXCEPTION 'therapist can directly SELECT child encrypted private payload'; END IF;
  IF (SELECT count(*) FROM public.ildan_session_notes)<>1 THEN RAISE EXCEPTION 'therapist note scope wrong'; END IF;
  IF EXISTS(SELECT 1 FROM public.ildan_records WHERE author_id='00000000-0000-4000-8000-000000000002') THEN
   RAISE EXCEPTION 'therapist can see student private entry'; END IF;
 END$$;
 SELECT set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000004',false);
 DO $$BEGIN
- IF (SELECT count(*) FROM public.ildan_records)<>1 THEN RAISE EXCEPTION 'unrelated therapist access wrong'; END IF;
+ IF (SELECT count(*) FROM public.ildan_records)<>0 THEN RAISE EXCEPTION 'unrelated therapist can directly read child records'; END IF;
  IF (SELECT count(*) FROM public.ildan_session_notes)<>1 THEN RAISE EXCEPTION 'unrelated therapist notes wrong'; END IF;
 END$$;
 SELECT set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000003',false);
