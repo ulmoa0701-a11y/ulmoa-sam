@@ -25,6 +25,9 @@ function fixture(){
   if(query.startsWith('SELECT attachment_key,attachment_name,metadata_approved,attachment_approved,visibility FROM posts WHERE id=')){
    const row=posts.find(p=>p.id===args[0]);return row?[row]:[];
   }
+  if(query.startsWith('SELECT id,visibility FROM posts WHERE id=')){
+   const row=posts.find(p=>p.id===args[0]);return row?[row]:[];
+  }
   if(query.startsWith('SELECT * FROM posts WHERE id=')){
    const row=posts.find(p=>p.id===args[0]);return row?[row]:[];
   }
