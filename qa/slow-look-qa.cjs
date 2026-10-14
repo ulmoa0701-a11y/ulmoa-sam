@@ -13,7 +13,7 @@ const fs=require('node:fs');
   page.setDefaultTimeout(12000);const errors=[];
   page.on('pageerror',e=>errors.push(e.stack||e.message));
   await page.goto(base+'thinking-garden/',{waitUntil:'load'});
-  assert.equal(await page.locator('#gardenGamePanel .library-card').count(),22);
+  assert.equal(await page.locator('#gardenGamePanel .library-card').count(),25);
   assert.equal(await page.locator('#gardenGamePanel .library-card[data-open^="slow"]').count(),6);
   for(const mode of names){
    await page.locator('.category-tab[data-category="'+categories[mode]+'"]').click();

@@ -11,7 +11,7 @@ const fs=require('node:fs');
    const page=await browser.newPage({viewport:vp,deviceScaleFactor:1});page.setDefaultTimeout(12000);
    const errors=[];page.on('pageerror',e=>errors.push(String(e)));
    await page.goto(base,{waitUntil:'load'});
-   assert.equal(await page.locator('#gardenGamePanel .library-card').count(),22,'22 independently accessible games');
+   assert.equal(await page.locator('#gardenGamePanel .library-card').count(),25,'25 independently accessible games');
    assert.equal(await page.locator('button.library-card[data-open^="slow"]').count(),6,'six original newer games retained');
    for(let m=0;m<modes.length;m++){
      const id=modes[m];
@@ -85,6 +85,70 @@ const fs=require('node:fs');
    assert.deepEqual(errors,[],vp.label+' page JS errors');
    await page.close();
  }
+
+ for(const vp of [{label:'mobile',width:390,height:844},{label:'desktop',width:1280,height:900}]){
+  const page=await browser.newPage({viewport:{width:vp.width,height:vp.height}});page.setDefaultTimeout(10000);
+  await page.goto(base,{waitUntil:'load'});
+  for(const [filter,n] of [['story',6],['basic',19],['all',25]]){
+    await page.locator('[data-experience-filter="'+filter+'"]').click();
+    assert.equal(await page.locator('#gardenGamePanel .library-card:visible').count(),n);
+  }
+  for(const id of ['resetRescue','classroomMove','festivalPlan']){
+    const category=id==='classroomMove'?'life':'memory';
+    await page.locator('.category-tab[data-category="'+category+'"]').click();
+    await page.locator('[data-open="'+id+'"]').click();
+    assert.equal(await page.locator('#strategyAutoGroup:visible').count(),1);
+    await page.locator('#slowLevel').selectOption(vp.label==='desktop'?'3':'1');
+    await page.locator('#introStart').click();
+    assert.equal(await page.locator('#gameScreen.active').count(),1);
+    for(let k=0;k<5;k++){
+      let r=await page.evaluate(()=>state.strategy.r);
+      if(id==='resetRescue'){
+        if(r.suggested===r.target)await page.locator('[data-rec=trust]').click();
+        else{
+          if(k===1){await page.locator('[data-rec=trust]').click();await page.locator('[data-rec=recover]').click();}
+          else await page.locator('[data-rec=question]').click();
+          await page.locator('[data-rec=pick][data-id="'+r.target+'"]').click();
+        }
+      }else if(id==='classroomMove'){
+        for(let j=0;j<r.tasks.length;j++){
+          r=await page.evaluate(()=>state.strategy.r);
+          const t=r.tasks[r.step];
+          await page.locator('[data-room=item][data-i="'+t.item+'"]').click();
+          if(k===0&&j===0){
+            const wrong=[0,1,2,3,5,6,7,8].find(x=>x!==t.pos);
+            await page.locator('[data-room=pos][data-i="'+wrong+'"]').click();
+            await page.locator('[data-room=check]').click();
+            assert.ok(await page.locator('.strategy-reset').isVisible());
+            await page.locator('[data-room=recover]').click();
+          }
+          await page.locator('[data-room=pos][data-i="'+t.pos+'"]').click();
+          await page.locator('[data-room=check]').click();
+        }
+      }else{
+        const n=r.tasks.length;
+        if(k===0){
+          for(const x of [2,0,1,3].slice(0,n))await page.locator('[data-plan=choose][data-i="'+x+'"]').click();
+          await page.locator('[data-plan=check]').click();
+          assert.ok(await page.locator('.strategy-reset').isVisible());
+          await page.locator('[data-plan=recover]').click();
+        }
+        for(let j=0;j<n;j++)await page.locator('[data-plan=choose][data-i="'+j+'"]').click();
+        await page.locator('[data-plan=check]').click();
+      }
+      assert.equal(await page.locator('.strategy-done').count(),1,id+' round '+k);
+      await page.locator('[data-core=next]').click();
+      if(k===4)await page.locator('#resultScreen.active').waitFor();
+      else await page.waitForFunction(n=>document.querySelector('#stageLabel')?.textContent.trim()===n,(k+2)+' / 5');
+    }
+    assert.equal(await page.locator('.strategy-results').count(),1);
+    assert.equal(await page.locator('.strategy-export').count(),1);
+    await page.screenshot({path:out+'/'+vp.label+'-'+id+'-result.png'});
+    await page.locator('#resultScreen [data-go=home]').click();
+  }
+  await page.close();
+ }
+
  await browser.close();
  console.log('PASS 3 novel game mechanics x 5 rounds x 2 viewport sizes, first error+recovery, correct answer path, direct previews, no separate page');
 })().catch(e=>{console.error(e);process.exit(1)});
