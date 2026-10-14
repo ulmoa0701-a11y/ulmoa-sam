@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feature/ildan-supabase-secure-auth-20261014
+      - feature/ildan-supabase-live-staging-20261014
     paths:
       - 'secure-portal/supabase/**'
       - 'secure-portal/lib/record-contract.mjs'
@@ -65,6 +66,7 @@ jobs:
           psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 \
             -f secure-portal/supabase/tests/00_stub_supabase_auth.sql \
             -f secure-portal/supabase/migrations/20261014000100_ildan_secure_roles.sql \
+            -f secure-portal/supabase/migrations/20261014000200_private_record_author_only.sql \
             -f secure-portal/supabase/tests/01_role_isolation.sql
       - uses: denoland/setup-deno@v2
         with:
