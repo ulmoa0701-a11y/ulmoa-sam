@@ -944,7 +944,7 @@ function updateRangeInfo(){
  box.textContent=invisible?level+'음 모드 · 공은 해당 음 '+events.filter(e=>e.active).length+'개만 내려옵니다. 나머지 '+invisible+'개 음도 원곡 멜로디와 MR에서 그대로 들려요.':'';
  const part=practiceSection==='all'?'전체 노래':(scoreStartBar+1)+'~'+(scoreStartBar+playbackMeasures.length)+'마디 연습';
  $('#practiceSectionHelp').textContent=part+' · 모든 음의 노래는 그대로, 공만 '+level+'음 선택';
- if(out&&!FREQ[events.find(e=>e.note!=='쉼'&&!FREQ[e.note])?.note])$('#stageStatus').textContent='일부 특수 음표는 소리 확인 필요';
+ if(events.some(e=>e.note!=='쉼'&&!FREQ[e.note]))$('#stageStatus').textContent='일부 특수 음표는 소리 확인 필요';
  else if(loadedFromTransfer)$('#stageStatus').textContent='하트악보에서 가져옴';
  else $('#stageStatus').textContent=practiceSection==='all'?'준비':part;
 }
