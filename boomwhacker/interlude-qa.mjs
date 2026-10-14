@@ -231,8 +231,11 @@ try{
    await page.waitForFunction(()=>!introActive&&playing,null,{timeout:16000});
    result.handoff=await page.evaluate(()=>({introActive,playing,mrScheduled:!!mrSource,mix:mixMode,elapsed,firstNote:firstNoteMs(),leadGain:!!leadInGain}));
    result.audioClock=await page.evaluate(()=>window.__musicClock);
-   const scheduledNote=result.audioClock.find(x=>x.type==='melody');
    const scheduledMr=result.audioClock.find(x=>x.type==='mr');
+   // The prelude now legitimately contains real score melody notes.
+   // Compare the first MAIN-SONG note at/after the MR downbeat, not the
+   // first note of the instrumental introduction.
+   const scheduledNote=result.audioClock.find(x=>x.type==='melody'&&scheduledMr&&x.when>=scheduledMr.when-.003);
    if(!scheduledNote||!scheduledMr||scheduledNote.pitch!=='도'||
       Math.abs(scheduledNote.when-scheduledMr.when)>.003||
       Math.abs(scheduledNote.noteDur-result.info.beat)>5)
