@@ -95,7 +95,7 @@ export async function handle(request:Request):Promise<Response>{
    .select('role,expires_at').eq('code_digest',await digest(code))
    .is('used_by',null).gt('expires_at',new Date().toISOString()).maybeSingle();
   if(error||!data)return send({error:'링크가 만료되었거나 이미 사용되었습니다.'},404);
-  return send({role:data.role,expiresAt:data.expires_at,requiresDeviceSetup:true,
+  return send({role:data.role,expiresAt:data.expires_at,requiresDeviceSetup:true,registrationOpen:env('INVITE_REGISTRATION_ENABLED')==='true',
    notice:'링크를 열었다고 등록되지는 않습니다. 사용자의 확인 후 1회 등록합니다.'});
  }
  // Registration is explicitly DISABLED until passkeys and verified guardian
