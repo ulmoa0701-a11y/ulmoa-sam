@@ -1007,13 +1007,13 @@ function wantsMr(){return mixMode==='mr'||mixMode==='both'}
 function firstNoteMs(){const e=events.find(x=>x.active);return e?e.start:FIRST_NOTE_LEAD_MS}
 function stopMr(){if(mrSource){try{mrSource.onended=null;mrSource.stop()}catch(e){}}mrSource=null;mrGain=null}
 function scheduleMrBuffer(ac,dest,when,offsetSec=0,volume=mrVolume){if(!mrBuffer)return null;const offset=Math.max(0,Number(offsetSec)||0);if(offset>=mrBuffer.duration)return null;const src=ac.createBufferSource(),g=ac.createGain();src.buffer=mrBuffer;g.gain.setValueAtTime(Math.max(0,Math.min(1,Number(volume)||0)),when);src.connect(g);g.connect(dest);src.start(when,offset);return{src,g}}
-function mrBaseNote(n){return String(n||'').replace('높은','').replace('낮은','').replace(/[♯#♭b]/g,'')}
+function mrBaseNote(n){return String(n||'').replace(/^높은|^낮은/g,'').replace(/♯/g,'#')}
 // Curated harmonic structure for the built-in Small Star arrangement.
 // Greedy per-bar matching mistakes the second '솔·솔' bar for C (tie),
 // and can produce a directionless auto-MR despite correctly timed beats.
 const TWINKLE_CHORDS=[
  'C','C','F','C','F','C','G','C',
- 'G','G','F','G','G','G','F','G',
+ 'G','F','C','G','G','F','C','G',
  'C','C','F','C','F','C','G','C'
 ];
 function isTwinkleScore(){
@@ -1035,13 +1035,32 @@ function preludeChordForBar(bar,bars){
 // C-major nursery scores. Imported music retains note-based fallback.
 const SONG_CHORD_CHARTS={
  plane:['C','C','G','C','C','C','G','C'],
- butterfly:['C','G','C','C','C','G','C','C','G','G','C','C','C','G','C','C'],
+ butterfly:['C','Dm','C','C','C','Dm','C','C','G','Dm','C','C','C','Dm','C','C'],
  rabbit:['C','C','C','C','G','G','C','C','C','C','C','C','G','G','G','C'],
  same:['C','C','F','C','F','C','G','C'],
  school_bell:['C','C','C','G','C','C','G','C'],
- bear:['C','C','C','C','C','G','C','G','C','F','C','C']
+ bear:['C','C','C','C','C','G','C','G','C','G','C','C']
 };
+// D/F transposed Butterfly melodies must carry their HARMONY with them.
+// The original sample list includes these keys, so C-major fallback would
+// produce wrong-key chords despite the melody being correctly transposed.
+const BUTTERFLY_TRANSPOSITIONS={
+ 'butterfly-d':{semitones:2,notes:{'도':'레','레':'미','미':'파#','파':'솔','솔':'라','라':'시','시':'도#'}},
+ 'butterfly-f':{semitones:5,notes:{'도':'파','레':'솔','미':'라','파':'시♭','솔':'도','라':'레','시':'미'}}
+};
+function transposedChord(chord,change){
+ const ratio=Math.pow(2,change.semitones/12);
+ return{name:chord.name+'+'+change.semitones,tones:chord.tones.map(n=>change.notes[n]||n),
+  freqs:chord.freqs.map(f=>f*ratio)};
+}
 function chordForMeasure(mi){
+ const key=String(currentSong.key||'');
+ const transposition=BUTTERFLY_TRANSPOSITIONS[key];
+ if(transposition){
+  const chart=SONG_CHORD_CHARTS.butterfly;
+  if((currentSong.measures||[]).length===chart.length&&chart[mi])
+   return transposedChord(chordByName(chart[mi]),transposition);
+ }
  if(isTwinkleScore()&&Number.isInteger(mi)&&mi>=0&&mi<TWINKLE_CHORDS.length)
   return chordByName(TWINKLE_CHORDS[mi]);
  const chart=SONG_CHORD_CHARTS[String(currentSong.key||'').replace(/-/g,'_')];
@@ -1091,39 +1110,57 @@ function softShaker(ac,dest,when,strength=.08){
  gain.gain.setValueAtTime(strength,when);
  src.connect(high);high.connect(gain);gain.connect(dest);src.start(when);
 }
-function backingMeasure(ac,dest,chord,when,intervalMs,beats,style=mrStyle,offsetBeats=0,ending=false){
+// Suppress accompaniment pitches that would overlap an actual written
+// non-chord tone, including the tails of earlier piano strikes. This is
+// intentionally conservative: missing one chord is preferable to forcing
+// a dissonant accompaniment on a beginner's melody.
+function safeBackingHold(chord,measureIndex,barStartAt,at,requestedSeconds){
+ if(!Number.isInteger(measureIndex)||measureIndex<0)return requestedSeconds;
+ const written=events.filter(e=>e.measure===measureIndex&&e.note!=='쉼');
+ if(!written.length)return requestedSeconds;
+ const absoluteStart=written[0].start+(at-barStartAt)*1000;
+ const absoluteEnd=absoluteStart+requestedSeconds*1000;
+ let safeUntil=absoluteEnd;
+ for(const note of written){
+  if(chord.tones.includes(mrBaseNote(note.note)))continue;
+  if(note.start>=absoluteEnd||note.start+note.dur<=absoluteStart)continue;
+  const conflictAt=Math.max(absoluteStart,note.start);
+  if(conflictAt-absoluteStart<38)return 0;
+  safeUntil=Math.min(safeUntil,conflictAt-38);
+ }
+ const actual=Math.min(requestedSeconds,(safeUntil-absoluteStart)/1000);
+ return actual>=.11?actual:0;
+}
+function backingMeasure(ac,dest,chord,when,intervalMs,beats,style=mrStyle,offsetBeats=0,ending=false,measureIndex=-1){
  const unit=intervalMs/1000,soft=style==='soft';
  const [bass,...upper]=chord.freqs;
+ const safeNote=(hz,t,v,hold)=>{
+  const safe=safeBackingHold(chord,measureIndex,when,t,hold);
+  if(safe>0)backingNote(ac,dest,hz,t,v,safe);
+ };
  for(let i=offsetBeats;i<beats;i++){
   const t=when+i*unit,downbeat=i===0,last=i===beats-1;
   if(downbeat){
-   // Low left hand on the strong beat; light, staggered right hand
-   // so accompaniment doesn't hit as a repeated four-note block.
-   backingNote(ac,dest,bass,t,soft?.24:.27,Math.min(2.6,unit*beats*.88));
-   backingNote(ac,dest,upper[0],t+.018,soft?.12:.14,Math.min(1.6,unit*1.75));
-   backingNote(ac,dest,upper[1],t+.066,soft?.10:.12,Math.min(1.5,unit*1.65));
-   if(soft)backingNote(ac,dest,upper[2],t+.105,.075,Math.min(1.4,unit*1.5));
+   safeNote(bass,t,soft?.24:.27,Math.min(2.6,unit*beats*.88));
+   safeNote(upper[0],t+.018,soft?.12:.14,Math.min(.86,unit*.88));
+   safeNote(upper[1],t+.066,soft?.10:.12,Math.min(.86,unit*.86));
+   if(soft)safeNote(upper[2],t+.105,.075,Math.min(.82,unit*.85));
   }else if(soft){
-   // Gentle piano: single moving inner voice rather than a fresh triad.
    if(!ending||!last)
-    backingNote(ac,dest,upper[(i+1)%upper.length],t+.012,.085,unit*.76);
+    safeNote(upper[(i+1)%upper.length],t+.012,.085,unit*.68);
   }else{
-   // Light nursery-pop pulse, distinct in 2/4, 3/4 and 4/4.
    if(beats>=4&&i===2){
-    backingNote(ac,dest,bass*1.5,t,.105,unit*.72);
-    backingNote(ac,dest,upper[1],t+.02,.09,unit*.70);
-   }else{
-    if(!ending||!last){
-     backingNote(ac,dest,upper[beats===3?(i===1?1:2):(i%2?2:1)],t+.016,.12,unit*.70);
-     if(i%2===1)backingNote(ac,dest,upper[0],t+.05,.065,unit*.53);
-    }
+    safeNote(bass*1.5,t,.105,unit*.67);
+    safeNote(upper[1],t+.02,.09,unit*.65);
+   }else if(!ending||!last){
+    safeNote(upper[beats===3?(i===1?1:2):(i%2?2:1)],t+.016,.12,unit*.65);
+    if(i%2===1)safeNote(upper[0],t+.05,.065,unit*.50);
    }
    if(i%2===1&&!ending&&unit<1.15)
     softShaker(ac,dest,t+.012,.037);
   }
  }
 }
-
 function scheduleBuiltinMr(ac,dest,when,offsetSec=0,volume=mrVolume){
  const startMs=Math.max(0,Number(offsetSec)||0)*1000,lead=firstNoteMs(),beat=beatMs();
  const master=ac.createGain(),comp=ac.createDynamicsCompressor(),pre=ac.createGain();
@@ -1144,7 +1181,7 @@ function scheduleBuiltinMr(ac,dest,when,offsetSec=0,volume=mrVolume){
   const initial=Math.max(0,Math.ceil((startMs-ms-.5)/beat));
   if(initial>=beats)continue;
   // Maintain note and MR phase when scrubbing / restarting.
-  backingMeasure(ac,pre,chordForMeasure(mi),when+(ms-startMs)/1000,beat,beats,mrStyle,initial,i===measureIds.length-1);
+  backingMeasure(ac,pre,chordForMeasure(mi),when+(ms-startMs)/1000,beat,beats,mrStyle,initial,i===measureIds.length-1,mi);
  }
  const stopper={stop(){try{master.gain.cancelScheduledValues(ac.currentTime);master.gain.setTargetAtTime(.0001,ac.currentTime,.012)}catch(e){}}};
  return{src:stopper,g:master};
@@ -1350,7 +1387,7 @@ function scheduleInterludeMusic(ac,dest,start,intervalMs,meter){
    const writtenBeats=Math.max(1,Math.round(barLength/intervalMs));
    const at=phraseStart+(first.start-origin)/1000;
    const isEnding=repeatIndex===plan.repeats-1&&mi===(currentSong.measures||[]).length-1;
-   backingMeasure(ac,backing,chordForMeasure(mi),at,intervalMs,writtenBeats,'soft',0,isEnding);
+   backingMeasure(ac,backing,chordForMeasure(mi),at,intervalMs,writtenBeats,'soft',0,isEnding,mi);
   }
  }
  return plan;
