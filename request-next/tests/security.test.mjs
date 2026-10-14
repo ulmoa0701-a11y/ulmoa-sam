@@ -9,6 +9,7 @@ class MockDB {
    const query={args:[],bind(...args){this.args=args;return this;},
     async first(){
       const a=this.args;
+      if(sql.includes('FROM habom_runtime_checks'))return null;
       if(sql.includes('COUNT(*)'))return {n:db.rate.filter(x=>x.key===a[0]&&x.created_at>a[1]).length};
       if(sql.includes('FROM posts WHERE id='))return db.posts.find(x=>x.id===a[0])||null;
       throw Error('unexpected first: '+sql);
@@ -157,7 +158,7 @@ test('read-only health checks database without exposing posts or secrets',async(
  const health=await call(env,'/api/health');
  assert.equal(health.status,200);
  const data=await health.json();
- assert.deepEqual(data,{ok:true,service:'habom',database:'ready'});
+ assert.deepEqual(data,{ok:true,service:'habom',database:'ready',liveCheck:{status:'pending'}});
  const raw=JSON.stringify(data);
  assert.ok(!raw.includes('SENSITIVE-HEALTH-TEST-NOT-PUBLIC'));
  assert.ok(!raw.includes(created.data.receipt));
