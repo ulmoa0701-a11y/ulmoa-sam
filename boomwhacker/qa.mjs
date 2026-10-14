@@ -181,7 +181,7 @@ async function basicCase(name,width,height){
   await page.locator('#sampleSelect').selectOption('butterfly-d');
   check((await page.locator('#songTitle').innerText()).includes('D장조'),`${name}: transposed sample did not load`);
   check(await page.locator('.beat.unsupported').count()>0,`${name}: chromatic notes were not marked out of base range`);
-  check((await page.locator('#rangeNote').innerText()).includes('다른 음으로 바꾸지 않고'),`${name}: safe out-of-range explanation missing`);
+  check((await page.locator('#rangeNote').innerText()).includes('나머지')&&(await page.locator('#rangeNote').innerText()).includes('멜로디와 MR'),`${name}: 8-note visual limits should not imply muted original audio`);
   await page.locator('#sampleSelect').selectOption('twinkle');
 
   await page.locator('#tempo').evaluate((el)=>{el.value='80';el.dispatchEvent(new Event('input',{bubbles:true}))});
