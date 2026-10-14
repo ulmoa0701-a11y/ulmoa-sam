@@ -19,6 +19,7 @@ const fs=require('node:fs');
    assert.match(await page.locator('.taskHead h1').innerText(),/탐험|건축가/);
    assert.equal(await page.locator('[data-action=finish]').count(),1);
    if(mode==='name'){
+    await page.locator('#nameGo').click();
     await page.locator('[data-action=ready]').click();
     await page.locator('[data-action=score][data-correct=yes]').click();
     assert.ok(await page.locator('[data-action=next]').count()===1);
@@ -32,7 +33,7 @@ const fs=require('node:fs');
    }
    await page.screenshot({path:out+'/'+vp.label+'-'+mode+'.png'});
    await page.locator('[data-action=finish]').click();
-   assert.ok(await page.locator('.summarynum').count()===1);
+   assert.ok(await page.locator('.statrow .stat').count()===3);
    await page.locator('#homeBtn').click();
    assert.ok(await page.locator('button.mode').count()===6);
   }
