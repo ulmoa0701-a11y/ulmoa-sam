@@ -41,9 +41,15 @@ test('temporary PostgreSQL schema works through Netlify adapter for public/priva
    const privatePost=await call('/api/posts','POST',form('hidden','CI 비공개 테스트 내용'));
    assert.equal(privatePost.status,201);
    const listing=await call('/api/posts');
-   assert.equal(listing.data.posts.length,1);
+   assert.equal(listing.data.posts.length,0,'public note must await admin approval');
    assert.equal(listing.data.locked.length,0);
-   assert.equal(listing.data.posts[0].body,'공개 테스트 내용');
+   const approve=await call('/api/admin/posts/'+publicPost.data.id,'POST',
+    JSON.stringify({status:'확인 중',reply:'',publicTitle:'',metadataApproved:true,attachmentApproved:false}),
+    {Authorization:'Bearer postgres-ci-admin-secret-is-isolated-42chars','Content-Type':'application/json'});
+   assert.equal(approve.status,200);
+   const released=await call('/api/posts');
+   assert.equal(released.data.posts.length,1);
+   assert.equal(released.data.posts[0].body,'공개 테스트 내용');
    assert.doesNotMatch(JSON.stringify(listing.data),/CI 비공개 테스트 내용/);
    assert.equal((await call('/api/mine/'+privatePost.data.id)).status,403);
    const mine=await call('/api/mine/'+privatePost.data.id,'GET',null,{'X-Receipt-Token':privatePost.data.receipt});
