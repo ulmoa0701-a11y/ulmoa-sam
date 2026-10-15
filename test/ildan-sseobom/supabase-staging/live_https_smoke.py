@@ -31,6 +31,12 @@ with sync_playwright() as p:
         assert "사진 추가" in media_js and "사진 촬영" in media_js and "그림 그리기" in media_js, "actual photo and drawing module deployed"
         assert "indexedDB.open" in media_js, "on-device archive implementation deployed"
         assert "convertPhoto(file)" in media_js, "original photos should be recompressed and stripped"
+        assert "publicInviteApi('invite-register',code)" in live_js, "Invite link alone triggers access"
+        assert "retry.onclick=connect;await connect()" in live_js, "Link opens and connects automatically"
+        assert "사용 횟수·기한 제한 없이" in live_js, "Unlimited reuse described"
+        assert "verificationCodeOutput" not in live_js, "No independent verification code UI"
+        assert "verifiedInviteForm" not in live_js, "No extra PIN form"
+
 
         page.locator("#returnChoice").click()
         assert page.locator("#trialLoginForm").is_visible()
