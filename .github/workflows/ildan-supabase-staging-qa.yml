@@ -25,6 +25,7 @@ jobs:
       - name: Ensure no backend service secret or encryption key is bundled in public site
         run: |
           node --check test/ildan-sseobom/supabase-staging/app.js
+          node --check test/ildan-sseobom/supabase-staging/trial-media.mjs
           node <<'JS'
           const fs=require('fs'),assert=require('node:assert/strict');
           const base='test/ildan-sseobom/supabase-staging/';
@@ -39,6 +40,12 @@ jobs:
           assert(app.includes("publicInviteApi('invite-register',code,{verificationCode})"),'Second-factor enrollment required');
           assert(app.includes('ildanPersonalDevice'),'Explicit device session persistence required');
           assert(app.includes('createStudentForm')&&app.includes("api('students',{method:'POST'"),'Therapist student provisioning is wired');
+          const media=fs.readFileSync(base+'trial-media.mjs','utf8');
+          assert(app.includes("from './trial-media.mjs'"),'photo module must be loaded');
+          assert(app.includes("savePracticeRecord(me.id,me.role"),'media records saved only locally');
+          assert(!app.includes("await api('records',{method:'POST'"),'clinical writes must remain disabled in trial app');
+          assert(media.includes('convertPhoto') && media.includes('indexedDB.open') && media.includes("photos=[]"),'image data is processed locally and scoped by account');
+          assert(!media.includes('/storage/v1/')&&!media.includes("api('records'"),'photo trial should not upload private pictures to Supabase');
           assert(cfg.includes('sb_publishable_'));
           assert(!/sb_secret_|service_role|ENCRYPTION_KEY\s*[:=]\s*["']/.test(cfg));
           assert(html.includes('실제 학생·보호자 상담정보 입력 금지'));
@@ -51,6 +58,10 @@ jobs:
         env:
           CHROME_BIN: /usr/bin/google-chrome
         run: python3 test/ildan-sseobom/supabase-staging/staging_browser_qa.py
+      - name: Trial photo import, drawing and local IndexedDB persistence across reload
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+        run: python3 test/ildan-sseobom/supabase-staging/trial_media_browser_qa.py
       - name: Live HTTPS backend readiness and unauthorized access denied
         run: |
           node <<'JS'
