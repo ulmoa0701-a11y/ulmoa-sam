@@ -4,6 +4,8 @@
 -- No existing clients have enrolled; all active invitations require both factors.
 alter table public.ildan_invites
   add column if not exists verification_digest text;
+alter table public.ildan_invites
+  add column if not exists target_user_id uuid references auth.users(id) on delete cascade;
 -- The enrollment project had no issued invitations at implementation; a fail-closed migration
 -- expires any previously issued invitations rather than making them usable without a second factor.
 update public.ildan_invites set expires_at=now()
@@ -31,8 +33,7 @@ begin
  then raise exception 'Invalid enrollment' using errcode='22023'; end if;
  if not exists(select 1 from auth.users where id=p_user_id and email_confirmed_at is not null)
  then raise exception 'Confirmed account required' using errcode='42501'; end if;
- if exists(select 1 from public.ildan_members where user_id=p_user_id)
- then raise exception 'Already enrolled' using errcode='42501'; end if;
+
  select * into v_inv from public.ildan_invites
   where code_digest=p_code_digest and used_by is null and expires_at>now()
   for update;
@@ -41,6 +42,18 @@ begin
  if not exists(select 1 from public.ildan_members
   where user_id=v_inv.therapist_id and role='therapist')
  then raise exception 'Therapist inactive' using errcode='42501'; end if;
+ if v_inv.target_user_id is not null then
+  if v_inv.target_user_id is distinct from p_user_id
+   or not exists(
+    select 1 from public.ildan_members m
+    where m.user_id=p_user_id and m.role=v_inv.role
+     and m.therapist_id=v_inv.therapist_id
+     and (v_inv.role='student' or m.student_id=v_inv.student_id)
+   )
+  then raise exception 'Existing account ownership mismatch' using errcode='42501'; end if;
+ else
+  if exists(select 1 from public.ildan_members where user_id=p_user_id)
+  then raise exception 'Account already enrolled' using errcode='42501'; end if;
  if v_inv.role='parent' and not exists(select 1 from public.ildan_members
   where user_id=v_inv.student_id and role='student' and therapist_id=v_inv.therapist_id)
  then raise exception 'Student assignment mismatch' using errcode='42501'; end if;
@@ -48,6 +61,7 @@ begin
  then raise exception 'Invalid student invitation' using errcode='42501'; end if;
  insert into public.ildan_members(user_id,role,therapist_id,student_id)
  values(p_user_id,v_inv.role,v_inv.therapist_id,v_inv.student_id);
+ end if;
  update public.ildan_invites set used_by=p_user_id
   where code_digest=p_code_digest and used_by is null;
  if not found then raise exception 'Invitation already claimed' using errcode='42501'; end if;
