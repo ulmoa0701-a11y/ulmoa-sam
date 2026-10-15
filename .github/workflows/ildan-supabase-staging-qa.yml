@@ -70,7 +70,9 @@ jobs:
             if(badInvite.status!==400)throw Error('Invalid invite preview was not rejected '+badInvite.status);
             const unused='0'.repeat(64);
             const blockedEnrollment=await fetch(base+'invite-register',{method:'POST',headers:{Origin:'https://ulmoa0701-a11y.github.io','Content-Type':'application/json'},body:JSON.stringify({code:unused}),signal:AbortSignal.timeout(15000)});
-            if(![400,503].includes(blockedEnrollment.status))throw Error('Ungated signup without second code '+blockedEnrollment.status);
+            if(blockedEnrollment.status!==400)throw Error('Second verification secret is not required '+blockedEnrollment.status);
+            const wrongSecret=await fetch(base+'invite-register',{method:'POST',headers:{Origin:'https://ulmoa0701-a11y.github.io','Content-Type':'application/json'},body:JSON.stringify({code:'0'.repeat(64),verificationCode:'9'.repeat(24)}),signal:AbortSignal.timeout(15000)});
+            if(wrongSecret.status!==403)throw Error('Nonexistent two-factor invite accepted '+wrongSecret.status);
             const invalid=await fetch(base+'me',{headers:{Origin:'https://evil.example'},signal:AbortSignal.timeout(15000)});
             if(invalid.status!==403)throw Error('Cross-site request was not rejected');
             console.log('PASS live backend locked down, anonymous & cross-site requests blocked');
