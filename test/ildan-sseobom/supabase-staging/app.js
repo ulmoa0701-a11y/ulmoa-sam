@@ -11,7 +11,8 @@ const configured=Boolean(/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(CFG.url||''
  && /^https:\/\/[a-z0-9-]+\.supabase\.co\/functions\/v1\/ildan-api$/.test(CFG.apiUrl||''));
 const supabase=configured?createClient(CFG.url,CFG.publishableKey,{
  auth:{persistSession:true,storage:window.sessionStorage,autoRefreshToken:true,detectSessionInUrl:false,experimental:{passkey:true}}
-}):null;
+ } ):null;
+const smsConfigured=Boolean(CFG.phoneOtpEnabled===true);
 
 const invitationParams=new URLSearchParams(location.hash.replace(/^#/,''));
 let activeInvite=/^[0-9a-f]{64}$/.test(invitationParams.get('invite')||'')?invitationParams.get('invite'):null;
@@ -129,12 +130,46 @@ function rolePicker(){return `<div class="role-picker" role="group" aria-label="
   <button type="button" data-login-role="parent" class="role-choice${chosenRole==='parent'?' active':''}" aria-pressed="${chosenRole==='parent'}"><span class="role-glyph" aria-hidden="true">//</span><strong>학부모</strong><small>관찰·전달</small></button>
   <button type="button" data-login-role="therapist" class="role-choice${chosenRole==='therapist'?' active':''}" aria-pressed="${chosenRole==='therapist'}"><span class="role-glyph" aria-hidden="true">&lt;/&gt;</span><strong>치료사</strong><small>공유 기록</small></button>
  </div>`;}
+function koreanMobileE164(input){
+ const digits=String(input||'').replace(/[\s()-]/g,'');
+ if(!/^01[016789][0-9]{7,8}$/.test(digits))throw Error('휴대전화 번호를 01012345678 형식으로 확인해 주세요.');
+ return '+82'+digits.slice(1);
+}
+function clinicianPendingScreen(user){
+ const id=String(user?.id||'');
+ app.innerHTML=`<section class="login-page"><section class="login-window"><div class="login-body">
+ <h2>치료사 계정 승인 대기</h2>
+ <p>휴대전화 인증이 끝나도 치료사 권한이 자동으로 생기지는 않습니다.
+ 기관 담당자가 신원을 확인한 뒤 이 계정에 치료사 권한을 연결해야 합니다.</p>
+ <label>내 계정 식별번호<input readonly id="clinicianVerifiedUid" value="${sanitize(id)}"></label>
+ <p class="muted">이 번호는 인증코드나 비밀번호가 아니지만 공개 게시판에 올리지 마세요.
+ 학생·보호자 개인정보는 아직 입력할 수 없습니다.</p>
+ <div class="buttons"><button id="clinicianRecheck" class="button" type="button">승인 확인하기</button>
+ <button id="clinicianSignOut" class="button-ghost" type="button">로그아웃</button></div>
+ </div></section></section>`;
+ $('clinicianRecheck').onclick=()=>refreshAuth();
+ $('clinicianSignOut').onclick=async()=>{await supabase.auth.signOut();me=null;render()};
+}
 function loginScreen(){
  app.innerHTML=`<section class="login-page"><div class="login-heading"><span class="eyebrow">일단써봄 / PRIVATE</span><h1>내 기록 공간에<br><em>로그인하기.</em></h1><p>기록 화면은 로그인한 계정의 실제 역할에 따라 열립니다. 화면에서 역할을 임의로 바꿀 수 없어요.</p></div>
  <div class="login-layout"><section class="login-window"><div class="login-body">
  <h2>일단써봄 로그인</h2>
  <div class="buttons"><button class="button" type="button" id="loginPasskey">기기 인증으로 로그인</button></div>
- <p class="muted">학생·보호자는 치료사가 보낸 링크로 최초 등록하면, 다음부터 이 버튼으로 로그인할 수 있습니다.</p>
+ <p class="muted">기기 등록이 끝난 학생·보호자·치료사는 이 버튼으로 들어갈 수 있어요.</p>
+ <details class="phone-doctor-only" open><summary>치료사 처음 등록 · 휴대전화 인증</summary>
+  <div>
+    <p class="muted">문자로 본인 확인 후 기관 운영자가 치료사 권한을 승인합니다. 전화번호만 입력한다고 치료사 권한이 생기지 않습니다.</p>
+    ${smsConfigured?'<p class="muted">문자로 받은 인증번호를 입력하세요.</p>':'<p class="callout">현재 무료 개발본은 SMS 발송업체가 연결되지 않아 휴대전화 인증이 중지되어 있습니다. 비용 동의와 SMS 설정이 필요합니다.</p>'}
+    <form id="phoneRequestForm" class="form"><label>치료사 휴대전화 번호
+      <input name="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="01012345678" required></label>
+      <button class="button" type="submit" ${smsConfigured&&configured?'':'disabled'}>문자로 인증번호 받기</button>
+    </form>
+    <form id="phoneVerifyForm" class="form" hidden>
+      <label>받은 6자리 인증번호<input name="token" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required></label>
+      <button class="button" type="submit">인증하고 계정 확인</button>
+    </form>
+  </div>
+ </details>
  <details class="email-doctor-only"><summary>치료사 계정 · 이메일 인증으로 로그인</summary><div>
  <p class="muted">학생·보호자·치료사 각각 별도 계정이 필요합니다. 인증코드는 실제 운영 환경 설정이 끝난 후 이용할 수 있습니다.</p>
  ${configured?'<p class="muted">인증 이메일이 오지 않으면 담당 운영자에게 문의해 주세요.</p>':'<p class="callout">아직 Supabase 프로젝트가 연결되지 않은 개발용 화면입니다. 실제 개인정보를 입력하면 안 됩니다.</p>'}
@@ -152,7 +187,32 @@ function loginScreen(){
   if(error)throw Error('기기 인증이 되지 않았습니다. 기기 등록 여부나 브라우저 지원을 확인해 주세요.');
   await refreshAuth();
  });
-  const request=$('emailRequestForm'),verify=$('emailVerifyForm');
+ const phoneRequest=$('phoneRequestForm'),phoneVerify=$('phoneVerifyForm');
+ let awaitingPhone='';
+ phoneRequest.onsubmit=e=>{
+  e.preventDefault();
+  loading(phoneRequest.querySelector('button'),async()=>{
+   if(!smsConfigured)throw Error('SMS 발송 설정 전입니다.');
+   awaitingPhone=koreanMobileE164(formValue(phoneRequest,'phone'));
+   const {error}=await supabase.auth.signInWithOtp({phone:awaitingPhone,options:{shouldCreateUser:true}});
+   if(error)throw Error('문자 발송에 실패했습니다. 문자 제공업체 설정을 확인해 주세요.');
+   phoneVerify.hidden=false;
+   toast('휴대전화로 보낸 6자리 인증번호를 입력해 주세요.');
+  });
+ };
+ phoneVerify.onsubmit=e=>{
+  e.preventDefault();
+  loading(phoneVerify.querySelector('button'),async()=>{
+   if(!awaitingPhone)throw Error('인증번호를 먼저 요청해 주세요.');
+   const token=formValue(phoneVerify,'token');
+   if(!/^[0-9]{6}$/.test(token))throw Error('인증번호 6자리를 입력해 주세요.');
+   const {error}=await supabase.auth.verifyOtp({phone:awaitingPhone,token,type:'sms'});
+   if(error)throw Error('인증번호가 다르거나 만료됐습니다.');
+   awaitingPhone='';
+   await refreshAuth();
+  });
+ };
+ const request=$('emailRequestForm'),verify=$('emailVerifyForm');
  request.onsubmit=e=>{e.preventDefault();const email=formValue(request,'email');loading(request.querySelector('button'),async()=>{
   const {error}=await supabase.auth.signInWithOtp({email,options:{shouldCreateUser:true}});
   if(error)throw Error('로그인 코드 전송에 실패했습니다. 관리자에게 문의해 주세요.');
@@ -182,7 +242,12 @@ async function refreshAuth(){
  const {data:{session}}=await supabase.auth.getSession();
  if(!session){me=null;if(activeInvite)await inviteLanding();else render();return;}
  try{me=(await api('me')).user;activeView=me.role==='therapist'?'inbox':'write';render();}
- catch{me=null;header();enrollmentScreen();}
+ catch{
+  me=null;header();
+  const {data:{user}}=await supabase.auth.getUser();
+  if(user?.phone_confirmed_at)clinicianPendingScreen(user);
+  else enrollmentScreen();
+ }
 }
 function workspaceNav(items, selected){
  return `<nav class="workspace-nav" aria-label="내 공간 메뉴">${items.map(([id,ico,name,sub])=>`<button type="button" data-workspace-target="${id}" class="workspace-link${selected===id?' selected':''}" aria-current="${selected===id?'page':'false'}"><span class="w-icon" aria-hidden="true">${ico}</span><span class="w-copy"><strong>${name}</strong><small>${sub}</small></span></button>`).join('')}</nav>`;
