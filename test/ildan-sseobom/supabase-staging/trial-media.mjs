@@ -25,10 +25,19 @@ export function mediaWidget(){
  </section>`;
 }
 export function getPracticePhotos(){return [...photos];}
+export function setPracticePhotos(existing=[]){
+ // The server provides only authenticated, short-lived signed URLs for old photos.
+ const safe=existing.filter(src=>typeof src==='string'&&(
+  /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(src)||
+  /^https:\/\/miohovwmhmtcvkurjamm\.supabase\.co\/storage\/v1\/object\/sign\/ildan-practice-media\/[0-9a-f-]+\/[0-9a-f-]+\.jpg\?token=[A-Za-z0-9._%-]+(?:&[^"'<>]*)?$/.test(src)
+ )).slice(0,LIMIT);
+ photos=[...safe];preview();setStatus();
+}
+
 function preview(){
  const box=document.getElementById('photoThumbnails');if(!box)return;
  box.innerHTML=photos.map((src,i)=>`<figure class="photo-thumbnail">
-  <img src="${src}" alt="첨부한 사진 ${i+1}">
+  <img src="${src.replaceAll('&','&amp;').replaceAll('"','&quot;')}" alt="첨부한 사진 ${i+1}">
   <button type="button" data-remove-photo="${i}" aria-label="사진 ${i+1} 제거">× 제거</button>
  </figure>`).join('');
  for(const b of box.querySelectorAll('[data-remove-photo]')){
@@ -110,6 +119,20 @@ export async function savePracticeRecord(owner,kind,entry){
   tx.oncomplete=()=>resolve(item);
   tx.onerror=()=>reject(Error('기기 용량이 부족하거나 브라우저 보관 기능이 차단됐어.'));
   tx.onabort=()=>reject(Error('기기 임시 저장에 실패했어.'));
+ });}finally{db.close();}
+}
+export async function updatePracticeRecord(owner,id,entry){
+ const db=await openDb();
+ try{return await new Promise((resolve,reject)=>{
+  const tx=db.transaction('records','readwrite'),store=tx.objectStore('records');
+  store.get(id).onsuccess=e=>{
+   const old=e.target.result;
+   if(old?.owner!==owner||!old.local){tx.abort();return;}
+   store.put({...old,entry,updatedAt:new Date().toISOString()});
+  };
+  tx.oncomplete=()=>resolve(true);
+  tx.onerror=()=>reject(Error('이 기기의 기존 기록을 수정하지 못했어.'));
+  tx.onabort=()=>reject(Error('수정할 기록을 찾을 수 없어. 내 기록을 다시 열어 줘.'));
  });}finally{db.close();}
 }
 export async function listPracticeRecords(owner){

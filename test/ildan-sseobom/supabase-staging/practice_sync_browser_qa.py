@@ -34,15 +34,24 @@ def init(page,role):
   if name=='me':data={'user':{'id':uid,'role':role,'nickname':'연습계정','trial':True}}
   elif name=='practice-records' and method=='GET':
    data={'records':[{'id':row['id'],'kind':'student','student':'가상 학생','studentId':student,'author':'연습 학생',
-    'createdAt':'2026-10-15T10:00:00Z','shared':row['shared'],'practice':True,
+    'createdAt':'2026-10-15T10:00:00Z','updatedAt':row.get('updatedAt','2026-10-15T10:00:00Z'),'shared':row['shared'],'practice':True,
+    'photoPaths':row['entry'].get('photos',[]) if role!='therapist' else [],
     'entry':{**row['entry'],'photos':['https://miohovwmhmtcvkurjamm.supabase.co/storage/v1/object/sign/'+bucket+'/'+p+'?token=test' for p in row['entry'].get('photos',[])]}}
     for row in stored if role!='therapist' or row['shared']]}
   elif name=='practice-media-sign':
    n=len(uploaded)+1
    data={'path':student+'/00000000-0000-4000-8000-'+str(n).zfill(12)+'.jpg','bucket':bucket,'token':'qa-upload','maxBytes':2097152}
   elif name=='practice-records' and method=='POST':
-   stored.append({'id':'00000000-0000-4000-8000-000000000057','entry':payload['entry'],'shared':payload['share']})
+   stored.append({'id':'00000000-0000-4000-8000-000000000057','entry':payload['entry'],'shared':payload['share'],'updatedAt':'2026-10-15T10:00:00Z'})
    code=201;data={'record':{'id':stored[-1]['id'],'shared':payload['share']}}
+  elif name=='practice-update':
+   if not stored or payload['recordId']!=stored[0]['id']:
+    code=403;data={'error':'수정 대상 없음'}
+   elif payload['expectedUpdatedAt']!=stored[0]['updatedAt']:
+    code=409;data={'error':'다른 기기에서 수정된 기록'}
+   else:
+    stored[0]['entry']=payload['entry'];stored[0]['shared']=payload['share'];stored[0]['updatedAt']='2026-10-15T11:11:00Z'
+    data={'ok':True,'record':{'id':stored[0]['id'],'updatedAt':stored[0]['updatedAt'],'shared':stored[0]['shared']}}
   elif name=='practice-share':
    stored[0]['shared']=True;data={'ok':True,'shared':True}
   elif name=='practice-unshare':
@@ -98,6 +107,45 @@ with sync_playwright() as p:
   assert len(stored[-1]['entry']['photos'])==1 and uploaded
   assert 'sketch' in stored[-1]['entry']
   assert page.locator('.practice-cloud-record .saved-photo-grid img').count()>=1
+  # Edit the SAME record and re-upload a replacement photo; keep same record ID.
+  original=stored[0]['id'];old_photo=stored[0]['entry']['photos'][0]
+  page.locator('[data-practice-edit]').click()
+  page.locator('#saveEntry').get_by_text('수정 내용 저장하기').wait_for(timeout=10000)
+  assert page.locator('textarea[name=note]').input_value()=='가상의 연습 기록입니다.'
+  assert page.locator('.photo-thumbnail').count()==1, 'old photo must remain editable'
+  assert page.locator('input[name=practiceShare]').is_checked(), 'share consent retained'
+  assert page.locator('#drawPanel').is_visible(), 'previous drawing should reopen'
+  page.locator('textarea[name=note]').fill('수정한 가상 기록 - 편집 완료')
+  page.locator('[data-remove-photo="0"]').click()
+  page.locator('#photoUpload').set_input_files({'name':'replacement.png','mimeType':'image/png','buffer':png()})
+  page.locator('.photo-thumbnail img').wait_for(timeout=10000)
+  assert page.locator('.photo-thumbnail').count()==1
+  page.locator('#saveEntry').click()
+  page.locator('.practice-cloud-record').wait_for(timeout=12000)
+  assert len(stored)==1 and stored[0]['id']==original, 'update cannot create a duplicate'
+  assert stored[0]['entry']['note']=='수정한 가상 기록 - 편집 완료'
+  assert len(stored[0]['entry']['photos'])==1 and stored[0]['entry']['photos'][0]!=old_photo, 'photo replaced'
+  assert stored[0]['shared'] and 'sketch' in stored[0]['entry'], 'drawing and sharing preserved'
+  assert '수정한 가상 기록' in page.locator('.practice-cloud-record').inner_text()
+  # Old IndexedDB records in the same student's browser also support edit-in-place.
+  page.evaluate("""async(uid)=>{
+   const m=await import('./trial-media.mjs');
+   await m.savePracticeRecord(uid,'student',{date:'2026-10-15',note:'이전 기기 기록'});
+  }""",student)
+  page.reload(wait_until='domcontentloaded')
+  page.locator('[data-workspace-target="history"]').click()
+  page.locator('.device-only-record').wait_for(timeout=15000)
+  page.locator('.device-only-record [data-practice-edit]').click()
+  page.locator('#saveEntry').get_by_text('이 기기에 수정 저장하기').wait_for(timeout=10000)
+  assert page.locator('textarea[name=note]').input_value()=='이전 기기 기록'
+  assert not page.locator('.practice-sync-box').is_visible(),'no server share for old local note'
+  page.locator('textarea[name=note]').fill('이 기기에 수정된 기록')
+  previous_api=len([x for x in api_calls if x==('practice-update','POST')])
+  page.locator('#saveEntry').click()
+  page.locator('.device-only-record').wait_for(timeout=13000)
+  assert page.locator('.device-only-record').count()==1,'device edit must not create duplicate'
+  assert '이 기기에 수정된 기록' in page.locator('.device-only-record').inner_text()
+  assert len([x for x in api_calls if x==('practice-update','POST')])==previous_api,'local edit must not be uploaded'
   assert not errors,('page errors',width,errors)
   page.close()
   # A totally new context/device sees server-synced record without previous IndexedDB.
@@ -105,12 +153,12 @@ with sync_playwright() as p:
   init(page,'student');page.goto(url,wait_until='domcontentloaded',timeout=30000)
   page.locator('[data-workspace-target=history]').click()
   page.locator('.practice-cloud-record').wait_for(timeout=12000)
-  assert '가상의 연습 기록' in page.locator('.practice-cloud-record').inner_text()
+  assert '수정한 가상 기록' in page.locator('.practice-cloud-record').inner_text()
   page.close()
   teacher=browser.new_page(viewport={'width':width,'height':900})
   init(teacher,'therapist');teacher.goto(url,wait_until='domcontentloaded',timeout=30000)
   teacher.locator('#inboxResults .record').first.wait_for(timeout=18000)
-  assert '가상의 연습 기록' in teacher.locator('#inboxResults').inner_text() or '학생 공유 기록' in teacher.locator('#inboxResults').inner_text()
+  assert '수정한 가상 기록' in teacher.locator('#inboxResults').inner_text() or '학생 공유 기록' in teacher.locator('#inboxResults').inner_text()
   teacher.close()
   checks.append(f'{width}px practice save with drawing/photo, cross-device reload, therapist share, no clinical write')
   stored.clear()
