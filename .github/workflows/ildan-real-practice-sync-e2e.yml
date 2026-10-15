@@ -87,9 +87,28 @@ jobs:
            recordId=null;
            const emptyAgain=await request('practice-records',null,therapistToken,'GET');
            check(emptyAgain.status===200&&emptyAgain.data.records?.length===0,'Deleted record is still visible');
+           // Guardian is a separate account assigned to the same student, not another student record.
+           const guardianInvite=await request('invites',{role:'parent',studentId:ids.student},therapistToken);
+           check(guardianInvite.status===200&&guardianInvite.data.invite,'guardian invitation failed');
+           const guardianAuth=await request('invite-register',{code:guardianInvite.data.invite});
+           check(guardianAuth.status===200&&guardianAuth.data.tokenHash,'guardian enrollment failed');
+           const guardianVerify=await auth('verify',{type:'magiclink',token_hash:guardianAuth.data.tokenHash});
+           check(guardianVerify.status===200&&guardianVerify.data.access_token,'guardian verification failed');
+           ids.parent=guardianVerify.data.user.id;
+           const guardianToken=guardianVerify.data.access_token;
+           const guardianEntry={date:'2026-10-15',observation:'가상 보호자 관찰 메모 - 실제 아동 내용 아님'};
+           const parentSaved=await request('practice-records',{entry:guardianEntry,share:true},guardianToken);
+           check(parentSaved.status===201&&parentSaved.data.record?.id,'guardian note save failed '+JSON.stringify(parentSaved));
+           const parentRead=await request('practice-records',null,therapistToken,'GET');
+           check(parentRead.status===200&&parentRead.data.records?.length===1&&parentRead.data.records[0].kind==='parent',
+            'Therapist cannot see linked guardian shared note');
+           const parentRemove=await request('practice-delete',{recordId:parentSaved.data.record.id},guardianToken);
+           check(parentRemove.status===200&&parentRemove.data.deleted,'guardian note delete failed');
+           const noGuardian=await request('practice-records',null,therapistToken,'GET');
+           check(noGuardian.status===200&&!noGuardian.data.records?.length,'deleted guardian note visible');
            const wrong=await request('practice-records',{entry,share:true},null);
            check(wrong.status===401,'Anonymous practice write accepted');
-           console.log('PASS REAL SANDBOX: student sign-in -> private JPEG upload -> encrypted record -> therapist share -> unshare -> reshare -> delete -> anonymous denied');
+           console.log('PASS REAL SANDBOX: student+guardian sign-in -> private JPEG upload -> encrypted practice records -> therapist share -> unshare -> reshare -> delete -> anonymous denied');
            console.log('SYNTHETIC_CLEANUP_IDS='+JSON.stringify(ids));
           })().catch(e=>{
            console.error('FAIL '+e.message);
