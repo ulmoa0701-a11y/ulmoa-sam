@@ -10,7 +10,7 @@ const configured=Boolean(/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(CFG.url||''
  && /^sb_publishable_|^eyJ/.test(CFG.publishableKey||'')
  && /^https:\/\/[a-z0-9-]+\.supabase\.co\/functions\/v1\/ildan-api$/.test(CFG.apiUrl||''));
 const supabase=configured?createClient(CFG.url,CFG.publishableKey,{
- auth:{persistSession:true,storage:window.sessionStorage,autoRefreshToken:true,detectSessionInUrl:false,experimental:{passkey:true}}
+ auth:{persistSession:true,storage:window.sessionStorage,autoRefreshToken:true,detectSessionInUrl:true,experimental:{passkey:true}}
  } ):null;
 
 const invitationParams=new URLSearchParams(location.hash.replace(/^#/,''));
@@ -135,7 +135,7 @@ function clinicianPendingScreen(user){
  const id=String(user?.id||'');
  app.innerHTML=`<section class="login-page"><section class="login-window"><div class="login-body">
  <h2>계정 연결 확인 중</h2>
- <p>기기 인증이 되었어도 학생·보호자·치료사 권한은 자동으로 만들어지지 않습니다.
+ <p>본인 확인이 되었어도 학생·보호자·치료사 권한은 자동으로 만들어지지 않습니다.
  담당자가 실제 사용자와 역할을 확인한 뒤 계정을 연결해야 합니다.</p>
  <label>내 계정 식별번호<input readonly id="clinicianVerifiedUid" value="${sanitize(id)}"></label>
  <p class="muted">이 번호를 공개 게시판에 올리지 마세요. 실제 학생·보호자 상담기록은 아직 저장할 수 없습니다.</p>
@@ -145,36 +145,56 @@ function clinicianPendingScreen(user){
  $('clinicianRecheck').onclick=()=>refreshAuth();
  $('clinicianSignOut').onclick=async()=>{await supabase.auth.signOut();me=null;render()};
 }
+
 function loginScreen(){
- app.innerHTML=`<section class="login-page"><div class="login-heading"><span class="eyebrow">일단써봄 / PRIVATE</span>
- <h1>내 기록 공간에<br><em>로그인하기.</em></h1>
- <p>학생·보호자·치료사 모두 등록한 휴대전화에서 간편하게 로그인할 수 있어요.</p></div>
+ app.innerHTML=`<section class="login-page" aria-label="일단써봄 로그인"><div class="login-heading">
+ <span class="eyebrow">일단써봄 / PRIVATE</span><h1>처음엔 등록하고,<br><em>그다음엔 간편하게.</em></h1>
+ <p>치료사가 먼저 계정을 확인한 뒤 학생·보호자를 초대해요.</p></div>
  <div class="login-layout"><section class="login-window"><div class="login-body">
- <h2>휴대전화로 로그인</h2>
- <p class="muted">문자 인증번호나 이메일은 받지 않습니다. 최초에 승인받아 등록한 기기로 지문·얼굴·기기 PIN 인증을 진행해요.</p>
- <button class="button" type="button" id="loginPasskey">휴대전화 기기 인증으로 로그인</button>
+ <div class="buttons" role="group" aria-label="접속 방법"><button class="button" id="firstChoice" type="button">처음 이용해요</button>
+ <button class="button-ghost" id="returnChoice" type="button">이미 등록했어요</button></div>
+ <section id="firstLogin"><h2>치료사 첫 계정 등록</h2>
+ <p>본인 이메일 확인 후 운영자 승인을 받는 절차입니다. 승인 전에는 기록을 열어볼 수 없습니다.</p>
+ <form id="clinicianFirstForm" class="form">
+ <label>치료사 본인 이메일<input type="email" name="email" autocomplete="email" inputmode="email" required maxlength="254" placeholder="본인 이메일"></label>
+ <button type="submit" class="button">확인 메일 받기</button></form>
+ <p class="muted" id="firstLoginStatus" role="status" aria-live="polite">개발 단계에서는 Supabase 프로젝트 팀원 이메일로만 인증 메일을 받을 수 있습니다.</p>
+ <div class="callout"><strong>학생·보호자</strong><p>이메일 입력 없이 치료사의 카카오톡 초대 링크에서 시작해요. 최초 등록은 추가 안전 점검 후 열립니다.</p></div></section>
+ <section id="returnLogin" hidden><h2>등록된 기기로 로그인</h2>
+ <p>처음 등록한 계정만 지문·얼굴·기기 잠금으로 다시 로그인할 수 있어요.</p>
+ <button class="button" id="loginPasskey" type="button">기기 인증으로 로그인</button>
  <p class="muted" id="passkeySupportStatus" role="status"></p>
- <div class="callout"><strong>처음 사용하는 경우</strong>
- <p>학생·보호자: 담당 치료사가 보낸 개인별 링크를 열어 등록합니다.</p>
- <p>치료사: 운영자의 신원 확인과 계정 승인 후 최초 기기를 등록합니다.
- 아직 치료사 첫 등록 기능은 검증 중이며, 휴대전화번호 입력만으로 치료사 권한을 발급하지 않습니다.</p>
- </div>
- <p class="muted">카카오톡에서 열었던 초대 링크는 기본 브라우저로 복사해 열 수 있습니다.
- 브라우저가 달라지면 별도로 기기 인증이 필요할 수 있어요.</p>
- <p class="muted">개발용 검증 화면입니다. 실제 아동·상담 자료는 입력하지 마세요.</p>
+ <p class="muted">카카오톡과 다른 브라우저는 로그인 상태가 다를 수 있어요. 다시 인증해야 할 수도 있습니다.</p></section>
+ <p class="muted">현재 안전 검증 중입니다. 실제 학생·상담 기록은 입력하지 마세요.</p>
  </div></section></div></section>`;
- const login=$('loginPasskey');
- login.disabled=!configured||!canUsePasskey();
- $('passkeySupportStatus').textContent=!configured
-  ?'서버 연결 설정을 확인하고 있어요.'
-  :!canUsePasskey()?'현재 브라우저는 기기 인증을 지원하지 않습니다. 크롬·삼성 인터넷·사파리에서 열어 주세요.'
-  :'등록된 기기가 있으면 아래 인증 화면으로 연결됩니다. 처음 등록하는 계정은 운영자 승인이 필요합니다.';
+ const first=$('firstLogin'),ret=$('returnLogin'),a=$('firstChoice'),b=$('returnChoice');
+ function toggle(returning){first.hidden=returning;ret.hidden=!returning;
+  a.className=returning?'button-ghost':'button';b.className=returning?'button':'button-ghost';
+  a.setAttribute('aria-pressed',String(!returning));b.setAttribute('aria-pressed',String(returning));}
+ a.onclick=()=>toggle(false);b.onclick=()=>toggle(true);toggle(false);
+ $('clinicianFirstForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;
+  loading(f.querySelector('button'),async()=>{
+   if(!supabase)throw Error('서버 연결을 확인할 수 없습니다.');
+   const email=formValue(f,'email').toLowerCase();
+   const {error}=await supabase.auth.signInWithOtp({email,options:{
+    shouldCreateUser:true,emailRedirectTo:location.origin+location.pathname
+   }});
+   if(error)throw Error('인증 메일을 보내지 못했습니다. 등록된 프로젝트 팀원 이메일인지 확인해 주세요.');
+   $('firstLoginStatus').textContent='인증 메일을 요청했습니다. 메일에서 확인 링크를 연 다음 운영자 승인을 받아야 합니다.';
+   f.querySelector('input[name=email]').readOnly=true;
+  });
+ };
+ const login=$('loginPasskey');login.disabled=!configured||!canUsePasskey();
+ $('passkeySupportStatus').textContent=!configured?'서버 연결 설정을 확인해 주세요.':
+   !canUsePasskey()?'현재 브라우저에서는 기기 인증을 사용할 수 없습니다. 크롬·삼성 인터넷·사파리에서 열어 주세요.':
+   '기존에 패스키 등록을 마친 사용자만 이용할 수 있습니다.';
  login.onclick=()=>loading(login,async()=>{
   const {error}=await supabase.auth.signInWithPasskey();
-  if(error)throw Error('기기 인증에 실패했습니다. 패스키가 등록되었는지, Supabase의 패스키 기능이 켜져 있는지 확인해 주세요.');
+  if(error)throw Error('등록된 기기 인증을 확인하지 못했습니다. 최초 등록과 운영자 승인을 확인해 주세요.');
   await refreshAuth();
  });
 }
+
 function enrollmentScreen(){
  app.innerHTML=`<div class="login-page"><section class="login-window"><div class="login-body">
  <h2>초대코드 등록</h2><p>기기 로그인은 확인됐지만 기관 역할 등록 전입니다. 담당 치료사에게 전달받은 일회용 코드를 입력하세요. 코드를 모르면 기록에 접근할 수 없습니다.</p>
