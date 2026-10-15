@@ -101,7 +101,7 @@ function formValue(form,name){return form.elements[name]?.value?.trim()??''}
 function header(){if(!me){account.innerHTML='<span class="role-chip">안전한 기록</span>';return}account.innerHTML=`<span>${sanitize(me.nickname)} <span class="role-chip">${me.role==='therapist'?'치료사':me.role==='student'?'학생':me.role==='parent'?'학부모':'관리자'}</span></span><button id="signOut">로그아웃</button>`;attachTherapistDeviceRegistration();$('signOut').onclick=async()=>{if(supabase)await supabase.auth.signOut();me=null;records=[];activeView='write';render();};}
 // Register a device only after verified Auth login AND manual role approval.
 function attachTherapistDeviceRegistration(){
- if(me?.role!=='therapist'||!supabase)return;
+ if(me?.role!=='therapist'||me.trial||!supabase)return;
  const logout=$('signOut');if(!logout)return;
  const b=document.createElement('button');
  b.id='registerTherapistPasskey';b.type='button';b.textContent='이 기기 등록';
@@ -162,54 +162,88 @@ function clinicianPendingScreen(user){
  $('clinicianSignOut').onclick=async()=>{await supabase.auth.signOut();me=null;render()};
 }
 
+async function trialAccountEmail(username){
+ const name=String(username||'').trim().normalize('NFC').toLowerCase();
+ const bytes=new TextEncoder().encode(name);
+ const hash=await crypto.subtle.digest('SHA-256',bytes);
+ const hex=Array.from(new Uint8Array(hash),x=>x.toString(16).padStart(2,'0')).join('');
+ return 'trial-'+hex.slice(0,48)+'@members.ildan.example';
+}
+async function trialSignIn(username,password){
+ const email=await trialAccountEmail(username);
+ const result=await supabase.auth.signInWithPassword({email,password});
+ if(result.error)throw Error('아이디 또는 비밀번호를 확인해 주세요.');
+ await refreshAuth();
+}
 function loginScreen(){
- app.innerHTML=`<section class="login-page" aria-label="일단써봄 로그인"><div class="login-heading">
- <span class="eyebrow">일단써봄 / PRIVATE</span><h1>처음엔 등록하고,<br><em>그다음엔 간편하게.</em></h1>
- <p>치료사가 먼저 계정을 확인한 뒤 학생·보호자를 초대해요.</p></div>
- <div class="login-layout"><section class="login-window"><div class="login-body">
- <div class="buttons" role="group" aria-label="접속 방법"><button class="button" id="firstChoice" type="button">처음 이용해요</button>
- <button class="button-ghost" id="returnChoice" type="button">이미 등록했어요</button></div>
- <section id="firstLogin"><h2>치료사 첫 계정 등록</h2>
- <p>본인 이메일 확인 후 운영자 승인을 받는 절차입니다. 승인 전에는 기록을 열어볼 수 없습니다.</p>
- <form id="clinicianFirstForm" class="form">
- <label>치료사 본인 이메일<input type="email" name="email" autocomplete="email" inputmode="email" required maxlength="254" placeholder="본인 이메일"></label>
- <label><input type="checkbox" id="rememberClinicianDevice" checked> 개인 기기에서 로그인 유지하기</label>
-<button type="submit" class="button">확인 메일 받기</button></form>
- <p class="muted" id="firstLoginStatus" role="status" aria-live="polite">개발 단계에서는 Supabase 프로젝트 팀원 이메일로만 인증 메일을 받을 수 있습니다.</p>
- <div class="callout"><strong>학생·보호자</strong><p>이메일 입력 없이 치료사의 카카오톡 초대 링크에서 시작해요. 최초 등록은 추가 안전 점검 후 열립니다.</p></div></section>
- <section id="returnLogin" hidden><h2>등록된 기기로 로그인</h2>
- <p>처음 등록한 계정만 지문·얼굴·기기 잠금으로 다시 로그인할 수 있어요.</p>
- <button class="button" id="loginPasskey" type="button">기기 인증으로 로그인</button>
- <p class="muted" id="passkeySupportStatus" role="status"></p>
- <p class="muted">카카오톡과 다른 브라우저는 로그인 상태가 다를 수 있어요. 다시 인증해야 할 수도 있습니다.</p></section>
- <p class="muted">현재 안전 검증 중입니다. 실제 학생·상담 기록은 입력하지 마세요.</p>
- </div></section></div></section>`;
+ app.innerHTML=`<section class="login-page" aria-label="일단써봄 체험 로그인">
+  <div class="login-heading"><span class="eyebrow">일단써봄 / 체험하기</span>
+   <h1>복잡한 인증 없이,<br><em>일단 시작해봄.</em></h1>
+   <p>치료사는 간단히 계정을 만들고, 학생과 보호자는 초대 링크로 연결해요.</p></div>
+  <div class="login-layout"><section class="login-window"><div class="login-body">
+  <div class="buttons" role="group" aria-label="계정 이용 방법">
+   <button id="firstChoice" class="button" type="button">처음 이용해요</button>
+   <button id="returnChoice" class="button-ghost" type="button">이미 계정이 있어요</button></div>
+  <section id="firstLogin"><h2>치료사 체험 계정 만들기</h2>
+   <p>이메일 인증 없이 아이디와 비밀번호만 정하면 바로 체험할 수 있어요.</p>
+   <form id="trialSignupForm" class="form">
+    <label>사용할 아이디<input name="username" autocomplete="username" minlength="3" maxlength="20" required
+      placeholder="예: ulmoa_teacher"></label>
+    <label>비밀번호<input name="password" type="password" autocomplete="new-password"
+      minlength="8" maxlength="72" required placeholder="문자·숫자 포함 8글자 이상"></label>
+    <label><input type="checkbox" id="rememberTrialDevice" checked> 이 기기에서 로그인 유지</label>
+    <button class="button" type="submit">무료로 체험 시작하기</button>
+   </form><p id="trialSignupStatus" role="status" class="muted">아이디와 비밀번호는 나중에 다시 접속할 때 필요해요.</p>
+   <div class="callout"><strong>학생·보호자는?</strong>
+    <p>치료사가 만든 별도 초대 링크를 받아 본인 확인 후 접속할 수 있어요.</p></div>
+  </section>
+  <section id="returnLogin" hidden><h2>기존 계정으로 로그인</h2>
+   <form id="trialLoginForm" class="form">
+    <label>아이디<input name="username" autocomplete="username" required
+      placeholder="등록했던 아이디"></label>
+    <label>비밀번호<input type="password" name="password" autocomplete="current-password" required
+      placeholder="비밀번호"></label>
+    <label><input type="checkbox" id="rememberLoginDevice" checked> 이 기기에서 로그인 유지</label>
+    <button class="button" type="submit">로그인</button>
+   </form><p class="muted">학생·보호자는 기존 초대 링크 또는 담당 치료사에게 재접속 링크를 요청해 주세요.</p>
+  </section>
+  <p class="muted">현재는 기능 체험 단계예요. 실명, 진단명, 실제 아동·상담 내용은 입력하지 마세요.</p>
+  </div></section></div></section>`;
  const first=$('firstLogin'),ret=$('returnLogin'),a=$('firstChoice'),b=$('returnChoice');
- function toggle(returning){first.hidden=returning;ret.hidden=!returning;
+ const toggle=(returning)=>{first.hidden=returning;ret.hidden=!returning;
   a.className=returning?'button-ghost':'button';b.className=returning?'button':'button-ghost';
-  a.setAttribute('aria-pressed',String(!returning));b.setAttribute('aria-pressed',String(returning));}
+  a.setAttribute('aria-pressed',String(!returning));b.setAttribute('aria-pressed',String(returning));};
  a.onclick=()=>toggle(false);b.onclick=()=>toggle(true);toggle(false);
- $('clinicianFirstForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;
-  loading(f.querySelector('button'),async()=>{
-   if(!supabase)throw Error('서버 연결을 확인할 수 없습니다.');
-   const email=formValue(f,'email').toLowerCase();localStorage.setItem('ildanPersonalDevice',$('rememberClinicianDevice').checked?'yes':'no');
-   const {error}=await supabase.auth.signInWithOtp({email,options:{
-    shouldCreateUser:true,emailRedirectTo:location.origin+location.pathname
-   }});
-   if(error)throw Error('인증 메일을 보내지 못했습니다. 등록된 프로젝트 팀원 이메일인지 확인해 주세요.');
-   $('firstLoginStatus').textContent='인증 메일을 요청했습니다. 메일에서 확인 링크를 연 다음 운영자 승인을 받아야 합니다.';
-   f.querySelector('input[name=email]').readOnly=true;
+ $('trialSignupForm').onsubmit=e=>{e.preventDefault();
+  const form=e.currentTarget,btn=form.querySelector('button[type="submit"]');
+  loading(btn,async()=>{
+   if(!supabase)throw Error('계정 서버에 연결할 수 없습니다.');
+   const username=formValue(form,'username').normalize('NFC').toLowerCase();
+   const password=formValue(form,'password');
+   if(!/^[a-z0-9가-힣_-]{3,20}$/.test(username))
+    throw Error('아이디는 한글·영문·숫자·밑줄·하이픈 3~20글자로 입력해 주세요.');
+   if(password.length<8||password.length>72||!/[A-Za-z가-힣]/.test(password)||!/[0-9]/.test(password))
+    throw Error('비밀번호는 문자와 숫자를 포함한 8글자 이상이어야 합니다.');
+   const r=await fetch(CFG.apiUrl+'/test-therapist-signup',{
+    method:'POST',mode:'cors',credentials:'omit',
+    headers:{'Content-Type':'application/json',apikey:CFG.publishableKey},
+    body:JSON.stringify({username,password})
+   });
+   const result=await r.json().catch(()=>({}));
+   if(!r.ok)throw Error(result.error||'체험 계정 생성에 실패했습니다.');
+   localStorage.setItem('ildanPersonalDevice',$('rememberTrialDevice').checked?'yes':'no');
+   $('trialSignupStatus').textContent='계정이 만들어졌어요. 지금 로그인할게요.';
+   await trialSignIn(username,password);
   });
  };
- const login=$('loginPasskey');login.disabled=!configured||!canUsePasskey();
- $('passkeySupportStatus').textContent=!configured?'서버 연결 설정을 확인해 주세요.':
-   !canUsePasskey()?'현재 브라우저에서는 기기 인증을 사용할 수 없습니다. 크롬·삼성 인터넷·사파리에서 열어 주세요.':
-   '기존에 패스키 등록을 마친 사용자만 이용할 수 있습니다.';
- login.onclick=()=>loading(login,async()=>{
-  const {error}=await supabase.auth.signInWithPasskey();
-  if(error)throw Error('등록된 기기 인증을 확인하지 못했습니다. 최초 등록과 운영자 승인을 확인해 주세요.');
-  await refreshAuth();
- });
+ $('trialLoginForm').onsubmit=e=>{e.preventDefault();
+  const form=e.currentTarget,btn=form.querySelector('button[type="submit"]');
+  loading(btn,async()=>{
+   if(!supabase)throw Error('계정 서버에 연결할 수 없습니다.');
+   localStorage.setItem('ildanPersonalDevice',$('rememberLoginDevice').checked?'yes':'no');
+   await trialSignIn(formValue(form,'username'),formValue(form,'password'));
+  });
+ };
 }
 
 function enrollmentScreen(){
