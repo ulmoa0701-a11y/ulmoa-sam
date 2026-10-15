@@ -31,7 +31,7 @@ jobs:
           const cfg=fs.readFileSync(base+'config.js','utf8');
           const html=fs.readFileSync(base+'index.html','utf8');
           const app=fs.readFileSync(base+'app.js','utf8');
-          assert(!/signInWithOtp\\s*\\(\\{\\s*phone|type:\\s*['"]sms['"]|phoneRequestForm|phoneVerifyForm|emailRequestForm|emailVerifyForm/.test(app),'Phone SMS or guardian OTP flows are forbidden');
+          assert(!['signInWithOtp({phone','phoneRequestForm','phoneVerifyForm','emailRequestForm','emailVerifyForm'].some(x=>app.includes(x)),'Phone SMS or guardian OTP flows are forbidden');
           assert(app.includes('shouldCreateUser:true') && app.includes('emailRedirectTo:'),'First clinician verified email bootstrap required');
           assert(app.includes('registerTherapistPasskey') && app.includes("me?.role!=='therapist'"),'Only approved therapist can register after sign-in');
           assert(app.includes('returnLogin" hidden'),'First visit must not lead to unregistered passkey sign-in');
