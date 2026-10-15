@@ -5,6 +5,7 @@ on:
       - feature/ildan-supabase-secure-auth-20261014
       - feature/ildan-supabase-live-staging-20261014
       - feature/ildan-invite-link-passkey-20261015
+      - feature/ildan-clinician-phone-auth-20261015
     paths:
       - 'secure-portal/supabase/**'
       - 'secure-portal/lib/record-contract.mjs'
