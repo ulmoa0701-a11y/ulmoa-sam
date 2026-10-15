@@ -86,7 +86,13 @@ with sync_playwright() as p:
   canvas=page.locator('#noteCanvas');bb=canvas.bounding_box()
   page.mouse.move(bb['x']+10,bb['y']+15);page.mouse.down();page.mouse.move(bb['x']+90,bb['y']+65,steps=8);page.mouse.up()
   page.locator('#saveEntry').click()
-  page.locator('.practice-cloud-record').wait_for(timeout=18000)
+  try:page.locator('.practice-cloud-record').wait_for(timeout=12000)
+  except Exception as e:
+   print('PHOTO_SYNC_FAILURE',{'uploaded':uploaded,'stored':stored,'errors':errors,
+     'toast':page.locator('#toast').inner_text() if page.locator('#toast').count() else None,
+     'status':page.locator('#photoProgress').inner_text() if page.locator('#photoProgress').count() else None,
+     'bodyTail':page.locator('body').inner_text()[-1300:]})
+   raise
   assert len(stored)>=1 and stored[-1]['shared']==True
   assert len(stored[-1]['entry']['photos'])==1 and uploaded
   assert 'sketch' in stored[-1]['entry']
