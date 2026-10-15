@@ -18,10 +18,12 @@ jobs:
       - name: Verify real server author revisions and photo removal
         shell: bash
         run: |
+          git fetch --depth=1 origin qa/ildan-practice-real-e2e-20261015
+          git show FETCH_HEAD:.github/workflows/ildan-real-practice-sync-e2e.yml > /tmp/ildan-original-e2e.yml
           python3 <<'PY'
           from pathlib import Path
           root=Path('test/ildan-sseobom/supabase-staging')
-          src=Path('.github/workflows/ildan-real-practice-sync-e2e.yml').read_text()
+          src=Path('/tmp/ildan-original-e2e.yml').read_text()
           text=src.split("node <<'JS'\n",1)[1].split("\n          JS",1)[0]
           code='\n'.join(line[10:] if line.startswith('          ') else line for line in text.splitlines())
           edits=(root/'practice_edit_student.frag').read_text()
