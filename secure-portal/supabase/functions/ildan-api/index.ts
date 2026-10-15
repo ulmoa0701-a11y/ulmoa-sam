@@ -286,7 +286,7 @@ export async function handle(request:Request):Promise<Response>{
     .eq('therapist_id',uid).order('created_at',{ascending:false}).limit(50);
    if(error)throw Error('INVITE_LIST_FAILED');
    return send({invites:(data||[]).map((x:any)=>({
-    digest:x.code_digest,role:x.role,studentId:x.student_id,recovery:!!x.target_user_id,
+    digest:x.code_digest,role:x.role,studentId:x.student_id,targetUserId:x.target_user_id,usedBy:x.used_by,recovery:!!x.target_user_id,
     createdAt:x.created_at,expiresAt:null,used:!!x.used_by,reusable:true,revoked:!!x.revoked_at,
     active:!x.revoked_at&&new Date(x.expires_at).getTime()>Date.now()
    }))});
