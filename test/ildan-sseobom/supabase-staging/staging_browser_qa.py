@@ -134,7 +134,7 @@ with sync_playwright() as p:
     else:data={'students':members}
    elif path.endswith('/accounts'):data={'accounts':[]}
    elif path.endswith('/drive/status'):data={'connected':False,'configured':False,'backupEnabled':False}
-   elif path.endswith('/invites'):data={'invites':[]}
+   elif path.endswith('/invites'):data={'invites':[{'digest':'a'*64,'role':'student','targetUserId':members[0]['id'],'active':True,'used':False,'revoked':False,'createdAt':'2026-10-15T00:00:00Z'}] if members else []}
    elif path.endswith('/session-notes'):data={'notes':[]}
    else:data={'error':'Unknown synthetic endpoint: '+path};status=404
    status=locals().get('status',200)
