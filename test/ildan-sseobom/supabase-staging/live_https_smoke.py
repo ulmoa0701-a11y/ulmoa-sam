@@ -15,19 +15,20 @@ with sync_playwright() as p:
         page.on("pageerror", lambda e: errors.append(str(e)))
         response = page.goto(URL, wait_until="domcontentloaded", timeout=40000)
         assert response and response.status == 200, ("live HTTP", response.status if response else None)
-        page.locator("#clinicianFirstForm input[type=email]").wait_for(timeout=30000)
+        page.locator("#trialSignupForm input[name=username]").wait_for(timeout=30000)
         assert page.locator("#firstLogin").is_visible(), "first visit must show account setup"
-        assert not page.locator("#loginPasskey").is_visible(), "do not prompt first-time users for passkey"
+        assert page.locator("#trialSignupForm input[name=password][type=password]").count() == 1, "test user password is required"
+        assert page.locator("input[type=email]").count() == 0, "email verification must not be required"
         assert page.locator("#inviteList").count() == 0, "guest must never see invitation management"
         assert "실제 학생·보호자 상담정보 입력 금지" in page.locator("body").inner_text()
         page.locator("#returnChoice").click()
-        assert page.locator("#loginPasskey").is_visible()
+        assert page.locator("#trialLoginForm").is_visible()
         page.locator("#firstChoice").click()
-        assert page.locator("#clinicianFirstForm input[type=email]").is_visible()
-        assert not page.locator("#loginPasskey").is_visible()
+        assert page.locator("#trialSignupForm input[name=username]").is_visible()
+        assert not page.locator("#trialLoginForm").is_visible()
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 3"), "horizontal overflow"
         assert not errors, ("uncaught page errors", errors)
-        checks.append(f"live HTTPS Chrome {width}px first/repeat UI, runtime code loaded, no overflow")
+        checks.append(f"live HTTPS Chrome {width}px sandbox signup/relogin UI, real HTTPS assets loaded, no overflow")
         page.close()
     browser.close()
 print(json.dumps({"status": "PASS", "checks": checks}, ensure_ascii=False))
