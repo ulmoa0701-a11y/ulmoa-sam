@@ -12,7 +12,6 @@ const configured=Boolean(/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(CFG.url||''
 const supabase=configured?createClient(CFG.url,CFG.publishableKey,{
  auth:{persistSession:true,storage:window.sessionStorage,autoRefreshToken:true,detectSessionInUrl:false,experimental:{passkey:true}}
  } ):null;
-const smsConfigured=Boolean(CFG.phoneOtpEnabled===true);
 
 const invitationParams=new URLSearchParams(location.hash.replace(/^#/,''));
 let activeInvite=/^[0-9a-f]{64}$/.test(invitationParams.get('invite')||'')?invitationParams.get('invite'):null;
@@ -130,103 +129,55 @@ function rolePicker(){return `<div class="role-picker" role="group" aria-label="
   <button type="button" data-login-role="parent" class="role-choice${chosenRole==='parent'?' active':''}" aria-pressed="${chosenRole==='parent'}"><span class="role-glyph" aria-hidden="true">//</span><strong>학부모</strong><small>관찰·전달</small></button>
   <button type="button" data-login-role="therapist" class="role-choice${chosenRole==='therapist'?' active':''}" aria-pressed="${chosenRole==='therapist'}"><span class="role-glyph" aria-hidden="true">&lt;/&gt;</span><strong>치료사</strong><small>공유 기록</small></button>
  </div>`;}
-function koreanMobileE164(input){
- const digits=String(input||'').replace(/[\s()-]/g,'');
- if(!/^01[016789][0-9]{7,8}$/.test(digits))throw Error('휴대전화 번호를 01012345678 형식으로 확인해 주세요.');
- return '+82'+digits.slice(1);
-}
+// All roles use a registered device passkey. Phone numbers are never used as
+// unauthenticated account secrets. No SMS or email challenge is sent here.
 function clinicianPendingScreen(user){
  const id=String(user?.id||'');
  app.innerHTML=`<section class="login-page"><section class="login-window"><div class="login-body">
- <h2>치료사 계정 승인 대기</h2>
- <p>휴대전화 인증이 끝나도 치료사 권한이 자동으로 생기지는 않습니다.
- 기관 담당자가 신원을 확인한 뒤 이 계정에 치료사 권한을 연결해야 합니다.</p>
+ <h2>계정 연결 확인 중</h2>
+ <p>기기 인증이 되었어도 학생·보호자·치료사 권한은 자동으로 만들어지지 않습니다.
+ 담당자가 실제 사용자와 역할을 확인한 뒤 계정을 연결해야 합니다.</p>
  <label>내 계정 식별번호<input readonly id="clinicianVerifiedUid" value="${sanitize(id)}"></label>
- <p class="muted">이 번호는 인증코드나 비밀번호가 아니지만 공개 게시판에 올리지 마세요.
- 학생·보호자 개인정보는 아직 입력할 수 없습니다.</p>
- <div class="buttons"><button id="clinicianRecheck" class="button" type="button">승인 확인하기</button>
+ <p class="muted">이 번호를 공개 게시판에 올리지 마세요. 실제 학생·보호자 상담기록은 아직 저장할 수 없습니다.</p>
+ <div class="buttons"><button id="clinicianRecheck" class="button" type="button">권한 다시 확인</button>
  <button id="clinicianSignOut" class="button-ghost" type="button">로그아웃</button></div>
  </div></section></section>`;
  $('clinicianRecheck').onclick=()=>refreshAuth();
  $('clinicianSignOut').onclick=async()=>{await supabase.auth.signOut();me=null;render()};
 }
 function loginScreen(){
- app.innerHTML=`<section class="login-page"><div class="login-heading"><span class="eyebrow">일단써봄 / PRIVATE</span><h1>내 기록 공간에<br><em>로그인하기.</em></h1><p>기록 화면은 로그인한 계정의 실제 역할에 따라 열립니다. 화면에서 역할을 임의로 바꿀 수 없어요.</p></div>
+ app.innerHTML=`<section class="login-page"><div class="login-heading"><span class="eyebrow">일단써봄 / PRIVATE</span>
+ <h1>내 기록 공간에<br><em>로그인하기.</em></h1>
+ <p>학생·보호자·치료사 모두 등록한 휴대전화에서 간편하게 로그인할 수 있어요.</p></div>
  <div class="login-layout"><section class="login-window"><div class="login-body">
- <h2>일단써봄 로그인</h2>
- <div class="buttons"><button class="button" type="button" id="loginPasskey">기기 인증으로 로그인</button></div>
- <p class="muted">기기 등록이 끝난 학생·보호자·치료사는 이 버튼으로 들어갈 수 있어요.</p>
- <details class="phone-doctor-only" open><summary>치료사 처음 등록 · 휴대전화 인증</summary>
-  <div>
-    <p class="muted">문자로 본인 확인 후 기관 운영자가 치료사 권한을 승인합니다. 전화번호만 입력한다고 치료사 권한이 생기지 않습니다.</p>
-    ${smsConfigured?'<p class="muted">문자로 받은 인증번호를 입력하세요.</p>':'<p class="callout">현재 무료 개발본은 SMS 발송업체가 연결되지 않아 휴대전화 인증이 중지되어 있습니다. 비용 동의와 SMS 설정이 필요합니다.</p>'}
-    <form id="phoneRequestForm" class="form"><label>치료사 휴대전화 번호
-      <input name="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="01012345678" required></label>
-      <button class="button" type="submit" ${smsConfigured&&configured?'':'disabled'}>문자로 인증번호 받기</button>
-    </form>
-    <form id="phoneVerifyForm" class="form" hidden>
-      <label>받은 6자리 인증번호<input name="token" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required></label>
-      <button class="button" type="submit">인증하고 계정 확인</button>
-    </form>
-  </div>
- </details>
- <details class="email-doctor-only"><summary>치료사 계정 · 이메일 인증으로 로그인</summary><div>
- <p class="muted">학생·보호자·치료사 각각 별도 계정이 필요합니다. 인증코드는 실제 운영 환경 설정이 끝난 후 이용할 수 있습니다.</p>
- ${configured?'<p class="muted">인증 이메일이 오지 않으면 담당 운영자에게 문의해 주세요.</p>':'<p class="callout">아직 Supabase 프로젝트가 연결되지 않은 개발용 화면입니다. 실제 개인정보를 입력하면 안 됩니다.</p>'}
- <form id="emailRequestForm" class="form"><label>이메일 주소<input type="email" name="email" autocomplete="email" required placeholder="본인이 사용하는 이메일"></label>
- <button type="submit" class="button" ${configured?'':'disabled'}>로그인 코드 요청</button></form>
- <form id="emailVerifyForm" class="form" hidden><label>이메일 주소<input name="email" type="email" readonly></label>
- <label>이메일로 받은 6자리 코드<input name="token" pattern="[0-9]{6}" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required></label>
- <button type="submit" class="button">코드 확인하고 로그인</button></form>
- </div></details>
- <p class="muted">실제 아동·상담 기록을 저장하려면 기관의 개인정보·법정대리인 동의 및 보안 검증이 먼저 필요합니다.</p>
+ <h2>휴대전화로 로그인</h2>
+ <p class="muted">문자 인증번호나 이메일은 받지 않습니다. 최초에 승인받아 등록한 기기로 지문·얼굴·기기 PIN 인증을 진행해요.</p>
+ <button class="button" type="button" id="loginPasskey">휴대전화 기기 인증으로 로그인</button>
+ <p class="muted" id="passkeySupportStatus" role="status"></p>
+ <div class="callout"><strong>처음 사용하는 경우</strong>
+ <p>학생·보호자: 담당 치료사가 보낸 개인별 링크를 열어 등록합니다.</p>
+ <p>치료사: 운영자의 신원 확인과 계정 승인 후 최초 기기를 등록합니다.
+ 아직 치료사 첫 등록 기능은 검증 중이며, 휴대전화번호 입력만으로 치료사 권한을 발급하지 않습니다.</p>
+ </div>
+ <p class="muted">카카오톡에서 열었던 초대 링크는 기본 브라우저로 복사해 열 수 있습니다.
+ 브라우저가 달라지면 별도로 기기 인증이 필요할 수 있어요.</p>
+ <p class="muted">개발용 검증 화면입니다. 실제 아동·상담 자료는 입력하지 마세요.</p>
  </div></section></div></section>`;
- $('loginPasskey').disabled=!configured||!canUsePasskey();
- $('loginPasskey').onclick=()=>loading($('loginPasskey'),async()=>{
+ const login=$('loginPasskey');
+ login.disabled=!configured||!canUsePasskey();
+ $('passkeySupportStatus').textContent=!configured
+  ?'서버 연결 설정을 확인하고 있어요.'
+  :!canUsePasskey()?'현재 브라우저는 기기 인증을 지원하지 않습니다. 크롬·삼성 인터넷·사파리에서 열어 주세요.'
+  :'등록된 기기가 있으면 아래 인증 화면으로 연결됩니다. 처음 등록하는 계정은 운영자 승인이 필요합니다.';
+ login.onclick=()=>loading(login,async()=>{
   const {error}=await supabase.auth.signInWithPasskey();
-  if(error)throw Error('기기 인증이 되지 않았습니다. 기기 등록 여부나 브라우저 지원을 확인해 주세요.');
+  if(error)throw Error('기기 인증에 실패했습니다. 패스키가 등록되었는지, Supabase의 패스키 기능이 켜져 있는지 확인해 주세요.');
   await refreshAuth();
  });
- const phoneRequest=$('phoneRequestForm'),phoneVerify=$('phoneVerifyForm');
- let awaitingPhone='';
- phoneRequest.onsubmit=e=>{
-  e.preventDefault();
-  loading(phoneRequest.querySelector('button'),async()=>{
-   if(!smsConfigured)throw Error('SMS 발송 설정 전입니다.');
-   awaitingPhone=koreanMobileE164(formValue(phoneRequest,'phone'));
-   const {error}=await supabase.auth.signInWithOtp({phone:awaitingPhone,options:{shouldCreateUser:true}});
-   if(error)throw Error('문자 발송에 실패했습니다. 문자 제공업체 설정을 확인해 주세요.');
-   phoneVerify.hidden=false;
-   toast('휴대전화로 보낸 6자리 인증번호를 입력해 주세요.');
-  });
- };
- phoneVerify.onsubmit=e=>{
-  e.preventDefault();
-  loading(phoneVerify.querySelector('button'),async()=>{
-   if(!awaitingPhone)throw Error('인증번호를 먼저 요청해 주세요.');
-   const token=formValue(phoneVerify,'token');
-   if(!/^[0-9]{6}$/.test(token))throw Error('인증번호 6자리를 입력해 주세요.');
-   const {error}=await supabase.auth.verifyOtp({phone:awaitingPhone,token,type:'sms'});
-   if(error)throw Error('인증번호가 다르거나 만료됐습니다.');
-   awaitingPhone='';
-   await refreshAuth();
-  });
- };
- const request=$('emailRequestForm'),verify=$('emailVerifyForm');
- request.onsubmit=e=>{e.preventDefault();const email=formValue(request,'email');loading(request.querySelector('button'),async()=>{
-  const {error}=await supabase.auth.signInWithOtp({email,options:{shouldCreateUser:true}});
-  if(error)throw Error('로그인 코드 전송에 실패했습니다. 관리자에게 문의해 주세요.');
-  verify.elements.email.value=email;verify.hidden=false;toast('인증 이메일을 확인해 주세요.');
- })};
- verify.onsubmit=e=>{e.preventDefault();const email=formValue(verify,'email'),token=formValue(verify,'token');loading(verify.querySelector('button'),async()=>{
-  const {error}=await supabase.auth.verifyOtp({email,token,type:'email'});
-  if(error)throw Error('코드가 만료되었거나 올바르지 않습니다.');
-  await refreshAuth();
- })};
 }
 function enrollmentScreen(){
  app.innerHTML=`<div class="login-page"><section class="login-window"><div class="login-body">
- <h2>초대코드 등록</h2><p>이메일 로그인은 확인됐지만 기관 역할 등록 전입니다. 담당 치료사에게 전달받은 일회용 코드를 입력하세요. 코드를 모르면 기록에 접근할 수 없습니다.</p>
+ <h2>초대코드 등록</h2><p>기기 로그인은 확인됐지만 기관 역할 등록 전입니다. 담당 치료사에게 전달받은 일회용 코드를 입력하세요. 코드를 모르면 기록에 접근할 수 없습니다.</p>
  <form id="claimForm" class="form"><label>초대코드<input name="code" autocomplete="off" required minlength="32" maxlength="128"></label><button type="submit" class="button">계정 연결하기</button></form>
  <button type="button" id="claimLogout" class="button-ghost">로그아웃</button>
  <p class="muted">치료사 계정은 운영자가 실제 신원을 확인한 뒤 Supabase 관리 화면에서 직접 등록해야 합니다.</p>
@@ -245,8 +196,7 @@ async function refreshAuth(){
  catch{
   me=null;header();
   const {data:{user}}=await supabase.auth.getUser();
-  if(user?.phone_confirmed_at)clinicianPendingScreen(user);
-  else enrollmentScreen();
+  clinicianPendingScreen(user);
  }
 }
 function workspaceNav(items, selected){

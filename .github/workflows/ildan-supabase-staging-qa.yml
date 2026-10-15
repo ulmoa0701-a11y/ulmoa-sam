@@ -5,6 +5,7 @@ on:
       - feature/ildan-supabase-staging-ui-20261014
       - feature/ildan-invite-kakao-staging-20261015
       - feature/ildan-clinician-phone-staging-20261015
+      - feature/ildan-staging-no-sms-passkey-20261015
     paths:
       - 'test/ildan-sseobom/supabase-staging/**'
       - '.github/workflows/ildan-supabase-staging-qa.yml'
@@ -29,6 +30,8 @@ jobs:
           const base='test/ildan-sseobom/supabase-staging/';
           const cfg=fs.readFileSync(base+'config.js','utf8');
           const html=fs.readFileSync(base+'index.html','utf8');
+          const app=fs.readFileSync(base+'app.js','utf8');
+          assert(!/signInWithOtp\s*\(|type:\s*['"]sms['"]|phoneRequestForm|phoneVerifyForm|emailRequestForm|emailVerifyForm/.test(app),'No SMS or email OTP flows are allowed in the app');
           assert(cfg.includes('sb_publishable_'));
           assert(!/sb_secret_|service_role|ENCRYPTION_KEY\s*[:=]\s*["']/.test(cfg));
           assert(html.includes('실제 학생·보호자 상담정보 입력 금지'));
