@@ -937,3 +937,15 @@ form[hidden], .form[hidden] {display:none !important;}
 .invite-issued-person{margin:16px 0 8px;font-size:16px;color:#193c60}
 .invite-recipient-card button{min-height:44px}
 @media(max-width:540px){.invite-recipient-card{padding:13px 14px}.invite-person{font-size:16px}}
+
+
+/* Clearly scoped, functional online practice save and opt-in therapist share. */
+.practice-sync-box{border:1px solid #a9d2ba;background:#edf9f1;border-radius:14px;padding:15px 17px;margin:18px 0 12px;display:flex;flex-direction:column;gap:8px}
+.practice-sync-box>strong{color:#1b5334;font-size:17px}
+.practice-sync-box p{margin:0;color:#335b4e;font-size:14px;line-height:1.65}
+.practice-sync-box label{display:flex;gap:11px;align-items:flex-start;border:1px solid #c7e1d1;border-radius:12px;background:white;padding:14px 12px;font-weight:700;line-height:1.45;cursor:pointer}
+.practice-sync-box input[type=checkbox]{flex:none;margin-top:3px;width:20px;height:20px;accent-color:#276748}
+.practice-cloud-record{border-left:4px solid #2d7754}
+.practice-record-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.practice-record-actions button{min-height:44px}
+@media(max-width:540px){.practice-sync-box{padding:13px}.practice-record-actions>*{flex:1 1 100%}}
