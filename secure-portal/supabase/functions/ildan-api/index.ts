@@ -52,7 +52,7 @@ const getVerifiedAuth=async(request:Request)=>{
  if(!url||!pubkey)throw Error('AUTH_CONFIG_MISSING');
  const authClient=createClient(url,pubkey,{auth:{persistSession:false,autoRefreshToken:false}});
  const {data,error}=await authClient.auth.getUser(token);
- if(error||!data?.user||!data.user.email_confirmed_at)return null;
+ if(error||!data?.user||!(data.user.email_confirmed_at||data.user.phone_confirmed_at))return null;
  const userDb=createClient(url,pubkey,{auth:{persistSession:false,autoRefreshToken:false},global:{headers:{Authorization:bearer}}});
  return {user:data.user,userDb};
 };
@@ -143,7 +143,7 @@ export async function handle(request:Request):Promise<Response>{
 
  try{
   const auth=await getVerifiedAuth(request);
-  if(!auth)return send({error:'이메일 인증 로그인이 필요합니다.'},401);
+  if(!auth)return send({error:'인증된 로그인 세션이 필요합니다.'},401);
   const {user,userDb}=auth;const uid=user.id;
   const member=await getRole(userDb,uid);
   if(apiName==='claim-invite'&&request.method==='POST'){
