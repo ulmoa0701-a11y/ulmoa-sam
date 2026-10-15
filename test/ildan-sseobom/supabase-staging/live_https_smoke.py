@@ -45,6 +45,13 @@ with sync_playwright() as p:
         assert "name=\"practiceShare\"" in live_js, "therapist share must be opt-in"
         assert "data-practice-share" in live_js and "data-practice-unshare" in live_js, "share and revoke UI must exist"
         assert "practice-cloud-record" in live_js, "synced record archive must exist"
+        assert "data-practice-edit" in live_js, "author edit action must exist"
+        assert "api('practice-update'" in live_js, "save must update existing encrypted record"
+        assert "expectedUpdatedAt:old.updatedAt" in live_js, "edit must include revision guard"
+        assert "populatePracticeEditor" in live_js and "cancelPracticeEdit" in live_js, "preloaded editor and cancel"
+        assert "uploadPracticePhotos(old)" in live_js, "edits preserve/replace existing photos"
+        assert "setPracticePhotos" in media_js, "existing photos must be preloaded for editing"
+
 
 
 
