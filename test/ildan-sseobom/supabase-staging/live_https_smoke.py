@@ -21,6 +21,10 @@ with sync_playwright() as p:
         assert page.locator("input[type=email]").count() == 0, "email verification must not be required"
         assert page.locator("#inviteList").count() == 0, "guest must never see invitation management"
         assert "실제 학생·보호자 상담정보 입력 금지" in page.locator("body").inner_text()
+        live_js=page.evaluate("fetch('./app.js',{cache:'no-store'}).then(r=>r.ok?r.text():Promise.reject(new Error('app.js '+r.status)))")
+        assert "학생 이름 또는 별칭" in live_js, "deployed page must include student name label"
+        assert "student-list-summary" in live_js, "deployed page must include registered student list"
+        assert "보호자 접속 링크 만들기" in live_js, "deployed page must distinguish guardian invitation"
         page.locator("#returnChoice").click()
         assert page.locator("#trialLoginForm").is_visible()
         page.locator("#firstChoice").click()
