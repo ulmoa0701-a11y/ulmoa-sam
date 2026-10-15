@@ -92,7 +92,7 @@ async function openJSON(nonce:string,ciphertext:string){
 }
 const requireText=(o:Obj,key:string)=>typeof o[key]==='string'?String(o[key]):'';
 const roles=new Set(['student','parent','therapist']);
-const endpoints=new Set(['test-therapist-signup','test-therapist-delete','me','records','share','unshare','session-notes','students','accounts','invites','claim-invite','invite-preview','invite-register','delete-record','revoke-invite','drive/status','health','practice-records','practice-media-sign','practice-share','practice-unshare','practice-delete']);
+const endpoints=new Set(['test-therapist-signup','test-therapist-delete','me','records','share','unshare','session-notes','students','accounts','invites','claim-invite','invite-preview','invite-register','delete-record','revoke-invite','drive/status','health','practice-records','practice-media-sign','practice-share','practice-unshare','practice-delete','practice-update']);
 const getRole=async(userDb:any,id:string)=>{
  const {data,error}=await userDb.from('ildan_members').select('user_id,role,therapist_id,student_id,display_alias').eq('user_id',id).maybeSingle();
  if(error)throw Error('ROLE_LOOKUP_FAILED');
@@ -425,25 +425,87 @@ export async function handle(request:Request):Promise<Response>{
      const ids=[...names.keys()];
      if(!ids.length)return send({records:[]});
      const {data,error}=await admin.from('ildan_practice_records')
-      .select('id,kind,student_id,author_id,shared_nonce,shared_ciphertext,created_at')
+      .select('id,kind,student_id,author_id,shared_nonce,shared_ciphertext,created_at,updated_at')
       .eq('therapist_id',uid).in('student_id',ids)
       .not('shared_at','is',null).order('created_at',{ascending:false}).limit(120);
      if(error)throw Error('PRACTICE_READ_FAILED');
      return send({records:await Promise.all((data||[]).map(async(r:any)=>({
       id:r.id,kind:r.kind,studentId:r.student_id,student:names.get(r.student_id),
       author:r.kind==='student'?'연습 학생':'연습 보호자',createdAt:r.created_at,
-      shared:true,practice:true,
+      shared:true,practice:true,updatedAt:r.updated_at,
       entry:await practiceForView(admin,{nonce:r.shared_nonce,ciphertext:r.shared_ciphertext},r.author_id)
      })))});
     }
     const {data,error}=await admin.from('ildan_practice_records')
-     .select('id,kind,author_id,private_nonce,private_ciphertext,shared_at,created_at')
+     .select('id,kind,author_id,private_nonce,private_ciphertext,shared_at,created_at,updated_at')
      .eq('author_id',uid).order('created_at',{ascending:false}).limit(120);
     if(error)throw Error('PRACTICE_READ_FAILED');
-    return send({records:await Promise.all((data||[]).map(async(r:any)=>({
-     id:r.id,kind:r.kind,createdAt:r.created_at,shared:!!r.shared_at,practice:true,
-     entry:await practiceForView(admin,{nonce:r.private_nonce,ciphertext:r.private_ciphertext},uid)
-    })))});
+    return send({records:await Promise.all((data||[]).map(async(r:any)=>{
+     const privateEntry=await practiceOpen(r.private_nonce,r.private_ciphertext);
+     return {id:r.id,kind:r.kind,createdAt:r.created_at,updatedAt:r.updated_at,
+      shared:!!r.shared_at,practice:true,
+      photoPaths:Array.isArray(privateEntry.photos)?privateEntry.photos:[],
+      entry:await practiceForView(admin,{nonce:r.private_nonce,ciphertext:r.private_ciphertext},uid)
+     };
+    }))});
+   }
+   if(apiName==='practice-update'&&request.method==='POST'){
+    if(!['student','parent'].includes(member.role))return send({error:'작성자만 수정할 수 있습니다.'},403);
+    const b=await body(request),id=requireText(b,'recordId'),
+      expected=requireText(b,'expectedUpdatedAt');
+    if(!UUID_RE.test(id)||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}T/.test(expected)||!Number.isFinite(Date.parse(expected)))
+     return send({error:'수정할 기록을 다시 열어 주세요.'},400);
+    const {data:old,error:readError}=await admin.from('ildan_practice_records')
+     .select('id,private_nonce,private_ciphertext,shared_at,updated_at,student_id,therapist_id,kind')
+     .eq('id',id).eq('author_id',uid).maybeSingle();
+    if(readError||!old||old.kind!==member.role)return send({error:'본인의 연습 기록만 수정할 수 있습니다.'},403);
+    if(new Date(old.updated_at).getTime()!==new Date(expected).getTime())
+     return send({error:'다른 기기에서 먼저 수정되었어요. 기록을 새로 열어 다시 수정해 주세요.'},409);
+    const requiredStudent=member.role==='student'?uid:member.student_id;
+    if(!requiredStudent||old.student_id!==requiredStudent||old.therapist_id!==member.therapist_id
+      ||!(await checkStudent(admin,requiredStudent,member.therapist_id)))
+     return send({error:'학생·치료사 연결이 변경되어 수정할 수 없습니다.'},403);
+    const previous=await practiceOpen(old.private_nonce,old.private_ciphertext);
+    const next=validatePractice(b.entry,uid),share=b.share===true;
+    // Image paths are opaque; keep paths from this record, or accept only
+    // newly uploaded unreferenced files in the author's private directory.
+    const oldPaths=Array.isArray(previous.photos)?previous.photos as string[]:[];
+    const newPaths=Array.isArray(next.photos)?next.photos as string[]:[];
+    const added=newPaths.filter(path=>!oldPaths.includes(path));
+    if(added.length){
+     const {data:other,error:lookupError}=await admin.from('ildan_practice_records')
+      .select('id,private_nonce,private_ciphertext').eq('author_id',uid).neq('id',id).limit(120);
+     if(lookupError)return send({error:'첨부 사진을 검증할 수 없습니다.'},503);
+     const used=new Set<string>();
+     for(const item of other||[]){
+      const e=await practiceOpen(item.private_nonce,item.private_ciphertext);
+      if(Array.isArray(e.photos))for(const path of e.photos)used.add(path);
+     }
+     if(added.some(path=>used.has(path)))return send({error:'다른 기록에 첨부된 사진은 옮길 수 없습니다.'},403);
+     for(const path of added){
+      const {data:file,error:fileError}=await admin.storage.from(PRACTICE_BUCKET)
+       .info(path);
+      if(fileError||!file)return send({error:'새로 첨부한 사진을 찾지 못했습니다.'},400);
+     }
+    }
+    const priv=await practiceSeal(next),shared=share?await practiceSeal(next):null;
+    const version=new Date().toISOString();
+    const {data:updated,error:updateError}=await admin.from('ildan_practice_records')
+     .update({private_nonce:priv.nonce,private_ciphertext:priv.ciphertext,
+      shared_nonce:shared?.nonce||null,shared_ciphertext:shared?.ciphertext||null,
+      shared_at:share?version:null,updated_at:version})
+     .eq('id',id).eq('author_id',uid).eq('updated_at',old.updated_at)
+     .select('id,created_at,updated_at').maybeSingle();
+    if(updateError)throw Error('PRACTICE_UPDATE_FAILED');
+    if(!updated)return send({error:'기록이 다른 기기에서 변경됐어요. 새로고침 후 수정해 주세요.'},409);
+    const removed=oldPaths.filter(path=>!newPaths.includes(path));
+    let photoCleanupPending=false;
+    if(removed.length){
+     const {error:cleanupError}=await admin.storage.from(PRACTICE_BUCKET).remove(removed);
+     photoCleanupPending=!!cleanupError;
+    }
+    return send({ok:true,record:{id:updated.id,createdAt:updated.created_at,
+     updatedAt:updated.updated_at,shared:share,practice:true},photoCleanupPending});
    }
    if(['practice-share','practice-unshare','practice-delete'].includes(apiName)
      &&request.method==='POST'){
