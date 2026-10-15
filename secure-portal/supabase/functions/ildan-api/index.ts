@@ -38,7 +38,7 @@ async function openJSON(nonce:string,ciphertext:string){
 }
 const requireText=(o:Obj,key:string)=>typeof o[key]==='string'?String(o[key]):'';
 const roles=new Set(['student','parent','therapist']);
-const endpoints=new Set(['me','records','share','unshare','session-notes','students','accounts','invites','claim-invite','invite-preview','invite-register','delete-record','drive/status','health']);
+const endpoints=new Set(['me','records','share','unshare','session-notes','students','accounts','invites','claim-invite','invite-preview','invite-register','delete-record','revoke-invite','drive/status','health']);
 const getRole=async(userDb:any,id:string)=>{
  const {data,error}=await userDb.from('ildan_members').select('user_id,role,therapist_id,student_id,display_alias').eq('user_id',id).maybeSingle();
  if(error)throw Error('ROLE_LOOKUP_FAILED');
@@ -168,6 +168,30 @@ export async function handle(request:Request):Promise<Response>{
    const {data,error}=await userDb.from('ildan_members').select('user_id,display_alias,role,student_id').eq('therapist_id',uid);
    if(error)throw Error('ACCOUNTS_FAILED');
    return send({accounts:(data||[]).map((x:any)=>({id:x.user_id,nickname:x.display_alias||x.role,role:x.role,studentId:x.student_id}))});
+  }
+  if(apiName==='invites'&&request.method==='GET'){
+   if(member.role!=='therapist')return send({error:'치료사 전용입니다.'},403);
+   const {data,error}=await admin.from('ildan_invites')
+    .select('code_digest,role,student_id,created_at,expires_at,used_by')
+    .eq('therapist_id',uid).order('created_at',{ascending:false}).limit(50);
+   if(error)throw Error('INVITE_LIST_FAILED');
+   return send({invites:(data||[]).map((x:any)=>({
+    digest:x.code_digest,role:x.role,studentId:x.student_id,
+    createdAt:x.created_at,expiresAt:x.expires_at,used:!!x.used_by,
+    active:!x.used_by&&new Date(x.expires_at).getTime()>Date.now()
+   }))});
+  }
+  if(apiName==='revoke-invite'&&request.method==='POST'){
+   if(member.role!=='therapist')return send({error:'치료사 전용입니다.'},403);
+   const b=await body(request),hash=requireText(b,'digest');
+   if(!/^[0-9a-f]{64}$/.test(hash))return send({error:'초대 링크를 확인해 주세요.'},400);
+   const now=new Date().toISOString();
+   const {data,error}=await admin.from('ildan_invites').update({expires_at:now})
+    .eq('code_digest',hash).eq('therapist_id',uid)
+    .is('used_by',null).gt('expires_at',now).select('code_digest');
+   if(error)throw Error('REVOKE_FAILED');
+   if(!data?.length)return send({error:'이미 사용되거나 만료된 링크입니다.'},409);
+   return send({ok:true,revoked:true});
   }
   if(apiName==='invites'&&request.method==='POST'){
    if(member.role!=='therapist')return send({error:'담당 치료사만 초대할 수 있습니다.'},403);
