@@ -1,0 +1,21 @@
+name: Ildan Live HTTPS Guest UI Smoke
+on:
+  pull_request:
+    paths:
+      - 'test/ildan-sseobom/supabase-staging/live_https_smoke.py'
+      - '.github/workflows/ildan-live-https-smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install synthetic browser smoke runner
+        run: python3 -m pip install --quiet playwright==1.57.0
+      - name: Verify deployed GitHub Pages, not local source
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+        run: python3 test/ildan-sseobom/supabase-staging/live_https_smoke.py
