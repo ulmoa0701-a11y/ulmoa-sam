@@ -371,11 +371,12 @@ function dataForm(role){
  </div></details>
  </div><!-- /parent-mode-advanced -->
  ${mediaWidget()}
- <div class="privacy-panel parent-privacy"><label class="checkbox"><input type="checkbox" name="share"><span>담당 치료사에게 전달하기<small>선택하지 않으면 내 기록에만 남아요.</small></span></label><div id="sharePicker" class="share-picker" hidden>
+ <div class="privacy-panel parent-privacy trial-sharing-hidden" hidden aria-hidden="true"><label class="checkbox"><input type="checkbox" name="share" disabled><span>담당 치료사에게 전달하기<small>선택하지 않으면 내 기록에만 남아요.</small></span></label><div id="sharePicker" class="share-picker" hidden>
  <p>관찰 내용을 공유하면 날짜·시간·장소·선택한 표시도 함께 전달돼요. 아래 추가 항목은 직접 고른 것만 보냅니다.</p>
  ${['observation','origin','context','childWords','response','after','impact','message'].map(k=>`<label><input type="checkbox" name="shareField" value="${k}" ${k==='observation'?'checked':''}><span>${NOTE_LABELS[k]}</span></label>`).join('')}
  </div></div>
- <button class="button entry-save" id="saveEntry">내 관찰 메모 저장</button><p class="parent-nudge">보호자는 관찰하거나 전해 들은 사실만 남기면 됩니다. 기록하지 않는 날도 괜찮습니다. 진단이나 원인 판단은 하지 않아도 됩니다. 실시간 상담·응급 연락창이 아닙니다.</p></form>`;
+ <div class="trial-storage-note" role="note"><strong>✓ 이 기기에 저장돼요</strong><span>저장 후 ‘내 기록’에서 다시 볼 수 있어요. 아직 치료사에게 전송되거나 다른 기기와 동기화되지는 않아요.</span></div>
+ <button class="button entry-save" id="saveEntry">💾 이 기기에 저장하기</button><p class="parent-nudge">보호자는 관찰하거나 전해 들은 사실만 남기면 됩니다. 기록하지 않는 날도 괜찮습니다. 진단이나 원인 판단은 하지 않아도 됩니다. 실시간 상담·응급 연락창이 아닙니다.</p></form>`;
  return `<form class="form entry-v5 student-journal" id="entryForm" data-journal-mode="quick">
  <div class="student-mode-header"><div class="student-mode-title">어떤 방식으로 남길까?</div><div class="journal-mode-switch" role="group" aria-label="기록 상세 정도 선택"><button class="journal-mode-btn active" type="button" data-journal-mode="quick" aria-pressed="true"><strong>⚡ 간편 기록</strong><small>한두 줄이면 끝</small></button><button class="journal-mode-btn" type="button" data-journal-mode="detail" aria-pressed="false"><strong>▤ 자세히 기록</strong><small>필요한 만큼 더 쓰기</small></button></div><p class="student-mode-hint" id="journalModeHint" aria-live="polite">한 줄만 남겨도 돼. 나머지는 선택이야.</p></div>
  <section class="student-info-card" aria-label="기록 날짜, 시간, 장소">
@@ -406,10 +407,11 @@ function dataForm(role){
  </div>
  <p id="journalHiddenNotice" class="journal-hidden-notice" hidden>자세히 기록에서 작성한 내용도 함께 보관돼. 다시 보려면 자세히 기록을 선택해.</p>
  ${mediaWidget()}
- <div class="privacy-panel student-share"><label class="checkbox"><input type="checkbox" name="share"><span>담당 치료사에게 기록 공유하기<small>기본 비공개 · 공유 내용은 직접 고를 수 있어.</small></span></label>
+ <div class="privacy-panel student-share trial-sharing-hidden" hidden aria-hidden="true"><label class="checkbox"><input type="checkbox" name="share" disabled><span>담당 치료사에게 기록 공유하기<small>기본 비공개 · 공유 내용은 직접 고를 수 있어.</small></span></label>
  <div id="sharePicker" class="share-picker" hidden><div class="student-share-bar"><strong>보낼 항목 선택</strong><div class="student-share-actions"><button type="button" class="button-ghost" id="studentSelectAll">전체 선택</button><button type="button" class="button-ghost" id="studentClearAll">선택 해제</button></div></div>
  ${['title','date','time','place','note','sketch','mood','energy','thought','body','action','experience','experienceImpact','abcBefore','abcBehavior','abcAfter'].map(k=>`<label class="student-share-field"><input type="checkbox" name="shareField" value="${k}"><span>${NOTE_LABELS[k]}</span></label>`).join('')}<p id="studentShareCount" aria-live="polite">보낼 항목을 선택해 줘. 작성하지 않은 항목은 선택되지 않아.</p><p>선택하지 않은 내용은 치료사에게 보내지 않아. 전송 전에 확인할 수 있어.</p></div></div>
- <button class="button entry-save" id="saveEntry">🔒 내 기록 저장</button><p class="student-save-note">매일 쓰지 않아도 괜찮아. 기록을 정확하게 쓰려 애쓸 필요도 없어. 실시간 상담·응급 연락창이 아니야. 체험판에서 저장한 글·사진·그림은 이 기기 브라우저에만 임시 보관돼. 실제 아동 정보는 입력하지 마.</p>
+ <div class="trial-storage-note" role="note"><strong>✓ 이 기기에 저장돼</strong><span>저장하면 ‘내 기록’에서 다시 볼 수 있어. 치료사에게 보내는 기능은 아직 준비 중이야.</span></div>
+ <button class="button entry-save" id="saveEntry">💾 이 기기에 저장하기</button><p class="student-save-note">매일 쓰지 않아도 괜찮아. 기록을 정확하게 쓰려 애쓸 필요도 없어. 실시간 상담·응급 연락창이 아니야. 체험판에서 저장한 글·사진·그림은 이 기기 브라우저에만 임시 보관돼. 실제 아동 정보는 입력하지 마.</p>
  </form>`;
 }function gatherEntry(f,role){
  const fields=role==='parent'?['date','time','place','observation','origin','context','childWords','response','after','impact','message']:['date','time','place','title','note','energy','thought','body','action','experience','experienceImpact','abcBefore','abcBehavior','abcAfter'];
@@ -515,15 +517,14 @@ function wireEntryForm(isParent){
   const meaningful=(isParent?!!entry.observation:['note','sketch','mood','energy','thought','body','action','experience','experienceImpact','abcBefore','abcBehavior','abcAfter'].some(k=>!!entry[k]))||!!entry.sketch||getPracticePhotos().length>0;
   if(!meaningful){toast('글, 사진, 그림 중 하나만 있어도 괜찮아.');return;}
   if(isParent&&!entry.date){toast('일이 있었던 날짜를 선택해 주세요.');return;}
-  const sharedFields=share.checked?selectedKeys().filter(k=>entry[k]):[];
-  if(isParent&&share.checked&&sharedFields.includes('observation')){for(const k of ['date','time','place','signals'])if(entry[k]&&!sharedFields.includes(k))sharedFields.push(k);}
-  if(share.checked){toast('체험 중에는 실제 전송이 안 돼. 공유를 해제하면 사진·그림을 이 기기에 임시 보관할 수 있어.');return;}
-  if(share.checked&&!sharedFields.some(k=>!['date','time','place','title'].includes(k))){toast('공유할 내용을 한 가지 이상 골라줘.');return;}
-  if(share.checked&&!(await confirmSharedEntry(sharedFields,entry)))return;
+  // Trial recording always goes into the current device. No clinical or media
+  // data is ever sent to a server here; no confusing share choice blocks save.
   loading(button,async()=>{
    const localEntry={...entry};const images=getPracticePhotos();if(images.length)localEntry.photos=images;
    await savePracticeRecord(me.id,me.role,localEntry);
-   activeView='history';toast('사진·그림까지 이 기기에 임시 보관했어.');await dashboard();
+   activeView='history';await dashboard();
+   toast('저장 완료! ‘내 기록’에서 다시 볼 수 있어.');
+   document.querySelector('[data-workspace-view="history"]')?.scrollIntoView({behavior:'smooth',block:'start'});
   });
  };
 }
@@ -720,7 +721,7 @@ async function therapistHome(){const r=await Promise.all([api('students'),api('d
  <input name="alias" maxlength="30" placeholder="예: 민수, 지우(가명)" required autocomplete="off"></label>
  <button class="button" type="submit">학생 추가하기</button></form>
  <p class="muted">이름은 학생 목록과 연결 메뉴에 표시됩니다. 현재 체험 단계에서는 실제 아동의 개인정보 대신 가상 이름을 사용해 주세요.</p><div class="student-list-summary" aria-label="등록된 학생"><strong>등록된 학생 (${students.length}명)</strong>${students.length?`<div class="student-list-chips">${students.map(s=>`<span class="student-list-chip">${sanitize(s.nickname)}</span>`).join("")}</div>`:`<p class="muted">등록된 학생이 없어요. 위에서 먼저 추가해 주세요.</p>`}</div><h3>2. 학생·보호자에게 보낼 링크 만들기</h3><p class="muted" id="inviteExplainer">등록된 학생을 선택해 주세요.</p><form id="inviteForm" class="form"><label>초대할 사람<select name="role" id="inviteRole"><option value="student">학생</option><option value="parent">보호자</option></select></label><label id="studentPicker">대상 학생<select name="studentId" ${students.length?"":"disabled"}>${students.map(s=>`<option value="${sanitize(s.id)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><button id="inviteSubmit" class="button" ${students.length?"":"disabled"}>학생 접속 링크 만들기</button></form><div id="inviteOutput"></div><section aria-label="발급한 초대 링크"><h3>초대 링크 관리</h3>
- <p>학생·보호자는 같은 링크로 계속 접속할 수 있어요. 링크가 잘못 전달됐다면 취소할 수 있어요. 링크 내용은 발급 직후에만 복사할 수 있습니다.</p>
+ <p>누구에게 보낸 링크인지 학생 이름과 구분해 표시합니다. 링크 자체는 발급 직후에만 복사할 수 있고, 잘못 전달한 링크는 취소할 수 있어요.</p>
  <div id="inviteList" role="status" aria-live="polite">목록을 불러오는 중입니다.</div></section></section><section class="panel" data-workspace-view="accounts"><span class="tag">02 / ACCOUNT HELP</span><h2>계정 접근 도움말</h2><p>기기를 바꾸거나 로그아웃해서 다시 접속해야 할 때 신원 확인 후 기존 계정용 링크를 새로 발급할 수 있어요.</p><label>대상 계정<select id="resetUser">${accounts.map(a=>`<option value="${sanitize(a.id)}">${sanitize(a.nickname)} · ${a.role==='student'?'학생':'학부모'}</option>`).join('')}</select></label><div class="buttons"><button id="resetIssue" class="button-ghost" ${accounts.length?'':'disabled'}>기존 계정 새 접속 링크 만들기</button></div><div id="resetOutput"></div></section><section class="panel full" data-workspace-view="drive"><span class="tag">03 / GOOGLE DRIVE</span><h2>Google Drive</h2><p>${drive.connected?'내 구글 계정이 연결돼 있습니다.':'구글 계정 연결 전입니다. 학생 기록은 아직 자동 업로드되지 않습니다.'}</p><div class="buttons"><button id="googleConnect" class="button-ghost" ${drive.configured&&drive.backupEnabled?'':'disabled'}>${drive.connected?'구글 계정 다시 연결':'내 구글 계정 연결'}</button><button id="driveSync" class="button" ${drive.connected&&drive.backupEnabled?'':'disabled'}>공유 기록 백업</button>${drive.folderUrl?`<a class="button-ghost" href="${sanitize(drive.folderUrl)}" target="_blank" rel="noopener noreferrer">내 드라이브 폴더 열기 ↗</a>`:''}</div>${!drive.backupEnabled?hint('보존·삭제·동의 및 사본 처리 정책 검증 전까지 Google Drive 백업이 비활성화되어 있습니다. 서버 공유를 취소해도 기존 다운로드 파일은 자동으로 회수되지 않습니다.'):!drive.configured?hint('구글 OAuth 관리자 설정이 아직 끝나지 않았습니다.'):''}<p>삭제 확인이 필요한 사본은 치료사의 기록 관리자에게 문의하세요.</p></section></div></div></div>`;
 attachShares();bindWorkspace();paintSketches();initSessionNotes();const rerenderInbox=()=>{const name=$('filterStudent').value,kind=$('filterKind').value;const list=records.filter(r=>(name==='all'||r.student===name)&&(kind==='all'||r.kind===kind));$('inboxResults').innerHTML=recordCards(list);paintSketches();};$('filterStudent').onchange=rerenderInbox;$('filterKind').onchange=rerenderInbox;$('refresh').onclick=()=>dashboard();$('csv').onclick=exportCSV;$('createStudentForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;
   loading(f.querySelector('button'),async()=>{
@@ -741,7 +742,9 @@ attachShares();bindWorkspace();paintSketches();initSessionNotes();const rerender
  };
  $('inviteRole').onchange=updateInviteHelp;updateInviteHelp();$('inviteForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;loading(f.querySelector('button'),async()=>{const out=await api('invites',{method:'POST',body:formValue(f,'role')==='student'
   ?{role:'student',targetUserId:formValue(f,'studentId')}
-  :{role:'parent',studentId:formValue(f,'studentId')}});const div=$('inviteOutput');div.innerHTML='<p class="muted">이 링크 하나로 학생·보호자가 접속해요. <strong>사용 횟수·기한 제한 없이</strong> 다시 들어올 수 있고, 필요하면 치료사가 링크를 취소할 수 있어요. 다른 사람에게 전달하지 않도록 안내해 줘.</p><textarea id="inviteCode" readonly aria-label="학생·보호자 접속 링크"></textarea><button class="button-ghost" type="button" id="copyCode">접속 링크 복사</button>';$('inviteCode').value=invitationUrl(out.invite);
+  :{role:'parent',studentId:formValue(f,'studentId')}});const selectedStudent=students.find(x=>x.id===formValue(f,'studentId'));
+ const recipient=(selectedStudent?.nickname||'선택한 학생')+' · '+(formValue(f,'role')==='student'?'학생용':'보호자용');
+ const div=$('inviteOutput');div.innerHTML='<p class="invite-issued-person"><strong>'+sanitize(recipient)+'</strong> 접속 링크를 만들었어요.</p><p class="muted">이 링크 하나로 계속 접속할 수 있어요. 다른 사람에게 전달하지 않도록 안내해 주세요.</p><textarea id="inviteCode" readonly aria-label="학생·보호자 접속 링크"></textarea><button class="button-ghost" type="button" id="copyCode">이 사람의 접속 링크 복사</button>';$('inviteCode').value=invitationUrl(out.invite);
 refreshInviteList();$('copyCode').onclick=()=>{navigator.clipboard.writeText(invitationUrl(out.invite)).then(()=>toast('링크를 복사했어요. 카카오톡으로 전달해 주세요.')).catch(()=>toast('복사가 차단돼 있습니다. 링크를 길게 눌러 복사해 주세요.'))}})};
 refreshInviteList();
 $('resetIssue').onclick=()=>loading($('resetIssue'),async()=>{
@@ -759,25 +762,32 @@ $('googleConnect').onclick=()=>{location.assign('/api/drive/start')};$('driveSyn
 async function refreshInviteList(){
  const el=$('inviteList');if(!el||me?.role!=='therapist')return;
  try{
-  const data=await api('invites');
-  const list=data.invites||[];
-  if(!list.length){el.textContent='아직 발급한 초대 링크가 없습니다.';return;}
+  const data=await api('invites'),list=data.invites||[];
+  if(!list.length){el.textContent='아직 발급한 접속 링크가 없습니다.';return;}
   el.innerHTML=list.map(i=>{
-   const label=i.role==='parent'?'보호자':'학생';
-   const status=i.revoked?'취소됨':i.active?(i.used?'계속 접속 가능 · 연결됨':'계속 접속 가능 · 연결 전'):'사용할 수 없음';
-   return `<div class="callout"><strong>${label} 초대 · ${status}</strong>
-    <p>사용 횟수·기한 제한 없음 · 링크를 받은 사람만 사용</p>
-    ${i.active?`<button type="button" class="button-ghost" data-revoke-digest="${sanitize(i.digest)}">이 링크 취소</button>`:''}</div>`;
+   const studentId=i.role==='parent'?i.studentId:(i.targetUserId||i.usedBy||i.studentId);
+   const student=students.find(s=>s.id===studentId);
+   const studentName=student?.nickname||'대상 확인 필요';
+   const isUnknown=!student;
+   const label=i.role==='parent'?'보호자용':'학생용';
+   const status=i.revoked?'취소됨':i.active?(i.used?'연결됨 · 다시 접속 가능':'아직 접속 전'):'사용할 수 없음';
+   const date=new Date(i.createdAt||'').toLocaleDateString('ko-KR');
+   return `<div class="invite-recipient-card ${i.revoked?'is-revoked':''}">
+     <div class="invite-card-top"><span class="invite-person">${sanitize(studentName)}</span><span class="invite-kind">${label}</span></div>
+     <p class="invite-state">${sanitize(status)} <small>· 발급 ${sanitize(date)}</small></p>
+     ${isUnknown?'<p class="invite-unknown">이전 링크의 학생 이름을 확인할 수 없어요. 사용하지 말고 취소한 뒤 해당 학생을 선택해 새로 발급해 주세요.</p>':''}
+     ${i.active?`<button type="button" class="button-ghost" data-revoke-digest="${sanitize(i.digest)}">이 접속 링크 취소</button>`:''}
+    </div>`;
   }).join('');
   el.querySelectorAll('[data-revoke-digest]').forEach(button=>{
    button.onclick=()=>loading(button,async()=>{
-    if(!window.confirm('이 초대 링크를 취소할까요? 취소하면 다시 사용할 수 없습니다.'))return;
+    if(!window.confirm('이 학생·보호자 접속 링크를 취소할까요? 취소하면 다시 사용할 수 없습니다.'))return;
     await api('revoke-invite',{method:'POST',body:{digest:button.dataset.revokeDigest}});
-    toast('초대 링크를 취소했습니다. 필요하면 새 링크를 발급해 주세요.');
+    toast('접속 링크를 취소했어요. 필요하면 새 링크를 발급해 주세요.');
     await refreshInviteList();
    });
   });
- }catch(e){el.textContent='초대 목록을 불러오지 못했습니다. '+e.message;}
+ }catch(e){el.textContent='접속 링크 목록을 불러오지 못했어요. '+e.message;}
 }
 function adminHome(){app.innerHTML=hero('계정 운영','최초 관리자 계정은 기록을 읽을 수 없습니다. 치료사 초대만 발급할 수 있어요.')+`<div class="panel"><h2>치료사 초대코드 발급</h2><p>치료사도 학생·학부모와 같은 패스키 방식으로 등록합니다.</p><button id="inviteTherapist" class="button">치료사 초대코드 만들기</button><div id="adminInvite"></div></div>`;$('inviteTherapist').onclick=e=>loading(e.target,async()=>{const r=await api('invites',{method:'POST',body:{role:'therapist'}});const d=$('adminInvite');d.innerHTML='<p>코드를 복사해 치료사에게 개별 전달하세요. 7일간 유효합니다.</p><textarea readonly id="adminCode"></textarea>';$('adminCode').value=r.invite;})}
 async function dashboard(){header();records=me.role==='admin'?[]:(await api('records')).records??[];
