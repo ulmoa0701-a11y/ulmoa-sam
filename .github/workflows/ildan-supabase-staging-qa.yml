@@ -4,6 +4,7 @@ on:
     branches:
       - feature/ildan-supabase-staging-ui-20261014
       - feature/ildan-invite-kakao-staging-20261015
+      - feature/ildan-clinician-phone-staging-20261015
     paths:
       - 'test/ildan-sseobom/supabase-staging/**'
       - '.github/workflows/ildan-supabase-staging-qa.yml'
