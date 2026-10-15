@@ -118,6 +118,7 @@ with sync_playwright() as p:
   page.locator('textarea[name=note]').fill('수정한 가상 기록 - 편집 완료')
   page.locator('[data-remove-photo="0"]').click()
   page.locator('#photoUpload').set_input_files({'name':'replacement.png','mimeType':'image/png','buffer':png()})
+  page.locator('.photo-thumbnail img').wait_for(timeout=10000)
   assert page.locator('.photo-thumbnail').count()==1
   page.locator('#saveEntry').click()
   page.locator('.practice-cloud-record').wait_for(timeout=12000)
