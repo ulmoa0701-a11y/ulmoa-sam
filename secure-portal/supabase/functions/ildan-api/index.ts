@@ -8,6 +8,9 @@ import {validateEntry,sharedSelection,validateSessionEntry} from './record-contr
 const encoder=new TextEncoder(),decoder=new TextDecoder();
 const env=(s:string)=>Deno.env.get(s)||'';
 const maxBody=28000;
+const sandboxSignupAllowed=()=>env('SUPABASE_URL')==='https://miohovwmhmtcvkurjamm.supabase.co'
+ && env('CLINICAL_WRITES_ENABLED')!=='true';
+
 type Obj=Record<string,unknown>;
 const resp=(x:Obj,status=200,origin='')=>new Response(JSON.stringify(x),{
  status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',
@@ -38,7 +41,7 @@ async function openJSON(nonce:string,ciphertext:string){
 }
 const requireText=(o:Obj,key:string)=>typeof o[key]==='string'?String(o[key]):'';
 const roles=new Set(['student','parent','therapist']);
-const endpoints=new Set(['me','records','share','unshare','session-notes','students','accounts','invites','claim-invite','invite-preview','invite-register','delete-record','revoke-invite','drive/status','health']);
+const endpoints=new Set(['test-therapist-signup','test-therapist-delete','me','records','share','unshare','session-notes','students','accounts','invites','claim-invite','invite-preview','invite-register','delete-record','revoke-invite','drive/status','health']);
 const getRole=async(userDb:any,id:string)=>{
  const {data,error}=await userDb.from('ildan_members').select('user_id,role,therapist_id,student_id,display_alias').eq('user_id',id).maybeSingle();
  if(error)throw Error('ROLE_LOOKUP_FAILED');
@@ -85,6 +88,47 @@ export async function handle(request:Request):Promise<Response>{
  if(!endpoints.has(apiName))return send({error:'경로를 찾을 수 없습니다.'},404);
  if(!['GET','POST'].includes(request.method))return send({error:'지원하지 않는 요청입니다.'},405);
  if(apiName==='health'&&request.method==='GET')return send({ready:!!(env('SUPABASE_URL')&&env('SUPABASE_ANON_KEY')&&env('SUPABASE_SERVICE_ROLE_KEY')&&env('RECORD_ENCRYPTION_KEY')),mode:'not-approved-for-clinical-use'});
+ // Staging-only account signup: no real email, no OTP, no SMS, no clinical data writes.
+ // This explicitly DOES NOT grant any privileges in future clinical deployments.
+ if(apiName==='test-therapist-signup'&&request.method==='POST'){
+  if(!sandboxSignupAllowed())return send({error:'체험 계정 생성은 개발 환경에서만 가능합니다.'},403);
+  if(origin!=='https://ulmoa0701-a11y.github.io')
+   return send({error:'공개 홈페이지에서만 체험 계정을 만들 수 있습니다.'},403);
+  const form=await body(request);
+  const nickname=requireText(form,'username').normalize('NFC').trim().toLowerCase();
+  const password=requireText(form,'password');
+  if(!/^[a-z0-9가-힣_-]{3,20}$/.test(nickname))
+   return send({error:'아이디는 한글·영문·숫자·밑줄·하이픈 3~20글자로 입력해 주세요.'},400);
+  if(password.length<8||password.length>72||!/[A-Za-z가-힣]/.test(password)||!/[0-9]/.test(password))
+   return send({error:'비밀번호는 8~72글자이며 문자와 숫자를 함께 사용해야 합니다.'},400);
+  const email='trial-'+(await digest(nickname)).slice(0,48)+'@members.ildan.example';
+  const admin=adminDb();
+  const {count,error:countError}=await admin.from('ildan_members')
+   .select('user_id',{count:'exact',head:true}).eq('role','therapist');
+  if(countError)return send({error:'체험 계정 현황을 확인할 수 없습니다.'},503);
+  if((count||0)>=30)return send({error:'체험 계정 생성 한도에 도달했습니다. 담당자에게 문의해 주세요.'},429);
+  const {data:created,error:createdError}=await admin.auth.admin.createUser({
+   email,password,email_confirm:true,
+   app_metadata:{enrollment:'sandbox-self-signup',role:'unassigned'}
+  });
+  if(createdError||!created?.user){
+   const text=String(createdError?.message||'');
+   if(/already|registered|exists|duplicate/i.test(text))
+    return send({error:'이미 사용 중인 아이디입니다. 다른 아이디를 선택하거나 로그인해 주세요.'},409);
+   return send({error:'계정을 만들지 못했습니다. 다른 아이디로 다시 시도해 주세요.'},503);
+  }
+  const uid=created.user.id;
+  const {error:memberError}=await admin.from('ildan_members').insert({
+   user_id:uid,role:'therapist',display_alias:nickname
+  });
+  if(memberError){
+   await admin.auth.admin.deleteUser(uid).catch(()=>{});
+   return send({error:'계정 연결에 실패했습니다. 다시 시도해 주세요.'},503);
+  }
+  return send({ok:true,trial:true,
+   notice:'체험 계정이 만들어졌습니다. 이제 바로 로그인합니다. 실제 아동·상담 정보는 저장하지 마세요.'},201);
+ }
+
  // Link previews do not consume invitation tokens. Useful in KakaoTalk in-app
  // browser and externally opened Chrome/Samsung Internet/Safari alike.
  // Hash fragments in invite URLs are never transmitted by the HTTP request.
@@ -142,7 +186,7 @@ export async function handle(request:Request):Promise<Response>{
    p_code_digest:hash,p_user_id:uid,p_verification_digest:await digest(checkCode)
   });
   if(claimError||claimed!==invite.role){
-   await admin.auth.admin.deleteUser(uid).catch(()=>{});
+   if(createdNew)await admin.auth.admin.deleteUser(uid).catch(()=>{});
    return send({error:'이미 사용된 링크이거나 등록이 허용되지 않았습니다.'},403);
   }
   return send({ok:true,role:claimed,tokenHash,otpType:'magiclink',
@@ -159,7 +203,7 @@ export async function handle(request:Request):Promise<Response>{
    return send({error:'과거 초대코드 등록 방식은 폐기되었습니다. 담당 치료사에게 새로운 링크를 요청해 주세요.'},410);
   if(!member||!roles.has(member.role))return send({error:'승인된 학생·보호자·치료사 계정이 아닙니다.'},403);
   const admin=adminDb();
-  if(apiName==='me'&&request.method==='GET')return send({user:{id:uid,role:member.role,nickname:member.display_alias||member.role,therapistId:member.therapist_id,studentId:member.student_id}});
+  if(apiName==='me'&&request.method==='GET')return send({user:{id:uid,role:member.role,nickname:member.display_alias||member.role,trial:user.app_metadata?.enrollment==='sandbox-self-signup',therapistId:member.therapist_id,studentId:member.student_id}});
   if(apiName==='students'&&request.method==='GET'){
    if(member.role!=='therapist')return send({error:'치료사 전용입니다.'},403);
    const {data,error}=await userDb.from('ildan_members').select('user_id,display_alias').eq('therapist_id',uid).eq('role','student');
@@ -193,6 +237,22 @@ export async function handle(request:Request):Promise<Response>{
    }
    return send({student:{id:newUid,nickname:alias,registeredDevice:false},
     notice:'학생의 실제 이름 대신 내부 별칭만 사용하세요. 학생에게 링크를 발급하면 별도 신원 확인 후 접속할 수 있습니다.'},201);
+  }
+  if(apiName==='test-therapist-delete'&&request.method==='POST'){
+   if(!sandboxSignupAllowed()||member?.role!=='therapist'
+    ||user.app_metadata?.enrollment!=='sandbox-self-signup')
+    return send({error:'체험 계정만 삭제할 수 있습니다.'},403);
+   const {count:studentsCount,error:studentsError}=await admin.from('ildan_members')
+    .select('user_id',{count:'exact',head:true}).eq('therapist_id',uid);
+   if(studentsError||studentsCount!==0)
+    return send({error:'연결된 학생·보호자가 있으면 계정을 삭제할 수 없습니다.'},409);
+   const {count:invitesCount,error:invitesError}=await admin.from('ildan_invites')
+    .select('code_digest',{count:'exact',head:true}).eq('therapist_id',uid);
+   if(invitesError||invitesCount!==0)
+    return send({error:'초대 링크가 남아 있으면 계정을 삭제할 수 없습니다.'},409);
+   const {error:deleteError}=await admin.auth.admin.deleteUser(uid);
+   if(deleteError)return send({error:'계정 삭제가 완료되지 않았습니다.'},503);
+   return send({ok:true,deleted:true});
   }
   if(apiName==='accounts'&&request.method==='GET'){
    if(member.role!=='therapist')return send({error:'치료사 전용입니다.'},403);

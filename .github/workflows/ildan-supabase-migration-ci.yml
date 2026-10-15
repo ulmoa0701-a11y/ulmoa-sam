@@ -52,9 +52,9 @@ jobs:
           const html=fs.readFileSync('secure-portal/supabase/web/index.html','utf8');
           const cfg=fs.readFileSync('secure-portal/supabase/web/config.js','utf8');
           assert(js.includes("supabase.auth.verifyOtp"));
-          assert(js.includes('supabase.auth.signInWithPasskey()'));
+          assert(js.includes('supabase.auth.signInWithPassword({email,password})'),'Password-based sandbox login required');
           assert(!['signInWithOtp({phone','phoneRequestForm','phoneVerifyForm','emailRequestForm','emailVerifyForm'].some(x=>js.includes(x)),'No SMS or guardian email forms');
-          assert(js.includes('shouldCreateUser:true')&&js.includes('registerTherapistPasskey'),'Therapist-first setup must be present');
+          assert(js.includes("test-therapist-signup")&&js.includes('signInWithPassword'),'Email-free trial therapist setup must be present');
           assert(js.includes("api('revoke-invite'"),'Therapist must be able to revoke invites');
           assert(js.includes("publicInviteApi('invite-register',code,{verificationCode})"),'Link plus secondary code required in client');
           assert(!js.includes("api('passkeys/login/verify'"));
@@ -98,6 +98,8 @@ jobs:
           assert(src.includes("apiName==='unshare'"));
           assert(src.includes("apiName==='claim-invite'"));
           assert(src.includes("apiName==='session-notes'"));
+          assert(src.includes("apiName==='test-therapist-signup'") && src.includes("CLINICAL_WRITES_ENABLED") && src.includes("sandbox-self-signup"),'Anonymous signup only while staging writes are disabled');
+          assert(src.includes("test-therapist-delete") && src.includes("studentsCount!==0"),'Only empty own sandbox account can be removed');
           assert(src.includes("apiName==='students'&&request.method==='POST'")&&src.includes("role:'student',therapist_id:uid"),'Therapist-only student workspace creation required');
           assert(src.includes("apiName==='revoke-invite'") && src.includes(".eq('therapist_id',uid)"),'Only clinician may revoke own unclaimed links');
           assert(sql.includes('ENABLE ROW LEVEL SECURITY'));
