@@ -92,7 +92,7 @@ async function openJSON(nonce:string,ciphertext:string){
 }
 const requireText=(o:Obj,key:string)=>typeof o[key]==='string'?String(o[key]):'';
 const roles=new Set(['student','parent','therapist']);
-const endpoints=new Set(['test-therapist-signup','test-therapist-delete','me','records','share','unshare','session-notes','students','accounts','invites','claim-invite','invite-preview','invite-register','delete-record','revoke-invite','drive/status','health','practice-records','practice-media-sign','practice-share','practice-unshare','practice-delete']);
+const endpoints=new Set(['test-therapist-signup','test-therapist-delete','me','records','share','unshare','session-notes','students','accounts','invites','claim-invite','invite-preview','invite-register','delete-record','revoke-invite','drive/status','health','practice-records','practice-media-sign','practice-share','practice-unshare','practice-delete','practice-update']);
 const getRole=async(userDb:any,id:string)=>{
  const {data,error}=await userDb.from('ildan_members').select('user_id,role,therapist_id,student_id,display_alias').eq('user_id',id).maybeSingle();
  if(error)throw Error('ROLE_LOOKUP_FAILED');
@@ -425,25 +425,72 @@ export async function handle(request:Request):Promise<Response>{
      const ids=[...names.keys()];
      if(!ids.length)return send({records:[]});
      const {data,error}=await admin.from('ildan_practice_records')
-      .select('id,kind,student_id,author_id,shared_nonce,shared_ciphertext,created_at')
+      .select('id,kind,student_id,author_id,shared_nonce,shared_ciphertext,created_at,updated_at')
       .eq('therapist_id',uid).in('student_id',ids)
       .not('shared_at','is',null).order('created_at',{ascending:false}).limit(120);
      if(error)throw Error('PRACTICE_READ_FAILED');
      return send({records:await Promise.all((data||[]).map(async(r:any)=>({
       id:r.id,kind:r.kind,studentId:r.student_id,student:names.get(r.student_id),
-      author:r.kind==='student'?'연습 학생':'연습 보호자',createdAt:r.created_at,
+      author:r.kind==='student'?'연습 학생':'연습 보호자',createdAt:r.created_at,updatedAt:r.updated_at,
       shared:true,practice:true,
       entry:await practiceForView(admin,{nonce:r.shared_nonce,ciphertext:r.shared_ciphertext},r.author_id)
      })))});
     }
     const {data,error}=await admin.from('ildan_practice_records')
-     .select('id,kind,author_id,private_nonce,private_ciphertext,shared_at,created_at')
+     .select('id,kind,author_id,private_nonce,private_ciphertext,shared_at,created_at,updated_at')
      .eq('author_id',uid).order('created_at',{ascending:false}).limit(120);
     if(error)throw Error('PRACTICE_READ_FAILED');
-    return send({records:await Promise.all((data||[]).map(async(r:any)=>({
-     id:r.id,kind:r.kind,createdAt:r.created_at,shared:!!r.shared_at,practice:true,
-     entry:await practiceForView(admin,{nonce:r.private_nonce,ciphertext:r.private_ciphertext},uid)
-    })))});
+    return send({records:await Promise.all((data||[]).map(async(r:any)=>{
+     const privateEntry=await practiceOpen(r.private_nonce,r.private_ciphertext);
+     return {id:r.id,kind:r.kind,createdAt:r.created_at,updatedAt:r.updated_at,
+      shared:!!r.shared_at,practice:true,
+      // Only the author receives paths needed for retaining/removing own photos.
+      photoPaths:Array.isArray(privateEntry.photos)?privateEntry.photos:[],
+      entry:await practiceForView(admin,{nonce:r.private_nonce,ciphertext:r.private_ciphertext},uid)};
+    }))});
+   }
+   if(apiName==='practice-update'&&request.method==='POST'){
+    if(!['student','parent'].includes(member.role))
+     return send({error:'작성자만 수정할 수 있습니다.'},403);
+    const b=await body(request),id=requireText(b,'recordId');
+    const revision=requireText(b,'expectedUpdatedAt'),share=b.share===true;
+    if(!UUID_RE.test(id)||!revision||!Number.isFinite(Date.parse(revision)))
+     return send({error:'기록 수정 정보가 올바르지 않습니다.'},400);
+    const {data:old,error:readError}=await admin.from('ildan_practice_records')
+     .select('id,author_id,student_id,therapist_id,kind,private_nonce,private_ciphertext,shared_at,updated_at')
+     .eq('id',id).eq('author_id',uid).maybeSingle();
+    if(readError||!old||old.kind!==member.role)
+     return send({error:'본인의 기록만 수정할 수 있습니다.'},403);
+    if(old.updated_at!==revision)
+     return send({error:'다른 기기에서 이 기록이 수정됐어. 내 기록을 다시 불러와 줘.'},409);
+    if(old.therapist_id!==member.therapist_id||
+       (member.role==='student'&&old.student_id!==uid)||
+       (member.role==='parent'&&old.student_id!==member.student_id)||
+       !(await checkStudent(admin,old.student_id,old.therapist_id)))
+     return send({error:'담당 학생·치료사 연결이 변경되었습니다.'},403);
+    const entry=validatePractice(b.entry,uid);
+    const previous=await practiceOpen(old.private_nonce,old.private_ciphertext);
+    const previousPhotos=Array.isArray(previous.photos)?previous.photos.filter((p:any)=>pathBelongsTo(p,uid)):[];
+    const nextPhotos=Array.isArray(entry.photos)?entry.photos:[];
+    const priv=await practiceSeal(entry),shared=share?await practiceSeal(entry):null;
+    const now=new Date().toISOString();
+    const {data:changed,error:updateError}=await admin.from('ildan_practice_records')
+     .update({private_nonce:priv.nonce,private_ciphertext:priv.ciphertext,
+      shared_nonce:shared?.nonce||null,shared_ciphertext:shared?.ciphertext||null,
+      shared_at:share?(old.shared_at||now):null,updated_at:now})
+     .eq('id',id).eq('author_id',uid).eq('updated_at',revision)
+     .select('id,updated_at');
+    if(updateError)throw Error('PRACTICE_UPDATE_FAILED');
+    if(!changed?.length)
+     return send({error:'기록이 다른 기기에서 변경됐어. 다시 불러와 줘.'},409);
+    const deleted=previousPhotos.filter((p:string)=>!nextPhotos.includes(p));
+    let cleanupPending=false;
+    if(deleted.length){
+     const {error:cleanupError}=await admin.storage.from(PRACTICE_BUCKET).remove(deleted);
+     cleanupPending=!!cleanupError;
+    }
+    return send({ok:true,recordId:id,updatedAt:changed[0].updated_at,
+     shared:share,photoCleanupPending:cleanupPending});
    }
    if(['practice-share','practice-unshare','practice-delete'].includes(apiName)
      &&request.method==='POST'){
