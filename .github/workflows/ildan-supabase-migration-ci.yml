@@ -56,7 +56,7 @@ jobs:
           assert(!['signInWithOtp({phone','phoneRequestForm','phoneVerifyForm','emailRequestForm','emailVerifyForm'].some(x=>js.includes(x)),'No SMS or guardian email forms');
           assert(js.includes('shouldCreateUser:true')&&js.includes('registerTherapistPasskey'),'Therapist-first setup must be present');
           assert(js.includes("api('revoke-invite'"),'Therapist must be able to revoke invites');
-          assert(js.includes("api('claim-invite'"));
+          assert(js.includes("publicInviteApi('invite-register',code,{verificationCode})"),'Link plus secondary code required in client');
           assert(!js.includes("api('passkeys/login/verify'"));
           assert(js.includes("credentials:'omit'"));
           assert(html.includes('실제 학생·보호자 상담정보 입력 금지'));
@@ -76,7 +76,9 @@ jobs:
             -f secure-portal/supabase/migrations/20261014000200_private_record_author_only.sql \
             -f secure-portal/supabase/tests/01_role_isolation.sql \
             -f secure-portal/supabase/migrations/20261015000100_email_free_one_time_invite.sql \
-            -f secure-portal/supabase/tests/02_invite_link_role_sql.sql
+            -f secure-portal/supabase/tests/02_invite_link_role_sql.sql \
+            -f secure-portal/supabase/migrations/20261015000200_out_of_band_identity_code.sql \
+            -f secure-portal/supabase/tests/03_out_of_band_invite.sql
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
