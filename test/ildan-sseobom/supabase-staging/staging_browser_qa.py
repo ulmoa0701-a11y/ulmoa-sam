@@ -57,6 +57,7 @@ with sync_playwright() as p:
   assert page.locator('#phoneRequestForm').count()==0
   assert page.locator('#phoneVerifyForm').count()==0
   page.locator('#returnChoice').click()
+  page.locator('#passkeySupportStatus').get_by_text('아직 서버에서 준비되지 않았어요.',exact=False).wait_for(timeout=15000)
   assert page.locator('#loginPasskey').is_visible(),'returning users can reach registered passkey'
   assert page.locator('#loginPasskey').is_disabled(),'server-disabled passkeys must not invite failed login'
   assert page.locator('#returnEmail').is_visible(),'clinician email recovery offered'
