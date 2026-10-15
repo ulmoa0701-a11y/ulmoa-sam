@@ -958,3 +958,5 @@ form[hidden], .form[hidden] {display:none !important;}
 #cancelPracticeEdit{display:block;margin-top:12px;min-height:48px;width:100%}
 .practice-record-actions [data-practice-edit]{border-color:#b5c8e5;color:#29589f;font-weight:800}
 @media(max-width:540px){.practice-edit-header{padding:13px 14px}}
+
+.practice-sync-box[hidden]{display:none!important}
