@@ -1,0 +1,100 @@
+name: Ildan real practice cloud sync role isolation QA
+on:
+  push:
+    branches:
+      - qa/ildan-practice-real-e2e-20261015
+    paths:
+      - '.github/workflows/ildan-real-practice-sync-e2e.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-synthetic-roundtrip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create synthetic student, upload JPEG, save/share/read/revoke/delete on live staging
+        shell: bash
+        run: |
+          node <<'JS'
+          const fs=require('node:fs'),crypto=require('node:crypto');
+          const key=fs.readFileSync('test/ildan-sseobom/supabase-staging/config.js','utf8').match(/publishableKey:"([^"]+)"/)?.[1];
+          if(!key)throw Error('Missing publishable key');
+          const base='https://miohovwmhmtcvkurjamm.supabase.co',api=base+'/functions/v1/ildan-api/';
+          const originalHeaders={apikey:key,'Content-Type':'application/json',Origin:'https://ulmoa0701-a11y.github.io'};
+          const username='qa'+crypto.randomBytes(6).toString('hex'),password='Q3'+crypto.randomBytes(20).toString('hex');
+          const email='trial-'+crypto.createHash('sha256').update(username).digest('hex').slice(0,48)+'@members.ildan.example';
+          const ids={};let recordId=null,mediaPath=null;
+          const check=(ok,msg)=>{if(!ok)throw Error(msg)};
+          async function request(path,body,token,method='POST'){
+           const headers={...originalHeaders};if(token)headers.Authorization='Bearer '+token;
+           const res=await fetch(api+path,{method,headers,...(method==='GET'?{}:{body:JSON.stringify(body||{})}),signal:AbortSignal.timeout(25000)});
+           return {status:res.status,data:await res.json().catch(()=>({}))};
+          }
+          async function auth(path,body){
+           const res=await fetch(base+'/auth/v1/'+path,{method:'POST',headers:{apikey:key,'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(25000)});
+           return {status:res.status,data:await res.json().catch(()=>({}))};
+          }
+          (async()=>{
+           const health=await request('health',null,null,'GET');
+           check(health.status===200&&health.data.mode==='not-approved-for-clinical-use','Real clinical writes should stay locked');
+           const creation=await request('test-therapist-signup',{username,password});
+           check(creation.status===201,'Therapist synthetic create error '+JSON.stringify({status:creation.status,detail:creation.data.error}));
+           const login=await auth('token?grant_type=password',{email,password});
+           check(login.status===200&&login.data.access_token,'Therapist authentication failed');
+           ids.therapist=login.data.user.id;const therapistToken=login.data.access_token;
+           const student=await request('students',{alias:'가상_기록QA'},therapistToken);
+           check(student.status===201&&student.data.student?.id,'student create '+JSON.stringify(student));
+           ids.student=student.data.student.id;
+           const invite=await request('invites',{role:'student',targetUserId:ids.student},therapistToken);
+           check(invite.status===200&&invite.data.invite,'student invite failed');
+           const authLink=await request('invite-register',{code:invite.data.invite});
+           check(authLink.status===200&&authLink.data.tokenHash,'student invitation exchange failed');
+           const verify=await auth('verify',{type:'magiclink',token_hash:authLink.data.tokenHash});
+           check(verify.status===200&&verify.data.access_token,'student login failed');
+           const studentToken=verify.data.access_token;
+           const empty=await request('practice-records',null,therapistToken,'GET');
+           check(empty.status===200&&!empty.data.records?.length,'Therapist initial practice inbox not empty');
+           const media=await request('practice-media-sign',{},studentToken);
+           check(media.status===200&&media.data.bucket==='ildan-practice-media'&&media.data.token,'image signing failed '+JSON.stringify({status:media.status,detail:media.data.error}));
+           mediaPath=media.data.path;
+           const jpg=Buffer.from('/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAoHBwgHBgoICAgLCgoLDhgQDg0NDh0VFhEYIx8lJCIfIiEmKzcvJik0KSEiMEExNDk7Pj4+JS5ESUM8SDc9Pjv/2wBDAQoLCw4NDhwQEBw7KCIoOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozv/wAARCAACAAIDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLTNXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiiigD//2Q==','base64');
+           const uploaded=await fetch(base+'/storage/v1/object/upload/sign/'+media.data.bucket+'/'+mediaPath+'?token='+encodeURIComponent(media.data.token),{
+            method:'PUT',headers:{'Content-Type':'image/jpeg'},body:jpg,signal:AbortSignal.timeout(25000)});
+           check(uploaded.ok,'SIGNED_UPLOAD_FAILED '+uploaded.status+' '+(await uploaded.text()).slice(0,300));
+           const entry={date:'2026-10-15',note:'가상 연습기록 QA - 실사용자 자료 아님',photos:[mediaPath],
+            sketch:'[[[20,20],[60,70],[100,100]]]'};
+           const saved=await request('practice-records',{entry,share:true},studentToken);
+           check(saved.status===201&&saved.data.record?.id,'record save failed '+JSON.stringify(saved));
+           recordId=saved.data.record.id;
+           const teacher=await request('practice-records',null,therapistToken,'GET');
+           check(teacher.status===200&&teacher.data.records?.length===1,'Teacher must receive exactly one shared record '+JSON.stringify(teacher));
+           const visible=teacher.data.records[0];
+           check(visible.entry.note===entry.note&&visible.entry.photos?.length===1&&visible.entry.photos[0].includes('storage/v1/object/sign/'),'Shared text/photo not found');
+           const owner=await request('practice-records',null,studentToken,'GET');
+           check(owner.status===200&&owner.data.records?.length===1,'student cross-device API record missing');
+           const revoke=await request('practice-unshare',{recordId},studentToken);
+           check(revoke.status===200,'Unshare failed '+JSON.stringify(revoke));
+           const hidden=await request('practice-records',null,therapistToken,'GET');
+           check(hidden.status===200&&!hidden.data.records?.length,'Teacher still sees unshared record');
+           const again=await request('practice-share',{recordId},studentToken);
+           check(again.status===200,'reshare failed');
+           const reshared=await request('practice-records',null,therapistToken,'GET');
+           check(reshared.status===200&&reshared.data.records?.length===1,'reshare unavailable');
+           const erased=await request('practice-delete',{recordId},studentToken);
+           check(erased.status===200&&erased.data.deleted===true,'delete failed');
+           recordId=null;
+           const emptyAgain=await request('practice-records',null,therapistToken,'GET');
+           check(emptyAgain.status===200&&emptyAgain.data.records?.length===0,'Deleted record is still visible');
+           const wrong=await request('practice-records',{entry,share:true},null);
+           check(wrong.status===401,'Anonymous practice write accepted');
+           console.log('PASS REAL SANDBOX: student sign-in -> private JPEG upload -> encrypted record -> therapist share -> unshare -> reshare -> delete -> anonymous denied');
+           console.log('SYNTHETIC_CLEANUP_IDS='+JSON.stringify(ids));
+          })().catch(e=>{
+           console.error('FAIL '+e.message);
+           console.error('SYNTHETIC_CLEANUP_IDS='+JSON.stringify(ids));
+           if(recordId)console.error('WARNING temp practice record remains; delete only synthetic user via guarded admin cleanup');
+           process.exitCode=1;
+          });
+          JS
