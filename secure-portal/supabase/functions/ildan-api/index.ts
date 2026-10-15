@@ -92,10 +92,10 @@ export async function handle(request:Request):Promise<Response>{
   const b=await body(request),code=requireText(b,'code');
   if(!/^[0-9a-f]{64}$/.test(code))return send({error:'유효한 초대 링크가 아닙니다.'},400);
   const {data,error}=await adminDb().from('ildan_invites')
-   .select('role,expires_at,verification_digest').eq('code_digest',await digest(code))
+    .select('role,expires_at,verification_digest,target_user_id').eq('code_digest',await digest(code))
    .is('used_by',null).gt('expires_at',new Date().toISOString()).maybeSingle();
   if(error||!data)return send({error:'링크가 만료되었거나 이미 사용되었습니다.'},404);
-  return send({role:data.role,expiresAt:data.expires_at,requiresDeviceSetup:false,registrationOpen:!!data.verification_digest,needsSeparateVerificationCode:true,
+  return send({role:data.role,expiresAt:data.expires_at,requiresDeviceSetup:false,registrationOpen:!!data.verification_digest,recovery:!!data.target_user_id,needsSeparateVerificationCode:true,
    notice:'링크를 열었다고 등록되지는 않습니다. 사용자의 확인 후 1회 등록합니다.'});
  }
  // Registration requires BOTH a 256-bit one-time link and an independent
@@ -109,26 +109,33 @@ export async function handle(request:Request):Promise<Response>{
   if(!env('SUPABASE_SERVICE_ROLE_KEY'))return send({error:'서버 설정 확인이 필요합니다.'},503);
   const admin=adminDb(),hash=await digest(code);
   const {data:invite,error:readError}=await admin.from('ildan_invites')
-   .select('role,expires_at').eq('code_digest',hash)
+   .select('role,expires_at,target_user_id').eq('code_digest',hash)
    .eq('verification_digest',await digest(checkCode))
    .is('used_by',null).gt('expires_at',new Date().toISOString()).maybeSingle();
   if(readError||!invite)return send({error:'링크가 만료되었거나 본인 확인 코드가 맞지 않습니다.'},403);
   // Mint an internal, non-deliverable email identity. It is never an end-user
   // email address and the random password is NOT shown, stored, or reused.
   // Only verified passkeys will enable durable passwordless sign-in after signup.
-  const userId=crypto.randomUUID();
-  const email='member-'+userId+'@members.ildan.example';
-  const password=hex(crypto.getRandomValues(new Uint8Array(32)));
-  const {data:created,error:createError}=await admin.auth.admin.createUser({
-   email,password,email_confirm:true,
-   app_metadata:{enrollment:'clinic-invite',role:'unassigned'}
-  });
-  if(createError||!created?.user)return send({error:'계정 생성에 실패했습니다. 담당 치료사에게 문의해 주세요.'},503);
-  const uid=created.user.id;
+  let uid='',email='',createdNew=false;
+  if(invite.target_user_id){
+   const {data:existing,error:existingError}=await admin.auth.admin.getUserById(invite.target_user_id);
+   if(existingError||!existing?.user?.email)return send({error:'복구할 계정이 없습니다. 담당 치료사에게 문의해 주세요.'},404);
+   uid=existing.user.id;email=existing.user.email;
+  }else{
+   const userId=crypto.randomUUID();
+   email='member-'+userId+'@members.ildan.example';
+   const password=hex(crypto.getRandomValues(new Uint8Array(32)));
+   const {data:created,error:createError}=await admin.auth.admin.createUser({
+    email,password,email_confirm:true,
+    app_metadata:{enrollment:'clinic-invite',role:'unassigned'}
+   });
+   if(createError||!created?.user)return send({error:'계정 생성에 실패했습니다. 담당 치료사에게 문의해 주세요.'},503);
+   uid=created.user.id;createdNew=true;
+  }
   const {data:link,error:linkError}=await admin.auth.admin.generateLink({type:'magiclink',email});
   const tokenHash=link?.properties?.hashed_token;
   if(linkError||!tokenHash){
-   await admin.auth.admin.deleteUser(uid).catch(()=>{});
+   if(createdNew)await admin.auth.admin.deleteUser(uid).catch(()=>{});
    return send({error:'기기 등록을 준비하지 못했습니다.'},503);
   }
   const {data:claimed,error:claimError}=await admin.rpc('ildan_claim_invite_for_user',{
@@ -168,11 +175,11 @@ export async function handle(request:Request):Promise<Response>{
   if(apiName==='invites'&&request.method==='GET'){
    if(member.role!=='therapist')return send({error:'치료사 전용입니다.'},403);
    const {data,error}=await admin.from('ildan_invites')
-    .select('code_digest,role,student_id,created_at,expires_at,used_by')
+    .select('code_digest,role,student_id,target_user_id,created_at,expires_at,used_by')
     .eq('therapist_id',uid).order('created_at',{ascending:false}).limit(50);
    if(error)throw Error('INVITE_LIST_FAILED');
    return send({invites:(data||[]).map((x:any)=>({
-    digest:x.code_digest,role:x.role,studentId:x.student_id,
+    digest:x.code_digest,role:x.role,studentId:x.student_id,recovery:!!x.target_user_id,
     createdAt:x.created_at,expiresAt:x.expires_at,used:!!x.used_by,
     active:!x.used_by&&new Date(x.expires_at).getTime()>Date.now()
    }))});
@@ -191,20 +198,30 @@ export async function handle(request:Request):Promise<Response>{
   }
   if(apiName==='invites'&&request.method==='POST'){
    if(member.role!=='therapist')return send({error:'담당 치료사만 초대할 수 있습니다.'},403);
-   const b=await body(request),role=requireText(b,'role'),studentId=requireText(b,'studentId')||null;
+   const b=await body(request),role=requireText(b,'role');
+   let studentId=requireText(b,'studentId')||null;
+   const targetUserId=requireText(b,'targetUserId')||null;
    if(!['student','parent'].includes(role))return send({error:'초대할 사용자 구분이 올바르지 않습니다.'},400);
-   if(role==='parent'&&!studentId)return send({error:'학생을 선택해 주세요.'},400);
+   if(targetUserId){
+    if(!/^[0-9a-f-]{36}$/i.test(targetUserId))return send({error:'계정 번호를 확인해 주세요.'},400);
+    const {data:target,error:targetError}=await admin.from('ildan_members')
+     .select('user_id,role,student_id,therapist_id')
+     .eq('user_id',targetUserId).eq('therapist_id',uid).eq('role',role).maybeSingle();
+    if(targetError||!target)return send({error:'담당 계정만 복구할 수 있습니다.'},403);
+    studentId=role==='parent'?target.student_id:null;
+   }
    if(role==='parent'&&(!studentId||!(await checkStudent(admin,studentId,uid))))
-    return send({error:'담당 학생을 확인할 수 없습니다.'},403);
+    return send({error:'담당 학생을 선택해 주세요.'},403);
+   if(role==='student'&&!targetUserId&&studentId)return send({error:'학생 초대 정보가 올바르지 않습니다.'},400);
    const token=hex(crypto.getRandomValues(new Uint8Array(32)));
    const verificationCode=hex(crypto.getRandomValues(new Uint8Array(12))).toUpperCase();
    const {error}=await admin.from('ildan_invites').insert({
     code_digest:await digest(token),verification_digest:await digest(verificationCode.toLowerCase()),
-    role,therapist_id:uid,student_id:studentId,issued_by:uid,
+    role,therapist_id:uid,student_id:studentId,target_user_id:targetUserId,issued_by:uid,
     expires_at:new Date(Date.now()+48*60*60*1000).toISOString()
    });
    if(error)return send({error:'초대 생성에 실패했습니다.'},503);
-   return send({invite:token,verificationCode,expiresInHours:48,
+   return send({invite:token,verificationCode,recovery:!!targetUserId,expiresInHours:48,
     notice:'확인 코드는 초대 링크와 같은 카카오톡 대화에 보내지 마세요. 치료사가 실제 신원을 확인하고 별도로 전달해야 합니다.'});
   }
   if(apiName==='records'&&request.method==='GET'){
