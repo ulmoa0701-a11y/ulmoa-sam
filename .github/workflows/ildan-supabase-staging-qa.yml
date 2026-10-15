@@ -35,6 +35,7 @@ jobs:
           assert(app.includes('shouldCreateUser:true') && app.includes('emailRedirectTo:'),'First clinician verified email bootstrap required');
           assert(app.includes('registerTherapistPasskey') && app.includes("me?.role!=='therapist'"),'Only approved therapist can register after sign-in');
           assert(app.includes('returnLogin" hidden'),'First visit must not lead to unregistered passkey sign-in');
+          assert(app.includes("api('revoke-invite'")&&app.includes('refreshInviteList()'),'Therapist invite revocation UI must exist');
           assert(cfg.includes('sb_publishable_'));
           assert(!/sb_secret_|service_role|ENCRYPTION_KEY\s*[:=]\s*["']/.test(cfg));
           assert(html.includes('실제 학생·보호자 상담정보 입력 금지'));
@@ -57,10 +58,12 @@ jobs:
             if(health.status!==200)throw Error('health HTTP '+health.status);
             const meta=await health.json();
             if(meta.mode!=='not-approved-for-clinical-use'||meta.ready!==false)throw Error('Staging unexpectedly marked clinically ready');
-            for(const ep of ['me','records','session-notes']){
+            for(const ep of ['me','records','session-notes','invites']){
               const r=await fetch(base+ep,{signal:AbortSignal.timeout(15000)});
               if(r.status!==401)throw Error('Unsafe anonymous '+ep+' status '+r.status);
             }
+            const revokeWithoutAuth=await fetch(base+'revoke-invite',{method:'POST',headers:{'Content-Type':'application/json',Origin:'https://ulmoa0701-a11y.github.io'},body:JSON.stringify({digest:'0'.repeat(64)}),signal:AbortSignal.timeout(15000)});
+            if(revokeWithoutAuth.status!==401)throw Error('Unauthenticated invite revocation '+revokeWithoutAuth.status);
             const badInvite=await fetch(base+'invite-preview',{method:'POST',headers:{Origin:'https://ulmoa0701-a11y.github.io','Content-Type':'application/json'},body:JSON.stringify({code:'not-valid'}),signal:AbortSignal.timeout(15000)});
             if(badInvite.status!==400)throw Error('Invalid invite preview was not rejected '+badInvite.status);
             const unused='0'.repeat(64);
