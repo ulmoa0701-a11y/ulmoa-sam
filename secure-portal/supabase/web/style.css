@@ -919,3 +919,21 @@ form[hidden], .form[hidden] {display:none !important;}
 .device-only-record>.meta{color:#815318}
 .device-only-record>[data-delete-practice]{margin-top:10px}
 @media(max-width:540px){.media-practice-panel{padding:12px}.media-practice-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.media-practice-buttons button:last-child{grid-column:span 2}.photo-thumbnail img,.saved-photo-grid img{height:140px}}
+
+
+/* Trial: disabled clinical sharing must not look like a working send control. */
+.trial-sharing-hidden,.trial-sharing-hidden[hidden]{display:none!important}
+.trial-storage-note{display:flex;flex-direction:column;gap:4px;border:1px solid #c9e4d7;background:#f4fbf7;color:#275348;padding:15px 16px;border-radius:12px;margin:18px 0 12px;line-height:1.55}
+.trial-storage-note strong{font-size:17px}
+.trial-storage-note span{font-size:13px}
+.invite-recipient-card{border:1px solid #d5e2e5;border-radius:15px;background:#f8fafb;padding:15px 16px;margin:12px 0}
+.invite-recipient-card.is-revoked{opacity:.68}
+.invite-card-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.invite-person{font-size:18px;font-weight:800;color:#172e3f;overflow-wrap:anywhere}
+.invite-kind{display:inline-block;border:1px solid #bacfeb;background:#e8efff;border-radius:999px;padding:4px 10px;color:#244d91;font-size:13px;font-weight:750}
+.invite-state{margin:7px 0 12px!important;font-size:14px;color:#45616d}
+.invite-state small{color:#71848b}
+.invite-unknown{font-size:13px;color:#8c4d1d;background:#fff2de;border-radius:8px;padding:9px;margin:8px 0}
+.invite-issued-person{margin:16px 0 8px;font-size:16px;color:#193c60}
+.invite-recipient-card button{min-height:44px}
+@media(max-width:540px){.invite-recipient-card{padding:13px 14px}.invite-person{font-size:16px}}
