@@ -86,6 +86,51 @@ h2{font-family:MaruBuri,'Noto Serif KR',serif;color:#31634e;font-size:clamp(18px
 @media(max-width:760px){.shell{padding:7px 9px 17px}.panel{padding:13px;border-radius:19px}.intro{margin:0}.intro-top{grid-template-columns:1fr 85px}.moa{height:110px}.chosen{gap:8px}.mode{padding:12px;gap:4px}.mode .emoji{font-size:25px}.mode strong{font-size:15px}.mode small{font-size:11px}.start-actions{gap:7px}.primary,.secondary{padding:10px 5px;font-size:14px}.play{grid-template-columns:1fr;gap:8px}.viewer{height:min(54dvh,440px);min-height:270px}.camera-panel{padding:7px}.game-right{gap:8px}.target>span{font-size:65px}.target>strong{font-size:19px}.target{padding:5px 10px}.bar{margin:6px 0}.camera-tools span{font-size:10px}.disclaimer{font-size:11px}}
 @media(max-width:370px){.mode strong{font-size:14px}.mode small{font-size:10px}.chosen{gap:6px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Camera-first projection: the learner sees the sample inside the same frame as their own hand. */
+.viewer{background:#c5edeb}
+.viewer video{filter:brightness(.82) saturate(.82)}
+.viewer .live-task{position:absolute;z-index:4;left:12px;right:12px;top:10px;display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:none;text-align:center}
+.live-task small{padding:3px 10px;border-radius:99px;background:#123e31e6;color:#ffffff;font-size:12px;font-weight:850}
+.live-task strong{display:block;max-width:98%;font-size:clamp(19px,4vw,27px);font-weight:1000;letter-spacing:-.03em;color:#153f31;background:#fffffff0;border-radius:13px;padding:6px 12px;box-shadow:0 3px 13px #0002}
+.ghost-guides{position:absolute;z-index:3;left:8%;right:8%;top:14%;bottom:20%;display:flex;align-items:center;justify-content:center;gap:6%;pointer-events:none;transition:opacity .2s}
+.ghost-guides .ghost-hand{width:min(44%,205px);height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;filter:drop-shadow(0 2px 5px #143c2d55)}
+.ghost-guides .ghost-hand svg{width:100%;height:90%;max-height:305px;opacity:.55;stroke-linejoin:round}
+.ghost-guides .ghost-hand:nth-child(even) svg{transform:scaleX(-1)}
+.ghost-guides .ghost-hand small{color:#114431;background:#fffefaee;font-weight:950;border-radius:11px;padding:3px 8px;font-size:12px}
+.ghost-guides.is-matched .ghost-hand svg{opacity:.23}
+.ghost-guides.is-hidden{display:none}
+.viewer[data-phase="memorize"] .ghost-guides{background:#193f3510}
+.viewer .viewer-badge{bottom:11px;font-size:clamp(13px,2.7vw,17px);font-weight:950;padding:10px 9px}
+.viewer .camera-hold{position:absolute;z-index:5;left:18%;right:18%;bottom:62px;height:12px;border-radius:999px;overflow:hidden;background:#ffffffb5;border:2px solid #fefefe9c;box-shadow:0 2px 8px #18462d40}
+.viewer .camera-hold span{display:block;width:0;height:100%;border-radius:999px;background:#7add99;transition:width .13s}
+.target>span.has-hands{display:flex;justify-content:center;align-items:center;gap:8px;min-height:110px}
+.target>span.has-hands svg{width:95px;max-width:45%;height:110px}
+.choices .choice-art{display:flex;justify-content:center;align-items:center;gap:1px;min-height:57px;margin-bottom:4px}
+.choices .choice-art svg{width:55px;height:65px;max-width:48%}
+.steps .step svg{width:35px;height:40px}
+
+.viewer[data-match="yes"]{outline:4px solid #7bd78f;outline-offset:-4px}
+.camera-panel .camera-title{padding:5px 5px 8px}
+.camera-panel .camera-title span{color:#337757;font-weight:850}
+.viewer #placeholder{font-size:15px;background:#fffffff0;border-radius:19px;padding:12px;z-index:4;max-width:83%;box-shadow:0 4px 15px #183d2a30}
+body:has(#game:not([hidden])) .play.is-camera .target{display:none}
+body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
+.play.is-camera .game-right .panel{padding:10px 15px}
+.play.is-camera .game-right .mission-msg{margin:4px 0 0}
+.play.is-camera .viewer{height:clamp(340px,57vw,530px)}
+.play.is-camera .camera-panel{padding:9px}
+@media(max-width:760px){
+ .play.is-camera .viewer{height:clamp(345px,55dvh,490px)}
+ .viewer .live-task{top:9px}
+ .live-task strong{font-size:19px;line-height:1.32}
+ .ghost-guides{left:6%;right:6%;top:17%;bottom:23%}
+ .viewer .camera-hold{bottom:66px}
+ .viewer .viewer-badge{font-size:14px;line-height:1.35}
+ .play.is-camera .game-right .panel{padding:9px}
+}
+@media(max-width:380px){.play.is-camera .viewer{height:min(52dvh,410px);min-height:320px}.ghost-guides{top:19%;bottom:22%}}
+
 </style>
 </head>
 <body>
@@ -108,11 +153,11 @@ h2{font-family:MaruBuri,'Noto Serif KR',serif;color:#31634e;font-size:clamp(18px
 </section>
 <section id="game" class="play" hidden>
 <div class="panel camera-panel"><div class="camera-title"><strong id="viewName">손 모양 살펴보기</strong><span id="kindBadge">📷 카메라</span></div>
-<div class="viewer" id="viewer"><video id="video" playsinline autoplay muted aria-hidden="true"></video><canvas id="overlay" aria-label="손가락 인식 표시"></canvas><div id="placeholder" class="placeholder"><span class="hand">✋</span>준비되면 손을 카메라에 보여줘!</div><div class="viewer-badge" id="viewerBadge" role="status">차근차근 준비해요</div></div>
-<div class="camera-tools"><button class="tiny" type="button" id="flip" hidden>↻ 앞·뒤 카메라</button><button class="tiny" type="button" id="pause">⏹ 그만하기</button><span>🔒 영상 저장·업로드 없음</span></div>
+<div class="viewer" id="viewer"><video id="video" playsinline autoplay muted aria-hidden="true"></video><canvas id="overlay" aria-label="손가락 인식 표시"></canvas><div class="live-task" id="liveTask" hidden><small>모아의 손을 따라 해봐!</small><strong id="liveTitle">손바닥 활짝</strong></div><div class="ghost-guides" id="ghostGuides" aria-hidden="true"></div><div class="camera-hold" id="cameraHold" hidden><span id="cameraHoldFill"></span></div><div id="placeholder" class="placeholder"><span class="hand">✋</span>준비되면 손을 카메라에 보여줘!</div><div class="viewer-badge" id="viewerBadge" role="status">차근차근 준비해요</div></div>
+<div class="camera-tools"><button class="tiny" type="button" id="flip" hidden>↻ 앞·뒤 카메라</button><button class="tiny" type="button" id="guideToggle" hidden aria-pressed="true">👋 손 그림 보이기</button><button class="tiny" type="button" id="pause">⏹ 그만하기</button><span>🔒 영상 저장·업로드 없음</span></div>
 </div>
 <div class="game-right"><div class="panel"><div class="progress-head"><span id="roundLabel">1 / 6</span><span id="flowerLabel">🌼 0</span></div><div class="bar"><span id="meter"></span></div>
-<div class="task-head" id="taskTitle">모아의 손을 따라해요!</div><div class="target"><span id="targetEmoji">✋</span><strong id="targetTitle">손바닥 활짝</strong><p id="targetHelp">손을 카메라에 보여줘!</p></div>
+<div class="task-head" id="taskTitle">모아의 손을 따라해요!</div><div class="target" id="targetPanel"><span id="targetEmoji">✋</span><strong id="targetTitle">손바닥 활짝</strong><p id="targetHelp">손을 카메라에 보여줘!</p></div>
 <div class="steps" id="sequence" hidden></div><div class="mission-msg" id="message" role="status" aria-live="polite">손을 준비해 볼까?</div>
 <div class="choices" id="choices" hidden></div>
 <button class="secondary next" type="button" id="ready" hidden>외웠어요! ▶</button>
@@ -123,5 +168,5 @@ h2{font-family:MaruBuri,'Noto Serif KR',serif;color:#31634e;font-size:clamp(18px
 </main>
 <div class="footer">모아의 인지정원 · 카메라로 관찰하는 손가락 움직임 놀이 · 손 힘, 실제 물체 조작 및 치료 효과를 자동으로 평가하는 기능은 아닙니다.</div>
 </div>
-<script src="core.js?v=1"></script><script src="app.js?v=1"></script>
+<script src="core.js?v=1"></script><script src="app.js?v=2"></script>
 </body></html>
