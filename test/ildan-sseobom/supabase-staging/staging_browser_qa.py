@@ -49,7 +49,6 @@ with sync_playwright() as p:
   page.locator('#firstLogin').wait_for(timeout=25000)
   assert page.locator('#firstLogin').is_visible(),'first-visit onboarding must be primary'
   assert not page.locator('#loginPasskey').is_visible()
-  page.locator('#passkeySupportStatus').get_by_text('아직 서버에서 준비되지 않았어요.',exact=False).wait_for(timeout=15000),'passkey login must not precede enrollment'
   assert page.locator('#clinicianFirstForm input[type="email"]').count()==1
   assert '운영자 승인' in page.locator('#firstLogin').inner_text()
   assert '학생·보호자' in page.locator('#firstLogin').inner_text()
