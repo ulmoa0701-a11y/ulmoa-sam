@@ -6,6 +6,7 @@ on:
       - feature/ildan-supabase-live-staging-20261014
       - feature/ildan-invite-link-passkey-20261015
       - feature/ildan-clinician-phone-auth-20261015
+      - feature/ildan-therapist-phone-passkey-no-sms-20261015
     paths:
       - 'secure-portal/supabase/**'
       - 'secure-portal/lib/record-contract.mjs'
@@ -51,6 +52,8 @@ jobs:
           const html=fs.readFileSync('secure-portal/supabase/web/index.html','utf8');
           const cfg=fs.readFileSync('secure-portal/supabase/web/config.js','utf8');
           assert(js.includes("supabase.auth.verifyOtp"));
+          assert(js.includes('supabase.auth.signInWithPasskey()'));
+          assert(!/signInWithOtp\s*\(|type:\s*['"]sms['"]|phoneRequestForm|phoneVerifyForm|emailRequestForm|emailVerifyForm/.test(js),'No SMS or email OTP allowed for clinician or guardian');
           assert(js.includes("api('claim-invite'"));
           assert(!js.includes("api('passkeys/login/verify'"));
           assert(js.includes("credentials:'omit'"));
