@@ -194,7 +194,7 @@ export async function handle(request:Request):Promise<Response>{
    const b=await body(request),role=requireText(b,'role'),studentId=requireText(b,'studentId')||null;
    if(!['student','parent'].includes(role))return send({error:'초대할 사용자 구분이 올바르지 않습니다.'},400);
    if(role==='parent'&&!studentId)return send({error:'학생을 선택해 주세요.'},400);
-   if(role==='parent'&&!(await checkStudent(admin,studentId,uid)))
+   if(role==='parent'&&(!studentId||!(await checkStudent(admin,studentId,uid))))
     return send({error:'담당 학생을 확인할 수 없습니다.'},403);
    const token=hex(crypto.getRandomValues(new Uint8Array(32)));
    const verificationCode=hex(crypto.getRandomValues(new Uint8Array(12))).toUpperCase();
