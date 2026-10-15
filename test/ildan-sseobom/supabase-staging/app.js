@@ -462,7 +462,9 @@ async function uploadPracticePhotos(){
  for(const dataUrl of photos){
   const signed=await api('practice-media-sign',{method:'POST',body:{}});
   if(!signed.token||!signed.path||signed.bucket!=='ildan-practice-media')throw Error('사진 업로드 준비에 실패했어.');
-  const blob=await (await fetch(dataUrl)).blob();
+  // CSP intentionally disallows data: fetch. Convert prepared JPEG locally instead.
+  const bytes=Uint8Array.from(atob(dataUrl.split(',')[1]),c=>c.charCodeAt(0));
+  const blob=new Blob([bytes],{type:'image/jpeg'});
   if(blob.size>signed.maxBytes)throw Error('사진이 너무 커서 업로드할 수 없어.');
   const {error}=await supabase.storage.from(signed.bucket).uploadToSignedUrl(signed.path,signed.token,blob,{contentType:'image/jpeg'});
   if(error)throw Error('사진 업로드에 실패했어. 연결 상태를 확인해 줘. '+error.message);
