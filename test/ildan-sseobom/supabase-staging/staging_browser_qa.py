@@ -47,11 +47,17 @@ with sync_playwright() as p:
   logins=[]
   page.on('pageerror',lambda e:errors.append(str(e)))
   def fake_signup(route):
+   if route.request.method=='OPTIONS':
+    route.fulfill(status=204,headers={'Access-Control-Allow-Origin':'http://127.0.0.1:8829','Access-Control-Allow-Methods':'POST,OPTIONS','Access-Control-Allow-Headers':'apikey,content-type,authorization'})
+    return
    payload=route.request.post_data_json
    signups.append(payload)
    route.fulfill(status=409,content_type='application/json',headers={'Access-Control-Allow-Origin':'http://127.0.0.1:8829'},
     body=json.dumps({'error':'이미 사용 중인 아이디입니다.'},ensure_ascii=False))
   def fake_login(route):
+   if route.request.method=='OPTIONS':
+    route.fulfill(status=204,headers={'Access-Control-Allow-Origin':'http://127.0.0.1:8829','Access-Control-Allow-Methods':'POST,OPTIONS','Access-Control-Allow-Headers':'apikey,content-type,authorization'})
+    return
    logins.append(True)
    route.fulfill(status=400,content_type='application/json',headers={'Access-Control-Allow-Origin':'http://127.0.0.1:8829'},
     body='{"error":"invalid_grant","error_description":"Invalid login credentials"}')
