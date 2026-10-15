@@ -66,8 +66,10 @@ jobs:
           for i in {1..48}; do
             curl -fsSL 'https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/' -o /tmp/live-garden.html &&
             curl -fsSL 'https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/hand-mirror/' -o /tmp/live-handmirror.html &&
+            curl -fsSL 'https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/hand-mirror/app.js?v=2' -o /tmp/live-handmirror.js &&
             grep -q 'data-open="handMirror"' /tmp/live-garden.html &&
-            grep -q '반짝손 따라하기' /tmp/live-handmirror.html && exit 0
+            grep -q 'ghostGuides' /tmp/live-handmirror.html &&
+            grep -q 'function renderGuide' /tmp/live-handmirror.js && exit 0
             sleep 10
           done
           echo "Latest hand mirror game not published" >&2
