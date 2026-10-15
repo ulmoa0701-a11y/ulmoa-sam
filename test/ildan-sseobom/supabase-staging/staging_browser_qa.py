@@ -43,12 +43,17 @@ with sync_playwright() as p:
   page.goto(url,wait_until='domcontentloaded',timeout=35000)
   page.locator('#loginPasskey').wait_for(timeout=25000)
   assert page.locator('#loginPasskey').is_visible()
+  assert page.locator('.phone-doctor-only').count()==1
+  assert page.locator('#phoneRequestForm input[name="phone"]').is_visible()
+  assert page.locator('#phoneRequestForm button').is_disabled(), 'SMS must be gated until verified provider is configured'
+  assert '발송업체' in page.locator('.phone-doctor-only').inner_text()
+  assert page.locator('#phoneVerifyForm').is_hidden()
   assert page.locator('.email-doctor-only').count()==1
   assert page.locator('#emailRequestForm input[name="email"]').is_hidden()
   assert page.locator('input[name="code"]').count()==0
   assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth+3')
   assert not errors,errors
-  checks.append(f'{width}px return visit: passkey entry and optional clinician email')
+  checks.append(f'{width}px return visit: phone signup safely disabled pending provider, passkey sign-in and clinician email fallback')
   page.close()
  browser.close()
 server.shutdown()
