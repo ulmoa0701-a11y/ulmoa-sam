@@ -121,6 +121,20 @@ export async function savePracticeRecord(owner,kind,entry){
   tx.onabort=()=>reject(Error('기기 임시 저장에 실패했어.'));
  });}finally{db.close();}
 }
+export async function updatePracticeRecord(owner,id,entry){
+ const db=await openDb();
+ try{return await new Promise((resolve,reject)=>{
+  const tx=db.transaction('records','readwrite'),store=tx.objectStore('records');
+  store.get(id).onsuccess=e=>{
+   const old=e.target.result;
+   if(old?.owner!==owner||!old.local){tx.abort();return;}
+   store.put({...old,entry,updatedAt:new Date().toISOString()});
+  };
+  tx.oncomplete=()=>resolve(true);
+  tx.onerror=()=>reject(Error('이 기기의 기존 기록을 수정하지 못했어.'));
+  tx.onabort=()=>reject(Error('수정할 기록을 찾을 수 없어. 내 기록을 다시 열어 줘.'));
+ });}finally{db.close();}
+}
 export async function listPracticeRecords(owner){
  const db=await openDb();
  try{return await new Promise((resolve,reject)=>{
