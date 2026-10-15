@@ -193,13 +193,32 @@ function loginScreen(){
  $('clinicianFirstForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;
   loading(f.querySelector('button'),async()=>{
    if(!supabase)throw Error('서버 연결을 확인할 수 없습니다.');
-   const email=formValue(f,'email').toLowerCase();localStorage.setItem('ildanPersonalDevice',$('rememberClinicianDevice').checked?'yes':'no');
+   const status=$('firstLoginStatus');
+   // Suppress accidental repeat sends. Auth also enforces the server's rate limit.
+   const previous=Number(sessionStorage.getItem('ildanLastEmailRequestAt')||0);
+   if(Date.now()-previous<65000){
+    status.textContent='인증 메일을 최근에 요청했어요. Gmail 받은편지함·스팸함에서 Supabase 메일을 먼저 확인해 주세요. 1분 후 다시 요청할 수 있습니다.';
+    return;
+   }
+   const email=formValue(f,'email').toLowerCase();
+   localStorage.setItem('ildanPersonalDevice',$('rememberClinicianDevice').checked?'yes':'no');
    const {error}=await supabase.auth.signInWithOtp({email,options:{
     shouldCreateUser:true,emailRedirectTo:location.origin+location.pathname
    }});
-   if(error)throw Error('인증 메일을 보내지 못했습니다. 등록된 프로젝트 팀원 이메일인지 확인해 주세요.');
-   $('firstLoginStatus').textContent='인증 메일을 요청했습니다. 메일에서 확인 링크를 연 다음 운영자 승인을 받아야 합니다.';
-   f.querySelector('input[name=email]').readOnly=true;
+   if(error){
+    if(error.status===429||error.code==='over_email_send_rate_limit'){
+     sessionStorage.setItem('ildanLastEmailRequestAt',String(Date.now()));
+     status.textContent='메일 요청이 너무 빠르게 반복돼 발송 제한에 걸렸어요. 이미 도착한 Supabase 메일부터 확인해 주세요. 약 1분 후 재요청할 수 있습니다.';
+     return;
+    }
+    const message=(error.code==='email_address_not_authorized'||error.status===403)
+     ?'현재 Supabase 기본 메일 설정에서 발송이 허용되지 않은 이메일입니다. 프로젝트 팀원 등록 또는 SMTP 설정이 필요해요.'
+     :'인증 메일 요청에 실패했어요. 서버 설정을 확인해 주세요. ('+String(error.code||error.status||'unknown')+')';
+    status.textContent=message;
+    throw Error(message);
+   }
+   sessionStorage.setItem('ildanLastEmailRequestAt',String(Date.now()));
+   status.textContent='메일 발송 요청이 접수되었습니다. Gmail에서 Supabase 메일을 확인해 주세요. 메일 링크를 한 번만 열고, 돌아온 뒤 운영자 승인을 받아야 합니다.';
   });
  };
  const login=$('loginPasskey');login.disabled=true;
