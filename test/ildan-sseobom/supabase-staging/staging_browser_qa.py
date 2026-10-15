@@ -68,7 +68,7 @@ with sync_playwright() as p:
   def mock_email_rate_limit(route):
    otp_attempts.append(1)
    route.fulfill(status=429,content_type='application/json',body='{"code":"over_email_send_rate_limit","msg":"For security purposes, you can only request this after 51 seconds."}')
-  page.route('**/auth/v1/otp',mock_email_rate_limit)
+  page.route('**/auth/v1/otp**',mock_email_rate_limit)
   page.locator('#clinicianFirstForm input[type="email"]').fill('therapist-test@example.com')
   page.locator('#clinicianFirstForm button[type="submit"]').click()
   page.locator('#firstLoginStatus').get_by_text('발송 제한',exact=False).wait_for(timeout=10000)
