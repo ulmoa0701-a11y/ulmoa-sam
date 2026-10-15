@@ -102,7 +102,7 @@ with sync_playwright() as p:
            'expires_in':3600,'expires_at':int(time.time())+3600,
            'user':{'id':account_id,'email':'fake-test@example.invalid','aud':'authenticated',
                    'role':'authenticated','app_metadata':{},'user_metadata':{},'created_at':'2026-10-15T00:00:00Z'}}
-  page.add_init_script("""(session)=>{localStorage.setItem('ildanPersonalDevice','yes');localStorage.setItem('sb-miohovwmhmtcvkurjamm-auth-token',JSON.stringify(session))}""",session)
+  page.add_init_script("(()=>{const session="+json.dumps(session)+";localStorage.setItem('ildanPersonalDevice','yes');localStorage.setItem('sb-miohovwmhmtcvkurjamm-auth-token',JSON.stringify(session))})()")
   members=[]
   def mock_therapist_api(route):
    path=urlsplit(route.request.url).path
