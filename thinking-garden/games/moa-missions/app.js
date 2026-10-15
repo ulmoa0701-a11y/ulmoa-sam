@@ -20,8 +20,8 @@ const config={
   levels:[['쉬움','짧고 친숙한 상황'],['보통','서로 다른 입장 생각하기'],['도전','여러 마음이 섞일 수 있는 상황']]}
 };
 const opts=['easy','normal','hard'];let state={game:chosen,level:'easy',index:0,stage:'',correct:0,attempts:0,locked:false,selected:[],chosenFeeling:'',options:[],audio:false};
-let lastSpokenStage='';
-const game=config[chosen];const roundMax=4;
+let lastSpokenStage='';let roundMax=12;let lastSessionComplete=0;
+const game=config[chosen];
 $('gardenBack').href='../../../gardens/#'+game.hash;
 $('resultGarden').href='../../../gardens/#'+game.hash;
 $('gardenName').textContent=game.garden;
@@ -37,13 +37,29 @@ game.levels.forEach((a,i)=>{
 });
 function updateLevels(){levelList.querySelectorAll('button').forEach(b=>{const selected=b.dataset.level===state.level;b.classList.toggle('chosen',selected);b.setAttribute('aria-pressed',String(selected))})}
 updateLevels();
+function updateRounds(){
+ document.querySelectorAll('#roundOptions [data-rounds]').forEach(b=>{
+  const chosen=Number(b.dataset.rounds)===roundMax;
+  b.classList.toggle('chosen',chosen);b.setAttribute('aria-pressed',String(chosen));
+ });
+ $('roundPlan').textContent=roundMax+'미션을 선택했어요. 4미션마다 꽃이 피어요. 중간에 쉬어도 괜찮아요.';
+}
+document.querySelectorAll('#roundOptions [data-rounds]').forEach(b=>b.addEventListener('click',()=>{roundMax=Number(b.dataset.rounds);updateRounds();}));
+updateRounds();
 function show(screen){['intro','play','result'].forEach(id=>$(id+'Screen').hidden=id!==screen)}
-function roundItem(bank){return bank[state.index%bank.length]}
+function roundItem(bank){
+ // Rotate across a larger problem bank rather than replaying the first 4 cases.
+ const offset=state.sessionSeed||0;
+ return bank[(state.index+offset)%bank.length];
+}
 function htmlButton(label,action,extra){return '<button type="button" '+(extra||'')+' data-action="'+action+'">'+esc(label)+'</button>'}
 function setScene(title,desc,label){
  $('missionHeading').textContent=title;$('missionDescription').textContent=desc||'';
  $('sceneLabel').textContent=label||'도전 '+(state.index+1);
  $('roundCount').textContent=(state.index+1)+' / '+roundMax;
+ const petals=Math.floor(state.index/4);
+ $('gardenProgress').textContent=state.index>0&&state.index%4===0?'🌸 모아가 새 꽃을 발견했어요!':(['🌱 씨앗을 심어요','🌿 싹을 키워요','🌼 꽃을 피워요','🌷 새로운 정원도 가봐요','🌻 함께 꽃밭을 완성해요'][Math.min(4,petals)]);
+ $('seedCount').textContent='🌼 '+petals+'송이';
  $('progressFill').style.width=(state.index/roundMax*100)+'%';
  $('gameArea').innerHTML='';$('feedback').textContent='';$('feedback').className='feedback';$('gameActions').innerHTML='';
  const voiceKey=state.index+'/'+(state.stage||'main');if(state.audio&&lastSpokenStage!==voiceKey){lastSpokenStage=voiceKey;speak(title+'. '+desc);}
@@ -54,11 +70,12 @@ function nextAction(message){
  $('gameActions').innerHTML='<button type="button" data-action="next" class="primary-action">'+(state.index===roundMax-1?'오늘 놀이 마치기':'다음 미션 →')+'</button>';
  if(message)feedback(message,true);
 }
-function advance(){state.index++;state.locked=false;state.selected=[];state.stage='';state.options=[];state.attempts=0;
+function advance(){state.index++;state.locked=false;state.selected=[];state.stage='';state.options=[];state.attempts=0;state.chosenFeeling='';state.chosenResponse=null;
  if(state.index>=roundMax){finish();return}draw();
 }
 function finish(){
  show('result');$('progressFill').style.width='100%';
+ $('resultFlowers').textContent='🌼'.repeat(Math.max(1,Math.floor(roundMax/4)))+' 🌱';
  const count=state.correct;
  $('resultHeading').textContent='오늘의 미션 완료!';
  if(chosen==='feel'){$('resultText').textContent='서로 다른 마음과 대응 방법을 '+roundMax+'가지 상황에서 생각해봤어요. 실제 마음은 사람마다 다를 수 있어요.'}
@@ -164,7 +181,10 @@ function drawFeel(){
  }
 }
 function draw(){state.locked=false;if(chosen==='money')drawMoney();else if(chosen==='change')drawChange();else drawFeel()}
-function start(){state.index=0;state.correct=0;state.attempts=0;state.stage='';state.selected=[];state.locked=false;state.options=[];lastSpokenStage='';show('play');draw()}
+function start(){
+ state.index=0;state.correct=0;state.attempts=0;state.stage='';state.selected=[];state.locked=false;state.options=[];state.sessionSeed=(lastSessionComplete++*5);lastSpokenStage='';
+ show('play');draw();
+}
 $('startGame').addEventListener('click',start);
 $('exitGame').addEventListener('click',()=>show('intro'));
 $('playAgain').addEventListener('click',start);
