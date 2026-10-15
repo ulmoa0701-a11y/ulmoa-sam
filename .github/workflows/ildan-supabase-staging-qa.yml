@@ -74,3 +74,23 @@ jobs:
             console.log('PASS live backend locked down, anonymous & cross-site requests blocked');
           })().catch(e=>{console.error(e);process.exitCode=1});
           JS
+
+      - name: Report hosted Passkey challenge readiness without enrolling a user
+        shell: bash
+        run: |
+          node <<'JS'
+          const fs=require('fs');
+          const cfg=fs.readFileSync('test/ildan-sseobom/supabase-staging/config.js','utf8');
+          const key=cfg.match(/publishableKey:"([^"]+)"/)?.[1];
+          if(!key)throw Error('Public publishable key is not configured');
+          (async()=>{
+            const res=await fetch('https://miohovwmhmtcvkurjamm.supabase.co/auth/v1/passkeys/authentication/options',{
+              method:'POST',headers:{apikey:key,'Content-Type':'application/json'},
+              body:'{}',signal:AbortSignal.timeout(12000)
+            });
+            const data=await res.json().catch(()=>({}));
+            console.log('PASSKEY_DIAGNOSTIC HTTP='+res.status+' code='+String(data.code||data.error_code||'none'));
+            if(res.ok)console.log('Passkey options endpoint responds; actual enrollment/browser RP configuration still requires verification.');
+            else console.log('Passkey options endpoint not ready; first-device enrollment is NOT verified.');
+          })().catch(e=>console.log('PASSKEY_DIAGNOSTIC unavailable: '+e.message));
+          JS
