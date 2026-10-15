@@ -127,6 +127,25 @@ with sync_playwright() as p:
   assert len(stored[0]['entry']['photos'])==1 and stored[0]['entry']['photos'][0]!=old_photo, 'photo replaced'
   assert stored[0]['shared'] and 'sketch' in stored[0]['entry'], 'drawing and sharing preserved'
   assert '수정한 가상 기록' in page.locator('.practice-cloud-record').inner_text()
+  # Old IndexedDB records in the same student's browser also support edit-in-place.
+  page.evaluate("""async(uid)=>{
+   const m=await import('./trial-media.mjs');
+   await m.savePracticeRecord(uid,'student',{date:'2026-10-15',note:'이전 기기 기록'});
+  }""",student)
+  page.reload(wait_until='domcontentloaded')
+  page.locator('[data-workspace-target="history"]').click()
+  page.locator('.device-only-record').wait_for(timeout=15000)
+  page.locator('.device-only-record [data-practice-edit]').click()
+  page.locator('#saveEntry').get_by_text('이 기기에 수정 저장하기').wait_for(timeout=10000)
+  assert page.locator('textarea[name=note]').input_value()=='이전 기기 기록'
+  assert not page.locator('.practice-sync-box').is_visible(),'no server share for old local note'
+  page.locator('textarea[name=note]').fill('이 기기에 수정된 기록')
+  previous_api=len([x for x in api_calls if x==('practice-update','POST')])
+  page.locator('#saveEntry').click()
+  page.locator('.device-only-record').wait_for(timeout=13000)
+  assert page.locator('.device-only-record').count()==1,'device edit must not create duplicate'
+  assert '이 기기에 수정된 기록' in page.locator('.device-only-record').inner_text()
+  assert len([x for x in api_calls if x==('practice-update','POST')])==previous_api,'local edit must not be uploaded'
   assert not errors,('page errors',width,errors)
   page.close()
   # A totally new context/device sees server-synced record without previous IndexedDB.
