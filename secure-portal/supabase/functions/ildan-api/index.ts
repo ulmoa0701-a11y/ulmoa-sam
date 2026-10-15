@@ -453,7 +453,7 @@ export async function handle(request:Request):Promise<Response>{
     if(!['student','parent'].includes(member.role))return send({error:'작성자만 수정할 수 있습니다.'},403);
     const b=await body(request),id=requireText(b,'recordId'),
       expected=requireText(b,'expectedUpdatedAt');
-    if(!UUID_RE.test(id)||!/^\\d{4}-\\d\\d-\\d\\dT/.test(expected))
+    if(!UUID_RE.test(id)||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}T/.test(expected)||!Number.isFinite(Date.parse(expected)))
      return send({error:'수정할 기록을 다시 열어 주세요.'},400);
     const {data:old,error:readError}=await admin.from('ildan_practice_records')
      .select('id,private_nonce,private_ciphertext,shared_at,updated_at,student_id,therapist_id,kind')
