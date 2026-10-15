@@ -15,7 +15,7 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
-      - name: Verify real server: author revisions, share changes, photo removal, conflicts
+      - name: Verify real server author revisions and photo removal
         shell: bash
         run: |
           python3 <<'PY'
