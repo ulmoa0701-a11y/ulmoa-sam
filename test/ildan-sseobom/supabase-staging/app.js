@@ -593,7 +593,7 @@ function recordCards(list=records){
  return list.map(r=>{
   const time=sanitize(new Date(r.createdAt).toLocaleString('ko-KR'));
   const observed=r.entry?.date?`${r.kind==='parent'?'관찰':'기록'} ${sanitize(r.entry.date)}${r.entry.time?' '+sanitize(r.entry.time):''}${r.entry.place?' · '+sanitize(r.entry.place):''} · 작성 ${time}`:time;
-  if(r.practice&&me.role!=='therapist')return `<article class="record archive-record practice-cloud-record"><div class="meta">연습용 서버 저장 · ${observed} · ${r.shared?'치료사에게 공유 중':'나만 보기'}</div>${prettyRecordEntry(r.entry)}<div class="practice-record-actions"><button class="button-ghost" type="button" data-practice-edit="${sanitize(r.id)}">✎ 기록 수정하기</button>${r.shared?`<button class="button-ghost" data-practice-unshare="${sanitize(r.id)}">치료사 공유 취소</button>`:`<button class="button-ghost" data-practice-share="${sanitize(r.id)}">치료사에게 공유하기</button>`}<button class="button-ghost" data-practice-delete="${sanitize(r.id)}">연습 기록 삭제</button></div></article>`;
+  if(r.practice&&me.role!=='therapist')return `<article class="record archive-record practice-cloud-record"><div class="meta">연습용 서버 저장 · ${observed}${r.updatedAt&&new Date(r.updatedAt).getTime()-new Date(r.createdAt).getTime()>1000?' · 수정 '+sanitize(new Date(r.updatedAt).toLocaleString('ko-KR')):''} · ${r.shared?'치료사에게 공유 중':'나만 보기'}</div>${prettyRecordEntry(r.entry)}<div class="practice-record-actions"><button class="button-ghost" type="button" data-practice-edit="${sanitize(r.id)}">✎ 기록 수정하기</button>${r.shared?`<button class="button-ghost" data-practice-unshare="${sanitize(r.id)}">치료사 공유 취소</button>`:`<button class="button-ghost" data-practice-share="${sanitize(r.id)}">치료사에게 공유하기</button>`}<button class="button-ghost" data-practice-delete="${sanitize(r.id)}">연습 기록 삭제</button></div></article>`;
   if(r.local)return `<article class="record archive-record device-only-record"><div class="meta">이 기기에만 임시 보관 · ${observed} · 치료사에게 전달되지 않음</div>${prettyRecordEntry(r.entry)}<button class="button-ghost" type="button" data-delete-practice="${sanitize(r.id)}">이 기기에서 기록·사진 삭제</button></article>`;
   if(me.role==='therapist'&&r.kind==='student'){
    const text=String(r.entry?.note||r.entry?.experience||r.entry?.thought||r.entry?.action||r.entry?.mood||'');
@@ -734,6 +734,7 @@ function populatePracticeEditor(isParent){
   const rest=moods.filter(x=>!options.some(o=>o.value===x));
   const other=f.querySelector('[name="emotionOther"]');if(other)other.value=rest.join(' · ');
  }
+ if(e.sketch)document.getElementById('showDrawing')?.click();
  const share=f.querySelector('input[name="practiceShare"]');if(share)share.checked=!!record.shared;
  const title=document.createElement('div');title.className='practice-edit-header';title.role='status';
  title.innerHTML='<strong>✎ 기존 기록 수정 중</strong><p>내용과 사진·그림을 고친 뒤 저장하면 기존 기록에 반영돼요. 치료사 공유 여부도 변경할 수 있어요.</p>';
