@@ -32,9 +32,9 @@ jobs:
           const html=fs.readFileSync(base+'index.html','utf8');
           const app=fs.readFileSync(base+'app.js','utf8');
           assert(!['signInWithOtp({phone','phoneRequestForm','phoneVerifyForm','emailRequestForm','emailVerifyForm'].some(x=>app.includes(x)),'Phone SMS or guardian OTP flows are forbidden');
-          assert(app.includes('shouldCreateUser:true') && app.includes('emailRedirectTo:'),'First clinician verified email bootstrap required');
-          assert(app.includes('registerTherapistPasskey') && app.includes("me?.role!=='therapist'"),'Only approved therapist can register after sign-in');
-          assert(app.includes('returnLogin" hidden'),'First visit must not lead to unregistered passkey sign-in');
+          assert(app.includes('test-therapist-signup') && app.includes('signInWithPassword'),'Trial clinician registers with username/password without email');
+          assert(app.includes("me?.role!=='therapist'||me.trial"),'Trial users are not sent to disabled passkeys');
+          assert(app.includes('returnLogin" hidden'),'First visit must default to test account signup');
           assert(app.includes("api('revoke-invite'")&&app.includes('refreshInviteList()'),'Therapist invite revocation UI must exist');
           assert(app.includes("publicInviteApi('invite-register',code,{verificationCode})"),'Second-factor enrollment required');
           assert(app.includes('ildanPersonalDevice'),'Explicit device session persistence required');
@@ -47,7 +47,7 @@ jobs:
           JS
       - name: Install synthetic-only Chrome test
         run: python3 -m pip install --quiet playwright==1.57.0
-      - name: Run actual Chrome in desktop and mobile widths without sending an OTP
+      - name: Run actual Chrome 390 and 1440px with sandbox-only mocked signup and login
         env:
           CHROME_BIN: /usr/bin/google-chrome
         run: python3 test/ildan-sseobom/supabase-staging/staging_browser_qa.py
@@ -76,6 +76,8 @@ jobs:
             if(wrongSecret.status!==403)throw Error('Nonexistent two-factor invite accepted '+wrongSecret.status);
             const invalid=await fetch(base+'me',{headers:{Origin:'https://evil.example'},signal:AbortSignal.timeout(15000)});
             if(invalid.status!==403)throw Error('Cross-site request was not rejected');
+            const badTrial=await fetch(base+'test-therapist-signup',{method:'POST',headers:{Origin:'https://ulmoa0701-a11y.github.io','Content-Type':'application/json'},body:JSON.stringify({username:'!invalid',password:'invalid'}),signal:AbortSignal.timeout(15000)});
+            if(badTrial.status!==400)throw Error('Invalid sandbox registration accepted or endpoint inactive '+badTrial.status);
             console.log('PASS live backend locked down, anonymous & cross-site requests blocked');
           })().catch(e=>{console.error(e);process.exitCode=1});
           JS
