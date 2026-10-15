@@ -13,7 +13,7 @@ url='http://127.0.0.1:8829/test/ildan-sseobom/supabase-staging/'
 student='10000000-0000-4000-8000-000000000015'
 therapist='10000000-0000-4000-8000-000000000016'
 bucket='ildan-practice-media'
-stored=[];uploaded=[];remote_clinical=[]
+stored=[];uploaded=[];remote_clinical=[];api_calls=[];browser_requests=[]
 def png():
  raw=b''.join(b'\0'+b'\xe1\x93\x65'*24 for _ in range(24))
  def chunk(tag,data):return struct.pack('>I',len(data))+tag+data+struct.pack('>I',zlib.crc32(tag+data)&0xffffffff)
@@ -30,7 +30,7 @@ def init(page,role):
   'Access-Control-Allow-Methods':'POST,GET,OPTIONS'}
   if method=='OPTIONS':route.fulfill(status=204,headers=headers);return
   payload=route.request.post_data_json if method=='POST' else {}
-  name=path.split('/ildan-api/')[-1];code=200;data={}
+  name=path.split('/ildan-api/')[-1];api_calls.append((name,method));code=200;data={}
   if name=='me':data={'user':{'id':uid,'role':role,'nickname':'연습계정','trial':True}}
   elif name=='practice-records' and method=='GET':
    data={'records':[{'id':row['id'],'kind':'student','student':'가상 학생','studentId':student,'author':'연습 학생',
@@ -74,6 +74,7 @@ with sync_playwright() as p:
  for width in [390,1440]:
   page=browser.new_page(viewport={'width':width,'height':900})
   errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+  page.on('request',lambda req:browser_requests.append((req.method,urlsplit(req.url).path)) if ('miohovwmhmtcvkurjamm' in req.url) else None)
   init(page,'student');page.goto(url,wait_until='domcontentloaded',timeout=30000)
   page.locator('#photoUpload').wait_for(timeout=20000)
   assert page.locator('#saveEntry').inner_text().strip()=='💾 연습 기록 저장하기'
@@ -91,7 +92,7 @@ with sync_playwright() as p:
    print('PHOTO_SYNC_FAILURE',{'uploaded':uploaded,'stored':stored,'errors':errors,
      'toast':page.locator('#toast').inner_text() if page.locator('#toast').count() else None,
      'status':page.locator('#photoProgress').inner_text() if page.locator('#photoProgress').count() else None,
-     'bodyTail':page.locator('body').inner_text()[-1300:]})
+     'bodyTail':page.locator('body').inner_text()[-450:], 'apiCalls':api_calls[-15:],'requests':browser_requests[-15:]})
    raise
   assert len(stored)>=1 and stored[-1]['shared']==True
   assert len(stored[-1]['entry']['photos'])==1 and uploaded
