@@ -1,0 +1,36 @@
+name: Ildan Real Practice Edit Regression QA
+on:
+  push:
+    branches:
+      - qa/ildan-practice-edit-real-20261015
+    paths:
+      - '.github/workflows/ildan-practice-edit-regression.yml'
+      - 'test/ildan-sseobom/supabase-staging/practice_edit_*.frag'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-synthetic-edits:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify real server: author revisions, share changes, photo removal, conflicts
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          root=Path('test/ildan-sseobom/supabase-staging')
+          src=Path('.github/workflows/ildan-real-practice-sync-e2e.yml').read_text()
+          text=src.split("node <<'JS'\n",1)[1].split("\n          JS",1)[0]
+          code='\n'.join(line[10:] if line.startswith('          ') else line for line in text.splitlines())
+          edits=(root/'practice_edit_student.frag').read_text()
+          guardian=(root/'practice_edit_parent.frag').read_text()
+          first="const revoke=await request('practice-unshare',{recordId},studentToken);"
+          second="const parentRemove=await request('practice-delete',{recordId:parentSaved.data.record.id},guardianToken);"
+          assert code.count(first)==1 and code.count(second)==1
+          code=code.replace(first,edits+'\n'+first)
+          code=code.replace(second,guardian+'\n'+second)
+          Path('/tmp/ildan-practice-edit-e2e.cjs').write_text(code)
+          PY
+          node /tmp/ildan-practice-edit-e2e.cjs
