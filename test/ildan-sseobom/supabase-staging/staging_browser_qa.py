@@ -41,21 +41,24 @@ with sync_playwright() as p:
   errors=[]
   page.on('pageerror',lambda e:errors.append(str(e)))
   page.goto(url,wait_until='domcontentloaded',timeout=35000)
-  page.locator('#loginPasskey').wait_for(timeout=25000)
-  assert page.locator('#loginPasskey').is_visible()
-  assert '휴대전화로 로그인' in page.locator('.login-body').inner_text()
-  assert '치료사' in page.locator('.login-body').inner_text()
+  page.locator('#firstLogin').wait_for(timeout=25000)
+  assert page.locator('#firstLogin').is_visible(),'first-visit onboarding must be primary'
+  assert not page.locator('#loginPasskey').is_visible(),'passkey login must not precede enrollment'
+  assert page.locator('#clinicianFirstForm input[type="email"]').count()==1
+  assert '운영자 승인' in page.locator('#firstLogin').inner_text()
+  assert '학생·보호자' in page.locator('#firstLogin').inner_text()
+  assert page.locator('input[type="tel"]').count()==0
   assert page.locator('#phoneRequestForm').count()==0
   assert page.locator('#phoneVerifyForm').count()==0
-  assert page.locator('#emailRequestForm').count()==0
-  assert page.locator('#emailVerifyForm').count()==0
-  assert page.locator('input[type="tel"]').count()==0
-  assert page.locator('input[type="email"]').count()==0
-  assert page.locator('input[name="code"]').count()==0
-  assert '문자 인증번호나 이메일은 받지 않습니다.' in page.locator('.login-body').inner_text()
-  assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth+3')
+  page.locator('#returnChoice').click()
+  assert page.locator('#loginPasskey').is_visible(),'returning users can reach registered passkey'
+  assert not page.locator('#firstLogin').is_visible()
+  page.locator('#firstChoice').click()
+  assert page.locator('#firstLogin').is_visible()
+  assert not page.locator('#loginPasskey').is_visible()
+  assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth+3'),('overflow',width)
   assert not errors,errors
-  checks.append(f'{width}px return visit: therapist/child/guardian phone-device passkey UI; zero SMS/email OTP forms')
+  checks.append(f'{width}px: therapist-first enrollment, passkey returning-only, no guardian email/phone, no overflow')
   page.close()
  browser.close()
 server.shutdown()
