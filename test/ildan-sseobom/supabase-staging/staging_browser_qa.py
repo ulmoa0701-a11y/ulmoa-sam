@@ -151,6 +151,8 @@ with sync_playwright() as p:
   page.locator('#createStudentForm button[type=submit]').click()
   page.locator('.student-list-summary').get_by_text('등록된 학생 (1명)').wait_for(timeout=15000)
   assert '가상 민수' in page.locator('.student-list-summary').inner_text()
+  assert '가상 민수' in page.locator('.invite-recipient-card').first.inner_text(), 'invite must identify student'
+  assert '학생용' in page.locator('.invite-recipient-card').first.inner_text(), 'invite must identify role'
   assert page.locator('#inviteSubmit').is_enabled()
   assert page.locator('#inviteSubmit').inner_text()=='학생 접속 링크 만들기'
   page.locator('#inviteRole').select_option('parent')
