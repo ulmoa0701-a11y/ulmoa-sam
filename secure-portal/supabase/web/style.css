@@ -898,3 +898,24 @@ form[hidden], .form[hidden] {display:none !important;}
 .student-list-summary>strong{display:block;font-size:15px;margin-bottom:8px;color:#284e48}
 .student-list-chips{display:flex;flex-wrap:wrap;gap:8px}
 .student-list-chip{display:inline-block;max-width:100%;overflow-wrap:anywhere;padding:4px 11px;border:1px solid #c6ded7;border-radius:999px;background:#fff;color:#275a51;font-size:14px;font-weight:700}
+
+
+/* Drawing and photo attachments: easy touch/click access in quick & detailed recording. */
+.media-practice-panel{margin:20px 0;padding:18px;border:1px solid #c9dcd5;border-radius:16px;background:#f8fbf9;min-width:0}
+.media-practice-heading{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.media-practice-heading strong{font-size:18px;color:#20483f}
+.media-practice-heading small{font-size:12px;color:#526b65}
+.media-practice-panel>p{margin:6px 0 11px}
+.media-practice-buttons{display:flex;flex-wrap:wrap;gap:8px}
+.media-practice-buttons button{min-height:44px;flex:1 1 130px;border-radius:12px;font-weight:700}
+.photo-thumbnails,.saved-photo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:12px;margin:12px 0;max-width:100%}
+.photo-thumbnail,.saved-photo-grid figure{min-width:0;margin:0;border:1px solid #d1ded9;background:#fff;border-radius:12px;padding:7px;overflow:hidden}
+.photo-thumbnail img,.saved-photo-grid img{display:block;max-width:100%;width:100%;height:160px;object-fit:contain;border-radius:8px;background:#f5f6f8}
+.photo-thumbnail button{width:100%;min-height:39px;margin-top:7px;background:#fff;border:1px solid #bfcfc9;border-radius:9px;color:#294f49;font-weight:750}
+.media-local-notice{font-size:13px;line-height:1.65;padding:10px 12px;background:#fff6e7;border-left:3px solid #d9ab57;border-radius:6px}
+.media-practice-panel #drawPanel{margin-top:12px;max-width:100%}
+.media-practice-panel .sketch-board{max-width:100%;overflow:hidden}
+.media-practice-panel #noteCanvas{display:block;max-width:100%;width:100%;height:auto;touch-action:none;cursor:crosshair;background:#fff}
+.device-only-record>.meta{color:#815318}
+.device-only-record>[data-delete-practice]{margin-top:10px}
+@media(max-width:540px){.media-practice-panel{padding:12px}.media-practice-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.media-practice-buttons button:last-child{grid-column:span 2}.photo-thumbnail img,.saved-photo-grid img{height:140px}}
