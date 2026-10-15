@@ -21,7 +21,7 @@ export function mediaWidget(){
    <button type="button" id="undoStroke" class="button-ghost">↶ 되돌리기</button>
    <button type="button" id="clearSketch" class="button-ghost">전부 지우기</button></div>
  </div>
- <p class="muted media-local-notice">체험판에서는 사진과 그림이 이 브라우저에만 임시 보관돼. 치료사에게 보내지거나 다른 기기에 자동 저장되지 않아. 실제 아동 사진은 아직 넣지 말아 줘.</p>
+ <p class="muted media-local-notice">사진과 그림을 연습용 서버에 저장하고, 원하면 담당 치료사에게 공유할 수 있어. 실제 아동 사진이나 상담정보는 아직 넣지 말아 줘.</p>
  </section>`;
 }
 export function getPracticePhotos(){return [...photos];}
@@ -131,6 +131,9 @@ export async function deletePracticeRecord(owner,id){
 }
 export function photosMarkup(value){
  if(!Array.isArray(value))return '';
- const safe=value.slice(0,LIMIT).filter(src=>typeof src==='string'&&src.length<=1700000&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(src));
- return `<div class="saved-photo-grid">${safe.map((src,i)=>`<figure><img alt="보관한 사진 ${i+1}" loading="lazy" src="${src}"></figure>`).join('')}</div>`;
+ const safe=value.slice(0,LIMIT).filter(src=>typeof src==='string'&&src.length<=1700000&&(
+  /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(src)||
+  /^https:\/\/miohovwmhmtcvkurjamm\.supabase\.co\/storage\/v1\/object\/sign\/ildan-practice-media\/[0-9a-f-]+\/[0-9a-f-]+\.jpg\?token=[A-Za-z0-9._%-]+(?:&[^"'<>]*)?$/.test(src)
+  ));
+ return `<div class="saved-photo-grid">${safe.map((src,i)=>`<figure><img alt="보관한 사진 ${i+1}" loading="lazy" src="${src.replaceAll('&','&amp;').replaceAll('"','&quot;')}"></figure>`).join('')}</div>`;
 }
