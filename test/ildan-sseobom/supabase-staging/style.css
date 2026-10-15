@@ -892,3 +892,9 @@ body:has(.parent-easy-form) .editor-paper>p{margin:0 0 10px;line-height:1.45}
 
 /* Ensure hidden verification forms never appear before an OTP is actually sent. */
 form[hidden], .form[hidden] {display:none !important;}
+
+/* Student onboarding: compact, scannable list before individual invites. */
+.student-list-summary{margin:16px 0 22px;padding:14px 16px;border:1px solid #d8e7e3;border-radius:14px;background:#f7faf9}
+.student-list-summary>strong{display:block;font-size:15px;margin-bottom:8px;color:#284e48}
+.student-list-chips{display:flex;flex-wrap:wrap;gap:8px}
+.student-list-chip{display:inline-block;max-width:100%;overflow-wrap:anywhere;padding:4px 11px;border:1px solid #c6ded7;border-radius:999px;background:#fff;color:#275a51;font-size:14px;font-weight:700}

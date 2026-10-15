@@ -713,21 +713,31 @@ async function therapistHome(){const r=await Promise.all([api('students'),api('d
  </div>
 </details>
 <div class="clinician-save-row"><button class="button" type="submit">치료사 메모 보관</button><p>모든 항목은 선택입니다. 별도의 임상 평가·동의 절차와 치료기록을 대신하지 않습니다.</p></div>
-</form><div id="sessionSaved"></div></section><section class="panel" data-workspace-view="accounts"><span class="tag">02 / ACCOUNTS</span><h2>학생·보호자 연결하기</h2><p>먼저 담당 학생 공간을 만든 다음 학생과 보호자에게 각각 링크를 전달합니다.</p>
- <form id="createStudentForm" class="form"><label>담당 학생 구분용 별칭(실명 입력하지 않기)
- <input name="alias" maxlength="30" placeholder="예: 모아1" required autocomplete="off"></label>
- <button class="button" type="submit">학생 공간 만들기</button></form>
- <p class="muted">이 단계에서는 실제 이름이나 상담 내용을 입력하지 않아요. 이후 학생·보호자 링크는 별도로 생성합니다.</p><form id="inviteForm" class="form"><label>초대할 사람<select name="role" id="inviteRole"><option value="student">학생</option><option value="parent">학부모</option></select></label><label id="studentPicker">연결할 학생<select name="studentId">${students.map(s=>`<option value="${sanitize(s.id)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><button class="button">초대 링크 만들기</button></form><div id="inviteOutput"></div><section aria-label="발급한 초대 링크"><h3>초대 링크 관리</h3>
+</form><div id="sessionSaved"></div></section><section class="panel" data-workspace-view="accounts"><span class="tag">02 / ACCOUNTS</span><h2>학생·보호자 연결하기</h2><p>학생을 한 번 등록하면 학생용·보호자용 접속 링크를 따로 만들 수 있어요.</p><h3>1. 학생 추가</h3>
+ <form id="createStudentForm" class="form"><label>학생 이름 또는 별칭 <small>(체험판에서는 가명 권장)</small>
+ <input name="alias" maxlength="30" placeholder="예: 민수, 지우(가명)" required autocomplete="off"></label>
+ <button class="button" type="submit">학생 추가하기</button></form>
+ <p class="muted">이름은 학생 목록과 연결 메뉴에 표시됩니다. 현재 체험 단계에서는 실제 아동의 개인정보 대신 가상 이름을 사용해 주세요.</p><div class="student-list-summary" aria-label="등록된 학생"><strong>등록된 학생 (${students.length}명)</strong>${students.length?`<div class="student-list-chips">${students.map(s=>`<span class="student-list-chip">${sanitize(s.nickname)}</span>`).join("")}</div>`:`<p class="muted">등록된 학생이 없어요. 위에서 먼저 추가해 주세요.</p>`}</div><h3>2. 학생·보호자에게 보낼 링크 만들기</h3><p class="muted" id="inviteExplainer">등록된 학생을 선택해 주세요.</p><form id="inviteForm" class="form"><label>초대할 사람<select name="role" id="inviteRole"><option value="student">학생</option><option value="parent">보호자</option></select></label><label id="studentPicker">대상 학생<select name="studentId" ${students.length?"":"disabled"}>${students.map(s=>`<option value="${sanitize(s.id)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><button id="inviteSubmit" class="button" ${students.length?"":"disabled"}>학생 접속 링크 만들기</button></form><div id="inviteOutput"></div><section aria-label="발급한 초대 링크"><h3>초대 링크 관리</h3>
  <p>기한이 지나거나 잘못 전달한 링크는 취소할 수 있어요. 링크 내용은 발급 직후에만 복사할 수 있습니다.</p>
  <div id="inviteList" role="status" aria-live="polite">목록을 불러오는 중입니다.</div></section></section><section class="panel" data-workspace-view="accounts"><span class="tag">02 / ACCOUNT HELP</span><h2>계정 접근 도움말</h2><p>기기를 바꾸거나 로그아웃해서 다시 접속해야 할 때 신원 확인 후 기존 계정용 링크를 새로 발급할 수 있어요.</p><label>대상 계정<select id="resetUser">${accounts.map(a=>`<option value="${sanitize(a.id)}">${sanitize(a.nickname)} · ${a.role==='student'?'학생':'학부모'}</option>`).join('')}</select></label><div class="buttons"><button id="resetIssue" class="button-ghost" ${accounts.length?'':'disabled'}>기존 계정 새 접속 링크 만들기</button></div><div id="resetOutput"></div></section><section class="panel full" data-workspace-view="drive"><span class="tag">03 / GOOGLE DRIVE</span><h2>Google Drive</h2><p>${drive.connected?'내 구글 계정이 연결돼 있습니다.':'구글 계정 연결 전입니다. 학생 기록은 아직 자동 업로드되지 않습니다.'}</p><div class="buttons"><button id="googleConnect" class="button-ghost" ${drive.configured&&drive.backupEnabled?'':'disabled'}>${drive.connected?'구글 계정 다시 연결':'내 구글 계정 연결'}</button><button id="driveSync" class="button" ${drive.connected&&drive.backupEnabled?'':'disabled'}>공유 기록 백업</button>${drive.folderUrl?`<a class="button-ghost" href="${sanitize(drive.folderUrl)}" target="_blank" rel="noopener noreferrer">내 드라이브 폴더 열기 ↗</a>`:''}</div>${!drive.backupEnabled?hint('보존·삭제·동의 및 사본 처리 정책 검증 전까지 Google Drive 백업이 비활성화되어 있습니다. 서버 공유를 취소해도 기존 다운로드 파일은 자동으로 회수되지 않습니다.'):!drive.configured?hint('구글 OAuth 관리자 설정이 아직 끝나지 않았습니다.'):''}<p>삭제 확인이 필요한 사본은 치료사의 기록 관리자에게 문의하세요.</p></section></div></div></div>`;
 attachShares();bindWorkspace();paintSketches();initSessionNotes();const rerenderInbox=()=>{const name=$('filterStudent').value,kind=$('filterKind').value;const list=records.filter(r=>(name==='all'||r.student===name)&&(kind==='all'||r.kind===kind));$('inboxResults').innerHTML=recordCards(list);paintSketches();};$('filterStudent').onchange=rerenderInbox;$('filterKind').onchange=rerenderInbox;$('refresh').onclick=()=>dashboard();$('csv').onclick=exportCSV;$('createStudentForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;
   loading(f.querySelector('button'),async()=>{
-   await api('students',{method:'POST',body:{alias:formValue(f,'alias')}});
-   toast('담당 학생 공간이 만들어졌습니다. 학생·보호자 링크를 발급할 수 있어요.');
+   const created=await api('students',{method:'POST',body:{alias:formValue(f,'alias')}});
+   toast('학생이 추가됐습니다. 이제 학생 또는 보호자 접속 링크를 만들 수 있어요.');
    activeView='accounts';await dashboard();
+   const selected=$('inviteForm')?.elements?.studentId;
+   if(selected&&created.student?.id)selected.value=created.student.id;
+   $('inviteRole')?.focus();
   });
  };
- $('inviteRole').onchange=()=>{};$('inviteForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;loading(f.querySelector('button'),async()=>{const out=await api('invites',{method:'POST',body:formValue(f,'role')==='student'
+ const updateInviteHelp=()=>{
+  const studentMode=$('inviteRole').value==='student';
+  $('inviteSubmit').textContent=studentMode?'학생 접속 링크 만들기':'보호자 접속 링크 만들기';
+  $('inviteExplainer').textContent=studentMode
+   ?'학생 본인에게 보낼 링크를 만듭니다. 링크와 별도 확인 코드를 전달해 주세요.'
+   :'선택한 학생의 보호자에게 보낼 링크를 만듭니다. 학생 계정과 별도로 연결돼요.';
+ };
+ $('inviteRole').onchange=updateInviteHelp;updateInviteHelp();$('inviteForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;loading(f.querySelector('button'),async()=>{const out=await api('invites',{method:'POST',body:formValue(f,'role')==='student'
   ?{role:'student',targetUserId:formValue(f,'studentId')}
   :{role:'parent',studentId:formValue(f,'studentId')}});const div=$('inviteOutput');div.innerHTML='<p class="muted">학생 또는 보호자 전용 링크입니다. 48시간 후 만료되며 처음 등록에 한 번만 사용됩니다. 카카오톡으로 개별 전달해 주세요.</p><textarea id="inviteCode" readonly></textarea> <p><strong>별도 본인 확인 코드</strong> — 신원 확인 후 대면·확인된 전화로 전달하세요. 링크와 같은 카카오톡 메시지에 보내면 안 됩니다.</p> <textarea id="verificationCodeOutput" readonly aria-label="별도 본인 확인 코드"></textarea> <button class="button-ghost" type="button" id="copyCode">초대 링크 복사</button>';$('inviteCode').value=invitationUrl(out.invite);
 $('verificationCodeOutput').value=(out.verificationCode||'').match(/.{1,4}/g)?.join('-')||'';

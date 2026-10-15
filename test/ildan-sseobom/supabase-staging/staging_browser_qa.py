@@ -89,6 +89,68 @@ with sync_playwright() as p:
   assert not errors,('unexpected page JavaScript error',width,errors)
   checks.append(f'{width}px: therapist alias/password signup and returning login, no email or OTP, no overflow')
   page.close()
+ # Simulate an already signed-in therapist, with ALL account APIs mocked.
+ # No user identity, record, invite or clinical data is created on Supabase.
+ import time
+ from urllib.parse import urlsplit
+ for width in [390,1440]:
+  page=browser.new_page(viewport={'width':width,'height':860})
+  problems=[]
+  page.on('pageerror',lambda e:problems.append(str(e)))
+  account_id='00000000-0000-4000-8000-000000000001'
+  session={'access_token':'fake.qa.browser.token','refresh_token':'fake-refresh','token_type':'bearer',
+           'expires_in':3600,'expires_at':int(time.time())+3600,
+           'user':{'id':account_id,'email':'fake-test@example.invalid','aud':'authenticated',
+                   'role':'authenticated','app_metadata':{},'user_metadata':{},'created_at':'2026-10-15T00:00:00Z'}}
+  page.add_init_script("(()=>{const session="+json.dumps(session)+";localStorage.setItem('ildanPersonalDevice','yes');localStorage.setItem('sb-miohovwmhmtcvkurjamm-auth-token',JSON.stringify(session))})()")
+  members=[]
+  def mock_therapist_api(route):
+   path=urlsplit(route.request.url).path
+   method=route.request.method
+   headers={'Access-Control-Allow-Origin':'http://127.0.0.1:8829','Access-Control-Allow-Methods':'GET,POST,OPTIONS',
+            'Access-Control-Allow-Headers':'content-type,authorization,apikey'}
+   if method=='OPTIONS':
+    route.fulfill(status=204,headers=headers)
+    return
+   if path.endswith('/me'):data={'user':{'id':account_id,'role':'therapist','nickname':'QA치료사','trial':True}}
+   elif path.endswith('/records'):data={'records':[]}
+   elif path.endswith('/students'):
+    if method=='POST':
+     alias=route.request.post_data_json['alias']
+     assert alias=='가상 민수','Korean student name should pass unchanged to API'
+     members.append({'id':'00000000-0000-4000-8000-000000000051','nickname':alias})
+     data={'student':members[-1]};status=201
+    else:data={'students':members}
+   elif path.endswith('/accounts'):data={'accounts':[]}
+   elif path.endswith('/drive/status'):data={'connected':False,'configured':False,'backupEnabled':False}
+   elif path.endswith('/invites'):data={'invites':[]}
+   elif path.endswith('/session-notes'):data={'notes':[]}
+   else:data={'error':'Unknown synthetic endpoint: '+path};status=404
+   status=locals().get('status',200)
+   route.fulfill(status=status,headers=headers,content_type='application/json',body=json.dumps(data,ensure_ascii=False))
+  page.route('**/functions/v1/ildan-api/**',mock_therapist_api)
+  page.goto(url,wait_until='domcontentloaded',timeout=35000)
+  page.locator('[data-workspace-target="accounts"]').wait_for(timeout=25000)
+  page.locator('[data-workspace-target="accounts"]').click()
+  page.locator('#createStudentForm').wait_for(timeout=15000)
+  assert page.locator('#createStudentForm').get_by_text('학생 이름 또는 별칭',exact=False).count()==1
+  assert page.locator('#inviteSubmit').is_disabled(),'Cannot invite before adding any students'
+  assert '등록된 학생 (0명)' in page.locator('.student-list-summary').inner_text()
+  page.locator('#createStudentForm input[name=alias]').fill('가상 민수')
+  page.locator('#createStudentForm button[type=submit]').click()
+  page.locator('.student-list-summary').get_by_text('등록된 학생 (1명)').wait_for(timeout=15000)
+  assert '가상 민수' in page.locator('.student-list-summary').inner_text()
+  assert page.locator('#inviteSubmit').is_enabled()
+  assert page.locator('#inviteSubmit').inner_text()=='학생 접속 링크 만들기'
+  page.locator('#inviteRole').select_option('parent')
+  assert page.locator('#inviteSubmit').inner_text()=='보호자 접속 링크 만들기'
+  page.locator('#inviteRole').select_option('student')
+  assert page.locator('#inviteSubmit').inner_text()=='학생 접속 링크 만들기'
+  assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth+3'),'Account flow overflow'
+  assert not problems,('client runtime error',width,problems)
+  checks.append(f'{width}px: signed-in therapist can add Korean student display name; student/guardian invite steps work')
+  page.close()
+
  browser.close()
 server.shutdown()
 print(json.dumps({'status':'PASS','cases':checks},ensure_ascii=False))
