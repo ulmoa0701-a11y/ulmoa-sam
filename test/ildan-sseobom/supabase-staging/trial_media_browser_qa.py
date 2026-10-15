@@ -74,9 +74,8 @@ with sync_playwright() as p:
   page.locator('[data-workspace-target=history]').wait_for(timeout=15000)
   page.locator('[data-workspace-target=history]').click()
   assert page.locator('.device-only-record .saved-photo-grid img').count()==1,'photo survives reload on same device'
-  page.locator('[data-delete-practice]').click()
   page.once('dialog',lambda dialog:dialog.accept())
-  # If dialog was already shown before event registration, call click once more.
+  page.locator('[data-delete-practice]').click()
   page.locator('.device-only-record').wait_for(state='detached',timeout=15000)
   assert not errors,('uncaught errors',role,width,errors)
   checks.append(f'{role} {width}px: photo import/preview/remove + touch-capable canvas + on-device archive/reload/delete, no remote write')
