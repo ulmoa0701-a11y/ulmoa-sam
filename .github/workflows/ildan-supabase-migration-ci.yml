@@ -53,7 +53,9 @@ jobs:
           const cfg=fs.readFileSync('secure-portal/supabase/web/config.js','utf8');
           assert(js.includes("supabase.auth.verifyOtp"));
           assert(js.includes('supabase.auth.signInWithPasskey()'));
-          assert(!/signInWithOtp\s*\(|type:\s*['"]sms['"]|phoneRequestForm|phoneVerifyForm|emailRequestForm|emailVerifyForm/.test(js),'No SMS or email OTP allowed for clinician or guardian');
+          assert(!['signInWithOtp({phone','phoneRequestForm','phoneVerifyForm','emailRequestForm','emailVerifyForm'].some(x=>js.includes(x)),'No SMS or guardian email forms');
+          assert(js.includes('shouldCreateUser:true')&&js.includes('registerTherapistPasskey'),'Therapist-first setup must be present');
+          assert(js.includes("api('revoke-invite'"),'Therapist must be able to revoke invites');
           assert(js.includes("api('claim-invite'"));
           assert(!js.includes("api('passkeys/login/verify'"));
           assert(js.includes("credentials:'omit'"));
@@ -94,6 +96,7 @@ jobs:
           assert(src.includes("apiName==='unshare'"));
           assert(src.includes("apiName==='claim-invite'"));
           assert(src.includes("apiName==='session-notes'"));
+          assert(src.includes("apiName==='revoke-invite'") && src.includes(".eq('therapist_id',uid)"),'Only clinician may revoke own unclaimed links');
           assert(sql.includes('ENABLE ROW LEVEL SECURITY'));
           assert(sql.includes('REVOKE ALL'));
           assert(sql.includes('email_confirmed_at IS NOT NULL'));
