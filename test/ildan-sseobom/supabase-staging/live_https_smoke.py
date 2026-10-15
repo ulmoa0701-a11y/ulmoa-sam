@@ -25,6 +25,13 @@ with sync_playwright() as p:
         assert "학생 이름 또는 별칭" in live_js, "deployed page must include student name label"
         assert "student-list-summary" in live_js, "deployed page must include registered student list"
         assert "보호자 접속 링크 만들기" in live_js, "deployed page must distinguish guardian invitation"
+        assert "from './trial-media.mjs'" in live_js, "public app must load actual photo module"
+        assert "savePracticeRecord(me.id,me.role" in live_js, "photo drafts must be kept on device"
+        media_js=page.evaluate("fetch('./trial-media.mjs',{cache:'no-store'}).then(r=>r.ok?r.text():Promise.reject(new Error('photo media script HTTP '+r.status)))")
+        assert "사진 추가" in media_js and "사진 촬영" in media_js and "그림 그리기" in media_js, "actual photo and drawing module deployed"
+        assert "indexedDB.open" in media_js, "on-device archive implementation deployed"
+        assert "convertPhoto(file)" in media_js, "original photos should be recompressed and stripped"
+
         page.locator("#returnChoice").click()
         assert page.locator("#trialLoginForm").is_visible()
         page.locator("#firstChoice").click()
