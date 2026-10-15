@@ -1,11 +1,11 @@
 const $=(id)=>document.getElementById(id);const app=$('app'),account=$('account');
 let me=null,records=[],students=[],therapists=[],view='login',drive={connected:false,configured:false};
-let activeView='write';
+let activeView='write',editingPracticeRecord=null;
 const sanitize=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 const hint=(s)=>`<div class="callout">${s}</div>`;
 function toast(s){$('toast').textContent=s;$('toast').classList.add('visible');setTimeout(()=>$('toast').classList.remove('visible'),3400)}
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.105.0/+esm';
-import {mediaWidget,attachPracticePhotos,getPracticePhotos,savePracticeRecord,listPracticeRecords,deletePracticeRecord,photosMarkup} from './trial-media.mjs';
+import {mediaWidget,attachPracticePhotos,getPracticePhotos,setPracticePhotos,savePracticeRecord,updatePracticeRecord,listPracticeRecords,deletePracticeRecord,photosMarkup} from './trial-media.mjs';
 const CFG=window.ILDAN_SUPABASE_CONFIG||{};
 const configured=Boolean(/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(CFG.url||'')
  && /^sb_publishable_|^eyJ/.test(CFG.publishableKey||'')
@@ -457,13 +457,19 @@ function confirmSharedEntry(fields,entry){
  });
 }
 
-async function uploadPracticePhotos(){
+async function uploadPracticePhotos(existing=null){
  const photos=getPracticePhotos(),paths=[];
- for(const dataUrl of photos){
+ for(const src of photos){
+  if(!src.startsWith('data:image/jpeg;base64,')){
+   const i=existing?.entry?.photos?.indexOf(src)??-1;
+   const oldPath=i>=0?existing?.photoPaths?.[i]:null;
+   if(!oldPath)throw Error('이전에 저장한 사진을 확인할 수 없어. 내 기록을 새로 열어 줘.');
+   paths.push(oldPath);
+   continue;
+  }
   const signed=await api('practice-media-sign',{method:'POST',body:{}});
   if(!signed.token||!signed.path||signed.bucket!=='ildan-practice-media')throw Error('사진 업로드 준비에 실패했어.');
-  // CSP intentionally disallows data: fetch. Convert prepared JPEG locally instead.
-  const bytes=Uint8Array.from(atob(dataUrl.split(',')[1]),c=>c.charCodeAt(0));
+  const bytes=Uint8Array.from(atob(src.split(',')[1]),c=>c.charCodeAt(0));
   const blob=new Blob([bytes],{type:'image/jpeg'});
   if(blob.size>signed.maxBytes)throw Error('사진이 너무 커서 업로드할 수 없어.');
   const {error}=await supabase.storage.from(signed.bucket).uploadToSignedUrl(signed.path,signed.token,blob,{contentType:'image/jpeg'});
@@ -488,7 +494,17 @@ function compactSketchForCloud(entry){
 function wireEntryForm(isParent){
  const f=$('entryForm'),button=$('saveEntry'),share=f.elements.share,area=$('sharePicker');
  const selectedKeys=()=>[...f.querySelectorAll('input[name="shareField"]:checked')].map(x=>x.value);
- sketchStrokes=[];bindSketch();attachPracticePhotos(toast);
+ sketchStrokes=[];
+ if(editingPracticeRecord?.entry?.sketch){
+  try{
+   const previous=JSON.parse(editingPracticeRecord.entry.sketch);
+   if(Array.isArray(previous)&&previous.length<=60
+     &&previous.every(x=>Array.isArray(x)&&x.length<=240))
+    sketchStrokes=previous;
+  }catch(_){}
+ }
+ bindSketch();attachPracticePhotos(toast);
+ if(editingPracticeRecord)setPracticePhotos(editingPracticeRecord.entry.photos||[]);
  const updateParentShare=()=>{
   if(!isParent)return;
   const detailsVisible=f.dataset.parentMode==='detail',entry=gatherEntry(f,'parent');
@@ -548,11 +564,26 @@ function wireEntryForm(isParent){
   if(isParent&&!entry.date){toast('일이 있었던 날짜를 선택해 주세요.');return;}
   loading(button,async()=>{
    const clean=compactSketchForCloud(entry),shareWithTherapist=Boolean(f.elements.practiceShare?.checked);
-   const paths=await uploadPracticePhotos();
+   const old=editingPracticeRecord;
+   if(old?.local){
+    const local={...clean},images=getPracticePhotos();if(images.length)local.photos=images;
+    await updatePracticeRecord(me.id,old.id,local);
+    editingPracticeRecord=null;activeView='history';await dashboard();
+    toast('이 기기의 기존 기록을 수정했어.');
+    return;
+   }
+   const paths=await uploadPracticePhotos(old);
    if(paths.length)clean.photos=paths;
-   await api('practice-records',{method:'POST',body:{entry:clean,share:shareWithTherapist}});
-   activeView='history';await dashboard();
-   toast(shareWithTherapist?'저장하고 담당 치료사에게 공유했어.':'연습용 서버에 저장했어. 다른 기기에서도 볼 수 있어.');
+   if(old){
+    const out=await api('practice-update',{method:'POST',
+     body:{recordId:old.id,expectedUpdatedAt:old.updatedAt,entry:clean,share:shareWithTherapist}});
+    editingPracticeRecord=null;activeView='history';await dashboard();
+    toast(out.photoCleanupPending?'내용은 수정됐어. 일부 사진 삭제를 다시 확인해야 해.':'수정 완료! 원래 기록이 업데이트됐어.');
+   }else{
+    await api('practice-records',{method:'POST',body:{entry:clean,share:shareWithTherapist}});
+    activeView='history';await dashboard();
+    toast(shareWithTherapist?'저장하고 담당 치료사에게 공유했어.':'연습용 서버에 저장했어. 다른 기기에서도 볼 수 있어.');
+   }
    document.querySelector('[data-workspace-view="history"]')?.scrollIntoView({behavior:'smooth',block:'start'});
   });
  };
@@ -569,8 +600,8 @@ function recordCards(list=records){
  return list.map(r=>{
   const time=sanitize(new Date(r.createdAt).toLocaleString('ko-KR'));
   const observed=r.entry?.date?`${r.kind==='parent'?'관찰':'기록'} ${sanitize(r.entry.date)}${r.entry.time?' '+sanitize(r.entry.time):''}${r.entry.place?' · '+sanitize(r.entry.place):''} · 작성 ${time}`:time;
-  if(r.practice&&me.role!=='therapist')return `<article class="record archive-record practice-cloud-record"><div class="meta">연습용 서버 저장 · ${observed} · ${r.shared?'치료사에게 공유 중':'나만 보기'}</div>${prettyRecordEntry(r.entry)}<div class="practice-record-actions">${r.shared?`<button class="button-ghost" data-practice-unshare="${sanitize(r.id)}">치료사 공유 취소</button>`:`<button class="button-ghost" data-practice-share="${sanitize(r.id)}">치료사에게 공유하기</button>`}<button class="button-ghost" data-practice-delete="${sanitize(r.id)}">연습 기록 삭제</button></div></article>`;
-  if(r.local)return `<article class="record archive-record device-only-record"><div class="meta">이 기기에만 임시 보관 · ${observed} · 치료사에게 전달되지 않음</div>${prettyRecordEntry(r.entry)}<button class="button-ghost" type="button" data-delete-practice="${sanitize(r.id)}">이 기기에서 기록·사진 삭제</button></article>`;
+  if(r.practice&&me.role!=='therapist')return `<article class="record archive-record practice-cloud-record"><div class="meta">연습용 서버 저장 · ${observed}${r.updatedAt&&new Date(r.updatedAt).getTime()-new Date(r.createdAt).getTime()>1000?' · 수정 '+sanitize(new Date(r.updatedAt).toLocaleString('ko-KR')):''} · ${r.shared?'치료사에게 공유 중':'나만 보기'}</div>${prettyRecordEntry(r.entry)}<div class="practice-record-actions"><button class="button-ghost" type="button" data-practice-edit="${sanitize(r.id)}">✎ 기록 수정하기</button>${r.shared?`<button class="button-ghost" data-practice-unshare="${sanitize(r.id)}">치료사 공유 취소</button>`:`<button class="button-ghost" data-practice-share="${sanitize(r.id)}">치료사에게 공유하기</button>`}<button class="button-ghost" data-practice-delete="${sanitize(r.id)}">연습 기록 삭제</button></div></article>`;
+  if(r.local)return `<article class="record archive-record device-only-record"><div class="meta">이 기기에만 임시 보관 · ${observed}${r.updatedAt?' · 수정됨':''} · 치료사에게 전달되지 않음</div>${prettyRecordEntry(r.entry)}<div class="practice-record-actions"><button class="button-ghost" type="button" data-practice-edit="${sanitize(r.id)}">✎ 기록 수정하기</button><button class="button-ghost" type="button" data-delete-practice="${sanitize(r.id)}">이 기기에서 기록·사진 삭제</button></div></article>`;
   if(me.role==='therapist'&&r.kind==='student'){
    const text=String(r.entry?.note||r.entry?.experience||r.entry?.thought||r.entry?.action||r.entry?.mood||'');
    const short=text.length>120?text.slice(0,120)+'…':text;
@@ -588,6 +619,14 @@ function recordCards(list=records){
 }
 
 function attachShares(){
+ document.querySelectorAll('[data-practice-edit]').forEach(btn=>btn.onclick=()=>loading(btn,async()=>{
+  const record=records.find(r=>(r.practice||r.local)&&r.id===btn.dataset.practiceEdit);
+  if(!record)return toast('기록을 찾을 수 없어. 다시 열어 줘.');
+  editingPracticeRecord=record;
+  activeView='write';
+  await dashboard();
+  document.querySelector('[data-workspace-view="write"]')?.scrollIntoView({behavior:'smooth',block:'start'});
+ }));
  const actionMap={'practice-share':'practice-share','practice-unshare':'practice-unshare','practice-delete':'practice-delete'};
  for(const type of Object.keys(actionMap))document.querySelectorAll('[data-'+type+']').forEach(btn=>btn.onclick=()=>loading(btn,async()=>{
   if(type==='practice-delete'&&!confirm('이 연습 기록과 서버의 첨부 사진을 삭제할까?'))return;
@@ -681,6 +720,42 @@ function attachCoding(){
  $('codingSelect').onchange=refresh;
  $('runCode').onclick=()=>{const x=$('codingSelect').value;const act=x==='sun'?'산책':'실내 활동';$('codeResult').textContent=`출력: ${act}`;};
 }
+function populatePracticeEditor(isParent){
+ const record=editingPracticeRecord,f=$('entryForm'),button=$('saveEntry');
+ if(!record||!f||!(record.practice||record.local))return;
+ const e=record.entry||{};
+ if(isParent)f.querySelector('[data-parent-mode="detail"]')?.click();
+ else f.querySelector('[data-journal-mode="detail"]')?.click();
+ for(const [k,value] of Object.entries(e)){
+  if(['photos','sketch','signals','mood'].includes(k)||typeof value!=='string')continue;
+  const field=f.querySelector('[name="'+k+'"]');
+  if(field&&['INPUT','TEXTAREA','SELECT'].includes(field.tagName))field.value=value;
+ }
+ if(isParent){
+  const selected=String(e.signals||'').split(' / ');
+  f.querySelectorAll('input[name="signalChoice"]').forEach(x=>{x.checked=selected.includes(x.value)});
+ }else{
+  const moods=String(e.mood||'').split(' · ').filter(Boolean);
+  const options=[...f.querySelectorAll('input[name="emotionChoice"]')];
+  options.forEach(x=>{x.checked=moods.includes(x.value)});
+  const rest=moods.filter(x=>!options.some(o=>o.value===x));
+  const other=f.querySelector('[name="emotionOther"]');if(other)other.value=rest.join(' · ');
+ }
+ if(e.sketch)document.getElementById('showDrawing')?.click();
+ const share=f.querySelector('input[name="practiceShare"]');if(share)share.checked=!!record.shared;
+ const title=document.createElement('div');title.className='practice-edit-header';title.role='status';
+ title.innerHTML=record.local
+  ?'<strong>✎ 이 기기에 저장된 기록 수정 중</strong><p>기존 내용·사진·그림을 변경해 이 기기에 다시 저장해요. 이 기록은 치료사에게 전달되지 않아요.</p>'
+  :'<strong>✎ 기존 기록 수정 중</strong><p>내용과 사진·그림을 고친 뒤 저장하면 기존 기록에 반영돼요. 치료사 공유 여부도 변경할 수 있어요.</p>';
+ if(record.local){const practicePanel=f.querySelector('.practice-sync-box');if(practicePanel)practicePanel.hidden=true;}
+ f.prepend(title);
+ button.textContent=record.local?'이 기기에 수정 저장하기':'수정 내용 저장하기';
+ const cancel=document.createElement('button');cancel.type='button';cancel.id='cancelPracticeEdit';
+ cancel.className='button-ghost';cancel.textContent='수정 취소';
+ button.insertAdjacentElement('afterend',cancel);
+ cancel.onclick=()=>{editingPracticeRecord=null;activeView='history';studentHome()};
+ f.dispatchEvent(new Event('input',{bubbles:true}));
+}
 function studentHome(){
  const isParent=me.role==='parent';
  const items=isParent?[
@@ -695,7 +770,9 @@ function studentHome(){
  <section data-workspace-view="history" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>my-notes.json</span></div><div class="editor-paper"><span class="tag">02 / ARCHIVE</span><h2>${isParent?'내 생활 메모':'내 서랍'}</h2><p>${isParent?'내가 남긴 메모만 보여요.':'내가 남긴 페이지들을 모아두는 곳이야.'}</p><div id="recordsHere">${recordCards()}</div></div></section>
  ${isParent?'':`<section data-workspace-view="coding" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>studio / playground</span></div><div class="editor-paper"><span class="tag">OPTIONAL / PLAY</span><h2>코딩 실험실</h2><p>조건을 바꿔 결과를 확인하는 작은 실험 공간이야. 기록하지 않고 그냥 놀아도 돼.</p>${codingMarkup()}<details class="optional-fields"><summary>간단한 선택 예시 살펴보기 <small>선택</small></summary><div class="optional-wrap">${situationMarkup()}</div></details></div></section>`}
  </div></div><p class="workspace-footer">일단써봄은 원하는 방식으로 경험을 남기는 개인 작업공간이야. 사용하고 싶은 때에만 열어도 돼.</p>`;
- wireEntryForm(isParent);attachShares();bindWorkspace();paintSketches();if(isParent)renderParentCalendar();
+ wireEntryForm(isParent);attachShares();bindWorkspace();
+ if(editingPracticeRecord)populatePracticeEditor(isParent);
+ paintSketches();if(isParent)renderParentCalendar();
  if(!isParent){attachSituation();attachCoding();}
 
 }
@@ -830,6 +907,8 @@ async function refreshInviteList(){
 function adminHome(){app.innerHTML=hero('계정 운영','최초 관리자 계정은 기록을 읽을 수 없습니다. 치료사 초대만 발급할 수 있어요.')+`<div class="panel"><h2>치료사 초대코드 발급</h2><p>치료사도 학생·학부모와 같은 패스키 방식으로 등록합니다.</p><button id="inviteTherapist" class="button">치료사 초대코드 만들기</button><div id="adminInvite"></div></div>`;$('inviteTherapist').onclick=e=>loading(e.target,async()=>{const r=await api('invites',{method:'POST',body:{role:'therapist'}});const d=$('adminInvite');d.innerHTML='<p>코드를 복사해 치료사에게 개별 전달하세요. 7일간 유효합니다.</p><textarea readonly id="adminCode"></textarea>';$('adminCode').value=r.invite;})}
 async function dashboard(){header();records=me.role==='admin'?[]:(await api('practice-records')).records??[];
  if(me.role==='student'||me.role==='parent'){try{records=[...(await listPracticeRecords(me.id)),...records]}catch(e){toast(e.message)}}
+ if(editingPracticeRecord&&['student','parent'].includes(me.role))
+  editingPracticeRecord=records.find(r=>r.id===editingPracticeRecord.id&&(r.practice||r.local))||null;
  if(me.role==='therapist')await therapistHome();else if(me.role==='admin')adminHome();else studentHome();}
 function render(){header();if(!me)loginScreen();else dashboard().catch(e=>{app.innerHTML=hint('화면을 불러오지 못했어요. '+sanitize(e.message))})}
 (async()=>{await refreshAuth()})();
