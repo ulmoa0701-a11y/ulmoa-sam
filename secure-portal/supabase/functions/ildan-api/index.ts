@@ -203,7 +203,7 @@ export async function handle(request:Request):Promise<Response>{
    return send({error:'과거 초대코드 등록 방식은 폐기되었습니다. 담당 치료사에게 새로운 링크를 요청해 주세요.'},410);
   if(!member||!roles.has(member.role))return send({error:'승인된 학생·보호자·치료사 계정이 아닙니다.'},403);
   const admin=adminDb();
-  if(apiName==='me'&&request.method==='GET')return send({user:{id:uid,role:member.role,nickname:member.display_alias||member.role,therapistId:member.therapist_id,studentId:member.student_id}});
+  if(apiName==='me'&&request.method==='GET')return send({user:{id:uid,role:member.role,nickname:member.display_alias||member.role,trial:user.app_metadata?.enrollment==='sandbox-self-signup',therapistId:member.therapist_id,studentId:member.student_id}});
   if(apiName==='students'&&request.method==='GET'){
    if(member.role!=='therapist')return send({error:'치료사 전용입니다.'},403);
    const {data,error}=await userDb.from('ildan_members').select('user_id,display_alias').eq('therapist_id',uid).eq('role','student');
