@@ -74,9 +74,10 @@ begin
  if v_inv.pin_locked_until is not null and v_inv.pin_locked_until > now() then return false; end if;
  if v_inv.verification_digest is distinct from p_verification_digest then
   update public.ildan_invites
-   set failed_pin_attempts=case when coalesce(v_inv.pin_locked_until, '-infinity'::timestamptz)<now()
-     then least(v_inv.failed_pin_attempts+1,5) else least(v_inv.failed_pin_attempts+1,5) end,
-    pin_locked_until=case when v_inv.failed_pin_attempts>=4
+   set failed_pin_attempts=case when v_inv.pin_locked_until is not null and v_inv.pin_locked_until<=now()
+     then 1 else least(v_inv.failed_pin_attempts+1,5) end,
+    pin_locked_until=case when v_inv.pin_locked_until is not null and v_inv.pin_locked_until<=now()
+     then null when v_inv.failed_pin_attempts>=4
      then now()+interval '30 minutes' else null end
   where code_digest=p_code_digest;
   return false;
