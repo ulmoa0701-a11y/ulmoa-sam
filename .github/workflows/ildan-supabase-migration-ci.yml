@@ -98,6 +98,7 @@ jobs:
           assert(src.includes("apiName==='unshare'"));
           assert(src.includes("apiName==='claim-invite'"));
           assert(src.includes("apiName==='session-notes'"));
+          assert(src.includes("apiName==='students'&&request.method==='POST'")&&src.includes("role:'student',therapist_id:uid"),'Therapist-only student workspace creation required');
           assert(src.includes("apiName==='revoke-invite'") && src.includes(".eq('therapist_id',uid)"),'Only clinician may revoke own unclaimed links');
           assert(sql.includes('ENABLE ROW LEVEL SECURITY'));
           assert(sql.includes('REVOKE ALL'));
