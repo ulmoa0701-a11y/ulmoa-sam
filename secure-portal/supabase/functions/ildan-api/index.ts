@@ -136,33 +136,50 @@ export async function handle(request:Request):Promise<Response>{
   const b=await body(request),code=requireText(b,'code');
   if(!/^[0-9a-f]{64}$/.test(code))return send({error:'유효한 초대 링크가 아닙니다.'},400);
   const {data,error}=await adminDb().from('ildan_invites')
-    .select('role,expires_at,verification_digest,target_user_id').eq('code_digest',await digest(code))
-   .is('used_by',null).gt('expires_at',new Date().toISOString()).maybeSingle();
-  if(error||!data)return send({error:'링크가 만료되었거나 이미 사용되었습니다.'},404);
-  return send({role:data.role,expiresAt:data.expires_at,requiresDeviceSetup:false,registrationOpen:!!data.verification_digest,recovery:!!data.target_user_id,needsSeparateVerificationCode:true,
-   notice:'링크를 열었다고 등록되지는 않습니다. 사용자의 확인 후 1회 등록합니다.'});
+    .select('role,expires_at,verification_digest,target_user_id,used_by').eq('code_digest',await digest(code))
+   .is('revoked_at',null).gt('expires_at',new Date().toISOString()).maybeSingle();
+  if(error||!data)return send({error:'취소된 링크입니다. 담당 치료사에게 새 링크를 요청해 주세요.'},404);
+  return send({role:data.role,expiresAt:null,reusable:true,linked:!!data.used_by,requiresDeviceSetup:false,
+   registrationOpen:true,recovery:!!data.target_user_id,needsSeparateVerificationCode:false,
+   notice:data.used_by?'기존 계정으로 다시 접속할 수 있어요.':'처음 연결한 계정으로 이후에도 접속할 수 있어요.'});
  }
- // Registration requires BOTH a 256-bit one-time link and an independent
- // 96-bit verification secret conveyed after an offline identity check.
- // Client confirmation is explicit; merely previewing a URL consumes nothing.
+ // Trial-only link possession is the login credential. No PIN or email needed.
+ // Reuse MUST resolve to the same member; never create another account.
+ // This path is disabled when clinical write access is enabled.
  if(apiName==='invite-register'&&request.method==='POST'){
+  if(!sandboxSignupAllowed())return send({error:'링크로 바로 접속은 체험판에서만 제공돼요.'},403);
   const b=await body(request),code=requireText(b,'code');
-  const checkCode=requireText(b,'verificationCode').replace(/[-\s]/g,'').toLowerCase();
-  if(!/^[0-9a-f]{64}$/.test(code)||!/^[0-9a-f]{24}$/.test(checkCode))
-   return send({error:'초대 링크 또는 본인 확인 코드를 확인해 주세요.'},400);
+  if(!/^[0-9a-f]{64}$/.test(code))
+   return send({error:'올바른 학생·보호자 접속 링크가 아니에요.'},400);
   if(!env('SUPABASE_SERVICE_ROLE_KEY'))return send({error:'서버 설정 확인이 필요합니다.'},503);
   const admin=adminDb(),hash=await digest(code);
   const {data:invite,error:readError}=await admin.from('ildan_invites')
-   .select('role,expires_at,target_user_id').eq('code_digest',hash)
-   .eq('verification_digest',await digest(checkCode))
-   .is('used_by',null).gt('expires_at',new Date().toISOString()).maybeSingle();
-  if(readError||!invite)return send({error:'링크가 만료되었거나 본인 확인 코드가 맞지 않습니다.'},403);
+   .select('role,expires_at,target_user_id,used_by,therapist_id,student_id,verification_digest').eq('code_digest',hash)
+   .is('revoked_at',null).gt('expires_at',new Date().toISOString()).maybeSingle();
+  if(readError||!invite)return send({error:'취소되거나 만료된 링크입니다. 담당 치료사에게 문의해 주세요.'},403);
+  const repeatLogin=Boolean(invite.used_by);
+  // Reuse is never a second registration. Validate account and assignment
+  // against CURRENT membership, even if the old code itself still matches.
+  if(repeatLogin){
+   if(invite.target_user_id&&invite.target_user_id!==invite.used_by)
+    return send({error:'연결된 사용자 정보가 올바르지 않습니다.'},403);
+   const {data:linked,error:linkedError}=await admin.from('ildan_members')
+    .select('user_id,role,student_id,therapist_id')
+    .eq('user_id',invite.used_by).eq('role',invite.role)
+    .eq('therapist_id',invite.therapist_id).maybeSingle();
+   if(linkedError||!linked||(invite.role==='parent'&&linked.student_id!==invite.student_id))
+    return send({error:'연결된 계정이 변경되었습니다. 담당 치료사에게 문의해 주세요.'},403);
+   const {data:therapist}=await admin.from('ildan_members')
+    .select('user_id').eq('user_id',invite.therapist_id).eq('role','therapist').maybeSingle();
+   if(!therapist)return send({error:'담당 치료사를 확인할 수 없습니다.'},403);
+  }
   // Mint an internal, non-deliverable email identity. It is never an end-user
   // email address and the random password is NOT shown, stored, or reused.
   // Only verified passkeys will enable durable passwordless sign-in after signup.
   let uid='',email='',createdNew=false;
-  if(invite.target_user_id){
-   const {data:existing,error:existingError}=await admin.auth.admin.getUserById(invite.target_user_id);
+  if(invite.used_by||invite.target_user_id){
+   const accountId=invite.used_by||invite.target_user_id;
+   const {data:existing,error:existingError}=await admin.auth.admin.getUserById(accountId);
    if(existingError||!existing?.user?.email)return send({error:'복구할 계정이 없습니다. 담당 치료사에게 문의해 주세요.'},404);
    uid=existing.user.id;email=existing.user.email;
   }else{
@@ -182,16 +199,18 @@ export async function handle(request:Request):Promise<Response>{
    if(createdNew)await admin.auth.admin.deleteUser(uid).catch(()=>{});
    return send({error:'기기 등록을 준비하지 못했습니다.'},503);
   }
-  const {data:claimed,error:claimError}=await admin.rpc('ildan_claim_invite_for_user',{
-   p_code_digest:hash,p_user_id:uid,p_verification_digest:await digest(checkCode)
-  });
-  if(claimError||claimed!==invite.role){
-   if(createdNew)await admin.auth.admin.deleteUser(uid).catch(()=>{});
-   return send({error:'이미 사용된 링크이거나 등록이 허용되지 않았습니다.'},403);
+  if(!repeatLogin){
+   const {data:claimed,error:claimError}=await admin.rpc('ildan_claim_invite_for_user',{
+    p_code_digest:hash,p_user_id:uid,p_verification_digest:invite.verification_digest
+   });
+   if(claimError||claimed!==invite.role){
+    if(createdNew)await admin.auth.admin.deleteUser(uid).catch(()=>{});
+    return send({error:'계정 연결이 허용되지 않았습니다. 담당 치료사에게 문의해 주세요.'},403);
+   }
   }
-  return send({ok:true,role:claimed,tokenHash,otpType:'magiclink',
+  return send({ok:true,role:invite.role,tokenHash,otpType:'magiclink',reconnected:repeatLogin,
    mustRegisterPasskey:false,
-   notice:'등록되었습니다. 이 기기의 브라우저에서 로그인 상태를 유지합니다. 기기를 바꾸면 치료사에게 다시 본인 확인을 요청해 주세요.'});
+   notice:repeatLogin?'기존 계정으로 다시 로그인했습니다. 이전 기록은 유지됩니다.':'계정이 연결되었습니다. 다음에도 같은 링크로 접속할 수 있습니다.'});
  }
 
  try{
@@ -263,13 +282,13 @@ export async function handle(request:Request):Promise<Response>{
   if(apiName==='invites'&&request.method==='GET'){
    if(member.role!=='therapist')return send({error:'치료사 전용입니다.'},403);
    const {data,error}=await admin.from('ildan_invites')
-    .select('code_digest,role,student_id,target_user_id,created_at,expires_at,used_by')
+    .select('code_digest,role,student_id,target_user_id,created_at,expires_at,used_by,revoked_at')
     .eq('therapist_id',uid).order('created_at',{ascending:false}).limit(50);
    if(error)throw Error('INVITE_LIST_FAILED');
    return send({invites:(data||[]).map((x:any)=>({
     digest:x.code_digest,role:x.role,studentId:x.student_id,recovery:!!x.target_user_id,
-    createdAt:x.created_at,expiresAt:x.expires_at,used:!!x.used_by,
-    active:!x.used_by&&new Date(x.expires_at).getTime()>Date.now()
+    createdAt:x.created_at,expiresAt:null,used:!!x.used_by,reusable:true,revoked:!!x.revoked_at,
+    active:!x.revoked_at&&new Date(x.expires_at).getTime()>Date.now()
    }))});
   }
   if(apiName==='revoke-invite'&&request.method==='POST'){
@@ -277,11 +296,11 @@ export async function handle(request:Request):Promise<Response>{
    const b=await body(request),hash=requireText(b,'digest');
    if(!/^[0-9a-f]{64}$/.test(hash))return send({error:'초대 링크를 확인해 주세요.'},400);
    const now=new Date().toISOString();
-   const {data,error}=await admin.from('ildan_invites').update({expires_at:now})
+   const {data,error}=await admin.from('ildan_invites').update({revoked_at:now})
     .eq('code_digest',hash).eq('therapist_id',uid)
-    .is('used_by',null).gt('expires_at',now).select('code_digest');
+    .is('revoked_at',null).gt('expires_at',now).select('code_digest');
    if(error)throw Error('REVOKE_FAILED');
-   if(!data?.length)return send({error:'이미 사용되거나 만료된 링크입니다.'},409);
+   if(!data?.length)return send({error:'이미 취소된 링크이거나 찾을 수 없습니다.'},409);
    return send({ok:true,revoked:true});
   }
   if(apiName==='invites'&&request.method==='POST'){
@@ -302,15 +321,15 @@ export async function handle(request:Request):Promise<Response>{
     return send({error:'담당 학생을 선택해 주세요.'},403);
    if(role==='student'&&!targetUserId&&studentId)return send({error:'학생 초대 정보가 올바르지 않습니다.'},400);
    const token=hex(crypto.getRandomValues(new Uint8Array(32)));
-   const verificationCode=hex(crypto.getRandomValues(new Uint8Array(12))).toUpperCase();
+   const internalDigest=await digest(hex(crypto.getRandomValues(new Uint8Array(32))));
    const {error}=await admin.from('ildan_invites').insert({
-    code_digest:await digest(token),verification_digest:await digest(verificationCode.toLowerCase()),
+    code_digest:await digest(token),verification_digest:internalDigest,
     role,therapist_id:uid,student_id:studentId,target_user_id:targetUserId,issued_by:uid,
-    expires_at:new Date(Date.now()+48*60*60*1000).toISOString()
+    expires_at:'9999-12-31T23:59:59+00:00'
    });
    if(error)return send({error:'초대 생성에 실패했습니다.'},503);
-   return send({invite:token,verificationCode,recovery:!!targetUserId,expiresInHours:48,
-    notice:'확인 코드는 초대 링크와 같은 카카오톡 대화에 보내지 마세요. 치료사가 실제 신원을 확인하고 별도로 전달해야 합니다.'});
+   return send({invite:token,recovery:!!targetUserId,reusable:true,expiresInHours:null,
+    notice:'링크를 받은 학생 또는 보호자는 별도 번호 없이 바로 접속할 수 있어요. 링크는 다른 사람에게 전달하지 마세요.'});
   }
   if(apiName==='records'&&request.method==='GET'){
    if(member.role==='therapist'){

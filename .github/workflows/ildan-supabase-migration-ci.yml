@@ -56,7 +56,8 @@ jobs:
           assert(!['signInWithOtp({phone','phoneRequestForm','phoneVerifyForm','emailRequestForm','emailVerifyForm'].some(x=>js.includes(x)),'No SMS or guardian email forms');
           assert(js.includes("test-therapist-signup")&&js.includes('signInWithPassword'),'Email-free trial therapist setup must be present');
           assert(js.includes("api('revoke-invite'"),'Therapist must be able to revoke invites');
-          assert(js.includes("publicInviteApi('invite-register',code,{verificationCode})"),'Link plus secondary code required in client');
+          assert(js.includes("publicInviteApi('invite-register',code)"),'Student/guardian links must be enough for trial access');
+          assert(!js.includes('verifiedInviteForm')&&!js.includes('verificationCodeOutput'),'No extra PIN forms');
           assert(!js.includes("api('passkeys/login/verify'"));
           assert(js.includes("credentials:'omit'"));
           assert(html.includes('실제 학생·보호자 상담정보 입력 금지'));
@@ -78,7 +79,9 @@ jobs:
             -f secure-portal/supabase/migrations/20261015000100_email_free_one_time_invite.sql \
             -f secure-portal/supabase/tests/02_invite_link_role_sql.sql \
             -f secure-portal/supabase/migrations/20261015000200_out_of_band_identity_code.sql \
-            -f secure-portal/supabase/tests/03_out_of_band_invite.sql
+            -f secure-portal/supabase/tests/03_out_of_band_invite.sql \
+            -f secure-portal/supabase/migrations/20261015000400_reusable_student_access_links.sql \
+            -f secure-portal/supabase/tests/04_reusable_invite.sql
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
@@ -101,9 +104,12 @@ jobs:
           assert(src.includes("apiName==='test-therapist-signup'") && src.includes("CLINICAL_WRITES_ENABLED") && src.includes("sandbox-self-signup"),'Anonymous signup only while staging writes are disabled');
           assert(src.includes("test-therapist-delete") && src.includes("studentsCount!==0"),'Only empty own sandbox account can be removed');
           assert(src.includes("apiName==='students'&&request.method==='POST'")&&src.includes("role:'student',therapist_id:uid"),'Therapist-only student workspace creation required');
-          assert(src.includes("apiName==='revoke-invite'") && src.includes(".eq('therapist_id',uid)"),'Only clinician may revoke own unclaimed links');
+          assert(src.includes("apiName==='revoke-invite'") && src.includes(".eq('therapist_id',uid)"),'Only clinician may revoke own link');
+          assert(src.includes("if(!sandboxSignupAllowed())return send({error:'링크로 바로 접속"),'Link-only auth is trial-only');
+          assert(src.includes("const repeatLogin=Boolean(invite.used_by)"),'Repeat links resolve to same account');
+          assert(!src.includes("requireText(b,'verificationCode')"),'No user PIN required');
           assert(sql.includes('ENABLE ROW LEVEL SECURITY'));
           assert(sql.includes('REVOKE ALL'));
           assert(sql.includes('email_confirmed_at IS NOT NULL'));
-          console.log('PASS authenticated Edge auth, AES encryption, RLS and single-use invitations');
+          console.log('PASS authenticated Edge auth, AES encryption, RLS and reusable clinician-revocable trial links');
           JS
