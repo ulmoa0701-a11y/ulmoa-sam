@@ -40,9 +40,9 @@ do $$ begin
    '00000000-0000-4000-8000-000000000012',repeat('2',64));
   raise exception 'one-time invite replay succeeded';
  exception when insufficient_privilege then null; end;
-end $;
+end $$;
 -- Recovery reuses the exact existing member. A different account cannot claim it.
-do $ begin
+do $$ begin
  begin
   perform public.ildan_claim_invite_for_user(repeat('3',64),
     '00000000-0000-4000-8000-000000000012',repeat('4',64));
@@ -55,10 +55,10 @@ do $ begin
   perform public.ildan_claim_invite_for_user(repeat('3',64),
     '00000000-0000-4000-8000-000000000011',repeat('4',64));
   raise exception 'Recovery replayed'; exception when insufficient_privilege then null; end;
-end $;
+end $$;
 reset role;
-do $ begin
+do $$ begin
  if (select count(*) from public.ildan_members where user_id='00000000-0000-4000-8000-000000000011')<>1
  then raise exception 'Recovery created duplicate account'; end if;
-end $;
+end $$;
 select 'PASS: distinct check code, membership isolation, replay and existing-account recovery' as result;
