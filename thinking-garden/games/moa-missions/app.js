@@ -167,18 +167,52 @@ const changedBank={
  {base:['hat','pen','glue','scissors','water'],after:['hat','pen','glue','water','cloth'],note:'가위는 빼고 손수건을 추가하세요.',wrong:['hat','pen','scissors','water','cloth']},
  {base:['eraser','apple','book','folder','tissue'],after:['eraser','apple','book','pencilcase','tissue'],note:'파일은 빼고 필통을 추가하세요.',wrong:['eraser','apple','folder','pencilcase','tissue']}
  ]};
+
+// Additional genuinely different list updates rather than the same four cases looping.
+function changedRound(){
+ const bank=changedBank[state.level],n=state.index+(state.sessionSeed||0);
+ if(n<bank.length)return bank[n];
+ const ids=Object.keys(itemLabels),len=state.level==='easy'?3:state.level==='normal'?4:5;
+ const index=n-bank.length,start=(index*3+Math.floor(index/5))%ids.length;
+ const base=Array.from({length:len},(_,i)=>ids[(start+i*7)%ids.length]);
+ const add=[],after=[...base];let note='';
+ const replacement=(skip)=>ids.find((name,i)=>!skip.includes(name)&&(i+index)%3===0)||ids.find(name=>!skip.includes(name));
+ if(state.level==='easy'){
+  const old=base[index%len],fresh=replacement(base);after[index%len]=fresh;
+  note=itemLabels[old][1]+' 대신 '+itemLabels[fresh][1]+'를 챙기세요.';
+ }else if(state.level==='normal'){
+  const ix=index%len,jx=(ix+2)%len;
+  const oldA=base[ix],oldB=base[jx],newA=replacement(base),newB=replacement([...base,newA]);
+  after[ix]=newA;after[jx]=newB;
+  note=itemLabels[oldA][1]+'는 '+itemLabels[newA][1]+'로, '+itemLabels[oldB][1]+'는 '+itemLabels[newB][1]+'로 바뀌었어요.';
+ }else{
+  const removed=base[index%len],added=replacement(base);
+  after.splice(index%len,1,added);
+  note=itemLabels[removed][1]+'는 빼고 '+itemLabels[added][1]+'를 추가하세요.';
+ }
+ const wrong=[...base];if(state.level==='easy')wrong[index%len]=replacement([...base,after[index%len]]);
+ else if(state.level==='normal')wrong[index%len]=after[index%len];
+ else wrong[(index+1)%len]=replacement([...base,...after]);
+ return {base,after,note,wrong};
+}
 function itemView(id){const item=itemLabels[id];return '<span class="item-chip"><span aria-hidden="true">'+item[0]+'</span><b>'+esc(item[1])+'</b></span>'}
 function listView(arr){return '<div class="item-line">'+arr.map(itemView).join('')+'</div>'}
 function drawChange(){
- const r=roundItem(changedBank[state.level]);if(!state.stage)state.stage='remember';
+ const r=changedRound();
+ if(!state.stage)state.stage='remember';
  if(state.stage==='remember'){
   setScene('모아의 준비물을 기억해요','천천히 살펴보세요. 충분히 기억한 뒤 다음으로 넘어가요.','처음 목록');
   $('gameArea').innerHTML='<div class="bag-scene"><span class="bag-icon" aria-hidden="true">🎒</span><p>처음 준비물</p>'+listView(r.base)+'</div>';
   $('gameActions').innerHTML=htmlButton('기억했어요! 바뀐 목록 보기 →','changed-go','class="primary-action"');
+ }else if(state.stage==='assemble'){
+  setScene('직접 준비물을 챙겨요','바뀐 지시대로 챙길 물건을 모두 골라봐요. 같은 물건을 두 번 담지는 않아요.','실제 준비물 챙기기');
+  const all=[...new Set([...r.base,...r.after,...r.wrong])];
+  const pool=all.slice().sort((a,b)=>((itemLabels[a][1].charCodeAt(0)+state.index)%11)-((itemLabels[b][1].charCodeAt(0)+state.index)%11));
+  $('gameArea').innerHTML='<div class="change-note"><span aria-hidden="true">📣</span><strong>'+esc(r.note)+'</strong></div><div class="assembled-cart"><strong>내 가방 ('+state.selected.length+'개)</strong>'+listView(state.selected)+'</div><p class="tiny-instruction">아래 물건을 눌러 넣거나 빼요.</p><div class="inventory-options">'+pool.map(id=>'<button type="button" data-item="'+esc(id)+'" class="item-pick'+(state.selected.includes(id)?' added':'')+'" aria-pressed="'+state.selected.includes(id)+'">'+itemView(id)+'</button>').join('')+'</div>';
+  $('gameActions').innerHTML=htmlButton('↶ 처음 목록 보기','changed-back','class="secondary-action"')+htmlButton('이대로 챙기기','check-list','class="primary-action"');
  }else{
   setScene('이제 무엇을 챙길까요?','처음 목록에서 바뀐 내용을 반영해 골라봐요.','바뀐 안내');
-  const decoy=r.wrong;
-  const vals=[r.after,r.base,decoy];
+  const vals=[r.after,r.base,r.wrong];
   state.options=[vals[(state.index+1)%3],vals[(state.index+2)%3],vals[state.index%3]];
   $('gameArea').innerHTML='<div class="change-note"><span aria-hidden="true">📣</span><strong>'+esc(r.note)+'</strong></div><p class="tiny-instruction">바뀐 준비물 목록을 골라요.</p><div class="list-options">'+state.options.map((list,i)=>'<button type="button" class="list-choice" data-list-index="'+i+'"><span>목록 '+(i+1)+'</span>'+listView(list)+'</button>').join('')+'</div>';
   $('gameActions').innerHTML=htmlButton('↶ 처음 목록 다시 보기','changed-back','class="secondary-action"');
@@ -230,8 +264,14 @@ $('gameArea').addEventListener('click',e=>{
   if(b.dataset.value!==undefined){const n=Number(b.dataset.value),expected=moneyRound().value;state.attempts++;if(n===expected){if(state.attempts===1)state.correct++;nextAction('맞았어요! '+fmt(expected)+'이에요.')}else feedback('다시 살펴봐요. 그림에 적힌 금액과 비교해도 좋아요.');return;}
   if(b.dataset.money!==undefined){if(state.selected.length>=20){feedback('너무 많이 담았어요. 하나씩 다시 살펴봐요.');return}state.selected.push(Number(b.dataset.money));drawMoney();return;}
  }
+ if(chosen==='change'&&b.dataset.item!==undefined){
+ const item=b.dataset.item;
+ if(state.selected.includes(item))state.selected=state.selected.filter(x=>x!==item);
+ else state.selected.push(item);
+ drawChange();return;
+ }
  if(chosen==='change'&&b.dataset.listIndex!==undefined){
-  const answer=roundItem(changedBank[state.level]).after;const chosenList=state.options[Number(b.dataset.listIndex)];
+  const answer=changedRound().after;const chosenList=state.options[Number(b.dataset.listIndex)];
   state.attempts++;if(chosenList.join('|')===answer.join('|')){if(state.attempts===1)state.correct++;nextAction('변경된 목록을 잘 반영했어요!')}else feedback('한 가지씩 비교해봐요. 처음 목록을 다시 볼 수도 있어요.');return;
  }
  if(chosen==='feel'){
@@ -254,7 +294,15 @@ $('gameActions').addEventListener('click',e=>{
  if(action==='remake'){state.locked=false;state.selected=[];drawMoney();feedback('같은 금액을 다른 돈으로도 만들어볼까요?');return;}
  if(action==='undo'){state.selected.pop();drawMoney();return;}
  if(action==='clear'){state.selected=[];drawMoney();return;}
- if(action==='changed-go'){state.stage='choose';draw();return;}
+ if(action==='changed-go'){state.stage=state.level==='hard'&&state.index%2===0?'assemble':'choose';draw();return;}
+ if(action==='check-list'&&chosen==='change'){
+  const expected=changedRound().after;
+  state.attempts++;
+  if(state.selected.length===expected.length&&state.selected.every(v=>expected.includes(v))){
+   if(state.attempts===1)state.correct++;nextAction('준비물을 모두 바르게 챙겼어요!');
+  }else feedback('목록을 다시 비교해봐요. 필요한 물건은 '+expected.length+'개예요.');
+  return;
+ }
  if(action==='changed-back'){state.stage='remember';draw();return;}
 });
 function speak(text){
