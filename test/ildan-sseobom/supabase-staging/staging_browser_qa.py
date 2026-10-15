@@ -43,43 +43,45 @@ with sync_playwright() as p:
    page.close()
   page=browser.new_page(viewport={'width':width,'height':860})
   errors=[]
+  signups=[]
+  logins=[]
   page.on('pageerror',lambda e:errors.append(str(e)))
-  page.route('**/auth/v1/passkeys/authentication/options',lambda route: route.fulfill(status=404,content_type='application/json',body='{"code":"passkey_disabled"}'))
+  def fake_signup(route):
+   payload=route.request.post_data_json
+   signups.append(payload)
+   route.fulfill(status=409,content_type='application/json',headers={'Access-Control-Allow-Origin':'http://127.0.0.1:8829'},
+    body=json.dumps({'error':'이미 사용 중인 아이디입니다.'},ensure_ascii=False))
+  def fake_login(route):
+   logins.append(True)
+   route.fulfill(status=400,content_type='application/json',headers={'Access-Control-Allow-Origin':'http://127.0.0.1:8829'},
+    body='{"error":"invalid_grant","error_description":"Invalid login credentials"}')
+  page.route('**/functions/v1/ildan-api/test-therapist-signup',fake_signup)
+  page.route('**/auth/v1/token**',fake_login)
   page.goto(url,wait_until='domcontentloaded',timeout=35000)
-  page.locator('#firstLogin').wait_for(timeout=25000)
-  assert page.locator('#firstLogin').is_visible(),'first-visit onboarding must be primary'
-  assert not page.locator('#loginPasskey').is_visible()
-  assert page.locator('#clinicianFirstForm input[type="email"]').count()==1
-  assert '운영자 승인' in page.locator('#firstLogin').inner_text()
-  assert '학생·보호자' in page.locator('#firstLogin').inner_text()
-  assert page.locator('input[type="tel"]').count()==0
-  assert page.locator('#phoneRequestForm').count()==0
-  assert page.locator('#phoneVerifyForm').count()==0
-  page.locator('#returnChoice').click()
-  page.locator('#passkeySupportStatus').get_by_text('아직 서버에서 준비되지 않았어요.',exact=False).wait_for(timeout=15000)
-  assert page.locator('#loginPasskey').is_visible(),'returning users can reach registered passkey'
-  assert page.locator('#loginPasskey').is_disabled(),'server-disabled passkeys must not invite failed login'
-  assert page.locator('#returnEmail').is_visible(),'clinician email recovery offered'
-  assert not page.locator('#firstLogin').is_visible()
-  page.locator('#firstChoice').click()
+  page.locator('#trialSignupForm').wait_for(timeout=25000)
   assert page.locator('#firstLogin').is_visible()
-  # Simulate a real Auth 429 without ever requesting an actual email.
-  otp_attempts=[]
-  def mock_email_rate_limit(route):
-   otp_attempts.append(1)
-   route.fulfill(status=429,content_type='application/json',body='{"code":"over_email_send_rate_limit","msg":"For security purposes, you can only request this after 51 seconds."}')
-  page.route('**/auth/v1/otp**',mock_email_rate_limit)
-  page.locator('#clinicianFirstForm input[type="email"]').fill('therapist-test@example.com')
-  page.locator('#clinicianFirstForm button[type="submit"]').click()
-  page.locator('#firstLoginStatus').get_by_text('발송 제한',exact=False).wait_for(timeout=10000)
-  assert len(otp_attempts)==1,('OTP should only be requested once',len(otp_attempts))
-  page.locator('#clinicianFirstForm button[type="submit"]').click()
-  page.locator('#firstLoginStatus').get_by_text('최근에 요청했어요.',exact=False).wait_for(timeout=10000)
-  assert len(otp_attempts)==1,'Retry should be suppressed locally for 65 seconds'
-  assert not page.locator('#loginPasskey').is_visible()
+  assert page.locator('#trialSignupForm input[name="username"]').count()==1
+  assert page.locator('#trialSignupForm input[name="password"][type="password"]').count()==1
+  assert page.locator('#clinicianFirstForm').count()==0,'No email verification forms on trial site'
+  assert page.locator('input[type="email"]').count()==0,'No email needed'
+  assert not page.locator('#returnLogin').is_visible()
+  page.locator('#trialSignupForm input[name="username"]').fill('test_sandbox1')
+  page.locator('#trialSignupForm input[name="password"]').fill('trialPassword2026')
+  page.locator('#trialSignupForm button[type="submit"]').click()
+  page.locator('#toast').get_by_text('이미 사용 중인 아이디',exact=False).wait_for(timeout=10000)
+  assert len(signups)==1,'Staging server signup called exactly once'
+  assert signups[0]['username']=='test_sandbox1'
+  assert signups[0]['password']=='trialPassword2026'
+  page.locator('#returnChoice').click()
+  assert page.locator('#returnLogin').is_visible()
+  page.locator('#trialLoginForm input[name="username"]').fill('test_sandbox1')
+  page.locator('#trialLoginForm input[name="password"]').fill('trialPassword2026')
+  page.locator('#trialLoginForm button[type="submit"]').click()
+  page.locator('#toast').get_by_text('아이디 또는 비밀번호',exact=False).wait_for(timeout=10000)
+  assert len(logins)==1,'Auth password login requested exactly once'
   assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth+3'),('overflow',width)
-  assert not errors,errors
-  checks.append(f'{width}px: therapist-first enrollment, passkey returning-only, no guardian email/phone, no overflow')
+  assert not errors,('unexpected page JavaScript error',width,errors)
+  checks.append(f'{width}px: therapist alias/password signup and returning login, no email or OTP, no overflow')
   page.close()
  browser.close()
 server.shutdown()
