@@ -81,6 +81,7 @@ jobs:
             -f secure-portal/supabase/migrations/20261015000200_out_of_band_identity_code.sql \
             -f secure-portal/supabase/tests/03_out_of_band_invite.sql \
             -f secure-portal/supabase/migrations/20261015000400_reusable_student_access_links.sql \
+            -f secure-portal/supabase/migrations/20261015000600_fix_service_role_rpc_execute.sql \
             -f secure-portal/supabase/tests/04_reusable_invite.sql
       - uses: denoland/setup-deno@v2
         with:
