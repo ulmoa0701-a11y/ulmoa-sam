@@ -169,8 +169,8 @@ function loginScreen(){
  <div class="login-layout"><section class="login-window"><div class="login-body">
  <div class="buttons" role="group" aria-label="접속 방법"><button class="button" id="firstChoice" type="button">처음 이용해요</button>
  <button class="button-ghost" id="returnChoice" type="button">이미 등록했어요</button></div>
- <section id="firstLogin"><h2>치료사 첫 계정 등록</h2>
- <p>본인 이메일 확인 후 운영자 승인을 받는 절차입니다. 승인 전에는 기록을 열어볼 수 없습니다.</p>
+ <section id="firstLogin"><h2>치료사 계정 확인</h2>
+ <p>처음 이용한다면 이메일 확인 후 운영자 승인이 필요합니다. 승인된 치료사는 같은 이메일로 다시 로그인할 수도 있어요.</p>
  <form id="clinicianFirstForm" class="form">
  <label>치료사 본인 이메일<input type="email" name="email" autocomplete="email" inputmode="email" required maxlength="254" placeholder="본인 이메일"></label>
  <label><input type="checkbox" id="rememberClinicianDevice" checked> 개인 기기에서 로그인 유지하기</label>
@@ -181,14 +181,15 @@ function loginScreen(){
  <p>처음 등록한 계정만 지문·얼굴·기기 잠금으로 다시 로그인할 수 있어요.</p>
  <button class="button" id="loginPasskey" type="button">기기 인증으로 로그인</button>
  <p class="muted" id="passkeySupportStatus" role="status"></p>
- <p class="muted">카카오톡과 다른 브라우저는 로그인 상태가 다를 수 있어요. 다시 인증해야 할 수도 있습니다.</p></section>
+ <button class="button-ghost" id="returnEmail" type="button">치료사는 이메일로 다시 확인하기</button>
+ <p class="muted">학생·보호자는 담당 치료사에게 기존 계정용 새 접속 링크를 요청할 수 있어요. 카카오톡과 다른 브라우저의 로그인은 서로 구분됩니다.</p></section>
  <p class="muted">현재 안전 검증 중입니다. 실제 학생·상담 기록은 입력하지 마세요.</p>
  </div></section></div></section>`;
  const first=$('firstLogin'),ret=$('returnLogin'),a=$('firstChoice'),b=$('returnChoice');
  function toggle(returning){first.hidden=returning;ret.hidden=!returning;
   a.className=returning?'button-ghost':'button';b.className=returning?'button':'button-ghost';
   a.setAttribute('aria-pressed',String(!returning));b.setAttribute('aria-pressed',String(returning));}
- a.onclick=()=>toggle(false);b.onclick=()=>toggle(true);toggle(false);
+ a.onclick=()=>toggle(false);b.onclick=()=>toggle(true);$('returnEmail').onclick=()=>toggle(false);toggle(false);
  $('clinicianFirstForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;
   loading(f.querySelector('button'),async()=>{
    if(!supabase)throw Error('서버 연결을 확인할 수 없습니다.');
@@ -201,10 +202,26 @@ function loginScreen(){
    f.querySelector('input[name=email]').readOnly=true;
   });
  };
- const login=$('loginPasskey');login.disabled=!configured||!canUsePasskey();
- $('passkeySupportStatus').textContent=!configured?'서버 연결 설정을 확인해 주세요.':
-   !canUsePasskey()?'현재 브라우저에서는 기기 인증을 사용할 수 없습니다. 크롬·삼성 인터넷·사파리에서 열어 주세요.':
-   '기존에 패스키 등록을 마친 사용자만 이용할 수 있습니다.';
+ const login=$('loginPasskey');login.disabled=true;
+ $('passkeySupportStatus').textContent='기기 인증 사용 가능 여부를 확인 중입니다.';
+ if(!configured||!canUsePasskey()){
+  $('passkeySupportStatus').textContent='기기 인증을 사용할 수 없습니다. 치료사는 이메일 인증, 학생·보호자는 담당 치료사에게 문의해 주세요.';
+ }else{
+  fetch(CFG.url+'/auth/v1/passkeys/authentication/options',{
+   method:'POST',mode:'cors',credentials:'omit',
+   headers:{apikey:CFG.publishableKey,'Content-Type':'application/json'},body:'{}'
+  }).then(res=>{
+   if(!document.getElementById('loginPasskey'))return;
+   login.disabled=!res.ok;
+   $('passkeySupportStatus').textContent=res.ok
+    ?'기기 인증 서버가 준비되었습니다. 이미 등록한 계정만 로그인할 수 있어요.'
+    :'기기 인증은 아직 서버에서 준비되지 않았어요. 치료사 이메일 인증이나 새 접속 링크를 이용해 주세요.';
+  }).catch(()=>{
+   if(!document.getElementById('loginPasskey'))return;
+   login.disabled=true;
+   $('passkeySupportStatus').textContent='기기 인증 연결이 확인되지 않았어요. 치료사는 이메일로 다시 확인할 수 있습니다.';
+  });
+ }
  login.onclick=()=>loading(login,async()=>{
   const {error}=await supabase.auth.signInWithPasskey();
   if(error)throw Error('등록된 기기 인증을 확인하지 못했습니다. 최초 등록과 운영자 승인을 확인해 주세요.');

@@ -44,10 +44,11 @@ with sync_playwright() as p:
   page=browser.new_page(viewport={'width':width,'height':860})
   errors=[]
   page.on('pageerror',lambda e:errors.append(str(e)))
+  page.route('**/auth/v1/passkeys/authentication/options',lambda route: route.fulfill(status=404,content_type='application/json',body='{"code":"passkey_disabled"}'))
   page.goto(url,wait_until='domcontentloaded',timeout=35000)
   page.locator('#firstLogin').wait_for(timeout=25000)
   assert page.locator('#firstLogin').is_visible(),'first-visit onboarding must be primary'
-  assert not page.locator('#loginPasskey').is_visible(),'passkey login must not precede enrollment'
+  assert not page.locator('#loginPasskey').is_visible()
   assert page.locator('#clinicianFirstForm input[type="email"]').count()==1
   assert '운영자 승인' in page.locator('#firstLogin').inner_text()
   assert '학생·보호자' in page.locator('#firstLogin').inner_text()
@@ -55,7 +56,10 @@ with sync_playwright() as p:
   assert page.locator('#phoneRequestForm').count()==0
   assert page.locator('#phoneVerifyForm').count()==0
   page.locator('#returnChoice').click()
+  page.locator('#passkeySupportStatus').get_by_text('아직 서버에서 준비되지 않았어요.',exact=False).wait_for(timeout=15000)
   assert page.locator('#loginPasskey').is_visible(),'returning users can reach registered passkey'
+  assert page.locator('#loginPasskey').is_disabled(),'server-disabled passkeys must not invite failed login'
+  assert page.locator('#returnEmail').is_visible(),'clinician email recovery offered'
   assert not page.locator('#firstLogin').is_visible()
   page.locator('#firstChoice').click()
   assert page.locator('#firstLogin').is_visible()
