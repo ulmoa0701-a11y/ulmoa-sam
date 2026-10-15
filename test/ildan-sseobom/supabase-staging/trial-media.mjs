@@ -25,10 +25,19 @@ export function mediaWidget(){
  </section>`;
 }
 export function getPracticePhotos(){return [...photos];}
+export function setPracticePhotos(existing=[]){
+ // The server provides only authenticated, short-lived signed URLs for old photos.
+ const safe=existing.filter(src=>typeof src==='string'&&(
+  /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(src)||
+  /^https:\/\/miohovwmhmtcvkurjamm\.supabase\.co\/storage\/v1\/object\/sign\/ildan-practice-media\/[0-9a-f-]+\/[0-9a-f-]+\.jpg\?token=[A-Za-z0-9._%-]+(?:&[^"'<>]*)?$/.test(src)
+ )).slice(0,LIMIT);
+ photos=[...safe];preview();setStatus();
+}
+
 function preview(){
  const box=document.getElementById('photoThumbnails');if(!box)return;
  box.innerHTML=photos.map((src,i)=>`<figure class="photo-thumbnail">
-  <img src="${src}" alt="첨부한 사진 ${i+1}">
+  <img src="${src.replaceAll('&','&amp;').replaceAll('"','&quot;')}" alt="첨부한 사진 ${i+1}">
   <button type="button" data-remove-photo="${i}" aria-label="사진 ${i+1} 제거">× 제거</button>
  </figure>`).join('');
  for(const b of box.querySelectorAll('[data-remove-photo]')){
