@@ -43,6 +43,9 @@ with sync_playwright() as p:
   page.route('**/functions/v1/ildan-api/**',mock_api)
   page.goto(url,wait_until='domcontentloaded',timeout=35000)
   page.locator('#photoUpload').wait_for(timeout=25000)
+  assert page.locator('#saveEntry').inner_text().strip()=='💾 이 기기에 저장하기','save button promises device storage, not sharing'
+  assert not page.locator('.trial-sharing-hidden').is_visible(),'Unavailable remote share UI must not block save'
+  assert '내 기록' in page.locator('.trial-storage-note').inner_text()
   assert page.locator('#showDrawing').count()==1, 'drawing is always discoverable'
   assert page.locator('#photoCapture').get_attribute('capture')=='environment'
   assert page.locator('#photoUpload').get_attribute('multiple') is not None
