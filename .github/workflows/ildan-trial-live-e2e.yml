@@ -1,0 +1,78 @@
+name: Ildan live sandbox therapist signup and cleanup QA
+on:
+  push:
+    branches:
+      - feature/ildan-instant-test-login-ui-20261015
+    paths:
+      - '.github/workflows/ildan-trial-live-e2e.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sandbox-account-roundtrip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Live staging signup, password login, role guard and test-account cleanup
+        shell: bash
+        run: |
+          node <<'JS'
+          const crypto=require('node:crypto');
+          const base='https://miohovwmhmtcvkurjamm.supabase.co';
+          const api=base+'/functions/v1/ildan-api/';
+          const key='sb_publishable_HFaaKmZ84O6Mreo3Zo8N3g_uw2MtrYe';
+          const origin='https://ulmoa0701-a11y.github.io';
+          const username='qa'+crypto.randomBytes(6).toString('hex');
+          const password='Q6'+crypto.randomBytes(20).toString('hex');
+          const digest=crypto.createHash('sha256').update(username.normalize('NFC').toLowerCase()).digest('hex');
+          const email='trial-'+digest.slice(0,48)+'@members.ildan.example';
+          const headers={apikey:key,'Content-Type':'application/json',Origin:origin};
+          let token=null,created=false,deleted=false;
+          async function parse(res){const body=await res.json().catch(()=>({}));return {status:res.status,data:body};}
+          (async()=>{
+           const health=await parse(await fetch(api+'health'));
+           if(health.status!==200 || health.data.mode!=='not-approved-for-clinical-use')
+            throw Error('Not a safely isolated staging instance');
+           const bad=await parse(await fetch(api+'test-therapist-signup',{
+            method:'POST',headers,body:JSON.stringify({username:'!',password:'1234'})
+           }));
+           if(bad.status!==400)throw Error('Weak signup not blocked '+bad.status);
+           const createdResponse=await parse(await fetch(api+'test-therapist-signup',{
+            method:'POST',headers,body:JSON.stringify({username,password})
+           }));
+           if(createdResponse.status!==201||createdResponse.data.trial!==true)
+            throw Error('Signup failed '+createdResponse.status+' '+JSON.stringify(createdResponse.data));
+           created=true;
+           const badPass=await parse(await fetch(base+'/auth/v1/token?grant_type=password',{
+            method:'POST',headers:{apikey:key,'Content-Type':'application/json'},
+            body:JSON.stringify({email,password:'WrongPassword88'})
+           }));
+           if(badPass.status===200)throw Error('Wrong password accepted');
+           const login=await parse(await fetch(base+'/auth/v1/token?grant_type=password',{
+            method:'POST',headers:{apikey:key,'Content-Type':'application/json'},
+            body:JSON.stringify({email,password})
+           }));
+           if(login.status!==200||!login.data.access_token)
+            throw Error('Sign in failed '+login.status+' '+JSON.stringify(login.data));
+           token=login.data.access_token;
+           const me=await parse(await fetch(api+'me',{headers:{apikey:key,Authorization:'Bearer '+token,Origin:origin}}));
+           if(me.status!==200||me.data.user?.role!=='therapist'||me.data.user?.trial!==true)
+            throw Error('Role or sandbox tagging failed '+me.status+' '+JSON.stringify(me.data));
+           const records=await parse(await fetch(api+'records',{headers:{apikey:key,Authorization:'Bearer '+token,Origin:origin}}));
+           if(records.status!==200||records.data.records?.length!==0)
+            throw Error('New isolated therapist sees unexpected records '+records.status);
+           const removed=await parse(await fetch(api+'test-therapist-delete',{
+            method:'POST',headers:{...headers,Authorization:'Bearer '+token},body:'{}'
+           }));
+           if(removed.status!==200||removed.data.deleted!==true)
+            throw Error('Synthetic test account cleanup failed '+removed.status+' '+JSON.stringify(removed.data));
+           deleted=true;
+           const oldSession=await parse(await fetch(api+'me',{headers:{apikey:key,Authorization:'Bearer '+token,Origin:origin}}));
+           if(oldSession.status===200)throw Error('Deleted user can still access data');
+           console.log('PASS: real sandbox signup -> wrong password denied -> password login -> role-scoped empty records -> cleanup -> old token denied');
+          })().catch(e=>{
+           console.error('LIVE_SANDBOX_QA_FAILED: '+e.message);
+           if(created&&!deleted)console.error('WARNING: synthetic signup was created but could not be deleted; retry cleanup with the generated CI test credentials (not logged) is unavailable; review staging account table.');
+           process.exitCode=1;
+          });
+          JS
