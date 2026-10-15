@@ -16,30 +16,41 @@ with sync_playwright() as p:
  for width in [390,1440]:
   for role,label in [('parent','보호자'),('student','학생')]:
    page=browser.new_page(viewport={'width':width,'height':860})
-   errors=[]
-   preview=[]
+   errors=[];preview=[];register=[]
    page.on('pageerror',lambda e:errors.append(str(e)))
-   def mock_route(route):
-    data=route.request.post_data_json
-    assert data.get('code')==token
+   def mock_preview(route):
+    if route.request.method=='OPTIONS':
+     route.fulfill(status=204,headers={'Access-Control-Allow-Origin':'http://127.0.0.1:8829','Access-Control-Allow-Methods':'POST,OPTIONS','Access-Control-Allow-Headers':'content-type,apikey,authorization'})
+     return
+    payload=route.request.post_data_json
+    assert payload.get('code')==token
     preview.append(True)
-    route.fulfill(status=200,content_type='application/json',body=json.dumps({'role':role,'expiresAt':'2026-11-01T00:00:00Z','requiresDeviceSetup':False,'registrationOpen':True,'needsSeparateVerificationCode':True}))
-   page.route('**/functions/v1/ildan-api/invite-preview',mock_route)
+    route.fulfill(status=200,content_type='application/json',headers={'Access-Control-Allow-Origin':'http://127.0.0.1:8829'},
+     body=json.dumps({'role':role,'reusable':True,'registrationOpen':True,'needsSeparateVerificationCode':False}))
+   def mock_register(route):
+    if route.request.method=='OPTIONS':
+     route.fulfill(status=204,headers={'Access-Control-Allow-Origin':'http://127.0.0.1:8829','Access-Control-Allow-Methods':'POST,OPTIONS','Access-Control-Allow-Headers':'content-type,apikey,authorization'})
+     return
+    payload=route.request.post_data_json
+    assert payload=={'code':token},'No code/PIN/email is sent'
+    register.append(True)
+    route.fulfill(status=503,content_type='application/json',headers={'Access-Control-Allow-Origin':'http://127.0.0.1:8829'},
+     body=json.dumps({'error':'모의 연결 테스트'},ensure_ascii=False))
+   page.route('**/functions/v1/ildan-api/invite-preview',mock_preview)
+   page.route('**/functions/v1/ildan-api/invite-register',mock_register)
    page.goto(url+'#invite='+token,wait_until='domcontentloaded',timeout=35000)
-   page.locator('#inviteRoleTitle').get_by_text(label+' 전용 초대입니다.').wait_for(timeout=25000)
-   assert len(preview)==1,('link preview called',len(preview))
-   assert page.locator('#inviteAccept').count()==1
-   assert page.locator('#verificationCode').count()==1
-   assert page.locator('#verifiedInviteForm').count()==1
-   assert page.locator('#inviteAccept').is_enabled(), 'explicit second-code flow should be available after preview'
-   assert page.locator('#verificationCode').get_attribute('required') is not None, 'identity check code must be required'
+   page.locator('#inviteRoleTitle').get_by_text(label+' 계정 연결').wait_for(timeout=25000)
+   page.locator('#inviteRetry').wait_for(state='visible',timeout=15000)
+   assert len(preview)==1 and len(register)==1,(role,preview,register)
+   assert page.locator('#verificationCode').count()==0,'No separate PIN'
+   assert page.locator('#verifiedInviteForm').count()==0,'No extra verification form'
+   assert page.locator('input[type=email]').count()==0,'No email'
+   assert '모의 연결 테스트' in page.locator('#inviteStatus').inner_text()
    assert page.locator('#inviteCopy').is_visible()
-   assert page.locator('#emailRequestForm').count()==0,'should not request guardian email'
-   assert page.locator('[data-login-role]').count()==0,'role spoofing UI'
    assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth+3'),('horizontal overflow',width)
    assert not errors,('page error',width,role,errors)
-   assert page.evaluate('location.hash')=='#invite='+token,'invite must survive until explicit confirmation for other browser'
-   checks.append(f'{width}px {role}: verified one-time link preview, no email, no auto enrollment, no overflow')
+   assert page.evaluate('location.hash')=='#invite='+token,'Failed connection must preserve reusable link'
+   checks.append(f'{width}px {role}: link alone starts access, no PIN/email, retry shown, no overflow')
    page.close()
   page=browser.new_page(viewport={'width':width,'height':860})
   errors=[]
