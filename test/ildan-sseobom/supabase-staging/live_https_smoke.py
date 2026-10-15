@@ -26,7 +26,9 @@ with sync_playwright() as p:
         assert "student-list-summary" in live_js, "deployed page must include registered student list"
         assert "보호자 접속 링크 만들기" in live_js, "deployed page must distinguish guardian invitation"
         assert "from './trial-media.mjs'" in live_js, "public app must load actual photo module"
-        assert "savePracticeRecord(me.id,me.role" in live_js, "photo drafts must be kept on device"
+        assert "api('practice-records')" in live_js, "practice cloud read must be deployed"
+        assert "api('practice-records',{method:'POST'" in live_js, "practice cloud save must be deployed"
+        assert "uploadToSignedUrl" in live_js, "private signed photo uploads must be deployed"
         media_js=page.evaluate("fetch('./trial-media.mjs',{cache:'no-store'}).then(r=>r.ok?r.text():Promise.reject(new Error('photo media script HTTP '+r.status)))")
         assert "사진 추가" in media_js and "사진 촬영" in media_js and "그림 그리기" in media_js, "actual photo and drawing module deployed"
         assert "indexedDB.open" in media_js, "on-device archive implementation deployed"
@@ -38,9 +40,11 @@ with sync_playwright() as p:
         assert "verifiedInviteForm" not in live_js, "No extra PIN form"
         assert "invite-recipient-card" in live_js, "student-specific invite cards must be deployed"
         assert "targetUserId||i.usedBy" in live_js, "student invocations must resolve linked recipient"
-        assert "trial-storage-note" in live_js, "local save message must exist"
-        assert "💾 이 기기에 저장하기" in live_js, "no unsupported server-share save button"
-        assert "trial-sharing-hidden" in live_js, "disabled sharing must be hidden"
+        assert "practice-sync-box" in live_js, "sync status and consent must be visible"
+        assert "💾 연습 기록 저장하기" in live_js, "cloud practice save must be explicit"
+        assert "name=\"practiceShare\"" in live_js, "therapist share must be opt-in"
+        assert "data-practice-share" in live_js and "data-practice-unshare" in live_js, "share and revoke UI must exist"
+        assert "practice-cloud-record" in live_js, "synced record archive must exist"
 
 
 
