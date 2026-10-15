@@ -375,8 +375,8 @@ function dataForm(role){
  <p>관찰 내용을 공유하면 날짜·시간·장소·선택한 표시도 함께 전달돼요. 아래 추가 항목은 직접 고른 것만 보냅니다.</p>
  ${['observation','origin','context','childWords','response','after','impact','message'].map(k=>`<label><input type="checkbox" name="shareField" value="${k}" ${k==='observation'?'checked':''}><span>${NOTE_LABELS[k]}</span></label>`).join('')}
  </div></div>
- <div class="trial-storage-note" role="note"><strong>✓ 이 기기에 저장돼요</strong><span>저장 후 ‘내 기록’에서 다시 볼 수 있어요. 아직 치료사에게 전송되거나 다른 기기와 동기화되지는 않아요.</span></div>
- <button class="button entry-save" id="saveEntry">💾 이 기기에 저장하기</button><p class="parent-nudge">보호자는 관찰하거나 전해 들은 사실만 남기면 됩니다. 기록하지 않는 날도 괜찮습니다. 진단이나 원인 판단은 하지 않아도 됩니다. 실시간 상담·응급 연락창이 아닙니다.</p></form>`;
+ <div class="practice-sync-box"><strong>연습용 서버에 저장</strong><p>가상 기록은 다른 기기에서도 다시 볼 수 있어요. 실제 아동의 개인정보·상담내용·사진은 아직 넣지 말아 주세요.</p><label><input name="practiceShare" type="checkbox"> 이 기록과 사진·그림을 담당 치료사에게도 공유하기</label></div>
+ <button class="button entry-save" id="saveEntry">💾 연습 기록 저장하기</button><p class="parent-nudge">보호자는 관찰하거나 전해 들은 사실만 남기면 됩니다. 기록하지 않는 날도 괜찮습니다. 진단이나 원인 판단은 하지 않아도 됩니다. 실시간 상담·응급 연락창이 아닙니다.</p></form>`;
  return `<form class="form entry-v5 student-journal" id="entryForm" data-journal-mode="quick">
  <div class="student-mode-header"><div class="student-mode-title">어떤 방식으로 남길까?</div><div class="journal-mode-switch" role="group" aria-label="기록 상세 정도 선택"><button class="journal-mode-btn active" type="button" data-journal-mode="quick" aria-pressed="true"><strong>⚡ 간편 기록</strong><small>한두 줄이면 끝</small></button><button class="journal-mode-btn" type="button" data-journal-mode="detail" aria-pressed="false"><strong>▤ 자세히 기록</strong><small>필요한 만큼 더 쓰기</small></button></div><p class="student-mode-hint" id="journalModeHint" aria-live="polite">한 줄만 남겨도 돼. 나머지는 선택이야.</p></div>
  <section class="student-info-card" aria-label="기록 날짜, 시간, 장소">
@@ -410,8 +410,8 @@ function dataForm(role){
  <div class="privacy-panel student-share trial-sharing-hidden" hidden aria-hidden="true"><label class="checkbox"><input type="checkbox" name="share" disabled><span>담당 치료사에게 기록 공유하기<small>기본 비공개 · 공유 내용은 직접 고를 수 있어.</small></span></label>
  <div id="sharePicker" class="share-picker" hidden><div class="student-share-bar"><strong>보낼 항목 선택</strong><div class="student-share-actions"><button type="button" class="button-ghost" id="studentSelectAll">전체 선택</button><button type="button" class="button-ghost" id="studentClearAll">선택 해제</button></div></div>
  ${['title','date','time','place','note','sketch','mood','energy','thought','body','action','experience','experienceImpact','abcBefore','abcBehavior','abcAfter'].map(k=>`<label class="student-share-field"><input type="checkbox" name="shareField" value="${k}"><span>${NOTE_LABELS[k]}</span></label>`).join('')}<p id="studentShareCount" aria-live="polite">보낼 항목을 선택해 줘. 작성하지 않은 항목은 선택되지 않아.</p><p>선택하지 않은 내용은 치료사에게 보내지 않아. 전송 전에 확인할 수 있어.</p></div></div>
- <div class="trial-storage-note" role="note"><strong>✓ 이 기기에 저장돼</strong><span>저장하면 ‘내 기록’에서 다시 볼 수 있어. 치료사에게 보내는 기능은 아직 준비 중이야.</span></div>
- <button class="button entry-save" id="saveEntry">💾 이 기기에 저장하기</button><p class="student-save-note">매일 쓰지 않아도 괜찮아. 기록을 정확하게 쓰려 애쓸 필요도 없어. 실시간 상담·응급 연락창이 아니야. 체험판에서 저장한 글·사진·그림은 이 기기 브라우저에만 임시 보관돼. 실제 아동 정보는 입력하지 마.</p>
+ <div class="practice-sync-box"><strong>연습용 서버에 저장해</strong><p>가상 기록은 휴대폰을 바꿔도 볼 수 있어. 진짜 학생의 개인정보나 상담 내용은 아직 적지 말아 줘.</p><label><input name="practiceShare" type="checkbox"> 이 기록과 사진·그림을 담당 치료사에게도 공유할래</label></div>
+ <button class="button entry-save" id="saveEntry">💾 연습 기록 저장하기</button><p class="student-save-note">매일 쓰지 않아도 괜찮아. 기록을 정확하게 쓰려 애쓸 필요도 없어. 실시간 상담·응급 연락창이 아니야. 연습용 서버에 가상 기록을 저장할 수 있어. 실제 학생의 상담정보나 사진은 아직 입력하지 마.</p>
  </form>`;
 }function gatherEntry(f,role){
  const fields=role==='parent'?['date','time','place','observation','origin','context','childWords','response','after','impact','message']:['date','time','place','title','note','energy','thought','body','action','experience','experienceImpact','abcBefore','abcBehavior','abcAfter'];
@@ -444,7 +444,7 @@ function sharePreview(fields,entry){return fields.map(k=>{const v=String(entry[k
 function confirmSharedEntry(fields,entry){
  return new Promise(resolve=>{
   let d=document.getElementById('shareReviewDialog');
-  if(!d){d=document.createElement('dialog');d.id='shareReviewDialog';d.className='share-review-dialog';d.innerHTML='<h2>담당 치료사에게 공유할 내용</h2><p class="share-review-help">아래 항목만 공유돼. 선택하지 않은 내용은 보내지 않아. 실제 체험판에서는 서버로 전송되지 않아.</p><pre class="share-review-body"></pre><div class="share-review-sketch"></div><p class="share-review-help">보낸 뒤에는 공유를 취소할 수 있지만 이미 별도로 복사된 자료까지 되돌릴 수는 없어.</p><div class="share-review-actions"><button type="button" data-cancel class="button-ghost">돌아가기</button><button type="button" data-approve class="button">이 내용 공유하기</button></div>';document.body.append(d);}
+  if(!d){d=document.createElement('dialog');d.id='shareReviewDialog';d.className='share-review-dialog';d.innerHTML='<h2>담당 치료사에게 공유할 내용</h2><p class="share-review-help">아래 항목만 공유돼. 선택하지 않은 내용은 보내지 않아. 가상 기록에 한해 연습용 서버로 전송돼.</p><pre class="share-review-body"></pre><div class="share-review-sketch"></div><p class="share-review-help">보낸 뒤에는 공유를 취소할 수 있지만 이미 별도로 복사된 자료까지 되돌릴 수는 없어.</p><div class="share-review-actions"><button type="button" data-cancel class="button-ghost">돌아가기</button><button type="button" data-approve class="button">이 내용 공유하기</button></div>';document.body.append(d);}
   d.querySelector('.share-review-body').textContent=sharePreview(fields,entry);
   const drawing=d.querySelector('.share-review-sketch');
   drawing.innerHTML=fields.includes('sketch')&&entry.sketch?'<div class="sketch-record" data-sketch="'+sanitize(entry.sketch)+'"><div class="sketch-mini-label">공유할 그림 전체</div><canvas width="760" height="380"></canvas></div>':'';
@@ -456,6 +456,35 @@ function confirmSharedEntry(fields,entry){
   else resolve(confirm('담당 치료사에게 아래 내용만 공유할까?\n\n'+sharePreview(fields,entry)));
  });
 }
+
+async function uploadPracticePhotos(){
+ const photos=getPracticePhotos(),paths=[];
+ for(const dataUrl of photos){
+  const signed=await api('practice-media-sign',{method:'POST',body:{}});
+  if(!signed.token||!signed.path||signed.bucket!=='ildan-practice-media')throw Error('사진 업로드 준비에 실패했어.');
+  // CSP intentionally disallows data: fetch. Convert prepared JPEG locally instead.
+  const bytes=Uint8Array.from(atob(dataUrl.split(',')[1]),c=>c.charCodeAt(0));
+  const blob=new Blob([bytes],{type:'image/jpeg'});
+  if(blob.size>signed.maxBytes)throw Error('사진이 너무 커서 업로드할 수 없어.');
+  const {error}=await supabase.storage.from(signed.bucket).uploadToSignedUrl(signed.path,signed.token,blob,{contentType:'image/jpeg'});
+  if(error)throw Error('사진 업로드에 실패했어. 연결 상태를 확인해 줘. '+error.message);
+  paths.push(signed.path);
+ }
+ return paths;
+}
+function compactSketchForCloud(entry){
+ if(!entry.sketch)return entry;
+ try{
+  const strokes=JSON.parse(entry.sketch);
+  if(!Array.isArray(strokes))return entry;
+  const trimmed=strokes.filter(x=>Array.isArray(x)&&x.length).slice(0,60);
+  const simplified=trimmed.map(stroke=>stroke.filter((p,i)=>i%Math.max(1,Math.ceil(stroke.length/Math.max(2,Math.floor(220/trimmed.length))))===0).slice(0,240));
+  const remaining=simplified.reduce((a,b)=>a+b.length,0);
+  if(remaining<=240)return {...entry,sketch:JSON.stringify(simplified)};
+  return {...entry,sketch:JSON.stringify(simplified.map(x=>x.slice(0,4)))};
+ }catch(_){return entry;}
+}
+
 function wireEntryForm(isParent){
  const f=$('entryForm'),button=$('saveEntry'),share=f.elements.share,area=$('sharePicker');
  const selectedKeys=()=>[...f.querySelectorAll('input[name="shareField"]:checked')].map(x=>x.value);
@@ -517,13 +546,13 @@ function wireEntryForm(isParent){
   const meaningful=(isParent?!!entry.observation:['note','sketch','mood','energy','thought','body','action','experience','experienceImpact','abcBefore','abcBehavior','abcAfter'].some(k=>!!entry[k]))||!!entry.sketch||getPracticePhotos().length>0;
   if(!meaningful){toast('글, 사진, 그림 중 하나만 있어도 괜찮아.');return;}
   if(isParent&&!entry.date){toast('일이 있었던 날짜를 선택해 주세요.');return;}
-  // Trial recording always goes into the current device. No clinical or media
-  // data is ever sent to a server here; no confusing share choice blocks save.
   loading(button,async()=>{
-   const localEntry={...entry};const images=getPracticePhotos();if(images.length)localEntry.photos=images;
-   await savePracticeRecord(me.id,me.role,localEntry);
+   const clean=compactSketchForCloud(entry),shareWithTherapist=Boolean(f.elements.practiceShare?.checked);
+   const paths=await uploadPracticePhotos();
+   if(paths.length)clean.photos=paths;
+   await api('practice-records',{method:'POST',body:{entry:clean,share:shareWithTherapist}});
    activeView='history';await dashboard();
-   toast('저장 완료! ‘내 기록’에서 다시 볼 수 있어.');
+   toast(shareWithTherapist?'저장하고 담당 치료사에게 공유했어.':'연습용 서버에 저장했어. 다른 기기에서도 볼 수 있어.');
    document.querySelector('[data-workspace-view="history"]')?.scrollIntoView({behavior:'smooth',block:'start'});
   });
  };
@@ -540,24 +569,33 @@ function recordCards(list=records){
  return list.map(r=>{
   const time=sanitize(new Date(r.createdAt).toLocaleString('ko-KR'));
   const observed=r.entry?.date?`${r.kind==='parent'?'관찰':'기록'} ${sanitize(r.entry.date)}${r.entry.time?' '+sanitize(r.entry.time):''}${r.entry.place?' · '+sanitize(r.entry.place):''} · 작성 ${time}`:time;
+  if(r.practice&&me.role!=='therapist')return `<article class="record archive-record practice-cloud-record"><div class="meta">연습용 서버 저장 · ${observed} · ${r.shared?'치료사에게 공유 중':'나만 보기'}</div>${prettyRecordEntry(r.entry)}<div class="practice-record-actions">${r.shared?`<button class="button-ghost" data-practice-unshare="${sanitize(r.id)}">치료사 공유 취소</button>`:`<button class="button-ghost" data-practice-share="${sanitize(r.id)}">치료사에게 공유하기</button>`}<button class="button-ghost" data-practice-delete="${sanitize(r.id)}">연습 기록 삭제</button></div></article>`;
   if(r.local)return `<article class="record archive-record device-only-record"><div class="meta">이 기기에만 임시 보관 · ${observed} · 치료사에게 전달되지 않음</div>${prettyRecordEntry(r.entry)}<button class="button-ghost" type="button" data-delete-practice="${sanitize(r.id)}">이 기기에서 기록·사진 삭제</button></article>`;
   if(me.role==='therapist'&&r.kind==='student'){
    const text=String(r.entry?.note||r.entry?.experience||r.entry?.thought||r.entry?.action||r.entry?.mood||'');
    const short=text.length>120?text.slice(0,120)+'…':text;
-   return `<article class="record archive-record"><div class="meta">학생 공유 기록 · ${observed} · ${sanitize(r.student)}</div><div class="parent-inbox-skim">${sanitize(short)||'선택된 공유 내용이 있어.'}</div><details class="parent-inbox-details"><summary>공유한 내용 전체 보기</summary><div class="parent-inbox-full">${prettyRecordEntry(r.entry)}</div></details><p class="muted">학생이 선택해 공유한 내용만 표시돼.</p></article>`;
+   return `<article class="record archive-record"><div class="meta">학생 공유 기록 · ${observed} · ${sanitize(r.student)}</div><div class="parent-inbox-skim">${sanitize(short)||'선택된 공유 내용이 있어.'}</div><details class="parent-inbox-details"><summary>공유한 내용 전체 보기</summary><div class="parent-inbox-full">${prettyRecordEntry(r.entry)}</div></details><p class="muted">학생이 공유를 선택한 가상 기록 전체가 표시돼.</p></article>`;
   }
   if(me.role==='therapist'&&r.kind==='parent'){
    const field=String(r.entry?.observation||r.entry?.message||r.entry?.impact||r.entry?.response||'');
    const preview=field.length>110?field.slice(0,110)+'…':field;
    const place=r.entry?.place?' · '+sanitize(r.entry.place):'';
    const kinds=r.entry?.signals?' · '+sanitize(r.entry.signals):'';
-   return `<article class="record parent-inbox-record"><div class="meta">보호자 기록 · ${observed}${place}${kinds} · ${sanitize(r.student)}</div><div class="parent-inbox-skim">${sanitize(preview)||'공유된 메모가 있어요.'}</div><details class="parent-inbox-details"><summary>전달 내용 더 보기</summary><div class="parent-inbox-full">${parentObservationFacts(r.entry)}<div class="muted">학생: ${sanitize(r.student)} · 작성자: ${sanitize(r.author)}</div></div></details></article>`;
+   return `<article class="record parent-inbox-record"><div class="meta">보호자 기록 · ${observed}${place}${kinds} · ${sanitize(r.student)}</div><div class="parent-inbox-skim">${sanitize(preview)||'공유된 메모가 있어요.'}</div><details class="parent-inbox-details"><summary>전달 내용 더 보기</summary><div class="parent-inbox-full">${parentObservationFacts(r.entry)}${prettyRecordEntry(Object.fromEntries(['photos','sketch'].filter(k=>r.entry?.[k]).map(k=>[k,r.entry[k]])))}<div class="muted">학생: ${sanitize(r.student)} · 작성자: ${sanitize(r.author)}</div></div></details></article>`;
   }
   return `<article class="record archive-record"><div class="meta">${observed} · ${r.kind==='student'?'학생':'학부모'} · ${r.shared?'치료사와 일부 공유':'나만 보기'}${r.driveSynced?' · 드라이브 백업':''}</div>${prettyRecordEntry(r.entry)}${!r.shared&&me.role!=='therapist'?`<div class="inline-share"><button class="button-ghost" type="button" data-share="${sanitize(r.id)}">선택해서 공유</button><div class="share-choices" data-share-panel="${sanitize(r.id)}" hidden><p>치료사에게 전달할 내용만 골라줘.</p>${me.role==='student'?`<div class="student-share-bar"><strong>내 기록 공유</strong><div class="student-share-actions"><button type="button" class="button-ghost" data-archive-all="${sanitize(r.id)}">전체 선택</button><button type="button" class="button-ghost" data-archive-clear="${sanitize(r.id)}">선택 해제</button></div></div>`:''}${Object.keys(r.entry??{}).map(k=>`<label><input type="checkbox" value="${sanitize(k)}"><span>${sanitize(NOTE_LABELS[k]||k)}</span></label>`).join('')}<button class="button" type="button" data-share-confirm="${sanitize(r.id)}">선택한 항목 전달</button></div></div>`:''}${r.shared&&me.role!=='therapist'?`<div class="inline-share"><button type="button" class="button-ghost" data-unshare="${sanitize(r.id)}">이후 공유 취소</button><small>이미 전달된 복사본은 별도 관리가 필요해.</small></div>`:''}${me.role==='therapist'?`<div class="muted">학생: ${sanitize(r.student)} · 작성자: ${sanitize(r.author)}</div>`:''}</article>`;
  }).join('');
 }
 
 function attachShares(){
+ const actionMap={'practice-share':'practice-share','practice-unshare':'practice-unshare','practice-delete':'practice-delete'};
+ for(const type of Object.keys(actionMap))document.querySelectorAll('[data-'+type+']').forEach(btn=>btn.onclick=()=>loading(btn,async()=>{
+  if(type==='practice-delete'&&!confirm('이 연습 기록과 서버의 첨부 사진을 삭제할까?'))return;
+  if(type==='practice-share'&&!confirm('이 연습 기록의 글·사진·그림 전체를 담당 치료사에게 공유할까?'))return;
+  if(type==='practice-unshare'&&!confirm('담당 치료사의 추가 열람을 중단할까? 이미 확인한 내용은 되돌릴 수 없어.'))return;
+  await api(actionMap[type],{method:'POST',body:{recordId:btn.dataset[type.replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]}});
+  await dashboard();toast(type==='practice-delete'?'연습 기록을 삭제했어.':type==='practice-share'?'담당 치료사에게 공유했어.':'공유를 중단했어.');
+ }));
  document.querySelectorAll('[data-delete-practice]').forEach(b=>b.onclick=()=>loading(b,async()=>{
   if(!confirm('이 기기의 임시 기록과 사진을 삭제할까? 삭제하면 복구할 수 없어.'))return;
   await deletePracticeRecord(me.id,b.dataset.deletePractice);toast('기기 임시 기록을 삭제했어.');await dashboard();
@@ -790,7 +828,7 @@ async function refreshInviteList(){
  }catch(e){el.textContent='접속 링크 목록을 불러오지 못했어요. '+e.message;}
 }
 function adminHome(){app.innerHTML=hero('계정 운영','최초 관리자 계정은 기록을 읽을 수 없습니다. 치료사 초대만 발급할 수 있어요.')+`<div class="panel"><h2>치료사 초대코드 발급</h2><p>치료사도 학생·학부모와 같은 패스키 방식으로 등록합니다.</p><button id="inviteTherapist" class="button">치료사 초대코드 만들기</button><div id="adminInvite"></div></div>`;$('inviteTherapist').onclick=e=>loading(e.target,async()=>{const r=await api('invites',{method:'POST',body:{role:'therapist'}});const d=$('adminInvite');d.innerHTML='<p>코드를 복사해 치료사에게 개별 전달하세요. 7일간 유효합니다.</p><textarea readonly id="adminCode"></textarea>';$('adminCode').value=r.invite;})}
-async function dashboard(){header();records=me.role==='admin'?[]:(await api('records')).records??[];
+async function dashboard(){header();records=me.role==='admin'?[]:(await api('practice-records')).records??[];
  if(me.role==='student'||me.role==='parent'){try{records=[...(await listPracticeRecords(me.id)),...records]}catch(e){toast(e.message)}}
  if(me.role==='therapist')await therapistHome();else if(me.role==='admin')adminHome();else studentHome();}
 function render(){header();if(!me)loginScreen();else dashboard().catch(e=>{app.innerHTML=hint('화면을 불러오지 못했어요. '+sanitize(e.message))})}
