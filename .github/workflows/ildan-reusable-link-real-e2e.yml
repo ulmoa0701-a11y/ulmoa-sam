@@ -1,0 +1,88 @@
+name: Ildan actual link-only trial roundtrip QA
+on:
+  push:
+    branches:
+      - qa/ildan-linkonly-real-roundtrip-20261015
+    paths:
+      - '.github/workflows/ildan-reusable-link-real-e2e.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sandbox-real-invite-roundtrip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Real temporary therapist/student/guardian, link login twice, revoke
+        shell: bash
+        run: |
+          node <<'JS'
+          const fs=require('node:fs'),crypto=require('node:crypto');
+          const cfg=fs.readFileSync('test/ildan-sseobom/supabase-staging/config.js','utf8');
+          const key=cfg.match(/publishableKey:"([^"]+)"/)?.[1];
+          if(!key)throw Error('Missing public key');
+          const base='https://miohovwmhmtcvkurjamm.supabase.co',url=base+'/functions/v1/ildan-api/';
+          const origin='https://ulmoa0701-a11y.github.io';
+          const common={apikey:key,'Content-Type':'application/json',Origin:origin};
+          const username='qa'+crypto.randomBytes(6).toString('hex');
+          const password='Z7'+crypto.randomBytes(20).toString('hex');
+          const digest=(s)=>crypto.createHash('sha256').update(s).digest('hex');
+          const email='trial-'+digest(username).slice(0,48)+'@members.ildan.example';
+          const ids={};
+          async function request(path,body,token,method='POST'){
+           const headers={...common};if(token)headers.Authorization='Bearer '+token;
+           const r=await fetch(url+path,{method,headers,...(method==='GET'?{}:{body:JSON.stringify(body||{})}),signal:AbortSignal.timeout(20000)});
+           const data=await r.json().catch(()=>({}));
+           return {status:r.status,data};
+          }
+          async function auth(path,body){
+           const r=await fetch(base+'/auth/v1/'+path,{method:'POST',headers:{apikey:key,'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(20000)});
+           return {status:r.status,data:await r.json().catch(()=>({}))};
+          }
+          function check(cond,msg){if(!cond)throw Error(msg);}
+          async function loginViaLink(code,who){
+           const preview=await request('invite-preview',{code});
+           check(preview.status===200 && preview.data.reusable===true && preview.data.needsSeparateVerificationCode===false,who+' preview failed '+JSON.stringify(preview));
+           const c=await request('invite-register',{code});
+           check(c.status===200&&c.data.tokenHash,who+' exchange failed '+JSON.stringify(c));
+           const v=await auth('verify',{type:'magiclink',token_hash:c.data.tokenHash});
+           check(v.status===200&&v.data.access_token,who+' OTP verify failed '+JSON.stringify({status:v.status,error:v.data.code}));
+           const member=await request('me',null,v.data.access_token,'GET');
+           check(member.status===200&&member.data.user?.role===who,who+' member role failed '+JSON.stringify(member));
+           return {id:member.data.user.id,token:v.data.access_token};
+          }
+          (async()=>{
+           let h=await request('health',null,null,'GET');
+           check(h.status===200&&h.data.mode==='not-approved-for-clinical-use','non-clinical sandbox is mandatory');
+           const signup=await request('test-therapist-signup',{username,password});
+           check(signup.status===201,'therapist signup failed '+JSON.stringify(signup));
+           const t=await auth('token?grant_type=password',{email,password});
+           check(t.status===200&&t.data.access_token,'therapist login failed '+JSON.stringify({status:t.status,error:t.data.code}));
+           ids.therapist=t.data.user?.id;
+           const bearer=t.data.access_token;
+           const student=await request('students',{alias:'가상_연결QA'},bearer);
+           check(student.status===201&&student.data.student?.id,'student create failed '+JSON.stringify(student));
+           ids.student=student.data.student.id;
+           const invitation=await request('invites',{role:'student',targetUserId:ids.student},bearer);
+           check(invitation.status===200&&/^[a-f0-9]{64}$/.test(invitation.data.invite)&&invitation.data.verificationCode===undefined,'student link should be enough '+JSON.stringify({status:invitation.status,data:Object.keys(invitation.data)}));
+           const code=invitation.data.invite;
+           const first=await loginViaLink(code,'student');check(first.id===ids.student,'student target mismatch');
+           const again=await loginViaLink(code,'student');check(again.id===first.id,'repeat link created different student');
+           const parentInvite=await request('invites',{role:'parent',studentId:ids.student},bearer);
+           check(parentInvite.status===200&&/^[a-f0-9]{64}$/.test(parentInvite.data.invite),'parent link creation failed');
+           const parent=await loginViaLink(parentInvite.data.invite,'parent');ids.parent=parent.id;
+           const parentAgain=await loginViaLink(parentInvite.data.invite,'parent');
+           check(parentAgain.id===ids.parent,'repeat parent link created duplicate');
+           const revoke=await request('revoke-invite',{digest:digest(code)},bearer);
+           check(revoke.status===200&&revoke.data.revoked===true,'revoke failed '+JSON.stringify(revoke));
+           const blocked=await request('invite-register',{code});
+           check(blocked.status===403,'revoked link must be denied '+JSON.stringify({status:blocked.status,data:blocked.data}));
+           console.log('PASS: real therapist -> student and guardian -> open SAME link twice -> original member IDs -> revoke student link -> 403');
+           console.log('SYNTHETIC_CLEANUP_IDS='+JSON.stringify(ids));
+          })().catch(e=>{
+           console.error('FAIL: '+e.message);
+           console.error('SYNTHETIC_CLEANUP_IDS='+JSON.stringify(ids));
+           process.exitCode=1;
+          });
+          JS
