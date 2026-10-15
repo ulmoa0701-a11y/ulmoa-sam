@@ -39,7 +39,7 @@ function handArt(kind){
  const thumb=kind==='palm'?
   '<path d="M49 119 Q35 90 23 100 Q11 110 22 134 L45 164" fill="#ffe273" stroke="#c77a25" stroke-width="5"/>':
   '<path d="M46 139 Q26 137 25 153 Q25 169 45 175" fill="#d2ddd9" stroke="#8ba99c" stroke-width="4"/>';
- return '<svg class="hand-pose" data-pose="'+kind+'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 223" aria-hidden="true" focusable="false">'+
+ return '<svg class="hand-pose" data-hand-pose="'+kind+'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 223" aria-hidden="true" focusable="false">'+
  thumb+fingers+
  '<rect x="38" y="116" width="117" height="90" rx="31" fill="#e1f4e6" stroke="#318363" stroke-width="4"/>'+
  '</svg>';
