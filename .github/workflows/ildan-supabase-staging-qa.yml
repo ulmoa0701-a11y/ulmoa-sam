@@ -36,6 +36,9 @@ jobs:
           assert(app.includes('registerTherapistPasskey') && app.includes("me?.role!=='therapist'"),'Only approved therapist can register after sign-in');
           assert(app.includes('returnLogin" hidden'),'First visit must not lead to unregistered passkey sign-in');
           assert(app.includes("api('revoke-invite'")&&app.includes('refreshInviteList()'),'Therapist invite revocation UI must exist');
+          assert(app.includes("publicInviteApi('invite-register',code,{verificationCode})"),'Second-factor enrollment required');
+          assert(app.includes('ildanPersonalDevice'),'Explicit device session persistence required');
+          assert(app.includes('createStudentForm')&&app.includes("api('students',{method:'POST'"),'Therapist student provisioning is wired');
           assert(cfg.includes('sb_publishable_'));
           assert(!/sb_secret_|service_role|ENCRYPTION_KEY\s*[:=]\s*["']/.test(cfg));
           assert(html.includes('실제 학생·보호자 상담정보 입력 금지'));
@@ -68,7 +71,9 @@ jobs:
             if(badInvite.status!==400)throw Error('Invalid invite preview was not rejected '+badInvite.status);
             const unused='0'.repeat(64);
             const blockedEnrollment=await fetch(base+'invite-register',{method:'POST',headers:{Origin:'https://ulmoa0701-a11y.github.io','Content-Type':'application/json'},body:JSON.stringify({code:unused}),signal:AbortSignal.timeout(15000)});
-            if(blockedEnrollment.status!==503)throw Error('Ungated email-free signup endpoint '+blockedEnrollment.status);
+            if(blockedEnrollment.status!==400)throw Error('Second verification secret is not required '+blockedEnrollment.status);
+            const wrongSecret=await fetch(base+'invite-register',{method:'POST',headers:{Origin:'https://ulmoa0701-a11y.github.io','Content-Type':'application/json'},body:JSON.stringify({code:'0'.repeat(64),verificationCode:'9'.repeat(24)}),signal:AbortSignal.timeout(15000)});
+            if(wrongSecret.status!==403)throw Error('Nonexistent two-factor invite accepted '+wrongSecret.status);
             const invalid=await fetch(base+'me',{headers:{Origin:'https://evil.example'},signal:AbortSignal.timeout(15000)});
             if(invalid.status!==403)throw Error('Cross-site request was not rejected');
             console.log('PASS live backend locked down, anonymous & cross-site requests blocked');

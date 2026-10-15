@@ -23,12 +23,16 @@ with sync_playwright() as p:
     data=route.request.post_data_json
     assert data.get('code')==token
     preview.append(True)
-    route.fulfill(status=200,content_type='application/json',body=json.dumps({'role':role,'expiresAt':'2026-11-01T00:00:00Z','requiresDeviceSetup':True}))
+    route.fulfill(status=200,content_type='application/json',body=json.dumps({'role':role,'expiresAt':'2026-11-01T00:00:00Z','requiresDeviceSetup':False,'registrationOpen':True,'needsSeparateVerificationCode':True}))
    page.route('**/functions/v1/ildan-api/invite-preview',mock_route)
    page.goto(url+'#invite='+token,wait_until='domcontentloaded',timeout=35000)
    page.locator('#inviteRoleTitle').get_by_text(label+' 전용 초대입니다.').wait_for(timeout=25000)
    assert len(preview)==1,('link preview called',len(preview))
    assert page.locator('#inviteAccept').count()==1
+   assert page.locator('#verificationCode').count()==1
+   assert page.locator('#verifiedInviteForm').count()==1
+   assert page.locator('#inviteAccept').is_enabled(), 'explicit second-code flow should be available after preview'
+   assert page.locator('#verificationCode').get_attribute('required') is not None, 'identity check code must be required'
    assert page.locator('#inviteCopy').is_visible()
    assert page.locator('#emailRequestForm').count()==0,'should not request guardian email'
    assert page.locator('[data-login-role]').count()==0,'role spoofing UI'
