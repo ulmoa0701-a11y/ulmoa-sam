@@ -166,6 +166,34 @@ export async function handle(request:Request):Promise<Response>{
    if(error)throw Error('STUDENT_LIST_FAILED');
    return send({students:(data||[]).map((s:any)=>({id:s.user_id,nickname:s.display_alias||'학생'}))});
   }
+  if(apiName==='students'&&request.method==='POST'){
+   if(member.role!=='therapist')return send({error:'치료사 전용입니다.'},403);
+   const b=await body(request),alias=requireText(b,'alias').trim();
+   if(!alias||alias.length>30||/[<>\u0000-\u001f\u007f]/.test(alias))
+    return send({error:'학생 구분용 별칭은 1~30글자로 입력해 주세요.'},400);
+   const {count,error:countError}=await admin.from('ildan_members')
+    .select('user_id',{count:'exact',head:true}).eq('therapist_id',uid).eq('role','student');
+   if(countError)return send({error:'학생 목록을 확인하지 못했습니다.'},503);
+   if((count||0)>=100)return send({error:'학생 계정 수가 제한을 초과했습니다.'},409);
+   const randomId=crypto.randomUUID();
+   const email='member-'+randomId+'@members.ildan.example';
+   const password=hex(crypto.getRandomValues(new Uint8Array(32)));
+   const {data:created,error:createError}=await admin.auth.admin.createUser({
+    email,password,email_confirm:true,
+    app_metadata:{enrollment:'therapist-approved-student',role:'unassigned'}
+   });
+   if(createError||!created?.user)return send({error:'학생 공간을 만들지 못했습니다.'},503);
+   const newUid=created.user.id;
+   const {error:memberError}=await admin.from('ildan_members').insert({
+    user_id:newUid,role:'student',therapist_id:uid,display_alias:alias
+   });
+   if(memberError){
+    await admin.auth.admin.deleteUser(newUid).catch(()=>{});
+    return send({error:'학생 계정을 연결하지 못했습니다.'},503);
+   }
+   return send({student:{id:newUid,nickname:alias,registeredDevice:false},
+    notice:'학생의 실제 이름 대신 내부 별칭만 사용하세요. 학생에게 링크를 발급하면 별도 신원 확인 후 접속할 수 있습니다.'},201);
+  }
   if(apiName==='accounts'&&request.method==='GET'){
    if(member.role!=='therapist')return send({error:'치료사 전용입니다.'},403);
    const {data,error}=await userDb.from('ildan_members').select('user_id,display_alias,role,student_id').eq('therapist_id',uid);
