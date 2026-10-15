@@ -33,7 +33,7 @@ with sync_playwright() as p:
         assert "convertPhoto(file)" in media_js, "original photos should be recompressed and stripped"
         assert "publicInviteApi('invite-register',code)" in live_js, "Invite link alone triggers access"
         assert "retry.onclick=connect;await connect()" in live_js, "Link opens and connects automatically"
-        assert "사용 횟수·기한 제한 없이" in live_js, "Unlimited reuse described"
+        assert "같은 링크로 계속 접속할 수 있어요." in live_js, "Repeated link access described"
         assert "verificationCodeOutput" not in live_js, "No independent verification code UI"
         assert "verifiedInviteForm" not in live_js, "No extra PIN form"
         assert "invite-recipient-card" in live_js, "student-specific invite cards must be deployed"
