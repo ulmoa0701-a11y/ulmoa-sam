@@ -52,7 +52,7 @@ jobs:
           const html=fs.readFileSync('secure-portal/supabase/web/index.html','utf8');
           const cfg=fs.readFileSync('secure-portal/supabase/web/config.js','utf8');
           assert(js.includes("supabase.auth.verifyOtp"));
-          assert(js.includes('supabase.auth.signInWithPasskey()'));
+          assert(js.includes('supabase.auth.signInWithPassword({email,password})'),'Password-based sandbox login required');
           assert(!['signInWithOtp({phone','phoneRequestForm','phoneVerifyForm','emailRequestForm','emailVerifyForm'].some(x=>js.includes(x)),'No SMS or guardian email forms');
           assert(js.includes("test-therapist-signup")&&js.includes('signInWithPassword'),'Email-free trial therapist setup must be present');
           assert(js.includes("api('revoke-invite'"),'Therapist must be able to revoke invites');
