@@ -3,7 +3,7 @@
 const LIMIT=4, DB='ildan-media-practice-v1';
 let photos=[];
 export function mediaWidget(){
- return \`<section class="media-practice-panel" aria-label="사진 및 그림 추가">
+ return `<section class="media-practice-panel" aria-label="사진 및 그림 추가">
  <div class="media-practice-heading"><strong>사진·그림 추가하기</strong><small>선택 · 글 없이도 가능</small></div>
  <p>직접 그리거나 사진 파일을 골라 넣을 수 있어. 사진과 그림을 함께 남겨도 돼.</p>
  <div class="media-practice-buttons">
@@ -22,21 +22,21 @@ export function mediaWidget(){
    <button type="button" id="clearSketch" class="button-ghost">전부 지우기</button></div>
  </div>
  <p class="muted media-local-notice">체험판에서는 사진과 그림이 이 브라우저에만 임시 보관돼. 치료사에게 보내지거나 다른 기기에 자동 저장되지 않아. 실제 아동 사진은 아직 넣지 말아 줘.</p>
- </section>\`;
+ </section>`;
 }
 export function getPracticePhotos(){return [...photos];}
 function preview(){
  const box=document.getElementById('photoThumbnails');if(!box)return;
- box.innerHTML=photos.map((src,i)=>\`<figure class="photo-thumbnail">
-  <img src="\${src}" alt="첨부한 사진 \${i+1}">
-  <button type="button" data-remove-photo="\${i}" aria-label="사진 \${i+1} 제거">× 제거</button>
- </figure>\`).join('');
+ box.innerHTML=photos.map((src,i)=>`<figure class="photo-thumbnail">
+  <img src="${src}" alt="첨부한 사진 ${i+1}">
+  <button type="button" data-remove-photo="${i}" aria-label="사진 ${i+1} 제거">× 제거</button>
+ </figure>`).join('');
  for(const b of box.querySelectorAll('[data-remove-photo]')){
   b.onclick=()=>{photos.splice(Number(b.dataset.removePhoto),1);preview();setStatus();};
  }
 }
 function setStatus(message){
- const p=document.getElementById('photoProgress');if(p)p.textContent=message||\`사진 \${photos.length}장 선택했어. 원하는 사진만 남길 수 있어.\`;
+ const p=document.getElementById('photoProgress');if(p)p.textContent=message||`사진 ${photos.length}장 선택했어. 원하는 사진만 남길 수 있어.`;
 }
 async function convertPhoto(file){
  const allowed=/^image\/(jpeg|png|webp|heic|heif)$/i;
@@ -132,5 +132,5 @@ export async function deletePracticeRecord(owner,id){
 export function photosMarkup(value){
  if(!Array.isArray(value))return '';
  const safe=value.slice(0,LIMIT).filter(src=>typeof src==='string'&&src.length<=1700000&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(src));
- return \`<div class="saved-photo-grid">\${safe.map((src,i)=>\`<figure><img alt="보관한 사진 \${i+1}" loading="lazy" src="\${src}"></figure>\`).join('')}</div>\`;
+ return `<div class="saved-photo-grid">${safe.map((src,i)=>`<figure><img alt="보관한 사진 ${i+1}" loading="lazy" src="${src}"></figure>`).join('')}</div>`;
 }
