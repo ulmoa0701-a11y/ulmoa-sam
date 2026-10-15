@@ -88,29 +88,65 @@ function moneyChip(value){
  const paper=value>=1000;
  return '<span class="currency '+(paper?'paper':'coin')+' value-'+value+'"><span>'+ (paper?'지폐':'동전')+'</span><strong>'+value.toLocaleString('ko-KR')+'</strong><small>원</small></span>';
 }
+
+const easyMoneyBank=[
+ {kind:'read',value:100},{kind:'read',value:500},{kind:'read',value:1000},{kind:'read',value:5000},
+ {kind:'sum',pieces:[100,100,100],value:300},{kind:'sum',pieces:[500,100],value:600},
+ {kind:'read',value:50},{kind:'sum',pieces:[500,500],value:1000},
+ {kind:'sum',pieces:[1000,500],value:1500},{kind:'sum',pieces:[100,100,500],value:700},
+ {kind:'read',value:10},{kind:'sum',pieces:[50,50,100],value:200},
+ {kind:'sum',pieces:[500,500,100],value:1100},{kind:'sum',pieces:[1000,100,100],value:1200},
+ {kind:'sum',pieces:[100,500,100],value:700},{kind:'sum',pieces:[500,500,500],value:1500},
+ {kind:'sum',pieces:[1000,500,100],value:1600},{kind:'sum',pieces:[500,100,100,100],value:800},
+ {kind:'sum',pieces:[1000,1000,500],value:2500},{kind:'sum',pieces:[1000,500,500],value:2000}
+];
+const moneyNormalPrices=[300,600,1100,800,1500,2500,700,1300,1600,900,1800,2400,400,1400,2300,2000,2700,1900,2200,2600];
+const moneyHardPrices=[1300,2400,3600,4500,1800,3300,2700,4100,5200,3400,1500,2800,4600,3700,5400,4200,5600,3900,6200,4800];
+const shopGoods=['🍎 사과 바구니','📒 작은 공책','🌻 꽃씨 꾸러미','🎁 선물 상자','🥪 간식 꾸러미','🖍️ 색연필','🧼 비누','🍌 바나나','📓 수첩','🌼 꽃 화분','🧩 작은 퍼즐','🥛 우유','⚽ 장난감 공','🍪 쿠키','✂️ 가위','🖇️ 클립','🥕 당근','🌸 꽃다발','🪁 연','📦 준비물 상자'];
 function moneyRound(){
- if(state.level==='easy')return {kind:'read',value:moneyVals[state.index%4]};
- const prices=state.level==='normal'?[300,600,1100,800]:[1300,2400,3600,4500];
- const goods=['🍎 사과 바구니','📒 작은 공책','🌻 꽃씨 꾸러미','🎁 선물 상자'];
- return {kind:'make',value:prices[state.index],item:goods[state.index]};
+ const offset=state.sessionSeed||0;
+ if(state.level==='easy')return easyMoneyBank[(state.index+offset)%easyMoneyBank.length];
+ const prices=state.level==='normal'?moneyNormalPrices:moneyHardPrices;
+ const n=(state.index+offset)%prices.length;
+ const price=prices[n],item=shopGoods[n];
+ if(state.level==='hard'&&state.index%4===2){
+  const paid=Math.ceil((price+100)/1000)*1000;
+  return {kind:'change',price,paid,value:paid-price,item};
+ }
+ return {kind:'make',value:price,item};
+}
+function buildMoneyChoices(r){
+ const value=r.value;
+ if(r.kind==='read'){
+  const bank=[10,50,100,500,1000,5000,10000];
+  const near=bank.filter(v=>v!==value).sort((a,b)=>Math.abs(Math.log(a/value))-Math.abs(Math.log(b/value)));
+  return [value,near[0],near[1]].sort((a,b)=>((a*13+state.index*7)%17)-((b*13+state.index*7)%17));
+ }
+ const candidates=[value+100,Math.max(0,value-100),value+500,Math.max(0,value-500),value+200,Math.max(0,value-200)].filter(v=>v>0&&v!==value);
+ const options=[value,...new Set(candidates)].slice(0,3);
+ return options.sort((a,b)=>((a+state.index*19)%13)-((b+state.index*19)%13));
 }
 function drawMoney(){
  const r=moneyRound();
- if(r.kind==='read'){
-  setScene('어떤 돈인가요?','숫자와 돈의 종류를 살펴보고 금액을 골라요.','화폐 알아보기');
-  const distractors=moneyVals.filter(x=>x!==r.value);
-  const answers=[r.value,distractors[(state.index+1)%3],distractors[(state.index+2)%3]];
-  state.options=answers.sort((a,b)=>((a+state.index*3)%7)-((b+state.index*3)%7));
-  $('gameArea').innerHTML='<div class="currency-stage"><span class="currency-large">'+moneyChip(r.value)+'</span><p>이 돈의 금액을 골라요.</p></div><div class="choice-grid">'+state.options.map(x=>'<button type="button" class="choice" data-value="'+x+'">'+fmt(x)+'</button>').join('')+'</div>';
+ if(r.kind==='read'||r.kind==='sum'){
+  const sum=r.kind==='sum';
+  setScene(sum?'돈을 합쳐보세요':'어떤 돈인가요?',sum?'돈이 몇 원인지 하나씩 더해봐요.':'숫자와 돈의 종류를 살펴보고 골라요.',sum?'금액 세기':'화폐 알아보기');
+  state.options=buildMoneyChoices(r);
+  const moneyView=sum?r.pieces.map(moneyChip).join(''):moneyChip(r.value);
+  $('gameArea').innerHTML='<div class="currency-stage '+(sum?'currency-multiple':'')+'"><span class="currency-large">'+moneyView+'</span><p>'+(sum?'이 돈을 모두 합하면 얼마인가요?':'이 돈은 얼마인가요?')+'</p></div><div class="choice-grid">'+state.options.map(x=>'<button type="button" class="choice" data-value="'+x+'">'+fmt(x)+'</button>').join('')+'</div>';
   return;
  }
- setScene(state.level==='hard'?'가게에서 물건값 내기':'목표 금액 만들기','동전·지폐를 눌러 필요한 금액을 담아봐요. 담은 돈은 다시 뺄 수 있어요.','돈 만들기');
- const denominations=state.level==='normal'?[100,500,1000]:[100,500,1000];
- const curr=state.selected.reduce((s,n)=>s+n,0);
+ const change=r.kind==='change';
+ setScene(change?'거스름돈 계산하기':state.level==='hard'?'모아의 가게에서 계산하기':'금액을 만들어봐요',
+  change?'손님이 낸 돈에서 물건값을 뺀 거스름돈을 담아봐요.':'동전·지폐를 눌러 필요한 금액을 담아봐요. 돈은 다시 뺄 수 있어요.',change?'거스름돈 돌려주기':'돈 만들기');
+ const denominations=[100,500,1000,5000];
+ const curr=state.selected.reduce((sum,n)=>sum+n,0);
  const itemHTML=state.level==='hard'?'<p class="item-banner">'+esc(r.item)+'</p>':'';
- $('gameArea').innerHTML='<div class="money-target">'+itemHTML+'<small>필요한 금액</small><strong>'+fmt(r.value)+'</strong></div><div class="money-cart"><small>지금 담은 돈</small><strong id="cartSum">'+fmt(curr)+'</strong><div id="cartItems" class="cart-pieces">'+(state.selected.map(n=>moneyChip(n)).join('')||'<span class="empty-cart">아직 담은 돈이 없어요.</span>')+'</div></div><p class="tiny-instruction">아래 돈을 눌러 담아요.</p><div class="money-palette">'+denominations.map(n=>'<button type="button" class="money-pick" data-money="'+n+'">'+moneyChip(n)+'</button>').join('')+'</div>';
- $('gameActions').innerHTML=htmlButton('↶ 마지막 돈 빼기','undo','class="secondary-action"')+htmlButton('다시 담기','clear','class="secondary-action"')+htmlButton('이 금액으로 확인','check','class="primary-action"');
+ const changeNote=change?'<div class="change-receipt">손님이 낸 돈 <b>'+fmt(r.paid)+'</b> − 물건값 <b>'+fmt(r.price)+'</b></div>':'';
+ $('gameArea').innerHTML='<div class="money-target">'+itemHTML+changeNote+'<small>'+(change?'돌려줄 거스름돈':'필요한 금액')+'</small><strong>'+fmt(r.value)+'</strong></div><div class="money-cart"><small>지금 담은 돈</small><strong id="cartSum">'+fmt(curr)+'</strong><div id="cartItems" class="cart-pieces">'+(state.selected.map(n=>moneyChip(n)).join('')||'<span class="empty-cart">아직 담은 돈이 없어요.</span>')+'</div></div><p class="tiny-instruction">아래 돈을 눌러 담아요.</p><div class="money-palette">'+denominations.map(n=>'<button type="button" class="money-pick" data-money="'+n+'">'+moneyChip(n)+'</button>').join('')+'</div>';
+ $('gameActions').innerHTML=htmlButton('↶ 마지막 돈 빼기','undo','class="secondary-action"')+htmlButton('모두 다시 담기','clear','class="secondary-action"')+htmlButton(change?'거스름돈 확인':'금액 확인','check','class="primary-action"');
 }
+
 const itemLabels={pen:['✏️','연필'],book:['📒','공책'],water:['💧','물병'],eraser:['🧽','지우개'],apple:['🍎','사과'],folder:['📁','파일'],glue:['🧴','풀'],ruler:['📏','자'],notebook:['📓','수첩'],tissue:['🧻','휴지'],pencilcase:['🖍️','필통'],scissors:['✂️','가위'],snack:['🥪','간식'],hat:['🧢','모자'],cloth:['🧣','손수건']};
 const changedBank={
  easy:[
@@ -211,10 +247,11 @@ $('gameActions').addEventListener('click',e=>{
  if(action==='check'&&chosen==='money'&&!state.locked){
   const target=moneyRound().value,sum=state.selected.reduce((s,v)=>s+v,0);
   state.attempts++;
-  if(sum===target){if(state.attempts===1)state.correct++;nextAction('맞았어요! '+fmt(target)+'을 정확히 만들었어요.')}
+  if(sum===target){if(state.attempts===1)state.correct++;nextAction('맞았어요! '+fmt(target)+'을 정확히 만들었어요.');$('gameActions').insertAdjacentHTML('afterbegin',htmlButton('다른 방법으로 만들기','remake','class="secondary-action"'))}
   else feedback(sum>target?'조금 많아요. '+fmt(sum-target)+'만큼 더 담았어요.':'조금 부족해요. '+fmt(target-sum)+'을 더 담아야 해요.');
   return;
  }
+ if(action==='remake'){state.locked=false;state.selected=[];drawMoney();feedback('같은 금액을 다른 돈으로도 만들어볼까요?');return;}
  if(action==='undo'){state.selected.pop();drawMoney();return;}
  if(action==='clear'){state.selected=[];drawMoney();return;}
  if(action==='changed-go'){state.stage='choose';draw();return;}
