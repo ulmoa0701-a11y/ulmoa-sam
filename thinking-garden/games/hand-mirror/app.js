@@ -102,7 +102,7 @@ function render(){
  $('targetEmoji').innerHTML=memoryPreview?current().map(p=>handArt(p)).join('<span style="font-size:25px">→</span>'):isMemory()?'❔':currentGoal().map(p=>handArt(p)).join('');
  $('targetEmoji').classList.toggle('has-hands',!isMemory()||memoryPreview);
  $('targetTitle').textContent=memoryPreview?'동작 '+current().length+'개 기억하기':isMemory()?(S.part+1)+'번째 손동작!':goalText();
- $('targetHelp').textContent=memoryPreview?'다 살펴봤으면 아래 버튼을 눌러!':isMemory()?'방금 본 모양을 기억해서 만들어 봐!':isCamera()?'카메라 앞에서 손 모양을 바꾸어 봐!':'모양을 흉내 내며 답을 골라 봐!';
+ $('targetHelp').textContent=memoryPreview?'다 살펴봤으면 아래 버튼을 눌러!':isMemory()?'방금 본 모양을 기억해서 만들어 봐!':isCamera()?'반투명 그림은 참고용! 똑같은 자리에 놓지 않아도 돼.':'모양을 흉내 내며 답을 골라 봐!';
  $('ready').hidden=!memoryPreview;
  $('next').hidden=true;
  $('meter').style.width='0%';
@@ -220,7 +220,7 @@ function accept(){
  $('choices').hidden=true;$('ready').hidden=true;
  if(isMemory()){
   const correct=current()[S.part];
-  $('targetEmoji').textContent=core.EMOJI[correct];$('targetTitle').textContent=core.TITLES[correct];
+  $('targetEmoji').innerHTML=handArt(correct);$('targetEmoji').classList.add('has-hands');$('targetTitle').textContent=core.TITLES[correct];
   updateSteps(false);
  }
  message('🌼 성공! 손가락 꽃이 피었어!');
