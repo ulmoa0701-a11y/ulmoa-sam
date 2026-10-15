@@ -889,3 +889,6 @@ body:has(.parent-easy-form) .editor-paper>p{margin:0 0 10px;line-height:1.45}
  .parent-easy-form .parent-when .parent-location{grid-column:auto}
 }
 
+
+/* Ensure hidden verification forms never appear before an OTP is actually sent. */
+form[hidden], .form[hidden] {display:none !important;}
