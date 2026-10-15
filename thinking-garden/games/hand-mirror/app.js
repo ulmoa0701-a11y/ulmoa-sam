@@ -26,16 +26,22 @@ const goalEmoji=()=>currentGoal().map(x=>core.EMOJI[x]).join(' ');
 function handArt(kind){
  const pattern=core.PATTERNS[kind];if(!pattern)return '';
  const xs=[45,70,97,124],widths=[22,23,23,20],openTops=[30,17,27,44];
+ // Do not require anatomical vocabulary: yellow long fingers = extend, pale short fingers = bend.
+ // The thumb is shown as a reference only; it is not auto-scored by the present camera model.
  let fingers='';
  for(let i=0;i<4;i++){
-  const y=pattern[i]?openTops[i]:105,w=widths[i];
-  fingers+='<rect x="'+xs[i]+'" y="'+y+'" width="'+w+'" height="'+(141-y)+'" rx="'+(w/2)+'" fill="#d9f7e5" stroke="#318363" stroke-width="4"/>';
+  const open=pattern[i]===1,y=open?openTops[i]:104,w=widths[i],tipY=open?openTops[i]+11:113;
+  fingers+='<g class="'+(open?'open-finger':'folded-finger')+'" data-finger="'+i+'">'+
+    '<rect x="'+xs[i]+'" y="'+y+'" width="'+w+'" height="'+(141-y)+'" rx="'+(w/2)+'" fill="'+(open?'#ffe273':'#d2ddd9')+'" stroke="'+(open?'#c77a25':'#8ba99c')+'" stroke-width="'+(open?5:3)+'"/>'+
+    '<circle cx="'+(xs[i]+w/2)+'" cy="'+tipY+'" r="'+(open?7:3.5)+'" fill="'+(open?'#fff8ce':'#b4c6bd')+'" stroke="'+(open?'#d28a33':'#aabfb4')+'" stroke-width="2"/>'+
+    '</g>';
  }
- return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 223" aria-hidden="true" focusable="false">'+
- '<path d="M49 119 Q35 96 23 102 Q11 110 22 130 L45 164" fill="#d9f7e5" stroke="#318363" stroke-width="4"/>'+
- fingers+
- '<rect x="38" y="116" width="117" height="90" rx="31" fill="#d9f7e5" stroke="#318363" stroke-width="4"/>'+
- pattern.map((opened,i)=>'<circle cx="'+(xs[i]+widths[i]/2)+'" cy="'+(opened?openTops[i]+11:113)+'" r="6" fill="'+(opened?'#51c28e':'#f1b65d')+'"/>').join('')+
+ const thumb=kind==='palm'?
+  '<path d="M49 119 Q35 90 23 100 Q11 110 22 134 L45 164" fill="#ffe273" stroke="#c77a25" stroke-width="5"/>':
+  '<path d="M46 139 Q26 137 25 153 Q25 169 45 175" fill="#d2ddd9" stroke="#8ba99c" stroke-width="4"/>';
+ return '<svg class="hand-pose" data-pose="'+kind+'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 223" aria-hidden="true" focusable="false">'+
+ thumb+fingers+
+ '<rect x="38" y="116" width="117" height="90" rx="31" fill="#e1f4e6" stroke="#318363" stroke-width="4"/>'+
  '</svg>';
 }
 function gestureFigure(kind,side=''){
@@ -47,7 +53,8 @@ function renderGuide(){
  $('game').classList.toggle('is-camera',camera);
  $('viewer').dataset.phase=preview?'memorize':S.phase;
  $('liveTask').hidden=!camera;
- $('liveTitle').textContent=preview?'순서를 보고 기억해!':recall?'기억한 손 모양 만들기!':S.phase==='reward'?'🌼 손동작 성공!':goalText();
+ $('liveTitle').textContent=preview?'손 그림을 보고 기억해!':recall?'기억한 손 모양 만들기!':S.phase==='reward'?'🌼 손동작 성공!':goalText();
+ $('liveLegend').textContent=recall?'기억한 대로 해볼까?':preview?'노란 손가락 위치도 함께 기억해!':'🟡 노란 손가락 쭉! · 연한 손가락 접기';
  $('guideToggle').hidden=!camera||recall;
  $('cameraHold').hidden=!camera||preview;
  $('ghostGuides').hidden=!active||!S.guideVisible;
@@ -188,7 +195,7 @@ function evaluate(t){
  }
  if(!ok){
   S.matchSince=0;$('meter').style.width='0%';$('cameraHoldFill').style.width='0%';$('viewer').dataset.match='no';
-  const need=currentGoal().length===2?'두 손을 함께 보여줘!':'손이 잘 보이게 조금 떨어져 보여줘!';
+  const need=currentGoal().length===2?'두 손을 함께 보여줘!':'노란 손가락은 쭉 펴고, 연한 손가락은 접어봐!';
   message(S.camHands.length===0?'손이 보이면 천천히 시작해!':need);return;
  }
  if(!S.matchSince)S.matchSince=t;
