@@ -4,7 +4,7 @@
 <meta name="description" content="울모아쌤이 만드는 화폐 놀이, 바뀐 목록 기억놀이, 마음 이야기 게임.">
 <title>모아의 새 미션 · 일단 해봄</title>
 <link rel="stylesheet" href="../../../assets/habom-gamja-font.css?v=20261012-readable2">
-<link rel="stylesheet" href="style.css?v=20261015-missions1">
+<link rel="stylesheet" href="style.css?v=20261015-missions2">
 </head>
 <body><div class="mission-app">
 <header class="mission-header">
@@ -20,10 +20,16 @@
   <h2 id="introHeading">어떤 놀이를 해볼까요?</h2>
   <p id="introText" class="intro-text"></p>
   <div class="level-list" id="levelList" role="group" aria-label="단계 고르기"></div>
+  <div class="session-choice"><p class="small-label">오늘은 얼마나 놀아볼까요?</p><div class="round-options" id="roundOptions" role="group" aria-label="미션 수 고르기">
+    <button type="button" data-rounds="6"><strong>짧게</strong><small>6미션</small></button>
+    <button type="button" data-rounds="12" class="chosen"><strong>충분히</strong><small>12미션</small></button>
+    <button type="button" data-rounds="20"><strong>길게</strong><small>20미션</small></button>
+  </div><p id="roundPlan" class="round-plan">4미션마다 꽃이 피어요. 언제든 멈춰도 괜찮아요.</p></div>
   <div class="intro-foot"><p>시간 제한은 없어요. 틀려도 다시 해볼 수 있어요.</p><button type="button" class="primary-action" id="startGame">시작하기 <span aria-hidden="true">→</span></button></div>
  </section>
  <section id="playScreen" class="panel play-panel" hidden aria-labelledby="missionHeading">
-  <div class="play-toolbar"><span id="roundCount">1 / 4</span><div class="progress-track" aria-hidden="true"><div id="progressFill"></div></div><button type="button" class="text-action" id="exitGame">처음으로</button></div>
+  <div class="play-toolbar"><span id="roundCount">1 / 12</span><div class="progress-track" aria-hidden="true"><div id="progressFill"></div></div><button type="button" class="text-action" id="exitGame">처음으로</button></div>
+  <div class="journey-row"><div id="gardenProgress" class="garden-progress" aria-live="polite">🌱 모아의 정원 출발!</div><div id="seedCount" class="seed-count" aria-live="polite">🌼 0송이</div></div>
   <div class="scene-head"><p class="scene-label" id="sceneLabel">도전 1</p><h2 id="missionHeading">준비됐나요?</h2><p id="missionDescription"></p></div>
   <div id="gameArea" class="game-area"></div>
   <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
@@ -31,7 +37,7 @@
  </section>
  <section id="resultScreen" class="panel result-panel" hidden aria-labelledby="resultHeading">
   <span class="result-emoji" aria-hidden="true">🌼</span><h2 id="resultHeading">오늘의 미션 완료!</h2><p id="resultText"></p>
-  <div class="result-actions"><button id="playAgain" type="button" class="primary-action">다시 해보기</button><a id="resultGarden" href="../../../gardens/#learning" class="secondary-action">다른 게임 찾아보기 →</a></div>
+  <div class="result-garden" id="resultFlowers" aria-hidden="true">🌼</div><div class="result-actions"><button id="playAgain" type="button" class="primary-action">다시 해보기</button><a id="resultGarden" href="../../../gardens/#learning" class="secondary-action">다른 게임 찾아보기 →</a></div>
  </section>
  <p class="footer-note">이 놀이는 연습용 활동이며 검사·진단·치료 효과를 판정하지 않습니다. 필요하면 아동과 함께 천천히 이야기를 나눠주세요.</p>
-</main></div><script defer src="app.js?v=20261015-missions1"></script></body></html>
+</main></div><script defer src="app.js?v=20261015-missions2"></script></body></html>
