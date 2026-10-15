@@ -33,9 +33,15 @@ with sync_playwright() as p:
         assert "convertPhoto(file)" in media_js, "original photos should be recompressed and stripped"
         assert "publicInviteApi('invite-register',code)" in live_js, "Invite link alone triggers access"
         assert "retry.onclick=connect;await connect()" in live_js, "Link opens and connects automatically"
-        assert "사용 횟수·기한 제한 없이" in live_js, "Unlimited reuse described"
+        assert "이 링크 하나로 계속 접속할 수 있어요." in live_js, "Repeated link access described"
         assert "verificationCodeOutput" not in live_js, "No independent verification code UI"
         assert "verifiedInviteForm" not in live_js, "No extra PIN form"
+        assert "invite-recipient-card" in live_js, "student-specific invite cards must be deployed"
+        assert "targetUserId||i.usedBy" in live_js, "student invocations must resolve linked recipient"
+        assert "trial-storage-note" in live_js, "local save message must exist"
+        assert "💾 이 기기에 저장하기" in live_js, "no unsupported server-share save button"
+        assert "trial-sharing-hidden" in live_js, "disabled sharing must be hidden"
+
 
 
         page.locator("#returnChoice").click()
