@@ -97,7 +97,22 @@ async function api(path,{method='GET',body}={}){
  return data;
 }
 function formValue(form,name){return form.elements[name]?.value?.trim()??''}
-function header(){if(!me){account.innerHTML='<span class="role-chip">안전한 기록</span>';return}account.innerHTML=`<span>${sanitize(me.nickname)} <span class="role-chip">${me.role==='therapist'?'치료사':me.role==='student'?'학생':me.role==='parent'?'학부모':'관리자'}</span></span><button id="signOut">로그아웃</button>`;$('signOut').onclick=async()=>{if(supabase)await supabase.auth.signOut();me=null;records=[];activeView='write';render();};}
+function header(){if(!me){account.innerHTML='<span class="role-chip">안전한 기록</span>';return}account.innerHTML=`<span>${sanitize(me.nickname)} <span class="role-chip">${me.role==='therapist'?'치료사':me.role==='student'?'학생':me.role==='parent'?'학부모':'관리자'}</span></span><button id="signOut">로그아웃</button>`;attachTherapistDeviceRegistration();$('signOut').onclick=async()=>{if(supabase)await supabase.auth.signOut();me=null;records=[];activeView='write';render();};}
+// Register a device only after verified Auth login AND manual role approval.
+function attachTherapistDeviceRegistration(){
+ if(me?.role!=='therapist'||!supabase)return;
+ const logout=$('signOut');if(!logout)return;
+ const b=document.createElement('button');
+ b.id='registerTherapistPasskey';b.type='button';b.textContent='이 기기 등록';
+ b.disabled=!passkeyAvailable();
+ b.title='승인된 치료사의 기기 인증 등록';
+ logout.before(b);
+ b.onclick=()=>loading(b,async()=>{
+  const {error}=await supabase.auth.registerPasskey();
+  if(error)throw Error('기기 등록을 완료하지 못했습니다. 브라우저나 Supabase 패스키 설정을 확인해 주세요.');
+  toast('기기 등록을 완료했습니다. 다음부터는 등록한 기기로 로그인할 수 있어요.');
+ });
+}
 function hero(t,d){return `<div class="hero"><div class="eyebrow">WORKSPACE / ${sanitize(me?.role||'START')}</div><h1>${t}</h1><p>${d}</p></div>`;}
 function loading(btn,task){btn.disabled=true;Promise.resolve(task()).catch(e=>toast(e.message)).finally(()=>btn.disabled=false)}
 // The same passkey flow serves students, parents, therapists and administrators.
