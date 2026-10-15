@@ -63,6 +63,19 @@ with sync_playwright() as p:
   assert not page.locator('#firstLogin').is_visible()
   page.locator('#firstChoice').click()
   assert page.locator('#firstLogin').is_visible()
+  # Simulate a real Auth 429 without ever requesting an actual email.
+  otp_attempts=[]
+  def mock_email_rate_limit(route):
+   otp_attempts.append(1)
+   route.fulfill(status=429,content_type='application/json',body='{"code":"over_email_send_rate_limit","msg":"For security purposes, you can only request this after 51 seconds."}')
+  page.route('**/auth/v1/otp',mock_email_rate_limit)
+  page.locator('#clinicianFirstForm input[type="email"]').fill('therapist-test@example.com')
+  page.locator('#clinicianFirstForm button[type="submit"]').click()
+  page.locator('#firstLoginStatus').get_by_text('발송 제한',exact=False).wait_for(timeout=10000)
+  assert len(otp_attempts)==1,('OTP should only be requested once',len(otp_attempts))
+  page.locator('#clinicianFirstForm button[type="submit"]').click()
+  page.locator('#firstLoginStatus').get_by_text('최근에 요청했어요.',exact=False).wait_for(timeout=10000)
+  assert len(otp_attempts)==1,'Retry should be suppressed locally for 65 seconds'
   assert not page.locator('#loginPasskey').is_visible()
   assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth+3'),('overflow',width)
   assert not errors,errors
