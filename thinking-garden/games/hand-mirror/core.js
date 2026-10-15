@@ -3,7 +3,7 @@
 'use strict';
 const FINGER_JOINTS=[[5,6,8],[9,10,12],[13,14,16],[17,18,20]];
 const PATTERNS={palm:[1,1,1,1],fist:[0,0,0,0],one:[1,0,0,0],two:[1,1,0,0],three:[1,1,1,0]};
-const TITLES={palm:'손바닥 활짝',fist:'주먹 꼭',one:'검지 하나',two:'검지와 중지',three:'검지·중지·약지'};
+const TITLES={palm:'손가락 모두 펴기',fist:'손가락 모두 접기',one:'한 개만 쭉 펴기',two:'두 개만 쭉 펴기',three:'세 개만 쭉 펴기'};
 const EMOJI={palm:'✋',fist:'✊',one:'☝️',two:'✌️',three:'3️⃣'};
 function distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
 function pose(landmarks){

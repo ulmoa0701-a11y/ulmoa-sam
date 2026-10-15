@@ -16,6 +16,7 @@ function hand(kind){
  return arr;
 }
 for(const kind of ['palm','fist','one','two','three'])assert.equal(core.pose(hand(kind)),kind,'Pose recognition '+kind);
+assert.ok(Object.values(core.TITLES).every(t=>!/검지|중지|약지|새끼손가락/.test(t)),'Main game does not require anatomy vocabulary');
 assert.equal(core.pose([]),null);
 assert.equal(core.match([hand('palm'),hand('fist')],['fist','palm']),true,'Unordered two-hand match');
 assert.equal(core.match([hand('palm')],['palm','palm']),false,'Requires two separately recognized hands');
@@ -79,6 +80,11 @@ async function main(width,height,label){
  await cameraPage.locator('#cameraStart').click();
  assert.equal(await cameraPage.locator('#liveTask').isVisible(),true,'Target instruction projected inside camera');
  assert.equal(await cameraPage.locator('#ghostGuides [data-pose="one"] svg').isVisible(),true,'Open index finger projected as actual hand diagram');
+ assert.equal(await cameraPage.locator('#ghostGuides [data-pose="one"] svg .open-finger').count(),1,'One finger visually highlighted to extend');
+ assert.equal(await cameraPage.locator('#ghostGuides [data-pose="one"] svg .folded-finger').count(),3,'Other fingers shown as folded');
+ assert.match(await cameraPage.locator('#liveLegend').innerText(),/노란 손가락/,'Child-facing color cue inside video');
+ assert.doesNotMatch(await cameraPage.locator('#liveTitle').innerText(),/검지|중지|약지|새끼/,'No finger jargon on main instruction');
+
  assert.equal(await cameraPage.locator('#targetPanel').isVisible(),false,'No duplicate giant prompt below camera');
  assert.equal(await cameraPage.locator('#cameraHold').isVisible(),true,'Hold feedback displayed inside camera');
  assert.equal(await cameraPage.locator('#guideToggle').isVisible(),true,'Option to hide projection');
