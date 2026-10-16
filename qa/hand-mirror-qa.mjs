@@ -21,7 +21,7 @@ assert.equal(core.pose([]),null);
 assert.equal(core.match([hand('palm'),hand('fist')],['fist','palm']),true,'Unordered two-hand match');
 assert.equal(core.match([hand('palm')],['palm','palm']),false,'Requires two separately recognized hands');
 assert.equal(core.match([hand('one')],['palm']),false,'Reject different pose');
-const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_BIN,args:['--no-sandbox']});
+const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_BIN,args:['--no-sandbox','--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream']});
 const checks=[];
 const goals={copy:['palm','fist','one','two','three','palm'],fingers:['one','two','three','one','three','two'],both:['palm,palm','fist,fist','palm,fist','one,one']};
 async function touchFlow(page,mode,patterns){
@@ -55,6 +55,40 @@ async function memoryFlow(page){
   }
  }
  assert.equal(await page.locator('#finish').isVisible(),true,'Memory play finishes');
+}
+async function simulatedLiveCamera(width,height,label){
+ const context=await browser.newContext({viewport:{width,height},permissions:['camera'],locale:'ko-KR'});
+ const page=await context.newPage(),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ // Fake Chromium camera provides changing test pixels; only MediaPipe model is mocked.
+ // This validates camera stream/play(), MediaPipe invocation, pose classification and reward without accessing a real camera.
+ await page.route('**/vision_bundle.mjs',route=>route.fulfill({status:200,contentType:'text/javascript',headers:{'access-control-allow-origin':'*'},body:`
+ export const FilesetResolver={forVisionTasks:async()=>({})};
+ export const HandLandmarker={createFromOptions:async()=>({
+  detectForVideo(){
+    const a=Array.from({length:21},()=>({x:.5,y:.85}));
+    [[5,6,8],[9,10,12],[13,14,16],[17,18,20]].forEach(([m,p,t],i)=>{
+      a[m]={x:.28+i*.12,y:.65};a[p]={x:.28+i*.12,y:.5};a[t]={x:.28+i*.12,y:.19};
+    });
+    return {landmarks:[a]};
+  },
+  close(){}
+ })};
+ `}));
+ await page.goto(base+'/thinking-garden/games/hand-mirror/',{waitUntil:'domcontentloaded'});
+ await page.locator('#cameraStart').click();
+ await page.waitForFunction(()=>document.querySelector('#video').classList.contains('is-ready'),{timeout:20000}).catch(()=>{});
+ assert.equal(await page.locator('#video').getAttribute('class')?.then(x=>x?.includes('is-ready')),true,'Mock camera video actually begins playing');
+ await page.waitForFunction(()=>document.getElementById('flowerLabel').textContent.includes('1'),null,{timeout:15000});
+ assert.match(await page.locator('#message').innerText(),/성공/,'Recognized pose progresses in camera mode');
+ assert.equal(await page.locator('#cameraProblem').isVisible(),false,'No false black camera warning during valid playback');
+ assert.equal(await page.locator('#kindBadge').innerText(),'📷 손 인식');
+ assert.equal(await page.locator('#viewer').getAttribute('data-match'),'no'===await page.locator('#viewer').getAttribute('data-match')?'no':'yes');
+ await page.screenshot({path:output+'/live-mock-camera-'+label+'.png',fullPage:true});
+ await page.locator('#pause').click();
+ assert.equal(await page.locator('#game').isVisible(),false,'Camera stopped on exit');
+ assert.deepEqual(errors,[],'No mocked-camera page errors');
+ await context.close();
 }
 async function main(width,height,label){
  const c=await browser.newContext({viewport:{width,height},locale:'ko-KR'});
@@ -131,4 +165,4 @@ async function main(width,height,label){
  checks.push({label,width,height,ok:true});
  await c.close();
 }
-try{await main(1280,800,'desktop');await main(390,844,'mobile');console.log('PASS hand mirror QA',JSON.stringify(checks));}finally{await browser.close();}
+try{await main(1280,800,'desktop');await main(390,844,'mobile');await simulatedLiveCamera(390,844,'mobile');console.log('PASS hand mirror QA',JSON.stringify(checks));}finally{await browser.close();}
