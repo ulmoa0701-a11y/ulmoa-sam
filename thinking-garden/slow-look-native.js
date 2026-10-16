@@ -45,13 +45,15 @@ function render(id,d) {
  missionSub.textContent=cues[s.cue];
  if(s.cue==='guide')say(missionText.textContent); // deliberately avoid reading answer or repeating prompts under wait/self
  const n=s.level===3?4:3;
- const shape=(s.level===1?simple:s.level===2?medium:hard)[round%simple.length];
+ const baseShape=(s.level===1?simple:s.level===2?medium:hard)[round%simple.length];
+  const rotation=Math.floor(round/5)%4;
+  const shape=baseShape.map(([r,c])=>{let a=r,b=c;for(let k=0;k<rotation;k++){const t=a;a=b;b=n-1-t}return[a,b]});
  const selected=s.selected;
  const pattern=shape.map(([r,c])=>r+','+c);
  const target=new Set(pattern);
  const cells=Math.pow(n,2);
  const nameSequence=[0,1,2,0,2,1];
- const itemIndex=nameSequence[round%6];
+ const itemIndex=(nameSequence[round%6]+Math.floor(round/6))%6;
  const pool=s.kind==='color'?colors:animals;
  const item=pool[itemIndex];
  const targetObject=[...objects[(round*2+1)%objects.length]];
