@@ -6,10 +6,14 @@ const title={rulePost:'바뀌는 바람우체국',mirrorPond:'거울연못의 �
 const friendly={rulePost:'지금 규칙을 보고 소포를 배달해요.',mirrorPond:'연못에 비친 모양을 찾아요.',sceneDetect:'아까 본 장면에서 달라진 곳을 찾아요.'};
 const stamps=['⭐','🍀'];
 const colors=[{color:'#f7cf67',name:'노랑'},{color:'#77b6f0',name:'파랑'}];
-const objects=['🌳','🌷','🏡','🐰','🦋'];
-const alternates=['🌲','🌻','🏠','🐱','🐞'];
+const objects=['🌳','🌷','🏡','🐰','🦋','🎈','🍄','🐸','🍎','🦆'];
+const alternates=['🌲','🌻','🏠','🐱','🐞','🎁','🌺','🐧','🍐','🐢'];
 const sourceSets=[
- ['🌼','🐸','🦋',''],['🐞','','🌻','🐢'],['🍀','🌸','','🦆'],['🐠','🍄','🦋',''],['','🐰','🌲','🌻']
+ ['🌼','🐸','🦋',''],['🐞','','🌻','🐢'],['🍀','🌸','','🦆'],['🐠','🍄','🦋',''],['','🐰','🌲','🌻'],
+ ['🌷','🦊','','🍓'],['🪻','🐙','🎈',''],['🍄','','🐦','🍎'],['🐢','🌙','🪁',''],
+ ['🌲','🐝','','🥕'],['🐧','🌸','🧁',''],['','🐥','🌾','🍇'],['🎁','🌼','','🚗'],
+ ['🦋','🍐','🐻',''],['','🍀','🐳','🎨'],['🌻','🐞','','⛵'],['🐰','','🌷','🍎'],
+ ['🌼','🐨','🐳',''],['🍉','🍃','','🪿'],['🦉','🌴','🥕','']
 ];
 const transforms={
   horizontal:a=>[a[1],a[0],a[3],a[2]],
@@ -30,18 +34,17 @@ function makePackages(round){
 }
 function makeRound(id,round,level){
  if(id==='rulePost'){
-  const schedule=level===1?['color','color','stamp','stamp','color']:level===2?['color','stamp','color','stamp','color']:['stamp','color','stamp','color','stamp'];
-  return {rule:schedule[round],packages:makePackages(round),parcel:0,rightFirst:0,shipped:[],lastRule:round===0?null:schedule[round-1]};
+  const schedule=level===1?['color','color','stamp','stamp','color']:level===2?['color','stamp','color','stamp','color']:['stamp','color','stamp','color','stamp'];const step=round%5;
+  return {rule:schedule[step],packages:makePackages(round),parcel:0,rightFirst:0,shipped:[],lastRule:round===0?null:(step===0?schedule[4]:schedule[step-1])};
  }
  if(id==='mirrorPond'){
-  const operation=level===1?'horizontal':level===2?(round>=3?'vertical':'horizontal'):['horizontal','vertical','rotate','horizontal','rotate'][round];
-  const source=sourceSets[round%5];
+  const step=round%5;const operation=level===1?'horizontal':level===2?(step>=3?'vertical':'horizontal'):['horizontal','vertical','rotate','horizontal','rotate'][step];
+  const source=sourceSets[round%sourceSets.length];
   const choices=['horizontal','vertical','rotate'].map(type=>({type,icons:transforms[type](source)}));
   return {operation,source,choices:choices.slice(round%3).concat(choices.slice(0,round%3))};
  }
  const n=level===1?3:level===2?4:5;
- const changed=(round*2+1)%n;
- return {before:objects.slice(0,n),after:objects.slice(0,n).map((x,i)=>i===changed?alternates[i]:x),changed,phase:'study',peeks:0};
+ const changed=(round*2+1)%n;const start=(round*3)%objects.length;const indices=Array.from({length:n},(_,i)=>(start+i)%objects.length);return {before:indices.map(i=>objects[i]),after:indices.map((i,pos)=>pos===changed?alternates[i]:objects[i]),changed,phase:'study',peeks:0};
 }
 function summary(s,parent){
  parent.querySelector('.novel-results')?.remove();

@@ -4,8 +4,8 @@
 const friends=[['토끼','🐰'],['고양이','🐱'],['곰','🐻'],['개구리','🐸'],['강아지','🐶']];
 window.StrategyGarden.register('resetRescue',{
  begin(s,r,round){
-  r.target=(round*2+1)%friends.length;
-  r.suggested=round===0||round===2?r.target:(r.target+1+(r.level===3?1:0))%friends.length;
+  r.target=(round*2+1+Math.floor(round/5))%friends.length;
+  r.suggested=round%5===0||round%5===2?r.target:(r.target+1+(r.level===3?1:0))%friends.length;
   r.phase='signal';r.checked=false;
  },
  view({r,round,body,rerender,assist,fail,complete}){

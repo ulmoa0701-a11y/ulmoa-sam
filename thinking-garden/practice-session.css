@@ -1,0 +1,21 @@
+/* Practice-session controls; only shown for native cognitive games (not literacy). */
+.practice-session{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin:12px 0 0;padding:10px 15px;background:#f7faf4;border:1px solid #e1ecd9;border-radius:15px}
+.practice-session[hidden]{display:none!important}
+.practice-session label{font-size:13px;font-weight:900;color:#496d55}
+.practice-session select{border:2px solid #cadec7;border-radius:11px;min-height:44px;padding:8px 12px;background:white;font:inherit;color:#334d3d;font-weight:850}
+.practice-session span{color:#6c7c6e;font-size:12px;line-height:1.45;flex:1 1 260px}
+.practice-break{display:grid;justify-items:center;gap:14px;padding:30px 16px;border:2px solid #d6e8cc;background:linear-gradient(130deg,#fff2d7,#eaf7df);border-radius:25px;text-align:center;max-width:780px;margin:14px auto}
+.practice-break .break-art{font-size:65px;line-height:1}.practice-break h3{font-size:clamp(22px,4vw,28px);margin:0}.practice-break p{font-size:15px;line-height:1.6;color:#5f765e;margin:0}.practice-break .break-steps{display:flex;flex-wrap:wrap;justify-content:center;gap:9px}.practice-break .break-steps span{background:#fff;border-radius:99px;padding:8px 12px;font-size:13px;font-weight:800;color:#526c54}
+.practice-break .break-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.practice-break button{min-height:48px;border-radius:14px;padding:11px 18px;font-weight:900;font-size:14px;cursor:pointer;border:2px solid #bcd6b7;background:#fff;color:#44654c}
+.practice-break button.primary{background:#327659;color:#fff;border-color:#286447}
+.practice-result-summary{margin:13px auto 0;color:#4f7056;background:#f2f8ee;border-radius:15px;padding:12px 15px;max-width:610px;font-size:14px;font-weight:750}
+.practice-result-summary strong{display:block;font-size:16px}
+.practice-break button:focus-visible,.practice-session select:focus-visible{outline:3px solid #dcbb4a;outline-offset:3px}
+@media(max-width:620px){.practice-session{gap:6px;padding:9px 12px}.practice-session span{flex-basis:100%}.practice-break{padding:21px 10px}.practice-break p{font-size:13px}}
+
+.basic-observation{margin:14px auto 0;padding:12px 16px;max-width:640px;border-radius:15px;background:#f9fcf5;border:1px dashed #c9dac9;color:#506d57;font-size:13px;text-align:left}
+.basic-observation summary{cursor:pointer;font-size:13px;font-weight:900}
+.basic-observation-items{background:white;padding:12px;line-height:1.7;border-radius:10px;margin:12px 0;font-size:12px}
+.basic-observation-export{min-height:44px;border:2px solid #91ba95;border-radius:11px;padding:9px 14px;background:white;color:#305b43;font-weight:800;cursor:pointer}
+.basic-observation small{font-size:11px;color:#637a67;display:block;margin-top:8px;line-height:1.5}

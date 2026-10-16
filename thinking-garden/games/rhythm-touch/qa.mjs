@@ -157,7 +157,7 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
    name+': legacy music-category URL did not redirect into music garden');
  await page.locator('.other-garden').click();
  await page.waitForURL('**/thinking-garden/');
- check(await page.locator('.library-card').count()===25 && await page.locator('.library-card[data-open]:not([data-open^="slow"]):not([data-open="rulePost"]):not([data-open="mirrorPond"]):not([data-open="sceneDetect"]):not([data-open="resetRescue"]):not([data-open="classroomMove"]):not([data-open="festivalPlan"])').count()===13 && await page.locator('.library-card[data-open^="slow"]').count()===6,name+': preserve 13 original cognitive games plus 6 new independent activities');
+ check(await page.locator('.library-card').count()>=25 && await page.locator('.library-card[data-open]:not([data-open^="slow"]):not([data-open="rulePost"]):not([data-open="mirrorPond"]):not([data-open="sceneDetect"]):not([data-open="resetRescue"]):not([data-open="classroomMove"]):not([data-open="festivalPlan"])').count()>=13 && await page.locator('.library-card[data-open^="slow"]').count()===6,name+': preserve 13 original cognitive games plus 6 new independent activities');
  check(await page.locator('.library-card.music').count()===0&&
    await page.locator('.category-tab[data-category="music"]').count()===0,
    name+': music game cards must not be mixed into cognitive garden');

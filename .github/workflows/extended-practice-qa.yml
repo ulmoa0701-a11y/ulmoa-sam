@@ -1,0 +1,49 @@
+name: Clinical Practice Length - All Cognitive Games QA
+on:
+  push:
+    branches: [main, feat/clinical-practice-25-games-20261014]
+    paths: ['thinking-garden/**', 'qa/extended-practice-qa.cjs', '.github/workflows/extended-practice-qa.yml']
+  pull_request:
+    paths: ['thinking-garden/**', 'qa/extended-practice-qa.cjs', '.github/workflows/extended-practice-qa.yml']
+permissions:
+  contents: read
+jobs:
+  extended-practice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Install browser QA
+        run: |
+          npm install --no-save --no-package-lock playwright-core@1.56.1
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Verify JavaScript syntax
+        run: |
+          node --check thinking-garden/app.js
+          node --check thinking-garden/slow-look-native.js
+          node --check thinking-garden/novel-garden.js
+          node --check thinking-garden/strategy-garden-core.js
+          node --check thinking-garden/strategy-festival.js
+          node --check qa/extended-practice-qa.cjs
+      - name: Start static site
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/practice-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8765/thinking-garden/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/practice-server.log
+          exit 1
+      - name: Exercise full sessions with rest breaks on mobile and desktop
+        run: node qa/extended-practice-qa.cjs
+      - name: Attach QA screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: extended-practice-qa
+          path: qa/practice-session-screenshots/
+          if-no-files-found: ignore
