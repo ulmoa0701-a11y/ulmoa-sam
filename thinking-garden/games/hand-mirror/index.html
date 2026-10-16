@@ -143,6 +143,50 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
  .ghost-guides .ghost-hand small{font-size:11px}
 }
 
+
+/* V4: the camera video should not become a black, unlabelled rectangle. */
+.viewer{background:radial-gradient(circle at 50% 37%,#d2f4e6 0,#a7d9cb 58%,#9fc8b7 100%)}
+.viewer video{filter:none;opacity:0;transition:opacity .2s}
+.viewer video.is-ready{opacity:1}
+.viewer .live-task{z-index:5;gap:3px;left:10px;right:10px}
+.viewer .live-task small{display:none}
+.viewer .live-task strong{background:#fffef4ed;font-size:clamp(20px,3.1vw,25px);padding:7px 12px}
+.viewer .live-legend{background:#ffffffe8;max-width:97%;font-size:12px}
+.ghost-guides{left:9px;right:13px;top:108px;bottom:77px;justify-content:flex-end;align-items:center}
+.ghost-guides .ghost-hand{width:min(36%,174px);height:auto;max-height:96%;padding:6px;border-radius:20px;background:#fafff0b8;filter:drop-shadow(0 4px 8px #1d564b35)}
+.ghost-guides .ghost-hand svg{height:auto;max-height:230px;opacity:.84}
+.ghost-guides .ghost-hand small{background:#fffffff0;padding:5px 6px;border-radius:9px}
+.ghost-guides:has(.ghost-hand:nth-child(2)){justify-content:center;gap:8px}
+.ghost-guides:has(.ghost-hand:nth-child(2)) .ghost-hand{width:min(36%,153px)}
+.ghost-guides.is-matched .ghost-hand svg{opacity:.65}
+.viewer .viewer-badge{background:#fffffff2;color:#25553f;bottom:12px;left:8px;right:8px;padding:9px;border-radius:14px;box-shadow:0 2px 12px #103f2c25;min-height:43px}
+.viewer .camera-hold{left:15%;right:15%;bottom:69px;height:11px}
+.play.is-camera .game-right .mission-msg{display:none}
+.play.is-camera .camera-panel{background:#fffefa}
+.play.is-camera .viewer{height:clamp(330px,51vw,490px)}
+.viewer .placeholder{z-index:6}
+.viewer .camera-problem{position:absolute;z-index:8;left:11px;right:11px;bottom:76px;background:#fffdf3ed;border:2px solid #e9ce8c;border-radius:17px;padding:13px;text-align:center;color:#345a45;box-shadow:0 7px 20px #264d3850}
+.viewer .camera-problem strong{font-size:17px;font-weight:950}
+.viewer .camera-problem p{font-size:13px;line-height:1.55;margin:5px 0 11px;font-weight:720}
+.camera-problem-actions{display:flex;justify-content:center;gap:7px}
+.camera-problem-actions button{background:#fff;border:2px solid #bddbc7;border-radius:13px;padding:8px;font-size:12px;color:#38634f;font-weight:920;min-height:43px}
+.camera-problem-actions button:first-child{background:#ffecb3;border-color:#ebca71}
+@media(max-width:760px){
+ .play.is-camera .viewer{height:clamp(335px,49dvh,440px)}
+ .viewer .live-task{top:8px}
+ .viewer .live-task strong{font-size:20px}
+ .ghost-guides{top:101px;bottom:77px}
+ .ghost-guides .ghost-hand{width:39%;max-width:159px;padding:5px}
+ .ghost-guides .ghost-hand svg{max-height:190px}
+ .viewer .camera-problem{bottom:75px}
+ .viewer .camera-problem strong{font-size:15px}
+ .camera-problem-actions button{font-size:11px}
+ .play.is-camera .game-right .panel{padding:9px 13px}
+ .play.is-camera .camera-tools{justify-content:space-around}
+ .play.is-camera .camera-tools span{flex-basis:100%;text-align:center}
+}
+@media(max-width:370px){.play.is-camera .viewer{height:340px}.ghost-guides{top:106px;bottom:75px}}
+
 </style>
 </head>
 <body>
@@ -165,7 +209,7 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 </section>
 <section id="game" class="play" hidden>
 <div class="panel camera-panel"><div class="camera-title"><strong id="viewName">손 모양 살펴보기</strong><span id="kindBadge">📷 카메라</span></div>
-<div class="viewer" id="viewer"><video id="video" playsinline autoplay muted aria-hidden="true"></video><canvas id="overlay" aria-label="손가락 인식 표시"></canvas><div class="live-task" id="liveTask" hidden><small>모아의 손을 따라 해봐!</small><strong id="liveTitle">손 모양 따라하기</strong><span class="live-legend" id="liveLegend">🟡 노란 손가락 쭉! · 연한 손가락 접기</span></div><div class="ghost-guides" id="ghostGuides" aria-hidden="true"></div><div class="camera-hold" id="cameraHold" hidden><span id="cameraHoldFill"></span></div><div id="placeholder" class="placeholder"><span class="hand">✋</span>준비되면 손을 카메라에 보여줘!</div><div class="viewer-badge" id="viewerBadge" role="status">차근차근 준비해요</div></div>
+<div class="viewer" id="viewer"><video id="video" playsinline autoplay muted aria-hidden="true"></video><canvas id="overlay" aria-label="손가락 인식 표시"></canvas><div class="live-task" id="liveTask" hidden><small>모아의 손을 따라 해봐!</small><strong id="liveTitle">손 모양 따라하기</strong><span class="live-legend" id="liveLegend">🟡 노란 손가락 쭉! · 연한 손가락 접기</span></div><div class="ghost-guides" id="ghostGuides" aria-hidden="true"></div><div class="camera-hold" id="cameraHold" hidden><span id="cameraHoldFill"></span></div><div id="cameraProblem" class="camera-problem" role="status" hidden><strong id="cameraProblemTitle">카메라를 확인해 볼까?</strong><p id="cameraProblemText">영상이 보이지 않으면 카메라를 다시 연결해 봐.</p><div class="camera-problem-actions"><button id="retryCamera" type="button">↻ 카메라 다시 연결</button><button id="cameraToTouch" type="button">👆 화면 놀이로 바꾸기</button></div></div><div id="placeholder" class="placeholder"><span class="hand">✋</span>준비되면 손을 카메라에 보여줘!</div><div class="viewer-badge" id="viewerBadge" role="status">차근차근 준비해요</div></div>
 <div class="camera-tools"><button class="tiny" type="button" id="flip" hidden>↻ 앞·뒤 카메라</button><button class="tiny" type="button" id="guideToggle" hidden aria-pressed="true">👋 손 그림 보이기</button><button class="tiny" type="button" id="pause">⏹ 그만하기</button><span>🔒 영상 저장·업로드 없음</span></div>
 </div>
 <div class="game-right"><div class="panel"><div class="progress-head"><span id="roundLabel">1 / 6</span><span id="flowerLabel">🌼 0</span></div><div class="bar"><span id="meter"></span></div>
@@ -180,5 +224,5 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 </main>
 <div class="footer">모아의 인지정원 · 카메라로 관찰하는 손가락 움직임 놀이 · 손 힘, 실제 물체 조작 및 치료 효과를 자동으로 평가하는 기능은 아닙니다.</div>
 </div>
-<script src="core.js?v=2"></script><script src="app.js?v=3"></script>
+<script src="core.js?v=2"></script><script src="app.js?v=4"></script>
 </body></html>
