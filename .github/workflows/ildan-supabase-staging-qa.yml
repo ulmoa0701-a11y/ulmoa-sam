@@ -1,0 +1,118 @@
+name: Ildan Supabase Staging Safety QA
+on:
+  push:
+    branches:
+      - feature/ildan-supabase-staging-ui-20261014
+      - feature/ildan-invite-kakao-staging-20261015
+      - feature/ildan-clinician-phone-staging-20261015
+      - feature/ildan-staging-no-sms-passkey-20261015
+    paths:
+      - 'test/ildan-sseobom/supabase-staging/**'
+      - '.github/workflows/ildan-supabase-staging-qa.yml'
+  pull_request:
+    paths:
+      - 'test/ildan-sseobom/supabase-staging/**'
+      - '.github/workflows/ildan-supabase-staging-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  staging-chrome:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure no backend service secret or encryption key is bundled in public site
+        run: |
+          node --check test/ildan-sseobom/supabase-staging/app.js
+          node --check test/ildan-sseobom/supabase-staging/trial-media.mjs
+          node <<'JS'
+          const fs=require('fs'),assert=require('node:assert/strict');
+          const base='test/ildan-sseobom/supabase-staging/';
+          const cfg=fs.readFileSync(base+'config.js','utf8');
+          const html=fs.readFileSync(base+'index.html','utf8');
+          const app=fs.readFileSync(base+'app.js','utf8');
+          assert(!['signInWithOtp({phone','phoneRequestForm','phoneVerifyForm','emailRequestForm','emailVerifyForm'].some(x=>app.includes(x)),'Phone SMS or guardian OTP flows are forbidden');
+          assert(app.includes('test-therapist-signup') && app.includes('signInWithPassword'),'Trial clinician registers with username/password without email');
+          assert(app.includes("me?.role!=='therapist'||me.trial"),'Trial users are not sent to disabled passkeys');
+          assert(app.includes('returnLogin" hidden'),'First visit must default to test account signup');
+          assert(app.includes("api('revoke-invite'")&&app.includes('refreshInviteList()'),'Therapist invite revocation UI must exist');
+          assert(app.includes("publicInviteApi('invite-register',code)"),'Direct single-link signup required');
+          assert(!app.includes('verifiedInviteForm')&&!app.includes('verificationCodeOutput'),'No PIN or extra signup form');
+          assert(app.includes('ildanPersonalDevice'),'Explicit device session persistence required');
+          assert(app.includes('createStudentForm')&&app.includes("api('students',{method:'POST'"),'Therapist student provisioning is wired');
+          const media=fs.readFileSync(base+'trial-media.mjs','utf8');
+          assert(app.includes("from './trial-media.mjs'"),'photo module must be loaded');
+          assert(app.includes("await api('practice-records',{method:'POST'"),'online practice save must be enabled');
+          assert(app.includes("await api('practice-records')"),'online practice reload must be enabled');
+          assert(app.includes('uploadToSignedUrl'),'photo uploads use private signed URLs');
+          assert(app.includes("practiceShare"),'therapist sharing opt-in must exist');
+          assert(!app.includes("await api('records',{method:'POST'"),'clinical writes must remain disabled in trial app');
+          assert(media.includes('convertPhoto') && media.includes('indexedDB.open') && media.includes("photos=[]"),'image data is processed locally and scoped by account');
+          assert(!media.includes("api('records'"),'never send raw photos to clinical records');
+          assert(cfg.includes('sb_publishable_'));
+          assert(!/sb_secret_|service_role|ENCRYPTION_KEY\s*[:=]\s*["']/.test(cfg));
+          assert(html.includes('실제 학생·보호자 상담정보 입력 금지'));
+          assert(html.includes('Content-Security-Policy'));
+          console.log('PASS no sensitive server secrets in public staging config');
+          JS
+      - name: Install synthetic-only Chrome test
+        run: python3 -m pip install --quiet playwright==1.57.0
+      - name: Run actual Chrome 390 and 1440px with sandbox-only mocked signup and login
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+        run: python3 test/ildan-sseobom/supabase-staging/staging_browser_qa.py
+      - name: Online practice photo upload, drawing, remote reload and sharing UI in Chrome
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+        run: python3 test/ildan-sseobom/supabase-staging/practice_sync_browser_qa.py
+      - name: Live HTTPS backend readiness and unauthorized access denied
+        run: |
+          node <<'JS'
+          const base='https://miohovwmhmtcvkurjamm.supabase.co/functions/v1/ildan-api/';
+          (async()=>{
+            const opts={signal:AbortSignal.timeout(15000)};
+            const health=await fetch(base+'health',opts);
+            if(health.status!==200)throw Error('health HTTP '+health.status);
+            const meta=await health.json();
+            if(meta.mode!=='not-approved-for-clinical-use'||meta.ready!==false)throw Error('Staging unexpectedly marked clinically ready');
+            for(const ep of ['me','records','session-notes','invites']){
+              const r=await fetch(base+ep,{signal:AbortSignal.timeout(15000)});
+              if(r.status!==401)throw Error('Unsafe anonymous '+ep+' status '+r.status);
+            }
+            const revokeWithoutAuth=await fetch(base+'revoke-invite',{method:'POST',headers:{'Content-Type':'application/json',Origin:'https://ulmoa0701-a11y.github.io'},body:JSON.stringify({digest:'0'.repeat(64)}),signal:AbortSignal.timeout(15000)});
+            if(revokeWithoutAuth.status!==401)throw Error('Unauthenticated invite revocation '+revokeWithoutAuth.status);
+            const badInvite=await fetch(base+'invite-preview',{method:'POST',headers:{Origin:'https://ulmoa0701-a11y.github.io','Content-Type':'application/json'},body:JSON.stringify({code:'not-valid'}),signal:AbortSignal.timeout(15000)});
+            if(badInvite.status!==400)throw Error('Invalid invite preview was not rejected '+badInvite.status);
+            const unused='0'.repeat(64);
+            const blockedEnrollment=await fetch(base+'invite-register',{method:'POST',headers:{Origin:'https://ulmoa0701-a11y.github.io','Content-Type':'application/json'},body:JSON.stringify({code:unused}),signal:AbortSignal.timeout(15000)});
+            if(blockedEnrollment.status!==403)throw Error('Unknown valid-shape link must be denied '+blockedEnrollment.status);
+            const wrongSecret=await fetch(base+'invite-register',{method:'POST',headers:{Origin:'https://ulmoa0701-a11y.github.io','Content-Type':'application/json'},body:JSON.stringify({code:'0'.repeat(64),verificationCode:'9'.repeat(24)}),signal:AbortSignal.timeout(15000)});
+            if(wrongSecret.status!==403)throw Error('Unknown link accepted '+wrongSecret.status);
+            const invalid=await fetch(base+'me',{headers:{Origin:'https://evil.example'},signal:AbortSignal.timeout(15000)});
+            if(invalid.status!==403)throw Error('Cross-site request was not rejected');
+            const badTrial=await fetch(base+'test-therapist-signup',{method:'POST',headers:{Origin:'https://ulmoa0701-a11y.github.io','Content-Type':'application/json'},body:JSON.stringify({username:'!invalid',password:'invalid'}),signal:AbortSignal.timeout(15000)});
+            if(badTrial.status!==400)throw Error('Invalid sandbox registration accepted or endpoint inactive '+badTrial.status);
+            console.log('PASS live backend locked down, anonymous & cross-site requests blocked');
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          JS
+
+      - name: Report hosted Passkey challenge readiness without enrolling a user
+        shell: bash
+        run: |
+          node <<'JS'
+          const fs=require('fs');
+          const cfg=fs.readFileSync('test/ildan-sseobom/supabase-staging/config.js','utf8');
+          const key=cfg.match(/publishableKey:"([^"]+)"/)?.[1];
+          if(!key)throw Error('Public publishable key is not configured');
+          (async()=>{
+            const res=await fetch('https://miohovwmhmtcvkurjamm.supabase.co/auth/v1/passkeys/authentication/options',{
+              method:'POST',headers:{apikey:key,'Content-Type':'application/json'},
+              body:'{}',signal:AbortSignal.timeout(12000)
+            });
+            const data=await res.json().catch(()=>({}));
+            console.log('PASSKEY_DIAGNOSTIC HTTP='+res.status+' code='+String(data.code||data.error_code||'none'));
+            if(res.ok)console.log('Passkey options endpoint responds; actual enrollment/browser RP configuration still requires verification.');
+            else console.log('Passkey options endpoint not ready; first-device enrollment is NOT verified.');
+          })().catch(e=>console.log('PASSKEY_DIAGNOSTIC unavailable: '+e.message));
+          JS

@@ -51,7 +51,7 @@ try{
   await page.locator('#tempo').evaluate((el,value)=>{el.value=String(value);el.dispatchEvent(new Event('input',{bubbles:true}))},bpmValue);
   for(const mode of types){
    const filename='boomwhacker-'+bpmValue+'bpm-'+mode+'.wav';
-   const downloadPromise=page.waitForEvent('download',{timeout:20000});
+   const downloadPromise=page.waitForEvent('download',{timeout:65000});
    const stat=await page.evaluate(async ({mode,filename})=>{
     const rate=22050,plan=instrumentalPreludePlan(),delay=.10;
     const ac=new OfflineAudioContext(1,Math.ceil(rate*(plan.durationMs/1000+.85)),rate);
@@ -96,6 +96,47 @@ try{
    console.log('BOOM_AUDIO_PREVIEW='+JSON.stringify(stat));
   }
  }
+ // Real rendered listening samples of all NEW songs and two easy versions.
+ // Automatic pitch and volume checks do not replace a teacher's listening.
+ const classroomSongs=[
+  ['moa-signal',3],['moa-space',5],['moa-party',8],['moa-breeze',3],
+  ['twinkle',3],['plane',5]
+ ];
+ for(const [key,difficulty] of classroomSongs){
+  await page.locator('#sampleSelect').selectOption(key);
+  await page.locator('#levels button[data-level="'+difficulty+'"]').click();
+  const filename='classroom-'+key+'-'+difficulty+'note-melody-mr.wav';
+  const waitDownload=page.waitForEvent('download',{timeout:65000});
+  const stats=await page.evaluate(async (filename)=>{
+   const rate=22050,bufferSec=(events.at(-1).start+events.at(-1).dur-firstNoteMs())/1000+1.3;
+   const ac=new OfflineAudioContext(1,Math.ceil(rate*bufferSec),rate),bus=ac.createGain();
+   bus.gain.value=.70;bus.connect(ac.destination);
+   const start=.06;
+   // The backing audio includes every original note; difficulty hides only falling cues.
+   for(const e of events)if(e.note!=='쉼'&&FREQ[e.note])
+    scheduleMelodyTone(ac,bus,e.note,start+(e.start-firstNoteMs())/1000,'piano',.64,e.dur);
+   scheduleBuiltinMr(ac,bus,start,0,.48);
+   const data=(await ac.startRendering()).getChannelData(0);
+   const wav=new ArrayBuffer(data.length*2+44),v=new DataView(wav),word=(off,s)=>{
+    for(let i=0;i<s.length;i++)v.setUint8(off+i,s.charCodeAt(i));
+   };
+   word(0,'RIFF');v.setUint32(4,wav.byteLength-8,true);word(8,'WAVE');
+   word(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);
+   v.setUint16(22,1,true);v.setUint32(24,rate,true);v.setUint32(28,rate*2,true);
+   v.setUint16(32,2,true);v.setUint16(34,16,true);word(36,'data');v.setUint32(40,data.length*2,true);
+   let peak=0,energy=0;
+   for(let i=0;i<data.length;i++){const sample=Math.max(-1,Math.min(1,data[i]));v.setInt16(44+2*i,Math.round(sample*32767),true);peak=Math.max(peak,Math.abs(sample));energy+=sample*sample;}
+   const blob=new Blob([wav],{type:'audio/wav'}),url=URL.createObjectURL(blob),link=document.createElement('a');
+   link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();
+   setTimeout(()=>URL.revokeObjectURL(url),5000);
+   return{song:currentSong.title,key:currentSong.key,level,notes:events.length,arrangedNotes,peak,
+    rms:Math.sqrt(energy/data.length),seconds:bufferSec,skipped:events.filter(e=>e.note!=='쉼'&&!e.active).length};
+  },filename);
+  const file=await waitDownload;await file.saveAs(path.join(dir,filename));
+  if(stats.arrangedNotes!==0||stats.peak<.008||stats.rms<.002||stats.peak>=.98||!fs.statSync(path.join(dir,filename)).size)
+   throw Error('Invalid classroom audio '+JSON.stringify(stats));
+  outputs.push({kind:'classroom',...stats,filename});console.log('CLASSROOM_AUDIO_PREVIEW='+JSON.stringify(stats));
+ }
  fs.writeFileSync(path.join(dir,'measurements.json'),JSON.stringify(outputs,null,2));
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}
-if(outputs.length!==12)process.exitCode=1;
+if(outputs.length!==18)process.exitCode=1;

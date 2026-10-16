@@ -254,6 +254,120 @@ try{
       !result.correctedHarmony.f.notes.includes(result.correctedHarmony.f.pitch))
     throw Error('Known harmonic dissonance was not corrected '+JSON.stringify(result.correctedHarmony));
 
+   result.classroom=await page.evaluate(async()=>{
+     const saved={song:currentSong,level,custom:[...customNotes],bpm,section:practiceSection,length:introLength,loaded:loadedFromTransfer,
+        playing,sound,mixMode,melodyMode,elapsed,ctx:audioCtx};
+     const report=[];
+     let ownedAudio=false;
+     try{
+      loadedFromTransfer=false;
+      if(!audioCtx){audioCtx=new AudioContext();ownedAudio=true}
+      const originalTone=scheduleMelodyTone;
+      for(const key of ['plane','twinkle','butterfly','moa-signal','moa-space','moa-party','moa-breeze','butterfly-d','hometown-spring']){
+       currentSong=clone(findSample(key));practiceSection='all';refreshPracticeSections();bpm=92;
+       let pitchBaseline=null,timingBaseline=null,harmonyBaseline=null,beatsBaseline=null;
+       const expected=currentSong.measures.flat().map(e=>({note:canonical(e.note),dur:e.dur}));
+       for(const n of [3,5,8]){
+        level=n;build();
+        const pitch=events.map(e=>e.note).join(',');
+        const timing=events.map(e=>e.start+':'+e.dur).join(',');
+        const harmony=playbackMeasures.map((_,i)=>chordForMeasure(i).name).join(',');
+        const expectedPitches=expected.map(e=>e.note).join(',');
+        const filtered=events.filter(e=>e.active);
+        const valid=pitch===expectedPitches&&(pitchBaseline===null||pitchBaseline===pitch)
+          &&(timingBaseline===null||timingBaseline===timing)
+          &&(harmonyBaseline===null||harmonyBaseline===harmony)
+          &&(beatsBaseline===null||beatsBaseline===firstNoteMs())
+          &&arrangedNotes===0&&filtered.every(e=>ALLOWED[n].has(e.note))
+          &&events.every(e=>e.note==='쉼'||e.active===ALLOWED[n].has(e.note));
+        // Full original melody must actually be scheduled on the WebAudio
+        // timeline, irrespective of the difficulty's active falling notes.
+        const fired=[];
+        try{
+         scheduleMelodyTone=function(_ac,_dest,note,when,_mode,_volume,duration){
+          fired.push({note,when,duration});return true;
+         };
+         playing=true;sound=true;mixMode='both';melodyMode='piano';elapsed=firstNoteMs()-.5;
+         syncLiveSongMelody();
+         songAudioStartAt=audioCtx.currentTime-10000;
+         queueUpcomingMelody();
+         stopSongMelody();
+        }finally{scheduleMelodyTone=originalTone;playing=false}
+        const sounded=expected.filter(e=>e.note!=='쉼'&&!!FREQ[e.note]);
+        const playbackFull=fired.map(e=>e.note).join(',')===sounded.map(e=>e.note).join(',')
+          &&fired.length===sounded.length;
+        report.push({key,level:n,valid:valid&&playbackFull,total:events.length,
+          sounded:fired.length,falling:filtered.length,hidden:events.filter(e=>e.note!=='쉼'&&!e.active).length,
+          first:events[0]?.note,firstBeat:firstNoteMs(),playbackFull,unmodified:valid});
+        if(pitchBaseline===null){pitchBaseline=pitch;timingBaseline=timing;harmonyBaseline=harmony;beatsBaseline=firstNoteMs()}
+       }
+       if(currentSong.measures.length>4){
+        level=3;practiceSection='4';build();
+        const measureSource=currentSong.measures.slice(4,8).flat().map(e=>canonical(e.note)).join(',');
+        const chosen=events.map(e=>e.note).join(',');
+        report.push({key,exercise:true,valid:playbackMeasures.length===Math.min(4,currentSong.measures.length-4)
+          &&scoreStartBar===4&&events.every(e=>e.measure>=0&&e.measure<4)
+          &&measureSource===chosen&&arrangedNotes===0});
+       }
+      }
+      // Custom 1/2/8-note choices are just visual masks: the complete melody
+      // must still schedule every supported note, and all MR chords match.
+      for(const key of ['plane','twinkle','butterfly-d']){
+       currentSong=clone(findSample(key));practiceSection='all';bpm=92;level=8;build();
+       const baseline={
+        notes:events.map(e=>[e.note,e.start,e.dur]),
+        chords:playbackMeasures.map((_,i)=>chordForMeasure(i).name),
+        downbeat:firstNoteMs()
+       };
+       for(const names of [['레','솔'],['높은도'],[...ORDER]]){
+        customNotes=new Set(names);level='custom';build();
+        const tracks=events.map(e=>[e.note,e.start,e.dur]);
+        const chords=playbackMeasures.map((_,i)=>chordForMeasure(i).name);
+        const fired=[];
+        try{
+         scheduleMelodyTone=function(_ac,_dest,note,when,_mode,_volume,duration){
+          fired.push({note,when,duration});return true;
+         };
+         playing=true;sound=true;mixMode='both';melodyMode='piano';elapsed=firstNoteMs()-.5;
+         syncLiveSongMelody();songAudioStartAt=audioCtx.currentTime-10000;queueUpcomingMelody();stopSongMelody();
+        }finally{scheduleMelodyTone=originalTone;playing=false}
+        const played=events.filter(e=>e.note!=='쉼'&&FREQ[e.note]).map(e=>e.note);
+        report.push({key,custom:names.join(','),
+          valid:JSON.stringify(baseline.notes)===JSON.stringify(tracks)
+            &&JSON.stringify(chords)===JSON.stringify(baseline.chords)
+            &&baseline.downbeat===firstNoteMs()
+            &&events.every(e=>e.note==='쉼'||e.active===names.includes(e.note))
+            &&fired.map(x=>x.note).join(',')===played.join(',')
+            &&arrangedNotes===0,
+          falling:events.filter(e=>e.active).length,sounding:fired.length});
+       }
+      }
+      // A first scored pitch with no corresponding ball must not move the
+      // song's MR clock or alter the timing of its later selected balls.
+      currentSong=clone(findSample('twinkle'));practiceSection='all';level=3;introLength='full';bpm=92;build();
+      const full=instrumentalPreludePlan();
+      introLength='short';
+      const short=instrumentalPreludePlan();
+      const rate=22050,ac=new OfflineAudioContext(1,Math.ceil(rate*(short.durationMs/1000+.5)),rate);
+      scheduleInterludeMusic(ac,ac.destination,.01,beatMs(),short.meter);
+      const wave=(await ac.startRendering()).getChannelData(0);
+      const energy=wave.reduce((sum,x)=>sum+Math.abs(x),0);
+      report.push({key:'twinkle',intro:'short',valid:short.durationMs<full.durationMs
+        &&short.durationMs>firstNoteMs()&&short.firstBallOffsetMs>=0&&energy>20
+        &&firstNoteMs()===events[0].start,
+        shortBeats:short.beats,fullBeats:full.beats,energy:Math.round(energy)});
+     }finally{
+      stopSongMelody();
+      currentSong=saved.song;level=saved.level;customNotes=new Set(saved.custom);bpm=saved.bpm;practiceSection=saved.section;introLength=saved.length;loadedFromTransfer=saved.loaded;
+      playing=saved.playing;sound=saved.sound;mixMode=saved.mixMode;melodyMode=saved.melodyMode;elapsed=saved.elapsed;
+      if(ownedAudio){try{await audioCtx.close()}catch(e){}audioCtx=saved.ctx}
+      build();refreshPracticeSections();
+     }
+     return report;
+   });
+   if(result.classroom.some(x=>!x.valid))
+    throw Error('Full original melody, 3/5-note falling cue isolation or 4-bar practice failed '+JSON.stringify(result.classroom));
+
    const mu=result.musicality;
    if(mu.notes.join(',')!=='도,도,솔,솔,라,라,솔'||
       mu.harmonies.join(',')!=='C,C,F,C,F,C,G,C'||

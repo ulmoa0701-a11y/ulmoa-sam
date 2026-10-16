@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="card-previews.css?v=20261006-rescue6">
 <link rel="stylesheet" href="slow-look-native.css?v=20261014-native1">
 <link rel="stylesheet" href="strategy-adventures.css?v=20261014-strategy1">
-<link rel="stylesheet" href="practice-session.css?v=20261014-25practice1">
+<link rel="stylesheet" href="practice-session.css?v=20261017-25practice1">
 <link rel="stylesheet" href="novel-garden.css?v=20261014-newmechanics1">
 <link rel="stylesheet" href="literacy-practice.css?v=20261010-levels1">
 <link rel="stylesheet" href="../assets/habom-gamja-font.css?v=20261012-readable2">
@@ -21,14 +21,14 @@
 <section class="screen active" id="homeScreen">
   <div class="library-hero"><div><span class="hero-tag">인지 · 주의 · 기억 · 읽기쓰기</span><h1>오늘 연습할 힘을<br><em>골라서 게임해요.</em></h1><p>영역 → 세부주제 → 게임 순서로 찾고,<br>게임 안에서는 모아와 친구들의 모험이 이어집니다.</p><div class="garden-hero-actions"><button class="hero-start" id="scrollToGarden">인지게임 고르기 ↓</button><a class="garden-music-link" href="../music-garden/">🎵 음악게임은 음악정원 →</a></div></div><img src="assets/moa-discovery.png" alt="모아"></div>
   <section class="game-library" id="gardenMap" aria-label="게임 라이브러리">
-    <div class="library-heading"><div><small>영역별 게임</small><h2>인지·학습 살펴보기</h2><p>먼저 분야를 고른 뒤, 게임·활동지·관련 설명을 바로 살펴볼 수 있어요.</p></div><div class="garden-progress" id="gardenProgress">완료한 게임 0 / 25</div></div>
+    <div class="library-heading"><div><small>영역별 게임</small><h2>인지·학습 살펴보기</h2><p>먼저 분야를 고른 뒤, 게임·활동지·관련 설명을 바로 살펴볼 수 있어요.</p></div><div class="garden-progress" id="gardenProgress">완료한 게임 0 / 26</div></div>
     <div class="category-tabs" role="tablist" aria-label="영역 선택">
-      <button class="category-tab active" data-category="all">전체 <b>25</b></button>
+      <button class="category-tab active" data-category="all">전체 <b>26</b></button>
       <button class="category-tab" data-category="visual">👀 시각·주의 <b>7</b></button>
       <button class="category-tab" data-category="memory">🧠 기억·집행 <b>7</b></button>
       <button class="category-tab" data-category="literacy">✍️ 읽기·쓰기 <b>2</b></button>
       <button class="category-tab" data-category="language">💬 언어·추론 <b>1</b></button>
-      <button class="category-tab" data-category="space">🧩 공간·구성 <b>6</b></button>
+      <button class="category-tab" data-category="space">🧩 공간·구성 <b>7</b></button>
       <button class="category-tab" data-category="life">🔢 수·생활학습 <b>2</b></button>
     </div>
     <div class="garden-format-tabs" role="tablist" aria-label="콘텐츠 종류 선택">
@@ -38,7 +38,7 @@
     </div>
     <div id="gardenGamePanel" class="garden-game-panel" role="tabpanel" aria-labelledby="gardenView-games">
     <div class="subtopic-tabs" id="subtopicTabs"><button class="subtopic-tab active" data-subtopic="all">전체 주제</button><button class="subtopic-tab" data-subtopic="condition">조건찾기</button><button class="subtopic-tab" data-subtopic="sequence">순서기억</button><button class="subtopic-tab" data-subtopic="spacing">띄어쓰기</button><button class="subtopic-tab" data-subtopic="spelling">맞춤법</button><button class="subtopic-tab" data-subtopic="basicfind">기초찾기</button><button class="subtopic-tab" data-subtopic="focus">주의·억제</button><button class="subtopic-tab" data-subtopic="spacebasic">눈손협응</button></div>
-    <div class="library-experience" role="group" aria-label="게임 방식 고르기"><button type="button" class="experience-tab active" data-experience-filter="all" aria-pressed="true">모든 게임 <b>25</b></button><button type="button" class="experience-tab" data-experience-filter="story" aria-pressed="false">🌟 이야기·문제해결 <b>6</b></button><button type="button" class="experience-tab" data-experience-filter="basic" aria-pressed="false">🌱 기초 연습 <b>19</b></button></div>
+    <div class="library-experience" role="group" aria-label="게임 방식 고르기"><button type="button" class="experience-tab active" data-experience-filter="all" aria-pressed="true">모든 게임 <b>26</b></button><button type="button" class="experience-tab" data-experience-filter="story" aria-pressed="false">🌟 이야기·문제해결 <b>6</b></button><button type="button" class="experience-tab" data-experience-filter="basic" aria-pressed="false">🌱 기초 연습 <b>20</b></button></div>
     <div class="library-grid" id="libraryGrid">
       <button class="library-card visual" data-open="rescue" data-category="visual" data-subtopic="condition"><span class="card-category">시각·주의 › 조건찾기</span><img src="assets/friend-hong.png" alt=""><div><h3>모아 구조대!</h3><p>무전을 듣고 숲속에 숨은 친구를 찾아 구조차로 데려와요.</p><span class="skill-tags"><i>시각탐색</i><i>선택주의</i><i>조건억제</i></span><strong>게임 시작 →</strong></div></button>
       <button class="library-card memory" data-open="memory" data-category="memory" data-subtopic="sequence"><span class="card-category">기억·집행 › 순서기억</span><img src="assets/friend-ru.png" alt=""><div><h3>기억꽃길 이어가기</h3><p>주문표의 색과 동물 순서를 기억해 피크닉 바구니에 담아요.</p><span class="skill-tags"><i>작업기억</i><i>순서화</i><i>언어반복</i></span><strong>예시 보고 시작 →</strong></div></button>
@@ -63,6 +63,7 @@
        <button class="library-card literacy" data-open="slowName" data-category="language" data-subtopic="all"><span class="card-category">언어·추론 › 명명·반응조절</span><img src="assets/friend-saem.png" alt=""><div><h3>친구 이름 탐정</h3><p>동물과 색을 충분히 보고 생각한 뒤 정확하게 대답해요.</p><span class="skill-tags"><i>명명</i><i>반응조절</i><i>자기점검</i></span><strong>예시 보고 시작 →</strong></div></button>
        <button class="library-card memory" data-open="slowMemory" data-category="memory" data-subtopic="focus"><span class="card-category">기억·집행 › 시각기억</span><img src="assets/friend-ru.png" alt=""><div><h3>꽃자리 기억하기</h3><p>꽃의 위치를 기억하고 가려진 뒤 같은 자리에 표시해요.</p><span class="skill-tags"><i>시각작업기억</i><i>위치기억</i><i>자기점검</i></span><strong>예시 보고 시작 →</strong></div></button>
        <button class="library-card visual" data-open="slowEveryday" data-category="life" data-subtopic="all"><span class="card-category">수·생활학습 › 물건찾기</span><img src="assets/friend-saem.png" alt=""><div><h3>가방 준비 탐험</h3><p>필요한 물건을 확인하고 가방에 넣을 물건을 찾아요.</p><span class="skill-tags"><i>생활적용</i><i>시각탐색</i><i>지시수행</i></span><strong>예시 보고 시작 →</strong></div></button>
+      <button class="library-card space" data-open="handMirror" data-category="space" data-subtopic="spacebasic" data-experience="basic"><span class="card-category">공간·구성 › 눈손·손동작 협응</span><img src="assets/moa-discovery.png" alt=""><div><h3>반짝손 따라하기 ✨</h3><p>카메라로 손 모양을 따라하고, 손가락 분리·동작 순서·양손 협응을 연습해요.</p><span class="skill-tags"><i>동작모방</i><i>손가락분리</i><i>양손협응</i></span><strong>게임 시작 →</strong></div></button>
       <button class="library-card space" data-open="paint" data-category="space" data-subtopic="spacebasic"><span class="card-category">공간·구성 › 경계조절</span><img src="assets/friend-saem.png" alt=""><div><h3>정원길 쓱싹 칠하기</h3><p>정해진 영역 안을 움직이며 길을 채워요.</p><span class="skill-tags"><i>경계조절</i><i>손조절</i></span><strong>예시 보고 시작 →</strong></div></button>
       <button class="library-card visual" data-open="water" data-category="visual" data-subtopic="focus"><span class="card-category">시각·주의 › 지속주의</span><img src="assets/friend-hong.png" alt=""><div><h3>시든 꽃 깨우기</h3><p>시든 꽃을 하나씩 찾아 눌러 모두 피워요.</p><span class="skill-tags"><i>지속주의</i><i>완료하기</i></span><strong>예시 보고 시작 →</strong></div></button>
     </div>
@@ -153,7 +154,7 @@
 <script src="strategy-rescue.js?v=20261014-strategy1"></script>
 <script src="strategy-classroom.js?v=20261014-strategy1"></script>
 <script src="strategy-festival.js?v=20261014-strategy1"></script>
-<script src="app.js?v=20261014-25practice1"></script>
+<script src="app.js?v=20261017-25practice1"></script>
 <script src="card-previews.js?v=20261014-strategy1"></script>
 <script src="../assets/moa-garden-resources.js?v=20261012-resources1"></script>
 </body></html>

@@ -25,9 +25,12 @@ for(const width of [360,390,1366]){
  });
  check(response?.ok(),width+' portal HTTP failed');
  check(data.sections===5,width+' missing garden sections '+data.sections);
- check(data.counts.join(',')==='17,2,3,2,3',width+' incorrect garden game counts '+data.counts);
+ check(data.counts.join(',')==='21,3,4,3,3',width+' incorrect garden game counts '+data.counts);
  check(data.anchors.every(Boolean),width+' missing jump anchor');
- check(data.gameRefs.length===21&&new Set(data.gameRefs).size===21,width+' game registry has duplicates or omissions');
+ const musicBeat=await page.locator('#music .play-card[href*="mode=beat"]').count();
+ const heartBeat=await page.locator('#heart .play-card[href*="mode=beat"]').count();
+ check(musicBeat===1&&heartBeat===0,width+' rhythm breath wrongly classified');
+ check(data.gameRefs.length===24&&new Set(data.gameRefs).size===24,width+' game registry has duplicates or omissions');
  check(data.overflow<=3,width+' horizontal overflow '+data.overflow);
  check(data.navPresent,width+' shared navigation missing');
  if(width===390){
@@ -55,7 +58,7 @@ const context=await browser.newContext({viewport:{width:390,height:844}});
 const page=await context.newPage();
 const library=await page.goto(base+'/thinking-garden/',{waitUntil:'domcontentloaded',timeout:25000});
 const gameCount=await page.locator('.library-card[data-open]').count();
-check(library?.ok()&&gameCount>=25,'25-game library (22 previous + 3 strategy adventures) missing: '+gameCount);
+check(library?.ok()&&gameCount===26,'25-game library (22 previous + 3 strategy adventures) missing: '+gameCount);
 for(const id of ['memory','rulePost','spacing']){
  const errors=[];const fn=e=>errors.push(e.message);page.on('pageerror',fn);
  const response=await page.goto(base+'/thinking-garden/?game='+id,{waitUntil:'domcontentloaded',timeout:25000});
