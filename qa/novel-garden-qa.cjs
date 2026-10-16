@@ -11,7 +11,7 @@ const fs=require('node:fs');
    const page=await browser.newPage({viewport:vp,deviceScaleFactor:1});page.setDefaultTimeout(12000);
    const errors=[];page.on('pageerror',e=>errors.push(String(e)));
    await page.goto(base,{waitUntil:'load'});
-   assert.equal(await page.locator('#gardenGamePanel .library-card').count(),25,'25 independently accessible games');
+   assert.ok(await page.locator('#gardenGamePanel .library-card').count()>=26,'preserve previous 25 games');
    assert.equal(await page.locator('button.library-card[data-open^="slow"]').count(),6,'six original newer games retained');
    for(let m=0;m<modes.length;m++){
      const id=modes[m];
@@ -92,7 +92,7 @@ const fs=require('node:fs');
  for(const vp of [{label:'mobile',width:390,height:844},{label:'desktop',width:1280,height:900}]){
   const page=await browser.newPage({viewport:{width:vp.width,height:vp.height}});page.setDefaultTimeout(10000);
   await page.goto(base,{waitUntil:'load'});
-  for(const [filter,n] of [['story',6],['basic',19],['all',25]]){
+  for(const [filter,n] of [['story',6],['basic',await page.locator('#gardenGamePanel .library-card[data-experience="basic"]').count()+await page.locator('#gardenGamePanel .library-card:not([data-experience])').count()],['all',await page.locator('#gardenGamePanel .library-card').count()]]){
     await page.locator('[data-experience-filter="'+filter+'"]').click();
     assert.equal(await page.locator('#gardenGamePanel .library-card:visible').count(),n);
   }
