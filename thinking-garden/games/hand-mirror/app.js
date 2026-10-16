@@ -14,7 +14,7 @@ const ROUNDS={
  both:[['palm','palm'],['fist','fist'],['palm','fist'],['one','one']]
 };
 const CONNECTIONS=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17],[5,9],[9,13],[13,17]];
-let S={mode:'copy',kind:'none',phase:'intro',round:0,part:0,success:0,token:0,raf:0,model:null,stream:null,facing:'user',lastFrame:-1,lastObserved:0,matchSince:0,readyToMatch:true,rearmSince:0,winTimer:0,silent:false,camHands:[],loading:false,guideVisible:true};
+let S={mode:'copy',kind:'none',phase:'intro',round:0,part:0,success:0,token:0,raf:0,model:null,stream:null,facing:'user',lastFrame:-1,lastObserved:0,matchSince:0,readyToMatch:true,rearmSince:0,winTimer:0,silent:false,camHands:[],loading:false,guideVisible:true,connectTimer:0,firstVideoFrame:0,firstHandSeen:0,darkFrameSince:0,lastLightCheck:0};
 let audio=null;
 const video=$('video'),canvas=$('overlay'),ctx=canvas.getContext('2d');
 const now=()=>performance.now();
@@ -25,24 +25,23 @@ const goalEmoji=()=>currentGoal().map(x=>core.EMOJI[x]).join(' ');
 /* Transparent anatomical-style visual sample. Finger states, not pixel alignment, are scored. */
 function handArt(kind){
  const pattern=core.PATTERNS[kind];if(!pattern)return '';
- const xs=[45,70,97,124],widths=[22,23,23,20],openTops=[30,17,27,44];
- // Do not require anatomical vocabulary: yellow long fingers = extend, pale short fingers = bend.
- // The thumb is shown as a reference only; it is not auto-scored by the present camera model.
- let fingers='';
- for(let i=0;i<4;i++){
-  const open=pattern[i]===1,y=open?openTops[i]:104,w=widths[i],tipY=open?openTops[i]+11:113;
-  fingers+='<g class="'+(open?'open-finger':'folded-finger')+'" data-finger="'+i+'">'+
-    '<rect x="'+xs[i]+'" y="'+y+'" width="'+w+'" height="'+(141-y)+'" rx="'+(w/2)+'" fill="'+(open?'#ffe273':'#d2ddd9')+'" stroke="'+(open?'#c77a25':'#8ba99c')+'" stroke-width="'+(open?5:3)+'"/>'+
-    '<circle cx="'+(xs[i]+w/2)+'" cy="'+tipY+'" r="'+(open?7:3.5)+'" fill="'+(open?'#fff8ce':'#b4c6bd')+'" stroke="'+(open?'#d28a33':'#aabfb4')+'" stroke-width="2"/>'+
-    '</g>';
- }
+ // Rounded fingers with separate bent joints; no rectangular bars or fake instrument holes.
+ const columns=[{x:43,w:24,tip:34},{x:69,w:25,tip:19},{x:97,w:24,tip:27},{x:124,w:22,tip:47}];
+ const fingers=columns.map(({x,w,tip},i)=>{
+  const ext=pattern[i]===1,end=ext?tip:108;
+  const mid=x+w/2,arc=Math.min(w/2,12);
+  const shape='M '+x+' 140 L '+x+' '+(end+arc)+' Q '+x+' '+end+' '+mid+' '+end+' Q '+(x+w)+' '+end+' '+(x+w)+' '+(end+arc)+' L '+(x+w)+' 140 Z';
+  return '<g class="'+(ext?'open-finger':'folded-finger')+'" data-finger="'+i+'">'+
+    '<path d="'+shape+'" fill="'+(ext?'#ffe6a0':'#c1d5c9')+'" stroke="'+(ext?'#b9752d':'#88a595')+'" stroke-width="'+(ext?4.5:3)+'" stroke-linejoin="round"/>'+
+    (ext?'<path d="M '+(mid-5)+' '+(end+14)+' Q '+mid+' '+(end+9)+' '+(mid+5)+' '+(end+14)+'" stroke="#fff9dc" stroke-width="3" fill="none"/>':'')+
+    '<circle cx="'+mid+'" cy="'+(end+12)+'" r="'+(ext?6:3)+'" fill="'+(ext?'#fff6bb':'#adc9b5')+'" stroke="'+(ext?'#ba802e':'#829f8e')+'" stroke-width="1.5"/></g>';
+ }).join('');
  const thumb=kind==='palm'?
-  '<path d="M49 119 Q35 90 23 100 Q11 110 22 134 L45 164" fill="#ffe273" stroke="#c77a25" stroke-width="5"/>':
-  '<path d="M46 139 Q26 137 25 153 Q25 169 45 175" fill="#d2ddd9" stroke="#8ba99c" stroke-width="4"/>';
- return '<svg class="hand-pose" data-hand-pose="'+kind+'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 223" aria-hidden="true" focusable="false">'+
- thumb+fingers+
- '<rect x="38" y="116" width="117" height="90" rx="31" fill="#e1f4e6" stroke="#318363" stroke-width="4"/>'+
- '</svg>';
+  '<path d="M55 158 C39 146 24 121 16 113 C4 101 0 113 4 128 C8 148 24 167 43 183" fill="#ffe6a0" stroke="#b9752d" stroke-width="4"/>':
+  '<path d="M56 156 C36 147 22 151 20 160 C20 168 34 176 47 184" fill="#c1d5c9" stroke="#88a595" stroke-width="3"/>';
+ const palm='<path d="M39 139 C39 125 48 118 61 118 L139 118 C154 118 161 132 161 147 L159 174 C156 193 141 202 123 202 L72 202 C53 201 40 185 39 170 Z" fill="#e3f5de" stroke="#43856d" stroke-width="4"/>'+
+  '<path d="M61 152 Q92 163 131 153" stroke="#95c6ab" stroke-width="3" fill="none" opacity=".7"/>';
+ return '<svg class="hand-pose" data-hand-pose="'+kind+'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 177 212" aria-hidden="true" focusable="false">'+thumb+fingers+palm+'</svg>';
 }
 function gestureFigure(kind,side=''){
  return '<div class="ghost-hand" data-pose="'+kind+'">'+handArt(kind)+'<small>'+ (side?side+' · ':'')+core.TITLES[kind]+'</small></div>';
@@ -69,10 +68,12 @@ const isCamera=()=>S.kind==='camera';
 const isMemory=()=>S.mode==='memory';
 const timeouts=()=>{if(S.winTimer)clearTimeout(S.winTimer);S.winTimer=0};
 function show(id){for(const key of ['intro','game','finish'])$(key).hidden=key!==id;$('home').hidden=id==='intro';}
-function message(s){$('message').textContent=s;$('viewerBadge').textContent=s;}
+function message(s){if($('message').textContent!==s)$('message').textContent=s;if($('viewerBadge').textContent!==s)$('viewerBadge').textContent=s;}
 function sound(){if(S.silent)return;try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return;if(!audio)audio=new A();const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.setValueAtTime(670,audio.currentTime);o.frequency.linearRampToValueAtTime(930,audio.currentTime+.17);g.gain.setValueAtTime(.001,audio.currentTime);g.gain.exponentialRampToValueAtTime(.045,audio.currentTime+.02);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.26);o.connect(g).connect(audio.destination);o.start();o.stop(audio.currentTime+.28)}catch(e){}}
 function stopCamera(){
- S.token++;
+ S.token++;clearTimeout(S.connectTimer);S.connectTimer=0;S.firstVideoFrame=0;S.firstHandSeen=0;S.darkFrameSince=0;S.lastLightCheck=0;
+ video.classList.remove('is-ready');hideCameraProblem();
+
  if(S.raf)cancelAnimationFrame(S.raf);
  S.raf=0;
  if(S.stream){S.stream.getTracks().forEach(t=>t.stop());S.stream=null;}
@@ -81,6 +82,25 @@ function stopCamera(){
  S.camHands=[];S.lastFrame=-1;S.matchSince=0;S.lastObserved=0;S.loading=false;
  $('viewer').dataset.match='no';$('cameraHoldFill').style.width='0%';
  const c=canvas.getContext('2d');c.clearRect(0,0,canvas.width,canvas.height);
+}
+function showCameraProblem(title,detail){
+ if(!isCamera())return;
+ $('cameraProblemTitle').textContent=title;
+ $('cameraProblemText').textContent=detail;
+ $('cameraProblem').hidden=false;
+ $('placeholder').hidden=true;
+}
+function hideCameraProblem(){$('cameraProblem').hidden=true;}
+function frameBrightness(){
+ if(!video.videoWidth||!video.videoHeight)return null;
+ try{
+  const c=document.createElement('canvas');c.width=30;c.height=22;
+  const g=c.getContext('2d',{willReadFrequently:true});
+  g.drawImage(video,0,0,30,22);
+  const a=g.getImageData(0,0,30,22).data;let sum=0;
+  for(let i=0;i<a.length;i+=4)sum+=(a[i]+a[i+1]+a[i+2])/3;
+  return sum/(a.length/4);
+ }catch(e){return null;}
 }
 function reset(){timeouts();stopCamera();S.phase='intro';S.kind='none';show('intro');}
 function modeSelected(m){S.mode=m;document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));}
@@ -137,7 +157,9 @@ function start(kind){
  if(kind==='camera')startCamera();
 }
 async function startCamera(){
- const own=++S.token;S.loading=true;S.model=null;S.camHands=[];
+ clearTimeout(S.connectTimer);hideCameraProblem();
+ const own=++S.token;S.loading=true;S.model=null;S.camHands=[];S.lastLightCheck=now();
+ S.connectTimer=setTimeout(()=>{if(own===S.token&&S.loading)showCameraProblem('카메라 준비가 오래 걸려요','권한 허용 여부와 인터넷 연결을 확인해 봐. 다시 연결하거나 화면 놀이로 바꿀 수 있어.');},10000);
  $('placeholder').hidden=false;$('placeholder').innerHTML='<span class="hand">📷</span>카메라와 손 인식을 준비하고 있어요…';renderGuide();
  message('카메라 연결 중…');
  try{
@@ -149,7 +171,7 @@ async function startCamera(){
   const vision=await mod.FilesetResolver.forVisionTasks(CDN+'/wasm');
   const model=await mod.HandLandmarker.createFromOptions(vision,{baseOptions:{modelAssetPath:MODEL,delegate:'CPU'},numHands:2,runningMode:'VIDEO',minHandDetectionConfidence:.60,minTrackingConfidence:.5,minHandPresenceConfidence:.55});
   if(own!==S.token){model.close();return;}
-  S.model=model;S.loading=false;$('placeholder').hidden=true;renderGuide();
+  S.model=model;S.loading=false;clearTimeout(S.connectTimer);S.connectTimer=0;S.lastLightCheck=now();$('placeholder').hidden=true;hideCameraProblem();renderGuide();
   if(S.phase==='memorize')message('동작 순서를 본 뒤 시작해!');else message('손을 천천히 보여줘. 조금 유지하면 인식해!');
   tick();
  }catch(e){
@@ -158,7 +180,7 @@ async function startCamera(){
   stopCamera();S.kind='touch';
   $('placeholder').hidden=false;
   render();
-  message('이 기기에서 카메라를 사용할 수 없어 화면 연습으로 바꿨어. 실제 손 인식은 아니야.');
+  message('카메라 연결이 안 됐어. 화면 그림을 고르는 놀이로 바뀌었어.');
  }
 }
 function drawHands(hands){
@@ -178,10 +200,22 @@ function tick(){
  if(!isCamera()||!S.model||S.phase==='intro')return;
  const t=now();
  if(video.readyState>=2&&video.currentTime!==S.lastFrame){
-  S.lastFrame=video.currentTime;
-  try{const r=S.model.detectForVideo(video,t);S.camHands=r.landmarks||[];drawHands(S.camHands);evaluate(t);}
-  catch(e){S.camHands=[];S.matchSince=0;}
+  S.lastFrame=video.currentTime;S.firstVideoFrame ||= t;video.classList.add('is-ready');
+  if(t-S.lastLightCheck>1500){
+   S.lastLightCheck=t;const light=frameBrightness();
+   if(light!==null&&light<14){S.darkFrameSince ||= t;if(t-S.darkFrameSince>2800)showCameraProblem('화면이 너무 어두워요','밝은 곳에서 손을 비춰 봐. 계속 검으면 카메라를 바꿔 보거나 다시 연결할 수 있어.');}
+   else{S.darkFrameSince=0;if(!$('cameraProblem').hidden)hideCameraProblem();}
+  }
+  try{
+   const r=S.model.detectForVideo(video,t);S.camHands=r.landmarks||[];
+   if(S.camHands.length)S.firstHandSeen=t;
+   drawHands(S.camHands);evaluate(t);
+  }catch(e){S.camHands=[];S.matchSince=0;}
+  if(!S.camHands.length&&t-S.firstVideoFrame>7000&&!S.firstHandSeen&&S.darkFrameSince===0&&$('cameraProblem').hidden){
+    showCameraProblem('손이 아직 안 보여요','한 손을 화면 가운데 조금 떨어뜨려 보여줘. 움직여도 안 보이면 카메라를 다시 연결해 봐.');
+  }
  }else if(t-S.lastObserved>500){S.matchSince=0;$('meter').style.width='0%';}
+ if(!S.firstVideoFrame&&S.model&&t-S.lastLightCheck>8000){showCameraProblem('카메라 영상을 확인할 수 없어요','카메라 권한이나 다른 앱의 카메라 사용을 확인한 뒤 다시 연결해 봐.');}
  S.raf=requestAnimationFrame(tick);
 }
 function evaluate(t){
@@ -263,6 +297,8 @@ $('next').addEventListener('click',advance);
 $('home').addEventListener('click',reset);$('pause').addEventListener('click',reset);$('finishHome').addEventListener('click',reset);
 $('again').addEventListener('click',()=>start(S.kind==='camera'?'camera':'touch'));
 $('flip').addEventListener('click',()=>{if(!isCamera())return;stopCamera();S.facing=S.facing==='user'?'environment':'user';startCamera();});
+$('retryCamera').addEventListener('click',()=>{if(!isCamera())return;stopCamera();startCamera();});
+$('cameraToTouch').addEventListener('click',()=>{if(!isCamera())return;stopCamera();S.kind='touch';S.phase=isMemory()?'memorize':'play';render();message('화면에서 손 모양을 보고 정답 그림을 골라 볼까?');});
 $('guideToggle').addEventListener('click',()=>{S.guideVisible=!S.guideVisible;$('guideToggle').setAttribute('aria-pressed',String(S.guideVisible));$('guideToggle').textContent=S.guideVisible?'👋 손 그림 숨기기':'👋 손 그림 보이기';renderGuide();});
 $('mute').addEventListener('click',()=>{S.silent=!S.silent;$('mute').textContent=S.silent?'🔇 효과음':'🔊 효과음';});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&isCamera()){reset();}});
