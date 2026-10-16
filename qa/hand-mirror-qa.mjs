@@ -88,10 +88,26 @@ async function main(width,height,label){
  assert.equal(await cameraPage.locator('#targetPanel').isVisible(),false,'No duplicate giant prompt below camera');
  assert.equal(await cameraPage.locator('#cameraHold').isVisible(),true,'Hold feedback displayed inside camera');
  assert.equal(await cameraPage.locator('#guideToggle').isVisible(),true,'Option to hide projection');
+ assert.equal(await cameraPage.locator('#cameraProblem').isVisible(),false,'No spurious camera warning while permission pending');
+ assert.equal(await cameraPage.locator('#retryCamera').count(),1,'Troubleshooting offers camera reconnect');
+ assert.equal(await cameraPage.locator('#cameraToTouch').count(),1,'Troubleshooting offers touch choice');
+ assert.equal(await cameraPage.locator('#ghostGuides svg rect').count(),0,'Avoid misleading rectangular finger bars');
+
  await cameraPage.locator('#guideToggle').click();
  assert.equal(await cameraPage.locator('#ghostGuides').isVisible(),false,'Child can hide projected hand');
  await cameraPage.locator('#guideToggle').click();
  assert.equal(await cameraPage.locator('#ghostGuides').isVisible(),true,'Projection can be re-enabled');
+ await cameraPage.evaluate(()=>{
+  document.querySelector('#cameraProblem').hidden=false;
+ });
+ assert.equal(await cameraPage.locator('#cameraProblem').isVisible(),true,'Visible camera troubleshooting instead of unexplained black preview');
+ await cameraPage.locator('#cameraToTouch').click();
+ assert.equal(await cameraPage.locator('#kindBadge').innerText(),'👆 화면 정답 고르기','Visible opt-in touch fallback');
+ assert.equal(await cameraPage.locator('#cameraProblem').isVisible(),false,'Recovery message closes in touch mode');
+ await cameraPage.locator('#pause').click();
+ await cameraPage.locator('[data-mode="fingers"]').click();
+ await cameraPage.locator('#cameraStart').click();
+
  assert.ok((await cameraPage.evaluate(()=>document.documentElement.scrollWidth-innerWidth))<=2,'No camera-screen horizontal overflow');
  await cameraPage.screenshot({path:output+'/camera-projection-'+label+'.png',fullPage:true});
  await cameraPage.locator('#pause').click();
@@ -107,7 +123,7 @@ async function main(width,height,label){
  await page.reload({waitUntil:'domcontentloaded'});
  await page.locator('#cameraStart').click();
  await page.waitForFunction(()=>document.getElementById('kindBadge').textContent.includes('화면 정답 고르기'));
- assert.match(await page.locator('#message').innerText(),/카메라를 사용할 수 없어/,'Graceful fallback');
+ assert.match(await page.locator('#message').innerText(),/카메라 연결이 안 됐어/,'Clear camera fallback');
  assert.equal(await page.locator('.choices .choice').count(),5,'Fallback touch selections');
  assert.ok((await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth))<=2,'No horizontal overflow');
  await page.screenshot({path:output+'/camera-fallback-'+label+'.png',fullPage:true});
