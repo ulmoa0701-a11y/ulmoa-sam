@@ -77,13 +77,12 @@ async function simulatedLiveCamera(width,height,label){
  `}));
  await page.goto(base+'/thinking-garden/games/hand-mirror/',{waitUntil:'domcontentloaded'});
  await page.locator('#cameraStart').click();
- await page.waitForFunction(()=>document.querySelector('#video').classList.contains('is-ready'),{timeout:20000}).catch(()=>{});
- assert.equal(await page.locator('#video').getAttribute('class')?.then(x=>x?.includes('is-ready')),true,'Mock camera video actually begins playing');
+ await page.waitForFunction(()=>document.querySelector('#video').classList.contains('is-ready'),null,{timeout:20000});
+ assert.equal(await page.locator('#video').evaluate(v=>v.videoWidth>0),true,'Mock camera video has real frames');
  await page.waitForFunction(()=>document.getElementById('flowerLabel').textContent.includes('1'),null,{timeout:15000});
  assert.match(await page.locator('#message').innerText(),/성공/,'Recognized pose progresses in camera mode');
  assert.equal(await page.locator('#cameraProblem').isVisible(),false,'No false black camera warning during valid playback');
  assert.equal(await page.locator('#kindBadge').innerText(),'📷 손 인식');
- assert.equal(await page.locator('#viewer').getAttribute('data-match'),'no'===await page.locator('#viewer').getAttribute('data-match')?'no':'yes');
  await page.screenshot({path:output+'/live-mock-camera-'+label+'.png',fullPage:true});
  await page.locator('#pause').click();
  assert.equal(await page.locator('#game').isVisible(),false,'Camera stopped on exit');
