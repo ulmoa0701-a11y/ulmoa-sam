@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="card-previews.css?v=20261006-rescue6">
 <link rel="stylesheet" href="slow-look-native.css?v=20261014-native1">
 <link rel="stylesheet" href="strategy-adventures.css?v=20261014-strategy1">
+<link rel="stylesheet" href="practice-session.css?v=20261017-25practice1">
 <link rel="stylesheet" href="novel-garden.css?v=20261014-newmechanics1">
 <link rel="stylesheet" href="literacy-practice.css?v=20261010-levels1">
 <link rel="stylesheet" href="../assets/habom-gamja-font.css?v=20261012-readable2">
@@ -102,6 +103,16 @@
 
         <div class="preview-label"><span>👀 게임 예시</span><small id="previewRoundInfo">실제 게임은 5스테이지로 진행돼요.</small></div>
         <div class="preview-stage" id="introPreview"></div>
+        <div class="practice-session" id="extendedPracticeControls" hidden>
+          <label for="sessionRounds">연습 분량</label>
+          <select id="sessionRounds" aria-describedby="sessionRoundsHelp">
+            <option value="5">가볍게 · 5문제</option>
+            <option value="10">꾸준히 · 10문제</option>
+            <option value="15">충분히 · 15문제</option>
+            <option value="20">길게 · 20문제</option>
+          </select>
+          <span id="sessionRoundsHelp">5문제마다 쉬어가는 화면이 나와요. 반복해도 문제는 조금씩 달라져요.</span>
+        </div>
         <div class="slow-preview-controls" id="slowLookControls" hidden>
           <div class="slow-preview-main">
             <label for="slowLevel">난이도
@@ -143,7 +154,7 @@
 <script src="strategy-rescue.js?v=20261014-strategy1"></script>
 <script src="strategy-classroom.js?v=20261014-strategy1"></script>
 <script src="strategy-festival.js?v=20261014-strategy1"></script>
-<script src="app.js?v=20261014-strategy1"></script>
+<script src="app.js?v=20261017-25practice1"></script>
 <script src="card-previews.js?v=20261014-strategy1"></script>
 <script src="../assets/moa-garden-resources.js?v=20261012-resources1"></script>
 </body></html>
