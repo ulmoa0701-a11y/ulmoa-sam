@@ -99,4 +99,4 @@ await browser.close();
 const ok=report.filter(x=>x.play&&x.preview),notOk=report.filter(x=>!x.play||!x.preview);
 fs.writeFileSync(path.join(outDir,'capture-report.json'),JSON.stringify({count:report.length,ok:ok.length,notOk:notOk.map(x=>({id:x.id,errors:x.errors})),report},null,2));
 console.log(JSON.stringify({requested:report.length,ok:ok.length,introOnly:ok.filter(x=>x.introOnly).map(x=>x.id),missing:notOk.map(x=>x.id)},null,2));
-if(ok.length<28){console.error('Too few live captures; abort publishing misleading fallback images.');process.exit(1)}
+if(ok.length!==report.length){console.error('Some game screenshots are missing; do not publish incomplete gallery.');process.exit(1)}
