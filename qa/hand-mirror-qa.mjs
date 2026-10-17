@@ -21,6 +21,16 @@ assert.deepEqual(fingerTest.matched,[true,false,false,false],'Guide distinguishe
 assert.equal(fingerTest.count,1);
 assert.equal(core.fingerFeedback(hand('palm'),'palm').count,4);
 assert.equal(core.fingerFeedback([],'fist'),null);
+const pinky=hand('one');
+pinky[8]={...pinky[8],y:.60};pinky[20]={...pinky[20],y:.19};
+assert.equal(core.countMatch([pinky],'one'),true,'Any ONE finger must pass finger-count adventure');
+assert.equal(core.match([pinky],['one']),false,'Exact copy-game model remains unchanged');
+assert.equal(core.countMatch([hand('palm')],'one'),false,'Four fingers are not one finger');
+assert.equal(core.countMatch([hand('one'),hand('one')],'one'),false,'Other hand cannot answer for learner');
+assert.equal(core.countMatch([hand('two')],'two'),true);
+assert.equal(core.countMatch([hand('three')],'three'),true);
+assert.equal(core.countMatch([hand('fist')],'one'),false);
+
 assert.equal(core.pose([]),null);
 assert.equal(core.match([hand('palm'),hand('fist')],['fist','palm']),true);
 assert.equal(core.match([hand('one')],['fist']),false);
