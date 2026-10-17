@@ -9,6 +9,7 @@ on:
       - 'qa/homework-persona-qa.cjs'
       - 'qa/garden-name-quest-qa.cjs'
       - 'qa/garden-life-bag-qa.cjs'
+      - 'qa/whole-block-play-qa.cjs'
       - '.github/workflows/curated-share-qa.yml'
   pull_request:
     paths:
@@ -48,6 +49,7 @@ jobs:
           node --check qa/garden-name-quest-qa.cjs
           node --check thinking-garden/life-bag-scenes.js
           node --check qa/garden-life-bag-qa.cjs
+          node --check qa/whole-block-play-qa.cjs
       - name: Start site
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/assigned-site.log 2>&1 &
@@ -69,6 +71,8 @@ jobs:
         run: node qa/garden-name-quest-qa.cjs
       - name: Everyday scenario packing full game play 5/10/15/20 (mobile and PC)
         run: node qa/garden-life-bag-qa.cjs
+      - name: Whole-block spatial construction sessions (5/10/15/20)
+        run: node qa/whole-block-play-qa.cjs
       - name: Screenshots
         if: always()
         uses: actions/upload-artifact@v4
