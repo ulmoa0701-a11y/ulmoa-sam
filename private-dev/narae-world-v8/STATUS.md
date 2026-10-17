@@ -9,45 +9,52 @@ Status: **PUBLICATION_HOLD / NOT RELEASED**
 - V7.x: frozen as rejected prototype / comparison only
 
 ## Current artifact
-- `나래반_놀이터_WORLD_V8_3_STRUCTURAL_REBUILD_DEV.html`
-- Private Drive DEV_HOLD file id: `1r9bakD-y36lcKqp_AYCISQzmz-wk7szL`
-- SHA-256: `b86935324c4762149570259aff146f2403f812a9cfd963d6dde61c2bb093db8a`
+- `나래반_놀이터_WORLD_V8_6_NURI_JOINT_PLAY_DEV.html`
+- Private Drive DEV_HOLD file id: `1byzV8chE61TvD6dIIIROOn3Ou19W150W`
+- SHA-256: `1da5b4772a2f82ecbd3cc4fa2da6c424ca5b029e6bc2fc6e0bf303b256926bae`
 
-## Structural rebuild completed in V8
-- 1D x-only movement replaced by true x/y movement.
+## Structural rebuild completed
+- 1D x-only movement -> true x/y movement.
 - A* grid pathfinding + obstacle avoidance.
-- World-object hit testing uses 2D distance/interaction, not x-only proximity.
-- Click/tap-to-move is the primary control; no walk/run button.
-- Walk/run changes automatically by route length.
-- Mission chrome (`오늘의 부탁 0/3`, exclamation marks, therapy-like labels) removed.
-- Browser SpeechSynthesis/TTS removed.
-- No adult device voice dependency.
-- Generated no-cost environmental WebAudio ambience/effects.
-- Nuri mission starts from in-world interaction, not a mission menu.
-- Target is not spawned before the search begins.
-- Nuri target cue is brief rather than permanently displayed.
-- Wrong choices produce character responses rather than X/failure penalties.
-- Success continues into a world-state change (dinosaur house remains in the sandbox).
-- Memory album now captures the played scene; in-session fallback works when storage is unavailable.
-- Camera has normal / friend / success framing modes.
-- Free-play reactions added for slide, flowers/butterfly, sandbox, bench, and toy truck.
+- World-object interaction uses 2D distance/hit testing.
+- Click/tap-to-move is primary; walk/run button removed and gait switches automatically by route length.
+- Mission chrome (`오늘의 부탁 0/3`, exclamation marks, therapy labels) removed.
+- Browser SpeechSynthesis/TTS removed; no device adult-voice dependency.
+- No-cost generated WebAudio ambience/effects.
+- Foreground overlays added for better world depth/occlusion.
 - Character/world draw order follows world y position.
-- PC and mobile canvas are responsive with no document overflow in tested viewport.
+- Nuri mission begins in-world, not from a mission menu.
+- Search target is hidden before the player approaches; the cue is brief and the hiding position is randomized.
+- Hints use the actual hidden zone rather than a fixed generic hint.
+- Wrong choices trigger character reactions, not X/failure penalties.
+- Nuri now moves and looks around during search instead of remaining a static quest marker.
+- Nuri search uses an additional pose derived from the approved FINAL character sheet; no regenerated face/eyes.
+- Yeoreum's energetic approved pose is tied to a hop-play/chalk context rather than random idle placement.
+- Sandbox Garam remains context-bound to sand play.
+- Free-play reactions exist for slide, flowers/butterfly, sandbox, bench, toy truck, climbing wall and bridge.
+- Success is joint play: player and Nuri move toward the sandbox before building.
+- The dinosaur sand house uses the existing world sand texture and remains as a world-state change.
+- Memory is captured after the success frame is rendered; in-session fallback works when storage is unavailable.
+- Camera has normal / friend / success framing modes.
+- Desktop and mobile canvas are responsive with no document overflow in tested viewport.
 
-## QA verified
+## QA verified for V8.6
 - JavaScript syntax: PASS.
-- Chromium runtime load through DevTools document injection: PASS.
+- Chromium runtime: PASS.
 - Runtime exceptions: 0.
-- Actual pointer-driven 2D movement: PASS (both x and y changed).
-- Slide free-play interaction: PASS.
-- Flower/butterfly free-play FX: PASS.
-- Nuri search start: PASS.
-- Wrong-object retry: PASS; mission remains active.
+- Actual pointer-driven x/y movement: PASS.
+- Nuri target initially hidden: PASS.
+- Nuri autonomous search movement: PASS.
+- Wrong-object retry keeps search active: PASS.
 - Correct target -> carrying state: PASS.
-- Handoff -> house/world change -> completion: PASS.
-- Memory-card creation and album open: PASS even with localStorage blocked (session fallback).
-- Desktop viewport render: PASS.
-- Mobile 390×844 render + body overflow check: PASS.
+- Joint handoff -> sandbox move -> world change -> completion: PASS.
+- Memory save after rendered world change: PASS.
+- Desktop 1440×900 render: PASS; no document overflow.
+- Mobile 390×844 render: PASS; no document overflow.
+- Success camera no longer exposes a black/uncovered canvas band.
 
-## Still not publication-approved
-V8.3 is a structural vertical slice, not a release candidate. Character rigging/animation is still limited by the currently approved fixed-pose art, so this build must not be linked from `main` or GitHub Pages before explicit user approval.
+## Publication rule
+V8.6 is still a private vertical slice. It must **not** be linked from `main`, the existing cognitive games, or GitHub Pages until the user explicitly approves publication.
+
+## Remaining release gate
+The major V7.5 structural failures are replaced in V8.6. Full commercial-quality character motion still requires a fixed-master rig/animation pipeline for all seven characters; do not multiply content to all seven characters until the Nuri slice passes the user's visual/gameplay approval.
