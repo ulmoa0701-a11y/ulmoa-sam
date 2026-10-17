@@ -16,6 +16,11 @@ function hand(kind){
  return arr;
 }
 for(const kind of ['palm','fist','one','two','three'])assert.equal(core.pose(hand(kind)),kind);
+const fingerTest=core.fingerFeedback(hand('one'),'palm');
+assert.deepEqual(fingerTest.matched,[true,false,false,false],'Guide distinguishes correct index from 3 fingers needing correction');
+assert.equal(fingerTest.count,1);
+assert.equal(core.fingerFeedback(hand('palm'),'palm').count,4);
+assert.equal(core.fingerFeedback([],'fist'),null);
 assert.equal(core.pose([]),null);
 assert.equal(core.match([hand('palm'),hand('fist')],['fist','palm']),true);
 assert.equal(core.match([hand('one')],['fist']),false);
@@ -115,7 +120,7 @@ async function fakeVideoGarden(){
  'const a=Array.from({length:21},()=>({x:.5,y:.85}));',
  '[[5,6,8],[9,10,12],[13,14,16],[17,18,20]].forEach(([m,p,t],i)=>{',
  'a[m]={x:.28+i*.12,y:.65};a[p]={x:.28+i*.12,y:.5};',
- 'a[t]={x:.28+i*.12,y:globalThis.__testPalm?.19:.60};',
+ 'a[t]={x:.28+i*.12,y:globalThis.__testPalm?.19:(globalThis.__testOne&&i===0?.19:.60)};',
  '});return {landmarks:[a]};},close(){}})};'
  ].join('\n');
  await p.route('**/vision_bundle.mjs',r=>r.fulfill({status:200,contentType:'text/javascript',headers:{'access-control-allow-origin':'*'},body:fakeModule}));
@@ -126,13 +131,25 @@ async function fakeVideoGarden(){
  await p.waitForFunction(()=>document.querySelector('#video').classList.contains('is-ready'),null,{timeout:20000});
  await p.waitForFunction(()=>document.querySelector('#cameraCheck').hidden&&document.querySelector('#viewer').dataset.phase==='play',null,{timeout:20000});
  assert.equal(await p.locator('#video').evaluate(v=>v.videoWidth>0),true,'Video stream produced pixels');
- await p.waitForFunction(()=>document.getElementById('flowerLabel').textContent.includes('1'),null,{timeout:15000});
+ assert.equal(await p.locator('#modelCard').isVisible(),true,'Real hand demo is visible instead of tiny static sticker');
+ assert.equal(await p.locator('#modelSymbol').innerText(),'✊','Fist target uses instantly recognizable demonstration');
+ assert.equal(await p.locator('#modelTitle').innerText(),'주먹 쥐기');
+ assert.equal(await p.locator('#ghostGuides').isVisible(),false,'Old static tiny diagram is hidden in garden');
+ await p.waitForFunction(()=>document.getElementById('flowerLabel').textContent.includes('0'),null,{timeout:6000});
+ await p.waitForFunction(()=>document.querySelector('.garden-bed[data-growth="seed"]'),null,{timeout:15000});
  assert.equal(await p.locator('.garden-bed[data-growth="seed"]').count(),1,'Fist plants seed');
  assert.equal(await p.locator('#cameraProblem').isVisible(),false);
- await p.evaluate(()=>{window.__testPalm=true});
+ await p.evaluate(()=>{window.__testOne=true});
  await p.locator('#next').click();
- await p.waitForFunction(()=>document.getElementById('flowerLabel').textContent.includes('2'),null,{timeout:15000});
+ assert.equal(await p.locator('#modelSymbol').innerText(),'✋','Target demonstration changes to open palm');
+ await p.waitForFunction(()=>document.getElementById('liveCompareTitle').textContent==='내 손 1 / 4',null,{timeout:12000});
+ assert.match(await p.locator('#liveCompareCue').innerText(),/주황 점/,'Finger-specific corrective cue rather than static model');
+ assert.equal(await p.locator('#liveCompare').getAttribute('data-state'),'adjust');
+ await p.screenshot({path:output+'/live-finger-correction-mobile.png',fullPage:true});
+ await p.evaluate(()=>{window.__testOne=false;window.__testPalm=true});
+ await p.waitForFunction(()=>document.querySelector('.garden-bed[data-growth="flower"]'),null,{timeout:15000});
  assert.equal(await p.locator('.garden-bed[data-growth="flower"]').count(),1,'Palm grows flower');
+ assert.equal(await p.locator('#flowerLabel').innerText(),'🌼 1 / 3','Count real flowers rather than hand motions');
  await p.screenshot({path:output+'/garden-video-and-bloom-mobile.png',fullPage:true});
  await p.locator('#pause').click();
  assert.equal(await p.locator('#game').isVisible(),false,'Stop ends game and stream');
