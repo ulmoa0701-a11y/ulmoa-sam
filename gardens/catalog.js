@@ -127,7 +127,7 @@ function refreshResults(){
  let grandTotal=0;
  for(const section of sections){
   const filter=section.dataset.activeFocus||'all';
-  const cards=$('.play-card-enhanced',section);
+  const cards=Array.from(section.querySelectorAll('.play-card-enhanced'));
   const matches=cards.filter(card=>(filter==='all'||card.dataset.focus===filter)&&(!query||card.dataset.search.includes(query)));
   const limit=!query&&section.id==='cognitive'&&filter==='all'&&section.dataset.expanded!=='true'?6:Infinity;
   cards.forEach(card=>{card.hidden=!matches.includes(card)||matches.indexOf(card)>=limit});
@@ -146,10 +146,10 @@ function refreshResults(){
  searchClear.hidden=!query;
  searchStatus.textContent=query?(grandTotal?grandTotal+'개 게임을 찾았어요.':'일치하는 게임이 없어요. 다른 말로 다시 찾아볼 수 있어요.'):'';
 }
-searchInput.addEventListener('input',()=>{for(const section of sections){section.dataset.activeFocus='all';$('button[data-focus]',section).forEach(b=>{const active=b.dataset.focus==='all';b.classList.toggle('is-current',active);b.setAttribute('aria-pressed',String(active))});}refreshResults()});
+searchInput.addEventListener('input',()=>{for(const section of sections){section.dataset.activeFocus='all';Array.from(section.querySelectorAll('button[data-focus]')).forEach(b=>{const active=b.dataset.focus==='all';b.classList.toggle('is-current',active);b.setAttribute('aria-pressed',String(active))});}refreshResults()});
 searchInput.addEventListener('keydown',e=>{if(e.key==='Escape'){searchInput.value='';refreshResults()}});
 searchClear.addEventListener('click',()=>{searchInput.value='';refreshResults();searchInput.focus()});
-$('.garden-jumps a').forEach(a=>a.addEventListener('click',()=>{if(searchInput.value){searchInput.value='';refreshResults()}}));
+Array.from(document.querySelectorAll('.garden-jumps a')).forEach(a=>a.addEventListener('click',()=>{if(searchInput.value){searchInput.value='';refreshResults()}}));
 refreshResults();
 
 console.info('Garden discovery ready:',total,'games');
