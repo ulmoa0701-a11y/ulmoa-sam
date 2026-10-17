@@ -143,7 +143,7 @@ async function fakeVideoGarden(){
  await p.locator('#next').click();
  assert.equal(await p.locator('#modelSymbol').innerText(),'✋','Target demonstration changes to open palm');
  await p.waitForFunction(()=>document.getElementById('liveCompareTitle').textContent==='내 손 1 / 4',null,{timeout:12000});
- assert.match(await p.locator('#liveCompareCue').innerText(),/주황 점/,'Finger-specific corrective cue rather than static model');
+ assert.match(await p.locator('#liveCompareCue').innerText(),/주황 점.*더 펴/,'Targeted finger-extension cue rather than static model');
  assert.equal(await p.locator('#liveCompare').getAttribute('data-state'),'adjust');
  await p.screenshot({path:output+'/live-finger-correction-mobile.png',fullPage:true});
  await p.evaluate(()=>{window.__testOne=false;window.__testPalm=true});
