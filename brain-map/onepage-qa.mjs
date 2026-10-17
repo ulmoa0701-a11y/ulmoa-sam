@@ -138,7 +138,7 @@ try{
     assert.equal(await page.locator('#brainMap [data-scene-focus]').getAttribute('data-brain-region'),region);
     assert.equal(await page.locator('.lobe-card[data-scene-focus]').getAttribute('data-region'),region);
     const number=await page.locator('#brainMap [data-brain-region="'+region+'"] .zone-number').textContent();
-    const name=await page.locator('.lobe-card[data-region="'+region+'"] strong').innerText();
+    const name=(await page.locator('.lobe-card[data-region="'+region+'"] strong').textContent()).trim();
     const label=await page.locator('#lobeSceneFocusTitle').innerText();
     const hint=await page.locator('#lobeSceneRegionHint').innerText();
     assert.ok(hint.includes(number.trim())&&hint.includes(name),'area number and name appear as supporting information: '+hint);
