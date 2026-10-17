@@ -263,6 +263,7 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 .viewer .live-compare{position:absolute;z-index:6;bottom:116px;left:10px;max-width:65%;background:#173e35eb;color:white;border-radius:13px;padding:8px 11px;display:flex;flex-direction:column;align-items:flex-start;gap:3px;pointer-events:none;box-shadow:0 4px 10px #11362833}
 .viewer .live-compare strong{font-size:15px;font-weight:990;color:#fff8cc}
 .viewer .live-compare span{font-size:12px;font-weight:850;line-height:1.35;text-align:left}
+.viewer:has(.model-card[data-side="left"]) .live-compare{left:auto;right:10px}
 .viewer .live-compare[data-state="good"]{background:#1e6952ed}
 .viewer .live-compare[data-state="adjust"]{background:#694617ef}
 .viewer .live-compare[data-state="uncertain"]{background:#455e61ed}
