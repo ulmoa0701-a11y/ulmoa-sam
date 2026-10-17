@@ -31,13 +31,31 @@ function connectedShapes(side,count){
  visit([],0);return result;
 }
 const spatialBanks={1:connectedShapes(3,2),2:connectedShapes(3,3),3:connectedShapes(4,4)};
+// A connected 4-cell shape is not automatically buildable from TWO dominoes.
+// Generate targets only when the real block palette has a complete solution.
+function blockCanBeAssembled(shape){
+ const keys=shape.map(([r,c])=>r+','+c).sort();
+ function solve(left,doubles,singles){
+  if(!left.length)return doubles===0&&singles===0;
+  const first=left[0],parts=first.split(',').map(Number);
+  if(doubles>0){
+   for(const next of [parts[0]+','+(parts[1]+1),(parts[0]+1)+','+parts[1]]){
+    if(left.includes(next)&&solve(left.filter(key=>key!==first&&key!==next),doubles-1,singles))return true;
+   }
+  }
+  return singles>0&&solve(left.slice(1),doubles,singles-1);
+ }
+ return solve(keys,Math.floor(keys.length/2),keys.length%2);
+}
+
 function spatialPattern(id,level,round,offset){
  const blockHard=[[[0,1],[1,1],[2,1],[2,2]],...hard.slice(1)];
  const early=level===1?simple:level===2?medium:id==='slowBlock'?blockHard:hard;
  if(round<5)return early[round];
  const sig=x=>x.map(([r,c])=>r+','+c).sort().join('|');
  const used=new Set(early.map(sig));
- const choices=spatialBanks[level].filter(shape=>!used.has(sig(shape)));
+ const choices=spatialBanks[level].filter(shape=>!used.has(sig(shape))&&
+  (id!=='slowBlock'||blockCanBeAssembled(shape)));
  return choices[(round-5+offset)%choices.length];
 }
 function isNew(id){return IDS.includes(id)}
