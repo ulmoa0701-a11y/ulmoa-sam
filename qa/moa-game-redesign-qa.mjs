@@ -74,6 +74,10 @@ for(const width of [390,1366]){
    }
    if(id==='targets'){
     check(await page.locator('.wake-scene-head').count()===1,width+' wake seeds need a goal scene');
+    check(await page.locator('.wake-grown').count()>=1,width+' finished flower distractor missing');
+    const original=await page.locator('.wake-target').count();
+    await page.locator('.wake-grown').first().click({force:true});
+    check(await page.locator('.wake-target').count()===original,width+' finished flower must not advance');
     await page.locator('.wake-target').first().click();
     check(await page.locator('.wake-target.awake').count()===1,width+' tapped seed did not bloom');
    }
