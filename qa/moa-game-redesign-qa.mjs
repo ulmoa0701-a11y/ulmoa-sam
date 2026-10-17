@@ -50,6 +50,22 @@ for(const width of [390,1366]){
      await page.locator('.leaf-has-clue').first().click();
      check((await page.locator('#miniCount').textContent()).includes('1 /'),width+' clue-based leaf must count');
     }
+   if(id==='path'){
+    check(await page.locator('.trail-adventure .trail-node').count()>=4,width+' follow-the-light path missing');
+    const orders=await page.locator('.trail-adventure .trail-node').evaluateAll(nodes=>nodes.map(n=>Number(n.style.order)));
+    check(new Set(orders).size===orders.length,width+' path positions are duplicated');
+    check(orders.some((n,i)=>n!==i),width+' lit-follow path still a fixed left-to-right row');
+    await page.locator('.trail-node[data-i="0"]').click();
+    check(await page.locator('.trail-node[data-i="1"].ready').count()===1,width+' follow-the-light did not advance cue');
+   }
+   if(id==='inside'){
+    await page.evaluate(()=>{
+     const zone=document.querySelector('#insideZone'),r=zone.getBoundingClientRect();
+     for(const [x,y] of [[55,55],[55,55],[145,130]])
+      zone.dispatchEvent(new MouseEvent('click',{bubbles:true,clientX:r.left+x,clientY:r.top+y}));
+    });
+    check((await page.locator('#miniCount').textContent()).includes('2 /'),width+' duplicate star planting counted or valid spot ignored');
+   }
    if(id==='sameShape')check(await page.locator('.shape-adventure .shape-target').count()===1,width+' shape target is not visually separated');
    if(id==='flower'){
     check(await page.locator('.flower-basket').count()===1,width+' flower basket missing');
@@ -58,6 +74,10 @@ for(const width of [390,1366]){
    }
    if(id==='targets'){
     check(await page.locator('.wake-scene-head').count()===1,width+' wake seeds need a goal scene');
+    check(await page.locator('.wake-grown').count()>=1,width+' finished flower distractor missing');
+    const original=await page.locator('.wake-target').count();
+    await page.locator('.wake-grown').first().click({force:true});
+    check(await page.locator('.wake-target').count()===original,width+' finished flower must not advance');
     await page.locator('.wake-target').first().click();
     check(await page.locator('.wake-target.awake').count()===1,width+' tapped seed did not bloom');
    }

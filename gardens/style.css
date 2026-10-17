@@ -185,3 +185,37 @@ body.gardens-page{margin:0;background:#f8faf5;color:#2b3f3c;font-family:"Pretend
  .preview-frame-switch button{min-height:38px}
  .preview-visual>img{min-height:0;max-height:275px}
 }
+
+
+/* 34-game discovery: close-up of real play and a unique, non-reading mission cue. */
+.gardens-page .play-card-media{
+ display:grid;grid-template-rows:minmax(0,1fr) 64px;
+ aspect-ratio:16/11;background:#ecf3ed;isolation:isolate;
+}
+.gardens-page .play-card-media img.real-shot{
+ grid-row:1;min-width:0;min-height:0;width:100%;height:100%;
+ object-fit:cover;object-position:50% 50%;padding:0;background:#edf5ef;
+}
+.gardens-page .play-card-media .play-demo-sequence{
+ grid-row:2;min-height:64px;width:100%;display:flex;align-items:center;
+ justify-content:center;gap:clamp(12px,2.3vw,24px);
+ background:linear-gradient(95deg,#fff9e8,#f4faf0 50%,#eef9f3);
+ border-top:1px solid #d9e6d9;
+}
+.gardens-page .play-demo-glyph{font-size:clamp(29px,3vw,40px);line-height:1;filter:drop-shadow(0 2px 2px #233d3022)}
+.gardens-page .play-demo-arrow{font-size:22px;line-height:1;font-weight:900;color:#688c70}
+.gardens-page .shot-caption{top:9px;bottom:auto;left:9px;background:#234b3dcf;font-size:11px;padding:5px 8px}
+.gardens-page .play-card-media.no-real-shot img.real-shot{object-fit:contain;padding:15px}
+.gardens-page .play-card-details{padding:13px 15px 14px}
+.gardens-page .play-life-one-line{display:none}
+.gardens-page .play-story-name{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#718779;font-size:11px;line-height:1.4;margin:0 0 3px}
+.gardens-page .play-simple-desc{min-height:0;font-size:14px;line-height:1.55;margin:8px 0 15px}
+.gardens-page .play-buttons{margin-top:auto}
+.gardens-page .play-buttons .play-preview-btn,.gardens-page .play-buttons .play-start-btn{min-height:48px;font-size:14px}
+@media(max-width:650px){
+ .gardens-page .play-card-media{grid-template-rows:minmax(0,1fr) 61px;aspect-ratio:16/10}
+ .gardens-page .play-card-media .play-demo-sequence{min-height:61px}
+ .gardens-page .play-demo-glyph{font-size:32px}
+ .gardens-page .play-simple-desc{font-size:13px;margin:7px 0 13px}
+}
+@media(prefers-reduced-motion:reduce){.gardens-page .play-card.play-card-enhanced{transition:none}}

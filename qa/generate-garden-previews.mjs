@@ -23,14 +23,19 @@ const browser=await chromium.launch({headless:true,executablePath:process.env.CH
 const report=[];
 const settings={type:'jpeg',quality:79,animations:'disabled',timeout:7000};
 async function snap(page,selector,name){
- const loc=page.locator(selector).first();
- try{
-  if(!await loc.isVisible())return false;
-  const box=await loc.boundingBox();
-  if(!box||box.width<80||box.height<65)return false;
-  await loc.screenshot({...settings,path:path.join(outDir,name+'.jpg')});
-  return true;
- }catch{return false}
+ // A CSS selector group is DOM-ordered: the container would otherwise win
+ // over its nested active puzzle even when listed last.
+ for(const part of selector.split(',')){
+  const loc=page.locator(part.trim()).first();
+  try{
+   if(!await loc.isVisible())continue;
+   const box=await loc.boundingBox();
+   if(!box||box.width<80||box.height<65)continue;
+   await loc.screenshot({...settings,path:path.join(outDir,name+'.jpg')});
+   return true;
+  }catch{/* Try the next concrete gameplay region. */}
+ }
+ return false;
 }
 async function capture(id,url,{native=false}={}){
  const context=await browser.newContext({viewport:{width:1024,height:740},deviceScaleFactor:1,reducedMotion:'reduce',permissions:[]});
@@ -53,7 +58,8 @@ async function capture(id,url,{native=false}={}){
    const start=page.locator('#introStart');
    if(await start.isVisible()){
     await start.click({timeout:2000});await page.waitForTimeout(600);
-    entry.play=await snap(page,'#gameWorld',id+'-play');
+    // Capture the hands-on puzzle rather than the whole page, tiny instructions or header.
+    entry.play=await snap(page,'#gameArea .basic-game, #gameArea .novel-quest, #gameArea .strategy-quest, #gameArea .slow-native, #gameArea',id+'-play');
    }
   }else if(['money','change','feel'].includes(id)){
    await page.locator('#startGame').click({timeout:1500});await page.waitForTimeout(240);
@@ -62,7 +68,7 @@ async function capture(id,url,{native=false}={}){
   }else if(id==='hand-mirror'){
    entry.preview=await snap(page,'.intro',id);
    try{await page.locator('#touchStart').click({timeout:900});await page.waitForTimeout(260);
-     entry.play=await snap(page,'.play-panel,#play,.garden-stage,.shell main',id+'-play');
+     entry.play=await snap(page,'#game .viewer, #game .garden-scene, #game .camera-panel, #game',id+'-play');
    }catch{}
   }else if(id==='rescue'){
    entry.preview=await snap(page,'.app-shell',id);
@@ -70,19 +76,20 @@ async function capture(id,url,{native=false}={}){
      const b=page.locator(sel).first();
      if(await b.isVisible().catch(()=>false)){await b.click({timeout:1000}).catch(()=>{});await page.waitForTimeout(320);break}
    }
-   entry.play=await snap(page,'#gameScreen,.game-world,.rescue-scene,.app-shell',id+'-play');
+   entry.play=await snap(page,'#game canvas, #gameScreen .game-world, .rescue-scene, #gameScreen, .app-shell',id+'-play');
   }else{
    entry.preview=await snap(page,'main',id);
    if(id==='strength'){await page.locator('#chooseStrength').click({timeout:1000}).catch(()=>{});}
    if(id==='long'){await page.locator('#chooseLong').click({timeout:1000}).catch(()=>{});}
    if(id==='beat'){await page.locator('#chooseBeat').click({timeout:1000}).catch(()=>{});}
    await page.waitForTimeout(280);
-   entry.play=await snap(page,'#gameScreen:not([hidden]),.game-scene,.game-area,main',id+'-play');
+   entry.play=await snap(page,'#gameArea:visible, #gameScreen:not([hidden]), .game-scene, .game-area, main',id+'-play');
   }
   // If the game stage requires a camera or another input, preserve its authentic intro/preview.
   if(!entry.play&&entry.preview){fs.copyFileSync(path.join(outDir,id+'.jpg'),path.join(outDir,id+'-play.jpg'));entry.play=true;entry.introOnly=true;}
   if(!entry.preview&&entry.play){fs.copyFileSync(path.join(outDir,id+'-play.jpg'),path.join(outDir,id+'.jpg'));entry.preview=true;}
   if(!entry.play&&!entry.preview){entry.errors.push('No meaningful visible game region captured');}
+  entry.focusedPlay=entry.play&&!entry.introOnly;
  }catch(e){entry.errors.push(String(e).slice(0,170));}
  finally{report.push(entry);await context.close()}
 }
@@ -92,4 +99,4 @@ await browser.close();
 const ok=report.filter(x=>x.play&&x.preview),notOk=report.filter(x=>!x.play||!x.preview);
 fs.writeFileSync(path.join(outDir,'capture-report.json'),JSON.stringify({count:report.length,ok:ok.length,notOk:notOk.map(x=>({id:x.id,errors:x.errors})),report},null,2));
 console.log(JSON.stringify({requested:report.length,ok:ok.length,introOnly:ok.filter(x=>x.introOnly).map(x=>x.id),missing:notOk.map(x=>x.id)},null,2));
-if(ok.length<28){console.error('Too few live captures; abort publishing misleading fallback images.');process.exit(1)}
+if(ok.length!==report.length){console.error('Some game screenshots are missing; do not publish incomplete gallery.');process.exit(1)}
