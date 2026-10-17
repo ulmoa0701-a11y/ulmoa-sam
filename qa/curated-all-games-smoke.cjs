@@ -36,7 +36,11 @@ function planUrl(items,opts={}){
     if(await page.locator('#moaAssignedEmbed').count()){
      const frame=page.locator('#moaAssignedEmbed iframe');
      assert.ok((await frame.getAttribute('allow')).includes('camera'),marker+' iframe lacks camera permission');
-     await page.locator('#moaAssignedEmbed .moa-assigned-exit').click();
+     if(id==='moaMoney'){
+      await page.waitForFunction(()=>!!document.querySelector('#moaAssignedEmbed iframe')?.contentWindow?.document?.readyState);
+      await page.evaluate(()=>{document.querySelector('#moaAssignedEmbed iframe').contentWindow.location.href='/gardens/';});
+      await page.locator('#moaAssignedEmbed').waitFor({state:'detached'});
+     }else await page.locator('#moaAssignedEmbed .moa-assigned-exit').click();
     }else{
      assert.ok(await page.locator('#introScreen.active').isVisible(),marker+' game preview did not open');
      await page.locator('#introStart').click();
