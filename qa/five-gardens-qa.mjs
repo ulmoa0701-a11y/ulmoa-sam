@@ -19,7 +19,7 @@ for(const width of [360,390,1366]){
   const ids=['cognitive','thinking','learning','music','heart'];
   const counts=ids.map(id=>document.querySelectorAll('#'+id+' .play-card').length);
   return {sections:document.querySelectorAll('.garden-section').length,counts,anchors:ids.map(id=>!!document.querySelector('nav.garden-jumps a[href="#'+id+'"]')),
-    gameRefs:[...document.querySelectorAll('.play-card[href*="thinking-garden/?game="]')].map(a=>new URL(a.href).searchParams.get('game')),
+    gameRefs:[...document.querySelectorAll('.play-start-btn[href*="thinking-garden/?game="]')].map(a=>new URL(a.href).searchParams.get('game')),
     navPresent:!!document.querySelector('.hb-menu-games'),overflow:document.documentElement.scrollWidth-innerWidth,
     mobileToggle:!!document.querySelector('.hb-mobile-toggle')};
  });
@@ -27,12 +27,29 @@ for(const width of [360,390,1366]){
  check(data.sections===5,width+' missing garden sections '+data.sections);
  check(data.counts.join(',')==='21,3,4,3,3',width+' incorrect garden game counts '+data.counts);
  check(data.anchors.every(Boolean),width+' missing jump anchor');
- const musicBeat=await page.locator('#music .play-card[href*="mode=beat"]').count();
- const heartBeat=await page.locator('#heart .play-card[href*="mode=beat"]').count();
+ const musicBeat=await page.locator('#music .play-start-btn[href*="mode=beat"]').count();
+ const heartBeat=await page.locator('#heart .play-start-btn[href*="mode=beat"]').count();
  check(musicBeat===1&&heartBeat===0,width+' rhythm breath wrongly classified');
  check(data.gameRefs.length===24&&new Set(data.gameRefs).size===24,width+' game registry has duplicates or omissions');
  check(data.overflow<=3,width+' horizontal overflow '+data.overflow);
  check(data.navPresent,width+' shared navigation missing');
+ check(await page.locator('.play-card-enhanced').count()===34,width+' enhanced game card count mismatch');
+ const tags=await page.locator('#cognitive .garden-filter-buttons button').allTextContents();
+ check(tags.some(x=>x.includes('찾기'))&&tags.some(x=>x.includes('기억'))&&tags.some(x=>x.includes('손동작')),width+' cognitive activity filters missing');
+ if(width===390){
+  await page.locator('#cognitive .garden-filter-buttons button[data-focus="memory"]').click();
+  const visibleCards=await page.locator('#cognitive .play-card-enhanced:not([hidden])').count();
+  check(visibleCards===5,width+' memory filter count incorrect '+visibleCards);
+  const hiddenCards=await page.locator('#cognitive .play-card-enhanced[hidden]').count();
+  check(hiddenCards===16,width+' memory filter not hiding unrelated games');
+  await page.locator('#cognitive .garden-filter-buttons button[data-focus="all"]').click();
+  await page.locator('#cognitive .play-preview-btn').first().click();
+  check(await page.locator('#gardenPreviewDialog').isVisible(),width+' actual preview dialog did not open');
+  check((await page.locator('#previewSteps li').count())===3,width+' preview steps not clear');
+  check((await page.locator('#previewPlay').getAttribute('href')).includes('rescue'),width+' preview start link mismatches game');
+  await page.locator('.preview-close').click();
+ }
+
  if(width===390){
   await page.locator('.hb-mobile-toggle').click();
   const gameSummary=page.locator('.hb-menu-games > summary');
