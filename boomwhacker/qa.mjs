@@ -581,6 +581,51 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
   check(x.clipped.length===0,screen+': karaoke overflow at '+x.key+': '+JSON.stringify(x.clipped.slice(0,3)));
   check(x.activeMiss.length===0,screen+': wrong active syllable at '+x.key);
  }
+ // Musical lyric phrases MUST match how the songs are sung, not just avoid
+ // splitting words. A lone "동쪽" after "비치네" is a regression.
+ const phraseCase=await page.evaluate(()=>{
+  const before={song:currentSong,section:practiceSection,t:elapsed};
+  const samples=['twinkle','plane','butterfly','rabbit','same','bear','school-bell'];
+  const results=[];
+  try{
+   for(const key of samples){
+    currentSong=clone(findSample(key));practiceSection='all';refreshPracticeSections();build();
+    const seen=new Set(),lines=[],notFull=[];
+    for(const e of events.filter(x=>eHasLyric(x))){
+     const view=lyricWindowAt(e.start+10,18,document.querySelector('#lyricTrack').clientWidth-34);
+     const line=view.items.map((item,j)=>(j&&lyricWordBreakIndices().has(item.i)?' ':'')+String(item.e.lyric).trim()).join('');
+     if(!seen.has(view.start)){seen.add(view.start);lines.push(line)}
+     if(!view.items.some(x=>x.i===e.index))notFull.push(e.index);
+    }
+    const starts=musicalLyricStarts(events.map((e,i)=>({e,i})).filter(x=>eHasLyric(x.e)),lyricWordBreakIndices());
+    results.push({key,lines,hasMusicalPhrases:!!starts,notFull});
+   }
+   currentSong=clone(findSample('twinkle'));practiceSection='4';refreshPracticeSections();build();
+   const section=lyricWindowAt(firstNoteMs()+20,18,document.querySelector('#lyricTrack').clientWidth-34)
+      .items.map((x,j)=>(j&&lyricWordBreakIndices().has(x.i)?' ':'')+x.e.lyric).join('');
+   results.push({key:'twinkle-4bars',lines:[section],hasMusicalPhrases:true,notFull:[]});
+  }finally{
+   currentSong=before.song;practiceSection=before.section;elapsed=before.t;refreshPracticeSections();build();
+  }
+  return results;
+ });
+ const expectTwinkle=[
+  '반짝반짝 작은 별','아름답게 비치네','동쪽 하늘에서도',
+  '서쪽 하늘에서도','반짝반짝 작은 별','아름답게 비치네'
+ ];
+ const songLines=Object.fromEntries(phraseCase.map(x=>[x.key,x.lines]));
+ check(JSON.stringify(songLines.twinkle)===JSON.stringify(expectTwinkle),
+   screen+': small star lyrics not grouped into six SINGABLE lines '+JSON.stringify(songLines.twinkle));
+ check(JSON.stringify(songLines.plane)===JSON.stringify([
+  '떴다 떴다 비행기','날아라 날아라','높이 높이 날아라','우리 비행기'
+ ]),screen+': plane phrases do not match musical cadence '+JSON.stringify(songLines.plane));
+ check(songLines['twinkle-4bars']?.join('')==='아름답게 비치네',
+   screen+': 4-measure practice must show only its musical phrase '+JSON.stringify(songLines['twinkle-4bars']));
+ for(const p of phraseCase){
+  check(p.hasMusicalPhrases&&p.notFull.length===0,screen+': broken phrase grouping '+JSON.stringify(p));
+ }
+ report.push({name:screen+'-sung-phrases',phraseCase});
+
  const end=await page.evaluate(()=>{
   currentSong=clone(findSample('twinkle'));practiceSection='all';refreshPracticeSections();build();
   const lyrics=events.filter(e=>e.lyric);elapsed=lyrics[lyrics.length-6].start+10;updateLyricTrack(true);
