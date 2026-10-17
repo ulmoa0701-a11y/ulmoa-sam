@@ -98,12 +98,17 @@ for(const section of sections){
   const list=$('.plays',section);list.before(controls);
   const buttons=$$('button[data-focus]',controls);
   buttons.forEach(button=>button.addEventListener('click',()=>{
-   const wanted=button.dataset.focus;
-   buttons.forEach(x=>{const active=x===button;x.classList.toggle('is-current',active);x.setAttribute('aria-pressed',String(active))});
-   let visible=0;
-   $$('.play-card-enhanced',list).forEach(card=>{const show=wanted==='all'||card.dataset.focus===wanted;card.hidden=!show;if(show)visible++});
-   $('.garden-filter-count b',controls).textContent=visible;
+    section.dataset.activeFocus=button.dataset.focus;
+    buttons.forEach(x=>{const active=x===button;x.classList.toggle('is-current',active);x.setAttribute('aria-pressed',String(active))});
+    section.dataset.expanded='false';
+    refreshResults();
   }));
+  if(area==='cognitive'){
+    const more=document.createElement('div');more.className='garden-more-wrap';
+    more.innerHTML='<button type="button" class="garden-more-button" aria-expanded="false">더 많은 게임 보기</button>';
+    list.after(more);
+    more.querySelector('button').addEventListener('click',()=>{section.dataset.expanded=String(section.dataset.expanded!=='true');refreshResults()});
+  }
  }
 }
 console.info('Garden discovery ready:',total,'games');
