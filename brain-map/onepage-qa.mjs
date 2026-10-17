@@ -44,12 +44,20 @@ try{
     'real Nanum Pen Script webfont missing: '+JSON.stringify(fontCheck));
   console.log('BRAIN_FONT_QA_'+name+'='+JSON.stringify(fontCheck));
   const photo=page.locator('.brain-one-panel');
-  assert.equal(await page.locator('.lobe-card').count(),6,'six main functions are visible');
+  assert.equal(await page.locator('.lobe-card').count(),6,'approved six main functions are preserved');
+  assert.equal(await page.locator('#lobeDirectory').getAttribute('open'),null,'anatomy detail is collapsed by default');
+  assert.equal(await page.locator('.lobe-science-note').getAttribute('open'),null,'scientific detail initially collapsed');
+  assert.match(await page.locator('.lobe-science-note a').getAttribute('href'),/^https:\/\/www\.ninds\.nih\.gov\//,'primary NINDS source is available');
+  assert.equal(await page.locator('#lobeSceneRead').count(),1,'one optional selected-process read-aloud control');
+  assert.equal(await page.locator('#lobeSceneRead').getAttribute('aria-label'),'현재 선택한 과정과 관련 뇌 부위 설명 듣기');
+  assert.equal(await page.locator('#lobeSceneRead').evaluate(el=>el.getBoundingClientRect().height>=44),true,'read-aloud tap target accessible');
+
   assert.equal(await page.locator('[data-lobe-scene]').count(),8,'all eight existing everyday scenes available beside six-lobe map');
   assert.equal(await page.locator('[data-lobe-scene="talk"]').getAttribute('aria-pressed'),'true','initial daily scene is active');
   assert.equal(await page.locator('#lobeSceneRoles > li').count(),3,'glanceable roles for selected scene');
-  assert.match(await page.locator('#lobeSceneNotice').innerText(),/여러 뇌 영역이 함께 참여해요/,'do not imply only the spotlight area is active');
-  assert.match(await page.locator('#lobeSceneNotice').innerText(),/실제 뇌 활성도나 진단 결과가 아니에요/,'not a brain scan or diagnosis');
+  assert.match(await page.locator('#lobeSceneNotice').innerText(),/여러 부분이 함께 일해요/,'no inactive brain implication');
+  assert.match(await page.locator('#lobeSceneNotice').innerText(),/실제 뇌 활동을 측정한 결과가 아니에요/,'avoid mistaken brain activation claim');
+  assert.match(await page.locator('.lobe-science-note').textContent(),/어려움·뇌 활성도·치료효과를 판단하지 않아요|개인의 원인을 판단하지 않아요/,'scientific limits remain available in optional details');
   assert.equal(await page.locator('.sub-footer > div').count(),1,'footer brand must be valid and grouped in its own div');
   assert.equal(await page.locator('.hemisphere-inline, .hemi-fact, .both-work').count(),0,'no duplicate hemisphere teaser on lobe tab');
   assert.match(await page.locator('.brain-bottom > p').innerText(),/여러 부분은 연결되어 함께 일해요/,'retain one concise cooperation reminder');
@@ -60,6 +68,8 @@ try{
   assert.notEqual(await page.locator('.sub-footer .footer-social').evaluate(el=>getComputedStyle(el).position),'fixed','shared social links must not float over educational content');
   const footerColor=await page.locator('.sub-footer .footer-social a').first().evaluate(el=>getComputedStyle(el).color);
   assert.ok(footerColor==='rgb(241, 248, 242)','social links should have readable contrast on dark footer, got '+footerColor);
+  await page.locator('#lobeDirectory summary').click();
+  assert.equal(await page.locator('#lobeDirectory').getAttribute('open'),'','six-lobe anatomy directory opens when requested');
   const allText=await page.locator('.lobe-list').innerText();
   for(const label of ['전두엽','두정엽','측두엽','후두엽','소뇌','뇌줄기'])assert.ok(allText.includes(label),'missing '+label);
   const fit=await page.evaluate(()=>({
@@ -73,7 +83,7 @@ try{
   assert.ok(fit.scroll<=fit.client+1,'horizontal overflow: '+JSON.stringify(fit));
   assert.ok(fit.cards.every(c=>c.left>=0&&c.right<=width+1&&c.height>=66),'cards clipped: '+JSON.stringify(fit.cards));
   assert.ok(fit.diagram>=250,'brain picture too narrow');
-  if(width>=1020)assert.ok(fit.lastCard<820,'approved six-lobe learning cards must remain near desktop first fold, got '+JSON.stringify(fit));
+  if(width>=1020)assert.ok(fit.diagram>470,'visual diagram must be legible on desktop');
   if(width<500)assert.ok(fit.cards.every(c=>c.height>=(width<=380?64:75)),'mobile touch target too small');
   const textSize=await page.evaluate(()=>({
    cards:parseFloat(getComputedStyle(document.querySelector('.lobe-card small')).fontSize),
@@ -84,19 +94,34 @@ try{
   if(width<=380)assert.equal(textSize.columns,1,'small phones use readable one-column cards');
   if(width<=380){
    const titleHeight=await page.locator('.map-panel-heading h2').evaluate(el=>el.getBoundingClientRect().height);
-   assert.ok(titleHeight<43,'six-lobe heading should not wrap awkwardly on small screens: '+titleHeight);
+   assert.ok(titleHeight<95,'purpose heading should not overflow on narrow screens: '+titleHeight);
   }
+  await page.locator('#lobeDirectory summary').click();
+  assert.equal(await page.locator('#lobeDirectory').getAttribute('open'),null,'daily-life lesson does not require six anatomy cards');
   const sceneLayout=await page.evaluate(()=>{
    const rect=selector=>document.querySelector(selector).getBoundingClientRect().toJSON();
    return {choice:rect('.lobe-scene-choices'),roles:rect('#lobeSceneRoles'),
     focus:rect('#lobeSceneSelection'),svg:rect('#brainMap')};
   });
-  assert.ok(sceneLayout.choice.bottom<sceneLayout.roles.top &&
-   sceneLayout.roles.bottom<sceneLayout.focus.top &&
-   sceneLayout.focus.bottom<sceneLayout.svg.top,
-   'one linear story: scene, choose a role, focus explanation, brain: '+JSON.stringify(sceneLayout));
-  if(width<=390)assert.ok(sceneLayout.svg.top-sceneLayout.choice.bottom<310,
-   'focused story must be compact on phones: '+JSON.stringify(sceneLayout));
+  if(width>=941){
+   assert.ok(sceneLayout.choice.right < sceneLayout.svg.left+24,
+    'desktop everyday tasks should appear beside the brain, not above its faraway result: '+JSON.stringify(sceneLayout));
+  }else{
+   assert.ok(sceneLayout.choice.bottom<sceneLayout.roles.top &&
+    sceneLayout.roles.bottom<sceneLayout.focus.top &&
+    sceneLayout.focus.bottom<sceneLayout.svg.top,
+    'mobile shows one continuous daily task -> process -> explanation -> brain flow: '+JSON.stringify(sceneLayout));
+  }
+  assert.equal(await page.locator('#lobeSceneRoles button').count(),3,'three process choices, not a brain-name test');
+  assert.match(await page.locator('#lobeSceneRoles button').first().locator('b').innerText(),/말소리/,
+   'visible main labels describe everyday processes before anatomy');
+  if(width<=390){
+   const roleFit=await page.locator('#lobeSceneRoles button').evaluateAll(els=>els.map(el=>({
+    w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height,
+    textW:el.querySelector('b').getBoundingClientRect().width
+   })));
+   assert.ok(roleFit.every(x=>x.w>=220&&x.h>=54),'phone uses readable full-width process rows: '+JSON.stringify(roleFit));
+  }
   await page.screenshot({path:out+'/'+name+'-initial.png',fullPage:true});
   const sceneToRegions={
    talk:['temporal','frontal','occipital'],read:['occipital','temporal','frontal'],
@@ -121,16 +146,30 @@ try{
     assert.equal(await page.locator('#brainMap [data-scene-focus]').getAttribute('data-brain-region'),region);
     assert.equal(await page.locator('.lobe-card[data-scene-focus]').getAttribute('data-region'),region);
     const number=await page.locator('#brainMap [data-brain-region="'+region+'"] .zone-number').textContent();
-    const name=await page.locator('.lobe-card[data-region="'+region+'"] strong').innerText();
+    const name=(await page.locator('.lobe-card[data-region="'+region+'"] strong').textContent()).trim();
     const label=await page.locator('#lobeSceneFocusTitle').innerText();
-    assert.ok(label.includes(number.trim())&&label.includes(name),'visible focus label matches original brain: '+label);
+    const hint=await page.locator('#lobeSceneRegionHint').innerText();
+    assert.ok(hint.includes(number.trim())&&hint.includes(name),'area number and name appear as supporting information: '+hint);
+    assert.ok(!label.includes(name),'large focus heading must describe the process, not demand remembering region names: '+label);
+    const processLabel=await choices.nth(step).locator('b').innerText();
+    assert.equal(label,processLabel,'selected process word is the large heading, not an anatomy term: '+key);
+    assert.match(await choices.nth(step).locator('small').innerText(),/관련 영역 예시/,'region details remain clearly secondary');
+
     assert.ok((await page.locator('#lobeSceneFocusText').innerText()).length>18,'specific educational clue, not just a name');
    }
-   await page.waitForTimeout(170);
-   const stroke=await page.locator('#brainMap [data-scene-focus] .zone-shape').evaluate(el=>parseFloat(getComputedStyle(el).strokeWidth));
-   assert.ok(stroke>=14,'active region should clearly stand out: '+stroke);
+   await page.waitForFunction(()=>{
+    const el=document.querySelector('#brainMap [data-scene-focus] .zone-shape');
+    return el&&parseFloat(getComputedStyle(el).strokeWidth)>=10;
+   },{timeout:3000});
+   const strokeInfo=await page.locator('#brainMap [data-scene-focus] .zone-shape').evaluate(el=>({
+    width:getComputedStyle(el).strokeWidth,
+    matched:el.matches('.brain-page .brain-svg[data-scene-mode="focus"] .brain-zone[data-scene-focus] .zone-shape'),
+    mapMode:document.querySelector('#brainMap').getAttribute('data-scene-mode')
+   }));
+   assert.ok(parseFloat(strokeInfo.width)>=10 && strokeInfo.matched,
+    'active outline must be clear after transition: '+JSON.stringify(strokeInfo));
    const unfocusedOpacity=await page.locator('#brainMap [data-brain-region]:not([data-scene-focus])').first().evaluate(el=>parseFloat(getComputedStyle(el).opacity));
-   assert.ok(unfocusedOpacity>=0.5&&unfocusedOpacity<0.9,'other cooperating regions must remain clearly visible: '+unfocusedOpacity);
+   assert.ok(unfocusedOpacity>=0.99,'all other brain regions retain their approved original colors: '+unfocusedOpacity);
    assert.equal(await page.locator('#simpleDetail').isHidden(),true,'no unrelated detailed popup');
    const metrics=await page.evaluate(()=>({
     buttons:[...document.querySelectorAll('[data-lobe-scene],.lobe-scene-role-choice')].map(el=>el.getBoundingClientRect().toJSON()),
@@ -140,10 +179,10 @@ try{
    assert.ok(metrics.scroll<=metrics.client+1,'no horizontal overflow: '+JSON.stringify(metrics));
   }
   await page.locator('[data-lobe-scene="map"]').click();
-  const mapClues=await page.locator('#lobeSceneRoles li').evaluateAll(els=>els.map(el=>el.querySelector('small').textContent));
+  const mapClues=await page.locator('#lobeSceneRoles li').evaluateAll(els=>els.map(el=>el.querySelector('b').textContent));
   const mapRoles=await page.locator('#brainMap [data-scene-related]').evaluateAll(els=>els.map(el=>el.dataset.brainRegion).sort());
   await page.locator('[data-lobe-scene="bag"]').click();
-  const bagClues=await page.locator('#lobeSceneRoles li').evaluateAll(els=>els.map(el=>el.querySelector('small').textContent));
+  const bagClues=await page.locator('#lobeSceneRoles li').evaluateAll(els=>els.map(el=>el.querySelector('b').textContent));
   const bagRoles=await page.locator('#brainMap [data-scene-related]').evaluateAll(els=>els.map(el=>el.dataset.brainRegion).sort());
   assert.deepEqual(mapRoles,bagRoles,'do not fabricate different neural regions for different tasks');
   assert.notDeepEqual(mapClues,bagClues,'same areas should have task-specific clues');
@@ -161,6 +200,8 @@ try{
    console.log('BRAIN_LOBES_PREVIEW_'+name+'='+jpeg.toString('base64'));
   }
   const sixRegions=['frontal','parietal','temporal','occipital','cerebellum','brainstem'];
+  await page.locator('#lobeDirectory summary').click();
+  assert.equal(await page.locator('#lobeDirectory').getAttribute('open'),'','on-demand anatomy panel supports all six detail cards');
   for(const [index,[key,label]] of [['frontal','전두엽'],['parietal','두정엽'],['temporal','측두엽'],['occipital','후두엽'],['cerebellum','소뇌'],['brainstem','뇌줄기']].entries()){
    await page.locator('.lobe-card[data-region="'+key+'"]').click();
    assert.equal(await page.locator('#brainMap [data-scene-active]').count(),0,'individual region selection clears multiregion explanation');
@@ -182,7 +223,8 @@ try{
   }
   await page.screenshot({path:out+'/'+name+'-lobe-detail.png',fullPage:true});
   await page.locator('#detailClose').click();
-  assert.equal(await page.locator('.lobe-card[data-region="brainstem"]').evaluate(el=>document.activeElement===el),true,'close returns keyboard focus to selected card');
+  assert.equal(await page.locator('#lobeSceneRoles button[data-scene-region="parietal"]').evaluate(el=>document.activeElement===el),true,'close restores keyboard focus to the selected everyday process');
+  assert.equal(await page.locator('#lobeDirectory').getAttribute('open'),null,'returns to uncluttered lesson after closing anatomy detail');
   assert.equal(await page.locator('#simpleDetail').isHidden(),true);
   assert.equal(await page.locator('[data-lobe-scene="ball"]').getAttribute('aria-pressed'),'true',
    'closing single-lobe explanation restores the earlier daily-scene context');
@@ -194,6 +236,7 @@ try{
   assert.equal(await page.locator('.lobe-card[data-scene-focus]').count(),1,'exactly one highlighted lobe card returns');
   await page.locator('#brainMap [data-brain-region="occipital"]').click();
   assert.equal(await page.locator('#simpleDetailTitle').innerText(),'후두엽');
+  assert.equal(await page.locator('#lobeDirectory').getAttribute('open'),'','diagram allows requesting anatomy detail without losing it');
   // Newly added native HTML/SVG side-by-side hemispheres view.
   assert.equal(await page.locator('#lobesView').isVisible(),true,'Original six-lobe map is default');
   assert.equal(await page.locator('#hemispheresView').isHidden(),true,'Comparison should not replace the approved default');
