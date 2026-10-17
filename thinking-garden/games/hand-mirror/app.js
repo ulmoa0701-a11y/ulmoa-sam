@@ -53,7 +53,7 @@ function renderGuide(){
  $('game').classList.toggle('is-camera',camera);
  $('viewer').dataset.phase=preview?'memorize':S.phase;
  $('liveTask').hidden=!camera||S.phase==='setup';
- $('liveTitle').textContent=preview?'손 그림을 보고 기억해!':recall?'기억한 손 모양 만들기!':S.phase==='reward'?'🌼 손동작 성공!':goalText();
+ $('liveTitle').textContent=preview?'손 그림을 보고 기억해!':recall?'기억한 손 모양 만들기!':S.phase==='reward'?'🌼 성공!':isGarden()?(S.round%2===0?'주먹을 쥐어 봐!':'손을 활짝 펴 봐!'):goalText();
  $('liveLegend').textContent=recall?'기억한 대로 해볼까?':preview?'노란 손가락 위치도 함께 기억해!':'🟡 노란 손가락 쭉! · 연한 손가락 접기';
  $('guideToggle').hidden=!camera||recall;
  $('cameraHold').hidden=!camera||preview||S.phase==='setup';
@@ -122,7 +122,7 @@ function gardenUpdate(){
 }
 function modeSelected(m){S.mode=m;document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));}
 function taskOptions(){
- const types=S.mode==='both'?[['palm','palm'],['fist','fist'],['palm','fist'],['one','one']]:POSES.map(p=>[p]);
+ const types=isGarden()?[['fist'],['palm']]:S.mode==='both'?[['palm','palm'],['fist','fist'],['palm','fist'],['one','one']]:POSES.map(p=>[p]);
  const options=$('choices');options.replaceChildren();
  for(const typeset of types){const b=document.createElement('button');b.type='button';b.className='choice';b.dataset.pose=typeset.join(',');
  const icon=document.createElement('span');icon.className='choice-art';icon.innerHTML=typeset.map(p=>handArt(p)).join('');
@@ -147,7 +147,7 @@ function render(){
  $('taskTitle').textContent=isMemory()?'🧠 순서를 기억해 볼까?':MODE[S.mode];
  $('targetEmoji').innerHTML=memoryPreview?current().map(p=>handArt(p)).join('<span style="font-size:25px">→</span>'):isMemory()?'❔':currentGoal().map(p=>handArt(p)).join('');
  $('targetEmoji').classList.toggle('has-hands',!isMemory()||memoryPreview);
- $('targetTitle').textContent=memoryPreview?'동작 '+current().length+'개 기억하기':isMemory()?(S.part+1)+'번째 손동작!':goalText();
+ $('targetTitle').textContent=memoryPreview?'동작 '+current().length+'개 기억하기':isMemory()?(S.part+1)+'번째 손동작!':isGarden()?(S.round%2===0?'주먹으로 씨앗 잡기':'손 펴서 꽃 피우기'):goalText();
  $('targetHelp').textContent=memoryPreview?'다 살펴봤으면 아래 버튼을 눌러!':isMemory()?'방금 본 모양을 기억해서 만들어 봐!':isCamera()?'반투명 그림은 참고용! 똑같은 자리에 놓지 않아도 돼.':'모양을 흉내 내며 답을 골라 봐!';
  $('ready').hidden=!memoryPreview;
  $('next').hidden=true;
