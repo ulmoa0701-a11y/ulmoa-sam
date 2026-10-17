@@ -43,6 +43,11 @@ async function capture(id,url,{native=false}={}){
   // Wait for readable Korean webfonts before screenshotting game text.
   await page.evaluate(async()=>{if(document.fonts?.ready)await document.fonts.ready;});
   await page.waitForTimeout(450);
+  if(id==='rescue'){
+   // Its Phaser game now waits for Korean font loading before creating the canvas.
+   try {await page.locator('#game canvas').first().waitFor({state:'visible',timeout:10000});await page.waitForTimeout(450);}
+   catch {entry.errors.push('rescue canvas unavailable after Korean font readiness');}
+  }
   if(native){
    entry.preview=await snap(page,'#introPreview',id);
    const start=page.locator('#introStart');
