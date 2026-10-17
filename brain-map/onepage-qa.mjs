@@ -45,6 +45,10 @@ try{
   console.log('BRAIN_FONT_QA_'+name+'='+JSON.stringify(fontCheck));
   const photo=page.locator('.brain-one-panel');
   assert.equal(await page.locator('.lobe-card').count(),6,'six main functions are visible');
+  assert.equal(await page.locator('[data-lobe-scene]').count(),8,'all eight existing everyday scenes available beside six-lobe map');
+  assert.equal(await page.locator('[data-lobe-scene="talk"]').getAttribute('aria-pressed'),'true','initial daily scene is active');
+  assert.equal(await page.locator('#lobeSceneRoles > li').count(),3,'glanceable roles for selected scene');
+  assert.match(await page.locator('#lobeSceneNotice').innerText(),/실제 뇌 활성도나 모든 관련 부위를 나타낸 그림은 아니에요/,'do not mistake highlighted roles for measured brain activation');
   assert.equal(await page.locator('.sub-footer > div').count(),1,'footer brand must be valid and grouped in its own div');
   assert.equal(await page.locator('.hemisphere-inline, .hemi-fact, .both-work').count(),0,'no duplicate hemisphere teaser on lobe tab');
   assert.match(await page.locator('.brain-bottom > p').innerText(),/여러 부분은 연결되어 함께 일해요/,'retain one concise cooperation reminder');
@@ -62,12 +66,13 @@ try{
    cards:[...document.querySelectorAll('.lobe-card')].map(x=>{let b=x.getBoundingClientRect();return{left:b.left,right:b.right,height:b.height}}),
    title:document.querySelector('.map-intro h1')?.getBoundingClientRect().top,
    bottom:document.querySelector('.brain-bottom')?.getBoundingClientRect().top,
+   lastCard:document.querySelector('.lobe-card[data-region="brainstem"]')?.getBoundingClientRect().bottom,
    diagram:document.querySelector('#brainMap')?.getBoundingClientRect().width
   }));
   assert.ok(fit.scroll<=fit.client+1,'horizontal overflow: '+JSON.stringify(fit));
   assert.ok(fit.cards.every(c=>c.left>=0&&c.right<=width+1&&c.height>=66),'cards clipped: '+JSON.stringify(fit.cards));
   assert.ok(fit.diagram>=250,'brain picture too narrow');
-  if(width>=1020)assert.ok(fit.bottom<820,'lobe map summary must be near desktop first fold, got '+fit.bottom);
+  if(width>=1020)assert.ok(fit.lastCard<820,'approved six-lobe learning cards must remain near desktop first fold, got '+JSON.stringify(fit));
   if(width<500)assert.ok(fit.cards.every(c=>c.height>=(width<=380?64:75)),'mobile touch target too small');
   const textSize=await page.evaluate(()=>({
    cards:parseFloat(getComputedStyle(document.querySelector('.lobe-card small')).fontSize),
@@ -81,6 +86,40 @@ try{
    assert.ok(titleHeight<43,'six-lobe heading should not wrap awkwardly on small screens: '+titleHeight);
   }
   await page.screenshot({path:out+'/'+name+'-initial.png',fullPage:true});
+  const sceneToRegions={
+   talk:['frontal','temporal','occipital'],read:['frontal','temporal','occipital'],
+   map:['frontal','parietal','occipital'],ball:['parietal','occipital','cerebellum'],
+   music:['frontal','temporal','cerebellum'],draw:['frontal','parietal','occipital'],
+   bag:['frontal','parietal','occipital'],feeling:['frontal','temporal','occipital']
+  };
+  const scenes=['talk','read','map','ball','music','draw','bag','feeling'];
+  for(const key of scenes){
+   await page.locator('[data-lobe-scene="'+key+'"]').click();
+   assert.equal(await page.locator('[data-lobe-scene="'+key+'"]').getAttribute('aria-pressed'),'true',
+    'selected scene is announced: '+key);
+   assert.equal(await page.locator('[data-lobe-scene][aria-pressed="true"]').count(),1,'exactly one scene selected: '+key);
+   assert.equal(await page.locator('#lobeSceneRoles li').count(),3,'three concise brain role clues: '+key);
+   const selected=await page.locator('#brainMap [data-scene-active]').evaluateAll(els=>els.map(el=>el.dataset.brainRegion).sort());
+   assert.deepEqual(selected,sceneToRegions[key].slice().sort(),'correct explanatory brain regions: '+key);
+   assert.equal(await page.locator('#simpleDetail').isHidden(),true,'scene does not show unrelated single-region detail');
+   const metrics=await page.evaluate(()=>({
+    buttons:[...document.querySelectorAll('[data-lobe-scene]')].map(el=>el.getBoundingClientRect().toJSON()),
+    roles:[...document.querySelectorAll('#lobeSceneRoles li')].map(el=>el.getBoundingClientRect().toJSON()),
+    scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth
+   }));
+   assert.ok(metrics.buttons.every(x=>x.height>=44&&x.left>=0&&x.right<=width+1),
+    'scene buttons must remain accessible and not clipped: '+JSON.stringify(metrics));
+   assert.ok(metrics.roles.every(x=>x.width>=60&&x.left>=0&&x.right<=width+1),
+    'visual roles must remain visible: '+JSON.stringify(metrics));
+   assert.ok(metrics.scroll<=metrics.client+1,'scene detail should not cause page overflow: '+JSON.stringify(metrics));
+  }
+  await page.locator('[data-lobe-scene="ball"]').click();
+  await page.screenshot({path:out+'/'+name+'-scene-ball.png',fullPage:true});
+  if(name==='desktop'||name==='mobile'){
+   const preview=await page.locator('.lobe-figure').screenshot({type:'jpeg',quality:55,animations:'disabled'});
+   console.log('BRAIN_SCENE_PREVIEW_'+name+'='+preview.toString('base64'));
+  }
+
   if(name==='desktop'||name==='small-mobile'){
    const jpeg=await page.screenshot({type:'jpeg',quality:45,animations:'disabled'});
    console.log('BRAIN_LOBES_PREVIEW_'+name+'='+jpeg.toString('base64'));
@@ -88,6 +127,8 @@ try{
   const sixRegions=['frontal','parietal','temporal','occipital','cerebellum','brainstem'];
   for(const [index,[key,label]] of [['frontal','전두엽'],['parietal','두정엽'],['temporal','측두엽'],['occipital','후두엽'],['cerebellum','소뇌'],['brainstem','뇌줄기']].entries()){
    await page.locator('.lobe-card[data-region="'+key+'"]').click();
+   assert.equal(await page.locator('#brainMap [data-scene-active]').count(),0,'individual region selection clears multiregion explanation');
+   assert.equal(await page.locator('#lobeSceneResult').isHidden(),true,'scene role panel folds when examining an individual area');
    assert.equal(await page.locator('#simpleDetail').isVisible(),true);
    assert.equal(await page.locator('#simpleDetailTitle').innerText(),label);
    assert.equal(await page.locator('.lobe-card[data-region="'+key+'"]').getAttribute('aria-pressed'),'true');
@@ -117,6 +158,10 @@ try{
   assert.equal(await page.locator('.hemi-ability-list').count(),2);
   assert.equal(await page.locator('.hemi-ability-list li').count(),8,'four concrete features per side');
   assert.equal(await page.locator('.hemi-team-examples button').count(),8,'eight selectable daily-life scenarios');
+  await page.locator('[data-brain-scene="music"]').click();
+  assert.equal(await page.locator('[data-lobe-scene="music"]').getAttribute('aria-pressed'),'true',
+    'existing scenario buttons keep lobe diagram synchronized');
+  await page.locator('[data-brain-scene="talk"]').click();
   assert.equal(await page.locator('#hemiMascot').count(),1,'brand character graphic exists');
   assert.equal(await page.locator('#hemiMoaOriginal').count(),1,'original Moa image is rendered, not recreated');
   assert.equal(await page.locator('#hemiMoaOriginal').getAttribute('href'),'../thinking-garden/assets/moa-default.png','must use the existing Moa asset');
