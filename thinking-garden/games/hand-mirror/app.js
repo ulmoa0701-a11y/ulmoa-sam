@@ -54,12 +54,21 @@ function renderGuide(){
  $('viewer').dataset.phase=preview?'memorize':S.phase;
  $('liveTask').hidden=!camera||S.phase==='setup';
  $('liveTitle').textContent=preview?'손 그림을 보고 기억해!':recall?'기억한 손 모양 만들기!':S.phase==='reward'?'🌼 성공!':isGarden()?(S.round%2===0?'주먹을 쥐어 봐!':'손을 활짝 펴 봐!'):goalText();
- $('liveLegend').textContent=recall?'기억한 대로 해볼까?':preview?'노란 손가락 위치도 함께 기억해!':'🟡 노란 손가락 쭉! · 연한 손가락 접기';
+ $('liveLegend').textContent=recall?'기억한 대로 해볼까?':preview?'손 모양 순서를 기억해!':isGarden()?'모아의 손 모양을 따라 해봐!':'🟡 노란 손가락 쭉! · 연한 손가락 접기';
  $('guideToggle').hidden=!camera||recall;
  $('cameraHold').hidden=!camera||preview||S.phase==='setup';
- $('ghostGuides').hidden=!active||!S.guideVisible;
- $('ghostGuides').classList.toggle('is-hidden',!active||!S.guideVisible);
- if(!active){$('ghostGuides').replaceChildren();return;}
+ $('ghostGuides').hidden=!active||!S.guideVisible||isGarden();
+ $('ghostGuides').classList.toggle('is-hidden',!active||!S.guideVisible||isGarden());
+ const showLiveModel=active&&isGarden()&&S.guideVisible&&S.phase!=='reward';
+ $('modelCard').hidden=!showLiveModel;
+ if(showLiveModel){
+  const target=currentGoal()[0];
+  $('modelSymbol').textContent=target==='fist'?'✊':target==='palm'?'✋':core.EMOJI[target];
+  $('modelTitle').textContent=target==='fist'?'주먹 쥐기':target==='palm'?'손바닥 펴기':core.TITLES[target];
+  $('modelCard').dataset.pose=target;
+ }
+ $('liveCompare').hidden=!camera||!S.cameraReady||S.phase!=='play';
+ if(!active||isGarden()){$('ghostGuides').replaceChildren();return;}
  const poses=preview?current():currentGoal();
  $('ghostGuides').innerHTML=poses.map((p,i)=>gestureFigure(p,preview?'순서 '+(i+1):poses.length>1?(i===0?'첫 손':'다음 손'):'')).join('');
  $('ghostGuides').classList.toggle('is-matched',S.phase==='reward');
@@ -83,7 +92,7 @@ function stopCamera(){
  video.srcObject=null;
  if(S.model){try{S.model.close()}catch(e){}S.model=null;}
  S.camHands=[];S.lastFrame=-1;S.matchSince=0;S.lastObserved=0;S.loading=false;
- $('viewer').dataset.match='no';$('cameraHoldFill').style.width='0%';
+ $('viewer').dataset.match='no';$('cameraHoldFill').style.width='0%';$('liveCompare').hidden=true;$('modelCard').hidden=true;
  const c=canvas.getContext('2d');c.clearRect(0,0,canvas.width,canvas.height);
 }
 function showCameraProblem(title,detail){
@@ -142,7 +151,7 @@ function render(){
  const preparing=isCamera()&&!S.cameraReady;
  const memoryPreview=isMemory()&&S.phase==='memorize';
  $('roundLabel').textContent=(S.round+1)+' / '+ROUNDS[S.mode].length;
- $('flowerLabel').textContent='🌼 '+S.success;
+ $('flowerLabel').textContent=isGarden()?'🌼 '+Math.floor(S.success/2)+' / 3':'🌼 '+S.success;
  $('viewName').textContent=MODE[S.mode];$('kindBadge').textContent=isCamera()?'📷 손 인식':'👆 화면 정답 고르기';
  $('taskTitle').textContent=isMemory()?'🧠 순서를 기억해 볼까?':MODE[S.mode];
  $('targetEmoji').innerHTML=memoryPreview?current().map(p=>handArt(p)).join('<span style="font-size:25px">→</span>'):isMemory()?'❔':currentGoal().map(p=>handArt(p)).join('');
@@ -162,6 +171,7 @@ function render(){
  $('targetPanel').hidden=isCamera();
  $('cameraHoldFill').style.width='0%';
  $('viewer').dataset.match='no';
+ $('liveCompare').hidden=true;
  renderGuide();
  $('placeholder').hidden=isCamera()&&S.model!==null;
  if(!isCamera())$('placeholder').innerHTML='<span class="hand">👀</span>모양을 흉내 내면서 아래에서 답을 골라 줘!';
@@ -220,11 +230,51 @@ function drawHands(hands){
  if(!w||!h||!video.videoWidth||!video.videoHeight)return;
  const scale=Math.max(w/video.videoWidth,h/video.videoHeight),offX=(w-video.videoWidth*scale)/2,offY=(h-video.videoHeight*scale)/2;
  function xy(p){let x=offX+p.x*video.videoWidth*scale;return [S.facing==='user'?w-x:x,offY+p.y*video.videoHeight*scale]}
- for(const hand of hands){
-  ctx.lineWidth=3;ctx.strokeStyle='#aaffda';ctx.shadowBlur=5;ctx.shadowColor='#1e7555';
+ const teaching=isCamera()&&S.cameraReady&&S.phase==='play';
+ const targets=teaching?currentGoal():[];
+ let topFeedback=null;
+ hands.forEach((hand,handIndex)=>{
+  if(handIndex===0&&isGarden()&&!$('modelCard').hidden){
+   // Keep the sample on the opposite side from the child's detected palm.
+   $('modelCard').dataset.side=xy(hand[9])[0]>w*.52?'left':'right';
+  }
+  // The fine-grained overlay follows the child's detected joints, rather than asking the child to align with a fixed sticker.
+  ctx.shadowBlur=0;ctx.lineWidth=3.6;ctx.strokeStyle='#54f2b5';ctx.lineJoin='round';ctx.lineCap='round';
   for(const [a,b] of CONNECTIONS){const q=xy(hand[a]),r=xy(hand[b]);ctx.beginPath();ctx.moveTo(...q);ctx.lineTo(...r);ctx.stroke();}
-  ctx.shadowBlur=0;for(const t of [4,8,12,16,20]){const [x,y]=xy(hand[t]);ctx.beginPath();ctx.arc(x,y,7,0,Math.PI*2);ctx.fillStyle='#ffecab';ctx.fill();ctx.strokeStyle='#337e61';ctx.lineWidth=2;ctx.stroke();}
- }
+  const goal=targets[Math.min(handIndex,targets.length-1)];
+  const feedback=goal?core.fingerFeedback(hand,goal):null;
+  if(handIndex===0&&feedback)topFeedback=feedback;
+  const joints=core.FINGER_JOINTS;
+  for(let finger=0;finger<4;finger++){
+   const tip=xy(hand[joints[finger][2]]);
+   const good=feedback?feedback.matched[finger]:true;
+   ctx.beginPath();ctx.arc(tip[0],tip[1],good?8:11,0,Math.PI*2);
+   ctx.fillStyle=good?'#27d28a':'#ffb93d';ctx.fill();
+   ctx.lineWidth=3;ctx.strokeStyle='#fff';ctx.stroke();
+   if(!feedback||good)continue;
+   const [m,p]=joints[finger],base=xy(hand[m]),pip=xy(hand[p]);
+   let dx=pip[0]-base[0],dy=pip[1]-base[1];
+   const len=Math.hypot(dx,dy)||1;
+   dx/=len;dy/=len;
+   const multiplier=feedback.expected[finger]?Math.max(44,Math.min(115,len*2.55)):Math.max(12,Math.min(33,len*.68));
+   const cx=Math.max(13,Math.min(w-13,base[0]+dx*multiplier));
+   const cy=Math.max(13,Math.min(h-13,base[1]+dy*multiplier));
+   ctx.save();ctx.setLineDash([5,5]);ctx.lineWidth=3;ctx.strokeStyle='#ffe072';
+   ctx.beginPath();ctx.moveTo(tip[0],tip[1]);ctx.lineTo(cx,cy);ctx.stroke();ctx.restore();
+   ctx.beginPath();ctx.arc(cx,cy,9,0,Math.PI*2);ctx.fillStyle='#ffef7a';ctx.fill();
+   ctx.lineWidth=3;ctx.strokeStyle='#ab6819';ctx.stroke();
+  }
+ });
+ if(teaching&&topFeedback){
+  const state=topFeedback.count===4?'good':topFeedback.unknown>0?'uncertain':'adjust';
+  const requested=targets[0];
+  const cue=state==='good'?'좋아! 그대로 잠깐 유지해 봐!':state==='uncertain'?'손가락이 잘 보이게 손을 조금 돌려 봐!':requested==='fist'?'주황 점이 있는 손가락을 접어 봐!':requested==='palm'?'주황 점이 있는 손가락을 더 펴 봐!':'주황 점이 있는 손가락을 조절해 봐!';
+  const count='내 손 '+topFeedback.count+' / 4';
+  $('liveCompare').hidden=false;
+  $('liveCompare').dataset.state=state;
+  if($('liveCompareTitle').textContent!==count)$('liveCompareTitle').textContent=count;
+  if($('liveCompareCue').textContent!==cue)$('liveCompareCue').textContent=cue;
+ }else $('liveCompare').hidden=true;
 }
 function tick(){
  if(!isCamera()||!S.model||S.phase==='intro')return;
@@ -315,7 +365,7 @@ function fakePose(kind){
 function accept(){
  if(S.phase!=='play')return;
  S.phase='reward';S.matchSince=0;S.success++;sound();
- $('meter').style.width='100%';$('cameraHoldFill').style.width='100%';$('flowerLabel').textContent='🌼 '+S.success;
+ $('meter').style.width='100%';$('cameraHoldFill').style.width='100%';$('flowerLabel').textContent=isGarden()?'🌼 '+Math.floor(S.success/2)+' / 3':'🌼 '+S.success;
  $('choices').hidden=true;$('ready').hidden=true;
  if(isMemory()){
   const correct=current()[S.part];
