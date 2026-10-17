@@ -57,7 +57,7 @@ jobs:
         run: node qa/curated-all-games-smoke.cjs
       - name: Clinical transfer and adaptive training
         run: node qa/clinical-adaptive-qa.cjs
-      - name: Naming quest stimulus and feedback QA (5/10/15/20)
+      - name: Native garden quests (naming 6/12/18/24, pauses, shapes)
         run: node qa/garden-name-quest-qa.cjs
       - name: Screenshots
         if: always()
