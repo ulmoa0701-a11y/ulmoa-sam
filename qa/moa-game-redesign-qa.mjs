@@ -40,10 +40,16 @@ for(const width of [390,1366]){
    if(width===390&&['hide','memory','calm','slowBlock','mirrorPond'].includes(id))
     await page.screenshot({path:path.join(artifact,id+'-mobile.png'),fullPage:false});
    if(id==='hide'){
-    const clues=await page.locator('.leaf-has-clue').count();
-    check(clues>=2,width+' leaf game has no observable clues');
-    check(await page.locator('.leaf-no-clue').count()>=1,width+' leaves need distractors');
-   }
+     const clues=await page.locator('.leaf-has-clue').count();
+     check(clues>=2,width+' leaf game has no observable clues');
+     check(await page.locator('.leaf-no-clue').count()>=1,width+' leaves need distractors');
+     check(await page.locator('.leaf-example').isVisible(),width+' leaf clue needs picture-only example');
+     check((await page.locator('.leaf-has-clue .leaf-trail').first().textContent()).includes('🐾'),width+' footprint should be recognizable');
+     await page.locator('.leaf-no-clue').first().click();
+     check((await page.locator('#miniCount').textContent()).includes('0 /'),width+' empty leaf must not count');
+     await page.locator('.leaf-has-clue').first().click();
+     check((await page.locator('#miniCount').textContent()).includes('1 /'),width+' clue-based leaf must count');
+    }
    if(id==='sameShape')check(await page.locator('.shape-adventure .shape-target').count()===1,width+' shape target is not visually separated');
    if(id==='flower'){
     check(await page.locator('.flower-basket').count()===1,width+' flower basket missing');
@@ -59,12 +65,12 @@ for(const width of [390,1366]){
     check(await page.locator('#paintGrid i').count()>=12,width+' paint cells missing');
     await page.evaluate(()=>{
       const cells=document.querySelectorAll('#paintGrid i'),grid=document.querySelector('#paintGrid');
-      const first=cells[0].getBoundingClientRect(),second=cells[1].getBoundingClientRect();
-      cells[0].dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'touch',clientX:first.x+first.width/2,clientY:first.y+first.height/2}));
-      grid.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerType:'touch',clientX:second.x+second.width/2,clientY:second.y+second.height/2}));
-      grid.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch',clientX:second.x+second.width/2,clientY:second.y+second.height/2}));
+      const first=cells[0].getBoundingClientRect(),fourth=cells[3].getBoundingClientRect();
+       cells[0].dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'touch',pointerId:1,clientX:first.x+first.width/2,clientY:first.y+first.height/2}));
+       grid.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerType:'touch',pointerId:1,clientX:fourth.x+fourth.width/2,clientY:fourth.y+fourth.height/2}));
+       grid.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch',pointerId:1,clientX:fourth.x+fourth.width/2,clientY:fourth.y+fourth.height/2}));
     });
-    check(await page.locator('#paintGrid i.painted').count()>=2,width+' touch drag failed to fill two cells');
+    check(await page.locator('#paintGrid i.painted').count()>=4,width+' fast touch drag skipped an intermediate cell');
    }
    check(errors.length===0,width+' '+id+' JavaScript errors '+errors.join('; '));
    results.push({id,width,result:'checked'});
