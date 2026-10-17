@@ -265,6 +265,14 @@ function drawHands(hands){
  if(isGarden())syncAcornUI();
  const teaching=isCamera()&&S.cameraReady&&S.phase==='play';
  const targets=teaching?currentGoal():[];
+ // The two-hand game scores left/right in either order. Match the visual coaching
+ // to whichever assignment fits the child's observed hands best.
+ let goalsForHands=targets;
+ if(targets.length===2&&hands.length===2){
+  const score=(a,b)=>core.fingerFeedback(hands[a],targets[b])?.count||0;
+  const straight=score(0,0)+score(1,1),reversed=score(0,1)+score(1,0);
+  if(reversed>straight)goalsForHands=[targets[1],targets[0]];
+ }
  let topFeedback=null;
  hands.forEach((hand,handIndex)=>{
   if(handIndex===0){
@@ -282,7 +290,7 @@ function drawHands(hands){
   // The fine-grained overlay follows the child's detected joints, rather than asking the child to align with a fixed sticker.
   ctx.shadowBlur=0;ctx.lineWidth=3.6;ctx.strokeStyle='#54f2b5';ctx.lineJoin='round';ctx.lineCap='round';
   for(const [a,b] of CONNECTIONS){const q=xy(hand[a]),r=xy(hand[b]);ctx.beginPath();ctx.moveTo(...q);ctx.lineTo(...r);ctx.stroke();}
-  const goal=targets[Math.min(handIndex,targets.length-1)];
+  const goal=goalsForHands[Math.min(handIndex,goalsForHands.length-1)];
   const feedback=goal?core.fingerFeedback(hand,goal):null;
   if(handIndex===0&&feedback)topFeedback=feedback;
   const joints=core.FINGER_JOINTS;
