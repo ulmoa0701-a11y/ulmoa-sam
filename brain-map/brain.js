@@ -54,54 +54,74 @@
   bag:['물건의 모양과 색을 볼 때 시각 정보를 처리해요.','물건이 놓인 자리와 가방 안의 공간을 살펴봐요.','순서를 정하고 빠진 물건이 있는지 확인할 때 함께해요.'],
   feeling:['목소리와 말투처럼 들리는 단서를 처리해요.','얼굴과 표정처럼 보이는 단서를 처리해요.','여러 단서와 상황을 함께 생각하고 반응을 조절해요.']
  };
- if(nodes.length!==6||shapes.length!==6||![detail,title,text,icon,close,lobeSceneTitle,lobeSceneRoles,lobeSceneResult,lobeSceneSelection,lobeSceneCurrent,lobeSceneSelectedRegions,brainMap].every(Boolean)||lobeSceneButtons.length!==8)return;
+ if(nodes.length!==6||shapes.length!==6||![detail,title,text,icon,close,lobeSceneTitle,
+  lobeSceneRoles,lobeSceneResult,lobeSceneSelection,lobeSceneCurrent,
+  lobeSceneFocusTitle,lobeSceneFocusText,brainMap].every(Boolean)||lobeSceneButtons.length!==8)return;
  function clearLobeScene(){
-  shapes.forEach(g=>g.removeAttribute('data-scene-active'));
-  nodes.forEach(node=>node.removeAttribute('data-scene-example'));
+  shapes.forEach(g=>{g.removeAttribute('data-scene-active');g.removeAttribute('data-scene-focus');g.removeAttribute('data-scene-related');});
+  nodes.forEach(node=>{node.removeAttribute('data-scene-example');node.removeAttribute('data-scene-focus');});
   brainMap.removeAttribute('data-scene-mode');
   lobeSceneButtons.forEach(button=>button.setAttribute('aria-pressed','false'));
   lobeSceneResult.hidden=true;
   lobeSceneSelection.hidden=true;
  }
- function selectLobeScene(key){
-  const scene=lobeScenes[key];
-  if(!scene)return;
-  lastLobeScene=key;
+ function focusSceneRegion(region){
+  const scene=lobeScenes[lastLobeScene];
+  const index=scene.roles.findIndex(role=>role[0]===region);
+  if(index<0)return;
+  lastFocusRegion=region;
+  lobeSceneCurrent.textContent=scene.title+' · 세 역할 중 '+(index+1)+'번째';
+  lobeSceneFocusTitle.textContent=regionMarkers[region].number+' '+data[region].name;
+  lobeSceneFocusText.textContent=focusExplainers[lastLobeScene][index];
+  lobeSceneSelection.hidden=false;
+  const related=new Set(scene.roles.map(role=>role[0]));
+  shapes.forEach(g=>{
+   const focused=g.dataset.brainRegion===region;
+   g.toggleAttribute('data-scene-focus',focused);
+   g.toggleAttribute('data-scene-active',focused);
+   g.toggleAttribute('data-scene-related',related.has(g.dataset.brainRegion));
+  });
+  nodes.forEach(node=>{
+   node.toggleAttribute('data-scene-focus',node.dataset.region===region);
+   node.toggleAttribute('data-scene-example',node.dataset.region===region);
+  });
+  brainMap.setAttribute('data-scene-mode','focus');
+  lobeSceneRoles.querySelectorAll('button[data-scene-region]').forEach(button=>{
+   button.setAttribute('aria-pressed',String(button.dataset.sceneRegion===region));
+  });
+ }
+ function selectLobeScene(key,preferredRegion){
+  const scene=lobeScenes[key];if(!scene)return;
   reset();
+  lastLobeScene=key;
   lobeSceneResult.hidden=false;
   lobeSceneSelection.hidden=false;
-  lobeSceneTitle.textContent=scene.title;
-  lobeSceneCurrent.textContent='지금 선택: '+scene.title;
-  lobeSceneSelectedRegions.replaceChildren();
+  lobeSceneTitle.textContent=scene.title+' · 함께하는 역할 세 가지';
   lobeSceneRoles.replaceChildren();
-  const selected=new Set(scene.roles.map(([region])=>region));
   for(const [region,emoji,task] of scene.roles){
-   const chip=document.createElement('span');
-   chip.className='lobe-scene-selected-chip';
-   chip.style.setProperty('--scene-lobe-color',regionMarkers[region].color);
-   chip.textContent=regionMarkers[region].number+' '+data[region].name;
-   lobeSceneSelectedRegions.append(chip);
-   const row=document.createElement('li');
+   const li=document.createElement('li');
+   const button=document.createElement('button');
+   button.type='button';button.className='lobe-scene-role-choice';
+   button.dataset.sceneRegion=region;
+   button.setAttribute('aria-controls','lobeSceneSelection brainMap');
    const number=document.createElement('span');
-   number.className='lobe-scene-number';
-   number.setAttribute('aria-hidden','true');
+   number.className='lobe-scene-number';number.setAttribute('aria-hidden','true');
    number.textContent=regionMarkers[region].number;
    number.style.setProperty('--scene-lobe-color',regionMarkers[region].color);
    const symbol=document.createElement('span');
-   symbol.className='lobe-scene-task-icon';
-   symbol.setAttribute('aria-hidden','true');symbol.textContent=emoji;
+   symbol.className='lobe-scene-task-icon';symbol.setAttribute('aria-hidden','true');symbol.textContent=emoji;
    const copy=document.createElement('span');
    copy.className='lobe-scene-role-copy';
    const name=document.createElement('b');name.textContent=data[region].name;
-   const explanation=document.createElement('small');explanation.textContent=task;
-   copy.append(name,explanation);row.append(number,symbol,copy);lobeSceneRoles.append(row);
+   const label=document.createElement('small');label.textContent=task;
+   copy.append(name,label);button.append(number,symbol,copy);
+   button.addEventListener('click',()=>focusSceneRegion(region));
+   li.append(button);lobeSceneRoles.append(li);
   }
-  shapes.forEach(g=>g.toggleAttribute('data-scene-active',selected.has(g.dataset.brainRegion)));
-  nodes.forEach(node=>node.toggleAttribute('data-scene-example',selected.has(node.dataset.region)));
-  brainMap.setAttribute('data-scene-mode','active');
   lobeSceneButtons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.lobeScene===key)));
+  const focus=scene.roles.some(role=>role[0]===preferredRegion)?preferredRegion:scene.roles[0][0];
+  focusSceneRegion(focus);
  }
-
  function moveDetailNearSelection(key){
   const index=nodes.findIndex(b=>b.dataset.region===key);
   if(index<0)return;
@@ -150,7 +170,7 @@
  close.addEventListener('click',()=>{
   const selected=nodes.find(b=>b.getAttribute('aria-pressed')==='true');
   reset();
-  selectLobeScene(lastLobeScene);
+  selectLobeScene(lastLobeScene,lastFocusRegion);
   // Restore the earlier scene, with focus back at the opened brain part.
   if(selected)selected.focus({preventScroll:true});
  });
