@@ -29,7 +29,7 @@ const assert=require('node:assert/strict');
       await page.locator('#practiceContinue').waitFor();
       await page.locator('#practiceContinue').click();
      }
-     if(round+1<length)await page.locator('.slow-name-picture').waitFor();
+     if(round+1<length)await page.waitForFunction(next=>state.round===next&&!state.advancing&&!!document.querySelector('.slow-name-picture'),round+1);
     }
     await page.locator('#resultScreen.active').waitFor();
     assert.equal((await page.evaluate(()=>state.slowLook.records)).length,length,'missing clinical observations');
