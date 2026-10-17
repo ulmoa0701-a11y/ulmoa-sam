@@ -46,7 +46,7 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  await page.goto(base+'/thinking-garden/?category=visual&view=learn',{waitUntil:'networkidle'});
  check(await page.locator('.category-tab[data-category="visual"].active').count()===1&&await page.locator('#gardenResourcePanel').isVisible(),name+': shared topic/view deep link does not restore UI');
  await page.goto(base+'/music-garden/',{waitUntil:'networkidle'});
- check(await page.locator('#gardenGamePanel .game-card').count()===2,name+': original music games missing');
+ check(await page.locator('#gardenGamePanel .game-card').count()===3,name+': three current music activities must remain');
  check(await page.locator('[data-garden-topic]').count()>=6,name+': music topic filters missing');
  await page.locator('button[data-garden-topic="notation"]').click();
  check(await page.locator('[data-garden-view="materials"]').getAttribute('aria-selected')==='true',name+': notation without dedicated game must show real scores');
@@ -60,7 +60,7 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  await page.locator('[data-garden-view="games"]').click();
  check(await page.locator('.game-card:visible').count()===1&&await page.locator('.recorder-card:visible').count()===1,name+': recorder game link hidden or wrong');
  await page.locator('button[data-garden-topic="rhythm"]').click();
- check(await page.locator('.game-card:visible').count()===1&&await page.locator('.rhythm-card:visible').count()===1,name+': rhythm game link hidden or wrong');
+ check(await page.locator('.game-card:visible').count()===2&&await page.locator('.rhythm-card:visible').count()===1&&await page.locator('.beat-card:visible').count()===1,name+': both rhythm activities must remain visible');
  await page.goto(base+'/music-garden/?topic=notation&view=learn',{waitUntil:'networkidle'});
  check(await page.locator('[data-garden-topic="notation"].active').count()===1&&await page.locator('[data-garden-view="learn"].active').count()===1,name+': music deep links not respected');
  const layout=await page.evaluate(()=>{
