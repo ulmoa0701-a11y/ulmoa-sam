@@ -583,7 +583,7 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
  }
  const end=await page.evaluate(()=>{
   currentSong=clone(findSample('twinkle'));practiceSection='all';refreshPracticeSections();build();
-  const lyrics=events.filter(e=>e.lyric);elapsed=lyrics[lyrics.length-3].start+10;updateLyricTrack(true);
+  const lyrics=events.filter(e=>e.lyric);elapsed=lyrics[lyrics.length-6].start+10;updateLyricTrack(true);
   return document.querySelector('#lyricTrack').getAttribute('aria-label');
  });
  check(end.includes('아름답게')&&!end.startsWith('름답게'),screen+': little star last line starts mid-word '+end);
