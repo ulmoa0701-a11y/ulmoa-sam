@@ -27,6 +27,15 @@ const base='http://127.0.0.1:8765/thinking-garden/';
    await page.evaluate(()=>openPreview('memory'));
    await page.locator('#sessionRounds').selectOption('20');
    await page.locator('#introStart').click();
+   // Help is child-paced: a forced two-second glimpse can heighten anxiety.
+   await page.locator('.memory-ready').click();
+   await page.locator('.memory-peek').click();
+   await page.waitForTimeout(2150);
+   assert.equal(await page.locator('.memory-choices.paused').count(),1,'recall choices must wait while studying');
+   assert.equal(await page.locator('.memory-strip .memory-tile.hidden').count(),0,'re-check should stay visible until child says ready');
+   await page.locator('.memory-peek').click();
+   assert.equal(await page.locator('.memory-choices.paused').count(),0,'resume recall must restore choice taps');
+   assert.ok(await page.locator('.memory-peek').isDisabled(),'optional re-check is limited to one use');
    const memories=[];
    for(let i=0;i<20;i++){
     const sample=await page.evaluate(n=>{
