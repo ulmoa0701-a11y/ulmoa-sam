@@ -387,7 +387,7 @@ $('gameArea').addEventListener('click',e=>{
   state.attempts++;if(chosenList.join('|')===answer.join('|')){if(state.attempts===1)state.correct++;nextAction('변경된 목록을 잘 반영했어요!')}else feedback('한 가지씩 비교해봐요. 처음 목록을 다시 볼 수도 있어요.');return;
  }
  if(chosen==='feel'){
-  const r=roundItem(storyBank[state.level]);
+  const r=storyRound();
   if(b.dataset.feeling!==undefined){state.chosenFeeling=r.feelings[Number(b.dataset.feeling)];state.stage='response';draw();return;}
   if(b.dataset.response!==undefined){state.chosenResponse=r.actions[Number(b.dataset.response)];state.stage='reflect';draw();return;}
  }
