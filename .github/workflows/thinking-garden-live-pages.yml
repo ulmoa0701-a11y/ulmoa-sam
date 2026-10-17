@@ -37,12 +37,21 @@ jobs:
                   assert b'moaMoney' in js,'public JS missing independent games'
                   assert b'function safePlan' in js,'public JS missing validated share plans'
                   assert 'javascript' in jsct.lower(),'wrong JS Content-Type'
+                  # The new clinical game changes must reach the actual Pages
+                  # origin. A green repository Action is not proof of deployment.
+                  assert b'life-bag-scenes.js?v=20261017-bag1' in html,'published HTML lacks situation bank'
+                  assert b'slow-block-builder.js?v=20261017-build1' in html,'published HTML lacks block builder'
+                  bag,bagct=get('thinking-garden/life-bag-scenes.js')
+                  block,blockct=get('thinking-garden/slow-block-builder.js')
+                  assert b'window.MoaBagScenes' in bag and b'window.MoaBlockBuilder' in block,'published games missing'
+                  assert len(bag)>2500 and len(block)>2500,'new gameplay module incomplete'
+                  assert 'javascript' in bagct.lower() and 'javascript' in blockct.lower(),'published JS MIME type incorrect'
                   share,sharect=get('thinking-garden/?plan='+token)
                   assert b'share-plans.js' in share,'curated URL does not return garden page'
                   pdf,pdfct=get('materials/slow-look/worksheets-16p.pdf')
                   assert pdf.startswith(b'%PDF-'),'printable PDF header invalid'
                   assert 'pdf' in pdfct.lower(),'wrong PDF Content-Type'
-                  print('PASS LIVE HTTPS public garden, v2 curated game list, per-game settings, standalone game, share link, 16-page PDF')
+                  print('PASS LIVE HTTPS: new 20-situation bank + block builder, v2 curated menu/settings, standalone game, PDF')
                   break
               except Exception as e:
                   if attempt==4: raise
