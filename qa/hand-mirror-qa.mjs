@@ -167,8 +167,10 @@ async function fakeVideoGarden(){
  assert.equal(await p.locator('#acornActor').getAttribute('data-state'),'caught','Acorn visually attaches to the clenched hand');
  assert.equal(await p.locator('#cameraProblem').isVisible(),false);
  await p.evaluate(()=>{window.__testOne=true});
- await p.locator('#next').click();
- assert.match(await p.locator('#liveTitle').innerText(),/보자기! 도토리 놓기/,'Next goal tells the child to release the acorn');
+ // Camera mode intentionally has no Next button: the flowerbed advances automatically.
+ assert.equal(await p.locator('#next').isVisible(),false,'Camera garden is automatic, not button driven');
+ await p.waitForFunction(()=>document.getElementById('liveTitle').textContent.includes('보자기! 도토리 놓기'),null,{timeout:8000});
+ assert.match(await p.locator('#liveTitle').innerText(),/보자기! 도토리 놓기/,'Next goal automatically prompts release');
  await p.waitForFunction(()=>document.getElementById('viewerBadge').textContent.includes('보자기처럼 손을'),null,{timeout:12000});
  assert.equal(await p.locator('#liveCompare').isVisible(),false,'Scoring panel no longer obstructs the acorn play');
  assert.match(await p.locator('#viewerBadge').innerText(),/주먹을 활짝 펴|도토리/,'Short actionable feedback inside camera');
