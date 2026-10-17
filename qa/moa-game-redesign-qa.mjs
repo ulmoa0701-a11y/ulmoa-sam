@@ -1,0 +1,77 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url);
+const {chromium}=require('playwright-core');
+const base=process.env.TEST_BASE_URL||'http://127.0.0.1:8765';
+const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',args:['--no-sandbox']});
+const failures=[],results=[];
+const check=(v,s)=>{if(!v)failures.push(s)};
+const artifact='qa/moa-game-redesign-artifacts';fs.mkdirSync(artifact,{recursive:true});
+const shared=['memory','spacing','spelling','sameShape','flower','hide','path','calm','inside','targets','resetRescue','classroomMove','festivalPlan','rulePost','mirrorPond','sceneDetect','slowScan','slowPlace','slowBlock','slowName','slowMemory','slowEveryday','paint','water'];
+const standalone=[
+ ['rescue','/thinking-garden/games/rescue/'],['hand-mirror','/thinking-garden/games/hand-mirror/'],
+ ['money','/thinking-garden/games/moa-missions/?game=money'],
+ ['change','/thinking-garden/games/moa-missions/?game=change'],
+ ['feel','/thinking-garden/games/moa-missions/?game=feel'],
+ ['rhythm-touch','/thinking-garden/games/rhythm-touch/'],
+ ['recorder','/thinking-garden/recorder/'],
+ ['strength','/breath-garden/?mode=strength'],['long','/breath-garden/?mode=long'],['beat','/breath-garden/?mode=beat']
+];
+for(const width of [390,1366]){
+ const context=await browser.newContext({viewport:{width,height:width===390?844:900},reducedMotion:'reduce'});
+ const page=await context.newPage();const errors=[];
+ page.on('pageerror',e=>errors.push(e.message.slice(0,180)));
+ for(const id of shared){
+  errors.length=0;
+  try{
+   const res=await page.goto(base+'/thinking-garden/?game='+id,{waitUntil:'domcontentloaded',timeout:26000});
+   check(res?.ok(),width+' '+id+' HTTP error');
+   await page.locator('#introStart').click({timeout:9000});
+   await page.waitForTimeout(80);
+   check(await page.locator('#gameScreen.active').isVisible(),width+' '+id+' playable game missing');
+   const compass=page.locator('.moa-play-compass');
+   check(await compass.isVisible(),width+' '+id+' task guide missing');
+   check((await compass.locator('.moa-compass-goal').textContent()).trim().length>4,width+' '+id+' objective empty');
+   await compass.locator('.moa-compass-help').click();
+   check(await compass.locator('.moa-compass-steps li').count()===3,width+' '+id+' action steps missing');
+   const horizontal=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+   check(horizontal<=6,width+' '+id+' horizontal overflow '+horizontal);
+   if(width===390&&['hide','memory','calm','slowBlock','mirrorPond'].includes(id))
+    await page.screenshot({path:path.join(artifact,id+'-mobile.png'),fullPage:false});
+   if(id==='hide'){
+    const clues=await page.locator('.leaf-has-clue').count();
+    check(clues>=2,width+' leaf game has no observable clues');
+   }
+   check(errors.length===0,width+' '+id+' JavaScript errors '+errors.join('; '));
+   results.push({id,width,result:'checked'});
+  }catch(e){failures.push(width+' '+id+' error '+String(e).slice(0,370))}
+ }
+ await context.close();
+}
+for(const [id,url] of standalone){
+ const context=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});
+ const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message.slice(0,180)));
+ try{
+  const r=await page.goto(base+url,{waitUntil:'domcontentloaded',timeout:25000});
+  check(r?.ok(),id+' standalone HTTP error');
+  await page.waitForTimeout(160);
+  const help=page.locator('.moa-quick-guide');
+  check(await help.isVisible(),id+' standalone goal missing');
+  const goal=await help.locator('.moa-quick-goal').textContent();
+  check(goal.trim().length>10,id+' standalone objective too vague');
+  await help.locator('.moa-quick-toggle').click();
+  check(await help.locator('.moa-quick-steps li').count()===3,id+' standalone guide steps missing');
+  check(await help.locator('.moa-quick-steps').isVisible(),id+' standalone steps not expanded');
+  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+  check(overflow<=9,id+' standalone mobile overflow '+overflow);
+  if(['money','feel','rhythm-touch','hand-mirror'].includes(id))await page.screenshot({path:path.join(artifact,id+'-mobile.png'),fullPage:false});
+  check(errors.length===0,id+' page script errors '+errors.join('; '));
+  results.push({id,width:390,result:'checked'});
+ }catch(e){failures.push(id+' standalone exception '+String(e).slice(0,350))}
+ await context.close();
+}
+await browser.close();
+fs.writeFileSync(path.join(artifact,'report.json'),JSON.stringify({checked:results.length,expected:shared.length*2+standalone.length,failures,results},null,2));
+if(failures.length){console.error('MOA 34-GAME QA FAILED '+JSON.stringify(failures));process.exit(1)}
+console.log('PASS: '+shared.length+' shared games in mobile+desktop and '+standalone.length+' independent playable game help screens, no script errors');
