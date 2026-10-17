@@ -9,7 +9,7 @@ const isNew=id=>IDS.includes(id);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 function setup(id,config={}){
  const level=clamp(Number(config.level)||1,1,3);
- return {id,level,currentLevel:level,cue:config.cue||'guide',adaptive:config.adaptive!==false,round:-1,r:null,records:[],correctStreak:0,recoveries:0};
+ return {id,level,maxLevel:Math.min(3,level+1),currentLevel:level,cue:config.cue||'guide',adaptive:config.adaptive!==false,round:-1,r:null,records:[],correctStreak:0,recoveries:0};
 }
 function rounds(){return 5;}
 function register(id,game){if(!isNew(id))throw Error('Unknown thinking game '+id);impl[id]=game;}
@@ -23,7 +23,7 @@ function summary(s,parent){
  parent.querySelector('.strategy-results')?.remove();
  const first=s.records.filter(r=>r.first==='O').length,final=s.records.filter(r=>r.final==='O').length;
  const el=document.createElement('div');el.className='strategy-results';
- el.innerHTML='<p class="strategy-result">첫 반응 정확 '+first+'/'+s.records.length+' · 마지막 완수 '+final+'/'+s.records.length+' · 다시 확인 '+s.recoveries+'회</p><details class="strategy-teacher"><summary>교사용 관찰 · CSV 기록</summary><div class="strategy-observations"></div><button type="button" class="strategy-export">CSV 다운로드</button><small>선택하지 않으면 기록은 서버에 저장되지 않습니다. 진단점수가 아닙니다.</small></details>';
+ el.innerHTML='<p class="strategy-result">첫 반응 정확 '+first+'/'+s.records.length+' · 마지막 완수 '+final+'/'+s.records.length+' · 전략 도움·재확인 '+s.recoveries+'회</p><details class="strategy-teacher"><summary>교사용 관찰 · CSV 기록</summary><div class="strategy-observations"></div><button type="button" class="strategy-export">CSV 다운로드</button><small>선택하지 않으면 기록은 서버에 저장되지 않습니다. 진단점수가 아닙니다.</small></details>';
  el.querySelector('.strategy-observations').textContent=s.records.map(r=>r.round+'번 첫 '+r.first+' / 최종 '+r.final+' / 오반응 '+r.errors+' / 확인 '+r.support+' · '+r.note).join('　');
  el.querySelector('.strategy-export').addEventListener('click',()=>csv(s));
  parent.appendChild(el);
@@ -59,7 +59,7 @@ function render(id,ctx){
   r.done=true;r.note=note;
   s.records.push({round:state.round+1,level:r.level,first:r.first?'O':'X',final:correct===null?'-':correct?'O':'X',errors:r.errors,support:r.support,note});
   if(correct===true){addSeeds(r.errors?7:10);sfx('ok');}else if(correct===false)sfx('tap');
-  if(r.first&&correct===true){s.correctStreak++;if(s.adaptive&&s.correctStreak>=2&&s.currentLevel<s.level){s.currentLevel++;s.correctStreak=0;}}
+  if(r.first&&correct===true){s.correctStreak++;if(s.adaptive&&s.correctStreak>=2&&s.currentLevel<s.maxLevel){s.currentLevel++;s.correctStreak=0;}}
   else s.correctStreak=0;
   if(s.adaptive&&r.errors>=2&&s.currentLevel>1){s.currentLevel--;s.correctStreak=0;}
   r.message=correct===null?'쉬어가도 괜찮아요.':correct?'이번 활동도 완성했어요!':'잠깐 쉬고 다시 시도할 수 있어요.';
