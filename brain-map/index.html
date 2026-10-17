@@ -47,7 +47,7 @@
     <section class="lobe-scene-explorer" aria-labelledby="lobeSceneHeading">
      <div class="lobe-scene-head">
       <h3 id="lobeSceneHeading">🌿 생활 속에서 함께하는 뇌</h3>
-      <p>어떤 장면일까요? 누르면 관련된 부분이 뇌 그림에 표시돼요.</p>
+      <p>장면을 고르면 그림의 번호와 아래 역할을 함께 볼 수 있어요.</p>
      </div>
      <div class="lobe-scene-choices" role="group" aria-label="생활 장면 고르기">
       <button type="button" data-lobe-scene="talk" aria-pressed="true" aria-controls="brainMap lobeSceneRoles">💬 대화</button>
@@ -94,9 +94,9 @@
      <div class="lobe-scene-result" id="lobeSceneResult" aria-live="polite" aria-atomic="true">
       <strong id="lobeSceneTitle">💬 친구와 대화할 때</strong>
       <ul class="lobe-scene-roles" id="lobeSceneRoles">
-       <li><span aria-hidden="true">👂</span><span><b>측두엽</b><small>말소리 살피기</small></span></li>
-       <li><span aria-hidden="true">💡</span><span><b>전두엽</b><small>대답 계획하기</small></span></li>
-       <li><span aria-hidden="true">👀</span><span><b>후두엽</b><small>표정 보기</small></span></li>
+       <li><span class="lobe-scene-number" style="--scene-lobe-color:#B3E4C1" aria-hidden="true">3</span><span class="lobe-scene-task-icon" aria-hidden="true">👂</span><span class="lobe-scene-role-copy"><b>측두엽</b><small>말소리 살피기</small></span></li>
+       <li><span class="lobe-scene-number" style="--scene-lobe-color:#CDB2F3" aria-hidden="true">1</span><span class="lobe-scene-task-icon" aria-hidden="true">💡</span><span class="lobe-scene-role-copy"><b>전두엽</b><small>대답 계획하기</small></span></li>
+       <li><span class="lobe-scene-number" style="--scene-lobe-color:#FFC1A8" aria-hidden="true">4</span><span class="lobe-scene-task-icon" aria-hidden="true">👀</span><span class="lobe-scene-role-copy"><b>후두엽</b><small>표정 보기</small></span></li>
       </ul>
      </div>
      <p class="lobe-scene-caution" id="lobeSceneNotice">색 테두리는 이해를 돕는 예시예요. 실제 뇌 활성도나 모든 관련 부위를 나타낸 그림은 아니에요.</p>
