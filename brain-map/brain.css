@@ -792,6 +792,8 @@
 .brain-page .brain-main .brain-bottom{margin-top:13px}
 .brain-page .brain-main .brain-bottom > p{font-size:12.5px;line-height:1.6}
 @media(max-width:380px){
+ .brain-page .brain-main .map-panel-heading{flex-wrap:wrap;justify-content:flex-start;gap:3px}
+ .brain-page .brain-main .map-panel-heading > span{flex-basis:100%;text-align:left;font-size:11px}
  .brain-page .brain-main .lobe-list{grid-template-columns:minmax(0,1fr);gap:7px}
  .brain-page .brain-main .lobe-card{min-height:72px;padding:10px 11px;gap:11px}
  .brain-page .brain-main .lobe-card strong{font-size:16px}
