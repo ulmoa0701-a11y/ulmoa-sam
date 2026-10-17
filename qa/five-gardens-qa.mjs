@@ -34,6 +34,23 @@ for(const width of [360,390,1366]){
  check(data.overflow<=3,width+' horizontal overflow '+data.overflow);
  check(data.navPresent,width+' shared navigation missing');
  check(await page.locator('.play-card-enhanced').count()===34,width+' enhanced game card count mismatch');
+ check(await page.locator('#gardenSearch').count()===1,width+' overall search missing');
+ const firstVisible=await page.locator('#cognitive .play-card-enhanced:not([hidden])').count();
+ check(firstVisible===6,width+' cognitive preview should begin with six cards, got '+firstVisible);
+ if(width===390){
+  const more=page.locator('#cognitive .garden-more-button');
+  await more.click();
+  check(await page.locator('#cognitive .play-card-enhanced:not([hidden])').count()===21,'cognitive expand did not reveal 21 cards');
+  check(await more.getAttribute('aria-expanded')==='true','expanded flag incorrect');
+  await more.click();
+  check(await page.locator('#cognitive .play-card-enhanced:not([hidden])').count()===6,'cognitive collapse failed');
+  await page.locator('#gardenSearch').fill('화폐');
+  check(await page.locator('#learning .play-card-enhanced:not([hidden])').count()===1,'global search cannot find money game');
+  check(await page.locator('#cognitive').isHidden(),'global search does not hide irrelevant cognitive section');
+  await page.locator('#gardenSearchClear').click();
+  check(await page.locator('#cognitive').isVisible(),'clear search did not restore cognitive section');
+ }
+
  if(width===1366){
   await page.evaluate(()=>document.querySelectorAll('.play-card-media img').forEach(img=>img.loading='eager'));
   try{await page.waitForFunction(()=>{
@@ -57,6 +74,11 @@ for(const width of [360,390,1366]){
   await page.locator('#cognitive .play-preview-btn').first().click();
   check(await page.locator('#gardenPreviewDialog').isVisible(),width+' actual preview dialog did not open');
   check((await page.locator('#previewSteps li').count())===3,width+' preview steps not clear');
+  await page.locator('.preview-frame-switch [data-frame="intro"]').click();
+  check((await page.locator('#previewShot').getAttribute('src')).includes('rescue.jpg'),'intro frame not displayed');
+  await page.locator('.preview-frame-switch [data-frame="play"]').click();
+  check((await page.locator('#previewShot').getAttribute('src')).includes('rescue-play.jpg'),'play frame not displayed');
+
   check((await page.locator('#previewPlay').getAttribute('href')).includes('rescue'),width+' preview start link mismatches game');
   await page.locator('.preview-close').click();
  }
