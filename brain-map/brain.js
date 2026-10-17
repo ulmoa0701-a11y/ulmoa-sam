@@ -22,7 +22,8 @@
  const lobeSceneResult=document.getElementById('lobeSceneResult');
  const lobeSceneSelection=document.getElementById('lobeSceneSelection');
  const lobeSceneCurrent=document.getElementById('lobeSceneCurrent');
- const lobeSceneSelectedRegions=document.getElementById('lobeSceneSelectedRegions');
+ const lobeSceneFocusTitle=document.getElementById('lobeSceneFocusTitle');
+ const lobeSceneFocusText=document.getElementById('lobeSceneFocusText');
  const brainMap=document.getElementById('brainMap');
  // Representative, explainable roles, not measured neural activation, diagnoses,
  // or an exhaustive anatomical network. All areas cooperate in everyday tasks.
@@ -32,6 +33,7 @@
   cerebellum:{number:'5',color:'#A7CEF6'},brainstem:{number:'6',color:'#CEC7DE'}
  };
  let lastLobeScene='talk';
+ let lastFocusRegion='temporal';
  const lobeScenes={
   talk:{title:'💬 친구와 대화할 때',roles:[['temporal','👂','말소리 살피기'],['frontal','💡','대답 계획하기'],['occipital','👀','표정 보기']]},
   read:{title:'📖 책을 읽을 때',roles:[['occipital','👀','글자 모양 보기'],['temporal','👂','말소리·뜻 연결'],['frontal','💡','읽기 목표 유지']]},
