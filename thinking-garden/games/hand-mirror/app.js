@@ -336,6 +336,9 @@ function advance(){
   S.part++;S.phase='play';render();return;
  }
  S.round++;S.part=0;S.phase=isMemory()?'memorize':'play';
+ // New rounds must re-arm after the target changes; otherwise the child can never
+ // earn the next flower despite making the correct opposite gesture.
+ S.readyToMatch=true;S.rearmSince=0;
  if(S.round>=ROUNDS[S.mode].length){finish();return;}
  render();
 }
