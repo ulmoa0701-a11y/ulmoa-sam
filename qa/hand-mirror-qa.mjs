@@ -36,6 +36,18 @@ async function touchFlow(page,mode,patterns){
  await pickMode(page,mode);
  await page.locator('#touchStart').click();
  assert.equal(await page.locator('#game').isVisible(),true,mode+' launched');
+ if(mode==='garden'){
+  assert.equal(await page.locator('#gardenScene').evaluate(el=>el.parentElement.id),'viewer','Flowerbed must be INSIDE same stage as camera');
+  assert.equal(await page.locator('#gardenHud').isVisible(),true,'Mission progress lives inside game stage');
+  assert.equal(await page.locator('.game-right').isVisible(),false,'No second lower game panel');
+  assert.equal(await page.locator('#gardenTouchDock').isVisible(),true,'Touch controls share the same stage');
+  assert.equal(await page.locator('#choices').evaluate(el=>el.parentElement.id),'gardenTouchDock','Choices are inside the stage');
+  assert.equal(await page.locator('#gardenTouchPreview').isVisible(),true,'Touch demo occupies same screen');
+  assert.ok(await page.evaluate(()=>document.querySelector('#viewer').getBoundingClientRect().bottom<=window.innerHeight),'Entire garden play stage fits viewport');
+ }else{
+  assert.equal(await page.locator('#choices').evaluate(el=>el.parentElement.id),'standardControls','Other games still use their original answers');
+ }
+
  for(let i=0;i<patterns.length;i++){
   assert.equal(await page.locator('#roundLabel').innerText(),(i+1)+' / '+patterns.length,mode+' round');
   await page.locator('.choices button[data-pose="'+patterns[i]+'"]').click();
@@ -43,6 +55,8 @@ async function touchFlow(page,mode,patterns){
   if(mode==='garden'){
    const expected=i%2===0?'held':'planted';
    assert.equal(await page.locator('#gardenScene').getAttribute('data-acorn'),expected,'Acorn must be '+expected+' after round '+(i+1));
+   assert.equal(await page.locator('#gardenHudRound').innerText(),(i+1)+' / 6','One in-camera stage progress readout');
+   assert.equal(await page.locator('#gardenHudFlower').innerText(),'🌷 '+Math.floor((i+1)/2)+' / 3','One in-camera flower counter');
   }
   await page.locator('#next').click();
  }
@@ -137,6 +151,12 @@ async function fakeVideoGarden(){
  assert.equal(await p.locator('#video').evaluate(v=>v.videoWidth>0),true,'Video stream produced pixels');
  assert.equal(await p.locator('#modelCard').isVisible(),false,'Acorn game emphasizes a real camera-tracked nut rather than a redundant demo card');
  assert.equal(await p.locator('#acornActor').isVisible(),true,'Acorn appears in the hand area');
+ assert.equal(await p.locator('#gardenScene').evaluate(el=>el.parentElement.id),'viewer','In-camera flowerbed instead of second screen');
+ assert.equal(await p.locator('.game-right').isVisible(),false,'Second panel hidden on camera');
+ assert.equal(await p.locator('#gardenHud').isVisible(),true,'Camera progress stays in same screen');
+ assert.equal(await p.locator('#gardenTouchDock').isVisible(),false,'No touch controls in camera mode');
+ assert.ok(await p.evaluate(()=>document.querySelector('#viewer').getBoundingClientRect().bottom<=window.innerHeight),'Mobile camera game stage is visible without scroll');
+
  assert.equal(await p.locator('#acornActor img').evaluate(e=>e.complete&&e.naturalWidth>0),true,'Real acorn asset loaded in camera overlay');
  assert.equal(await p.locator('#acornActor').getAttribute('data-state'),'waiting','Before fist gesture the acorn waits to be caught');
  assert.match(await p.locator('#liveTitle').innerText(),/도토리 잡기/,'Child can read a short game objective');
@@ -147,8 +167,10 @@ async function fakeVideoGarden(){
  assert.equal(await p.locator('#acornActor').getAttribute('data-state'),'caught','Acorn visually attaches to the clenched hand');
  assert.equal(await p.locator('#cameraProblem').isVisible(),false);
  await p.evaluate(()=>{window.__testOne=true});
- await p.locator('#next').click();
- assert.match(await p.locator('#liveTitle').innerText(),/보자기! 도토리 놓기/,'Next goal tells the child to release the acorn');
+ // Camera mode intentionally has no Next button: the flowerbed advances automatically.
+ assert.equal(await p.locator('#next').isVisible(),false,'Camera garden is automatic, not button driven');
+ await p.waitForFunction(()=>document.getElementById('liveTitle').textContent.includes('보자기! 도토리 놓기'),null,{timeout:8000});
+ assert.match(await p.locator('#liveTitle').innerText(),/보자기! 도토리 놓기/,'Next goal automatically prompts release');
  await p.waitForFunction(()=>document.getElementById('viewerBadge').textContent.includes('보자기처럼 손을'),null,{timeout:12000});
  assert.equal(await p.locator('#liveCompare').isVisible(),false,'Scoring panel no longer obstructs the acorn play');
  assert.match(await p.locator('#viewerBadge').innerText(),/주먹을 활짝 펴|도토리/,'Short actionable feedback inside camera');
@@ -159,6 +181,8 @@ async function fakeVideoGarden(){
  assert.equal(await p.locator('#acornActor').getAttribute('data-state'),'released','Open hand visibly releases the acorn');
  assert.equal(await p.locator('#gardenScene').getAttribute('data-acorn'),'planted','Acorn reaches flower garden');
  assert.equal(await p.locator('#flowerLabel').innerText(),'🌼 1 / 3','Count real flowers rather than hand motions');
+ assert.equal(await p.locator('#gardenHudFlower').innerText(),'🌷 1 / 3','Camera overlay flower count tracks bloom');
+ assert.equal(await p.locator('#gardenScene .garden-bed[data-growth="flower"]').count(),1,'Bloom stays in the same video frame');
  await p.screenshot({path:output+'/garden-video-and-bloom-mobile.png',fullPage:true});
  await p.locator('#pause').click();
  assert.equal(await p.locator('#game').isVisible(),false,'Stop ends game and stream');

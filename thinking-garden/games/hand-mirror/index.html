@@ -336,6 +336,74 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 }
 @media(prefers-reduced-motion:reduce){.acorn-actor .acorn-icon,.acorn-actor .acorn-glow,.garden-scene[data-acorn="ready"] .garden-acorn{animation:none!important}}
 
+
+/* V8: One continuous, camera-sized play field for the entire acorn garden. */
+.play.is-garden{display:block;width:100%;max-width:900px;margin:0 auto}
+.play.is-garden .camera-panel{padding:11px}
+.play.is-garden .game-right{display:none!important}
+.play.is-garden .camera-title{padding:6px 6px 10px}
+.play.is-garden .viewer{height:clamp(430px,68dvh,640px);min-height:430px}
+.play.is-garden .garden-hud{position:absolute;z-index:7;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;pointer-events:none}
+.play.is-garden .garden-hud>span{background:#fffffff0;color:#285841;border:1px solid #cfe9d3;border-radius:999px;padding:6px 12px;min-width:67px;font-size:clamp(12px,2.1vw,15px);font-weight:950;box-shadow:0 2px 8px #1c483017}
+.play.is-garden .live-task{top:49px;left:8px;right:8px}
+.play.is-garden .live-task strong{font-size:clamp(19px,3.5vw,26px);line-height:1.35;max-width:96%;padding:7px 12px}
+.play.is-garden .garden-scene{position:absolute;z-index:6;bottom:8px;left:10px;right:10px;min-height:0;height:91px;margin:0;padding:5px 8px;background:#f7fff0e8;border:2px solid #badbbf;border-radius:17px;box-shadow:0 5px 20px #163d2933;pointer-events:none}
+.play.is-garden .garden-scene-title,.play.is-garden .garden-caption,.play.is-garden .garden-acorn{display:none!important}
+.play.is-garden .garden-beds{height:76px;min-height:0;margin:0;background:linear-gradient(transparent 66%,#eddbb1a8 69%,#e6cda5a8 96%);border-radius:10px}
+.play.is-garden .garden-bed{min-height:0;height:76px;max-width:150px}
+.play.is-garden .garden-plant{font-size:43px;transform:translateY(72px) scale(.35)}
+.play.is-garden .garden-bed[data-growth="seed"] .garden-plant::before{font-size:31px}
+.play.is-garden .garden-bed[data-growth="flower"] .garden-plant{transform:translateY(0) scale(1)}
+.play.is-garden .garden-soil{height:10px;width:86%}
+.play.is-garden .viewer .viewer-badge{z-index:7;bottom:105px;left:10px;right:10px;padding:9px 11px;min-height:0;background:#fffffff0;border-radius:12px;color:#315c42;font-size:clamp(13px,2.5vw,16px);line-height:1.3;box-shadow:0 2px 8px #23513327}
+.play.is-garden .viewer .camera-hold{bottom:156px;left:20%;right:20%;height:11px}
+.play.is-garden .camera-check{bottom:121px}
+.play.is-garden .camera-problem{bottom:125px}
+.play.is-garden .viewer[data-phase="setup"] .garden-scene,.play.is-garden .viewer:has(.camera-problem:not([hidden])) .garden-scene{display:none!important}
+.play.is-garden .garden-touch-preview{z-index:4;position:absolute;top:108px;left:50%;transform:translateX(-50%);width:156px;height:154px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:5px;background:#f7fff7eb;border-radius:18px;border:2px solid #cae4c5}
+.play.is-garden .garden-touch-preview svg{max-width:100%;height:102px;min-height:0;flex:1}
+.play.is-garden .garden-touch-caption{display:block;text-align:center;font-size:12px;font-weight:950;line-height:1.25;color:#285c42}
+.play.is-garden .viewer:not(:has(video:not([hidden]))) .placeholder{display:none!important}
+.play.is-garden .garden-mini-dock{position:absolute;z-index:8;bottom:105px;left:10px;right:10px;min-height:93px}
+.play.is-garden .garden-mini-dock .choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0}
+.play.is-garden .garden-mini-dock .choice{min-height:90px;display:flex;align-items:center;justify-content:center;gap:10px;padding:5px 9px;background:#fffffff0;border-radius:14px;box-shadow:0 2px 8px #295b3b18}
+.play.is-garden .garden-mini-dock .choice-art{min-height:0;margin:0}
+.play.is-garden .garden-mini-dock .choice-art svg{width:46px;height:64px}
+.play.is-garden .garden-mini-dock .choice small{font-size:13px;line-height:1.3}
+.play.is-garden .garden-mini-dock #next{margin:4px auto 0;min-height:49px;max-width:270px;display:block;background:#fff4d6}
+.play.is-garden .garden-mini-dock #next[hidden]{display:none!important}
+.play.is-garden:not(.is-camera) .viewer .viewer-badge{bottom:213px}
+.play.is-garden:not(.is-camera) .garden-touch-preview{top:102px}
+.play.is-garden:not(.is-camera) .viewer .placeholder{display:none!important}
+.play.is-garden .camera-tools{justify-content:center;gap:8px}
+.play.is-garden .camera-tools span{flex-basis:100%;text-align:center}
+@media(max-width:760px){
+ .play.is-garden{margin:0 auto}
+ .play.is-garden .camera-panel{padding:8px}
+ .play.is-garden .viewer{height:clamp(425px,65dvh,560px);min-height:425px}
+ .play.is-garden .garden-hud{top:8px;left:8px;right:8px}
+ .play.is-garden .garden-hud>span{padding:5px 10px;font-size:12px;min-width:60px}
+ .play.is-garden .live-task{top:39px}
+ .play.is-garden .live-task strong{font-size:clamp(18px,4.6vw,22px);padding:6px 10px}
+ .play.is-garden .garden-scene{bottom:7px;left:7px;right:7px;height:75px;padding:3px 7px;border-radius:13px}
+ .play.is-garden .garden-beds,.play.is-garden .garden-bed{height:64px}
+ .play.is-garden .garden-plant{font-size:37px;transform:translateY(63px) scale(.35)}
+ .play.is-garden .garden-bed[data-growth="seed"] .garden-plant::before{font-size:27px}
+ .play.is-garden .garden-soil{height:8px}
+ .play.is-garden .viewer .viewer-badge{bottom:90px;left:7px;right:7px;padding:8px 9px;font-size:13px}
+ .play.is-garden .viewer .camera-hold{bottom:137px}
+ .play.is-garden .camera-check,.play.is-garden .camera-problem{bottom:106px}
+ .play.is-garden .garden-mini-dock{bottom:89px;left:7px;right:7px;min-height:83px}
+ .play.is-garden .garden-mini-dock .choice{min-height:81px;gap:5px}
+ .play.is-garden .garden-mini-dock .choice-art svg{width:39px;height:52px}
+ .play.is-garden .garden-mini-dock .choice small{font-size:11px}
+ .play.is-garden:not(.is-camera) .viewer .viewer-badge{bottom:181px}
+ .play.is-garden .garden-touch-preview{top:91px;width:135px;height:107px;padding:4px}
+ .play.is-garden .garden-touch-preview svg{height:76px}
+ .play.is-garden .garden-touch-caption{font-size:10.5px}
+}
+@media(max-width:360px){.play.is-garden .viewer{height:425px}.play.is-garden .garden-mini-dock .choice-art svg{width:35px}}
+
 </style>
 </head>
 <body>
@@ -360,20 +428,19 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 </section>
 <section id="game" class="play" hidden>
 <div class="panel camera-panel"><div class="camera-title"><strong id="viewName">손 모양 살펴보기</strong><span id="kindBadge">📷 카메라</span></div>
-<div class="viewer" id="viewer"><video id="video" playsinline autoplay muted aria-hidden="true"></video><canvas id="overlay" aria-label="손가락 인식 표시"></canvas><div class="live-task" id="liveTask" hidden><small>모아의 손을 따라 해봐!</small><strong id="liveTitle">손 모양 따라하기</strong><span class="live-legend" id="liveLegend">🟡 노란 손가락 쭉! · 연한 손가락 접기</span></div><div class="ghost-guides" id="ghostGuides" aria-hidden="true"></div><div id="acornActor" class="acorn-actor" aria-hidden="true" hidden><span class="acorn-icon"><img src="assets/acorn.svg" alt="" draggable="false"></span><span class="acorn-glow"></span></div><div id="modelCard" class="model-card" aria-label="따라 할 손 모양" hidden><small>🌱 모아의 손</small><span class="model-symbol" id="modelSymbol" aria-hidden="true">✊</span><strong id="modelTitle">주먹 쥐기</strong></div><div id="liveCompare" class="live-compare" role="status" aria-live="polite" hidden><strong id="liveCompareTitle">내 손 0 / 4</strong><span id="liveCompareCue">표시된 손가락을 움직여 봐!</span></div><div class="camera-check" id="cameraCheck" role="status" aria-live="polite" hidden><strong>📷 먼저 내 손을 보여줘!</strong><span id="cameraCheckText">카메라를 연결하고 있어요…</span><span class="camera-check-progress"><span id="cameraCheckFill"></span></span></div><div class="camera-hold" id="cameraHold" hidden><span id="cameraHoldFill"></span></div><div id="cameraProblem" class="camera-problem" role="status" hidden><strong id="cameraProblemTitle">카메라를 확인해 볼까?</strong><p id="cameraProblemText">영상이 보이지 않으면 카메라를 다시 연결해 봐.</p><div class="camera-problem-actions"><button id="retryCamera" type="button">↻ 카메라 다시 연결</button><button id="cameraToTouch" type="button">👆 화면 놀이로 바꾸기</button></div></div><div id="placeholder" class="placeholder"><span class="hand">✋</span>준비되면 손을 카메라에 보여줘!</div><div class="viewer-badge" id="viewerBadge" role="status">차근차근 준비해요</div></div>
+<div class="viewer" id="viewer"><div class="garden-hud" id="gardenHud" hidden aria-label="현재 꽃밭 진행"><span id="gardenHudRound">1 / 6</span><span id="gardenHudFlower">🌷 0 / 3</span></div><div class="garden-touch-preview" id="gardenTouchPreview" hidden aria-label="따라 할 손 모양"></div><video id="video" playsinline autoplay muted aria-hidden="true"></video><canvas id="overlay" aria-label="손가락 인식 표시"></canvas><div class="live-task" id="liveTask" hidden><small>모아의 손을 따라 해봐!</small><strong id="liveTitle">손 모양 따라하기</strong><span class="live-legend" id="liveLegend">🟡 노란 손가락 쭉! · 연한 손가락 접기</span></div><div class="ghost-guides" id="ghostGuides" aria-hidden="true"></div><div id="acornActor" class="acorn-actor" aria-hidden="true" hidden><span class="acorn-icon"><img src="assets/acorn.svg" alt="" draggable="false"></span><span class="acorn-glow"></span></div><div id="modelCard" class="model-card" aria-label="따라 할 손 모양" hidden><small>🌱 모아의 손</small><span class="model-symbol" id="modelSymbol" aria-hidden="true">✊</span><strong id="modelTitle">주먹 쥐기</strong></div><div id="liveCompare" class="live-compare" role="status" aria-live="polite" hidden><strong id="liveCompareTitle">내 손 0 / 4</strong><span id="liveCompareCue">표시된 손가락을 움직여 봐!</span></div><div class="camera-check" id="cameraCheck" role="status" aria-live="polite" hidden><strong>📷 먼저 내 손을 보여줘!</strong><span id="cameraCheckText">카메라를 연결하고 있어요…</span><span class="camera-check-progress"><span id="cameraCheckFill"></span></span></div><div class="camera-hold" id="cameraHold" hidden><span id="cameraHoldFill"></span></div><div id="cameraProblem" class="camera-problem" role="status" hidden><strong id="cameraProblemTitle">카메라를 확인해 볼까?</strong><p id="cameraProblemText">영상이 보이지 않으면 카메라를 다시 연결해 봐.</p><div class="camera-problem-actions"><button id="retryCamera" type="button">↻ 카메라 다시 연결</button><button id="cameraToTouch" type="button">👆 화면 놀이로 바꾸기</button></div></div><div id="placeholder" class="placeholder"><span class="hand">✋</span>준비되면 손을 카메라에 보여줘!</div><div class="garden-mini-dock" id="gardenTouchDock" hidden></div><div class="garden-scene" id="gardenScene" hidden><p class="garden-scene-title" id="gardenStory">🌰 도토리 잡아볼까?</p><div id="gardenAcorn" class="garden-acorn" aria-hidden="true"><img src="assets/acorn.svg" alt="" draggable="false"></div><div class="garden-beds" aria-label="꽃밭 진행 모습"><div class="garden-bed" data-bed="0" data-growth="empty"><span class="garden-plant">🌱</span><span class="garden-soil"></span></div><div class="garden-bed" data-bed="1" data-growth="empty"><span class="garden-plant">🌷</span><span class="garden-soil"></span></div><div class="garden-bed" data-bed="2" data-growth="empty"><span class="garden-plant">🌻</span><span class="garden-soil"></span></div></div><p class="garden-caption" id="gardenCaption">손을 움직일 때마다 꽃밭이 자라요</p></div><div class="viewer-badge" id="viewerBadge" role="status">차근차근 준비해요</div></div>
 <div class="camera-tools"><button class="tiny" type="button" id="flip" hidden>↻ 앞·뒤 카메라</button><button class="tiny" type="button" id="guideToggle" hidden aria-pressed="true">👋 손 그림 보이기</button><button class="tiny" type="button" id="pause">⏹ 그만하기</button><span>🔒 영상 저장·업로드 없음</span></div>
 </div>
 <div class="game-right"><div class="panel"><div class="progress-head"><span id="roundLabel">1 / 6</span><span id="flowerLabel">🌼 0</span></div><div class="bar"><span id="meter"></span></div>
-<div class="garden-scene" id="gardenScene" hidden><p class="garden-scene-title" id="gardenStory">🌰 도토리 잡아볼까?</p><div id="gardenAcorn" class="garden-acorn" aria-hidden="true"><img src="assets/acorn.svg" alt="" draggable="false"></div><div class="garden-beds" aria-label="꽃밭 진행 모습"><div class="garden-bed" data-bed="0" data-growth="empty"><span class="garden-plant">🌱</span><span class="garden-soil"></span></div><div class="garden-bed" data-bed="1" data-growth="empty"><span class="garden-plant">🌷</span><span class="garden-soil"></span></div><div class="garden-bed" data-bed="2" data-growth="empty"><span class="garden-plant">🌻</span><span class="garden-soil"></span></div></div><p class="garden-caption" id="gardenCaption">손을 움직일 때마다 꽃밭이 자라요</p></div><div class="task-head" id="taskTitle">모아의 손을 따라해요!</div><div class="target" id="targetPanel"><span id="targetEmoji">✋</span><strong id="targetTitle">손바닥 활짝</strong><p id="targetHelp">손을 카메라에 보여줘!</p></div>
+<div class="task-head" id="taskTitle">모아의 손을 따라해요!</div><div class="target" id="targetPanel"><span id="targetEmoji">✋</span><strong id="targetTitle">손바닥 활짝</strong><p id="targetHelp">손을 카메라에 보여줘!</p></div>
 <div class="steps" id="sequence" hidden></div><div class="mission-msg" id="message" role="status" aria-live="polite">손을 준비해 볼까?</div>
-<div class="choices" id="choices" hidden></div>
+<div id="standardControls"><div class="choices" id="choices" hidden></div><button class="secondary next" type="button" id="next" hidden>다음 손동작 →</button></div>
 <button class="secondary next" type="button" id="ready" hidden>외웠어요! ▶</button>
-<button class="secondary next" type="button" id="next" hidden>다음 손동작 →</button>
 </div></div>
 </section>
 <section id="finish" class="finish panel" hidden><img src="../../assets/moa-cheer.png" alt="모아가 응원해요" onerror="this.style.display='none'"><span class="eyebrow">🌻 오늘의 작은 성공</span><h2>반짝손 모험 완료!</h2><p id="finishInfo">손동작을 따라했어!</p><div class="transfer" id="transfer"></div><div class="start-actions"><button id="again" type="button" class="primary">한 번 더 놀기</button><button id="finishHome" type="button" class="secondary">다른 놀이 고르기</button></div></section>
 </main>
 <div class="footer">모아의 인지정원 · 카메라로 관찰하는 손가락 움직임 놀이 · 손 힘, 실제 물체 조작 및 치료 효과를 자동으로 평가하는 기능은 아닙니다.</div>
 </div>
-<script src="core.js?v=3"></script><script src="app.js?v=7"></script>
+<script src="core.js?v=3"></script><script src="app.js?v=8"></script>
 </body></html>

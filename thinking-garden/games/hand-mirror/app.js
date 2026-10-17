@@ -165,10 +165,23 @@ function updateSteps(preview){
 function render(){
  if(S.round>=ROUNDS[S.mode].length){finish();return;}
  $('game').classList.toggle('is-garden',isGarden());
+ // Garden has one full-screen-style play surface. Move the *same* existing
+ // answer/next controls into its camera stage; return them for other games.
+ const dock=isGarden() ? $('gardenTouchDock') : $('standardControls');
+ dock.append($('choices'),$('next'));
+ $('gardenTouchDock').hidden=!isGarden()||isCamera();
+ $('gardenHud').hidden=!isGarden();
+ $('gardenTouchPreview').hidden=!isGarden()||isCamera();
+ if(isGarden()&&!isCamera()){
+  const task=currentGoal()[0];
+  $('gardenTouchPreview').innerHTML=handArt(task)+'<strong class="garden-touch-caption">'+(task==='fist'?'✊ 주먹! 도토리 잡기':'✋ 보자기! 도토리 놓기')+'</strong>';
+ }else $('gardenTouchPreview').replaceChildren();
  const preparing=isCamera()&&!S.cameraReady;
  const memoryPreview=isMemory()&&S.phase==='memorize';
  $('roundLabel').textContent=(S.round+1)+' / '+ROUNDS[S.mode].length;
  $('flowerLabel').textContent=isGarden()?'🌼 '+Math.floor(S.success/2)+' / 3':'🌼 '+S.success;
+ $('gardenHudRound').textContent=(S.round+1)+' / '+ROUNDS[S.mode].length;
+ $('gardenHudFlower').textContent='🌷 '+Math.floor(S.success/2)+' / 3';
  $('viewName').textContent=MODE[S.mode];$('kindBadge').textContent=isCamera()?'📷 손 인식':'👆 화면 정답 고르기';
  $('taskTitle').textContent=isMemory()?'🧠 순서를 기억해 볼까?':MODE[S.mode];
  $('targetEmoji').innerHTML=memoryPreview?current().map(p=>handArt(p)).join('<span style="font-size:25px">→</span>'):isMemory()?'❔':currentGoal().map(p=>handArt(p)).join('');
@@ -397,6 +410,7 @@ function accept(){
  if(S.phase!=='play')return;
  S.phase='reward';S.matchSince=0;S.success++;sound();
  $('meter').style.width='100%';$('cameraHoldFill').style.width='100%';$('flowerLabel').textContent=isGarden()?'🌼 '+Math.floor(S.success/2)+' / 3':'🌼 '+S.success;
+ if(isGarden())$('gardenHudFlower').textContent='🌷 '+Math.floor(S.success/2)+' / 3';
  $('choices').hidden=true;$('ready').hidden=true;
  if(isMemory()){
   const correct=current()[S.part];
