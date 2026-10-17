@@ -207,7 +207,8 @@ body.gardens-page{margin:0;background:#f8faf5;color:#2b3f3c;font-family:"Pretend
 .gardens-page .shot-caption{top:9px;bottom:auto;left:9px;background:#234b3dcf;font-size:11px;padding:5px 8px}
 .gardens-page .play-card-media.no-real-shot img.real-shot{object-fit:contain;padding:15px}
 .gardens-page .play-card-details{padding:13px 15px 14px}
-.gardens-page .play-story-name,.gardens-page .play-life-one-line{display:none}
+.gardens-page .play-life-one-line{display:none}
+.gardens-page .play-story-name{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#718779;font-size:11px;line-height:1.4;margin:0 0 3px}
 .gardens-page .play-simple-desc{min-height:0;font-size:14px;line-height:1.55;margin:8px 0 15px}
 .gardens-page .play-buttons{margin-top:auto}
 .gardens-page .play-buttons .play-preview-btn,.gardens-page .play-buttons .play-start-btn{min-height:48px;font-size:14px}
