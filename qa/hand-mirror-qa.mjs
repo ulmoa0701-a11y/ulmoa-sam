@@ -148,7 +148,7 @@ async function fakeVideoGarden(){
  await p.evaluate(()=>{window.__testOne=true});
  await p.locator('#next').click();
  assert.match(await p.locator('#liveTitle').innerText(),/펼쳐서 심어/,'Next goal tells the child to release the acorn');
- await p.waitForFunction(()=>document.getElementById('liveCompareTitle').textContent==='내 손 1 / 4',null,{timeout:12000});
+ await p.waitForFunction(()=>document.getElementById('viewerBadge').textContent.includes('주먹을 활짝'),null,{timeout:12000});
  assert.equal(await p.locator('#liveCompare').isVisible(),false,'Scoring panel no longer obstructs the acorn play');
  assert.match(await p.locator('#viewerBadge').innerText(),/주먹을 활짝 펴|도토리/,'Short actionable feedback inside camera');
  await p.screenshot({path:output+'/live-finger-correction-mobile.png',fullPage:true});
