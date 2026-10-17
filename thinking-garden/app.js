@@ -217,7 +217,7 @@ function renderPath(){
  area.innerHTML='<div class="basic-game trail-adventure"><div class="trail-scene-hint" aria-hidden="true">✨ → ☝️ → 🦋</div><div class="trail-game">'+
   seq.map((x,i)=>'<button type="button" class="trail-node '+(i===0?'ready':'')+'" data-i="'+i+'" style="order:'+order[i]+'" aria-label="'+(i===0?'지금 누를 반짝이는 자리':'아직 차례가 아닌 자리')+'">'+x+'</button>').join('')+
   '<div class="trail-runner" id="trailRunner" aria-hidden="true">🦋</div></div></div>';
- $('.trail-node').forEach(b=>b.onclick=()=>{
+ area.querySelectorAll('.trail-node').forEach(b=>b.onclick=()=>{
   if(state.lock)return;
   const i=Number(b.dataset.i);
   if(i!==pos){b.classList.add('wrong');sfx('no');flash('빛나는 자리를 찾아요.');later(()=>b.classList.remove('wrong'),350);return;}
