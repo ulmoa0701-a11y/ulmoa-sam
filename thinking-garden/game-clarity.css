@@ -33,3 +33,13 @@
  .moa-compass-steps li{font-size:13px}
 }
 @media(prefers-reduced-motion:reduce){.moa-play-compass *{animation-duration:.001ms!important;transition:none!important}}
+
+/* Hidden-friend game is no longer chance-based: clues are visible near the leaves. */
+#gameWorld .leaf-rule{font-size:15px;color:#375f46;font-weight:800;line-height:1.6;margin:2px 0 13px;text-align:center}
+#gameWorld .leaf-clue-game .leaf-btn{position:relative;display:grid;align-content:center;justify-items:center;gap:0;overflow:hidden;border:2px solid #d4e8d8;min-height:95px}
+#gameWorld .leaf-cover{display:block;font-size:clamp(41px,5vw,56px);line-height:1.08}
+#gameWorld .leaf-trail{display:block;min-height:17px;font-size:24px;letter-spacing:4px;font-weight:900;line-height:0.8}
+#gameWorld .leaf-has-clue .leaf-trail{color:#bb7151;text-shadow:1px 1px 0 #f3e8ce}
+#gameWorld .leaf-no-clue .leaf-trail{color:transparent}
+#gameWorld .leaf-clue-game .leaf-btn:focus-visible{outline:3px solid #3f8760;outline-offset:3px}
+@media(max-width:650px){#gameWorld .leaf-rule{font-size:13px}#gameWorld .leaf-clue-game .leaf-btn{min-height:79px}#gameWorld .leaf-cover{font-size:40px}#gameWorld .leaf-trail{font-size:21px}}
