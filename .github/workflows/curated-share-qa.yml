@@ -5,11 +5,13 @@ on:
     paths:
       - 'thinking-garden/**'
       - 'qa/curated-share-qa.cjs'
+      - 'qa/curated-all-games-smoke.cjs'
       - '.github/workflows/curated-share-qa.yml'
   pull_request:
     paths:
       - 'thinking-garden/**'
       - 'qa/curated-share-qa.cjs'
+      - 'qa/curated-all-games-smoke.cjs'
       - '.github/workflows/curated-share-qa.yml'
 permissions:
   contents: read
@@ -32,6 +34,7 @@ jobs:
           node --check thinking-garden/app.js
           node --check thinking-garden/share-plans.js
           node --check qa/curated-share-qa.cjs
+          node --check qa/curated-all-games-smoke.cjs
           node --check thinking-garden/clinical-bridges.js
           node --check thinking-garden/strategy-garden-core.js
           node --check thinking-garden/strategy-festival.js
@@ -47,6 +50,8 @@ jobs:
           exit 1
       - name: Teacher and parent journeys
         run: node qa/curated-share-qa.cjs
+      - name: All catalog games in curated menu (desktop and mobile)
+        run: node qa/curated-all-games-smoke.cjs
       - name: Clinical transfer and adaptive training
         run: node qa/clinical-adaptive-qa.cjs
       - name: Screenshots
