@@ -34,6 +34,17 @@ for(const width of [360,390,1366]){
  check(data.overflow<=3,width+' horizontal overflow '+data.overflow);
  check(data.navPresent,width+' shared navigation missing');
  check(await page.locator('.play-card-enhanced').count()===34,width+' enhanced game card count mismatch');
+ if(width===1366){
+  await page.evaluate(()=>document.querySelectorAll('.play-card-media img').forEach(img=>img.loading='eager'));
+  try{await page.waitForFunction(()=>{
+   const images=[...document.querySelectorAll('.play-card-media img')];
+   return images.length===34&&images.every(img=>img.complete&&img.naturalWidth>=200&&img.currentSrc.includes('/gardens/previews/'));
+  },{timeout:15000});}catch{
+   const missing=await page.evaluate(()=>[...document.querySelectorAll('.play-card-media img')].filter(img=>!img.complete||img.naturalWidth<200||!img.currentSrc.includes('/gardens/previews/')).map(img=>({src:img.currentSrc,width:img.naturalWidth})));
+   check(false,'missing actual screenshot images '+JSON.stringify(missing));
+  }
+ }
+
  const tags=await page.locator('#cognitive .garden-filter-buttons button').allTextContents();
  check(tags.some(x=>x.includes('찾기'))&&tags.some(x=>x.includes('기억'))&&tags.some(x=>x.includes('손동작')),width+' cognitive activity filters missing');
  if(width===390){
