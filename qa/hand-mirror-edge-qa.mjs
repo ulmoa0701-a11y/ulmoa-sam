@@ -247,6 +247,7 @@ async function allCameraModes(){
    await p.locator('#ready').click();
    assert.equal(await p.locator('#ghostGuides').isVisible(),false,'Recall hides demonstrated answer');
    assert.equal(await p.locator('#adventureSceneObjects svg').count(),0,'Camera recall shows no answer shapes');
+   assert.equal(await p.locator('#adventureSceneObjects .stone-placeholder').count(),2,'Recall shows neutral stepping stones, not gesture answers');
    assert.equal(await p.locator('#gardenHud').isVisible(),true,'Path progress stays in camera');
    await p.evaluate(()=>{window.__pose='palm';});
    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('1'),8500);
@@ -258,6 +259,8 @@ async function allCameraModes(){
    assert.equal(await p.locator('#guideToggle').isVisible(),true,'Copy camera visual guide can be hidden');
    assert.equal(await p.locator('#modelCard').isVisible(),true,'The child sees a real target model on the stage');
    assert.equal(await p.locator('#adventureScene').isVisible(),true,'Bubbles fill along the same frame');
+   assert.match(await p.locator('#liveTitle').innerText(),/손바닥을 펴서 풍선을 띄워/);
+   assert.equal(await p.locator('#adventureActor').getAttribute('data-action'),'release','Open palm sets release action');
    assert.equal(await p.locator('#adventureActor').getAttribute('data-mode'),'copy','Live bubble has its own physical-looking illustration');
    assert.equal(await p.locator('#adventureActorEmoji').evaluate(e=>getComputedStyle(e,'::before').content),'""','Balloon shape is rendered, not a floating emoji');
    await p.locator('#guideToggle').click();
@@ -266,7 +269,18 @@ async function allCameraModes(){
    assert.equal(await p.locator('#modelCard').isVisible(),true);
    await p.evaluate(()=>{window.__pose='palm';});
    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('1'),9000);
-   assert.equal(await p.locator('#adventureActor').getAttribute('data-state'),'success','Balloon pops on matching pose');
+   assert.equal(await p.locator('#adventureActor').getAttribute('data-state'),'success','Balloon reacts to matching pose');
+   assert.equal(await p.locator('#adventureActorEmoji').evaluate(e=>getComputedStyle(e,'::before').animationName),'moa-copy-float');
+   await wait(p,()=>document.querySelector('#adventureActor')?.dataset.action==='grab',8500);
+   assert.match(await p.locator('#liveTitle').innerText(),/주먹으로 풍선을 꼭 잡아/);
+   await p.evaluate(()=>{window.__pose='fist';});
+   await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('2'),9000);
+   assert.equal(await p.locator('#adventureActorEmoji').evaluate(e=>getComputedStyle(e,'::before').animationName),'moa-copy-grab');
+   await wait(p,()=>document.querySelector('#adventureActor')?.dataset.taps==='1',8500);
+   assert.match(await p.locator('#liveTitle').innerText(),/손가락 하나로 풍선 톡/);
+   await p.evaluate(()=>{window.__pose='one';});
+   await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('3'),9000);
+   assert.equal(await p.locator('#adventureActorEmoji').evaluate(e=>getComputedStyle(e,'::before').animationName),'moa-copy-tap-one');
   }else if(mode==='fingers'){
    assert.equal(await p.locator('#modelCard').isVisible(),true);
    assert.equal(await p.locator('#liveCompare').isVisible(),false);

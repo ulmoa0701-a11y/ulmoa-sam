@@ -543,6 +543,26 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 @media(max-width:760px){.finger-stars .finger-star{width:34px;height:34px;font-size:23px;border-width:2px}.play.is-adventure .adventure-actor[data-mode="copy"]{transform:translate(-50%,-50%) scale(.8)}.play.is-adventure .adventure-actor[data-mode="both"]{transform:translate(-50%,-50%) scale(.8)}}
 @media(prefers-reduced-motion:reduce){.play.is-adventure .adventure-actor[data-mode="copy"] #adventureActorEmoji::before{animation:none}.finger-stars .finger-star{transition:none}}
 
+
+/* Gesture-specific balloon consequences, reusing the existing original balloon. */
+.play.is-adventure .adventure-actor[data-mode="copy"][data-action="release"][data-state="success"] #adventureActorEmoji::before{animation:moa-copy-float .85s ease-out both}
+.play.is-adventure .adventure-actor[data-mode="copy"][data-action="grab"][data-state="success"] #adventureActorEmoji::before{animation:moa-copy-grab .7s ease-in-out both}
+.play.is-adventure .adventure-actor[data-mode="copy"][data-action="tap"][data-taps="1"][data-state="success"] #adventureActorEmoji::before{animation:moa-copy-tap-one .55s ease-out both}
+.play.is-adventure .adventure-actor[data-mode="copy"][data-action="tap"][data-taps="2"][data-state="success"] #adventureActorEmoji::before{animation:moa-copy-tap-two .7s ease-in-out both}
+.play.is-adventure .adventure-actor[data-mode="copy"][data-action="tap"][data-taps="3"][data-state="success"] #adventureActorEmoji::before{animation:moa-copy-tap-three .8s ease-in-out both}
+.play.is-adventure .adventure-actor[data-mode="copy"][data-action="release"][data-state="success"] #adventureActorEmoji::after{animation:moa-copy-string .85s ease-out both}
+.play.is-adventure .adventure-actor[data-mode="copy"][data-action="grab"][data-state="success"] #adventureActorEmoji::after{opacity:1}
+@keyframes moa-copy-float{0%{opacity:1;transform:translateY(3px) scale(.92)}65%{opacity:1;transform:translateY(-24px) scale(1.08)}100%{opacity:.6;transform:translateY(-42px) scale(.92)}}
+@keyframes moa-copy-string{0%{opacity:1;transform:translateY(0)}100%{opacity:.6;transform:translateY(-42px)}}
+@keyframes moa-copy-grab{0%{opacity:1;transform:scale(1.05)}55%{opacity:1;transform:scale(.57) translateY(14px)}100%{opacity:1;transform:scale(.75) translateY(7px)}}
+@keyframes moa-copy-tap-one{0%{opacity:1;transform:scale(.94)}45%{opacity:1;transform:scale(1.22)}100%{opacity:.33;transform:scale(1.45)}}
+@keyframes moa-copy-tap-two{0%,100%{opacity:1;transform:scale(.95)}28%,72%{transform:scale(1.23)}47%{transform:scale(.87)}100%{opacity:.42;transform:scale(1.3)}}
+@keyframes moa-copy-tap-three{0%,100%{opacity:1;transform:scale(.96)}20%,54%,85%{transform:scale(1.22)}37%,70%{transform:scale(.9)}100%{opacity:.38;transform:scale(1.29)}}
+.play.is-adventure .adventure-scene[data-mode="memory"] .adventure-token{border-radius:45% 55% 46% 50%;box-shadow:inset 0 -5px 0 #769c9430}
+.play.is-adventure .adventure-scene[data-mode="memory"] .stone-placeholder{width:33px;height:15px;display:block;border-radius:50%;background:#a4b8b4;box-shadow:0 3px 0 #678a82}
+.play.is-adventure .adventure-scene[data-mode="memory"] .stone-glow{font-size:33px;line-height:1;color:#f6c43a;filter:drop-shadow(0 0 4px #fff0a4)}
+@media(max-width:760px){.play.is-adventure .adventure-scene[data-mode="memory"] .stone-placeholder{width:25px;height:12px}}
+@media(prefers-reduced-motion:reduce){.play.is-adventure .adventure-actor[data-mode="copy"] #adventureActorEmoji::before,.play.is-adventure .adventure-actor[data-mode="copy"] #adventureActorEmoji::after{animation:none!important}}
 </style>
 <link rel="stylesheet" href="../../../assets/moa-quick-guide.css?v=20261017-v1">
 </head>
@@ -582,6 +602,6 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 </main>
 <div class="footer">모아의 인지정원 · 카메라로 관찰하는 손가락 움직임 놀이 · 손 힘, 실제 물체 조작 및 치료 효과를 자동으로 평가하는 기능은 아닙니다.</div>
 </div>
-<script src="core.js?v=3"></script><script src="app.js?v=11"></script>
+<script src="core.js?v=3"></script><script src="app.js?v=12"></script>
 <script src="../../../assets/moa-quick-guide.js?v=20261017-v1"></script>
 </body></html>
