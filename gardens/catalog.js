@@ -23,7 +23,7 @@ function keyFor(href){
  return q.get('game');
 }
 const modal=document.createElement('dialog');modal.className='garden-preview-dialog';modal.id='gardenPreviewDialog';
-modal.innerHTML='<div class="preview-dialog-header"><span class="preview-overline">게임 미리보기</span><button type="button" class="preview-close" aria-label="미리보기 닫기">✕</button></div><div class="preview-dialog-content"><div class="preview-visual"><img id="previewShot" alt="실제 게임 예시 화면" /><div class="preview-fallback" hidden>화면 미리보기를 준비하고 있어요.</div></div><div class="preview-info"><p class="preview-type" id="previewType"></p><h2 id="previewTitle"></h2><p class="preview-action" id="previewAction"></p><h3>어떻게 놀아요?</h3><ol id="previewSteps"></ol><div class="preview-life"><small>활동에서 연습하는 것</small><p id="previewLife"></p></div><p class="preview-note">게임 속 친구의 색은 활동 분류나 난이도를 나타내지 않아요. 실제 게임에서 만나는 친구예요.</p><a id="previewPlay" class="preview-play" href="#">바로 게임 시작 →</a></div></div>';
+modal.innerHTML='<div class="preview-dialog-header"><span class="preview-overline">게임 미리보기</span><button type="button" class="preview-close" aria-label="미리보기 닫기">✕</button></div><div class="preview-dialog-content"><div class="preview-visual"><div class="preview-frame-switch" role="group" aria-label="게임 화면 종류"><button type="button" data-frame="play" aria-pressed="true">놀이 장면</button><button type="button" data-frame="intro" aria-pressed="false">시작 안내</button></div><img id="previewShot" alt="실제 게임 예시 화면" /><div class="preview-fallback" hidden>화면 미리보기를 준비하고 있어요.</div></div><div class="preview-info"><p class="preview-type" id="previewType"></p><h2 id="previewTitle"></h2><p class="preview-action" id="previewAction"></p><h3>어떻게 놀아요?</h3><ol id="previewSteps"></ol><div class="preview-life"><small>활동에서 연습하는 것</small><p id="previewLife"></p></div><p class="preview-note">게임 속 친구의 색은 활동 분류나 난이도를 나타내지 않아요. 실제 게임에서 만나는 친구예요.</p><a id="previewPlay" class="preview-play" href="#">바로 게임 시작 →</a></div></div>';
 document.body.append(modal);
 $('.preview-close',modal).addEventListener('click',()=>modal.close());
 modal.addEventListener('click',e=>{if(e.target===modal)modal.close()});
@@ -31,7 +31,16 @@ let lastPreviewTrigger=null;
 modal.addEventListener('close',()=>lastPreviewTrigger?.focus());
 const supportDialog=typeof modal.showModal==='function';
 function imageFallback(img,key,old){
- img.onerror=()=>{if(!img.dataset.fallbackStep){img.dataset.fallbackStep='intro';img.src='previews/'+key+'.jpg';return}if(img.dataset.fallbackStep==='intro'){img.dataset.fallbackStep='character';img.src=old||'../thinking-garden/assets/moa-discovery.png';return}img.onerror=null;img.closest('.preview-visual, .play-card-media')?.classList.add('no-real-shot');};
+ img.onerror=()=>{
+  if(!img.dataset.fallbackStep){img.dataset.fallbackStep='intro';img.src='previews/'+key+'.jpg';return}
+  if(img.dataset.fallbackStep==='intro'){
+   img.dataset.fallbackStep='character';img.closest('.preview-visual, .play-card-media')?.classList.add('no-real-shot');
+   const cap=img.closest('.play-card-media')?.querySelector('.shot-caption');if(cap)cap.textContent='게임 대표 캐릭터';
+   img.src=old||'../thinking-garden/assets/moa-discovery.png';return
+  }
+  img.onerror=null;img.closest('.preview-visual, .play-card-media')?.classList.add('no-real-shot');
+  const cap=img.closest('.play-card-media')?.querySelector('.shot-caption');if(cap)cap.textContent='이미지를 표시할 수 없어요';
+ };
 }
 function openPreview(key,href,trigger){
  const item=CATALOG[key];if(!item)return;
@@ -42,8 +51,17 @@ function openPreview(key,href,trigger){
  $('#previewSteps').innerHTML=item.steps.map(t=>'<li>'+esc(t)+'</li>').join('');
  $('#previewLife').textContent=item.life;
  $('#previewPlay').href=href;
- const img=$('#previewShot');img.dataset.fallbackStep='';img.src='previews/'+key+'-play.jpg';
- imageFallback(img,key,trigger.closest('.play-card')?.dataset.character);
+ const img=$('#previewShot');
+ function setFrame(frame){
+  modal.querySelectorAll('[data-frame]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.frame===frame)));
+  img.closest('.preview-visual')?.classList.remove('no-real-shot');
+  img.alt=item.title+(frame==='play'?' 실제 놀이 장면':' 실제 시작 안내 화면');
+  img.dataset.fallbackStep='';
+  img.src='previews/'+key+(frame==='play'?'-play':'')+'.jpg';
+  imageFallback(img,key,trigger.closest('.play-card')?.dataset.character);
+ }
+ modal.querySelectorAll('[data-frame]').forEach(b=>{b.onclick=()=>setFrame(b.dataset.frame)});
+ setFrame('play');
  if(supportDialog)modal.showModal();else {modal.setAttribute('open','');modal.scrollIntoView({behavior:'smooth'})}
 }
 const sections=$$('.garden-section');let total=0;
@@ -59,10 +77,11 @@ for(const section of sections){
   card.className='play-card play-card-enhanced';
   card.dataset.game=key;card.dataset.focus=item.focus;card.dataset.character=originalImage;
   card.dataset.title=item.title;card.dataset.oldName=originalTitle;
+  card.dataset.search=[item.title,originalTitle,item.action,item.focusLabel,item.life,...item.steps].join(' ').toLocaleLowerCase('ko-KR');
   card.innerHTML='<div class="play-card-media"><img loading="lazy" decoding="async" class="real-shot" src="previews/'+esc(key)+'-play.jpg" alt="'+esc(item.title)+' 실제 게임 예시" /><span class="shot-caption">실제 게임 화면</span></div>'+
     '<div class="play-card-details"><p class="play-activity">'+esc(item.focusLabel)+'</p><h3>'+esc(item.title)+'</h3>'+
     (originalTitle!==item.title?'<p class="play-story-name">'+esc(originalTitle)+'</p>':'')+
-    '<p class="play-simple-desc">'+esc(item.action)+'</p><div class="play-purpose"><span>활동 연결</span><p>'+esc(item.life)+'</p></div>'+
+    '<p class="play-simple-desc">'+esc(item.action)+'</p><p class="play-life-one-line" title="'+esc(item.life)+'">생활 연결 · '+esc(item.life)+'</p>'+
     '<div class="play-buttons"><button type="button" class="play-preview-btn">미리보기</button><a class="play-start-btn" href="'+esc(href)+'">바로 하기 <span aria-hidden="true">→</span></a></div></div>';
   const img=$('img.real-shot',card);
   imageFallback(img,key,originalImage);
