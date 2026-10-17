@@ -33,7 +33,7 @@
     slowBlock: `<div class="cp-mission">같은 블록 모양의 정원을 만들어요</div><div class="cp-choice-row"><span>🧱</span><span>🧱</span><span>→</span><span class="is-good">🧱</span><span>🧱</span></div>`,
     slowName: `<div class="cp-mission">보고 생각한 뒤 말해요</div><div class="cp-choice-row"><span>🐰</span><span>🐶</span><span>🐱</span></div>`,
     slowMemory: `<div class="cp-mission">어느 칸에 꽃이 피었을까요?</div><div class="cp-sequence"><i>🌼</i><i>▫</i><i>🌸</i><i>▫</i></div><div class="cp-arrow">잠깐 기억해요 ↓</div><div class="cp-slots"><i>?</i><i>?</i><i>?</i><i>?</i></div>`,
-    slowEveryday: `<div class="cp-mission">가방에 넣을 연필을 찾아요</div><div class="cp-choice-row"><span>📖</span><span class="is-good">✏️</span><span>📏</span><span>🧽</span></div>`,
+    slowEveryday: `<div class="cp-mission">🌧️ 비 오는 날! 준비물은 무엇일까?</div><div class="cp-choice-row"><span class="is-good">☂️</span><span>🥁</span><span class="is-good">🧥</span><span>📖</span><span class="is-good">👢</span></div><div class="cp-arrow">🎒 모아 가방을 채워 출발해요</div>`,
     water: `<div class="cp-mission">시든 꽃에만 물을 주세요</div><div class="cp-choice-row"><span>🌷<small>✓</small></span><span class="is-good">🥀<small>💧</small></span><span>🌻<small>✓</small></span><span class="is-good">🥀<small>💧</small></span></div>`
   };
 
