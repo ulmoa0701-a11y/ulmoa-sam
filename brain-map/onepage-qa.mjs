@@ -89,8 +89,9 @@ try{
   const sceneLayout=await page.evaluate(()=>{
    const choice=document.querySelector('.lobe-scene-choices').getBoundingClientRect();
    const svg=document.querySelector('#brainMap').getBoundingClientRect();
+   const selection=document.querySelector('#lobeSceneSelection').getBoundingClientRect();
    const result=document.querySelector('#lobeSceneResult').getBoundingClientRect();
-   return {choice:choice.toJSON(),svg:svg.toJSON(),result:result.toJSON()};
+   return {choice:choice.toJSON(),selection:selection.toJSON(),svg:svg.toJSON(),result:result.toJSON()};
   });
   assert.ok(sceneLayout.choice.bottom<sceneLayout.svg.top,'scene choice must be placed before brain map: '+JSON.stringify(sceneLayout));
   assert.ok(sceneLayout.svg.bottom<sceneLayout.result.top+8,'role cues must be after the brain: '+JSON.stringify(sceneLayout));
