@@ -98,6 +98,7 @@ async function missingOrExtraHands(){
  await p.locator('#cameraStart').click();
  await wait(p,()=>document.querySelector('#video').classList.contains('is-ready'),20000);
  assert.equal(await p.locator('#cameraCheck').isVisible(),true,'Two hands must not pass single-hand preflight');
+ await wait(p,()=>document.querySelector('#cameraCheckText').textContent.includes('한 손만'),7000);
  assert.match(await p.locator('#cameraCheckText').innerText(),/한 손만/);
  assert.equal(await p.locator('#gardenHudFlower').innerText(),'🌷 0 / 3');
  await p.evaluate(()=>{window.__hands=1;window.__handPoses=['fist'];});
