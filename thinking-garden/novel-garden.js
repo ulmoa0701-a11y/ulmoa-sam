@@ -29,8 +29,14 @@ function isNew(id){return IDS.includes(id)}
 function setup(id,config={}){return {id,level:Math.min(3,Math.max(1,Number(config.level)||1)),cue:config.cue||'guide',activeRound:-1,roundData:null,records:[],mistakes:0,resetCount:0,switchedMistakes:0,firstCorrect:null,retries:0,awaitingPause:false,done:false,answerCount:0}}
 function rounds(){return 5}
 function makePackages(round){
- const pairs=[[0,1],[1,0],[0,0],[1,1],[0,1],[1,0]];
- return Array.from({length:3},(_,i)=>{const [color,stamp]=pairs[(round*3+i+round%3)%pairs.length];return {color,stamp};});
+ // 4 possible colour/stamp pairs -> 64 ordered three-parcel challenges.
+ // A stride coprime to 64 avoids repeating any complete prompt in 20 rounds.
+ const pairs=[[0,0],[0,1],[1,0],[1,1]];
+ const index=(round*13+7)%64;
+ return Array.from({length:3},(_,i)=>{
+  const [color,stamp]=pairs[Math.floor(index/(4**i))%4];
+  return {color,stamp};
+ });
 }
 function makeRound(id,round,level){
  if(id==='rulePost'){
@@ -44,7 +50,11 @@ function makeRound(id,round,level){
   return {operation,source,choices:choices.slice(round%3).concat(choices.slice(0,round%3))};
  }
  const n=level===1?3:level===2?4:5;
- const changed=(round*2+1)%n;const start=(round*3)%objects.length;const indices=Array.from({length:n},(_,i)=>(start+i)%objects.length);return {before:indices.map(i=>objects[i]),after:indices.map((i,pos)=>pos===changed?alternates[i]:objects[i]),changed,phase:'study',peeks:0};
+ // Balanced target locations, with a different full scene across 20 questions.
+ const start=round%objects.length;
+ const changed=(round+Math.floor(round/objects.length))%n;
+ const indices=Array.from({length:n},(_,i)=>(start+i)%objects.length);
+ return {before:indices.map(i=>objects[i]),after:indices.map((i,pos)=>pos===changed?alternates[i]:objects[i]),changed,phase:'study',peeks:0};
 }
 function summary(s,parent){
  parent.querySelector('.novel-results')?.remove();
@@ -95,12 +105,12 @@ function render(id,d){
   parts.push('<div class="novel-mirror-scene"><div><b>🪷 원래 자리</b>'+pond(data.source)+'</div><span class="novel-mirror-line">✦</span><div class="novel-water"><b>🌊 거울연못</b><span>어떤 모습으로 보일까요?</span></div></div>');
   parts.push('<div class="novel-choose-label">연못에 비친 그림을 골라요.</div><div class="novel-pond-choices">'+data.choices.map((choice,i)=>'<button type="button" data-novel-action="chooseReflection" data-idx="'+i+'"><b>'+['A','B','C'][i]+'번 섬</b>'+pond(choice.icons)+'</button>').join('')+'</div>');
  }else if(id==='sceneDetect'){
-  const study=data.phase==='study';
-  parts.push('<div class="novel-rule-banner"><span>🔎 숲속 탐정의 관찰 노트</span><strong>'+(study?'첫 번째 장면을 살펴봐요':'무엇이 달라졌을까요?')+'</strong><p>'+(study?'시간 제한 없이 충분히 살펴봐도 돼요.':'이전 장면이 헷갈리면 다시 볼 수 있어요.')+'</p></div>');
-  parts.push('<div class="novel-story-scene"><div class="novel-landscape"><span class="novel-skydecor">☁️　☀️　☁️</span><div class="novel-story-objects">'+(study?data.before:data.after).map((icon,i)=>study?'<span class="novel-story-object">'+icon+'</span>':'<button type="button" class="novel-story-object" data-novel-action="change" data-idx="'+i+'" aria-label="장면 '+(i+1)+'번째 자리">'+icon+'</button>').join('')+'</div><div class="novel-ground">🌿　🌼　🌿　🌼</div></div></div>');
+  const study=data.phase==='study',lookingBack=data.phase==='peek';
+  parts.push('<div class="novel-rule-banner"><span>🔎 숲속 탐정의 관찰 노트</span><strong>'+(study?'첫 번째 장면을 살펴봐요':lookingBack?'처음 장면을 다시 확인해요':'무엇이 달라졌을까요?')+'</strong><p>'+(study||lookingBack?'시간 제한 없이 충분히 살펴봐도 돼요.':'이전 장면이 헷갈리면 다시 볼 수 있어요.')+'</p></div>');
+  parts.push('<div class="novel-story-scene"><div class="novel-landscape"><span class="novel-skydecor">☁️　☀️　☁️</span><div class="novel-story-objects">'+(study||lookingBack?data.before:data.after).map((icon,i)=>(study||lookingBack)?'<span class="novel-story-object">'+icon+'</span>':'<button type="button" class="novel-story-object" data-novel-action="change" data-idx="'+i+'" aria-label="장면 '+(i+1)+'번째 자리">'+icon+'</button>').join('')+'</div><div class="novel-ground">🌿　🌼　🌿　🌼</div></div></div>');
   if(study)parts.push('<button type="button" class="novel-main-button" data-novel-action="reveal">충분히 살펴봤어요 → 지금 장면 보기</button>');
   else parts.push('<div class="novel-scene-tools"><button type="button" class="novel-side-button" data-novel-action="peek">👀 이전 장면 다시 보기</button><small>'+(level===1?'비교하며 천천히 찾아요.':'다시 본 횟수도 관찰기록에 남아요.')+'</small></div>');
-  if(data.phase==='peek')parts.push('<div class="novel-peek"><strong>처음 장면</strong><div class="novel-peek-row">'+data.before.join('　')+'</div><button type="button" class="novel-side-button" data-novel-action="back">지금 장면으로 돌아가기</button></div>');
+  if(lookingBack)parts.push('<div class="novel-peek"><button type="button" class="novel-side-button" data-novel-action="back">다 봤어요 · 달라진 장면으로 돌아가기</button></div>');
  }
  parts.push('<div class="novel-feedback" role="status" aria-live="polite"></div><div class="novel-recovery" hidden><p>괜찮아요. 이전 선택에서 벗어나 현재 규칙이나 장면을 다시 확인해요.</p><button type="button" data-novel-action="pause">⏸ 잠깐 멈춰서 다시 확인하기</button></div>');
  parts.push('<div class="novel-bottom-actions"><button type="button" class="novel-side-button" data-novel-action="rest">어려워요 · 쉬어가기</button></div>');
@@ -121,7 +131,7 @@ function render(id,d){
   const button=document.createElement('button');button.className='novel-main-button';button.type='button';button.dataset.novelAction='next';button.textContent=round+1===state.roundTotal?'탐험 결과 보기 →':'다음 이야기로 →';root.appendChild(button);
  }
  function failure(message,oldRuleInterference=false){
-  s.firstCorrect=false;
+  if(s.firstCorrect===null)s.firstCorrect=false;
   s.retries++;s.mistakes++;
   if(oldRuleInterference)s.switchedMistakes++;
   if(s.retries>=3){feedback.textContent='같은 문제가 계속 헷갈린다면 여기까지 하고 잠시 쉬어갈 수 있어요.';recovery.hidden=false;return;}
