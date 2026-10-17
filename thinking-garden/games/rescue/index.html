@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#16382d">
   <title>모아 구조대!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=3">
 <link rel="stylesheet" href="../../../assets/moa-quick-guide.css?v=20261017-v1">
 </head>
@@ -52,7 +55,21 @@
   <script src="phaser.min.js"></script>
   <script src="rescue-core.js?v=1"></script>
   <script src="landscape.js?v=8"></script>
-  <script src="game.js?v=11"></script>
+  <script>
+  // Phaser snapshots text as canvas pixels. Wait briefly for the Korean glyphs
+  // before creating the canvas so instructions do not render as blank squares.
+  (async()=>{
+    try {
+      await Promise.race([
+        document.fonts.load('700 26px "Noto Sans KR"','가나다라마바사 출동 친구 찾기').catch(()=>[]),
+        new Promise(resolve=>setTimeout(resolve,3500))
+      ]);
+    } catch(_) {}
+    const script=document.createElement('script');
+    script.src='game.js?v=11';
+    document.body.appendChild(script);
+  })();
+</script>
 <script src="../../../assets/moa-quick-guide.js?v=20261017-v1"></script>
 </body>
 </html>
