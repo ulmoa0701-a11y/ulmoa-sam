@@ -88,7 +88,7 @@ async function visualAndRecovery(width,height,label){
  const p=await c.newPage(),errors=[];
  p.on('pageerror',e=>errors.push(e.message));
  await p.goto(base+'/',{waitUntil:'domcontentloaded'});
- const homeCognitive=p.locator('a[href="gardens/#cognitive"]');
+ const homeCognitive=p.locator('a[href="gardens/#cognitive"]:visible');
  assert.ok(await homeCognitive.count()>=1,'Home page has cognitive garden entry');
  await homeCognitive.first().click();
  await p.waitForURL('**/gardens/#cognitive');
