@@ -576,6 +576,38 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
   return report;
  });
  check(result.some(x=>x.key==='twinkle'&&x.hasWords),screen+': cannot match twinkle text to known words');
+ // All builtin lyrics should have a real validated word map, not just fixed
+ // sung-phrase timing. This catches missing spaces in classroom songs.
+ const wordAudit=await page.evaluate(()=>{
+  const old={song:currentSong,section:practiceSection,t:elapsed},out=[];
+  try{
+   for(const song of SAMPLES){
+    currentSong=clone(song);practiceSection='all';refreshPracticeSections();build();
+    const actual=events.filter(e=>eHasLyric(e)).map(e=>String(e.lyric).replace(/\s/g,'')).join('');
+    const text=LYRIC_WORDS[song.key]||'';
+    const boundary=lyricWordBreakIndices();
+    const firstPhrase=lyricWindowAt(firstNoteMs()+10,18,document.querySelector('#lyricTrack').clientWidth-34);
+    out.push({key:song.key,text,valid:actual===text.replace(/\s/g,''),
+      gaps:boundary.size,first:firstPhrase.items.map((x,i)=>(i&&boundary.has(x.i)?' ':'')+String(x.e.lyric).trim()).join('')});
+   }
+  }finally{currentSong=old.song;practiceSection=old.section;elapsed=old.t;refreshPracticeSections();build()}
+  return out;
+ });
+ for(const x of wordAudit){
+  check(x.valid,screen+': invalid or absent song word spacing map '+JSON.stringify(x));
+  check(x.gaps>=1,screen+': all songs need spaces in their subtitles '+JSON.stringify(x));
+ }
+ const wordBySong=Object.fromEntries(wordAudit.map(x=>[x.key,x]));
+ check(wordBySong['spring-outing']?.first==='나리나리 개나리',
+   screen+': spring outing opening does not preserve Korean spaces '+JSON.stringify(wordBySong['spring-outing']));
+ check(wordBySong['hometown-spring']?.first==='나의 살던 고향은' &&
+       wordBySong['hometown-spring']?.text.includes('차린 동네') &&
+       !wordBySong['hometown-spring']?.text.includes('차리인'),
+   screen+': hometown spring natural lyrics remain incorrect '+JSON.stringify(wordBySong['hometown-spring']));
+ check(wordBySong.bicycle?.first==='따르릉 따르릉',
+   screen+': bicycle opening lacks word spacing '+JSON.stringify(wordBySong.bicycle));
+ report.push({name:screen+'-all-songs-word-audit',all:wordAudit.map(x=>({key:x.key,first:x.first,gaps:x.gaps}))});
+
  for(const x of result){
   check(x.incomplete.length===0,screen+': lyric fragment at '+x.key+': '+JSON.stringify(x.incomplete.slice(0,3)));
   check(x.clipped.length===0,screen+': karaoke overflow at '+x.key+': '+JSON.stringify(x.clipped.slice(0,3)));
