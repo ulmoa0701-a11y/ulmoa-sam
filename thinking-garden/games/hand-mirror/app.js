@@ -466,7 +466,7 @@ function advance(){
  if(S.phase!=='reward')return;
  timeouts();
  if(isMemory()&&S.part<current().length-1){
-  S.part++;S.phase='play';render();return;
+  S.part++;S.phase='play';S.readyToMatch=true;S.rearmSince=0;render();return;
  }
  S.round++;S.part=0;S.phase=isMemory()?'memorize':'play';
  // New rounds must re-arm after the target changes; otherwise the child can never
