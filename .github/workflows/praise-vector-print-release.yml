@@ -6,6 +6,7 @@ on:
       - fix/praise-chart-crisp-print-20261017
     paths:
       - qa/build_praise_vector.py
+      - .github/workflows/praise-vector-print-release.yml
 
 permissions:
   contents: write
