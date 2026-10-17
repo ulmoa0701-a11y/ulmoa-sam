@@ -13,7 +13,12 @@ const medium=[[[0,1],[1,1],[1,2]],[[0,0],[0,1],[1,0]],[[1,0],[1,1],[2,1]],[[0,1]
 const hard=[[[0,1],[1,0],[1,1],[2,1]],[[1,1],[1,2],[2,0],[2,1]],[[0,0],[0,1],[1,1],[2,1]],[[0,1],[1,1],[1,2],[2,2]],[[0,0],[1,0],[1,1],[2,1]]];
 function isNew(id){return IDS.includes(id)}
 function rounds(id){return id==='slowName'?6:5}
-function setUp(id, options){return {id,level:Math.max(1,Math.min(3,Number(options.level)||1)),cue:options.cue||'guide',kind:options.kind||'animal',response:options.response||'speech',records:[],activeRound:-1,selected:new Set(),attempts:0,firstCorrect:null,hint:false,finished:false}}
+function newNameOrder(){
+ const order=[0,1,2,3,4,5];
+ for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+ return order;
+}
+function setUp(id, options){return {nameOrder:newNameOrder(),id,level:Math.max(1,Math.min(3,Number(options.level)||1)),cue:options.cue||'guide',kind:options.kind||'animal',response:options.response||'speech',records:[],activeRound:-1,selected:new Set(),attempts:0,firstCorrect:null,hint:false,finished:false}}
 function csv(s){
  const headers=['활동','난이도','지원방식','제시번호','최초정확','최종정확','재시도','단서','반응'];
  const rows=[headers,...s.records.map(r=>[names[s.id],s.level,{guide:'전략 안내',wait:'기다리기',self:'스스로'}[s.cue],r.round,r.first,r.final,r.retries,r.hint?'사용':'없음',r.note])];
@@ -52,8 +57,9 @@ function render(id,d) {
  const pattern=shape.map(([r,c])=>r+','+c);
  const target=new Set(pattern);
  const cells=Math.pow(n,2);
- const nameSequence=[0,1,2,0,2,1];
- const itemIndex=(nameSequence[round%6]+Math.floor(round/6))%6;
+ // Every six-round block contains every target exactly once.
+ // The starting order varies by session; a later block rotates to avoid rote response.
+ const itemIndex=s.nameOrder[(round+Math.floor(round/6))%6];
  const pool=s.kind==='color'?colors:animals;
  const item=pool[itemIndex];
  const targetObject=[...objects[(round*2+1)%objects.length]];
@@ -62,7 +68,7 @@ function render(id,d) {
  if(id==='slowScan'){const rows=[[0,0],[0,n-1],[n-1,0],[n-1,n-1],[1,1],[2,1]];rows.slice(0,s.level+1).forEach(([r,c])=>scanTargets.add(((r+round)%n)+','+((c+round*2)%n)));}
  let objectTargets=new Set();
  if(id==='slowEveryday'){objectArr=Array.from({length:cells},(_,i)=>objects[(i+round*2+i%3)%objects.length]);const ix=(round*2+2)%objectArr.length;const chosen=objectArr[ix];targetObject[0]=chosen[0];targetObject[1]=chosen[1];objectArr.forEach((x,i)=>{if(x[0]===chosen[0])objectTargets.add(Math.floor(i/n)+','+(i%n))});}
- const el=(html)=>{area.innerHTML='<div class="slow-task">'+html+'</div>';return area.querySelector('.slow-task');};
+ const el=(html)=>{area.innerHTML='<div class="slow-task '+(id==='slowName'?'slow-name-task':'')+'">'+html+'</div>';return area.querySelector('.slow-task');};
  const info='<p class="slow-step"><span>① 자세히 보기</span><span>② 생각하기</span><span>③ 준비되면 표현하기</span></p>';
  const teacher='<details class="slow-teacher-details"><summary>선생님 도움·관찰</summary><p>정답을 알려주지 않고 스스로 확인할 시간을 제공해요. 이전 반응 간섭이나 어려움을 보이면 쉬어갈 수 있어요.</p><button type="button" data-slow="hint">다시 확인하는 방법 안내</button></details>';
  function grid(sample, mode) {
@@ -87,10 +93,16 @@ function render(id,d) {
   else html+='<button type="button" class="slow-secondary" data-slow="show">잠깐 다시 보기</button>';
  }else if(id==='slowName') {
   const visual=s.kind==='animal'?item[1]:'<span class="slow-color" style="background:'+item[1]+'"></span>';
+  html+='<div class="slow-name-quest"><img src="assets/friend-saem.png" alt="" class="slow-name-guide"><span aria-hidden="true">🌿</span><strong>누가 정원 문 앞에 왔을까?</strong><span aria-hidden="true">🚪</span></div>';
   html+='<div class="slow-name-picture" aria-label="이름을 생각할 그림">'+visual+'</div>';
   if(!s.nameReady)html+='<button type="button" class="slow-primary" data-slow="ready">충분히 봤어요 · 이제 말할게요 →</button>';
   else if(s.response==='speech')html+='<div class="slow-teacher-choice"><p>아동이 말한 뒤 선생님이 결과를 기록합니다.</p><button data-slow="name-right">정확하게 말함</button><button data-slow="name-wrong">다른 이름을 말함</button><button data-slow="skip">모르겠어요 · 쉬어가기</button></div>';
-  else {const ix=[itemIndex,(itemIndex+2)%6,(itemIndex+4)%6].sort((a,b)=>(a*3+round)%7-(b*3+round)%7);html+='<div class="slow-name-choice">'+ix.map(i=>'<button type="button" data-slow="word" data-word="'+i+'">'+pool[i][0]+'</button>').join('')+'</div>'}
+  else {
+   const distractors=[(itemIndex+2+round)%6,(itemIndex+4+round)%6].filter(i=>i!==itemIndex);
+   for(let j=0;j<6&&distractors.length<2;j++)if(j!==itemIndex&&!distractors.includes(j))distractors.push(j);
+   const ix=[itemIndex,...distractors].sort((a,b)=>((a+round*3)%7)-((b+round*3)%7));
+   html+='<div class="slow-name-choice" role="group" aria-label="글자로 이름 고르기">'+ix.map(i=>'<button type="button" data-slow="word" data-word="'+i+'">'+pool[i][0]+'</button>').join('')+'</div>';
+  }
  }else if(id==='slowEveryday'){
   html+='<div class="slow-mission-label">가방에 넣을 '+targetObject[0]+'을(를) 모두 찾아요.</div><div class="slow-board slow-bag" style="--side:'+n+'">'+objectArr.map((obj,i)=>{const key=Math.floor(i/n)+','+(i%n);return '<button type="button" class="slow-tile '+(selected.has(key)?'picked':'')+'" data-slow="cell" data-key="'+key+'" aria-pressed="'+selected.has(key)+'" aria-label="물건 '+(i+1)+'">'+obj[1]+'</button>'}).join('')+'</div>';
  }
@@ -105,6 +117,12 @@ function render(id,d) {
   if(correct){addSeeds(s.attempts?7:10);sfx('ok');}else if(outcome===false){sfx('tap');}
   root.querySelectorAll('button[data-slow]').forEach(b=>{if(b.dataset.slow!=='next')b.disabled=true;});
   feed.textContent=outcome===null?'쉬어가도 괜찮아요.':correct?'정원을 정확하게 살폈어요!':'어려웠던 문제는 잠시 두고 다음 길로 가요.';
+  if(correct&&id==='slowName'){
+   const visit=document.createElement('div');visit.className='slow-name-arrival';visit.setAttribute('role','status');
+   const art=document.createElement('span');art.className='slow-name-arrival-art';art.setAttribute('aria-hidden','true');art.textContent=(s.kind==='animal'?item[1]:'🚩')+' 🌷';
+   const caption=document.createElement('strong');caption.textContent=s.kind==='animal'?'🌼 정원 문이 열리고 친구가 들어왔어요!':'🌼 색깔 깃발을 정원에 세웠어요!';
+   visit.append(art,caption);root.appendChild(visit);
+  }
   const btn=document.createElement('button');btn.type='button';btn.className='slow-primary';btn.dataset.slow='next';btn.textContent=round+1===state.roundTotal?'탐험 결과 보기 →':'다음 길로 가기 →';root.appendChild(btn);
  }
  function check(){
@@ -128,9 +146,9 @@ function render(id,d) {
   if(a==='show'){s.hint=true;s.memoryHidden=-1;render(id,d);return;}
   if(a==='ready'){s.nameReady=true;render(id,d);return;}
   if(a==='retryName'){s.nameReady=true;render(id,d);return;}
-  if(a==='name-right')return nameScore(true,'교사 관찰: 정확한 명명');
-  if(a==='name-wrong')return nameScore(false,'교사 관찰: 다른 이름으로 명명');
-  if(a==='word')return nameScore(Number(b.dataset.word)===itemIndex,'글자 보기 선택');
+  if(a==='name-right')return nameScore(true,'교사 관찰: 말로 명명 (정확)');
+  if(a==='name-wrong')return nameScore(false,'교사 관찰: 말로 명명 (오반응)');
+  if(a==='word')return nameScore(Number(b.dataset.word)===itemIndex,'글자로 선택 (말하기 수행 아님)');
   if(a==='hint'){s.hint=true;feed.textContent='한 칸씩 비교한 뒤 대답해요. 필요하면 쉬었다가 다시 해요.';return;}
  });
 }
