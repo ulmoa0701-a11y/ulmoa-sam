@@ -92,7 +92,7 @@ const previewExamples={
  sceneDetect:`<div class="pv-instruction">첫 장면을 기억하고 달라진 곳을 찾아요</div><div class="pv-options emoji"><span>🌳</span><span>🐰</span><span>→</span><span>🌳</span><span>🐱</span></div><div class="pv-hint">시간 제한 없이 충분히 본 뒤 선택해요.</div>`,
  slowScan:`<div class="pv-instruction">잎과 돌 사이에서 꽃을 찾아요</div><div class="pv-options emoji"><span>🍃</span><span class="preview-pulse">🌼</span><span>🌱</span><span class="preview-pulse">🌼</span></div>`,
  slowPlace:`<div class="pv-instruction">같은 위치에 꽃을 심어요</div><div class="pv-options emoji"><span>🌼</span><span>▫</span><span>→</span><span class="preview-pulse">🌼</span><span>▫</span></div>`,
- slowBlock:`<div class="pv-instruction">블록이 맞닿는 자리를 살펴요</div><div class="pv-options emoji"><span>🧱</span><span>🧱</span><span>→</span><span class="preview-pulse">🧱</span><span>🧱</span></div>`,
+ slowBlock:`<div class="pv-instruction">샘의 집을 지어요! 🏡</div><div class="pv-options emoji"><span>🧱🧱</span><span>↻</span><span class="preview-pulse">↕</span><span>🧱🧱</span></div><div class="pv-hint">긴 블록을 가로·세로로 돌리고 붙여 조립해요.</div>`,
  slowName:`<div class="pv-instruction">충분히 보고 생각한 뒤 이름을 말해요</div><div class="pv-options emoji"><span>🐶</span><span>🐰</span><span>🐱</span></div>`,
  slowMemory:`<div class="pv-instruction">꽃이 있던 자리를 기억해요</div><div class="pv-sequence"><i class="blue"></i><b>→</b><i class="yellow"></i><b>→</b><i class="green"></i></div><div class="pv-hint">보기를 가린 뒤 위치를 표시해요</div>`,
  slowEveryday:`<div class="pv-instruction">🌧️ 비 오는 날, 무엇을 챙길까?</div><div class="pv-options emoji"><span class="preview-pulse">☂️</span><span>🥁</span><span>👢</span><span>📖</span><span class="preview-pulse">🧥</span></div><div class="pv-hint">필요한 준비물을 가방에 넣고 출발해요 🎒</div>`,
