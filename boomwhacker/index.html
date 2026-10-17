@@ -1060,6 +1060,45 @@ function lyricWordBreakIndices(){
  return boundaries;
 }
 function eHasLyric(e){return !!String(e.lyric||'').trim()}
+// Curated sung phrases (starting bars, zero-based) for existing sample songs.
+// These are MUSICAL lyric units, not an arbitrary number of words or pixels.
+// Never take the first word of the following phrase simply to fill empty space.
+const LYRIC_PHRASE_BARS={
+ twinkle:[0,4,8,12,16,20],
+ plane:[0,2,4,6],
+ butterfly:[0,2,4,6,8,10,12,14],
+ 'butterfly-d':[0,2,4,6,8,10,12,14],
+ 'butterfly-f':[0,2,4,6,8,10,12,14],
+ rabbit:[0,4,8,12],
+ same:[0,2,4,6],
+ bear:[0,2,4,6,8,10],
+ 'school-bell':[0,2,4,6],
+ bicycle:[0,2,4,6,8,10,12,14],
+ 'spring-outing':[0,2,4,6],
+ 'hometown-spring':[0,2,4,6,8,10,12,14],
+ 'sixteenth':[0,1,2,3],
+ dotted:[0,1,2,3],
+ 'moa-signal':[0,2,4,6],
+ 'moa-space':[0,2,4,6],
+ 'moa-party':[0,2,4,6],
+ 'moa-breeze':[0,2,4]
+};
+function musicalLyricStarts(hits,wordStarts){
+ const bars=LYRIC_PHRASE_BARS[currentSong.key];
+ const reference=findSample(currentSong.key);
+ const normalize=items=>items.flat().filter(eHasLyric).map(e=>String(e.lyric).replace(/\s/g,'')).join('');
+ // Ignore a sample key if the score was replaced by imported/custom notes.
+ if(!bars||!reference||normalize(reference.measures)!==normalize(currentSong.measures))return null;
+ const starts=new Set([hits[0]?.i]);
+ const wordKnown=!!LYRIC_WORDS[currentSong.key]&&normalize(currentSong.measures)===LYRIC_WORDS[currentSong.key].replace(/\s/g,'');
+ for(const bar of bars.slice(1)){
+  const hit=hits.find(({e})=>e.measure+scoreStartBar===bar);
+  if(hit&&(!wordKnown||wordStarts.has(hit.i)))starts.add(hit.i);
+ }
+ return starts;
+}
+// Prefer known musical phrases. Unknown imported material uses existing
+// word-aware width grouping; the original song timing is never changed.
 // Each visible lyric page begins AND ends on a word boundary, not an arbitrary
 // 18th note. A word whose notes straddle the old boundary stays on one page.
 function lyricWindowAt(t=elapsed,size=18,widthPx=Infinity){
@@ -1067,15 +1106,22 @@ function lyricWindowAt(t=elapsed,size=18,widthPx=Infinity){
  if(!hits.length)return{items:[],activeIndex:-1,start:0};
  let activePos=-1;
  for(let i=0;i<hits.length;i++){if(t>=hits[i].e.start-90)activePos=i;else break}
- const boundaries=lyricWordBreakIndices(),words=[];
+ const boundaries=lyricWordBreakIndices(),phraseStarts=musicalLyricStarts(hits,boundaries),words=[];
  for(const hit of hits){
-  if(!words.length||boundaries.has(hit.i))words.push([]);
+  if(!words.length||(phraseStarts?phraseStarts.has(hit.i):boundaries.has(hit.i)))words.push([]);
   words[words.length-1].push(hit);
  }
  const maxUnits=Math.max(1,Number(size)||18);
  const maxPx=Number.isFinite(widthPx)?Math.max(80,widthPx):Infinity;
  const pxPer=window.innerWidth<=800?27:document.body.classList.contains('fullscreen')?41:29;
  const pages=[];let page=[],units=0,pixels=0;
+ // In a curated song each group IS one complete sung phrase; do not blend
+ // in the next phrase when the bar still has available width.
+ if(phraseStarts){
+  const current=hits[Math.max(0,activePos)]?.i;
+  const visible=words.find(group=>group.some(x=>x.i===current))||words[0]||[];
+  return{items:visible,activeIndex:activePos>=0?hits[activePos].i:-1,start:visible[0]?.i??0};
+ }
  for(const word of words){
   const count=word.reduce((n,x)=>n+Math.max(1,Array.from(String(x.e.lyric).trim()).length),0);
   const w=count*pxPer+Math.max(0,word.length-1);
