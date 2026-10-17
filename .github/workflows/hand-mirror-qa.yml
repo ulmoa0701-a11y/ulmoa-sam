@@ -71,10 +71,10 @@ jobs:
           for i in {1..48}; do
             curl -fsSL 'https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/' -o /tmp/live-garden.html &&
             curl -fsSL 'https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/hand-mirror/' -o /tmp/live-handmirror.html &&
-            curl -fsSL 'https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/hand-mirror/app.js?v=10' -o /tmp/live-handmirror.js &&
+            curl -fsSL 'https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/games/hand-mirror/app.js?v=11' -o /tmp/live-handmirror.js &&
             grep -q 'data-open="handMirror"' /tmp/live-garden.html &&
             grep -q 'id="gardenHud"' /tmp/live-handmirror.html && grep -q 'id="adventureScene"' /tmp/live-handmirror.html &&
-            grep -q 'function drawHands' /tmp/live-handmirror.js && grep -q 'gardenTouchDock' /tmp/live-handmirror.js && grep -q 'function adventureUpdate' /tmp/live-handmirror.js && exit 0
+            grep -q 'function drawHands' /tmp/live-handmirror.js && grep -q 'gardenTouchDock' /tmp/live-handmirror.js && grep -q 'function adventureUpdate' /tmp/live-handmirror.js && grep -q 'const COPY_CUES=' /tmp/live-handmirror.js && exit 0
             sleep 10
           done
           echo "Latest hand mirror game not published" >&2
