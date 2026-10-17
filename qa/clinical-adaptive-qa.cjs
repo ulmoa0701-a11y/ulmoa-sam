@@ -44,5 +44,6 @@ await page.locator('[data-rec=question]').click();
 assert.equal(await page.evaluate(()=>state.strategy.r.first),null,'asking to check is not a correct answer');
 await page.locator('[data-rec=pick][data-id="'+(await page.evaluate(()=>state.strategy.r.target))+'"]').click();
 assert.equal(await page.evaluate(()=>state.strategy.records[0].first),'O');
+assert.equal(await page.evaluate(()=>state.strategy.correctStreak),0,'self-check is not an independent first-try success for adaptive increase');
 assert.deepEqual(errors,[]);await browser.close();console.log('PASS clinical bridge for 26 games; dynamic difficulty increase/decrease; self-check does not inflate correctness');
 })().catch(e=>{console.error(e);process.exit(1)});
