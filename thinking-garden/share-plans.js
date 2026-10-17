@@ -40,6 +40,7 @@ function safePlan(o){
  if(!picked.length)return null;
  const level=[1,2,3].includes(Number(o.level))?Number(o.level):1;
  const rounds=[5,10,15,20].includes(Number(o.rounds))?Number(o.rounds):5;
+ const view=o.view==='calm'?'calm':'garden';
  const settings={};
  if(o.v===2&&o.settings&&typeof o.settings==='object'&&!Array.isArray(o.settings)){
   for(const id of picked){
@@ -51,7 +52,7 @@ function safePlan(o){
    if(Object.keys(clean).length)settings[id]=clean;
   }
  }
- return {v:2,items:picked,level,rounds,settings};
+ return {v:2,items:picked,level,rounds,settings,view};
 }
 function shareUrl(plan){const u=new URL(location.pathname,location.origin);u.searchParams.set(CODE,pack(plan));return u.href}
 // Reuse the game's existing visual examples rather than making generic thumbnails.
@@ -95,15 +96,22 @@ function makeAssignedVisual(id,isGame){
 function updateSharedMenu(){
  if(!active)return;
  document.body.classList.add('moa-assigned');
+ document.body.classList.toggle('moa-assigned-calm',active.view==='calm');
  const old=$('#moaAssignedHome');if(old)old.remove();
  const panel=E('section','moa-assigned-home');panel.id='moaAssignedHome';panel.setAttribute('aria-label','선택된 연습 활동');
- const hero=E('div','moa-assigned-hero');hero.append(E('span','moa-assigned-eyebrow','🌱 모아의 오늘 연습'),E('h1','', '준비한 활동만 모아뒀어요'),E('p','', '원하는 활동부터 시작해요. 서두르지 않아도 괜찮아요.'));
+ const calm=active.view==='calm';
+ const hero=E('div','moa-assigned-hero');
+ hero.append(
+  E('span','moa-assigned-eyebrow',calm?'선택한 활동':'🌱 모아의 오늘 연습'),
+  E('h1','',calm?'나에게 필요한 활동':'준비한 활동만 모아뒀어요'),
+  E('p','',calm?'필요한 활동을 골라 진행하면 됩니다. 전부 한 번에 할 필요는 없어요.':'마음에 드는 활동부터 시작해요. 오늘은 한 가지만 해도 괜찮아요.')
+ );
  const notice=E('p','moa-assigned-detail',active.items.length+'개 활동 · 게임마다 연습량이 다를 수 있어요.');
- hero.append(notice);if(visited.size){hero.append(E('p','moa-assigned-progress','🌱 '+visited.size+'개 활동을 해봤어요. 다음 활동도 천천히 이어갈 수 있어요.'));}panel.append(hero);
+ hero.append(notice);if(visited.size){hero.append(E('p','moa-assigned-progress',(calm?'✓ ':'🌱 ')+visited.size+'개 활동을 이 화면에서 해봤어요.'));}panel.append(hero);
  const grid=E('div','moa-assigned-list');
  active.items.forEach((id,i)=>{
   const game=library.find(x=>x.id===id),material=materialMap.get(id),card=E('article','moa-assigned-item');
-  const n=E('span','moa-assigned-number',visited.has(id)?'🌼 해봤어요':String(i+1).padStart(2,'0'));card.append(n);
+  const n=E('span','moa-assigned-number',visited.has(id)?(calm?'✓ 해봤어요':'🌼 해봤어요'):String(i+1).padStart(2,'0'));card.append(n);
   card.append(makeAssignedVisual(id,!!game));
   const title=E('h2','',game?.title||material?.title||id);card.append(title);
   const desc=E('p','',game?.desc||material?.desc||'');card.append(desc);
@@ -121,7 +129,17 @@ function updateSharedMenu(){
   grid.append(card);
  });
  panel.append(grid);
- const foot=E('p','moa-assigned-foot','선택된 활동만 표시하는 공개 메뉴예요. 로그인이나 접근 제한 기능은 아니며, 개인정보는 링크에 넣지 않았어요.');
+ const homeHelp=E('details','moa-assigned-home-help');
+ homeHelp.append(E('summary','','🏠 집에서 함께할 때'));
+ const tips=E('div','moa-assigned-home-help-body');
+ const points=[
+  '오늘은 한 가지 활동만 해도 괜찮아요. 쉬고 싶으면 멈춰도 됩니다.',
+  '아이가 읽기 어렵다면 설명을 짧게 읽어주고, 답은 대신 골라주지 않아요.',
+  '아이가 화가 나거나 피곤해하면 쉬었다가 다른 날 해도 됩니다.',
+  '활동 결과는 선생님에게 자동으로 전송되지 않아요. 필요할 때 해본 활동이나 어려웠던 점만 직접 전해주세요.'
+ ];
+ points.forEach(tipsText=>tips.append(E('p','',tipsText)));homeHelp.append(tips);panel.append(homeHelp);
+ const foot=E('p','moa-assigned-foot','선택된 활동만 표시하는 공개 메뉴입니다. 로그인이나 접근 제한 기능이 아니며, 링크에 개인정보를 넣지 않았습니다. “해봤어요” 표시는 현재 열린 페이지에서만 유지되고, 새로고침이나 다른 기기에서는 초기화됩니다.');
  const editor=E('details','moa-assigned-editor');
  editor.append(E('summary','','선생님용 · 선택 목록 수정'));
  const edit=E('button','moa-assigned-exit','이 목록을 복사해 수정하기');edit.type='button';edit.onclick=()=>$('#moaPlannerLaunch')?.click();
@@ -195,7 +213,7 @@ function makeBuilder(){
  const close=E('button','moa-plan-close','×');close.type='button';close.setAttribute('aria-label','닫기');close.onclick=()=>dialog.close();top.prepend(close);
  const settings=E('div','moa-plan-settings');
  const lev=E('label','','권장 난이도 '),levels=E('select');levels.id='moaPlanLevel';[['1','쉬움'],['2','보통'],['3','확장']].forEach(([v,t])=>{const o=E('option','',t);o.value=v;levels.append(o)});lev.append(levels);
- const rnd=E('label','','기본 연습량 '),rounds=E('select');rounds.id='moaPlanRounds';[5,10,15,20].forEach(n=>{const o=E('option','',n+'문제');o.value=String(n);rounds.append(o)});rnd.append(rounds);settings.append(lev,rnd);
+ const rnd=E('label','','기본 연습량 '),rounds=E('select');rounds.id='moaPlanRounds';[5,10,15,20].forEach(n=>{const o=E('option','',n+'문제');o.value=String(n);rounds.append(o)});rnd.append(rounds);const viewLabel=E('label','','공유 화면 '),viewSelect=E('select');viewSelect.id='moaPlanView';[['garden','모아 정원'],['calm','차분하게']].forEach(([v,t])=>{const option=E('option','',t);option.value=v;viewSelect.append(option)});viewLabel.append(viewSelect);settings.append(lev,rnd,viewLabel);
  const presetBox=E('div','moa-plan-presets');
  const presetTitle=E('strong','','활동 조합 예시');presetBox.append(presetTitle);
  const presets=[
@@ -263,13 +281,13 @@ function makeBuilder(){
   const ids=[...chosenOrder];
   if(!ids.length){msg.textContent='게임이나 활동지를 하나 이상 골라주세요.';output.hidden=true;return}
   if(ids.length>LIMIT){msg.textContent='한 링크에는 최대 '+LIMIT+'개까지 담을 수 있어요. 중요한 활동만 골라주세요.';output.hidden=true;return}
-  const model=safePlan({v:2,items:ids,level:Number(levels.value),rounds:Number(rounds.value),settings:perItem});
+  const model=safePlan({v:2,items:ids,level:Number(levels.value),rounds:Number(rounds.value),settings:perItem,view:viewSelect.value});
   if(!model){msg.textContent='선택 항목을 확인해 주세요.';return}
   const link=shareUrl(model);url.value=link;preview.href=link;output.hidden=false;
   msg.textContent=model.items.length+'개 활동으로 만들었어요. 복사해서 보호자에게 전달할 수 있어요.';
  };
  selection.addEventListener('change',()=>{syncOrder();const count=chosenOrder.length;msg.textContent='선택한 활동 '+count+'개 (최대 '+LIMIT+'개)';output.hidden=true});
- levels.onchange=dirty;rounds.onchange=dirty;
+ levels.onchange=dirty;rounds.onchange=dirty;viewSelect.onchange=dirty;
  dialog.append(top,settings,presetBox,selection,orderBox,create,msg,output);document.body.append(dialog);
  renderOrder();
  entry.onclick=()=>{
@@ -278,7 +296,7 @@ function makeBuilder(){
    chosenOrder.splice(0,chosenOrder.length,...active.items);
    Object.keys(perItem).forEach(k=>delete perItem[k]);
    Object.assign(perItem,JSON.parse(JSON.stringify(active.settings||{})));
-   levels.value=String(active.level);rounds.value=String(active.rounds);
+   levels.value=String(active.level);rounds.value=String(active.rounds);viewSelect.value=active.view||'garden';
    syncOrder();dirty();msg.textContent='기존 목록을 불러왔어요. 바꾼 뒤 새 링크를 만들 수 있어요.';
   }
   dialog.showModal();
