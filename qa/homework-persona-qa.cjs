@@ -57,6 +57,23 @@ const personas=[
     }
     await page.locator('#introStart').click();
     assert.equal(await page.locator('#gameScreen.active').count(),1,spec.name+' did not enter game');
+    if(spec.name==='preschool-nonreader'||spec.name==='older-motor-keyboard'){
+     const target=await page.locator('.shape-target').innerText();
+     if(spec.name==='preschool-nonreader'){
+      const all=page.locator('.basic-choice');
+      let chosen=-1;
+      for(let n=0;n<await all.count();n++)if(await all.nth(n).getAttribute('data-shape')!==target){chosen=n;break;}
+      assert.ok(chosen>=0,'no incorrect alternative');
+      await all.nth(chosen).click();
+      assert.equal(await page.locator('.round-gate').count(),0,'one error must not complete the task');
+     }
+     const correct=page.locator('.basic-choice[data-shape="'+target+'"]');
+     assert.equal(await correct.count(),1,'shape answer ambiguous');
+     if(spec.name==='older-motor-keyboard'){await correct.focus();await page.keyboard.press('Enter');}
+     else await correct.click();
+     await page.locator('.round-gate').waitFor();
+     assert.ok(await page.locator('.round-gate').isVisible(),spec.name+' response did not register');
+    }
     await page.locator('#backHome').click();
    }
    assert.equal(await page.locator('#moaAssignedHome').count(),1,spec.name+' no homework return');
