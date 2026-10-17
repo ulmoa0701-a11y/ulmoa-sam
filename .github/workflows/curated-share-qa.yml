@@ -6,6 +6,7 @@ on:
       - 'thinking-garden/**'
       - 'qa/curated-share-qa.cjs'
       - 'qa/curated-all-games-smoke.cjs'
+      - 'qa/garden-name-quest-qa.cjs'
       - '.github/workflows/curated-share-qa.yml'
   pull_request:
     paths:
@@ -39,6 +40,8 @@ jobs:
           node --check thinking-garden/strategy-garden-core.js
           node --check thinking-garden/strategy-festival.js
           node --check qa/clinical-adaptive-qa.cjs
+          node --check thinking-garden/slow-look-native.js
+          node --check qa/garden-name-quest-qa.cjs
       - name: Start site
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/assigned-site.log 2>&1 &
@@ -54,6 +57,8 @@ jobs:
         run: node qa/curated-all-games-smoke.cjs
       - name: Clinical transfer and adaptive training
         run: node qa/clinical-adaptive-qa.cjs
+      - name: Naming quest stimulus and feedback QA (5/10/15/20)
+        run: node qa/garden-name-quest-qa.cjs
       - name: Screenshots
         if: always()
         uses: actions/upload-artifact@v4
