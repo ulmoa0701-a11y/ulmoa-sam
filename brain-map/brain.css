@@ -828,7 +828,7 @@
 .brain-page .brain-main .lobe-scene-focus-hint{font-size:11px;color:#52715b;line-height:1.4}
 .brain-page .brain-main .lobe-scene-explorer .figure-orientation{padding:7px 8px 0}
 .brain-page .brain-main .lobe-scene-explorer .brain-svg{display:block;background:#fff;max-width:610px;margin:0 auto}
-.brain-page .brain-svg[data-scene-mode="focus"] .brain-zone:not([data-scene-focus]){opacity:.30}
+.brain-page .brain-svg[data-scene-mode="focus"] .brain-zone:not([data-scene-focus]){opacity:.56}
 .brain-page .brain-svg[data-scene-mode="focus"] .brain-zone[data-scene-focus]{opacity:1}
 .brain-page .brain-svg[data-scene-mode="focus"] .brain-zone[data-scene-focus] .zone-shape{
  stroke:#164b36;stroke-width:16;filter:drop-shadow(0 0 7px #164b368c)
