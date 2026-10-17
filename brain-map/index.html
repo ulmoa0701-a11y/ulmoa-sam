@@ -13,8 +13,8 @@
 <link href="https://hangeul.pstatic.net/hangeul_static/css/maru-buri.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
 <link rel="stylesheet" href="../assets/notebook-subpages.css?v=20261005-clean3">
-<link rel="stylesheet" href="brain.css?v=20261017-focus4">
-<script src="brain.js?v=20261017-focus4" defer></script>
+<link rel="stylesheet" href="brain.css?v=20261017-process5">
+<script src="brain.js?v=20261017-process5" defer></script>
 <script src="activity-guide.js?v=20261017-activities3" defer></script>
 <link rel="stylesheet" href="../assets/habom-brand.css?v=20261010b">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/habom-favicon-v3-32.png">
@@ -41,13 +41,13 @@
   </nav>
  <div id="lobesView" class="brain-view" role="tabpanel" aria-labelledby="lobesTab">
  <section class="brain-one-panel" aria-labelledby="brainAreasHeading">
-  <div class="map-panel-heading"><h2 id="brainAreasHeading">뇌의 6가지 부분</h2><span>그림 속 숫자와 오른쪽 숫자가 같아요</span></div>
+  <div class="map-panel-heading"><h2 id="brainAreasHeading">생활 속에서 우리 뇌는 어떻게 일할까?</h2><span>익숙한 장면에서 여러 기능의 협력을 살펴봐요</span></div>
   <div class="one-panel-grid">
    <figure class="lobe-figure">
     <section class="lobe-scene-explorer" aria-labelledby="lobeSceneHeading">
      <div class="lobe-scene-head">
-      <h3 id="lobeSceneHeading">🌿 생활 속 뇌 이야기</h3>
-      <p>활동을 고르고, 세 가지 역할을 하나씩 살펴봐요.</p>
+      <h3 id="lobeSceneHeading">🌿 하나의 행동, 여러 가지 과정</h3>
+      <p>생활 장면을 선택하면 보고·듣고·생각하고·움직이는 여러 과정을 볼 수 있어요.</p>
      </div>
      <div class="lobe-scene-choices" role="group" aria-label="생활 장면 선택">
       <button type="button" data-lobe-scene="talk" aria-pressed="false" aria-controls="lobeSceneRoles lobeSceneSelection">💬 대화</button>
@@ -60,18 +60,18 @@
       <button type="button" data-lobe-scene="feeling" aria-pressed="false" aria-controls="lobeSceneRoles lobeSceneSelection">🙂 친구 기분</button>
      </div>
      <div class="lobe-scene-result" id="lobeSceneResult">
-      <strong id="lobeSceneTitle" class="lobe-scene-result-title">💬 대화할 때 · 함께하는 역할 3가지</strong>
+      <strong id="lobeSceneTitle" class="lobe-scene-result-title">💬 대화할 때 필요한 여러 과정의 예</strong>
       <ul class="lobe-scene-roles" id="lobeSceneRoles" aria-label="살펴볼 역할 선택">
-       <li><button type="button" data-scene-region="temporal" aria-pressed="true" aria-controls="lobeSceneSelection brainMap"><span class="lobe-scene-number" style="--scene-lobe-color:#B3E4C1" aria-hidden="true">3</span><span class="lobe-scene-task-icon" aria-hidden="true">👂</span><span class="lobe-scene-role-copy"><b>측두엽</b><small>말소리 살피기</small></span></button></li>
-       <li><button type="button" data-scene-region="frontal" aria-pressed="false" aria-controls="lobeSceneSelection brainMap"><span class="lobe-scene-number" style="--scene-lobe-color:#CDB2F3" aria-hidden="true">1</span><span class="lobe-scene-task-icon" aria-hidden="true">💡</span><span class="lobe-scene-role-copy"><b>전두엽</b><small>대답 계획하기</small></span></button></li>
-       <li><button type="button" data-scene-region="occipital" aria-pressed="false" aria-controls="lobeSceneSelection brainMap"><span class="lobe-scene-number" style="--scene-lobe-color:#FFC1A8" aria-hidden="true">4</span><span class="lobe-scene-task-icon" aria-hidden="true">👀</span><span class="lobe-scene-role-copy"><b>후두엽</b><small>표정 보기</small></span></button></li>
+       <li><button type="button" data-scene-region="temporal" aria-pressed="true" aria-controls="lobeSceneSelection brainMap"><span class="lobe-scene-number" style="--scene-lobe-color:#B3E4C1" aria-hidden="true">3</span><span class="lobe-scene-task-icon" aria-hidden="true">👂</span><span class="lobe-scene-role-copy"><b>말소리 살피기</b><small>3 측두엽 · 관련 영역 예시</small></span></button></li>
+       <li><button type="button" data-scene-region="frontal" aria-pressed="false" aria-controls="lobeSceneSelection brainMap"><span class="lobe-scene-number" style="--scene-lobe-color:#CDB2F3" aria-hidden="true">1</span><span class="lobe-scene-task-icon" aria-hidden="true">💡</span><span class="lobe-scene-role-copy"><b>대답 계획하기</b><small>1 전두엽 · 관련 영역 예시</small></span></button></li>
+       <li><button type="button" data-scene-region="occipital" aria-pressed="false" aria-controls="lobeSceneSelection brainMap"><span class="lobe-scene-number" style="--scene-lobe-color:#FFC1A8" aria-hidden="true">4</span><span class="lobe-scene-task-icon" aria-hidden="true">👀</span><span class="lobe-scene-role-copy"><b>표정 보기</b><small>4 후두엽 · 관련 영역 예시</small></span></button></li>
       </ul>
      </div>
      <div class="lobe-scene-selection" id="lobeSceneSelection" role="status" aria-live="polite" aria-atomic="true">
-      <span class="lobe-scene-focus-eyebrow" id="lobeSceneCurrent">💬 대화 · 세 역할 중 1번째</span>
-      <strong id="lobeSceneFocusTitle">3 측두엽</strong>
-      <p id="lobeSceneFocusText">말소리를 듣고 뜻을 이해하는 데 관여해요.</p>
-      <span class="lobe-scene-focus-hint">그림에서 진하게 표시된 한 부분을 살펴봐요.</span>
+      <span class="lobe-scene-focus-eyebrow" id="lobeSceneCurrent">💬 대화할 때 살펴보는 과정</span>
+      <strong id="lobeSceneFocusTitle">말소리 살피기</strong>
+      <p id="lobeSceneFocusText">우리가 듣는 말소리를 구별하고 뜻을 이해하는 데 여러 영역이 관여해요.</p>
+      <span class="lobe-scene-focus-hint" id="lobeSceneRegionHint">뇌 그림의 3 측두엽은 관련 영역의 대표적인 예예요.</span>
      </div>
     <div class="figure-orientation"><span>← 이마 쪽 (앞)</span><span>뒤통수 쪽 (뒤) →</span></div>
     <svg id="brainMap" class="brain-svg" viewBox="125 70 685 500" xmlns="http://www.w3.org/2000/svg" role="group" tabindex="-1" aria-label="옆에서 바라본 뇌. 보라색 전두엽, 노란색 두정엽, 초록색 측두엽, 복숭아색 후두엽, 하늘색 소뇌, 연보라색 뇌줄기.">
@@ -105,11 +105,13 @@
 </g>
 </g>
 </svg>
-     <p class="lobe-scene-caution" id="lobeSceneNotice">같은 행동에 여러 뇌 영역이 함께 참여해요. 강조 표시는 실제 뇌 활성도나 진단 결과가 아니에요.</p>
+     <p class="lobe-scene-caution" id="lobeSceneNotice">강조한 부분만 일하는 것은 아니에요. 이 그림은 대표적인 기능을 설명하는 예시이며, 아이의 어려움·뇌 활성도·치료효과를 판단하지 않아요.</p>
     </section>
     <figcaption>옆에서 본 모습 · 실제 뇌의 경계를 정확히 표시한 그림은 아니에요.</figcaption>
    </figure>
-   <div class="lobe-list" aria-label="뇌 부위별 대표 기능">
+   <details class="lobe-directory" id="lobeDirectory">
+    <summary>뇌 부위 6가지 자세히 살펴보기 <span>이름·위치·대표 기능</span></summary>
+    <div class="lobe-list" aria-label="뇌 부위별 대표 기능">
     <button class="lobe-card" type="button" data-region="frontal" aria-pressed="false">
       <span class="lobe-number" style="--lobe:#CDB2F3">1</span><span><strong>전두엽</strong><small>생각하고, 계획하고, 멈춰요</small></span>
     </button>
@@ -134,6 +136,7 @@
     <button type="button" id="detailClose" aria-label="예시 설명 닫기">×</button>
   </div>
    </div>
+   </details>
   </div>
  </section>
  <div class="brain-bottom">
