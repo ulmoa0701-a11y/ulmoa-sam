@@ -97,3 +97,11 @@
 .shape-reunion{display:flex;align-items:center;justify-content:center;min-height:70px;width:min(100%,430px);margin:8px auto 14px;border:2px solid #b9dcb9;border-radius:20px;background:linear-gradient(120deg,#f0f9dd,#ecf7fa);color:#305b42;font-size:clamp(28px,6vw,46px);line-height:1.4;letter-spacing:.02em}
 .shape-reunited .shape-target{background:#eaf8df;border-color:#81bb8d}
 @media(prefers-reduced-motion:no-preference){.shape-reunion{animation:moa-shape-hello .28s ease-out}@keyframes moa-shape-hello{from{opacity:.4;transform:scale(.96)}to{opacity:1;transform:scale(1)}}}
+
+/* Living water garden: a visible, task-linked change after each choice. */
+.water-quest-story{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;margin:8px auto 12px;padding:10px;border:1px solid #c8e4bd;border-radius:20px;background:#f1fae9;color:#2b6149;font-weight:900}
+.water-quest-story img{width:54px;height:54px;object-fit:contain}
+.water-quest-story span{font-size:27px}
+.water-quest-growth{display:grid;gap:6px;justify-items:center;align-items:center;text-align:center;margin:10px auto 18px;min-height:88px;padding:12px;border:2px solid #a7d1b6;border-radius:20px;background:linear-gradient(#e9f8fd,#e5f3dd);color:#285b44;font-weight:850}
+#waterGardenGrowth{font-size:clamp(24px,4vw,42px);overflow-wrap:anywhere;line-height:1.4}
+@media(max-width:550px){.water-quest-story{gap:6px}.water-quest-story img{width:40px;height:40px}.water-quest-story span{font-size:22px}}
