@@ -35,7 +35,7 @@ const STORIES=[
  ['공원에서 돗자리 피기','🏞️🧺',['mat','fruit','water'],['mirror','drum','scissors','boots','paste']],
  ['공연장에 가는 날','🎭🎟️',['ticket','card','bag'],['watering','bucket','broom','seed','pillow']],
  ['놀이터에서 공놀이','🛝⚽',['ball','shoes','water'],['brush','flute','paint','bin','pillow']],
- ['연주회 준비','🎵🎼',['music','flute','drum'],['shovel','umbrella','toothbrush','bucket','mat']],
+ ['연주회 준비','🎵🎼',['music','flute','drum'],['shovel','umbrella','brush','bucket','mat']],
  ['블록 놀이터 만들기','🏠🧱',['block','flag','rope'],['paste','ticket','boots','brush','pillow']],
  ['색종이 오려 붙이기','✂️🌈',['paper','scissors','glue'],['ball','ticket','boots','watering','pillow']],
  ['교실에서 길이 재기','📏✏️',['ruler','pencil','paper'],['umbrella','drum','shovel','blanket','hat']],
