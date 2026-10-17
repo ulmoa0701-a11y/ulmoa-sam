@@ -41,3 +41,14 @@ body.moa-assigned .site-home-link{display:none!important}
 .moa-assigned-pdf-link{font-size:12px;color:#356b4e;font-weight:750}
 .moa-assigned-frame{border:0;width:100%;flex:1;min-height:0;background:#fff}
 @media(max-width:600px){.moa-plan-builder{padding:14px;max-height:94vh}.moa-plan-row{padding:10px 5px}.moa-assigned-list{grid-template-columns:1fr}.moa-assigned-hero{padding:22px 11px}.moa-assigned-item{padding:16px}}
+
+/* Optional, nonintrusive clinician / caregiver guidance for every cognition activity. */
+.moa-clinical-bridge{max-width:680px;margin:13px auto;padding:11px 14px;border:1px solid #d6e3cd;border-radius:15px;background:#f7faf2;color:#4d6f56;text-align:left}
+.moa-clinical-bridge summary{font-size:13px;cursor:pointer;font-weight:850}
+.moa-clinical-bridge-body{padding:9px 2px 3px;font-size:13px;line-height:1.65}
+.moa-clinical-bridge-body p{margin:7px 0;font-size:13px}
+.moa-clinical-bridge-body b{color:#376e51}
+.moa-clinical-bridge-body a{display:inline-block;font-weight:850;color:#317c53;margin:6px 0}
+.moa-clinical-bridge-body small{display:block;font-size:11px;color:#7d8c7c}
+body.moa-assigned .moa-clinical-bridge-body>a{display:none}
+.moa-assigned-progress{font-size:13px!important;font-weight:800;color:#4a8061!important}
