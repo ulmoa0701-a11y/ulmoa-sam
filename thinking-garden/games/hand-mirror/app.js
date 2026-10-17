@@ -172,6 +172,9 @@ function adventureUpdate(){
  if(!active)return;
  const meta=ADVENTURE_META[S.mode],phase=S.phase;
  const count=S.mode==='memory'?S.round:S.success;
+ const key=[S.mode,phase,S.round,S.part,S.success].join(':');
+ if($('adventureScene').dataset.renderKey!==key){
+  $('adventureScene').dataset.renderKey=key;
  $('adventureScene').dataset.mode=S.mode;
  $('adventureScene').dataset.phase=phase;
  $('adventureSceneTitle').textContent=S.mode==='copy'?'🫧 풍선을 하나씩 반짝이게 해요':
@@ -195,6 +198,7 @@ function adventureUpdate(){
   }).join('');
   $('gardenHudFlower').textContent=(S.mode==='copy'?'✨ ':S.mode==='fingers'?'⭐ ':'🔑 ')+Math.min(count,meta.rounds)+' / '+meta.rounds;
   $('gardenHudRound').textContent=(S.round+1)+' / '+meta.rounds;
+ }
  }
  $('adventureActorEmoji').textContent=S.mode==='copy'?(phase==='reward'?'✨':'🫧'):
   S.mode==='fingers'?(phase==='reward'?'⭐':'✨'):
@@ -284,7 +288,12 @@ function render(){
  if(preparing){S.phase='setup';message('먼저 카메라에서 손을 찾아 볼게요.');}
  else if(memoryPreview){S.phase='memorize';message('모아가 보여준 순서를 기억해 볼까? 시간 제한은 없어!');}
  else if(S.phase!=='reward'){
-  S.phase='play';message(isCamera()?'손을 보여줘! 모양이 맞으면 꽃이 피어.':'손 모양을 따라 한 뒤 알맞은 그림을 골라!');
+  S.phase='play';message(isCamera()?(isGarden()?'손을 보여줘! 도토리를 잡아볼까?':
+    S.mode==='memory'?'기억할 손 모양이 나타났어!':
+    S.mode==='copy'?'모아 손을 따라해서 풍선을 깨워!':
+    S.mode==='fingers'?'손가락으로 별을 밝혀봐!':'두 손으로 자물쇠를 열어봐!'):
+   (isGarden()?'손을 흉내 내고 그림을 골라 봐!':
+    S.mode==='memory'?'방금 본 손 모양을 기억해 골라 봐!':'손 모양을 흉내 낸 뒤 그림을 골라 봐!'));
  }
 }
 function start(kind){
@@ -481,7 +490,7 @@ function cameraCalibration(t){
   S.phase=isMemory()?'memorize':'play';
   render();
   $('cameraCheck').hidden=true;
-  message(isGarden()?'좋아! 주먹을 쥐고 첫 씨앗을 잡아보자.':'좋아! 손 모양을 따라해 봐.');
+  message(isGarden()?'좋아! 주먹을 쥐고 첫 도토리를 잡아보자.':S.mode==='memory'?'손 모양 순서를 기억해봐!':'좋아! 손 모양을 따라해 봐.');
  }
 }
 function evaluate(t){
@@ -518,7 +527,7 @@ function evaluate(t){
 function answerTouch(typeset){
  if(S.phase!=='play'||isCamera())return;
  if(core.match(typeset.map(x=>fakePose(x)),currentGoal()))accept();
- else{message('다른 모양이야. 기억한 손 모양을 다시 떠올려 봐!');}
+ else{message(isMemory()?'다른 모양이야. 방금 본 순서를 다시 생각해 볼까?':'다른 모양이야. 모아 손 그림과 비교해봐!');}
 }
 function fakePose(kind){
  // Touch answers are intentionally explicit selection; never described as camera tracking.
