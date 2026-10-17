@@ -493,6 +493,28 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 }
 @media(max-width:360px){.play.is-adventure .viewer{height:485px}.play.is-adventure .garden-mini-dock .choice{min-width:62px}}
 
+
+/* Keep every answer visible at once: no hidden horizontal strip of options. */
+.play.is-adventure .garden-mini-dock .choices{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));overflow:visible;gap:5px}
+.play.is-adventure:has(.choice[data-pose*=","]) .garden-mini-dock .choices{grid-template-columns:repeat(4,minmax(0,1fr))}
+.play.is-adventure .garden-mini-dock .choice,.play.is-adventure .garden-mini-dock .choice[data-pose*=","]{min-width:0;max-width:none;width:100%;padding:5px 2px}
+.play.is-adventure .garden-mini-dock .choice[data-pose*=","] .choice-art svg{height:44px;width:35px}
+.play.is-adventure .viewer:has(#ready:not([hidden])) .viewer-badge{bottom:185px}
+.play.is-adventure:not(.is-camera) .viewer:has(#ready:not([hidden])) .viewer-badge{bottom:185px}
+.play.is-adventure .viewer .memory-question{font-size:clamp(65px,10vw,100px);line-height:1.1}
+.play.is-adventure:not(.is-camera) .garden-touch-preview:has(.memory-question){border-style:dashed;background:#f5fbffed}
+.play.is-adventure .adventure-scene[data-mode="memory"] .adventure-token[data-state="done"]{background:#d7f5e7;border-color:#90d5ad}
+.play.is-adventure .adventure-scene[data-mode="copy"] .adventure-token[data-state="current"]{animation:acorn-breathe 1.7s ease-in-out infinite}
+.play.is-adventure .adventure-scene[data-mode="fingers"] .adventure-token[data-state="done"]{box-shadow:0 0 14px #ffd86d78}
+.play.is-adventure .adventure-scene[data-mode="both"] .adventure-token[data-state="done"]{box-shadow:0 0 9px #a8edba8c}
+@media(max-width:760px){
+ .play.is-adventure .garden-mini-dock .choices{gap:3px}
+ .play.is-adventure .garden-mini-dock .choice,.play.is-adventure .garden-mini-dock .choice[data-pose*=","]{min-width:0;padding:4px 1px}
+ .play.is-adventure .garden-mini-dock .choice small{font-size:9px;letter-spacing:-.04em}
+ .play.is-adventure .garden-mini-dock .choice[data-pose*=","] .choice-art svg{height:38px;width:30px}
+ .play.is-adventure .viewer:has(#ready:not([hidden])) .viewer-badge{bottom:174px}
+}
+
 </style>
 <link rel="stylesheet" href="../../../assets/moa-quick-guide.css?v=20261017-v1">
 </head>
