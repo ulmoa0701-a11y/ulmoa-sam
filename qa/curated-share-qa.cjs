@@ -61,7 +61,7 @@ assert.ok(await parent.locator('.moa-assigned-next').count()>=1,'assigned next a
 await parent.locator('.moa-assigned-next').last().click();
 assert.ok(await parent.locator('#moaAssignedHome').isVisible(),'assignment after result');
 assert.ok((await parent.locator('.moa-assigned-progress').innerText()).includes('1개'),'session-only journey progress missing');
-const legacy=await page.evaluate(()=>{const obj={v:1,items:['flower','slowSheets'],level:1,rounds:5};return location.origin+location.pathname+'?plan='+btoa(unescape(encodeURIComponent(JSON.stringify(obj)))).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'')});
+const legacy=await page.evaluate(()=>{const obj={v:1,items:['flower','slowSheets'],level:1,rounds:5};return location.origin+location.pathname+'?plan='+btoa(unescape(encodeURIComponent(JSON.stringify(obj)))).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'')});
 const older=await browser.newPage({viewport:{width:vp.width,height:vp.height}});
 await older.goto(legacy,{waitUntil:'load'});assert.equal(await older.locator('.moa-assigned-item').count(),2,'legacy version 1 links must remain usable');await older.close();
 assert.deepEqual(perr,[]);assert.deepEqual(errors,[]);await parent.close();await page.close();
