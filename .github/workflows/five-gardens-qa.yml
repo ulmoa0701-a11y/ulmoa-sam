@@ -46,7 +46,22 @@ jobs:
           exit 1
       - name: Check five gardens and original game links
         run: node qa/five-gardens-qa.mjs
+      - name: Wait for matching GitHub Pages deployment
+        if: github.event_name != 'pull_request'
+        run: |
+          EXPECTED_VERSION="$(grep -o 'catalog.js?v=[^"]*' gardens/index.html | tail -n 1)"
+          echo "Waiting for public page to include $EXPECTED_VERSION"
+          for i in $(seq 1 72); do
+            if curl -fsSL --max-time 12 "https://ulmoa0701-a11y.github.io/ulmoa-sam/gardens/?qa=$GITHUB_SHA" | grep -Fq "$EXPECTED_VERSION"; then
+              echo "Verified current HTML is published"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "Public site did not publish the checked version in time"
+          exit 1
       - name: Verify deployed public gardens and all preview images
+        if: github.event_name != 'pull_request'
         env:
           TEST_BASE_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam
         run: node qa/five-gardens-qa.mjs
