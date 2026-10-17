@@ -909,7 +909,7 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
   });
   check(probe.size>1000,'video probe: MediaRecorder produced no usable bytes');
   check(String(probe.mime).startsWith('video/webm'),'video probe: unexpected mime '+probe.mime);
-  check(probe.brand?.copy?.includes('영상·편집 © 울모아쌤'),'video probe: copyright mark missing');
+  check(probe.brand?.copy?.includes('자체 제작 화면·편집 © 울모아쌤'),'video probe: content-specific copyright mark missing');
   await page.locator('#qaVideoCanvas').screenshot({path:out+'/video-frame-probe.png'});
   check(errors.length===0,'video probe: page errors '+errors.join(' | '));
   report.push({name:'videoProbe',bytes:probe.size,mime:probe.mime});
@@ -940,6 +940,64 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
    'persistence: changing songs unexpectedly reset custom note selection');
  check(errors.length===0,'persistence: page errors '+errors.join(' | '));
  report.push({name:'customNotePersistence',before,after,newSong:{level:newSong.level,selected:newSong.selected}});
+ await context.close();
+}
+
+ 
+// Public YouTube export is not the same as classroom export. The guardrail
+// must reject third-party songs, custom scores, external MR and child names.
+for(const [name,w,h] of [['publishMobile390',390,844],['publishDesktop1366',1366,900]]){
+ const context=await browser.newContext({viewport:{width:w,height:h}});
+ const page=await context.newPage(),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(BASE,{waitUntil:'networkidle'});
+ const inspection=await page.evaluate(async()=>{
+  const blocked=[],savedStatus=$('#publicStatus').textContent;
+  chooseSample('twinkle');
+  blocked.push({case:'known song',...publicVideoEligibility()});
+  chooseSample('moa-signal');
+  const original=publicVideoEligibility();
+  const allowed=window.__boomVideoQA.publicExport();
+  const former=displayMode;
+  displayMode='name';blocked.push({case:'child name display',...publicVideoEligibility()});displayMode=former;
+  const oldMr=mrBuffer,oldName=mrName;mrBuffer={duration:20};mrName='external';
+  blocked.push({case:'external MR',...publicVideoEligibility()});mrBuffer=oldMr;mrName=oldName;
+  currentSong.measures[0][0].note='라';blocked.push({case:'modified score',...publicVideoEligibility()});
+  chooseSample('beat-half');
+  await exportVideo({publicMode:true});
+  const noAgreement=$('#publicStatus').textContent;
+  $('#publicRightsOpt').checked=true;
+  chooseSample('moa-space');
+  const agreementReset=$('#publicRightsOpt').checked;
+  const introText=[],outroText=[];
+  const canvas=videoCanvas(),ctx=canvas.getContext('2d');
+  const old=ctx.fillText.bind(ctx);ctx.fillText=(text,...args)=>{outroText.push(String(text));return old(text,...args)};
+  videoOutro(ctx,true);
+  return {original,allowed,blocked,noAgreement,agreementReset,savedStatus,
+   description:publicVideoDescription(),outroText,
+   isPublicPanelPresent:!!$('#publicVideoPanel'),hasCopyButton:!!$('#publicCreditBtn'),
+   hasCheckbox:!!$('#publicRightsOpt'),current:publicVideoEligibility()};
+ });
+ check(inspection.original.ok&&inspection.allowed.eligible.ok&&inspection.current.ok,
+  name+': self-composed originals in public mode mistakenly blocked '+JSON.stringify(inspection));
+ check(inspection.allowed.sampleKeys.length===8, name+': public whitelist unexpectedly changed');
+ check(inspection.blocked.length===4&&inspection.blocked.every(x=>!x.ok),
+  name+': copied song/custom score/external MR/child identifier was allowed '+JSON.stringify(inspection.blocked));
+ check(inspection.noAgreement.includes('체크')&&!inspection.agreementReset,
+  name+': consent is not required or survives switching songs '+JSON.stringify(inspection));
+ check(inspection.description.includes('Mats Helgesson')&&inspection.description.includes('creativecommons.org/licenses/by/4.0/')&&
+   inspection.description.includes('musictheory')&&inspection.description.includes('pitch-shifted'),
+  name+': attribution links or modification details missing '+inspection.description);
+ check(inspection.outroText.some(x=>x.includes('Mats Helgesson'))&&
+   inspection.outroText.some(x=>x.includes('creativecommons.org/licenses/by/4.0/'))&&
+   inspection.outroText.every(x=>!x.includes('무단 재배포·재판매 금지')),
+  name+': public video outro omits license or falsely reserves CC audio '+JSON.stringify(inspection.outroText));
+ check(inspection.isPublicPanelPresent&&inspection.hasCopyButton&&inspection.hasCheckbox,
+  name+': public access controls missing');
+ check(errors.length===0,name+': runtime errors '+errors.join(' / '));
+ report.push({name,publicExport:{allowed:inspection.original.ok,
+  rejected:inspection.blocked.map(x=>x.case),agreementReset:inspection.agreementReset,
+  missingAgreement:inspection.noAgreement,hasCredits:inspection.outroText.some(x=>x.includes('Mats Helgesson'))}});
  await context.close();
 }
 

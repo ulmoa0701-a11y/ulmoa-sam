@@ -553,6 +553,18 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
 .customNoteCancel{border:1px solid #dce5ed;background:#fff;color:#52647a}
 .customNoteApply{border:0;background:#2378ed;color:#fff}
 @media(max-width:800px){.noteLevels button{padding:8px 3px;font-size:11px}.customNoteOverlay{align-items:flex-end;padding:0}.customNoteCard{border-radius:22px 22px 0 0;width:100%;padding:18px 16px max(18px,env(safe-area-inset-bottom));max-height:90dvh}.customNoteChoices{gap:8px}.customNoteChoice{min-height:72px}}
+.publishPanel{border:1px solid #bfd7e9;background:#f6fbff;border-radius:13px;margin-top:8px;padding:9px 11px;color:#203b55}
+.publishPanel summary{cursor:pointer;font-size:13px;font-weight:850;list-style-position:inside}
+.publishPanel .publishBody{display:grid;gap:9px;margin-top:10px;font-size:12px;line-height:1.6}
+.publishPanel .publishBody p{margin:0;word-break:keep-all}
+.publishPanel .publishWarn{color:#a44222;font-weight:700}
+.publishPanel .publishOk{color:#146344;font-weight:700}
+.publishPanel .publishAgree{display:flex;align-items:flex-start;gap:7px;font-size:11.5px}
+.publishPanel .publishAgree input{flex-shrink:0;margin-top:3px}
+.publishPanel button{border:1px solid #a5c7dc;background:white;padding:9px;border-radius:10px;font:inherit;font-weight:800;color:#184b72}
+.publishPanel #publicVideoBtn{background:#1975ad;color:white;border-color:#1975ad}
+.publishPanel .publishButtons{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+@media(max-width:450px){.publishPanel .publishButtons{grid-template-columns:1fr}}
 </style>
 <link rel="stylesheet" href="./mobile-layout.css?v=20261009" />
 </head>
@@ -582,6 +594,17 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
     <label class="videoOption"><input id="watermarkOpt" type="checkbox" checked> 울모아쌤 워터마크</label>
     <label class="videoOption"><input id="creditOpt" type="checkbox" checked> 인트로·엔딩</label>
   </div>
+
+  <details id="publicVideoPanel" class="publishPanel">
+    <summary>📺 유튜브 공개용 · 권리 확인</summary>
+    <div class="publishBody">
+      <p>수업용 저장과 달리, 내장 창작 연습곡만 공개용으로 제작해요. 창작곡이어도 기존 곡과의 유사성이나 저작권이 자동 검증되는 것은 아니에요.</p>
+      <p id="publicCheck" role="status" aria-live="polite"></p>
+      <label class="publishAgree"><input id="publicRightsOpt" type="checkbox"> 선택한 곡·가사·영상 표현의 권리를 직접 확인했으며 다른 채널의 독창적인 장면·음악을 복제하지 않았습니다.</label>
+      <div class="publishButtons"><button id="publicVideoBtn" type="button">📺 공개용 영상 제작</button><button id="publicCreditBtn" type="button">📋 출처·설명문 복사</button></div>
+      <p id="publicStatus" role="status" aria-live="polite">영상과 설명문 모두 출처를 넣어 주세요. 유튜브 저작권 자동검사 결과를 보장하지는 않아요.</p>
+    </div>
+  </details>
   <div id="videoProgress" class="videoProgress" role="progressbar" aria-label="영상 저장 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="videoProgressFill" class="videoProgressFill"></span></div>
   <div id="videoStatus" class="hint videoStatus">16:9 영상 · 곡 재생 시간만큼 녹화 후 다운로드돼요.</div>
   <a id="videoDownloadLink" class="videoDownloadLink" href="#" download>⬇ 완성된 영상 다시 다운로드</a>
@@ -1971,34 +1994,43 @@ function updateTime(){
  $('#progressFill').style.width=Math.max(0,Math.min(100,passed/duration*100))+'%';
 }
 function on(btn,v){btn.classList.toggle('on',v)}
-function syncSongUI(){bpm=selectedTempo(currentSong);refreshPracticeSections();updateRhythmGuide();$('#songTitle').textContent=$('#stageTitle').textContent=currentSong.title||'제목 없는 곡';$('#songMeta').textContent=`${currentSong.timeN||4}/${currentSong.timeD||4} · ${bpm} BPM`;$('#tempo').value=bpm;$('#bpmLabel').textContent=bpm+' BPM';buildSampleSelect();renderLanes();build();reset();saveLast()}
+function syncSongUI(){bpm=selectedTempo(currentSong);refreshPracticeSections();updateRhythmGuide();$('#songTitle').textContent=$('#stageTitle').textContent=currentSong.title||'제목 없는 곡';$('#songMeta').textContent=`${currentSong.timeN||4}/${currentSong.timeD||4} · ${bpm} BPM`;$('#tempo').value=bpm;$('#bpmLabel').textContent=bpm+' BPM';buildSampleSelect();renderLanes();build();reset();saveLast();if($('#publicRightsOpt'))$('#publicRightsOpt').checked=false;refreshPublicExportUi()}
 function chooseSample(key){const s=findSample(key);if(!s)return;loadedFromTransfer=false;currentSampleKey=s.key;currentSong=clone(s);practiceSection='all';syncSongUI()}
 
-const VIDEO_W=1280,VIDEO_H=720,VIDEO_BRAND='울모아쌤',VIDEO_HANDLE='@ulmoa__sam',VIDEO_COPY='영상·편집 © 울모아쌤 · @ulmoa__sam';
+const VIDEO_W=1280,VIDEO_H=720,VIDEO_BRAND='울모아쌤',VIDEO_HANDLE='@ulmoa__sam',VIDEO_COPY='자체 제작 화면·편집 © 울모아쌤 · @ulmoa__sam';
 let videoExporting=false,videoDownloadUrl=null;
 function videoMime(){const list=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm','video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4'];return window.MediaRecorder?list.find(x=>MediaRecorder.isTypeSupported(x))||'':''}
 function videoSupported(){return !!(window.MediaRecorder&&HTMLCanvasElement.prototype.captureStream&&videoMime())}
 function videoCanvas(){const c=document.createElement('canvas');c.width=VIDEO_W;c.height=VIDEO_H;return c}
 function videoStatus(msg,cls=''){const el=$('#videoStatus');el.textContent=msg;el.className='hint videoStatus '+cls}
 function rr(ctx,x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,w,h,r);else ctx.rect(x,y,w,h)}
-function videoBrand(ctx){
- if(!$('#watermarkOpt')?.checked)return;
+function videoBrand(ctx,publicMode=false){
+ if(!publicMode&&!$('#watermarkOpt')?.checked)return;
  ctx.save();ctx.globalAlpha=.9;rr(ctx,972,662,280,42,14);ctx.fillStyle='rgba(18,35,59,.78)';ctx.fill();ctx.globalAlpha=1;ctx.textAlign='left';ctx.textBaseline='middle';
  ctx.fillStyle='#fff';ctx.font='700 18px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(VIDEO_BRAND,990,676);
  ctx.fillStyle='rgba(255,255,255,.78)';ctx.font='500 11px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(VIDEO_HANDLE+' · 일단 해봄노트',990,694);ctx.restore()
 }
-function videoIntro(ctx){
+function videoIntro(ctx,publicMode=false){
  const g=ctx.createLinearGradient(0,0,VIDEO_W,VIDEO_H);g.addColorStop(0,'#eefaff');g.addColorStop(1,'#f8fbff');ctx.fillStyle=g;ctx.fillRect(0,0,VIDEO_W,VIDEO_H);
- ctx.textAlign='center';ctx.fillStyle='#17233b';ctx.font='800 34px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText('🥁 붐웨커 색깔악보',VIDEO_W/2,250);
+ ctx.textAlign='center';ctx.fillStyle='#17233b';ctx.font='800 34px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(publicMode?'🎵 색깔 리듬연주':'🥁 붐웨커 색깔악보',VIDEO_W/2,250);
  ctx.font='900 64px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(currentSong.title||'제목 없는 곡',VIDEO_W/2,340);
  ctx.fillStyle='#607087';ctx.font='600 22px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(String(currentSong.timeN||4)+'/'+String(currentSong.timeD||4)+' · '+bpm+' BPM · '+level+'음 모드 · '+audioMixLabel(),VIDEO_W/2,390);
  ctx.fillStyle='#177652';ctx.font='700 24px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText('일단 해봄노트 · 울모아쌤',VIDEO_W/2,475);
  ctx.font='500 18px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(VIDEO_HANDLE,VIDEO_W/2,510)
 }
-function videoOutro(ctx){
- ctx.fillStyle='#f7fbff';ctx.fillRect(0,0,VIDEO_W,VIDEO_H);ctx.textAlign='center';ctx.fillStyle='#17233b';ctx.font='900 48px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText('일단 해봄노트 · 울모아쌤',VIDEO_W/2,300);
- ctx.fillStyle='#526071';ctx.font='600 22px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(VIDEO_HANDLE,VIDEO_W/2,350);
- ctx.fillStyle='#738095';ctx.font='500 17px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(VIDEO_COPY,VIDEO_W/2,410);ctx.font='500 15px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText('무단 재배포·재판매 금지',VIDEO_W/2,445)
+function videoOutro(ctx,publicMode=false){
+ ctx.fillStyle='#f7fbff';ctx.fillRect(0,0,VIDEO_W,VIDEO_H);ctx.textAlign='center';ctx.fillStyle='#17233b';ctx.font='900 44px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText('일단 해봄노트 · 울모아쌤',VIDEO_W/2,245);
+ ctx.fillStyle='#526071';ctx.font='600 21px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(VIDEO_HANDLE,VIDEO_W/2,293);
+ ctx.fillStyle='#738095';ctx.font='500 17px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(VIDEO_COPY,VIDEO_W/2,334);
+ if(publicMode){
+  ctx.fillStyle='#233f61';ctx.font='700 20px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText('피아노 녹음 출처: Mats Helgesson · CC BY 4.0',VIDEO_W/2,402);
+  ctx.font='500 18px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText('원본: github.com/musictheory/piano.js',VIDEO_W/2,439);
+  ctx.fillText('라이선스: creativecommons.org/licenses/by/4.0/',VIDEO_W/2,470);
+  ctx.font='500 15px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText('녹음 샘플의 재생속도·구간·음량을 프로그램에서 조정해 연주에 사용',VIDEO_W/2,518);
+  ctx.fillText('피아노 녹음 원저작자가 이 콘텐츠를 보증하거나 후원하는 것은 아닙니다.',VIDEO_W/2,549);
+ }else{
+  ctx.font='500 15px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText('사용 음원에 별도 저작권·라이선스가 적용될 수 있습니다.',VIDEO_W/2,388);
+ }
 }
 function videoNoteText(ctx,text,x,y,size=18,color='#17233b'){ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='900 '+size+'px "Noto Sans KR","Malgun Gothic",sans-serif';const mw=Math.max(25,ctx.measureText(text).width+12),mh=size+12;rr(ctx,x-mw/2,y-mh/2,mw,mh,mh/2);ctx.fillStyle='rgba(255,255,255,.9)';ctx.fill();ctx.fillStyle=color;ctx.fillText(text,x,y+1);ctx.restore()}
 function videoLyricBar(ctx,t,x,y,w,h){if(!lyrics)return;
@@ -2010,7 +2042,7 @@ function videoLyricBar(ctx,t,x,y,w,h){if(!lyrics)return;
   ctx.fillStyle='#17233b';ctx.fillText(ready?'준비':'박자 세기   '+[1,2,3,4].map(v=>v===n?'['+v+']':v).join('   '),x+w/2,y+h/2);ctx.restore();return;
  }
  const view=lyricWindowAt(t,18,w-40);if(!view.items.length)return;ctx.save();ctx.globalAlpha=.94;rr(ctx,x,y,w,h,16);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='rgba(218,228,238,.95)';ctx.lineWidth=1;ctx.stroke();ctx.globalAlpha=1;ctx.font='850 27px "Noto Sans KR","Malgun Gothic",sans-serif';const breaks=lyricWordBreakIndices(),widths=view.items.map((v,i)=>Math.max(29,ctx.measureText(v.e.lyric).width+8)+(i&&breaks.has(v.i)?16:0)),total=widths.reduce((a,b)=>a+b,0),scale=Math.min(1,(w-28)/Math.max(1,total)),fontSize=Math.max(16,27*scale);ctx.font='850 '+fontSize+'px "Noto Sans KR","Malgun Gothic",sans-serif';const scaled=view.items.map((v,i)=>Math.max(25,ctx.measureText(v.e.lyric).width+7)+(i&&breaks.has(v.i)?16:0)),sum=scaled.reduce((a,b)=>a+b,0);let px=x+(w-sum)/2;view.items.forEach((v,i)=>{const gap=i&&breaks.has(v.i)?16:0,ww=scaled[i]-gap,active=v.i===view.activeIndex,cx=px+gap+ww/2;px+=gap;if(active){ctx.save();ctx.shadowColor='rgba(35,50,75,.12)';ctx.shadowBlur=8;ctx.shadowOffsetY=3;rr(ctx,px+1,y+5,ww-2,h-10,10);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle=noteColor(v.e.note);ctx.lineWidth=3;ctx.stroke();ctx.beginPath();ctx.moveTo(px+6,y+h-9);ctx.lineTo(px+ww-6,y+h-9);ctx.strokeStyle=noteColor(v.e.note);ctx.lineWidth=4;ctx.stroke();ctx.restore()}ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=active?'#17233b':'#6b7789';ctx.font=(active?'950 ':'800 ')+fontSize+'px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(v.e.lyric,cx,y+h/2+1);px+=ww});ctx.restore()}
-function videoScene(ctx,t){
+function videoScene(ctx,t,publicMode=false){
  ctx.fillStyle='#f7fbff';ctx.fillRect(0,0,VIDEO_W,VIDEO_H);ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillStyle='#17233b';ctx.font='900 27px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(currentSong.title||'제목 없는 곡',24,37);
  ctx.textAlign='right';ctx.fillStyle='#738095';ctx.font='600 15px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(String(currentSong.timeN||4)+'/'+String(currentSong.timeD||4)+' · '+bpm+' BPM · '+selectedLabel(),1254,36);
  const x=18,y=50,w=1244,h=600,tubeH=86,hitY=y+h-tubeH;rr(ctx,x,y,w,h,22);ctx.fillStyle='#eff9ff';ctx.fill();ctx.strokeStyle='#dbe9f5';ctx.lineWidth=2;ctx.stroke();
@@ -2030,11 +2062,63 @@ function videoScene(ctx,t){
   videoNoteText(ctx,displayLabel(e.note),cx,cy+1,displayMode==='instrument'?30:(displayMode==='name'||displayMode==='custom'?17:22),COLORS[e.note]);
  }
  ctx.restore();
- videoLyricBar(ctx,t,x+120,hitY-68,w-240,54);videoBrand(ctx)
+ videoLyricBar(ctx,t,x+120,hitY-68,w-240,54);videoBrand(ctx,publicMode)
 }
 function safeVideoName(v){return String(v||'붐웨커').replace(/[\\/:*?"<>|]+/g,'_').trim()||'붐웨커'}
-async function exportVideo(){
+const PUBLIC_ORIGINAL_KEYS=new Set(['moa-signal','moa-space','moa-party','moa-breeze','beat-basic','beat-half','sixteenth','dotted']);
+const PIANO_SAMPLE_SOURCE='https://github.com/musictheory/piano.js';
+const PIANO_SAMPLE_LICENSE='https://creativecommons.org/licenses/by/4.0/';
+function publicVideoEligibility(){
+ const sample=findSample(currentSong.key);
+ if(!sample||!PUBLIC_ORIGINAL_KEYS.has(currentSong.key)||currentSampleKey!==currentSong.key||
+  currentSong.title!==sample.title||currentSong.timeN!==sample.timeN||
+  currentSong.timeD!==sample.timeD||JSON.stringify(currentSong.measures)!==JSON.stringify(sample.measures))
+  return {ok:false,reason:'공개용은 내장 창작곡 8개만 지원해요. 동요·가져온 악보·수정된 곡은 개별 권리 확인이 필요합니다.'};
+ if(mrBuffer||mrName||$('#mrFile')?.files?.length)
+  return {ok:false,reason:'외부 MR 파일은 권리 여부를 확인할 수 없어요. 파일을 해제하고 자동 반주를 사용해 주세요.'};
+ if(displayMode!=='note')
+  return {ok:false,reason:'공개 영상에는 아이 이름이나 사용자 입력 문구가 나오지 않도록 「표시 방식 → 계이름」으로 바꿔 주세요.'};
+ return {ok:true,reason:'내장 창작 연습곡 · 외부 MR 없음 · 이름 노출 방지. 음악의 독창성은 직접 최종 확인해야 해요.'};
+}
+function refreshPublicExportUi(){
+ const box=$('#publicCheck');if(!box)return;
+ const v=publicVideoEligibility();box.className=v.ok?'publishOk':'publishWarn';box.textContent=(v.ok?'● 공개용 기술 조건 확인: ':'● 공개용 제작 제한: ')+v.reason;
+}
+function publicVideoDescription(){
+ const v=publicVideoEligibility();if(!v.ok)return '';
+ return [currentSong.title+' | 일단 해봄노트 · 울모아쌤 색깔 리듬연주',
+ '',
+ '울모아쌤이 제작한 연주 화면과 내장 창작 연습곡을 사용했습니다.',
+ '리듬 연습·음악 수업에 활용할 수 있는 색깔악보 영상입니다.',
+ '홈페이지: https://ulmoa0701-a11y.github.io/ulmoa-sam/boomwhacker/',
+ '',
+ '[샘플 피아노 녹음 출처 및 이용 조건]',
+ 'Piano recordings © Mats Helgesson (2007).',
+ 'Piano sampler processing: musictheory.net, LLC (2015).',
+ 'Source: '+PIANO_SAMPLE_SOURCE,
+ 'License (recordings): CC BY 4.0 — '+PIANO_SAMPLE_LICENSE,
+ 'Changes in use: time-sliced and pitch-shifted playback, note scheduling and gain envelopes.',
+ 'Original contributors do not endorse this video.',
+ '',
+ '※ 이 설명문은 이용 허락을 새로 만들어 주지 않습니다. 게시자는 곡·가사·영상·외부 자료의 권리를 별도로 확인해야 합니다.'].join('\n');
+}
+async function copyPublicVideoDescription(){
+ const target=$('#publicStatus'),v=publicVideoEligibility();
+ if(!v.ok){target.textContent=v.reason;return false}
+ const desc=publicVideoDescription();
+ try{await navigator.clipboard.writeText(desc);target.textContent='설명문을 복사했어요. 업로드 시 영상 설명에 붙여넣어 주세요.';return true}
+ catch(e){target.textContent='자동 복사가 제한됐어요. HTTPS 환경에서 다시 시도하거나 아래 내용을 선택해 복사해 주세요.';
+  const field=document.createElement('textarea');field.value=desc;field.rows=7;field.style.width='100%';field.setAttribute('aria-label','유튜브 설명문 직접 복사');target.appendChild(field);field.focus();field.select();return false}
+}
+async function exportVideo({publicMode=false}={}){
  if(videoExporting)return;
+ if(publicMode){
+  const v=publicVideoEligibility(),notice=$('#publicStatus');
+  if(!v.ok){notice.textContent=v.reason;refreshPublicExportUi();return}
+  if(!$('#publicRightsOpt')?.checked){notice.textContent='곡·영상의 권리 확인 항목을 체크한 뒤 공개용 영상 제작을 눌러 주세요.';return}
+  notice.textContent='공개용 안내·음원 출처를 영상에 포함합니다. 게시 전 비공개 검사도 필요해요.';
+ }
+
  if(!videoSupported()){
   videoStatus('이 브라우저에서는 영상 녹화가 지원되지 않아요. 최신 Chrome·Edge 또는 호환 브라우저에서 다시 시도해 주세요.','warn');
   return;
@@ -2063,7 +2147,7 @@ async function exportVideo(){
   const stream=new MediaStream(tracks),mime=videoMime();
   const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:6000000}),chunks=[];
   rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
-  const intro=$('#creditOpt')?.checked?1200:0,outro=$('#creditOpt')?.checked?1800:0;
+  const intro=publicMode?1200:($('#creditOpt')?.checked?1200:0),outro=publicMode?5200:($('#creditOpt')?.checked?1800:0);
   const prepBeats=isGuidedStartMode()?instrumentalPreludePlan().beats:0;
   const countdownMs=0;
   const prep=prepBeats*beatMs(),firstSongNote=firstNoteMs();
@@ -2087,19 +2171,19 @@ async function exportVideo(){
    const tick=()=>{
     try{
      const t=performance.now()-startPerf;
-     if(t<intro)videoIntro(ctx);
+     if(t<intro)videoIntro(ctx,publicMode);
      else if(t<intro+prep){
       const inCountdown=t<intro+countdownMs;
-      if(inCountdown)videoIntro(ctx);
-      else videoScene(ctx,firstSongNote-(prep-(t-intro)));
+      if(inCountdown)videoIntro(ctx,publicMode);
+      else videoScene(ctx,firstSongNote-(prep-(t-intro)),publicMode);
       ctx.save();ctx.textAlign='center';
       rr(ctx,440,83,400,72,20);ctx.fillStyle='rgba(255,255,255,.92)';ctx.fill();
       ctx.fillStyle='#155c83';ctx.font='900 29px "Noto Sans KR","Malgun Gothic",sans-serif';
       ctx.fillText(introMode==='interlude'?'🎶 음악 전주 · 공 준비':'🥁 박자 안내 · 공 준비',VIDEO_W/2,131);
       ctx.restore();
      }else if(t<intro+prep+duration)
-      videoScene(ctx,t-intro-prep+(isGuidedStartMode()?firstSongNote:0));
-     else videoOutro(ctx);
+      videoScene(ctx,t-intro-prep+(isGuidedStartMode()?firstSongNote:0),publicMode);
+     else videoOutro(ctx,publicMode);
      if(t-previous>=350||t>=total){
       previous=t;
       const pct=Math.min(100,Math.floor(t/total*100)),remaining=Math.max(0,Math.ceil((total-t)/1000));
@@ -2121,7 +2205,7 @@ async function exportVideo(){
   const ext=mime.startsWith('video/mp4')?'mp4':'webm';
   videoDownloadUrl=URL.createObjectURL(blob);
   link.href=videoDownloadUrl;
-  link.download=safeVideoName(currentSong.title)+lessonFileSuffix()+'_붐웨커_울모아쌤.'+ext;
+  link.download=safeVideoName(currentSong.title)+lessonFileSuffix()+(publicMode?'_유튜브공개검토용':'_붐웨커_울모아쌤')+'.'+ext;
   link.textContent='⬇ 영상 다시 다운로드 ('+ext.toUpperCase()+')';
   link.classList.add('show');
   // Some mobile browsers block delayed automatic downloads. The permanent
@@ -2129,9 +2213,11 @@ async function exportVideo(){
   link.click();
   fill.style.width='100%';progress.setAttribute('aria-valuenow','100');
   videoStatus('영상 제작 완료 · '+(blob.size/1024/1024).toFixed(1)+'MB · '+ext.toUpperCase()+'. 다운로드가 보이지 않으면 아래 버튼을 눌러 주세요.','ok');
+  if(publicMode)$('#publicStatus').textContent='공개 검토용 영상이 저장됐어요. 출처·설명문을 복사하고 YouTube Studio 비공개 업로드에서 저작권 검사를 확인해 주세요.';
  }catch(err){
   console.error('Boomwhacker video export failed',err);
   videoStatus('영상 저장 오류: '+String(err?.message||err).slice(0,115)+' · 브라우저나 저장 권한을 확인해 주세요.','warn');
+  if(publicMode)$('#publicStatus').textContent='공개용 영상 저장 오류: '+String(err?.message||err).slice(0,110);
  }finally{
   if(ac)try{await ac.close()}catch(e){}
   canvasStream?.getTracks().forEach(t=>t.stop());
@@ -2140,17 +2226,20 @@ async function exportVideo(){
   if(!videoDownloadUrl){progress.classList.remove('show');fill.style.width='0%'}
  }
 }
-window.__boomVideoQA={noteSelection:()=>({level,selected:ORDER.filter(n=>selectedNotes().has(n)),saved:customNoteNames(),activeBalls:events.filter(e=>e.active).length,soundingNotes:events.filter(e=>e.note!=='쉼'&&FREQ[e.note]).length,original:events.map(e=>[e.note,e.start,e.dur]),customOpen:$('#customNoteDialog')?.classList.contains('open')}),scoreTiming:()=>({view:playView,firstScoreBeatMs:scoreStartMs(),elapsed,playing,introActive,firstEvent:events[0]?{note:events[0].note,start:events[0].start,duration:events[0].dur}:null,secondEvent:events[1]?{note:events[1].note,start:events[1].start,duration:events[1].dur}:null,visibleTime:$('#timeLabel').textContent}),print:()=>({pngCanvas:scoreSheetCanvas().width+'x'+scoreSheetCanvas().height,pdfPageCount:Math.max(1,Math.ceil(events.length/PRINT_PAGE_NOTES)),pdfBytes:scorePdfBytes([scoreSheetCanvas(0,Math.min(events.length,PRINT_PAGE_NOTES),true)]).size}),view:()=>({mode:playView,active:activeScoreIndex(elapsed),scoreTiles:$('#scoreStageGrid').children.length,sideTiles:$('#scoreRows').children.length,elapsed}),supported:()=>videoSupported(),mime:()=>videoMime(),brand:()=>({brand:VIDEO_BRAND,handle:VIDEO_HANDLE,copy:VIDEO_COPY}),colors:()=>({...COLORS}),melody:()=>({mode:melodyMode,label:MELODY_LABELS[melodyMode],options:{...MELODY_LABELS},volume:melodyVolume}),fall:()=>({leadMs:FIRST_NOTE_LEAD_MS,travelMs:FALL_TRAVEL_MS,firstNoteMs:firstNoteMs(),spawnDelayMs:firstNoteMs()-FALL_TRAVEL_MS,elapsed,playing}),tempo:()=>({bpm,sourceBpm:currentSong.bpm,min:MIN_TEMPO,max:MAX_TEMPO,comfortable:comfortableTempo(currentSong),custom:tempoPrefs[tempoKey(currentSong)]??null,beatMs:beatMs()}),lesson:()=>({level,part:practiceSection,startBar:scoreStartBar,bars:playbackMeasures.length,originalBars:(currentSong.measures||[]).length,arrangedNotes,missedEvents:events.filter(e=>e.note!=='쉼'&&!e.active).length,introLength,notes:events.length}),intro:()=>({mode:introMode,active:introActive,started:hasStartedSong,durationMs:introDurationMs,beats:introBeats,meter:introMeter,previewBeats:introPreviewBeats,countBeats:introCountBeats,lastBeat:introLastBeat,progressMs:introActive?Math.max(0,performance.now()-introStartPerf):0}),mix:()=>({mode:mixMode,label:MIX_LABELS[mixMode],options:{...MIX_LABELS},mrReady:true,mrKind:mrBuffer?'file':'auto',mrLoaded:!!mrBuffer,mrName,mrVolume,melodyVolume}),display:()=>({mode:displayMode,label:DISPLAY_LABELS[displayMode],options:{...DISPLAY_LABELS},labels:ORDER.map(displayLabel),names:[...childLabels],custom:[...customLabels],instruments:[...instrumentIds],instrumentLibrary:instrumentLibrary.map(x=>({...x}))}),lyrics:()=>lyricWindowAt(Math.min(2600,totalMs/2)),preview:()=>{const c=videoCanvas(),x=c.getContext('2d');videoScene(x,Math.min(1500,totalMs/2));return {w:c.width,h:c.height,data:c.toDataURL('image/png').slice(0,40)}}};
+window.__boomVideoQA={publicExport:()=>({eligible:publicVideoEligibility(),description:publicVideoDescription(),sampleKeys:[...PUBLIC_ORIGINAL_KEYS],confirmed:!!$('#publicRightsOpt')?.checked}),noteSelection:()=>({level,selected:ORDER.filter(n=>selectedNotes().has(n)),saved:customNoteNames(),activeBalls:events.filter(e=>e.active).length,soundingNotes:events.filter(e=>e.note!=='쉼'&&FREQ[e.note]).length,original:events.map(e=>[e.note,e.start,e.dur]),customOpen:$('#customNoteDialog')?.classList.contains('open')}),scoreTiming:()=>({view:playView,firstScoreBeatMs:scoreStartMs(),elapsed,playing,introActive,firstEvent:events[0]?{note:events[0].note,start:events[0].start,duration:events[0].dur}:null,secondEvent:events[1]?{note:events[1].note,start:events[1].start,duration:events[1].dur}:null,visibleTime:$('#timeLabel').textContent}),print:()=>({pngCanvas:scoreSheetCanvas().width+'x'+scoreSheetCanvas().height,pdfPageCount:Math.max(1,Math.ceil(events.length/PRINT_PAGE_NOTES)),pdfBytes:scorePdfBytes([scoreSheetCanvas(0,Math.min(events.length,PRINT_PAGE_NOTES),true)]).size}),view:()=>({mode:playView,active:activeScoreIndex(elapsed),scoreTiles:$('#scoreStageGrid').children.length,sideTiles:$('#scoreRows').children.length,elapsed}),supported:()=>videoSupported(),mime:()=>videoMime(),brand:()=>({brand:VIDEO_BRAND,handle:VIDEO_HANDLE,copy:VIDEO_COPY}),colors:()=>({...COLORS}),melody:()=>({mode:melodyMode,label:MELODY_LABELS[melodyMode],options:{...MELODY_LABELS},volume:melodyVolume}),fall:()=>({leadMs:FIRST_NOTE_LEAD_MS,travelMs:FALL_TRAVEL_MS,firstNoteMs:firstNoteMs(),spawnDelayMs:firstNoteMs()-FALL_TRAVEL_MS,elapsed,playing}),tempo:()=>({bpm,sourceBpm:currentSong.bpm,min:MIN_TEMPO,max:MAX_TEMPO,comfortable:comfortableTempo(currentSong),custom:tempoPrefs[tempoKey(currentSong)]??null,beatMs:beatMs()}),lesson:()=>({level,part:practiceSection,startBar:scoreStartBar,bars:playbackMeasures.length,originalBars:(currentSong.measures||[]).length,arrangedNotes,missedEvents:events.filter(e=>e.note!=='쉼'&&!e.active).length,introLength,notes:events.length}),intro:()=>({mode:introMode,active:introActive,started:hasStartedSong,durationMs:introDurationMs,beats:introBeats,meter:introMeter,previewBeats:introPreviewBeats,countBeats:introCountBeats,lastBeat:introLastBeat,progressMs:introActive?Math.max(0,performance.now()-introStartPerf):0}),mix:()=>({mode:mixMode,label:MIX_LABELS[mixMode],options:{...MIX_LABELS},mrReady:true,mrKind:mrBuffer?'file':'auto',mrLoaded:!!mrBuffer,mrName,mrVolume,melodyVolume}),display:()=>({mode:displayMode,label:DISPLAY_LABELS[displayMode],options:{...DISPLAY_LABELS},labels:ORDER.map(displayLabel),names:[...childLabels],custom:[...customLabels],instruments:[...instrumentIds],instrumentLibrary:instrumentLibrary.map(x=>({...x}))}),lyrics:()=>lyricWindowAt(Math.min(2600,totalMs/2)),preview:()=>{const c=videoCanvas(),x=c.getContext('2d');videoScene(x,Math.min(1500,totalMs/2));return {w:c.width,h:c.height,data:c.toDataURL('image/png').slice(0,40)}}};
 
 function init(){document.body.dataset.displayMode=displayMode;syncLevelUI();loadPianoSamples();syncSongUI();choosePlayView(playView);$('#melodySelect').value=melodyMode;$('#mrStyle').value=mrStyle;$('#introMode').value=introMode;$('#introLength').value=introLength;updateIntroHelp();$('#displayModeSelect').value=displayMode;$('#displayEditBtn').classList.toggle('show',displayMode==='name'||displayMode==='custom'||displayMode==='instrument');$('#displayEditBtn').textContent=displayMode==='name'?'✎ 이름':displayMode==='instrument'?'✎ 악기':'✎ 설정'}
 $('#playViewSelect').onchange=e=>choosePlayView(e.target.value);
 $('#scorePngBtn').onclick=()=>downloadScore('png');
 $('#scorePdfBtn').onclick=()=>downloadScore('pdf');
-$('#videoBtn').onclick=exportVideo;
+$('#videoBtn').onclick=()=>exportVideo();
+$('#publicVideoBtn').onclick=()=>exportVideo({publicMode:true});
+$('#publicCreditBtn').onclick=copyPublicVideoDescription;
+$('#publicRightsOpt').onchange=()=>refreshPublicExportUi();
 $('#melodySelect').onchange=e=>{const v=e.target.value;melodyMode=MELODY_LABELS[v]?v:'boom';e.target.value=melodyMode;try{localStorage.setItem('ulmoaBoomMelody',melodyMode)}catch(err){};if(playing)syncLiveSongMelody();else if(melodyMode!=='none'&&sound&&wantsMelody()){audio();tone('도')} };
 $('#melodyVolume').oninput=e=>{melodyVolume=Math.max(0,Math.min(1,Number(e.target.value)/100));$('#melodyPct').textContent=Math.round(melodyVolume*100)+'%'};
 $('#mixModes').onclick=e=>{const b=e.target.closest('button[data-mix]');if(!b)return;mixMode=MIX_LABELS[b.dataset.mix]?b.dataset.mix:'melody';document.querySelectorAll('#mixModes button').forEach(x=>x.classList.toggle('on',x.dataset.mix===mixMode));if(wantsMr()&&!mrBuffer){$('#mrStatus').textContent='기본 자동 MR을 사용 중이에요. 내 MR 파일을 선택하면 자동으로 바뀝니다.';$('#mrStatus').className='hint mrStatus ok'}if(playing){syncLiveMr();syncLiveSongMelody()}};
-$('#mrFile').onchange=e=>loadMrFile(e.target.files?.[0]||null);
+$('#mrFile').onchange=async e=>{await loadMrFile(e.target.files?.[0]||null);refreshPublicExportUi()};
 $('#mrStyle').onchange=e=>{mrStyle=e.target.value==='soft'?'soft':'kids';try{localStorage.setItem('ulmoaBoomMrStyle',mrStyle)}catch(err){};if(playing&&wantsMr()&&!mrBuffer)syncLiveMr()};
 $('#mrVolume').oninput=e=>{mrVolume=Math.max(0,Math.min(1,Number(e.target.value)/100));$('#mrPct').textContent=Math.round(mrVolume*100)+'%';if(mrGain&&audioCtx)mrGain.gain.setTargetAtTime(mrVolume,audioCtx.currentTime,.02)};
 $('#displayModeSelect').onchange=e=>{displayMode=DISPLAY_LABELS[e.target.value]?e.target.value:'note';applyDisplayMode();if(displayMode==='name'||displayMode==='custom'||displayMode==='instrument')openDisplayEditor()};
