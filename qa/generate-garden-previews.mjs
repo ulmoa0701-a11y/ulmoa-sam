@@ -53,7 +53,8 @@ async function capture(id,url,{native=false}={}){
    const start=page.locator('#introStart');
    if(await start.isVisible()){
     await start.click({timeout:2000});await page.waitForTimeout(600);
-    entry.play=await snap(page,'#gameWorld',id+'-play');
+    // Capture the hands-on puzzle rather than the whole page, tiny instructions or header.
+    entry.play=await snap(page,'#gameArea .basic-game, #gameArea .novel-quest, #gameArea .strategy-quest, #gameArea .slow-native, #gameArea',id+'-play');
    }
   }else if(['money','change','feel'].includes(id)){
    await page.locator('#startGame').click({timeout:1500});await page.waitForTimeout(240);
@@ -62,7 +63,7 @@ async function capture(id,url,{native=false}={}){
   }else if(id==='hand-mirror'){
    entry.preview=await snap(page,'.intro',id);
    try{await page.locator('#touchStart').click({timeout:900});await page.waitForTimeout(260);
-     entry.play=await snap(page,'.play-panel,#play,.garden-stage,.shell main',id+'-play');
+     entry.play=await snap(page,'#game .viewer, #game .garden-scene, #game .camera-panel, #game',id+'-play');
    }catch{}
   }else if(id==='rescue'){
    entry.preview=await snap(page,'.app-shell',id);
@@ -70,19 +71,20 @@ async function capture(id,url,{native=false}={}){
      const b=page.locator(sel).first();
      if(await b.isVisible().catch(()=>false)){await b.click({timeout:1000}).catch(()=>{});await page.waitForTimeout(320);break}
    }
-   entry.play=await snap(page,'#gameScreen,.game-world,.rescue-scene,.app-shell',id+'-play');
+   entry.play=await snap(page,'#game canvas, #gameScreen .game-world, .rescue-scene, #gameScreen, .app-shell',id+'-play');
   }else{
    entry.preview=await snap(page,'main',id);
    if(id==='strength'){await page.locator('#chooseStrength').click({timeout:1000}).catch(()=>{});}
    if(id==='long'){await page.locator('#chooseLong').click({timeout:1000}).catch(()=>{});}
    if(id==='beat'){await page.locator('#chooseBeat').click({timeout:1000}).catch(()=>{});}
    await page.waitForTimeout(280);
-   entry.play=await snap(page,'#gameScreen:not([hidden]),.game-scene,.game-area,main',id+'-play');
+   entry.play=await snap(page,'#gameArea:visible, #gameScreen:not([hidden]), .game-scene, .game-area, main',id+'-play');
   }
   // If the game stage requires a camera or another input, preserve its authentic intro/preview.
   if(!entry.play&&entry.preview){fs.copyFileSync(path.join(outDir,id+'.jpg'),path.join(outDir,id+'-play.jpg'));entry.play=true;entry.introOnly=true;}
   if(!entry.preview&&entry.play){fs.copyFileSync(path.join(outDir,id+'-play.jpg'),path.join(outDir,id+'.jpg'));entry.preview=true;}
   if(!entry.play&&!entry.preview){entry.errors.push('No meaningful visible game region captured');}
+  entry.focusedPlay=entry.play&&!entry.introOnly;
  }catch(e){entry.errors.push(String(e).slice(0,170));}
  finally{report.push(entry);await context.close()}
 }
