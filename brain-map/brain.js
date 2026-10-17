@@ -57,7 +57,10 @@
   lastLobeScene=key;
   reset();
   lobeSceneResult.hidden=false;
+  lobeSceneSelection.hidden=false;
   lobeSceneTitle.textContent=scene.title;
+  lobeSceneCurrent.textContent='지금 선택: '+scene.title;
+  lobeSceneSelectedRegions.replaceChildren();
   lobeSceneRoles.replaceChildren();
   const selected=new Set(scene.roles.map(([region])=>region));
   for(const [region,emoji,task] of scene.roles){
