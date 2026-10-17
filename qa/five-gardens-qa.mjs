@@ -67,9 +67,9 @@ for(const width of [360,390,1366]){
  if(width===390){
   await page.locator('#cognitive .garden-filter-buttons button[data-focus="memory"]').click();
   const visibleCards=await page.locator('#cognitive .play-card-enhanced:not([hidden])').count();
-  check(visibleCards===5,width+' memory filter count incorrect '+visibleCards);
+  check(visibleCards===4,width+' memory filter count incorrect '+visibleCards);
   const hiddenCards=await page.locator('#cognitive .play-card-enhanced[hidden]').count();
-  check(hiddenCards===16,width+' memory filter not hiding unrelated games');
+  check(hiddenCards===17,width+' memory filter not hiding unrelated games');
   await page.locator('#cognitive .garden-filter-buttons button[data-focus="all"]').click();
   await page.locator('#cognitive .play-preview-btn').first().click();
   check(await page.locator('#gardenPreviewDialog').isVisible(),width+' actual preview dialog did not open');
