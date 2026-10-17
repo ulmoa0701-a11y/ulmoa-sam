@@ -23,14 +23,19 @@ const browser=await chromium.launch({headless:true,executablePath:process.env.CH
 const report=[];
 const settings={type:'jpeg',quality:79,animations:'disabled',timeout:7000};
 async function snap(page,selector,name){
- const loc=page.locator(selector).first();
- try{
-  if(!await loc.isVisible())return false;
-  const box=await loc.boundingBox();
-  if(!box||box.width<80||box.height<65)return false;
-  await loc.screenshot({...settings,path:path.join(outDir,name+'.jpg')});
-  return true;
- }catch{return false}
+ // A CSS selector group is DOM-ordered: the container would otherwise win
+ // over its nested active puzzle even when listed last.
+ for(const part of selector.split(',')){
+  const loc=page.locator(part.trim()).first();
+  try{
+   if(!await loc.isVisible())continue;
+   const box=await loc.boundingBox();
+   if(!box||box.width<80||box.height<65)continue;
+   await loc.screenshot({...settings,path:path.join(outDir,name+'.jpg')});
+   return true;
+  }catch{/* Try the next concrete gameplay region. */}
+ }
+ return false;
 }
 async function capture(id,url,{native=false}={}){
  const context=await browser.newContext({viewport:{width:1024,height:740},deviceScaleFactor:1,reducedMotion:'reduce',permissions:[]});
