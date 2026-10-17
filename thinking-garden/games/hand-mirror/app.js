@@ -15,7 +15,7 @@ const ROUNDS={
  both:[['palm','palm'],['fist','fist'],['palm','fist'],['one','one']]
 };
 const CONNECTIONS=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17],[5,9],[9,13],[13,17]];
-let S={mode:'copy',kind:'none',phase:'intro',round:0,part:0,success:0,token:0,raf:0,model:null,stream:null,facing:'user',lastFrame:-1,lastObserved:0,matchSince:0,readyToMatch:true,rearmSince:0,winTimer:0,silent:false,camHands:[],loading:false,guideVisible:true,connectTimer:0,firstVideoFrame:0,firstHandSeen:0,darkFrameSince:0,lastLightCheck:0,cameraReady:false,readySince:0,frameLightOk:false,lightChecked:false,problemType:null,videoStallSince:0,hasTrackedHand:false};
+let S={mode:'copy',kind:'none',phase:'intro',round:0,part:0,success:0,token:0,raf:0,model:null,stream:null,facing:'user',lastFrame:-1,lastObserved:0,matchSince:0,readyToMatch:true,rearmSince:0,winTimer:0,silent:false,camHands:[],loading:false,guideVisible:true,connectTimer:0,firstVideoFrame:0,firstHandSeen:0,darkFrameSince:0,lastLightCheck:0,cameraReady:false,readySince:0,frameLightOk:false,lightChecked:false,problemType:null,videoStallSince:0,hasTrackedHand:false,noHandSince:0,noLightSince:0,modelErrorCount:0};
 let audio=null;
 const video=$('video'),canvas=$('overlay'),ctx=canvas.getContext('2d');
 const now=()=>performance.now();
@@ -84,7 +84,7 @@ function show(id){for(const key of ['intro','game','finish'])$(key).hidden=key!=
 function message(s){if($('message').textContent!==s)$('message').textContent=s;if($('viewerBadge').textContent!==s)$('viewerBadge').textContent=s;}
 function sound(){if(S.silent)return;try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return;if(!audio)audio=new A();const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.setValueAtTime(670,audio.currentTime);o.frequency.linearRampToValueAtTime(930,audio.currentTime+.17);g.gain.setValueAtTime(.001,audio.currentTime);g.gain.exponentialRampToValueAtTime(.045,audio.currentTime+.02);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.26);o.connect(g).connect(audio.destination);o.start();o.stop(audio.currentTime+.28)}catch(e){}}
 function stopCamera(){
- S.token++;clearTimeout(S.connectTimer);S.connectTimer=0;S.firstVideoFrame=0;S.firstHandSeen=0;S.darkFrameSince=0;S.lastLightCheck=0;S.readySince=0;S.frameLightOk=false;S.lightChecked=false;S.cameraReady=false;S.loading=false;S.videoStallSince=0;S.hasTrackedHand=false;
+ S.token++;clearTimeout(S.connectTimer);S.connectTimer=0;S.firstVideoFrame=0;S.firstHandSeen=0;S.darkFrameSince=0;S.lastLightCheck=0;S.readySince=0;S.frameLightOk=false;S.lightChecked=false;S.cameraReady=false;S.loading=false;S.videoStallSince=0;S.hasTrackedHand=false;S.noHandSince=0;S.noLightSince=0;S.modelErrorCount=0;
  $('cameraCheck').hidden=true;$('cameraCheckFill').style.width='0%';
  video.classList.remove('is-ready');hideCameraProblem();
 
@@ -326,6 +326,10 @@ function tick(){
   if(t-S.lastLightCheck>1500){
    S.lastLightCheck=t;const light=frameBrightness();
    S.lightChecked=light!==null;S.frameLightOk=light!==null&&light>=14;
+   if(light===null){
+    S.noLightSince ||= t;
+    if(t-S.noLightSince>4500&&S.problemType!=='camera')showCameraProblem('카메라 영상을 확인할 수 없어요','카메라를 다시 연결해 봐. 계속 문제가 생기면 화면 놀이를 이용할 수 있어.','camera');
+   }else{S.noLightSince=0;}
    if(light!==null&&light<14){
     S.darkFrameSince ||= t;
     if(t-S.darkFrameSince>2800)showCameraProblem('화면이 너무 어두워요','밝은 곳에서 손을 비춰 봐. 계속 검으면 카메라를 바꿔 보거나 다시 연결할 수 있어.','dark');
@@ -336,12 +340,17 @@ function tick(){
   }
   try{
    const r=S.model.detectForVideo(video,t);S.camHands=r.landmarks||[];
-   if(S.camHands.length){S.firstHandSeen=t;if(S.problemType==='no-hand')hideCameraProblem();}
+   if(S.camHands.length){S.firstHandSeen=t;S.noHandSince=0;if(S.problemType==='no-hand')hideCameraProblem();}
+   else S.noHandSince ||= t;
+   S.modelErrorCount=0;
    drawHands(S.camHands);
    if(S.phase==='setup'){cameraCalibration(t);}
    else evaluate(t);
-  }catch(e){S.camHands=[];S.matchSince=0;}
-  if(!S.camHands.length&&t-S.firstVideoFrame>7000&&!S.firstHandSeen&&S.darkFrameSince===0&&$('cameraProblem').hidden){
+  }catch(e){
+   S.camHands=[];S.hasTrackedHand=false;syncAcornUI();S.matchSince=0;
+   if(++S.modelErrorCount>25&&S.problemType!=='camera')showCameraProblem('손 인식이 중단됐어요','카메라를 다시 연결해 봐. 손 인식이 반복해서 실패하고 있어.','camera');
+  }
+  if(S.camHands.length===0&&S.noHandSince&&t-S.noHandSince>6500&&S.frameLightOk&&$('cameraProblem').hidden){
     showCameraProblem('손이 아직 안 보여요','한 손을 화면 가운데 조금 떨어뜨려 보여줘. 움직여도 안 보이면 카메라를 다시 연결해 봐.','no-hand');
   }
  }else{
@@ -363,9 +372,11 @@ function cameraCalibration(t){
   S.readySince=0;$('cameraCheckFill').style.width='0%';
   $('cameraCheckText').textContent='화면이 어두워요. 밝은 곳으로 옮겨 봐요.';return;
  }
- if(!S.camHands.length){
+ const expectedHands=S.mode==='both'?2:1;
+ if(S.camHands.length!==expectedHands){
   S.readySince=0;$('cameraCheckFill').style.width='0%';
-  $('cameraCheckText').textContent='손바닥이 보이도록 손을 들어줘!';return;
+  $('cameraCheckText').textContent=expectedHands===2?'두 손을 함께 보여줘!':'한 손만 잘 보이게 들어줘!';
+  return;
  }
  if(!S.readySince)S.readySince=t;
  const pct=Math.min(100,Math.round(100*(t-S.readySince)/650));
