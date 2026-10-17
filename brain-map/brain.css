@@ -873,9 +873,19 @@
  .brain-page .brain-main #lobeSceneFocusText{font-size:12.5px}
  .brain-page .brain-main .lobe-directory>summary span{display:block;margin:2px 0 0}
 }
+@media(max-width:500px){
+ .brain-page .brain-main .lobe-scene-roles{grid-template-columns:minmax(0,1fr);gap:5px}
+ .brain-page .brain-main .lobe-scene-role-choice{
+  flex-direction:row;align-items:center;text-align:left;
+  min-height:59px;padding:8px 10px;gap:10px
+ }
+ .brain-page .brain-main .lobe-scene-number{flex-basis:24px;width:24px;height:24px}
+ .brain-page .brain-main .lobe-scene-task-icon{font-size:21px}
+ .brain-page .brain-main .lobe-scene-role-copy b{font-size:14px}
+ .brain-page .brain-main .lobe-scene-role-copy small{font-size:11.5px;margin-top:1px}
+ .brain-page .brain-main .lobe-scene-caution{font-size:12px}
+}
 @media(max-width:380px){
- .brain-page .brain-main .lobe-scene-role-choice{min-height:113px}
- .brain-page .brain-main .lobe-scene-role-copy b{font-size:12px}
  .brain-page .brain-main .lobe-directory>.lobe-list{grid-template-columns:minmax(0,1fr)}
 }
 @media(prefers-reduced-motion:reduce){.brain-page .brain-svg .zone-shape{transition:none}}
