@@ -130,6 +130,8 @@ try{
     assert.ok(visibleLabels.some(t=>t.includes(zoneNumber)&&t.includes(lobeName)),
      'number and area name must match illustration and card: '+region);
    }
+   // CSS animates the selected stroke for 120ms; inspect after transition settles.
+   await page.waitForTimeout(200);
    const strokeInfo=await page.locator('#brainMap [data-scene-active] .zone-shape').first().evaluate(el=>({
     width:getComputedStyle(el).strokeWidth,
     selector:el.matches('.brain-page .brain-svg[data-scene-mode="active"] .brain-zone[data-scene-active] .zone-shape'),
