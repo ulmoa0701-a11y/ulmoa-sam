@@ -156,6 +156,53 @@ function gardenUpdate(){
  });
  syncAcornUI();
 }
+
+const ADVENTURE_META={
+ copy:{label:'반짝 풍선',token:'🫧',done:'✨',rounds:6},
+ fingers:{label:'별빛 모으기',token:'☆',done:'⭐',rounds:6},
+ memory:{label:'비밀 발판',token:'🪨',done:'✨',rounds:4},
+ both:{label:'보물문 열기',token:'🔒',done:'🔑',rounds:4}
+};
+function adventureUpdate(){
+ const active=isAdventure();
+ $('adventureScene').hidden=!active;
+ const hasHands=S.camHands.length===(S.mode==='both'?2:1);
+ $('adventureActor').hidden=!active||!isCamera()||!S.cameraReady||
+  !hasHands||!S.frameLightOk||S.phase==='setup'||S.mode==='memory';
+ if(!active)return;
+ const meta=ADVENTURE_META[S.mode],phase=S.phase;
+ const count=S.mode==='memory'?S.round:S.success;
+ $('adventureScene').dataset.mode=S.mode;
+ $('adventureScene').dataset.phase=phase;
+ $('adventureSceneTitle').textContent=S.mode==='copy'?'🫧 풍선을 하나씩 반짝이게 해요':
+  S.mode==='fingers'?'⭐ 손가락을 펴면 별빛이 켜져요':
+  S.mode==='memory'?'🚶 기억한 손 모양만큼 발판이 이어져요':'🔑 두 손으로 자물쇠를 열어요';
+ const mark=$('adventureSceneObjects');
+ if(S.mode==='memory'){
+  const sequence=current();
+  mark.innerHTML=sequence.map((p,i)=>{
+   const done=i<S.part||(phase==='reward'&&i===S.part);
+   // Deliberate recall: never leak the saved hand pose during play.
+   const icon=phase==='memorize'?handArt(p):done?'✨':'❔';
+   return '<span class="adventure-token" data-state="'+(done?'done':i===S.part?'current':'waiting')+'" data-step="'+i+'">'+icon+'</span>';
+  }).join('');
+  $('gardenHudFlower').textContent='🪨 '+S.round+' / 4';
+  $('gardenHudRound').textContent='길 '+(S.round+1)+' / 4';
+ }else{
+  mark.innerHTML=Array.from({length:meta.rounds},(_,i)=>{
+   const state=i<count?'done':i===count?'current':'waiting';
+   return '<span class="adventure-token" data-state="'+state+'" data-step="'+i+'">'+(state==='done'?meta.done:meta.token)+'</span>';
+  }).join('');
+  $('gardenHudFlower').textContent=(S.mode==='copy'?'✨ ':S.mode==='fingers'?'⭐ ':'🔑 ')+Math.min(count,meta.rounds)+' / '+meta.rounds;
+  $('gardenHudRound').textContent=(S.round+1)+' / '+meta.rounds;
+ }
+ $('adventureActorEmoji').textContent=S.mode==='copy'?(phase==='reward'?'✨':'🫧'):
+  S.mode==='fingers'?(phase==='reward'?'⭐':'✨'):
+  S.mode==='both'?(phase==='reward'?'🔑':'🔒'):'';
+ $('adventureActor').dataset.state=phase==='reward'?'success':'waiting';
+ $('adventureActor').style.left=(S.acornX??50)+'%';
+ $('adventureActor').style.top=(S.acornY??52)+'%';
+}
 function modeSelected(m){
  S.mode=m;
  document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));
