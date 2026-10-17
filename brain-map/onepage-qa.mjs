@@ -180,13 +180,13 @@ try{
   assert.equal(await page.locator('#hemiTopicDialog').isHidden(),true,'X closes modal');
   // A concept explanation must lead to a related, usable practice guide.
   for(const [topic,scene,label] of [
-    ['speech','talk','하루 이야기'],
+    ['speech','talk','친구와 질문'],
     ['phonics','read','읽고 위치'],
     ['right-hand','ball','공을 굴리고'],
-    ['space','map','물건의 자리'],
+    ['space','map','작은 길 찾아가기'],
     ['intonation','feeling','말투와 상황'],
     ['attention','bag','가방 챙기는'],
-    ['left-hand','draw','그림에서 위치']
+    ['left-hand','draw','보고 그림 완성하기']
   ]){
     await page.locator('[data-hemi-topic="'+topic+'"]').click();
     assert.equal(await page.locator('#hemiTopicDialog').isVisible(),true);
@@ -266,6 +266,20 @@ try{
     assert.ok((await page.locator('#hemiActivityWhy').innerText()).length>25,'functional rationale for '+scene);
     assert.ok((await page.locator('#hemiActivityNote').innerText()).length>25,'safe caveat for '+scene);
     assert.equal(await page.locator('#hemiActivityOptions').getAttribute('open'),null,'fold between scenes');
+  }
+  // Distinct learning goals: conversation turn-taking, actual route, visual construction.
+  for(const [scene,goal,step,access] of [
+    ['talk',/차례를 주고받아요/,/질문 그림/,/AAC/],
+    ['map',/지나갈 곳/,/길 따라가기/,/손가락|시선/],
+    ['draw',/작은 그림/,/나란히 비교하기/,/시선 선택/]
+  ]){
+    await page.locator('[data-brain-scene="'+scene+'"]').click();
+    assert.match(await page.locator('#hemiActivityAim').innerText(),goal,'distinct goal: '+scene);
+    assert.match(await page.locator('#hemiActivitySteps').innerText(),step,'distinct action: '+scene);
+    await page.locator('#hemiActivityOptions summary').click();
+    const adaptation=(await page.locator('#hemiActivityEasy').innerText())+' '+(await page.locator('#hemiActivityNote').innerText());
+    assert.match(adaptation,access,'accessible response option: '+scene);
+    await page.locator('#hemiActivityOptions summary').click();
   }
   await page.locator('[data-brain-scene="talk"]').click();
   assert.equal(await page.locator('.hemi-more-facts').getAttribute('open'),null,'extra science detail stays folded by default');
