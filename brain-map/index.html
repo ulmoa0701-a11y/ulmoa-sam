@@ -13,8 +13,8 @@
 <link href="https://hangeul.pstatic.net/hangeul_static/css/maru-buri.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
 <link rel="stylesheet" href="../assets/notebook-subpages.css?v=20261005-clean3">
-<link rel="stylesheet" href="brain.css?v=20261017-selected3">
-<script src="brain.js?v=20261017-selected3" defer></script>
+<link rel="stylesheet" href="brain.css?v=20261017-focus4">
+<script src="brain.js?v=20261017-focus4" defer></script>
 <script src="activity-guide.js?v=20261017-activities3" defer></script>
 <link rel="stylesheet" href="../assets/habom-brand.css?v=20261010b">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/habom-favicon-v3-32.png">
@@ -46,27 +46,32 @@
    <figure class="lobe-figure">
     <section class="lobe-scene-explorer" aria-labelledby="lobeSceneHeading">
      <div class="lobe-scene-head">
-      <h3 id="lobeSceneHeading">🌿 생활 속에서 함께하는 뇌</h3>
-      <p>장면을 고르면 어떤 부분을 살펴보는지 그림과 함께 보여줘요.</p>
+      <h3 id="lobeSceneHeading">🌿 생활 속 뇌 이야기</h3>
+      <p>활동을 고르고, 세 가지 역할을 하나씩 살펴봐요.</p>
      </div>
-     <div class="lobe-scene-choices" role="group" aria-label="생활 장면 고르기">
-      <button type="button" data-lobe-scene="talk" aria-pressed="true" aria-controls="brainMap lobeSceneRoles">💬 대화</button>
-      <button type="button" data-lobe-scene="read" aria-pressed="false" aria-controls="brainMap lobeSceneRoles">📖 책 읽기</button>
-      <button type="button" data-lobe-scene="map" aria-pressed="false" aria-controls="brainMap lobeSceneRoles">🧭 길 찾기</button>
-      <button type="button" data-lobe-scene="ball" aria-pressed="false" aria-controls="brainMap lobeSceneRoles">⚽ 공놀이</button>
-      <button type="button" data-lobe-scene="music" aria-pressed="false" aria-controls="brainMap lobeSceneRoles">🎵 노래</button>
-      <button type="button" data-lobe-scene="draw" aria-pressed="false" aria-controls="brainMap lobeSceneRoles">🎨 그림</button>
-      <button type="button" data-lobe-scene="bag" aria-pressed="false" aria-controls="brainMap lobeSceneRoles">🎒 가방</button>
-      <button type="button" data-lobe-scene="feeling" aria-pressed="false" aria-controls="brainMap lobeSceneRoles">🙂 친구 기분</button>
+     <div class="lobe-scene-choices" role="group" aria-label="생활 장면 선택">
+      <button type="button" data-lobe-scene="talk" aria-pressed="false" aria-controls="lobeSceneRoles lobeSceneSelection">💬 대화</button>
+      <button type="button" data-lobe-scene="read" aria-pressed="false" aria-controls="lobeSceneRoles lobeSceneSelection">📖 책 읽기</button>
+      <button type="button" data-lobe-scene="map" aria-pressed="false" aria-controls="lobeSceneRoles lobeSceneSelection">🧭 길 찾기</button>
+      <button type="button" data-lobe-scene="ball" aria-pressed="false" aria-controls="lobeSceneRoles lobeSceneSelection">⚽ 공놀이</button>
+      <button type="button" data-lobe-scene="music" aria-pressed="false" aria-controls="lobeSceneRoles lobeSceneSelection">🎵 노래</button>
+      <button type="button" data-lobe-scene="draw" aria-pressed="false" aria-controls="lobeSceneRoles lobeSceneSelection">🎨 그림</button>
+      <button type="button" data-lobe-scene="bag" aria-pressed="false" aria-controls="lobeSceneRoles lobeSceneSelection">🎒 가방</button>
+      <button type="button" data-lobe-scene="feeling" aria-pressed="false" aria-controls="lobeSceneRoles lobeSceneSelection">🙂 친구 기분</button>
      </div>
-     <div class="lobe-scene-selection" id="lobeSceneSelection">
-      <strong id="lobeSceneCurrent">지금 선택: 💬 대화</strong>
-      <span class="lobe-scene-selection-label">진한 테두리로 표시한 대표 부위</span>
-      <div class="lobe-scene-selection-pills" id="lobeSceneSelectedRegions" aria-label="이번 장면에서 살펴보는 대표적인 뇌 부위">
-       <span class="lobe-scene-selected-chip" style="--scene-lobe-color:#B3E4C1">3 측두엽</span>
-       <span class="lobe-scene-selected-chip" style="--scene-lobe-color:#CDB2F3">1 전두엽</span>
-       <span class="lobe-scene-selected-chip" style="--scene-lobe-color:#FFC1A8">4 후두엽</span>
-      </div>
+     <div class="lobe-scene-result" id="lobeSceneResult">
+      <strong id="lobeSceneTitle" class="lobe-scene-result-title">💬 대화할 때 · 함께하는 역할 3가지</strong>
+      <ul class="lobe-scene-roles" id="lobeSceneRoles" aria-label="살펴볼 역할 선택">
+       <li><button type="button" data-scene-region="temporal" aria-pressed="true" aria-controls="lobeSceneSelection brainMap"><span class="lobe-scene-number" style="--scene-lobe-color:#B3E4C1" aria-hidden="true">3</span><span class="lobe-scene-task-icon" aria-hidden="true">👂</span><span class="lobe-scene-role-copy"><b>측두엽</b><small>말소리 살피기</small></span></button></li>
+       <li><button type="button" data-scene-region="frontal" aria-pressed="false" aria-controls="lobeSceneSelection brainMap"><span class="lobe-scene-number" style="--scene-lobe-color:#CDB2F3" aria-hidden="true">1</span><span class="lobe-scene-task-icon" aria-hidden="true">💡</span><span class="lobe-scene-role-copy"><b>전두엽</b><small>대답 계획하기</small></span></button></li>
+       <li><button type="button" data-scene-region="occipital" aria-pressed="false" aria-controls="lobeSceneSelection brainMap"><span class="lobe-scene-number" style="--scene-lobe-color:#FFC1A8" aria-hidden="true">4</span><span class="lobe-scene-task-icon" aria-hidden="true">👀</span><span class="lobe-scene-role-copy"><b>후두엽</b><small>표정 보기</small></span></button></li>
+      </ul>
+     </div>
+     <div class="lobe-scene-selection" id="lobeSceneSelection" role="status" aria-live="polite" aria-atomic="true">
+      <span class="lobe-scene-focus-eyebrow" id="lobeSceneCurrent">💬 대화 · 세 역할 중 1번째</span>
+      <strong id="lobeSceneFocusTitle">3 측두엽</strong>
+      <p id="lobeSceneFocusText">말소리를 듣고 뜻을 이해하는 데 관여해요.</p>
+      <span class="lobe-scene-focus-hint">그림에서 진하게 표시된 한 부분을 살펴봐요.</span>
      </div>
     <div class="figure-orientation"><span>← 이마 쪽 (앞)</span><span>뒤통수 쪽 (뒤) →</span></div>
     <svg id="brainMap" class="brain-svg" viewBox="125 70 685 500" xmlns="http://www.w3.org/2000/svg" role="group" tabindex="-1" aria-label="옆에서 바라본 뇌. 보라색 전두엽, 노란색 두정엽, 초록색 측두엽, 복숭아색 후두엽, 하늘색 소뇌, 연보라색 뇌줄기.">
@@ -100,15 +105,7 @@
 </g>
 </g>
 </svg>
-     <div class="lobe-scene-result" id="lobeSceneResult" aria-live="polite" aria-atomic="true">
-      <strong id="lobeSceneTitle">💬 친구와 대화할 때</strong>
-      <ul class="lobe-scene-roles" id="lobeSceneRoles">
-       <li><span class="lobe-scene-number" style="--scene-lobe-color:#B3E4C1" aria-hidden="true">3</span><span class="lobe-scene-task-icon" aria-hidden="true">👂</span><span class="lobe-scene-role-copy"><b>측두엽</b><small>말소리 살피기</small></span></li>
-       <li><span class="lobe-scene-number" style="--scene-lobe-color:#CDB2F3" aria-hidden="true">1</span><span class="lobe-scene-task-icon" aria-hidden="true">💡</span><span class="lobe-scene-role-copy"><b>전두엽</b><small>대답 계획하기</small></span></li>
-       <li><span class="lobe-scene-number" style="--scene-lobe-color:#FFC1A8" aria-hidden="true">4</span><span class="lobe-scene-task-icon" aria-hidden="true">👀</span><span class="lobe-scene-role-copy"><b>후두엽</b><small>표정 보기</small></span></li>
-      </ul>
-     </div>
-     <p class="lobe-scene-caution" id="lobeSceneNotice">진하게 표시되지 않은 부분도 함께 작동해요. 이 표시는 실제 뇌 활성도나 아이의 어려움을 판정하는 결과가 아니에요.</p>
+     <p class="lobe-scene-caution" id="lobeSceneNotice">같은 행동에 여러 뇌 영역이 함께 참여해요. 강조 표시는 실제 뇌 활성도나 진단 결과가 아니에요.</p>
     </section>
     <figcaption>옆에서 본 모습 · 실제 뇌의 경계를 정확히 표시한 그림은 아니에요.</figcaption>
    </figure>
