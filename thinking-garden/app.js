@@ -383,12 +383,22 @@ function renderMemory(){
  const study=document.createElement('div');study.className='memory-study-actions';study.innerHTML='<button class="memory-ready" type="button">준비됐어요 ✓</button><small>시간 제한 없음 · 충분히 보고 시작해요.</small>';
  const path=document.createElement('div');path.className='garden-path picnic-path';path.innerHTML='<span class="vine"></span><span class="picnic-goal">🧺</span><img class="walker" src="assets/moa-default.png" alt="">';
  stage.append(ticket,strip,study,basket,path);area.appendChild(stage);
- let choices=null,pos=0,peekUsed=false,peekTimer=null;
+ let choices=null,pos=0,peekUsed=false;
  const hideTicket=()=>{[...strip.children].forEach((d,i)=>{d.classList.add('hidden');d.innerHTML=`<span class="memory-question">${i+1}</span>`})};
  const revealTicket=()=>{[...strip.children].forEach((d,i)=>{d.classList.remove('hidden');d.innerHTML=visual(seq[i])})};
  const beginRecall=()=>{if(choices)return;hideTicket();ticket.classList.add('folded');study.innerHTML='<button class="memory-peek" type="button">👀 주문표 한 번 더 보기</button><small>막히면 한 번만 다시 볼 수 있어요.</small>';
   choices=document.createElement('div');choices.className='memory-choices';const pool=type==='color'?memoryColors:animals;shuffle(pool).forEach(x=>{const b=document.createElement('button');b.className='memory-choice';b.dataset.value=x[0];b.innerHTML=visual(x);choices.appendChild(b)});stage.insertBefore(choices,basket);
-  const peek=study.querySelector('.memory-peek');peek.onclick=()=>{if(peekUsed||state.lock)return;peekUsed=true;peek.disabled=true;peek.textContent='👀 주문표 확인 중…';revealTicket();ticket.classList.remove('folded');choices.classList.add('paused');clearTimeout(peekTimer);peekTimer=setTimeout(()=>{hideTicket();ticket.classList.add('folded');choices.classList.remove('paused');peek.textContent='주문표 다시 보기 사용함 ✓'},1800)};
+  const peek=study.querySelector('.memory-peek');peek.onclick=()=>{
+   if(state.lock||peek.disabled)return;
+   if(!peekUsed){
+    peekUsed=true;revealTicket();ticket.classList.remove('folded');
+    choices.classList.add('paused');
+    peek.textContent='다 봤어요 · 이어하기 ▶';
+    return;
+   }
+   hideTicket();ticket.classList.add('folded');choices.classList.remove('paused');
+   peek.disabled=true;peek.textContent='한 번 더 확인했어요 ✓';
+  };
   choices.onclick=e=>{const b=e.target.closest('button');if(!b||state.lock||choices.classList.contains('paused')||b.classList.contains('used'))return;if(b.dataset.value===seq[pos][0]){const bs=basket.querySelector(`[data-basket="${pos}"]`);bs.innerHTML=visual(seq[pos]);bs.classList.add('filled');b.classList.add('used','correct');pos++;sfx('ok');addSeeds(Math.ceil(10/len));path.querySelector('.vine').style.width=`${pos/len*100}%`;path.querySelector('.walker').style.left=`${Math.min(86,pos/len*86)}%`;flash(pos===len?'주문을 정확히 담았어요! 피크닉 출발 🌿':`${pos}번째 물건을 담았어요!`);if(pos===len){stage.classList.add('delivered');choices.classList.add('paused');revealTicket();ticket.classList.remove('folded');const review=seq.map(x=>x[0]).join(', ');roundGate(stage,'다음 주문 ▶',650,`${review}. 이 순서였어요.`)}}else{b.classList.add('wrong');sfx('no');flash('주문 순서를 다시 떠올려봐요.');later(()=>b.classList.remove('wrong'),430)}};
  };
  study.querySelector('.memory-ready').onclick=beginRecall;
