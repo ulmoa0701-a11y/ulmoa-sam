@@ -352,11 +352,11 @@ function syncFingerStars(hands,position,w,h){
  const raised=states?states.map((v,i)=>v===1?i:-1).filter(i=>i>=0):[];
  const countOK=core.countMatch(hands,currentGoal()[0]);
  // The target is a finger count, never a mandatory finger identity.
- const visible=[...raised];
- for(let i=0;i<4&&visible.length<target;i++)if(!visible.includes(i))visible.push(i);
+ const starIndices=[...raised];
+ for(let i=0;i<4&&starIndices.length<target;i++)if(!starIndices.includes(i))starIndices.push(i);
  for(let i=0;i<4;i++){
   const star=layer.children[i];
-  star.hidden=!visible.includes(i);
+  star.hidden=!starIndices.includes(i);
   if(star.hidden)continue;
   const [x,y]=position(landmark[core.FINGER_JOINTS[i][2]]);
   star.style.left=Math.max(5,Math.min(95,100*x/w))+'%';
