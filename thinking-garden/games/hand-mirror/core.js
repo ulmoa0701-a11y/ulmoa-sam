@@ -6,17 +6,27 @@ const PATTERNS={palm:[1,1,1,1],fist:[0,0,0,0],one:[1,0,0,0],two:[1,1,0,0],three:
 const TITLES={palm:'손가락 모두 펴기',fist:'손가락 모두 접기',one:'한 개만 쭉 펴기',two:'두 개만 쭉 펴기',three:'세 개만 쭉 펴기'};
 const EMOJI={palm:'✋',fist:'✊',one:'☝️',two:'✌️',three:'3️⃣'};
 function distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
-function pose(landmarks){
+function fingerStates(landmarks){
  if(!Array.isArray(landmarks)||landmarks.length<21)return null;
- const state=FINGER_JOINTS.map(([m,p,t])=>{
+ return FINGER_JOINTS.map(([m,p,t])=>{
   const d=distance(landmarks[p],landmarks[m]);
-  if(d<.008)return null;
+  if(!Number.isFinite(d)||d<.008)return null;
   const ratio=distance(landmarks[t],landmarks[m])/d;
   if(ratio>1.65)return 1;
   if(ratio<1.38)return 0;
   return null;
  });
- if(state.includes(null))return null;
+}
+function fingerFeedback(landmarks,expectedPose){
+ const expected=PATTERNS[expectedPose],actual=fingerStates(landmarks);
+ if(!expected||!actual)return null;
+ const matched=expected.map((v,i)=>actual[i]===v);
+ return {expected:[...expected],actual,matched,count:matched.filter(Boolean).length,total:4,
+  unknown:actual.filter(v=>v===null).length};
+}
+function pose(landmarks){
+ const state=fingerStates(landmarks);
+ if(!state||state.includes(null))return null;
  const found=Object.entries(PATTERNS).find(([,pattern])=>pattern.every((v,i)=>v===state[i]));
  return found?.[0]||null;
 }
@@ -28,7 +38,7 @@ function match(hands, expected){
  for(const label of labels){const i=target.indexOf(label);if(i>=0)target.splice(i,1);}
  return target.length===0;
 }
-const api={FINGER_JOINTS,PATTERNS,TITLES,EMOJI,pose,match};
+const api={FINGER_JOINTS,PATTERNS,TITLES,EMOJI,fingerStates,fingerFeedback,pose,match};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;
 root.HandMirrorCore=api;
 })(typeof window!=='undefined'?window:globalThis);
