@@ -32,6 +32,20 @@ function planUrl(items,opts={}){
     assert.ok(await page.locator('#moaAssignedHome').isVisible(),marker+' curated menu missing');
     assert.equal(await page.locator('.moa-assigned-item').count(),1,marker+' unexpected other activities');
     assert.equal(await page.locator('#gardenGamePanel:visible').count(),0,marker+' exposed full catalog');
+    const preview=page.locator('.moa-assigned-item .moa-assigned-visual');
+    assert.equal(await preview.count(),1,marker+' missing visual example');
+    assert.equal(await preview.locator('.moa-assigned-visual-label').count(),1,marker+' missing image meaning');
+    if(id==='handMirror'||standalone.includes(id)){
+     assert.ok(await preview.locator('.moa-assigned-fallback-icons span').count()>=4,marker+' missing illustrated gameplay');
+    }else{
+     assert.equal(await preview.locator('.card-live-preview').count(),1,marker+' must reuse actual catalog gameplay example');
+    }
+    assert.ok(await preview.isVisible(),marker+' example hidden on device');
+    const fit=await page.locator('.moa-assigned-item').evaluate(el=>{
+     const box=el.getBoundingClientRect(),image=el.querySelector('.moa-assigned-visual').getBoundingClientRect();
+     return image.width>190&&image.height>145&&image.left>=box.left-2&&image.right<=box.right+2&&document.documentElement.scrollWidth<=innerWidth+3;
+    });
+    assert.ok(fit,marker+' game image clipped, collapsed or mobile layout overflowing');
     await page.locator('.moa-assigned-item button.moa-assigned-start').click();
     if(await page.locator('#moaAssignedEmbed').count()){
      const frame=page.locator('#moaAssignedEmbed iframe');
@@ -50,6 +64,13 @@ function planUrl(items,opts={}){
     assert.ok(await page.locator('#moaAssignedHome').isVisible(),marker+' did not return to selected activities');
     assert.equal(await page.locator('#gardenGamePanel:visible').count(),0,marker+' showed unrelated game cards on return');
    }
+   // Screenshot the exact two-activity caregiver journey reported by the user.
+   await page.goto(planUrl(['moaChange','rescue']),{waitUntil:'load'});
+   assert.equal(await page.locator('.moa-assigned-item').count(),2);
+   assert.equal(await page.locator('.moa-assigned-item .moa-assigned-visual').count(),2);
+   assert.equal(await page.locator('.moa-assigned-item .card-live-preview').count(),1,'rescue must display catalog sample');
+   assert.equal(await page.locator('.moa-assigned-item .moa-assigned-fallback-icons').count(),1,'changing supplies needs pictorial preview');
+   await page.screenshot({path:'qa/curated-share-screenshots/'+vp.name+'-visual-parent.png',fullPage:true});
    assert.deepEqual(failures,[],vp.name+' console exceptions');
    console.log('PASS '+vp.name+': '+games.length+' curated game entries, launch and selected-list return');
    await page.close();
