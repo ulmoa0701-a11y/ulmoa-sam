@@ -18,10 +18,23 @@ function newNameOrder(){
  for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
  return order;
 }
-function setUp(id, options){return {nameOrder:newNameOrder(),id,level:Math.max(1,Math.min(3,Number(options.level)||1)),cue:options.cue||'guide',kind:options.kind||'animal',response:options.response||'speech',records:[],activeRound:-1,selected:new Set(),attempts:0,firstCorrect:null,hint:false,pauses:0,finished:false}}
+function pieceCells(shape,turn){
+ let cells=shape.map(p=>[...p]);
+ for(let i=0;i<turn;i++)cells=cells.map(([r,c])=>[c,-r]);
+ const minR=Math.min(...cells.map(p=>p[0])),minC=Math.min(...cells.map(p=>p[1]));
+ return cells.map(([r,c])=>[r-minR,c-minC]);
+}
+function fitPose(shape,pose,n){
+ const cells=pieceCells(shape,pose.turn);
+ const maxR=Math.max(...cells.map(p=>p[0])),maxC=Math.max(...cells.map(p=>p[1]));
+ pose.row=Math.max(0,Math.min(n-1-maxR,pose.row));
+ pose.col=Math.max(0,Math.min(n-1-maxC,pose.col));
+ return cells.map(([r,c])=>(r+pose.row)+','+(c+pose.col));
+}
+function setUp(id, options){return {blockPose:null,blockMoves:0,nameOrder:newNameOrder(),id,level:Math.max(1,Math.min(3,Number(options.level)||1)),cue:options.cue||'guide',kind:options.kind||'animal',response:options.response||'speech',records:[],activeRound:-1,selected:new Set(),attempts:0,firstCorrect:null,hint:false,pauses:0,finished:false}}
 function csv(s){
- const headers=['활동','난이도','지원방식','제시번호','최초정확','최종정확','재시도','단서','쉬기','반응'];
- const rows=[headers,...s.records.map(r=>[names[s.id],s.level,{guide:'전략 안내',wait:'기다리기',self:'스스로'}[s.cue],r.round,r.first,r.final,r.retries,r.hint?'사용':'없음',r.pauses||0,r.note])];
+ const headers=['활동','난이도','지원방식','제시번호','최초정확','최종정확','재시도','단서','쉬기','블록 조작','반응'];
+ const rows=[headers,...s.records.map(r=>[names[s.id],s.level,{guide:'전략 안내',wait:'기다리기',self:'스스로'}[s.cue],r.round,r.first,r.final,r.retries,r.hint?'사용':'없음',r.pauses||0,r.moves||0,r.note])];
  const safe=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
  const csv='\uFEFF'+rows.map(r=>r.map(safe).join(',')).join('\r\n');
  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),link=document.createElement('a'),uri=URL.createObjectURL(blob);
@@ -34,7 +47,7 @@ function addSummary(s,container) {
  const correct=s.records.filter(r=>r.final==='O').length;
  const initial=s.records.filter(r=>r.first==='O').length;
  root.innerHTML='<p class="slow-result-info">처음 정확 '+initial+'/'+s.records.length+' · 마지막 정확 '+correct+'/'+s.records.length+' · 전략은 결과보다 과정이 중요해요.</p><details class="slow-teacher-details"><summary>선생님 관찰기록 열기</summary><div class="slow-result-lines"></div><button type="button" class="slow-csv">CSV 기록 저장</button><p>저장하지 않으면 기록은 사이트로 전송되지 않아요. 진단 점수가 아닙니다.</p></details>';
- root.querySelector('.slow-result-lines').textContent=s.records.map(r=>r.round+'번: 첫 '+r.first+', 마지막 '+r.final+', 재시도 '+r.retries+(r.hint?', 단서 사용':'')+' · 쉬기 '+(r.pauses||0)+'회 · '+r.note).join(' / ');
+ root.querySelector('.slow-result-lines').textContent=s.records.map(r=>r.round+'번: 첫 '+r.first+', 마지막 '+r.final+', 재시도 '+r.retries+(r.hint?', 단서 사용':'')+' · 쉬기 '+(r.pauses||0)+'회'+(s.id==='slowBlock'?' · 블록 조작 '+(r.moves||0)+'회':'')+' · '+r.note).join(' / ');
  root.querySelector('.slow-csv').addEventListener('click',()=>csv(s));
  container.appendChild(root);
 }
@@ -42,7 +55,7 @@ function render(id,d) {
  const {state,area,missionText,missionSub,guide,say,flash,addSeeds,sfx,nextRound}=d;
  const s=state.slowLook;
  if(!s || !isNew(id))return;
- if(s.activeRound!==state.round){s.activeRound=state.round;s.selected=new Set();s.attempts=0;s.firstCorrect=null;s.hint=false;s.pauses=0;s.finished=false;s.nameReady=false;s.memoryHidden=-1;}
+ if(s.activeRound!==state.round){s.activeRound=state.round;s.selected=new Set();s.attempts=0;s.firstCorrect=null;s.hint=false;s.pauses=0;s.finished=false;s.nameReady=false;s.memoryHidden=-1;s.blockPose=null;s.blockMoves=0;}
  const round=state.round;
  const cues={guide:'눈으로 보고, 생각하고, 준비되면 표현해요.',wait:'천천히 살펴볼 시간을 가져요.',self:'스스로 확인한 뒤 준비되면 시작해요.'};
  guide.src=id==='slowMemory'?'assets/friend-ru.png':id==='slowScan'?'assets/friend-hong.png':'assets/friend-saem.png';
@@ -54,6 +67,10 @@ function render(id,d) {
   const rotation=Math.floor(round/5)%4;
   const shape=baseShape.map(([r,c])=>{let a=r,b=c;for(let k=0;k<rotation;k++){const t=a;a=b;b=n-1-t}return[a,b]});
  const selected=s.selected;
+ if(id==='slowBlock'){
+  if(!s.blockPose)s.blockPose={turn:0,row:0,col:0};
+  const active=fitPose(baseShape,s.blockPose,n);selected.clear();active.forEach(key=>selected.add(key));
+ }
  const pattern=shape.map(([r,c])=>r+','+c);
  const target=new Set(pattern);
  const cells=Math.pow(n,2);
@@ -83,8 +100,16 @@ function render(id,d) {
    const key=Math.floor(i/n)+','+(i%n),yes=scanTargets.has(key),icons=['🍃','🌱','🪨','🌿'];
    return '<button type="button" data-slow="cell" data-key="'+key+'" aria-label="그림 '+(i+1)+'" aria-pressed="'+selected.has(key)+'" class="slow-tile '+(selected.has(key)?'picked':'')+'">'+(yes?'🌼':icons[(i+round)%4])+'</button>';
   }).join('')+'</div>';
- }else if(id==='slowPlace'||id==='slowBlock') {
+ }else if(id==='slowPlace') {
   html+='<div class="slow-map-pair"><div><b>보기</b>'+grid(true)+'</div><div><b>내가 만드는 정원</b>'+grid(false)+'</div></div>';
+ }else if(id==='slowBlock'){
+  const building='<div class="slow-block-play" role="group" aria-label="블록 배치하기">'+Array.from({length:cells},(_,i)=>{
+   const row=Math.floor(i/n),col=i%n,key=row+','+col,on=selected.has(key);
+   return '<button type="button" class="slow-tile '+(on?'picked slow-block-filled':'slow-block-empty')+'" data-slow="block-anchor" data-key="'+key+'" aria-label="'+(row+1)+'행 '+(col+1)+'열에 블록 위치 옮기기">'+(on?'🧱':'')+'</button>';
+  }).join('')+'</div>';
+  html+='<div class="slow-block-goal"><img src="assets/friend-saem.png" alt=""><strong>한 덩어리 블록으로 모양을 완성해요!</strong></div>';
+  html+='<div class="slow-map-pair slow-block-pair"><div><b>만들 모양</b>'+grid(true)+'</div><div><b>움직이는 블록</b><div class="slow-board slow-block-board" style="--side:'+n+'">'+building+'</div></div></div>';
+  html+='<div class="slow-block-controls" aria-label="블록 움직이기"><button type="button" data-slow="block-left" aria-label="왼쪽으로">←</button><button type="button" data-slow="block-up" aria-label="위로">↑</button><button type="button" data-slow="block-down" aria-label="아래로">↓</button><button type="button" data-slow="block-right" aria-label="오른쪽으로">→</button><button type="button" class="slow-block-rotate" data-slow="block-rotate">↻ 돌리기</button></div>';
  }else if(id==='slowMemory'){
   const hidden=s.memoryHidden===round;
   html+=hidden?'<div class="slow-mission-label">어디에 꽃이 있었을까요?</div><div class="slow-map-pair"><div><b>가려진 보기</b><div class="slow-board slow-covered">🙈<small>잠깐 기억해요</small></div></div><div><b>내가 기억한 자리</b>'+grid(false)+'</div></div>':'<div class="slow-mission-label">꽃이 있는 위치를 기억해요.</div><div class="slow-map-pair"><div><b>기억할 정원</b>'+grid(true)+'</div><div><b>기억할 수 있으면 눌러요</b><div class="slow-board slow-covered">🌿<small>준비되면 시작해요</small></div></div></div>';
@@ -118,10 +143,15 @@ function render(id,d) {
  function finish(outcome,note){
   if(s.finished)return;
   s.finished=true;const correct=outcome===true;
-  s.records.push({round:round+1,first:s.firstCorrect===true?'O':s.firstCorrect===false?'X':'미확인',final:outcome===null?'미평가':correct?'O':'X',retries:s.attempts,hint:s.hint,pauses:s.pauses,note});
+  s.records.push({round:round+1,first:s.firstCorrect===true?'O':s.firstCorrect===false?'X':'미확인',final:outcome===null?'미평가':correct?'O':'X',retries:s.attempts,hint:s.hint,pauses:s.pauses,moves:s.blockMoves,note});
   if(correct){addSeeds(s.attempts?7:10);sfx('ok');}else if(outcome===false){sfx('tap');}
   root.querySelectorAll('button[data-slow]').forEach(b=>{if(b.dataset.slow!=='next')b.disabled=true;});
   feed.textContent=outcome===null?'쉬어가도 괜찮아요.':correct?'정원을 정확하게 살폈어요!':'어려웠던 문제는 잠시 두고 다음 길로 가요.';
+  if(correct&&id==='slowBlock'){
+   const building=document.createElement('div');building.className='slow-block-complete';building.setAttribute('role','status');
+   building.innerHTML='<div class="slow-block-house" aria-hidden="true">🧱 🏡 🧱</div><strong>한 덩어리 블록으로 정원집을 완성했어요!</strong>';
+   root.appendChild(building);
+  }
   if(correct&&id==='slowEveryday'){
    const arrival=document.createElement('div');arrival.className='slow-bag-arrival';arrival.setAttribute('role','status');
    const packed=bag.targets.map(id=>bag.choices.find(c=>c.id===id).icon).join(' ');
@@ -157,6 +187,18 @@ function render(id,d) {
   }
   if(a==='resume'){
    root.querySelector('.slow-pause-panel')?.remove();root.classList.remove('slow-paused');return;
+  }
+  if(a.startsWith('block-')&&id==='slowBlock'){
+   const pose=s.blockPose;
+   if(a==='block-rotate')pose.turn=(pose.turn+1)%4;
+   else if(a==='block-left')pose.col--;
+   else if(a==='block-right')pose.col++;
+   else if(a==='block-up')pose.row--;
+   else if(a==='block-down')pose.row++;
+   else if(a==='block-anchor'){
+    const [row,col]=b.dataset.key.split(',').map(Number);pose.row=row;pose.col=col;
+   }else return;
+   s.blockMoves++;fitPose(baseShape,pose,n);render(id,d);return;
   }
   if(a==='cell'){
    const key=b.dataset.key;
