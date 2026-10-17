@@ -114,8 +114,10 @@ function openPreview(id){
   const isPractice=LITERACY_GAMES.has(id);
   $('#literacyPracticeControls').hidden=!isPractice;
   const isSlow=window.SlowLookNative?.isNew(id),isNovel=window.NovelGarden?.isNew(id),isStrategy=window.StrategyGarden?.isNew(id);
-  const training=!isPractice&&id!=='rescue';
-  $('#slowLookControls').hidden=!training;
+  const training=!isPractice;
+  // Rescue supports session length but has no independent manual difficulty switch.
+  // Do not expose a setting that would not actually affect its target bank.
+  $('#slowLookControls').hidden=!training||id==='rescue';
   const sessionBlock=$('#extendedPracticeControls');sessionBlock.hidden=!training;
   if(training){const counts=id==='slowName'?[6,12,18,24]:[5,10,15,20];const selected=$('#sessionRounds');selected.innerHTML=counts.map((n,i)=>`<option value="${n}">${['가볍게','꾸준히','충분히','길게'][i]} · ${n}문제</option>`).join('');selected.value=String(counts[0]);}
   // Do not expose controls intended for one activity in any unrelated game.
