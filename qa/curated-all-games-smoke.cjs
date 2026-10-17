@@ -51,9 +51,12 @@ function planUrl(items,opts={}){
      const frame=page.locator('#moaAssignedEmbed iframe');
      assert.ok((await frame.getAttribute('allow')).includes('camera'),marker+' iframe lacks camera permission');
      if(id==='moaMoney'){
-      await page.waitForFunction(()=>!!document.querySelector('#moaAssignedEmbed iframe')?.contentWindow?.document?.readyState);
-      await page.evaluate(()=>{document.querySelector('#moaAssignedEmbed iframe').contentWindow.location.href='/gardens/';});
+      await frame.contentFrame().locator('body').waitFor();
+      // Different mission inside the same iframe directory must never bypass
+      // the teacher's selected-only assignment.
+      await page.evaluate(()=>{document.querySelector('#moaAssignedEmbed iframe').contentWindow.location.href='?game=change';});
       await page.locator('#moaAssignedEmbed').waitFor({state:'detached'});
+      assert.equal(await page.locator('.moa-assigned-item').count(),1,marker+' escaped to an unassigned mission');
      }else await page.locator('#moaAssignedEmbed .moa-assigned-exit').click();
     }else{
      assert.ok(await page.locator('#introScreen.active').isVisible(),marker+' game preview did not open');
