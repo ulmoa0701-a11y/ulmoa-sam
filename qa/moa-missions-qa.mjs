@@ -82,8 +82,9 @@ const ctx=await browser.newContext({viewport:{width:390,height:844}});
 const portal=await ctx.newPage();
 await portal.goto(base+'/gardens/',{waitUntil:'domcontentloaded'});
 for(const [garden,game] of [['learning','money'],['cognitive','change'],['heart','feel']]){
- const links=portal.locator('#'+garden+' a.play-card[href*="game='+game+'"]');
- verify(await links.count()===1,'garden card missing or duplicated '+garden+' '+game);
+ const card=portal.locator('#'+garden+' .play-card-enhanced[data-game="'+game+'"]');
+ const links=card.locator('a.play-start-btn[href*="game='+game+'"]');
+ verify(await card.count()===1&&await links.count()===1,'garden card or launch link missing/duplicated '+garden+' '+game);
 }
 await ctx.close();
 
