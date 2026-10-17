@@ -30,6 +30,14 @@ function pose(landmarks){
  const found=Object.entries(PATTERNS).find(([,pattern])=>pattern.every((v,i)=>v===state[i]));
  return found?.[0]||null;
 }
+// In the star-count adventure, the task is NUMBER of raised fingers, not WHICH finger.
+// Other game modes continue to use exact poses for gesture imitation.
+function countMatch(hands,expectedPose){
+ const requested={one:1,two:2,three:3}[expectedPose];
+ if(!requested||!Array.isArray(hands)||hands.length!==1)return false;
+ const states=fingerStates(hands[0]);
+ return !!states&&!states.includes(null)&&states.reduce((n,v)=>n+v,0)===requested;
+}
 function match(hands, expected){
  if(!Array.isArray(hands)||!Array.isArray(expected)||hands.length!==expected.length||expected.length<1||expected.length>2)return false;
  const labels=hands.map(pose).filter(Boolean);
@@ -40,7 +48,7 @@ function match(hands, expected){
  for(const label of labels){const i=target.indexOf(label);if(i>=0)target.splice(i,1);}
  return target.length===0;
 }
-const api={FINGER_JOINTS,PATTERNS,TITLES,EMOJI,fingerStates,fingerFeedback,pose,match};
+const api={FINGER_JOINTS,PATTERNS,TITLES,EMOJI,fingerStates,fingerFeedback,pose,match,countMatch};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;
 root.HandMirrorCore=api;
 })(typeof window!=='undefined'?window:globalThis);
