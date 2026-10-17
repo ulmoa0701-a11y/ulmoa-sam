@@ -58,7 +58,7 @@ for(const plan of plans){
        homeHeroDuplicateDoors:document.querySelectorAll('body.notebook-home .hero-copy .garden-door').length,
        homeFeaturedGardens:document.querySelectorAll('body.notebook-home .desk-collage.featured-two > a.feature-card').length,
        homeMusicApprovedImage:!!document.querySelector('body.notebook-home .feature-music img[src*="moa-music-garden-approved.webp"]'),
-       homeBreathShortcut:!!document.querySelector('body.notebook-home .hb-shortcuts a[href="breath-garden/"]'),
+       homeBreathShortcut:!!document.querySelector('body.notebook-home .hb-shortcuts a[href="gardens/#heart"]'),
        homeSocialNavPosition:document.querySelector('body.notebook-home .note-footer .footer-social')?getComputedStyle(document.querySelector('body.notebook-home .note-footer .footer-social')).position:null,
        homeSocialLinks:document.querySelectorAll('body.notebook-home .note-footer .footer-social a').length,
        homeFeatureCaptionSize:sizeOf('.desk-collage.featured-two .feature-card small'),
@@ -135,7 +135,7 @@ for(const plan of plans){
      assert(reading.scrollWidth<=plan.width+3,plan.name+' '+p+': unexpected horizontal overflow '+reading.scrollWidth);
    }
    if(p==='/thinking-garden/')assert(reading.gameCards>=25&&reading.originalCognitiveCards>=13&&reading.expeditionCognitiveCards===6&&reading.novelCognitiveCards===3&&reading.strategyCognitiveCards===3&&reading.resourceTabs===3,plan.name+': 13 legacy games + 1 new expedition and 3 tabs must remain');
-   if(p==='/music-garden/')assert(reading.gameCards===2&&reading.resourceTabs===3,plan.name+': existing music games/tabs changed');
+   if(p==='/music-garden/')assert(reading.gameCards===3&&reading.resourceTabs===3,plan.name+': existing music games/tabs changed');
    if(plan.name==='mobile360'||(plan.name==='mobile390'&&['/','/notes/','/materials/','/thinking-garden/','/music-garden/','/brain-map/'].includes(p))||(['desktop1366','desktop1600'].includes(plan.name)&&['/','/thinking-garden/','/music-garden/','/about/'].includes(p))){
     const screenshot=await page.screenshot({path:path.join(out,plan.name+'-'+(p==='/'?'home':p.split('/')[1])+'.png'),fullPage:true,timeout:12000});
     const screenshotWidth=screenshot.readUInt32BE(16); // PNG IHDR width: catches absolute/flex overflow that scrollWidth misses
