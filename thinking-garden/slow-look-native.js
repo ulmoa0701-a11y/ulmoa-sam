@@ -18,10 +18,10 @@ function newNameOrder(){
  for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
  return order;
 }
-function setUp(id, options){return {nameOrder:newNameOrder(),id,level:Math.max(1,Math.min(3,Number(options.level)||1)),cue:options.cue||'guide',kind:options.kind||'animal',response:options.response||'speech',records:[],activeRound:-1,selected:new Set(),attempts:0,firstCorrect:null,hint:false,finished:false}}
+function setUp(id, options){return {nameOrder:newNameOrder(),id,level:Math.max(1,Math.min(3,Number(options.level)||1)),cue:options.cue||'guide',kind:options.kind||'animal',response:options.response||'speech',records:[],activeRound:-1,selected:new Set(),attempts:0,firstCorrect:null,hint:false,pauses:0,finished:false}}
 function csv(s){
- const headers=['활동','난이도','지원방식','제시번호','최초정확','최종정확','재시도','단서','반응'];
- const rows=[headers,...s.records.map(r=>[names[s.id],s.level,{guide:'전략 안내',wait:'기다리기',self:'스스로'}[s.cue],r.round,r.first,r.final,r.retries,r.hint?'사용':'없음',r.note])];
+ const headers=['활동','난이도','지원방식','제시번호','최초정확','최종정확','재시도','단서','쉬기','반응'];
+ const rows=[headers,...s.records.map(r=>[names[s.id],s.level,{guide:'전략 안내',wait:'기다리기',self:'스스로'}[s.cue],r.round,r.first,r.final,r.retries,r.hint?'사용':'없음',r.pauses||0,r.note])];
  const safe=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
  const csv='\uFEFF'+rows.map(r=>r.map(safe).join(',')).join('\r\n');
  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),link=document.createElement('a'),uri=URL.createObjectURL(blob);
@@ -34,7 +34,7 @@ function addSummary(s,container) {
  const correct=s.records.filter(r=>r.final==='O').length;
  const initial=s.records.filter(r=>r.first==='O').length;
  root.innerHTML='<p class="slow-result-info">처음 정확 '+initial+'/'+s.records.length+' · 마지막 정확 '+correct+'/'+s.records.length+' · 전략은 결과보다 과정이 중요해요.</p><details class="slow-teacher-details"><summary>선생님 관찰기록 열기</summary><div class="slow-result-lines"></div><button type="button" class="slow-csv">CSV 기록 저장</button><p>저장하지 않으면 기록은 사이트로 전송되지 않아요. 진단 점수가 아닙니다.</p></details>';
- root.querySelector('.slow-result-lines').textContent=s.records.map(r=>r.round+'번: 첫 '+r.first+', 마지막 '+r.final+', 재시도 '+r.retries+(r.hint?', 단서 사용':'')+' · '+r.note).join(' / ');
+ root.querySelector('.slow-result-lines').textContent=s.records.map(r=>r.round+'번: 첫 '+r.first+', 마지막 '+r.final+', 재시도 '+r.retries+(r.hint?', 단서 사용':'')+' · 쉬기 '+(r.pauses||0)+'회 · '+r.note).join(' / ');
  root.querySelector('.slow-csv').addEventListener('click',()=>csv(s));
  container.appendChild(root);
 }
@@ -42,7 +42,7 @@ function render(id,d) {
  const {state,area,missionText,missionSub,guide,say,flash,addSeeds,sfx,nextRound}=d;
  const s=state.slowLook;
  if(!s || !isNew(id))return;
- if(s.activeRound!==state.round){s.activeRound=state.round;s.selected=new Set();s.attempts=0;s.firstCorrect=null;s.hint=false;s.finished=false;s.nameReady=false;s.memoryHidden=-1;}
+ if(s.activeRound!==state.round){s.activeRound=state.round;s.selected=new Set();s.attempts=0;s.firstCorrect=null;s.hint=false;s.pauses=0;s.finished=false;s.nameReady=false;s.memoryHidden=-1;}
  const round=state.round;
  const cues={guide:'눈으로 보고, 생각하고, 준비되면 표현해요.',wait:'천천히 살펴볼 시간을 가져요.',self:'스스로 확인한 뒤 준비되면 시작해요.'};
  guide.src=id==='slowMemory'?'assets/friend-ru.png':id==='slowScan'?'assets/friend-hong.png':'assets/friend-saem.png';
@@ -107,13 +107,13 @@ function render(id,d) {
   html+='<div class="slow-mission-label">가방에 넣을 '+targetObject[0]+'을(를) 모두 찾아요.</div><div class="slow-board slow-bag" style="--side:'+n+'">'+objectArr.map((obj,i)=>{const key=Math.floor(i/n)+','+(i%n);return '<button type="button" class="slow-tile '+(selected.has(key)?'picked':'')+'" data-slow="cell" data-key="'+key+'" aria-pressed="'+selected.has(key)+'" aria-label="물건 '+(i+1)+'">'+obj[1]+'</button>'}).join('')+'</div>';
  }
  if(id!=='slowName'&&(id!=='slowMemory'||s.memoryHidden===round))html+='<div class="slow-actions"><button type="button" class="slow-primary" data-slow="check">확인했어요 ✓</button><button type="button" class="slow-secondary" data-slow="skip">쉬어가기</button></div>';
- html+='<div class="slow-feedback" role="status" aria-live="polite"></div>'+teacher;
+ html+='<button type="button" class="slow-secondary slow-pause-button" data-slow="pause">🌿 잠깐 쉬기</button><div class="slow-feedback" role="status" aria-live="polite"></div>'+teacher;
  const root=el(html),feed=root.querySelector('.slow-feedback');
  
  function finish(outcome,note){
   if(s.finished)return;
   s.finished=true;const correct=outcome===true;
-  s.records.push({round:round+1,first:s.firstCorrect===true?'O':s.firstCorrect===false?'X':'미확인',final:outcome===null?'미평가':correct?'O':'X',retries:s.attempts,hint:s.hint,note});
+  s.records.push({round:round+1,first:s.firstCorrect===true?'O':s.firstCorrect===false?'X':'미확인',final:outcome===null?'미평가':correct?'O':'X',retries:s.attempts,hint:s.hint,pauses:s.pauses,note});
   if(correct){addSeeds(s.attempts?7:10);sfx('ok');}else if(outcome===false){sfx('tap');}
   root.querySelectorAll('button[data-slow]').forEach(b=>{if(b.dataset.slow!=='next')b.disabled=true;});
   feed.textContent=outcome===null?'쉬어가도 괜찮아요.':correct?'정원을 정확하게 살폈어요!':'어려웠던 문제는 잠시 두고 다음 길로 가요.';
@@ -138,6 +138,15 @@ function render(id,d) {
  function nameScore(okay,note){if(s.firstCorrect===null)s.firstCorrect=okay;if(okay)finish(true,note);else {s.attempts++;if(s.attempts>=2){finish(false,note);return;}s.nameReady=false;s.hint=true;feed.textContent='다시 천천히 눈으로 보고 생각할 시간을 가져요.';let btn=root.querySelector('[data-slow="ready"]');if(!btn){btn=document.createElement('button');btn.type='button';btn.className='slow-primary slow-retry-name';btn.dataset.slow='retryName';btn.textContent='다시 보고 말하기 →';root.appendChild(btn)}else btn.disabled=false;root.querySelectorAll('.slow-teacher-choice button,.slow-name-choice button').forEach(x=>x.disabled=true)}}
  root.addEventListener('click',e=>{
   const b=e.target.closest('button[data-slow]');if(!b||b.disabled)return;const a=b.dataset.slow;
+  if(a==='pause'){
+   s.pauses++;root.classList.add('slow-paused');
+   const panel=document.createElement('div');panel.className='slow-pause-panel';panel.setAttribute('role','status');
+   panel.innerHTML='<span aria-hidden="true">🌿</span><strong>잠깐 쉬어가요</strong><p>같은 곳에서 다시 시작할 수 있어요.</p><button type="button" class="slow-primary" data-slow="resume">준비됐어요 · 이어하기 →</button>';
+   root.appendChild(panel);panel.querySelector('button').focus();return;
+  }
+  if(a==='resume'){
+   root.querySelector('.slow-pause-panel')?.remove();root.classList.remove('slow-paused');return;
+  }
   if(a==='cell'){const key=b.dataset.key;if(selected.has(key))selected.delete(key);else selected.add(key);b.classList.toggle('picked',selected.has(key));b.setAttribute('aria-pressed',String(selected.has(key)));if(id==='slowPlace'||id==='slowBlock')b.textContent=selected.has(key)?id==='slowBlock'?'🧱':'🌼':'';return;}
   if(a==='check')return check();
   if(a==='skip')return finish(null,'쉬어감/미응답');
