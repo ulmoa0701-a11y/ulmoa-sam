@@ -76,3 +76,25 @@ button:disabled.slow-primary,button:disabled.slow-secondary{opacity:.65;cursor:d
 .slow-pause-panel strong{font-size:22px}
 .slow-pause-panel p{margin:0;color:#637765}
 .slow-pause-button{margin-top:4px}
+
+/* The bag is visibly filled by child choices; no extra child-facing settings. */
+.slow-bag-quest{width:min(100%,670px);display:grid;grid-template-columns:minmax(0,1.6fr) minmax(120px,.8fr);gap:10px;align-items:stretch}
+.slow-bag-story,.slow-bag-progress{min-width:0;display:flex;align-items:center;gap:11px;padding:12px;border:2px solid #c8e5d4;background:linear-gradient(140deg,#f0faf7,#fffdf2);border-radius:19px;color:#345b48}
+.slow-bag-story img{width:54px;height:54px;object-fit:contain;flex-shrink:0}
+.slow-bag-story>div{display:grid;gap:3px;min-width:0}
+.slow-bag-scene{font-size:clamp(27px,5vw,38px)}
+.slow-bag-story strong{font-size:clamp(14px,2.8vw,19px);word-break:keep-all}
+.slow-bag-story small{font-size:12px;color:#557461}
+.slow-bag-progress{display:grid;grid-template-columns:48px 1fr;column-gap:6px;text-align:center;justify-items:center}
+.slow-bag-progress>span{grid-row:span 2;font-size:42px}
+.slow-bag-progress strong{font-size:22px}
+#moaBagContents{font-size:clamp(18px,3vw,23px);min-height:27px;line-height:1.35;grid-column:2}
+.slow-board.slow-bag{width:min(100%,480px);aspect-ratio:auto;min-height:190px;gap:9px;padding:11px;align-content:center}
+.slow-bag .slow-tile{aspect-ratio:1;min-height:64px;font-size:clamp(32px,5vw,44px)}
+.slow-bag .slow-tile.picked{background:#dff4d5;border:3px solid #4b9b71;transform:scale(.98)}
+.slow-bag-arrival{width:min(100%,530px);display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;padding:14px;background:#eaf7df;border:2px solid #b8dda9;border-radius:19px;color:#315840}
+.slow-bag-ready-icons{font-size:clamp(28px,6vw,44px);line-height:1.6}
+.slow-bag-arrival strong{font-size:19px}
+.slow-bag-arrival p{margin:0;font-size:13px}
+@media(max-width:480px){.slow-bag-quest{grid-template-columns:1fr}.slow-bag-story,.slow-bag-progress{padding:9px}.slow-bag-progress{grid-template-columns:40px 60px 1fr}.slow-bag-progress>span{grid-row:auto;font-size:32px}.slow-bag-progress strong{font-size:18px}#moaBagContents{grid-column:auto}.slow-bag-story img{width:43px;height:43px}.slow-board.slow-bag{gap:6px;min-height:0;padding:7px}.slow-bag .slow-tile{min-height:52px;font-size:clamp(27px,8vw,38px)}}
+@media(prefers-reduced-motion:reduce){.slow-bag .slow-tile{transform:none}}
