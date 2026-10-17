@@ -10,10 +10,15 @@ const MATERIALS=[
  {id:'slowSheets',title:'차근차근 활동지 보기',desc:'A4 인쇄 가능한 기초 활동',href:'../materials/slow-look/'},
  {id:'clinicalGuide',title:'교사·보호자 연계활동 안내',desc:'게임별 일상 연결 활동과 관찰 방법',href:'../materials/cognitive-practice/guide.html'}
 ];
-const external={rescue:'games/rescue/',handMirror:'games/hand-mirror/'};
+const STANDALONE_GAMES=[
+ {id:'moaMoney',title:'모아의 화폐 가게',desc:'동전·지폐를 알아보고 물건값을 맞추는 생활학습',category:'life'},
+ {id:'moaChange',title:'바뀐 준비물 찾기',desc:'기억한 물건 목록에 추가·변경된 정보를 반영해요',category:'memory'},
+ {id:'moaFeel',title:'마음 이야기 탐험',desc:'친구의 마음과 여러 선택을 생각해요',category:'life'}
+];
+const external={rescue:'games/rescue/',handMirror:'games/hand-mirror/',moaMoney:'games/moa-missions/?game=money',moaChange:'games/moa-missions/?game=change',moaFeel:'games/moa-missions/?game=feel'};
 let active=null,library=[],materialMap=new Map(MATERIALS.map(x=>[x.id,x])),hooks={},lastPlayed=null,visited=new Set();
 const $=q=>document.querySelector(q), E=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e};
-const allGames=()=>[...document.querySelectorAll('.library-card[data-open]')].map(c=>({id:c.dataset.open,title:c.querySelector('h3')?.textContent.trim()||c.dataset.open,desc:c.querySelector('p')?.textContent.trim()||'',category:c.dataset.category||'all'})).filter((x,i,a)=>a.findIndex(y=>y.id===x.id)===i);
+const allGames=()=>[...[...document.querySelectorAll('.library-card[data-open]')].map(c=>({id:c.dataset.open,title:c.querySelector('h3')?.textContent.trim()||c.dataset.open,desc:c.querySelector('p')?.textContent.trim()||'',category:c.dataset.category||'all'})),...STANDALONE_GAMES].filter((x,i,a)=>a.findIndex(y=>y.id===x.id)===i);
 function pack(x){return btoa(unescape(encodeURIComponent(JSON.stringify(x)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
 function unpack(input){
  if(!input||input.length>2800)return null;
