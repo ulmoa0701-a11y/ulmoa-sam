@@ -9,6 +9,7 @@ on:
       - 'qa/homework-persona-qa.cjs'
       - 'qa/garden-name-quest-qa.cjs'
       - 'qa/garden-life-bag-qa.cjs'
+      - 'qa/slow-observation-fidelity-qa.cjs'
       - 'qa/garden-block-builder-qa.cjs'
       - '.github/workflows/curated-share-qa.yml'
   pull_request:
@@ -49,6 +50,7 @@ jobs:
           node --check qa/garden-name-quest-qa.cjs
           node --check thinking-garden/life-bag-scenes.js
           node --check qa/garden-life-bag-qa.cjs
+          node --check qa/slow-observation-fidelity-qa.cjs
           node --check thinking-garden/slow-block-builder.js
           node --check qa/garden-block-builder-qa.cjs
       - name: Start site
@@ -74,6 +76,8 @@ jobs:
         run: node qa/garden-life-bag-qa.cjs
       - name: Block assembly and spatial construction all levels (mobile and PC)
         run: node qa/garden-block-builder-qa.cjs
+      - name: Self-review and teacher-cue recording fidelity
+        run: node qa/slow-observation-fidelity-qa.cjs
       - name: Screenshots
         if: always()
         uses: actions/upload-artifact@v4
