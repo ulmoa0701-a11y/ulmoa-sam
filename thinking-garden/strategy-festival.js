@@ -28,11 +28,17 @@ window.StrategyGarden.register('festivalPlan',{
   r.pool=r.tasks.length===4?[2,0,3,1]:[2,0,1];
   r.chosen=[];r.phase='plan';
  },
- view({r,body,rerender,assist,fail,complete}){
+ view({r,round,body,rerender,assist,fail,complete}){
   const count=r.tasks.length,seq=r.tasks;
-  const clues=Array.from({length:count-1},(_,i)=>({friend:['🐰','🐻','🐱'][i],text:seq[i][1]+' '+seq[i][0]+'을(를) 먼저 하고, 그다음 '+seq[i+1][1]+' '+seq[i+1][0]+'을(를) 해야 해요.'}));
+  const clues=Array.from({length:count-1},(_,i)=>{
+   const reversed=r.level>=2&&(i+round)%2===1;
+   const text=reversed?seq[i+1][1]+' '+seq[i+1][0]+'은(는) '+seq[i][1]+' '+seq[i][0]+' 다음이에요.':seq[i][1]+' '+seq[i][0]+' 다음에 '+seq[i+1][1]+' '+seq[i+1][0]+'을(를) 해요.';
+   return {friend:['🐰','🐻','🐱'][i],text};
+  });
+  if(r.level>=2&&clues.length>=2){const first=clues.shift();clues.push(first);}
+  if(r.level===3&&clues.length===3){[clues[0],clues[1]]=[clues[1],clues[0]];}
   const story='<div class="strategy-story-head"><span>🎪 모아의 축제 정원</span><h3>친구들의 이야기를 듣고 축제를 준비해요!</h3></div><div class="strategy-festival-banner">🎈　🌱　🎉　🌷　🎁</div>';
-  const evidence='<div class="strategy-evidence"><strong>📜 친구들이 알려준 순서 단서</strong>'+clues.map(c=>'<div class="strategy-witness"><span>'+c.friend+'</span><p>'+c.text+'</p></div>').join('')+'</div>';
+  const evidence='<div class="strategy-evidence"><strong>📜 친구들이 알려준 순서 단서'+(r.level>=2?' (단서가 순서대로 나오지 않아요)':'')+'</strong>'+clues.map(c=>'<div class="strategy-witness"><span>'+c.friend+'</span><p>'+c.text+'</p></div>').join('')+'</div>';
   if(r.phase==='reset'){
    body.innerHTML=story+evidence+'<div class="strategy-reset"><h3>🌿 잠깐 멈춰서 단서 확인!</h3><p>무엇을 먼저 해야 할까요? 한 가지 단서씩 확인한 뒤 다시 순서를 정해요.</p><button type="button" data-plan="recover" class="strategy-primary">✋ 준비되면 다시 계획하기</button></div>';
   }else{

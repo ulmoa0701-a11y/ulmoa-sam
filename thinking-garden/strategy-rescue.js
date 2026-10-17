@@ -35,7 +35,7 @@ window.StrategyGarden.register('resetRescue',{
     return;
    }
    if(action==='question'){
-    if(r.first===null)r.first=true; // checking is treated as an appropriate safety strategy
+    if(r.first===null)r.checked=true; // self-check is helpful, but not proof that the first answer was correct
     r.phase='choose';r.checked=true;r.message='좋아요. 안내를 그대로 따르지 않고 스스로 확인해 봐요.';rerender();return;
    }
    if(action==='recover'){r.phase='choose';assist('멈춘 뒤 구조 요청을 다시 확인했어요. 천천히 골라도 됩니다.');return;}

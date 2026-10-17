@@ -1,0 +1,59 @@
+/* Assigned-only lesson view and compact teacher share-link builder. */
+.moa-planner-launch{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;margin:9px 0 19px;border-radius:15px;border:2px solid #adcea9;color:#326c48;background:#eff7e9;font:inherit;font-weight:850;cursor:pointer;min-height:48px}
+.moa-planner-launch:focus-visible,.moa-plan-builder button:focus-visible,.moa-assigned-home button:focus-visible{outline:3px solid #d9b54d;outline-offset:3px}
+.moa-plan-builder{border:2px solid #bed4c0;border-radius:24px;background:#fffefa;color:#375443;max-width:min(92vw,720px);width:720px;max-height:90vh;overflow-y:auto;padding:25px;box-shadow:0 16px 60px #27473248}
+.moa-plan-builder::backdrop{background:#283d348f}
+.moa-plan-top{position:relative}.moa-plan-top h2{font-size:23px;line-height:1.3;margin:4px 40px 7px 0}.moa-plan-top p{font-size:13px;color:#657565;line-height:1.7;margin:0 0 14px}
+.moa-plan-close{position:absolute;right:0;top:0;font-size:25px;border:0;background:#eff4ea;width:38px;height:38px;border-radius:50%;cursor:pointer}
+.moa-plan-settings{display:flex;flex-wrap:wrap;gap:11px;padding:14px;border-radius:14px;background:#eef7ea;margin:7px 0 15px}
+.moa-plan-settings label{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:850}
+.moa-plan-settings select{min-height:40px;min-width:93px;border:1px solid #c7d9c4;background:white;border-radius:9px;padding:7px;font:inherit}
+.moa-plan-selection{max-height:45vh;overflow-y:auto;border:1px solid #dce9d4;border-radius:13px;padding:6px;background:#fff}
+.moa-plan-row{display:flex;align-items:flex-start;gap:11px;padding:11px 9px;cursor:pointer;border-bottom:1px solid #eff3e9}
+.moa-plan-row:last-child{border-bottom:0}.moa-plan-row:has(input:checked){background:#edf6e6;border-radius:10px}
+.moa-plan-row input{accent-color:#4c9a66;flex:0 0 auto;width:21px;height:21px;margin-top:3px}
+.moa-plan-row span{display:grid;gap:2px}.moa-plan-row strong{font-size:14px;font-weight:850}.moa-plan-row small{font-size:12px;color:#697969;line-height:1.45}
+.moa-plan-create,.moa-assigned-start{padding:12px 16px;border-radius:12px;background:#317755;color:white;border:2px solid #28684a;font:inherit;font-size:14px;font-weight:900;cursor:pointer;min-height:45px}
+.moa-plan-create{width:100%;margin-top:14px}.moa-plan-status{font-size:12px;font-weight:800;color:#526d54;margin:12px 0}
+.moa-plan-output{display:flex;gap:9px;flex-wrap:wrap;align-items:center;border-radius:12px;padding:13px;background:#f2f7eb}.moa-plan-output[hidden]{display:none}
+.moa-plan-output input{flex:1 1 100%;min-width:0;min-height:44px;font-size:13px;border-radius:10px;padding:9px;border:1px solid #bdd9c0;background:white}
+.moa-plan-output>a{color:#327251;font-size:13px;font-weight:850;padding:10px}
+body.moa-assigned .site-home-link,body.moa-assigned .brand,body.moa-assigned #homeScreen>.home-hero,body.moa-assigned #homeScreen>.hero,body.moa-assigned #homeScreen>.hub-shell,body.moa-assigned #homeScreen>.garden-map,body.moa-assigned #homeScreen>.hub-content,body.moa-assigned #homeScreen>.home-head,body.moa-assigned #homeScreen>#gardenGamePanel,body.moa-assigned #homeScreen>#gardenResourcePanel,body.moa-assigned #homeScreen #gardenGamePanel,body.moa-assigned #homeScreen #gardenResourcePanel,body.moa-assigned #homeScreen .hub-tabs,body.moa-assigned #homeScreen .garden-map-section,body.moa-assigned #homeScreen .hub-intro,body.moa-assigned #homeScreen .garden-hero,body.moa-assigned #homeScreen .library-section,body.moa-assigned #homeScreen .garden-view-tabs{display:none!important}
+body.moa-assigned #homeScreen>*:not(#moaAssignedHome){display:none!important}
+body.moa-assigned #homeScreen{max-width:100%;padding:0}
+body.moa-assigned .site-home-link{display:none!important}
+.moa-assigned-home{max-width:960px;margin:0 auto;padding:24px clamp(14px,5vw,36px) 56px;display:grid;gap:18px}
+.moa-assigned-hero{padding:26px 24px;border-radius:25px;background:linear-gradient(120deg,#fff3d9,#e4f3de);border:1px solid #e4e9ce;text-align:center}
+.moa-assigned-eyebrow{display:block;font-weight:850;color:#557e5d;font-size:13px}
+.moa-assigned-hero h1{font-size:clamp(23px,4vw,34px);line-height:1.3;margin:9px auto}
+.moa-assigned-hero p{font-size:14px;line-height:1.55;color:#5e7761;margin:0}
+.moa-assigned-hero .moa-assigned-detail{font-weight:800;color:#4b7859;margin-top:12px;font-size:12px}
+.moa-assigned-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:13px}
+.moa-assigned-item{display:flex;flex-direction:column;align-items:start;gap:8px;background:white;border:2px solid #e1ecd9;border-radius:20px;padding:19px;box-shadow:0 6px 20px #47634816}
+.moa-assigned-number{color:#5c956b;font-weight:900;font-size:12px}
+.moa-assigned-item h2{font-size:19px;line-height:1.35;margin:0}.moa-assigned-item p{font-size:13px;line-height:1.6;color:#6a776a;flex:1;margin:0 0 10px}
+.moa-assigned-foot{text-align:center;color:#7a8c7b;font-size:12px}
+.moa-assigned-next{background:#e4f3e6!important;border:2px solid #a4cba9!important;color:#35704d!important;border-radius:13px;min-height:44px;padding:10px 14px;font-weight:850}
+.moa-plan-invalid{color:#876038;background:#fff2dd;border-radius:12px;padding:14px}
+.moa-assigned-embed{position:fixed;inset:0;z-index:99999;background:#fff;display:flex;flex-direction:column}
+.moa-assigned-embedbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:9px 13px;background:#f1f8eb;min-height:60px;border-bottom:1px solid #c6dbc6}
+.moa-assigned-embedbar strong{flex:1;font-size:15px}.moa-assigned-exit{padding:9px 12px;font-size:13px;border-radius:10px;border:1px solid #a8caad;background:white;color:#436950;min-height:42px;font-weight:900;cursor:pointer}
+.moa-assigned-pdf-link{font-size:12px;color:#356b4e;font-weight:750}
+.moa-assigned-frame{border:0;width:100%;flex:1;min-height:0;background:#fff}
+@media(max-width:600px){.moa-plan-builder{padding:14px;max-height:94vh}.moa-plan-row{padding:10px 5px}.moa-assigned-list{grid-template-columns:1fr}.moa-assigned-hero{padding:22px 11px}.moa-assigned-item{padding:16px}}
+
+/* Optional, nonintrusive clinician / caregiver guidance for every cognition activity. */
+.moa-clinical-bridge{max-width:680px;margin:13px auto;padding:11px 14px;border:1px solid #d6e3cd;border-radius:15px;background:#f7faf2;color:#4d6f56;text-align:left}
+.moa-clinical-bridge summary{font-size:13px;cursor:pointer;font-weight:850}
+.moa-clinical-bridge-body{padding:9px 2px 3px;font-size:13px;line-height:1.65}
+.moa-clinical-bridge-body p{margin:7px 0;font-size:13px}
+.moa-clinical-bridge-body b{color:#376e51}
+.moa-clinical-bridge-body a{display:inline-block;font-weight:850;color:#317c53;margin:6px 0}
+.moa-clinical-bridge-body small{display:block;font-size:11px;color:#7d8c7c}
+body.moa-assigned .moa-clinical-bridge-body>a{display:none}
+.moa-assigned-progress{font-size:13px!important;font-weight:800;color:#4a8061!important}
+
+.moa-plan-presets{display:grid;gap:7px;margin:0 0 14px}.moa-plan-presets>strong{font-size:13px;color:#4d755a}
+.moa-plan-preset-buttons{display:flex;gap:7px;flex-wrap:wrap}
+.moa-plan-preset{font:inherit;font-size:12px;font-weight:850;color:#3d684c;padding:8px 12px;border-radius:999px;border:1px solid #b5d4b3;background:#edf7e8;cursor:pointer;min-height:38px}
+.moa-plan-preset:hover{background:#dcecd9}

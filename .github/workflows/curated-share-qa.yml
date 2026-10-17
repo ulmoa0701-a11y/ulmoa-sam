@@ -1,0 +1,58 @@
+name: Curated Activity Links QA
+on:
+  push:
+    branches: [main, feat/garden-curated-share-and-clinical-qa-20261017]
+    paths:
+      - 'thinking-garden/**'
+      - 'qa/curated-share-qa.cjs'
+      - '.github/workflows/curated-share-qa.yml'
+  pull_request:
+    paths:
+      - 'thinking-garden/**'
+      - 'qa/curated-share-qa.cjs'
+      - '.github/workflows/curated-share-qa.yml'
+permissions:
+  contents: read
+jobs:
+  curated-garden:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Install browser QA
+        run: |
+          npm install --no-save --no-package-lock playwright-core@1.56.1
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Check JavaScript
+        run: |
+          node --check thinking-garden/app.js
+          node --check thinking-garden/share-plans.js
+          node --check qa/curated-share-qa.cjs
+          node --check thinking-garden/clinical-bridges.js
+          node --check thinking-garden/strategy-garden-core.js
+          node --check thinking-garden/strategy-festival.js
+          node --check qa/clinical-adaptive-qa.cjs
+      - name: Start site
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/assigned-site.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:8765/thinking-garden/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/assigned-site.log
+          exit 1
+      - name: Teacher and parent journeys
+        run: node qa/curated-share-qa.cjs
+      - name: Clinical transfer and adaptive training
+        run: node qa/clinical-adaptive-qa.cjs
+      - name: Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: curated-activity-qa
+          path: qa/curated-share-screenshots/
+          if-no-files-found: ignore
