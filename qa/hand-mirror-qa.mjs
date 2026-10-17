@@ -94,6 +94,7 @@ async function visualAndRecovery(width,height,label){
  await p.waitForURL('**/gardens/#cognitive');
  await p.waitForLoadState('domcontentloaded');
  const catalog=p.locator('#cognitive .play-card[href="../thinking-garden/games/hand-mirror/"]');
+ console.log('HOME-CATALOG-DIAG',JSON.stringify({url:p.url(),title:await p.title(),body:(await p.locator('body').innerText()).slice(0,400),sectionCount:await p.locator('#cognitive').count(),cardCount:await p.locator('.play-card').count(),htmlCardCount:await p.locator('a[href*="hand-mirror"]').count()}));
  await catalog.waitFor({state:'attached',timeout:10000});
  assert.equal(await catalog.count(),1,'One acorn flower garden listing in the main directory');
  assert.match(await catalog.innerText(),/모아의 마법 꽃밭/,'Main home directory uses new game title');
