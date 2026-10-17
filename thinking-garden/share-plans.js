@@ -54,6 +54,44 @@ function safePlan(o){
  return {v:2,items:picked,level,rounds,settings};
 }
 function shareUrl(plan){const u=new URL(location.pathname,location.origin);u.searchParams.set(CODE,pack(plan));return u.href}
+// Reuse the game's existing visual examples rather than making generic thumbnails.
+// The source preview cards are built by card-previews.js later in the page load.
+const FALLBACK_SCENES={
+ handMirror:{icons:['✊','🌰','→','✋','🌼'],caption:'도토리를 잡고 꽃 피우기'},
+ moaMoney:{icons:['🪙','🪙','→','🧸'],caption:'돈을 모아 물건값 내기'},
+ moaChange:{icons:['🎒','📗','✏️','→','🖍️'],caption:'준비물에서 달라진 것 찾기'},
+ moaFeel:{icons:['🧒','💭','🙂','😟'],caption:'같은 상황, 여러 마음 살펴보기'},
+ slowPdf:{icons:['👀','🔎','🧩','📄'],caption:'그림을 보고 찾아보고 맞춰보기'},
+ slowSheets:{icons:['✏️','🧩','📄'],caption:'그림 활동지 펼쳐보기'},
+ clinicalGuide:{icons:['🎮','→','🏠','📖'],caption:'게임과 생활 놀이 이어보기'}
+};
+function fillAssignedScene(host){
+ const id=host.dataset.previewId;
+ const source=[...document.querySelectorAll('.library-card[data-open]')].find(x=>x.dataset.open===id)?.querySelector('.card-live-preview');
+ if(!source)return;
+ const scene=host.querySelector('.moa-assigned-scene');
+ if(!scene||scene.querySelector('.card-live-preview'))return;
+ scene.replaceChildren(source.cloneNode(true));
+ host.classList.add('moa-assigned-has-source');
+}
+function refreshAssignedScenes(){
+ document.querySelectorAll('#moaAssignedHome .moa-assigned-visual[data-preview-id]').forEach(fillAssignedScene);
+}
+function makeAssignedVisual(id,isGame){
+ const wrap=E('div','moa-assigned-visual');
+ wrap.dataset.previewId=id;
+ wrap.setAttribute('aria-hidden','true');
+ wrap.append(E('small','moa-assigned-visual-label',isGame?'🎮 이런 놀이예요':'📄 이런 자료예요'));
+ const scene=E('div','moa-assigned-scene');
+ const model=FALLBACK_SCENES[id]||{icons:['🌱','👀','🧩'],caption:'보고 생각하며 풀어보기'};
+ const drawing=E('div','moa-assigned-fallback');
+ const icons=E('div','moa-assigned-fallback-icons');
+ for(const icon of model.icons)icons.append(E('span','',icon));
+ drawing.append(icons,E('small','moa-assigned-fallback-caption',model.caption));
+ scene.append(drawing);wrap.append(scene);
+ fillAssignedScene(wrap);
+ return wrap;
+}
 function updateSharedMenu(){
  if(!active)return;
  document.body.classList.add('moa-assigned');
@@ -66,6 +104,7 @@ function updateSharedMenu(){
  active.items.forEach((id,i)=>{
   const game=library.find(x=>x.id===id),material=materialMap.get(id),card=E('article','moa-assigned-item');
   const n=E('span','moa-assigned-number',visited.has(id)?'🌼 해봤어요':String(i+1).padStart(2,'0'));card.append(n);
+  card.append(makeAssignedVisual(id,!!game));
   const title=E('h2','',game?.title||material?.title||id);card.append(title);
   const desc=E('p','',game?.desc||material?.desc||'');card.append(desc);
   if(game&&!external[id]){
@@ -89,6 +128,7 @@ function updateSharedMenu(){
  editor.append(edit,E('p','','수정하면 새로운 링크가 만들어져요. 이미 보낸 링크는 그대로 유지돼요.'));
  panel.append(foot,editor);
  $('#homeScreen').prepend(panel);
+ refreshAssignedScenes();
 }
 function embed(path,title,isMaterial){
  const overlay=E('div','moa-assigned-embed');overlay.id='moaAssignedEmbed';
@@ -242,6 +282,7 @@ function makeBuilder(){
 function init(o){
  if(!$('#homeScreen')||!o?.openPreview)return;
  hooks=o;library=allGames();makeBuilder();
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refreshAssignedScenes,{once:true});
  const token=new URLSearchParams(location.search).get(CODE);
  if(token){const plan=safePlan(unpack(token));
   if(plan){active=plan;updateSharedMenu();hooks.show('home');}
