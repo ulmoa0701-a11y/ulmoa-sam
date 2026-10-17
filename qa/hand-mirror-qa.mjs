@@ -87,8 +87,25 @@ async function visualAndRecovery(width,height,label){
  const c=await browser.newContext({viewport:{width,height},locale:'ko-KR'});
  const p=await c.newPage(),errors=[];
  p.on('pageerror',e=>errors.push(e.message));
+ await p.goto(base+'/',{waitUntil:'domcontentloaded'});
+ const homeCognitive=p.locator('a[href="gardens/#cognitive"]:visible');
+ assert.ok(await homeCognitive.count()>=1,'Home page has cognitive garden entry');
+ await homeCognitive.first().click();
+ await p.waitForURL('**/gardens/#cognitive');
+ await p.waitForLoadState('domcontentloaded');
+ const catalog=p.locator('a[href*="/thinking-garden/games/hand-mirror/"],a[href*="../thinking-garden/games/hand-mirror/"]');
+ await catalog.waitFor({state:'attached',timeout:10000});
+ assert.equal(await catalog.count(),1,'One acorn flower garden listing in the main directory');
+ assert.match(await p.locator('body').innerText(),/모아의 마법 꽃밭/,'Main home directory shows the current flower-garden title');
+ assert.match(await catalog.getAttribute('href'),/thinking-garden\/games\/hand-mirror\//,'Main directory uses the actual game destination');
+ await catalog.click();
+ await p.waitForURL('**/thinking-garden/games/hand-mirror/');
+ await p.locator('h1').waitFor({state:'attached',timeout:10000});
+ assert.equal(await p.locator('h1').innerText(),'모아의 마법 꽃밭 🌼','Main homepage navigation opens current game');
  await p.goto(base+'/thinking-garden/',{waitUntil:'domcontentloaded'});
  const card=p.locator('.library-card[data-open="handMirror"]');
+ assert.match(await card.innerText(),/모아의 마법 꽃밭/,'Secondary library title matches new game');
+
  assert.equal(await card.count(),1,'Garden native library card');
  await card.click();
  await p.waitForURL('**/thinking-garden/games/hand-mirror/');
