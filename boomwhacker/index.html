@@ -736,6 +736,7 @@ function updateRhythmGuide(){
  const active=isRhythmPractice();
  el.classList.toggle('show',active);
  el.innerHTML=active?'<strong>🥁 '+esc(guide.short)+'</strong><span>'+esc(guide.tip)+'</span><small>'+esc(guide.preview)+' · 도 한 음으로 연습</small>':'';
+ const label=$('#lyricBtn');if(label){label.textContent=active?'박자 세기':'가사 표시';label.setAttribute('aria-label',active?'박자 숫자 표시 또는 숨기기':'가사 표시 또는 숨기기')}
 }
 function transpose(src,key,title,map){return song(key,title,src.bpm,src.timeN,src.timeD,src.measures.map(m=>m.map(e=>E(e.note==='쉼'?'쉼':(map[e.note]||e.note),e.dur,e.lyric))),src.category)}
 const butterflyD=transpose(butterfly,'butterfly-d','나비야 · D장조',{'도':'레','레':'미','미':'파#','파':'솔','솔':'라','라':'시','시':'도#'});
@@ -1183,6 +1184,13 @@ function updateLyricTrack(force=false){
  const box=$('#lyricTrack');if(!box)return;
  if(!lyrics){box.classList.add('hide');box.innerHTML='';lastLyricKey='hidden';return}
  if(isRhythmPractice()){
+  if(elapsed<firstNoteMs()-70){
+   const key='rhythm:'+currentSong.key+':ready';
+   if(!force&&key===lastLyricKey)return;
+   lastLyricKey=key;box.classList.remove('hide');box.setAttribute('aria-label','박자 연습 준비');
+   box.innerHTML='<div class="lyricLine"><span class="lyricSyllable">준비</span></div>';
+   return;
+  }
   const beat=Math.max(0,Math.floor((elapsed-firstNoteMs()+70)/beatMs())),active=beat%4;
   const key='rhythm:'+currentSong.key+':'+active;
   if(!force&&key===lastLyricKey)return;
@@ -1957,8 +1965,9 @@ function videoLyricBar(ctx,t,x,y,w,h){if(!lyrics)return;
  if(isRhythmPractice()){
   ctx.save();ctx.fillStyle='rgba(255,255,255,.95)';rr(ctx,x,y,w,h,16);ctx.fill();ctx.strokeStyle='#dce6ef';ctx.stroke();
   ctx.font='bold 25px "Malgun Gothic",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  const ready=t<firstNoteMs()-70;
   const n=(Math.max(0,Math.floor((t-firstNoteMs()+70)/beatMs()))%4)+1;
-  ctx.fillStyle='#17233b';ctx.fillText('박자 세기   '+[1,2,3,4].map(v=>v===n?'['+v+']':v).join('   '),x+w/2,y+h/2);ctx.restore();return;
+  ctx.fillStyle='#17233b';ctx.fillText(ready?'준비':'박자 세기   '+[1,2,3,4].map(v=>v===n?'['+v+']':v).join('   '),x+w/2,y+h/2);ctx.restore();return;
  }
  const view=lyricWindowAt(t,18,w-40);if(!view.items.length)return;ctx.save();ctx.globalAlpha=.94;rr(ctx,x,y,w,h,16);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='rgba(218,228,238,.95)';ctx.lineWidth=1;ctx.stroke();ctx.globalAlpha=1;ctx.font='850 27px "Noto Sans KR","Malgun Gothic",sans-serif';const breaks=lyricWordBreakIndices(),widths=view.items.map((v,i)=>Math.max(29,ctx.measureText(v.e.lyric).width+8)+(i&&breaks.has(v.i)?16:0)),total=widths.reduce((a,b)=>a+b,0),scale=Math.min(1,(w-28)/Math.max(1,total)),fontSize=Math.max(16,27*scale);ctx.font='850 '+fontSize+'px "Noto Sans KR","Malgun Gothic",sans-serif';const scaled=view.items.map((v,i)=>Math.max(25,ctx.measureText(v.e.lyric).width+7)+(i&&breaks.has(v.i)?16:0)),sum=scaled.reduce((a,b)=>a+b,0);let px=x+(w-sum)/2;view.items.forEach((v,i)=>{const gap=i&&breaks.has(v.i)?16:0,ww=scaled[i]-gap,active=v.i===view.activeIndex,cx=px+gap+ww/2;px+=gap;if(active){ctx.save();ctx.shadowColor='rgba(35,50,75,.12)';ctx.shadowBlur=8;ctx.shadowOffsetY=3;rr(ctx,px+1,y+5,ww-2,h-10,10);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle=noteColor(v.e.note);ctx.lineWidth=3;ctx.stroke();ctx.beginPath();ctx.moveTo(px+6,y+h-9);ctx.lineTo(px+ww-6,y+h-9);ctx.strokeStyle=noteColor(v.e.note);ctx.lineWidth=4;ctx.stroke();ctx.restore()}ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=active?'#17233b':'#6b7789';ctx.font=(active?'950 ':'800 ')+fontSize+'px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.fillText(v.e.lyric,cx,y+h/2+1);px+=ww});ctx.restore()}
 function videoScene(ctx,t){
