@@ -546,6 +546,54 @@ for(const [label,w,h] of [['mobile-score-immediate',390,844],['desktop-score-imm
 
 for(const [name,w,h] of [['mobile360',360,800],['mobile390',390,844],['mobile412',412,915],['tablet768',768,1024],['desktop1366short',1366,768],['desktop1600short',1600,800],['desktop1366',1366,900]]) await basicCase(name,w,h);
 
+// Karaoke must never paginate inside a Korean word. In particular, the last
+// reprise of 작은별 must show "아름답게" instead of the broken "름답게".
+for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,900],['lyricNarrowDesktop1024',1024,768]]){
+ const ctx=await browser.newContext({viewport:{width:w,height:h}});
+ const page=await ctx.newPage(),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(BASE,{waitUntil:'networkidle'});
+ const result=await page.evaluate(()=>{
+  const original={song:currentSong,section:practiceSection,t:elapsed};
+  const report=[];
+  for(const key of ['twinkle','plane','butterfly','bear','school-bell']){
+   const sample=findSample(key);if(!sample)continue;
+   currentSong=clone(sample);practiceSection='all';refreshPracticeSections();build();
+   const full=LYRIC_WORDS[key]||'',joined=events.filter(e=>e.lyric).map(e=>String(e.lyric).replace(/\s/g,'')).join('');
+   const hasWords=full.replace(/\s/g,'')===joined;
+   let incomplete=[],clipped=[],activeMiss=[];
+   for(const e of events.filter(e=>e.lyric)){
+    elapsed=e.start+10;updateLyricTrack(true);
+    const track=document.querySelector('#lyricTrack'),label=track.getAttribute('aria-label')||'';
+    if(hasWords&&!full.includes(label))incomplete.push({at:e.start,label});
+    const line=track.querySelector('.lyricLine'),bounds=line?.getBoundingClientRect(),outer=track.getBoundingClientRect();
+    if(bounds&&(bounds.left<outer.left-2||bounds.right>outer.right+2))clipped.push({at:e.start,label,left:bounds.left,right:bounds.right,width:outer.width});
+    if(track.querySelectorAll('.lyricSyllable.active').length!==1)activeMiss.push(e.start);
+   }
+   report.push({key,hasWords,incomplete,clipped,activeMiss});
+  }
+  currentSong=original.song;practiceSection=original.section;elapsed=original.t;refreshPracticeSections();build();
+  return report;
+ });
+ check(result.some(x=>x.key==='twinkle'&&x.hasWords),screen+': cannot match twinkle text to known words');
+ for(const x of result){
+  check(x.incomplete.length===0,screen+': lyric fragment at '+x.key+': '+JSON.stringify(x.incomplete.slice(0,3)));
+  check(x.clipped.length===0,screen+': karaoke overflow at '+x.key+': '+JSON.stringify(x.clipped.slice(0,3)));
+  check(x.activeMiss.length===0,screen+': wrong active syllable at '+x.key);
+ }
+ const end=await page.evaluate(()=>{
+  currentSong=clone(findSample('twinkle'));practiceSection='all';refreshPracticeSections();build();
+  const lyrics=events.filter(e=>e.lyric);elapsed=lyrics[lyrics.length-6].start+10;updateLyricTrack(true);
+  return document.querySelector('#lyricTrack').getAttribute('aria-label');
+ });
+ check(end.includes('아름답게')&&!end.startsWith('름답게'),screen+': little star last line starts mid-word '+end);
+ await page.locator('#lyricTrack').screenshot({path:out+'/'+screen+'-last-word.png'});
+ check(errors.length===0,screen+': lyric runtime errors '+errors.join(' | '));
+ report.push({name:screen,end,wordLines:result.map(x=>({song:x.key,naturalWordMap:x.hasWords}))});
+ await ctx.close();
+}
+
+
 {
   const context=await browser.newContext({viewport:{width:390,height:844}});
   const page=await context.newPage();
