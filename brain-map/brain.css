@@ -793,7 +793,7 @@
 .brain-page .brain-main .brain-bottom > p{font-size:12.5px;line-height:1.6}
 @media(max-width:380px){
  .brain-page .brain-main .lobe-list{grid-template-columns:minmax(0,1fr);gap:7px}
- .brain-page .brain-main .lobe-card{min-height:65px;padding:9px 11px;gap:11px}
+ .brain-page .brain-main .lobe-card{min-height:72px;padding:10px 11px;gap:11px}
  .brain-page .brain-main .lobe-card strong{font-size:16px}
  .brain-page .brain-main .lobe-card small{font-size:13px;line-height:1.45}
  .brain-page .brain-main .lobe-number{width:34px;height:34px;flex-basis:34px;font-size:18px}
