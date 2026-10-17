@@ -122,7 +122,7 @@ function render(id,d) {
  function finish(outcome,note){
   if(s.finished)return;
   s.finished=true;const correct=outcome===true;
-  s.records.push({round:round+1,first:s.firstCorrect===true?'O':s.firstCorrect===false?'X':'미확인',final:outcome===null?'미평가':correct?'O':'X',retries:s.attempts,hint:s.hint,pauses:s.pauses,note});
+  s.records.push({round:round+1,first:s.firstCorrect===true?'O':s.firstCorrect===false?'X':'미확인',final:outcome===null?'미평가':correct?'O':'X',retries:s.attempts,hint:s.hint,pauses:s.pauses,note:id==='slowBlock'?note+' · 조립 수정 '+(s.blockEdits||0)+'회':note});
   if(correct){addSeeds(s.attempts?7:10);sfx('ok');}else if(outcome===false){sfx('tap');}
   root.querySelectorAll('button[data-slow]').forEach(b=>{if(b.dataset.slow!=='next')b.disabled=true;});
   feed.textContent=outcome===null?'쉬어가도 괜찮아요.':correct?'정원을 정확하게 살폈어요!':'어려웠던 문제는 잠시 두고 다음 길로 가요.';
