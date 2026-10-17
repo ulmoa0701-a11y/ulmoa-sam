@@ -271,7 +271,7 @@ async function allCameraModes(){
    assert.equal(await p.locator('#modelCard').isVisible(),true);
    assert.equal(await p.locator('#liveCompare').isVisible(),false);
    await p.evaluate(()=>{window.__pose='one';});
-   await wait(p,()=>document.querySelector('#fingerStars:not([hidden]) .finger-star[data-lit="yes"]:not([hidden])').length===1,9000);
+   await wait(p,()=>document.querySelectorAll('#fingerStars:not([hidden]) .finger-star[data-lit="yes"]:not([hidden])').length===1,9000);
    assert.equal(await p.locator('#adventureActor').isVisible(),false,'Floating star cluster does not cover the learner');
    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('1'),9000);
    assert.equal(await p.locator('#adventureActorEmoji').innerText(),'⭐','One-finger goal lights one star');
