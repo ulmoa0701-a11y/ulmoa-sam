@@ -793,10 +793,10 @@
    The original region colors and single-region drilldown stay untouched. */
 .brain-page .brain-main .brain-one-panel .one-panel-grid{align-items:start}
 .brain-page .brain-svg .brain-zone[data-scene-active] .zone-shape{
- stroke:#26724b;stroke-width:9;filter:drop-shadow(0 0 3px #4b946766);
+ stroke:#50896a;stroke-width:7;filter:drop-shadow(0 0 2px #4b94674d);
 }
 .brain-page .brain-svg .brain-zone[data-scene-active] .zone-badge{
- stroke:#26724b;stroke-width:4;
+ stroke:#50896a;stroke-width:3;
 }
 .brain-page .brain-main .lobe-scene-explorer{
  margin:7px 0 3px;padding:11px 10px 9px;border-radius:15px;
