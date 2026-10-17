@@ -58,7 +58,7 @@ function renderGuide(){
    (isGarden()?(S.success%2===1?'🌰 도토리 잡았어!':'🌷 꽃이 피었어!'):
     S.mode==='copy'?'🫧 풍선이 반짝!':S.mode==='fingers'?'⭐ 별빛이 켜졌어!':S.mode==='memory'?'✨ 다음 발판으로!':'🔑 보물문이 열리고 있어!'):
    isGarden()?(S.round%2===0?'✊ 주먹! 도토리 잡기':'✋ 보자기! 도토리 놓기'):
-   S.mode==='copy'?'🫧 '+goalText()+' → 풍선 톡!':
+   S.mode==='copy'?'🫧 '+COPY_CUES[S.round]:
    S.mode==='fingers'?'⭐ '+goalText()+' → 별빛 켜기!':
    S.mode==='both'?'🔑 두 손으로 '+goalText()+'!':'🚶 비밀 발판 기억하기';
  $('liveLegend').textContent=recall?'기억한 대로 해볼까?':preview?'손 모양 순서를 기억해!':isGarden()?'모아의 손 모양을 따라 해봐!':'🟡 노란 손가락 쭉! · 연한 손가락 접기';
@@ -157,6 +157,8 @@ function gardenUpdate(){
  syncAcornUI();
 }
 
+const COPY_CUES=['손바닥을 펴서 풍선을 띄워!','주먹으로 풍선을 꼭 잡아!','손가락 하나로 풍선 톡!','손가락 두 개로 톡톡!','손가락 세 개로 반짝!','손바닥을 펴서 마지막 풍선을 보내!'];
+const COPY_REWARDS=['풍선이 하늘로 둥실!','풍선을 잡았어!','풍선을 톡 건드렸어!','풍선이 두 번 반짝!','풍선이 세 번 반짝!','마지막 풍선도 하늘로!'];
 const ADVENTURE_META={
  copy:{label:'반짝 풍선',token:'🫧',done:'✨',rounds:6},
  fingers:{label:'별빛 모으기',token:'☆',done:'⭐',rounds:6},
@@ -178,6 +180,14 @@ function adventureUpdate(){
  $('adventureScene').dataset.mode=S.mode;
  $('adventureScene').dataset.phase=phase;
  $('adventureActor').dataset.mode=S.mode;
+ if(S.mode==='copy'){
+  const pose=currentGoal()[0];
+  $('adventureActor').dataset.action=pose==='palm'?'release':pose==='fist'?'grab':'tap';
+  $('adventureActor').dataset.taps=pose==='one'?'1':pose==='two'?'2':pose==='three'?'3':'0';
+ }else{
+  delete $('adventureActor').dataset.action;
+  delete $('adventureActor').dataset.taps;
+ }
  $('adventureSceneTitle').textContent=S.mode==='copy'?'🫧 풍선을 하나씩 반짝이게 해요':
   S.mode==='fingers'?'⭐ 손가락을 펴면 별빛이 켜져요':
   S.mode==='memory'?'🚶 기억한 손 모양만큼 발판이 이어져요':'🔑 두 손으로 자물쇠를 열어요';
@@ -187,7 +197,7 @@ function adventureUpdate(){
   mark.innerHTML=sequence.map((p,i)=>{
    const done=i<S.part||(phase==='reward'&&i===S.part);
    // Deliberate recall: never leak the saved hand pose during play.
-   const icon=phase==='memorize'?handArt(p):done?'✨':'❔';
+   const icon=phase==='memorize'?handArt(p):done?'<span class="stone-glow">✦</span>':'<span class="stone-placeholder"></span>';
    return '<span class="adventure-token" data-state="'+(done?'done':i===S.part?'current':'waiting')+'" data-step="'+i+'">'+icon+'</span>';
   }).join('');
   $('gardenHudFlower').textContent='🪨 '+S.round+' / 4';
@@ -576,7 +586,7 @@ function accept(){
  if(isGarden()){gardenUpdate();message(S.success%2===1?'🌰 도토리를 잡았어!':'🌷 도토리를 심어서 꽃이 피었어!');}
  else{
   adventureUpdate();
-  message(S.mode==='copy'?'🫧 손으로 풍선을 깨웠어!':
+  message(S.mode==='copy'?'🫧 '+COPY_REWARDS[S.round]:
    S.mode==='fingers'?'⭐ 반짝! 별이 켜졌어!':
    S.mode==='memory'?'✨ 기억한 발판이 빛나!':'🔑 찰칵! 보물문 자물쇠가 열려!');
  }
