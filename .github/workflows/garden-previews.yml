@@ -1,0 +1,54 @@
+name: Capture Real Garden Screens
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa/generate-garden-previews.mjs'
+      - '.github/workflows/garden-previews.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  screenshot-gardens:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check preview generator syntax
+        run: node --check qa/generate-garden-previews.mjs
+      - name: Install browser automation
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Locate Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Serve game pages locally
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/garden-preview-server.log 2>&1 &
+          for i in {1..40}; do curl -fsS http://127.0.0.1:8765/thinking-garden/ >/dev/null && exit 0; sleep 0.25; done
+          cat /tmp/garden-preview-server.log
+          exit 1
+      - name: Capture real interactive game screens
+        run: node qa/generate-garden-previews.mjs
+      - name: Publish screenshots to website repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add gardens/previews/*.jpg gardens/previews/capture-report.json
+          if git diff --cached --quiet; then echo "All previews are current"; exit 0; fi
+          git commit -m "assets(gardens): real game screen previews captured by Chrome"
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: garden-actual-screen-captures
+          path: gardens/previews/
+          if-no-files-found: warn
