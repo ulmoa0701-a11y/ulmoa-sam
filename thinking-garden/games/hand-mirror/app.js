@@ -72,7 +72,8 @@ function renderGuide(){
   const target=currentGoal()[0];
   $('modelSymbol').innerHTML=currentGoal().map(p=>handArt(p)).join('');
   $('modelSymbol').classList.toggle('is-double',currentGoal().length===2);
-  $('modelTitle').textContent=currentGoal().map(p=>core.TITLES[p]).join(' + ');
+  $('modelCard').querySelector('small').textContent=S.mode==='fingers'?'예시 · 어떤 손가락이든 괜찮아':'모아의 손';
+  $('modelTitle').textContent=S.mode==='fingers'?'손가락 '+({one:1,two:2,three:3}[target]||1)+'개 펴기':currentGoal().map(p=>core.TITLES[p]).join(' + ');
   $('modelCard').dataset.pose=target;
  }
  $('liveCompare').hidden=!camera||!S.cameraReady||S.phase!=='play';
@@ -347,14 +348,20 @@ function syncFingerStars(hands,position,w,h){
  if(!visible)return;
  const landmark=hands[0],pattern=core.PATTERNS[currentGoal()[0]];
  const states=core.fingerStates(landmark);
+ const target=pattern.reduce((n,v)=>n+v,0);
+ const raised=states?states.map((v,i)=>v===1?i:-1).filter(i=>i>=0):[];
+ const countOK=core.countMatch(hands,currentGoal()[0]);
+ // The target is a finger count, never a mandatory finger identity.
+ const starIndices=[...raised];
+ for(let i=0;i<4&&starIndices.length<target;i++)if(!starIndices.includes(i))starIndices.push(i);
  for(let i=0;i<4;i++){
   const star=layer.children[i];
-  star.hidden=pattern[i]!==1;
+  star.hidden=!starIndices.includes(i);
   if(star.hidden)continue;
   const [x,y]=position(landmark[core.FINGER_JOINTS[i][2]]);
   star.style.left=Math.max(5,Math.min(95,100*x/w))+'%';
   star.style.top=Math.max(17,Math.min(78,100*y/h))+'%';
-  star.dataset.lit=S.phase==='reward'||states?.[i]===1?'yes':'no';
+  star.dataset.lit=(S.phase==='reward'||countOK)&&states?.[i]===1?'yes':'no';
  }
 }
 function drawHands(hands){
@@ -408,7 +415,7 @@ function drawHands(hands){
   ctx.shadowBlur=0;ctx.lineWidth=3.6;ctx.strokeStyle='#54f2b5';ctx.lineJoin='round';ctx.lineCap='round';
   for(const [a,b] of CONNECTIONS){const q=xy(hand[a]),r=xy(hand[b]);ctx.beginPath();ctx.moveTo(...q);ctx.lineTo(...r);ctx.stroke();}
   const goal=goalsForHands[Math.min(handIndex,goalsForHands.length-1)];
-  const feedback=goal?core.fingerFeedback(hand,goal):null;
+  const feedback=S.mode==='fingers'?null:goal?core.fingerFeedback(hand,goal):null;
   if(handIndex===0&&feedback)topFeedback=feedback;
   const joints=core.FINGER_JOINTS;
   for(let finger=0;finger<4;finger++){
@@ -523,7 +530,7 @@ function evaluate(t){
   S.matchSince=0;$('meter').style.width='0%';$('cameraHoldFill').style.width='0%';$('viewer').dataset.match='no';
   return;
  }
- const ok=core.match(S.camHands,currentGoal());
+ const ok=S.mode==='fingers'?core.countMatch(S.camHands,currentGoal()[0]):core.match(S.camHands,currentGoal());
  if(!S.readyToMatch){
   if(!ok){if(!S.rearmSince)S.rearmSince=t;if(t-S.rearmSince>300){S.readyToMatch=true;S.rearmSince=0;}}
   else S.rearmSince=0;
@@ -531,13 +538,15 @@ function evaluate(t){
  }
  if(!ok){
   S.matchSince=0;$('meter').style.width='0%';$('cameraHoldFill').style.width='0%';$('viewer').dataset.match='no';
-  const feedback=S.camHands[0]?core.fingerFeedback(S.camHands[0],currentGoal()[0]):null;
+  const states=S.mode==='fingers'&&S.camHands.length===1?core.fingerStates(S.camHands[0]):null;
+  const targetCount=S.mode==='fingers'?({one:1,two:2,three:3}[currentGoal()[0]]):null;
+  const count=states?.filter(v=>v===1).length;
+  const fingerCue=states?.includes(null)?'손가락이 보이게 손을 조금 돌려 봐!':
+    states&&count<targetCount?'손가락을 '+(targetCount-count)+'개 더 펴 봐!':
+    states&&count>targetCount?'손가락을 '+(count-targetCount)+'개 접어 봐!':'원하는 손가락을 펴 봐!';
   const need=currentGoal().length===1&&S.camHands.length>1?'한 손만 카메라에 보여줘!':currentGoal().length===2?'두 손을 함께 보여줘!':
     isGarden()?(S.round%2===0?'도토리 옆에서 주먹을 꼭 쥐어 봐!':'보자기처럼 손을 쫙 펴서 도토리를 놓아 봐!'):
-    S.mode==='fingers'&&feedback?
-      feedback.unknown>0?'손이 잘 보이도록 조금만 돌려 봐!':
-      feedback.expected.some((v,i)=>v===1&&!feedback.matched[i])?'노란 표시가 있는 손가락을 펴 봐!':'다른 손가락은 살짝 접어 봐!':
-    '노란 손가락은 펴고 연한 손가락은 접어 봐!';
+    S.mode==='fingers'?fingerCue:'모아의 손 모양을 따라해 봐!';
   message(S.camHands.length===0?'손을 카메라에 보여줘!':need);return;
  }
  if(!S.matchSince)S.matchSince=t;
