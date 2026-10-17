@@ -57,6 +57,18 @@ const assert=require('node:assert/strict');
     assert.ok(await page.locator('.slow-task').isVisible(),id+' failed to resume');
     await page.locator('#backHome').click();
    }
+   await page.goto('http://127.0.0.1:8765/thinking-garden/',{waitUntil:'load'});
+   await page.locator('[data-open="sameShape"]').click();
+   await page.locator('#introStart').click();
+   const target=await page.locator('.shape-target').innerText();
+   await page.locator('.basic-choice[data-shape]').filter({hasNotText:target}).first().click();
+   assert.deepEqual(await page.evaluate(()=>[state.basicRecords[0].firstAttempt,state.basicRecords[0].attempts]),['X',1],'explicit first shape response missing');
+   await page.locator('.basic-choice[data-shape="'+target+'"]').click();
+   assert.ok(await page.locator('.shape-reunion').isVisible(),'matching shapes need an actual in-scene event');
+   assert.deepEqual(await page.evaluate(()=>[state.basicRecords[0].firstAttempt,state.basicRecords[0].finalCorrect,state.basicRecords[0].attempts]),['X','O',2],'first/final shape responses must differ');
+   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+4),true,'shape reunion overflows mobile viewport');
+   await page.locator('.round-gate button').click();
+   await page.waitForFunction(()=>state.round===1);
    assert.deepEqual(errors,[],'uncaught browser errors');
    await page.close();
   }
