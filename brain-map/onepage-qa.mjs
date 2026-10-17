@@ -149,9 +149,17 @@ try{
 
     assert.ok((await page.locator('#lobeSceneFocusText').innerText()).length>18,'specific educational clue, not just a name');
    }
-   await page.waitForTimeout(170);
-   const stroke=await page.locator('#brainMap [data-scene-focus] .zone-shape').evaluate(el=>parseFloat(getComputedStyle(el).strokeWidth));
-   assert.ok(stroke>=10,'active region should be distinct without giant borders: '+stroke);
+   await page.waitForFunction(()=>{
+    const el=document.querySelector('#brainMap [data-scene-focus] .zone-shape');
+    return el&&parseFloat(getComputedStyle(el).strokeWidth)>=10;
+   },{timeout:3000});
+   const strokeInfo=await page.locator('#brainMap [data-scene-focus] .zone-shape').evaluate(el=>({
+    width:getComputedStyle(el).strokeWidth,
+    matched:el.matches('.brain-page .brain-svg[data-scene-mode="focus"] .brain-zone[data-scene-focus] .zone-shape'),
+    mapMode:document.querySelector('#brainMap').getAttribute('data-scene-mode')
+   }));
+   assert.ok(parseFloat(strokeInfo.width)>=10 && strokeInfo.matched,
+    'active outline must be clear after transition: '+JSON.stringify(strokeInfo));
    const unfocusedOpacity=await page.locator('#brainMap [data-brain-region]:not([data-scene-focus])').first().evaluate(el=>parseFloat(getComputedStyle(el).opacity));
    assert.ok(unfocusedOpacity>=0.99,'all other brain regions retain their approved original colors: '+unfocusedOpacity);
    assert.equal(await page.locator('#simpleDetail').isHidden(),true,'no unrelated detailed popup');
