@@ -42,6 +42,29 @@ for(const width of [390,1366]){
    if(id==='hide'){
     const clues=await page.locator('.leaf-has-clue').count();
     check(clues>=2,width+' leaf game has no observable clues');
+    check(await page.locator('.leaf-no-clue').count()>=1,width+' leaves need distractors');
+   }
+   if(id==='sameShape')check(await page.locator('.shape-adventure .shape-target').count()===1,width+' shape target is not visually separated');
+   if(id==='flower'){
+    check(await page.locator('.flower-basket').count()===1,width+' flower basket missing');
+    await page.locator('.flower-collect .object-btn[data-good="1"]').first().click();
+    check((await page.locator('#flowerCollected').textContent()).includes('1 /'),width+' collected flower not tracked');
+   }
+   if(id==='targets'){
+    check(await page.locator('.wake-scene-head').count()===1,width+' wake seeds need a goal scene');
+    await page.locator('.wake-target').first().click();
+    check(await page.locator('.wake-target.awake').count()===1,width+' tapped seed did not bloom');
+   }
+   if(id==='paint'){
+    check(await page.locator('#paintGrid i').count()>=12,width+' paint cells missing');
+    await page.evaluate(()=>{
+      const cells=document.querySelectorAll('#paintGrid i'),grid=document.querySelector('#paintGrid');
+      const first=cells[0].getBoundingClientRect(),second=cells[1].getBoundingClientRect();
+      cells[0].dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'touch',clientX:first.x+first.width/2,clientY:first.y+first.height/2}));
+      grid.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerType:'touch',clientX:second.x+second.width/2,clientY:second.y+second.height/2}));
+      grid.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch',clientX:second.x+second.width/2,clientY:second.y+second.height/2}));
+    });
+    check(await page.locator('#paintGrid i.painted').count()>=2,width+' touch drag failed to fill two cells');
    }
    check(errors.length===0,width+' '+id+' JavaScript errors '+errors.join('; '));
    results.push({id,width,result:'checked'});
@@ -56,6 +79,10 @@ for(const [id,url] of standalone){
   const r=await page.goto(base+url,{waitUntil:'domcontentloaded',timeout:25000});
   check(r?.ok(),id+' standalone HTTP error');
   await page.waitForTimeout(160);
+  if(id==='rescue'){
+    try{await page.locator('#game canvas').first().waitFor({state:'attached',timeout:13000});}
+    catch{check(false,'rescue Phaser canvas did not start after Korean font readiness')}
+  }
   const help=page.locator('.moa-quick-guide');
   check(await help.isVisible(),id+' standalone goal missing');
   const goal=await help.locator('.moa-quick-goal').textContent();
