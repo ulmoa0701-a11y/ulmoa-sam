@@ -187,7 +187,7 @@ function renderHide(){
   return '<button class="leaf-btn '+(clue?'leaf-has-clue':'leaf-no-clue')+'" data-i="'+i+'" type="button" aria-label="'+label+'"><span class="leaf-cover" aria-hidden="true">🍃</span><span class="leaf-trail" aria-hidden="true">'+(trail||'&nbsp;')+'</span></button>';
  }).join('');
  area.innerHTML='<div class="basic-game leaf-clue-game leaf-level-'+level+'"><div class="mini-count" id="miniCount">🐞 0 / '+need+'</div><div class="leaf-example" aria-label="발자국을 보고 잎사귀를 열어 무당벌레 찾기"><span>🐾</span><span>→</span><span>🍃</span><span>→</span><span>🐞</span></div><p class="leaf-rule">🐾 발자국을 찾아 잎사귀를 열어요.'+(level===3?' 💧 이슬방울과 구분해요.':'')+'</p><div class="leaf-game">'+leaves+'</div></div>';
- $('.leaf-btn').forEach(b=>b.onclick=()=>{
+ area.querySelectorAll('.leaf-btn').forEach(b=>b.onclick=()=>{
   if(b.classList.contains('opened')||state.lock)return;
   const ok=bugs.has(+b.dataset.i);
   b.classList.add('opened');
