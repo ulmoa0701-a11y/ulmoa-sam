@@ -1,0 +1,46 @@
+name: Garden 26 Games Content and Clinical Semantics QA
+on:
+  pull_request:
+    paths:
+      - 'thinking-garden/novel-garden.js'
+      - 'thinking-garden/strategy-garden-core.js'
+      - 'qa/garden-session-integrity-qa.cjs'
+      - '.github/workflows/garden-session-integrity-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'thinking-garden/novel-garden.js'
+      - 'thinking-garden/strategy-garden-core.js'
+      - 'qa/garden-session-integrity-qa.cjs'
+      - '.github/workflows/garden-session-integrity-qa.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Set up headless Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright-core@1.56.1
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Check source syntax
+        run: |
+          node --check thinking-garden/novel-garden.js
+          node --check thinking-garden/strategy-garden-core.js
+          node --check qa/garden-session-integrity-qa.cjs
+      - name: Launch site
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/garden-session.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8765/thinking-garden/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/garden-session.log; exit 1
+      - name: Play twenty unique tasks on phone and desktop
+        run: node qa/garden-session-integrity-qa.cjs
