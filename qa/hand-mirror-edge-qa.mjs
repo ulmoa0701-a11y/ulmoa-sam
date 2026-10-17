@@ -14,7 +14,7 @@ const fakeModel=[
  'detectForVideo(){',
  'if(globalThis.__modelError)throw new Error("model-inference-test-error");',
  'const count=globalThis.__hands??1;',
- 'const pattern={palm:[1,1,1,1],fist:[0,0,0,0],one:[1,0,0,0],two:[1,1,0,0],three:[1,1,1,0]};',
+ 'const pattern={palm:[1,1,1,1],fist:[0,0,0,0],one:[1,0,0,0],two:[1,1,0,0],three:[1,1,1,0],pinky:[0,0,0,1],outerThree:[1,0,1,1]};',
  'const poses=globalThis.__handPoses||Array(count).fill(globalThis.__pose||"fist");',
  'const hands=poses.slice(0,count).map((kind,index)=>{',
  'const a=Array.from({length:21},()=>({x:.5,y:.85}));',
@@ -286,6 +286,19 @@ async function allCameraModes(){
    await wait(p,()=>document.querySelectorAll('#fingerStars .finger-star[data-lit="yes"]:not([hidden])').length===3,9000);
    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('3'),9000);
    assert.equal(await p.locator('#adventureActorEmoji').innerText(),'⭐⭐⭐','Three-finger goal lights three stars');
+    await wait(p,()=>document.querySelector('#gardenHudRound').textContent.startsWith('4'),9000);
+    await p.evaluate(()=>{window.__pose='palm';});
+    await p.waitForTimeout(1500);
+    assert.equal(await p.locator('#flowerLabel').innerText(),'🌼 3','Four fingers cannot answer a one-finger goal');
+    assert.equal(await p.locator('#fingerStars .finger-star[data-lit="yes"]').count(),0,'Four fingers must not light the stars');
+    assert.match(await p.locator('#viewerBadge').innerText(),/3개 접어/,'Counts fingers instead of demanding an index finger');
+    await p.evaluate(()=>{window.__pose='pinky';});
+    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('4'),10500);
+    assert.equal(await p.locator('#fingerStars .finger-star[data-finger="3"]').getAttribute('data-lit'),'yes','Pinky-only star appears at the pinky');
+    await wait(p,()=>document.querySelector('#gardenHudRound').textContent.startsWith('5'),9000);
+    await p.evaluate(()=>{window.__pose='outerThree';});
+    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('5'),10500);
+    assert.equal(await p.locator('#fingerStars .finger-star[data-finger="3"]').getAttribute('data-lit'),'yes','Any three-finger combination accepted');
   }else if(mode==='both'){
    assert.equal(await p.locator('#adventureActor').getAttribute('data-mode'),'both','Bilateral stage has a treasure door object');
    assert.equal(await p.locator('#adventureActorEmoji').evaluate(e=>getComputedStyle(e,'::before').content),'""','Door is drawn with original frame illustration');
