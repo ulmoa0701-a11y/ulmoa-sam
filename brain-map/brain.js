@@ -27,6 +27,8 @@
  const brainMap=document.getElementById('brainMap');
  const lobeDirectory=document.getElementById('lobeDirectory');
  const lobeSceneRegionHint=document.getElementById('lobeSceneRegionHint');
+ const lobeSceneRead=document.getElementById('lobeSceneRead');
+ const lobeSceneSpeechStatus=document.getElementById('lobeSceneSpeechStatus');
  // Representative, explainable roles, not measured neural activation, diagnoses,
  // or an exhaustive anatomical network. All areas cooperate in everyday tasks.
  const regionMarkers={
@@ -58,7 +60,32 @@
  };
  if(nodes.length!==6||shapes.length!==6||![detail,title,text,icon,close,lobeSceneTitle,
   lobeSceneRoles,lobeSceneResult,lobeSceneSelection,lobeSceneCurrent,
-  lobeSceneFocusTitle,lobeSceneFocusText,lobeSceneRegionHint,brainMap,lobeDirectory].every(Boolean)||lobeSceneButtons.length!==8)return;
+  lobeSceneFocusTitle,lobeSceneFocusText,lobeSceneRegionHint,lobeSceneRead,lobeSceneSpeechStatus,brainMap,lobeDirectory].every(Boolean)||lobeSceneButtons.length!==8)return;
+ // Optional device-only speech; never automatic, never records or sends audio.
+ const canReadScene=typeof window.speechSynthesis!=='undefined' && typeof window.SpeechSynthesisUtterance==='function';
+ let sceneUtterance=null;
+ if(!canReadScene){lobeSceneRead.disabled=true;lobeSceneSpeechStatus.textContent='이 기기에서는 읽어주기를 지원하지 않아요.';}
+ function stopSceneSpeech(){
+  if(canReadScene && sceneUtterance)window.speechSynthesis.cancel();
+  sceneUtterance=null;
+  lobeSceneRead.textContent='🔊 이 설명 듣기';
+ }
+ lobeSceneRead.addEventListener('click',()=>{
+  if(!canReadScene)return;
+  if(sceneUtterance){stopSceneSpeech();lobeSceneSpeechStatus.textContent='읽기를 멈췄어요.';return;}
+  const utterance=new SpeechSynthesisUtterance(lobeSceneFocusTitle.textContent+'. '+lobeSceneFocusText.textContent+' '+lobeSceneRegionHint.textContent);
+  utterance.lang='ko-KR';utterance.rate=.88;
+  const voice=window.speechSynthesis.getVoices().find(v=>v.lang?.toLowerCase().startsWith('ko'));
+  if(voice)utterance.voice=voice;
+  utterance.onend=()=>{if(sceneUtterance===utterance){sceneUtterance=null;lobeSceneRead.textContent='🔊 이 설명 듣기';lobeSceneSpeechStatus.textContent='읽기가 끝났어요.';}};
+  utterance.onerror=()=>{if(sceneUtterance===utterance){sceneUtterance=null;lobeSceneRead.textContent='🔊 이 설명 듣기';lobeSceneSpeechStatus.textContent='음성을 재생하지 못했어요. 기기의 한국어 음성을 확인해 주세요.';}};
+  try{
+   window.speechSynthesis.cancel();
+   sceneUtterance=utterance;lobeSceneRead.textContent='⏹ 읽기 멈추기';
+   lobeSceneSpeechStatus.textContent=voice?'기기 음성으로 읽는 중이에요.':'기기에 한국어 음성이 없으면 발음이 어색할 수 있어요.';
+   window.speechSynthesis.speak(utterance);
+  }catch(error){stopSceneSpeech();lobeSceneSpeechStatus.textContent='현재 기기에서 읽기를 시작할 수 없어요.';}
+ });
  function clearLobeScene(){
   shapes.forEach(g=>{g.removeAttribute('data-scene-active');g.removeAttribute('data-scene-focus');g.removeAttribute('data-scene-related');});
   nodes.forEach(node=>{node.removeAttribute('data-scene-example');node.removeAttribute('data-scene-focus');});
@@ -68,6 +95,7 @@
   lobeSceneSelection.hidden=true;
  }
  function focusSceneRegion(region){
+  stopSceneSpeech();lobeSceneSpeechStatus.textContent='';
   const scene=lobeScenes[lastLobeScene];
   const index=scene.roles.findIndex(role=>role[0]===region);
   if(index<0)return;
@@ -147,6 +175,7 @@
   });
  }
  function select(key){
+  stopSceneSpeech();
   const d=data[key];if(!d)return;
   lobeDirectory.open=true;
   clearLobeScene();
@@ -216,6 +245,7 @@
  }
  function chooseView(key,updateHash=true){
   if(!viewPanels[key])return;
+  stopSceneSpeech();
   for(const [name,panel] of Object.entries(viewPanels)){
    panel.hidden=name!==key;
   }
