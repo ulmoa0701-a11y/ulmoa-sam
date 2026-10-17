@@ -7,7 +7,7 @@ const names={slowScan:'꽃과 단서 찾기',slowPlace:'정원 지도 따라 놓
 const icons={slowScan:'🌼',slowPlace:'🧭',slowBlock:'🧩',slowName:'🐰',slowMemory:'🌸',slowEveryday:'🎒'};
 const animals=[['강아지','🐶'],['고양이','🐱'],['토끼','🐰'],['곰','🐻'],['돼지','🐷'],['개구리','🐸']];
 const colors=[['노란색','#efc15d'],['파란색','#448dcc'],['초록색','#53a87a'],['빨간색','#d56e64'],['보라색','#946ec0'],['주황색','#ef955a']];
-const objects=[['책','📖'],['연필','✏️'],['가위','✂️'],['지우개','🧽'],['물병','🍼'],['자','📏']];
+// Situation-based everyday materials live in life-bag-scenes.js.
 const simple=[[[0,1],[1,1]],[[1,0],[1,1]],[[0,0],[0,1]],[[1,1],[2,1]],[[0,0],[1,0]]];
 const medium=[[[0,1],[1,1],[1,2]],[[0,0],[0,1],[1,0]],[[1,0],[1,1],[2,1]],[[0,1],[1,0],[1,1]],[[0,0],[1,0],[1,1]]];
 const hard=[[[0,1],[1,0],[1,1],[2,1]],[[1,1],[1,2],[2,0],[2,1]],[[0,0],[0,1],[1,1],[2,1]],[[0,1],[1,1],[1,2],[2,2]],[[0,0],[1,0],[1,1],[2,1]]];
@@ -48,7 +48,7 @@ function render(id,d) {
  guide.src=id==='slowMemory'?'assets/friend-ru.png':id==='slowScan'?'assets/friend-hong.png':'assets/friend-saem.png';
  missionText.textContent=({slowScan:'꽃을 빠뜨리지 않고 찾아요!',slowPlace:'정원의 같은 위치에 꽃을 심어요!',slowBlock:'같은 블록 모양의 정원을 만들어요!',slowName:'친구의 이름을 차근차근 말해요!',slowMemory:'꽃이 있던 자리를 기억해요!',slowEveryday:'가방에 넣을 물건을 찾아요!'})[id];
  missionSub.textContent=cues[s.cue];
- if(s.cue==='guide')say(missionText.textContent); // deliberately avoid reading answer or repeating prompts under wait/self
+ if(s.cue==='guide'&&id!=='slowEveryday')say(missionText.textContent); // no automatic repetition in wait/self mode
  const n=s.level===3?4:3;
  const baseShape=(s.level===1?simple:s.level===2?medium:hard)[round%simple.length];
   const rotation=Math.floor(round/5)%4;
@@ -62,12 +62,11 @@ function render(id,d) {
  const itemIndex=s.nameOrder[(round+Math.floor(round/6))%6];
  const pool=s.kind==='color'?colors:animals;
  const item=pool[itemIndex];
- const targetObject=[...objects[(round*2+1)%objects.length]];
- let objectArr=Array.from({length:Math.max(6,cells)},(_,i)=>objects[(i*5+round+i%3)%objects.length]);
+ const bag=id==='slowEveryday'?window.MoaBagScenes?.makePlan(round,s.level):null;
+ if(id==='slowEveryday'&&!bag)throw Error('Moa everyday scenario bank unavailable');
  let scanTargets=new Set();
  if(id==='slowScan'){const rows=[[0,0],[0,n-1],[n-1,0],[n-1,n-1],[1,1],[2,1]];rows.slice(0,s.level+1).forEach(([r,c])=>scanTargets.add(((r+round)%n)+','+((c+round*2)%n)));}
- let objectTargets=new Set();
- if(id==='slowEveryday'){objectArr=Array.from({length:cells},(_,i)=>objects[(i+round*2+i%3)%objects.length]);const ix=(round*2+2)%objectArr.length;const chosen=objectArr[ix];targetObject[0]=chosen[0];targetObject[1]=chosen[1];objectArr.forEach((x,i)=>{if(x[0]===chosen[0])objectTargets.add(Math.floor(i/n)+','+(i%n))});}
+ const objectTargets=new Set(bag?bag.choices.map((x,i)=>x.correct?Math.floor(i/n)+','+(i%n):null).filter(Boolean):[]);
  const el=(html)=>{area.innerHTML='<div class="slow-task '+(id==='slowName'?'slow-name-task':'')+'">'+html+'</div>';return area.querySelector('.slow-task');};
  const info='<p class="slow-step"><span>① 자세히 보기</span><span>② 생각하기</span><span>③ 준비되면 표현하기</span></p>';
  const teacher='<details class="slow-teacher-details"><summary>선생님 도움·관찰</summary><p>정답을 알려주지 않고 스스로 확인할 시간을 제공해요. 이전 반응 간섭이나 어려움을 보이면 쉬어갈 수 있어요.</p><button type="button" data-slow="hint">다시 확인하는 방법 안내</button></details>';
@@ -104,7 +103,13 @@ function render(id,d) {
    html+='<div class="slow-name-choice" role="group" aria-label="글자로 이름 고르기">'+ix.map(i=>'<button type="button" data-slow="word" data-word="'+i+'">'+pool[i][0]+'</button>').join('')+'</div>';
   }
  }else if(id==='slowEveryday'){
-  html+='<div class="slow-mission-label">가방에 넣을 '+targetObject[0]+'을(를) 모두 찾아요.</div><div class="slow-board slow-bag" style="--side:'+n+'">'+objectArr.map((obj,i)=>{const key=Math.floor(i/n)+','+(i%n);return '<button type="button" class="slow-tile '+(selected.has(key)?'picked':'')+'" data-slow="cell" data-key="'+key+'" aria-pressed="'+selected.has(key)+'" aria-label="물건 '+(i+1)+'">'+obj[1]+'</button>'}).join('')+'</div>';
+  missionText.textContent=bag.title+' 준비해요!';
+  missionSub.textContent='그림 속 상황에 어울리는 준비물 '+bag.targets.length+'개를 골라요.';
+  if(s.cue==='guide')say(missionText.textContent+' '+missionSub.textContent);
+  const chosenIcons=bag.choices.filter((o,i)=>selected.has(Math.floor(i/n)+','+(i%n))).map(o=>o.icon);
+  html+='<div class="slow-bag-quest"><div class="slow-bag-story"><img src="assets/friend-saem.png" alt=""><div><span class="slow-bag-scene" aria-hidden="true">'+bag.scene+'</span><strong>'+bag.title+'</strong><small>모아의 오늘 준비 이야기</small></div></div><div class="slow-bag-progress" aria-live="polite"><span aria-hidden="true">🎒</span><strong id="moaBagCounter">'+selected.size+' / '+bag.targets.length+'</strong><div id="moaBagContents">'+(chosenIcons.join(' ')||'🌱')+'</div></div></div>';
+  html+='<p class="slow-mission-label">가방에 알맞은 물건 '+bag.targets.length+'개를 담아요.</p>';
+  html+='<div class="slow-board slow-bag" style="--side:'+n+'" role="group" aria-label="준비물 고르기">'+bag.choices.map((obj,i)=>{const key=Math.floor(i/n)+','+(i%n);return '<button type="button" class="slow-tile '+(selected.has(key)?'picked':'')+'" data-slow="cell" data-key="'+key+'" aria-pressed="'+selected.has(key)+'" aria-label="'+obj.label+'">'+obj.icon+'</button>'}).join('')+'</div>';
  }
  if(id!=='slowName'&&(id!=='slowMemory'||s.memoryHidden===round))html+='<div class="slow-actions"><button type="button" class="slow-primary" data-slow="check">확인했어요 ✓</button><button type="button" class="slow-secondary" data-slow="skip">쉬어가기</button></div>';
  html+='<button type="button" class="slow-secondary slow-pause-button" data-slow="pause">🌿 잠깐 쉬기</button><div class="slow-feedback" role="status" aria-live="polite"></div>'+teacher;
@@ -117,6 +122,12 @@ function render(id,d) {
   if(correct){addSeeds(s.attempts?7:10);sfx('ok');}else if(outcome===false){sfx('tap');}
   root.querySelectorAll('button[data-slow]').forEach(b=>{if(b.dataset.slow!=='next')b.disabled=true;});
   feed.textContent=outcome===null?'쉬어가도 괜찮아요.':correct?'정원을 정확하게 살폈어요!':'어려웠던 문제는 잠시 두고 다음 길로 가요.';
+  if(correct&&id==='slowEveryday'){
+   const arrival=document.createElement('div');arrival.className='slow-bag-arrival';arrival.setAttribute('role','status');
+   const packed=bag.targets.map(id=>bag.choices.find(c=>c.id===id).icon).join(' ');
+   arrival.innerHTML='<div class="slow-bag-ready-icons" aria-hidden="true">🎒 '+packed+' 🌼</div><strong>모아가 준비를 마쳤어요!</strong><p>필요한 것을 골라 가방에 담았어요.</p>';
+   root.appendChild(arrival);
+  }
   if(correct&&id==='slowName'){
    const visit=document.createElement('div');visit.className='slow-name-arrival';visit.setAttribute('role','status');
    const art=document.createElement('span');art.className='slow-name-arrival-art';art.setAttribute('aria-hidden','true');art.textContent=(s.kind==='animal'?item[1]:'🚩')+' 🌷';
@@ -147,7 +158,17 @@ function render(id,d) {
   if(a==='resume'){
    root.querySelector('.slow-pause-panel')?.remove();root.classList.remove('slow-paused');return;
   }
-  if(a==='cell'){const key=b.dataset.key;if(selected.has(key))selected.delete(key);else selected.add(key);b.classList.toggle('picked',selected.has(key));b.setAttribute('aria-pressed',String(selected.has(key)));if(id==='slowPlace'||id==='slowBlock')b.textContent=selected.has(key)?id==='slowBlock'?'🧱':'🌼':'';return;}
+  if(a==='cell'){
+   const key=b.dataset.key;
+   if(selected.has(key))selected.delete(key);else selected.add(key);
+   b.classList.toggle('picked',selected.has(key));b.setAttribute('aria-pressed',String(selected.has(key)));
+   if(id==='slowPlace'||id==='slowBlock')b.textContent=selected.has(key)?id==='slowBlock'?'🧱':'🌼':'';
+   if(id==='slowEveryday'){
+    root.querySelector('#moaBagCounter').textContent=selected.size+' / '+bag.targets.length;
+    root.querySelector('#moaBagContents').textContent=bag.choices.filter((obj,i)=>selected.has(Math.floor(i/n)+','+(i%n))).map(obj=>obj.icon).join(' ')||'🌱';
+   }
+   return;
+  }
   if(a==='check')return check();
   if(a==='skip')return finish(null,'쉬어감/미응답');
   if(a==='next'){b.disabled=true;nextRound(0);return;}
