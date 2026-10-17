@@ -17,9 +17,29 @@
  const icon=document.getElementById('simpleDetailIcon');
  const close=document.getElementById('detailClose');
  if(nodes.length!==6||shapes.length!==6||![detail,title,text,icon,close].every(Boolean))return;
+ function moveDetailNearSelection(key){
+  const index=nodes.findIndex(b=>b.dataset.region===key);
+  if(index<0)return;
+  // Two-column layouts keep a selected row together; one-column phones put
+  // the single detail immediately below the selected card.
+  const oneColumn=window.matchMedia('(max-width:380px)').matches;
+  const rowLast=oneColumn?index:Math.min(index+(index%2===0?1:0),nodes.length-1);
+  nodes[rowLast].after(detail);
+ }
+ function revealDetailOnSmallScreens(){
+  if(!window.matchMedia('(max-width:760px)').matches)return;
+  window.requestAnimationFrame(()=>{
+   if(detail.hidden)return;
+   const rect=detail.getBoundingClientRect();
+   if(rect.top<85||rect.bottom>window.innerHeight-12){
+    detail.scrollIntoView({block:'nearest',behavior:'instant'});
+   }
+  });
+ }
  function select(key){
   const d=data[key];if(!d)return;
   title.textContent=d.name;text.textContent=d.fact;icon.textContent=d.icon;
+  moveDetailNearSelection(key);
   detail.hidden=false;
   nodes.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.region===key)));
   shapes.forEach(g=>{
@@ -27,6 +47,7 @@
    g.toggleAttribute('data-active',active);
    g.setAttribute('aria-pressed',String(active));
   });
+  revealDetailOnSmallScreens();
  }
  function reset(){
   detail.hidden=true;
@@ -40,7 +61,16 @@
    if(event.key==='Enter'||event.key===' '){event.preventDefault();select(group.dataset.brainRegion);}
   });
  });
- close.addEventListener('click',reset);
+ close.addEventListener('click',()=>{
+  const selected=nodes.find(b=>b.getAttribute('aria-pressed')==='true');
+  reset();
+  // Return keyboard focus to the original option, not the now-hidden close button.
+  if(selected)selected.focus({preventScroll:true});
+ });
+ window.addEventListener('resize',()=>{
+  const selected=nodes.find(b=>b.getAttribute('aria-pressed')==='true');
+  if(selected)moveDetailNearSelection(selected.dataset.region);
+ });
  reset();
  // The current six-lobe diagram remains the default. The second tab is a genuine
  // DOM/SVG lesson with live selection, not a flattened generated image.

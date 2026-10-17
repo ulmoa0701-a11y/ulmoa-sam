@@ -780,3 +780,24 @@
  .brain-page .hemi-topic-to-activity{width:100%;min-height:46px;font-size:13px}
  .brain-page #hemiActivityGuide{scroll-margin-top:75px}
 }
+
+/* 2026-10-17: keep each lobe explanation with the selected card, not offscreen.
+   Original SVG, color keys and the separate hemisphere lesson stay unchanged. */
+.brain-page .brain-main .lobe-list > .quick-detail{
+ grid-column:1/-1;margin-top:0;scroll-margin-top:100px;min-width:0;
+}
+.brain-page .brain-main .lobe-list > .quick-detail p{
+ font-size:13.5px;line-height:1.65;
+}
+.brain-page .brain-main .brain-bottom{margin-top:13px}
+.brain-page .brain-main .brain-bottom > p{font-size:12.5px;line-height:1.6}
+@media(max-width:380px){
+ .brain-page .brain-main .map-panel-heading{flex-wrap:wrap;justify-content:flex-start;gap:3px}
+ .brain-page .brain-main .map-panel-heading > span{flex-basis:100%;text-align:left;font-size:11px}
+ .brain-page .brain-main .lobe-list{grid-template-columns:minmax(0,1fr);gap:7px}
+ .brain-page .brain-main .lobe-card{min-height:72px;padding:10px 11px;gap:11px}
+ .brain-page .brain-main .lobe-card strong{font-size:16px}
+ .brain-page .brain-main .lobe-card small{font-size:13px;line-height:1.45}
+ .brain-page .brain-main .lobe-number{width:34px;height:34px;flex-basis:34px;font-size:18px}
+ .brain-page .brain-main .lobe-list > .quick-detail{padding:10px 11px}
+}
