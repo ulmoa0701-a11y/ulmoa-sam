@@ -30,7 +30,7 @@
     sceneDetect: `<div class="cp-mission">🌳 숲에서 무엇이 바뀌었을까요?</div><div class="cp-choice-row"><span>🌳</span><span>🐰</span><span>→</span><span>🌳</span><span class="is-good">🐱</span></div><div class="cp-arrow">👀 단서를 기억해요</div>`,
     slowScan: `<div class="cp-mission">🌼 꽃을 빠뜨리지 않고 찾아요</div><div class="cp-choice-row"><span>🍃</span><span class="is-good">🌼</span><span>🌱</span><span class="is-good">🌼</span><span>🪨</span></div>`,
     slowPlace: `<div class="cp-mission">같은 위치에 꽃을 심어요</div><div class="cp-choice-row"><span>🌼</span><span>▫</span><span>▫</span><span>→</span><span class="is-good">🌼</span></div>`,
-    slowBlock: `<div class="cp-mission">같은 블록 모양의 정원을 만들어요</div><div class="cp-choice-row"><span>🧱</span><span>🧱</span><span>→</span><span class="is-good">🧱</span><span>🧱</span></div>`,
+    slowBlock: `<div class="cp-mission">블록을 돌려 샘의 집을 지어요 🏗️</div><div class="cp-choice-row"><span>🧱🧱</span><span>🔄</span><span class="is-good">↕</span><span>🧱🧱</span></div><div class="cp-arrow">🏡 길쭉한 블록 조립하기</div>`,
     slowName: `<div class="cp-mission">보고 생각한 뒤 말해요</div><div class="cp-choice-row"><span>🐰</span><span>🐶</span><span>🐱</span></div>`,
     slowMemory: `<div class="cp-mission">어느 칸에 꽃이 피었을까요?</div><div class="cp-sequence"><i>🌼</i><i>▫</i><i>🌸</i><i>▫</i></div><div class="cp-arrow">잠깐 기억해요 ↓</div><div class="cp-slots"><i>?</i><i>?</i><i>?</i><i>?</i></div>`,
     slowEveryday: `<div class="cp-mission">🌧️ 비 오는 날! 준비물은 무엇일까?</div><div class="cp-choice-row"><span class="is-good">☂️</span><span>🥁</span><span class="is-good">🧥</span><span>📖</span><span class="is-good">👢</span></div><div class="cp-arrow">🎒 모아 가방을 채워 출발해요</div>`,

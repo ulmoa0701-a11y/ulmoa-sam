@@ -42,15 +42,17 @@ function render(id,d) {
  const {state,area,missionText,missionSub,guide,say,flash,addSeeds,sfx,nextRound}=d;
  const s=state.slowLook;
  if(!s || !isNew(id))return;
- if(s.activeRound!==state.round){s.activeRound=state.round;s.selected=new Set();s.attempts=0;s.firstCorrect=null;s.hint=false;s.pauses=0;s.finished=false;s.nameReady=false;s.memoryHidden=-1;}
+ const newRound=s.activeRound!==state.round;
+ if(newRound){s.activeRound=state.round;s.selected=new Set();s.attempts=0;s.firstCorrect=null;s.hint=false;s.pauses=0;s.finished=false;s.nameReady=false;s.memoryHidden=-1;if(id==='slowBlock')window.MoaBlockBuilder.fresh(s);}
  const round=state.round;
  const cues={guide:'눈으로 보고, 생각하고, 준비되면 표현해요.',wait:'천천히 살펴볼 시간을 가져요.',self:'스스로 확인한 뒤 준비되면 시작해요.'};
  guide.src=id==='slowMemory'?'assets/friend-ru.png':id==='slowScan'?'assets/friend-hong.png':'assets/friend-saem.png';
  missionText.textContent=({slowScan:'꽃을 빠뜨리지 않고 찾아요!',slowPlace:'정원의 같은 위치에 꽃을 심어요!',slowBlock:'같은 블록 모양의 정원을 만들어요!',slowName:'친구의 이름을 차근차근 말해요!',slowMemory:'꽃이 있던 자리를 기억해요!',slowEveryday:'가방에 넣을 물건을 찾아요!'})[id];
  missionSub.textContent=cues[s.cue];
- if(s.cue==='guide'&&id!=='slowEveryday')say(missionText.textContent); // no automatic repetition in wait/self mode
+ if(s.cue==='guide'&&id!=='slowEveryday'&&newRound)say(missionText.textContent); // no automatic repetition in wait/self mode
  const n=s.level===3?4:3;
- const baseShape=(s.level===1?simple:s.level===2?medium:hard)[round%simple.length];
+ const blockHard=[[[0,1],[1,1],[2,1],[2,2]],...hard.slice(1)];
+ const baseShape=(s.level===1?simple:s.level===2?medium:id==='slowBlock'?blockHard:hard)[round%simple.length];
   const rotation=Math.floor(round/5)%4;
   const shape=baseShape.map(([r,c])=>{let a=r,b=c;for(let k=0;k<rotation;k++){const t=a;a=b;b=n-1-t}return[a,b]});
  const selected=s.selected;
@@ -83,8 +85,10 @@ function render(id,d) {
    const key=Math.floor(i/n)+','+(i%n),yes=scanTargets.has(key),icons=['🍃','🌱','🪨','🌿'];
    return '<button type="button" data-slow="cell" data-key="'+key+'" aria-label="그림 '+(i+1)+'" aria-pressed="'+selected.has(key)+'" class="slow-tile '+(selected.has(key)?'picked':'')+'">'+(yes?'🌼':icons[(i+round)%4])+'</button>';
   }).join('')+'</div>';
- }else if(id==='slowPlace'||id==='slowBlock') {
+ }else if(id==='slowPlace') {
   html+='<div class="slow-map-pair"><div><b>보기</b>'+grid(true)+'</div><div><b>내가 만드는 정원</b>'+grid(false)+'</div></div>';
+ }else if(id==='slowBlock'){
+  html+=window.MoaBlockBuilder.model(s,pattern,n);
  }else if(id==='slowMemory'){
   const hidden=s.memoryHidden===round;
   html+=hidden?'<div class="slow-mission-label">어디에 꽃이 있었을까요?</div><div class="slow-map-pair"><div><b>가려진 보기</b><div class="slow-board slow-covered">🙈<small>잠깐 기억해요</small></div></div><div><b>내가 기억한 자리</b>'+grid(false)+'</div></div>':'<div class="slow-mission-label">꽃이 있는 위치를 기억해요.</div><div class="slow-map-pair"><div><b>기억할 정원</b>'+grid(true)+'</div><div><b>기억할 수 있으면 눌러요</b><div class="slow-board slow-covered">🌿<small>준비되면 시작해요</small></div></div></div>';
@@ -118,10 +122,13 @@ function render(id,d) {
  function finish(outcome,note){
   if(s.finished)return;
   s.finished=true;const correct=outcome===true;
-  s.records.push({round:round+1,first:s.firstCorrect===true?'O':s.firstCorrect===false?'X':'미확인',final:outcome===null?'미평가':correct?'O':'X',retries:s.attempts,hint:s.hint,pauses:s.pauses,note});
+  s.records.push({round:round+1,first:s.firstCorrect===true?'O':s.firstCorrect===false?'X':'미확인',final:outcome===null?'미평가':correct?'O':'X',retries:s.attempts,hint:s.hint,pauses:s.pauses,note:id==='slowBlock'?note+' · 조립 수정 '+(s.blockEdits||0)+'회':note});
   if(correct){addSeeds(s.attempts?7:10);sfx('ok');}else if(outcome===false){sfx('tap');}
   root.querySelectorAll('button[data-slow]').forEach(b=>{if(b.dataset.slow!=='next')b.disabled=true;});
   feed.textContent=outcome===null?'쉬어가도 괜찮아요.':correct?'정원을 정확하게 살폈어요!':'어려웠던 문제는 잠시 두고 다음 길로 가요.';
+  if(correct&&id==='slowBlock'){
+   const home=document.createElement('div');home.className='slow-block-built';home.setAttribute('role','status');home.innerHTML='<span aria-hidden="true">🧱 🏡 🌼</span><strong>샘의 집이 완성됐어요!</strong><p>블록을 돌리고 연결해서 집을 만들었어요.</p>';root.appendChild(home);
+  }
   if(correct&&id==='slowEveryday'){
    const arrival=document.createElement('div');arrival.className='slow-bag-arrival';arrival.setAttribute('role','status');
    const packed=bag.targets.map(id=>bag.choices.find(c=>c.id===id).icon).join(' ');
@@ -148,6 +155,12 @@ function render(id,d) {
  }
  function nameScore(okay,note){if(s.firstCorrect===null)s.firstCorrect=okay;if(okay)finish(true,note);else {s.attempts++;if(s.attempts>=2){finish(false,note);return;}s.nameReady=false;s.hint=true;feed.textContent='다시 천천히 눈으로 보고 생각할 시간을 가져요.';let btn=root.querySelector('[data-slow="ready"]');if(!btn){btn=document.createElement('button');btn.type='button';btn.className='slow-primary slow-retry-name';btn.dataset.slow='retryName';btn.textContent='다시 보고 말하기 →';root.appendChild(btn)}else btn.disabled=false;root.querySelectorAll('.slow-teacher-choice button,.slow-name-choice button').forEach(x=>x.disabled=true)}}
  root.addEventListener('click',e=>{
+  const block=e.target.closest('button[data-block]');
+  if(id==='slowBlock'&&block&&!block.disabled){
+   window.MoaBlockBuilder.action(s,block.dataset.block,block.dataset.key,n,pattern.length);
+   render(id,d);
+   return;
+  }
   const b=e.target.closest('button[data-slow]');if(!b||b.disabled)return;const a=b.dataset.slow;
   if(a==='pause'){
    s.pauses++;root.classList.add('slow-paused');

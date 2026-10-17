@@ -50,14 +50,39 @@ const fs=require('node:fs');
       for(let j=0;j<cells;j++)if((await flowers.nth(j).innerText()).includes('🌼'))await flowers.nth(j).click();
       await page.locator('[data-slow="check"]').click();
       assert.ok(await page.locator('[data-slow="next"]').isVisible(),'correct visual search rejected');
-    }else if(mode==='slowPlace'||mode==='slowBlock'){
+    }else if(mode==='slowPlace'){
       const sample=page.locator('.slow-map-pair .slow-board').first();
       const cells=sample.locator('.slow-tile');const count=await cells.count();
       const target=page.locator('.slow-map-pair .slow-board').last().locator('button[data-slow="cell"]');
       for(let j=0;j<count;j++)if((await cells.nth(j).getAttribute('class')).includes('shown'))await target.nth(j).click();
       await page.locator('[data-slow="check"]').click();
       assert.ok(await page.locator('[data-slow="next"]').isVisible(),mode+' correct spatial copy rejected');
-    }else if(mode==='slowEveryday'){
+    }else if(mode==='slowBlock'){
+       await page.evaluate(()=>{
+        const s=state.slowLook,n=s.level===3?4:3,tiles=[...document.querySelector('.slow-block-board').querySelectorAll('.slow-tile')];
+        const remaining=tiles.map((t,i)=>t.classList.contains('shown')?Math.floor(i/n)+','+(i%n):null).filter(Boolean);
+        function solver(left,pairs,singles){
+         if(!left.length)return pairs===0&&singles===0?[]:null;
+         const first=left[0],[r,c]=first.split(',').map(Number);
+         if(pairs>0)for(const [dir,other] of [['right',r+','+(c+1)],['down',(r+1)+','+c]]){
+          if(left.includes(other)){const sub=solver(left.filter(k=>k!==first&&k!==other),pairs-1,singles);if(sub)return [{pos:first,dir,size:2},...sub];}
+         }
+         if(singles>0){const sub=solver(left.filter(k=>k!==first),pairs,singles-1);if(sub)return [{pos:first,dir:'right',size:1},...sub];}
+         return null;
+        }
+        const quota=MoaBlockBuilder.quota(remaining.length),parts=solver(remaining,quota.double,quota.single);
+        if(!parts)throw Error('Constructed block shape is not solvable');
+        for(const part of parts){
+         const kind=part.size===2?'double':'single';
+         if(s.blockMode!==kind)document.querySelector('[data-block="'+kind+'"]').click();
+         if(kind==='double'&&s.blockDir!==part.dir)document.querySelector('[data-block="rotate"]').click();
+         document.querySelector('[data-block="place"][data-key="'+part.pos+'"]').click();
+        }
+        document.querySelector('[data-slow="check"]').click();
+       });
+       assert.ok(await page.locator('.slow-block-built').isVisible(),'assembled house not completed');
+       assert.ok(await page.locator('[data-slow="next"]').isVisible(),'actual block assembly rejected');
+     }else if(mode==='slowEveryday'){
       await page.locator('.slow-bag [data-slow="cell"]').first().click();
       await page.locator('[data-slow="check"]').click();
       if(await page.locator('[data-slow="next"]').count()===0)await page.locator('[data-slow="skip"]').click();

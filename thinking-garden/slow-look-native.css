@@ -98,3 +98,26 @@ button:disabled.slow-primary,button:disabled.slow-secondary{opacity:.65;cursor:d
 .slow-bag-arrival p{margin:0;font-size:13px}
 @media(max-width:480px){.slow-bag-quest{grid-template-columns:1fr}.slow-bag-story,.slow-bag-progress{padding:9px}.slow-bag-progress{grid-template-columns:40px 60px 1fr}.slow-bag-progress>span{grid-row:auto;font-size:32px}.slow-bag-progress strong{font-size:18px}#moaBagContents{grid-column:auto}.slow-bag-story img{width:43px;height:43px}.slow-board.slow-bag{gap:6px;min-height:0;padding:7px}.slow-bag .slow-tile{min-height:52px;font-size:clamp(27px,8vw,38px)}}
 @media(prefers-reduced-motion:reduce){.slow-bag .slow-tile{transform:none}}
+
+/* Architect game: whole adjacent bricks rather than identical position tapping. */
+.slow-block-story{width:min(100%,640px);display:flex;align-items:center;gap:12px;background:linear-gradient(115deg,#eef8e8,#f9f9ee);border:2px solid #c4e0c3;border-radius:18px;padding:10px 13px}
+.slow-block-story img{width:50px;height:50px;object-fit:contain}
+.slow-block-story div{display:grid;gap:5px;flex:1;min-width:0}
+.slow-block-story strong{color:#355a46;font-size:16px}
+.slow-block-story span{color:#576f60;font-size:13px}
+.slow-block-story>span{font-size:36px}
+.slow-build-pair .slow-block-board{max-width:275px}
+.slow-build-pair .slow-block-board .slow-tile{min-height:50px}
+.slow-block-tools{display:grid;gap:8px;justify-items:center;max-width:650px;width:100%}
+.slow-block-pieces,.slow-block-other{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;width:100%}
+.slow-block-tools button{min-height:48px;border-radius:14px;border:2px solid #c5dcca;background:#fff;padding:8px 13px;font-size:14px;font-weight:800;color:#315944;cursor:pointer}
+.slow-block-tools button small{display:block;font-size:11px;font-weight:700;color:#637a69;margin-top:2px}
+.slow-block-tools button.selected{border-color:#4e9a70;background:#e3f5df;box-shadow:inset 0 0 0 2px #9cd3a0}
+.slow-block-tools button:disabled{opacity:.45;cursor:default}
+.slow-block-tools button:focus-visible{outline:3px solid #e1b644;outline-offset:2px}
+.slow-block-feedback{margin:0;min-height:26px;text-align:center;font-size:14px;font-weight:800;color:#4a6954}
+.slow-block-built{width:min(100%,560px);border:2px solid #b7dbae;border-radius:18px;background:#ecf8e5;color:#315c42;padding:12px;text-align:center;display:grid;gap:5px}
+.slow-block-built span{font-size:clamp(32px,7vw,50px)}
+.slow-block-built strong{font-size:19px}
+.slow-block-built p{margin:0;font-size:13px}
+@media(max-width:600px){.slow-block-story{gap:7px;padding:8px}.slow-block-story img{width:39px;height:39px}.slow-block-story strong{font-size:14px}.slow-block-story span{font-size:12px}.slow-block-tools button{padding:8px;font-size:12px;flex:1 1 auto}.slow-build-pair .slow-block-board .slow-tile{min-height:37px}}
