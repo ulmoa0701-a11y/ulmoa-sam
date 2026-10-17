@@ -4,6 +4,28 @@
 const things=[['연필','✏️'],['가방','🎒'],['물병','🧃'],['책','📚'],['지우개','🧽'],['우산','☂️']];
 const advanced=[[1,2,3,6],[7,6,5,2],[3,0,1,2],[5,8,7,6],[1,0,3,6]];
 const simple=[[1,3],[5,7],[3,1],[7,5],[1,7]];
+const cells=[0,1,2,3,5,6,7,8],cardinal=[1,3,5,7];
+function arrangements(pool,size){
+ const result=[];
+ function visit(order,remaining){
+  if(order.length===size){result.push(order);return;}
+  for(let i=0;i<remaining.length;i++)visit([...order,remaining[i]],remaining.filter((_,j)=>j!==i));
+ }
+ visit([],pool);return result;
+}
+// 12 basic layouts, 336 three-object layouts, 1680 four-object layouts.
+// The first five approved patterns stay in place; later cases no longer
+// repeat the same five spatial relationships.
+const easyLayouts=arrangements(cardinal,2);
+const normalLayouts=arrangements(cells,3).filter(x=>!advanced.some(a=>a.slice(0,3).join(',')===x.join(',')));
+const hardLayouts=arrangements(cells,4).filter(x=>!advanced.some(a=>a.join(',')===x.join(',')));
+function choosePlaces(round,level){
+ if(round<5)return level===1?simple[round]:advanced[round].slice(0,level===2?3:4);
+ if(level===1)return easyLayouts[((round-5)*5)%easyLayouts.length];
+ const choices=level===2?normalLayouts:hardLayouts;
+ const stride=level===2?17:79;
+ return choices[((round-5)*stride)%choices.length];
+}
 function relative(origin,target){
  const dr=Math.floor(target/3)-Math.floor(origin/3),dc=target%3-origin%3;
  return (dc<0?'왼쪽':dc>0?'오른쪽':'')+(dc!==0&&dr!==0?' ':'')+(dr<0?'위':dr>0?'아래':'');
@@ -11,7 +33,7 @@ function relative(origin,target){
 window.StrategyGarden.register('classroomMove',{
  begin(s,r,round){
   const n=r.level===1?2:r.level===2?3:4;
-  const places=r.level===1?simple[round%5]:advanced[round%5].slice(0,n);
+  const places=choosePlaces(round,r.level);
   r.tasks=places.map((pos,i)=>({item:(round+i)%things.length,pos,origin:r.level===3&&i%2===1?places[i-1]:4,reference:r.level===3&&i%2===1?(round+i-1)%things.length:null}));
   r.doneItems={};r.step=0;r.selectedItem=null;r.selectedPos=null;r.phase='arrange';
  },
