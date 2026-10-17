@@ -664,7 +664,7 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
  // Real timing exercises: four distinct subdivisions, 8 measures each,
  // on a single pitch, no artificial lyrics and with a useful beat counter.
  const rhythmChecks=await page.evaluate(()=>{
-  const prev={song:currentSong,section:practiceSection,t:elapsed,level},results=[];
+  const prev={song:currentSong,section:practiceSection,t:elapsed,level,bpm},results=[];
   try{
    for(const key of ['beat-basic','beat-half','sixteenth','dotted']){
     currentSong=clone(findSample(key));level=3;practiceSection='all';elapsed=0;bpm=selectedTempo(currentSong);
@@ -690,7 +690,7 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
        items:[...document.querySelectorAll('#sampleSelect optgroup')].map(x=>[x.label,x.querySelectorAll('option').length]),
        results};
   }finally{
-   currentSong=prev.song;level=prev.level;practiceSection=prev.section;elapsed=prev.t;
+   currentSong=prev.song;level=prev.level;practiceSection=prev.section;elapsed=prev.t;bpm=prev.bpm;
    refreshPracticeSections();build();updateRhythmGuide();
   }
  });
