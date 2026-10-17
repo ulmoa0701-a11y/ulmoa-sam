@@ -76,6 +76,10 @@ try{
   const minimum=width<500?12.5:13;
   assert.ok(textSize.cards>=minimum,'brain function descriptions too small: '+JSON.stringify(textSize));
   if(width<=380)assert.equal(textSize.columns,1,'small phones use readable one-column cards');
+  if(width<=380){
+   const titleHeight=await page.locator('.map-panel-heading h2').evaluate(el=>el.getBoundingClientRect().height);
+   assert.ok(titleHeight<43,'six-lobe heading should not wrap awkwardly on small screens: '+titleHeight);
+  }
   await page.screenshot({path:out+'/'+name+'-initial.png',fullPage:true});
   if(name==='desktop'||name==='small-mobile'){
    const jpeg=await page.screenshot({type:'jpeg',quality:45,animations:'disabled'});
