@@ -31,8 +31,10 @@ function pose(landmarks){
  return found?.[0]||null;
 }
 function match(hands, expected){
- if(!Array.isArray(hands)||!Array.isArray(expected)||hands.length<expected.length)return false;
+ if(!Array.isArray(hands)||!Array.isArray(expected)||hands.length!==expected.length||expected.length<1||expected.length>2)return false;
  const labels=hands.map(pose).filter(Boolean);
+ // Extra hands must not score someone else's pose for the learner; use one visible hand
+ // for one-handed games and two visible hands for bilateral games.
  if(labels.length<expected.length)return false;
  const target=[...expected];
  for(const label of labels){const i=target.indexOf(label);if(i>=0)target.splice(i,1);}
