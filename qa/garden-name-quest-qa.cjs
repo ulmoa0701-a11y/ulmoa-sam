@@ -32,7 +32,7 @@ const assert=require('node:assert/strict');
      await page.locator('[data-slow="name-right"]').click();
      assert.ok(await page.locator('.slow-name-arrival').isVisible(),'no visible reward for successful response');
      await page.locator('[data-slow="next"]').click();
-     if(round+1<length&&((round+1)%5===0)){
+     if(length>=10&&round+1<length&&((round+1)%5===0)){
       await page.locator('#practiceContinue').waitFor();
       await page.locator('#practiceContinue').click();
      }
