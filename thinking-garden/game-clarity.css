@@ -72,3 +72,23 @@
  #gameWorld .flower-basket strong,#gameWorld .wake-scene-head strong{font-size:14px}
  #gameWorld .flower-collect .object-grid{gap:7px}
 }
+
+
+/* Visual trace, discovery and scaffold for the hidden-friend game. */
+#gameWorld .leaf-clue-game{gap:12px}
+#gameWorld .leaf-example{display:flex;align-items:center;justify-content:center;gap:11px;padding:7px 16px;border-radius:24px;background:#fffdf5;border:2px solid #e4e8cd;box-shadow:0 5px 12px #31553a10;font-size:clamp(22px,3.8vw,32px);line-height:1.25}
+#gameWorld .leaf-example span:nth-child(even){font-size:17px;color:#63916d}
+#gameWorld .leaf-clue-game .leaf-rule{margin:3px 0 10px;max-width:36em}
+#gameWorld .leaf-clue-game .leaf-game{gap:clamp(8px,2vw,15px)}
+#gameWorld .leaf-clue-game .leaf-btn{transition:transform .17s ease,background .17s ease,box-shadow .17s ease;outline-offset:3px;min-width:0}
+#gameWorld .leaf-clue-game .leaf-trail{min-height:26px;font-size:clamp(22px,3vw,28px);letter-spacing:0;line-height:1.12}
+#gameWorld .leaf-level-3 .leaf-no-clue .leaf-trail{color:#4684b9;text-shadow:0 1px 0 #e2f1ff}
+#gameWorld .leaf-clue-game .leaf-hint:not(.opened){outline:4px solid #ffc56f;box-shadow:0 0 0 6px #ffcc7044}
+#gameWorld .leaf-clue-game .leaf-discovery{font-size:clamp(39px,5.5vw,56px);line-height:1}
+#gameWorld .leaf-clue-game .leaf-btn.opened{background:#ecf7e8}
+@media(max-width:650px){
+ #gameWorld .leaf-clue-game .leaf-example{gap:8px;padding:6px 13px}
+ #gameWorld .leaf-clue-game .leaf-btn{min-height:92px}
+ #gameWorld .leaf-clue-game .leaf-trail{font-size:23px}
+}
+@media(prefers-reduced-motion:reduce){#gameWorld .leaf-clue-game .leaf-btn{transition:none}}

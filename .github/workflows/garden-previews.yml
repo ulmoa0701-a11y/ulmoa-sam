@@ -3,6 +3,11 @@ on:
   push:
     branches: [main]
     paths:
+      - 'thinking-garden/app.js'
+      - 'thinking-garden/game-clarity.css'
+      - 'thinking-garden/novel-garden.js'
+      - 'thinking-garden/slow-look-native.js'
+      - 'thinking-garden/strategy-*.js'
       - 'qa/generate-garden-previews.mjs'
       - '.github/workflows/garden-previews.yml'
   workflow_dispatch:

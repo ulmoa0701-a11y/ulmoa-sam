@@ -174,24 +174,33 @@ function renderFlower(){
  });
 }
 function renderHide(){
- const total=6+practiceStep(),need=2+Math.floor(practiceStep()/2);
+ const total=6+practiceStep(),need=2+Math.floor(practiceStep()/2),level=Math.min(3,1+Math.floor(practiceStep()/2));
  const spots=shuffle([...Array(total).keys()]).slice(0,need),bugs=new Set(spots);
- let found=0;
- missionText.textContent='작은 발자국이 있는 잎사귀를 찾아요!';
- missionSub.textContent='친구가 숨은 잎사귀 아래에는 작은 흔적이 있어요. 먼저 살펴보고 열어봐요.';
+ let found=0,misses=0;
+ missionText.textContent='작은 발자국을 따라 숨은 친구를 찾아요!';
+ missionSub.textContent='발자국 🐾이 있는 잎사귀를 열면 무당벌레를 찾을 수 있어요.';
  say(missionText.textContent);
- area.innerHTML='<div class="basic-game leaf-clue-game"><div class="mini-count" id="miniCount">🐞 0 / '+need+'</div><p class="leaf-rule">👣 작은 발자국이 있는 잎사귀를 찾아요. 천천히 보면 보여요!</p><div class="leaf-game">'+
- [...Array(total).keys()].map(i=>'<button class="leaf-btn '+(bugs.has(i)?'leaf-has-clue':'leaf-no-clue')+'" data-i="'+i+'" type="button" aria-label="'+(bugs.has(i)?'작은 흔적이 있는 잎사귀':'잎사귀')+'"><span class="leaf-cover" aria-hidden="true">🍃</span><span class="leaf-trail" aria-hidden="true">'+(bugs.has(i)?'··':'　')+'</span></button>').join('')+'</div></div>';
- $$('.leaf-btn').forEach(b=>b.onclick=()=>{
+ const leaves=[...Array(total).keys()].map(i=>{
+  const clue=bugs.has(i),dew=!clue&&level===3&&i%2===0;
+  const trail=clue?'🐾':dew?'💧':'';
+  const label=clue?'발자국이 있는 잎사귀':dew?'이슬방울이 있는 잎사귀':'흔적이 없는 잎사귀';
+  return '<button class="leaf-btn '+(clue?'leaf-has-clue':'leaf-no-clue')+'" data-i="'+i+'" type="button" aria-label="'+label+'"><span class="leaf-cover" aria-hidden="true">🍃</span><span class="leaf-trail" aria-hidden="true">'+(trail||'&nbsp;')+'</span></button>';
+ }).join('');
+ area.innerHTML='<div class="basic-game leaf-clue-game leaf-level-'+level+'"><div class="mini-count" id="miniCount">🐞 0 / '+need+'</div><div class="leaf-example" aria-label="발자국을 보고 잎사귀를 열어 무당벌레 찾기"><span>🐾</span><span>→</span><span>🍃</span><span>→</span><span>🐞</span></div><p class="leaf-rule">🐾 발자국을 찾아 잎사귀를 열어요.'+(level===3?' 💧 이슬방울과 구분해요.':'')+'</p><div class="leaf-game">'+leaves+'</div></div>';
+ area.querySelectorAll('.leaf-btn').forEach(b=>b.onclick=()=>{
   if(b.classList.contains('opened')||state.lock)return;
-  b.classList.add('opened');
   const ok=bugs.has(+b.dataset.i);
-  b.innerHTML='<span aria-hidden="true">'+(ok?'🐞':'🌱')+'</span>';
+  b.classList.add('opened');
+  b.innerHTML='<span class="leaf-discovery" aria-hidden="true">'+(ok?'🐞':'🌱')+'</span>';
   b.setAttribute('aria-label',ok?'무당벌레를 찾았어요':'빈 잎사귀예요');
   sfx(ok?'ok':'tap');
-  if(ok){found++;$('#miniCount').textContent='🐞 '+found+' / '+need;addSeeds(Math.ceil(10/need));
-   if(found===need){flash('발자국을 보고 친구를 찾아냈어요!');roundGate(area.querySelector('.basic-game'),'다음 잎사귀 ▶',500);}
-  }else{flash('이번엔 흔적이 없네요. 다른 잎사귀에서 찾아봐요.')}
+  if(ok){
+   found++;$('#miniCount').textContent='🐞 '+found+' / '+need;addSeeds(Math.ceil(10/need));
+   if(found===need){flash('발자국을 따라 숨은 친구를 모두 찾았어요!');roundGate(area.querySelector('.basic-game'),'다음 잎사귀 ▶',500)}
+  }else{
+   misses++;flash('여긴 발자국이 없어요. 🐾 모양을 다시 찾아요.');
+   if(misses>=2)area.querySelectorAll('.leaf-has-clue:not(.opened)').forEach(x=>x.classList.add('leaf-hint'));
+  }
  });
 }
 function renderPath(){const len=4+Math.min(practiceStep(),3),icons=['🌱','🌼','🍃','🌸','🌿','🌻','🌷'],seq=icons.slice(Math.floor(state.round/5)%icons.length).concat(icons.slice(0,Math.floor(state.round/5)%icons.length)).slice(0,len);let pos=0;missionText.textContent='반짝이는 길을 차례로 따라가요!';missionSub.textContent='지금 반짝이는 곳을 찾아 한 칸씩 이동해요.';say(missionText.textContent);area.innerHTML=`<div class="basic-game"><div class="trail-game">${seq.map((x,i)=>`<button class="trail-node ${i===0?'ready':''}" data-i="${i}">${x}</button>`).join('')}<div class="trail-runner" id="trailRunner">🦋</div></div></div>`;$$('.trail-node').forEach(b=>b.onclick=()=>{if(state.lock)return;const i=+b.dataset.i;if(i!==pos){b.classList.add('wrong');sfx('no');flash('반짝이는 곳부터!');later(()=>b.classList.remove('wrong'),350);return}b.classList.remove('ready');b.classList.add('visited');pos++;addSeeds(Math.ceil(10/len));sfx('ok');if(pos<len)$$('.trail-node')[pos].classList.add('ready');else{flash('길 완성! 🦋');roundGate(area.querySelector('.basic-game'),'다음 길 ▶',500)}})}
@@ -211,7 +220,51 @@ function renderTargets(){
   if(done===total){flash('꽃씨가 모두 깨어났어요! 🌻');roundGate(area.querySelector('.basic-game'),'다음 꽃씨 ▶',500)}
  });
 }
-function renderPaint(){const total=12+practiceStep()*3;let done=0,drawing=false;missionText.textContent='정원길을 쓱싹 채워요!';missionSub.textContent='누른 채 움직이거나 칸을 톡톡 눌러 안쪽을 채워요.';say(missionText.textContent);area.innerHTML=`<div class="basic-game"><div class="mini-count" id="miniCount">🖍️ 0%</div><div class="paint-grid-new" id="paintGrid">${Array.from({length:total},()=>'<i></i>').join('')}</div></div>`;const fill=cell=>{if(state.lock||cell.classList.contains('painted'))return;cell.classList.add('painted');done++;$('#miniCount').textContent=`🖍️ ${Math.round(done/total*100)}%`;if(done===total){addSeeds(10);sfx('ok');flash('정원길 완성!');roundGate(area.querySelector('.basic-game'),'다음 색칠길 ▶',500)}};const g=$('#paintGrid');g.onpointerdown=e=>{drawing=true;if(e.target.tagName==='I')fill(e.target)};g.onpointermove=e=>{if(!drawing)return;const cell=document.elementFromPoint(e.clientX,e.clientY);if(cell&&cell.parentElement===g&&cell.tagName==='I')fill(cell)};g.onpointerover=e=>{if(drawing&&e.target.tagName==='I')fill(e.target)};g.onclick=e=>{if(e.target.tagName==='I')fill(e.target)};g.onpointerup=()=>drawing=false;g.onpointercancel=()=>drawing=false;g.onpointerleave=e=>{if(e.pointerType==='mouse')drawing=false}}
+function renderPaint(){
+ const total=12+practiceStep()*3;let done=0,drawing=false,activePointer=null,lastPoint=null;
+ missionText.textContent='정원길을 쓱싹 채워요!';
+ missionSub.textContent='손가락으로 길을 쭉 이으면 지나간 칸이 채워져요.';
+ say(missionText.textContent);
+ area.innerHTML=`<div class="basic-game"><div class="mini-count" id="miniCount">🖍️ 0%</div><div class="paint-grid-new" id="paintGrid">${Array.from({length:total},()=>'<i></i>').join('')}</div></div>`;
+ const g=$('#paintGrid');
+ const fill=cell=>{
+  if(state.lock||!cell||cell.parentElement!==g||cell.tagName!=='I'||cell.classList.contains('painted'))return;
+  cell.classList.add('painted');done++;
+  $('#miniCount').textContent=`🖍️ ${Math.round(done/total*100)}%`;
+  if(done===total){addSeeds(10);sfx('ok');flash('정원길 완성!');roundGate(area.querySelector('.basic-game'),'다음 색칠길 ▶',500)}
+ };
+ const paintAt=(x,y)=>fill(document.elementFromPoint(x,y));
+ const paintTrail=(x,y)=>{
+  if(!drawing)return;
+  if(lastPoint){
+   const dx=x-lastPoint.x,dy=y-lastPoint.y,steps=Math.max(1,Math.ceil(Math.hypot(dx,dy)/7));
+   for(let k=1;k<=steps;k++)paintAt(lastPoint.x+dx*k/steps,lastPoint.y+dy*k/steps);
+  }else paintAt(x,y);
+  lastPoint={x,y};
+ };
+ const end=e=>{
+  if(!drawing||activePointer!==e.pointerId)return;
+  if(e.type==='pointerup')paintTrail(e.clientX,e.clientY);
+  drawing=false;lastPoint=null;activePointer=null;
+  try{if(g.hasPointerCapture(e.pointerId))g.releasePointerCapture(e.pointerId)}catch{}
+ };
+ g.addEventListener('pointerdown',e=>{
+  if(state.lock||drawing)return;
+  drawing=true;activePointer=e.pointerId;lastPoint=null;
+  try{g.setPointerCapture(e.pointerId)}catch{}
+  paintTrail(e.clientX,e.clientY);e.preventDefault();
+ });
+ g.addEventListener('pointermove',e=>{
+  if(!drawing||activePointer!==e.pointerId)return;
+  if(e.pointerType==='mouse'&&e.buttons===0){drawing=false;activePointer=null;lastPoint=null;return}
+  paintTrail(e.clientX,e.clientY);
+ });
+ g.addEventListener('pointerup',end);
+ g.addEventListener('pointercancel',end);
+ g.addEventListener('lostpointercapture',()=>{drawing=false;activePointer=null;lastPoint=null});
+ g.addEventListener('click',e=>{if(e.target.tagName==='I')fill(e.target)});
+}
+
 function renderWater(){const total=3+practiceStep();let done=0;const flowers=['🌷','🌼','🌸','🌻','🌺','🌹','🪻'];const items=shuffle([...Array.from({length:total},(_,i)=>({wilt:true,flower:flowers[i%flowers.length]})),...Array.from({length:2+Math.floor(practiceStep()/2)},(_,i)=>({wilt:false,flower:flowers[(i+3)%flowers.length]}))]);missionText.textContent=`시든 꽃 ${total}송이만 깨워요!`;missionSub.textContent='이미 활짝 핀 꽃은 그대로 두고, 시든 꽃에만 물을 주세요.';say(missionText.textContent);area.innerHTML=`<div class="basic-game"><div class="mini-count" id="miniCount">💧 0 / ${total}</div><div class="water-grid-new">${items.map(o=>`<button class="wilt ${o.wilt?'needs-water':'healthy'}" data-good="${o.wilt?1:0}" data-flower="${o.flower}">${o.wilt?'🥀':o.flower}<small>${o.wilt?'💧':'✓'}</small></button>`).join('')}</div></div>`;$$('.wilt').forEach(b=>b.onclick=()=>{if(state.lock||b.classList.contains('bloom'))return;if(b.dataset.good!=='1'){b.classList.add('wrong');sfx('no');flash('이 꽃은 이미 싱싱해요. 시든 꽃을 찾아요.');later(()=>b.classList.remove('wrong'),380);return}b.classList.add('bloom');b.firstChild.textContent=b.dataset.flower;done++;$('#miniCount').textContent=`💧 ${done} / ${total}`;addSeeds(Math.ceil(10/total));sfx('ok');if(done===total){flash('시든 꽃을 모두 깨웠어!');roundGate(area.querySelector('.basic-game'),'다음 물주기 ▶',500)}})}
 
 function goHome(){clearTimers();speechSynthesis?.cancel?.();state.game=null;updateHome();window.MoaAssignment?.returnToPlan();show('home')}
