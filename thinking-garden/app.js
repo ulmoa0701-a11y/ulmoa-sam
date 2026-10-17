@@ -258,16 +258,24 @@ function renderInside(){
  };
 }
 function renderTargets(){
- const total=4+practiceStep()*2;let done=0;
+ const total=4+practiceStep()*2,distractors=1+Math.floor(practiceStep()/2);let done=0;
  missionText.textContent='잠든 꽃씨를 하나씩 깨워요!';
- missionSub.textContent='한 씨앗을 한 번씩만 눌러 모든 꽃을 피워봐요.';
+ missionSub.textContent='이미 꽃이 핀 자리는 그대로 두고, 아직 잠든 꽃씨만 찾아요.';
  say(missionText.textContent);
- area.innerHTML='<div class="basic-game wake-garden"><div class="wake-scene-head"><span aria-hidden="true">🌱 → 🌼</span><div><strong>모아의 꽃씨 정원</strong><p id="miniCount">피어난 꽃 0 / '+total+'</p></div></div><div class="target-grid-new">'+Array.from({length:total},()=>'<button class="wake-target" type="button" aria-label="아직 잠든 꽃씨">🌱</button>').join('')+'</div></div>';
+ const items=shuffle([
+  ...Array.from({length:total},()=>({seed:true})),
+  ...Array.from({length:distractors},(_,i)=>({seed:false,flower:['🌼','🌷','🌻'][i%3]}))
+ ]);
+ area.innerHTML='<div class="basic-game wake-garden"><div class="wake-scene-head"><span aria-hidden="true">🌱 → 🌼</span><div><strong>모아의 꽃씨 정원</strong><p id="miniCount">피어난 꽃 0 / '+total+'</p></div></div>'+
+  '<div class="target-grid-new">'+items.map(o=>o.seed?
+   '<button class="wake-target" type="button" aria-label="아직 잠든 꽃씨">🌱</button>':
+   '<span class="wake-grown" role="img" aria-label="이미 핀 꽃, 건드리지 않아요">'+o.flower+'</span>'
+  ).join('')+'</div></div>';
  $$('.wake-target').forEach(b=>b.onclick=()=>{
   if(state.lock||b.classList.contains('awake'))return;
   b.classList.add('awake');b.textContent='🌼';b.setAttribute('aria-label','꽃이 피었어요');done++;
   $('#miniCount').textContent='피어난 꽃 '+done+' / '+total;addSeeds(Math.ceil(10/total));sfx('ok');
-  if(done===total){flash('꽃씨가 모두 깨어났어요! 🌻');roundGate(area.querySelector('.basic-game'),'다음 꽃씨 ▶',500)}
+  if(done===total){flash('잠든 꽃씨를 모두 깨웠어요! 🌻');roundGate(area.querySelector('.basic-game'),'다음 꽃씨 ▶',500)}
  });
 }
 function renderPaint(){
