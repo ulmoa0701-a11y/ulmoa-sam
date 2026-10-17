@@ -111,3 +111,21 @@ body.moa-assigned .moa-clinical-bridge-body>a{display:none}
  .moa-assigned-fallback{min-height:173px}
  .moa-assigned-scene .cp-choice-row span,.moa-assigned-scene .cp-sequence i,.moa-assigned-scene .cp-slots i,.moa-assigned-scene .cp-leaves span,.moa-assigned-scene .cp-path i,.moa-assigned-scene .cp-targets i{min-width:33px;min-height:36px;font-size:20px}
 }
+
+
+/* Homework mode: quiet presentation for older learners and a caregiver-only help drawer. */
+.moa-assigned-home-help{border:1px solid #d6e4d5;border-radius:16px;background:#f8fbf5;padding:12px 16px;color:#42644c}
+.moa-assigned-home-help summary{cursor:pointer;font-size:14px;font-weight:850;min-height:30px;display:flex;align-items:center}
+.moa-assigned-home-help-body{padding-top:8px}
+.moa-assigned-home-help-body p{margin:7px 0;font-size:13px;line-height:1.65}
+body.moa-assigned-calm .moa-assigned-hero{background:linear-gradient(135deg,#f4f7f2,#e9f1eb);border-color:#d9e4dd;padding:24px 20px}
+body.moa-assigned-calm .moa-assigned-eyebrow{letter-spacing:.025em;color:#536a59}
+body.moa-assigned-calm .moa-assigned-item{border-color:#dfe7e1;box-shadow:0 4px 16px #354b4010}
+body.moa-assigned-calm .moa-assigned-number{color:#526f62}
+body.moa-assigned-calm .moa-assigned-start{background:#3d6657;border-color:#365b4e}
+body.moa-assigned-calm .moa-assigned-visual{background:#eff3f0}
+body.moa-assigned-calm .moa-assigned-visual-label{color:#52715e}
+@media(max-width:600px){
+ .moa-assigned-home-help{padding:11px 13px}
+ .moa-assigned-home-help-body p{font-size:13px;line-height:1.55}
+}
