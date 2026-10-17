@@ -137,6 +137,7 @@ async function fakeVideoGarden(){
  assert.equal(await p.locator('#video').evaluate(v=>v.videoWidth>0),true,'Video stream produced pixels');
  assert.equal(await p.locator('#modelCard').isVisible(),false,'Acorn game emphasizes a real camera-tracked nut rather than a redundant demo card');
  assert.equal(await p.locator('#acornActor').isVisible(),true,'Acorn appears in the hand area');
+ assert.equal(await p.locator('#acornActor img').evaluate(e=>e.complete&&e.naturalWidth>0),true,'Real acorn asset loaded in camera overlay');
  assert.equal(await p.locator('#acornActor').getAttribute('data-state'),'waiting','Before fist gesture the acorn waits to be caught');
  assert.match(await p.locator('#liveTitle').innerText(),/도토리를 잡아/,'Child can read a short game objective');
  assert.equal(await p.locator('#ghostGuides').isVisible(),false,'Old static tiny diagram is hidden in garden');
