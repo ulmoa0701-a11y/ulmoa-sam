@@ -111,5 +111,46 @@ for(const section of sections){
   }
  }
 }
+
+/* Search the entire collection without making visitors memorize which garden holds a game. */
+const introNote=$('.garden-note');
+const searchPanel=document.createElement('section');
+searchPanel.className='garden-search-panel';
+searchPanel.setAttribute('aria-label','전체 게임 찾기');
+searchPanel.innerHTML='<div class="garden-search-title"><span aria-hidden="true">🔎</span><div><strong>어떤 게임이 필요하세요?</strong><small>기억, 준비물, 돈 계산, 박자처럼 찾아보세요.</small></div></div>'+
+ '<div class="garden-search-controls"><label class="sr-only" for="gardenSearch">게임 검색</label><input id="gardenSearch" type="search" autocomplete="off" placeholder="예: 기억, 기다리기, 돈, 박자" /><button type="button" id="gardenSearchClear" hidden>지우기</button></div>'+
+ '<p class="garden-search-status" id="gardenSearchStatus" role="status" aria-live="polite"></p>';
+introNote.before(searchPanel);
+const searchInput=$('#gardenSearch'),searchClear=$('#gardenSearchClear'),searchStatus=$('#gardenSearchStatus');
+function refreshResults(){
+ const query=searchInput.value.trim().toLocaleLowerCase('ko-KR');
+ let grandTotal=0;
+ for(const section of sections){
+  const filter=section.dataset.activeFocus||'all';
+  const cards=$('.play-card-enhanced',section);
+  const matches=cards.filter(card=>(filter==='all'||card.dataset.focus===filter)&&(!query||card.dataset.search.includes(query)));
+  const limit=!query&&section.id==='cognitive'&&filter==='all'&&section.dataset.expanded!=='true'?6:Infinity;
+  cards.forEach(card=>{card.hidden=!matches.includes(card)||matches.indexOf(card)>=limit});
+  const visible=Math.min(limit,matches.length);
+  grandTotal+=matches.length;
+  section.hidden=!!query&&!matches.length;
+  const counter=$('.garden-filter-count',section);
+  if(counter)counter.innerHTML='<b>'+matches.length+'</b>개 게임'+(visible<matches.length?' 중 '+visible+'개 먼저 보기':'');
+  const more=$('.garden-more-wrap',section);
+  if(more){
+   more.hidden=!!query||filter!=='all'||matches.length<=6;
+   const button=$('.garden-more-button',more);
+   if(button){const expanded=section.dataset.expanded==='true';button.textContent=expanded?'접기 ↑':'나머지 '+(matches.length-6)+'개 게임 더 보기 ↓';button.setAttribute('aria-expanded',String(expanded))}
+  }
+ }
+ searchClear.hidden=!query;
+ searchStatus.textContent=query?(grandTotal?grandTotal+'개 게임을 찾았어요.':'일치하는 게임이 없어요. 다른 말로 다시 찾아볼 수 있어요.'):'';
+}
+searchInput.addEventListener('input',refreshResults);
+searchInput.addEventListener('keydown',e=>{if(e.key==='Escape'){searchInput.value='';refreshResults()}});
+searchClear.addEventListener('click',()=>{searchInput.value='';refreshResults();searchInput.focus()});
+$('.garden-jumps a').forEach(a=>a.addEventListener('click',()=>{if(searchInput.value){searchInput.value='';refreshResults()}}));
+refreshResults();
+
 console.info('Garden discovery ready:',total,'games');
 })();
