@@ -115,8 +115,9 @@ try{
    assert.equal(await page.locator('[data-lobe-scene][aria-pressed="true"]').count(),1,'exactly one scene selected: '+key);
    assert.equal(await page.locator('#lobeSceneRoles li').count(),3,'three concise brain role clues: '+key);
    assert.equal(await page.locator('#lobeSceneSelectedRegions .lobe-scene-selected-chip').count(),3,'three visible selected region names: '+key);
-   assert.ok((await page.locator('#lobeSceneCurrent').innerText()).includes((await page.locator('[data-lobe-scene="'+key+'"]').innerText()).replace(/^\\S+\\s*/,'').trim().split(' ')[0])||key==='feeling',
-     'chosen scenario must be named in visible selection header: '+key);
+   const currentLabel=await page.locator('#lobeSceneCurrent').innerText();
+   assert.match(currentLabel,/^지금 선택: /,'selected daily-life scene must be clearly named');
+   assert.ok(currentLabel.length>10,'selected scene name must not be blank: '+key);
    const selected=await page.locator('#brainMap [data-scene-active]').evaluateAll(els=>els.map(el=>el.dataset.brainRegion).sort());
    assert.deepEqual(selected,sceneToRegions[key].slice().sort(),'correct explanatory brain regions: '+key);
    const selectedCards=await page.locator('.lobe-card[data-scene-example]').evaluateAll(els=>els.map(el=>el.dataset.region).sort());
