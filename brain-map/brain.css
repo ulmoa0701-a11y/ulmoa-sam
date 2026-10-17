@@ -884,3 +884,8 @@
 .brain-page .brain-main .lobe-science-note p{padding:0 13px;margin:0 0 10px!important;font-size:13px;line-height:1.6;word-break:keep-all}
 .brain-page .brain-main .lobe-science-note a{text-decoration:underline;text-underline-offset:2px}
 .brain-page .brain-main .lobe-science-note summary:focus-visible{outline:3px solid #257447;outline-offset:2px}
+.brain-page .brain-main .lobe-scene-audio-row{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin-top:3px}
+.brain-page .brain-main #lobeSceneRead{min-height:44px;padding:8px 12px;background:#fff;border:1px solid #90b49b;border-radius:10px;font:750 12px/1.4 var(--brain-font-body);color:#24533c;cursor:pointer}
+.brain-page .brain-main #lobeSceneRead:disabled{opacity:.6;cursor:not-allowed}
+.brain-page .brain-main #lobeSceneRead:focus-visible{outline:3px solid #257447;outline-offset:2px}
+.brain-page .brain-main #lobeSceneSpeechStatus{font-size:11.5px;line-height:1.4;color:#4d6a56}
