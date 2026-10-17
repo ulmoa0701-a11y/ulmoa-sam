@@ -10,6 +10,17 @@ on:
       - 'thinking-garden/strategy-*.js'
       - 'qa/generate-garden-previews.mjs'
       - '.github/workflows/garden-previews.yml'
+  pull_request:
+    paths:
+      - 'qa/generate-garden-previews.mjs'
+      - 'thinking-garden/app.js'
+      - 'thinking-garden/game-clarity.css'
+      - 'thinking-garden/novel-garden.js'
+      - 'thinking-garden/slow-look-native.js'
+      - 'thinking-garden/strategy-*.js'
+      - 'thinking-garden/games/**'
+      - 'gardens/catalog.js'
+      - '.github/workflows/garden-previews.yml'
   workflow_dispatch:
 permissions:
   contents: write
@@ -42,6 +53,7 @@ jobs:
       - name: Capture real interactive game screens
         run: node qa/generate-garden-previews.mjs
       - name: Publish screenshots to website repository
+        if: github.event_name != 'pull_request'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
