@@ -224,7 +224,7 @@ function renderPath(){
   b.classList.remove('ready');b.classList.add('visited');b.setAttribute('aria-label','이미 지나간 자리');
   pos++;addSeeds(Math.ceil(10/len));sfx('ok');
   const runner=$('#trailRunner');if(runner)runner.textContent='🦋 '+ '✨'.repeat(Math.min(pos,7));
-  if(pos<len){const next=$('.trail-node')[pos];next.classList.add('ready');next.setAttribute('aria-label','지금 누를 반짝이는 자리');}
+  if(pos<len){const next=area.querySelectorAll('.trail-node')[pos];next.classList.add('ready');next.setAttribute('aria-label','지금 누를 반짝이는 자리');}
   else{flash('길 완성! 🦋');roundGate(area.querySelector('.basic-game'),'다음 길 ▶',500);}
  });
 }
