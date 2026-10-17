@@ -55,8 +55,9 @@ try{
   assert.equal(await page.locator('[data-lobe-scene]').count(),8,'all eight existing everyday scenes available beside six-lobe map');
   assert.equal(await page.locator('[data-lobe-scene="talk"]').getAttribute('aria-pressed'),'true','initial daily scene is active');
   assert.equal(await page.locator('#lobeSceneRoles > li').count(),3,'glanceable roles for selected scene');
-  assert.match(await page.locator('#lobeSceneNotice').innerText(),/강조한 부분만 일하는 것은 아니에요/,'no inactive brain implication');
-  assert.match(await page.locator('#lobeSceneNotice').innerText(),/아이의 어려움·뇌 활성도·치료효과를 판단하지 않아요/,'not a diagnosis or promised therapeutic effect');
+  assert.match(await page.locator('#lobeSceneNotice').innerText(),/여러 부분이 함께 일해요/,'no inactive brain implication');
+  assert.match(await page.locator('#lobeSceneNotice').innerText(),/실제 뇌 활동을 측정한 결과가 아니에요/,'avoid mistaken brain activation claim');
+  assert.match(await page.locator('.lobe-science-note').textContent(),/어려움·뇌 활성도·치료효과를 판단하지 않아요|개인의 원인을 판단하지 않아요/,'scientific limits remain available in optional details');
   assert.equal(await page.locator('.sub-footer > div').count(),1,'footer brand must be valid and grouped in its own div');
   assert.equal(await page.locator('.hemisphere-inline, .hemi-fact, .both-work').count(),0,'no duplicate hemisphere teaser on lobe tab');
   assert.match(await page.locator('.brain-bottom > p').innerText(),/여러 부분은 연결되어 함께 일해요/,'retain one concise cooperation reminder');
@@ -114,6 +115,13 @@ try{
   assert.equal(await page.locator('#lobeSceneRoles button').count(),3,'three process choices, not a brain-name test');
   assert.match(await page.locator('#lobeSceneRoles button').first().locator('b').innerText(),/말소리/,
    'visible main labels describe everyday processes before anatomy');
+  if(width<=390){
+   const roleFit=await page.locator('#lobeSceneRoles button').evaluateAll(els=>els.map(el=>({
+    w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height,
+    textW:el.querySelector('b').getBoundingClientRect().width
+   })));
+   assert.ok(roleFit.every(x=>x.w>=220&&x.h>=54),'phone uses readable full-width process rows: '+JSON.stringify(roleFit));
+  }
   await page.screenshot({path:out+'/'+name+'-initial.png',fullPage:true});
   const sceneToRegions={
    talk:['temporal','frontal','occipital'],read:['occipital','temporal','frontal'],
