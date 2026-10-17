@@ -125,7 +125,7 @@ try{
    const visibleLabels=await page.locator('#lobeSceneSelectedRegions .lobe-scene-selected-chip').allInnerTexts();
    assert.equal(visibleLabels.length,3,'show all selected region names');
    for(const region of selected){
-    const zoneNumber=await page.locator('#brainMap [data-brain-region="'+region+'"] .zone-number').innerText();
+    const zoneNumber=await page.locator('#brainMap [data-brain-region="'+region+'"] .zone-number').textContent();
     const lobeName=await page.locator('.lobe-card[data-region="'+region+'"] strong').innerText();
     assert.ok(visibleLabels.some(t=>t.includes(zoneNumber)&&t.includes(lobeName)),
      'number and area name must match illustration and card: '+region);
