@@ -5,6 +5,7 @@ on:
     paths:
       - 'thinking-garden/**'
       - 'qa/curated-share-qa.cjs'
+      - 'qa/garden-water-quest-qa.cjs'
       - 'qa/curated-all-games-smoke.cjs'
       - 'qa/homework-persona-qa.cjs'
       - 'qa/garden-name-quest-qa.cjs'
@@ -40,6 +41,7 @@ jobs:
           node --check thinking-garden/app.js
           node --check thinking-garden/share-plans.js
           node --check qa/curated-share-qa.cjs
+          node --check qa/garden-water-quest-qa.cjs
           node --check qa/curated-all-games-smoke.cjs
           node --check qa/homework-persona-qa.cjs
           node --check thinking-garden/clinical-bridges.js
@@ -78,6 +80,8 @@ jobs:
         run: node qa/garden-block-builder-qa.cjs
       - name: Self-review and teacher-cue recording fidelity
         run: node qa/slow-observation-fidelity-qa.cjs
+      - name: Water garden full game play and observations (mobile and desktop)
+        run: node qa/garden-water-quest-qa.cjs
       - name: Screenshots
         if: always()
         uses: actions/upload-artifact@v4
