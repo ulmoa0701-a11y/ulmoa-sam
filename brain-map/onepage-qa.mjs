@@ -93,7 +93,7 @@ try{
    const result=document.querySelector('#lobeSceneResult').getBoundingClientRect();
    return {choice:choice.toJSON(),selection:selection.toJSON(),svg:svg.toJSON(),result:result.toJSON()};
   });
-  assert.ok(sceneLayout.choice.bottom<sceneLayout.svg.top,'scene choice must be placed before brain map: '+JSON.stringify(sceneLayout));
+  assert.ok(sceneLayout.choice.bottom<sceneLayout.selection.top && sceneLayout.selection.bottom<sceneLayout.svg.top,'selected region names belong between controls and the map: '+JSON.stringify(sceneLayout));
   assert.ok(sceneLayout.svg.bottom<sceneLayout.result.top+8,'role cues must be after the brain: '+JSON.stringify(sceneLayout));
   if(width<=390){
    assert.ok(sceneLayout.svg.top-sceneLayout.choice.bottom<65,
