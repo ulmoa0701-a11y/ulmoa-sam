@@ -1,6 +1,6 @@
 'use strict';
-/* Real Chromium audit: 5/10/15/20 selectable rescue sessions, 20 distinct
-   target conditions, shape cycles, and non-linear path routes. No clinical
+/* Real Chromium audit: 5/10/15/20 native game sessions, distinct
+   memory and shape stimuli, and non-linear path routes. No clinical
    efficacy conclusions or precision claims are inferred from these tests. */
 const {chromium}=require('playwright-core');
 const assert=require('node:assert/strict');
@@ -16,40 +16,14 @@ const base='http://127.0.0.1:8765/thinking-garden/';
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
    await page.goto(base,{waitUntil:'load'});
    for(const count of [5,10,15,20]){
-    await page.evaluate(()=>openPreview('rescue'));
+    // Unlike the approved external Phaser rescue game, these are native garden
+    // games whose session length is configured in this screen.
+    await page.evaluate(()=>openPreview('memory'));
     await page.locator('#sessionRounds').selectOption(String(count));
     await page.locator('#introStart').click();
-    const session=await page.evaluate(()=>({count:state.roundTotal,problems:state.rescuePractice.map(q=>[q.kind,q.color,q.size,q.animal||'all'].join('|'))}));
-    assert.equal(session.count,count,'rescue ignored '+count+'-problem assignment');
-    assert.equal(session.problems.length,20,'rescue bank cannot support 20');
-    assert.equal(new Set(session.problems).size,20,'repeated target conditions within 20');
-    assert.equal(await page.locator('.rescue-creature').count(),8,'first rescue target not 8 choices');
+    assert.equal(await page.evaluate(()=>state.roundTotal),count,'memory ignored '+count+' problem selection');
     await page.locator('#backHome').click();
    }
-   await page.evaluate(()=>openPreview('rescue'));
-   await page.locator('#sessionRounds').selectOption('20');
-   await page.locator('#introStart').click();
-   for(let i=0;i<20;i++){
-    const review=await page.evaluate(n=>{
-     state.round=n;renderRound();
-     const q=state.rescuePractice[n];
-     const creatures=[...document.querySelectorAll('.rescue-creature')];
-     const positions=creatures.map(x=>x.style.left+':'+x.style.top);
-     const matches=creatures.filter(x=>{
-      const txt=x.querySelector('.sr-only')?.textContent||'';
-      return txt.includes(q.size+' '+q.color) && (q.kind==='group'||txt.includes(q.animal));
-     });
-     return {q,options:creatures.length,positions,matches:matches.length,labels:matches.map(x=>x.querySelector('.sr-only').textContent),
-       overflows:document.documentElement.scrollWidth>innerWidth+3};
-    },i);
-    assert.equal(review.options,review.q.kind==='group'?9:8,'incorrect option count at '+i);
-    assert.equal(new Set(review.positions).size,review.positions.length,'stacked or inaccessible animals at '+i);
-    assert.equal(review.matches,review.q.kind==='group'?5:1,'answer set incorrect at '+i);
-    if(review.q.kind==='group')assert.equal(new Set(review.labels).size,4,'expected 4 unique species plus one already-encountered foil');
-    assert.equal(review.overflows,false,'horizontal overflow at '+i);
-   }
-   await page.screenshot({path:'qa/practice-session-screenshots/'+viewport.name+'-rescue-diversity.png'});
-   await page.locator('#backHome').click();
    await page.evaluate(()=>openPreview('memory'));
    await page.locator('#sessionRounds').selectOption('20');
    await page.locator('#introStart').click();
@@ -103,7 +77,7 @@ const base='http://127.0.0.1:8765/thinking-garden/';
    assert.equal(await page.locator('.trail-node.visited').count(),4,'path selection was not ordered by indicated step');
    await page.screenshot({path:'qa/practice-session-screenshots/'+viewport.name+'-path-diversity.png'});
    assert.deepEqual(errors,[],'JavaScript exceptions: '+viewport.name);
-   console.log('PASS '+viewport.name+' 20 rescue targets, 20 unique memory tasks, 20 distinct paths, 6-target shapes, count options 5/10/15/20');
+   console.log('PASS '+viewport.name+' 20 unique memory tasks, 20 distinct paths, 6-target shapes, count options 5/10/15/20');
    await page.close();
   }
  }finally{await browser.close()}
