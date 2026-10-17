@@ -256,7 +256,7 @@ function renderPaint(){
  });
  g.addEventListener('pointermove',e=>{
   if(!drawing||activePointer!==e.pointerId)return;
-  if(e.pointerType==='mouse'&&e.buttons===0){end({...e,type:'pointercancel'});return}
+  if(e.pointerType==='mouse'&&e.buttons===0){drawing=false;activePointer=null;lastPoint=null;return}
   paintTrail(e.clientX,e.clientY);
  });
  g.addEventListener('pointerup',end);
