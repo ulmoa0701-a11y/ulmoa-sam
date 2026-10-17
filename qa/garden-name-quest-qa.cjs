@@ -7,7 +7,7 @@ const assert=require('node:assert/strict');
   for(const vp of [{name:'mobile',width:390,height:844},{name:'desktop',width:1280,height:900}]){
    const page=await browser.newPage({viewport:vp});page.setDefaultTimeout(12000);
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
-   for(const length of [5,10,15,20]){
+   for(const length of [6,12,18,24]){
     await page.goto('http://127.0.0.1:8765/thinking-garden/',{waitUntil:'load'});
     await page.locator('[data-open="slowName"]').click();
     await page.locator('#sessionRounds').selectOption(String(length));
@@ -44,7 +44,7 @@ const assert=require('node:assert/strict');
     assert.equal(new Set(visit.slice(0,Math.min(6,length))).size,Math.min(6,length),'repeated stimuli inside the first six-round block');
     for(let start=6;start+6<=length;start+=6)assert.equal(new Set(visit.slice(start,start+6)).size,6,'later block repeats stimuli');
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+4),true,'horizontal scrolling / cut-off on '+vp.name);
-    console.log('PASS name quest '+vp.name+' '+length+' rounds, unique blocks, error recovery and visual arrival');
+    console.log('PASS naming quest '+vp.name+' '+length+' rounds, unique blocks, error recovery and visual arrival');
    }
    for(const id of ['slowScan','slowPlace','slowBlock','slowMemory','slowEveryday']){
     await page.goto('http://127.0.0.1:8765/thinking-garden/',{waitUntil:'load'});
