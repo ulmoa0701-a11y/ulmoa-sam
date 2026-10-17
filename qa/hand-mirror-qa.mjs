@@ -87,7 +87,7 @@ async function visualAndRecovery(width,height,label){
  assert.equal(await cp.locator('#cameraCheck').isVisible(),true,'Real camera must first be calibrated');
  assert.equal(await cp.locator('#liveTask').isVisible(),false,'No task before calibration');
  assert.equal(await cp.locator('#ghostGuides').isVisible(),false,'No target obstructing setup');
- assert.equal(await cp.locator('#flowerLabel').innerText(),'🌼 0');
+ assert.equal(await cp.locator('#flowerLabel').innerText(),'🌼 0 / 3','Actual number of bloomed flowers');
  assert.equal(await cp.locator('#cameraProblem').isVisible(),false);
  await cp.screenshot({path:output+'/camera-preflight-'+label+'.png',fullPage:true});
  await cp.evaluate(()=>{document.getElementById('cameraProblem').hidden=false;});
