@@ -200,9 +200,10 @@ function adventureUpdate(){
   $('gardenHudRound').textContent=(S.round+1)+' / '+meta.rounds;
  }
  }
+ const expectedFingers=S.mode==='fingers'?(core.PATTERNS[currentGoal()[0]]?.reduce((n,v)=>n+v,0)||1):1;
  $('adventureActorEmoji').textContent=S.mode==='copy'?(phase==='reward'?'✨':'🫧'):
-  S.mode==='fingers'?(phase==='reward'?'⭐':'✨'):
-  S.mode==='both'?(phase==='reward'?'🔑':'🔒'):'';
+  S.mode==='fingers'?(phase==='reward'?'⭐'.repeat(expectedFingers):'☆'.repeat(expectedFingers)):
+  S.mode==='both'?(phase==='reward'?'🔓':'🚪'):'';
  $('adventureActor').dataset.state=phase==='reward'?'success':'waiting';
  $('adventureActor').style.left=(S.acornX??50)+'%';
  $('adventureActor').style.top=(S.acornY??52)+'%';
@@ -577,7 +578,10 @@ function advance(){
 }
 function finish(){
  timeouts();stopCamera();S.phase='finish';
- $('finishInfo').textContent=isGarden()?'꽃 3송이를 피웠어!'+(S.kind==='touch'?' (그림을 골라서 완성한 꽃밭)':' (카메라 손동작으로 완성한 꽃밭)'):MODE[S.mode]+'에서 '+S.success+'번의 손동작을 해봤어!'+(S.kind==='touch'?' (화면 정답 선택 연습)':' (카메라 손 모양 인식)');
+ const descriptions={garden:'꽃 3송이를 피웠어! 🌷',copy:'풍선 6개를 반짝이게 했어! 🫧',fingers:'별빛 6개를 켰어! ⭐',memory:'비밀 길 4개를 밝혔어! ✨',both:'열쇠 4개를 모아 보물문을 열었어! 🔓'};
+ $('finishInfo').textContent=descriptions[S.mode]+(S.kind==='touch'?' (화면 정답 선택 연습)':' (카메라 손 모양 인식)');
+ $('finishPrize').textContent={garden:'🌷🌻🌼',copy:'🫧✨🫧',fingers:'⭐⭐⭐',memory:'✨🪨✨',both:'🚪🔓✨'}[S.mode];
+ $('finishHeading').textContent={garden:'꽃밭이 완성됐어!',copy:'풍선이 반짝반짝!',fingers:'별이 가득 켜졌어!',memory:'비밀 길을 찾았어!',both:'보물문이 열렸어!'}[S.mode];
  $('transfer').textContent=isGarden()?'🌰 실제로도 도토리 모형이나 작은 블록을 손으로 쥐었다 놓으며 이어갈 수 있어요. 이 게임은 손 힘을 평가하지 않아요.':S.mode==='fingers'?'🌷 이어서 실제로 해보기: 스티커 떼기·종이 집기·집게 열고 닫기로 이어가요. 손의 힘은 화면만으로 평가하지 않아요.':
   S.mode==='both'?'🌷 이어서 실제로 해보기: 두 손으로 종이를 잡고 찢기, 블록 맞추기 등을 해봐요.':
   S.mode==='memory'?'🌷 이어서 실제로 해보기: 두세 동작 순서를 보고 집게·블록·단추 활동에도 적용해 봐요.':
