@@ -64,6 +64,11 @@
   lobeSceneRoles.replaceChildren();
   const selected=new Set(scene.roles.map(([region])=>region));
   for(const [region,emoji,task] of scene.roles){
+   const chip=document.createElement('span');
+   chip.className='lobe-scene-selected-chip';
+   chip.style.setProperty('--scene-lobe-color',regionMarkers[region].color);
+   chip.textContent=regionMarkers[region].number+' '+data[region].name;
+   lobeSceneSelectedRegions.append(chip);
    const row=document.createElement('li');
    const number=document.createElement('span');
    number.className='lobe-scene-number';
