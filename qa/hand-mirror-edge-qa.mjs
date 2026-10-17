@@ -269,6 +269,15 @@ async function allCameraModes(){
    assert.equal(await p.locator('#liveCompare').isVisible(),false);
    await p.evaluate(()=>{window.__pose='one';});
    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('1'),9000);
+   assert.equal(await p.locator('#adventureActorEmoji').innerText(),'⭐','One-finger goal lights one star');
+   await wait(p,()=>document.querySelector('#adventureActorEmoji').textContent==='☆☆',7000);
+   await p.evaluate(()=>{window.__pose='two';});
+   await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('2'),9000);
+   assert.equal(await p.locator('#adventureActorEmoji').innerText(),'⭐⭐','Two-finger goal lights two stars');
+   await wait(p,()=>document.querySelector('#adventureActorEmoji').textContent==='☆☆☆',7000);
+   await p.evaluate(()=>{window.__pose='three';});
+   await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('3'),9000);
+   assert.equal(await p.locator('#adventureActorEmoji').innerText(),'⭐⭐⭐','Three-finger goal lights three stars');
   }else if(mode==='both'){
    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('1'),8500);
    await p.evaluate(()=>{window.__handPoses=['fist','fist'];});
