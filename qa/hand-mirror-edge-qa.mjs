@@ -247,6 +247,7 @@ async function allCameraModes(){
    await p.locator('#ready').click();
    assert.equal(await p.locator('#ghostGuides').isVisible(),false,'Recall hides demonstrated answer');
    assert.equal(await p.locator('#adventureSceneObjects svg').count(),0,'Camera recall shows no answer shapes');
+   assert.equal(await p.locator('#adventureSceneObjects .stone-placeholder').count(),2,'Memory recall has two neutral stones without answer clues');
    assert.equal(await p.locator('#gardenHud').isVisible(),true,'Path progress stays in camera');
    await p.evaluate(()=>{window.__pose='palm';});
    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('1'),8500);
@@ -258,12 +259,25 @@ async function allCameraModes(){
    assert.equal(await p.locator('#guideToggle').isVisible(),true,'Copy camera visual guide can be hidden');
    assert.equal(await p.locator('#modelCard').isVisible(),true,'The child sees a real target model on the stage');
    assert.equal(await p.locator('#adventureScene').isVisible(),true,'Bubbles fill along the same frame');
+   assert.match(await p.locator('#liveTitle').innerText(),/손바닥을 펴서 풍선 띄우기/,'Opening a hand has a distinct balloon-release mission');
+   assert.equal(await p.locator('#adventureActor').getAttribute('data-action'),'release');
+   assert.equal(await p.locator('#adventureActorEmoji .moa-balloon').count(),1,'A drawn balloon is present instead of a static emoji');
    await p.locator('#guideToggle').click();
    assert.equal(await p.locator('#modelCard').isVisible(),false);
    await p.locator('#guideToggle').click();
    assert.equal(await p.locator('#modelCard').isVisible(),true);
    await p.evaluate(()=>{window.__pose='palm';});
    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('1'),9000);
+   assert.equal(await p.locator('#adventureActor').getAttribute('data-action'),'release','Release success triggers float animation');
+   await wait(p,()=>document.querySelector('#adventureActor').dataset.action==='grab',8500);
+   assert.match(await p.locator('#liveTitle').innerText(),/주먹으로 풍선 꼭 잡기/,'Closed hand now grabs balloon');
+   await p.evaluate(()=>{window.__pose='fist';});
+   await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('2'),9000);
+   await wait(p,()=>document.querySelector('#adventureActor').dataset.action==='pop',8500);
+   await p.evaluate(()=>{window.__pose='one';});
+   await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('3'),9000);
+   await wait(p,()=>document.querySelector('#adventureActorEmoji .moa-balloon').length===2,8500);
+   assert.equal(await p.locator('#adventureActorEmoji .moa-balloon').count(),2,'Two-finger goal has two actual balloon props');
   }else if(mode==='fingers'){
    assert.equal(await p.locator('#modelCard').isVisible(),true);
    assert.equal(await p.locator('#liveCompare').isVisible(),false);
@@ -271,9 +285,13 @@ async function allCameraModes(){
    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('1'),9000);
    assert.equal(await p.locator('#adventureActorEmoji').innerText(),'⭐','One-finger goal lights one star');
    await wait(p,()=>document.querySelector('#adventureActorEmoji').textContent==='☆☆',7000);
+   const positionOne=Number.parseFloat(await p.locator('#adventureActor').evaluate(e=>e.style.left));
+   assert.equal(await p.locator('#adventureActor').getAttribute('data-action'),'stars');
    await p.evaluate(()=>{window.__pose='two';});
    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('2'),9000);
    assert.equal(await p.locator('#adventureActorEmoji').innerText(),'⭐⭐','Two-finger goal lights two stars');
+   const positionTwo=Number.parseFloat(await p.locator('#adventureActor').evaluate(e=>e.style.left));
+   assert.ok(Math.abs(positionTwo-positionOne)>2,'Star target follows the CENTER of extended fingertips, not only index finger');
    await wait(p,()=>document.querySelector('#adventureActorEmoji').textContent==='☆☆☆',7000);
    await p.evaluate(()=>{window.__pose='three';});
    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('3'),9000);
@@ -286,6 +304,11 @@ async function allCameraModes(){
    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('3'),11500);
    assert.equal(await p.locator('#cameraCheck').isVisible(),false,'Bilateral camera remains calibrated');
    assert.equal(await p.locator('#adventureSceneObjects .adventure-token[data-state="done"]').count(),3,'Three of four locks are open');
+   assert.equal(await p.locator('#adventureActor').getAttribute('data-unlocks'),'3','Treasure door visibly indicates three unlocks');
+   await wait(p,()=>document.querySelector('#adventureSceneObjects .adventure-token[data-state="current"]'),8500);
+   await p.evaluate(()=>{window.__handPoses=['one','one'];});
+   await wait(p,()=>document.querySelector('#adventureActor').dataset.unlocks==='4',9500);
+   assert.equal(await p.locator('#adventureActorEmoji .moa-treasure-door').count(),1,'Full unlock animates drawn door, not door emoji');
   }
   assert.equal(await p.locator('.game-right').isVisible(),false,'Every camera mode is now single stage');
   assert.equal(await p.locator('#adventureScene').isVisible(),true,'Every camera game has its own active reward scene');
