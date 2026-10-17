@@ -183,7 +183,7 @@ async function wrongAnswerAndReplay(){
  await p.locator('.choices button[data-pose="palm"]').click();
  assert.equal(await p.locator('#gardenHudFlower').innerText(),'🌷 0 / 3');
  await p.locator('.choices button[data-pose="fist"]').click();
- await p.locator('.choices button[data-pose="palm"]').click({force:true});
+ await p.evaluate(()=>document.querySelector('.choices button[data-pose="palm"]').click());
  assert.equal(await p.locator('#gardenScene').getAttribute('data-acorn'),'held','Double response ignored during reward');
  for(let i=1;i<6;i++){
   await p.locator('#next').click();
