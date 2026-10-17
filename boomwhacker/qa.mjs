@@ -588,7 +588,7 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
   const samples=['twinkle','plane','butterfly','rabbit','same','bear','school-bell'];
   const results=[];
   try{
-   for(const key of samples){
+   for(const key of SAMPLES.map(song=>song.key)){
     currentSong=clone(findSample(key));practiceSection='all';refreshPracticeSections();build();
     const seen=new Set(),lines=[],notFull=[];
     for(const e of events.filter(x=>eHasLyric(x))){
@@ -598,7 +598,7 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
      if(!view.items.some(x=>x.i===e.index))notFull.push(e.index);
     }
     const starts=musicalLyricStarts(events.map((e,i)=>({e,i})).filter(x=>eHasLyric(x.e)),lyricWordBreakIndices());
-    results.push({key,lines,hasMusicalPhrases:!!starts,notFull});
+    results.push({key,lines,hasMusicalPhrases:!!starts,expectedPhrases:LYRIC_PHRASE_BARS[key]?.length||0,notFull});
    }
    currentSong=clone(findSample('twinkle'));practiceSection='4';refreshPracticeSections();build();
    const section=lyricWindowAt(firstNoteMs()+20,18,document.querySelector('#lyricTrack').clientWidth-34)
@@ -623,6 +623,8 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
    screen+': 4-measure practice must show only its musical phrase '+JSON.stringify(songLines['twinkle-4bars']));
  for(const p of phraseCase){
   check(p.hasMusicalPhrases&&p.notFull.length===0,screen+': broken phrase grouping '+JSON.stringify(p));
+  if(p.key!=='twinkle-4bars')check(p.lines.length===p.expectedPhrases,
+    screen+': phrase counts must match the actual score sections '+JSON.stringify(p));
  }
  report.push({name:screen+'-sung-phrases',phraseCase});
 
