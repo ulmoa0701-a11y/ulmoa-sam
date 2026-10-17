@@ -103,7 +103,7 @@ function stopCamera(){
  video.srcObject=null;
  if(S.model){try{S.model.close()}catch(e){}S.model=null;}
  S.camHands=[];S.lastFrame=-1;S.matchSince=0;S.lastObserved=0;S.loading=false;
- $('viewer').dataset.match='no';$('cameraHoldFill').style.width='0%';$('liveCompare').hidden=true;$('modelCard').hidden=true;$('acornActor').hidden=true;$('adventureActor').hidden=true;
+ $('viewer').dataset.match='no';$('cameraHoldFill').style.width='0%';$('liveCompare').hidden=true;$('modelCard').hidden=true;$('acornActor').hidden=true;$('fingerStars').hidden=true;$('adventureActor').hidden=true;
  const c=canvas.getContext('2d');c.clearRect(0,0,canvas.width,canvas.height);
 }
 function showCameraProblem(title,detail,type='camera'){
@@ -177,6 +177,7 @@ function adventureUpdate(){
   $('adventureScene').dataset.renderKey=key;
  $('adventureScene').dataset.mode=S.mode;
  $('adventureScene').dataset.phase=phase;
+ $('adventureActor').dataset.mode=S.mode;
  $('adventureSceneTitle').textContent=S.mode==='copy'?'🫧 풍선을 하나씩 반짝이게 해요':
   S.mode==='fingers'?'⭐ 손가락을 펴면 별빛이 켜져요':
   S.mode==='memory'?'🚶 기억한 손 모양만큼 발판이 이어져요':'🔑 두 손으로 자물쇠를 열어요';
@@ -285,6 +286,7 @@ function render(){
  if(!isCamera())$('placeholder').innerHTML='<span class="hand">👀</span>모양을 흉내 내면서 아래에서 답을 골라 줘!';
  $('video').hidden=!isCamera();canvas.hidden=!isCamera();
  gardenUpdate();adventureUpdate();
+ if(S.mode!=='fingers'||!isCamera())$('fingerStars').hidden=true;
  S.matchSince=0;S.lastObserved=0;S.rearmSince=0;
  if(preparing){S.phase='setup';message('먼저 카메라에서 손을 찾아 볼게요.');}
  else if(memoryPreview){S.phase='memorize';message('모아가 보여준 순서를 기억해 볼까? 시간 제한은 없어!');}
@@ -334,6 +336,25 @@ async function startCamera(){
     name==='NotReadableError'?'다른 앱이 카메라를 사용 중일 수 있어요. 앱을 닫고 다시 연결해요.':
     '카메라나 손 인식 모델이 준비되지 않았어요. 인터넷 연결을 확인한 후 다시 시도해요.';
   showCameraProblem('카메라를 시작하지 못했어요',reason);
+ }
+}
+function syncFingerStars(hands,position,w,h){
+ const layer=$('fingerStars');
+ const visible=isCamera()&&S.cameraReady&&S.mode==='fingers'&&
+  (S.phase==='play'||S.phase==='reward')&&hands.length===1&&S.frameLightOk&&
+  S.problemType!=='dark'&&S.problemType!=='stalled'&&S.problemType!=='camera';
+ layer.hidden=!visible;
+ if(!visible)return;
+ const landmark=hands[0],pattern=core.PATTERNS[currentGoal()[0]];
+ const states=core.fingerStates(landmark);
+ for(let i=0;i<4;i++){
+  const star=layer.children[i];
+  star.hidden=pattern[i]!==1;
+  if(star.hidden)continue;
+  const [x,y]=position(landmark[core.FINGER_JOINTS[i][2]]);
+  star.style.left=Math.max(5,Math.min(95,100*x/w))+'%';
+  star.style.top=Math.max(17,Math.min(78,100*y/h))+'%';
+  star.dataset.lit=S.phase==='reward'||states?.[i]===1?'yes':'no';
  }
 }
 function drawHands(hands){
@@ -410,6 +431,7 @@ function drawHands(hands){
    ctx.lineWidth=3;ctx.strokeStyle='#ab6819';ctx.stroke();
   }
  });
+ syncFingerStars(hands,xy,w,h);
  if(teaching&&topFeedback){
   const state=topFeedback.count===4?'good':topFeedback.unknown>0?'uncertain':'adjust';
   const requested=targets[0];
