@@ -139,7 +139,7 @@ async function fakeVideoGarden(){
  assert.equal(await p.locator('#acornActor').isVisible(),true,'Acorn appears in the hand area');
  assert.equal(await p.locator('#acornActor img').evaluate(e=>e.complete&&e.naturalWidth>0),true,'Real acorn asset loaded in camera overlay');
  assert.equal(await p.locator('#acornActor').getAttribute('data-state'),'waiting','Before fist gesture the acorn waits to be caught');
- assert.match(await p.locator('#liveTitle').innerText(),/도토리를 잡아/,'Child can read a short game objective');
+ assert.match(await p.locator('#liveTitle').innerText(),/도토리 잡기/,'Child can read a short game objective');
  assert.equal(await p.locator('#ghostGuides').isVisible(),false,'Old static tiny diagram is hidden in garden');
  await p.waitForFunction(()=>document.getElementById('flowerLabel').textContent.includes('0'),null,{timeout:6000});
  await p.waitForFunction(()=>document.querySelector('.garden-bed[data-growth="seed"]'),null,{timeout:15000});
@@ -148,8 +148,8 @@ async function fakeVideoGarden(){
  assert.equal(await p.locator('#cameraProblem').isVisible(),false);
  await p.evaluate(()=>{window.__testOne=true});
  await p.locator('#next').click();
- assert.match(await p.locator('#liveTitle').innerText(),/펼쳐서 심어/,'Next goal tells the child to release the acorn');
- await p.waitForFunction(()=>document.getElementById('viewerBadge').textContent.includes('주먹을 활짝'),null,{timeout:12000});
+ assert.match(await p.locator('#liveTitle').innerText(),/보자기! 도토리 놓기/,'Next goal tells the child to release the acorn');
+ await p.waitForFunction(()=>document.getElementById('viewerBadge').textContent.includes('보자기처럼 손을'),null,{timeout:12000});
  assert.equal(await p.locator('#liveCompare').isVisible(),false,'Scoring panel no longer obstructs the acorn play');
  assert.match(await p.locator('#viewerBadge').innerText(),/주먹을 활짝 펴|도토리/,'Short actionable feedback inside camera');
  await p.screenshot({path:output+'/live-finger-correction-mobile.png',fullPage:true});
