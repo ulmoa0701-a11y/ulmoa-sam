@@ -81,7 +81,7 @@ function play(id){
   count.value=String(opts.find(x=>x>=active.rounds)||opts[opts.length-1]);
  }
  if(id==='spacing'||id==='spelling'){
-  const levels=['easy','medium','hard'],sel=levels[active.level-1];
+  const levels=['easy','normal','hard'],sel=levels[active.level-1];
   $('#literacyPracticeControls [data-level="'+sel+'"]')?.click();
   const amounts=[...document.querySelectorAll('#literacyPracticeControls [data-count]')].map(x=>Number(x.dataset.count));
   const n=amounts.find(x=>x>=active.rounds)||amounts[amounts.length-1];
