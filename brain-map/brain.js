@@ -20,6 +20,10 @@
  const lobeSceneTitle=document.getElementById('lobeSceneTitle');
  const lobeSceneRoles=document.getElementById('lobeSceneRoles');
  const lobeSceneResult=document.getElementById('lobeSceneResult');
+ const lobeSceneSelection=document.getElementById('lobeSceneSelection');
+ const lobeSceneCurrent=document.getElementById('lobeSceneCurrent');
+ const lobeSceneSelectedRegions=document.getElementById('lobeSceneSelectedRegions');
+ const brainMap=document.getElementById('brainMap');
  // Representative, explainable roles, not measured neural activation, diagnoses,
  // or an exhaustive anatomical network. All areas cooperate in everyday tasks.
  const regionMarkers={
@@ -38,7 +42,7 @@
   bag:{title:'🎒 가방을 챙길 때',roles:[['occipital','🎒','물건 살펴보기'],['parietal','📍','물건 위치 찾기'],['frontal','✅','순서·빠진 것 확인']]},
   feeling:{title:'🙂 친구 기분을 살필 때',roles:[['temporal','👂','말투 단서 살피기'],['occipital','👀','표정 단서 보기'],['frontal','💡','상황 함께 생각하기']]}
  };
- if(nodes.length!==6||shapes.length!==6||![detail,title,text,icon,close,lobeSceneTitle,lobeSceneRoles,lobeSceneResult].every(Boolean)||lobeSceneButtons.length!==8)return;
+ if(nodes.length!==6||shapes.length!==6||![detail,title,text,icon,close,lobeSceneTitle,lobeSceneRoles,lobeSceneResult,lobeSceneSelection,lobeSceneCurrent,lobeSceneSelectedRegions,brainMap].every(Boolean)||lobeSceneButtons.length!==8)return;
  function clearLobeScene(){
   shapes.forEach(g=>g.removeAttribute('data-scene-active'));
   lobeSceneButtons.forEach(button=>button.setAttribute('aria-pressed','false'));
