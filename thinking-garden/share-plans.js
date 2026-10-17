@@ -106,12 +106,24 @@ function makeBuilder(){
  const settings=E('div','moa-plan-settings');
  const lev=E('label','','권장 난이도 '),levels=E('select');levels.id='moaPlanLevel';[['1','쉬움'],['2','보통'],['3','확장']].forEach(([v,t])=>{const o=E('option','',t);o.value=v;levels.append(o)});lev.append(levels);
  const rnd=E('label','','기본 연습량 '),rounds=E('select');rounds.id='moaPlanRounds';[5,10,15,20].forEach(n=>{const o=E('option','',n+'문제');o.value=String(n);rounds.append(o)});rnd.append(rounds);settings.append(lev,rnd);
+ const presetBox=E('div','moa-plan-presets');
+ const presetTitle=E('strong','','활동 조합 예시');presetBox.append(presetTitle);
+ const presets=[
+  ['👀 시각탐색',['slowScan','sceneDetect','slowPdf']],
+  ['🧩 시공간 구성',['slowPlace','slowBlock','mirrorPond','slowPdf']],
+  ['✋ 멈춤·규칙 변경',['calm','resetRescue','rulePost']],
+  ['🗣 명명·대답 조절',['slowName','resetRescue','slowSheets']],
+  ['🎒 생활·계획',['slowEveryday','classroomMove','festivalPlan','clinicalGuide']],
+  ['✍️ 읽기·쓰기',['spacing','spelling','clinicalGuide']]
+ ];
+ const presetList=E('div','moa-plan-preset-buttons');presetBox.append(presetList);
  const selection=E('div','moa-plan-selection');selection.id='moaPlanSelection';
  const rows=[...library.map(x=>({...x,resource:false})),...MATERIALS.map(x=>({...x,resource:true}))];
  rows.forEach(item=>{
   const label=E('label','moa-plan-row');const check=E('input');check.type='checkbox';check.value=item.id;check.name='moaPlanPick';
   const body=E('span');body.append(E('strong','',item.title),E('small','',item.resource?'📄 활동지·자료':item.desc));label.append(check,body);selection.append(label);
  });
+ presets.forEach(([title,ids])=>{const btn=E('button','moa-plan-preset',title);btn.type='button';btn.onclick=()=>{selection.querySelectorAll('input').forEach(input=>{input.checked=ids.includes(input.value)});selection.dispatchEvent(new Event('change'));};presetList.append(btn);});
  const msg=E('p','moa-plan-status','필요한 게임과 활동지를 선택하세요.');msg.id='moaPlanStatus';msg.setAttribute('role','status');
  const output=E('div','moa-plan-output');output.hidden=true;output.id='moaPlanOutput';
  const url=E('input');url.readOnly=true;url.setAttribute('aria-label','생성한 맞춤 연습 링크');url.id='moaPlanLink';
@@ -128,7 +140,7 @@ function makeBuilder(){
   msg.textContent=model.items.length+'개 활동으로 만들었어요. 복사해서 보호자에게 전달할 수 있어요.';
  };
  selection.addEventListener('change',()=>{const count=selection.querySelectorAll('input:checked').length;msg.textContent='선택한 활동 '+count+'개 (최대 '+LIMIT+'개)';output.hidden=true});
- dialog.append(top,settings,selection,create,msg,output);document.body.append(dialog);
+ dialog.append(top,settings,presetBox,selection,create,msg,output);document.body.append(dialog);
  entry.onclick=()=>dialog.showModal();
 }
 function init(o){
