@@ -27,7 +27,7 @@
   read:{title:'📖 책을 읽을 때',roles:[['occipital','👀','글자 모양 보기'],['temporal','👂','말소리·뜻 연결'],['frontal','💡','읽기 목표 유지']]},
   map:{title:'🧭 길을 찾을 때',roles:[['occipital','👀','길 표식 보기'],['parietal','✋','방향·위치 살피기'],['frontal','💡','가는 길 계획하기']]},
   ball:{title:'⚽ 공놀이할 때',roles:[['occipital','👀','공의 움직임 보기'],['parietal','✋','몸의 위치 느끼기'],['cerebellum','⚽','움직임 타이밍 맞추기']]},
-  music:{title:'🎵 노래 부를 때',roles:[['temporal','👂','소리·리듬 살피기'],['frontal','💡','시작·멈춤 조절'],['cerebellum','⚽','박자에 맞춰 움직이기']]},
+  music:{title:'🎵 노래 부를 때',roles:[['temporal','👂','소리·리듬 살피기'],['frontal','💡','시작·멈춤 조절'],['cerebellum','🥁','박자에 맞춰 움직이기']]},
   draw:{title:'🎨 그림을 그릴 때',roles:[['occipital','👀','모양 살펴보기'],['parietal','✋','위치·배치 살피기'],['frontal','💡','그릴 순서 계획']]},
   bag:{title:'🎒 가방을 챙길 때',roles:[['occipital','👀','물건 살펴보기'],['parietal','✋','물건 위치 찾기'],['frontal','💡','순서·빠진 것 확인']]},
   feeling:{title:'🙂 친구 기분을 살필 때',roles:[['temporal','👂','말투 단서 살피기'],['occipital','👀','표정 단서 보기'],['frontal','💡','상황 함께 생각하기']]}
