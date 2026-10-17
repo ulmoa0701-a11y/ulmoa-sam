@@ -32,7 +32,7 @@ const personas=[
    assert.equal(await page.locator('.moa-assigned-item').count(),spec.items.length,spec.name+' list count');
    assert.equal(await page.locator('#gardenGamePanel:visible').count(),0,spec.name+' exposed all games');
    assert.equal(await page.locator('#moaAssignedHome .moa-assigned-home-help').count(),1,'homework guide absent');
-   assert.ok((await page.locator('.moa-assigned-home-help').innerText()).includes('결과는 선생님에게 자동으로 전송되지'),'misleading result delivery');
+   assert.ok((await page.locator('.moa-assigned-home-help').textContent()).includes('결과는 선생님에게 자동으로 전송되지'),'misleading result delivery');
    assert.ok((await page.locator('.moa-assigned-foot').innerText()).includes('새로고침'),'progress persistence caveat missing');
    for(const key of spec.need)assert.ok(await page.locator('#moaAssignedHome .'+key).count()>0,spec.name+' missing '+key);
    assert.equal(await page.locator('body.moa-assigned-calm').count(),spec.view==='calm'?1:0,spec.name+' wrong neutral style');
