@@ -20,6 +20,10 @@
  const lobeSceneTitle=document.getElementById('lobeSceneTitle');
  const lobeSceneRoles=document.getElementById('lobeSceneRoles');
  const lobeSceneResult=document.getElementById('lobeSceneResult');
+ const lobeSceneSelection=document.getElementById('lobeSceneSelection');
+ const lobeSceneCurrent=document.getElementById('lobeSceneCurrent');
+ const lobeSceneSelectedRegions=document.getElementById('lobeSceneSelectedRegions');
+ const brainMap=document.getElementById('brainMap');
  // Representative, explainable roles, not measured neural activation, diagnoses,
  // or an exhaustive anatomical network. All areas cooperate in everyday tasks.
  const regionMarkers={
@@ -38,11 +42,14 @@
   bag:{title:'🎒 가방을 챙길 때',roles:[['occipital','🎒','물건 살펴보기'],['parietal','📍','물건 위치 찾기'],['frontal','✅','순서·빠진 것 확인']]},
   feeling:{title:'🙂 친구 기분을 살필 때',roles:[['temporal','👂','말투 단서 살피기'],['occipital','👀','표정 단서 보기'],['frontal','💡','상황 함께 생각하기']]}
  };
- if(nodes.length!==6||shapes.length!==6||![detail,title,text,icon,close,lobeSceneTitle,lobeSceneRoles,lobeSceneResult].every(Boolean)||lobeSceneButtons.length!==8)return;
+ if(nodes.length!==6||shapes.length!==6||![detail,title,text,icon,close,lobeSceneTitle,lobeSceneRoles,lobeSceneResult,lobeSceneSelection,lobeSceneCurrent,lobeSceneSelectedRegions,brainMap].every(Boolean)||lobeSceneButtons.length!==8)return;
  function clearLobeScene(){
   shapes.forEach(g=>g.removeAttribute('data-scene-active'));
+  nodes.forEach(node=>node.removeAttribute('data-scene-example'));
+  brainMap.removeAttribute('data-scene-mode');
   lobeSceneButtons.forEach(button=>button.setAttribute('aria-pressed','false'));
   lobeSceneResult.hidden=true;
+  lobeSceneSelection.hidden=true;
  }
  function selectLobeScene(key){
   const scene=lobeScenes[key];
@@ -50,10 +57,18 @@
   lastLobeScene=key;
   reset();
   lobeSceneResult.hidden=false;
+  lobeSceneSelection.hidden=false;
   lobeSceneTitle.textContent=scene.title;
+  lobeSceneCurrent.textContent='지금 선택: '+scene.title;
+  lobeSceneSelectedRegions.replaceChildren();
   lobeSceneRoles.replaceChildren();
   const selected=new Set(scene.roles.map(([region])=>region));
   for(const [region,emoji,task] of scene.roles){
+   const chip=document.createElement('span');
+   chip.className='lobe-scene-selected-chip';
+   chip.style.setProperty('--scene-lobe-color',regionMarkers[region].color);
+   chip.textContent=regionMarkers[region].number+' '+data[region].name;
+   lobeSceneSelectedRegions.append(chip);
    const row=document.createElement('li');
    const number=document.createElement('span');
    number.className='lobe-scene-number';
@@ -70,6 +85,8 @@
    copy.append(name,explanation);row.append(number,symbol,copy);lobeSceneRoles.append(row);
   }
   shapes.forEach(g=>g.toggleAttribute('data-scene-active',selected.has(g.dataset.brainRegion)));
+  nodes.forEach(node=>node.toggleAttribute('data-scene-example',selected.has(node.dataset.region)));
+  brainMap.setAttribute('data-scene-mode','active');
   lobeSceneButtons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.lobeScene===key)));
  }
 

@@ -48,7 +48,8 @@ try{
   assert.equal(await page.locator('[data-lobe-scene]').count(),8,'all eight existing everyday scenes available beside six-lobe map');
   assert.equal(await page.locator('[data-lobe-scene="talk"]').getAttribute('aria-pressed'),'true','initial daily scene is active');
   assert.equal(await page.locator('#lobeSceneRoles > li').count(),3,'glanceable roles for selected scene');
-  assert.match(await page.locator('#lobeSceneNotice').innerText(),/실제 뇌 활성도나 모든 관련 부위를 나타낸 그림은 아니에요/,'do not mistake highlighted roles for measured brain activation');
+  assert.match(await page.locator('#lobeSceneNotice').innerText(),/진하게 표시되지 않은 부분도 함께 작동해요/,'non-highlighted regions must not be misread as inactive');
+  assert.match(await page.locator('#lobeSceneNotice').innerText(),/실제 뇌 활성도나 아이의 어려움을 판정하는 결과가 아니에요/,'brain map is not diagnostic');
   assert.equal(await page.locator('.sub-footer > div').count(),1,'footer brand must be valid and grouped in its own div');
   assert.equal(await page.locator('.hemisphere-inline, .hemi-fact, .both-work').count(),0,'no duplicate hemisphere teaser on lobe tab');
   assert.match(await page.locator('.brain-bottom > p').innerText(),/여러 부분은 연결되어 함께 일해요/,'retain one concise cooperation reminder');
@@ -88,14 +89,15 @@ try{
   const sceneLayout=await page.evaluate(()=>{
    const choice=document.querySelector('.lobe-scene-choices').getBoundingClientRect();
    const svg=document.querySelector('#brainMap').getBoundingClientRect();
+   const selection=document.querySelector('#lobeSceneSelection').getBoundingClientRect();
    const result=document.querySelector('#lobeSceneResult').getBoundingClientRect();
-   return {choice:choice.toJSON(),svg:svg.toJSON(),result:result.toJSON()};
+   return {choice:choice.toJSON(),selection:selection.toJSON(),svg:svg.toJSON(),result:result.toJSON()};
   });
-  assert.ok(sceneLayout.choice.bottom<sceneLayout.svg.top,'scene choice must be placed before brain map: '+JSON.stringify(sceneLayout));
+  assert.ok(sceneLayout.choice.bottom<sceneLayout.selection.top && sceneLayout.selection.bottom<sceneLayout.svg.top,'selected region names belong between controls and the map: '+JSON.stringify(sceneLayout));
   assert.ok(sceneLayout.svg.bottom<sceneLayout.result.top+8,'role cues must be after the brain: '+JSON.stringify(sceneLayout));
   if(width<=390){
-   assert.ok(sceneLayout.svg.top-sceneLayout.choice.bottom<65,
-    'mobile brain should appear immediately below scene choices: '+JSON.stringify(sceneLayout));
+   assert.ok(sceneLayout.svg.top-sceneLayout.choice.bottom<140,
+    'mobile selection summary and brain should remain one visual group: '+JSON.stringify(sceneLayout));
   }
   assert.equal(await page.locator('#lobeSceneRoles .lobe-scene-number').count(),3,
    'each role has a color-and-number cue matching the original brain diagram');
@@ -113,8 +115,34 @@ try{
     'selected scene is announced: '+key);
    assert.equal(await page.locator('[data-lobe-scene][aria-pressed="true"]').count(),1,'exactly one scene selected: '+key);
    assert.equal(await page.locator('#lobeSceneRoles li').count(),3,'three concise brain role clues: '+key);
+   assert.equal(await page.locator('#lobeSceneSelectedRegions .lobe-scene-selected-chip').count(),3,'three visible selected region names: '+key);
+   const currentLabel=await page.locator('#lobeSceneCurrent').innerText();
+   assert.match(currentLabel,/^지금 선택: /,'selected daily-life scene must be clearly named');
+   assert.ok(currentLabel.length>10,'selected scene name must not be blank: '+key);
    const selected=await page.locator('#brainMap [data-scene-active]').evaluateAll(els=>els.map(el=>el.dataset.brainRegion).sort());
    assert.deepEqual(selected,sceneToRegions[key].slice().sort(),'correct explanatory brain regions: '+key);
+   const selectedCards=await page.locator('.lobe-card[data-scene-example]').evaluateAll(els=>els.map(el=>el.dataset.region).sort());
+   assert.deepEqual(selectedCards,selected,'right-side cards must match the selected areas: '+key);
+   const visibleLabels=await page.locator('#lobeSceneSelectedRegions .lobe-scene-selected-chip').allInnerTexts();
+   assert.equal(visibleLabels.length,3,'show all selected region names');
+   for(const region of selected){
+    const zoneNumber=await page.locator('#brainMap [data-brain-region="'+region+'"] .zone-number').textContent();
+    const lobeName=await page.locator('.lobe-card[data-region="'+region+'"] strong').innerText();
+    assert.ok(visibleLabels.some(t=>t.includes(zoneNumber)&&t.includes(lobeName)),
+     'number and area name must match illustration and card: '+region);
+   }
+   // CSS animates the selected stroke for 120ms; inspect after transition settles.
+   await page.waitForTimeout(200);
+   const strokeInfo=await page.locator('#brainMap [data-scene-active] .zone-shape').first().evaluate(el=>({
+    width:getComputedStyle(el).strokeWidth,
+    selector:el.matches('.brain-page .brain-svg[data-scene-mode="active"] .brain-zone[data-scene-active] .zone-shape'),
+    svgMode:document.querySelector('#brainMap').getAttribute('data-scene-mode'),
+    brainClasses:document.querySelector('#brainMap').getAttribute('class'),
+    bodyClasses:document.body.className,
+    parentClasses:el.parentElement?.getAttribute('class')
+   }));
+   assert.ok(parseFloat(strokeInfo.width)>=10,
+    'highlighted border must be visually distinct: '+JSON.stringify(strokeInfo));
    assert.equal(await page.locator('#simpleDetail').isHidden(),true,'scene does not show unrelated single-region detail');
    const metrics=await page.evaluate(()=>({
     buttons:[...document.querySelectorAll('[data-lobe-scene]')].map(el=>el.getBoundingClientRect().toJSON()),
@@ -167,6 +195,8 @@ try{
    await page.locator('.lobe-card[data-region="'+key+'"]').click();
    assert.equal(await page.locator('#brainMap [data-scene-active]').count(),0,'individual region selection clears multiregion explanation');
    assert.equal(await page.locator('#lobeSceneResult').isHidden(),true,'scene role panel folds when examining an individual area');
+   assert.equal(await page.locator('#lobeSceneSelection').isHidden(),true,'hide example summary while inspecting one lobe');
+   assert.equal(await page.locator('.lobe-card[data-scene-example]').count(),0,'clear scene-only emphasis in single-lobe view');
    assert.equal(await page.locator('#simpleDetail').isVisible(),true);
    assert.equal(await page.locator('#simpleDetailTitle').innerText(),label);
    assert.equal(await page.locator('.lobe-card[data-region="'+key+'"]').getAttribute('aria-pressed'),'true');
@@ -188,6 +218,8 @@ try{
    'closing single-lobe explanation restores the earlier daily-scene context');
   assert.equal(await page.locator('#brainMap [data-scene-active]').count(),3,
    'scene regions return after closing single-lobe explanation');
+  assert.equal(await page.locator('#lobeSceneSelection').isVisible(),true,'summary returns after closing single-region view');
+  assert.equal(await page.locator('.lobe-card[data-scene-example]').count(),3,'six-card highlights return to previous scene');
   await page.locator('#brainMap [data-brain-region="occipital"]').click();
   assert.equal(await page.locator('#simpleDetailTitle').innerText(),'후두엽');
   // Newly added native HTML/SVG side-by-side hemispheres view.
