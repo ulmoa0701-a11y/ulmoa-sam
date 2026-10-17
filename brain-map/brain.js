@@ -44,6 +44,16 @@
   bag:{title:'🎒 가방을 챙길 때',roles:[['occipital','🎒','물건 살펴보기'],['parietal','📍','물건 위치 찾기'],['frontal','✅','순서·빠진 것 확인']]},
   feeling:{title:'🙂 친구 기분을 살필 때',roles:[['temporal','👂','말투 단서 살피기'],['occipital','👀','표정 단서 보기'],['frontal','💡','상황 함께 생각하기']]}
  };
+ const focusExplainers={
+  talk:['친구의 말소리와 뜻을 이해하는 데 관여해요.','어떤 말로 대답할지 생각하고 순서를 조절할 때 함께해요.','상대방의 표정 등 시각적 단서를 처리해요.'],
+  read:['눈으로 본 글자의 모양과 선을 처리해요.','말소리와 뜻을 연결하는 여러 읽기 과정에 관여해요.','읽을 부분에 집중하고 목표를 이어가는 데 함께해요.'],
+  map:['길 안내판이나 주변 표지판을 볼 때 시각 정보를 처리해요.','내 위치와 주변 공간의 관계를 이해하는 데 관여해요.','목적지까지 어떤 길로 갈지 계획할 때 함께해요.'],
+  ball:['날아오는 공의 움직임을 볼 때 시각 정보를 처리해요.','팔과 몸의 위치에 관한 감각·공간 정보를 통합해요.','손을 뻗는 타이밍과 움직임의 정확성을 조정해요.'],
+  music:['노래의 소리·음높이·리듬 정보를 처리해요.','언제 시작하고 멈출지 정하며 행동을 조절해요.','발성과 움직임의 시간 맞추기에 관여해요.'],
+  draw:['그림의 선과 모양 같은 시각 정보를 처리해요.','종이 위에서 손과 그림의 위치를 파악하는 데 관여해요.','무엇을 어떤 순서로 그릴지 계획할 때 함께해요.'],
+  bag:['물건의 모양과 색을 볼 때 시각 정보를 처리해요.','물건이 놓인 자리와 가방 안의 공간을 살펴봐요.','순서를 정하고 빠진 물건이 있는지 확인할 때 함께해요.'],
+  feeling:['목소리와 말투처럼 들리는 단서를 처리해요.','얼굴과 표정처럼 보이는 단서를 처리해요.','여러 단서와 상황을 함께 생각하고 반응을 조절해요.']
+ };
  if(nodes.length!==6||shapes.length!==6||![detail,title,text,icon,close,lobeSceneTitle,lobeSceneRoles,lobeSceneResult,lobeSceneSelection,lobeSceneCurrent,lobeSceneSelectedRegions,brainMap].every(Boolean)||lobeSceneButtons.length!==8)return;
  function clearLobeScene(){
   shapes.forEach(g=>g.removeAttribute('data-scene-active'));
