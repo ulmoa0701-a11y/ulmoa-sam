@@ -98,3 +98,20 @@ button:disabled.slow-primary,button:disabled.slow-secondary{opacity:.65;cursor:d
 .slow-bag-arrival p{margin:0;font-size:13px}
 @media(max-width:480px){.slow-bag-quest{grid-template-columns:1fr}.slow-bag-story,.slow-bag-progress{padding:9px}.slow-bag-progress{grid-template-columns:40px 60px 1fr}.slow-bag-progress>span{grid-row:auto;font-size:32px}.slow-bag-progress strong{font-size:18px}#moaBagContents{grid-column:auto}.slow-bag-story img{width:43px;height:43px}.slow-board.slow-bag{gap:6px;min-height:0;padding:7px}.slow-bag .slow-tile{min-height:52px;font-size:clamp(27px,8vw,38px)}}
 @media(prefers-reduced-motion:reduce){.slow-bag .slow-tile{transform:none}}
+
+/* Whole-piece construction: clearly distinct from copying separate locations. */
+.slow-block-goal{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;max-width:520px;padding:8px 12px;border-radius:16px;background:#eef8e9;text-align:center;color:#335a45}
+.slow-block-goal img{width:49px;height:49px;object-fit:contain}
+.slow-block-pair{align-items:start}
+.slow-block-play{display:contents}
+.slow-block-board .slow-tile{min-width:0;min-height:0;aspect-ratio:1}
+.slow-block-board .slow-block-filled{background:#d3eab7;border-color:#83bd80;box-shadow:inset 0 0 0 2px #7db48b}
+.slow-block-board .slow-block-empty{background:#f8fcf6}
+.slow-block-controls{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;width:min(100%,540px)}
+.slow-block-controls button{min-width:54px;min-height:50px;padding:10px 12px;border:2px solid #b9d6b8;border-radius:14px;background:white;color:#2c5c46;font-size:25px;font-weight:900;cursor:pointer;touch-action:manipulation}
+.slow-block-controls .slow-block-rotate{font-size:16px;background:#eaf8df}
+.slow-block-controls button:focus-visible,.slow-block-board button:focus-visible{outline:3px solid #dfb847;outline-offset:2px}
+.slow-block-complete{display:flex;align-items:center;flex-direction:column;gap:8px;padding:14px;width:min(100%,520px);border:2px solid #b3d7b8;background:#effae9;border-radius:18px;color:#345b43;text-align:center}
+.slow-block-house{font-size:clamp(38px,7vw,60px)}
+@media(max-width:600px){.slow-block-goal{gap:5px;padding:7px;font-size:13px}.slow-block-goal img{width:35px;height:35px}.slow-block-controls{gap:5px}.slow-block-controls button{min-width:43px;min-height:46px;padding:6px;font-size:23px}.slow-block-controls .slow-block-rotate{font-size:13px}.slow-block-board .slow-tile{font-size:clamp(18px,6vw,29px)}}
+@media(prefers-reduced-motion:no-preference){.slow-block-complete{animation:slow-house-arrive .25s ease-out}@keyframes slow-house-arrive{from{opacity:.5;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}}
