@@ -114,3 +114,35 @@ button:focus-visible,a:focus-visible{outline:3px solid #4b9c70;outline-offset:3p
 }
 @media(max-width:365px){.mission-banner{padding-right:82px}.mission-banner img{width:73px}.mission-banner h1{font-size:23px}.list-choice .item-chip{min-width:46px}.list-choice .item-chip b{font-size:10px}.play-toolbar{gap:5px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+
+/* mission-session-extended-v2: longer journeys without overwhelming the start screen */
+.session-choice{margin-top:23px;border-top:1px solid #e3ece3;padding-top:18px}
+.session-choice>.small-label{margin:0 0 12px;color:#668274}
+.round-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.round-options button{border:2px solid #dce8dc;min-height:63px;padding:11px 9px;border-radius:13px;background:#fff;color:#3d604e;display:grid;align-content:center;gap:4px;text-align:center}
+.round-options button strong{font-size:16px}
+.round-options button small{font-size:12px;color:#6e8479}
+.round-options button.chosen{background:#ecf7ef;border-color:#5a9f78}
+.round-plan{font-size:12px;color:#728678;margin:9px 0 0;line-height:1.6}
+.journey-row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:12px 0 0;padding:9px 11px;border:1px solid #ddebdc;border-radius:12px;background:#f6faf5}
+.garden-progress{color:#518168;font-weight:750;font-size:12px}
+.seed-count{color:#577e50;font-weight:850;font-size:12px}
+.result-garden{font-size:24px;letter-spacing:.08em;margin:16px auto;max-width:100%;overflow-wrap:anywhere}
+.change-receipt{font-size:14px;color:#6b725e;line-height:1.6;padding:10px;margin:7px auto;border-radius:11px;background:#fffdf5}
+.currency-multiple .currency-large{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:11px}
+.currency-multiple .currency-large .currency{transform:none;margin:4px}
+.inventory-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.item-pick{padding:7px 3px;border:2px solid #e3ece4;border-radius:14px;background:#fff}
+.item-pick .item-chip{border:0;min-width:0;width:100%;padding:4px 2px}
+.item-pick.added{border-color:#68a680;background:#eff8ef}
+.assembled-cart{border-radius:14px;background:#f2f8ef;border:1px dashed #bed9c6;min-height:93px;padding:14px}
+.assembled-cart>strong{display:block;font-size:14px;color:#3f6554;margin:0 0 9px}
+@media(max-width:650px){
+ .session-choice{margin-top:16px;padding-top:13px}
+ .round-options button{min-height:56px}
+ .round-options button strong{font-size:14px}
+ .round-options button small{font-size:11px}
+ .inventory-options{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ .inventory-options .item-chip>span{font-size:25px}
+}
+@media(max-width:360px){.inventory-options{grid-template-columns:repeat(2,minmax(0,1fr))}}
