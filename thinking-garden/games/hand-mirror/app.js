@@ -234,6 +234,10 @@ function drawHands(hands){
  const targets=teaching?currentGoal():[];
  let topFeedback=null;
  hands.forEach((hand,handIndex)=>{
+  if(handIndex===0&&isGarden()&&!$('modelCard').hidden){
+   // Keep the sample on the opposite side from the child's detected palm.
+   $('modelCard').dataset.side=xy(hand[9])[0]>w*.52?'left':'right';
+  }
   // The fine-grained overlay follows the child's detected joints, rather than asking the child to align with a fixed sticker.
   ctx.shadowBlur=0;ctx.lineWidth=3.6;ctx.strokeStyle='#54f2b5';ctx.lineJoin='round';ctx.lineCap='round';
   for(const [a,b] of CONNECTIONS){const q=xy(hand[a]),r=xy(hand[b]);ctx.beginPath();ctx.moveTo(...q);ctx.lineTo(...r);ctx.stroke();}
