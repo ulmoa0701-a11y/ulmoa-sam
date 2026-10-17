@@ -57,3 +57,28 @@ body.moa-assigned .moa-clinical-bridge-body>a{display:none}
 .moa-plan-preset-buttons{display:flex;gap:7px;flex-wrap:wrap}
 .moa-plan-preset{font:inherit;font-size:12px;font-weight:850;color:#3d684c;padding:8px 12px;border-radius:999px;border:1px solid #b5d4b3;background:#edf7e8;cursor:pointer;min-height:38px}
 .moa-plan-preset:hover{background:#dcecd9}
+
+/* Teacher selection order and optional per-game overrides (compact on mobile). */
+.moa-plan-order{border:1px solid #dce9d4;border-radius:14px;margin:14px 0 2px;padding:12px;background:#fafcf8}
+.moa-plan-order>strong{display:block;font-size:14px;color:#406e50;margin-bottom:9px}
+.moa-plan-order-list{display:grid;gap:8px}
+.moa-plan-empty{color:#728372;font-size:13px;margin:6px 0}
+.moa-choice-row{border:1px solid #dfebd8;background:#fff;border-radius:12px;padding:9px 10px}
+.moa-choice-head{display:flex;align-items:center;gap:8px}
+.moa-choice-head>strong{font-size:13px;flex:1;min-width:0;overflow-wrap:anywhere}
+.moa-choice-num{display:inline-grid;place-items:center;width:25px;height:25px;border-radius:50%;background:#e4f3df;color:#386c49;font-weight:900;font-size:12px}
+.moa-choice-arrows{display:flex;gap:5px}
+.moa-choice-shift{width:37px;height:37px;border-radius:10px;border:1px solid #bcd4bd;background:#f3f9ef;font-size:20px;color:#356446;cursor:pointer}
+.moa-choice-shift:disabled{opacity:.35;cursor:default}
+.moa-choice-settings{margin:6px 0 0 34px}
+.moa-choice-settings summary{font-size:12px;color:#58715c;cursor:pointer;font-weight:750}
+.moa-choice-fields{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.moa-choice-fields label{display:flex;align-items:center;gap:6px;font-size:12px;color:#47654f}
+.moa-choice-fields select{min-height:42px;padding:6px;border-radius:9px;border:1px solid #b9d4be;background:#fff;font:inherit;max-width:170px}
+.moa-choice-note{display:block;margin:6px 0 0 34px;font-size:11px;color:#728372}
+.moa-assigned-options{display:block;color:#3a7553;font-size:12px;font-weight:750}
+.moa-assigned-editor{max-width:520px;margin:0 auto;text-align:center;color:#637e69;font-size:12px}
+.moa-assigned-editor summary{cursor:pointer;font-weight:800}
+.moa-assigned-editor button{margin:11px auto 0}
+.moa-assigned-editor p{line-height:1.6}
+@media(max-width:600px){.moa-plan-order{padding:9px}.moa-choice-row{padding:8px}.moa-choice-fields{display:grid;grid-template-columns:1fr 1fr;gap:6px}.moa-choice-fields label{display:grid;gap:4px}.moa-choice-fields select{width:100%;max-width:none}}

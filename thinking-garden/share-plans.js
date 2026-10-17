@@ -19,17 +19,34 @@ function unpack(input){
  if(!input||input.length>2800)return null;
  try{const json=decodeURIComponent(escape(atob(input.replace(/-/g,'+').replace(/_/g,'/'))));return JSON.parse(json)}catch{return null}
 }
+function roundChoices(id){
+ if(id==='slowName')return [6,12,18,24];
+ if(id==='spacing'||id==='spelling')return [10,20,30];
+ return [5,10,15,20];
+}
 function safePlan(o){
- if(!o||o.v!==1||!Array.isArray(o.items))return null;
- const valid=new Set(library.map(x=>x.id));
- const picked=[],seen=new Set();
+ if(!o||![1,2].includes(o.v)||!Array.isArray(o.items))return null;
+ const valid=new Set(library.map(x=>x.id)),picked=[],seen=new Set();
  for(const item of o.items){
   if(typeof item!=='string'||item.length>40||seen.has(item))continue;
   if(valid.has(item)||materialMap.has(item)){picked.push(item);seen.add(item)}
   if(picked.length>=LIMIT)break;
  }
  if(!picked.length)return null;
- return {v:1,items:picked,level:Math.min(3,Math.max(1,Number(o.level)||1)),rounds:[5,10,15,20].includes(Number(o.rounds))?Number(o.rounds):5};
+ const level=[1,2,3].includes(Number(o.level))?Number(o.level):1;
+ const rounds=[5,10,15,20].includes(Number(o.rounds))?Number(o.rounds):5;
+ const settings={};
+ if(o.v===2&&o.settings&&typeof o.settings==='object'&&!Array.isArray(o.settings)){
+  for(const id of picked){
+   if(!valid.has(id)||external[id])continue;
+   const opt=o.settings[id];if(!opt||typeof opt!=='object'||Array.isArray(opt))continue;
+   const clean={};
+   if([1,2,3].includes(Number(opt.level)))clean.level=Number(opt.level);
+   if(roundChoices(id).includes(Number(opt.rounds)))clean.rounds=Number(opt.rounds);
+   if(Object.keys(clean).length)settings[id]=clean;
+  }
+ }
+ return {v:2,items:picked,level,rounds,settings};
 }
 function shareUrl(plan){const u=new URL(location.pathname,location.origin);u.searchParams.set(CODE,pack(plan));return u.href}
 function updateSharedMenu(){
@@ -38,7 +55,7 @@ function updateSharedMenu(){
  const old=$('#moaAssignedHome');if(old)old.remove();
  const panel=E('section','moa-assigned-home');panel.id='moaAssignedHome';panel.setAttribute('aria-label','선택된 연습 활동');
  const hero=E('div','moa-assigned-hero');hero.append(E('span','moa-assigned-eyebrow','🌱 모아의 오늘 연습'),E('h1','', '준비한 활동만 모아뒀어요'),E('p','', '원하는 활동부터 시작해요. 서두르지 않아도 괜찮아요.'));
- const notice=E('p','moa-assigned-detail',active.items.length+'개 활동 · '+(['','쉬움','보통','확장'][active.level])+' 난이도 · '+active.rounds+'문제 기본 연습');
+ const notice=E('p','moa-assigned-detail',active.items.length+'개 활동 · 게임마다 연습량이 다를 수 있어요.');
  hero.append(notice);if(visited.size){hero.append(E('p','moa-assigned-progress','🌱 '+visited.size+'개 활동을 해봤어요. 다음 활동도 천천히 이어갈 수 있어요.'));}panel.append(hero);
  const grid=E('div','moa-assigned-list');
  active.items.forEach((id,i)=>{
@@ -46,6 +63,10 @@ function updateSharedMenu(){
   const n=E('span','moa-assigned-number',visited.has(id)?'🌼 해봤어요':String(i+1).padStart(2,'0'));card.append(n);
   const title=E('h2','',game?.title||material?.title||id);card.append(title);
   const desc=E('p','',game?.desc||material?.desc||'');card.append(desc);
+  if(game&&!external[id]){
+   const opt=active.settings?.[id]||{},n=opt.rounds||roundChoices(id).find(x=>x>=active.rounds)||roundChoices(id).at(-1);
+   card.append(E('small','moa-assigned-options',(['','쉬움','보통','확장'][opt.level||active.level])+' · '+n+'문제'));
+  }
   if(game){
    const action=E('button','moa-assigned-start','🎮 '+game.title+' 시작 →');
    action.type='button';action.addEventListener('click',()=>play(id));card.append(action);
@@ -56,7 +77,12 @@ function updateSharedMenu(){
   grid.append(card);
  });
  panel.append(grid);
- const foot=E('p','moa-assigned-foot','선생님이 선택한 활동만 표시합니다. 개인정보는 링크에 들어 있지 않아요.');panel.append(foot);
+ const foot=E('p','moa-assigned-foot','선택된 활동만 표시하는 공개 메뉴예요. 로그인이나 접근 제한 기능은 아니며, 개인정보는 링크에 넣지 않았어요.');
+ const editor=E('details','moa-assigned-editor');
+ editor.append(E('summary','','선생님용 · 선택 목록 수정'));
+ const edit=E('button','moa-assigned-exit','이 목록을 복사해 수정하기');edit.type='button';edit.onclick=()=>$('#moaPlannerLaunch')?.click();
+ editor.append(edit,E('p','','수정하면 새로운 링크가 만들어져요. 이미 보낸 링크는 그대로 유지돼요.'));
+ panel.append(foot,editor);
  $('#homeScreen').prepend(panel);
 }
 function embed(path,title,isMaterial){
@@ -74,17 +100,18 @@ function play(id){
  lastPlayed=id;
  if(external[id]){embed(external[id],library.find(x=>x.id===id)?.title||'선택한 게임',false);return;}
  hooks.openPreview(id);
- const level=$('#slowLevel');if(level)level.value=String(active.level);
+ const itemSettings=active.settings?.[id]||{};
+ const level=$('#slowLevel');if(level)level.value=String(itemSettings.level||active.level);
  const count=$('#sessionRounds');
  if(count&&count.options.length){
   const opts=[...count.options].map(x=>Number(x.value));
-  count.value=String(opts.find(x=>x>=active.rounds)||opts[opts.length-1]);
+  count.value=String(opts.find(x=>x>=(itemSettings.rounds||active.rounds))||opts[opts.length-1]);
  }
  if(id==='spacing'||id==='spelling'){
-  const levels=['easy','normal','hard'],sel=levels[active.level-1];
+  const levels=['easy','normal','hard'],sel=levels[(itemSettings.level||active.level)-1];
   $('#literacyPracticeControls [data-level="'+sel+'"]')?.click();
   const amounts=[...document.querySelectorAll('#literacyPracticeControls [data-count]')].map(x=>Number(x.dataset.count));
-  const n=amounts.find(x=>x>=active.rounds)||amounts[amounts.length-1];
+  const n=amounts.find(x=>x>=(itemSettings.rounds||active.rounds))||amounts[amounts.length-1];
   $('#literacyPracticeControls [data-count="'+n+'"]')?.click();
  }
 }
@@ -123,7 +150,46 @@ function makeBuilder(){
   const label=E('label','moa-plan-row');const check=E('input');check.type='checkbox';check.value=item.id;check.name='moaPlanPick';
   const body=E('span');body.append(E('strong','',item.title),E('small','',item.resource?'📄 활동지·자료':item.desc));label.append(check,body);selection.append(label);
  });
- presets.forEach(([title,ids])=>{const btn=E('button','moa-plan-preset',title);btn.type='button';btn.onclick=()=>{selection.querySelectorAll('input').forEach(input=>{input.checked=ids.includes(input.value)});selection.dispatchEvent(new Event('change'));};presetList.append(btn);});
+ const chosenOrder=[],perItem={};
+ const orderBox=E('section','moa-plan-order');orderBox.id='moaPlanOrder';
+ orderBox.append(E('strong','','선택한 활동 순서'));
+ const orderList=E('div','moa-plan-order-list');orderBox.append(orderList);
+ function dirty(){output.hidden=true;}
+ function renderOrder(){
+  orderList.replaceChildren();
+  if(!chosenOrder.length){orderList.append(E('p','moa-plan-empty','활동을 고르면 이곳에서 순서를 바꿀 수 있어요.'));return;}
+  chosenOrder.forEach((id,index)=>{
+   const info=rows.find(x=>x.id===id),line=E('div','moa-choice-row');line.dataset.choice=id;
+   const heading=E('div','moa-choice-head');heading.append(E('span','moa-choice-num',String(index+1)),E('strong','',info?.title||id));
+   const controls=E('div','moa-choice-arrows');
+   for(const [dir,label] of [[-1,'↑'],[1,'↓']]){
+    const b=E('button','moa-choice-shift',label);b.type='button';b.disabled=index+dir<0||index+dir>=chosenOrder.length;
+    b.setAttribute('aria-label',(info?.title||id)+' '+(dir<0?'위로':'아래로')+' 이동');
+    b.onclick=()=>{[chosenOrder[index],chosenOrder[index+dir]]=[chosenOrder[index+dir],chosenOrder[index]];renderOrder();dirty();};
+    controls.append(b);
+   }
+   heading.append(controls);line.append(heading);
+   if(!info?.resource&&!external[id]){
+    const details=E('details','moa-choice-settings');details.append(E('summary','','이 게임만 다르게 설정'));
+    const fields=E('div','moa-choice-fields');
+    const lv=E('label','','난이도'),lvSel=E('select');lvSel.dataset.setting='level';
+    [['','전체 설정'],['1','쉬움'],['2','보통'],['3','확장']].forEach(([v,t])=>{const opt=E('option','',t);opt.value=v;lvSel.append(opt)});
+    lvSel.value=String(perItem[id]?.level||'');lvSel.onchange=()=>{perItem[id]??={};if(lvSel.value)perItem[id].level=Number(lvSel.value);else delete perItem[id].level;dirty();};lv.append(lvSel);
+    const rd=E('label','','문제 수'),rdSel=E('select');rdSel.dataset.setting='rounds';
+    [['','전체 설정'],...roundChoices(id).map(x=>[String(x),x+'문제'])].forEach(([v,t])=>{const opt=E('option','',t);opt.value=v;rdSel.append(opt)});
+    rdSel.value=String(perItem[id]?.rounds||'');rdSel.onchange=()=>{perItem[id]??={};if(rdSel.value)perItem[id].rounds=Number(rdSel.value);else delete perItem[id].rounds;dirty();};rd.append(rdSel);
+    fields.append(lv,rd);details.append(fields);line.append(details);
+   }else if(external[id])line.append(E('small','moa-choice-note','이 게임은 자체 난이도·진행 방식을 사용해요.'));
+   orderList.append(line);
+  });
+ }
+ function syncOrder(){
+  const checked=[...selection.querySelectorAll('input:checked')].map(x=>x.value);
+  for(let i=chosenOrder.length-1;i>=0;i--)if(!checked.includes(chosenOrder[i]))chosenOrder.splice(i,1);
+  for(const id of checked)if(!chosenOrder.includes(id))chosenOrder.push(id);
+  renderOrder();
+ }
+ presets.forEach(([title,ids])=>{const btn=E('button','moa-plan-preset',title);btn.type='button';btn.onclick=()=>{selection.querySelectorAll('input').forEach(input=>{input.checked=ids.includes(input.value)});chosenOrder.splice(0,chosenOrder.length,...ids.filter(id=>rows.some(x=>x.id===id)));selection.dispatchEvent(new Event('change'));};presetList.append(btn);});
  const msg=E('p','moa-plan-status','필요한 게임과 활동지를 선택하세요.');msg.id='moaPlanStatus';msg.setAttribute('role','status');
  const output=E('div','moa-plan-output');output.hidden=true;output.id='moaPlanOutput';
  const url=E('input');url.readOnly=true;url.setAttribute('aria-label','생성한 맞춤 연습 링크');url.id='moaPlanLink';
@@ -131,17 +197,29 @@ function makeBuilder(){
  const preview=E('a','','만든 화면 미리보기 ↗');preview.id='moaPlanPreview';preview.target='_blank';preview.rel='noopener';
  output.append(url,copy,preview);
  const create=E('button','moa-plan-create','선택한 활동 링크 만들기');create.type='button';create.onclick=()=>{
-  const ids=[...selection.querySelectorAll('input:checked')].map(x=>x.value);
+  const ids=[...chosenOrder];
   if(!ids.length){msg.textContent='게임이나 활동지를 하나 이상 골라주세요.';output.hidden=true;return}
   if(ids.length>LIMIT){msg.textContent='한 링크에는 최대 '+LIMIT+'개까지 담을 수 있어요. 중요한 활동만 골라주세요.';output.hidden=true;return}
-  const model=safePlan({v:1,items:ids,level:Number(levels.value),rounds:Number(rounds.value)});
+  const model=safePlan({v:2,items:ids,level:Number(levels.value),rounds:Number(rounds.value),settings:perItem});
   if(!model){msg.textContent='선택 항목을 확인해 주세요.';return}
   const link=shareUrl(model);url.value=link;preview.href=link;output.hidden=false;
   msg.textContent=model.items.length+'개 활동으로 만들었어요. 복사해서 보호자에게 전달할 수 있어요.';
  };
- selection.addEventListener('change',()=>{const count=selection.querySelectorAll('input:checked').length;msg.textContent='선택한 활동 '+count+'개 (최대 '+LIMIT+'개)';output.hidden=true});
- dialog.append(top,settings,presetBox,selection,create,msg,output);document.body.append(dialog);
- entry.onclick=()=>dialog.showModal();
+ selection.addEventListener('change',()=>{syncOrder();const count=chosenOrder.length;msg.textContent='선택한 활동 '+count+'개 (최대 '+LIMIT+'개)';output.hidden=true});
+ levels.onchange=dirty;rounds.onchange=dirty;
+ dialog.append(top,settings,presetBox,selection,orderBox,create,msg,output);document.body.append(dialog);
+ renderOrder();
+ entry.onclick=()=>{
+  if(active){
+   selection.querySelectorAll('input').forEach(input=>{input.checked=active.items.includes(input.value)});
+   chosenOrder.splice(0,chosenOrder.length,...active.items);
+   Object.keys(perItem).forEach(k=>delete perItem[k]);
+   Object.assign(perItem,JSON.parse(JSON.stringify(active.settings||{})));
+   levels.value=String(active.level);rounds.value=String(active.rounds);
+   syncOrder();dirty();msg.textContent='기존 목록을 불러왔어요. 바꾼 뒤 새 링크를 만들 수 있어요.';
+  }
+  dialog.showModal();
+ };
 }
 function init(o){
  if(!$('#homeScreen')||!o?.openPreview)return;

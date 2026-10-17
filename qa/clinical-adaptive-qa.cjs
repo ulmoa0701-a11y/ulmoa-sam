@@ -20,6 +20,13 @@ await page.locator('[data-core=next]').click();
 await page.waitForFunction(n=>document.querySelector('#stageLabel')?.textContent.trim()===n,(round+2)+' / 5');
 }
 assert.equal(await page.evaluate(()=>state.strategy.currentLevel),3,'correct streak must increase 2 to 3');
+await page.locator('.strategy-quest .strategy-teacher summary').click();
+await page.locator('.strategy-quest [data-core="teacher-cue"]').click();
+assert.equal(await page.evaluate(()=>state.strategy.r.teacherCues),1,'teacher-provided cue must be recorded separately');
+await page.locator('[data-core="pause"]').click();
+assert.ok(await page.locator('.strategy-done').isVisible(),'a pause must stop the current task without skipping it');
+await page.locator('[data-core="resume"]').click();
+assert.equal(await page.evaluate(()=>state.strategy.r.pauses),1,'paused round must be resumed, not discarded');
 for(let attempt=0;attempt<2;attempt++){
 const n=await page.evaluate(()=>state.strategy.r.tasks.length);
 for(const i of [2,0,1,3].slice(0,n))await page.locator('[data-plan=choose][data-i="'+i+'"]').click();
@@ -29,6 +36,7 @@ assert.equal(await page.evaluate(()=>state.strategy.r.errors),2);
 await page.locator('[data-core=rest]').click();await page.locator('[data-core=next]').click();
 await page.waitForFunction(()=>document.querySelector('#stageLabel')?.textContent.trim()==='4 / 5');
 assert.equal(await page.evaluate(()=>state.strategy.currentLevel),2,'repeated errors must reduce difficulty');
+assert.deepEqual(await page.evaluate(()=>{const r=state.strategy.records[2];return [r.first,r.final,r.errors,r.support,r.teacherCues,r.pauses]}),['X','-',2,2,1,1],'first/final/cue/pause observations must be distinct');
 await page.locator('#backHome').click();
 await page.locator('[data-open="resetRescue"]').click();await page.locator('#introStart').click();
 await page.evaluate(()=>{state.strategy.r.suggested=(state.strategy.r.target+1)%5;renderRound()});
