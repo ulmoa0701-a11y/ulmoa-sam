@@ -58,9 +58,9 @@ function renderGuide(){
    (isGarden()?(S.success%2===1?'🌰 도토리 잡았어!':'🌷 꽃이 피었어!'):
     S.mode==='copy'?'🫧 풍선이 반짝!':S.mode==='fingers'?'⭐ 별빛이 켜졌어!':S.mode==='memory'?'✨ 다음 발판으로!':'🔑 보물문이 열리고 있어!'):
    isGarden()?(S.round%2===0?'✊ 주먹! 도토리 잡기':'✋ 보자기! 도토리 놓기'):
-   S.mode==='copy'?'🫧 '+goalText()+' → 풍선 톡!':
+   S.mode==='copy'?'🫧 '+COPY_CUES[S.round]:
    S.mode==='fingers'?'⭐ '+goalText()+' → 별빛 켜기!':
-   S.mode==='both'?'🔑 두 손으로 '+goalText()+'!':'🚶 비밀 발판 기억하기';
+   S.mode==='both'?'🔑 '+BOTH_CUES[S.round]:'🚶 비밀 발판 기억하기';
  $('liveLegend').textContent=recall?'기억한 대로 해볼까?':preview?'손 모양 순서를 기억해!':isGarden()?'모아의 손 모양을 따라 해봐!':'🟡 노란 손가락 쭉! · 연한 손가락 접기';
  $('guideToggle').hidden=!camera||recall||isGarden();
  $('cameraHold').hidden=!camera||preview||S.phase==='setup';
@@ -157,6 +157,9 @@ function gardenUpdate(){
  syncAcornUI();
 }
 
+const COPY_CUES=['손바닥을 펴서 풍선 띄우기!','주먹으로 풍선 꼭 잡기!','한 손가락으로 풍선 톡!','두 손가락으로 풍선 톡톡!','세 손가락으로 풍선 반짝!','손바닥을 펴서 마지막 풍선 보내기!'];
+const COPY_REWARDS=['풍선이 둥실 떠올랐어!','풍선을 꼭 잡았어!','풍선 하나가 반짝였어!','풍선 두 개가 톡톡!','풍선 세 개가 반짝반짝!','풍선을 모두 띄웠어!'];
+const BOTH_CUES=['두 손바닥을 활짝! 첫 번째 빛!','두 손을 꼭 쥐어! 두 번째 빛!','한 손은 펴고, 한 손은 꼭 쥐어!','두 손에서 손가락 하나씩!'];
 const ADVENTURE_META={
  copy:{label:'반짝 풍선',token:'🫧',done:'✨',rounds:6},
  fingers:{label:'별빛 모으기',token:'☆',done:'⭐',rounds:6},
@@ -186,7 +189,7 @@ function adventureUpdate(){
   mark.innerHTML=sequence.map((p,i)=>{
    const done=i<S.part||(phase==='reward'&&i===S.part);
    // Deliberate recall: never leak the saved hand pose during play.
-   const icon=phase==='memorize'?handArt(p):done?'✨':'❔';
+   const icon=phase==='memorize'?handArt(p):done?'<span class="stone-glow">✦</span>':'<span class="stone-placeholder"></span>';
    return '<span class="adventure-token" data-state="'+(done?'done':i===S.part?'current':'waiting')+'" data-step="'+i+'">'+icon+'</span>';
   }).join('');
   $('gardenHudFlower').textContent='🪨 '+S.round+' / 4';
@@ -194,17 +197,36 @@ function adventureUpdate(){
  }else{
   mark.innerHTML=Array.from({length:meta.rounds},(_,i)=>{
    const state=i<count?'done':i===count?'current':'waiting';
-   return '<span class="adventure-token" data-state="'+state+'" data-step="'+i+'">'+(state==='done'?meta.done:meta.token)+'</span>';
+   const token=S.mode==='copy'?'<span class="mini-balloon"></span>':state==='done'?meta.done:meta.token;
+    return '<span class="adventure-token" data-state="'+state+'" data-step="'+i+'">'+token+'</span>';
   }).join('');
   $('gardenHudFlower').textContent=(S.mode==='copy'?'✨ ':S.mode==='fingers'?'⭐ ':'🔑 ')+Math.min(count,meta.rounds)+' / '+meta.rounds;
   $('gardenHudRound').textContent=(S.round+1)+' / '+meta.rounds;
  }
  }
  const expectedFingers=S.mode==='fingers'?(core.PATTERNS[currentGoal()[0]]?.reduce((n,v)=>n+v,0)||1):1;
- $('adventureActorEmoji').textContent=S.mode==='copy'?(phase==='reward'?'✨':'🫧'):
-  S.mode==='fingers'?(phase==='reward'?'⭐'.repeat(expectedFingers):'☆'.repeat(expectedFingers)):
-  S.mode==='both'?(phase==='reward'?'🔓':'🚪'):'';
- $('adventureActor').dataset.state=phase==='reward'?'success':'waiting';
+ const actor=$('adventureActor'),actorSymbol=$('adventureActorEmoji');
+ if(S.mode==='copy'){
+  const pose=currentGoal()[0],balloons=pose==='two'?2:pose==='three'?3:1,visualKey='balloons-'+(pose==='fist'?'grab':pose==='palm'?'release':'pop')+'-'+balloons;
+  if(actor.dataset.visualKey!==visualKey){
+   actorSymbol.innerHTML='<span class="balloon-cluster">'+Array.from({length:balloons},(_,i)=>'<span class="moa-balloon" data-index="'+i+'"></span>').join('')+'</span>';
+   actor.dataset.visualKey=visualKey;
+  }
+  actor.dataset.action=pose==='palm'?'release':pose==='fist'?'grab':'pop';
+ }else if(S.mode==='both'){
+  if(actor.dataset.visualKey!=='treasure-door'){
+   actorSymbol.innerHTML='<span class="moa-treasure-door"><span class="door-knob"></span><span class="door-light"></span></span>';
+   actor.dataset.visualKey='treasure-door';
+  }
+  actor.dataset.action='unlock';actor.dataset.unlocks=String(Math.min(4,S.success));
+ }else{
+  const visual=S.mode==='fingers'?(phase==='reward'?'⭐'.repeat(expectedFingers):'☆'.repeat(expectedFingers)):'';
+  if(actor.dataset.visualKey!=='stars-'+visual){
+   actorSymbol.textContent=visual;actor.dataset.visualKey='stars-'+visual;
+  }
+  actor.dataset.action='stars';
+ }
+ actor.dataset.state=phase==='reward'?'success':'waiting';
  $('adventureActor').style.left=(S.acornX??50)+'%';
  $('adventureActor').style.top=(S.acornY??52)+'%';
 }
@@ -367,9 +389,12 @@ function drawHands(hands){
     syncAcornUI();
    }else if(isAdventure()){
     if(S.mode==='fingers'){
-     const tip=xy(hand[8]);
-     S.acornX=Math.max(8,Math.min(92,100*tip[0]/w));
-     S.acornY=Math.max(21,Math.min(77,100*tip[1]/h-8));
+     const pattern=core.PATTERNS[currentGoal()[0]]||[1,0,0,0];
+     const tipIds=[8,12,16,20].filter((_,i)=>pattern[i]===1);
+     const positions=tipIds.map(i=>xy(hand[i]));
+     const center=[positions.reduce((v,p)=>v+p[0],0)/positions.length,positions.reduce((v,p)=>v+p[1],0)/positions.length];
+     S.acornX=Math.max(8,Math.min(92,100*center[0]/w));
+     S.acornY=Math.max(21,Math.min(77,100*center[1]/h-8));
     }else{
      const base=xy(hand[9]);
      S.acornX=Math.max(10,Math.min(90,100*base[0]/w));
@@ -554,7 +579,7 @@ function accept(){
  if(isGarden()){gardenUpdate();message(S.success%2===1?'🌰 도토리를 잡았어!':'🌷 도토리를 심어서 꽃이 피었어!');}
  else{
   adventureUpdate();
-  message(S.mode==='copy'?'🫧 손으로 풍선을 깨웠어!':
+  message(S.mode==='copy'?'🫧 '+COPY_REWARDS[S.round]:
    S.mode==='fingers'?'⭐ 반짝! 별이 켜졌어!':
    S.mode==='memory'?'✨ 기억한 발판이 빛나!':'🔑 찰칵! 보물문 자물쇠가 열려!');
  }
