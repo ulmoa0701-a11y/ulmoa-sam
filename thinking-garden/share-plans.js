@@ -99,6 +99,19 @@ function embed(path,title,isMaterial){
   const a=E('a','moa-assigned-pdf-link','새 창에서 열기 ↗');a.href=path;a.target='_blank';a.rel='noopener';bar.append(a);
  }
  const frame=E('iframe','moa-assigned-frame');frame.src=path;frame.title=title;frame.setAttribute('allow','camera; microphone; fullscreen');frame.loading='eager';
+ // Standalone games run in this same-origin frame. Their normal 'back to all games'
+ // links must not escape the caregiver's selected-only list.
+ if(!isMaterial){
+  const allowed=new URL(path,location.href),gamePrefix=allowed.pathname;
+  frame.addEventListener('load',()=>{
+   if(!overlay.isConnected)return;
+   try{
+    const current=new URL(frame.contentWindow.location.href);
+    if(current.origin===location.origin&&current.pathname.startsWith(gamePrefix))return;
+   }catch{}
+   overlay.remove();hooks.goHome();
+  });
+ }
  overlay.append(bar,frame);document.body.append(overlay);
 }
 function play(id){
