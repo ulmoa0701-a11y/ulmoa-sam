@@ -60,7 +60,7 @@ function render(id,ctx){
   s.records.push({round:state.round+1,level:r.level,first:r.first===null?'-':r.first?'O':'X',final:correct===null?'-':correct?'O':'X',errors:r.errors,support:r.support,teacherCues:r.teacherCues,pauses:r.pauses,note});
   if(correct===true){addSeeds(r.errors?7:10);sfx('ok');}else if(correct===false)sfx('tap');
   // Only independent, error-free first responses count towards an increase.
-  const independent=correct===true&&r.first===true&&r.errors===0&&r.support===0&&r.teacherCues===0;
+  const independent=correct===true&&r.first===true&&r.errors===0&&r.support===0&&r.teacherCues===0&&r.checked!==true;
   if(independent){
    s.correctStreak++;s.strain=Math.max(0,s.strain-1);
    if(s.adaptive&&s.correctStreak>=2&&s.currentLevel<s.maxLevel){s.currentLevel++;s.correctStreak=0;}
