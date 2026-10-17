@@ -581,7 +581,7 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
  const wordAudit=await page.evaluate(()=>{
   const old={song:currentSong,section:practiceSection,t:elapsed},out=[];
   try{
-   for(const song of SAMPLES){
+   for(const song of SAMPLES.filter(s=>s.category!=='박자 연습')){
     currentSong=clone(song);practiceSection='all';refreshPracticeSections();build();
     const actual=events.filter(e=>eHasLyric(e)).map(e=>String(e.lyric).replace(/\s/g,'')).join('');
     const text=LYRIC_WORDS[song.key]||'';
@@ -620,7 +620,7 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
   const samples=['twinkle','plane','butterfly','rabbit','same','bear','school-bell'];
   const results=[];
   try{
-   for(const key of SAMPLES.map(song=>song.key)){
+   for(const key of SAMPLES.filter(s=>s.category!=='박자 연습').map(song=>song.key)){
     currentSong=clone(findSample(key));practiceSection='all';refreshPracticeSections();build();
     const seen=new Set(),lines=[],notFull=[];
     for(const e of events.filter(x=>eHasLyric(x))){
@@ -659,6 +659,49 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
     screen+': phrase counts must match the actual score sections '+JSON.stringify(p));
  }
  report.push({name:screen+'-sung-phrases',phraseCase});
+
+
+ // Real timing exercises: four distinct subdivisions, 8 measures each,
+ // on a single pitch, no artificial lyrics and with a useful beat counter.
+ const rhythmChecks=await page.evaluate(()=>{
+  const prev={song:currentSong,section:practiceSection,t:elapsed,level,bpm},results=[];
+  try{
+   for(const key of ['beat-basic','beat-half','sixteenth','dotted']){
+    currentSong=clone(findSample(key));level=3;practiceSection='all';elapsed=0;bpm=selectedTempo(currentSong);
+    refreshPracticeSections();build();updateRhythmGuide();updateLyricTrack(true);
+    const b=beatMs(),bars=playbackMeasures.map(bar=>bar.reduce((a,e)=>a+Number(e.dur),0));
+    const visual={
+      counter:document.querySelector('#lyricTrack')?.getAttribute('aria-label'),
+      selected:document.querySelector('#rhythmGuide')?.classList.contains('show'),
+      guide:document.querySelector('#rhythmGuide')?.innerText,
+      active:events.filter(e=>e.active).length,
+      notes:events.map(e=>e.note),
+      t:events.map(e=>e.start)
+    };
+    elapsed=firstNoteMs()+b+30;updateLyricTrack(true);
+    const beat2=document.querySelector('#lyricTrack')?.getAttribute('aria-label');
+    results.push({key,category:currentSong.category,title:currentSong.title,beats:bars,
+      measures:bars.length,allDo:visual.notes.every(n=>n==='도'),
+      allActive:visual.active===events.length,lyrics:events.filter(e=>e.lyric).length,
+      count1:visual.counter,count2:beat2,guide:visual.selected,help:visual.guide,
+      validTiming:events.every((e,i)=>!i||e.start>=events[i-1].start+events[i-1].dur-1)});
+   }
+   return {groups:[...document.querySelectorAll('#sampleSelect optgroup')].map(x=>x.label),
+       items:[...document.querySelectorAll('#sampleSelect optgroup')].map(x=>[x.label,x.querySelectorAll('option').length]),
+       results};
+  }finally{
+   currentSong=prev.song;level=prev.level;practiceSection=prev.section;elapsed=prev.t;bpm=prev.bpm;
+   refreshPracticeSections();build();updateRhythmGuide();
+  }
+ });
+ check(JSON.stringify(rhythmChecks.groups)===JSON.stringify(['동요','붐웨커 연습곡','박자 연습']),
+   screen+': misleading song categories remain '+JSON.stringify(rhythmChecks.groups));
+ check(rhythmChecks.items.at(-1)?.[1]===4,screen+': all four rhythm exercises must be visible');
+ for(const x of rhythmChecks.results)check(x.measures===8&&x.beats.every(n=>n===4)&&
+   x.category==='박자 연습'&&x.allDo&&x.allActive&&x.lyrics===0&&x.guide&&
+   x.count1==='박자 세기 1'&&x.count2==='박자 세기 2'&&x.validTiming,
+   screen+': invalid real beat exercise '+JSON.stringify(x));
+ report.push({name:screen+'-rhythm-lessons',rhythmChecks});
 
  const end=await page.evaluate(()=>{
   currentSong=clone(findSample('twinkle'));practiceSection='all';refreshPracticeSections();build();
