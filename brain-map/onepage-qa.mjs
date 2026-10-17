@@ -85,6 +85,20 @@ try{
    const titleHeight=await page.locator('.map-panel-heading h2').evaluate(el=>el.getBoundingClientRect().height);
    assert.ok(titleHeight<43,'six-lobe heading should not wrap awkwardly on small screens: '+titleHeight);
   }
+  const sceneLayout=await page.evaluate(()=>{
+   const choice=document.querySelector('.lobe-scene-choices').getBoundingClientRect();
+   const svg=document.querySelector('#brainMap').getBoundingClientRect();
+   const result=document.querySelector('#lobeSceneResult').getBoundingClientRect();
+   return {choice:choice.toJSON(),svg:svg.toJSON(),result:result.toJSON()};
+  });
+  assert.ok(sceneLayout.choice.bottom<sceneLayout.svg.top,'scene choice must be placed before brain map: '+JSON.stringify(sceneLayout));
+  assert.ok(sceneLayout.svg.bottom<sceneLayout.result.top+8,'role cues must be after the brain: '+JSON.stringify(sceneLayout));
+  if(width<=390){
+   assert.ok(sceneLayout.svg.top-sceneLayout.choice.bottom<65,
+    'mobile brain should appear immediately below scene choices: '+JSON.stringify(sceneLayout));
+  }
+  assert.equal(await page.locator('#lobeSceneRoles .lobe-scene-number').count(),3,
+   'each role has a color-and-number cue matching the original brain diagram');
   await page.screenshot({path:out+'/'+name+'-initial.png',fullPage:true});
   const sceneToRegions={
    talk:['frontal','temporal','occipital'],read:['frontal','temporal','occipital'],
@@ -113,6 +127,30 @@ try{
     'visual roles must remain visible: '+JSON.stringify(metrics));
    assert.ok(metrics.scroll<=metrics.client+1,'scene detail should not cause page overflow: '+JSON.stringify(metrics));
   }
+  await page.locator('[data-lobe-scene="map"]').click();
+  const pathfindingCues=await page.locator('#lobeSceneRoles li').evaluateAll(els=>
+   els.map(el=>({n:el.querySelector('.lobe-scene-number').textContent.trim(),
+    task:el.querySelector('small').textContent.trim(),
+    icon:el.querySelector('.lobe-scene-task-icon').textContent.trim()})));
+  const pathfindingRegions=await page.locator('#brainMap [data-scene-active]').evaluateAll(els=>
+   els.map(el=>el.dataset.brainRegion).sort());
+  await page.locator('[data-lobe-scene="bag"]').click();
+  const packingCues=await page.locator('#lobeSceneRoles li').evaluateAll(els=>
+   els.map(el=>({n:el.querySelector('.lobe-scene-number').textContent.trim(),
+    task:el.querySelector('small').textContent.trim(),
+    icon:el.querySelector('.lobe-scene-task-icon').textContent.trim()})));
+  const packingRegions=await page.locator('#brainMap [data-scene-active]').evaluateAll(els=>
+   els.map(el=>el.dataset.brainRegion).sort());
+  assert.deepEqual(pathfindingRegions,packingRegions,'do not fabricate differences in neural regions');
+  assert.notDeepEqual(pathfindingCues.map(x=>x.icon),packingCues.map(x=>x.icon),
+   'same regions must provide different recognizable visual task cues across scenes');
+  assert.notDeepEqual(pathfindingCues.map(x=>x.task),packingCues.map(x=>x.task),
+   'same regions must explain scene-specific functions instead of generic repetitions');
+  assert.deepEqual(pathfindingCues.map(x=>x.n),['4','2','1'],
+   'number indicators preserve the approved original 6-region legend');
+  assert.deepEqual(packingCues.map(x=>x.n),['4','2','1'],
+   'packing role numbers preserve the approved original 6-region legend');
+  await page.screenshot({path:out+'/'+name+'-scene-bag.png',fullPage:true});
   await page.locator('[data-lobe-scene="ball"]').click();
   await page.screenshot({path:out+'/'+name+'-scene-ball.png',fullPage:true});
   if(name==='desktop'||name==='mobile'){
@@ -146,6 +184,10 @@ try{
   await page.locator('#detailClose').click();
   assert.equal(await page.locator('.lobe-card[data-region="brainstem"]').evaluate(el=>document.activeElement===el),true,'close returns keyboard focus to selected card');
   assert.equal(await page.locator('#simpleDetail').isHidden(),true);
+  assert.equal(await page.locator('[data-lobe-scene="ball"]').getAttribute('aria-pressed'),'true',
+   'closing single-lobe explanation restores the earlier daily-scene context');
+  assert.equal(await page.locator('#brainMap [data-scene-active]').count(),3,
+   'scene regions return after closing single-lobe explanation');
   await page.locator('#brainMap [data-brain-region="occipital"]').click();
   assert.equal(await page.locator('#simpleDetailTitle').innerText(),'후두엽');
   // Newly added native HTML/SVG side-by-side hemispheres view.

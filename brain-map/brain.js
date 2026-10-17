@@ -22,14 +22,20 @@
  const lobeSceneResult=document.getElementById('lobeSceneResult');
  // Representative, explainable roles, not measured neural activation, diagnoses,
  // or an exhaustive anatomical network. All areas cooperate in everyday tasks.
+ const regionMarkers={
+  frontal:{number:'1',color:'#CDB2F3'},parietal:{number:'2',color:'#FFE18A'},
+  temporal:{number:'3',color:'#B3E4C1'},occipital:{number:'4',color:'#FFC1A8'},
+  cerebellum:{number:'5',color:'#A7CEF6'},brainstem:{number:'6',color:'#CEC7DE'}
+ };
+ let lastLobeScene='talk';
  const lobeScenes={
   talk:{title:'💬 친구와 대화할 때',roles:[['temporal','👂','말소리 살피기'],['frontal','💡','대답 계획하기'],['occipital','👀','표정 보기']]},
   read:{title:'📖 책을 읽을 때',roles:[['occipital','👀','글자 모양 보기'],['temporal','👂','말소리·뜻 연결'],['frontal','💡','읽기 목표 유지']]},
-  map:{title:'🧭 길을 찾을 때',roles:[['occipital','👀','길 표식 보기'],['parietal','✋','방향·위치 살피기'],['frontal','💡','가는 길 계획하기']]},
+  map:{title:'🧭 길을 찾을 때',roles:[['occipital','🚩','길 표식 보기'],['parietal','🧭','방향·위치 살피기'],['frontal','🗺️','가는 길 계획하기']]},
   ball:{title:'⚽ 공놀이할 때',roles:[['occipital','👀','공의 움직임 보기'],['parietal','✋','몸의 위치 느끼기'],['cerebellum','⚽','움직임 타이밍 맞추기']]},
   music:{title:'🎵 노래 부를 때',roles:[['temporal','👂','소리·리듬 살피기'],['frontal','💡','시작·멈춤 조절'],['cerebellum','🥁','박자에 맞춰 움직이기']]},
   draw:{title:'🎨 그림을 그릴 때',roles:[['occipital','👀','모양 살펴보기'],['parietal','✋','위치·배치 살피기'],['frontal','💡','그릴 순서 계획']]},
-  bag:{title:'🎒 가방을 챙길 때',roles:[['occipital','👀','물건 살펴보기'],['parietal','✋','물건 위치 찾기'],['frontal','💡','순서·빠진 것 확인']]},
+  bag:{title:'🎒 가방을 챙길 때',roles:[['occipital','🎒','물건 살펴보기'],['parietal','📍','물건 위치 찾기'],['frontal','✅','순서·빠진 것 확인']]},
   feeling:{title:'🙂 친구 기분을 살필 때',roles:[['temporal','👂','말투 단서 살피기'],['occipital','👀','표정 단서 보기'],['frontal','💡','상황 함께 생각하기']]}
  };
  if(nodes.length!==6||shapes.length!==6||![detail,title,text,icon,close,lobeSceneTitle,lobeSceneRoles,lobeSceneResult].every(Boolean)||lobeSceneButtons.length!==8)return;
@@ -41,6 +47,7 @@
  function selectLobeScene(key){
   const scene=lobeScenes[key];
   if(!scene)return;
+  lastLobeScene=key;
   reset();
   lobeSceneResult.hidden=false;
   lobeSceneTitle.textContent=scene.title;
@@ -48,12 +55,19 @@
   const selected=new Set(scene.roles.map(([region])=>region));
   for(const [region,emoji,task] of scene.roles){
    const row=document.createElement('li');
+   const number=document.createElement('span');
+   number.className='lobe-scene-number';
+   number.setAttribute('aria-hidden','true');
+   number.textContent=regionMarkers[region].number;
+   number.style.setProperty('--scene-lobe-color',regionMarkers[region].color);
    const symbol=document.createElement('span');
+   symbol.className='lobe-scene-task-icon';
    symbol.setAttribute('aria-hidden','true');symbol.textContent=emoji;
    const copy=document.createElement('span');
+   copy.className='lobe-scene-role-copy';
    const name=document.createElement('b');name.textContent=data[region].name;
    const explanation=document.createElement('small');explanation.textContent=task;
-   copy.append(name,explanation);row.append(symbol,copy);lobeSceneRoles.append(row);
+   copy.append(name,explanation);row.append(number,symbol,copy);lobeSceneRoles.append(row);
   }
   shapes.forEach(g=>g.toggleAttribute('data-scene-active',selected.has(g.dataset.brainRegion)));
   lobeSceneButtons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.lobeScene===key)));
@@ -107,7 +121,8 @@
  close.addEventListener('click',()=>{
   const selected=nodes.find(b=>b.getAttribute('aria-pressed')==='true');
   reset();
-  // Return keyboard focus to the original option, not the now-hidden close button.
+  selectLobeScene(lastLobeScene);
+  // Restore the earlier scene, with focus back at the opened brain part.
   if(selected)selected.focus({preventScroll:true});
  });
  window.addEventListener('resize',()=>{
@@ -118,9 +133,10 @@
  selectLobeScene('talk');
  lobeSceneButtons.forEach(button=>button.addEventListener('click',()=>{
   const key=button.dataset.lobeScene;
-  selectLobeScene(key);
-  // Reuse the current scenario and its existing activity guidance in the other tab.
-  document.querySelector('[data-brain-scene="'+key+'"]')?.click();
+  const existing=document.querySelector('[data-brain-scene="'+key+'"]');
+  // The existing scenario control synchronizes both lessons and activity guidance.
+  if(existing)existing.click();
+  else selectLobeScene(key);
  }));
  // Existing life scenes in the hemisphere lesson also update this same map.
  document.querySelectorAll('[data-brain-scene]').forEach(button=>
