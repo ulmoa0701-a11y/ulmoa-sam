@@ -184,10 +184,12 @@ try{
   assert.equal(await page.locator('#simpleDetail').isHidden(),true);
   assert.equal(await page.locator('[data-lobe-scene="ball"]').getAttribute('aria-pressed'),'true',
    'closing single-lobe explanation restores the earlier daily-scene context');
-  assert.equal(await page.locator('#brainMap [data-scene-active]').count(),3,
-   'scene regions return after closing single-lobe explanation');
-  assert.equal(await page.locator('#lobeSceneSelection').isVisible(),true,'summary returns after closing single-region view');
-  assert.equal(await page.locator('.lobe-card[data-scene-example]').count(),3,'six-card highlights return to previous scene');
+  assert.equal(await page.locator('#brainMap [data-scene-focus]').count(),1,
+   'exactly one focused region returns after closing single-lobe explanation');
+  assert.equal(await page.locator('#brainMap [data-scene-focus]').getAttribute('data-brain-region'),'parietal',
+   'the previously selected ball-game role is restored');
+  assert.equal(await page.locator('#lobeSceneSelection').isVisible(),true,'focus explanation returns after closing individual region');
+  assert.equal(await page.locator('.lobe-card[data-scene-focus]').count(),1,'exactly one highlighted lobe card returns');
   await page.locator('#brainMap [data-brain-region="occipital"]').click();
   assert.equal(await page.locator('#simpleDetailTitle').innerText(),'후두엽');
   // Newly added native HTML/SVG side-by-side hemispheres view.
