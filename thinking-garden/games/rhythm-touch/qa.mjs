@@ -43,8 +43,8 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  check(await cognitiveDoor.count()===1&&await musicDoor.count()===1&&
    await cognitiveDoor.getAttribute('href')==='gardens/#cognitive'&&
    await musicDoor.getAttribute('href')==='music-garden/'&&
-   await page.locator('.hb-shortcuts a[href="gardens/#heart"]').count()===1,
-   name+': cognitive, music, or breathing garden homepage links are missing');
+   await page.locator('nav.home-five-gardens a[href="gardens/#heart"]').count()===1,
+   name+': cognitive, music, or heart garden homepage links are missing');
 
  // Homepage's TOP two polaroids must match the two gardens; Heart Score is a separate tool.
  const featured=page.locator('.desk-collage.featured-two .feature-card');
@@ -84,9 +84,11 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  check((await page.locator('#resultCount').innerText()).trim()==='3개',
    name+': tools displayed count disagrees with actual three entries');
  await page.locator('.note-filters [data-search="음악"]').click();
- check(await page.locator('#toolGrid .tool-card:not([hidden])').count()===2&&
-   (await page.locator('#resultCount').innerText()).trim()==='2개',
-   name+': Music filter should include Music Garden AND Heart Score');
+ const musicFiltered=await page.locator('#toolGrid .tool-card:not([hidden])').count();
+ check(await page.locator('#toolGrid .entry-music:not([hidden])').count()===1&&
+   await page.locator('#toolGrid .entry-heart:not([hidden])').count()===1&&
+   (await page.locator('#resultCount').innerText()).trim()===musicFiltered+'개',
+   name+': Music filter must retain Music Garden and Heart Score and report the real visible count');
  await page.locator('.note-filters [data-search="게임"]').click();
  check(await page.locator('#toolGrid .tool-card:not([hidden])').count()===2,
    name+': Games filter should include both cognitive and music gardens');
@@ -105,7 +107,7 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  await page.waitForURL('**/music-garden/');
  check((await page.title()).includes('모아의 음악정원'),name+': music garden title wrong');
  check(await page.locator('.game-card').count()===3,
-   name+': music garden needs exactly two working game entrances');
+   name+': music garden needs exactly three activity entrances');
  check(await page.locator('.game-card[href="../thinking-garden/recorder/"]').count()===1,
    name+': music garden recorder entry missing');
  check(await page.locator('.game-card[href="../thinking-garden/games/rhythm-touch/"]').count()===1,
