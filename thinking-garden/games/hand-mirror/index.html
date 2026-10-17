@@ -515,6 +515,11 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
  .play.is-adventure .viewer:has(#ready:not([hidden])) .viewer-badge{bottom:174px}
 }
 
+.finish-prize{font-size:clamp(52px,10vw,84px);line-height:1.45;letter-spacing:.05em;filter:drop-shadow(0 5px 10px #4b8c6430);animation:prize-arrive .75s ease-out both}
+@keyframes prize-arrive{0%{opacity:0;transform:scale(.55) translateY(28px)}65%{opacity:1;transform:scale(1.16) translateY(-6px)}100%{transform:scale(1) translateY(0)}}
+.play.is-adventure .adventure-actor{white-space:nowrap;text-align:center;line-height:1.1}
+.play.is-adventure.is-fingers .adventure-actor{font-size:clamp(29px,5vw,42px)}
+@media(prefers-reduced-motion:reduce){.finish-prize{animation:none}}
 </style>
 <link rel="stylesheet" href="../../../assets/moa-quick-guide.css?v=20261017-v1">
 </head>
@@ -550,7 +555,7 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 <button class="secondary next" type="button" id="ready" hidden>외웠어요! ▶</button>
 </div></div>
 </section>
-<section id="finish" class="finish panel" hidden><img src="../../assets/moa-cheer.png" alt="모아가 응원해요" onerror="this.style.display='none'"><span class="eyebrow">🌻 오늘의 작은 성공</span><h2>반짝손 모험 완료!</h2><p id="finishInfo">손동작을 따라했어!</p><div class="transfer" id="transfer"></div><div class="start-actions"><button id="again" type="button" class="primary">한 번 더 놀기</button><button id="finishHome" type="button" class="secondary">다른 놀이 고르기</button></div></section>
+<section id="finish" class="finish panel" hidden><img src="../../assets/moa-cheer.png" alt="모아가 응원해요" onerror="this.style.display='none'"><span class="eyebrow">🌻 오늘의 작은 성공</span><h2 id="finishHeading">반짝손 모험 완료!</h2><div id="finishPrize" class="finish-prize" aria-hidden="true">🌟</div><p id="finishInfo">손동작을 따라했어!</p><div class="transfer" id="transfer"></div><div class="start-actions"><button id="again" type="button" class="primary">한 번 더 놀기</button><button id="finishHome" type="button" class="secondary">다른 놀이 고르기</button></div></section>
 </main>
 <div class="footer">모아의 인지정원 · 카메라로 관찰하는 손가락 움직임 놀이 · 손 힘, 실제 물체 조작 및 치료 효과를 자동으로 평가하는 기능은 아닙니다.</div>
 </div>
