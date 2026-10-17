@@ -73,6 +73,11 @@ function render(id,d) {
  }
  const pattern=shape.map(([r,c])=>r+','+c);
  const target=new Set(pattern);
+ // A construction puzzle must not start already solved.
+ if(id==='slowBlock'&&s.blockMoves===0&&selected.size===target.size&&[...selected].every(k=>target.has(k))){
+  s.blockPose.turn=(s.blockPose.turn+1)%4;
+  selected.clear();fitPose(baseShape,s.blockPose,n).forEach(k=>selected.add(k));
+ }
  const cells=Math.pow(n,2);
  // Every six-round block contains every target exactly once.
  // The starting order varies by session; a later block rotates to avoid rote response.
