@@ -4,7 +4,7 @@
 (()=>{
 'use strict';
 function quota(n){return {double:Math.floor(n/2),single:n%2}}
-function fresh(s){s.blockParts=[];s.blockMode='double';s.blockDir='right';s.blockMessage='';}
+function fresh(s){s.blockParts=[];s.blockEdits=0;s.blockMode='double';s.blockDir='right';s.blockMessage='';}
 function hasRoom(s,size,count){
  return s.blockParts.filter(p=>p.keys.length===size).length<count;
 }
@@ -27,7 +27,7 @@ function action(s,act,key,n,targetCount){
   s.blockMode=act;s.blockMessage='블록을 놓을 첫 칸을 눌러요.';return;
  }
  if(act==='undo'){
-  const last=parts.pop();if(last)last.keys.forEach(k=>s.selected.delete(k));
+  const last=parts.pop();if(last){last.keys.forEach(k=>s.selected.delete(k));s.blockEdits++;}
   s.blockMode=parts.filter(p=>p.keys.length===2).length<q.double?'double':'single';
   s.blockMessage='마지막 블록을 다시 꺼냈어요.';return;
  }
