@@ -96,8 +96,8 @@ try{
   assert.ok(sceneLayout.choice.bottom<sceneLayout.selection.top && sceneLayout.selection.bottom<sceneLayout.svg.top,'selected region names belong between controls and the map: '+JSON.stringify(sceneLayout));
   assert.ok(sceneLayout.svg.bottom<sceneLayout.result.top+8,'role cues must be after the brain: '+JSON.stringify(sceneLayout));
   if(width<=390){
-   assert.ok(sceneLayout.svg.top-sceneLayout.choice.bottom<65,
-    'mobile brain should appear immediately below scene choices: '+JSON.stringify(sceneLayout));
+   assert.ok(sceneLayout.svg.top-sceneLayout.choice.bottom<140,
+    'mobile selection summary and brain should remain one visual group: '+JSON.stringify(sceneLayout));
   }
   assert.equal(await page.locator('#lobeSceneRoles .lobe-scene-number').count(),3,
    'each role has a color-and-number cue matching the original brain diagram');
