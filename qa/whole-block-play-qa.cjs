@@ -21,7 +21,7 @@ function normalized(points){
     await page.locator('#slowLevel').selectOption(vp.level);
     await page.locator('#sessionRounds').selectOption(String(rounds));
     await page.locator('#introStart').click();
-    assert.ok(await page.locator('.slow-block-play').isVisible());
+    assert.ok(await page.locator('.slow-block-board').isVisible());
     assert.equal(await page.locator('.slow-block-controls button').count(),5,'movement / rotation controls missing');
     assert.equal(await page.locator('.slow-map-pair .slow-board').count(),2);
     for(let round=0;round<rounds;round++){
@@ -47,7 +47,7 @@ function normalized(points){
      if(round+1<rounds){
       await page.locator('[data-slow="next"]').click();
       if(rounds>=10&&(round+1)%5===0)await page.locator('#practiceContinue').click();
-      await page.waitForFunction(next=>state.round===next&&!state.advancing&&!!document.querySelector('.slow-block-play'),round+1);
+      await page.waitForFunction(next=>state.round===next&&!state.advancing&&!!document.querySelector('.slow-block-board'),round+1);
      }else{
       await page.locator('[data-slow="next"]').click();
       await page.locator('#resultScreen.active').waitFor();
