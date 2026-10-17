@@ -53,3 +53,80 @@ body.gardens-page{margin:0;background:#f8faf5;color:#2b3f3c;font-family:"Pretend
 @media(max-width:650px){.gardens-main{width:calc(100% - 24px);padding-top:10px}.garden-hero{padding:23px 21px;grid-template-columns:minmax(0,1fr) 88px;gap:4px;border-radius:18px}.garden-hero img{width:88px}.garden-hero h1{font-size:29px}.garden-hero h1 em{display:inline-block}.garden-kicker{font-size:11px}.garden-lead{font-size:13px}.garden-lead br{display:none}.garden-jumps{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:13px 0}.garden-jump{min-height:73px;padding:10px;gap:6px}.jump-symbol{font-size:24px}.garden-jump strong{font-size:14px}.garden-jump small{font-size:11px}.garden-note{font-size:12px;padding:12px;margin-bottom:27px}.garden-section{padding:19px 13px 21px;border-radius:15px;margin-bottom:24px}.garden-section h2{font-size:24px}.garden-symbol{width:43px;height:43px;font-size:25px}.garden-label{gap:9px}.garden-overline{font-size:11px}.garden-intro{font-size:13px}.plays{grid-template-columns:minmax(0,1fr);gap:8px}.play-card{min-height:91px;padding:10px;gap:10px}.play-card-illustration{width:62px;height:62px}.play-card-body strong{font-size:14px}.play-card-body small{font-size:12px}.garden-footer{flex-direction:column;align-items:flex-start}}
 @media(max-width:360px){.garden-hero{grid-template-columns:1fr}.garden-hero img{display:none}.garden-jumps{gap:6px}.garden-jump{padding:9px 7px}.garden-jump strong{font-size:13px}.garden-jump small{font-size:10px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.garden-jump,.play-card{transition:none}}
+
+/* GARDEN_VISUAL_DISCOVERY_20261017 */
+.gardens-page .garden-discovery-controls{display:grid;gap:11px;margin:-1px 0 17px;padding:17px 18px;border:1px solid #e6ede5;border-radius:15px;background:#f9fcf9}
+.garden-filter-title{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.garden-filter-title strong{font-size:16px;color:#335345;font-weight:800}
+.garden-filter-title span{font-size:12px;color:#6c8277}
+.garden-filter-buttons{display:flex;gap:7px;flex-wrap:wrap}
+.garden-filter-buttons button{min-height:39px;border:1px solid #d9e6db;border-radius:999px;background:#fff;color:#456b54;padding:8px 13px;font-weight:750;font-size:13px;line-height:1.2;cursor:pointer}
+.garden-filter-buttons button.is-current,.garden-filter-buttons button[aria-pressed="true"]{background:#356c53;color:white;border-color:#356c53}
+.garden-filter-buttons button:focus-visible{outline:3px solid #7cb39a;outline-offset:2px}
+.garden-filter-count{margin:0;color:#668073;font-size:12px}
+.garden-filter-count b{color:#355e49}
+.gardens-page .play-card.play-card-enhanced{display:flex;flex-direction:column;align-items:stretch;gap:0;padding:0;min-height:0;border:1px solid #dde7e0;border-radius:16px;background:#fff;overflow:hidden;text-decoration:none;box-shadow:0 1px 4px #22502f07}
+.gardens-page .play-card.play-card-enhanced:hover{transform:translateY(-1px);box-shadow:0 8px 19px #2e63421a;border-color:#a8c6af}
+.gardens-page .play-card[hidden]{display:none!important}
+.play-card-media{width:100%;position:relative;overflow:hidden;aspect-ratio:16/10;background:#edf4ef}
+.play-card-media img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 47%}
+.play-card-media.no-real-shot img{object-fit:contain;padding:23px}
+.shot-caption{position:absolute;bottom:8px;left:9px;font-size:10px;font-weight:750;border-radius:6px;padding:5px 8px;background:#213d34c9;color:#fff;backdrop-filter:blur(5px)}
+.play-card-details{flex:1;min-width:0;width:100%;display:flex;flex-direction:column;align-items:stretch;padding:16px 17px 15px}
+.gardens-page .play-activity{font-size:12px;line-height:1.4;color:#347454;font-weight:850;margin:0 0 5px}
+.gardens-page .play-card h3{font-size:18px;line-height:1.35;color:#293e38;letter-spacing:-.03em;margin:0 0 3px;font-weight:800}
+.gardens-page .play-story-name{font-size:12px;color:#849188;margin:0 0 10px;line-height:1.4}
+.gardens-page .play-simple-desc{font-size:14px;color:#506b5c;line-height:1.6;margin:9px 0 10px}
+.gardens-page .play-purpose{padding:9px 11px;background:#f5f8f4;border-radius:9px;margin:auto 0 14px}
+.gardens-page .play-purpose>span{display:inline-block;color:#6c8773;font-size:10px;font-weight:800}
+.gardens-page .play-purpose p{font-size:12px;line-height:1.5;margin:2px 0 0;color:#415e4d}
+.play-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.play-buttons .play-preview-btn,.play-buttons .play-start-btn{display:flex;align-items:center;justify-content:center;gap:4px;text-align:center;min-height:42px;padding:8px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:850;border:1px solid #cbded0;line-height:1.35;cursor:pointer}
+.play-buttons .play-preview-btn{color:#446c55;background:#fff}
+.play-buttons .play-preview-btn:hover{background:#edf7ef}
+.play-buttons .play-start-btn{color:#fff;background:#34775c;border-color:#34775c}
+.play-buttons .play-start-btn:hover{background:#235e46}
+.garden-preview-dialog{width:min(890px,calc(100% - 24px));max-height:min(91dvh,920px);padding:0;border:0;border-radius:22px;color:#2f433b;background:#fff;box-shadow:0 24px 80px #11281d66;overflow-y:auto}
+.garden-preview-dialog::backdrop{background:#1d3228a3}
+.preview-dialog-header{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;background:#f8fcf7;border-bottom:1px solid #e0eae2;padding:12px 17px}
+.preview-overline{font-size:13px;font-weight:800;color:#528067}
+.preview-close{width:40px;height:40px;border-radius:50%;border:1px solid #dce9df;background:#fff;font-size:18px;color:#436b55;cursor:pointer}
+.preview-dialog-content{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:0}
+.preview-visual{background:#eef5ee;display:flex;align-items:center;justify-content:center;position:relative;min-width:0}
+.preview-visual>img{width:100%;height:100%;max-height:630px;object-fit:contain;display:block}
+.preview-visual.no-real-shot>img{width:65%;height:auto;max-height:330px}
+.preview-info{padding:27px 26px;display:flex;flex-direction:column;gap:12px}
+.preview-info .preview-type{font-size:12px;font-weight:800;color:#427956;margin:0}
+.preview-info h2{font-family:"Gowun Dodum","Pretendard Variable",Pretendard,sans-serif!important;font-weight:800!important;color:#304c3a;font-size:27px;line-height:1.3;margin:0}
+.preview-info .preview-action{font-size:15px;line-height:1.65;margin:0;color:#5b6f63}
+.preview-info h3{font-size:15px;color:#354f3e;margin:4px 0 0}
+.preview-info ol{counter-reset:steps;list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.preview-info li{display:flex;gap:9px;align-items:center;font-size:14px;line-height:1.5;color:#425e4c;counter-increment:steps}
+.preview-info li:before{content:counter(steps);width:25px;height:25px;flex:none;border-radius:50%;display:grid;place-items:center;background:#e6f4e8;color:#3b7455;font-size:12px;font-weight:900}
+.preview-life{border:1px solid #e2ece1;border-radius:11px;padding:11px 12px;background:#f6faf4}
+.preview-life small{font-weight:800;color:#5f7e67;font-size:11px}
+.preview-life p{font-size:13px;line-height:1.55;margin:3px 0 0}
+.preview-note{color:#77867e;line-height:1.5;font-size:11px;margin:0}
+.preview-play{display:flex;align-items:center;justify-content:center;text-decoration:none;color:#fff!important;background:#35785d;border-radius:11px;min-height:47px;padding:12px;margin-top:auto;font-size:15px;font-weight:800}
+.preview-play:focus-visible,.preview-close:focus-visible{outline:3px solid #70b390;outline-offset:3px}
+@media(max-width:1100px){.gardens-page .plays{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){
+ .gardens-page .garden-discovery-controls{padding:13px 11px;margin:0 0 13px;gap:9px}
+ .garden-filter-title{display:grid;gap:2px}
+ .garden-filter-title strong{font-size:14px}
+ .garden-filter-title span{font-size:11px}
+ .garden-filter-buttons{gap:6px}
+ .garden-filter-buttons button{min-height:40px;font-size:12px;padding:8px 10px}
+ .gardens-page .plays{grid-template-columns:1fr;gap:11px}
+ .play-card-media{aspect-ratio:16/9}
+ .play-card-details{padding:12px 14px 14px}
+ .gardens-page .play-card h3{font-size:17px}
+ .gardens-page .play-simple-desc{font-size:13px;margin:8px 0}
+ .gardens-page .play-purpose p{font-size:12px}
+ .preview-dialog-content{grid-template-columns:1fr}
+ .preview-visual{aspect-ratio:16/10;min-height:170px}
+ .preview-visual>img{max-height:285px}
+ .preview-info{padding:17px 17px 21px;gap:10px}
+ .preview-info h2{font-size:23px}
+}
+@media(min-width:651px) and (max-width:780px){.gardens-page .plays{grid-template-columns:1fr}}
