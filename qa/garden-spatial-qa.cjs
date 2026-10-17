@@ -36,7 +36,6 @@ const assert=require('node:assert/strict'),{chromium}=require('playwright-core')
     }
    }
    await page.evaluate(()=>openPreview('slowName'));
-   await page.locator('#slowResponse').selectOption('speech');
    await page.locator('#introStart').click();
    await page.locator('[data-slow=ready]').click();
    await page.locator('[data-slow=name-wrong]').click();
