@@ -189,6 +189,7 @@ async function wrongAnswerAndReplay(){
   await p.locator('#next').click();
   await p.locator('.choices button[data-pose="'+(i%2===0?'fist':'palm')+'"]').click();
  }
+ await p.locator('#next').click();
  assert.equal(await p.locator('#finish').isVisible(),true);
  await p.locator('#again').click();
  assert.equal(await p.locator('#gardenHudFlower').innerText(),'🌷 0 / 3','Replay resets garden');
