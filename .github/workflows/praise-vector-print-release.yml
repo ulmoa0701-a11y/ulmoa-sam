@@ -1,0 +1,60 @@
+name: A4 Promise Praise Chart Vector Release
+
+on:
+  push:
+    branches:
+      - fix/praise-chart-crisp-print-20261017
+    paths:
+      - qa/build_praise_vector.py
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/praise-chart-crisp-print-20261017
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Korean print fonts and renderer
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-nanum fonts-nanum-extra
+          python -m pip install --quiet reportlab Pillow pymupdf
+      - name: Render A4 text and grid as true vector PDF
+        run: python qa/build_praise_vector.py
+      - name: Verify page resolution, fonts and unchanged approved source
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import fitz
+          base=Path('resources/promise-praise-chart-20261017')
+          pdf=base/'우리의_약속_칭찬판_A4_벡터_인쇄용.pdf'
+          preview=base/'우리의_약속_칭찬판_선명한미리보기.jpg'
+          png=base/'우리의_약속_칭찬판_벡터_300dpi.png'
+          d=fitz.open(pdf)
+          assert len(d)==1 and abs(d[0].rect.width-595.276)<1
+          assert '약속' in d[0].get_text() and '기념' in d[0].get_text()
+          img=Image.open(preview)
+          assert img.size[0]>2400 and img.size[1]>3400
+          assert png.exists() and pdf.stat().st_size>40000
+          print('A4_VECTOR_QA_PASS',img.size,pdf.stat().st_size)
+          PY
+      - name: Commit generated files only on isolated feature branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add resources/promise-praise-chart-20261017/우리의_약속_칭찬판_A4_벡터_인쇄용.pdf
+          git add resources/promise-praise-chart-20261017/우리의_약속_칭찬판_선명한미리보기.jpg
+          git add resources/promise-praise-chart-20261017/우리의_약속_칭찬판_벡터_300dpi.png
+          if ! git diff --cached --quiet; then
+            git commit -m "build(resources): release tested 300dpi preview and vector A4 PDF"
+            git push origin HEAD:fix/praise-chart-crisp-print-20261017
+          fi
