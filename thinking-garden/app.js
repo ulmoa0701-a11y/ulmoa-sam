@@ -294,7 +294,28 @@ function renderPaint(){
  g.addEventListener('click',e=>{if(e.target.tagName==='I')fill(e.target)});
 }
 
-function renderWater(){const total=3+practiceStep();let done=0;const flowers=['🌷','🌼','🌸','🌻','🌺','🌹','🪻'];const items=shuffle([...Array.from({length:total},(_,i)=>({wilt:true,flower:flowers[i%flowers.length]})),...Array.from({length:2+Math.floor(practiceStep()/2)},(_,i)=>({wilt:false,flower:flowers[(i+3)%flowers.length]}))]);missionText.textContent=`시든 꽃 ${total}송이만 깨워요!`;missionSub.textContent='이미 활짝 핀 꽃은 그대로 두고, 시든 꽃에만 물을 주세요.';say(missionText.textContent);area.innerHTML=`<div class="basic-game"><div class="mini-count" id="miniCount">💧 0 / ${total}</div><div class="water-grid-new">${items.map(o=>`<button class="wilt ${o.wilt?'needs-water':'healthy'}" data-good="${o.wilt?1:0}" data-flower="${o.flower}">${o.wilt?'🥀':o.flower}<small>${o.wilt?'💧':'✓'}</small></button>`).join('')}</div></div>`;$$('.wilt').forEach(b=>b.onclick=()=>{if(state.lock||b.classList.contains('bloom'))return;if(b.dataset.good!=='1'){b.classList.add('wrong');sfx('no');flash('이 꽃은 이미 싱싱해요. 시든 꽃을 찾아요.');later(()=>b.classList.remove('wrong'),380);return}b.classList.add('bloom');b.firstChild.textContent=b.dataset.flower;done++;$('#miniCount').textContent=`💧 ${done} / ${total}`;addSeeds(Math.ceil(10/total));sfx('ok');if(done===total){flash('시든 꽃을 모두 깨웠어!');roundGate(area.querySelector('.basic-game'),'다음 물주기 ▶',500)}})}
+function renderWater(){
+ const total=3+practiceStep(),flowers=['🌷','🌼','🌸','🌻','🌺','🌹','🪻'];
+ let done=0;
+ const items=shuffle([...Array.from({length:total},(_,i)=>({wilt:true,flower:flowers[(i+state.round)%flowers.length]})),...Array.from({length:2+Math.floor(practiceStep()/2)},(_,i)=>({wilt:false,flower:flowers[(i+3+state.round)%flowers.length]}))]);
+ missionText.textContent='모아의 시든 꽃밭에 물을 주세요!';
+ missionSub.textContent='꽃이 시들었는지 살펴보고 필요한 꽃에만 물을 주세요.';
+ say(missionText.textContent);
+ area.innerHTML='<div class="basic-game water-quest"><div class="water-quest-story"><img src="assets/friend-hong.png" alt="" loading="lazy"><strong>꽃밭을 다시 피워요!</strong><span aria-hidden="true">🪣 → 🌷</span></div><div class="mini-count" id="miniCount">💧 0 / '+total+'</div><div class="water-quest-growth" role="status" aria-live="polite"><span id="waterGardenGrowth" aria-hidden="true">🌱</span><span id="waterGardenMessage">물을 줄 꽃을 찾아요</span></div><div class="water-grid-new">'+items.map((o,i)=>'<button type="button" class="wilt '+(o.wilt?'needs-water':'healthy')+'" data-good="'+(o.wilt?1:0)+'" data-flower="'+o.flower+'" aria-label="'+(o.wilt?'시든 꽃 '+(i+1):'피어 있는 꽃 '+(i+1))+'">'+(o.wilt?'🥀':o.flower)+'<small aria-hidden="true">'+(o.wilt?'💧':'✓')+'</small></button>').join('')+'</div></div>';
+ const observation=basicObservation();if(observation){observation.firstChoice=null;observation.waterChoices=0;observation.waterMistakes=0;}
+ $$('.wilt').forEach(b=>b.onclick=()=>{
+  if(state.lock||b.classList.contains('bloom'))return;
+  const needsWater=b.dataset.good==='1';
+  if(observation){if(observation.firstChoice===null)observation.firstChoice=needsWater?'적절':'불필요';observation.waterChoices++;if(!needsWater)observation.waterMistakes++;}
+  if(!needsWater){b.classList.add('wrong');sfx('no');flash('이미 피어난 꽃이에요. 다른 꽃을 살펴봐요.');later(()=>b.classList.remove('wrong'),380);return;}
+  b.classList.add('bloom');b.firstChild.textContent=b.dataset.flower;done++;
+  $('#miniCount').textContent='💧 '+done+' / '+total;
+  $('#waterGardenGrowth').textContent=Array.from({length:done},(_,i)=>flowers[(i+state.round)%flowers.length]).join(' ');
+  $('#waterGardenMessage').textContent=done===total?'꽃밭이 모두 피었어요!':'꽃이 '+done+'송이 피었어요!';
+  addSeeds(Math.ceil(10/total));sfx('ok');
+  if(done===total){flash('꽃밭이 살아났어요!');roundGate(area.querySelector('.basic-game'),'다음 꽃밭 ▶',500);}
+ });
+}
 
 function goHome(){clearTimers();speechSynthesis?.cancel?.();state.game=null;updateHome();window.MoaAssignment?.returnToPlan();show('home')}
 function addSeeds(n){recordBasic('correct');state.score+=n;state.total+=n;localStorage.setItem(STORE.seeds,state.total);$('#seedBank').textContent=`🌱 ${state.total}`;$('#scoreLabel').textContent=`🌱 ${state.score}`}
