@@ -46,8 +46,8 @@ try{
   const photo=page.locator('.brain-one-panel');
   assert.equal(await page.locator('.lobe-card').count(),6,'six main functions are visible');
   assert.equal(await page.locator('.sub-footer > div').count(),1,'footer brand must be valid and grouped in its own div');
-  assert.equal(await page.locator('.hemi-fact').count(),2,'both hemispheres immediately visible');
-  assert.equal(await page.locator('.both-work').count(),1,'brain cooperation statement visible');
+  assert.equal(await page.locator('.hemisphere-inline, .hemi-fact, .both-work').count(),0,'no duplicate hemisphere teaser on lobe tab');
+  assert.match(await page.locator('.brain-bottom > p').innerText(),/여러 부분은 연결되어 함께 일해요/,'retain one concise cooperation reminder');
   assert.equal(await page.locator('#brainMap [data-brain-region]').count(),6,'six interactive regions');
   assert.equal(await page.locator('.brain-hero,.brain3d-feature,.brain-explorer,.brain-networks,.brain-faq').count(),0,'no prior scrolling sections');
   assert.equal(await page.locator('#simpleDetail').isHidden(),true,'optional detail starts closed');
@@ -61,30 +61,45 @@ try{
    scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth,
    cards:[...document.querySelectorAll('.lobe-card')].map(x=>{let b=x.getBoundingClientRect();return{left:b.left,right:b.right,height:b.height}}),
    title:document.querySelector('.map-intro h1')?.getBoundingClientRect().top,
-   hemi:document.querySelector('.hemisphere-inline')?.getBoundingClientRect().top,
+   bottom:document.querySelector('.brain-bottom')?.getBoundingClientRect().top,
    diagram:document.querySelector('#brainMap')?.getBoundingClientRect().width
   }));
   assert.ok(fit.scroll<=fit.client+1,'horizontal overflow: '+JSON.stringify(fit));
   assert.ok(fit.cards.every(c=>c.left>=0&&c.right<=width+1&&c.height>=66),'cards clipped: '+JSON.stringify(fit.cards));
   assert.ok(fit.diagram>=250,'brain picture too narrow');
-  if(width>=1020)assert.ok(fit.hemi<820,'left-right diagram must be in first desktop viewport, got '+fit.hemi);
-  if(width<500)assert.ok(fit.cards.every(c=>c.height>=75),'mobile child-friendly tap target too small');
+  if(width>=1020)assert.ok(fit.bottom<820,'lobe map summary must be near desktop first fold, got '+fit.bottom);
+  if(width<500)assert.ok(fit.cards.every(c=>c.height>=(width<=380?64:75)),'mobile touch target too small');
   const textSize=await page.evaluate(()=>({
    cards:parseFloat(getComputedStyle(document.querySelector('.lobe-card small')).fontSize),
-   hemisphere:parseFloat(getComputedStyle(document.querySelector('.hemi-fact p')).fontSize)
+   columns:getComputedStyle(document.querySelector('.lobe-list')).gridTemplateColumns.split(' ').length
   }));
-  const minimum=width<=380?11.5:width<500?12.5:13;
+  const minimum=width<500?12.5:13;
   assert.ok(textSize.cards>=minimum,'brain function descriptions too small: '+JSON.stringify(textSize));
-  assert.ok(textSize.hemisphere>=(width<381?11:width<500?12:13),'hemisphere explanation too small');
+  if(width<=380)assert.equal(textSize.columns,1,'small phones use readable one-column cards');
   await page.screenshot({path:out+'/'+name+'-initial.png',fullPage:true});
-  for(const [key,label] of [['frontal','전두엽'],['parietal','두정엽'],['temporal','측두엽'],['occipital','후두엽'],['cerebellum','소뇌'],['brainstem','뇌줄기']]){
+  if(name==='desktop'||name==='small-mobile'){
+   const jpeg=await page.screenshot({type:'jpeg',quality:45,animations:'disabled'});
+   console.log('BRAIN_LOBES_PREVIEW_'+name+'='+jpeg.toString('base64'));
+  }
+  const sixRegions=['frontal','parietal','temporal','occipital','cerebellum','brainstem'];
+  for(const [index,[key,label]] of [['frontal','전두엽'],['parietal','두정엽'],['temporal','측두엽'],['occipital','후두엽'],['cerebellum','소뇌'],['brainstem','뇌줄기']].entries()){
    await page.locator('.lobe-card[data-region="'+key+'"]').click();
    assert.equal(await page.locator('#simpleDetail').isVisible(),true);
    assert.equal(await page.locator('#simpleDetailTitle').innerText(),label);
    assert.equal(await page.locator('.lobe-card[data-region="'+key+'"]').getAttribute('aria-pressed'),'true');
    assert.equal(await page.locator('#brainMap [data-brain-region="'+key+'"]').evaluate(el=>el.hasAttribute('data-active')),true);
+   const expectedPrevious=width<=380?key:sixRegions[Math.min(index+(index%2===0?1:0),5)];
+   assert.equal(await page.locator('#simpleDetail').evaluate(el=>el.previousElementSibling?.dataset.region),expectedPrevious,'explanation directly follows selected card row');
+   assert.equal(await page.locator('#simpleDetail').evaluate(el=>el.parentElement?.classList.contains('lobe-list')),true,'detail remains with its six cards');
+   if(width<500){
+    await page.waitForTimeout(80);
+    const rect=await page.locator('#simpleDetail').boundingBox();
+    assert.ok(rect.y>=-1 && rect.y+rect.height<=height+2,'selected explanation must be visible on mobile: '+JSON.stringify(rect));
+   }
   }
+  await page.screenshot({path:out+'/'+name+'-lobe-detail.png',fullPage:true});
   await page.locator('#detailClose').click();
+  assert.equal(await page.locator('.lobe-card[data-region="brainstem"]').evaluate(el=>document.activeElement===el),true,'close returns keyboard focus to selected card');
   assert.equal(await page.locator('#simpleDetail').isHidden(),true);
   await page.locator('#brainMap [data-brain-region="occipital"]').click();
   assert.equal(await page.locator('#simpleDetailTitle').innerText(),'후두엽');
@@ -358,7 +373,7 @@ try{
   assert.equal(await page.locator('.more-learn').getAttribute('open'),'');
   assert.match(await page.locator('.more-links a').first().getAttribute('href'),/3d\/explore/);
   assert.deepEqual(errors,[],'unexpected browser errors');
-  report.push({name,status:'PASS',viewport:width,firstViewHemisphereTop:Math.round(fit.hemi),buttons:6,noOverflow:true});
+  report.push({name,status:'PASS',viewport:width,lobeSummaryTop:Math.round(fit.bottom),buttons:6,noOverflow:true});
   await page.close();
  }
  await writeFile(out+'/result.json',JSON.stringify({passed:true,report},null,2));
