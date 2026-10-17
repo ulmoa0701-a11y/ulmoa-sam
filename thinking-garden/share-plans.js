@@ -142,12 +142,17 @@ function embed(path,title,isMaterial){
  // Standalone games run in this same-origin frame. Their normal 'back to all games'
  // links must not escape the caregiver's selected-only list.
  if(!isMaterial){
-  const allowed=new URL(path,location.href),gamePrefix=allowed.pathname;
+  const allowed=new URL(path,location.href);
+  const selectedMission=allowed.pathname.includes('/moa-missions/')?allowed.searchParams.get('game'):null;
   frame.addEventListener('load',()=>{
    if(!overlay.isConnected)return;
    try{
     const current=new URL(frame.contentWindow.location.href);
-    if(current.origin===location.origin&&current.pathname.startsWith(gamePrefix))return;
+    // Match the exact selected game path. A different mission within the same
+    // standalone module is not part of this child's curated assignment.
+    const sameGame=current.origin===allowed.origin&&current.pathname===allowed.pathname
+      &&(!selectedMission||current.searchParams.get('game')===selectedMission);
+    if(sameGame)return;
    }catch{}
    overlay.remove();hooks.goHome();
   });
