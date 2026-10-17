@@ -208,8 +208,11 @@ function renderHide(){
 function renderPath(){
  const len=4+Math.min(practiceStep(),3);
  const icons=['🌱','🌼','🍃','🌸','🌿','🌻','🌷'];
- const offset=(state.round+state.pathOffset)%icons.length;
- const seq=icons.slice(offset).concat(icons.slice(0,offset)).slice(0,len);
+ // Twenty rounds use twenty different first-two pairs. Each pair keeps
+ // its own visible route even when the requested path length repeats.
+ const start=(state.round+state.pathOffset)%icons.length;
+ const second=(start+1+Math.floor(state.round/icons.length))%icons.length;
+ const seq=[icons[start],icons[second],...shuffle(icons.filter((_,i)=>i!==start&&i!==second))].slice(0,len);
  // Mix physical positions too. Otherwise a child can complete every round
  // by touching from left to right without finding the lit next step.
  const route=shuffle(seq.map((icon,i)=>({icon,i})));
