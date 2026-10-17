@@ -46,6 +46,12 @@ try{
   const photo=page.locator('.brain-one-panel');
   assert.equal(await page.locator('.lobe-card').count(),6,'approved six main functions are preserved');
   assert.equal(await page.locator('#lobeDirectory').getAttribute('open'),null,'anatomy detail is collapsed by default');
+  assert.equal(await page.locator('.lobe-science-note').getAttribute('open'),null,'scientific detail initially collapsed');
+  assert.match(await page.locator('.lobe-science-note a').getAttribute('href'),/^https:\/\/www\.ninds\.nih\.gov\//,'primary NINDS source is available');
+  assert.equal(await page.locator('#lobeSceneRead').count(),1,'one optional selected-process read-aloud control');
+  assert.equal(await page.locator('#lobeSceneRead').getAttribute('aria-label'),'현재 선택한 과정과 관련 뇌 부위 설명 듣기');
+  assert.equal(await page.locator('#lobeSceneRead').evaluate(el=>el.getBoundingClientRect().height>=44),true,'read-aloud tap target accessible');
+
   assert.equal(await page.locator('[data-lobe-scene]').count(),8,'all eight existing everyday scenes available beside six-lobe map');
   assert.equal(await page.locator('[data-lobe-scene="talk"]').getAttribute('aria-pressed'),'true','initial daily scene is active');
   assert.equal(await page.locator('#lobeSceneRoles > li').count(),3,'glanceable roles for selected scene');
@@ -137,6 +143,10 @@ try{
     const hint=await page.locator('#lobeSceneRegionHint').innerText();
     assert.ok(hint.includes(number.trim())&&hint.includes(name),'area number and name appear as supporting information: '+hint);
     assert.ok(!label.includes(name),'large focus heading must describe the process, not demand remembering region names: '+label);
+    const processLabel=await choices.nth(step).locator('b').innerText();
+    assert.equal(label,processLabel,'selected process word is the large heading, not an anatomy term: '+key);
+    assert.match(await choices.nth(step).locator('small').innerText(),/관련 영역 예시/,'region details remain clearly secondary');
+
     assert.ok((await page.locator('#lobeSceneFocusText').innerText()).length>18,'specific educational clue, not just a name');
    }
    await page.waitForTimeout(170);
