@@ -1,0 +1,34 @@
+/* Lightweight goal aid for standalone MoA activities.
+   No fixed large popups: teacher and child always retain the play surface. */
+.moa-quick-guide{display:block;max-width:1080px;margin:9px auto 13px;width:calc(100% - 20px);border:1px solid #c3dbc7;border-radius:14px;background:#f8fff5;color:#294936;font-family:Pretendard,SUIT,system-ui,"Apple SD Gothic Neo",sans-serif;box-shadow:0 5px 17px #16341a18;box-sizing:border-box}
+.moa-quick-guide[hidden],.moa-quick-steps[hidden]{display:none!important}
+.moa-quick-guide *{box-sizing:border-box}
+.moa-quick-guide-line{display:flex;gap:10px;align-items:center;padding:11px 13px}
+.moa-quick-icon{font-size:25px;flex:none;display:grid;place-items:center;width:37px;height:37px;border-radius:11px;background:#eaf4e8}
+.moa-quick-summary{flex:1;min-width:0;display:grid;gap:3px}
+.moa-quick-title{font-size:14px;line-height:1.35;color:#315943;font-weight:900}
+.moa-quick-goal{font-size:13px;line-height:1.5;color:#476c55}
+.moa-quick-toggle{cursor:pointer;flex:none;min-height:42px;border:1px solid #b8d9bd;background:#fff;color:#315b40;border-radius:9px;font:800 12px Pretendard,SUIT,sans-serif;padding:8px 10px}
+.moa-quick-toggle:focus-visible{outline:3px solid #6dac83;outline-offset:3px}
+.moa-quick-steps{margin:0;padding:12px 15px;list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;border-top:1px solid #dae9db}
+.moa-quick-steps li{display:flex;align-items:center;gap:7px;font-size:13px;line-height:1.45;color:#4b6954}
+.moa-quick-steps b{flex:none;display:grid;place-items:center;background:#e0eee0;color:#316e4b;width:25px;height:25px;border-radius:50%}
+.moa-guide-floating{position:fixed;z-index:42;right:10px;bottom:10px;width:min(420px,calc(100% - 20px));max-width:none;margin:0;background:#f8fff5f5;backdrop-filter:blur(4px)}
+.moa-guide-floating .moa-quick-guide-line{padding:9px}
+.moa-guide-floating .moa-quick-icon{font-size:18px;width:29px;height:29px}
+.moa-guide-floating .moa-quick-title{font-size:12px}
+.moa-guide-floating .moa-quick-goal{font-size:11px}
+.moa-guide-floating .moa-quick-toggle{font-size:11px;min-height:36px}
+@media(max-width:650px){
+ .moa-quick-guide{margin:7px auto 10px;width:calc(100% - 12px);border-radius:10px}
+ .moa-quick-guide-line{gap:7px;padding:8px}
+ .moa-quick-icon{width:32px;height:32px;font-size:21px}
+ .moa-quick-title{font-size:12px}
+ .moa-quick-goal{font-size:11px}
+ .moa-quick-toggle{padding:7px;font-size:11px;min-height:38px}
+ .moa-quick-steps{grid-template-columns:1fr;padding:10px;gap:8px}
+ .moa-quick-steps li{font-size:12px}
+ .moa-guide-floating{width:min(280px,calc(100% - 20px));bottom:6px;right:6px}
+ .moa-guide-floating .moa-quick-icon{display:none}
+}
+@media(prefers-reduced-motion:reduce){.moa-quick-guide *{animation:none!important;transition:none!important}}
