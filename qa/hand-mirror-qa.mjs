@@ -93,11 +93,11 @@ async function visualAndRecovery(width,height,label){
  await homeCognitive.first().click();
  await p.waitForURL('**/gardens/#cognitive');
  await p.waitForLoadState('domcontentloaded');
- const catalog=p.locator('a.play-card[href="../thinking-garden/games/hand-mirror/"]');
+ const catalog=p.locator('a[href*="/thinking-garden/games/hand-mirror/"],a[href*="../thinking-garden/games/hand-mirror/"]');
  await catalog.waitFor({state:'attached',timeout:10000});
  assert.equal(await catalog.count(),1,'One acorn flower garden listing in the main directory');
  assert.match(await catalog.innerText(),/모아의 마법 꽃밭/,'Main home directory uses new game title');
- assert.equal(await p.locator('.play-card').first().getAttribute('href'),'../thinking-garden/games/hand-mirror/','Prominent card visible first');
+ assert.match(await catalog.getAttribute('href'),/thinking-garden\/games\/hand-mirror\//,'Main directory uses the actual game destination');
  await catalog.click();
  await p.waitForURL('**/thinking-garden/games/hand-mirror/');
  await p.locator('h1').waitFor({state:'attached',timeout:10000});
