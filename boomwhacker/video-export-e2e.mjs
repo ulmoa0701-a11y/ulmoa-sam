@@ -29,7 +29,8 @@ try{
   {name:'desktop-default-audio',width:1440,height:900,sound:true,credit:true},
   {name:'mobile-sized-muted',width:390,height:844,sound:false,credit:false},
   {name:'desktop-interlude-audio',width:1440,height:900,sound:true,credit:false,mode:'interlude'},
-  {name:'desktop-beat-guide-audio',width:1440,height:900,sound:true,credit:false,mode:'music'}
+  {name:'desktop-beat-guide-audio',width:1440,height:900,sound:true,credit:false,mode:'music'},
+  {name:'desktop-public-original',width:1366,height:900,sound:true,credit:false,mode:'instant',publicMode:true}
  ]){
   const context=await browser.newContext({viewport:{width:scenario.width,height:scenario.height},acceptDownloads:true});
   const page=await context.newPage(),jsErrors=[],consoleErrors=[];
@@ -37,21 +38,28 @@ try{
   page.on('pageerror',e=>jsErrors.push(e.message));
   page.on('console',msg=>{if(msg.type()==='error')consoleErrors.push(msg.text())});
   try{
-   await page.goto('http://127.0.0.1:'+server.address().port+'/boomwhacker/',{waitUntil:'domcontentloaded'});
-   await page.evaluate(song=>localStorage.setItem('ulmoaBoomTransfer',JSON.stringify(song)),baseSong);
-   await page.reload({waitUntil:'domcontentloaded'});
+   await page.goto('http://127.0.0.1:'+server.address().port+'/boomwhacker/'+(scenario.publicMode?'?song=beat-basic':''),{waitUntil:'domcontentloaded'});
+   if(!scenario.publicMode){
+    await page.evaluate(song=>localStorage.setItem('ulmoaBoomTransfer',JSON.stringify(song)),baseSong);
+    await page.reload({waitUntil:'domcontentloaded'});
+   }
    await page.locator('#videoBtn').waitFor({state:'attached'});
    if(!scenario.sound)await page.evaluate(()=>{sound=false;});
    if(!scenario.credit)await page.evaluate(()=>{document.querySelector('#creditOpt').checked=false;});
    if(scenario.mode){await page.locator('#introMode').selectOption(scenario.mode);result.modeSelected=await page.locator('#introMode').inputValue()===scenario.mode}
    result.supported=await page.evaluate(()=>window.__boomVideoQA?.supported());
    result.initialStatus=await page.locator('#videoStatus').innerText();
-   const pending=page.waitForEvent('download',{timeout:45000}).then(d=>({download:d})).catch(e=>({error:e.message}));
+   const pending=page.waitForEvent('download',{timeout:scenario.publicMode?100000:45000}).then(d=>({download:d})).catch(e=>({error:e.message}));
    if(scenario.width<=800){
      result.mobileQuickVisible=await page.locator('#mobileVideoBtn').isVisible();
      result.settingsHiddenInitially=!(await page.locator('#videoBtn').isVisible());
      await page.locator('#mobileVideoBtn').click({timeout:10000});
      result.settingsOpened=await page.locator('#mobileSettingsSheet').evaluate(e=>e.classList.contains('mobileOpen'));
+   }else if(scenario.publicMode){
+    await page.locator('#publicVideoPanel').evaluate(el=>el.open=true);
+    result.publicCheck=await page.evaluate(()=>window.__boomVideoQA.publicExport());
+    await page.locator('#publicRightsOpt').check();
+    await page.locator('#publicVideoBtn').click({timeout:10000});
    }else await page.locator('#videoBtn').click({timeout:10000});
    result.progressVisible=await page.locator('#videoProgress').isVisible();
    result.progressButtonText=await page.locator('#videoBtn').innerText();
@@ -74,7 +82,10 @@ try{
       &&(scenario.width>800||(result.mobileQuickVisible&&result.settingsHiddenInitially&&result.settingsOpened))
       &&result.progressVisible&&result.retryDownloadVisible&&result.retryDownloadHref?.startsWith('blob:')
       &&result.mobileStatusFontPx>=10&&/영상 제작 완료/.test(result.finalStatus)
-      &&(!scenario.mode||result.modeSelected));
+      &&(!scenario.mode||result.modeSelected)
+      &&(!scenario.publicMode||(result.publicCheck?.eligible?.ok===true&&result.filename?.includes('유튜브공개검토용')
+        &&result.videoBytes>30000&&result.finalStatus.includes('영상 제작 완료')
+        &&await page.locator('#publicStatus').innerText().then(x=>x.includes('출처·설명문')))));
    console.log('VIDEO_EXPORT_E2E='+JSON.stringify(result));
   }catch(e){result.ok=false;result.exception=String(e);result.finalStatus=await page.locator('#videoStatus').innerText().catch(()=>'?');console.log('VIDEO_EXPORT_E2E='+JSON.stringify(result));}
   results.push(result);
@@ -85,4 +96,4 @@ try{
  if(server)await new Promise(resolve=>server.close(resolve));
 }
 fs.writeFileSync(path.join(artifactDir,'results.json'),JSON.stringify(results,null,2));
-if(results.length!==4||results.some(r=>!r.ok))process.exitCode=1;
+if(results.length!==5||results.some(r=>!r.ok))process.exitCode=1;
