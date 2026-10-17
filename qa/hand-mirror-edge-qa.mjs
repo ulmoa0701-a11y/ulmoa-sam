@@ -223,6 +223,107 @@ async function rapidStopAndPermission(){
  await c.close();
  results.push({case:'late permission response after cancel releases track',pass:true});
 }
+async function allCameraModes(){
+ // All five games are exercised in camera mode, not just tested as touch choices.
+ for(const mode of ['copy','fingers','memory','both']){
+  const {c,p,errors}=await ctx({width:390,height:844});
+  await p.goto(url,{waitUntil:'domcontentloaded'});
+  await p.locator('#advancedModes summary').click();
+  await p.locator('[data-mode="'+mode+'"]').click();
+  await p.evaluate(args=>{window.__hands=args.hands;window.__pose='fist';}, {hands:mode==='both'?1:1});
+  await p.locator('#cameraStart').click();
+  await wait(p,()=>document.querySelector('#video').classList.contains('is-ready'),20000);
+  if(mode==='both'){
+   await wait(p,()=>document.querySelector('#cameraCheckText').textContent.includes('두 손을'),8000);
+   assert.equal(await p.locator('#cameraCheck').isVisible(),true,'Both mode cannot start with one hand');
+   await p.evaluate(()=>{window.__hands=2;window.__handPoses=['palm','palm'];});
+  }
+  await wait(p,()=>document.querySelector('#cameraCheck').hidden,12000);
+  if(mode==='memory'){
+   assert.equal(await p.locator('#ready').isVisible(),true,'Memory camera waits for deliberate remember action');
+   assert.equal(await p.locator('#sequence .step').count(),2);
+   await p.waitForTimeout(1500);
+   assert.equal(await p.locator('#ready').isVisible(),true,'Memory preview never expires automatically');
+   await p.locator('#ready').click();
+   assert.equal(await p.locator('#ghostGuides').isVisible(),false,'Recall hides demonstrated answer');
+   await p.evaluate(()=>{window.__pose='palm';});
+   await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('1'),8500);
+   await p.evaluate(()=>{window.__pose='one';});
+   await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('2'),10500);
+   await wait(p,()=>document.querySelector('#ready').hidden===false,6500);
+   assert.equal(await p.locator('#sequence .step').count(),2,'Next memory round is shown');
+  }else if(mode==='copy'){
+   assert.equal(await p.locator('#guideToggle').isVisible(),true,'Copy camera visual guide can be hidden');
+   assert.equal(await p.locator('#ghostGuides').isVisible(),true);
+   await p.locator('#guideToggle').click();
+   assert.equal(await p.locator('#ghostGuides').isVisible(),false);
+   await p.locator('#guideToggle').click();
+   assert.equal(await p.locator('#ghostGuides').isVisible(),true);
+   await p.evaluate(()=>{window.__pose='palm';});
+   await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('1'),9000);
+  }else if(mode==='fingers'){
+   assert.equal(await p.locator('#modelCard').isVisible(),true);
+   assert.equal(await p.locator('#liveCompare').isVisible(),false);
+   await p.evaluate(()=>{window.__pose='one';});
+   await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('1'),9000);
+  }else if(mode==='both'){
+   await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('1'),8500);
+   await p.evaluate(()=>{window.__handPoses=['fist','fist'];});
+   await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('2'),11000);
+   await p.evaluate(()=>{window.__handPoses=['fist','palm'];});
+   await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('3'),11500);
+   assert.equal(await p.locator('#cameraCheck').isVisible(),false,'Bilateral camera remains calibrated');
+  }
+  assert.deepEqual(errors,[],mode+' has no unexpected page errors');
+  await p.screenshot({path:out+'/all-camera-'+mode+'.png',fullPage:true});
+  await p.locator('#pause').click();
+  await c.close();
+  results.push({case:'camera '+mode+' full mode smoke',pass:true});
+ }
+}
+async function brokenModelAndRetry(){
+ const {c,p,errors}=await ctx({width:390,height:844});
+ await prepared(p);
+ await p.evaluate(()=>{window.__pose='one';window.__modelError=true;});
+ await wait(p,()=>!document.querySelector('#cameraProblem').hidden,12500);
+ assert.match(await p.locator('#cameraProblemTitle').innerText(),/손 인식이 중단/);
+ assert.equal(await p.locator('#acornActor').isVisible(),false,'Acorn hidden during recognition failure');
+ await p.evaluate(()=>{window.__pose='fist';window.__modelError=false;});
+ await p.locator('#retryCamera').click();
+ await wait(p,()=>document.querySelector('#cameraCheck').hidden&&document.querySelector('#cameraProblem').hidden,20000);
+ await wait(p,()=>document.querySelector('#acornActor')?.dataset.state==='caught',9500);
+ assert.deepEqual(errors,[]);
+ await p.locator('#pause').click();await c.close();
+ results.push({case:'model inference errors show reconnect and recover',pass:true});
+}
+async function cameraFlip(){
+ const {c,p,errors}=await ctx({width:390,height:844});
+ await prepared(p);
+ await p.evaluate(()=>{window.__pose='one';});
+ await p.locator('#flip').click();
+ assert.equal(await p.locator('#cameraCheck').isVisible(),true,'Switch camera requires new calibration');
+ await wait(p,()=>document.querySelector('#cameraCheck').hidden,17500);
+ assert.equal(await p.locator('#video').evaluate(e=>e.classList.contains('front')),false,'Back camera preview not mirrored');
+ await p.locator('#flip').click();
+ await wait(p,()=>document.querySelector('#cameraCheck').hidden,17500);
+ assert.equal(await p.locator('#video').evaluate(e=>e.classList.contains('front')),true,'Front camera preview mirrored');
+ assert.deepEqual(errors,[]);
+ await p.locator('#pause').click();await c.close();
+ results.push({case:'front/back camera change and recalibration',pass:true});
+}
+async function cameraModelOffline(){
+ const c=await browser.newContext({viewport:{width:390,height:844},permissions:['camera']});
+ const p=await c.newPage();
+ await p.route('**/vision_bundle.mjs',route=>route.abort('failed'));
+ await p.goto(url);await p.locator('#cameraStart').click();
+ await wait(p,()=>!document.querySelector('#cameraProblem').hidden,10000);
+ assert.match(await p.locator('#cameraProblemText').innerText(),/인터넷 연결/);
+ assert.equal(await p.locator('#cameraToTouch').isVisible(),true);
+ await p.locator('#cameraToTouch').click();
+ assert.equal(await p.locator('#kindBadge').innerText(),'👆 화면 정답 고르기');
+ await c.close();
+ results.push({case:'hand model/CDN offline safe fallback',pass:true});
+}
 async function run(){
  await screenSizes();
  await permissions();
@@ -231,6 +332,10 @@ async function run(){
  await missingOrExtraHands();
  await darknessAndRecovery();
  await frozenVideo();
+ await allCameraModes();
+ await brokenModelAndRetry();
+ await cameraFlip();
+ await cameraModelOffline();
  console.log('PASS extended hand mirror adversarial QA',JSON.stringify(results));
 }
 try{await run()}finally{await browser.close()}
