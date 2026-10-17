@@ -879,3 +879,8 @@
  .brain-page .brain-main .lobe-directory>.lobe-list{grid-template-columns:minmax(0,1fr)}
 }
 @media(prefers-reduced-motion:reduce){.brain-page .brain-svg .zone-shape{transition:none}}
+.brain-page .brain-main .lobe-science-note{margin:8px 0 0;border:1px solid #dde8df;border-radius:12px;background:#f7fbf7;color:#42604c}
+.brain-page .brain-main .lobe-science-note summary{padding:11px 13px;min-height:44px;cursor:pointer;font:750 13px/1.5 var(--brain-font-body)}
+.brain-page .brain-main .lobe-science-note p{padding:0 13px;margin:0 0 10px!important;font-size:13px;line-height:1.6;word-break:keep-all}
+.brain-page .brain-main .lobe-science-note a{text-decoration:underline;text-underline-offset:2px}
+.brain-page .brain-main .lobe-science-note summary:focus-visible{outline:3px solid #257447;outline-offset:2px}
