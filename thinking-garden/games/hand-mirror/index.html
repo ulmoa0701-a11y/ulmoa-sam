@@ -360,8 +360,9 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 .play.is-garden .camera-check{bottom:121px}
 .play.is-garden .camera-problem{bottom:125px}
 .play.is-garden .viewer[data-phase="setup"] .garden-scene,.play.is-garden .viewer:has(.camera-problem:not([hidden])) .garden-scene{display:none!important}
-.play.is-garden .garden-touch-preview{z-index:4;position:absolute;top:108px;left:50%;transform:translateX(-50%);width:138px;height:152px;display:flex;align-items:center;justify-content:center;padding:9px;background:#f7fff7eb;border-radius:18px;border:2px solid #cae4c5}
-.play.is-garden .garden-touch-preview svg{max-width:100%;max-height:100%}
+.play.is-garden .garden-touch-preview{z-index:4;position:absolute;top:108px;left:50%;transform:translateX(-50%);width:156px;height:154px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:5px;background:#f7fff7eb;border-radius:18px;border:2px solid #cae4c5}
+.play.is-garden .garden-touch-preview svg{max-width:100%;height:102px;min-height:0;flex:1}
+.play.is-garden .garden-touch-caption{display:block;text-align:center;font-size:12px;font-weight:950;line-height:1.25;color:#285c42}
 .play.is-garden .viewer:not(:has(video:not([hidden]))) .placeholder{display:none!important}
 .play.is-garden .garden-mini-dock{position:absolute;z-index:8;bottom:105px;left:10px;right:10px;min-height:93px}
 .play.is-garden .garden-mini-dock .choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0}
@@ -397,7 +398,9 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
  .play.is-garden .garden-mini-dock .choice-art svg{width:39px;height:52px}
  .play.is-garden .garden-mini-dock .choice small{font-size:11px}
  .play.is-garden:not(.is-camera) .viewer .viewer-badge{bottom:181px}
- .play.is-garden .garden-touch-preview{top:100px;width:115px;height:123px}
+ .play.is-garden .garden-touch-preview{top:91px;width:135px;height:107px;padding:4px}
+ .play.is-garden .garden-touch-preview svg{height:76px}
+ .play.is-garden .garden-touch-caption{font-size:10.5px}
 }
 @media(max-width:360px){.play.is-garden .viewer{height:425px}.play.is-garden .garden-mini-dock .choice-art svg{width:35px}}
 
