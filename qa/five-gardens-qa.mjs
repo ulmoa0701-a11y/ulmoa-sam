@@ -41,7 +41,7 @@ for(const width of [360,390,1366]){
   hidden:c.hidden,image:c.querySelector('img.real-shot')?.getBoundingClientRect().height||0
  })));
  check(missionArt.length===34&&missionArt.every(x=>x.icons===3&&x.arrows===2&&x.text.length>4),width+' 34 distinct picture-based game demonstrations missing');
- check(missionArt.every(x=>x.image>=45),width+' play screenshot too short or hidden');
+ check(missionArt.every(x=>x.hidden||x.image>=45),width+' visible play screenshot too short');
  check(await page.locator('#gardenSearch').count()===1,width+' overall search missing');
  const firstVisible=await page.locator('#cognitive .play-card-enhanced:not([hidden])').count();
  check(firstVisible===6,width+' cognitive preview should begin with six cards, got '+firstVisible);
