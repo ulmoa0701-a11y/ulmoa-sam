@@ -92,3 +92,8 @@
  #gameWorld .leaf-clue-game .leaf-trail{font-size:23px}
 }
 @media(prefers-reduced-motion:reduce){#gameWorld .leaf-clue-game .leaf-btn{transition:none}}
+
+/* A correct matching choice changes the scene; no timer or competitive pressure. */
+.shape-reunion{display:flex;align-items:center;justify-content:center;min-height:70px;width:min(100%,430px);margin:8px auto 14px;border:2px solid #b9dcb9;border-radius:20px;background:linear-gradient(120deg,#f0f9dd,#ecf7fa);color:#305b42;font-size:clamp(28px,6vw,46px);line-height:1.4;letter-spacing:.02em}
+.shape-reunited .shape-target{background:#eaf8df;border-color:#81bb8d}
+@media(prefers-reduced-motion:no-preference){.shape-reunion{animation:moa-shape-hello .28s ease-out}@keyframes moa-shape-hello{from{opacity:.4;transform:scale(.96)}to{opacity:1;transform:scale(1)}}}
