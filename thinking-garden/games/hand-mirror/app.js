@@ -54,7 +54,7 @@ function renderGuide(){
  $('game').classList.toggle('is-fingers',S.mode==='fingers');
  $('viewer').dataset.phase=preview?'memorize':S.phase;
  $('liveTask').hidden=!camera||S.phase==='setup';
- $('liveTitle').textContent=preview?'손 그림을 보고 기억해!':recall?'기억한 손 모양 만들기!':S.phase==='reward'?(isGarden()?S.success%2===1?'🌰 도토리 잡았어!':'🌷 꽃이 피었어!':'🌼 성공!'):isGarden()?(S.round%2===0?'✊ 도토리를 잡아!':'✋ 펼쳐서 심어!'):goalText();
+ $('liveTitle').textContent=preview?'손 그림을 보고 기억해!':recall?'기억한 손 모양 만들기!':S.phase==='reward'?(isGarden()?S.success%2===1?'🌰 도토리 잡았어!':'🌷 꽃이 피었어!':'🌼 성공!'):isGarden()?(S.round%2===0?'✊ 주먹! 도토리 잡기':'✋ 보자기! 도토리 놓기'):goalText();
  $('liveLegend').textContent=recall?'기억한 대로 해볼까?':preview?'손 모양 순서를 기억해!':isGarden()?'모아의 손 모양을 따라 해봐!':'🟡 노란 손가락 쭉! · 연한 손가락 접기';
  $('guideToggle').hidden=!camera||recall;
  $('cameraHold').hidden=!camera||preview||S.phase==='setup';
@@ -130,7 +130,7 @@ function syncAcornUI(){
 function gardenUpdate(){
  $('gardenScene').hidden=!isGarden();
  if(!isGarden())return;
- const msgs=['🌰 도토리를 꼭 잡아!','🌱 손을 활짝 펴서 심어!','🌰 다음 도토리를 잡아!','🌷 이번에도 손을 펴 봐!','🌰 마지막 도토리 잡기!','🌻 손을 펼쳐 꽃밭 완성!'];
+ const msgs=['🌰 도토리를 꼭 잡아!','✋ 보자기! 도토리 놓기','🌰 다음 도토리를 잡아!','✋ 보자기로 도토리 놓기!','🌰 마지막 도토리 잡기!','✋ 보자기로 마지막 도토리 놓기!'];
  const flowers=['🌷','🌻','🌼'];
  const round=Math.min(S.round,5);
  const held=S.success%2===1;
@@ -173,7 +173,7 @@ function render(){
  $('taskTitle').textContent=isMemory()?'🧠 순서를 기억해 볼까?':MODE[S.mode];
  $('targetEmoji').innerHTML=memoryPreview?current().map(p=>handArt(p)).join('<span style="font-size:25px">→</span>'):isMemory()?'❔':currentGoal().map(p=>handArt(p)).join('');
  $('targetEmoji').classList.toggle('has-hands',!isMemory()||memoryPreview);
- $('targetTitle').textContent=memoryPreview?'동작 '+current().length+'개 기억하기':isMemory()?(S.part+1)+'번째 손동작!':isGarden()?(S.round%2===0?'주먹으로 씨앗 잡기':'손 펴서 꽃 피우기'):goalText();
+ $('targetTitle').textContent=memoryPreview?'동작 '+current().length+'개 기억하기':isMemory()?(S.part+1)+'번째 손동작!':isGarden()?(S.round%2===0?'주먹으로 도토리 잡기':'보자기로 도토리 놓기'):goalText();
  $('targetHelp').textContent=memoryPreview?'다 살펴봤으면 아래 버튼을 눌러!':isMemory()?'방금 본 모양을 기억해서 만들어 봐!':isCamera()?'반투명 그림은 참고용! 똑같은 자리에 놓지 않아도 돼.':'모양을 흉내 내며 답을 골라 봐!';
  $('ready').hidden=!memoryPreview;
  $('next').hidden=true;
@@ -364,7 +364,7 @@ function evaluate(t){
   S.matchSince=0;$('meter').style.width='0%';$('cameraHoldFill').style.width='0%';$('viewer').dataset.match='no';
   const feedback=S.camHands[0]?core.fingerFeedback(S.camHands[0],currentGoal()[0]):null;
   const need=currentGoal().length===2?'두 손을 함께 보여줘!':
-    isGarden()?(S.round%2===0?'도토리 옆에서 주먹을 꼭 쥐어 봐!':'주먹을 활짝 펴서 도토리를 놓아 봐!'):
+    isGarden()?(S.round%2===0?'도토리 옆에서 주먹을 꼭 쥐어 봐!':'보자기처럼 손을 쫙 펴서 도토리를 놓아 봐!'):
     S.mode==='fingers'&&feedback?
       feedback.unknown>0?'손이 잘 보이도록 조금만 돌려 봐!':
       feedback.expected.some((v,i)=>v===1&&!feedback.matched[i])?'노란 표시가 있는 손가락을 펴 봐!':'다른 손가락은 살짝 접어 봐!':
