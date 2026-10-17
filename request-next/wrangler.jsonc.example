@@ -1,0 +1,9 @@
+{
+  "name": "habom-board-staging",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-10-01",
+  "assets": {"directory": "./site", "binding": "ASSETS"},
+  "d1_databases": [{"binding": "DB", "database_name": "habom-board-staging", "database_id": "REPLACE_WITH_OWN_D1_ID"}],
+  "r2_buckets": [{"binding": "FILES", "bucket_name": "habom-private-staging"}],
+  "observability": {"enabled": false}
+}

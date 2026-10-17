@@ -1,0 +1,12 @@
+{
+  "name": "habom-board-stage",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@netlify/database": "^1.0.0",
+    "@netlify/blobs": "^10.0.0"
+  }
+}

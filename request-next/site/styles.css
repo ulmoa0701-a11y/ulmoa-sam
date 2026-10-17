@@ -1,0 +1,96 @@
+:root{color-scheme:light;--ink:#273c35;--muted:#687c71;--border:#d3e0d7;--green:#347254;--soft:#f3f9f4}
+*{box-sizing:border-box}body{margin:0;background:#f8faf7;color:var(--ink);font-family:"Pretendard Variable",Pretendard,"SUIT",system-ui,sans-serif;font-size:15px;line-height:1.65}
+[hidden]{display:none!important}.wrap{max-width:850px;margin:0 auto;padding:22px 20px 50px}.heading{margin:0 0 22px}.heading .home{font-size:13px;display:inline-block;margin-bottom:20px}.eyebrow{display:block;color:var(--green);font-weight:700;font-size:12px}h1{font-size:34px;letter-spacing:-.05em;margin:4px 0 8px;font-weight:850}h2{font-family:"Gowun Batang",serif;font-size:23px;line-height:1.4;margin:0 0 15px}h3{font-size:17px;margin:0 0 17px}p{margin:0 0 10px}.heading p{color:#536b5c;font-size:14px}.sheet{background:#fff;border:1px solid var(--border);border-radius:20px;padding:28px 30px;margin:0 0 19px;box-shadow:0 6px 28px rgba(29,68,45,.035)}
+.step{border-top:1px solid #e4ebe6;padding:26px 0 18px}.step-number{display:inline-grid;place-items:center;width:27px;height:27px;border-radius:50%;margin-right:9px;background:#e9f4ed;color:#2f7250;font-weight:850}
+label:not(.choice):not(.check){display:block;margin:14px 0 7px;font-weight:750;font-size:14px}
+input:not([type=checkbox]):not([type=radio]),select,textarea{width:100%;min-height:47px;border:1px solid #bacfc1;border-radius:12px;background:#fff;color:var(--ink);padding:11px 13px;font:inherit;font-size:15px;outline:none}textarea{min-height:138px;resize:vertical}input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #70b491;outline-offset:2px}
+.optional{font-size:12px;color:var(--muted);font-weight:500}.required{color:#a54839;font-size:12px}.help,.muted{color:var(--muted);font-size:13px;line-height:1.6}
+.more{margin-top:14px;padding:12px 15px;border:1px solid #dbe8df;border-radius:12px;background:#fbfdfb}.more summary{font-size:13px;font-weight:750;cursor:pointer}.more summary span{color:var(--muted);font-weight:400}.more[open]{padding-bottom:17px}
+.check{display:flex;gap:10px;align-items:flex-start;line-height:1.5;font-size:14px;font-weight:650;margin:11px 0}.check input{margin-top:4px;accent-color:var(--green);width:17px;height:17px;flex:none}#nickname:disabled{background:#f2f5f2;color:#748278}
+.privacy-choice{padding:21px 0 8px;margin:0;border:0;border-top:1px solid #e4ebe6;display:grid;gap:10px}.privacy-choice legend{float:left;width:100%;font-weight:800;margin:0 0 12px}.choice{display:flex;align-items:center;gap:12px;cursor:pointer;padding:13px 16px;border:1px solid var(--border);border-radius:12px;min-height:68px}.choice.selected{background:#eff8f0;border-color:#5a9a70;box-shadow:inset 0 0 0 1px #5a9a70}.choice input{accent-color:var(--green);width:18px;height:18px;flex:none}.choice strong,.choice small{display:block;line-height:1.35}.choice small{font-size:12px;color:var(--muted);margin-top:4px}
+.secret-options{padding:12px 16px;border-left:3px solid #6c9a7d;background:#f5faf7;border-radius:0 10px 10px 0;margin:13px 0;font-size:13px}.consent{margin-top:18px}.public-safety{font-size:12px;color:#766958;margin:15px 0}.submit,.secondary,.actions button{min-height:47px;border:0;border-radius:12px;background:var(--green);color:#fff;padding:11px 23px;font:inherit;font-weight:800;cursor:pointer}.submit{width:100%;margin-top:8px}.submit:disabled{opacity:.6;cursor:wait}.secondary,.actions button{background:#e5f2e8;color:#2e6347}.status{margin:11px 0 0;font-size:13px;min-height:20px}.status.error{color:#b23b3b}.status.ok{color:#24734e}
+.trap{position:absolute;left:-10000px;height:1px;width:1px;opacity:0}.section-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}.section-row h2{margin:0}.section-row button{border:1px solid var(--border);background:#fff;border-radius:9px;padding:8px 13px;cursor:pointer}
+.feed{display:grid;gap:10px}.post{background:#fcfefc;border:1px solid #e1e9e2;border-radius:13px;padding:17px 18px;overflow-wrap:anywhere}.post h3{font-family:"Gowun Batang",serif;font-size:19px;margin:9px 0}.post-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:12px}.kind{background:#eaf4ec;color:#386d4d;padding:2px 9px;border-radius:99px;font-weight:800}.post-text{white-space:pre-wrap;overflow-wrap:anywhere;margin:0}.post a{color:var(--green);font-weight:700}.post .answer{background:#f6f8e9;border-left:3px solid #c5bd67;padding:12px 14px;border-radius:0 9px 9px 0;margin:13px 0 0}.locked-title{margin:28px 0 12px;font-size:17px}.archive{margin-top:20px;font-size:13px;color:var(--muted)}.archive summary{cursor:pointer;font-weight:650}.archive p{margin-top:8px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.receipt #receiptCode{font-family:ui-monospace,monospace;font-size:12px}.admin-section summary{font-weight:750;cursor:pointer}.admin-post{border-bottom:1px solid var(--border);padding:16px 0}.admin-post .admin-edit{display:grid;gap:8px;margin-top:10px}.admin-edit label{font-size:13px}.admin-edit button{border:0;border-radius:9px;background:#326949;color:white;padding:9px;cursor:pointer}
+footer{text-align:center;color:var(--muted);padding:19px;font-size:12px}
+@media(max-width:600px){body{font-size:14px}.wrap{padding:12px 12px 35px}.heading{padding:8px 6px}.heading h1{font-size:30px}.sheet{padding:22px 16px;border-radius:15px;margin-bottom:12px}h2{font-size:21px}.step{padding-top:21px}.choice{padding:12px;min-height:65px}.actions button{width:100%}.post{padding:14px}input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+
+/* 이야기해봄 — '메모를 건네는' 정서, 과잉 장식 없는 쪽지 디자인 */
+body{background:#f8f9f4}
+.heading{padding:4px 0 0;margin-bottom:17px}
+.note-hero{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:25px 29px 26px;border:1px solid #d4e3d6;border-radius:20px;background:linear-gradient(130deg,#f1f8ee 2%,#fffdf5 92%);overflow:hidden}
+.note-hero-copy{position:relative;z-index:2;max-width:560px}
+.heading .eyebrow{letter-spacing:.012em;font-size:13px;color:#527a59}
+.heading h1{font-size:36px;line-height:1.2;margin:9px 0 13px}
+.hero-doodle{font-family:"KyoboHandwriting2020","Nanum Pen Script","KyoboHandwriting2020","Nanum Pen Script","Gamja Flower",cursive;font-weight:400;color:#c47468;white-space:nowrap;font-size:29px;margin-left:8px;letter-spacing:0}
+.heading .hero-lead{margin:0;line-height:1.7;font-size:16px;color:#47624f;word-break:keep-all}
+.heading .hero-caption{margin:11px 6px 0;line-height:1.65;color:#66776b;font-size:12px;word-break:keep-all}
+.hero-envelope{flex:0 0 154px;height:124px;position:relative;transform:rotate(6deg);filter:drop-shadow(0 6px 6px rgba(68,86,61,.08))}
+.envelope-paper{position:absolute;z-index:1;top:0;left:17px;width:122px;height:84px;background:#fffdf7;border:1px solid #dfd8c7;border-radius:3px;text-align:center;padding-top:16px;color:#6b7057;font-family:"KyoboHandwriting2020","Nanum Pen Script","Gamja Flower",cursive;font-size:20px;transform:rotate(-5deg)}
+.envelope-front{position:absolute;z-index:2;inset:47px 0 0;border-radius:4px 4px 9px 9px;border:1px solid #ddcba9;background:linear-gradient(150deg,transparent 49.4%,#e4d6ba 50%,transparent 50.6%),linear-gradient(210deg,transparent 49.4%,#e4d6ba 50%,transparent 50.6%),#fae9cb}
+.envelope-flap{position:absolute;z-index:0;inset:27px 0 16px;background:#eedab4;clip-path:polygon(0 20%,50% 95%,100% 20%);border-radius:8px}
+.envelope-seal{position:absolute;z-index:3;top:79px;left:62px;display:grid;place-items:center;background:#7b987e;color:#fff;border-radius:50%;font-family:"KyoboHandwriting2020","Nanum Pen Script","Gamja Flower",cursive;font-size:15px;width:33px;height:33px;border:3px solid #e7d9c5}
+.writing-sheet{background:#fffefa;padding-top:25px}
+.note-address{display:flex;gap:10px;align-items:center;padding:12px 16px;background:#f7faf5;border:1px dashed #cddccc;border-radius:12px;margin-bottom:17px;color:#40634a}
+.note-stamp{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;background:#e9f2e5;border:1px solid #cfddcc;border-radius:10px;font-size:20px}
+.note-address small,.note-address strong{display:block;line-height:1.2}.note-address small{font-size:11px;color:#67806e}.note-address strong{font-size:14px;margin-top:3px}
+.note-address-caption{margin-left:auto;font-size:12px;color:#809282;font-family:"KyoboHandwriting2020","Nanum Pen Script","Gamja Flower",cursive;font-size:19px}
+.writing-sheet h2{margin-bottom:3px;font-family:"MaruBuri","Gowun Batang",serif;color:#32563e}
+.writing-intro{color:#697b6c;font-size:13px;margin-bottom:12px}
+.writing-sheet .step:first-child{padding-top:20px}
+.step h3{margin-bottom:12px}
+.step-number{background:#edf4e4;border:1px solid #dbe9d1;color:#41704e}
+.writing-sheet .step{border-color:#e6ebe1}
+.title-more{background:#f9fbf8}
+.prompt-hint{font-size:12px;color:#66806b;margin:0 0 9px}
+.prompt-chips{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 14px}
+.prompt-chip{font:inherit;font-weight:650;color:#4f7358;background:#f4f8f1;border:1px solid #dce9d6;border-radius:999px;padding:7px 11px;font-size:12px;line-height:1.4;cursor:pointer;min-height:38px;transition:background .12s,border-color .12s}
+.prompt-chip:hover,.prompt-chip:focus-visible{background:#eaf4e6;border-color:#8eb391}
+.prompt-chip:active{transform:translateY(1px)}
+.memo-editor{overflow:hidden;background:#fffef9;border:1px solid #cbd9c6;border-radius:12px}
+.memo-editor:focus-within{outline:3px solid #89b498;outline-offset:2px}
+.memo-editor textarea{display:block;padding:16px 16px 13px;min-height:150px;line-height:2.05;border:none;border-radius:0;box-shadow:none;outline:0;resize:vertical;background:repeating-linear-gradient(to bottom,#fffefa 0,#fffefa 31px,#f1efe4 32px,#fffefa 33px);color:#31453a}
+.memo-editor textarea:focus-visible{outline:0}
+.memo-editor textarea::placeholder{color:#8b998c}
+.memo-editor-foot{display:flex;justify-content:space-between;gap:10px;padding:7px 13px 10px;background:#fffefa;color:#8c9a87;font-size:12px}
+.memo-editor-foot span:first-child{font-family:"KyoboHandwriting2020","Nanum Pen Script","Gamja Flower",cursive;font-size:17px}
+.writing-sheet .privacy-choice legend{font-weight:800;color:#334f3a}
+.writing-sheet .choice.selected{background:#eef6e9}
+.submit{background:#39724b;box-shadow:0 3px 0 #c8ddc7;letter-spacing:.01em}
+.submit:hover{background:#2d6040}.submit:active{transform:translateY(1px)}
+.submit span{margin-right:6px}
+.receipt{background:#f7fcf5;border:1px solid #b8d7bf}
+.browse .post{background:#fffefa}
+.browse .post h3{font-family:"MaruBuri","Gowun Batang",serif}
+@media(max-width:600px){
+  .note-hero{padding:20px 17px;gap:8px;border-radius:15px}
+  .heading h1{font-size:29px}
+  .hero-doodle{display:block;font-size:25px;margin:1px 0 0}
+  .heading .hero-lead{font-size:14px}
+  .hero-envelope{flex-basis:80px;transform:scale(.66) rotate(7deg);transform-origin:center;min-width:80px;margin-left:-21px;margin-right:-24px}
+  .heading .hero-caption{margin-top:10px}
+  .writing-sheet{padding-top:19px}
+  .note-address{padding:10px 12px}
+  .note-address-caption{font-size:16px}
+  .prompt-chip{font-size:12px;min-height:40px}
+  .memo-editor textarea{min-height:148px;padding:12px;line-height:2}
+}
+@media(max-width:350px){.hero-envelope{display:none}.heading h1{font-size:28px}.prompt-chip{padding:7px 10px}}
+@media(prefers-reduced-motion:reduce){.prompt-chip:active,.submit:active{transform:none}}
+
+/* 작성자 전용 삭제: 편집 폼과 혼동되지 않는 보조 동작 */
+.delete-own{display:block;margin:20px 0 5px;background:#fff;border:1px solid #e3c4ba;border-radius:9px;color:#a44436;min-height:40px;padding:9px 14px;font:inherit;font-size:13px;cursor:pointer}
+.delete-own:disabled{opacity:.6;cursor:wait}
+
+.staging-notice{border:1px solid #e2d6bd;background:#fff8e8;color:#735837;padding:12px 14px;border-radius:11px;font-size:12px;line-height:1.7;margin:14px 0 0;word-break:keep-all}
+.staging-notice strong{color:#79502a}
+.submit:disabled{opacity:.55;box-shadow:none;cursor:not-allowed;transform:none}
+
+/* Production staging diagnostic is visible only after a successful admin authentication. */
+.self-test-panel{margin:16px 0;padding:15px;border:1px solid #d8e7d5;background:#f6faf3;border-radius:12px}
+.self-test-panel p{margin:0 0 8px}
+.self-test-panel p.muted{line-height:1.65;font-size:12px}
+.self-test-panel button{margin:4px 0 8px}
+.self-test-panel .status{overflow-wrap:anywhere}

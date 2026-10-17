@@ -1,0 +1,24 @@
+name: Habom Real Netlify Launch Smoke
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/habom-unified-secure-20261012
+    paths:
+      - .github/workflows/habom-live-release-test.yml
+permissions:
+  contents: read
+concurrency:
+  group: habom-live-site-smoke
+  cancel-in-progress: false
+jobs:
+  real-netlify-live-backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify actual Netlify Postgres, private file CRUD, permissions and deletion
+        run: node request-next/tests/live-production-e2e.mjs
