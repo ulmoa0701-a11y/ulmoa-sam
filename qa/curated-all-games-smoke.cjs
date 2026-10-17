@@ -13,9 +13,13 @@ function planUrl(items,opts={}){
  try{
   const catalog=await browser.newPage();
   await catalog.goto(base,{waitUntil:'load'});
-  const games=await catalog.locator('.library-card[data-open]').evaluateAll(cards=>cards.map(card=>card.dataset.open));
-  assert.equal(new Set(games).size,games.length,'duplicate catalog game identifiers');
-  assert.ok(games.length>=26,'the main game catalog is missing games');
+  const coreGames=await catalog.locator('.library-card[data-open]').evaluateAll(cards=>cards.map(card=>card.dataset.open));
+  const standalone=['moaMoney','moaChange','moaFeel'];
+  assert.equal(new Set(coreGames).size,coreGames.length,'duplicate catalog game identifiers');
+  assert.ok(coreGames.length>=26,'the main game catalog is missing games');
+  await catalog.locator('#moaPlannerLaunch').click();
+  for(const id of standalone)assert.equal(await catalog.locator('#moaPlanSelection input[value="'+id+'"]').count(),1,id+' existing Moa Mission missing in selection');
+  const games=[...coreGames,...standalone];
   await catalog.close();
   for(const vp of [{name:'mobile',width:390,height:844},{name:'desktop',width:1280,height:900}]){
    const page=await browser.newPage({viewport:{width:vp.width,height:vp.height}});
