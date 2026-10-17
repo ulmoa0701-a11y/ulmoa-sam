@@ -6,6 +6,7 @@ on:
       - 'thinking-garden/**'
       - 'qa/curated-share-qa.cjs'
       - 'qa/curated-all-games-smoke.cjs'
+      - 'qa/homework-persona-qa.cjs'
       - 'qa/garden-name-quest-qa.cjs'
       - '.github/workflows/curated-share-qa.yml'
   pull_request:
@@ -13,6 +14,7 @@ on:
       - 'thinking-garden/**'
       - 'qa/curated-share-qa.cjs'
       - 'qa/curated-all-games-smoke.cjs'
+      - 'qa/homework-persona-qa.cjs'
       - '.github/workflows/curated-share-qa.yml'
 permissions:
   contents: read
@@ -36,6 +38,7 @@ jobs:
           node --check thinking-garden/share-plans.js
           node --check qa/curated-share-qa.cjs
           node --check qa/curated-all-games-smoke.cjs
+          node --check qa/homework-persona-qa.cjs
           node --check thinking-garden/clinical-bridges.js
           node --check thinking-garden/strategy-garden-core.js
           node --check thinking-garden/strategy-festival.js
@@ -55,6 +58,8 @@ jobs:
         run: node qa/curated-share-qa.cjs
       - name: All catalog games in curated menu (desktop and mobile)
         run: node qa/curated-all-games-smoke.cjs
+      - name: Homework journeys (eight learner personas and neutral teen view)
+        run: node qa/homework-persona-qa.cjs
       - name: Clinical transfer and adaptive training
         run: node qa/clinical-adaptive-qa.cjs
       - name: Native garden quests (naming 6/12/18/24, pauses, shapes)
