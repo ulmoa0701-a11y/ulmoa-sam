@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 118" role="img" aria-label="도토리">
+ <defs>
+  <linearGradient id="nut" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#f7bb64"/><stop offset=".45" stop-color="#c9793e"/><stop offset="1" stop-color="#9b502d"/></linearGradient>
+  <linearGradient id="cap" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#e0a663"/><stop offset="1" stop-color="#a86539"/></linearGradient>
+ </defs>
+ <path d="M51 22Q49 11 58 4" fill="none" stroke="#684629" stroke-width="7" stroke-linecap="round"/>
+ <path d="M26 43C13 56 17 80 31 97Q41 111 51 114Q65 108 76 91C91 64 82 45 73 41Z" fill="url(#nut)" stroke="#754323" stroke-width="4" stroke-linejoin="round"/>
+ <path d="M31 60Q26 77 40 95" fill="none" stroke="#ffd39d" stroke-width="5" stroke-linecap="round" opacity=".65"/>
+ <path d="M17 49C8 45 10 32 21 26Q49 12 77 27C91 32 93 44 82 49Q51 63 17 49Z" fill="url(#cap)" stroke="#744526" stroke-width="4" stroke-linejoin="round"/>
+ <path d="M22 31L31 51M36 24L44 53M54 22L58 53M71 27L70 50" stroke="#83502d" stroke-width="3.2" opacity=".65" stroke-linecap="round"/>
+ <path d="M22 41Q52 54 80 41" fill="none" stroke="#f3cc9a" stroke-width="3" opacity=".8" stroke-linecap="round"/>
+</svg>
