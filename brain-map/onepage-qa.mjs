@@ -129,6 +129,8 @@ try{
    await page.waitForTimeout(170);
    const stroke=await page.locator('#brainMap [data-scene-focus] .zone-shape').evaluate(el=>parseFloat(getComputedStyle(el).strokeWidth));
    assert.ok(stroke>=14,'active region should clearly stand out: '+stroke);
+   const unfocusedOpacity=await page.locator('#brainMap [data-brain-region]:not([data-scene-focus])').first().evaluate(el=>parseFloat(getComputedStyle(el).opacity));
+   assert.ok(unfocusedOpacity>=0.5&&unfocusedOpacity<0.9,'other cooperating regions must remain clearly visible: '+unfocusedOpacity);
    assert.equal(await page.locator('#simpleDetail').isHidden(),true,'no unrelated detailed popup');
    const metrics=await page.evaluate(()=>({
     buttons:[...document.querySelectorAll('[data-lobe-scene],.lobe-scene-role-choice')].map(el=>el.getBoundingClientRect().toJSON()),
