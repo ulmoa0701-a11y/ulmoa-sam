@@ -18,10 +18,10 @@ function newNameOrder(){
  for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
  return order;
 }
-function setUp(id, options){return {nameOrder:newNameOrder(),id,level:Math.max(1,Math.min(3,Number(options.level)||1)),cue:options.cue||'guide',kind:options.kind||'animal',response:options.response||'speech',records:[],activeRound:-1,selected:new Set(),attempts:0,firstCorrect:null,hint:false,pauses:0,finished:false}}
+function setUp(id, options){return {nameOrder:newNameOrder(),id,level:Math.max(1,Math.min(3,Number(options.level)||1)),cue:options.cue||'guide',kind:options.kind||'animal',response:options.response||'speech',records:[],activeRound:-1,selected:new Set(),attempts:0,firstCorrect:null,hint:false,selfChecks:0,teacherCues:0,pauses:0,finished:false}}
 function csv(s){
- const headers=['활동','난이도','지원방식','제시번호','최초정확','최종정확','재시도','단서','쉬기','반응'];
- const rows=[headers,...s.records.map(r=>[names[s.id],s.level,{guide:'전략 안내',wait:'기다리기',self:'스스로'}[s.cue],r.round,r.first,r.final,r.retries,r.hint?'사용':'없음',r.pauses||0,r.note])];
+ const headers=['활동','난이도','지원방식','제시번호','최초정확','최종정확','재시도','자기 다시 보기','교사 안내 버튼','쉬기','반응'];
+ const rows=[headers,...s.records.map(r=>[names[s.id],s.level,{guide:'전략 안내',wait:'기다리기',self:'스스로'}[s.cue],r.round,r.first,r.final,r.retries,r.selfChecks||0,r.teacherCues||0,r.pauses||0,r.note])];
  const safe=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
  const csv='\uFEFF'+rows.map(r=>r.map(safe).join(',')).join('\r\n');
  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),link=document.createElement('a'),uri=URL.createObjectURL(blob);
@@ -34,7 +34,7 @@ function addSummary(s,container) {
  const correct=s.records.filter(r=>r.final==='O').length;
  const initial=s.records.filter(r=>r.first==='O').length;
  root.innerHTML='<p class="slow-result-info">처음 정확 '+initial+'/'+s.records.length+' · 마지막 정확 '+correct+'/'+s.records.length+' · 전략은 결과보다 과정이 중요해요.</p><details class="slow-teacher-details"><summary>선생님 관찰기록 열기</summary><div class="slow-result-lines"></div><button type="button" class="slow-csv">CSV 기록 저장</button><p>저장하지 않으면 기록은 사이트로 전송되지 않아요. 진단 점수가 아닙니다.</p></details>';
- root.querySelector('.slow-result-lines').textContent=s.records.map(r=>r.round+'번: 첫 '+r.first+', 마지막 '+r.final+', 재시도 '+r.retries+(r.hint?', 단서 사용':'')+' · 쉬기 '+(r.pauses||0)+'회 · '+r.note).join(' / ');
+ root.querySelector('.slow-result-lines').textContent=s.records.map(r=>r.round+'번: 첫 '+r.first+', 마지막 '+r.final+', 재시도 '+r.retries+' · 자기 다시 보기 '+(r.selfChecks||0)+'회 · 교사 안내 버튼 '+(r.teacherCues||0)+'회 · 쉬기 '+(r.pauses||0)+'회 · '+r.note).join(' / ');
  root.querySelector('.slow-csv').addEventListener('click',()=>csv(s));
  container.appendChild(root);
 }
@@ -43,7 +43,7 @@ function render(id,d) {
  const s=state.slowLook;
  if(!s || !isNew(id))return;
  const newRound=s.activeRound!==state.round;
- if(newRound){s.activeRound=state.round;s.selected=new Set();s.attempts=0;s.firstCorrect=null;s.hint=false;s.pauses=0;s.finished=false;s.nameReady=false;s.memoryHidden=-1;if(id==='slowBlock')window.MoaBlockBuilder.fresh(s);}
+ if(newRound){s.activeRound=state.round;s.selected=new Set();s.attempts=0;s.firstCorrect=null;s.hint=false;s.selfChecks=0;s.teacherCues=0;s.pauses=0;s.finished=false;s.nameReady=false;s.memoryHidden=-1;if(id==='slowBlock')window.MoaBlockBuilder.fresh(s);}
  const round=state.round;
  const cues={guide:'눈으로 보고, 생각하고, 준비되면 표현해요.',wait:'천천히 살펴볼 시간을 가져요.',self:'스스로 확인한 뒤 준비되면 시작해요.'};
  guide.src=id==='slowMemory'?'assets/friend-ru.png':id==='slowScan'?'assets/friend-hong.png':'assets/friend-saem.png';
@@ -122,7 +122,7 @@ function render(id,d) {
  function finish(outcome,note){
   if(s.finished)return;
   s.finished=true;const correct=outcome===true;
-  s.records.push({round:round+1,first:s.firstCorrect===true?'O':s.firstCorrect===false?'X':'미확인',final:outcome===null?'미평가':correct?'O':'X',retries:s.attempts,hint:s.hint,pauses:s.pauses,note:id==='slowBlock'?note+' · 조립 수정 '+(s.blockEdits||0)+'회':note});
+  s.records.push({round:round+1,first:s.firstCorrect===true?'O':s.firstCorrect===false?'X':'미확인',final:outcome===null?'미평가':correct?'O':'X',retries:s.attempts,hint:s.teacherCues>0,selfChecks:s.selfChecks,teacherCues:s.teacherCues,pauses:s.pauses,note:id==='slowBlock'?note+' · 조립 수정 '+(s.blockEdits||0)+'회':note});
   if(correct){addSeeds(s.attempts?7:10);sfx('ok');}else if(outcome===false){sfx('tap');}
   root.querySelectorAll('button[data-slow]').forEach(b=>{if(b.dataset.slow!=='next')b.disabled=true;});
   feed.textContent=outcome===null?'쉬어가도 괜찮아요.':correct?'정원을 정확하게 살폈어요!':'어려웠던 문제는 잠시 두고 다음 길로 가요.';
@@ -153,7 +153,7 @@ function render(id,d) {
   feed.textContent='잠깐 멈춰서 다시 확인해요. 틀린 곳을 바로 알려주지 않을게요.';
   flash('천천히 한 번 더 확인해요.');
  }
- function nameScore(okay,note){if(s.firstCorrect===null)s.firstCorrect=okay;if(okay)finish(true,note);else {s.attempts++;if(s.attempts>=2){finish(false,note);return;}s.nameReady=false;s.hint=true;feed.textContent='다시 천천히 눈으로 보고 생각할 시간을 가져요.';let btn=root.querySelector('[data-slow="ready"]');if(!btn){btn=document.createElement('button');btn.type='button';btn.className='slow-primary slow-retry-name';btn.dataset.slow='retryName';btn.textContent='다시 보고 말하기 →';root.appendChild(btn)}else btn.disabled=false;root.querySelectorAll('.slow-teacher-choice button,.slow-name-choice button').forEach(x=>x.disabled=true)}}
+ function nameScore(okay,note){if(s.firstCorrect===null)s.firstCorrect=okay;if(okay)finish(true,note);else {s.attempts++;if(s.attempts>=2){finish(false,note);return;}s.nameReady=false;feed.textContent='다시 천천히 눈으로 보고 생각할 시간을 가져요.';let btn=root.querySelector('[data-slow="ready"]');if(!btn){btn=document.createElement('button');btn.type='button';btn.className='slow-primary slow-retry-name';btn.dataset.slow='retryName';btn.textContent='다시 보고 말하기 →';root.appendChild(btn)}else btn.disabled=false;root.querySelectorAll('.slow-teacher-choice button,.slow-name-choice button').forEach(x=>x.disabled=true)}}
  root.addEventListener('click',e=>{
   const block=e.target.closest('button[data-block]');
   if(id==='slowBlock'&&block&&!block.disabled){
@@ -186,13 +186,13 @@ function render(id,d) {
   if(a==='skip')return finish(null,'쉬어감/미응답');
   if(a==='next'){b.disabled=true;nextRound(0);return;}
   if(a==='hide'){s.memoryHidden=round;render(id,d);return;}
-  if(a==='show'){s.hint=true;s.memoryHidden=-1;render(id,d);return;}
+  if(a==='show'){s.selfChecks++;s.memoryHidden=-1;render(id,d);return;}
   if(a==='ready'){s.nameReady=true;render(id,d);return;}
   if(a==='retryName'){s.nameReady=true;render(id,d);return;}
   if(a==='name-right')return nameScore(true,'교사 관찰: 말로 명명 (정확)');
   if(a==='name-wrong')return nameScore(false,'교사 관찰: 말로 명명 (오반응)');
   if(a==='word')return nameScore(Number(b.dataset.word)===itemIndex,'글자로 선택 (말하기 수행 아님)');
-  if(a==='hint'){s.hint=true;feed.textContent='한 칸씩 비교한 뒤 대답해요. 필요하면 쉬었다가 다시 해요.';return;}
+  if(a==='hint'){s.hint=true;s.teacherCues++;feed.textContent='한 칸씩 비교한 뒤 대답해요. 필요하면 쉬었다가 다시 해요.';return;}
  });
 }
 window.SlowLookNative={IDS,isNew,rounds,setUp,render,addSummary,names,icons};
