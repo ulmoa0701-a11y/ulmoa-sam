@@ -51,7 +51,7 @@ try{
   assert.equal(await page.locator('#brainMap [data-brain-region]').count(),6,'six interactive regions');
   assert.equal(await page.locator('.brain-hero,.brain3d-feature,.brain-explorer,.brain-networks,.brain-faq').count(),0,'no prior scrolling sections');
   assert.equal(await page.locator('#simpleDetail').isHidden(),true,'optional detail starts closed');
-  assert.equal(await page.locator('.more-learn').getAttribute('open'),null,'advanced features closed by default');
+  assert.equal(await page.locator('.more-learn, .more-links').count(),0,'remove redundant 3D link panel from main map');
   assert.notEqual(await page.locator('.sub-footer .footer-social').evaluate(el=>getComputedStyle(el).position),'fixed','shared social links must not float over educational content');
   const footerColor=await page.locator('.sub-footer .footer-social a').first().evaluate(el=>getComputedStyle(el).color);
   assert.ok(footerColor==='rgb(241, 248, 242)','social links should have readable contrast on dark footer, got '+footerColor);
@@ -373,9 +373,8 @@ try{
   await page.locator('[data-brain-view="lobes"]').click();
   assert.equal(await page.locator('#lobesView').isVisible(),true,'Returning to original map should work');
   assert.equal(await page.locator('.lobe-card').count(),6,'Original cards preserved');
-  await page.locator('.more-learn summary').click();
-  assert.equal(await page.locator('.more-learn').getAttribute('open'),'');
-  assert.match(await page.locator('.more-links a').first().getAttribute('href'),/3d\/explore/);
+  assert.equal(await page.locator('.more-learn, .more-links').count(),0,'main map has no duplicate advanced links');
+  assert.equal(await page.locator('.hemi-study-sources').count(),1,'scientific background remains accessible on comparison tab');
   assert.deepEqual(errors,[],'unexpected browser errors');
   report.push({name,status:'PASS',viewport:width,lobeSummaryTop:Math.round(fit.bottom),buttons:6,noOverflow:true});
   await page.close();
