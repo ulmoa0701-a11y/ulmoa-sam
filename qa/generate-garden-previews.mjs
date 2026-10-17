@@ -40,7 +40,9 @@ async function capture(id,url,{native=false}={}){
  try{
   const r=await page.goto(base+url,{waitUntil:'domcontentloaded',timeout:21000});
   if(!r?.ok())throw Error('HTTP '+r?.status());
-  await page.waitForTimeout(350);
+  // Wait for readable Korean webfonts before screenshotting game text.
+  await page.evaluate(async()=>{if(document.fonts?.ready)await document.fonts.ready;});
+  await page.waitForTimeout(450);
   if(native){
    entry.preview=await snap(page,'#introPreview',id);
    const start=page.locator('#introStart');
