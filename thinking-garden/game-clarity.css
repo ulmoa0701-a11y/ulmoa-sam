@@ -92,3 +92,14 @@
  #gameWorld .leaf-clue-game .leaf-trail{font-size:23px}
 }
 @media(prefers-reduced-motion:reduce){#gameWorld .leaf-clue-game .leaf-btn{transition:none}}
+
+
+/* Lit-follow path: randomized spatial search without turning it into a memory task. */
+#gameWorld .trail-adventure{gap:12px;min-height:270px}
+#gameWorld .trail-scene-hint{border:2px solid #dce8d6;background:#f8fff0;border-radius:18px;padding:7px 24px;font-size:clamp(26px,4vw,35px);letter-spacing:6px}
+#gameWorld .trail-adventure .trail-game{width:min(630px,100%);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(7px,1.5vw,15px);align-items:center;justify-items:center;padding:14px 10px}
+#gameWorld .trail-adventure .trail-node{width:min(100%,85px);height:auto;aspect-ratio:1;min-width:0;min-height:58px;border-radius:22px;font-size:clamp(28px,4vw,41px)}
+#gameWorld .trail-adventure .trail-runner{order:100;grid-column:1/-1;width:100%;min-height:42px;font-size:clamp(27px,3.5vw,37px);line-height:1.2}
+#gameWorld .trail-adventure .trail-node.ready{outline:3px solid #efc957;outline-offset:2px}
+@media(max-width:650px){#gameWorld .trail-adventure .trail-game{padding:10px 1px;gap:7px}#gameWorld .trail-adventure .trail-node{min-height:56px;border-width:3px}}
+@media(prefers-reduced-motion:reduce){#gameWorld .trail-adventure .trail-node.ready{animation:none;box-shadow:0 0 0 6px #ffd45b40}}
