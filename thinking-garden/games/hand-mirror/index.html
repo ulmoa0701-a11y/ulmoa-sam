@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#eef8ec">
-<title>반짝손 따라하기 | 모아의 인지정원</title>
+<title>모아의 마법 꽃밭 · 반짝손 따라하기 | 모아의 인지정원</title>
 <meta name="description" content="손동작 모양을 보고 카메라로 따라 하는 게임. 손가락 분리, 동작 순서, 양손 협응을 놀이로 경험해요.">
 <style>
 :root{--ink:#24483d;--forest:#31765b;--pale:#ecf8e9;--gold:#ffde8f;--line:#cce3d1}
@@ -187,6 +187,67 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 }
 @media(max-width:370px){.play.is-camera .viewer{height:340px}.ghost-guides{top:106px;bottom:75px}}
 
+
+/* Child-first garden game, existing advanced modes retained as optional choices. */
+.chosen{display:block;margin:13px 0}
+.garden-mode{width:100%;background:linear-gradient(110deg,#ebf8e6,#fff1c5);border-color:#d0dcb3;min-height:94px;display:grid;grid-template-columns:60px 1fr;column-gap:10px;align-items:center}
+.garden-mode .emoji{font-size:41px;grid-row:span 2;text-align:center}
+.garden-mode strong{font-size:21px;align-self:end}
+.garden-mode small{font-size:13px;align-self:start}
+.more-modes{margin-top:13px}
+.more-modes summary{cursor:pointer;padding:11px 15px;font-size:14px;font-weight:870;background:#f5f9ed;border:1px solid #d4e8d6;border-radius:12px;color:#3b7458;list-style:none}
+.more-modes summary::-webkit-details-marker{display:none}
+.more-modes summary span{float:right}
+.more-modes-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.start-copy{color:#547666;font-size:13px;font-weight:780;margin-top:6px}
+.play.is-camera .viewer{height:clamp(310px,48vw,470px)}
+.play.is-garden .task-head{display:none}
+.play.is-garden #targetPanel{display:none}
+.play.is-garden .garden-scene{display:block}
+.garden-scene{padding:14px;border-radius:19px;background:linear-gradient(#d8f4e4,#fcf8ce);border:2px solid #bee5cf;min-height:224px}
+.garden-scene-title{font-size:18px;font-weight:950;text-align:center;color:#376e52}
+.garden-beds{display:flex;align-items:end;justify-content:space-around;gap:6px;min-height:132px;margin:6px 0 1px;border-radius:20px;background:linear-gradient(transparent 60%,#d8b58500 60%,#ebd0a4 92%)}
+.garden-bed{position:relative;display:flex;flex:1;align-items:center;justify-content:end;flex-direction:column;gap:0;min-height:130px;overflow:hidden}
+.garden-plant{font-size:54px;transform:translateY(95px) scale(.35);opacity:0;transition:transform .55s cubic-bezier(.18,1.5,.3,1),opacity .22s;filter:drop-shadow(0 4px 4px #365c5026)}
+.garden-bed[data-growth="seed"] .garden-plant{font-size:40px;transform:translateY(3px) scale(.74);opacity:1}
+.garden-bed[data-growth="seed"] .garden-plant::before{content:'🌰'}
+.garden-bed[data-growth="seed"] .garden-plant{font-size:0}
+.garden-bed[data-growth="seed"] .garden-plant::before{font-size:39px}
+.garden-bed[data-growth="flower"] .garden-plant{transform:translateY(0) scale(1);opacity:1;animation:flower-pop .65s ease-out}
+.garden-soil{display:block;width:88%;height:13px;background:#ac8652;border-radius:50%;box-shadow:0 3px 0 #8a713b33}
+.garden-caption{text-align:center;font-size:13px;font-weight:800;color:#53765c;min-height:20px}
+@keyframes flower-pop{0%{transform:translateY(35px) scale(.35)}62%{transform:translateY(-8px) scale(1.12)}100%{transform:translateY(0) scale(1)}}
+.camera-check{position:absolute;z-index:7;left:10px;right:10px;bottom:75px;border:2px solid #a9daba;background:#fffefaec;padding:12px;border-radius:19px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;color:#2d6d4b;box-shadow:0 7px 22px #1b513437}
+.camera-check strong{font-size:18px;font-weight:980}
+.camera-check>span{font-size:13px;font-weight:800}
+.camera-check-progress{height:8px;width:80%;background:#dfeadd;border-radius:100px;overflow:hidden}
+.camera-check-progress>span{display:block;height:100%;width:0;background:#5dbd89;transition:width .17s}
+.viewer[data-phase="setup"] .live-task,.viewer[data-phase="setup"] .ghost-guides,.viewer[data-phase="setup"] .camera-hold{display:none!important}
+.play.is-camera #cameraCheck:not([hidden])~#placeholder{display:none}
+.play.is-camera.is-garden .game-right .panel{padding:12px}
+@media(max-width:760px){
+ .more-modes-grid{grid-template-columns:1fr 1fr;gap:6px}
+ .more-modes .mode{padding:8px}
+ .more-modes .mode strong{font-size:13px}
+ .more-modes .mode small{font-size:10px}
+ .garden-mode{min-height:80px;grid-template-columns:48px 1fr;padding:10px}
+ .garden-mode .emoji{font-size:32px}
+ .garden-mode strong{font-size:17px}
+ .garden-mode small{font-size:11px}
+ .play.is-garden .viewer{height:clamp(285px,43dvh,410px)}
+ .garden-scene{min-height:158px;padding:9px}
+ .garden-scene-title{font-size:15px}
+ .garden-beds{min-height:97px;margin:0}
+ .garden-bed{min-height:97px}
+ .garden-plant{font-size:44px}
+ .garden-bed[data-growth="seed"] .garden-plant::before{font-size:30px}
+ .garden-soil{height:9px}
+ .garden-caption{font-size:11px}
+ .camera-check{padding:9px;bottom:72px}
+ .camera-check strong{font-size:15px}
+}
+@media(prefers-reduced-motion:reduce){.garden-bed[data-growth="flower"] .garden-plant{animation:none}}
+
 </style>
 </head>
 <body>
@@ -194,26 +255,28 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 <header><a href="../../">🌱 모아의 인지정원</a><div class="tools"><button id="mute" class="tiny" type="button">🔊 효과음</button><button id="home" class="tiny" type="button" hidden>⌂ 처음</button></div></header>
 <main>
 <section id="intro" class="intro panel">
-<div class="intro-top"><div><span class="eyebrow">모아의 인지정원 · 손동작 놀이</span><h1>반짝손 따라하기 ✨</h1><p class="lead">모아가 보여주는 손동작을 따라해 봐! 손가락을 펼치고, 접고, 순서대로 움직이며 꽃을 깨워요.</p></div><img class="moa" src="../../assets/moa-default.png" alt="모아" onerror="this.style.display='none'"></div>
+<div class="intro-top"><div><span class="eyebrow">모아의 인지정원 · 손동작 놀이</span><h1>모아의 마법 꽃밭 🌼</h1><p class="lead">주먹을 쥐면 씨앗이 생기고, 손을 펴면 꽃이 피어요. 천천히 움직여도 괜찮아요.</p></div><img class="moa" src="../../assets/moa-default.png" alt="모아" onerror="this.style.display='none'"></div>
 <div class="chosen" role="group" aria-label="놀이 고르기">
-<button type="button" class="mode" data-mode="copy" aria-pressed="true"><span class="emoji">✋</span><strong>모아 손 따라하기</strong><small>한 손으로 여러 손 모양 따라하기</small></button>
+<button type="button" class="mode garden-mode" data-mode="garden" aria-pressed="true"><span class="emoji">🌼</span><strong>마법 꽃밭 · 먼저 놀기</strong><small>주먹 쥐기 → 손 펼치기로 꽃 3송이를 피워요</small></button>
+<details class="more-modes" id="advancedModes"><summary>다른 손동작 놀이도 있어요 <span>⌄</span></summary><div class="more-modes-grid">
+<button type="button" class="mode" data-mode="copy" aria-pressed="false"><span class="emoji">✋</span><strong>모아 손 따라하기</strong><small>한 손으로 여러 손 모양 따라하기</small></button>
 <button type="button" class="mode" data-mode="fingers" aria-pressed="false"><span class="emoji">☝️</span><strong>손가락 탐험</strong><small>하나·둘·세 손가락 바꾸기</small></button>
 <button type="button" class="mode" data-mode="memory" aria-pressed="false"><span class="emoji">🧠</span><strong>반짝손 기억길</strong><small>2~3개 손동작을 기억해 따라하기</small></button>
 <button type="button" class="mode" data-mode="both" aria-pressed="false"><span class="emoji">👐</span><strong>두 손 협동</strong><small>양손을 함께 움직여 모양 만들기</small></button>
-</div>
+</div></details></div>
 <div class="start-panel">
-<h2>어떻게 놀아볼까?</h2>
+<h2>어떻게 놀아볼까?</h2><p class="start-copy">카메라에 내 손이 잘 보이는지 확인하고 시작해요.</p>
 <div class="start-actions"><button class="primary" type="button" id="cameraStart">📷 카메라로 따라하기</button><button class="secondary" type="button" id="touchStart">👆 화면으로 규칙 연습</button></div>
 <p class="disclaimer">카메라는 시작할 때만 허용을 요청해요. 손 위치는 기기에서 분석하고 영상은 저장·전송하지 않아요. 외부 손 인식 라이브러리와 모델을 인터넷에서 받아올 수 있어요. 화면 연습은 정답 선택이지 실제 손동작 인식이 아니에요.</p>
 </div>
 </section>
 <section id="game" class="play" hidden>
 <div class="panel camera-panel"><div class="camera-title"><strong id="viewName">손 모양 살펴보기</strong><span id="kindBadge">📷 카메라</span></div>
-<div class="viewer" id="viewer"><video id="video" playsinline autoplay muted aria-hidden="true"></video><canvas id="overlay" aria-label="손가락 인식 표시"></canvas><div class="live-task" id="liveTask" hidden><small>모아의 손을 따라 해봐!</small><strong id="liveTitle">손 모양 따라하기</strong><span class="live-legend" id="liveLegend">🟡 노란 손가락 쭉! · 연한 손가락 접기</span></div><div class="ghost-guides" id="ghostGuides" aria-hidden="true"></div><div class="camera-hold" id="cameraHold" hidden><span id="cameraHoldFill"></span></div><div id="cameraProblem" class="camera-problem" role="status" hidden><strong id="cameraProblemTitle">카메라를 확인해 볼까?</strong><p id="cameraProblemText">영상이 보이지 않으면 카메라를 다시 연결해 봐.</p><div class="camera-problem-actions"><button id="retryCamera" type="button">↻ 카메라 다시 연결</button><button id="cameraToTouch" type="button">👆 화면 놀이로 바꾸기</button></div></div><div id="placeholder" class="placeholder"><span class="hand">✋</span>준비되면 손을 카메라에 보여줘!</div><div class="viewer-badge" id="viewerBadge" role="status">차근차근 준비해요</div></div>
+<div class="viewer" id="viewer"><video id="video" playsinline autoplay muted aria-hidden="true"></video><canvas id="overlay" aria-label="손가락 인식 표시"></canvas><div class="live-task" id="liveTask" hidden><small>모아의 손을 따라 해봐!</small><strong id="liveTitle">손 모양 따라하기</strong><span class="live-legend" id="liveLegend">🟡 노란 손가락 쭉! · 연한 손가락 접기</span></div><div class="ghost-guides" id="ghostGuides" aria-hidden="true"></div><div class="camera-check" id="cameraCheck" role="status" aria-live="polite" hidden><strong>📷 먼저 내 손을 보여줘!</strong><span id="cameraCheckText">카메라를 연결하고 있어요…</span><span class="camera-check-progress"><span id="cameraCheckFill"></span></span></div><div class="camera-hold" id="cameraHold" hidden><span id="cameraHoldFill"></span></div><div id="cameraProblem" class="camera-problem" role="status" hidden><strong id="cameraProblemTitle">카메라를 확인해 볼까?</strong><p id="cameraProblemText">영상이 보이지 않으면 카메라를 다시 연결해 봐.</p><div class="camera-problem-actions"><button id="retryCamera" type="button">↻ 카메라 다시 연결</button><button id="cameraToTouch" type="button">👆 화면 놀이로 바꾸기</button></div></div><div id="placeholder" class="placeholder"><span class="hand">✋</span>준비되면 손을 카메라에 보여줘!</div><div class="viewer-badge" id="viewerBadge" role="status">차근차근 준비해요</div></div>
 <div class="camera-tools"><button class="tiny" type="button" id="flip" hidden>↻ 앞·뒤 카메라</button><button class="tiny" type="button" id="guideToggle" hidden aria-pressed="true">👋 손 그림 보이기</button><button class="tiny" type="button" id="pause">⏹ 그만하기</button><span>🔒 영상 저장·업로드 없음</span></div>
 </div>
 <div class="game-right"><div class="panel"><div class="progress-head"><span id="roundLabel">1 / 6</span><span id="flowerLabel">🌼 0</span></div><div class="bar"><span id="meter"></span></div>
-<div class="task-head" id="taskTitle">모아의 손을 따라해요!</div><div class="target" id="targetPanel"><span id="targetEmoji">✋</span><strong id="targetTitle">손바닥 활짝</strong><p id="targetHelp">손을 카메라에 보여줘!</p></div>
+<div class="garden-scene" id="gardenScene" hidden><p class="garden-scene-title" id="gardenStory">🌰 씨앗을 심어 볼까?</p><div class="garden-beds" aria-label="꽃밭 진행 모습"><div class="garden-bed" data-bed="0" data-growth="empty"><span class="garden-plant">🌱</span><span class="garden-soil"></span></div><div class="garden-bed" data-bed="1" data-growth="empty"><span class="garden-plant">🌷</span><span class="garden-soil"></span></div><div class="garden-bed" data-bed="2" data-growth="empty"><span class="garden-plant">🌻</span><span class="garden-soil"></span></div></div><p class="garden-caption" id="gardenCaption">손을 움직일 때마다 꽃밭이 자라요</p></div><div class="task-head" id="taskTitle">모아의 손을 따라해요!</div><div class="target" id="targetPanel"><span id="targetEmoji">✋</span><strong id="targetTitle">손바닥 활짝</strong><p id="targetHelp">손을 카메라에 보여줘!</p></div>
 <div class="steps" id="sequence" hidden></div><div class="mission-msg" id="message" role="status" aria-live="polite">손을 준비해 볼까?</div>
 <div class="choices" id="choices" hidden></div>
 <button class="secondary next" type="button" id="ready" hidden>외웠어요! ▶</button>
@@ -224,5 +287,5 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 </main>
 <div class="footer">모아의 인지정원 · 카메라로 관찰하는 손가락 움직임 놀이 · 손 힘, 실제 물체 조작 및 치료 효과를 자동으로 평가하는 기능은 아닙니다.</div>
 </div>
-<script src="core.js?v=2"></script><script src="app.js?v=4"></script>
+<script src="core.js?v=2"></script><script src="app.js?v=5"></script>
 </body></html>
