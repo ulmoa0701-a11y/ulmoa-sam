@@ -6,7 +6,7 @@ if(!core)throw new Error('Gesture matcher unavailable');
 const CDN='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35';
 const MODEL='https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
 const POSES=['palm','fist','one','two','three'];
-const MODE={garden:'모아의 마법 꽃밭',copy:'모아 손 따라하기',fingers:'손가락 탐험',memory:'반짝손 기억길',both:'두 손 협동'};
+const MODE={garden:'모아의 마법 꽃밭',copy:'모아 손 따라하기 · 반짝 풍선',fingers:'손가락 탐험 · 별빛 켜기',memory:'반짝손 기억길 · 비밀 발판',both:'두 손 협동 · 보물문'};
 const ROUNDS={
  garden:[['fist'],['palm'],['fist'],['palm'],['fist'],['palm']],
  copy:[['palm'],['fist'],['one'],['two'],['three'],['palm']],
@@ -54,23 +54,31 @@ function renderGuide(){
  $('game').classList.toggle('is-fingers',S.mode==='fingers');
  $('viewer').dataset.phase=preview?'memorize':S.phase;
  $('liveTask').hidden=!camera||S.phase==='setup';
- $('liveTitle').textContent=preview?'손 그림을 보고 기억해!':recall?'기억한 손 모양 만들기!':S.phase==='reward'?(isGarden()?S.success%2===1?'🌰 도토리 잡았어!':'🌷 꽃이 피었어!':'🌼 성공!'):isGarden()?(S.round%2===0?'✊ 주먹! 도토리 잡기':'✋ 보자기! 도토리 놓기'):goalText();
+ $('liveTitle').textContent=preview?'🧠 비밀 손동작을 기억해!':recall?'🚶 기억한 순서로 발판을 밝혀!':S.phase==='reward'?
+   (isGarden()?(S.success%2===1?'🌰 도토리 잡았어!':'🌷 꽃이 피었어!'):
+    S.mode==='copy'?'🫧 풍선이 반짝!':S.mode==='fingers'?'⭐ 별빛이 켜졌어!':S.mode==='memory'?'✨ 다음 발판으로!':'🔑 보물문이 열리고 있어!'):
+   isGarden()?(S.round%2===0?'✊ 주먹! 도토리 잡기':'✋ 보자기! 도토리 놓기'):
+   S.mode==='copy'?'🫧 '+goalText()+' → 풍선 톡!':
+   S.mode==='fingers'?'⭐ '+goalText()+' → 별빛 켜기!':
+   S.mode==='both'?'🔑 두 손으로 '+goalText()+'!':'🚶 비밀 발판 기억하기';
  $('liveLegend').textContent=recall?'기억한 대로 해볼까?':preview?'손 모양 순서를 기억해!':isGarden()?'모아의 손 모양을 따라 해봐!':'🟡 노란 손가락 쭉! · 연한 손가락 접기';
  $('guideToggle').hidden=!camera||recall||isGarden();
  $('cameraHold').hidden=!camera||preview||S.phase==='setup';
- $('ghostGuides').hidden=!active||!S.guideVisible||isGarden();
- $('ghostGuides').classList.toggle('is-hidden',!active||!S.guideVisible||isGarden());
- const showLiveModel=active&&(isGarden()||S.mode==='fingers')&&S.guideVisible&&S.phase!=='reward';
+ $('ghostGuides').hidden=true;
+ $('ghostGuides').classList.add('is-hidden');
+ const showLiveModel=active&&isAdventure()&&!preview&&!recall&&S.guideVisible&&S.phase!=='reward';
  $('modelCard').hidden=!showLiveModel;
  if(showLiveModel){
   const target=currentGoal()[0];
-  $('modelSymbol').innerHTML=S.mode==='fingers'?handArt(target):(target==='fist'?'✊':target==='palm'?'✋':core.EMOJI[target]);
-  $('modelTitle').textContent=S.mode==='fingers'?core.TITLES[target]:target==='fist'?'도토리 잡기':target==='palm'?'도토리 심기':core.TITLES[target];
+  $('modelSymbol').innerHTML=currentGoal().map(p=>handArt(p)).join('');
+  $('modelSymbol').classList.toggle('is-double',currentGoal().length===2);
+  $('modelTitle').textContent=currentGoal().map(p=>core.TITLES[p]).join(' + ');
   $('modelCard').dataset.pose=target;
  }
  $('liveCompare').hidden=!camera||!S.cameraReady||S.phase!=='play';
  syncAcornUI();
- if(!active||isGarden()||S.mode==='fingers'){$('ghostGuides').replaceChildren();return;}
+ $('ghostGuides').replaceChildren();
+ return;
  const poses=preview?current():currentGoal();
  $('ghostGuides').innerHTML=poses.map((p,i)=>gestureFigure(p,preview?'순서 '+(i+1):poses.length>1?(i===0?'첫 손':'다음 손'):'')).join('');
  $('ghostGuides').classList.toggle('is-matched',S.phase==='reward');
@@ -79,6 +87,7 @@ function renderGuide(){
 const isCamera=()=>S.kind==='camera';
 const isMemory=()=>S.mode==='memory';
 const isGarden=()=>S.mode==='garden';
+const isAdventure=()=>!isGarden();
 const timeouts=()=>{if(S.winTimer)clearTimeout(S.winTimer);S.winTimer=0};
 function show(id){for(const key of ['intro','game','finish'])$(key).hidden=key!==id;$('home').hidden=id==='intro';}
 function message(s){if($('message').textContent!==s)$('message').textContent=s;if($('viewerBadge').textContent!==s)$('viewerBadge').textContent=s;}
@@ -94,7 +103,7 @@ function stopCamera(){
  video.srcObject=null;
  if(S.model){try{S.model.close()}catch(e){}S.model=null;}
  S.camHands=[];S.lastFrame=-1;S.matchSince=0;S.lastObserved=0;S.loading=false;
- $('viewer').dataset.match='no';$('cameraHoldFill').style.width='0%';$('liveCompare').hidden=true;$('modelCard').hidden=true;$('acornActor').hidden=true;
+ $('viewer').dataset.match='no';$('cameraHoldFill').style.width='0%';$('liveCompare').hidden=true;$('modelCard').hidden=true;$('acornActor').hidden=true;$('adventureActor').hidden=true;
  const c=canvas.getContext('2d');c.clearRect(0,0,canvas.width,canvas.height);
 }
 function showCameraProblem(title,detail,type='camera'){
@@ -147,7 +156,18 @@ function gardenUpdate(){
  });
  syncAcornUI();
 }
-function modeSelected(m){S.mode=m;document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));}
+function modeSelected(m){
+ S.mode=m;
+ document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));
+ const intros={
+  garden:['모아의 마법 꽃밭 🌼','도토리를 주먹으로 잡고, 보자기를 펼쳐서 심어요! 꽃 세 송이를 피워 볼까?'],
+  copy:['모아의 반짝 풍선 🫧','모아 손을 따라하면 풍선이 톡! 손 모양마다 반짝이는 풍선을 깨워요.'],
+  fingers:['손가락 별빛 탐험 ⭐','손가락 하나·둘·셋! 손 모양을 바꾸어 별빛 여섯 개를 밝혀요.'],
+  memory:['반짝손 비밀 발판 🪨','모아가 보여준 손 모양 순서를 기억한 뒤 발판을 하나씩 밝혀요.'],
+  both:['두 손 보물문 🔑','두 손을 함께 움직여 자물쇠를 하나씩 열고 보물문을 찾아요.']
+ };
+ $('introHeading').textContent=intros[m][0];$('introLead').textContent=intros[m][1];
+}
 function taskOptions(){
  const types=isGarden()?[['fist'],['palm']]:S.mode==='both'?[['palm','palm'],['fist','fist'],['palm','fist'],['one','one']]:POSES.map(p=>[p]);
  const options=$('choices');options.replaceChildren();
