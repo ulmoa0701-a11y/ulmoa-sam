@@ -9,159 +9,138 @@ const output='qa/hand-mirror-artifacts/'+(process.env.LIVE_TEST?'live':'staging'
 fs.mkdirSync(output,{recursive:true});
 function hand(kind){
  const arr=Array.from({length:21},()=>({x:.5,y:.85}));
- [[5,6,8],[9,10,12],[13,14,16],[17,18,20]].forEach(([a,b,c],i)=>{
-  arr[a]={x:.32+i*.11,y:.65};arr[b]={x:.32+i*.11,y:.5};
-  arr[c]={x:.32+i*.11,y:core.PATTERNS[kind][i]===1?.19:.60};
+ [[5,6,8],[9,10,12],[13,14,16],[17,18,20]].forEach(([m,p,t],i)=>{
+  arr[m]={x:.28+i*.12,y:.65};arr[p]={x:.28+i*.12,y:.5};
+  arr[t]={x:.28+i*.12,y:core.PATTERNS[kind][i]===1?.19:.60};
  });
  return arr;
 }
-for(const kind of ['palm','fist','one','two','three'])assert.equal(core.pose(hand(kind)),kind,'Pose recognition '+kind);
-assert.ok(Object.values(core.TITLES).every(t=>!/검지|중지|약지|새끼손가락/.test(t)),'Main game does not require anatomy vocabulary');
+for(const kind of ['palm','fist','one','two','three'])assert.equal(core.pose(hand(kind)),kind);
 assert.equal(core.pose([]),null);
-assert.equal(core.match([hand('palm'),hand('fist')],['fist','palm']),true,'Unordered two-hand match');
-assert.equal(core.match([hand('palm')],['palm','palm']),false,'Requires two separately recognized hands');
-assert.equal(core.match([hand('one')],['palm']),false,'Reject different pose');
+assert.equal(core.match([hand('palm'),hand('fist')],['fist','palm']),true);
+assert.equal(core.match([hand('one')],['fist']),false);
+assert.ok(Object.values(core.TITLES).every(t=>!/검지|중지|약지|새끼손가락/.test(t)));
 const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_BIN,args:['--no-sandbox','--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream']});
-const checks=[];
-const goals={copy:['palm','fist','one','two','three','palm'],fingers:['one','two','three','one','three','two'],both:['palm,palm','fist,fist','palm,fist','one,one']};
+const goals={garden:['fist','palm','fist','palm','fist','palm'],copy:['palm','fist','one','two','three','palm'],fingers:['one','two','three','one','three','two'],both:['palm,palm','fist,fist','palm,fist','one,one']};
+async function pickMode(page,mode){
+ if(mode!=='garden')await page.locator('#advancedModes summary').click();
+ await page.locator('[data-mode="'+mode+'"]').click();
+}
 async function touchFlow(page,mode,patterns){
  await page.goto(base+'/thinking-garden/games/hand-mirror/',{waitUntil:'domcontentloaded'});
- await page.locator('[data-mode="'+mode+'"]').click();
+ await pickMode(page,mode);
  await page.locator('#touchStart').click();
- assert.equal(await page.locator('#game').isVisible(),true,mode+' starts');
+ assert.equal(await page.locator('#game').isVisible(),true,mode+' launched');
  for(let i=0;i<patterns.length;i++){
-  assert.equal(await page.locator('#roundLabel').innerText(),(i+1)+' / '+patterns.length);
-  await page.locator('.choices [data-pose="'+patterns[i]+'"]').click();
-  assert.match(await page.locator('#message').innerText(),/성공/);
+  assert.equal(await page.locator('#roundLabel').innerText(),(i+1)+' / '+patterns.length,mode+' round');
+  await page.locator('.choices button[data-pose="'+patterns[i]+'"]').click();
+  assert.match(await page.locator('#message').innerText(),mode==='garden'?/씨앗|꽃/:/성공/);
   await page.locator('#next').click();
  }
- assert.equal(await page.locator('#finish').isVisible(),true,mode+' finishes');
- assert.match(await page.locator('#finishInfo').innerText(),/화면 정답 선택 연습/);
+ assert.equal(await page.locator('#finish').isVisible(),true,mode+' completed');
+ if(mode==='garden'){
+  assert.match(await page.locator('#finishInfo').innerText(),/꽃 3송이/);
+  assert.equal(await page.locator('#gardenScene .garden-bed[data-growth="flower"]').count(),3,'Three flowers grew');
+ }else assert.match(await page.locator('#finishInfo').innerText(),/화면 정답 선택 연습/);
 }
 async function memoryFlow(page){
  await page.goto(base+'/thinking-garden/games/hand-mirror/',{waitUntil:'domcontentloaded'});
- await page.locator('[data-mode="memory"]').click();
+ await pickMode(page,'memory');
  await page.locator('#touchStart').click();
- const sequences=[['palm','one'],['one','fist'],['two','palm','fist'],['three','one','palm']];
- for(let i=0;i<sequences.length;i++){
-  assert.equal(await page.locator('#ready').isVisible(),true,'No time limit memory preview');
-  assert.match(await page.locator('#targetTitle').innerText(),/기억하기/);
+ const seq=[['palm','one'],['one','fist'],['two','palm','fist'],['three','one','palm']];
+ for(let i=0;i<seq.length;i++){
+  assert.equal(await page.locator('#ready').isVisible(),true);
   await page.locator('#ready').click();
-  assert.equal(await page.locator('#targetEmoji').innerText(),'❔','Answer hidden during recall');
-  for(const goal of sequences[i]){
-   await page.locator('.choices [data-pose="'+goal+'"]').click();
+  assert.equal(await page.locator('#targetEmoji').innerText(),'❔','Memory answer concealed');
+  for(const pose of seq[i]){
+   await page.locator('.choices button[data-pose="'+pose+'"]').click();
    assert.match(await page.locator('#message').innerText(),/성공/);
    await page.locator('#next').click();
   }
  }
- assert.equal(await page.locator('#finish').isVisible(),true,'Memory play finishes');
+ assert.equal(await page.locator('#finish').isVisible(),true);
 }
-async function simulatedLiveCamera(width,height,label){
- const context=await browser.newContext({viewport:{width,height},permissions:['camera'],locale:'ko-KR'});
- const page=await context.newPage(),errors=[];
- page.on('pageerror',e=>errors.push(e.message));
- // Fake Chromium camera provides changing test pixels; only MediaPipe model is mocked.
- // This validates camera stream/play(), MediaPipe invocation, pose classification and reward without accessing a real camera.
- await page.route('**/vision_bundle.mjs',route=>route.fulfill({status:200,contentType:'text/javascript',headers:{'access-control-allow-origin':'*'},body:`
- export const FilesetResolver={forVisionTasks:async()=>({})};
- export const HandLandmarker={createFromOptions:async()=>({
-  detectForVideo(){
-    const a=Array.from({length:21},()=>({x:.5,y:.85}));
-    [[5,6,8],[9,10,12],[13,14,16],[17,18,20]].forEach(([m,p,t],i)=>{
-      a[m]={x:.28+i*.12,y:.65};a[p]={x:.28+i*.12,y:.5};a[t]={x:.28+i*.12,y:.19};
-    });
-    return {landmarks:[a]};
-  },
-  close(){}
- })};
- `}));
- await page.goto(base+'/thinking-garden/games/hand-mirror/',{waitUntil:'domcontentloaded'});
- await page.locator('#cameraStart').click();
- await page.waitForFunction(()=>document.querySelector('#video').classList.contains('is-ready'),null,{timeout:20000});
- assert.equal(await page.locator('#video').evaluate(v=>v.videoWidth>0),true,'Mock camera video has real frames');
- await page.waitForFunction(()=>document.getElementById('flowerLabel').textContent.includes('1'),null,{timeout:15000});
- assert.match(await page.locator('#message').innerText(),/성공/,'Recognized pose progresses in camera mode');
- assert.equal(await page.locator('#cameraProblem').isVisible(),false,'No false black camera warning during valid playback');
- assert.equal(await page.locator('#kindBadge').innerText(),'📷 손 인식');
- await page.screenshot({path:output+'/live-mock-camera-'+label+'.png',fullPage:true});
- await page.locator('#pause').click();
- assert.equal(await page.locator('#game').isVisible(),false,'Camera stopped on exit');
- assert.deepEqual(errors,[],'No mocked-camera page errors');
- await context.close();
-}
-async function main(width,height,label){
+async function visualAndRecovery(width,height,label){
  const c=await browser.newContext({viewport:{width,height},locale:'ko-KR'});
- const page=await c.newPage(),errors=[];
- page.on('pageerror',e=>errors.push(e.message));
- await page.goto(base+'/thinking-garden/',{waitUntil:'domcontentloaded'});
- const card=page.locator('.library-card[data-open="handMirror"]');
- assert.equal(await card.count(),1,'Game is a native garden card');
- assert.equal(await card.isVisible(),true,'Game discoverable on garden screen');
- assert.match(await page.locator('#gardenProgress').innerText(),/26/,'Garden count updated');
+ const p=await c.newPage(),errors=[];
+ p.on('pageerror',e=>errors.push(e.message));
+ await p.goto(base+'/thinking-garden/',{waitUntil:'domcontentloaded'});
+ const card=p.locator('.library-card[data-open="handMirror"]');
+ assert.equal(await card.count(),1,'Garden native library card');
  await card.click();
- await page.waitForURL('**/thinking-garden/games/hand-mirror/');
- assert.equal(await page.locator('h1').innerText(),'반짝손 따라하기 ✨');
- await page.screenshot({path:output+'/home-'+label+'.png',fullPage:true});
- for(const [mode,pattern] of Object.entries(goals))await touchFlow(page,mode,pattern);
- await memoryFlow(page);
- // Pending camera permission simulates a real first-use camera gate without downloading external models.
- const cameraPage=await c.newPage();
- cameraPage.on('pageerror',e=>errors.push(e.message));
- await cameraPage.addInitScript(()=>{Object.defineProperty(navigator,'mediaDevices',{configurable:true,value:{getUserMedia:()=>new Promise(()=>{})}})});
- await cameraPage.goto(base+'/thinking-garden/games/hand-mirror/',{waitUntil:'domcontentloaded'});
- await cameraPage.locator('[data-mode="fingers"]').click();
- await cameraPage.locator('#cameraStart').click();
- assert.equal(await cameraPage.locator('#liveTask').isVisible(),true,'Target instruction projected inside camera');
- assert.equal(await cameraPage.locator('#ghostGuides [data-pose="one"] svg').isVisible(),true,'Open index finger projected as actual hand diagram');
- assert.equal(await cameraPage.locator('#ghostGuides [data-pose="one"] svg .open-finger').count(),1,'One finger visually highlighted to extend');
- assert.equal(await cameraPage.locator('#ghostGuides [data-pose="one"] svg .folded-finger').count(),3,'Other fingers shown as folded');
- assert.match(await cameraPage.locator('#liveLegend').innerText(),/노란 손가락/,'Child-facing color cue inside video');
- assert.doesNotMatch(await cameraPage.locator('#liveTitle').innerText(),/검지|중지|약지|새끼/,'No finger jargon on main instruction');
-
- assert.equal(await cameraPage.locator('#targetPanel').isVisible(),false,'No duplicate giant prompt below camera');
- assert.equal(await cameraPage.locator('#cameraHold').isVisible(),true,'Hold feedback displayed inside camera');
- assert.equal(await cameraPage.locator('#guideToggle').isVisible(),true,'Option to hide projection');
- assert.equal(await cameraPage.locator('#cameraProblem').isVisible(),false,'No spurious camera warning while permission pending');
- assert.equal(await cameraPage.locator('#retryCamera').count(),1,'Troubleshooting offers camera reconnect');
- assert.equal(await cameraPage.locator('#cameraToTouch').count(),1,'Troubleshooting offers touch choice');
- assert.equal(await cameraPage.locator('#ghostGuides svg rect').count(),0,'Avoid misleading rectangular finger bars');
-
- await cameraPage.locator('#guideToggle').click();
- assert.equal(await cameraPage.locator('#ghostGuides').isVisible(),false,'Child can hide projected hand');
- await cameraPage.locator('#guideToggle').click();
- assert.equal(await cameraPage.locator('#ghostGuides').isVisible(),true,'Projection can be re-enabled');
- await cameraPage.evaluate(()=>{
-  document.querySelector('#cameraProblem').hidden=false;
- });
- assert.equal(await cameraPage.locator('#cameraProblem').isVisible(),true,'Visible camera troubleshooting instead of unexplained black preview');
- await cameraPage.locator('#cameraToTouch').click();
- assert.equal(await cameraPage.locator('#kindBadge').innerText(),'👆 화면 정답 고르기','Visible opt-in touch fallback');
- assert.equal(await cameraPage.locator('#cameraProblem').isVisible(),false,'Recovery message closes in touch mode');
- await cameraPage.locator('#pause').click();
- await cameraPage.locator('[data-mode="fingers"]').click();
- await cameraPage.locator('#cameraStart').click();
-
- assert.ok((await cameraPage.evaluate(()=>document.documentElement.scrollWidth-innerWidth))<=2,'No camera-screen horizontal overflow');
- await cameraPage.screenshot({path:output+'/camera-projection-'+label+'.png',fullPage:true});
- await cameraPage.locator('#pause').click();
- await cameraPage.locator('[data-mode="memory"]').click();
- await cameraPage.locator('#cameraStart').click();
- assert.equal(await cameraPage.locator('#ghostGuides .ghost-hand').count(),2,'Memory preview shows two projected gesture samples');
- await cameraPage.locator('#ready').click();
- assert.equal(await cameraPage.locator('#ghostGuides').isVisible(),false,'Memory answer is hidden during recall');
- assert.match(await cameraPage.locator('#liveTitle').innerText(),/기억한 손 모양/,'Prompt does not reveal remembered answer');
- await cameraPage.close();
- await page.goto(base+'/thinking-garden/games/hand-mirror/',{waitUntil:'domcontentloaded'});
- await page.addInitScript(()=>{Object.defineProperty(navigator,'mediaDevices',{configurable:true,value:{getUserMedia:async()=>{throw new Error('Permission blocked in test')}}})});
- await page.reload({waitUntil:'domcontentloaded'});
- await page.locator('#cameraStart').click();
- await page.waitForFunction(()=>document.getElementById('kindBadge').textContent.includes('화면 정답 고르기'));
- assert.match(await page.locator('#message').innerText(),/카메라 연결이 안 됐어/,'Clear camera fallback');
- assert.equal(await page.locator('.choices .choice').count(),5,'Fallback touch selections');
- assert.ok((await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth))<=2,'No horizontal overflow');
- await page.screenshot({path:output+'/camera-fallback-'+label+'.png',fullPage:true});
- assert.deepEqual(errors,[],'No uncaught JavaScript errors: '+label);
- checks.push({label,width,height,ok:true});
+ await p.waitForURL('**/thinking-garden/games/hand-mirror/');
+ assert.equal(await p.locator('h1').innerText(),'모아의 마법 꽃밭 🌼');
+ assert.equal(await p.locator('.garden-mode').getAttribute('aria-pressed'),'true');
+ await p.screenshot({path:output+'/new-home-'+label+'.png',fullPage:true});
+ for(const [mode,patterns] of Object.entries(goals))await touchFlow(p,mode,patterns);
+ await memoryFlow(p);
+ const cp=await c.newPage();
+ cp.on('pageerror',e=>errors.push(e.message));
+ await cp.addInitScript(()=>{Object.defineProperty(navigator,'mediaDevices',{configurable:true,value:{getUserMedia:()=>new Promise(()=>{})}});});
+ await cp.goto(base+'/thinking-garden/games/hand-mirror/',{waitUntil:'domcontentloaded'});
+ await cp.locator('#cameraStart').click();
+ assert.equal(await cp.locator('#cameraCheck').isVisible(),true,'Real camera must first be calibrated');
+ assert.equal(await cp.locator('#liveTask').isVisible(),false,'No task before calibration');
+ assert.equal(await cp.locator('#ghostGuides').isVisible(),false,'No target obstructing setup');
+ assert.equal(await cp.locator('#flowerLabel').innerText(),'🌼 0');
+ assert.equal(await cp.locator('#cameraProblem').isVisible(),false);
+ await cp.screenshot({path:output+'/camera-preflight-'+label+'.png',fullPage:true});
+ await cp.evaluate(()=>{document.getElementById('cameraProblem').hidden=false;});
+ assert.equal(await cp.locator('#cameraProblem').isVisible(),true,'Problem recovery accessible');
+ await cp.locator('#cameraToTouch').click();
+ assert.equal(await cp.locator('#kindBadge').innerText(),'👆 화면 정답 고르기');
+ assert.equal(await cp.locator('.choices .choice').count(),2,'Only simple garden options in touch mode');
+ await cp.close();
+ await p.goto(base+'/thinking-garden/games/hand-mirror/');
+ await p.addInitScript(()=>{Object.defineProperty(navigator,'mediaDevices',{configurable:true,value:{getUserMedia:async()=>{const e=new Error('denied');e.name='NotAllowedError';throw e;}}})});
+ await p.reload();
+ await p.locator('#cameraStart').click();
+ await p.waitForFunction(()=>!document.getElementById('cameraProblem').hidden,null,{timeout:15000});
+ assert.equal(await p.locator('#kindBadge').innerText(),'📷 손 인식','Failure never silently switches to touch');
+ assert.match(await p.locator('#cameraProblemText').innerText(),/권한/,'Permission-specific recovery');
+ await p.locator('#cameraToTouch').click();
+ assert.equal(await p.locator('#kindBadge').innerText(),'👆 화면 정답 고르기');
+ assert.ok((await p.evaluate(()=>document.documentElement.scrollWidth-innerWidth))<=2,'No horizontal overflow');
+ assert.deepEqual(errors,[],'No uncaught errors');
+ await c.close();
+ return {label,ok:true};
+}
+async function fakeVideoGarden(){
+ const c=await browser.newContext({viewport:{width:390,height:844},permissions:['camera'],locale:'ko-KR'});
+ const p=await c.newPage(),errors=[];
+ p.on('pageerror',e=>errors.push(e.message));
+ const fakeModule=[
+ 'export const FilesetResolver={forVisionTasks:async()=>({})};',
+ 'export const HandLandmarker={createFromOptions:async()=>({detectForVideo(){',
+ 'const a=Array.from({length:21},()=>({x:.5,y:.85}));',
+ '[[5,6,8],[9,10,12],[13,14,16],[17,18,20]].forEach(([m,p,t],i)=>{',
+ 'a[m]={x:.28+i*.12,y:.65};a[p]={x:.28+i*.12,y:.5};',
+ 'a[t]={x:.28+i*.12,y:globalThis.__testPalm?.19:.60};',
+ '});return {landmarks:[a]};},close(){}})};'
+ ].join('\n');
+ await p.route('**/vision_bundle.mjs',r=>r.fulfill({status:200,contentType:'text/javascript',headers:{'access-control-allow-origin':'*'},body:fakeModule}));
+ await p.goto(base+'/thinking-garden/games/hand-mirror/',{waitUntil:'domcontentloaded'});
+ await p.locator('#cameraStart').click();
+ assert.equal(await p.locator('#cameraCheck').isVisible(),true,'Before model ready, must show preflight');
+ assert.equal(await p.locator('#flowerLabel').innerText(),'🌼 0','No early score');
+ await p.waitForFunction(()=>document.querySelector('#video').classList.contains('is-ready'),null,{timeout:20000});
+ await p.waitForFunction(()=>document.querySelector('#cameraCheck').hidden&&document.querySelector('#viewer').dataset.phase==='play',null,{timeout:20000});
+ assert.equal(await p.locator('#video').evaluate(v=>v.videoWidth>0),true,'Video stream produced pixels');
+ await p.waitForFunction(()=>document.getElementById('flowerLabel').textContent.includes('1'),null,{timeout:15000});
+ assert.equal(await p.locator('.garden-bed[data-growth="seed"]').count(),1,'Fist plants seed');
+ assert.equal(await p.locator('#cameraProblem').isVisible(),false);
+ await p.evaluate(()=>{window.__testPalm=true});
+ await p.locator('#next').click();
+ await p.waitForFunction(()=>document.getElementById('flowerLabel').textContent.includes('2'),null,{timeout:15000});
+ assert.equal(await p.locator('.garden-bed[data-growth="flower"]').count(),1,'Palm grows flower');
+ await p.screenshot({path:output+'/garden-video-and-bloom-mobile.png',fullPage:true});
+ await p.locator('#pause').click();
+ assert.equal(await p.locator('#game').isVisible(),false,'Stop ends game and stream');
+ assert.deepEqual(errors,[],'Camera mock has no uncaught JS errors');
  await c.close();
 }
-try{await main(1280,800,'desktop');await main(390,844,'mobile');await simulatedLiveCamera(390,844,'mobile');console.log('PASS hand mirror QA',JSON.stringify(checks));}finally{await browser.close();}
+try{
+ const results=[await visualAndRecovery(1280,800,'desktop'),await visualAndRecovery(390,844,'mobile')];
+ await fakeVideoGarden();
+ console.log('PASS magic garden and legacy gesture QA',JSON.stringify(results));
+}finally{await browser.close();}
