@@ -71,15 +71,17 @@ for(const width of [360,390,1366]){
   const hiddenCards=await page.locator('#cognitive .play-card-enhanced[hidden]').count();
   check(hiddenCards===17,width+' memory filter not hiding unrelated games');
   await page.locator('#cognitive .garden-filter-buttons button[data-focus="all"]').click();
-  await page.locator('#cognitive .play-preview-btn').first().click();
+  const previewCard=page.locator('#cognitive .play-card-enhanced:not([hidden])').first();
+  const previewKey=await previewCard.getAttribute('data-game');
+  const previewTarget=await previewCard.locator('.play-start-btn').getAttribute('href');
+  await previewCard.locator('.play-preview-btn').click();
   check(await page.locator('#gardenPreviewDialog').isVisible(),width+' actual preview dialog did not open');
   check((await page.locator('#previewSteps li').count())===3,width+' preview steps not clear');
   await page.locator('.preview-frame-switch [data-frame="intro"]').click();
-  check((await page.locator('#previewShot').getAttribute('src')).includes('rescue.jpg'),'intro frame not displayed');
+  check((await page.locator('#previewShot').getAttribute('src')).includes(previewKey+'.jpg'),'intro frame not displayed');
   await page.locator('.preview-frame-switch [data-frame="play"]').click();
-  check((await page.locator('#previewShot').getAttribute('src')).includes('rescue-play.jpg'),'play frame not displayed');
-
-  check((await page.locator('#previewPlay').getAttribute('href')).includes('rescue'),width+' preview start link mismatches game');
+  check((await page.locator('#previewShot').getAttribute('src')).includes(previewKey+'-play.jpg'),'play frame not displayed');
+  check((await page.locator('#previewPlay').getAttribute('href'))===previewTarget,width+' preview game link changed');
   await page.locator('.preview-close').click();
  }
 
