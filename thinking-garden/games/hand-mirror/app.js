@@ -233,19 +233,24 @@ function updateSteps(preview){
 function render(){
  if(S.round>=ROUNDS[S.mode].length){finish();return;}
  $('game').classList.toggle('is-garden',isGarden());
- // Garden has one full-screen-style play surface. Move the *same* existing
- // answer/next controls into its camera stage; return them for other games.
- const dock=isGarden() ? $('gardenTouchDock') : $('standardControls');
- dock.append($('choices'),$('next'));
- $('gardenTouchDock').hidden=!isGarden()||isCamera();
- $('gardenHud').hidden=!isGarden();
- $('gardenTouchPreview').hidden=!isGarden()||isCamera();
- if(isGarden()&&!isCamera()){
-  const task=currentGoal()[0];
-  $('gardenTouchPreview').innerHTML=handArt(task)+'<strong class="garden-touch-caption">'+(task==='fist'?'✊ 주먹! 도토리 잡기':'✋ 보자기! 도토리 놓기')+'</strong>';
- }else $('gardenTouchPreview').replaceChildren();
+ $('game').classList.toggle('is-adventure',isAdventure());
  const preparing=isCamera()&&!S.cameraReady;
  const memoryPreview=isMemory()&&S.phase==='memorize';
+ $('gardenTouchDock').append($('choices'),$('next'),$('ready'));
+ $('gardenTouchDock').hidden=isCamera()&&(!isMemory()||!memoryPreview);
+ $('gardenHud').hidden=false;
+ $('gardenTouchPreview').hidden=isCamera()||memoryPreview;
+ if(!isCamera()&&!memoryPreview){
+  const task=currentGoal();
+  const hiddenRecall=isMemory()&&S.phase!=='memorize'&&S.phase!=='reward';
+  $('gardenTouchPreview').innerHTML=hiddenRecall?
+    '<span class="memory-question" aria-label="기억해서 따라 하기">❔</span><strong class="garden-touch-caption">방금 본 손모양 기억하기</strong>':
+    task.map(p=>handArt(p)).join('')+'<strong class="garden-touch-caption">'+
+    (isGarden()?(task[0]==='fist'?'✊ 주먹! 도토리 잡기':'✋ 보자기! 도토리 놓기'):
+    S.mode==='copy'?'🫧 '+goalText():
+    S.mode==='fingers'?'⭐ '+goalText():
+    S.mode==='both'?'🔑 두 손을 움직여요':'🚶 길 따라가기')+'</strong>';
+ }else $('gardenTouchPreview').replaceChildren();
  $('roundLabel').textContent=(S.round+1)+' / '+ROUNDS[S.mode].length;
  $('flowerLabel').textContent=isGarden()?'🌼 '+Math.floor(S.success/2)+' / 3':'🌼 '+S.success;
  $('gardenHudRound').textContent=(S.round+1)+' / '+ROUNDS[S.mode].length;
@@ -274,7 +279,7 @@ function render(){
  $('placeholder').hidden=isCamera()&&S.model!==null;
  if(!isCamera())$('placeholder').innerHTML='<span class="hand">👀</span>모양을 흉내 내면서 아래에서 답을 골라 줘!';
  $('video').hidden=!isCamera();canvas.hidden=!isCamera();
- gardenUpdate();
+ gardenUpdate();adventureUpdate();
  S.matchSince=0;S.lastObserved=0;S.rearmSince=0;
  if(preparing){S.phase='setup';message('먼저 카메라에서 손을 찾아 볼게요.');}
  else if(memoryPreview){S.phase='memorize';message('모아가 보여준 순서를 기억해 볼까? 시간 제한은 없어!');}
@@ -329,7 +334,7 @@ function drawHands(hands){
  const scale=Math.max(w/video.videoWidth,h/video.videoHeight),offX=(w-video.videoWidth*scale)/2,offY=(h-video.videoHeight*scale)/2;
  function xy(p){let x=offX+p.x*video.videoWidth*scale;return [S.facing==='user'?w-x:x,offY+p.y*video.videoHeight*scale]}
  S.hasTrackedHand=hands.length===1;
- if(isGarden())syncAcornUI();
+ if(isGarden())syncAcornUI();else adventureUpdate();
  const teaching=isCamera()&&S.cameraReady&&S.phase==='play';
  const targets=teaching?currentGoal():[];
  // The two-hand game scores left/right in either order. Match the visual coaching
@@ -350,8 +355,22 @@ function drawHands(hands){
     S.acornX=Math.max(8,Math.min(92,100*((wrist[0]+knuckle[0])/2)/w));
     S.acornY=Math.max(20,Math.min(83,100*((wrist[1]+knuckle[1])/2)/h));
     syncAcornUI();
-   }else if(S.mode==='fingers'&&!$('modelCard').hidden){
-    $('modelCard').dataset.side=xy(hand[9])[0]>w*.52?'left':'right';
+   }else if(isAdventure()){
+    if(S.mode==='fingers'){
+     const tip=xy(hand[8]);
+     S.acornX=Math.max(8,Math.min(92,100*tip[0]/w));
+     S.acornY=Math.max(21,Math.min(77,100*tip[1]/h-8));
+    }else{
+     const base=xy(hand[9]);
+     S.acornX=Math.max(10,Math.min(90,100*base[0]/w));
+     S.acornY=Math.max(22,Math.min(76,100*base[1]/h));
+    }
+    if(!$('modelCard').hidden)$('modelCard').dataset.side=xy(hand[9])[0]>w*.52?'left':'right';
+    if(S.mode==='both'&&hands.length===2){
+     const second=xy(hands[1][9]);
+     S.acornX=Math.max(13,Math.min(87,(S.acornX+100*second[0]/w)/2));
+    }
+    adventureUpdate();
    }
   }
   // The fine-grained overlay follows the child's detected joints, rather than asking the child to align with a fixed sticker.
@@ -523,7 +542,12 @@ function accept(){
   updateSteps(false);
  }
  if(isGarden()){gardenUpdate();message(S.success%2===1?'🌰 도토리를 잡았어!':'🌷 도토리를 심어서 꽃이 피었어!');}
- else message('🌼 성공! 손가락 꽃이 피었어!');
+ else{
+  adventureUpdate();
+  message(S.mode==='copy'?'🫧 손으로 풍선을 깨웠어!':
+   S.mode==='fingers'?'⭐ 반짝! 별이 켜졌어!':
+   S.mode==='memory'?'✨ 기억한 발판이 빛나!':'🔑 찰칵! 보물문 자물쇠가 열려!');
+ }
  renderGuide();
  $('next').hidden=false;
  $('next').textContent=isMemory()&&S.part<current().length-1?'다음 동작 →':'다음으로 →';
