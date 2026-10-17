@@ -130,8 +130,16 @@ try{
     assert.ok(visibleLabels.some(t=>t.includes(zoneNumber)&&t.includes(lobeName)),
      'number and area name must match illustration and card: '+region);
    }
-   const contrast=await page.locator('#brainMap [data-scene-active] .zone-shape').first().evaluate(el=>parseFloat(getComputedStyle(el).strokeWidth));
-   assert.ok(contrast>=10,'highlighted border must be visually distinct from the default stroke: '+contrast);
+   const strokeInfo=await page.locator('#brainMap [data-scene-active] .zone-shape').first().evaluate(el=>({
+    width:getComputedStyle(el).strokeWidth,
+    selector:el.matches('.brain-page .brain-svg[data-scene-mode="active"] .brain-zone[data-scene-active] .zone-shape'),
+    svgMode:document.querySelector('#brainMap').getAttribute('data-scene-mode'),
+    brainClasses:document.querySelector('#brainMap').getAttribute('class'),
+    bodyClasses:document.body.className,
+    parentClasses:el.parentElement?.getAttribute('class')
+   }));
+   assert.ok(parseFloat(strokeInfo.width)>=10,
+    'highlighted border must be visually distinct: '+JSON.stringify(strokeInfo));
    assert.equal(await page.locator('#simpleDetail').isHidden(),true,'scene does not show unrelated single-region detail');
    const metrics=await page.evaluate(()=>({
     buttons:[...document.querySelectorAll('[data-lobe-scene]')].map(el=>el.getBoundingClientRect().toJSON()),
