@@ -45,8 +45,11 @@
  if(nodes.length!==6||shapes.length!==6||![detail,title,text,icon,close,lobeSceneTitle,lobeSceneRoles,lobeSceneResult,lobeSceneSelection,lobeSceneCurrent,lobeSceneSelectedRegions,brainMap].every(Boolean)||lobeSceneButtons.length!==8)return;
  function clearLobeScene(){
   shapes.forEach(g=>g.removeAttribute('data-scene-active'));
+  nodes.forEach(node=>node.removeAttribute('data-scene-example'));
+  brainMap.removeAttribute('data-scene-mode');
   lobeSceneButtons.forEach(button=>button.setAttribute('aria-pressed','false'));
   lobeSceneResult.hidden=true;
+  lobeSceneSelection.hidden=true;
  }
  function selectLobeScene(key){
   const scene=lobeScenes[key];
