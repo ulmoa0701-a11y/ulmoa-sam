@@ -50,6 +50,21 @@ const base='http://127.0.0.1:8765/thinking-garden/';
    }
    await page.screenshot({path:'qa/practice-session-screenshots/'+viewport.name+'-rescue-diversity.png'});
    await page.locator('#backHome').click();
+   await page.evaluate(()=>openPreview('memory'));
+   await page.locator('#sessionRounds').selectOption('20');
+   await page.locator('#introStart').click();
+   const memories=[];
+   for(let i=0;i<20;i++){
+    const sample=await page.evaluate(n=>{
+     state.round=n;renderRound();
+     const tiles=[...document.querySelectorAll('.memory-strip .memory-tile')];
+     const key=tiles.map(t=>t.querySelector('.memory-dot')?.style.backgroundColor||t.textContent.trim()).join('|');
+     return {type:missionText.textContent.includes('색')?'color':'animal',len:tiles.length,key};
+    },i);
+    memories.push(sample.type+'|'+sample.len+'|'+sample.key);
+   }
+   assert.equal(new Set(memories).size,20,'a child encountered the same recall prompt twice in 20 rounds');
+   await page.locator('#backHome').click();
    await page.evaluate(()=>openPreview('sameShape'));
    await page.locator('#sessionRounds').selectOption('20');
    await page.locator('#introStart').click();
@@ -88,7 +103,7 @@ const base='http://127.0.0.1:8765/thinking-garden/';
    assert.equal(await page.locator('.trail-node.visited').count(),4,'path selection was not ordered by indicated step');
    await page.screenshot({path:'qa/practice-session-screenshots/'+viewport.name+'-path-diversity.png'});
    assert.deepEqual(errors,[],'JavaScript exceptions: '+viewport.name);
-   console.log('PASS '+viewport.name+' 20 rescue targets, 20 distinct paths, 6-target shapes, count options 5/10/15/20');
+   console.log('PASS '+viewport.name+' 20 rescue targets, 20 unique memory tasks, 20 distinct paths, 6-target shapes, count options 5/10/15/20');
    await page.close();
   }
  }finally{await browser.close()}
