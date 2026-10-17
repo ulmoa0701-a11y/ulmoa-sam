@@ -13,8 +13,8 @@
 <link href="https://hangeul.pstatic.net/hangeul_static/css/maru-buri.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
 <link rel="stylesheet" href="../assets/notebook-subpages.css?v=20261005-clean3">
-<link rel="stylesheet" href="brain.css?v=20261017-scenes1">
-<script src="brain.js?v=20261017-scenes1" defer></script>
+<link rel="stylesheet" href="brain.css?v=20261017-learning2">
+<script src="brain.js?v=20261017-learning2" defer></script>
 <script src="activity-guide.js?v=20261017-activities3" defer></script>
 <link rel="stylesheet" href="../assets/habom-brand.css?v=20261010b">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/habom-favicon-v3-32.png">
@@ -44,6 +44,21 @@
   <div class="map-panel-heading"><h2 id="brainAreasHeading">뇌의 6가지 부분</h2><span>그림 속 숫자와 오른쪽 숫자가 같아요</span></div>
   <div class="one-panel-grid">
    <figure class="lobe-figure">
+    <section class="lobe-scene-explorer" aria-labelledby="lobeSceneHeading">
+     <div class="lobe-scene-head">
+      <h3 id="lobeSceneHeading">🌿 생활 속에서 함께하는 뇌</h3>
+      <p>어떤 장면일까요? 누르면 관련된 부분이 뇌 그림에 표시돼요.</p>
+     </div>
+     <div class="lobe-scene-choices" role="group" aria-label="생활 장면 고르기">
+      <button type="button" data-lobe-scene="talk" aria-pressed="true" aria-controls="brainMap lobeSceneRoles">💬 대화</button>
+      <button type="button" data-lobe-scene="read" aria-pressed="false" aria-controls="brainMap lobeSceneRoles">📖 책 읽기</button>
+      <button type="button" data-lobe-scene="map" aria-pressed="false" aria-controls="brainMap lobeSceneRoles">🧭 길 찾기</button>
+      <button type="button" data-lobe-scene="ball" aria-pressed="false" aria-controls="brainMap lobeSceneRoles">⚽ 공놀이</button>
+      <button type="button" data-lobe-scene="music" aria-pressed="false" aria-controls="brainMap lobeSceneRoles">🎵 노래</button>
+      <button type="button" data-lobe-scene="draw" aria-pressed="false" aria-controls="brainMap lobeSceneRoles">🎨 그림</button>
+      <button type="button" data-lobe-scene="bag" aria-pressed="false" aria-controls="brainMap lobeSceneRoles">🎒 가방</button>
+      <button type="button" data-lobe-scene="feeling" aria-pressed="false" aria-controls="brainMap lobeSceneRoles">🙂 친구 기분</button>
+     </div>
     <div class="figure-orientation"><span>← 이마 쪽 (앞)</span><span>뒤통수 쪽 (뒤) →</span></div>
     <svg id="brainMap" class="brain-svg" viewBox="125 70 685 500" xmlns="http://www.w3.org/2000/svg" role="group" tabindex="-1" aria-label="옆에서 바라본 뇌. 보라색 전두엽, 노란색 두정엽, 초록색 측두엽, 복숭아색 후두엽, 하늘색 소뇌, 연보라색 뇌줄기.">
 <defs>
@@ -76,21 +91,6 @@
 </g>
 </g>
 </svg>
-    <section class="lobe-scene-explorer" aria-labelledby="lobeSceneHeading">
-     <div class="lobe-scene-head">
-      <h3 id="lobeSceneHeading">🌿 생활 속에서 함께하는 뇌</h3>
-      <p>어떤 장면일까요? 누르면 관련된 부분이 뇌 그림에 표시돼요.</p>
-     </div>
-     <div class="lobe-scene-choices" role="group" aria-label="생활 장면 고르기">
-      <button type="button" data-lobe-scene="talk" aria-pressed="true">💬 대화</button>
-      <button type="button" data-lobe-scene="read" aria-pressed="false">📖 책 읽기</button>
-      <button type="button" data-lobe-scene="map" aria-pressed="false">🧭 길 찾기</button>
-      <button type="button" data-lobe-scene="ball" aria-pressed="false">⚽ 공놀이</button>
-      <button type="button" data-lobe-scene="music" aria-pressed="false">🎵 노래</button>
-      <button type="button" data-lobe-scene="draw" aria-pressed="false">🎨 그림</button>
-      <button type="button" data-lobe-scene="bag" aria-pressed="false">🎒 가방</button>
-      <button type="button" data-lobe-scene="feeling" aria-pressed="false">🙂 친구 기분</button>
-     </div>
      <div class="lobe-scene-result" id="lobeSceneResult" aria-live="polite" aria-atomic="true">
       <strong id="lobeSceneTitle">💬 친구와 대화할 때</strong>
       <ul class="lobe-scene-roles" id="lobeSceneRoles">
