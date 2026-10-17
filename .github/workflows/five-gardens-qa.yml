@@ -46,6 +46,10 @@ jobs:
           exit 1
       - name: Check five gardens and original game links
         run: node qa/five-gardens-qa.mjs
+      - name: Verify deployed public gardens and all preview images
+        env:
+          TEST_BASE_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam
+        run: node qa/five-gardens-qa.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
