@@ -4,7 +4,7 @@ import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 const {chromium}=require('playwright-core');
 const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',args:['--no-sandbox']});
-const base='http://127.0.0.1:8765';
+const base=process.env.TEST_BASE_URL||'http://127.0.0.1:8765';
 const artifacts='qa/five-gardens-artifacts';
 fs.mkdirSync(artifacts,{recursive:true});
 const failures=[];
