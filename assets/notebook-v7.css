@@ -148,3 +148,7 @@
  .desk-collage.featured-two .feature-card em{font-size:clamp(8px,2.4vw,10px)!important}
  .scrapbook-grid .entry-heart{width:100%}
 }
+
+/* Four featured materials: preserve existing card styling and give each cover room to breathe. */
+.latest-materials .latest-material-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:720px){.latest-materials .latest-material-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
