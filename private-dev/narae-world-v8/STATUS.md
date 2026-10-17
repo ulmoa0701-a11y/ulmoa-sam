@@ -72,3 +72,17 @@ The major V7.5 structural failures are replaced in V8.6. Full commercial-quality
 - **Preview security:** an older AppDeploy V8.6 URL exists (app id `v8-6-dev-h4hbx9`), but its static frontend has no observed viewer authentication. An unlisted URL is not access-controlled. No V8.7 deployment performed.
 - **Git caveat:** repo visibility is public; this feature branch is NOT an access-controlled private Git branch. Do not commit unpublished binary/HTML assets to this repo. On inspection `main` had advanced 20 commits beyond the V8 branch's merge base; DO NOT force-push or merge blindly.
 - **Gate:** PUBLICATION_HOLD remains; no change to GitHub Pages, public homepage menu, or existing games. Godot/real rig, browser visual QA, and user approval outstanding.
+
+
+## V8.9.2 local + owner-only Drive QA candidate — 2026-10-17 (PUBLICATION_HOLD)
+- New source (not committed to this public repository): `나래반_놀이터_WORLD_V8_9_2_SAFE_PATH_QA_PRIVATE_HOLD.html`, 9,702,448 bytes, SHA-256 `04347989e63b722793bc04276a439c90f71656d393fad3ce55b1543673e0ac62`.
+- Owner-only Drive DEV_HOLD file: `1yGSUm7g5R8q6iov1BQ5Wd8qB2TmcwDp8` (metadata: shared=false, sole owner permission). Do NOT share publicly.
+- Source preserves the 24 embedded sprites from the V8.8.1 cleaned-Nuri working copy byte-for-byte; additional `sandcastle_v89` artwork is separate non-character art.
+- Picture-based three-choice Nuri repeat loop: green shovel, blue bucket, toy truck; scene additions and per-round small JPEG memory captures.
+- Revised sandy castle render and responsive phone sizing, cleaned confusing chalk squares, fixed short speech bubbles, short visible object transfer FX.
+- Replaced collision-unsafe A* direct fallback with collision-aware grid starts/ends and best-reachable fallback. Random 400 start/end path inspection: 0 intersections, safe fallback 1; no paths through barriers observed in these tests.
+- Chromium actual PC 1440x900 and touch-emulated mobile 390x844: each completed 4 consecutive rounds (8/8), album 4/4 saved, no DOM overflow and zero JavaScript runtime errors.
+- QA limit: target-nearby movement and handoff proximity were sometimes shortened in automated tests using internal position setup. These tests do not prove full real-child free navigation or 5-10 minute clinical engagement. No user/device physical acceptance.
+- Outstanding: polished articulated fixed-master Nuri hands/gaze/blinking with approved frames, real-depth castle material, varied interactions beyond finding objects, physical-phone/human-child exploratory QA, all-seven-character approval.
+- Security: GitHub repo and branches are public. AppDeploy old V8.6 unauthenticated preview remains independently unapproved. V8.9.2 has NOT been deployed to public web, linked in main, merged, or used to overwrite V7.x/V8.6.
+- Git rule: STATUS-only commit on the old feature branch; no main changes, no artifacts in public GitHub, no forced merge or rebase.
