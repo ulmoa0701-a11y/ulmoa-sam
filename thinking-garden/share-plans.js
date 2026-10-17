@@ -112,7 +112,7 @@ function updateSharedMenu(){
    card.append(E('small','moa-assigned-options',(['','쉬움','보통','확장'][opt.level||active.level])+' · '+n+'문제'));
   }
   if(game){
-   const action=E('button','moa-assigned-start','🎮 '+game.title+' 시작 →');
+   const action=E('button','moa-assigned-start','🎮 게임 시작하기 →');
    action.type='button';action.addEventListener('click',()=>play(id));card.append(action);
   }else{
    const a=E('button','moa-assigned-start','📄 '+material.title+' 열기 →');
