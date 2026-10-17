@@ -38,7 +38,7 @@ for(const width of [360,390,1366]){
   id:c.dataset.game,icons:c.querySelectorAll('.play-demo-glyph').length,
   arrows:c.querySelectorAll('.play-demo-arrow').length,
   text:c.querySelector('.play-demo-sequence')?.getAttribute('aria-label')||'',
-  image:c.querySelector('img.real-shot')?.getBoundingClientRect().height||0
+  hidden:c.hidden,image:c.querySelector('img.real-shot')?.getBoundingClientRect().height||0
  })));
  check(missionArt.length===34&&missionArt.every(x=>x.icons===3&&x.arrows===2&&x.text.length>4),width+' 34 distinct picture-based game demonstrations missing');
  check(missionArt.every(x=>x.image>=45),width+' play screenshot too short or hidden');
