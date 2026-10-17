@@ -85,6 +85,8 @@
    copy.append(name,explanation);row.append(number,symbol,copy);lobeSceneRoles.append(row);
   }
   shapes.forEach(g=>g.toggleAttribute('data-scene-active',selected.has(g.dataset.brainRegion)));
+  nodes.forEach(node=>node.toggleAttribute('data-scene-example',selected.has(node.dataset.region)));
+  brainMap.setAttribute('data-scene-mode','active');
   lobeSceneButtons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.lobeScene===key)));
  }
 
