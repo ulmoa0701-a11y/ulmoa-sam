@@ -32,6 +32,10 @@ jobs:
           node --check thinking-garden/app.js
           node --check thinking-garden/share-plans.js
           node --check qa/curated-share-qa.cjs
+          node --check thinking-garden/clinical-bridges.js
+          node --check thinking-garden/strategy-garden-core.js
+          node --check thinking-garden/strategy-festival.js
+          node --check qa/clinical-adaptive-qa.cjs
       - name: Start site
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/assigned-site.log 2>&1 &
@@ -43,6 +47,8 @@ jobs:
           exit 1
       - name: Teacher and parent journeys
         run: node qa/curated-share-qa.cjs
+      - name: Clinical transfer and adaptive training
+        run: node qa/clinical-adaptive-qa.cjs
       - name: Screenshots
         if: always()
         uses: actions/upload-artifact@v4
