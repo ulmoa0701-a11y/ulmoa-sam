@@ -199,7 +199,7 @@ async function wrongAnswerAndReplay(){
  await p.locator('#advancedModes summary').click();
  await p.locator('[data-mode="fingers"]').click();
  await p.locator('#touchStart').click();
- assert.equal(await p.locator('#choices').evaluate(e=>e.parentElement.id),'standardControls','Other mode restores controls');
+ assert.equal(await p.locator('#choices').evaluate(e=>e.parentElement.id),'gardenTouchDock','Other story mode keeps its answers in one play scene');
  await p.locator('#pause').click();
  await c.close();
  results.push({case:'wrong choice, double input, replay, mute, advanced mode',pass:true});
@@ -246,6 +246,8 @@ async function allCameraModes(){
    assert.equal(await p.locator('#ready').isVisible(),true,'Memory preview never expires automatically');
    await p.locator('#ready').click();
    assert.equal(await p.locator('#ghostGuides').isVisible(),false,'Recall hides demonstrated answer');
+   assert.equal(await p.locator('#adventureSceneObjects svg').count(),0,'Camera recall shows no answer shapes');
+   assert.equal(await p.locator('#gardenHud').isVisible(),true,'Path progress stays in camera');
    await p.evaluate(()=>{window.__pose='palm';});
    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('1'),8500);
    await p.evaluate(()=>{window.__pose='one';});
@@ -254,11 +256,12 @@ async function allCameraModes(){
    assert.equal(await p.locator('#sequence .step').count(),2,'Next memory round is shown');
   }else if(mode==='copy'){
    assert.equal(await p.locator('#guideToggle').isVisible(),true,'Copy camera visual guide can be hidden');
-   assert.equal(await p.locator('#ghostGuides').isVisible(),true);
+   assert.equal(await p.locator('#modelCard').isVisible(),true,'The child sees a real target model on the stage');
+   assert.equal(await p.locator('#adventureScene').isVisible(),true,'Bubbles fill along the same frame');
    await p.locator('#guideToggle').click();
-   assert.equal(await p.locator('#ghostGuides').isVisible(),false);
+   assert.equal(await p.locator('#modelCard').isVisible(),false);
    await p.locator('#guideToggle').click();
-   assert.equal(await p.locator('#ghostGuides').isVisible(),true);
+   assert.equal(await p.locator('#modelCard').isVisible(),true);
    await p.evaluate(()=>{window.__pose='palm';});
    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('1'),9000);
   }else if(mode==='fingers'){
@@ -273,7 +276,10 @@ async function allCameraModes(){
    await p.evaluate(()=>{window.__handPoses=['fist','palm'];});
    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('3'),11500);
    assert.equal(await p.locator('#cameraCheck').isVisible(),false,'Bilateral camera remains calibrated');
+   assert.equal(await p.locator('#adventureSceneObjects .adventure-token[data-state="done"]').count(),3,'Three of four locks are open');
   }
+  assert.equal(await p.locator('.game-right').isVisible(),false,'Every camera mode is now single stage');
+  assert.equal(await p.locator('#adventureScene').isVisible(),true,'Every camera game has its own active reward scene');
   assert.deepEqual(errors,[],mode+' has no unexpected page errors');
   await p.screenshot({path:out+'/all-camera-'+mode+'.png',fullPage:true});
   await p.locator('#pause').click();

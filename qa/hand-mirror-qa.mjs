@@ -45,18 +45,26 @@ async function touchFlow(page,mode,patterns){
   assert.equal(await page.locator('#gardenTouchPreview').isVisible(),true,'Touch demo occupies same screen');
   assert.ok(await page.evaluate(()=>document.querySelector('#viewer').getBoundingClientRect().bottom<=window.innerHeight),'Entire garden play stage fits viewport');
  }else{
-  assert.equal(await page.locator('#choices').evaluate(el=>el.parentElement.id),'standardControls','Other games still use their original answers');
+  assert.equal(await page.locator('#choices').evaluate(el=>el.parentElement.id),'gardenTouchDock','All modes choose answers inside one stage');
+  assert.equal(await page.locator('.game-right').isVisible(),false,'No lower scoring panel in playful modes');
+  assert.equal(await page.locator('#adventureScene').isVisible(),true,'Mode-specific story rewards share live play field');
+  assert.equal(await page.locator('#gardenHud').isVisible(),true,'Progress stays with action');
+  assert.equal(await page.locator('#gardenTouchPreview').isVisible(),true,'Target illustration visible in the same stage');
+  assert.ok(await page.evaluate(()=>document.querySelector('#viewer').getBoundingClientRect().bottom<=innerHeight),'One stage fits mobile viewport');
  }
 
  for(let i=0;i<patterns.length;i++){
   assert.equal(await page.locator('#roundLabel').innerText(),(i+1)+' / '+patterns.length,mode+' round');
   await page.locator('.choices button[data-pose="'+patterns[i]+'"]').click();
-  assert.match(await page.locator('#message').innerText(),mode==='garden'?/도토리|꽃/:/성공/);
+  assert.match(await page.locator('#message').innerText(),mode==='garden'?/도토리|꽃/:/풍선|별|자물쇠/);
   if(mode==='garden'){
    const expected=i%2===0?'held':'planted';
    assert.equal(await page.locator('#gardenScene').getAttribute('data-acorn'),expected,'Acorn must be '+expected+' after round '+(i+1));
    assert.equal(await page.locator('#gardenHudRound').innerText(),(i+1)+' / 6','One in-camera stage progress readout');
    assert.equal(await page.locator('#gardenHudFlower').innerText(),'🌷 '+Math.floor((i+1)/2)+' / 3','One in-camera flower counter');
+  }else{
+   const tokens=page.locator('#adventureSceneObjects .adventure-token[data-state="done"]');
+   assert.equal(await tokens.count(),i+1,mode+' lights one story reward per successful gesture');
   }
   await page.locator('#next').click();
  }
@@ -73,15 +81,20 @@ async function memoryFlow(page){
  const seq=[['palm','one'],['one','fist'],['two','palm','fist'],['three','one','palm']];
  for(let i=0;i<seq.length;i++){
   assert.equal(await page.locator('#ready').isVisible(),true);
+  assert.equal(await page.locator('#adventureScene').isVisible(),true);
+  assert.equal(await page.locator('#adventureSceneObjects svg').count(),seq[i].length,'Preview includes all sample hand poses');
   await page.locator('#ready').click();
+  assert.equal(await page.locator('#adventureSceneObjects svg').count(),0,'Recall must never show stored hand figures');
+  assert.equal(await page.locator('#gardenTouchPreview').innerText().then(t=>t.includes('❔')),true,'Touch recall shows question, not goal');
   assert.equal(await page.locator('#targetEmoji').innerText(),'❔','Memory answer concealed');
   for(const pose of seq[i]){
    await page.locator('.choices button[data-pose="'+pose+'"]').click();
-   assert.match(await page.locator('#message').innerText(),/성공/);
+   assert.match(await page.locator('#message').innerText(),/발판|기억/);
    await page.locator('#next').click();
   }
  }
  assert.equal(await page.locator('#finish').isVisible(),true);
+ assert.equal(await page.locator('#adventureSceneObjects svg').count(),0,'Memory answer figures are absent on completed recall');
 }
 async function visualAndRecovery(width,height,label){
  const c=await browser.newContext({viewport:{width,height},locale:'ko-KR'});
