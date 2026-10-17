@@ -39,7 +39,11 @@ async function touchFlow(page,mode,patterns){
  for(let i=0;i<patterns.length;i++){
   assert.equal(await page.locator('#roundLabel').innerText(),(i+1)+' / '+patterns.length,mode+' round');
   await page.locator('.choices button[data-pose="'+patterns[i]+'"]').click();
-  assert.match(await page.locator('#message').innerText(),mode==='garden'?/씨앗|꽃/:/성공/);
+  assert.match(await page.locator('#message').innerText(),mode==='garden'?/도토리|꽃/:/성공/);
+  if(mode==='garden'){
+   const expected=i%2===0?'held':'planted';
+   assert.equal(await page.locator('#gardenScene').getAttribute('data-acorn'),expected,'Acorn must be '+expected+' after round '+(i+1));
+  }
   await page.locator('#next').click();
  }
  assert.equal(await page.locator('#finish').isVisible(),true,mode+' completed');
@@ -131,28 +135,46 @@ async function fakeVideoGarden(){
  await p.waitForFunction(()=>document.querySelector('#video').classList.contains('is-ready'),null,{timeout:20000});
  await p.waitForFunction(()=>document.querySelector('#cameraCheck').hidden&&document.querySelector('#viewer').dataset.phase==='play',null,{timeout:20000});
  assert.equal(await p.locator('#video').evaluate(v=>v.videoWidth>0),true,'Video stream produced pixels');
- assert.equal(await p.locator('#modelCard').isVisible(),true,'Real hand demo is visible instead of tiny static sticker');
- assert.equal(await p.locator('#modelSymbol').innerText(),'✊','Fist target uses instantly recognizable demonstration');
- assert.equal(await p.locator('#modelTitle').innerText(),'주먹 쥐기');
+ assert.equal(await p.locator('#modelCard').isVisible(),false,'Acorn game emphasizes a real camera-tracked nut rather than a redundant demo card');
+ assert.equal(await p.locator('#acornActor').isVisible(),true,'Acorn appears in the hand area');
+ assert.equal(await p.locator('#acornActor img').evaluate(e=>e.complete&&e.naturalWidth>0),true,'Real acorn asset loaded in camera overlay');
+ assert.equal(await p.locator('#acornActor').getAttribute('data-state'),'waiting','Before fist gesture the acorn waits to be caught');
+ assert.match(await p.locator('#liveTitle').innerText(),/도토리 잡기/,'Child can read a short game objective');
  assert.equal(await p.locator('#ghostGuides').isVisible(),false,'Old static tiny diagram is hidden in garden');
  await p.waitForFunction(()=>document.getElementById('flowerLabel').textContent.includes('0'),null,{timeout:6000});
  await p.waitForFunction(()=>document.querySelector('.garden-bed[data-growth="seed"]'),null,{timeout:15000});
- assert.equal(await p.locator('.garden-bed[data-growth="seed"]').count(),1,'Fist plants seed');
+ assert.equal(await p.locator('.garden-bed[data-growth="seed"]').count(),1,'Fist catches the acorn');
+ assert.equal(await p.locator('#acornActor').getAttribute('data-state'),'caught','Acorn visually attaches to the clenched hand');
  assert.equal(await p.locator('#cameraProblem').isVisible(),false);
  await p.evaluate(()=>{window.__testOne=true});
  await p.locator('#next').click();
- assert.equal(await p.locator('#modelSymbol').innerText(),'✋','Target demonstration changes to open palm');
- await p.waitForFunction(()=>document.getElementById('liveCompareTitle').textContent==='내 손 1 / 4',null,{timeout:12000});
- assert.match(await p.locator('#liveCompareCue').innerText(),/주황 점.*더 펴/,'Targeted finger-extension cue rather than static model');
- assert.equal(await p.locator('#liveCompare').getAttribute('data-state'),'adjust');
+ assert.match(await p.locator('#liveTitle').innerText(),/보자기! 도토리 놓기/,'Next goal tells the child to release the acorn');
+ await p.waitForFunction(()=>document.getElementById('viewerBadge').textContent.includes('보자기처럼 손을'),null,{timeout:12000});
+ assert.equal(await p.locator('#liveCompare').isVisible(),false,'Scoring panel no longer obstructs the acorn play');
+ assert.match(await p.locator('#viewerBadge').innerText(),/주먹을 활짝 펴|도토리/,'Short actionable feedback inside camera');
  await p.screenshot({path:output+'/live-finger-correction-mobile.png',fullPage:true});
  await p.evaluate(()=>{window.__testOne=false;window.__testPalm=true});
  await p.waitForFunction(()=>document.querySelector('.garden-bed[data-growth="flower"]'),null,{timeout:15000});
  assert.equal(await p.locator('.garden-bed[data-growth="flower"]').count(),1,'Palm grows flower');
+ assert.equal(await p.locator('#acornActor').getAttribute('data-state'),'released','Open hand visibly releases the acorn');
+ assert.equal(await p.locator('#gardenScene').getAttribute('data-acorn'),'planted','Acorn reaches flower garden');
  assert.equal(await p.locator('#flowerLabel').innerText(),'🌼 1 / 3','Count real flowers rather than hand motions');
  await p.screenshot({path:output+'/garden-video-and-bloom-mobile.png',fullPage:true});
  await p.locator('#pause').click();
  assert.equal(await p.locator('#game').isVisible(),false,'Stop ends game and stream');
+ await p.goto(base+'/thinking-garden/games/hand-mirror/',{waitUntil:'domcontentloaded'});
+ await p.locator('#advancedModes summary').click();
+ await p.locator('[data-mode="fingers"]').click();
+ await p.locator('#cameraStart').click();
+ await p.waitForFunction(()=>document.querySelector('#cameraCheck').hidden&&document.querySelector('#modelCard svg'),null,{timeout:18000});
+ assert.equal(await p.locator('#modelCard').isVisible(),true,'Finger exploration uses big illustrated hand sample');
+ assert.equal(await p.locator('#modelSymbol svg').isVisible(),true,'Illustrated gesture is visible in camera');
+ assert.equal(await p.locator('#ghostGuides').isVisible(),false,'No duplicate ghost hand in finger mission');
+ assert.equal(await p.locator('#liveCompare').isVisible(),false,'No confusing 1/4 scoring box');
+ assert.equal(await p.locator('#liveLegend').isVisible(),false,'No secondary verbose color text');
+ assert.ok((await p.evaluate(()=>document.documentElement.scrollWidth-innerWidth))<=2,'Mobile camera has no horizontal overflow');
+ await p.screenshot({path:output+'/finger-explore-simple-mobile.png',fullPage:true});
+ await p.locator('#pause').click();
  assert.deepEqual(errors,[],'Camera mock has no uncaught JS errors');
  await c.close();
 }
