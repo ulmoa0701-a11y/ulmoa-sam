@@ -127,7 +127,7 @@ async function fakeVideoGarden(){
  await p.goto(base+'/thinking-garden/games/hand-mirror/',{waitUntil:'domcontentloaded'});
  await p.locator('#cameraStart').click();
  assert.equal(await p.locator('#cameraCheck').isVisible(),true,'Before model ready, must show preflight');
- assert.equal(await p.locator('#flowerLabel').innerText(),'🌼 0','No early score');
+ assert.equal(await p.locator('#flowerLabel').innerText(),'🌼 0 / 3','No early bloomed flower');
  await p.waitForFunction(()=>document.querySelector('#video').classList.contains('is-ready'),null,{timeout:20000});
  await p.waitForFunction(()=>document.querySelector('#cameraCheck').hidden&&document.querySelector('#viewer').dataset.phase==='play',null,{timeout:20000});
  assert.equal(await p.locator('#video').evaluate(v=>v.videoWidth>0),true,'Video stream produced pixels');
