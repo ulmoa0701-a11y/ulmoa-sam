@@ -138,7 +138,9 @@ function updateHome(){ $('#seedBank').textContent=`🌱 ${state.total}`;const co
 $$('[data-open]').forEach(b=>b.classList.toggle('completed',!!completed[b.dataset.open])) }
 const basicShapes=[['●','#ff7b76'],['■','#6bb7ff'],['▲','#69c77d'],['★','#ffd45b'],['◆','#9b83e8'],['♥','#ff8db2']];
 function renderSameShape(){
- const n=Math.min(3+practiceStep(),6),idx=Math.floor(Math.random()*basicShapes.length);
+ // A complete six-shape cycle comes before any shape repeats. Change the start
+ // between sessions while leaving the single target attribute (shape) stable.
+ const n=Math.min(3+practiceStep(),6),idx=(state.round+state.shapeOffset)%basicShapes.length;
  const target=basicShapes[idx],targetShape=target[0],targetColor=target[1];
  const correctColor=basicShapes[(idx+2)%basicShapes.length][1];
  missionText.textContent='모양이 같은 쌍둥이를 찾아요!';
@@ -206,10 +208,13 @@ function renderHide(){
 function renderPath(){
  const len=4+Math.min(practiceStep(),3);
  const icons=['🌱','🌼','🍃','🌸','🌿','🌻','🌷'];
- const seq=icons.slice(Math.floor(state.round/5)%icons.length).concat(icons.slice(0,Math.floor(state.round/5)%icons.length)).slice(0,len);
- // Game rule is VISUAL FOLLOWING, not hidden sequence memory. The next node stays lit.
- const layouts={4:[2,0,3,1],5:[3,0,4,1,2],6:[5,1,3,0,4,2],7:[3,6,1,4,0,5,2]};
- const order=layouts[len].map(x=>(x+state.round)%len);
+ // Rotate 20 different opening pairs per session; target is still the currently lit spot.
+ const start=(state.round+state.pathOffset)%icons.length;
+ const second=(start+1+Math.floor(state.round/icons.length))%icons.length;
+ const seq=[icons[start],icons[second],...shuffle(icons.filter((_,i)=>i!==start&&i!==second))].slice(0,len);
+ // Each route moves the lit button around the grid rather than a fixed left-to-right path.
+ const order=shuffle([...Array(len).keys()]);
+ if(order.every((x,i)=>x===i))order.unshift(order.pop());
  let pos=0;
  missionText.textContent='반짝이는 길을 차례로 따라가요!';
  missionSub.textContent='위치가 바뀌어도 지금 빛나는 곳을 따라가면 돼요.';
@@ -271,7 +276,7 @@ function renderTargets(){
    '<button class="wake-target" type="button" aria-label="아직 잠든 꽃씨">🌱</button>':
    '<span class="wake-grown" role="img" aria-label="이미 핀 꽃, 건드리지 않아요">'+o.flower+'</span>'
   ).join('')+'</div></div>';
- $$('.wake-target').forEach(b=>b.onclick=()=>{
+ $('.wake-target').forEach(b=>b.onclick=()=>{
   if(state.lock||b.classList.contains('awake'))return;
   b.classList.add('awake');b.textContent='🌼';b.setAttribute('aria-label','꽃이 피었어요');done++;
   $('#miniCount').textContent='피어난 꽃 '+done+' / '+total;addSeeds(Math.ceil(10/total));sfx('ok');
@@ -330,10 +335,10 @@ function addSeeds(n){recordBasic('correct');state.score+=n;state.total+=n;localS
 function say(text){state.lastSpeech=text;if(!state.sound||!('speechSynthesis'in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='ko-KR';u.rate=.88;speechSynthesis.speak(u)}
 function sfx(kind='ok'){if(kind==='no')recordBasic('wrong');if(!state.sound)return;try{const C=window.AudioContext||window.webkitAudioContext,c=new C(),o=c.createOscillator(),g=c.createGain();o.type=kind==='ok'?'triangle':'sine';const a=kind==='ok'?640:230,b=kind==='ok'?960:160;o.frequency.setValueAtTime(a,c.currentTime);o.frequency.exponentialRampToValueAtTime(b,c.currentTime+.16);g.gain.setValueAtTime(.07,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.19);o.connect(g).connect(c.destination);o.start();o.stop(c.currentTime+.2)}catch{}}
 function flash(text){toast.textContent=text;toast.classList.add('show');clearTimeout(flash.t);flash.t=setTimeout(()=>toast.classList.remove('show'),1150)}
-function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function shuffle(a){const copy=[...a];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]]}return copy}
 function practiceStep(){return Math.min(4,(state.round%5)+Math.max(0,state.basicLevel-1))}
 function updateProgress(){const total=state.roundTotal;$('#stageLabel').textContent=`${Math.min(state.round+1,total)} / ${total}`;$('#progressBar').style.width=`${state.round/total*100}%`;const badge=$('#missionBadge');if(badge)badge.textContent=`미션 ${Math.min(state.round+1,total)}` }
-function startGame(id){clearTimers();state.game=id;state.round=0;state.score=0;state.lock=false;state.basicRecords=[];state.basicLevel=Math.max(1,Math.min(3,Number($('#slowLevel').value)||1));const isSlow=window.SlowLookNative?.isNew(id);state.slowLook=isSlow?window.SlowLookNative.setUp(id,{level:$('#slowLevel')?.value,cue:$('#slowCue')?.value,kind:$('#slowKind')?.value,response:$('#slowResponse')?.value}):null;const isNovel=window.NovelGarden?.isNew(id);state.novel=isNovel?window.NovelGarden.setup(id,{level:$('#slowLevel')?.value,cue:$('#slowCue')?.value}):null;const isStrategy=window.StrategyGarden?.isNew(id);state.strategy=isStrategy?window.StrategyGarden.setup(id,{level:$('#slowLevel')?.value,cue:$('#slowCue')?.value,adaptive:$('#strategyAuto')?.checked}):null;state.sessionCount=Number($('#sessionRounds').value)||5;state.roundTotal=LITERACY_GAMES.has(id)?state.practiceCount:((id==='rescue')?5:state.sessionCount);state.practiceRounds=LITERACY_GAMES.has(id)?choosePracticeRounds(id,state.practiceLevel,state.roundTotal):[];const m=meta[id];$('#gameTitle').textContent=m.title;$('#gameKicker').textContent=m.kicker;$('#scoreLabel').textContent='🌱 0';guide.src=m.friend;world.className=`game-world theme-${m.theme}`;show('game');updateProgress();renderRound()}
+function startGame(id){clearTimers();state.game=id;state.round=0;state.score=0;state.lock=false;state.basicRecords=[];state.memorySeen=new Set();state.shapeOffset=Math.floor(Math.random()*basicShapes.length);state.pathOffset=Math.floor(Math.random()*7);state.basicLevel=Math.max(1,Math.min(3,Number($('#slowLevel').value)||1));const isSlow=window.SlowLookNative?.isNew(id);state.slowLook=isSlow?window.SlowLookNative.setUp(id,{level:$('#slowLevel')?.value,cue:$('#slowCue')?.value,kind:$('#slowKind')?.value,response:$('#slowResponse')?.value}):null;const isNovel=window.NovelGarden?.isNew(id);state.novel=isNovel?window.NovelGarden.setup(id,{level:$('#slowLevel')?.value,cue:$('#slowCue')?.value}):null;const isStrategy=window.StrategyGarden?.isNew(id);state.strategy=isStrategy?window.StrategyGarden.setup(id,{level:$('#slowLevel')?.value,cue:$('#slowCue')?.value,adaptive:$('#strategyAuto')?.checked}):null;state.sessionCount=Number($('#sessionRounds').value)||5;state.roundTotal=LITERACY_GAMES.has(id)?state.practiceCount:((id==='rescue')?5:state.sessionCount);state.practiceRounds=LITERACY_GAMES.has(id)?choosePracticeRounds(id,state.practiceLevel,state.roundTotal):[];const m=meta[id];$('#gameTitle').textContent=m.title;$('#gameKicker').textContent=m.kicker;$('#scoreLabel').textContent='🌱 0';guide.src=m.friend;world.className=`game-world theme-${m.theme}`;show('game');updateProgress();renderRound()}
 function renderRound(){clearTimers();state.lock=false;state.advancing=false;area.innerHTML='';if(window.StrategyGarden?.isNew(state.game)){window.StrategyGarden.render(state.game,{state,area,missionText,missionSub,guide,addSeeds,sfx,nextRound});return;}if(window.NovelGarden?.isNew(state.game)){window.NovelGarden.render(state.game,{state,area,missionText,missionSub,guide,addSeeds,sfx,nextRound});return;}if(window.SlowLookNative?.isNew(state.game)){window.SlowLookNative.render(state.game,{state,area,missionText,missionSub,guide,say,flash,addSeeds,sfx,nextRound});return;}({rescue:renderFind,memory:renderMemory,spacing:renderSpacing,spelling:renderSpelling,sameShape:renderSameShape,flower:renderFlower,hide:renderHide,path:renderPath,calm:renderCalm,inside:renderInside,targets:renderTargets,paint:renderPaint,water:renderWater}[state.game])()}
 function nextRound(delay=700){if(state.advancing)return;state.advancing=true;finishBasicRound();state.lock=true;later(()=>{state.round++;if(state.round>=state.roundTotal)return finishGame();if(state.roundTotal>=10&&state.round%5===0){state.advancing=false;area.innerHTML=`<section class="practice-break"><span class="break-art" aria-hidden="true">🌿</span><h3>잠깐 쉬어가는 정원</h3><p>${state.round}문제를 완료했어요. 눈과 손을 쉬었다가 다음 이야기를 시작해도 돼요.</p><div class="break-steps"><span>🌱 숨 고르기</span><span>👀 눈 쉬기</span><span>🧠 다음 문제는 새롭게 확인하기</span></div><div class="break-actions"><button type="button" class="primary" id="practiceContinue">준비됐어요 · 이어하기 →</button><button type="button" id="practiceStop">오늘은 여기까지</button></div></section>`;$('#practiceContinue').onclick=()=>{updateProgress();renderRound()};$('#practiceStop').onclick=()=>finishGame(true);return;}updateProgress();renderRound()},delay)}
 function finishGame(early=false){if(!early){completed[state.game]=true;localStorage.setItem(STORE.done,JSON.stringify(completed));}$('#progressBar').style.width=(early?Math.round(state.round/state.roundTotal*100):100)+'%';const m=meta[state.game];$('#resultCharacter').src=m.friend;$('#resultTitle').textContent=state.score>=state.roundTotal*9?'정원이 활짝 깨어났어!':state.score>=state.roundTotal*6?'정원 한 칸 완성!':'끝까지 길을 만들었어!';$('#resultMessage').textContent=window.StrategyGarden?.isNew(state.game)?'어떤 단서를 보고 실수를 다시 확인했는지 살펴봤어요.':window.NovelGarden?.isNew(state.game)?'오늘은 새로운 방법으로 살펴보고, 실수 후 다시 확인하는 연습을 했어요.':window.SlowLookNative?.isNew(state.game)?'모아와 함께 차근차근 확인하는 연습을 했어요.':LITERACY_GAMES.has(state.game)?`${LEVEL_NAMES[state.practiceLevel]} · ${state.roundTotal}문제를 끝까지 풀었어요!`:`${m.kicker}의 ${state.roundTotal}개 미션을 모두 지나왔어요.`;if(early){$('#resultTitle').textContent='오늘 연습 여기까지 🌿';$('#resultMessage').textContent=`${state.round}문제 연습했어요. 쉬었다가 다시 시작할 수 있어요.`;}
@@ -403,8 +408,23 @@ function renderFind(){
 }
 
 const memoryColors=[['파랑','#64adff'],['노랑','#ffd04f'],['초록','#67c67d'],['빨강','#ff7770']];
+function makeMemorySequence(type,len){
+ const pool=type==='color'?memoryColors:animals,variants=[];
+ const visit=(picked,rest)=>{
+  if(picked.length===len){variants.push(picked);return;}
+  for(let i=0;i<rest.length;i++)visit([...picked,rest[i]],rest.filter((_,j)=>j!==i));
+ };
+ visit([],pool);
+ const seen=state.memorySeen||(state.memorySeen=new Set());
+ const key=seq=>type+'|'+len+'|'+seq.map(x=>x[0]).join('|');
+ const fresh=variants.filter(seq=>!seen.has(key(seq)));
+ const choices=fresh.length?fresh:variants;
+ const seq=choices[Math.floor(Math.random()*choices.length)];
+ seen.add(key(seq));
+ return seq;
+}
 function renderMemory(){
- const type=practiceStep()%2===0?'color':'animal',len=practiceStep()<2?3:4,seq=type==='color'?shuffle(memoryColors).slice(0,len):shuffle(animals).slice(0,len);
+ const type=practiceStep()%2===0?'color':'animal',len=practiceStep()<2?3:4,seq=makeMemorySequence(type,len);
  missionText.textContent=type==='color'?`${len}개의 색 순서를 기억해요!`:`${len}마리 순서를 기억해요!`;
  missionSub.textContent='주문표를 충분히 보고 준비되면 바구니에 같은 순서로 담아요.';say(missionText.textContent);
  const stage=document.createElement('div');stage.className='memory-stage memory-picnic';
@@ -416,12 +436,22 @@ function renderMemory(){
  const study=document.createElement('div');study.className='memory-study-actions';study.innerHTML='<button class="memory-ready" type="button">준비됐어요 ✓</button><small>시간 제한 없음 · 충분히 보고 시작해요.</small>';
  const path=document.createElement('div');path.className='garden-path picnic-path';path.innerHTML='<span class="vine"></span><span class="picnic-goal">🧺</span><img class="walker" src="assets/moa-default.png" alt="">';
  stage.append(ticket,strip,study,basket,path);area.appendChild(stage);
- let choices=null,pos=0,peekUsed=false,peekTimer=null;
+ let choices=null,pos=0,peekUsed=false;
  const hideTicket=()=>{[...strip.children].forEach((d,i)=>{d.classList.add('hidden');d.innerHTML=`<span class="memory-question">${i+1}</span>`})};
  const revealTicket=()=>{[...strip.children].forEach((d,i)=>{d.classList.remove('hidden');d.innerHTML=visual(seq[i])})};
  const beginRecall=()=>{if(choices)return;hideTicket();ticket.classList.add('folded');study.innerHTML='<button class="memory-peek" type="button">👀 주문표 한 번 더 보기</button><small>막히면 한 번만 다시 볼 수 있어요.</small>';
   choices=document.createElement('div');choices.className='memory-choices';const pool=type==='color'?memoryColors:animals;shuffle(pool).forEach(x=>{const b=document.createElement('button');b.className='memory-choice';b.dataset.value=x[0];b.innerHTML=visual(x);choices.appendChild(b)});stage.insertBefore(choices,basket);
-  const peek=study.querySelector('.memory-peek');peek.onclick=()=>{if(peekUsed||state.lock)return;peekUsed=true;peek.disabled=true;peek.textContent='👀 주문표 확인 중…';revealTicket();ticket.classList.remove('folded');choices.classList.add('paused');clearTimeout(peekTimer);peekTimer=setTimeout(()=>{hideTicket();ticket.classList.add('folded');choices.classList.remove('paused');peek.textContent='주문표 다시 보기 사용함 ✓'},1800)};
+  const peek=study.querySelector('.memory-peek');peek.onclick=()=>{
+   if(state.lock||peek.disabled)return;
+   if(!peekUsed){
+    peekUsed=true;revealTicket();ticket.classList.remove('folded');
+    choices.classList.add('paused');
+    peek.textContent='다 봤어요 · 이어하기 ▶';
+    return;
+   }
+   hideTicket();ticket.classList.add('folded');choices.classList.remove('paused');
+   peek.disabled=true;peek.textContent='한 번 더 확인했어요 ✓';
+  };
   choices.onclick=e=>{const b=e.target.closest('button');if(!b||state.lock||choices.classList.contains('paused')||b.classList.contains('used'))return;if(b.dataset.value===seq[pos][0]){const bs=basket.querySelector(`[data-basket="${pos}"]`);bs.innerHTML=visual(seq[pos]);bs.classList.add('filled');b.classList.add('used','correct');pos++;sfx('ok');addSeeds(Math.ceil(10/len));path.querySelector('.vine').style.width=`${pos/len*100}%`;path.querySelector('.walker').style.left=`${Math.min(86,pos/len*86)}%`;flash(pos===len?'주문을 정확히 담았어요! 피크닉 출발 🌿':`${pos}번째 물건을 담았어요!`);if(pos===len){stage.classList.add('delivered');choices.classList.add('paused');revealTicket();ticket.classList.remove('folded');const review=seq.map(x=>x[0]).join(', ');roundGate(stage,'다음 주문 ▶',650,`${review}. 이 순서였어요.`)}}else{b.classList.add('wrong');sfx('no');flash('주문 순서를 다시 떠올려봐요.');later(()=>b.classList.remove('wrong'),430)}};
  };
  study.querySelector('.memory-ready').onclick=beginRecall;
