@@ -20,12 +20,14 @@ async function testGame(game,width,level){
   verify(await page.locator('.level-card').count()===3,game+' level buttons missing');
   await page.locator('.level-card[data-level="'+level+'"]').click();
   verify(await page.locator('.level-card[data-level="'+level+'"]').getAttribute('aria-pressed')==='true',game+' level is not selectable');
+  await page.locator('#roundOptions [data-rounds="6"]').click();
+  verify(await page.locator('#roundOptions [data-rounds="6"]').getAttribute('aria-pressed')==='true',game+' 6-round option not selected');
   await page.locator('#startGame').click();
   verify(await page.locator('#playScreen').isVisible(),game+' not started');
   if(game==='money'){
    if(level==='easy'){
-    const amounts=[100,500,1000,5000];
-    for(let i=0;i<4;i++){await page.locator('.choice[data-value="'+amounts[i]+'"]').click();verify(await page.locator('[data-action="next"]').count()===1,'money easy next missing, step '+i);await page.locator('[data-action="next"]').click();}
+    const amounts=[100,500,1000,5000,300,600];
+    for(let i=0;i<6;i++){await page.locator('.choice[data-value="'+amounts[i]+'"]').click();verify(await page.locator('[data-action="next"]').count()===1,'money easy next missing, step '+i);await page.locator('[data-action="next"]').click();}
     verify(await page.locator('#resultScreen').isVisible(),'money easy did not finish');
    }else{
     const count=await page.locator('.money-pick[data-money="100"]').count();
@@ -59,7 +61,7 @@ async function testGame(game,width,level){
     verify((await page.locator('#missionDescription').textContent()).includes('정답이 하나로'),'feel options should not be presented as one right answer');
     verify(await page.locator('[data-action="next"]').count()===1,'feel next not available');
     await page.locator('[data-action="next"]').click();
-    verify((await page.locator('#roundCount').textContent()).includes('2 / 4'),'feel second round not reached');
+    verify((await page.locator('#roundCount').textContent()).includes('2 / 6'),'feel second round not reached');
   }
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
   verify(overflow<=3,game+' '+width+'px horizontal overflow '+overflow);
@@ -84,7 +86,66 @@ for(const [garden,game] of [['learning','money'],['cognitive','change'],['heart'
  verify(await links.count()===1,'garden card missing or duplicated '+garden+' '+game);
 }
 await ctx.close();
+
+/* A whole long session must actually have varied content, not four screens replayed. */
+async function longFeel(level,width,rounds){
+ const ctx=await browser.newContext({viewport:{width,height:844},reducedMotion:'reduce'});
+ const page=await ctx.newPage(),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ try{
+  await page.goto(base+'/thinking-garden/games/moa-missions/?game=feel',{waitUntil:'domcontentloaded',timeout:25000});
+  await page.locator('.level-card[data-level="'+level+'"]').click();
+  await page.locator('#roundOptions [data-rounds="'+rounds+'"]').click();
+  await page.locator('#startGame').click();
+  const seen=[];
+  for(let i=0;i<rounds;i++){
+   verify(await page.locator('.emotion-options .choice').count()===3,'long feel options missing at '+i);
+   seen.push((await page.locator('.story-card p').first().textContent()).trim());
+   await page.locator('.emotion-options .choice').first().click();
+   await page.locator('.response-options .choice').nth(i%3).click();
+   verify(await page.locator('.reflect-note').isVisible(),'reflection missing at '+i);
+   await page.locator('[data-action="next"]').click();
+   if(i===3)verify((await page.locator('#seedCount').textContent()).includes('1송이'),'flower milestone not earned');
+  }
+  verify(await page.locator('#resultScreen').isVisible(),'20 feel rounds did not end');
+  verify(new Set(seen).size===rounds,'emotion scenarios repeated too quickly '+new Set(seen).size+'/'+rounds);
+  verify(errors.length===0,'long feel errors '+errors.join('; '));
+  verify((await page.locator('#resultText').textContent()).includes(rounds+'가지'),'emotion count incorrect');
+ }catch(e){failures.push('long feel '+level+' '+width+' '+String(e).slice(0,500))}
+ finally{await ctx.close()}
+}
+async function longMoney(level,width,rounds){
+ const ctx=await browser.newContext({viewport:{width,height:844},reducedMotion:'reduce'});
+ const page=await ctx.newPage(),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ try{
+  await page.goto(base+'/thinking-garden/games/moa-missions/?game=money',{waitUntil:'domcontentloaded',timeout:25000});
+  await page.locator('.level-card[data-level="'+level+'"]').click();
+  await page.locator('#roundOptions [data-rounds="'+rounds+'"]').click();
+  await page.locator('#startGame').click();
+  const prices=[];
+  for(let i=0;i<rounds;i++){
+   const target=Number((await page.locator('.money-target strong').textContent()).replace(/[^0-9]/g,''));
+   prices.push(target);
+   let remaining=target;
+   for(const n of [5000,1000,500,100])while(remaining>=n){await page.locator('.money-pick[data-money="'+n+'"]').click();remaining-=n}
+   verify(remaining===0,'unpayable amount '+target);
+   await page.locator('[data-action="check"]').click();
+   verify(await page.locator('[data-action="next"]').count()===1,'long money next button missing '+i);
+   await page.locator('[data-action="next"]').click();
+  }
+  verify(await page.locator('#resultScreen').isVisible(),'long money session not completed');
+  verify(new Set(prices).size>=Math.min(rounds,11),'long money not varied '+new Set(prices).size);
+  verify(errors.length===0,'long money JS errors '+errors.join('; '));
+ }catch(e){failures.push('long money '+level+' '+width+' '+String(e).slice(0,550));}
+ finally{await ctx.close()}
+}
+await longFeel('easy',390,20);
+await longFeel('normal',390,20);
+await longFeel('hard',1366,20);
+await longMoney('normal',390,12);
+await longMoney('hard',390,20);
 await browser.close();
 fs.writeFileSync(path.join(artifactDir,'report.json'),JSON.stringify({failures},null,2));
 if(failures.length){console.error('MOA MISSIONS QA FAIL:',JSON.stringify(failures));process.exit(1)}
-console.log('PASS: money 3 difficulty levels, four easy rounds and checkout, updated list review/answer, emotion/response reflection, 390px and 1366px layouts and garden links');
+console.log('PASS: money / memory / emotion gameplay at 6, 12 and 20 missions, unique emotion episodes, hard-mode change-making, mobile and desktop layouts');
