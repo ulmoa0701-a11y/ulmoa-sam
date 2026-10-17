@@ -667,7 +667,7 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
   const prev={song:currentSong,section:practiceSection,t:elapsed,level},results=[];
   try{
    for(const key of ['beat-basic','beat-half','sixteenth','dotted']){
-    currentSong=clone(findSample(key));level=3;practiceSection='all';
+    currentSong=clone(findSample(key));level=3;practiceSection='all';elapsed=0;bpm=selectedTempo(currentSong);
     refreshPracticeSections();build();updateRhythmGuide();updateLyricTrack(true);
     const b=beatMs(),bars=playbackMeasures.map(bar=>bar.reduce((a,e)=>a+Number(e.dur),0));
     const visual={
