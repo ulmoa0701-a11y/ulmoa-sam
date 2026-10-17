@@ -1,0 +1,51 @@
+name: Thinking Garden Public HTTPS Smoke
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/thinking-garden-live-pages.yml'
+  workflow_run:
+    workflows: ['pages build and deployment']
+    types: [completed]
+permissions:
+  contents: read
+jobs:
+  live-garden:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Check real public Pages resources, curated URL and PDF
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,base64,urllib.request,time
+          base='https://ulmoa0701-a11y.github.io/ulmoa-sam/'
+          plan={'v':2,'items':['flower','moaMoney','slowPdf'],'level':1,'rounds':5,'settings':{'flower':{'rounds':10}}}
+          token=base64.urlsafe_b64encode(json.dumps(plan,separators=(',',':')).encode()).decode().rstrip('=')
+          def get(path):
+              url=base+path+('?' if '?' not in path else '&')+'qa='+str(int(time.time()*1000))
+              req=urllib.request.Request(url,headers={'Cache-Control':'no-cache','User-Agent':'ulmoa-public-qa/1.0'})
+              with urllib.request.urlopen(req,timeout=15) as res:
+                  assert res.status==200,(path,res.status)
+                  return res.read(),res.headers.get('Content-Type','')
+          for attempt in range(5):
+              try:
+                  html,htmlct=get('thinking-garden/')
+                  js,jsct=get('thinking-garden/share-plans.js')
+                  assert b'share-plans.js' in html,'public HTML does not load planner'
+                  assert b'moa-choice-fields' in js,'public JS missing individual settings'
+                  assert b'moaMoney' in js,'public JS missing independent games'
+                  assert b'function safePlan' in js,'public JS missing validated share plans'
+                  assert 'javascript' in jsct.lower(),'wrong JS Content-Type'
+                  share,sharect=get('thinking-garden/?plan='+token)
+                  assert b'share-plans.js' in share,'curated URL does not return garden page'
+                  pdf,pdfct=get('materials/slow-look/worksheets-16p.pdf')
+                  assert pdf.startswith(b'%PDF-'),'printable PDF header invalid'
+                  assert 'pdf' in pdfct.lower(),'wrong PDF Content-Type'
+                  print('PASS LIVE HTTPS public garden, v2 curated game list, per-game settings, standalone game, share link, 16-page PDF')
+                  break
+              except Exception as e:
+                  if attempt==4: raise
+                  print('CDN propagation retry:',str(e)[:180])
+                  time.sleep(4)
+          PY
