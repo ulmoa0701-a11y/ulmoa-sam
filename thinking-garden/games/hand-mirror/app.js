@@ -267,7 +267,8 @@ function drawHands(hands){
  });
  if(teaching&&topFeedback){
   const state=topFeedback.count===4?'good':topFeedback.unknown>0?'uncertain':'adjust';
-  const cue=state==='good'?'좋아! 그대로 잠깐 유지해 봐!':state==='uncertain'?'손가락이 잘 보이게 손을 조금 돌려 봐!':'주황 점을 노란 원으로 옮겨 봐!';
+  const requested=targets[0];
+  const cue=state==='good'?'좋아! 그대로 잠깐 유지해 봐!':state==='uncertain'?'손가락이 잘 보이게 손을 조금 돌려 봐!':requested==='fist'?'주황 점이 있는 손가락을 접어 봐!':requested==='palm'?'주황 점이 있는 손가락을 더 펴 봐!':'주황 점이 있는 손가락을 조절해 봐!';
   const count='내 손 '+topFeedback.count+' / 4';
   $('liveCompare').hidden=false;
   $('liveCompare').dataset.state=state;
