@@ -2,9 +2,9 @@ name: Clinical Practice Length - All Cognitive Games QA
 on:
   push:
     branches: [main, feat/clinical-practice-25-games-20261014]
-    paths: ['thinking-garden/**', 'qa/extended-practice-qa.cjs', '.github/workflows/extended-practice-qa.yml']
+    paths: ['thinking-garden/**', 'qa/extended-practice-qa.cjs', 'qa/garden-diversity-qa.cjs', '.github/workflows/extended-practice-qa.yml']
   pull_request:
-    paths: ['thinking-garden/**', 'qa/extended-practice-qa.cjs', '.github/workflows/extended-practice-qa.yml']
+    paths: ['thinking-garden/**', 'qa/extended-practice-qa.cjs', 'qa/garden-diversity-qa.cjs', '.github/workflows/extended-practice-qa.yml']
 permissions:
   contents: read
 jobs:
@@ -29,6 +29,7 @@ jobs:
           node --check thinking-garden/strategy-garden-core.js
           node --check thinking-garden/strategy-festival.js
           node --check qa/extended-practice-qa.cjs
+          node --check qa/garden-diversity-qa.cjs
       - name: Start static site
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/practice-server.log 2>&1 &
@@ -40,6 +41,8 @@ jobs:
           exit 1
       - name: Exercise full sessions with rest breaks on mobile and desktop
         run: node qa/extended-practice-qa.cjs
+      - name: Audit unique targets and 20-round rescue progression
+        run: node qa/garden-diversity-qa.cjs
       - name: Attach QA screenshots
         if: always()
         uses: actions/upload-artifact@v4
