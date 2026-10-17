@@ -672,18 +672,27 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
     const b=beatMs(),bars=playbackMeasures.map(bar=>bar.reduce((a,e)=>a+Number(e.dur),0));
     const visual={
       counter:document.querySelector('#lyricTrack')?.getAttribute('aria-label'),
+      label:document.querySelector('#lyricBtn')?.textContent,
       selected:document.querySelector('#rhythmGuide')?.classList.contains('show'),
       guide:document.querySelector('#rhythmGuide')?.innerText,
       active:events.filter(e=>e.active).length,
       notes:events.map(e=>e.note),
       t:events.map(e=>e.start)
     };
+    elapsed=firstNoteMs()+30;updateLyricTrack(true);
+    const beat1=document.querySelector('#lyricTrack')?.getAttribute('aria-label');
     elapsed=firstNoteMs()+b+30;updateLyricTrack(true);
     const beat2=document.querySelector('#lyricTrack')?.getAttribute('aria-label');
+    const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d'),videoCues=[];
+    const originalFillText=ctx.fillText.bind(ctx);
+    ctx.fillText=(word,...args)=>{videoCues.push(String(word));return originalFillText(word,...args)};
+    videoLyricBar(ctx,0,8,8,480,58);
+    videoLyricBar(ctx,firstNoteMs()+30,8,8,480,58);
     results.push({key,category:currentSong.category,title:currentSong.title,beats:bars,
       measures:bars.length,allDo:visual.notes.every(n=>n==='도'),
       allActive:visual.active===events.length,lyrics:events.filter(e=>e.lyric).length,
-      count1:visual.counter,count2:beat2,guide:visual.selected,help:visual.guide,
+      countReady:visual.counter,count1:beat1,count2:beat2,videoCues,toggleLabel:visual.label,
+      guide:visual.selected,help:visual.guide,
       validTiming:events.every((e,i)=>!i||e.start>=events[i-1].start+events[i-1].dur-1)});
    }
    return {groups:[...document.querySelectorAll('#sampleSelect optgroup')].map(x=>x.label),
@@ -699,7 +708,8 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
  check(rhythmChecks.items.at(-1)?.[1]===4,screen+': all four rhythm exercises must be visible');
  for(const x of rhythmChecks.results)check(x.measures===8&&x.beats.every(n=>n===4)&&
    x.category==='박자 연습'&&x.allDo&&x.allActive&&x.lyrics===0&&x.guide&&
-   x.count1==='박자 세기 1'&&x.count2==='박자 세기 2'&&x.validTiming,
+   x.countReady==='박자 연습 준비'&&x.count1==='박자 세기 1'&&x.count2==='박자 세기 2'&&
+   x.toggleLabel==='박자 세기'&&x.videoCues[0]==='준비'&&x.videoCues[1]?.includes('[1]')&&x.validTiming,
    screen+': invalid real beat exercise '+JSON.stringify(x));
  report.push({name:screen+'-rhythm-lessons',rhythmChecks});
 
