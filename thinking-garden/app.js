@@ -348,7 +348,9 @@ function renderFind(){
  radio.querySelector('.radio-replay').onclick=()=>say(missionText.textContent);
  const field=document.createElement('div');field.className=`rescue-field scene-${['pond','meadow','forest','creek','sunset'][practiceStep()]}`;
  field.innerHTML=`<span class="field-prop sun">☀️</span><span class="field-prop tree a">🌳</span><span class="field-prop tree b">🌲</span><span class="field-prop bush a">🌿</span><span class="field-prop bush b">🌿</span><span class="field-prop rock">🪨</span><div class="rescue-counter">구조 <b id="rescueCount">0</b>/${need}</div><div class="rescue-van"><div class="van-seats">${Array.from({length:need},(_,i)=>`<span data-seat="${i}">?</span>`).join('')}</div><div class="van-body">🚐<small>모아 구조대</small></div></div>`;
- const positions=shuffle([{x:14,y:19},{x:49,y:16},{x:81,y:22},{x:23,y:40},{x:65,y:39},{x:12,y:61},{x:47,y:59},{x:82,y:61}]);
+ // The group mission has NINE icons (four targets, one already-seen target, four distractors).
+ // Give every icon its own reachable place instead of wrapping icon 9 onto icon 1.
+ const positions=shuffle([{x:18,y:22},{x:50,y:22},{x:82,y:22},{x:18,y:44},{x:50,y:44},{x:82,y:44},{x:18,y:66},{x:50,y:66},{x:82,y:66}]);
  const shuffled=shuffle(cards);
  const seats=[...field.querySelectorAll('[data-seat]')],truck=field.querySelector('.rescue-van');
  const land=x=>{
