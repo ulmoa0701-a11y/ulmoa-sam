@@ -661,13 +661,13 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
  report.push({name:screen+'-sung-phrases',phraseCase});
 
 
- // Real timing exercises: four distinct subdivisions, 8 measures each,
- // on a single pitch, no artificial lyrics and with a useful beat counter.
+ // Real timing exercises: musical 3/5-note contours without added lyrics;
+ // four distinct subdivisions, eight 4/4 measures and the same beat counter.
  const rhythmChecks=await page.evaluate(()=>{
   const prev={song:currentSong,section:practiceSection,t:elapsed,level,bpm},results=[];
   try{
    for(const key of ['beat-basic','beat-half','sixteenth','dotted']){
-    currentSong=clone(findSample(key));level=3;practiceSection='all';elapsed=0;bpm=selectedTempo(currentSong);
+    currentSong=clone(findSample(key));level=8;practiceSection='all';elapsed=0;bpm=selectedTempo(currentSong);
     refreshPracticeSections();build();updateRhythmGuide();updateLyricTrack(true);
     const b=beatMs(),bars=playbackMeasures.map(bar=>bar.reduce((a,e)=>a+Number(e.dur),0));
     const visual={
@@ -677,6 +677,7 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
       guide:document.querySelector('#rhythmGuide')?.innerText,
       active:events.filter(e=>e.active).length,
       notes:events.map(e=>e.note),
+      distinctBars:new Set(playbackMeasures.map(bar=>bar.map(e=>e.note).join(','))).size,
       t:events.map(e=>e.start)
     };
     elapsed=firstNoteMs()+30;updateLyricTrack(true);
@@ -688,9 +689,19 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
     ctx.fillText=(word,...args)=>{videoCues.push(String(word));return originalFillText(word,...args)};
     videoLyricBar(ctx,0,8,8,480,58);
     videoLyricBar(ctx,firstNoteMs()+30,8,8,480,58);
+    const fullNotes=events.map(e=>[e.note,e.start,e.dur]);
+    const fullChords=playbackMeasures.map((_,i)=>chordForMeasure(i).name);
+    let masksPreserveSong=true;
+    for(const mask of [3,5,8]){
+     level=mask;build();
+     masksPreserveSong &&= JSON.stringify(events.map(e=>[e.note,e.start,e.dur]))===JSON.stringify(fullNotes)
+      &&JSON.stringify(playbackMeasures.map((_,i)=>chordForMeasure(i).name))===JSON.stringify(fullChords)
+      &&events.every(e=>e.active===ALLOWED[mask].has(e.note));
+    }
+    level=8;build();updateRhythmGuide();
     results.push({key,category:currentSong.category,title:currentSong.title,beats:bars,
-      measures:bars.length,allDo:visual.notes.every(n=>n==='도'),
-      allActive:visual.active===events.length,lyrics:events.filter(e=>e.lyric).length,
+      measures:bars.length,pitches:[...new Set(visual.notes)],distinctBars:visual.distinctBars,
+      masksPreserveSong,allActive:visual.active===events.length,lyrics:events.filter(e=>e.lyric).length,
       countReady:visual.counter,count1:beat1,count2:beat2,videoCues,toggleLabel:visual.label,
       guide:visual.selected,help:visual.guide,
       validTiming:events.every((e,i)=>!i||e.start>=events[i-1].start+events[i-1].dur-1)});
@@ -707,11 +718,33 @@ for(const [screen,w,h] of [['lyricPhone390',390,844],['lyricDesktop1366',1366,90
    screen+': misleading song categories remain '+JSON.stringify(rhythmChecks.groups));
  check(rhythmChecks.items.at(-1)?.[1]===4,screen+': all four rhythm exercises must be visible');
  for(const x of rhythmChecks.results)check(x.measures===8&&x.beats.every(n=>n===4)&&
-   x.category==='박자 연습'&&x.allDo&&x.allActive&&x.lyrics===0&&x.guide&&
+   x.category==='박자 연습'&&x.pitches.length===(['beat-half','dotted'].includes(x.key)?5:3)&&
+   x.distinctBars>=4&&x.masksPreserveSong&&x.allActive&&x.lyrics===0&&x.guide&&
    x.countReady==='박자 연습 준비'&&x.count1==='박자 세기 1'&&x.count2==='박자 세기 2'&&
    x.toggleLabel==='박자 세기'&&x.videoCues[0]==='준비'&&x.videoCues[1]?.includes('[1]')&&x.validTiming,
    screen+': invalid real beat exercise '+JSON.stringify(x));
- report.push({name:screen+'-rhythm-lessons',rhythmChecks});
+ // Old locally saved single-note samples must rehydrate as the updated
+ // melodic originals, while hand-imported scores must remain untouched.
+ const rhythmMigration=await page.evaluate(()=>{
+  const raw=localStorage.getItem('ulmoaBoomLast'),priorKey=currentSampleKey;
+  try{
+   const sample=clone(findSample('beat-half'));
+   sample.measures=sample.measures.map(bar=>bar.map(e=>({...e,note:'도'})));
+   sample.sampleKey='beat-half';
+   localStorage.setItem('ulmoaBoomLast',JSON.stringify(sample));
+   const migrated=loadSong();
+   const updated=migrated.measures.flat().some(e=>e.note!=='도');
+   const custom={...sample,category:'직접 만든 곡',sampleKey:''};
+   localStorage.setItem('ulmoaBoomLast',JSON.stringify(custom));
+   const untouched=JSON.stringify(loadSong().measures)===JSON.stringify(custom.measures);
+   return {updated,untouched};
+  }finally{
+   if(raw===null)localStorage.removeItem('ulmoaBoomLast');else localStorage.setItem('ulmoaBoomLast',raw);
+   currentSampleKey=priorKey;
+  }
+ });
+ check(rhythmMigration.updated&&rhythmMigration.untouched,screen+': saved melody migration damaged originals or user scores');
+ report.push({name:screen+'-rhythm-lessons',rhythmChecks,rhythmMigration});
 
  const end=await page.evaluate(()=>{
   currentSong=clone(findSample('twinkle'));practiceSection='all';refreshPracticeSections();build();

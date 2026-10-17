@@ -703,31 +703,63 @@ const bear=song('bear','곰 세 마리',104,4,4,[[E('도',1,'곰'),E('도',.5,'�
 const school=song('school-bell','학교종',104,4,4,[[E('솔',1,'학'),E('솔',1,'교'),E('라',1,'종'),E('라',1,'이')],[E('솔',1,'땡'),E('솔',1,'땡'),E('미',2,'땡')],[E('솔',1,'어'),E('솔',1,'서'),E('미',1,'모'),E('미',1,'이')],[E('레',4,'자')],[E('솔',1,'선'),E('솔',1,'생'),E('라',1,'님'),E('라',1,'이')],[E('솔',1,'우'),E('솔',1,'리'),E('미',2,'를')],[E('솔',1,'기'),E('미',1,'다'),E('레',1,'리'),E('미',1,'신')],[E('도',4,'다')]]);
 const outing=song('spring-outing','봄나들이',108,2,4,[[E('솔',.5,'나'),E('미',.5,'리'),E('솔',.5,'나'),E('미',.5,'리')],[E('솔',.5,'개'),E('라',.5,'나'),E('솔',1,'리')],[E('미',.5,'입'),E('솔',.5,'에'),E('미',.5,'따'),E('도',.5,'다')],[E('레',.5,'물'),E('미',.5,'고'),E('레',1,'요')],[E('솔',.5,'병'),E('미',.5,'아'),E('솔',.5,'리'),E('미',.5,'떼')],[E('솔',.5,'종'),E('라',.5,'종'),E('솔',1,'종')],[E('도',.5,'봄'),E('라',.5,'나'),E('솔',.5,'들'),E('미',.5,'이')],[E('레',.5,'갑'),E('미',.5,'니'),E('도',1,'다')]]);
 const hometown=song('hometown-spring','고향의 봄',80,4,4,[[E('솔',1,'나'),E('솔',1,'의'),E('미',.5,'살'),E('파',.5,''),E('솔',1,'던')],[E('라',1,'고'),E('라',1,'향'),E('솔',2,'은')],[E('솔',1,'꽃'),E('높은도',1,'피'),E('높은미',1,'는'),E('높은레',.5,'산'),E('높은도',.5,'')],[E('높은레',4,'골')],[E('높은미',1,'복'),E('높은미',1,'숭'),E('높은레',1,'아'),E('높은레',1,'꽃')],[E('높은도',1,'살'),E('높은레',.5,'구'),E('높은도',.5,''),E('라',2,'꽃')],[E('솔',1,'아'),E('솔',1,'기'),E('솔',1,'진'),E('미',.5,'달'),E('레',.5,'')],[E('도',4,'래')],[E('레',1,'울'),E('레',1,'긋'),E('미',1,'불'),E('도',1,'긋')],[E('레',2,'꽃'),E('미',1,'대'),E('솔',1,'궐')],[E('라',1,'차'),E('높은도',1,'린'),E('높은미',1,''),E('높은레',.5,'동'),E('높은도',.5,'')],[E('높은레',4,'네')],[E('높은미',1,'그'),E('높은미',1,'속'),E('높은레',1,'에'),E('높은레',1,'서')],[E('높은도',1,'놀'),E('높은레',.5,'던'),E('높은도',.5,''),E('라',1,'때'),E('라',1,'가')],[E('솔',1,'그'),E('솔',1,'립'),E('솔',1,'습'),E('미',.5,'니'),E('레',.5,'')],[E('도',4,'다')]]);
-// Graduated 4/4 rhythm patterns use just 도 to reduce pitch distractions.
-const rhythmBar=lengths=>lengths.map(d=>E('도',d));
+// A short, five-note C-major melodic motif makes the rhythm activity sound
+// like music. Timing remains the SINGLE target; a simple 3-note melody is
+// used first and 3/5/custom pitch filtering still changes falling balls ONLY.
+const RHYTHM_TUNES_EASY=[
+ ['도','미','솔','미'],['도','미','솔','솔'],
+ ['미','솔','미','도'],['솔','미','도','도'],
+ ['도','미','솔','미'],['솔','솔','미','도'],
+ ['미','미','솔','미'],['솔','미','도','도']
+];
+const RHYTHM_TUNES_FIVE=[
+ ['도','미','솔','미'],['레','미','솔','미'],
+ ['도','미','솔','라'],['솔','미','레','도'],
+ ['도','레','미','솔'],['라','솔','미','레'],
+ ['미','솔','미','레'],['솔','미','레','도']
+];
+// Map each strike to a note in a four-beat tune without changing its
+// authored duration. Sixteenth pairs alternate neighbouring pitches, and
+// the final sixteenth of a dotted beat anticipates the next melody note.
+function rhythmBar(lengths,contour){
+ let beat=0;
+ return lengths.map(d=>{
+  const index=Math.min(3,Math.floor(beat+1e-7));
+  const secondHalf=d<=.25&&(beat-Math.floor(beat))>=.5-1e-7;
+  const note=contour[Math.min(3,index+(secondHalf?1:0))];
+  beat+=d;
+  return E(note,d);
+ });
+}
 const basicBeat=song('beat-basic','① 한 박씩 · 일정하게',76,4,4,
- Array.from({length:8},()=>rhythmBar([1,1,1,1])),'박자 연습');
+ RHYTHM_TUNES_EASY.map(tune=>rhythmBar([1,1,1,1],tune)),'박자 연습');
 const halfBeat=song('beat-half','② 반 박씩 · 두 번',72,4,4,
- Array.from({length:8},()=>rhythmBar(Array(8).fill(.5))),'박자 연습');
+ RHYTHM_TUNES_FIVE.map(tune=>rhythmBar(Array(8).fill(.5),tune)),'박자 연습');
 const sixteenth=song('sixteenth','③ 빠른 박 · 네 번',68,4,4,[
- rhythmBar([1,1,1,1]),rhythmBar([1,1,1,1]),
- rhythmBar(Array(8).fill(.5)),rhythmBar(Array(8).fill(.5)),
- rhythmBar(Array(16).fill(.25)),rhythmBar(Array(16).fill(.25)),
- rhythmBar([1,.25,.25,.25,.25,1,1]),
- rhythmBar([.25,.25,.25,.25,.25,.25,.25,.25,.5,.5,.5,.5])
+ rhythmBar([1,1,1,1],RHYTHM_TUNES_EASY[0]),
+ rhythmBar([1,1,1,1],RHYTHM_TUNES_EASY[1]),
+ rhythmBar(Array(8).fill(.5),RHYTHM_TUNES_EASY[2]),
+ rhythmBar(Array(8).fill(.5),RHYTHM_TUNES_EASY[3]),
+ rhythmBar(Array(16).fill(.25),RHYTHM_TUNES_EASY[4]),
+ rhythmBar(Array(16).fill(.25),RHYTHM_TUNES_EASY[5]),
+ rhythmBar([1,.25,.25,.25,.25,1,1],RHYTHM_TUNES_EASY[6]),
+ rhythmBar([.25,.25,.25,.25,.25,.25,.25,.25,.5,.5,.5,.5],RHYTHM_TUNES_EASY[7])
 ],'박자 연습');
 const dotted=song('dotted','④ 길게·짧게 · 점리듬',72,4,4,[
- rhythmBar([.75,.25,.75,.25,.75,.25,.75,.25]),
- rhythmBar([.75,.25,.75,.25,.75,.25,.75,.25]),
- rhythmBar([.75,.25,1,.75,.25,1]),rhythmBar([.75,.25,1,.75,.25,1]),
- rhythmBar([1,.75,.25,.75,.25,1]),rhythmBar([1,.75,.25,.75,.25,1]),
- rhythmBar([.75,.25,.5,.5,.75,.25,1]),rhythmBar([.75,.25,.5,.5,.75,.25,1])
+ rhythmBar([.75,.25,.75,.25,.75,.25,.75,.25],RHYTHM_TUNES_FIVE[0]),
+ rhythmBar([.75,.25,.75,.25,.75,.25,.75,.25],RHYTHM_TUNES_FIVE[1]),
+ rhythmBar([.75,.25,1,.75,.25,1],RHYTHM_TUNES_FIVE[2]),
+ rhythmBar([.75,.25,1,.75,.25,1],RHYTHM_TUNES_FIVE[3]),
+ rhythmBar([1,.75,.25,.75,.25,1],RHYTHM_TUNES_FIVE[4]),
+ rhythmBar([1,.75,.25,.75,.25,1],RHYTHM_TUNES_FIVE[5]),
+ rhythmBar([.75,.25,.5,.5,.75,.25,1],RHYTHM_TUNES_FIVE[6]),
+ rhythmBar([.75,.25,.5,.5,.75,.25,1],RHYTHM_TUNES_FIVE[7])
 ],'박자 연습');
 const RHYTHM_GUIDES={
- 'beat-basic':{short:'1 · 2 · 3 · 4',tip:'한 박에 한 번. 도를 같은 간격으로 쳐요.',preview:'● · ● · ● · ●'},
- 'beat-half':{short:'하나에 두 번',tip:'한 박을 둘로 나눠요. 하나-앤, 둘-앤처럼 일정하게 쳐요.',preview:'●● · ●● · ●● · ●●'},
- sixteenth:{short:'천천히 → 빠르게',tip:'처음엔 한 번, 다음엔 두 번, 마지막엔 네 번. 박의 기준은 그대로예요.',preview:'● → ●● → ●●●●'},
- dotted:{short:'길게 · 짧게',tip:'한 박 안에서 길게 기다렸다가 짧게 쳐요.',preview:'●──●  ●──●'}
+ 'beat-basic':{short:'1 · 2 · 3 · 4',tip:'도·미·솔 멜로디를 들으며 한 박에 한 번씩 쳐요.',preview:'● · ● · ● · ●'},
+ 'beat-half':{short:'하나에 두 번',tip:'멜로디는 그대로, 같은 박을 둘로 나눠 두 번씩 쳐요.',preview:'●● · ●● · ●● · ●●'},
+ sixteenth:{short:'천천히 → 빠르게',tip:'한 번 → 두 번 → 네 번. 힘들면 속도를 낮추거나 4마디만 골라요.',preview:'● → ●● → ●●●●'},
+ dotted:{short:'길게 · 짧게',tip:'멜로디를 들으며 긴 소리와 짧은 소리의 간격을 구별해요.',preview:'●──●  ●──●'}
 };
 function isRhythmPractice(){return currentSong.category==='박자 연습'&&!!RHYTHM_GUIDES[currentSong.key]}
 function updateRhythmGuide(){
@@ -735,7 +767,7 @@ function updateRhythmGuide(){
  if(!el)return;
  const active=isRhythmPractice();
  el.classList.toggle('show',active);
- el.innerHTML=active?'<strong>🥁 '+esc(guide.short)+'</strong><span>'+esc(guide.tip)+'</span><small>'+esc(guide.preview)+' · 도 한 음으로 연습</small>':'';
+ el.innerHTML=active?'<strong>🥁 '+esc(guide.short)+'</strong><span>'+esc(guide.tip)+'</span><small>'+esc(guide.preview)+' · 여러 음으로 연주해요</small>':'';
  const label=$('#lyricBtn');if(label){label.textContent=active?'박자 세기':'가사 표시';label.setAttribute('aria-label',active?'박자 숫자 표시 또는 숨기기':'가사 표시 또는 숨기기')}
 }
 function transpose(src,key,title,map){return song(key,title,src.bpm,src.timeN,src.timeD,src.measures.map(m=>m.map(e=>E(e.note==='쉼'?'쉼':(map[e.note]||e.note),e.dur,e.lyric))),src.category)}
@@ -787,7 +819,11 @@ function findSample(key){return SAMPLES.find(x=>x.key===key)}
 function loadSong(){
  try{const raw=localStorage.getItem('ulmoaBoomTransfer');if(raw){const x=JSON.parse(raw);if(x&&Array.isArray(x.measures)){localStorage.removeItem('ulmoaBoomTransfer');loadedFromTransfer=true;return x}}}catch(e){}
  const requested=new URLSearchParams(location.search).get('song');const qs=findSample(requested);if(qs){currentSampleKey=qs.key;return clone(qs)}
- try{const raw=localStorage.getItem('ulmoaBoomLast');if(raw){const x=JSON.parse(raw);if(x&&Array.isArray(x.measures)){currentSampleKey=x.sampleKey||'';return x}}}catch(e){}
+ try{const raw=localStorage.getItem('ulmoaBoomLast');if(raw){const x=JSON.parse(raw);if(x&&Array.isArray(x.measures)){currentSampleKey=x.sampleKey||'';
+  // Previously saved one-note rhythm samples must load their updated
+  // multi-pitch melodies; never overwrite imported or custom scores.
+  if(x.category==='박자 연습'&&x.key===currentSampleKey&&RHYTHM_GUIDES[currentSampleKey])return clone(findSample(currentSampleKey));
+  return x}}}catch(e){}
  currentSampleKey='twinkle';return clone(twinkle)
 }
 let melodyMode='piano';try{const saved=localStorage.getItem('ulmoaBoomMelody');if(MELODY_LABELS[saved])melodyMode=saved}catch(e){}
@@ -1354,6 +1390,10 @@ function preludeChordForBar(bar,bars){
 // Phrase-aware, hand-reviewed major-key progressions for the standard
 // C-major nursery scores. Imported music retains note-based fallback.
 const SONG_CHORD_CHARTS={
+ 'beat_basic':['C','C','C','C','C','C','C','C'],
+ 'beat_half':['C','G','Am','C','C','Am','G','C'],
+ sixteenth:['C','C','C','C','C','C','G','C'],
+ dotted:['C','G','Am','C','C','Am','G','C'],
  plane:['C','C','G','C','C','C','G','C'],
  butterfly:['C','Dm','C','C','C','Dm','C','C','G','Dm','C','C','C','Dm','C','C'],
  rabbit:['C','C','C','C','G','G','C','C','C','C','C','C','G','G','G','C'],
