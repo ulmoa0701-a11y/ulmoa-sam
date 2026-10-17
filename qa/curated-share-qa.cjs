@@ -32,6 +32,23 @@ await parent.locator('#backHome').click();assert.ok(await parent.locator('#moaAs
 await parent.locator('.moa-assigned-item').filter({hasText:'차근차근 인지활동지'}).locator('button').click();
 assert.ok(await parent.locator('#moaAssignedEmbed').isVisible());
 await parent.locator('#moaAssignedEmbed .moa-assigned-exit').click();assert.equal(await parent.locator('#moaAssignedEmbed').count(),0);
+await parent.locator('.moa-assigned-item').filter({hasText:'축제 준비'}).locator('button').click();
+await parent.locator('#introStart').click();
+for(let round=1;round<=10;round++){
+ const n=await parent.evaluate(()=>state.strategy.r.tasks.length);
+ for(let k=0;k<n;k++)await parent.locator('[data-plan=choose][data-i="'+k+'"]').click();
+ await parent.locator('[data-plan=check]').click();
+ assert.ok(await parent.locator('.strategy-done').isVisible(),'festival completion step '+round);
+ await parent.locator('[data-core=next]').click();
+ if(round===10){await parent.locator('#resultScreen.active').waitFor();}
+ else if(round===5){await parent.locator('#practiceContinue').waitFor();await parent.locator('#practiceContinue').click();}
+ else await parent.waitForFunction(n=>document.querySelector('#stageLabel')?.textContent.trim()===n,(round+1)+' / 10');
+}
+assert.ok(await parent.locator('#resultScreen .moa-clinical-bridge').count()===1,'home-transfer prompt missing');
+assert.ok(await parent.locator('.moa-assigned-next').count()>=1,'assigned next action missing');
+await parent.locator('.moa-assigned-next').last().click();
+assert.ok(await parent.locator('#moaAssignedHome').isVisible(),'assignment after result');
+assert.ok((await parent.locator('.moa-assigned-progress').innerText()).includes('1개'),'session-only journey progress missing');
 assert.deepEqual(perr,[]);assert.deepEqual(errors,[]);await parent.close();await page.close();
 }
 await browser.close();console.log('PASS curated-only share links and direct parent games/worksheets on mobile/desktop');
