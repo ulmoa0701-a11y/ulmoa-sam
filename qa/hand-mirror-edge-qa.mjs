@@ -283,9 +283,9 @@ async function allCameraModes(){
    assert.equal(await p.locator('#liveCompare').isVisible(),false);
    await p.evaluate(()=>{window.__pose='one';});
    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('1'),9000);
+   const positionOne=Number.parseFloat(await p.locator('#adventureActor').evaluate(e=>e.style.left));
    assert.equal(await p.locator('#adventureActorEmoji').innerText(),'⭐','One-finger goal lights one star');
    await wait(p,()=>document.querySelector('#adventureActorEmoji').textContent==='☆☆',7000);
-   const positionOne=Number.parseFloat(await p.locator('#adventureActor').evaluate(e=>e.style.left));
    assert.equal(await p.locator('#adventureActor').getAttribute('data-action'),'stars');
    await p.evaluate(()=>{window.__pose='two';});
    await wait(p,()=>document.querySelector('#flowerLabel').textContent.includes('2'),9000);
