@@ -41,9 +41,9 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  const cognitiveDoor=page.locator('.desk-collage.featured-two .feature-thinking');
  const musicDoor=page.locator('.desk-collage.featured-two .feature-music');
  check(await cognitiveDoor.count()===1&&await musicDoor.count()===1&&
-   await cognitiveDoor.getAttribute('href')==='thinking-garden/'&&
+   await cognitiveDoor.getAttribute('href')==='gardens/#cognitive'&&
    await musicDoor.getAttribute('href')==='music-garden/'&&
-   await page.locator('.hb-shortcuts a[href="breath-garden/"]').count()===1,
+   await page.locator('.hb-shortcuts a[href="gardens/#heart"]').count()===1,
    name+': cognitive, music, or breathing garden homepage links are missing');
 
  // Homepage's TOP two polaroids must match the two gardens; Heart Score is a separate tool.
@@ -55,7 +55,7 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
      imageLoaded:!!img?.complete&&img.naturalWidth>0,
      imageFits:!!img&&img.getBoundingClientRect().width>65};
  }));
- check(featureBoxes.length===2&&featureBoxes[0].href==='thinking-garden/'&&
+ check(featureBoxes.length===2&&featureBoxes[0].href==='gardens/#cognitive'&&
    featureBoxes[1].href==='music-garden/'&&
    featureBoxes.every(c=>c.imageLoaded&&c.imageFits&&c.x>=0&&c.right<=w+2&&c.width>=125)&&
    featureBoxes[1].x>featureBoxes[0].x+80&&
@@ -91,49 +91,20 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  check(await page.locator('#toolGrid .tool-card:not([hidden])').count()===2,
    name+': Games filter should include both cognitive and music gardens');
  await page.locator('.note-filters [data-search=""]').click();
- const navMenus=await page.locator('.hb-menu-games .hb-dropdown a').allTextContents();
- check(navMenus.some(t=>t.includes('생각정원'))&&navMenus.some(t=>t.includes('음악정원')),
-   name+': main Games navigation does not show both clearly named gardens');
- // Subcategories belong INSIDE one of the two parent garden cards.
- const gardenHierarchy=await page.locator('.hb-menu-games .hb-game-section').evaluateAll(groups=>groups.map(group=>({
-   parent:group.querySelector('.hb-game-parent')?.textContent.trim(),
-   href:group.querySelector('.hb-game-parent')?.getAttribute('href'),
-   children:[...group.querySelectorAll('.hb-game-child')].map(a=>({label:a.textContent,href:a.getAttribute('href')}))
- })));
- check(gardenHierarchy.length>=3&&gardenHierarchy[0].parent.includes('생각정원')&&
-   gardenHierarchy[0].href==='thinking-garden/'&&gardenHierarchy[0].children.length===4&&
-   gardenHierarchy[1].parent.includes('음악정원')&&gardenHierarchy[1].href==='music-garden/'&&
-   gardenHierarchy[1].children.length===2&&
-   gardenHierarchy.some(group=>group.parent.includes('바람놀이터')&&group.href==='breath-garden/'&&group.children.length===3),
-   name+': garden menu children are not nested by parent '+JSON.stringify(gardenHierarchy));
- if(w<1200){
-   await page.locator('.hb-mobile-toggle').click();
-   await page.locator('.hb-menu-games > summary').click();
-   check(await page.locator('.hb-mobile-game-section').count()>=3&&
-     await page.locator('.hb-mobile-game-section .hb-game-child').count()>=9,
-     name+': mobile menus flatten subcategories instead of nesting them');
-   const mobileBox=await page.locator('.hb-mobile-game-section').first().evaluate(el=>{
-     const r=el.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width}
-   });
-   check(mobileBox.left>=0&&mobileBox.right<=w+2,
-     name+': grouped mobile game menu overflows viewport '+JSON.stringify(mobileBox));
-   await page.screenshot({path:out+'/'+name+'-nested-menu.png'});
-   await page.locator('.hb-mobile-game-section .hb-game-child[href*="category=visual"]').click();
- }else{
-   await page.locator('.hb-menu-games > summary').click();
-   check(await page.locator('.hb-game-section').first().isVisible(),
-     name+': desktop game-menu sections not visible on open');
-   await page.screenshot({path:out+'/'+name+'-nested-menu.png'});
-   await page.locator('.hb-menu-games .hb-game-child[href*="category=visual"]').click();
- }
- await page.waitForURL(url=>url.pathname.endsWith('/thinking-garden/')&&url.searchParams.get('category')==='visual');
- check(await page.locator('.category-tab.active[data-category="visual"]').count()===1,
-   name+': nested visual-attention link did not select the correct garden filter');
+ // Five-garden navigation replaced the old dropdown hierarchy.
+ const five=page.locator('nav.home-five-gardens a');
+ check(await five.count()===5&&await page.locator('nav.home-five-gardens a[href="gardens/#cognitive"]').count()===1,
+   name+': five garden navigation missing or incorrectly labeled');
+ await page.locator('nav.home-five-gardens a[href="gardens/#cognitive"]').click();
+ await page.waitForURL(url=>url.pathname.endsWith('/gardens/')&&url.hash==='#cognitive');
+ check(await page.locator('#cognitive .play-card').count()>=18,
+   name+': cognitive garden entries missing in five garden directory');
+ await page.screenshot({path:out+'/'+name+'-nested-menu.png'});
  await page.goto(base+'/',{waitUntil:'networkidle'});
  await musicDoor.click();
  await page.waitForURL('**/music-garden/');
  check((await page.title()).includes('모아의 음악정원'),name+': music garden title wrong');
- check(await page.locator('.game-card').count()===2,
+ check(await page.locator('.game-card').count()===3,
    name+': music garden needs exactly two working game entrances');
  check(await page.locator('.game-card[href="../thinking-garden/recorder/"]').count()===1,
    name+': music garden recorder entry missing');
@@ -156,7 +127,9 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  check((await page.title()).includes('모아의 음악정원'),
    name+': legacy music-category URL did not redirect into music garden');
  await page.locator('.other-garden').click();
- await page.waitForURL('**/thinking-garden/');
+ await page.waitForURL('**/gardens/');
+ check(await page.locator('#cognitive .play-card').count()>=18,name+': music garden return to five garden catalog broken');
+ await page.goto(base+'/thinking-garden/',{waitUntil:'networkidle'});
  check(await page.locator('.library-card').count()>=25 && await page.locator('.library-card[data-open]:not([data-open^="slow"]):not([data-open="rulePost"]):not([data-open="mirrorPond"]):not([data-open="sceneDetect"]):not([data-open="resetRescue"]):not([data-open="classroomMove"]):not([data-open="festivalPlan"])').count()>=13 && await page.locator('.library-card[data-open^="slow"]').count()===6,name+': preserve 13 original cognitive games plus 6 new independent activities');
  check(await page.locator('.library-card.music').count()===0&&
    await page.locator('.category-tab[data-category="music"]').count()===0,
