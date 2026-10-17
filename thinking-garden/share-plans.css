@@ -82,3 +82,32 @@ body.moa-assigned .moa-clinical-bridge-body>a{display:none}
 .moa-assigned-editor button{margin:11px auto 0}
 .moa-assigned-editor p{line-height:1.6}
 @media(max-width:600px){.moa-plan-order{padding:9px}.moa-choice-row{padding:8px}.moa-choice-fields{display:grid;grid-template-columns:1fr 1fr;gap:6px}.moa-choice-fields label{display:grid;gap:4px}.moa-choice-fields select{width:100%;max-width:none}}
+
+
+/* Caregiver curated game thumbnails: existing in-game examples, not new game art. */
+.moa-assigned-item{min-width:0}
+.moa-assigned-visual{width:100%;align-self:stretch;overflow:hidden;border-radius:18px;background:#f0f8ed}
+.moa-assigned-visual-label{display:block;padding:9px 12px 7px;color:#53745e;font-size:12px;font-weight:850;line-height:1.25}
+.moa-assigned-scene{width:100%;overflow:hidden}
+.moa-assigned-scene .card-live-preview{border-radius:0 0 17px 17px;min-height:188px;padding:14px 10px;gap:9px;box-shadow:none}
+.moa-assigned-scene .cp-mission{max-width:96%;font-size:12px;line-height:1.4;padding:8px 11px}
+.moa-assigned-scene .cp-choice-row,.moa-assigned-scene .cp-sequence,.moa-assigned-scene .cp-slots,.moa-assigned-scene .cp-answer-row,.moa-assigned-scene .cp-leaves,.moa-assigned-scene .cp-path,.moa-assigned-scene .cp-targets{gap:5px}
+.moa-assigned-scene .cp-choice-row span,.moa-assigned-scene .cp-sequence i,.moa-assigned-scene .cp-slots i,.moa-assigned-scene .cp-leaves span,.moa-assigned-scene .cp-path i,.moa-assigned-scene .cp-targets i{min-width:35px;min-height:37px;padding:5px;font-size:21px}
+.moa-assigned-scene .cp-arrow{font-size:12px}
+.moa-assigned-scene .cp-sign{font-size:17px;padding:10px 12px;margin:0 auto}
+.moa-assigned-scene .cp-signal span{min-width:76px;font-size:22px;padding:8px}
+.moa-assigned-scene .cp-field{height:90px}
+.moa-assigned-fallback{min-height:188px;display:grid;place-content:center;gap:15px;padding:18px 8px;text-align:center;background:linear-gradient(165deg,#e4f3ff 0%,#e8f4d1 100%)}
+.moa-assigned-fallback-icons{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:7px}
+.moa-assigned-fallback-icons span{display:grid;place-items:center;min-width:46px;min-height:51px;padding:6px;border-radius:14px;background:#fff;font-size:29px;box-shadow:0 4px 12px #425c4318}
+.moa-assigned-fallback-icons span:only-child{min-width:90px}
+.moa-assigned-fallback-caption{font-size:13px;font-weight:850;color:#496d57;line-height:1.45}
+.moa-assigned-has-source .moa-assigned-fallback{display:none}
+.moa-assigned-item .moa-assigned-start{width:100%;margin-top:auto;min-height:48px}
+.moa-assigned-item h2{margin-top:2px}
+.moa-assigned-item p{margin-bottom:3px}
+@media(max-width:600px){
+ .moa-assigned-scene .card-live-preview{min-height:173px;padding:11px 8px}
+ .moa-assigned-fallback{min-height:173px}
+ .moa-assigned-scene .cp-choice-row span,.moa-assigned-scene .cp-sequence i,.moa-assigned-scene .cp-slots i,.moa-assigned-scene .cp-leaves span,.moa-assigned-scene .cp-path i,.moa-assigned-scene .cp-targets i{min-width:33px;min-height:36px;font-size:20px}
+}
