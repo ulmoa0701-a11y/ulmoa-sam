@@ -50,7 +50,28 @@ const fs=require('node:fs');
       for(let j=0;j<cells;j++)if((await flowers.nth(j).innerText()).includes('🌼'))await flowers.nth(j).click();
       await page.locator('[data-slow="check"]').click();
       assert.ok(await page.locator('[data-slow="next"]').isVisible(),'correct visual search rejected');
-    }else if(mode==='slowPlace'||mode==='slowBlock'){
+    }else if(mode==='slowBlock'){
+      const desired=await page.locator('.slow-block-pair>div:first-child .slow-board').evaluate(board=>{
+       const side=Math.round(Math.sqrt(board.children.length));
+       return [...board.children].flatMap((tile,i)=>tile.classList.contains('shown')?[[Math.floor(i/side),i%side]]:[]);
+      });
+      const footprint=points=>{
+       const mr=Math.min(...points.map(p=>p[0])),mc=Math.min(...points.map(p=>p[1]));
+       return points.map(([r,c])=>(r-mr)+','+(c-mc)).sort().join('|');
+      };
+      let solvable=false;
+      for(let turn=0;turn<4;turn++){
+       const current=await page.locator('.slow-block-filled').evaluateAll(tiles=>tiles.map(t=>t.dataset.key.split(',').map(Number)));
+       if(footprint(current)===footprint(desired)){solvable=true;break;}
+       await page.locator('[data-slow="block-rotate"]').click();
+      }
+      assert.ok(solvable,'whole block shape should be solvable by rotation');
+      const row=Math.min(...desired.map(p=>p[0])),col=Math.min(...desired.map(p=>p[1]));
+      await page.locator('[data-slow="block-anchor"][data-key="'+row+','+col+'"]').click();
+      await page.locator('[data-slow="check"]').click();
+      assert.ok(await page.locator('.slow-block-complete').isVisible(),'construction scene completion missing');
+      assert.ok(await page.locator('[data-slow="next"]').isVisible(),'whole-piece construction rejected');
+    }else if(mode==='slowPlace'){
       const sample=page.locator('.slow-map-pair .slow-board').first();
       const cells=sample.locator('.slow-tile');const count=await cells.count();
       const target=page.locator('.slow-map-pair .slow-board').last().locator('button[data-slow="cell"]');
