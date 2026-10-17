@@ -11,7 +11,7 @@ const MATERIALS=[
  {id:'clinicalGuide',title:'교사·보호자 연계활동 안내',desc:'게임별 일상 연결 활동과 관찰 방법',href:'../materials/cognitive-practice/guide.html'}
 ];
 const external={rescue:'games/rescue/',handMirror:'games/hand-mirror/'};
-let active=null,library=[],materialMap=new Map(MATERIALS.map(x=>[x.id,x])),hooks={},lastPlayed=null;
+let active=null,library=[],materialMap=new Map(MATERIALS.map(x=>[x.id,x])),hooks={},lastPlayed=null,visited=new Set();
 const $=q=>document.querySelector(q), E=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e};
 const allGames=()=>[...document.querySelectorAll('.library-card[data-open]')].map(c=>({id:c.dataset.open,title:c.querySelector('h3')?.textContent.trim()||c.dataset.open,desc:c.querySelector('p')?.textContent.trim()||'',category:c.dataset.category||'all'})).filter((x,i,a)=>a.findIndex(y=>y.id===x.id)===i);
 function pack(x){return btoa(unescape(encodeURIComponent(JSON.stringify(x)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
@@ -39,11 +39,11 @@ function updateSharedMenu(){
  const panel=E('section','moa-assigned-home');panel.id='moaAssignedHome';panel.setAttribute('aria-label','선택된 연습 활동');
  const hero=E('div','moa-assigned-hero');hero.append(E('span','moa-assigned-eyebrow','🌱 모아의 오늘 연습'),E('h1','', '준비한 활동만 모아뒀어요'),E('p','', '원하는 활동부터 시작해요. 서두르지 않아도 괜찮아요.'));
  const notice=E('p','moa-assigned-detail',active.items.length+'개 활동 · '+(['','쉬움','보통','확장'][active.level])+' 난이도 · '+active.rounds+'문제 기본 연습');
- hero.append(notice);panel.append(hero);
+ hero.append(notice);if(visited.size){hero.append(E('p','moa-assigned-progress','🌱 '+visited.size+'개 활동을 해봤어요. 다음 활동도 천천히 이어갈 수 있어요.'));}panel.append(hero);
  const grid=E('div','moa-assigned-list');
  active.items.forEach((id,i)=>{
   const game=library.find(x=>x.id===id),material=materialMap.get(id),card=E('article','moa-assigned-item');
-  const n=E('span','moa-assigned-number',String(i+1).padStart(2,'0'));card.append(n);
+  const n=E('span','moa-assigned-number',visited.has(id)?'🌼 해봤어요':String(i+1).padStart(2,'0'));card.append(n);
   const title=E('h2','',game?.title||material?.title||id);card.append(title);
   const desc=E('p','',game?.desc||material?.desc||'');card.append(desc);
   if(game){
@@ -91,9 +91,11 @@ function play(id){
 function returnToPlan(){if(!active)return false;updateSharedMenu();return true}
 function afterResult(id){
  if(!active||!active.items.includes(id))return;
+ visited.add(id);updateSharedMenu();
  const area=$('#resultScreen .result-actions');if(!area)return;
- area.querySelector('.moa-assigned-next')?.remove();
+ area.querySelectorAll('.moa-assigned-next').forEach(b=>b.remove());
  const btn=E('button','moa-assigned-next','🌿 선택한 활동으로 돌아가기');btn.onclick=()=>hooks.goHome();area.prepend(btn);
+ const next=active.items.find(x=>!visited.has(x));if(next){const item=library.find(x=>x.id===next)||materialMap.get(next);const move=E('button','moa-assigned-next','✨ 다음 활동: '+(item?.title||'모아의 모험'));move.onclick=()=>{if(materialMap.has(next)){hooks.goHome();embed(materialMap.get(next).href,materialMap.get(next).title,true)}else play(next)};area.prepend(move)}
 }
 function makeBuilder(){
  const entry=E('button','moa-planner-launch','🧺 필요한 활동만 골라 링크 만들기');entry.id='moaPlannerLaunch';entry.type='button';
