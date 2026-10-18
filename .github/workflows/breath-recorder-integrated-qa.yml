@@ -61,9 +61,11 @@ jobs:
           for i in {1..48}; do
             curl -fsSL 'https://ulmoa0701-a11y.github.io/ulmoa-sam/breath-garden/' -o /tmp/live-breath.html &&
             curl -fsSL 'https://ulmoa0701-a11y.github.io/ulmoa-sam/thinking-garden/recorder/' -o /tmp/live-recorder.html &&
-            grep -q 'app-v6.js?v=7' /tmp/live-breath.html &&
+            grep -q 'app-v7.js?v=8' /tmp/live-breath.html &&
+            grep -q 'moa-clay-game.js?v=20261018-a1' /tmp/live-breath.html &&
             grep -q 'calmEnough' /tmp/live-breath.html &&
-            grep -q 'rec-camera-path' /tmp/live-recorder.html && exit 0
+            grep -q 'rec-camera-path' /tmp/live-recorder.html &&
+            grep -q 'moa-clay-game.js?v=20261018-a1' /tmp/live-recorder.html && exit 0
             sleep 10
           done
           echo 'GitHub Pages content did not reach expected version' >&2
