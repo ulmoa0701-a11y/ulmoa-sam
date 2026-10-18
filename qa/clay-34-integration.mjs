@@ -14,6 +14,29 @@ for(const [size,w,h] of [['desktop',1366,850],['tablet',768,1024],['mobile',390,
  await page.goto(base+'/gardens/',{waitUntil:'networkidle'});
  check(await page.locator('.play-card-enhanced[data-game]').count()===34,size+': total 34 cards');
  check(await page.locator('.moa-clay-card-corner').count()===34,size+': every garden card has a clay companion');
+ // Exercise actual missing-screenshot state (some older game covers lack playable captures).
+ const rescueMedia=page.locator('.play-card-enhanced[data-game="rescue"] .play-card-media');
+ await rescueMedia.evaluate(el=>el.classList.add('no-real-shot'));
+ await page.waitForTimeout(35);
+ const fallback=await rescueMedia.evaluate(el=>{
+   const img=el.querySelector('img.real-shot'),art=el.querySelector('.moa-clay-card-corner');
+   const a=art.getBoundingClientRect(),m=el.getBoundingClientRect();
+   return {imageHidden:getComputedStyle(img).opacity==='0',icon:a.width,centered:Math.abs((a.left+a.width/2)-(m.left+m.width/2))<4,
+     caption:el.querySelector('.shot-caption')?.textContent};
+ });
+ check(fallback.imageHidden&&fallback.icon>=100&&fallback.centered&&fallback.caption==='게임 대표 그림',
+   size+': missing screenshot gets large, truthful illustration '+JSON.stringify(fallback));
+ await rescueMedia.evaluate(el=>el.classList.remove('no-real-shot'));
+ const previewButton=page.locator('.play-card-enhanced[data-game="rescue"] .play-preview-btn');
+ await previewButton.click();
+ const previewVisual=page.locator('.preview-visual');
+ check(await previewVisual.locator('.moa-clay-preview-art[data-clay-key="rescue"]').count()===1,
+   size+': preview modal keeps matching artwork as fallback');
+ await previewVisual.evaluate(el=>el.classList.add('no-real-shot'));
+ check(await previewVisual.locator('.moa-clay-preview-art').evaluate(el=>getComputedStyle(el).display!=='none'),
+   size+': preview modal never becomes blank');
+ await page.locator('.preview-close').click();
+
  const img=await page.evaluate(async()=>{
   const element=document.querySelector('.moa-clay-card-corner');
   const style=getComputedStyle(element);
@@ -31,6 +54,17 @@ for(const [size,w,h] of [['desktop',1366,850],['tablet',768,1024],['mobile',390,
  const num=await page.locator('#gardenGamePanel .library-card[data-open]').count();
  check(num>=24,size+': native games preserved '+num);
  check(await page.locator('#gardenGamePanel .moa-clay-library-badge').count()>=24,size+': native game cards illustrated');
+ const nativeCover=await page.locator('#gardenGamePanel .library-card[data-open="memory"]').evaluate(el=>{
+    const img=el.querySelector('img'),art=el.querySelector('.moa-clay-library-badge');
+    const bounds=art.getBoundingClientRect();
+    return {originalHidden:getComputedStyle(img).display==='none',
+      newWidth:Math.round(bounds.width),newVisible:getComputedStyle(art).display!=='none',
+      leading:el.classList.contains('has-clay-leading-art')};
+ });
+ check(nativeCover.originalHidden&&nativeCover.newVisible&&nativeCover.leading&&nativeCover.newWidth>95,
+   size+': native game uses real per-game character cover '+JSON.stringify(nativeCover));
+ if(size==='desktop'||size==='mobile')await page.screenshot({path:'qa/clay-34-artifacts/native-art-'+size+'.png',fullPage:true});
+
  await page.locator('#gardenGamePanel .library-card[data-open="memory"]').first().click();
  check(await page.locator('#introScreen .moa-clay-intro-badge[data-clay-key="memory"]').count()===1,size+': mission intro companion');
  await page.locator('#introStart').click();
