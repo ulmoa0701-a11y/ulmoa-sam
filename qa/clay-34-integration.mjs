@@ -1,6 +1,8 @@
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 const {chromium}=require('playwright-core');
+const fs=require('node:fs');
+fs.mkdirSync('qa/clay-34-artifacts',{recursive:true});
 const base=process.env.TEST_BASE_URL||'http://127.0.0.1:8765';
 const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',args:['--no-sandbox','--disable-dev-shm-usage']});
 const errors=[],results=[],checks=[];
@@ -21,6 +23,7 @@ for(const [size,w,h] of [['desktop',1366,850],['tablet',768,1024],['mobile',390,
  });
  check(img.w===960&&img.h===960,size+': atlas 960x960 loaded '+JSON.stringify(img).slice(0,150));
  check(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+3),size+': garden no page overflow');
+ if(size==='desktop'||size==='mobile')await page.screenshot({path:'qa/clay-34-artifacts/garden-'+size+'.png',fullPage:true});
  const toggle=page.locator('#gardenPictureMode');await toggle.click();
  check(await page.locator('.play-card-enhanced:visible').count()===34,size+': all 34 available in picture mode');
  await toggle.click();
@@ -32,6 +35,7 @@ for(const [size,w,h] of [['desktop',1366,850],['tablet',768,1024],['mobile',390,
  check(await page.locator('#introScreen .moa-clay-intro-badge[data-clay-key="memory"]').count()===1,size+': mission intro companion');
  await page.locator('#introStart').click();
  check(await page.locator('#gameScreen .moa-clay-playing-badge[data-clay-key="memory"]').count()===1,size+': real game companion');
+ if(size==='desktop'||size==='mobile')await page.screenshot({path:'qa/clay-34-artifacts/memory-game-'+size+'.png',fullPage:true});
  for(const key of ['change','feel','money']){
   await page.goto(base+'/thinking-garden/games/moa-missions/?game='+key,{waitUntil:'domcontentloaded'});
   check(await page.locator('.mission-banner .moa-clay-mission-badge[data-clay-key="'+key+'"]').count()===1,size+': mission '+key+' intro');
