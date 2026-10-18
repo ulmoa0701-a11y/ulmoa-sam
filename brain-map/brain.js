@@ -52,7 +52,7 @@
   talk:['친구의 말소리와 뜻을 이해하는 데 관여해요.','어떤 말로 대답할지 생각하고 순서를 조절할 때 함께해요.','상대방의 표정 등 시각적 단서를 처리해요.'],
   read:['눈으로 본 글자의 모양과 선을 처리해요.','말소리와 뜻을 연결하는 여러 읽기 과정에 관여해요.','읽을 부분에 집중하고 목표를 이어가는 데 함께해요.'],
   map:['길 안내판이나 주변 표지판을 볼 때 시각 정보를 처리해요.','내 위치와 주변 공간의 관계를 이해하는 데 관여해요.','목적지까지 어떤 길로 갈지 계획할 때 함께해요.'],
-  ball:['날아오는 공의 움직임을 볼 때 시각 정보를 처리해요.','팔과 몸의 위치에 관한 감각·공간 정보를 통합해요.','손을 뻗는 타이밍과 움직임의 정확성을 조정해요.'],
+  ball:['굴러오거나 날아오는 공의 움직임을 볼 때 시각 정보를 처리해요.','팔과 몸의 위치에 관한 감각·공간 정보를 통합해요.','손을 뻗는 타이밍과 움직임의 정확성을 조정해요.'],
   music:['노래의 소리·음높이·리듬 정보를 처리해요.','언제 시작하고 멈출지 정하며 행동을 조절해요.','발성과 움직임의 시간 맞추기에 관여해요.'],
   draw:['그림의 선과 모양 같은 시각 정보를 처리해요.','종이 위에서 손과 그림의 위치를 파악하는 데 관여해요.','무엇을 어떤 순서로 그릴지 계획할 때 함께해요.'],
   bag:['물건의 모양과 색을 볼 때 시각 정보를 처리해요.','물건이 놓인 자리와 가방 안의 공간을 살펴봐요.','순서를 정하고 빠진 물건이 있는지 확인할 때 함께해요.'],
@@ -65,23 +65,29 @@
  const canReadScene=typeof window.speechSynthesis!=='undefined' && typeof window.SpeechSynthesisUtterance==='function';
  let sceneUtterance=null;
  if(!canReadScene){lobeSceneRead.disabled=true;lobeSceneSpeechStatus.textContent='이 기기에서는 읽어주기를 지원하지 않아요.';}
+ function updateSceneReadControl(playing){
+  lobeSceneRead.textContent=playing?'⏹ 읽기 멈추기':'🔊 이 설명 듣기';
+  lobeSceneRead.setAttribute('aria-label',playing?'현재 설명 읽기 멈추기':'현재 선택한 과정과 관련 뇌 부위 설명 듣기');
+  lobeSceneRead.setAttribute('aria-pressed',String(playing));
+ }
+ updateSceneReadControl(false);
  function stopSceneSpeech(){
   if(canReadScene && sceneUtterance)window.speechSynthesis.cancel();
   sceneUtterance=null;
-  lobeSceneRead.textContent='🔊 이 설명 듣기';
+  updateSceneReadControl(false);
  }
  lobeSceneRead.addEventListener('click',()=>{
   if(!canReadScene)return;
   if(sceneUtterance){stopSceneSpeech();lobeSceneSpeechStatus.textContent='읽기를 멈췄어요.';return;}
-  const utterance=new SpeechSynthesisUtterance(lobeSceneFocusTitle.textContent+'. '+lobeSceneFocusText.textContent+' '+lobeSceneRegionHint.textContent);
+  const utterance=new SpeechSynthesisUtterance(lobeSceneCurrent.textContent+'. '+lobeSceneFocusTitle.textContent+'. '+lobeSceneFocusText.textContent+' '+lobeSceneRegionHint.textContent);
   utterance.lang='ko-KR';utterance.rate=.88;
   const voice=window.speechSynthesis.getVoices().find(v=>v.lang?.toLowerCase().startsWith('ko'));
   if(voice)utterance.voice=voice;
-  utterance.onend=()=>{if(sceneUtterance===utterance){sceneUtterance=null;lobeSceneRead.textContent='🔊 이 설명 듣기';lobeSceneSpeechStatus.textContent='읽기가 끝났어요.';}};
-  utterance.onerror=()=>{if(sceneUtterance===utterance){sceneUtterance=null;lobeSceneRead.textContent='🔊 이 설명 듣기';lobeSceneSpeechStatus.textContent='음성을 재생하지 못했어요. 기기의 한국어 음성을 확인해 주세요.';}};
+  utterance.onend=()=>{if(sceneUtterance===utterance){sceneUtterance=null;updateSceneReadControl(false);lobeSceneSpeechStatus.textContent='읽기가 끝났어요.';}};
+  utterance.onerror=()=>{if(sceneUtterance===utterance){sceneUtterance=null;updateSceneReadControl(false);lobeSceneSpeechStatus.textContent='음성을 재생하지 못했어요. 기기의 한국어 음성을 확인해 주세요.';}};
   try{
    window.speechSynthesis.cancel();
-   sceneUtterance=utterance;lobeSceneRead.textContent='⏹ 읽기 멈추기';
+   sceneUtterance=utterance;updateSceneReadControl(true);
    lobeSceneSpeechStatus.textContent=voice?'기기 음성으로 읽는 중이에요.':'기기에 한국어 음성이 없으면 발음이 어색할 수 있어요.';
    window.speechSynthesis.speak(utterance);
   }catch(error){stopSceneSpeech();lobeSceneSpeechStatus.textContent='현재 기기에서 읽기를 시작할 수 없어요.';}
