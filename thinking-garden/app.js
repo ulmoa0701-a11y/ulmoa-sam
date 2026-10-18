@@ -236,17 +236,34 @@ function renderHide(){
  });
 }
 function renderPath(){
- const len=4+Math.min(practiceStep(),3);
- const icons=['🌱','🌼','🍃','🌸','🌿','🌻','🌷'];
- // Twenty rounds use twenty different first-two pairs. Each pair keeps
- // its own visible route even when the requested path length repeats.
+ const len=4+Math.min(practiceStep(),3),icons=['🌱','🌼','🍃','🌸','🌿','🌻','🌷'];
  const start=(state.round+state.pathOffset)%icons.length;
  const second=(start+1+Math.floor(state.round/icons.length))%icons.length;
  const seq=[icons[start],icons[second],...shuffle(icons.filter((_,i)=>i!==start&&i!==second))].slice(0,len);
- // Mix physical positions too. Otherwise a child can complete every round
- // by touching from left to right without finding the lit next step.
  const route=shuffle(seq.map((icon,i)=>({icon,i})));
- let pos=0;missionText.textContent='반짝이는 길을 차례로 따라가요!';missionSub.textContent='지금 반짝이는 곳을 찾아 한 칸씩 이동해요.';say(missionText.textContent);area.innerHTML=`<div class="basic-game"><div class="trail-game">${route.map(x=>`<button type="button" class="trail-node ${x.i===0?'ready':''}" data-i="${x.i}" aria-label="${x.icon} 길 ${x.i+1}">${x.icon}</button>`).join('')}<div class="trail-runner" id="trailRunner">🦋</div></div></div>`;$$('.trail-node').forEach(b=>b.onclick=()=>{if(state.lock)return;const i=+b.dataset.i;if(i!==pos){b.classList.add('wrong');sfx('no');flash('반짝이는 곳부터!');later(()=>b.classList.remove('wrong'),350);return}b.classList.remove('ready');b.classList.add('visited');pos++;addSeeds(Math.ceil(10/len));sfx('ok');if(pos<len)area.querySelector('.trail-node[data-i="'+pos+'"]').classList.add('ready');else{flash('길 완성! 🦋');roundGate(area.querySelector('.basic-game'),'다음 길 ▶',500)}})}
+ let pos=0;
+ missionText.textContent='루와 함께 반짝이는 길을 찾아요!';
+ missionSub.textContent='순서대로 누르면 루가 다음 칸으로 이동해요.';
+ say(missionText.textContent);
+ area.innerHTML='<div class="basic-game path-quest"><div class="path-quest-header"><img src="assets/friend-ru.png" alt="" class="path-quest-friend"><strong>루의 정원길</strong><span id="pathStepCount">0 / '+len+'칸</span></div><div class="trail-game">'+route.map(x=>'<button type="button" class="trail-node '+(x.i===0?'ready':'')+'" data-i="'+x.i+'" aria-label="'+x.icon+' 길 '+(x.i+1)+'">'+x.icon+'</button>').join('')+'<div class="trail-runner path-moving-runner" id="trailRunner" aria-hidden="true"><img src="assets/friend-ru.png" alt=""></div></div></div>';
+ const board=area.querySelector('.trail-game'),runner=area.querySelector('#trailRunner');
+ function moveRunner(i){
+  const node=board.querySelector('.trail-node[data-i="'+i+'"]');
+  if(node){runner.style.left=(node.offsetLeft+node.offsetWidth/2)+'px';runner.style.top=(node.offsetTop+node.offsetHeight/2)+'px';}
+ }
+ moveRunner(0);
+ area.querySelectorAll('.trail-node').forEach(b=>b.onclick=()=>{
+  if(state.lock)return;
+  const i=+b.dataset.i;
+  if(i!==pos){recordGardenChoice(false);b.classList.add('wrong');sfx('no');flash('빛나는 칸을 다시 살펴봐요.');later(()=>b.classList.remove('wrong'),350);return;}
+  if(b.classList.contains('visited')){recordGardenChoice(true,{repeat:true});return;}
+  recordGardenChoice(true);b.classList.remove('ready');b.classList.add('visited');pos++;
+  $('#pathStepCount').textContent=pos+' / '+len+'칸';
+  addSeeds(Math.ceil(10/len));sfx('ok');
+  if(pos<len){board.querySelector('.trail-node[data-i="'+pos+'"]').classList.add('ready');moveRunner(pos);}
+  else{moveRunner(len-1);completeGardenQuest();flash('루가 길 끝에 도착했어요!');roundGate(area.querySelector('.basic-game'),'다음 길 ▶',500);}
+ });
+}
 function renderCalm(){let ready=false;const useYellow=practiceStep()>=2;missionText.textContent=useYellow?'빨강·노랑은 기다리고 초록에 톡!':'초록불에만 눌러 건너요!';missionSub.textContent=useYellow?'빨간불과 노란불에는 기다리고, 초록불에만 눌러요.':'차가 지나갈 때는 기다리고 초록 신호가 켜졌을 때만 눌러요.';say(missionText.textContent);area.innerHTML='<div class="basic-game calm-game road-game"><div class="traffic-scene"><div class="traffic-light"><i class="red on"></i><i class="yellow"></i><i class="green"></i></div><div class="road"><span class="road-car">🚗</span><div class="zebra"><i></i><i></i><i></i><i></i><i></i></div><img class="road-moa" src="assets/moa-default.png" alt=""><span class="road-goal">🌳</span></div><button id="signalBtn" class="signal-btn wait"><span>🔴</span><b>기다려요</b></button><p id="signalMsg">차가 지나가요. 손을 쉬고 기다려요.</p></div></div>';const b=$('#signalBtn'),scene=area.querySelector('.traffic-scene'),light=scene.querySelector('.traffic-light'),car=scene.querySelector('.road-car');const goGreen=()=>{ready=true;light.querySelector('.red').classList.remove('on');light.querySelector('.yellow').classList.remove('on');light.querySelector('.green').classList.add('on');b.className='signal-btn go';b.innerHTML='<span>🟢</span><b>지금 건너요!</b>';$('#signalMsg').textContent='초록불! 지금 톡!';sfx('ok')};const arm=()=>{ready=false;scene.classList.remove('cross-success');light.querySelector('.red').classList.add('on');light.querySelector('.yellow').classList.remove('on');light.querySelector('.green').classList.remove('on');b.className='signal-btn wait';b.innerHTML='<span>🔴</span><b>기다려요</b>';$('#signalMsg').textContent='차가 지나가요. 손을 쉬고 기다려요.';car.classList.remove('drive');void car.offsetWidth;car.classList.add('drive');later(()=>{if(useYellow){light.querySelector('.red').classList.remove('on');light.querySelector('.yellow').classList.add('on');b.className='signal-btn caution';b.innerHTML='<span>🟡</span><b>조금 더 기다려요</b>';$('#signalMsg').textContent='노란불도 아직 기다려요.';later(goGreen,650+Math.random()*500)}else goGreen()},1100+Math.random()*1200)};b.onclick=()=>{if(state.lock)return;if(!ready){sfx('no');scene.classList.add('too-soon');flash(light.querySelector('.yellow').classList.contains('on')?'노란불도 기다려요! 초록불까지 기다려요.':'아직 빨간불이에요! 차가 지나간 뒤 기다려요.');later(()=>scene.classList.remove('too-soon'),450);clearTimers();arm()}else{scene.classList.add('cross-success');addSeeds(10);sfx('ok');flash('안전하게 건넜어요! 🚦');roundGate(scene,'다음 길 건너기 ▶',950)}};arm()}
 
 function renderInside(){const need=3+practiceStep();let placed=0;missionText.textContent=`울타리 안에 별 ${need}개를 심어요!`;missionSub.textContent='넓은 들판 중 연두색 울타리 안에만 별을 심어요.';say(missionText.textContent);area.innerHTML=`<div class="basic-game"><div class="mini-count" id="miniCount">⭐ 0 / ${need}</div><div class="inside-stage-new" id="insideStage"><div class="inside-zone" id="insideZone"><span>울타리 안</span></div></div></div>`;const stage=$('#insideStage'),z=$('#insideZone');stage.onclick=e=>{if(state.lock||placed>=need)return;if(!e.target.closest('#insideZone')){sfx('no');flash('울타리 안에 심어봐요.');const p=document.createElement('b');p.className='outside-ripple';p.style.left=`${e.offsetX}px`;p.style.top=`${e.offsetY}px`;stage.appendChild(p);later(()=>p.remove(),420);return}const r=z.getBoundingClientRect(),star=document.createElement('i');star.textContent='⭐';star.style.left=`${e.clientX-r.left}px`;star.style.top=`${e.clientY-r.top}px`;z.appendChild(star);placed++;$('#miniCount').textContent=`⭐ ${placed} / ${need}`;addSeeds(Math.ceil(10/need));sfx('ok');if(placed===need){flash('별밭 완성!');roundGate(area.querySelector('.basic-game'),'다음 별밭 ▶',500)}}}
