@@ -1,0 +1,55 @@
+name: Music Playground QA
+on:
+  pull_request:
+    paths:
+      - 'boomwhacker/music-playground/**'
+      - 'boomwhacker/rhythm-worlds/index.html'
+      - 'boomwhacker/rhythm-worlds/styles.css'
+      - '.github/workflows/music-playground-qa.yml'
+  push:
+    branches: [feat/boomwhacker-music-playground-modes-20261018]
+    paths:
+      - 'boomwhacker/music-playground/**'
+      - 'boomwhacker/rhythm-worlds/index.html'
+      - 'boomwhacker/rhythm-worlds/styles.css'
+      - '.github/workflows/music-playground-qa.yml'
+jobs:
+  music-mini-games:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Korean fonts
+        run: |
+          if fc-list :lang=ko family | grep -q .; then
+            echo "Korean fonts present"
+          else
+            timeout 60s sudo apt-get update -qq && timeout 90s sudo apt-get install -y -qq fonts-noto-cjk || echo "Using system font fallbacks"
+            fc-cache -f || true
+          fi
+      - name: Install Playwright core
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Locate Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Start server
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/music-playground-server.log 2>&1 &
+          for i in {1..30}; do curl -fsS http://127.0.0.1:8765/boomwhacker/music-playground/ >/dev/null && exit 0; sleep .25; done
+          cat /tmp/music-playground-server.log
+          exit 1
+      - name: Play browser mini-games and check layouts
+        run: node boomwhacker/music-playground/qa.cjs
+      - name: Upload screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: music-playground-qa
+          path: boomwhacker/music-playground/qa-artifacts
+          if-no-files-found: warn
