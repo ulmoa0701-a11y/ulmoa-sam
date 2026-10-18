@@ -175,9 +175,14 @@ function drawEcho(){
  if(state.phase==="show")waveform(545,218,52,"#579f99");else{for(let i=0;i<state.pattern.length;i++){circ(457+i*48-(state.pattern.length-3)*24,204,14,i<state.reply.length?"#569e87":"#ffffffa8")}}
  text(state.phase==="show"?"먼저 들어요":"이제 내 차례",550,305,26,"#668a80");
 }
+function memoryVisibleCount(){return state.pattern.length||lengthForLevel()}
 function drawMemory(){
- for(let i=0;i<6;i++){const x=200+i*138,y=235;circ(x,y,49,"#ffffffb4");if(state.phase==="show"&&state.seenIndex===i){circ(x,y,34,COLORS[state.pattern[i]]||"#c8cab9")}else{circ(x,y,32,i<state.reply.length?"#83bfaa":"#d5dbec")}}
- text(state.phase==="show"?"빛을 따라 기억해":"기억한 순서대로 눌러",540,320,24,"#6a718a");
+ const len=memoryVisibleCount(),gap=Math.min(160,860/Math.max(1,len-1)),start=540-(len-1)*gap/2;
+ for(let i=0;i<len;i++){const x=start+i*gap,y=227,lit=state.phase==="show"&&state.seenIndex===i;
+  circ(x,y,48,"#ffffffb4");circ(x,y,lit?36:32,lit?COLORS[state.pattern[i]]:i<state.reply.length?"#83bfaa":"#d5dbec");
+  if(state.phase==="answer"&&i<state.reply.length)text(String(i+1),x,y,19,"#fff");
+ }
+ text(state.phase==="show"?"빛을 따라 기억해":"기억한 순서대로 눌러",540,321,24,"#6a718a");
 }
 function drawMissing(){
  const list=state.pattern.length?state.pattern:Array.from({length:4},(_,i)=>palette()[i%palette().length]);const width=Math.min(145,770/list.length),total=list.length*width;
@@ -194,10 +199,17 @@ function drawCompare(){
 function drawSignal(){
  box(397,129,285,201,"#415e66",39);const active=state.signal[state.signalStep]||{on:true,note:palette()[0]};circ(468,228,58,active.on?"#88d7a6":"#ed8f86","#f9f6e4");circ(610,228,57,active.on?"#b3bbbe":"#ec8f7e","#f9f6e4");if(active.on){text("연주",468,230,21,"#274e41");badge(850,227,active.note,49)}else{text("잠깐",610,231,22,"#603f3c");text("멈춰요",854,226,35,"#ae766f")}box(153,199,131,51,"#ffffffa9",14);text((state.signalStep+1)+" / "+(state.signal.length||8),218,224,25,"#5a7780");
 }
+function composerSlotCount(){return [0,8,12,16][state.level]}
 function drawComposer(){
- const ns=state.composer,slots=[0,1,2,3,4,5,6,7],per=8;
- for(let i=0;i<slots.length;i++){const x=168+i*108;box(x-44,179,86,86,ns[i]!==undefined?"#ffffffe8":"#ffffff65",18);if(ns[i]!==undefined)badge(x,222,ns[i],27);else{text("+",x,220,35,"#b9c7b0")}}
- text(ns.length+"개의 음으로 만든 나의 노래",540,322,24,"#947d57");
+ const ns=state.composer,cap=composerSlotCount(),rows=Math.ceil(cap/8);
+ for(let i=0;i<cap;i++){
+  const row=Math.floor(i/8),col=i%8,count=Math.min(8,cap-row*8);
+  const step=rows===1?108:124,start=540-(count-1)*step/2,x=start+col*step,y=rows===1?221:158+row*99;
+  box(x-39,y-36,78,72,ns[i]!==undefined?"#fffffff0":"#ffffff8c",15);
+  if(ns[i]!==undefined)badge(x,y,ns[i],24);
+  else text("+",x,y,33,"#b9c7b0");
+ }
+ text(ns.length+" / "+cap+"개의 음으로 만든 나의 노래",540,345,22,"#947d57");
 }
 function drawEnsemble(){
  const ns=state.ensemble;
@@ -217,6 +229,7 @@ function render(){windows();background();SCENE[state.mode]();$("#start").disable
 ui();changeMode("echo");render();
 window.__playlabQA={modes:Object.keys(MODES),state:()=>({mode:state.mode,level:state.level,range:state.range,round:state.round,phase:state.phase,pattern:state.pattern.slice(),alt:state.alt.slice(),reply:state.reply.slice(),same:state.same,missing:state.missing,score:state.score,role:state.role,composer:state.composer.slice(),notes:palette().map(i=>NOTES[i]),answer:state.answer,signal:state.signal.map(x=>({...x})),signalStep:state.signalStep}),
  selectMode:changeMode,reset,openRound,playNotes,padInput,listenComposition,answerChoice,previewMaze,composerStart,setPhase,render,
+ memoryVisibleCount,composerSlotCount,
  forceAnswer:()=>{const m=state.mode;if(m==="echo"||m==="memory"){state.phase="answer";state.reply=[];for(const n of state.pattern)padInput(n)}else if(m==="missing"){state.phase="answer";padInput(state.pattern[state.missing])}else if(m==="compare"||m==="maze"){state.phase="answer";answerChoice(true)}},
  answerSignal:()=>{state.phase="signal-running";const s=state.signal[state.signalStep];if(s&&s.on)padInput(s.note)}
 };
