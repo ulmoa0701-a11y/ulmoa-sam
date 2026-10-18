@@ -19,6 +19,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Ensure Korean text renders in screenshots
+        run: |
+          if fc-list :lang=ko family | grep -q .; then
+            echo 'Korean fonts already available'
+          else
+            timeout 60s sudo apt-get update -qq && timeout 90s sudo apt-get install -y -qq fonts-noto-cjk || echo 'Font package mirror unavailable'
+            fc-cache -f || true
+          fi
       - name: Install Playwright core
         run: npm install --no-save playwright-core@1.56.1
       - name: Locate installed Chrome
