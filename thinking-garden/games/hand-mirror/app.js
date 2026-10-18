@@ -221,8 +221,15 @@ function adventureUpdate(){
  $('adventureActor').style.top=(S.acornY??52)+'%';
 }
 function modeSelected(m){
+ if(!MODE[m])return;
  S.mode=m;
- document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));
+ document.querySelectorAll('.mode[data-mode]').forEach(b=>{
+  const selected=b.dataset.mode===m;
+  b.setAttribute('aria-pressed',String(selected));
+  const hint=b.querySelector('.mode-cue');
+  if(hint)hint.textContent=selected?'✓ 선택했어요':'이 놀이 고르기';
+ });
+ $('selectedPlayLabel').textContent=MODE[m];
  const intros={
   garden:['모아의 마법 꽃밭 🌼','도토리를 주먹으로 잡고, 보자기를 펼쳐서 심어요! 꽃 세 송이를 피워 볼까?'],
   copy:['모아의 반짝 풍선 🫧','모아 손을 따라하면 풍선이 톡! 손 모양마다 반짝이는 풍선을 깨워요.'],
