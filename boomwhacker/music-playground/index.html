@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f7faf9">
+<meta name="description" content="모아의 음악 놀이터: 소리탐정, 기억의 불빛, 리듬 대화, 신호 기다려, 사라진 음, 꼬마 작곡가. 서로 다른 규칙의 여섯 가지 음악게임.">
+<title>모아의 음악 놀이터 · 여섯 가지 게임 | 일단 해봄</title>
+<link rel="stylesheet" href="./style.css">
+<script src="./app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#game">게임으로 바로가기</a>
+<div class="shell">
+ <header class="top">
+  <div class="top-identity"><a href="../rhythm-worlds/" class="back" aria-label="음악여행으로 돌아가기">←</a><div><span class="eyebrow">일단 해봄 · 울모아쌤</span><strong>모아의 음악 놀이터</strong></div></div>
+  <nav class="top-nav" aria-label="다른 음악 활동"><a href="../rhythm-worlds/">음악여행 6종</a><a href="../">기존 붐웨커</a></nav>
+ </header>
+ <main>
+  <div class="intro-line"><span class="intro-dot"></span><strong>듣고, 기억하고, 주고받고, 만들어봐요.</strong><span>게임 하나를 골라 바로 시작할 수 있어요.</span></div>
+  <section class="chooser" aria-label="음악게임 선택" id="chooser">
+   <button type="button" class="game-choice selected" data-game="detect" aria-pressed="true"><span class="choice-symbol" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="20" cy="20" r="12" fill="none" stroke="currentColor" stroke-width="4"/><path d="m29 30 9 9" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M13 20h14M20 13v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><strong>소리탐정</strong><small>달라진 음 찾기</small></button>
+   <button type="button" class="game-choice" data-game="memory" aria-pressed="false"><span class="choice-symbol" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="12" cy="18" r="8" fill="currentColor"/><circle cx="36" cy="18" r="8" fill="currentColor" opacity=".65"/><circle cx="24" cy="36" r="8" fill="currentColor" opacity=".4"/></svg></span><strong>기억의 불빛</strong><small>음의 순서 기억</small></button>
+   <button type="button" class="game-choice" data-game="dialogue" aria-pressed="false"><span class="choice-symbol" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M6 15h18v17H6zM26 9h16v18H26z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="m14 32-5 6M34 27l6 7" stroke="currentColor" stroke-width="3"/></svg></span><strong>리듬 대화</strong><small>듣고 주고받기</small></button>
+   <button type="button" class="game-choice" data-game="signal" aria-pressed="false"><span class="choice-symbol" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="12" y="4" width="24" height="40" rx="12" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="14" r="6" fill="currentColor" opacity=".3"/><circle cx="24" cy="34" r="6" fill="currentColor"/></svg></span><strong>신호 기다려</strong><small>칠 때와 기다릴 때</small></button>
+   <button type="button" class="game-choice" data-game="missing" aria-pressed="false"><span class="choice-symbol" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="5" y="12" width="11" height="25" rx="5" fill="currentColor" opacity=".6"/><rect x="19" y="12" width="11" height="25" rx="5" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="3 3"/><rect x="33" y="12" width="11" height="25" rx="5" fill="currentColor"/></svg></span><strong>사라진 음</strong><small>빈자리 채우기</small></button>
+   <button type="button" class="game-choice" data-game="compose" aria-pressed="false"><span class="choice-symbol" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M17 13v23a7 7 0 1 1-5-7V11l24-5v24a7 7 0 1 1-5-7V7" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/></svg></span><strong>꼬마 작곡가</strong><small>내 멜로디 만들기</small></button>
+  </section>
+  <section class="game-area" id="game" aria-label="선택한 게임">
+   <div class="game-head"><div><span id="gameTag" class="game-tag">소리탐정</span><h1 id="gameTitle">어디에서 소리가 달라졌을까?</h1><p id="gameHelp">두 번 듣고, 바뀐 자리를 골라요.</p></div><div class="game-progress"><span id="roundLabel">1 / 5</span><div class="track"><div id="progressFill"></div></div></div></div>
+   <div class="stage" id="stage">
+    <div class="scene-head"><span id="sceneHint">먼저 소리를 들어요</span><span id="sceneState" class="scene-state">준비</span></div>
+    <div id="visual" class="visual" aria-live="off"></div>
+    <div id="actionRow" class="action-row" aria-label="게임 조작"></div>
+    <p class="live-message" id="message" aria-live="polite">시작을 누르면 음악게임이 열려요.</p>
+   </div>
+   <div class="note-panel" id="notePanel">
+    <div class="note-heading"><strong>소리 악기</strong><span id="padHelp">누르면 계이름 소리가 나요. 숫자 1~8도 가능해요.</span></div>
+    <div class="note-pads" id="notePads" aria-label="여덟 개 소리 악기">
+     <button type="button" class="note-pad" data-note="도" aria-label="도"><span>도</span><small>1</small></button>
+     <button type="button" class="note-pad" data-note="레" aria-label="레"><span>레</span><small>2</small></button>
+     <button type="button" class="note-pad" data-note="미" aria-label="미"><span>미</span><small>3</small></button>
+     <button type="button" class="note-pad" data-note="파" aria-label="파"><span>파</span><small>4</small></button>
+     <button type="button" class="note-pad" data-note="솔" aria-label="솔"><span>솔</span><small>5</small></button>
+     <button type="button" class="note-pad" data-note="라" aria-label="라"><span>라</span><small>6</small></button>
+     <button type="button" class="note-pad" data-note="시" aria-label="시"><span>시</span><small>7</small></button>
+     <button type="button" class="note-pad" data-note="높은 도" aria-label="높은 도"><span>도↑</span><small>8</small></button>
+    </div>
+   </div>
+   <div class="bottom-bar"><div class="options"><label for="level">사용할 음 <select id="level"><option value="3" selected>3음</option><option value="5">5음</option><option value="8">8음</option></select></label><label for="tempo">속도 <select id="tempo"><option value="slow">천천히</option><option value="normal" selected>보통</option></select></label><label class="check-option"><input type="checkbox" id="quiet">움직임 줄이기</label></div><div class="bottom-links"><a href="../rhythm-worlds/">이야기형 음악여행</a><a href="../">붐웨커 Studio</a></div></div>
+  </section>
+  <p class="scope-note">이 놀이터는 음악을 듣고 화면 버튼을 선택하는 활동이에요. 실제 붐웨커를 친 소리를 마이크로 인식하거나 치료 효과를 자동으로 평가하지는 않아요. 사용자가 만든 멜로디는 현재 브라우저에만 저장돼요.</p>
+ </main>
+ <footer>일단 해봄 · 울모아쌤 <span>기존 음악여행과 붐웨커 Studio는 그대로 유지됩니다.</span></footer>
+</div>
+</body>
+</html>
