@@ -1,0 +1,46 @@
+/* 그림체 통일 1차: 기존 게임 데이터·화폐·위치 규칙·모아 캐릭터 보존.
+   Canva 원본 아이콘은 라이선스 확인 전 이 공개 파일에 포함하지 않음. */
+.mission-app{
+ --clay-edge:#c9dfd0;--clay-shadow:0 7px 0 #abc5ae27,0 13px 22px #31584012;
+}
+.mission-app .mission-banner{
+ background:radial-gradient(circle at 92% 14%,#fff5d5 0,transparent 35%),linear-gradient(130deg,#e7f6e7,#fffaf1);
+ border:2px solid #d1e5d2;border-radius:23px;
+}
+.mission-app .panel{border-radius:23px;border-color:var(--clay-edge)}
+.mission-app .level-card,.mission-app .round-options button{
+ border:2px solid #dbe8de;border-bottom-width:4px;border-radius:16px;
+ background:linear-gradient(155deg,#fff,#f6faf4);
+}
+.mission-app .level-card.chosen,.mission-app .round-options button.chosen{
+ border-color:#438c64;background:#eef8ed;box-shadow:var(--clay-shadow);
+}
+.mission-app .primary-action,.mission-app .game-actions .primary-action{
+ border-radius:14px;border-bottom:4px solid #215e43;min-height:48px;
+ background:#2c7354;color:#fff;
+}
+.mission-app .secondary-action{border-radius:13px;min-height:46px}
+.mission-app .item-chip{border-radius:14px;background:#f6faf4;border:1px solid #d6e6d8}
+.mission-app .item-pick,.mission-app .list-choice,.mission-app .choice{
+ border-radius:16px;border:2px solid #dce8de;border-bottom-width:4px;background:#fff;
+ min-height:48px;transition:border-color .16s,transform .16s;
+}
+.mission-app .item-pick:hover,.mission-app .list-choice:hover,.mission-app .choice:hover{
+ border-color:#95c9a7;transform:translateY(-1px);
+}
+.mission-app .item-pick:focus-visible,.mission-app .list-choice:focus-visible,
+.mission-app .choice:focus-visible,.mission-app button:focus-visible{
+ outline:3px solid #2b8760;outline-offset:3px;
+}
+.mission-app .change-note,.mission-app .story-card{
+ background:linear-gradient(145deg,#f1f8ef,#fffdf7);border:2px solid #d5e7d4;border-radius:19px;
+}
+.mission-app .progress-track{background:#e0eee3}
+.mission-app #progressFill{background:linear-gradient(90deg,#70b18d,#2f8361);border-radius:999px}
+@media(max-width:600px){
+ .mission-app .mission-banner{border-radius:18px}
+ .mission-app .item-pick,.mission-app .list-choice,.mission-app .choice{min-height:48px}
+}
+@media(prefers-reduced-motion:reduce){
+ .mission-app .item-pick,.mission-app .list-choice,.mission-app .choice{transition:none;transform:none!important}
+}
