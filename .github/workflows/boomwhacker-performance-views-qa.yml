@@ -1,0 +1,49 @@
+name: Boomwhacker Performance Views QA
+on:
+  pull_request:
+    paths:
+      - 'boomwhacker/performance-views/**'
+      - '.github/workflows/boomwhacker-performance-views-qa.yml'
+  push:
+    branches:
+      - 'feat/boomwhacker-ten-performance-views-20261018'
+    paths:
+      - 'boomwhacker/performance-views/**'
+      - '.github/workflows/boomwhacker-performance-views-qa.yml'
+jobs:
+  performance-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Ensure Korean fonts
+        run: |
+          if fc-list :lang=ko family | grep -q .; then echo 'Korean font already present'; else
+            timeout 60s sudo apt-get update -qq && timeout 90s sudo apt-get install -y -qq fonts-noto-cjk || true
+            fc-cache -f || true
+          fi
+      - name: Install browser runner
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Locate Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Start static server
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/views-server.log 2>&1 &
+          for i in {1..20}; do curl -fsS http://127.0.0.1:8765/boomwhacker/performance-views/ >/dev/null && exit 0; sleep .25; done
+          cat /tmp/views-server.log
+          exit 1
+      - name: Run real browser performance views QA
+        run: node boomwhacker/performance-views/qa.cjs
+      - name: Upload PC/mobile screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boomwhacker-performance-views-qa
+          path: boomwhacker/performance-views/qa-artifacts
+          if-no-files-found: warn
