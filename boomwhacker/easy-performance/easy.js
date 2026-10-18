@@ -34,7 +34,7 @@ function updateControls(){
  $("#song").value=song.key;$("#notes").value=String(notes);$("#tempo").value=String(speed);$("#section").value=section;
  $("#metronome").checked=metronome;$("#loop").checked=loop;$("#motion").checked=motion;
  $("#sound").textContent=sound?"소리 켜짐":"소리 꺼짐";$("#sound").setAttribute("aria-pressed",String(sound));
- $(".view-choice").forEach(b=>{const yes=b.dataset.view===view;b.classList.toggle("active",yes);b.setAttribute("aria-pressed",String(yes))});
+ $$(".view-choice").forEach(b=>{const yes=b.dataset.view===view;b.classList.toggle("active",yes);b.setAttribute("aria-pressed",String(yes))});
  $$("#keys button").forEach(k=>k.classList.toggle("off",!isSelected(k.dataset.note)));
  $("#noteHelp").textContent=notes+"음 연주 · 다른 음은 연하게 · 노래 전체는 그대로";
  const bar=barAt(position),number=clamp(Math.floor(clamp(position,0,song.beats-.001)/song.meter)+1,1,song.bars.length);
@@ -390,7 +390,7 @@ async function exportVideo(){
 }
 function bind(){
  $("#song").replaceChildren(...scores.map(s=>new Option(s.title+(s.category==="박자 연습"?" · 박자 연습":""),s.key)));
- $(".view-choice").forEach(b=>b.onclick=()=>chooseView(b.dataset.view));
+ $$(".view-choice").forEach(b=>b.onclick=()=>chooseView(b.dataset.view));
  $("#play").onclick=()=>playing?pause():play();$("#overlayPlay").onclick=()=>play();$("#reset").onclick=reset;$("#record").onclick=exportVideo;
  $("#sound").onclick=()=>{const was=playing;if(was)pause();sound=!sound;updateControls();if(was)play()};
  $("#song").onchange=e=>chooseSong(e.target.value);
