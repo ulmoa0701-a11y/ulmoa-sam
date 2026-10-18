@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#f3f8f6">
+<meta name="description" content="붐웨커를 누구나 쉽게 연주하는 다섯 가지 색깔 연주 화면. 가로 리듬길, 색깔 악보, 한 마디씩, 두 줄 악보, 지금·다음 음.">
+<title>모아의 쉬운 붐웨커 연주 | 일단 해봄 · 울모아쌤</title>
+<link rel="stylesheet" href="./styles.css">
+<script src="../performance-views/scores.js" defer></script>
+<script src="./easy.js" defer></script>
+</head><body>
+<a class="skip" href="#stage">연주 화면으로 바로가기</a>
+<div class="app">
+<header class="header">
+ <div class="brand"><a href="../" class="back" aria-label="기존 붐웨커로 돌아가기">←</a><div><small>일단 해봄 · 울모아쌤</small><strong>모아의 쉬운 붐웨커 연주</strong></div></div>
+ <a class="legacy" href="../">기존 붐웨커 Studio <span aria-hidden="true">↗</span></a>
+</header>
+<main>
+ <section class="selection" aria-label="연주 화면 선택">
+  <div class="selection-heading"><strong>어떤 화면이 편할까?</strong><span>다섯 가지 모두 같은 노래로 연주해요.</span></div>
+  <div class="view-options" id="viewOptions">
+   <button class="view-choice active" data-view="road" type="button" aria-pressed="true"><span class="choice-icon road-icon" aria-hidden="true"></span><b>가로 리듬길</b><small>옆으로 오는 음</small></button>
+   <button class="view-choice" data-view="score" type="button" aria-pressed="false"><span class="choice-icon score-icon" aria-hidden="true"></span><b>색깔 악보</b><small>음표를 따라가요</small></button>
+   <button class="view-choice" data-view="bar" type="button" aria-pressed="false"><span class="choice-icon bar-icon" aria-hidden="true"></span><b>한 마디씩</b><small>네 칸처럼 보기</small></button>
+   <button class="view-choice" data-view="two" type="button" aria-pressed="false"><span class="choice-icon two-icon" aria-hidden="true"></span><b>두 줄 악보</b><small>지금 줄 · 다음 줄</small></button>
+   <button class="view-choice" data-view="next" type="button" aria-pressed="false"><span class="choice-icon next-icon" aria-hidden="true"></span><b>지금과 다음 음</b><small>큰 글씨로 보기</small></button>
+  </div>
+ </section>
+ <section class="player" aria-label="붐웨커 연주">
+  <div class="player-header">
+   <div><span class="view-label" id="viewName">가로 리듬길</span><h1 id="title">모아의 출발 신호</h1><p id="subtitle">옆으로 오는 음을 보고 함께 연주해요.</p></div>
+   <div class="bar-progress"><strong id="measure">1 / 8 마디</strong><span id="currentBeat">연주 준비</span></div>
+  </div>
+  <div class="stage" id="stage">
+   <canvas id="display" width="1200" height="620" role="img" aria-label="붐웨커 연주 안내 화면"></canvas>
+   <div class="overlay" id="startOverlay"><div class="overlay-card"><strong id="overlayTitle">연주 준비</strong><p id="overlayDescription">전주를 듣고 함께 연주해요.</p><button id="overlayPlay" type="button">연주 시작 <span aria-hidden="true">▶</span></button></div></div>
+  </div>
+  <div class="instrument">
+   <div class="instrument-head"><strong>내 색깔 악기</strong><span id="noteHelp">내가 연주할 음만 진하게 보여요</span></div>
+   <div class="keys" id="keys">
+    <button type="button" data-note="도" aria-label="도 연주"><b>도</b><small>1</small></button>
+    <button type="button" data-note="레" aria-label="레 연주"><b>레</b><small>2</small></button>
+    <button type="button" data-note="미" aria-label="미 연주"><b>미</b><small>3</small></button>
+    <button type="button" data-note="파" aria-label="파 연주"><b>파</b><small>4</small></button>
+    <button type="button" data-note="솔" aria-label="솔 연주"><b>솔</b><small>5</small></button>
+    <button type="button" data-note="라" aria-label="라 연주"><b>라</b><small>6</small></button>
+    <button type="button" data-note="시" aria-label="시 연주"><b>시</b><small>7</small></button>
+    <button type="button" data-note="높은도" aria-label="높은 도 연주"><b>도↑</b><small>8</small></button>
+   </div>
+  </div>
+  <div class="play-controls">
+   <div class="main-controls"><button type="button" class="primary" id="play">연주 시작</button><button type="button" id="reset">다시 하기</button><button type="button" id="record">영상 저장</button></div>
+   <div class="settings">
+    <label>연주곡<select id="song" aria-label="연주곡 선택"></select></label>
+    <label>음 선택<select id="notes" aria-label="연주할 음 개수"><option value="3">3음 · 도 미 솔</option><option value="5" selected>5음 · 도 레 미 솔 라</option><option value="8">8음 · 모두</option></select></label>
+    <label>속도<select id="tempo" aria-label="속도"><option value=".75">천천히</option><option value="1" selected>보통</option><option value="1.15">빠르게</option></select></label>
+    <label>연습 구간<select id="section" aria-label="연습 구간"><option value="all">노래 전체</option></select></label>
+   </div>
+  </div>
+  <details class="more-controls"><summary>연주 옵션</summary><div class="extras">
+   <label><input type="checkbox" id="metronome"> 박자 안내음</label>
+   <label><input type="checkbox" id="loop"> 구간 반복</label>
+   <label><input type="checkbox" id="motion"> 움직임 줄이기</label>
+   <button type="button" id="sound" aria-pressed="true">소리 켜짐</button>
+  </div></details>
+  <div class="message" id="status" role="status" aria-live="polite">화면을 고르고 연주 시작을 누르면 돼요.</div>
+ </section>
+ <div class="links"><a href="../">기존 낙하형 붐웨커</a><a href="../performance-views/">기존 10가지 실험실</a><a href="../rhythm-worlds/">음악여행 6종</a></div>
+</main><footer>일단 해봄 · 울모아쌤 <span>실제 악기 소리는 자동 판정하지 않아요. 노래 전체는 그대로 재생돼요.</span></footer>
+</div>
+</body></html>
