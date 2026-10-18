@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#eef6f5">
+<meta name="description" content="울모아쌤이 만든 여섯 가지 색깔 음악게임. 기존 붐웨커 Studio는 그대로 두고 음악정원, 리듬기차, 리듬다리, 숲속 합주단, 별빛 탐험, 리듬빵집에서 함께 연주해요.">
+<title>모아의 여섯 음악여행 | 일단 해봄 · 울모아쌤</title>
+<link rel="stylesheet" href="./styles.css">
+<script src="./game.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#stage">게임 화면으로 바로가기</a>
+<div class="app">
+<header class="topbar">
+ <div class="brand"><a class="back" href="../" title="기존 붐웨커 Studio로 돌아가기" aria-label="기존 붐웨커 Studio로 돌아가기">←</a><div><div class="eyebrow">일단 해봄 · 울모아쌤</div><strong>모아의 여섯 음악여행</strong></div></div>
+ <div class="topactions"><span class="pill">별도의 새 게임</span><a class="studio-link" href="../">기존 붐웨커 Studio</a></div>
+</header>
+<main>
+<section class="hero" aria-labelledby="heroTitle"><div><p class="kicker">색깔 음악게임 · 여섯 개의 작은 이야기</p><h1 id="heroTitle">내 색을 찾으면, 이야기가 움직여요.</h1><p class="intro">곡은 그대로 흐르고, 맡은 음에 맞춰 함께 연주해요. 화면을 눌러 직접 소리를 내도 좋아요.</p></div><div class="hero-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></section>
+<section class="worlds" aria-label="여섯 가지 게임 선택">
+ <button class="world-card active" type="button" data-world="garden" aria-pressed="true"><span class="world-art garden-art" aria-hidden="true"><i></i></span><strong>음악정원</strong><small>꽃씨를 깨워요</small></button>
+ <button class="world-card" type="button" data-world="train" aria-pressed="false"><span class="world-art train-art" aria-hidden="true"><i></i></span><strong>리듬기차</strong><small>마을을 지나가요</small></button>
+ <button class="world-card" type="button" data-world="bridge" aria-pressed="false"><span class="world-art bridge-art" aria-hidden="true"><i></i></span><strong>리듬다리</strong><small>징검다리를 건너요</small></button>
+ <button class="world-card" type="button" data-world="orchestra" aria-pressed="false"><span class="world-art orchestra-art" aria-hidden="true"><i></i></span><strong>숲속 합주단</strong><small>친구들과 연주해요</small></button>
+ <button class="world-card" type="button" data-world="stars" aria-pressed="false"><span class="world-art stars-art" aria-hidden="true"><i></i></span><strong>별빛 탐험</strong><small>별자리를 밝혀요</small></button>
+ <button class="world-card" type="button" data-world="bakery" aria-pressed="false"><span class="world-art bakery-art" aria-hidden="true"><i></i></span><strong>리듬빵집</strong><small>빵을 완성해요</small></button>
+</section>
+<section class="player" aria-label="연주 게임">
+ <div class="player-heading">
+  <div class="mission-text"><span class="mission-overline" id="missionLabel">모아의 음악정원</span><h2 id="worldTitle">첫 번째 꽃을 피워볼까요?</h2><p id="missionHelp">음악이 지나가면 정원에 꽃이 하나씩 피어나요.</p></div>
+  <div class="chapter"><span>음악 진행</span><strong id="progressText">0%</strong><div class="progress-track"><div id="progressFill" class="progress-fill"></div></div></div>
+ </div>
+ <div class="stage-shell" id="stage"><canvas id="scene" width="1120" height="620" role="img" aria-label="음악에 맞춰 음표가 움직이는 게임 화면"></canvas><div id="startOverlay" class="start-overlay"><div class="overlay-card"><span class="overlay-kicker" id="overlayKicker">음악정원</span><strong id="overlayTitle">준비됐나요?</strong><p id="overlayHelp">소리를 들으며 내 색이 올 때 함께 연주해요.</p><button type="button" id="startBig" class="start-big">연주 시작 <span aria-hidden="true">▶</span></button></div></div><div class="stage-caption" aria-live="polite"><span id="beatHint">음악 시작 전</span><span id="noteHint">도·미·솔부터 시작해요</span></div></div>
+ <div class="pad-panel">
+  <div class="pad-heading"><strong>내 색깔 악기</strong><span id="tapCounter">화면 터치 연주 0회 · 맞는 순간 0회</span></div>
+  <div class="pads" id="pads" aria-label="계이름 악기 버튼">
+   <button data-note="도" class="pad" type="button" aria-label="도 연주, 숫자 1"><b>도</b><small>1</small></button>
+   <button data-note="레" class="pad" type="button" aria-label="레 연주, 숫자 2"><b>레</b><small>2</small></button>
+   <button data-note="미" class="pad" type="button" aria-label="미 연주, 숫자 3"><b>미</b><small>3</small></button>
+   <button data-note="파" class="pad" type="button" aria-label="파 연주, 숫자 4"><b>파</b><small>4</small></button>
+   <button data-note="솔" class="pad" type="button" aria-label="솔 연주, 숫자 5"><b>솔</b><small>5</small></button>
+   <button data-note="라" class="pad" type="button" aria-label="라 연주, 숫자 6"><b>라</b><small>6</small></button>
+   <button data-note="시" class="pad" type="button" aria-label="시 연주, 숫자 7"><b>시</b><small>7</small></button>
+   <button data-note="높은 도" class="pad" type="button" aria-label="높은 도 연주, 숫자 8"><b>도↑</b><small>8</small></button>
+  </div>
+  <p class="pad-note">실제 붐웨커를 두드리면서 연주해도 돼요. 터치 기록은 화면 버튼이나 키보드로 누른 것만 세며, 실제 악기 소리를 채점하지 않아요.</p>
+ </div>
+ <div class="control-panel">
+  <div class="control-main"><button id="playBtn" type="button" class="primary-control">연주 시작</button><button id="resetBtn" type="button" class="secondary-control">처음부터</button><button id="exportBtn" type="button" class="secondary-control">영상 저장</button><button id="soundBtn" type="button" class="secondary-control" aria-pressed="true">소리 켜짐</button></div>
+  <div class="settings">
+   <label>연주곡<select id="songSelect" aria-label="연주할 창작곡 선택"></select></label>
+   <label>연주할 음<select id="notesSelect" aria-label="연주할 음 개수"><option value="3">3음 · 도 미 솔</option><option value="5" selected>5음 · 도 레 미 솔 라</option><option value="8">8음 · 모두</option></select></label>
+   <label>속도<select id="speedSelect" aria-label="연주 속도 선택"><option value=".75">느리게 · 75%</option><option value="1" selected>보통 · 100%</option><option value="1.2">빠르게 · 120%</option></select></label>
+   <label>진행 구간<select id="sectionSelect" aria-label="연습할 구간 선택"><option value="all">전체 연주</option><option value="0">앞 4마디</option><option value="4">뒤 4마디</option></select></label>
+  </div>
+  <div class="control-detail"><label class="toggle"><input id="loopToggle" type="checkbox"><span>구간 반복</span></label><label class="toggle"><input id="motionToggle" type="checkbox"><span>움직임 줄이기</span></label><span class="hint-inline" id="status" role="status" aria-live="polite">여섯 음악여행 중 원하는 곳을 골라주세요.</span></div>
+ </div>
+</section>
+<section class="howto" aria-label="이용 안내"><strong>같은 음악, 서로 다른 여섯 여행</strong><p>모든 곡은 직접 구성한 연습 선율과 브라우저에서 생성하는 악기 소리를 사용해요. 각 테마의 이야기는 음악 진행에 따라 펼쳐지고, 화면 악기를 제때 터치하면 별도의 반응이 나와요. 음악이 흐른 것과 실제로 연주에 성공한 것은 구분해 보여줍니다.</p></section>
+</main>
+<footer><span>일단 해봄 · 울모아쌤</span><a href="../">기존 붐웨커 Studio는 그대로</a></footer>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>window.__RHYTHM_WORLDS_VERSION__='six-worlds-v1';</script>
+</body>
+</html>
