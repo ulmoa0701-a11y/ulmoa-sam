@@ -61,7 +61,7 @@ const {chromium}=require("playwright-core");
   await page.locator("#overlayPlay").click();
   await page.waitForTimeout(410);
   const a=await page.evaluate(()=>window.__performanceViewsQA__.state());assert(a.playing&&a.clockAudio);
-  await page.locator('.view-choice[data-view="clock"]').click();
+  await page.locator('.view-choice[data-view="bar"]').click();
   await page.waitForTimeout(350);
   const b=await page.evaluate(()=>window.__performanceViewsQA__.state());
   assert(b.playing&&b.clockAudio);assert(b.position>a.position,"view switch should not restart audible music");
