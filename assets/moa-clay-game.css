@@ -1,0 +1,56 @@
+/* 공통 클레이 아트 — 주의: 과제/정답 자극은 수정하지 않는다. */
+.moa-clay-sprite{
+ display:inline-block; flex:none; width:58px;height:58px;pointer-events:none;
+ background-image:url("moa-clay-34-atlas.webp");background-repeat:no-repeat;
+ background-size:600% 600%;background-color:transparent;
+ filter:drop-shadow(0 4px 3px rgba(66,80,64,.12));
+}
+.play-card-media{position:relative}
+.moa-clay-card-corner{
+ position:absolute;top:9px;right:9px;width:62px;height:62px;z-index:1;
+ border-radius:17px;border:2px solid rgba(255,255,255,.92);
+ background-color:rgba(255,250,244,.91);
+ box-shadow:0 4px 9px rgba(30,60,45,.12);
+}
+#gardenGamePanel .library-card{position:relative}
+.moa-clay-library-badge{
+ position:absolute;right:9px;bottom:9px;width:42px;height:42px;
+ border-radius:10px;background-color:rgba(255,254,247,.88);
+ box-shadow:0 2px 5px rgba(34,65,51,.11);
+}
+#introScreen .intro-copy{position:relative}
+#introScreen .moa-clay-intro-badge{
+ position:absolute;right:0;top:0;width:65px;height:65px;
+}
+#introScreen .intro-copy:has(>.moa-clay-intro-badge){padding-right:70px}
+#gameScreen .game-name{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+#gameScreen .moa-clay-playing-badge{width:34px;height:34px}
+#resultScreen .moa-clay-result-badge,#finish .moa-clay-result-badge{
+ display:block;margin:8px auto;width:66px;height:66px;
+}
+.mission-banner{position:relative}
+.mission-banner .moa-clay-mission-badge{
+ position:absolute;right:113px;bottom:8px;width:55px;height:55px;
+}
+#intro .eyebrow .moa-clay-hand-badge{
+ display:inline-block;width:36px;height:36px;vertical-align:middle;margin-left:8px;
+}
+.topbar .brand .moa-clay-header-badge{width:36px;height:36px;vertical-align:middle;margin-left:6px}
+.heading{position:relative}
+.heading .moa-clay-intro-badge{position:absolute;right:135px;top:6px;width:52px;height:52px}
+.rec-welcome{position:relative}
+.rec-welcome>.moa-clay-recorder-badge{position:absolute;right:9px;bottom:9px;width:60px;height:60px}
+.game-choice .choice{position:relative}
+.game-choice .moa-clay-breath-choice{
+ position:absolute;right:11px;top:8px;width:48px;height:48px;
+ background-color:rgba(255,255,255,.6);border-radius:12px;
+}
+.play-title .moa-clay-playing-badge{width:35px;height:35px;vertical-align:middle;margin-left:8px}
+@media(max-width:600px){
+ .moa-clay-card-corner{width:49px;height:49px;top:6px;right:6px;border-radius:13px}
+ .mission-banner .moa-clay-mission-badge{width:40px;height:40px;right:89px;bottom:10px}
+ .heading .moa-clay-intro-badge{right:90px;width:38px;height:38px}
+ .rec-welcome>.moa-clay-recorder-badge{width:48px;height:48px}
+ .game-choice .moa-clay-breath-choice{width:37px;height:37px;right:5px;top:5px}
+}
+@media(prefers-reduced-motion:reduce){.moa-clay-sprite{transition:none;animation:none}}

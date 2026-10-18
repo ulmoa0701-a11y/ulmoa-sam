@@ -1,0 +1,52 @@
+name: MoA Clay 34 Game Integration QA
+on:
+  pull_request:
+    paths:
+      - 'assets/moa-clay-game.*'
+      - 'assets/moa-clay-34-atlas.webp'
+      - 'gardens/index.html'
+      - 'thinking-garden/**/index.html'
+      - 'breath-garden/index.html'
+      - 'qa/clay-34-integration.mjs'
+  push:
+    branches: [main]
+    paths:
+      - 'assets/moa-clay-game.*'
+      - 'assets/moa-clay-34-atlas.webp'
+      - 'gardens/index.html'
+      - 'thinking-garden/**/index.html'
+      - 'breath-garden/index.html'
+      - 'qa/clay-34-integration.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-clay-art:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Browser package
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Chrome executable
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Serve site
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/clay-34-test-server.log 2>&1 &
+          for i in {1..40}; do curl -fsS http://127.0.0.1:8765/gardens/ >/dev/null && exit 0; sleep 0.25; done
+          cat /tmp/clay-34-test-server.log
+          exit 1
+      - name: Run artwork, links and viewport checks
+        run: node qa/clay-34-integration.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: clay-34-screenshots
+          path: qa/clay-34-artifacts
+          if-no-files-found: warn
