@@ -1,0 +1,41 @@
+/* 그림 크게 보기 — 모든 34개 게임의 실제 미리보기 이미지를 보존하고 글 정보만 축소 */
+.gardens-page .garden-picture-toggle{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  margin:11px 0 0;min-height:46px;padding:9px 16px;border-radius:13px;
+  border:2px solid #b8d8c2;border-bottom-width:4px;background:#f7fcf8;
+  color:#28694d;font-size:14px;font-weight:850;cursor:pointer;
+}
+.gardens-page .garden-picture-toggle:hover,.gardens-page .garden-picture-toggle:focus-visible{background:#eaf7ec}
+.gardens-page .garden-picture-toggle[aria-pressed=true]{background:#266c50;color:#fff;border-color:#20583f}
+.gardens-page .garden-picture-toggle svg{width:21px;height:21px;flex:none}
+.gardens-page .garden-picture-description{font-size:12px;line-height:1.5;color:#647c6b;margin:8px 0 0}
+.gardens-page .garden-picture-description[hidden]{display:none}
+.gardens-page.garden-picture-mode .garden-intro,
+.gardens-page.garden-picture-mode .garden-filter-title span,
+.gardens-page.garden-picture-mode .garden-note{display:none}
+.gardens-page.garden-picture-mode .garden-section{padding-top:21px}
+.gardens-page.garden-picture-mode .plays{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.gardens-page.garden-picture-mode .play-card-media{aspect-ratio:4 / 3}
+.gardens-page.garden-picture-mode .play-card-media img{object-fit:cover}
+.gardens-page.garden-picture-mode .play-card-details{padding:12px;gap:8px}
+.gardens-page.garden-picture-mode .play-card-details h3{
+  font-size:16px;line-height:1.4;min-height:45px;margin:0;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
+}
+.gardens-page.garden-picture-mode .play-story-name,
+.gardens-page.garden-picture-mode .play-simple-desc,
+.gardens-page.garden-picture-mode .play-life-one-line,
+.gardens-page.garden-picture-mode .play-activity{display:none}
+.gardens-page.garden-picture-mode .play-buttons{margin-top:auto}
+.gardens-page.garden-picture-mode .play-buttons .play-preview-btn,
+.gardens-page.garden-picture-mode .play-buttons .play-start-btn{min-height:44px;font-size:12px}
+@media(max-width:1090px){.gardens-page.garden-picture-mode .plays{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:750px){.gardens-page.garden-picture-mode .plays{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:530px){
+  .gardens-page.garden-picture-mode .plays{grid-template-columns:1fr}
+  .gardens-page.garden-picture-mode .play-card-media{aspect-ratio:16 / 8}
+  .gardens-page.garden-picture-mode .play-card-details h3{font-size:17px;min-height:0}
+  .gardens-page.garden-picture-mode .play-card-details{padding:13px}
+  .gardens-page.garden-picture-mode .garden-discovery-controls{padding:11px}
+}
+@media(prefers-reduced-motion:reduce){.gardens-page .garden-picture-toggle{transition:none}}
