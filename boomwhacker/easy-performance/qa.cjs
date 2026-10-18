@@ -81,7 +81,7 @@ const {chromium}=require("playwright-core");
   if(name==="desktop"){
    await page.locator("#song").selectOption("moa-signal");
    await page.locator("#section").selectOption("0");
-   await page.locator('.view-choice[data-view="ribbon"]').click();
+   await page.locator('.view-choice[data-view="score"]').click();
    const [download]=await Promise.all([page.waitForEvent("download",{timeout:65000}),page.locator("#record").click()]);
    const video=await download.path();
    assert(video&&fs.statSync(video).size>15000,"real MediaRecorder video must not be empty");
