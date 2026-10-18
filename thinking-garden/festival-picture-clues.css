@@ -1,0 +1,20 @@
+/* Festival: picture-first two-step relationship cards; text/audio remain optional. */
+#gameWorld .festival-picture-evidence{display:grid;justify-items:stretch;gap:12px;width:min(100%,760px);padding:15px;border:2px solid #d3e6cd;border-radius:22px;background:#f6faf1}
+#gameWorld .festival-picture-evidence>strong{color:#345c49;font-size:clamp(14px,2.4vw,17px)}
+#gameWorld .festival-clue{display:flex;align-items:center;gap:12px;min-width:0;padding:10px 12px;border:1px solid #dce8d8;border-radius:17px;background:white}
+#gameWorld .festival-clue-friend{flex:none;width:42px;height:42px;object-fit:contain}
+#gameWorld .festival-clue-flow{display:flex;align-items:center;justify-content:center;gap:6px;flex:1;min-width:0}
+#gameWorld .festival-clue-item{display:grid;justify-items:center;align-content:center;min-width:0;flex:1;gap:4px;min-height:84px;padding:6px;border-radius:14px;background:#eef8ed}
+#gameWorld .festival-clue-item span{font-size:clamp(24px,4.3vw,36px);line-height:1.2}
+#gameWorld .festival-clue-item strong{font-size:clamp(12px,2.4vw,15px);line-height:1.25;text-align:center;word-break:keep-all}
+#gameWorld .festival-clue-arrow{color:#5c8668;font-size:24px;font-weight:900}
+#gameWorld .festival-clue button[data-plan="listen"]{flex:none;padding:9px 12px;min-height:44px;border:2px solid #b8d7c2;border-radius:14px;background:#eef8f4;color:#325946;font-size:13px;font-weight:850;cursor:pointer}
+#gameWorld .festival-clue button[data-plan="listen"]:focus-visible{outline:3px solid #d5a449;outline-offset:2px}
+@media(max-width:620px){
+ #gameWorld .festival-picture-evidence{padding:9px;gap:9px}
+ #gameWorld .festival-clue{flex-wrap:wrap;gap:6px;padding:8px}
+ #gameWorld .festival-clue-friend{width:35px;height:35px}
+ #gameWorld .festival-clue-flow{flex:1 1 calc(100% - 50px)}
+ #gameWorld .festival-clue-item{min-height:75px;padding:4px}
+ #gameWorld .festival-clue button[data-plan="listen"]{width:100%;font-size:13px;padding:7px}
+}
