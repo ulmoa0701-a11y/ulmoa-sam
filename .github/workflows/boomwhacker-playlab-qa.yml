@@ -1,0 +1,49 @@
+name: Boomwhacker Playlab 8 Games QA
+on:
+  pull_request:
+    paths:
+      - 'boomwhacker/playlab/**'
+      - 'boomwhacker/rhythm-worlds/**'
+      - '.github/workflows/boomwhacker-playlab-qa.yml'
+  push:
+    branches: ['feat/boomwhacker-playlab-eight-games-20261018']
+    paths:
+      - 'boomwhacker/playlab/**'
+      - '.github/workflows/boomwhacker-playlab-qa.yml'
+jobs:
+  playlab-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Korean fonts
+        run: |
+          if fc-list :lang=ko family | grep -q .; then echo 'Korean fonts present'; else
+            timeout 60s sudo apt-get update -qq && timeout 90s sudo apt-get install -y -qq fonts-noto-cjk || true
+            fc-cache -f || true
+          fi
+      - name: Install Playwright core
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Locate Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Start local test server
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/playlab-server.log 2>&1 &
+          for i in {1..20}; do curl -fsS http://127.0.0.1:8765/boomwhacker/playlab/ >/dev/null && exit 0; sleep .25; done
+          cat /tmp/playlab-server.log
+          exit 1
+      - name: Run Playlab full browser interaction QA
+        run: node boomwhacker/playlab/qa.cjs
+      - name: Upload screenshots and report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: boomwhacker-playlab-8-games-qa
+          path: boomwhacker/playlab/qa-artifacts
+          if-no-files-found: warn

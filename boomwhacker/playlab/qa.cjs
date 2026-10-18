@@ -1,0 +1,84 @@
+const assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path"),crypto=require("node:crypto");
+const {chromium}=require("playwright-core");
+(async()=>{
+ const dir=path.join(__dirname,"qa-artifacts");fs.mkdirSync(dir,{recursive:true});
+ const browser=await chromium.launch({executablePath:process.env.CHROME_BIN||"/usr/bin/google-chrome",headless:true,args:["--no-sandbox","--autoplay-policy=no-user-gesture-required"]});
+ const base=process.env.BASE_URL||"http://127.0.0.1:8765/boomwhacker/playlab/";
+ const tests=[],errors=[];
+ for(const vp of [{width:1366,height:900,name:"desktop"},{width:390,height:844,name:"mobile"}]){
+ const page=await browser.newPage({viewport:vp,deviceScaleFactor:1,hasTouch:vp.width<600,isMobile:vp.width<600});
+ page.on("pageerror",e=>errors.push(vp.name+": "+e));page.on("console",m=>{if(m.type()==="error")errors.push(vp.name+": console "+m.text())});
+ await page.goto(base,{waitUntil:"domcontentloaded"});await page.waitForFunction(()=>Boolean(window.__playlabQA));
+ assert.equal(await page.locator(".mode-card").count(),8);
+ assert.equal(await page.locator(".pad").count(),8);
+ let top=await page.locator("#scene").boundingBox();assert(top&&top.y<460,"game scene too low in "+vp.name+" top="+top?.y);
+ const hashes=[];
+ for(const mode of ["echo","memory","missing","compare","signal","composer","ensemble","maze"]){
+  await page.locator('.mode-card[data-mode="'+mode+'"]').click();
+  const state=await page.evaluate(()=>window.__playlabQA.state());assert.equal(state.mode,mode);
+  assert.equal(await page.locator(".mode-card.on").count(),1);
+  const snap=await page.locator("#scene").screenshot();hashes.push(crypto.createHash("sha256").update(snap).digest("hex"));assert(snap.length>3000);
+  await page.screenshot({path:path.join(dir,vp.name+"-"+mode+".png"),fullPage:true});
+ }
+ assert.equal(new Set(hashes).size,8,"eight scenes must be visually different");
+ tests.push(vp.name+": 8 visually distinct selectable game rules");
+ for(const n of ["3","5","8"]){await page.locator("#range").selectOption(n);const state=await page.evaluate(()=>window.__playlabQA.state());assert.equal(state.notes.length,Number(n));assert.equal(await page.locator(".pad:not(:disabled)").count(),0,"maze disables game pads")}
+ tests.push(vp.name+": levels and masks");
+ await page.locator(".mode-card[data-mode=echo]").click();
+ await page.locator("#range").selectOption("3");
+ await page.locator("#level").selectOption("1");
+ await page.locator("#start").click();
+ await page.waitForFunction(()=>window.__playlabQA.state().phase==="answer",{timeout:10000});
+ const state=await page.evaluate(()=>window.__playlabQA.state());
+ assert.equal(state.pattern.length,2);assert.equal(state.phase,"answer");
+ for(const idx of state.pattern){await page.locator(".pad").nth(idx).dispatchEvent("pointerdown")}
+ const r=await page.evaluate(()=>window.__playlabQA.state());assert(r.phase==="feedback"||r.phase==="complete","sequence should complete");
+ tests.push(vp.name+": echo actual child sequence success");
+ await page.locator(".mode-card[data-mode=memory]").click();
+ await page.locator("#start").click();
+ await page.waitForFunction(()=>window.__playlabQA.state().phase==="answer",{timeout:10000});
+ const mem=await page.evaluate(()=>window.__playlabQA.state());assert(mem.pattern.length>=2);
+ for(const idx of mem.pattern){await page.locator(".pad").nth(idx).dispatchEvent("pointerdown")}
+ tests.push(vp.name+": visual memory replay");
+ await page.locator(".mode-card[data-mode=missing]").click();await page.locator("#start").click();
+ await page.waitForFunction(()=>window.__playlabQA.state().phase==="answer",{timeout:16000});
+ const miss=await page.evaluate(()=>window.__playlabQA.state());assert(miss.missing>=0);
+ await page.locator(".pad").nth(miss.pattern[miss.missing]).dispatchEvent("pointerdown");
+ tests.push(vp.name+": missing-note recognition with real audio sequence");
+ await page.locator(".mode-card[data-mode=compare]").click();await page.locator("#start").click();
+ await page.waitForFunction(()=>window.__playlabQA.state().phase==="answer",{timeout:16000});
+ const comp=await page.evaluate(()=>window.__playlabQA.state());
+ await page.getByRole("button",{name:comp.same?"똑같아요":"달라요"}).click();
+ tests.push(vp.name+": independent pitch comparison and answers");
+ await page.locator(".mode-card[data-mode=signal]").click();await page.locator("#start").click();await page.waitForTimeout(220);
+ const sig=await page.evaluate(()=>window.__playlabQA.state());assert.equal(sig.phase,"signal-running");assert(sig.signal.length>=7);
+ tests.push(vp.name+": inhibition signal rounds start and present timed cues");
+ await page.locator(".mode-card[data-mode=composer]").click();
+ await page.locator("#start").click();
+ for(const idx of [0,2,4,0])await page.locator(".pad").nth(idx).dispatchEvent("pointerdown");
+ let composition=await page.evaluate(()=>window.__playlabQA.state());assert.deepEqual(composition.composer,[0,2,4,0]);
+ await page.getByRole("button",{name:"내 노래 듣기"}).click();await page.waitForFunction(()=>window.__playlabQA.state().phase==="composer",{timeout:8000});
+ composition=await page.evaluate(()=>window.__playlabQA.state());assert.deepEqual(composition.composer,[0,2,4,0]);
+ tests.push(vp.name+": composer records and replays original melody");
+ await page.locator(".mode-card[data-mode=ensemble]").click();await page.locator("#start").click();
+ await page.getByRole("button",{name:"2번 연주자"}).click();
+ assert.equal(await page.evaluate(()=>window.__playlabQA.state().role),2);
+ await page.getByRole("button",{name:"합주 출발"}).click();
+ await page.waitForFunction(()=>window.__playlabQA.state().phase==="ensemble-running",{timeout:5000});
+ tests.push(vp.name+": ensemble role selection and actual timed music");
+ await page.locator(".mode-card[data-mode=maze]").click();await page.locator("#start").click();
+ await page.waitForFunction(()=>window.__playlabQA.state().phase==="answer",{timeout:12000});
+ const mz=await page.evaluate(()=>window.__playlabQA.state());
+ assert([0,1].includes(mz.answer));
+ await page.getByRole("button",{name:mz.answer===0?"왼쪽으로":"오른쪽으로"}).click();
+ tests.push(vp.name+": maze preview and correct path choice");
+ const bounds=await page.evaluate(()=>({viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth}));
+ assert(bounds.scrollWidth<=bounds.viewport+2,"horizontal overflow "+JSON.stringify(bounds));
+ tests.push(vp.name+": no overflow at "+vp.width+"px and game visible above fold");
+ await page.close();
+ }
+ assert.deepEqual(errors,[],"browser javascript and console errors");
+ fs.writeFileSync(path.join(dir,"report.json"),JSON.stringify({status:"PASS",tests,errors},null,2));
+ console.log(JSON.stringify({status:"PASS",tests,errors}));
+ await browser.close();
+})().catch(err=>{console.error("PLAYLAB FAIL",err.stack||err);process.exit(1)});

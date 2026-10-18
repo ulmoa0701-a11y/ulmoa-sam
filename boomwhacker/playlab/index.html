@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f7f9f5">
+<meta name="description" content="울모아쌤의 음악 놀이터. 듣기·기억·리듬·작곡·합주·길찾기 8개 다른 규칙의 음악게임.">
+<title>모아의 음악 놀이터 | 여덟 가지 진짜 음악게임</title>
+<link rel="stylesheet" href="./styles.css"><script src="./playlab.js" defer></script>
+</head><body>
+<a class="skip" href="#gameScene">게임 화면으로 건너뛰기</a>
+<div class="app">
+<header class="top"><div class="brand"><a href="../rhythm-worlds/" aria-label="여섯 음악여행으로 돌아가기" class="back">←</a><div><small>일단 해봄 · 울모아쌤</small><strong>모아의 음악 놀이터</strong></div></div><nav><a href="../rhythm-worlds/">여섯 음악여행</a><a href="../">붐웨커 Studio</a></nav></header>
+<main>
+<section class="select-area" aria-label="놀이 종류 선택">
+<div class="selector-heading"><div><strong>어떤 놀이를 할까?</strong><span>그림을 누르면 다른 놀이가 시작돼요</span></div><span class="count">8가지 놀이</span></div>
+<div class="mode-grid" id="modeGrid">
+<button type="button" class="mode-card on" data-mode="echo" aria-pressed="true"><i class="mode-visual"><span class="mini-echo"></span></i><b>리듬 대화</b><small>듣고 따라해</small></button>
+<button type="button" class="mode-card" data-mode="memory" aria-pressed="false"><i class="mode-visual"><span class="mini-memory"></span></i><b>기억 불빛</b><small>보고 기억해</small></button>
+<button type="button" class="mode-card" data-mode="missing" aria-pressed="false"><i class="mode-visual"><span class="mini-missing"></span></i><b>사라진 음</b><small>빈칸을 찾아</small></button>
+<button type="button" class="mode-card" data-mode="compare" aria-pressed="false"><i class="mode-visual"><span class="mini-compare"></span></i><b>소리 비교</b><small>귀로 구별해</small></button>
+<button type="button" class="mode-card" data-mode="signal" aria-pressed="false"><i class="mode-visual"><span class="mini-signal"></span></i><b>신호 게임</b><small>초록색에 연주</small></button>
+<button type="button" class="mode-card" data-mode="composer" aria-pressed="false"><i class="mode-visual"><span class="mini-composer"></span></i><b>꼬마 작곡</b><small>내 노래 만들기</small></button>
+<button type="button" class="mode-card" data-mode="ensemble" aria-pressed="false"><i class="mode-visual"><span class="mini-ensemble"></span></i><b>우리 합주</b><small>내 음만 맡아</small></button>
+<button type="button" class="mode-card" data-mode="maze" aria-pressed="false"><i class="mode-visual"><span class="mini-maze"></span></i><b>소리 미로</b><small>같은 길 찾기</small></button>
+</div>
+</section>
+<section class="game" aria-label="음악 놀이">
+<div class="mission"><div><span id="modeTag" class="mode-tag">1 / 8 · 리듬 대화</span><h1 id="gameTitle">모아의 소리를 듣고 따라해!</h1><p id="gameDescription">짧은 소리를 듣고, 같은 순서로 악기를 눌러요.</p></div><div class="round"><small id="roundLabel">1 / 5</small><div class="track"><i id="roundFill"></i></div></div></div>
+<div class="gameScene" id="gameScene"><canvas id="scene" width="1080" height="375" role="img" aria-label="게임 진행을 그림으로 표시하는 화면"></canvas><div class="scene-message" aria-live="polite"><b id="prompt">시작을 눌러요</b><span id="subPrompt">준비되면 음악을 들어요</span></div></div>
+<div class="feedback" id="feedback" role="status" aria-live="polite">다양한 방법으로 음악을 듣고, 기억하고, 연주해요.</div>
+<div class="choice-strip" id="choices" hidden aria-label="선택해서 대답하기"></div>
+<div class="instrument-panel"><div class="panel-heading"><strong>나의 색깔 악기</strong><span id="padHelp">소리를 듣고 같은 순서로 눌러요</span></div><div id="pads" class="pads" aria-label="색깔 악기">
+<button data-note="도" type="button" class="pad" aria-label="도 연주"><b>도</b><span>1</span></button>
+<button data-note="레" type="button" class="pad" aria-label="레 연주"><b>레</b><span>2</span></button>
+<button data-note="미" type="button" class="pad" aria-label="미 연주"><b>미</b><span>3</span></button>
+<button data-note="파" type="button" class="pad" aria-label="파 연주"><b>파</b><span>4</span></button>
+<button data-note="솔" type="button" class="pad" aria-label="솔 연주"><b>솔</b><span>5</span></button>
+<button data-note="라" type="button" class="pad" aria-label="라 연주"><b>라</b><span>6</span></button>
+<button data-note="시" type="button" class="pad" aria-label="시 연주"><b>시</b><span>7</span></button>
+<button data-note="높은 도" type="button" class="pad" aria-label="높은 도 연주"><b>도↑</b><span>8</span></button>
+</div></div>
+<div class="toolbar"><div class="controls"><button id="start" type="button" class="primary">놀이 시작</button><button id="replay" type="button">다시 듣기</button><button id="reset" type="button">처음부터</button><button id="sound" type="button" aria-pressed="true">소리 켜짐</button></div><div class="prefs"><label>난이도<select id="level"><option value="1">쉬움</option><option value="2" selected>보통</option><option value="3">도전</option></select></label><label>사용할 음<select id="range"><option value="3">3음</option><option value="5" selected>5음</option><option value="8">8음</option></select></label></div></div>
+<details class="hint-box"><summary>놀이 방식 · 실제 악기 사용 안내</summary><p id="how">소리를 들은 다음 같은 순서로 색깔 악기를 눌러요.</p><p>화면 터치나 숫자키 1~8을 눌러서 대답할 수 있어요. 실제 붐웨커 소리를 마이크로 채점하지 않으므로, 직접 악기를 치는 활동은 선생님과 함께 확인하는 방식이에요. 틀려도 다시 들어보고 시도할 수 있어요.</p></details>
+</section>
+</main>
+<footer><span>일단 해봄 · 울모아쌤</span><span>창작 연습 음형 · 브라우저 합성음</span></footer></div>
+</body></html>
