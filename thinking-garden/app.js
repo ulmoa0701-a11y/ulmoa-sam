@@ -266,7 +266,47 @@ function renderPath(){
 }
 function renderCalm(){let ready=false;const useYellow=practiceStep()>=2;missionText.textContent=useYellow?'빨강·노랑은 기다리고 초록에 톡!':'초록불에만 눌러 건너요!';missionSub.textContent=useYellow?'빨간불과 노란불에는 기다리고, 초록불에만 눌러요.':'차가 지나갈 때는 기다리고 초록 신호가 켜졌을 때만 눌러요.';say(missionText.textContent);area.innerHTML='<div class="basic-game calm-game road-game"><div class="traffic-scene"><div class="traffic-light"><i class="red on"></i><i class="yellow"></i><i class="green"></i></div><div class="road"><span class="road-car">🚗</span><div class="zebra"><i></i><i></i><i></i><i></i><i></i></div><img class="road-moa" src="assets/moa-default.png" alt=""><span class="road-goal">🌳</span></div><button id="signalBtn" class="signal-btn wait"><span>🔴</span><b>기다려요</b></button><p id="signalMsg">차가 지나가요. 손을 쉬고 기다려요.</p></div></div>';const b=$('#signalBtn'),scene=area.querySelector('.traffic-scene'),light=scene.querySelector('.traffic-light'),car=scene.querySelector('.road-car');const goGreen=()=>{ready=true;light.querySelector('.red').classList.remove('on');light.querySelector('.yellow').classList.remove('on');light.querySelector('.green').classList.add('on');b.className='signal-btn go';b.innerHTML='<span>🟢</span><b>지금 건너요!</b>';$('#signalMsg').textContent='초록불! 지금 톡!';sfx('ok')};const arm=()=>{ready=false;scene.classList.remove('cross-success');light.querySelector('.red').classList.add('on');light.querySelector('.yellow').classList.remove('on');light.querySelector('.green').classList.remove('on');b.className='signal-btn wait';b.innerHTML='<span>🔴</span><b>기다려요</b>';$('#signalMsg').textContent='차가 지나가요. 손을 쉬고 기다려요.';car.classList.remove('drive');void car.offsetWidth;car.classList.add('drive');later(()=>{if(useYellow){light.querySelector('.red').classList.remove('on');light.querySelector('.yellow').classList.add('on');b.className='signal-btn caution';b.innerHTML='<span>🟡</span><b>조금 더 기다려요</b>';$('#signalMsg').textContent='노란불도 아직 기다려요.';later(goGreen,650+Math.random()*500)}else goGreen()},1100+Math.random()*1200)};b.onclick=()=>{if(state.lock)return;if(!ready){const r=basicObservation();if(r){r.earlySignalTaps=(r.earlySignalTaps||0)+1;if(!r.signalFirst)r.signalFirst='기다림 중 누름';}sfx('tap');scene.classList.add('too-soon');flash(light.querySelector('.yellow').classList.contains('on')?'노란불도 기다려요. 초록불까지 조금 더!':'아직 기다리는 중이에요. 초록불이 켜지면 눌러요.');later(()=>scene.classList.remove('too-soon'),450);/* Keep original signal timer: premature taps never prolong the waiting period. */}else{const r=basicObservation();if(r){r.greenSignalTaps=(r.greenSignalTaps||0)+1;if(!r.signalFirst)r.signalFirst='초록불에 누름';}scene.classList.add('cross-success');addSeeds(10);sfx('ok');flash('안전하게 건넜어요! 🚦');roundGate(scene,'다음 길 건너기 ▶',950)}};arm()}
 
-function renderInside(){const need=3+practiceStep();let placed=0;missionText.textContent=`울타리 안에 별 ${need}개를 심어요!`;missionSub.textContent='넓은 들판 중 연두색 울타리 안에만 별을 심어요.';say(missionText.textContent);area.innerHTML=`<div class="basic-game"><div class="mini-count" id="miniCount">⭐ 0 / ${need}</div><div class="inside-stage-new" id="insideStage"><div class="inside-zone" id="insideZone"><span>울타리 안</span></div></div></div>`;const stage=$('#insideStage'),z=$('#insideZone');stage.onclick=e=>{if(state.lock||placed>=need)return;if(!e.target.closest('#insideZone')){sfx('no');flash('울타리 안에 심어봐요.');const p=document.createElement('b');p.className='outside-ripple';p.style.left=`${e.offsetX}px`;p.style.top=`${e.offsetY}px`;stage.appendChild(p);later(()=>p.remove(),420);return}const r=z.getBoundingClientRect(),star=document.createElement('i');star.textContent='⭐';star.style.left=`${e.clientX-r.left}px`;star.style.top=`${e.clientY-r.top}px`;z.appendChild(star);placed++;$('#miniCount').textContent=`⭐ ${placed} / ${need}`;addSeeds(Math.ceil(10/need));sfx('ok');if(placed===need){flash('별밭 완성!');roundGate(area.querySelector('.basic-game'),'다음 별밭 ▶',500)}}}
+function renderInside(){
+ const need=3+practiceStep();let placed=0;
+ missionText.textContent='울타리 안에 별을 심어요!';
+ missionSub.textContent='연두색 울타리 안에 별을 심어 정원을 완성해요.';
+ say(missionText.textContent);
+ area.innerHTML='<div class="basic-game inside-garden"><div class="mini-count" id="miniCount">⭐ 0 / '+need+'</div><div class="inside-stage-new" id="insideStage"><div class="inside-zone" id="insideZone" role="button" tabindex="0" aria-label="울타리 안에 별 심기, 누르거나 엔터키로 심기"><span>울타리 안</span></div></div><p class="inside-key-help">울타리 안을 터치하거나 키보드 엔터키로 심을 수 있어요.</p></div>';
+ const stage=$('#insideStage'),z=$('#insideZone');
+ function noteChoice(inside,keyboard=false){
+  const obs=basicObservation();if(!obs)return;
+  if(!obs.fenceFirst)obs.fenceFirst=inside?'울타리 안':'울타리 밖';
+  if(inside)obs.fenceInside=(obs.fenceInside||0)+1;
+  else obs.fenceOutside=(obs.fenceOutside||0)+1;
+  if(keyboard)obs.fenceKeyboard=(obs.fenceKeyboard||0)+1;
+ }
+ function plantAt(x,y,keyboard=false){
+  if(state.lock||placed>=need)return;
+  noteChoice(true,keyboard);
+  const rect=z.getBoundingClientRect(),star=document.createElement('i');
+  star.textContent='⭐';star.style.left=(x-rect.left)+'px';star.style.top=(y-rect.top)+'px';
+  star.setAttribute('aria-hidden','true');z.appendChild(star);
+  placed++;$('#miniCount').textContent='⭐ '+placed+' / '+need;
+  addSeeds(Math.ceil(10/need));sfx('ok');
+  if(placed===need){flash('울타리 안 별밭 완성!');roundGate(area.querySelector('.basic-game'),'다음 별밭 ▶',500);}
+ }
+ stage.onclick=e=>{
+  if(state.lock||placed>=need)return;
+  if(!e.target.closest('#insideZone')){
+   noteChoice(false);sfx('tap');flash('별은 울타리 안에 심어요.');
+   const mark=document.createElement('b');mark.className='outside-ripple';mark.style.left=e.offsetX+'px';mark.style.top=e.offsetY+'px';stage.appendChild(mark);later(()=>mark.remove(),420);return;
+  }
+  plantAt(e.clientX,e.clientY);
+ };
+ z.addEventListener('keydown',e=>{
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  e.preventDefault();if(state.lock||placed>=need)return;
+  const rect=z.getBoundingClientRect();
+  const x=rect.left+rect.width*(.24+.25*(placed%3));
+  const y=rect.top+rect.height*(.35+.3*(Math.floor(placed/3)%2));
+  plantAt(x,y,true);
+ });
+}
 function renderTargets(){
  const total=4+practiceStep()*2,decoys=practiceStep()>=2?Math.min(3,practiceStep()-1):0;
  let done=0;
