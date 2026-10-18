@@ -46,6 +46,15 @@ function recordShapeAttempt(correct){
  r.attempts++;
  if(correct)r.finalCorrect='O';
 }
+function recordGardenChoice(ok,{repeat=false}={}){
+ if(!['flower','hide','path','targets'].includes(state.game))return;
+ const r=basicObservation();if(!r)return;
+ if(repeat){r.gardenRepeat=(r.gardenRepeat||0)+1;return;}
+ if(!r.gardenFirst)r.gardenFirst=ok?'O':'X';
+ r.gardenChoices=(r.gardenChoices||0)+1;
+ if(!ok)r.gardenErrors=(r.gardenErrors||0)+1;
+}
+function completeGardenQuest(){const r=basicObservation();if(r)r.gardenFinished=true;}
 function finishBasicRound(){const r=basicObservation();if(r)r.completed=true;}
 const LEVEL_NAMES={easy:'쉬움',normal:'보통',hard:'어려움'};
 const DEFAULT_COUNTS={easy:10,normal:20,hard:30};
@@ -173,21 +182,24 @@ function renderSameShape(){
 }
 function renderFlower(){
  const need=3+Math.min(practiceStep(),2),flowers=['🌷','🌼','🌸','🌻','🌺'],distractors=['🍃','🪨','🍄','🌱'];
- const good=Array.from({length:need},(_,i)=>flowers[(i+practiceStep())%flowers.length]);
- const bad=Array.from({length:3+practiceStep()},(_,i)=>distractors[i%distractors.length]);
+ const good=Array.from({length:need},(_,i)=>flowers[(i+state.round+practiceStep())%flowers.length]);
+ const bad=Array.from({length:3+practiceStep()},(_,i)=>distractors[(i+state.round)%distractors.length]);
  const pool=shuffle([...good.map(x=>({x,good:true})),...bad.map(x=>({x,good:false}))]);
  let found=0;
  missionText.textContent='모아의 꽃바구니를 채워요!';
  missionSub.textContent='꽃이라면 종류가 달라도 좋아요. 잎·돌·버섯은 지나가요.';
  say(missionText.textContent);
- area.innerHTML='<div class="basic-game flower-collect"><div class="flower-basket"><span aria-hidden="true">🧺</span><div><strong>꽃바구니</strong><p id="flowerCollected">🌼 0 / '+need+'송이</p></div></div><p class="flower-scene-hint">꽃만 찾아 바구니에 담아줘요!</p><div class="object-grid">'+pool.map(o=>'<button type="button" class="object-btn" data-good="'+(o.good?1:0)+'">'+o.x+'</button>').join('')+'</div></div>';
+ area.innerHTML='<div class="basic-game flower-collect flower-quest"><div class="flower-quest-harvest"><img src="assets/friend-hong.png" alt="" class="flower-quest-friend"><div id="flowerHarvest" role="status" aria-label="모은 꽃"></div></div><div class="flower-basket"><span aria-hidden="true">🧺</span><div><strong>꽃바구니</strong><p id="flowerCollected">🌼 0 / '+need+'송이</p></div></div><p class="flower-scene-hint">꽃만 찾아 바구니에 담아줘요!</p><div class="object-grid">'+pool.map(o=>'<button type="button" class="object-btn" data-good="'+(o.good?1:0)+'">'+o.x+'</button>').join('')+'</div></div>';
  $$('.object-btn').forEach(b=>b.onclick=()=>{
-  if(state.lock||b.classList.contains('picked'))return;
+  if(state.lock)return;
+  if(b.classList.contains('picked')){recordGardenChoice(true,{repeat:true});return;}
+  recordGardenChoice(b.dataset.good==='1');
   if(b.dataset.good==='1'){
    b.classList.add('picked');found++;$('#flowerCollected').textContent='🌼 '+found+' / '+need+'송이';
    const basket=area.querySelector('.flower-basket > span');basket.textContent=found===need?'💐':'🧺';
+   const picked=document.createElement('span');picked.className='flower-picked';picked.textContent=b.textContent;$('#flowerHarvest').appendChild(picked);
    addSeeds(Math.ceil(10/need));sfx('ok');
-   if(found===need){flash('꽃바구니 가득! 💐');roundGate(area.querySelector('.basic-game'),'다음 꽃밭 ▶',500)}
+   if(found===need){completeGardenQuest();flash('꽃바구니 가득! 💐');roundGate(area.querySelector('.basic-game'),'다음 꽃밭 ▶',500)}
   }else{b.classList.add('wrong');sfx('no');flash('꽃 종류만 골라봐요.');later(()=>b.classList.remove('wrong'),350)}
  });
 }
