@@ -16,6 +16,7 @@ for(const width of [1366,768,390,360]){
  await toggle.click();
  check(await toggle.getAttribute('aria-pressed')==='true','Pressed state wrong '+width);
  check(await page.locator('body.garden-picture-mode').count()===1,'Class absent '+width);
+ check(await page.locator('.play-card-enhanced:visible').count()===34,'Picture mode must reveal all 34 games '+width);
  const descHidden=await page.locator('.play-card-enhanced .play-simple-desc').first().evaluate(el=>getComputedStyle(el).display==='none');
  check(descHidden,'Descriptions not hidden in picture mode '+width);
  const first=page.locator('.play-card-enhanced:visible').first();

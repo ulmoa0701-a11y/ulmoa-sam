@@ -19,7 +19,17 @@
   panel.append(control,note);
   note.hidden=true;
   control.setAttribute('aria-describedby','gardenPictureHelp');
+  let expandedByPictureMode=false;
   function setPictureMode(on){
+    // Expanded cognitive entries become visible in picture mode, not just the first six.
+    const more=document.querySelector('#cognitive .garden-more-button');
+    if(on && more && more.getAttribute('aria-expanded')==='false' && !more.closest('.garden-more-wrap')?.hidden){
+      more.click();
+      expandedByPictureMode=true;
+    }else if(!on && expandedByPictureMode){
+      if(more?.getAttribute('aria-expanded')==='true')more.click();
+      expandedByPictureMode=false;
+    }
     document.body.classList.toggle('garden-picture-mode',on);
     control.setAttribute('aria-pressed',String(on));
     control.querySelector('span').textContent=on?'자세히 보기':'그림 크게 보기';
