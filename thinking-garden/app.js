@@ -249,7 +249,7 @@ function renderPath(){
  const board=area.querySelector('.trail-game'),runner=area.querySelector('#trailRunner');
  function moveRunner(i){
   const node=board.querySelector('.trail-node[data-i="'+i+'"]');
-  if(node){runner.style.left=(node.offsetLeft+node.offsetWidth/2)+'px';runner.style.top=(node.offsetTop+node.offsetHeight/2)+'px';}
+  if(node){runner.style.left=(node.offsetLeft+node.offsetWidth-4)+'px';runner.style.top=(node.offsetTop+8)+'px';}
  }
  moveRunner(0);
  area.querySelectorAll('.trail-node').forEach(b=>b.onclick=()=>{
