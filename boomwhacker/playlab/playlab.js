@@ -29,7 +29,7 @@ function label(msg,sub=""){ $("#prompt").textContent=msg;$("#subPrompt").textCon
 function feedback(s){$("#feedback").textContent=s}
 function button(name,action,sub="",cls=""){const b=document.createElement("button");b.type="button";b.className=cls;b.innerHTML="<b></b><small></small>";b.querySelector("b").textContent=name;b.querySelector("small").textContent=sub;b.onclick=action;return b}
 function choices(items){const area=$("#choices");area.replaceChildren();for(const it of items)area.appendChild(button(it.label,it.action,it.sub||"",it.cls||""));area.hidden=!items.length}
-function setPhase(phase){state.phase=phase;$("#start").disabled=["show","listen","signal-running","ensemble-running","composer-listen"].includes(phase);$("#replay").disabled=["ready","complete","signal-running","ensemble-running","composer-listen"].includes(phase);updatePads();render()}
+function setPhase(phase){state.phase=phase;$("#start").disabled=["show","listen","signal-running","ensemble-running","composer-listen","role"].includes(phase);$("#replay").disabled=["ready","complete","signal-running","ensemble-running","composer-listen"].includes(phase);updatePads();render()}
 function updatePads(){const allowed=palette();for(const p of padEls){const idx=noteIndex(p.dataset.note),on=allowed.includes(idx),special=state.mode==="ensemble"&&state.role!==0&&idx%2!==state.role-1;p.classList.toggle("dim",!on||special);p.disabled=!on||state.mode==="compare"||state.mode==="maze"||state.phase==="show"||state.phase==="listen"||state.phase==="composer-listen";p.setAttribute("aria-disabled",String(p.disabled))}
  $("#padHelp").textContent=MODES[state.mode].pad;
  $(".instrument-panel").hidden=state.mode==="compare"||state.mode==="maze";
@@ -120,12 +120,12 @@ async function beginSignal(token){
 }
 function roleFits(idx){return state.role===0||idx%2===state.role-1}
 async function beginEnsemble(token){
- state.phase="answer";label("합주 역할을 골라요","1번·2번 중 내 담당 음을 선택해요.");const make=()=>choices([
+ state.phase="role";label("합주 역할을 골라요","1번·2번 중 내 담당 음을 선택해요.");const make=()=>choices([
  {label:"1번 연주자",sub:"1·3·5·7번째 색",cls:state.role===1?"main-choice":"",action:()=>{state.role=1;make();render()}},
  {label:"2번 연주자",sub:"2·4·6·8번째 색",cls:state.role===2?"main-choice":"",action:()=>{state.role=2;make();render()}},
  {label:"모두 함께",sub:"모든 음",cls:state.role===0?"main-choice":"",action:()=>{state.role=0;make();render()}},
  {label:"합주 출발",sub:"노래 시작",action:()=>startEnsemble(token)}
- ]);make();updatePads();render();$("#start").textContent="합주 출발"}
+ ]);make();updatePads();render();$("#start").textContent="역할 선택 중"}
 async function startEnsemble(initialToken){if(!alive(initialToken))return;invalidate();const token=state.seq;state.phase="ensemble-running";state.playingBeat=-2;state.ensemble.forEach(e=>e.done=false);choices([]);updatePads();$("#start").textContent="합주 중";label("둘, 하나, 출발!","내 역할의 색깔이 올 때만 연주해요.");await ensureAudio();if(!alive(token))return;
  const tempo=[0,790,640,520][state.level],start=performance.now();
  for(let i=0;i<state.ensemble.length;i++){
@@ -162,7 +162,7 @@ function gradient(top,bottom){const g=c.createLinearGradient(0,0,0,375);g.addCol
 function box(x,y,w,h,color,r=0){c.fillStyle=color;c.beginPath();if(c.roundRect)c.roundRect(x,y,w,h,r);else c.rect(x,y,w,h);c.fill()}
 function circ(x,y,r,color,outline){c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fillStyle=color;c.fill();if(outline){c.strokeStyle=outline;c.lineWidth=3;c.stroke()}}
 function line(x,y,xx,yy,color,width=3){c.beginPath();c.moveTo(x,y);c.lineTo(xx,yy);c.strokeStyle=color;c.lineWidth=width;c.lineCap="round";c.stroke()}
-function text(v,x,y,size=24,color="#30505b",align="center",weight="800"){c.fillStyle=color;c.textAlign=align;c.textBaseline="middle";c.font=weight+" "+size+"px Pretendard,SUIT,'Malgun Gothic',sans-serif;c.fillText(String(v),x,y)}
+function text(v,x,y,size=24,color="#30505b",align="center",weight="800"){c.fillStyle=color;c.textAlign=align;c.textBaseline="middle";c.font=weight+" "+size+"px Pretendard,SUIT,'Malgun Gothic',sans-serif";c.fillText(String(v),x,y)}
 function waveform(x,y,amplitude,color){for(let i=-4;i<=4;i++){const h=10+(1-Math.abs(i)/5)*amplitude+(i%2)*9;line(x+i*17,y-h/2,x+i*17,y+h/2,color,7)}}
 function badge(x,y,n,r=29,outline="#fff"){const idx=typeof n==="number"?n:noteIndex(n);circ(x,y,r,COLORS[idx],outline);text(pretty(NOTES[idx]),x,y,r*.67,"#254650")}
 function windows(){const w=cvs.width,h=cvs.height;c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,w,h)}
@@ -181,7 +181,7 @@ function drawMemory(){
 }
 function drawMissing(){
  const list=state.pattern.length?state.pattern:Array.from({length:4},(_,i)=>palette()[i%palette().length]);const width=Math.min(145,770/list.length),total=list.length*width;
- for(let i=0;i<list.length;i++){const x=540-total/2+i*width+width/2,hidden=state.missing===i&&state.phase==="answer";box(x-width*.43,182,width*.86,94,"#fffcf6",19);if(hidden){text("?",x,227,46,"#d88f80")}else if(state.phase!=="ready"&&state.phase!=="show"&&state.phase!=="answer"){badge(x,228,list[i],32)}else if(state.phase==="show"&&state.seenIndex===i){badge(x,228,list[i],32)}else if(state.phase==="answer"){badge(x,228,list[i],32)}else{text("♪",x,228,36,"#b0bcaa")}}
+ for(let i=0;i<list.length;i++){const x=540-total/2+i*width+width/2,hidden=state.missing===i&&(state.phase==="answer"||(state.phase==="show"&&state.question===state.missing));box(x-width*.43,182,width*.86,94,"#fffcf6",19);if(hidden){text("?",x,227,46,"#d88f80")}else if(state.phase!=="ready"&&state.phase!=="show"&&state.phase!=="answer"){badge(x,228,list[i],32)}else if(state.phase==="show"&&state.seenIndex===i){badge(x,228,list[i],32)}else if(state.phase==="answer"){badge(x,228,list[i],32)}else{text("♪",x,228,36,"#b0bcaa")}}
  if(state.phase==="answer"){const x=540-total/2+state.missing*width+width/2;box(x-width*.43,182,width*.86,94,"#fff6d8",19);text("?",x,227,47,"#bb8b66")}
  text("소리의 빈칸을 찾아요",540,315,22,"#7b897e");
 }
@@ -213,7 +213,7 @@ function drawMaze(){
  box(474,296,133,40,"#e8d4a6",12);text("출발점",540,315,20,"#7a6b56");
 }
 const SCENE={echo:drawEcho,memory:drawMemory,missing:drawMissing,compare:drawCompare,signal:drawSignal,composer:drawComposer,ensemble:drawEnsemble,maze:drawMaze};
-function render(){windows();background();SCENE[state.mode]();$("#start").disabled=["show","listen","signal-running","ensemble-running","composer-listen"].includes(state.phase);$("#replay").disabled=["ready","complete","signal-running","ensemble-running","composer-listen"].includes(state.phase);updatePads()}
+function render(){windows();background();SCENE[state.mode]();$("#start").disabled=["show","listen","signal-running","ensemble-running","composer-listen","role"].includes(state.phase);$("#replay").disabled=["ready","complete","signal-running","ensemble-running","composer-listen"].includes(state.phase);updatePads()}
 ui();changeMode("echo");render();
 window.__playlabQA={modes:Object.keys(MODES),state:()=>({mode:state.mode,level:state.level,range:state.range,round:state.round,phase:state.phase,pattern:state.pattern.slice(),alt:state.alt.slice(),reply:state.reply.slice(),same:state.same,missing:state.missing,score:state.score,role:state.role,composer:state.composer.slice(),notes:palette().map(i=>NOTES[i]),answer:state.answer,signal:state.signal.map(x=>({...x})),signalStep:state.signalStep}),
  selectMode:changeMode,reset,openRound,playNotes,padInput,listenComposition,answerChoice,previewMaze,composerStart,setPhase,render,
