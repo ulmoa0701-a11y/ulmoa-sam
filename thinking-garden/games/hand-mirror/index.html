@@ -563,6 +563,56 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 .play.is-adventure .adventure-scene[data-mode="memory"] .stone-glow{font-size:33px;line-height:1;color:#f6c43a;filter:drop-shadow(0 0 4px #fff0a4)}
 @media(max-width:760px){.play.is-adventure .adventure-scene[data-mode="memory"] .stone-placeholder{width:25px;height:12px}}
 @media(prefers-reduced-motion:reduce){.play.is-adventure .adventure-actor[data-mode="copy"] #adventureActorEmoji::before,.play.is-adventure .adventure-actor[data-mode="copy"] #adventureActorEmoji::after{animation:none!important}}
+
+/* Visible first: the five real games are choices, not hidden advanced settings. */
+.chosen{display:block;margin:14px 0 12px}
+.pick-heading{font-size:19px;margin:0 0 3px;color:#2d644b}
+.pick-help{font-size:13px;color:#607b6c;font-weight:750;line-height:1.4;margin:0 0 10px}
+.mode-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mode-grid .mode{position:relative;display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:10px;row-gap:2px;min-height:100px;padding:12px 13px;align-content:center;align-items:center;background:#f8fbf5;border:2px solid #d5e4d2;border-radius:17px;text-align:left;cursor:pointer}
+.mode-grid .mode .emoji{grid-column:1;grid-row:1/4;align-self:center;font-size:32px;line-height:1.1;text-align:center}
+.mode-grid .mode strong{grid-column:2;grid-row:1;font-size:16px;color:#285942;line-height:1.32}
+.mode-grid .mode small{grid-column:2;grid-row:2;font-size:12px;line-height:1.3;color:#5d7768;font-weight:750}
+.mode-grid .mode .mode-cue{grid-column:2;grid-row:3;font-size:11px;line-height:1.35;font-weight:850;color:#648874;padding-top:3px}
+.mode-grid .mode[aria-pressed="true"]{background:#e6f5e7;border-color:#3f956b;box-shadow:0 0 0 2px #a9d7bc}
+.mode-grid .mode[aria-pressed="true"] .mode-cue{color:#256747}
+.mode-grid .garden-mode{grid-column:1/-1;min-height:82px;grid-template-columns:49px minmax(0,1fr);background:linear-gradient(110deg,#f4fae9,#fff6e4)}
+.mode-grid .garden-mode .emoji{font-size:38px}
+.mode-grid .garden-mode strong{font-size:19px}
+.mode-grid .mode:focus-visible{outline:3px solid #216e50;outline-offset:3px}
+.start-panel{margin-top:12px}
+.start-panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.start-panel-head h2{font-size:18px}
+#selectedPlayLabel{font-size:13px;font-weight:950;color:#26694d;background:#f2ffef;border:1px solid #b9d9bc;border-radius:999px;padding:6px 10px}
+@media(max-width:760px){
+ .intro{padding:13px 13px 15px}
+ .intro-top{grid-template-columns:minmax(0,1fr) 72px;gap:7px}
+ .intro-top .moa{width:72px;height:86px}
+ .intro-top h1{font-size:clamp(25px,7vw,32px);margin:4px 0;line-height:1.2}
+ .intro-top .lead{font-size:12px;line-height:1.43}
+ .intro-top .eyebrow{font-size:10px}
+ .chosen{margin:12px 0 9px}
+ .pick-heading{font-size:16px}
+ .pick-help{font-size:11px;margin-bottom:7px}
+ .mode-grid{gap:7px}
+ .mode-grid .mode{grid-template-columns:29px minmax(0,1fr);column-gap:6px;min-height:94px;padding:9px 7px;border-radius:13px}
+ .mode-grid .mode .emoji{font-size:24px}
+ .mode-grid .mode strong{font-size:14px;line-height:1.22}
+ .mode-grid .mode small{font-size:10px;line-height:1.3}
+ .mode-grid .mode .mode-cue{font-size:10px;padding-top:2px}
+ .mode-grid .garden-mode{min-height:71px;grid-template-columns:36px minmax(0,1fr);padding:8px 10px}
+ .mode-grid .garden-mode .emoji{font-size:30px}
+ .mode-grid .garden-mode strong{font-size:16px}
+ .start-panel{padding:11px}
+ .start-panel-head h2{font-size:16px}
+ #selectedPlayLabel{font-size:11px;padding:5px 8px}
+ .start-copy{font-size:11px;line-height:1.35;margin:5px 0 0}
+ .start-actions{gap:7px;margin-top:9px}
+ .start-actions button{min-height:49px;font-size:13px;padding:7px 5px}
+ .start-panel .disclaimer{font-size:10px;line-height:1.45;margin-top:8px}
+}
+@media(max-width:360px){.mode-grid .mode{padding:8px 6px;column-gap:4px}.mode-grid .mode strong{font-size:12px}.mode-grid .mode small{font-size:9px}.mode-grid .mode .mode-cue{font-size:9px}}
+
 </style>
 <link rel="stylesheet" href="../../../assets/moa-quick-guide.css?v=20261017-v1">
 </head>
@@ -573,16 +623,19 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 <section id="intro" class="intro panel">
 <div class="intro-top"><div><span class="eyebrow">모아의 인지정원 · 손동작 놀이</span><h1 id="introHeading">모아의 마법 꽃밭 🌼</h1><p class="lead" id="introLead">도토리를 주먹으로 잡고, 보자기를 펼쳐서 심어요! 꽃 세 송이를 피워 볼까?</p></div><img class="moa" src="../../assets/moa-default.png" alt="모아" onerror="this.style.display='none'"></div>
 <div class="chosen" role="group" aria-label="놀이 고르기">
-<button type="button" class="mode garden-mode" data-mode="garden" aria-pressed="true"><span class="emoji">🌼</span><strong>마법 꽃밭 · 먼저 놀기</strong><small>🌰 도토리 잡기 → ✋ 손 펼쳐 심기 → 🌷 꽃 피우기</small></button>
-<details class="more-modes" id="advancedModes"><summary>다른 손동작 놀이도 있어요 <span>⌄</span></summary><div class="more-modes-grid">
-<button type="button" class="mode" data-mode="copy" aria-pressed="false"><span class="emoji">✋</span><strong>모아 손 따라하기 · 반짝 풍선</strong><small>손 모양을 바꿔 풍선을 톡톡 깨워요</small></button>
-<button type="button" class="mode" data-mode="fingers" aria-pressed="false"><span class="emoji">☝️</span><strong>손가락 탐험 · 별빛 켜기</strong><small>하나·둘·세 손가락으로 별빛을 켜요</small></button>
-<button type="button" class="mode" data-mode="memory" aria-pressed="false"><span class="emoji">🧠</span><strong>반짝손 기억길 · 비밀 발판</strong><small>순서를 기억해서 길을 이어 가요</small></button>
-<button type="button" class="mode" data-mode="both" aria-pressed="false"><span class="emoji">👐</span><strong>두 손 협동 · 보물문</strong><small>두 손을 움직여 보물문을 열어요</small></button>
-</div></details></div>
-<div class="start-panel">
-<h2>어떻게 놀아볼까?</h2><p class="start-copy">카메라에 내 손이 잘 보이는지 확인하고 시작해요.</p>
-<div class="start-actions"><button class="primary" type="button" id="cameraStart">📷 카메라로 따라하기</button><button class="secondary" type="button" id="touchStart">👆 화면으로 규칙 연습</button></div>
+  <h2 class="pick-heading">어떤 놀이를 해볼까?</h2>
+  <p class="pick-help">다섯 가지 놀이가 있어요. 원하는 놀이를 바로 골라요.</p>
+  <div class="mode-grid">
+   <button type="button" class="mode garden-mode" data-mode="garden" aria-pressed="true"><span class="emoji" aria-hidden="true">🌼</span><strong>마법 꽃밭</strong><small>주먹으로 도토리 잡고 꽃 피우기</small><span class="mode-cue">✓ 선택했어요</span></button>
+   <button type="button" class="mode" data-mode="copy" aria-pressed="false"><span class="emoji" aria-hidden="true">🫧</span><strong>반짝 풍선</strong><small>손 모양 따라 풍선 깨우기</small><span class="mode-cue">이 놀이 고르기</span></button>
+   <button type="button" class="mode" data-mode="fingers" aria-pressed="false"><span class="emoji" aria-hidden="true">⭐</span><strong>손가락 별빛</strong><small>한·두·세 손가락으로 별 켜기</small><span class="mode-cue">이 놀이 고르기</span></button>
+   <button type="button" class="mode" data-mode="memory" aria-pressed="false"><span class="emoji" aria-hidden="true">🪨</span><strong>비밀 발판</strong><small>손 모양 순서 기억해 길 밝히기</small><span class="mode-cue">이 놀이 고르기</span></button>
+   <button type="button" class="mode" data-mode="both" aria-pressed="false"><span class="emoji" aria-hidden="true">🔑</span><strong>두 손 보물문</strong><small>양손을 움직여 문 열기</small><span class="mode-cue">이 놀이 고르기</span></button>
+  </div>
+ </div>
+ <div class="start-panel" id="startPanel">
+<div class="start-panel-head"><h2>골랐으면, 바로 시작!</h2><strong id="selectedPlayLabel" aria-live="polite">모아의 마법 꽃밭</strong></div><p class="start-copy">카메라로 손을 움직이거나, 화면에서 그림을 골라 놀 수 있어요.</p>
+<div class="start-actions"><button class="primary" type="button" id="cameraStart">📷 카메라로 시작</button><button class="secondary" type="button" id="touchStart">👆 화면으로 시작</button></div>
 <p class="disclaimer">카메라는 시작할 때만 허용을 요청해요. 손 위치는 기기에서 분석하고 영상은 저장·전송하지 않아요. 외부 손 인식 라이브러리와 모델을 인터넷에서 받아올 수 있어요. 화면 연습은 정답 선택이지 실제 손동작 인식이 아니에요.</p>
 </div>
 </section>
@@ -602,6 +655,6 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 </main>
 <div class="footer">모아의 인지정원 · 카메라로 관찰하는 손가락 움직임 놀이 · 손 힘, 실제 물체 조작 및 치료 효과를 자동으로 평가하는 기능은 아닙니다.</div>
 </div>
-<script src="core.js?v=4"></script><script src="app.js?v=13"></script>
+<script src="core.js?v=4"></script><script src="app.js?v=14"></script>
 <script src="../../../assets/moa-quick-guide.js?v=20261017-v1"></script>
 </body></html>
