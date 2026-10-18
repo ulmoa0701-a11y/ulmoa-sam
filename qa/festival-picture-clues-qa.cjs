@@ -22,7 +22,8 @@ const {chromium}=require('playwright-core'),assert=require('node:assert/strict')
      assert.equal(await page.locator('.festival-clue-flow').count(),r.clues,'missing icon before/after relationships');
      assert.equal(await page.locator('.festival-clue-friend').count(),r.clues,'missing custom characters');
      assert.equal(await page.locator('.festival-clue-flow').first().getAttribute('aria-label')!==null,true);
-     assert.equal(/은\\(는\\)|을\\(를\\)/.test(await page.locator('.festival-picture-evidence').innerText()),false,'unnatural grammatical placeholders');
+     const clueText=await page.locator('.festival-picture-evidence').innerText();
+     assert.equal(clueText.includes('은(는)')||clueText.includes('을(를)'),false,'unnatural grammatical placeholders');
      if(round===0){
       await page.evaluate(()=>state.sound=false);
       await page.locator('.festival-clue [data-plan="listen"]').first().click();
