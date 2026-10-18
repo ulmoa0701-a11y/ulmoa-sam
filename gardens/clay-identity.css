@@ -1,0 +1,66 @@
+/* 일단 해봄 | 그림체 통일 1차 (Canva 원본 PNG를 사용하지 않는 안전한 공통 레이어)
+   게임 실제 플레이 캡처를 가리지 않고, 선택/버튼/진행 상태에만 적용한다. */
+.gardens-page{
+ --moa-clay-ink:#263f34;--moa-clay-mint:#d7ebd9;--moa-clay-soft:#f4f9f2;
+ --moa-clay-edge:#bad4c1;--moa-clay-action:#28684d;--moa-clay-shadow:0 9px 0 #b3cdb825,0 13px 22px #2f694013;
+}
+.gardens-page .garden-hero{
+ background:radial-gradient(circle at 88% 16%,#fff5cf 0,transparent 35%),linear-gradient(135deg,#e8f5e8,#fffaf2);
+ border-color:var(--moa-clay-edge);box-shadow:inset 0 2px 0 #ffffffd9,0 9px 26px #4e785813;
+}
+.gardens-page .garden-jump{
+ border:2px solid #d8e6d9;border-bottom-width:4px;border-radius:19px;
+ background:linear-gradient(165deg,#fff,#f6fbf4);
+ box-shadow:inset 0 2px 0 #fff,0 5px 14px #42664a10;
+ transform:translateY(0);transition:transform .17s ease,box-shadow .17s ease,border-color .17s ease;
+}
+.gardens-page .garden-jump:hover,.gardens-page .garden-jump:focus-visible{
+ transform:translateY(-2px);border-color:#90bea0;box-shadow:var(--moa-clay-shadow);
+}
+.gardens-page .garden-section{
+ background:linear-gradient(180deg,#fff 72%,#fcfdfb);border-color:#dae8dc;
+}
+.gardens-page .play-card.play-card-enhanced{
+ border:2px solid #dbe8dd;border-bottom-width:4px;border-radius:20px;
+ background:#fff;box-shadow:0 5px 12px #3559410b;
+ transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;
+}
+.gardens-page .play-card.play-card-enhanced:hover,.gardens-page .play-card.play-card-enhanced:focus-within{
+ border-color:#a7c9ad;box-shadow:var(--moa-clay-shadow);
+}
+.gardens-page .play-card-media{background:#e9f4e9}
+.gardens-page .play-card-media img{object-fit:cover}
+.gardens-page .play-activity{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;color:#2a654a}
+.gardens-page .play-activity::before{
+ content:"";display:inline-block;width:11px;height:11px;flex:none;
+ border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff 0 10%,#abd9ad 18%,#6db384 70%,#458f69);
+ box-shadow:inset -2px -2px 3px #357a4944,0 2px 2px #35513a30;
+}
+.gardens-page .play-buttons .play-preview-btn,.gardens-page .play-buttons .play-start-btn{
+ min-height:46px;border-radius:13px;border-bottom-width:3px;font-size:14px;
+}
+.gardens-page .play-buttons .play-start-btn{background:#2c7454;border-color:#235e45}
+.gardens-page .play-buttons .play-start-btn:hover{background:#215c44}
+.gardens-page .garden-filter-buttons button{
+ min-height:44px;border:2px solid #dce9df;border-bottom-width:3px;
+ background:#fff;border-radius:999px;
+}
+.gardens-page .garden-filter-buttons button.is-current,
+.gardens-page .garden-filter-buttons button[aria-pressed="true"]{
+ background:#276d50;color:#fff;border-color:#215a43;box-shadow:inset 0 2px 0 #ffffff19;
+}
+.gardens-page .preview-dialog-header{background:#f5faf4}
+.gardens-page .garden-preview-dialog{border:2px solid #c5ddcb;border-radius:23px}
+.gardens-page .preview-play{background:#286f52;min-height:49px}
+.gardens-page button:focus-visible,.gardens-page a:focus-visible{
+ outline:3px solid #2c8460;outline-offset:3px;
+}
+@media(max-width:650px){
+ .gardens-page .garden-hero{padding:23px 20px}
+ .gardens-page .garden-filter-buttons button{min-height:44px}
+ .gardens-page .play-card.play-card-enhanced{border-radius:17px}
+ .gardens-page .play-buttons .play-preview-btn,.gardens-page .play-buttons .play-start-btn{min-height:46px}
+}
+@media(prefers-reduced-motion:reduce){
+ .gardens-page .garden-jump,.gardens-page .play-card.play-card-enhanced{transition:none!important;transform:none!important}
+}
