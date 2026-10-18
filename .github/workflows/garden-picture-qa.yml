@@ -1,0 +1,40 @@
+name: Five Gardens Picture Mode QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'gardens/picture-first.*'
+      - 'gardens/index.html'
+      - 'qa/garden-picture-qa.mjs'
+      - '.github/workflows/garden-picture-qa.yml'
+  pull_request:
+    paths:
+      - 'gardens/picture-first.*'
+      - 'gardens/index.html'
+      - 'qa/garden-picture-qa.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check-picture-first:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Browser dependency
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Chrome path
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Site server
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/garden-picture-server.log 2>&1 &
+          for i in {1..40}; do curl -fsS http://127.0.0.1:8765/gardens/ >/dev/null && exit 0; sleep 0.25; done
+          exit 1
+      - name: Check all 34 cards, interactive modes, mobile and desktop
+        run: node qa/garden-picture-qa.mjs
