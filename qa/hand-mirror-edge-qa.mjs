@@ -57,7 +57,6 @@ const wait=(p,fn,timeout=14000)=>p.waitForFunction(fn,null,{timeout});
 async function prepared(p,mode='garden',hands=1){
  await p.goto(url,{waitUntil:'domcontentloaded'});
  if(mode!=='garden'){
-   await p.locator('#advancedModes summary').click();
    await p.locator('[data-mode="'+mode+'"]').click();
  }
  await p.evaluate(n=>{window.__hands=n;},hands);
@@ -71,6 +70,8 @@ async function screenSizes(){
    const c=await browser.newContext({viewport}),p=await c.newPage(),errors=[];
    p.on('pageerror',e=>errors.push(e.message));
    await p.goto(url);
+   assert.equal(await p.locator('.mode[data-mode]:visible').count(),5,'Every game is visible without an accordion at '+viewport.width);
+   assert.equal(await p.locator('#advancedModes').count(),0,'No hidden menu for game choices');
    await p.locator('#touchStart').click();
    assert.equal(await p.locator('#game').isVisible(),true);
    const info=await p.evaluate(()=>({
@@ -196,7 +197,6 @@ async function wrongAnswerAndReplay(){
  assert.equal(await p.locator('#gardenHudFlower').innerText(),'🌷 0 / 3','Replay resets garden');
  assert.match(await p.locator('#mute').innerText(),/🔇/,'User mute preference persists');
  await p.locator('#pause').click();
- await p.locator('#advancedModes summary').click();
  await p.locator('[data-mode="fingers"]').click();
  await p.locator('#touchStart').click();
  assert.equal(await p.locator('#choices').evaluate(e=>e.parentElement.id),'gardenTouchDock','Other story mode keeps its answers in one play scene');
@@ -228,7 +228,6 @@ async function allCameraModes(){
  for(const mode of ['copy','fingers','memory','both']){
   const {c,p,errors}=await ctx({width:390,height:844});
   await p.goto(url,{waitUntil:'domcontentloaded'});
-  await p.locator('#advancedModes summary').click();
   await p.locator('[data-mode="'+mode+'"]').click();
   await p.evaluate(args=>{window.__hands=args.hands;window.__pose='fist';}, {hands:mode==='both'?1:1});
   await p.locator('#cameraStart').click();
