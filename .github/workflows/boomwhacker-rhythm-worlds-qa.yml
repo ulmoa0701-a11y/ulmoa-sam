@@ -1,0 +1,44 @@
+name: Six Rhythm Worlds QA
+on:
+  pull_request:
+    paths:
+      - 'boomwhacker/rhythm-worlds/**'
+      - '.github/workflows/boomwhacker-rhythm-worlds-qa.yml'
+  push:
+    branches:
+      - 'feat/boomwhacker-six-rhythm-worlds-20261018'
+    paths:
+      - 'boomwhacker/rhythm-worlds/**'
+      - '.github/workflows/boomwhacker-rhythm-worlds-qa.yml'
+jobs:
+  six-worlds-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright core
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Locate installed Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Start static web server
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/six-worlds-server.log 2>&1 &
+          for i in {1..20}; do curl -fsS http://127.0.0.1:8765/boomwhacker/rhythm-worlds/ >/dev/null && exit 0; sleep .25; done
+          cat /tmp/six-worlds-server.log
+          exit 1
+      - name: Run six-worlds browser QA
+        run: node boomwhacker/rhythm-worlds/qa.cjs
+      - name: Upload QA screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: six-rhythm-worlds-qa
+          path: boomwhacker/rhythm-worlds/qa-artifacts
+          if-no-files-found: warn
