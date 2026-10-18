@@ -1,0 +1,7 @@
+/* Gentle signal feedback and a visible keyboard focus for boundary planting. */
+#gameWorld .inside-zone[role="button"]{cursor:pointer;touch-action:manipulation}
+#gameWorld .inside-zone[role="button"]:focus-visible{outline:4px solid #e8bb58;outline-offset:5px}
+#gameWorld .inside-key-help{margin:0;max-width:660px;color:#546f5a;font-size:13px;line-height:1.45;text-align:center}
+#gameWorld .calm-game .signal-btn.wait,#gameWorld .calm-game .signal-btn.caution{border:3px solid #c9d7b8}
+@media(max-width:560px){#gameWorld .inside-key-help{font-size:12px;padding:0 10px}}
+@media(prefers-reduced-motion:reduce){#gameWorld .calm-game .signal-btn.go{animation:none}}

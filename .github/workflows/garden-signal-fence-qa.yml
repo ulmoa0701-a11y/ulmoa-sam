@@ -1,0 +1,44 @@
+name: Cognitive Signal Wait and Fence Keyboard QA
+on:
+  pull_request:
+    paths:
+      - 'thinking-garden/**'
+      - 'qa/garden-signal-fence-qa.cjs'
+      - '.github/workflows/garden-signal-fence-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'thinking-garden/**'
+      - 'qa/garden-signal-fence-qa.cjs'
+      - '.github/workflows/garden-signal-fence-qa.yml'
+permissions:
+  contents: read
+jobs:
+  signal-fence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Prepare Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright-core@1.56.1
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Check syntax
+        run: |
+          node --check thinking-garden/app.js
+          node --check qa/garden-signal-fence-qa.cjs
+      - name: Start local site
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/garden-signal-fence.log 2>&1 &
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:8765/thinking-garden/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/garden-signal-fence.log
+          exit 1
+      - name: Play mobile and desktop cognitive game sessions
+        run: node qa/garden-signal-fence-qa.cjs
