@@ -44,3 +44,9 @@ jobs:
           exit 1
       - name: Run artwork, links and viewport checks
         run: node qa/clay-34-integration.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: clay-34-screenshots
+          path: qa/clay-34-artifacts
+          if-no-files-found: warn
