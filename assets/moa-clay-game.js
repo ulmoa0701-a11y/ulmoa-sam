@@ -27,13 +27,45 @@
   function decorateCatalog(){
     document.querySelectorAll('.play-card-enhanced[data-game]').forEach(card=>{
       const key=card.dataset.game;
-      mount(card.querySelector('.play-card-media'),key,'moa-clay-card-corner');
+      const media=card.querySelector('.play-card-media');
+      mount(media,key,'moa-clay-card-corner');
+      if(!media||!INDEX.has(key))return;
+      // A missing gameplay screenshot should never look like an empty frame.
+      // Keep true gameplay captures, but show the game-specific art as a large fallback.
+      function syncFallback(){
+        if(!media.classList.contains('no-real-shot'))return;
+        const caption=media.querySelector('.shot-caption');
+        const img=media.querySelector('img.real-shot');
+        if(caption)caption.textContent='게임 대표 그림';
+        if(img)img.alt='';
+      }
+      new MutationObserver(syncFallback).observe(media,{attributes:true,attributeFilter:['class']});
+      syncFallback();
     });
+    // The same non-empty fallback must work in the preview dialog.
+    document.addEventListener('click',e=>{
+      const button=e.target.closest('.play-preview-btn');
+      const key=button?.closest('.play-card-enhanced')?.dataset.game;
+      if(!INDEX.has(key))return;
+      const media=document.querySelector('.preview-visual');
+      mount(media,key,'moa-clay-preview-art');
+      if(!media||media.dataset.clayFallbackObserved)return;
+      media.dataset.clayFallbackObserved='true';
+      new MutationObserver(()=>{
+        if(!media.classList.contains('no-real-shot'))return;
+        const img=media.querySelector('#previewShot');
+        if(img)img.alt='';
+      }).observe(media,{attributes:true,attributeFilter:['class']});
+    },true);
   }
   function decorateLibrary(){
     document.querySelectorAll('#gardenGamePanel .library-card[data-open]').forEach(card=>{
       const key=card.dataset.open;
+      if(!INDEX.has(key))return;
       mount(card,key,'moa-clay-library-badge');
+      // Swap generic repeated character thumbnails for the matching game cover.
+      // The original character still appears in stories and in the MoA hero.
+      card.classList.add('has-clay-leading-art');
     });
   }
   function thinkingGame(key){
