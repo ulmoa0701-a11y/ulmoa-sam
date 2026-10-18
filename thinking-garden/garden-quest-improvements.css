@@ -1,0 +1,28 @@
+/* Four mission mechanics. Keep task targets recognizable and avoid timers/competitive scoring. */
+#gameWorld .flower-quest-harvest,
+#gameWorld .leaf-rescue-home,
+#gameWorld .path-quest-header{display:flex;align-items:center;justify-content:center;gap:14px;width:min(100%,580px);min-height:86px;padding:12px 16px;background:linear-gradient(120deg,#f0f8e6,#e9f7fa);border:2px solid #bedbc3;border-radius:22px;color:#325f47}
+#gameWorld .flower-quest-friend,#gameWorld .leaf-rescue-friend,#gameWorld .path-quest-friend,#gameWorld .wake-garden-guide{width:57px;height:57px;object-fit:contain;flex:none}
+#flowerHarvest,.leaf-rescue-found,#wakeGardenProgress{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;min-width:140px;min-height:50px}
+#flowerHarvest .flower-picked,#leafRescued .leaf-rescued,#wakeGardenProgress .wake-progress-bloom{display:inline-flex;align-items:center;justify-content:center;min-height:35px;font-size:clamp(24px,4vw,35px);line-height:1.2}
+#gameWorld .flower-quest .flower-basket{margin:0}
+#gameWorld .leaf-rescue-home strong,#gameWorld .path-quest-header strong{display:block;font-size:16px;font-weight:850}
+#gameWorld .leaf-rescue-home>div{display:grid;justify-items:center;gap:5px}
+#gameWorld .path-quest-header{justify-content:space-between}
+#gameWorld #pathStepCount{padding:7px 12px;background:white;border-radius:18px;font-size:15px;font-weight:900;font-variant-numeric:tabular-nums}
+#gameWorld .path-quest .trail-game{position:relative;isolation:isolate}
+#gameWorld .trail-runner.path-moving-runner{position:absolute;z-index:4;pointer-events:none;display:flex;align-items:center;justify-content:center;width:39px;height:39px;border-radius:50%;border:2px solid #86ba91;background:#f7fcf5;box-shadow:0 4px 10px #204a3430;transform:translate(-50%,-50%);transition:left .23s ease,top .23s ease}
+#gameWorld .path-moving-runner img{display:block;width:32px;height:32px;object-fit:contain}
+#gameWorld .wake-garden .wake-scene-head>img.wake-garden-guide{font-size:inherit}
+#gameWorld .wake-garden-progress{width:min(100%,580px);min-height:66px;padding:7px 12px;background:linear-gradient(180deg,#f0f8e8,#dceecf);border:2px solid #c2ddbd;border-radius:19px}
+#gameWorld .wake-target.wake-decoy{border:2px solid #a3c3a4;background:#eaf7e5;cursor:pointer}
+#gameWorld .wake-target.wake-remind{outline:3px solid #e3b572}
+@media(max-width:600px){
+ #gameWorld .flower-quest-harvest,#gameWorld .leaf-rescue-home,#gameWorld .path-quest-header{padding:8px 10px;gap:8px;min-height:65px}
+ #gameWorld .flower-quest-friend,#gameWorld .leaf-rescue-friend,#gameWorld .path-quest-friend,#gameWorld .wake-garden-guide{width:43px;height:43px}
+ #flowerHarvest,.leaf-rescue-found{min-width:80px}
+ #gameWorld .path-quest-header strong{font-size:14px}
+ #gameWorld .trail-runner.path-moving-runner{width:32px;height:32px}
+ #gameWorld .path-moving-runner img{width:25px;height:25px}
+}
+@media(prefers-reduced-motion:reduce){#gameWorld .trail-runner.path-moving-runner{transition:none}}

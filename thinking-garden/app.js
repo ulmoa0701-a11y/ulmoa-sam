@@ -46,6 +46,15 @@ function recordShapeAttempt(correct){
  r.attempts++;
  if(correct)r.finalCorrect='O';
 }
+function recordGardenChoice(ok,{repeat=false}={}){
+ if(!['flower','hide','path','targets'].includes(state.game))return;
+ const r=basicObservation();if(!r)return;
+ if(repeat){r.gardenRepeat=(r.gardenRepeat||0)+1;return;}
+ if(!r.gardenFirst)r.gardenFirst=ok?'O':'X';
+ r.gardenChoices=(r.gardenChoices||0)+1;
+ if(!ok)r.gardenErrors=(r.gardenErrors||0)+1;
+}
+function completeGardenQuest(){const r=basicObservation();if(r)r.gardenFinished=true;}
 function finishBasicRound(){const r=basicObservation();if(r)r.completed=true;}
 const LEVEL_NAMES={easy:'쉬움',normal:'보통',hard:'어려움'};
 const DEFAULT_COUNTS={easy:10,normal:20,hard:30};
@@ -173,21 +182,24 @@ function renderSameShape(){
 }
 function renderFlower(){
  const need=3+Math.min(practiceStep(),2),flowers=['🌷','🌼','🌸','🌻','🌺'],distractors=['🍃','🪨','🍄','🌱'];
- const good=Array.from({length:need},(_,i)=>flowers[(i+practiceStep())%flowers.length]);
- const bad=Array.from({length:3+practiceStep()},(_,i)=>distractors[i%distractors.length]);
+ const good=Array.from({length:need},(_,i)=>flowers[(i+state.round+practiceStep())%flowers.length]);
+ const bad=Array.from({length:3+practiceStep()},(_,i)=>distractors[(i+state.round)%distractors.length]);
  const pool=shuffle([...good.map(x=>({x,good:true})),...bad.map(x=>({x,good:false}))]);
  let found=0;
  missionText.textContent='모아의 꽃바구니를 채워요!';
  missionSub.textContent='꽃이라면 종류가 달라도 좋아요. 잎·돌·버섯은 지나가요.';
  say(missionText.textContent);
- area.innerHTML='<div class="basic-game flower-collect"><div class="flower-basket"><span aria-hidden="true">🧺</span><div><strong>꽃바구니</strong><p id="flowerCollected">🌼 0 / '+need+'송이</p></div></div><p class="flower-scene-hint">꽃만 찾아 바구니에 담아줘요!</p><div class="object-grid">'+pool.map(o=>'<button type="button" class="object-btn" data-good="'+(o.good?1:0)+'">'+o.x+'</button>').join('')+'</div></div>';
+ area.innerHTML='<div class="basic-game flower-collect flower-quest"><div class="flower-quest-harvest"><img src="assets/friend-hong.png" alt="" class="flower-quest-friend"><div id="flowerHarvest" role="status" aria-label="모은 꽃"></div></div><div class="flower-basket"><span aria-hidden="true">🧺</span><div><strong>꽃바구니</strong><p id="flowerCollected">🌼 0 / '+need+'송이</p></div></div><p class="flower-scene-hint">꽃만 찾아 바구니에 담아줘요!</p><div class="object-grid">'+pool.map(o=>'<button type="button" class="object-btn" data-good="'+(o.good?1:0)+'">'+o.x+'</button>').join('')+'</div></div>';
  $$('.object-btn').forEach(b=>b.onclick=()=>{
-  if(state.lock||b.classList.contains('picked'))return;
+  if(state.lock)return;
+  if(b.classList.contains('picked')){recordGardenChoice(true,{repeat:true});return;}
+  recordGardenChoice(b.dataset.good==='1');
   if(b.dataset.good==='1'){
    b.classList.add('picked');found++;$('#flowerCollected').textContent='🌼 '+found+' / '+need+'송이';
    const basket=area.querySelector('.flower-basket > span');basket.textContent=found===need?'💐':'🧺';
+   const picked=document.createElement('span');picked.className='flower-picked';picked.textContent=b.textContent;$('#flowerHarvest').appendChild(picked);
    addSeeds(Math.ceil(10/need));sfx('ok');
-   if(found===need){flash('꽃바구니 가득! 💐');roundGate(area.querySelector('.basic-game'),'다음 꽃밭 ▶',500)}
+   if(found===need){completeGardenQuest();flash('꽃바구니 가득! 💐');roundGate(area.querySelector('.basic-game'),'다음 꽃밭 ▶',500)}
   }else{b.classList.add('wrong');sfx('no');flash('꽃 종류만 골라봐요.');later(()=>b.classList.remove('wrong'),350)}
  });
 }
@@ -204,17 +216,19 @@ function renderHide(){
   const label=clue?'발자국이 있는 잎사귀':dew?'이슬방울이 있는 잎사귀':'흔적이 없는 잎사귀';
   return '<button class="leaf-btn '+(clue?'leaf-has-clue':'leaf-no-clue')+'" data-i="'+i+'" type="button" aria-label="'+label+'"><span class="leaf-cover" aria-hidden="true">🍃</span><span class="leaf-trail" aria-hidden="true">'+(trail||'&nbsp;')+'</span></button>';
  }).join('');
- area.innerHTML='<div class="basic-game leaf-clue-game leaf-level-'+level+'"><div class="mini-count" id="miniCount">🐞 0 / '+need+'</div><div class="leaf-example" aria-label="발자국을 보고 잎사귀를 열어 무당벌레 찾기"><span>🐾</span><span>→</span><span>🍃</span><span>→</span><span>🐞</span></div><p class="leaf-rule">🐾 발자국을 찾아 잎사귀를 열어요.'+(level===3?' 💧 이슬방울과 구분해요.':'')+'</p><div class="leaf-game">'+leaves+'</div></div>';
+ area.innerHTML='<div class="basic-game leaf-clue-game leaf-level-'+level+'"><div class="leaf-rescue-home"><img src="assets/friend-hong.png" alt="" class="leaf-rescue-friend"><div><strong>찾은 친구들의 쉼터</strong><div id="leafRescued" class="leaf-rescue-found" role="status" aria-label="찾은 친구"></div></div></div><div class="mini-count" id="miniCount">🐞 0 / '+need+'</div><div class="leaf-example" aria-label="발자국을 보고 잎사귀를 열어 무당벌레 찾기"><span>🐾</span><span>→</span><span>🍃</span><span>→</span><span>🐞</span></div><p class="leaf-rule">🐾 발자국을 찾아 잎사귀를 열어요.'+(level===3?' 💧 이슬방울과 구분해요.':'')+'</p><div class="leaf-game">'+leaves+'</div></div>';
  area.querySelectorAll('.leaf-btn').forEach(b=>b.onclick=()=>{
-  if(b.classList.contains('opened')||state.lock)return;
-  const ok=bugs.has(+b.dataset.i);
+  if(state.lock)return;
+  if(b.classList.contains('opened')){recordGardenChoice(true,{repeat:true});return;}
+  const ok=bugs.has(+b.dataset.i);recordGardenChoice(ok);
   b.classList.add('opened');
   b.innerHTML='<span class="leaf-discovery" aria-hidden="true">'+(ok?'🐞':'🌱')+'</span>';
   b.setAttribute('aria-label',ok?'무당벌레를 찾았어요':'빈 잎사귀예요');
   sfx(ok?'ok':'tap');
   if(ok){
-   found++;$('#miniCount').textContent='🐞 '+found+' / '+need;addSeeds(Math.ceil(10/need));
-   if(found===need){flash('발자국을 따라 숨은 친구를 모두 찾았어요!');roundGate(area.querySelector('.basic-game'),'다음 잎사귀 ▶',500)}
+   found++;$('#miniCount').textContent='🐞 '+found+' / '+need;
+   const friend=document.createElement('span');friend.className='leaf-rescued';friend.textContent='🐞';$('#leafRescued').appendChild(friend);addSeeds(Math.ceil(10/need));
+   if(found===need){completeGardenQuest();flash('발자국을 따라 숨은 친구를 모두 찾았어요!');roundGate(area.querySelector('.basic-game'),'다음 잎사귀 ▶',500)}
   }else{
    misses++;flash('여긴 발자국이 없어요. 🐾 모양을 다시 찾아요.');
    if(misses>=2)area.querySelectorAll('.leaf-has-clue:not(.opened)').forEach(x=>x.classList.add('leaf-hint'));
@@ -222,31 +236,53 @@ function renderHide(){
  });
 }
 function renderPath(){
- const len=4+Math.min(practiceStep(),3);
- const icons=['🌱','🌼','🍃','🌸','🌿','🌻','🌷'];
- // Twenty rounds use twenty different first-two pairs. Each pair keeps
- // its own visible route even when the requested path length repeats.
+ const len=4+Math.min(practiceStep(),3),icons=['🌱','🌼','🍃','🌸','🌿','🌻','🌷'];
  const start=(state.round+state.pathOffset)%icons.length;
  const second=(start+1+Math.floor(state.round/icons.length))%icons.length;
  const seq=[icons[start],icons[second],...shuffle(icons.filter((_,i)=>i!==start&&i!==second))].slice(0,len);
- // Mix physical positions too. Otherwise a child can complete every round
- // by touching from left to right without finding the lit next step.
  const route=shuffle(seq.map((icon,i)=>({icon,i})));
- let pos=0;missionText.textContent='반짝이는 길을 차례로 따라가요!';missionSub.textContent='지금 반짝이는 곳을 찾아 한 칸씩 이동해요.';say(missionText.textContent);area.innerHTML=`<div class="basic-game"><div class="trail-game">${route.map(x=>`<button type="button" class="trail-node ${x.i===0?'ready':''}" data-i="${x.i}" aria-label="${x.icon} 길 ${x.i+1}">${x.icon}</button>`).join('')}<div class="trail-runner" id="trailRunner">🦋</div></div></div>`;$$('.trail-node').forEach(b=>b.onclick=()=>{if(state.lock)return;const i=+b.dataset.i;if(i!==pos){b.classList.add('wrong');sfx('no');flash('반짝이는 곳부터!');later(()=>b.classList.remove('wrong'),350);return}b.classList.remove('ready');b.classList.add('visited');pos++;addSeeds(Math.ceil(10/len));sfx('ok');if(pos<len)area.querySelector('.trail-node[data-i="'+pos+'"]').classList.add('ready');else{flash('길 완성! 🦋');roundGate(area.querySelector('.basic-game'),'다음 길 ▶',500)}})}
+ let pos=0;
+ missionText.textContent='루와 함께 반짝이는 길을 찾아요!';
+ missionSub.textContent='순서대로 누르면 루가 다음 칸으로 이동해요.';
+ say(missionText.textContent);
+ area.innerHTML='<div class="basic-game path-quest"><div class="path-quest-header"><img src="assets/friend-ru.png" alt="" class="path-quest-friend"><strong>루의 정원길</strong><span id="pathStepCount">0 / '+len+'칸</span></div><div class="trail-game">'+route.map(x=>'<button type="button" class="trail-node '+(x.i===0?'ready':'')+'" data-i="'+x.i+'" aria-label="'+x.icon+' 길 '+(x.i+1)+'">'+x.icon+'</button>').join('')+'<div class="trail-runner path-moving-runner" id="trailRunner" aria-hidden="true"><img src="assets/friend-ru.png" alt=""></div></div></div>';
+ const board=area.querySelector('.trail-game'),runner=area.querySelector('#trailRunner');
+ function moveRunner(i){
+  const node=board.querySelector('.trail-node[data-i="'+i+'"]');
+  if(node){runner.style.left=(node.offsetLeft+node.offsetWidth-4)+'px';runner.style.top=(node.offsetTop+8)+'px';}
+ }
+ moveRunner(0);
+ area.querySelectorAll('.trail-node').forEach(b=>b.onclick=()=>{
+  if(state.lock)return;
+  const i=+b.dataset.i;
+  if(b.classList.contains('visited')){recordGardenChoice(true,{repeat:true});return;}
+  if(i!==pos){recordGardenChoice(false);b.classList.add('wrong');sfx('no');flash('빛나는 칸을 다시 살펴봐요.');later(()=>b.classList.remove('wrong'),350);return;}
+  recordGardenChoice(true);b.classList.remove('ready');b.classList.add('visited');pos++;
+  $('#pathStepCount').textContent=pos+' / '+len+'칸';
+  addSeeds(Math.ceil(10/len));sfx('ok');
+  if(pos<len){board.querySelector('.trail-node[data-i="'+pos+'"]').classList.add('ready');moveRunner(pos);}
+  else{moveRunner(len-1);completeGardenQuest();flash('루가 길 끝에 도착했어요!');roundGate(area.querySelector('.basic-game'),'다음 길 ▶',500);}
+ });
+}
 function renderCalm(){let ready=false;const useYellow=practiceStep()>=2;missionText.textContent=useYellow?'빨강·노랑은 기다리고 초록에 톡!':'초록불에만 눌러 건너요!';missionSub.textContent=useYellow?'빨간불과 노란불에는 기다리고, 초록불에만 눌러요.':'차가 지나갈 때는 기다리고 초록 신호가 켜졌을 때만 눌러요.';say(missionText.textContent);area.innerHTML='<div class="basic-game calm-game road-game"><div class="traffic-scene"><div class="traffic-light"><i class="red on"></i><i class="yellow"></i><i class="green"></i></div><div class="road"><span class="road-car">🚗</span><div class="zebra"><i></i><i></i><i></i><i></i><i></i></div><img class="road-moa" src="assets/moa-default.png" alt=""><span class="road-goal">🌳</span></div><button id="signalBtn" class="signal-btn wait"><span>🔴</span><b>기다려요</b></button><p id="signalMsg">차가 지나가요. 손을 쉬고 기다려요.</p></div></div>';const b=$('#signalBtn'),scene=area.querySelector('.traffic-scene'),light=scene.querySelector('.traffic-light'),car=scene.querySelector('.road-car');const goGreen=()=>{ready=true;light.querySelector('.red').classList.remove('on');light.querySelector('.yellow').classList.remove('on');light.querySelector('.green').classList.add('on');b.className='signal-btn go';b.innerHTML='<span>🟢</span><b>지금 건너요!</b>';$('#signalMsg').textContent='초록불! 지금 톡!';sfx('ok')};const arm=()=>{ready=false;scene.classList.remove('cross-success');light.querySelector('.red').classList.add('on');light.querySelector('.yellow').classList.remove('on');light.querySelector('.green').classList.remove('on');b.className='signal-btn wait';b.innerHTML='<span>🔴</span><b>기다려요</b>';$('#signalMsg').textContent='차가 지나가요. 손을 쉬고 기다려요.';car.classList.remove('drive');void car.offsetWidth;car.classList.add('drive');later(()=>{if(useYellow){light.querySelector('.red').classList.remove('on');light.querySelector('.yellow').classList.add('on');b.className='signal-btn caution';b.innerHTML='<span>🟡</span><b>조금 더 기다려요</b>';$('#signalMsg').textContent='노란불도 아직 기다려요.';later(goGreen,650+Math.random()*500)}else goGreen()},1100+Math.random()*1200)};b.onclick=()=>{if(state.lock)return;if(!ready){sfx('no');scene.classList.add('too-soon');flash(light.querySelector('.yellow').classList.contains('on')?'노란불도 기다려요! 초록불까지 기다려요.':'아직 빨간불이에요! 차가 지나간 뒤 기다려요.');later(()=>scene.classList.remove('too-soon'),450);clearTimers();arm()}else{scene.classList.add('cross-success');addSeeds(10);sfx('ok');flash('안전하게 건넜어요! 🚦');roundGate(scene,'다음 길 건너기 ▶',950)}};arm()}
 
 function renderInside(){const need=3+practiceStep();let placed=0;missionText.textContent=`울타리 안에 별 ${need}개를 심어요!`;missionSub.textContent='넓은 들판 중 연두색 울타리 안에만 별을 심어요.';say(missionText.textContent);area.innerHTML=`<div class="basic-game"><div class="mini-count" id="miniCount">⭐ 0 / ${need}</div><div class="inside-stage-new" id="insideStage"><div class="inside-zone" id="insideZone"><span>울타리 안</span></div></div></div>`;const stage=$('#insideStage'),z=$('#insideZone');stage.onclick=e=>{if(state.lock||placed>=need)return;if(!e.target.closest('#insideZone')){sfx('no');flash('울타리 안에 심어봐요.');const p=document.createElement('b');p.className='outside-ripple';p.style.left=`${e.offsetX}px`;p.style.top=`${e.offsetY}px`;stage.appendChild(p);later(()=>p.remove(),420);return}const r=z.getBoundingClientRect(),star=document.createElement('i');star.textContent='⭐';star.style.left=`${e.clientX-r.left}px`;star.style.top=`${e.clientY-r.top}px`;z.appendChild(star);placed++;$('#miniCount').textContent=`⭐ ${placed} / ${need}`;addSeeds(Math.ceil(10/need));sfx('ok');if(placed===need){flash('별밭 완성!');roundGate(area.querySelector('.basic-game'),'다음 별밭 ▶',500)}}}
 function renderTargets(){
- const total=4+practiceStep()*2;let done=0;
+ const total=4+practiceStep()*2,decoys=practiceStep()>=2?Math.min(3,practiceStep()-1):0;
+ let done=0;
  missionText.textContent='잠든 꽃씨를 하나씩 깨워요!';
- missionSub.textContent='한 씨앗을 한 번씩만 눌러 모든 꽃을 피워봐요.';
+ missionSub.textContent='이미 꽃이 핀 곳은 그대로 두고 잠든 꽃씨만 찾아요.';
  say(missionText.textContent);
- area.innerHTML='<div class="basic-game wake-garden"><div class="wake-scene-head"><span aria-hidden="true">🌱 → 🌼</span><div><strong>모아의 꽃씨 정원</strong><p id="miniCount">피어난 꽃 0 / '+total+'</p></div></div><div class="target-grid-new">'+Array.from({length:total},()=>'<button class="wake-target" type="button" aria-label="아직 잠든 꽃씨">🌱</button>').join('')+'</div></div>';
- $$('.wake-target').forEach(b=>b.onclick=()=>{
-  if(state.lock||b.classList.contains('awake'))return;
-  b.classList.add('awake');b.textContent='🌼';b.setAttribute('aria-label','꽃이 피었어요');done++;
+ const spots=shuffle([...Array.from({length:total},()=>false),...Array.from({length:decoys},()=>true)]);
+ area.innerHTML='<div class="basic-game wake-garden"><div class="wake-scene-head"><img src="assets/friend-saem.png" alt="" class="wake-garden-guide"><div><strong>샘의 꽃씨 정원</strong><p id="miniCount">피어난 꽃 0 / '+total+'</p></div></div><div class="wake-garden-progress" id="wakeGardenProgress" aria-label="꽃밭 변화" role="status"></div><div class="target-grid-new">'+spots.map(ready=>'<button class="wake-target '+(ready?'wake-decoy':'')+'" type="button" data-ready="'+(ready?'1':'0')+'" aria-label="'+(ready?'이미 피어난 꽃':'잠든 꽃씨')+'">'+(ready?'🌼':'🌱')+'</button>').join('')+'</div></div>';
+ area.querySelectorAll('.wake-target').forEach(b=>b.onclick=()=>{
+  if(state.lock)return;
+  if(b.classList.contains('awake')){recordGardenChoice(true,{repeat:true});return;}
+  if(b.dataset.ready==='1'){recordGardenChoice(false);b.classList.add('wake-remind');sfx('no');flash('이 꽃은 이미 피었어요. 잠든 씨앗을 찾아요.');later(()=>b.classList.remove('wake-remind'),360);return;}
+  recordGardenChoice(true);b.classList.add('awake');b.textContent='🌼';b.setAttribute('aria-label','꽃이 피었어요');b.dataset.ready='1';done++;
+  const bloom=document.createElement('span');bloom.className='wake-progress-bloom';bloom.textContent='🌼';$('#wakeGardenProgress').appendChild(bloom);
   $('#miniCount').textContent='피어난 꽃 '+done+' / '+total;addSeeds(Math.ceil(10/total));sfx('ok');
-  if(done===total){flash('꽃씨가 모두 깨어났어요! 🌻');roundGate(area.querySelector('.basic-game'),'다음 꽃씨 ▶',500)}
+  if(done===total){completeGardenQuest();flash('잠든 씨앗이 모두 깨어났어요!');roundGate(area.querySelector('.basic-game'),'다음 꽃씨 ▶',500);}
  });
 }
 function renderPaint(){
@@ -329,7 +365,7 @@ function startGame(id){clearTimers();state.game=id;state.round=0;state.score=0;s
 function renderRound(){clearTimers();state.lock=false;state.advancing=false;area.innerHTML='';if(window.StrategyGarden?.isNew(state.game)){window.StrategyGarden.render(state.game,{state,area,missionText,missionSub,guide,addSeeds,sfx,nextRound});return;}if(window.NovelGarden?.isNew(state.game)){window.NovelGarden.render(state.game,{state,area,missionText,missionSub,guide,addSeeds,sfx,nextRound});return;}if(window.SlowLookNative?.isNew(state.game)){window.SlowLookNative.render(state.game,{state,area,missionText,missionSub,guide,say,flash,addSeeds,sfx,nextRound});return;}({rescue:renderFind,memory:renderMemory,spacing:renderSpacing,spelling:renderSpelling,sameShape:renderSameShape,flower:renderFlower,hide:renderHide,path:renderPath,calm:renderCalm,inside:renderInside,targets:renderTargets,paint:renderPaint,water:renderWater}[state.game])()}
 function nextRound(delay=700){if(state.advancing)return;state.advancing=true;finishBasicRound();state.lock=true;later(()=>{state.round++;if(state.round>=state.roundTotal)return finishGame();if(state.roundTotal>=10&&state.round%5===0){state.advancing=false;area.innerHTML=`<section class="practice-break"><span class="break-art" aria-hidden="true">🌿</span><h3>잠깐 쉬어가는 정원</h3><p>${state.round}문제를 완료했어요. 눈과 손을 쉬었다가 다음 이야기를 시작해도 돼요.</p><div class="break-steps"><span>🌱 숨 고르기</span><span>👀 눈 쉬기</span><span>🧠 다음 문제는 새롭게 확인하기</span></div><div class="break-actions"><button type="button" class="primary" id="practiceContinue">준비됐어요 · 이어하기 →</button><button type="button" id="practiceStop">오늘은 여기까지</button></div></section>`;$('#practiceContinue').onclick=()=>{updateProgress();renderRound()};$('#practiceStop').onclick=()=>finishGame(true);return;}updateProgress();renderRound()},delay)}
 function finishGame(early=false){if(!early){completed[state.game]=true;localStorage.setItem(STORE.done,JSON.stringify(completed));}$('#progressBar').style.width=(early?Math.round(state.round/state.roundTotal*100):100)+'%';const m=meta[state.game];$('#resultCharacter').src=m.friend;$('#resultTitle').textContent=state.score>=state.roundTotal*9?'정원이 활짝 깨어났어!':state.score>=state.roundTotal*6?'정원 한 칸 완성!':'끝까지 길을 만들었어!';$('#resultMessage').textContent=window.StrategyGarden?.isNew(state.game)?'어떤 단서를 보고 실수를 다시 확인했는지 살펴봤어요.':window.NovelGarden?.isNew(state.game)?'오늘은 새로운 방법으로 살펴보고, 실수 후 다시 확인하는 연습을 했어요.':window.SlowLookNative?.isNew(state.game)?'모아와 함께 차근차근 확인하는 연습을 했어요.':LITERACY_GAMES.has(state.game)?`${LEVEL_NAMES[state.practiceLevel]} · ${state.roundTotal}문제를 끝까지 풀었어요!`:`${m.kicker}의 5개 미션을 모두 지나왔어요.`;if(early){$('#resultTitle').textContent='오늘 연습 여기까지 🌿';$('#resultMessage').textContent=`${state.round}문제 연습했어요. 쉬었다가 다시 시작할 수 있어요.`;}
- $('#resultScore').textContent=`🌱 ${state.score}`;document.querySelector('.practice-result-summary')?.remove();document.querySelector('.basic-observation')?.remove();if(BASIC_GAMES.has(state.game)&&state.basicRecords?.length){const panel=document.createElement('details');panel.className='basic-observation';panel.innerHTML='<summary>선생님 관찰 · 문제별 조작 피드백</summary><div class="basic-observation-items"></div><button class="basic-observation-export" type="button">관찰기록 CSV 다운로드</button><small>오반응 피드백은 해당 게임이 실제로 제공한 피드백을 센 횟수입니다. 검사 점수나 정확도·발달 수준을 뜻하지 않습니다.</small>';const list=state.basicRecords;panel.querySelector('.basic-observation-items').textContent=list.map(r=>r.round+'번: '+(state.game==='sameShape'?'첫 선택 '+(r.firstAttempt||'미응답')+' / 최종 '+(r.finalCorrect||'미완료')+' / 시도 '+r.attempts+'회 / ':state.game==='water'?'첫 물주기 선택 '+(r.firstChoice||'미응답')+' / 선택 '+(r.waterChoices||0)+'회 / 불필요한 물주기 '+(r.waterMistakes||0)+'회 / ':'첫 피드백 '+(r.firstFeedback||'기록 없음')+' / ')+'오반응 피드백 '+r.wrongFeedback+'회 / 보상 발생 '+r.rewardEvents+'회').join(' · ');panel.querySelector('.basic-observation-export').onclick=()=>{const rows=[['미션','첫 피드백','오반응 피드백 횟수','보상 발생 횟수','첫 선택 정확','최종 완료','선택 시도 횟수','첫 물주기 선택','물주기 선택 총횟수','불필요한 물주기 횟수'],...list.map(r=>[r.round,r.firstFeedback||'',r.wrongFeedback,r.rewardEvents,r.firstAttempt||'',r.finalCorrect||'',r.attempts||'',r.firstChoice||'',r.waterChoices||'',r.waterMistakes||''])];const csv='\uFEFF'+rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');const u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=u;a.download='모아_기초게임_관찰.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};document.querySelector('.result-garden').appendChild(panel)}if(!LITERACY_GAMES.has(state.game)&&state.game!=='rescue'){const p=document.createElement('p');p.className='practice-result-summary';p.innerHTML=`<strong>${state.roundTotal}문제 중 ${early?state.round:state.roundTotal}문제를 연습했어요.</strong>쌍둥이 모양 찾기는 실제 선택의 첫 반응과 최종 수행을 구분해요. 시든 꽃 깨우기는 첫 물주기 선택과 불필요한 선택을 따로 기록해요. 다른 기초 게임의 보상·오반응 피드백은 정답률이 아니에요. 연습은 여러 회기에 나눌 수 있어요.`;document.querySelector('.result-garden').appendChild(p)};document.querySelector('.slow-result-extra')?.remove();document.querySelector('.novel-results')?.remove();document.querySelector('.strategy-results')?.remove();if(state.slowLook)window.SlowLookNative.addSummary(state.slowLook,document.querySelector('.result-garden'));if(state.novel)window.NovelGarden.summary(state.novel,document.querySelector('.result-garden'));if(state.strategy)window.StrategyGarden.summary(state.strategy,document.querySelector('.result-garden'));later(()=>{show('result');window.MoaClinicalBridge?.result(state.game);window.MoaAssignment?.afterResult(state.game)},500)}
+ $('#resultScore').textContent=`🌱 ${state.score}`;document.querySelector('.practice-result-summary')?.remove();document.querySelector('.basic-observation')?.remove();if(BASIC_GAMES.has(state.game)&&state.basicRecords?.length){const panel=document.createElement('details');panel.className='basic-observation';panel.innerHTML='<summary>선생님 관찰 · 문제별 조작 피드백</summary><div class="basic-observation-items"></div><button class="basic-observation-export" type="button">관찰기록 CSV 다운로드</button><small>오반응 피드백은 해당 게임이 실제로 제공한 피드백을 센 횟수입니다. 검사 점수나 정확도·발달 수준을 뜻하지 않습니다.</small>';const list=state.basicRecords;panel.querySelector('.basic-observation-items').textContent=list.map(r=>r.round+'번: '+(state.game==='sameShape'?'첫 선택 '+(r.firstAttempt||'미응답')+' / 최종 '+(r.finalCorrect||'미완료')+' / 시도 '+r.attempts+'회 / ':state.game==='water'?'첫 물주기 선택 '+(r.firstChoice||'미응답')+' / 선택 '+(r.waterChoices||0)+'회 / 불필요한 물주기 '+(r.waterMistakes||0)+'회 / ':['flower','hide','path','targets'].includes(state.game)?'첫 선택 '+(r.gardenFirst||'미응답')+' / 선택 '+(r.gardenChoices||0)+'회 / 재확인 필요 '+(r.gardenErrors||0)+'회 / 다시 터치 '+(r.gardenRepeat||0)+'회 / ':'첫 피드백 '+(r.firstFeedback||'기록 없음')+' / ')+'오반응 피드백 '+r.wrongFeedback+'회 / 보상 발생 '+r.rewardEvents+'회').join(' · ');panel.querySelector('.basic-observation-export').onclick=()=>{const rows=[['미션','첫 피드백','오반응 피드백 횟수','보상 발생 횟수','첫 선택 정확','최종 완료','선택 시도 횟수','첫 물주기 선택','물주기 선택 총횟수','불필요한 물주기 횟수','꽃·잎·길·씨앗 첫 선택','전체 선택','재확인 필요','반복 터치','게임 완료'],...list.map(r=>[r.round,r.firstFeedback||'',r.wrongFeedback,r.rewardEvents,r.firstAttempt||'',r.finalCorrect||'',r.attempts||'',r.firstChoice||'',r.waterChoices||'',r.waterMistakes||'',r.gardenFirst||'',r.gardenChoices||'',r.gardenErrors||'',r.gardenRepeat||'',r.gardenFinished?'O':''])];const csv='\uFEFF'+rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');const u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=u;a.download='모아_기초게임_관찰.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};document.querySelector('.result-garden').appendChild(panel)}if(!LITERACY_GAMES.has(state.game)&&state.game!=='rescue'){const p=document.createElement('p');p.className='practice-result-summary';p.innerHTML=`<strong>${state.roundTotal}문제 중 ${early?state.round:state.roundTotal}문제를 연습했어요.</strong>쌍둥이 모양 찾기는 실제 선택의 첫 반응과 최종 수행을 구분해요. 시든 꽃 깨우기는 첫 물주기 선택과 불필요한 선택을 따로 기록해요. 꽃·잎·길·씨앗 게임은 첫 선택, 다시 확인한 횟수, 중복 터치를 분리해요. 나머지 기초 게임의 보상·오반응 피드백은 정답률이 아니에요. 연습은 여러 회기에 나눌 수 있어요.`;document.querySelector('.result-garden').appendChild(p)};document.querySelector('.slow-result-extra')?.remove();document.querySelector('.novel-results')?.remove();document.querySelector('.strategy-results')?.remove();if(state.slowLook)window.SlowLookNative.addSummary(state.slowLook,document.querySelector('.result-garden'));if(state.novel)window.NovelGarden.summary(state.novel,document.querySelector('.result-garden'));if(state.strategy)window.StrategyGarden.summary(state.strategy,document.querySelector('.result-garden'));later(()=>{show('result');window.MoaClinicalBridge?.result(state.game);window.MoaAssignment?.afterResult(state.game)},500)}
 function rewardAt(el){const r=el.getBoundingClientRect(),w=world.getBoundingClientRect(),p=document.createElement('span');p.className='leaf-pop';p.textContent='🌱';p.style.left=`${r.left-w.left+r.width/2}px`;p.style.top=`${r.top-w.top+r.height/2}px`;world.appendChild(p);later(()=>p.remove(),800)}
 function roundGate(parent,label='다음 미션 ▶',delay=500,speech=''){
  state.lock=true;
