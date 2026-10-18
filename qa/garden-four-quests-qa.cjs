@@ -49,7 +49,7 @@ const url='http://127.0.0.1:8765/thinking-garden/';
       }
       if(game==='targets'){
        const sleeping=page.locator('.wake-target[data-ready="0"]'),n=await sleeping.count();
-       if(round>=2)assert.ok(await page.locator('.wake-target.wake-decoy').count()>=1,'high round should introduce already-bloomed distractors');
+       if(await page.evaluate(()=>practiceStep()>=2))assert.ok(await page.locator('.wake-target.wake-decoy').count()>=1,'harder rounds should introduce already-bloomed distractors');
        if(round===2)await page.locator('.wake-target.wake-decoy').first().click();
        await sleeping.first().click();
        if(round===0)await page.locator('.wake-target.awake').first().click();
