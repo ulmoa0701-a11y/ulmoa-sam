@@ -58,7 +58,7 @@ const {chromium}=require("playwright-core");
   await page.locator("#section").selectOption("4");
   const beforeStart=await page.evaluate(()=>window.__performanceViewsQA__.state());
   assert.equal(beforeStart.section,"4");
-  await page.locator("#overlayPlay").click();
+  await page.locator("#play").click();
   await page.waitForTimeout(410);
   const a=await page.evaluate(()=>window.__performanceViewsQA__.state());assert(a.playing&&a.clockAudio);
   await page.locator('.view-choice[data-view="bar"]').click();
