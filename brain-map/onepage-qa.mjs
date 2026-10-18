@@ -50,6 +50,7 @@ try{
   assert.match(await page.locator('.lobe-science-note a').getAttribute('href'),/^https:\/\/www\.ninds\.nih\.gov\//,'primary NINDS source is available');
   assert.equal(await page.locator('#lobeSceneRead').count(),1,'one optional selected-process read-aloud control');
   assert.equal(await page.locator('#lobeSceneRead').getAttribute('aria-label'),'현재 선택한 과정과 관련 뇌 부위 설명 듣기');
+  assert.equal(await page.locator('#lobeSceneRead').getAttribute('aria-pressed'),'false','read button begins stopped');
   assert.equal(await page.locator('#lobeSceneRead').evaluate(el=>el.getBoundingClientRect().height>=44),true,'read-aloud tap target accessible');
 
   assert.equal(await page.locator('[data-lobe-scene]').count(),8,'all eight existing everyday scenes available beside six-lobe map');
@@ -513,7 +514,40 @@ try{
   report.push({name,status:'PASS',viewport:width,lobeSummaryTop:Math.round(fit.bottom),buttons:6,noOverflow:true});
   await page.close();
  }
- await writeFile(out+'/result.json',JSON.stringify({passed:true,report},null,2));
+ // Headless Chromium may not have Korean device voices. Test control semantics with
+ // an explicit in-page speech mock; this is not evidence of audible device output.
+ const speechPage=await browser.newPage({viewport:{width:390,height:844}});
+ await speechPage.addInitScript(()=>{
+  window.__qaSpeech={utterances:[],cancelCount:0};
+  Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
+   cancel(){window.__qaSpeech.cancelCount++;},
+   getVoices(){return [{name:'QA Korean voice',lang:'ko-KR'}];},
+   speak(u){window.__qaSpeech.utterances.push(u.text);}
+  }});
+  window.SpeechSynthesisUtterance=class{constructor(text){this.text=text;this.lang='';this.rate=1;}};
+ });
+ await speechPage.goto(base+'brain-map/',{waitUntil:'networkidle',timeout:30000});
+ const speakButton=speechPage.locator('#lobeSceneRead');
+ assert.equal(await speakButton.getAttribute('aria-pressed'),'false');
+ await speakButton.click();
+ assert.equal(await speakButton.getAttribute('aria-label'),'현재 설명 읽기 멈추기','screen reader gets correct active button purpose');
+ assert.equal(await speakButton.getAttribute('aria-pressed'),'true');
+ const spoken=await speechPage.evaluate(()=>window.__qaSpeech.utterances[0]);
+ assert.match(spoken,/친구와 대화할 때/,'speech includes the selected daily-life scene');
+ assert.match(spoken,/말소리 살피기/,'speech includes the selected process');
+ await speakButton.click();
+ assert.equal(await speakButton.getAttribute('aria-label'),'현재 선택한 과정과 관련 뇌 부위 설명 듣기');
+ assert.equal(await speakButton.getAttribute('aria-pressed'),'false');
+ await speechPage.locator('[data-lobe-scene="ball"]').click();
+ await speechPage.locator('#lobeSceneRoles [data-scene-region="occipital"]').click();
+ assert.match(await speechPage.locator('#lobeSceneFocusText').innerText(),/굴러오거나 날아오는 공/,'brain-process wording includes guided rolling-ball activity');
+ await speakButton.click();
+ const spokenBall=await speechPage.evaluate(()=>window.__qaSpeech.utterances.at(-1));
+ assert.match(spokenBall,/공놀이할 때/);
+ await speechPage.locator('[data-lobe-scene="read"]').click();
+ assert.equal(await speakButton.getAttribute('aria-pressed'),'false','changing scene cancels speech and resets accessible button');
+ await speechPage.close();
+ await writeFile(out+'/result.json',JSON.stringify({passed:true,report,speechControl:'PASS (mocked synthesis control; audible voice unverified)'},null,2));
  console.log('BRAIN MAP QA PASS '+JSON.stringify(report));
 }catch(e){
  report.push({status:'FAIL',error:String(e.stack||e)});
