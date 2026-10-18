@@ -70,6 +70,7 @@ const url='http://127.0.0.1:8765/thinking-garden/';
      await page.locator('#resultScreen.active').waitFor();
      assert.equal(await page.evaluate(()=>state.basicRecords.length),count,'observation count '+game);
      assert.equal(await page.evaluate(()=>state.basicRecords.every(x=>x.gardenFinished===true)),true,'completed missions '+game);
+     await page.locator('.basic-observation summary').click();
      assert.ok((await page.locator('.basic-observation-items').innerText()).includes('첫 선택'),'teacher should see actual choices');
      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+4),true,'mobile viewport overflow '+game);
      if(count===5)await page.screenshot({path:'qa/four-quest-screenshots/'+viewport.name+'-'+game+'.png',fullPage:false});
