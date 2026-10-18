@@ -57,7 +57,7 @@ const wait=(p,fn,timeout=14000)=>p.waitForFunction(fn,null,{timeout});
 async function prepared(p,mode='garden',hands=1){
  await p.goto(url,{waitUntil:'domcontentloaded'});
  if(mode!=='garden'){
-   await p.locator('#advancedModes summary').click();
+   assert.equal(await p.locator('#advancedModes summary').count(),0,'The complete game picker must not be hidden');
    await p.locator('[data-mode="'+mode+'"]').click();
  }
  await p.evaluate(n=>{window.__hands=n;},hands);
@@ -85,6 +85,20 @@ async function screenSizes(){
    assert.equal(info.second,true);
    assert.equal(info.flower,true);
    assert.equal(info.children,2);
+   // Navigation is tested at the same 7 responsive breakpoints, not just 390px.
+   await p.locator('#pause').click();
+   assert.equal(await p.locator('#intro [data-mode]:visible').count(),5,'Five accessible game options at '+viewport.width+'px');
+   assert.equal(await p.locator('#intro [data-mode="garden"]').getAttribute('aria-pressed'),'true');
+   for(const mode of ['copy','fingers','memory','both']){
+    const card=p.locator('#intro [data-mode="'+mode+'"]');
+    assert.equal(await card.isVisible(),true,'Visible '+mode+' on '+viewport.width+'px');
+    await card.click();
+    assert.equal(await card.getAttribute('aria-pressed'),'true');
+    assert.equal(await p.locator('#cameraStart').isVisible(),true);
+   }
+   await p.locator('#intro [data-mode="garden"]').click();
+   assert.equal(await p.locator('#intro [data-mode="garden"]').getAttribute('aria-pressed'),'true');
+
    assert.deepEqual(errors,[]);
    if(viewport.width===320||viewport.width===844)await p.screenshot({path:out+'/edge-layout-'+viewport.width+'x'+viewport.height+'.png',fullPage:true});
    results.push({case:'viewport '+viewport.width+'x'+viewport.height,pass:true});
@@ -196,7 +210,7 @@ async function wrongAnswerAndReplay(){
  assert.equal(await p.locator('#gardenHudFlower').innerText(),'🌷 0 / 3','Replay resets garden');
  assert.match(await p.locator('#mute').innerText(),/🔇/,'User mute preference persists');
  await p.locator('#pause').click();
- await p.locator('#advancedModes summary').click();
+ assert.equal(await p.locator('#advancedModes summary').count(),0,'The complete game picker must not be hidden');
  await p.locator('[data-mode="fingers"]').click();
  await p.locator('#touchStart').click();
  assert.equal(await p.locator('#choices').evaluate(e=>e.parentElement.id),'gardenTouchDock','Other story mode keeps its answers in one play scene');
@@ -228,7 +242,7 @@ async function allCameraModes(){
  for(const mode of ['copy','fingers','memory','both']){
   const {c,p,errors}=await ctx({width:390,height:844});
   await p.goto(url,{waitUntil:'domcontentloaded'});
-  await p.locator('#advancedModes summary').click();
+  assert.equal(await p.locator('#advancedModes summary').count(),0,'The complete game picker must not be hidden');
   await p.locator('[data-mode="'+mode+'"]').click();
   await p.evaluate(args=>{window.__hands=args.hands;window.__pose='fist';}, {hands:mode==='both'?1:1});
   await p.locator('#cameraStart').click();

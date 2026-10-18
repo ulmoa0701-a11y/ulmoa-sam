@@ -231,6 +231,7 @@ function modeSelected(m){
   both:['두 손 보물문 🔑','두 손을 함께 움직여 자물쇠를 하나씩 열고 보물문을 찾아요.']
  };
  $('introHeading').textContent=intros[m][0];$('introLead').textContent=intros[m][1];
+ $('selectedModeLabel').textContent={garden:'마법 꽃밭',copy:'손 모양 따라하기',fingers:'손가락 탐험',memory:'손동작 기억길',both:'두 손 협동'}[m];
 }
 function taskOptions(){
  const types=isGarden()?[['fist'],['palm']]:S.mode==='both'?[['palm','palm'],['fist','fist'],['palm','fist'],['one','one']]:POSES.map(p=>[p]);
