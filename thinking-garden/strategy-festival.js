@@ -32,23 +32,32 @@ const tasks=[
   [['시간표 확인','🗓️'],['필요한 교과서 고르기','📚'],['가방 챙기기','🎒'],['등교하기','🏫']],
   [['약속 시간 확인','🕒'],['교통카드 챙기기','💳'],['정류장에 가기','🚏'],['버스 타기','🚌']]
 ];
+function rotateChoices(ids,last){
+ const result=[...ids];
+ for(let i=result.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[result[i],result[j]]=[result[j],result[i]];}
+ if(last===result.join(',')&&result.length>1)result.push(result.shift());
+ return result;
+}
 window.StrategyGarden.register('festivalPlan',{
  begin(s,r,round){
   r.tasks=tasks[round%tasks.length].slice(0,r.level===3?4:3);
-  r.pool=r.tasks.length===4?[2,0,3,1]:[2,0,1];
+  r.pool=rotateChoices(Array.from({length:r.tasks.length},(_,i)=>i),s.lastFestivalPool);
+  s.lastFestivalPool=r.pool.join(',');
   r.chosen=[];r.phase='plan';
  },
- view({r,round,body,rerender,assist,fail,complete}){
+ view({r,round,body,feedback,rerender,assist,fail,complete,ctx}){
   const count=r.tasks.length,seq=r.tasks;
-  const clues=Array.from({length:count-1},(_,i)=>{
-   const reversed=r.level>=2&&(i+round)%2===1;
-   const text=reversed?seq[i+1][1]+' '+seq[i+1][0]+'은(는) '+seq[i][1]+' '+seq[i][0]+' 다음이에요.':seq[i][1]+' '+seq[i][0]+' 다음에 '+seq[i+1][1]+' '+seq[i+1][0]+'을(를) 해요.';
-   return {friend:['🐰','🐻','🐱'][i],text};
-  });
-  if(r.level>=2&&clues.length>=2){const first=clues.shift();clues.push(first);}
-  if(r.level===3&&clues.length===3){[clues[0],clues[1]]=[clues[1],clues[0]];}
+  const clues=Array.from({length:count-1},(_,i)=>({
+   before:seq[i],after:seq[i+1],
+   text:'먼저 '+seq[i][0]+', 그다음 '+seq[i+1][0],
+   friend:['assets/friend-hong.png','assets/friend-saem.png','assets/friend-ru.png'][i%3]
+  }));
+  // Reordering the clue cards raises planning demand, without rotating the
+  // actual answer keys or requiring a child to decode grammatical placeholders.
+  if(r.level>=2&&clues.length>=2)clues.push(clues.shift());
+  if(r.level===3&&clues.length===3)[clues[0],clues[1]]=[clues[1],clues[0]];
   const story='<div class="strategy-story-head"><span>🎪 모아의 축제 정원</span><h3>친구들의 이야기를 듣고 축제를 준비해요!</h3></div><div class="strategy-festival-banner">🎈　🌱　🎉　🌷　🎁</div>';
-  const evidence='<div class="strategy-evidence"><strong>📜 친구들이 알려준 순서 단서'+(r.level>=2?' (단서가 순서대로 나오지 않아요)':'')+'</strong>'+clues.map(c=>'<div class="strategy-witness"><span>'+c.friend+'</span><p>'+c.text+'</p></div>').join('')+'</div>';
+  const evidence='<div class="strategy-evidence festival-picture-evidence"><strong>친구들이 알려준 순서 단서'+(r.level>=2?' · 카드 순서가 섞여 있어요':'')+'</strong>'+clues.map((clue,i)=>'<div class="festival-clue" data-clue="'+i+'"><img src="'+clue.friend+'" alt="" class="festival-clue-friend"><div class="festival-clue-flow" aria-label="'+clue.text+'"><div class="festival-clue-item"><span aria-hidden="true">'+clue.before[1]+'</span><strong>'+clue.before[0]+'</strong></div><span class="festival-clue-arrow" aria-hidden="true">→</span><div class="festival-clue-item"><span aria-hidden="true">'+clue.after[1]+'</span><strong>'+clue.after[0]+'</strong></div></div><button type="button" data-plan="listen" data-clue="'+i+'" aria-label="순서 단서 '+(i+1)+' 듣기">단서 듣기</button></div>').join('')+'</div>';
   if(r.phase==='reset'){
    body.innerHTML=story+evidence+'<div class="strategy-reset"><h3>🌿 잠깐 멈춰서 단서 확인!</h3><p>무엇을 먼저 해야 할까요? 한 가지 단서씩 확인한 뒤 다시 순서를 정해요.</p><button type="button" data-plan="recover" class="strategy-primary">✋ 준비되면 다시 계획하기</button></div>';
   }else{
@@ -60,6 +69,13 @@ window.StrategyGarden.register('festivalPlan',{
   body.addEventListener('click',e=>{
    const b=e.target.closest('button[data-plan]');if(!b||b.disabled)return;
    const act=b.dataset.plan,i=Number(b.dataset.i);
+   if(act==='listen'){
+    const clue=clues[Number(b.dataset.clue)];if(!clue)return;
+    if(ctx?.state?.sound&&'speechSynthesis' in window&&'SpeechSynthesisUtterance' in window){
+     try{speechSynthesis.cancel();const voice=new SpeechSynthesisUtterance(clue.text);voice.lang='ko-KR';voice.rate=.82;speechSynthesis.speak(voice);}catch{feedback.textContent='단서 그림을 보고 순서를 확인해요.';}
+    }else feedback.textContent='소리를 켜면 단서를 들을 수 있어요. 그림도 함께 볼 수 있어요.';
+    return;
+   }
    if(act==='recover'){r.chosen=[];r.phase='plan';assist('단서를 다시 읽고 새 순서를 계획했어요.');return;}
    if(act==='choose'){if(!r.chosen.includes(i)){r.chosen.push(i);rerender();}return;}
    if(act==='undo'){r.chosen.pop();rerender();return;}

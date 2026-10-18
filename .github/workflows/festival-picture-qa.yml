@@ -1,0 +1,44 @@
+name: Thinking Garden Festival Picture Clues QA
+on:
+  pull_request:
+    paths:
+      - 'thinking-garden/**'
+      - 'qa/festival-picture-clues-qa.cjs'
+      - '.github/workflows/festival-picture-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'thinking-garden/**'
+      - 'qa/festival-picture-clues-qa.cjs'
+      - '.github/workflows/festival-picture-qa.yml'
+permissions:
+  contents: read
+jobs:
+  festival-pictures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Prepare Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright-core@1.56.1
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Validate source
+        run: |
+          node --check thinking-garden/strategy-festival.js
+          node --check qa/festival-picture-clues-qa.cjs
+      - name: Serve repository
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/festival-http.log 2>&1 &
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:8765/thinking-garden/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/festival-http.log
+          exit 1
+      - name: Play mobile and desktop festival levels
+        run: node qa/festival-picture-clues-qa.cjs
