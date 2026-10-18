@@ -38,7 +38,6 @@ assert.ok(Object.values(core.TITLES).every(t=>!/검지|중지|약지|새끼손�
 const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_BIN,args:['--no-sandbox','--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream']});
 const goals={garden:['fist','palm','fist','palm','fist','palm'],copy:['palm','fist','one','two','three','palm'],fingers:['one','two','three','one','three','two'],both:['palm,palm','fist,fist','palm,fist','one,one']};
 async function pickMode(page,mode){
- if(mode!=='garden')await page.locator('#advancedModes summary').click();
  await page.locator('[data-mode="'+mode+'"]').click();
 }
 async function touchFlow(page,mode,patterns){
@@ -134,6 +133,21 @@ async function visualAndRecovery(width,height,label){
  await p.waitForURL('**/thinking-garden/games/hand-mirror/');
  assert.equal(await p.locator('h1').innerText(),'모아의 마법 꽃밭 🌼');
  assert.equal(await p.locator('.garden-mode').getAttribute('aria-pressed'),'true');
+ assert.equal(await p.locator('#advancedModes').count(),0,'No hidden accordion controls for other games');
+ assert.equal(await p.locator('.mode[data-mode]').count(),5,'All five games are available immediately');
+ assert.equal(await p.locator('.mode[data-mode]:visible').count(),5,'All five game cards are visibly displayed');
+ assert.match(await p.locator('#selectedPlayLabel').innerText(),/마법 꽃밭/,'Selected game visible next to start actions');
+ for(const [mode,title] of [['copy','반짝 풍선'],['fingers','손가락 별빛'],['memory','비밀 발판'],['both','두 손 보물문'],['garden','마법 꽃밭']]){
+  const selected=p.locator('.mode[data-mode="'+mode+'"]');
+  await selected.click();
+  assert.equal(await selected.getAttribute('aria-pressed'),'true',mode+' is explicitly selected');
+  assert.match(await selected.locator('.mode-cue').innerText(),/선택했어요/);
+  assert.equal(await p.locator('.mode[aria-pressed="true"]').count(),1,'Only one activity is highlighted');
+  assert.match(await p.locator('#selectedPlayLabel').innerText(),new RegExp(title),'Start section matches current mode');
+ }
+ assert.equal(await p.locator('#cameraStart').isVisible(),true,'Camera play entry is discoverable');
+ assert.equal(await p.locator('#touchStart').isVisible(),true,'Touch play entry is discoverable');
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+2),'No horizontal overflow in picker');
  await p.screenshot({path:output+'/new-home-'+label+'.png',fullPage:true});
  for(const [mode,patterns] of Object.entries(goals))await touchFlow(p,mode,patterns);
  await memoryFlow(p);
@@ -227,7 +241,6 @@ async function fakeVideoGarden(){
  await p.locator('#pause').click();
  assert.equal(await p.locator('#game').isVisible(),false,'Stop ends game and stream');
  await p.goto(base+'/thinking-garden/games/hand-mirror/',{waitUntil:'domcontentloaded'});
- await p.locator('#advancedModes summary').click();
  await p.locator('[data-mode="fingers"]').click();
  await p.locator('#cameraStart').click();
  await p.waitForFunction(()=>document.querySelector('#cameraCheck').hidden&&document.querySelector('#modelCard svg'),null,{timeout:18000});
