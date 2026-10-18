@@ -216,17 +216,19 @@ function renderHide(){
   const label=clue?'발자국이 있는 잎사귀':dew?'이슬방울이 있는 잎사귀':'흔적이 없는 잎사귀';
   return '<button class="leaf-btn '+(clue?'leaf-has-clue':'leaf-no-clue')+'" data-i="'+i+'" type="button" aria-label="'+label+'"><span class="leaf-cover" aria-hidden="true">🍃</span><span class="leaf-trail" aria-hidden="true">'+(trail||'&nbsp;')+'</span></button>';
  }).join('');
- area.innerHTML='<div class="basic-game leaf-clue-game leaf-level-'+level+'"><div class="mini-count" id="miniCount">🐞 0 / '+need+'</div><div class="leaf-example" aria-label="발자국을 보고 잎사귀를 열어 무당벌레 찾기"><span>🐾</span><span>→</span><span>🍃</span><span>→</span><span>🐞</span></div><p class="leaf-rule">🐾 발자국을 찾아 잎사귀를 열어요.'+(level===3?' 💧 이슬방울과 구분해요.':'')+'</p><div class="leaf-game">'+leaves+'</div></div>';
+ area.innerHTML='<div class="basic-game leaf-clue-game leaf-level-'+level+'"><div class="leaf-rescue-home"><img src="assets/friend-hong.png" alt="" class="leaf-rescue-friend"><div><strong>찾은 친구들의 쉼터</strong><div id="leafRescued" class="leaf-rescue-found" role="status" aria-label="찾은 친구"></div></div></div><div class="mini-count"' id="miniCount">🐞 0 / '+need+'</div><div class="leaf-example" aria-label="발자국을 보고 잎사귀를 열어 무당벌레 찾기"><span>🐾</span><span>→</span><span>🍃</span><span>→</span><span>🐞</span></div><p class="leaf-rule">🐾 발자국을 찾아 잎사귀를 열어요.'+(level===3?' 💧 이슬방울과 구분해요.':'')+'</p><div class="leaf-game">'+leaves+'</div></div>';
  area.querySelectorAll('.leaf-btn').forEach(b=>b.onclick=()=>{
-  if(b.classList.contains('opened')||state.lock)return;
-  const ok=bugs.has(+b.dataset.i);
+  if(state.lock)return;
+  if(b.classList.contains('opened')){recordGardenChoice(true,{repeat:true});return;}
+  const ok=bugs.has(+b.dataset.i);recordGardenChoice(ok);
   b.classList.add('opened');
   b.innerHTML='<span class="leaf-discovery" aria-hidden="true">'+(ok?'🐞':'🌱')+'</span>';
   b.setAttribute('aria-label',ok?'무당벌레를 찾았어요':'빈 잎사귀예요');
   sfx(ok?'ok':'tap');
   if(ok){
-   found++;$('#miniCount').textContent='🐞 '+found+' / '+need;addSeeds(Math.ceil(10/need));
-   if(found===need){flash('발자국을 따라 숨은 친구를 모두 찾았어요!');roundGate(area.querySelector('.basic-game'),'다음 잎사귀 ▶',500)}
+   found++;$('#miniCount').textContent='🐞 '+found+' / '+need;
+   const friend=document.createElement('span');friend.className='leaf-rescued';friend.textContent='🐞';$('#leafRescued').appendChild(friend);addSeeds(Math.ceil(10/need));
+   if(found===need){completeGardenQuest();flash('발자국을 따라 숨은 친구를 모두 찾았어요!');roundGate(area.querySelector('.basic-game'),'다음 잎사귀 ▶',500)}
   }else{
    misses++;flash('여긴 발자국이 없어요. 🐾 모양을 다시 찾아요.');
    if(misses>=2)area.querySelectorAll('.leaf-has-clue:not(.opened)').forEach(x=>x.classList.add('leaf-hint'));
