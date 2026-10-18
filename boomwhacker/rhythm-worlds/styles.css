@@ -11,3 +11,35 @@
 @media(max-width:1000px){.worlds{grid-template-columns:repeat(3,minmax(0,1fr))}.world-art{height:60px}.settings{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-mark{width:130px}.stage-caption{font-size:11px}}
 @media(max-width:620px){.topbar{height:66px}.brand{gap:8px}.back{height:36px;width:36px;font-size:21px}.topactions .pill{display:none}.studio-link{font-size:10px;max-width:90px;text-align:right}.hero{padding:18px 2px 15px}.hero h1{font-size:22px}.hero-mark{display:none}.intro{font-size:12px}.worlds{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:8px;padding:0 0 10px;margin:0 0 13px;scrollbar-width:thin}.world-card{scroll-snap-align:start;min-width:120px;width:120px;flex:none;border-radius:15px;padding:6px 7px 8px}.world-art{height:48px}.world-card strong{margin-top:4px;font-size:13px}.world-card small{font-size:10px}.player{border-radius:18px;padding:9px}.player-heading{margin:4px 3px 8px;gap:7px}.mission-overline{font-size:10px}.player-heading h2{font-size:17px}.player-heading p{font-size:11px;max-width:255px}.chapter{min-width:57px;width:63px}.chapter span{font-size:9px}.chapter strong{font-size:16px}.stage-shell{border-radius:12px}.start-overlay{inset:0 0 33px}.overlay-card{padding:14px;max-width:80%;border-radius:17px}.overlay-card strong{font-size:17px;margin:4px 0}.overlay-card p{font-size:10px;line-height:1.3;margin-bottom:9px}.start-big{font-size:12px;padding:9px 14px;border-radius:10px}.stage-caption{padding:7px 8px;font-size:10px;gap:3px}.stage-caption span:last-child{max-width:60%;text-align:right}.pad-panel{padding-top:9px}.pad-heading strong{font-size:12px}.pad-heading span{font-size:9px}.pads{gap:4px}.pad{min-height:50px;border-radius:8px;border-bottom-width:3px}.pad b{font-size:clamp(12px,3.6vw,17px)}.pad small{font-size:9px}.pad-note{font-size:10px;line-height:1.45}.control-panel{margin-top:10px;padding-top:11px}.control-main{gap:5px}.control-main button{flex:1 1 auto;padding:10px 5px;min-height:40px;font-size:11px;white-space:nowrap}.primary-control{min-width:95px}.settings{gap:10px;margin-top:14px}.settings label{font-size:11px}.settings select{font-size:11px;min-height:40px;padding:7px 23px 7px 8px;background-position:right 7px center}.control-detail{gap:8px 13px;margin-top:12px}.toggle{font-size:11px}.hint-inline{flex-basis:100%;text-align:left;min-width:0;font-size:11px}.howto{padding:19px 7px}.howto strong{font-size:16px}.howto p{font-size:11px}.topbar,footer{padding-left:0;padding-right:0}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Compact launch: reserve first screen for actual gameplay rather than a tall promotional hero. */
+.topbar{height:62px}
+.brand strong{font-size:clamp(16px,1.5vw,21px)}
+.topactions{gap:10px}
+.newgame-link{display:inline-flex;align-items:center;text-align:center;text-decoration:none;justify-content:center;min-height:38px;border-radius:11px;background:#337f71;color:#fff;font-size:12px;font-weight:900;padding:6px 12px}
+.newgame-link:hover{background:#286d60}
+.hero{padding:10px 2px 10px;min-height:0}
+.hero h1{font-size:clamp(17px,1.8vw,23px);line-height:1.25;margin:0 0 3px}
+.hero .intro{font-size:12px}
+.worlds{gap:8px;margin-bottom:12px}
+.world-card{border-radius:15px;padding:6px 8px 8px}
+.world-art{height:42px;border-radius:9px}
+.world-card strong{margin-top:5px}
+.player{padding:clamp(10px,1.5vw,19px)}
+.player-heading{margin-bottom:9px}
+@media(max-width:620px){
+ .topbar{height:57px}
+ .topactions{gap:4px}
+ .newgame-link{font-size:10px;max-width:106px;min-height:35px;padding:5px 6px;line-height:1.25}
+ .studio-link{max-width:78px;font-size:9px}
+ .hero{padding:8px 1px 9px}
+ .hero h1{font-size:17px}
+ .hero .intro{font-size:10px}
+ .worlds{gap:7px;margin-bottom:7px}
+ .world-card{min-width:107px;width:107px;padding:5px 6px 7px}
+ .world-art{height:32px}
+ .world-card strong{font-size:12px;margin-top:3px}
+ .world-card small{font-size:9px}
+ .player{padding:7px}
+ .player-heading{margin-bottom:6px}
+}
