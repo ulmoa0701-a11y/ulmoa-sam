@@ -1,0 +1,44 @@
+name: Garden Spatial 20-Round Variety and Clinical Record QA
+on:
+  pull_request:
+    paths:
+      - 'thinking-garden/slow-look-native.js'
+      - 'qa/garden-spatial-qa.cjs'
+      - '.github/workflows/garden-spatial-qa.yml'
+      - 'thinking-garden/index.html'
+  push:
+    branches: [main]
+    paths:
+      - 'thinking-garden/slow-look-native.js'
+      - 'qa/garden-spatial-qa.cjs'
+      - '.github/workflows/garden-spatial-qa.yml'
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install test browser
+        run: |
+          npm install --no-save --no-package-lock playwright-core@1.56.1
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Source syntax checks
+        run: |
+          node --check thinking-garden/slow-look-native.js
+          node --check qa/garden-spatial-qa.cjs
+      - name: Start site
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/slow-garden-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8765/thinking-garden/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/slow-garden-http.log; exit 1
+      - name: Verify 360 spatial trials and clinical hints
+        run: node qa/garden-spatial-qa.cjs
