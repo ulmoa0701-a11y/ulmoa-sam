@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="ko"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#f3f8f6">
-<meta name="description" content="붐웨커를 누구나 쉽게 연주하는 하트 안에 박을 나누는 다섯 가지 연주 화면. 가로 리듬길, 색깔 악보, 한 마디씩, 두 줄 악보, 지금·다음 음.">
+<meta name="description" content="붐웨커를 누구나 쉽게 연주하는 하트 안에 박을 나누는 여섯 가지 연주 화면. 가로 리듬길, 색깔 악보, 한 마디씩, 두 줄 악보, 지금·다음 음.">
 <title>모아의 하트 붐웨커 | 일단 해봄 · 울모아쌤</title>
 <link rel="stylesheet" href="./styles.css">
 <script src="../performance-views/scores.js" defer></script>
-<script src="./heart.js?v=heart-row-8to10-pr367" defer></script>
+<script src="./heart.js?v=heart-stairs-pr-new" defer></script>
 </head><body>
 <a class="skip" href="#stage">연주 화면으로 바로가기</a>
 <div class="app">
@@ -17,11 +17,12 @@
  <section class="selection" aria-label="연주 화면 선택">
   <div class="selection-heading"><strong>어떤 화면이 편할까?</strong><span>하트는 그대로 · 모아만 따라가요 · 두 줄 끝나면 악보 교체</span></div>
   <div class="view-options" id="viewOptions">
-   <button class="view-choice" data-view="road" type="button" aria-pressed="true"><span class="choice-icon road-icon" aria-hidden="true"></span><b>하트 리듬길</b><small>박이 옆으로 와요</small></button>
+   <button class="view-choice" data-view="road" type="button" aria-pressed="false"><span class="choice-icon road-icon" aria-hidden="true"></span><b>하트 리듬길</b><small>박이 옆으로 와요</small></button>
    <button class="view-choice" data-view="score" type="button" aria-pressed="false"><span class="choice-icon score-icon" aria-hidden="true"></span><b>하트 색깔악보</b><small>원래 하트 박자표</small></button>
    <button class="view-choice" data-view="bar" type="button" aria-pressed="false"><span class="choice-icon bar-icon" aria-hidden="true"></span><b>한 마디 하트판</b><small>한 박에 하트 하나</small></button>
-   <button class="view-choice active" data-view="two" type="button" aria-pressed="false"><span class="choice-icon two-icon" aria-hidden="true"></span><b>두 줄 고정 하트길</b><small>악보 고정 · 모아 이동</small></button>
+   <button class="view-choice active" data-view="two" type="button" aria-pressed="true"><span class="choice-icon two-icon" aria-hidden="true"></span><b>두 줄 고정 하트길</b><small>악보 고정 · 모아 이동</small></button>
    <button class="view-choice" data-view="next" type="button" aria-pressed="false"><span class="choice-icon next-icon" aria-hidden="true"></span><b>지금·다음 하트</b><small>현재 박 크게 보기</small></button>
+   <button class="view-choice" data-view="stairs" type="button" aria-pressed="false"><span class="choice-icon stair-icon" aria-hidden="true"></span><b>하트 계단악보</b><small>높낮이 따라 모아 이동</small></button>
   </div>
  </section>
  <section class="player" aria-label="붐웨커 연주">
@@ -64,6 +65,7 @@
    <label><input type="checkbox" id="loop"> 구간 반복</label>
    <label><input type="checkbox" id="motion"> 움직임 줄이기</label>
    <label class="moa-option">모아 움직임 <select id="moaMove" aria-label="모아 캐릭터 움직임"><option value="hop">깡충깡충 뛰기</option><option value="walk">부드럽게 이동</option></select></label>
+   <label class="stair-option" id="stairStyleWrap" hidden>계단악보 모양 <select id="stairStyle" aria-label="계단악보 모양 선택"><option value="simple">기본 계단형</option><option value="path">옅은 연결길</option></select></label>
    <button type="button" id="sound" aria-pressed="true">소리 켜짐</button>
   </div></details>
   <div class="message" id="status" role="status" aria-live="polite">화면을 고르고 연주 시작을 누르면 돼요.</div>
