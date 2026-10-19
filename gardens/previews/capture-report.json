@@ -201,7 +201,8 @@
       "preview": true,
       "play": true,
       "errors": [],
-      "playSelector": "#game canvas"
+      "playSelector": "#game canvas",
+      "playState": "mission"
     },
     {
       "id": "hand-mirror",
