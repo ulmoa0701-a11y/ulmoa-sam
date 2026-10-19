@@ -217,7 +217,7 @@
       "preview": true,
       "play": true,
       "errors": [],
-      "playSelector": "#gameArea > :first-child"
+      "playSelector": "#playScreen"
     },
     {
       "id": "money",
@@ -225,7 +225,7 @@
       "preview": true,
       "play": true,
       "errors": [],
-      "playSelector": "#gameArea > :first-child"
+      "playSelector": "#playScreen"
     },
     {
       "id": "feel",
@@ -233,7 +233,7 @@
       "preview": true,
       "play": true,
       "errors": [],
-      "playSelector": "#gameArea > :first-child"
+      "playSelector": "#playScreen"
     },
     {
       "id": "rhythm-touch",
@@ -249,7 +249,8 @@
       "preview": true,
       "play": true,
       "errors": [],
-      "playSelector": "main"
+      "playSelector": "#practiceScreen",
+      "playState": "practice"
     },
     {
       "id": "beat",
