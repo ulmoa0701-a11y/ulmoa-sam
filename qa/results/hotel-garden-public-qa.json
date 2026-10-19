@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-19T11:39:47.728Z",
+  "generatedAt": "2026-10-19T11:42:34.119Z",
   "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/",
   "kind": "real public browser loading and controls; internal event-path smoke (NOT full human playthrough)",
   "results": [
@@ -8,13 +8,20 @@
       "tests": {
         "load": true,
         "hud": true,
-        "movement": true,
+        "movement": false,
         "shiftSprint": true,
         "bossFlow": false,
         "endState": true,
-        "noFatalError": true
+        "noFatalError": false
       },
-      "errors": [],
+      "errors": [
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Failed to load resource: the server responded with a status of 404 ()"
+      ],
       "networkFailures": [],
       "start": {
         "state": {
@@ -47,7 +54,7 @@
             72
           ]
         },
-        "fps": 5.8,
+        "fps": 8.8,
         "canvas": 1,
         "overflow": false,
         "lotusText": "🌸 연꽃 0/3",
@@ -79,10 +86,10 @@
           -6
         ],
         "after": [
-          -18.59,
-          -6.78
+          -18.2,
+          -6.26
         ],
-        "distance": 0.98
+        "distance": 0.33
       },
       "smoke": {
         "geometry": true,
@@ -114,9 +121,16 @@
         "shiftSprint": true,
         "bossFlow": false,
         "endState": true,
-        "noFatalError": true
+        "noFatalError": false
       },
-      "errors": [],
+      "errors": [
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Failed to load resource: the server responded with a status of 404 ()"
+      ],
       "networkFailures": [],
       "start": {
         "state": {
@@ -149,7 +163,7 @@
             72
           ]
         },
-        "fps": 10.4,
+        "fps": 13.2,
         "canvas": 1,
         "overflow": false,
         "lotusText": "🌸 연꽃 0/3",
@@ -181,10 +195,10 @@
           -6
         ],
         "after": [
-          -20.29,
-          -9.06
+          -20.59,
+          -9.45
         ],
-        "distance": 3.82
+        "distance": 4.31
       },
       "smoke": {
         "geometry": true,
