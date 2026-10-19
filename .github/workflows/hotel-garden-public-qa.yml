@@ -38,7 +38,7 @@ jobs:
             hotel-garden-*.jpg
           if-no-files-found: warn
       - name: Save machine-readable QA report to isolated results branch
-        if: always()
+        if: always() && !cancelled()
         run: |
           if [ ! -f hotel-garden-public-qa.json ]; then
             printf '%s\n' '{"pass":false,"error":"browser QA did not produce a report"}' > hotel-garden-public-qa.json
