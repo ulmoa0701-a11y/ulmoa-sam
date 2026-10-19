@@ -225,7 +225,7 @@ window.__ulmoaGardenV2={
      out.pour=Kp===7&&!__hgPouring&&!__uHasBucket;
      out.smogHidden=!Wp.isEnabled();out.smogPicked=await window.__ulmoaGardenV2.holdPickup("smog");
      Dm(7);
-     out.slashHidden=!document.querySelector('[data-action="slash"]').classList.contains("hidden");
+     out.slashHidden=document.querySelector('[data-action="slash"]').classList.contains("hidden");
      out.threeLotus=__uLotusCount===3;
      out.stage7=Kp===7;
      out.pass=Object.values(out).every(Boolean);
