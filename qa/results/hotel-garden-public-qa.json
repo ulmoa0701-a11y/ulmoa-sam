@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-19T11:46:11.630Z",
+  "generatedAt": "2026-10-19T11:51:02.799Z",
   "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/",
   "kind": "real public browser loading and controls; internal event-path smoke (NOT full human playthrough)",
   "results": [
@@ -10,7 +10,10 @@
         "hud": true,
         "movement": true,
         "shiftSprint": true,
-        "bossFlow": false,
+        "preview_woods": true,
+        "preview_eye": true,
+        "preview_smog": true,
+        "bossFlow": true,
         "endState": true,
         "noFatalError": false
       },
@@ -30,10 +33,6 @@
         },
         {
           "status": 404,
-          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/default.vertex.fx"
-        },
-        {
-          "status": 404,
           "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/default.fragment.fx"
         },
         {
@@ -43,6 +42,10 @@
         {
           "status": 404,
           "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/default.fragment.fx"
+        },
+        {
+          "status": 404,
+          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/default.vertex.fx"
         },
         {
           "status": 404,
@@ -80,23 +83,23 @@
             72
           ]
         },
-        "fps": 5.7,
+        "fps": 8,
         "canvas": 1,
         "overflow": false,
         "lotusText": "🌸 연꽃 0/3",
         "timer": "07:00",
         "hudCollision": false,
         "target": {
-          "x": 650.109375,
+          "x": 643.3828125,
           "y": 98,
-          "width": 139.78125,
-          "height": 48
+          "width": 153.234375,
+          "height": 53
         },
         "lotus": {
           "x": 12,
           "y": 92,
-          "width": 96.40625,
-          "height": 36
+          "width": 101.515625,
+          "height": 39
         },
         "bucket": {
           "x": 0,
@@ -112,10 +115,10 @@
           -6
         ],
         "after": [
-          -18.2,
-          -6.26
+          -18.59,
+          -6.78
         ],
-        "distance": 0.33
+        "distance": 0.98
       },
       "smoke": {
         "geometry": true,
@@ -131,10 +134,10 @@
         "pour": true,
         "smogHidden": true,
         "smogPicked": true,
-        "slashHidden": false,
+        "slashHidden": true,
         "threeLotus": true,
         "stage7": true,
-        "pass": false
+        "pass": true
       },
       "pass": false
     },
@@ -145,7 +148,10 @@
         "hud": true,
         "movement": true,
         "shiftSprint": true,
-        "bossFlow": false,
+        "preview_woods": true,
+        "preview_eye": true,
+        "preview_smog": true,
+        "bossFlow": true,
         "endState": true,
         "noFatalError": false
       },
@@ -161,11 +167,11 @@
       "httpErrors": [
         {
           "status": 404,
-          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/default.fragment.fx"
+          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/default.vertex.fx"
         },
         {
           "status": 404,
-          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/default.vertex.fx"
+          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/default.fragment.fx"
         },
         {
           "status": 404,
@@ -215,23 +221,23 @@
             72
           ]
         },
-        "fps": 11.4,
+        "fps": 12.2,
         "canvas": 1,
         "overflow": false,
         "lotusText": "🌸 연꽃 0/3",
         "timer": "07:00",
         "hudCollision": false,
         "target": {
-          "x": 137.7421875,
+          "x": 132.03125,
           "y": 78,
-          "width": 114.515625,
-          "height": 41
+          "width": 125.9375,
+          "height": 45
         },
         "lotus": {
           "x": 10,
-          "y": 658,
-          "width": 81.015625,
-          "height": 29
+          "y": 654,
+          "width": 85.4375,
+          "height": 33
         },
         "bucket": {
           "x": 0,
@@ -247,10 +253,10 @@
           -6
         ],
         "after": [
-          -20.7,
-          -9.61
+          -20.85,
+          -9.81
         ],
-        "distance": 4.51
+        "distance": 4.76
       },
       "smoke": {
         "geometry": true,
@@ -266,10 +272,10 @@
         "pour": true,
         "smogHidden": true,
         "smogPicked": true,
-        "slashHidden": false,
+        "slashHidden": true,
         "threeLotus": true,
         "stage7": true,
-        "pass": false
+        "pass": true
       },
       "pass": false
     }
