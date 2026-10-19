@@ -61,9 +61,27 @@ async function capture(id,url,{native=false}={}){
     await start.click({timeout:2000});await page.waitForTimeout(600);
     entry.play=await snap(page,'#gameArea .slow-task,#gameArea .basic-game,#gameArea .garden-adventure,#gameArea .novel-game,#gameArea > :first-child,#gameArea,#gameWorld',id+'-play',entry);
    }
+  }else if(id==='recorder'){
+   // The recorder's actual exercise is #practiceScreen, not #gameScreen.
+   // Never publish the home screen as a successful game screenshot.
+   entry.preview=await snap(page,'#homeScreen',id);
+   await page.locator('#homeScreen [data-start="easy"]').click({timeout:2500});
+   await page.locator('#practiceScreen').waitFor({state:'visible',timeout:5000});
+   await page.waitForFunction(()=>{
+    const stage=document.querySelector('#practiceScreen');
+    return stage&&!stage.hidden&&stage.querySelectorAll('#guideRecorder .hole').length===8
+      &&stage.querySelectorAll('#playerRecorder .hole').length===8;
+   },{timeout:5000});
+   entry.play=await snap(page,'#practiceScreen',id+'-play',entry);
+   if(!entry.play)throw Error('Recorder practice stage was not photographed');
+   entry.playState='practice';
   }else if(['money','change','feel'].includes(id)){
-   await page.locator('#startGame').click({timeout:1500});await page.waitForTimeout(240);
-   entry.play=await snap(page,'#gameArea > :first-child,#gameArea',id+'-play',entry);
+   await page.locator('#startGame').click({timeout:1500});
+   await page.locator('#playScreen').waitFor({state:'visible',timeout:4000});
+   await page.waitForTimeout(240);
+   // The first gameArea child can be a tiny coin; include the actual
+   // instruction, task, answer controls and progress in the photo.
+   entry.play=await snap(page,'#playScreen',id+'-play',entry);
    entry.preview=await snap(page,'.mission-banner',id);
   }else if(id==='hand-mirror'){
    entry.preview=await snap(page,'.intro',id);
@@ -98,7 +116,13 @@ await browser.close();
 const ok=report.filter(x=>x.play&&x.preview),notOk=report.filter(x=>!x.play||!x.preview);
 const missedNative=report.filter(x=>nativeIds.includes(x.id)&&(!x.playSelector||!x.playSelector.startsWith('#gameArea')));
 if(missedNative.length){console.error('Native game screenshot shows an intro or full page, not play: '+missedNative.map(x=>x.id+':'+(x.playSelector||'none')).join(', '));process.exitCode=1;}
+const recorder=report.find(x=>x.id==='recorder');
+if(!recorder?.play||recorder.playState!=='practice'||recorder.playSelector!=='#practiceScreen'){
+ console.error('Recorder preview is not a validated, interactive fingering exercise');
+ process.exitCode=1;
+}
 
 fs.writeFileSync(path.join(outDir,'capture-report.json'),JSON.stringify({count:report.length,ok:ok.length,notOk:notOk.map(x=>({id:x.id,errors:x.errors})),report},null,2));
 console.log(JSON.stringify({requested:report.length,ok:ok.length,introOnly:ok.filter(x=>x.introOnly).map(x=>x.id),missing:notOk.map(x=>x.id)},null,2));
-if(ok.length<28){console.error('Too few live captures; abort publishing misleading fallback images.');process.exit(1)}
+if(notOk.length){console.error('Missing captures: '+notOk.map(x=>x.id).join(', '));process.exitCode=1}
+if(ok.length<28){console.error('Too few live captures; abort publishing misleading fallback images.');process.exitCode=1}
