@@ -32,7 +32,7 @@ for(const test of cases){
     });
     result.tests.load=result.start.canvas===1&&result.start.fps>0&&result.start.state?.stage===0&&result.start.dialogVisible;
     result.tests.hud=!result.start.overflow&&result.start.lotusText.includes('0/3')&&!result.start.hudCollision&&result.start.timer==='07:00';
-    await page.screenshot({path:'hotel-garden-'+test.name+'-start.png',fullPage:true});
+    await page.screenshot({path:'hotel-garden-'+test.name+'-start.jpg',type:'jpeg',quality:55,fullPage:true});
     await page.click('#dialogBtn');
     await sleep(300);
     let before=await page.evaluate(()=>window.__ulmoaGameQa.state().player);
@@ -51,7 +51,7 @@ for(const test of cases){
     result.smoke=await page.evaluate(async()=>await window.__ulmoaGameQa.runSmoke());
     result.tests.bossFlow=result.smoke?.pass===true;
     result.tests.endState=(await page.evaluate(()=>window.__ulmoaGameQa.state())).stage===7;
-    await page.screenshot({path:'hotel-garden-'+test.name+'-smoke.png',fullPage:true});
+    await page.screenshot({path:'hotel-garden-'+test.name+'-smoke.jpg',type:'jpeg',quality:55,fullPage:true});
   }catch(e){result.error=String(e)}
   result.tests.noFatalError=!result.error&&errors.length===0&&networkFailures.length===0;
   result.pass=Object.values(result.tests).every(Boolean);
