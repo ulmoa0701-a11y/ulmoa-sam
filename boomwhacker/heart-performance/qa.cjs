@@ -58,8 +58,8 @@ const {chromium}=require("playwright-core");
       hopEnd:hopEnd&&{x:hopEnd.x,y:hopEnd.y,row:hopEnd.row},
       movement:q.moaTravel()};
   });
-  assert.equal(staticTwoPage.first.barsPerLine,name==="mobile"?1:2,"responsive measures per line");
-  assert.equal(staticTwoPage.first.pageBars,name==="mobile"?2:4,"both rows fit per page");
+  assert.equal(staticTwoPage.first.barsPerLine,2,"4/4 has two full measures per line on both screens");
+  assert.equal(staticTwoPage.first.pageBars,4,"two fixed lines contain four 4/4 measures per page");
   assert.equal(staticTwoPage.first.page,staticTwoPage.lastInfo.page,"the score must NOT page-flip before both lines are finished");
   assert.equal(staticTwoPage.nextInfo.page,staticTwoPage.first.page+1,"page swaps only after TWO FULL LINES");
   assert.equal(staticTwoPage.unchanged,staticTwoPage.beforeChange,"score pixels must be bit-identical for every beat in the two fixed lines");
@@ -73,7 +73,19 @@ const {chromium}=require("playwright-core");
   assert.equal(await page.evaluate(()=>window.__performanceViewsQA__.moaTravel()),"hop");
   const prelude=await page.evaluate(()=>{const q=window.__performanceViewsQA__,original=q.state().song;q.selectSong("moa-breeze");q.at(-3);const first=q.twoPageAt(-3);q.selectSong(original);return first});
   assert.equal(prelude.page,0,"prelude shows first pair of fixed score lines");
-  tests.push(name+": score visually frozen for both rows, whole-page swap exactly at end, sprite-only motion, hop/walk toggle");
+  const visibleHearts=await page.evaluate(()=>{
+ const q=window.__performanceViewsQA__,original=q.state().song,out={};
+ for(const key of ["moa-signal","moa-breeze","moa-space"]){
+  q.selectSong(key);const p=q.twoPageAt(0);const s=q.state();
+  out[key]={meter:q.scores.find(x=>x.key===key).meter,barsPerLine:p.barsPerLine,beatsPerLine:p.barsPerLine*q.scores.find(x=>x.key===key).meter};
+ }
+ q.selectSong(original);return out;
+});
+assert.equal(visibleHearts["moa-signal"].beatsPerLine,name==="mobile"?8:10,"2/4 must show EIGHT OR TEN hearts per row, not two");
+assert.equal(visibleHearts["moa-breeze"].beatsPerLine,name==="mobile"?6:9,"3/4 phrase must fill the stationary score");
+assert.equal(visibleHearts["moa-space"].beatsPerLine,8,"4/4 phrase must display eight hearts per row");
+tests.push(name+": stationary two rows show 2/4="+visibleHearts["moa-signal"].beatsPerLine+" hearts per row, no tiny two-heart rows");
+tests.push(name+": score visually frozen for both rows, whole-page swap exactly at end, sprite-only motion, hop/walk toggle");
   await page.locator(".view-choice[data-view=two]").click();
   await page.evaluate(()=>window.__performanceViewsQA__.at(2.15));
   await page.screenshot({path:path.join(dir,name+"-static-two-line-current.png"),fullPage:true});
