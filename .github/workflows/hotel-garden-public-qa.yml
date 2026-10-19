@@ -35,7 +35,7 @@ jobs:
           name: hotel-garden-public-qa
           path: |
             hotel-garden-public-qa.json
-            hotel-garden-*.png
+            hotel-garden-*.jpg
           if-no-files-found: warn
       - name: Save machine-readable QA report to isolated results branch
         if: always()
@@ -45,7 +45,7 @@ jobs:
           fi
           cp hotel-garden-public-qa.json /tmp/hotel-garden-public-qa.json
           mkdir -p /tmp/hotel-garden-qa-images
-          cp hotel-garden-*.png /tmp/hotel-garden-qa-images/ 2>/dev/null || true
+          cp hotel-garden-*.jpg /tmp/hotel-garden-qa-images/ 2>/dev/null || true
           git fetch origin qa/hotel-garden-results
           git switch -C qa/hotel-garden-results origin/qa/hotel-garden-results
           mkdir -p qa/results
