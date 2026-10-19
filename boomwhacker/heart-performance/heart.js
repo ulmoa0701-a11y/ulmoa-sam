@@ -374,7 +374,7 @@ function heart(c,beat,x,y,w,h,now,muted=false){
  }
  c.globalAlpha=1;
  if(parts.length===1&&!parts[0].onset)txt(c,"이어서",50,48,11,"#395660");
- if(active&&!muted){c.beginPath();c.arc(clamp(now-beat,0,1)*100,85,4.5,0,Math.PI*2);c.fillStyle="#204e45";c.fill();}
+ if(active&&!muted){c.save();c.clip(HEART);ln(c,clamp(now-beat,0,1)*100,7,clamp(now-beat,0,1)*100,80,"#ffffffc9",1.8);c.restore();}
  c.restore();
 }
 function heartsInBar(c,bar,y,maxWidth,height,b,{muted=false,xleft=90,gap=14}={}){
@@ -382,13 +382,19 @@ function heartsInBar(c,bar,y,maxWidth,height,b,{muted=false,xleft=90,gap=14}={})
  for(let i=0;i<n;i++){const x=left+i*(w+gap);heart(c,bar.start+i,x,y,w,height,b,muted);txt(c,(i+1)+"박",x+w/2,y+height+17,16,muted?"#94a7a0":"#56877a");}
 }
 function heartRoad(c,b){
- rr(c,55,111,1090,424,30,"#ffffffbb");ln(c,92,340,1128,340,"#b0d5c8",4);
- const mark=256;rr(c,mark-5,126,10,382,5,"#5a9c86");
- rr(c,83,214,133,71,19,"#e4f4ec");txt(c,"여기에서",149,235,18,"#488474");txt(c,"연주!",149,261,25,"#30735f");
- for(let k=Math.max(startBeat(),Math.floor(b)-1);k<Math.min(endBeat(),Math.ceil(b)+7);k++){
-   const x=mark+(k-b)*153;if(x<10||x>1160)continue;heart(c,k,x-69,214,138,129,b);
+ rr(c,55,111,1090,424,30,"#ffffffbb");
+ const mark=323,step=202,w=157,h=146;
+ ln(c,88,402,1126,402,"#bfdacd",4);
+ rr(c,mark-5,185,10,268,5,"#4e9982");
+ txt(c,"여기서 연주",mark,158,23,"#397d6b");
+ // Look ahead at no more than four upcoming beats. Each heart is separate.
+ const first=Math.max(startBeat(),Math.ceil(b-.87));
+ for(let beat=first;beat<Math.min(endBeat(),first+5);beat++){
+   const x=mark+(beat-b)*step;
+   if(x<110||x>1120)continue;
+   heart(c,beat,x-w/2,249,w,h,b);
  }
- txt(c,"하트 하나 = 한 박    ·    색깔 조각은 그 박 안의 리듬",594,494,21,"#538477");
+ txt(c,"하트 1개 = 1박     ·     안의 색깔 조각이 리듬을 보여줘요",602,493,21,"#528478");
 }
 function heartScore(c,b){
  const bar=currentBar(b);rr(c,61,113,1079,298,27,"#ffffffd9");txt(c,(bar.index+1)+"마디",101,155,22,"#4c8275","left");
