@@ -44,13 +44,16 @@ jobs:
             printf '%s\n' '{"pass":false,"error":"browser QA did not produce a report"}' > hotel-garden-public-qa.json
           fi
           cp hotel-garden-public-qa.json /tmp/hotel-garden-public-qa.json
+          mkdir -p /tmp/hotel-garden-qa-images
+          cp hotel-garden-*.png /tmp/hotel-garden-qa-images/ 2>/dev/null || true
           git fetch origin qa/hotel-garden-results
           git switch -C qa/hotel-garden-results origin/qa/hotel-garden-results
           mkdir -p qa/results
           cp /tmp/hotel-garden-public-qa.json qa/results/hotel-garden-public-qa.json
+          cp /tmp/hotel-garden-qa-images/*.png qa/results/ 2>/dev/null || true
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add qa/results/hotel-garden-public-qa.json
+          git add qa/results/hotel-garden-public-qa.json qa/results/*.png
           if ! git diff --staged --quiet; then
             git commit -m "test(hotel garden): record latest public browser QA"
             git push origin HEAD:refs/heads/qa/hotel-garden-results
