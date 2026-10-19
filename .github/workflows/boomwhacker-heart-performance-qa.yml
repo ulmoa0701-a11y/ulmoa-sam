@@ -1,0 +1,50 @@
+name: Heart Boomwhacker Signature Performance QA
+on:
+  pull_request:
+    paths:
+      - 'boomwhacker/heart-performance/**'
+      - 'boomwhacker/performance-views/scores.js'
+      - '.github/workflows/boomwhacker-easy-performance-qa.yml'
+  push:
+    branches:
+      - 'feat/heart-boomwhacker-five-20261019'
+    paths:
+      - 'boomwhacker/heart-performance/**'
+      - '.github/workflows/boomwhacker-easy-performance-qa.yml'
+jobs:
+  heart-performance-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Korean font support
+        run: |
+          if fc-list :lang=ko family | grep -q .; then echo 'Korean fonts present'; else
+            timeout 60s sudo apt-get update -qq && timeout 90s sudo apt-get install -y -qq fonts-noto-cjk || true
+            fc-cache -f || true
+          fi
+      - name: Install headless browser testing
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Check browser
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Start static test web server
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/easy-views.log 2>&1 &
+          for i in {1..30}; do curl -fsS http://127.0.0.1:8765/boomwhacker/heart-performance/ >/dev/null && exit 0; sleep .3; done
+          cat /tmp/easy-views.log
+          exit 1
+      - name: Run five signature V-heart subdivisions and song performance browser QA
+        run: node boomwhacker/heart-performance/qa.cjs
+      - name: Save actual PC mobile snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boomwhacker-heart-five-qa
+          path: boomwhacker/heart-performance/qa-artifacts
+          if-no-files-found: warn
