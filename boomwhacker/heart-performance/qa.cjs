@@ -24,7 +24,7 @@ const {chromium}=require("playwright-core");
     const q=window.__performanceViewsQA__;
     const original=q.state();
     q.selectSong("sixteenth");
-    const fast=q.beatParts(2).filter(x=>x.onset);
+    const fast=q.beatParts(16).filter(x=>x.onset);
     q.selectSong("dotted");
     const dotted=q.beatParts(0).filter(x=>x.onset);
     const heartPath=q.heartPath;
