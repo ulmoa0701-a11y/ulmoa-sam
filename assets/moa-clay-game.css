@@ -54,3 +54,46 @@
  .game-choice .moa-clay-breath-choice{width:37px;height:37px;right:5px;top:5px}
 }
 @media(prefers-reduced-motion:reduce){.moa-clay-sprite{transition:none;animation:none}}
+
+/* V2 — In native cognitive game cards the game itself, rather than a repeated
+   generic friend character, becomes the primary visual identity. */
+#gardenGamePanel .library-card.has-clay-leading-art>img{display:none!important}
+#gardenGamePanel .library-card.has-clay-leading-art h3{
+  display:flex!important;align-items:center;flex-wrap:wrap;gap:8px;
+  min-height:58px!important;
+}
+#gardenGamePanel .library-card.has-clay-leading-art h3 .moa-clay-library-badge{
+  position:static;display:inline-block;
+  width:56px;height:56px;
+  border-radius:0;background-color:transparent;box-shadow:none;
+  filter:drop-shadow(0 5px 5px rgba(55,74,61,.13));
+}
+#gardenGamePanel .library-card.has-clay-leading-art strong{margin-left:0!important}
+#gardenGamePanel .library-card.has-clay-leading-art>div:not(.card-live-preview){padding-bottom:20px!important}
+/* When no real gameplay screenshot is available, replace the empty/generic
+   image with an actual game-specific illustration, never mislabel it a capture. */
+.gardens-page .play-card-media.no-real-shot img.real-shot{opacity:0}
+.gardens-page .play-card-media.no-real-shot .moa-clay-card-corner{
+  left:50%;right:auto;top:50%;
+  transform:translate(-50%,-50%);
+  width:clamp(105px,40%,158px);height:auto;aspect-ratio:1;
+  border:0;border-radius:0;box-shadow:none;background-color:transparent;
+  filter:drop-shadow(0 9px 10px rgba(57,86,61,.16));
+}
+.gardens-page .play-card-media.no-real-shot{background:linear-gradient(155deg,#e6f2e6,#fff4e4)}
+.preview-visual{position:relative}
+.preview-visual .moa-clay-preview-art{display:none}
+.preview-visual.no-real-shot #previewShot{opacity:0}
+.preview-visual.no-real-shot .moa-clay-preview-art{
+  display:block;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:min(210px,52%);height:auto;aspect-ratio:1;
+  filter:drop-shadow(0 12px 12px rgba(49,76,57,.17));
+}
+.preview-visual.no-real-shot{background:linear-gradient(140deg,#e8f4e9,#fff5e9)}
+@media(max-width:620px){
+ #gardenGamePanel .library-card.has-clay-leading-art h3 .moa-clay-library-badge{width:48px;height:48px}
+ #gardenGamePanel .library-card.has-clay-leading-art h3{min-height:50px!important}
+ .gardens-page .play-card-media.no-real-shot .moa-clay-card-corner{
+   width:clamp(105px,37%,142px);height:auto;
+ }
+}

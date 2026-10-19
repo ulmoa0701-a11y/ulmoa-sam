@@ -33,7 +33,13 @@ modal.addEventListener('close',()=>lastPreviewTrigger?.focus());
 const supportDialog=typeof modal.showModal==='function';
 function imageFallback(img,key,old){
  img.onerror=()=>{
-  if(!img.dataset.fallbackStep){img.dataset.fallbackStep='intro';img.src='previews/'+key+'.jpg'+PREVIEW_VERSION;return}
+  if(!img.dataset.fallbackStep){
+   img.dataset.fallbackStep='intro';
+   img.alt=(CATALOG[key]?.title||'게임')+' 실제 시작 안내 화면';
+   const cap=img.closest('.play-card-media')?.querySelector('.shot-caption');
+   if(cap)cap.textContent='게임 시작 화면';
+   img.src='previews/'+key+'.jpg'+PREVIEW_VERSION;return
+  }
   if(img.dataset.fallbackStep==='intro'){
    img.dataset.fallbackStep='character';img.closest('.preview-visual, .play-card-media')?.classList.add('no-real-shot');
    const cap=img.closest('.play-card-media')?.querySelector('.shot-caption');if(cap)cap.textContent='게임 대표 캐릭터';
