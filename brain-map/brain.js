@@ -26,6 +26,8 @@
  const lobeSceneFocusText=document.getElementById('lobeSceneFocusText');
  const brainMap=document.getElementById('brainMap');
  const lobeDirectory=document.getElementById('lobeDirectory');
+ const diagramLabels=[...document.querySelectorAll('[data-label-region]')];
+ const mobileLabels=[...document.querySelectorAll('[data-legend-region]')];
  const lobeSceneRegionHint=document.getElementById('lobeSceneRegionHint');
  const lobeSceneRead=document.getElementById('lobeSceneRead');
  const lobeSceneSpeechStatus=document.getElementById('lobeSceneSpeechStatus');
@@ -96,6 +98,8 @@
   shapes.forEach(g=>{g.removeAttribute('data-scene-active');g.removeAttribute('data-scene-focus');g.removeAttribute('data-scene-related');});
   nodes.forEach(node=>{node.removeAttribute('data-scene-example');node.removeAttribute('data-scene-focus');});
   brainMap.removeAttribute('data-scene-mode');
+  diagramLabels.forEach(label=>label.removeAttribute('data-label-active'));
+  mobileLabels.forEach(label=>label.removeAttribute('data-legend-active'));
   lobeSceneButtons.forEach(button=>button.setAttribute('aria-pressed','false'));
   lobeSceneResult.hidden=true;
   lobeSceneSelection.hidden=true;
@@ -124,6 +128,8 @@
    node.toggleAttribute('data-scene-example',node.dataset.region===region);
   });
   brainMap.setAttribute('data-scene-mode','focus');
+  diagramLabels.forEach(label=>label.toggleAttribute('data-label-active',label.dataset.labelRegion===region));
+  mobileLabels.forEach(label=>label.toggleAttribute('data-legend-active',label.dataset.legendRegion===region));
   lobeSceneRoles.querySelectorAll('button[data-scene-region]').forEach(button=>{
    button.setAttribute('aria-pressed',String(button.dataset.sceneRegion===region));
   });
@@ -194,6 +200,8 @@
    g.toggleAttribute('data-active',active);
    g.setAttribute('aria-pressed',String(active));
   });
+  diagramLabels.forEach(label=>label.toggleAttribute('data-label-active',label.dataset.labelRegion===key));
+  mobileLabels.forEach(label=>label.toggleAttribute('data-legend-active',label.dataset.legendRegion===key));
   revealDetailOnSmallScreens();
  }
  function reset(){

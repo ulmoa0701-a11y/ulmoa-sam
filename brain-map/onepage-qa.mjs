@@ -63,6 +63,8 @@ try{
   assert.equal(await page.locator('.hemisphere-inline, .hemi-fact, .both-work').count(),0,'no duplicate hemisphere teaser on lobe tab');
   assert.match(await page.locator('.brain-bottom > p').innerText(),/여러 부분은 연결되어 함께 일해요/,'retain one concise cooperation reminder');
   assert.equal(await page.locator('#brainMap [data-brain-region]').count(),6,'six interactive regions');
+  assert.equal(await page.locator('.brain-diagram-label').count(),6,'all six regions have visible in-map name and function');
+  for(const label of ['전두엽','두정엽','측두엽','후두엽','소뇌','뇌줄기'])assert.ok((await page.locator('.brain-diagram-labels').textContent()).includes(label),'missing diagram name '+label);
   assert.equal(await page.locator('.brain-hero,.brain3d-feature,.brain-explorer,.brain-networks,.brain-faq').count(),0,'no prior scrolling sections');
   assert.equal(await page.locator('#simpleDetail').isHidden(),true,'optional detail starts closed');
   assert.equal(await page.locator('.more-learn, .more-links').count(),0,'remove redundant 3D link panel from main map');
@@ -143,6 +145,8 @@ try{
     await choices.nth(step).click();
     assert.equal(await page.locator('#lobeSceneRoles button[aria-pressed="true"]').count(),1,'one chosen role');
     assert.equal(await page.locator('#brainMap [data-scene-focus]').count(),1,'ONE brain region spotlighted');
+    assert.equal(await page.locator('.brain-diagram-label[data-label-active]').count(),1,'one matching label active');
+    assert.equal(await page.locator('.brain-mobile-legend-item[data-legend-active]').count(),1,'one matching mobile legend active');
     assert.equal(await page.locator('.lobe-card[data-scene-focus]').count(),1,'ONE matching large lobe card highlighted');
     assert.equal(await page.locator('#brainMap [data-scene-focus]').getAttribute('data-brain-region'),region);
     assert.equal(await page.locator('.lobe-card[data-scene-focus]').getAttribute('data-region'),region);
@@ -160,14 +164,14 @@ try{
    }
    await page.waitForFunction(()=>{
     const el=document.querySelector('#brainMap [data-scene-focus] .zone-shape');
-    return el&&parseFloat(getComputedStyle(el).strokeWidth)>=10;
+    return el&&parseFloat(getComputedStyle(el).strokeWidth)>=6;
    },{timeout:3000});
    const strokeInfo=await page.locator('#brainMap [data-scene-focus] .zone-shape').evaluate(el=>({
     width:getComputedStyle(el).strokeWidth,
     matched:el.matches('.brain-page .brain-svg[data-scene-mode="focus"] .brain-zone[data-scene-focus] .zone-shape'),
     mapMode:document.querySelector('#brainMap').getAttribute('data-scene-mode')
    }));
-   assert.ok(parseFloat(strokeInfo.width)>=10 && strokeInfo.matched,
+   assert.ok(parseFloat(strokeInfo.width)>=6 && parseFloat(strokeInfo.width)<=8 && strokeInfo.matched,
     'active outline must be clear after transition: '+JSON.stringify(strokeInfo));
    const unfocusedOpacity=await page.locator('#brainMap [data-brain-region]:not([data-scene-focus])').first().evaluate(el=>parseFloat(getComputedStyle(el).opacity));
    assert.ok(unfocusedOpacity>=0.99,'all other brain regions retain their approved original colors: '+unfocusedOpacity);

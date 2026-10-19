@@ -899,3 +899,26 @@
 .brain-page .brain-main #lobeSceneRead:disabled{opacity:.6;cursor:not-allowed}
 .brain-page .brain-main #lobeSceneRead:focus-visible{outline:3px solid #257447;outline-offset:2px}
 .brain-page .brain-main #lobeSceneSpeechStatus{font-size:11.5px;line-height:1.4;color:#4d6a56}
+
+
+/* Diagram-only redesign: readable labels and calm state, without green contour. */
+.brain-page .brain-svg .brain-zone .zone-shape{stroke:#fffdf9;stroke-width:7;filter:none}
+.brain-page .brain-svg[data-scene-mode="focus"] .brain-zone[data-scene-focus] .zone-shape{stroke:#fffdf9;stroke-width:7;filter:brightness(1.065) drop-shadow(0 2px 5px #526b6650)}
+.brain-page .brain-svg[data-scene-mode="focus"] .brain-zone[data-scene-focus] .zone-badge{fill:#fffdf9;stroke:#657a69;stroke-width:2.4}
+.brain-page .brain-svg[data-scene-mode="focus"] .brain-zone[data-scene-focus] .zone-number{fill:#243d30}
+.brain-page .brain-svg .brain-zone:hover .zone-shape{stroke:#fffdf9;stroke-width:7;filter:brightness(1.045)}
+.brain-page .brain-svg .brain-zone:focus-visible .zone-shape{stroke:#fff;stroke-width:9}
+.brain-page .brain-diagram-labels{pointer-events:none;font-family:var(--brain-font-body, Pretendard, sans-serif)}
+.brain-page .brain-diagram-label .brain-label-back{fill:#fffefbf0;stroke:#e5e9e2;stroke-width:1.6}
+.brain-page .brain-diagram-label .brain-label-name{font-size:19px;font-weight:850;fill:#263b30}
+.brain-page .brain-diagram-label .brain-label-function{font-size:13px;font-weight:650;fill:#55685c}
+.brain-page .brain-svg .brain-diagram-label[data-label-active] .brain-label-back{fill:#fff;stroke:#657e6b;stroke-width:2.7;filter:drop-shadow(0 2px 4px #4b68552e)}
+.brain-page .brain-svg .brain-diagram-label[data-label-active] .brain-label-name{fill:#163e2a}
+.brain-page .brain-mobile-legend{display:none}
+@media(max-width:760px){
+ .brain-page .brain-mobile-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:5px 0 9px}
+ .brain-page .brain-mobile-legend-item{min-width:0;border:1px solid #dce6dd;background:#fbfcfa;border-radius:10px;padding:7px 9px;display:flex;flex-direction:column;gap:2px}
+ .brain-page .brain-mobile-legend-item b{font-size:12px;color:#2e4939}
+ .brain-page .brain-mobile-legend-item span{font-size:11px;color:#536d5c}
+ .brain-page .brain-mobile-legend-item[data-legend-active]{background:#ebf4ed;border-color:#8db19b}
+}
