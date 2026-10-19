@@ -428,7 +428,7 @@ function heart(c,beat,x,y,w,h,now,muted=false){
 function moaSprite(c,x,y,b,at,dim=false){
  if(dim)return;const alert=cueAt(b).now,cheer=alert&&Math.abs(alert.start-at)<.025;
  const sprite=cheer?moaCheer:moaDefault,swing=!motion&&playing?(Math.sin(performance.now()/185)*2):0;
- c.save();const size=65;
+ c.save();const size=view==="two"?(twoBarsPerLine()===1?88:79):65;
  if(sprite.complete&&sprite.naturalWidth>0){
   c.drawImage(sprite,x-size/2,y-size+12+swing,size,size);
  }else{
@@ -679,7 +679,7 @@ bind();rebuildSections();reset();
 window.addEventListener("resize",()=>{twoPageCache=null;draw(ctx,playing?nowBeat():position)});
 moaDefault.onload=()=>{if(view==="two")draw(ctx,position)};
 moaCheer.onload=()=>{if(view==="two")draw(ctx,position)};
-window.__performanceViewsQA__={twoPageAt,twoMoaPosition,twoBaseKey,twoBarsPerLine,twoBackground:()=>twoPageCache?.canvas,beatParts,heartPath:HEART_PATH,modes:Object.keys(VIEW),scores:scores.map(s=>({key:s.key,bpm:s.bpm,meter:s.meter,measures:s.bars.length,beats:s.beats,events:s.events.length,rests:s.events.filter(e=>e.note==="쉼").length})),
+window.__performanceViewsQA__={twoPageAt,twoMoaPosition,twoBaseKey,twoBarsPerLine,twoBackground:()=>twoPageCache?.canvas,moaTravel:()=>moaTravel,beatParts,heartPath:HEART_PATH,modes:Object.keys(VIEW),scores:scores.map(s=>({key:s.key,bpm:s.bpm,meter:s.meter,measures:s.bars.length,beats:s.beats,events:s.events.length,rests:s.events.filter(e=>e.note==="쉼").length})),
  cueAt,assignedEvents,beatUntil,state:()=>({view,song:song.key,notes,speed,section,playing,ended,position,measure:barAt(position).index,score:song.events.map(e=>[e.note,e.start,e.dur,e.lyric]),mask:selected(),clockAudio:!!acc,exporting}),
  selectView:chooseView,selectSong:chooseSong,play,pause,reset,at:(b)=>{if(playing)pause();position=b;draw(ctx,b);updateControls()},render:()=>draw(ctx,position),testMime:videoMime
 };
