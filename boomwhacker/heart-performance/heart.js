@@ -564,7 +564,7 @@ function scorePageBackground(info){
    for(let i=0;i<g.count;i++){
      const beatIndex=beginning*song.meter+i;if(beatIndex>=ending*song.meter)break;
      const x=g.left+i*(g.width+g.gap);
-     heart(c,beatIndex,x,g.top,g.width,g.height,-100,true);
+     heart(c,beatIndex,x,g.top,g.width,g.height,-100,false);
      if(i>0&&i%song.meter===0){
        const dividerX=x-g.gap/2;ln(c,dividerX,g.top-9,dividerX,g.top+g.height+9,"#cfdfd6",2);
      }
@@ -601,7 +601,7 @@ function twoMoaPosition(b,info){
    return {...second,progress:0,hop:0,beat:next.start};
  }
  const departure=Math.max(previous.start,next.start-.75);
- const progress=clamp((b-departure)/Math.max(.001,next.start-departure),0,1);
+ const progress=motion?0:clamp((b-departure)/Math.max(.001,next.start-departure),0,1);
  const arc=playing&&!motion&&moaTravel==="hop"?Math.sin(Math.PI*progress)*29:0;
  return {x:first.x+(second.x-first.x)*progress,y:first.y+(second.y-first.y)*progress-arc,
          row:first.row,progress,hop:arc,beat:progress>=1?next.start:previous.start};
@@ -620,7 +620,7 @@ function drawFixedTwoPage(c,b){
 const drawKinds={road:heartRoad,score:heartScore,bar:heartBar,two:drawFixedTwoPage,next:heartNext};
 function draw(c,b,exportFrame=false){c.save();c.setTransform(c.canvas.width/1200,0,0,c.canvas.height/620,0,0);
  c.fillStyle="#f4f9f7";c.fillRect(0,0,1200,620);const oldPosition=position;position=b;if(view==="two"){drawFixedTwoPage(c,b)}else{head(c,view);drawKinds[view](c,b);canvasForecast(c,b)}
- if(flash.until>performance.now())txt(c,"직접 눌렀어요 · "+fixedNote(flash.note),600,542,19,"#3f877a");position=oldPosition;c.restore()
+ if(view!=="two"&&flash.until>performance.now())txt(c,"직접 눌렀어요 · "+fixedNote(flash.note),600,542,19,"#3f877a");position=oldPosition;c.restore()
 }
 function videoMime(){if(!window.MediaRecorder)return"";return ["video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm","video/mp4"].find(m=>MediaRecorder.isTypeSupported(m))||""}
 async function exportVideo(){
@@ -669,6 +669,7 @@ function bind(){
  $("#metronome").onchange=e=>{const was=playing;if(was)pause();metronome=e.target.checked;if(was)play();else updateControls()};
  $("#loop").onchange=e=>{loop=e.target.checked;updateControls()};
  $("#motion").onchange=e=>{motion=e.target.checked;updateControls();draw(ctx,nowBeat())};
+ $("#moaMove").onchange=e=>{moaTravel=e.target.value;draw(ctx,playing?nowBeat():position)};
  $$("#keys button").forEach(b=>b.onpointerdown=()=>tap(b.dataset.note));
  document.addEventListener("keydown",e=>{if(e.repeat||e.altKey||e.ctrlKey||e.metaKey||/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName))return;if(/^[1-8]$/.test(e.key)){e.preventDefault();tap(ORDER[Number(e.key)-1])}else if(e.code==="Space"){e.preventDefault();playing?pause():play()}});
  document.addEventListener("visibilitychange",()=>{if(document.hidden&&playing)pause()});
