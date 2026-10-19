@@ -115,6 +115,8 @@
   lobeSceneFocusTitle.textContent=task;
   lobeSceneFocusText.textContent=focusExplainers[lastLobeScene][index];
   lobeSceneRegionHint.textContent='그림 속 '+regionMarkers[region].number+' '+data[region].name+'은 이 과정과 관련된 여러 영역 중 하나예요.';
+  document.getElementById('brainFocusName').textContent=regionMarkers[region].number+' '+data[region].name;
+  document.getElementById('brainFocusPurpose').textContent=task+' · 관련 부위 예시';
   lobeSceneSelection.hidden=false;
   const related=new Set(scene.roles.map(role=>role[0]));
   shapes.forEach(g=>{
@@ -192,6 +194,8 @@
   lobeDirectory.open=true;
   clearLobeScene();
   title.textContent=d.name;text.textContent=d.fact;icon.textContent=d.icon;
+  document.getElementById('brainFocusName').textContent=regionMarkers[key].number+' '+d.name;
+  document.getElementById('brainFocusPurpose').textContent='이 부위의 대표 기능 살펴보기';
   moveDetailNearSelection(key);
   detail.hidden=false;
   nodes.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.region===key)));

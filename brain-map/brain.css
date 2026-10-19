@@ -922,3 +922,27 @@
  .brain-page .brain-mobile-legend-item span{font-size:11px;color:#536d5c}
  .brain-page .brain-mobile-legend-item[data-legend-active]{background:#ebf4ed;border-color:#8db19b}
 }
+
+/* Clear instructional spotlight: show the relevant region without implying others switch off. */
+.brain-page .brain-svg[data-scene-mode="focus"] .brain-zone:not([data-scene-focus]){opacity:.32;filter:grayscale(.4)}
+.brain-page .brain-svg[data-scene-mode="focus"] .brain-zone[data-scene-focus]{opacity:1;filter:none}
+.brain-page .brain-svg[data-scene-mode="focus"] .brain-zone[data-scene-focus] .zone-shape{
+ stroke:#fff;stroke-width:10;filter:brightness(1.14) drop-shadow(0 0 12px #375d6180)
+}
+.brain-page .brain-svg[data-scene-mode="focus"] .brain-zone[data-scene-focus] .zone-badge{
+ fill:#244f3e;stroke:#fff;stroke-width:5
+}
+.brain-page .brain-svg[data-scene-mode="focus"] .brain-zone[data-scene-focus] .zone-number{fill:#fff}
+.brain-page .brain-svg[data-scene-mode="focus"] .brain-diagram-label:not([data-label-active]){opacity:.42}
+.brain-page .brain-svg[data-scene-mode="focus"] .brain-diagram-label[data-label-active] .brain-label-back{
+ fill:#fff;stroke:#245d49;stroke-width:4;filter:drop-shadow(0 4px 9px #2246356b)
+}
+.brain-page .brain-svg[data-scene-mode="focus"] .brain-diagram-label[data-label-active] .brain-label-name{font-size:21px}
+.brain-page .brain-svg .brain-diagram-label,.brain-page .brain-svg .brain-zone{transition:opacity .14s ease,filter .14s ease}
+.brain-page .brain-main .brain-mobile-legend-item:not([data-legend-active]){opacity:.75}
+.brain-page .brain-main .brain-mobile-legend-item[data-legend-active]{border:2px solid #245d49;background:#e5f3e9}
+.brain-page .brain-main .lobe-scene-visual{position:relative}
+.brain-page .brain-main .brain-focus-banner{display:flex;align-items:center;gap:9px;padding:10px 13px;margin:6px 0 0;border-radius:12px;border:1px solid #9fbdaa;background:#eef7ef;font:750 14px/1.4 var(--brain-font-body);color:#244633}
+.brain-page .brain-main .brain-focus-banner strong{font-size:16px}
+.brain-page .brain-main .brain-focus-banner span{font-size:12px;font-weight:550}
+@media(prefers-reduced-motion:reduce){.brain-page .brain-svg .brain-diagram-label,.brain-page .brain-svg .brain-zone{transition:none}}

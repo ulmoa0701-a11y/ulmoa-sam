@@ -146,6 +146,7 @@ try{
     assert.equal(await page.locator('#lobeSceneRoles button[aria-pressed="true"]').count(),1,'one chosen role');
     assert.equal(await page.locator('#brainMap [data-scene-focus]').count(),1,'ONE brain region spotlighted');
     assert.equal(await page.locator('.brain-diagram-label[data-label-active]').count(),1,'one matching label active');
+    assert.match(await page.locator('#brainFocusName').innerText(),new RegExp(region==='frontal'?'전두엽':region==='parietal'?'두정엽':region==='temporal'?'측두엽':region==='occipital'?'후두엽':region==='cerebellum'?'소뇌':'뇌줄기'),'diagram names the focused region prominently');
     assert.equal(await page.locator('.brain-mobile-legend-item[data-legend-active]').count(),1,'one matching mobile legend active');
     assert.equal(await page.locator('.lobe-card[data-scene-focus]').count(),1,'ONE matching large lobe card highlighted');
     assert.equal(await page.locator('#brainMap [data-scene-focus]').getAttribute('data-brain-region'),region);
@@ -164,17 +165,17 @@ try{
    }
    await page.waitForFunction(()=>{
     const el=document.querySelector('#brainMap [data-scene-focus] .zone-shape');
-    return el&&parseFloat(getComputedStyle(el).strokeWidth)>=6;
+    return el&&parseFloat(getComputedStyle(el).strokeWidth)>=9;
    },{timeout:3000});
    const strokeInfo=await page.locator('#brainMap [data-scene-focus] .zone-shape').evaluate(el=>({
     width:getComputedStyle(el).strokeWidth,
     matched:el.matches('.brain-page .brain-svg[data-scene-mode="focus"] .brain-zone[data-scene-focus] .zone-shape'),
     mapMode:document.querySelector('#brainMap').getAttribute('data-scene-mode')
    }));
-   assert.ok(parseFloat(strokeInfo.width)>=6 && parseFloat(strokeInfo.width)<=8 && strokeInfo.matched,
+   assert.ok(parseFloat(strokeInfo.width)>=9 && parseFloat(strokeInfo.width)<=11 && strokeInfo.matched,
     'active outline must be clear after transition: '+JSON.stringify(strokeInfo));
    const unfocusedOpacity=await page.locator('#brainMap [data-brain-region]:not([data-scene-focus])').first().evaluate(el=>parseFloat(getComputedStyle(el).opacity));
-   assert.ok(unfocusedOpacity>=0.99,'all other brain regions retain their approved original colors: '+unfocusedOpacity);
+   assert.ok(unfocusedOpacity>0.2&&unfocusedOpacity<0.55,'other areas recede but remain visible: '+unfocusedOpacity);
    assert.equal(await page.locator('#simpleDetail').isHidden(),true,'no unrelated detailed popup');
    const metrics=await page.evaluate(()=>({
     buttons:[...document.querySelectorAll('[data-lobe-scene],.lobe-scene-role-choice')].map(el=>el.getBoundingClientRect().toJSON()),
