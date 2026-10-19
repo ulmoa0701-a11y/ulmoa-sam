@@ -66,6 +66,7 @@ const {chromium}=require("playwright-core");
   assert.notEqual(staticTwoPage.unchanged,staticTwoPage.newPage,"the next two-line page must actually replace the completed page");
   assert(staticTwoPage.hopStart&&staticTwoPage.hopEnd,"Moa sprite needs concrete event anchors");
   assert(Math.abs(staticTwoPage.hopStart.x-staticTwoPage.hopEnd.x)>2,"Moa moves across the unmoving 16th-score beat");
+  await page.locator(".more-controls summary").click();
   await page.locator("#moaMove").selectOption("walk");
   assert.equal(await page.evaluate(()=>window.__performanceViewsQA__.moaTravel()),"walk");
   await page.locator("#moaMove").selectOption("hop");
