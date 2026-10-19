@@ -34,6 +34,8 @@ for(const width of [360,390,1366]){
  check(data.overflow<=3,width+' horizontal overflow '+data.overflow);
  check(data.navPresent,width+' shared navigation missing');
  check(await page.locator('.play-card-enhanced').count()===34,width+' enhanced game card count mismatch');
+ const photoURLs=await page.locator('.play-card-enhanced img.real-shot').evaluateAll(nodes=>nodes.map(x=>x.getAttribute('src')||''));
+ check(photoURLs.length===34&&photoURLs.every(u=>u.endsWith('?v=20261019-playcrop1')),width+' cropped game preview version not used across all 34 cards');
  check(await page.locator('#gardenSearch').count()===1,width+' overall search missing');
  const firstVisible=await page.locator('#cognitive .play-card-enhanced:not([hidden])').count();
  check(firstVisible===6,width+' cognitive preview should begin with six cards, got '+firstVisible);
