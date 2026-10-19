@@ -1,1 +1,208 @@
-{"pass":false,"error":"browser QA did not produce a report"}
+{
+  "generatedAt": "2026-10-19T10:27:43.298Z",
+  "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/",
+  "kind": "real public browser loading and controls; internal event-path smoke (NOT full human playthrough)",
+  "results": [
+    {
+      "viewport": "desktop",
+      "tests": {
+        "load": true,
+        "hud": true,
+        "movement": true,
+        "bossFlow": true,
+        "endState": true,
+        "noFatalError": true
+      },
+      "errors": [],
+      "networkFailures": [],
+      "start": {
+        "state": {
+          "stage": 0,
+          "patch": "2026-10-12-child-feedback-v1",
+          "player": [
+            -18,
+            -6
+          ],
+          "woods": {
+            "enabled": false,
+            "hits": 0,
+            "damage": 0
+          },
+          "eye": {
+            "enabled": false,
+            "hits": 0,
+            "damage": 0
+          },
+          "smog": {
+            "enabled": false,
+            "mode": "approach",
+            "cycle": 0,
+            "damage": 0
+          },
+          "lotus": 0,
+          "bucket": false,
+          "map": [
+            90,
+            72
+          ]
+        },
+        "fps": 8.5,
+        "canvas": 1,
+        "overflow": false,
+        "lotusText": "🌸 연꽃 0/3",
+        "timer": "07:00",
+        "hudCollision": false,
+        "target": {
+          "x": 650.109375,
+          "y": 98,
+          "width": 139.78125,
+          "height": 48
+        },
+        "lotus": {
+          "x": 12,
+          "y": 92,
+          "width": 96.40625,
+          "height": 36
+        },
+        "bucket": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "dialogVisible": true
+      },
+      "move": {
+        "before": [
+          -18,
+          -6
+        ],
+        "after": [
+          -18.92,
+          -7.22
+        ],
+        "distance": 1.53
+      },
+      "smoke": {
+        "patch": true,
+        "canvas": true,
+        "labels": true,
+        "distinctPeople": true,
+        "shadows": true,
+        "boss3d": true,
+        "map3x": true,
+        "retryDialog": true,
+        "retryReset": true,
+        "spikes": true,
+        "woodsReward": true,
+        "eyeReward": true,
+        "bucket": true,
+        "smogReward": true,
+        "lotusHud": true,
+        "pass": true
+      },
+      "pass": true
+    },
+    {
+      "viewport": "mobile",
+      "tests": {
+        "load": true,
+        "hud": true,
+        "movement": true,
+        "bossFlow": true,
+        "endState": true,
+        "noFatalError": true
+      },
+      "errors": [],
+      "networkFailures": [],
+      "start": {
+        "state": {
+          "stage": 0,
+          "patch": "2026-10-12-child-feedback-v1",
+          "player": [
+            -18,
+            -6
+          ],
+          "woods": {
+            "enabled": false,
+            "hits": 0,
+            "damage": 0
+          },
+          "eye": {
+            "enabled": false,
+            "hits": 0,
+            "damage": 0
+          },
+          "smog": {
+            "enabled": false,
+            "mode": "approach",
+            "cycle": 0,
+            "damage": 0
+          },
+          "lotus": 0,
+          "bucket": false,
+          "map": [
+            90,
+            72
+          ]
+        },
+        "fps": 17.3,
+        "canvas": 1,
+        "overflow": false,
+        "lotusText": "🌸 연꽃 0/3",
+        "timer": "07:00",
+        "hudCollision": false,
+        "target": {
+          "x": 137.7421875,
+          "y": 78,
+          "width": 114.515625,
+          "height": 41
+        },
+        "lotus": {
+          "x": 10,
+          "y": 658,
+          "width": 81.015625,
+          "height": 29
+        },
+        "bucket": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "dialogVisible": true
+      },
+      "move": {
+        "before": [
+          -18,
+          -6
+        ],
+        "after": [
+          -20.89,
+          -9.85
+        ],
+        "distance": 4.81
+      },
+      "smoke": {
+        "patch": true,
+        "canvas": true,
+        "labels": true,
+        "distinctPeople": true,
+        "shadows": true,
+        "boss3d": true,
+        "map3x": true,
+        "retryDialog": true,
+        "retryReset": true,
+        "spikes": true,
+        "woodsReward": true,
+        "eyeReward": true,
+        "bucket": true,
+        "smogReward": true,
+        "lotusHud": true,
+        "pass": true
+      },
+      "pass": true
+    }
+  ],
+  "pass": true
+}
