@@ -36,6 +36,39 @@ const {chromium}=require("playwright-core");
   assert(heart.dotted.includes(.75)&&heart.dotted.includes(.25),"dotted eighth + sixteenth must show 75% and 25% heart segments");
   tests.push(name+": canonical V-heart path, 16th and dotted 3:1 beat subdivisions");
 
+  const cues=await page.evaluate(()=>{
+    const q=window.__performanceViewsQA__,original=q.state();
+    q.selectSong("sixteenth");
+    q.at(16.01);const a=q.cueAt(16.01),owned=q.assignedEvents();
+    q.at(16.26);const b=q.cueAt(16.26);
+    q.selectSong("dotted");q.at(.05);const dot=q.cueAt(.05);
+    q.selectSong("moa-signal");q.at(.05);const full=q.cueAt(.05);
+    q.selectSong(original.song);
+    return {a:{now:a.now?.note,next:a.next?.start,beats:a.beats},b:{now:b.now?.note,next:b.next?.start},dot:{now:dot.now?.note,next:dot.next?.start},full:{next:full.next?.start},owned:owned.length};
+  });
+  assert(cues.owned>5,"actual assigned notes must exist");
+  assert(cues.a.now,"the exact 16th note at current onset must be highlighted");
+  assert(cues.a.next>16,"the next attack inside same heart must be forecast");
+  assert(cues.b.now,"next quarter-beat attack must become current");
+  assert(cues.dot.now,"dotted 0.75 note must be highlighted at onset");
+  assert.equal(await page.locator("#cueNow").count(),1);
+  assert.equal(await page.locator("#cueNext").count(),1);
+  await page.locator("#notes").selectOption("3");
+  const maskCues=await page.evaluate(()=>{
+     const q=window.__performanceViewsQA__;q.selectSong("moa-signal");q.at(.05);
+     const next=q.cueAt(.05).next,mask=q.state().mask;return {next:next?.note,mask};
+  });
+  assert(!maskCues.next||maskCues.mask.includes(maskCues.next),"next guide must skip unassigned pitches");
+  await page.locator("#notes").selectOption("5");
+  const mascot=await page.evaluate(async()=>{
+    const urls=["../../thinking-garden/assets/moa-default.png","../../thinking-garden/assets/moa-cheer.png"];
+    const imgs=await Promise.all(urls.map(async u=>{const i=new Image();i.src=u;try{await i.decode();return i.naturalWidth>10}catch(e){return false}}));
+    return imgs;
+  });
+  assert(mascot.every(Boolean),"the actual existing Moa character artworks must load");
+  tests.push(name+": current onset, 16th-note next cue, masked role forecast, and real Moa assets");
+
+
   assert.equal(await page.locator(".view-choice").count(),5);
   const images=[];
   for(const v of q.modes){
@@ -92,7 +125,7 @@ const {chromium}=require("playwright-core");
   tests.push(name+": audio-clock play, view switching without replay, pause, resume, reset");
   const viewport=await page.evaluate(()=>({w:innerWidth,scroll:document.documentElement.scrollWidth,stage:document.querySelector("#stage").getBoundingClientRect()}));
   assert(viewport.scroll<=viewport.w+3,"horizontal overflow at "+width+"px "+JSON.stringify(viewport));
-  assert(viewport.stage.y<345,"stage should not be pushed below blank header "+viewport.stage.y);
+  assert(viewport.stage.y<410,"stage should remain near the top after adding the predictive cue strip "+viewport.stage.y);
   tests.push(name+": responsive stage remains visible without oversized top whitespace or overflow");
   if(name==="desktop"){
    await page.locator("#song").selectOption("moa-signal");
