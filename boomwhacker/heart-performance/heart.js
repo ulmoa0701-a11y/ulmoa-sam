@@ -9,7 +9,8 @@ const VIEW={
  score:{name:"하트 색깔악보",desc:"한 박에 하트 하나, 안쪽 색깔로 박자를 읽어요."},
  bar:{name:"한 마디 하트판",desc:"지금 마디의 하트만 크게 따라가요."},
  two:{name:"두 줄 고정 하트길",desc:"하트악보 두 줄은 가만히, 모아만 음을 따라가요. 두 줄이 끝나면 다음 악보로 바뀌어요."},
- next:{name:"지금·다음 하트",desc:"지금 박을 크게, 다음 박을 미리 봐요."}
+ next:{name:"지금·다음 하트",desc:"지금 박을 크게, 다음 박을 미리 봐요."},
+ stairs:{name:"하트 계단악보",desc:"높은 음은 위에, 낮은 음은 아래에! 악보 두 줄은 그대로, 모아만 움직여요."}
 };
 const scores=window.__PERFORMANCE_SCORES__;
 if(!Array.isArray(scores)||scores.length<8)throw Error("기존 붐웨커 악보를 불러오지 못했어요.");
@@ -71,6 +72,7 @@ function updateControls(){
  $$(".view-choice").forEach(b=>{const yes=b.dataset.view===view;b.classList.toggle("active",yes);b.setAttribute("aria-pressed",String(yes))});
  $$("#keys button").forEach(k=>k.classList.toggle("off",!isSelected(k.dataset.note)));
  $("#noteHelp").textContent=notes+"음 강조 · 하트 1개=1박 · 원곡 그대로";
+ $("#stairStyleWrap").hidden=view!=="stairs";
  const bar=barAt(position),number=clamp(Math.floor(clamp(position,0,song.beats-.001)/song.meter)+1,1,song.bars.length);
  $("#measure").textContent=number+" / "+song.bars.length+" 마디";
  $("#currentBeat").textContent=position<startBeat()?"전주 · 준비":position>=endBeat()?"연주 끝":(Math.floor(((position-bar.start)%song.meter))+1)+"박 / "+song.meter+"박";
@@ -518,7 +520,7 @@ function heartNext(c,b){
    show one measure per line (2 measures per page) so hearts stay readable.
    No scrolling, sliding, enlarging, fading or pulsing of score objects.
    The only moving drawing is the actual Moa mascot. */
-let twoPageCache=null,moaTravel="hop";
+let twoPageCache=null,stairPageCache=null,moaTravel="hop",stairStyle="simple";
 /* Keep a FULL musical phrase on each stationary line rather than one measure.
     2/4 = 10 hearts desktop / 8 hearts mobile; 3/4 = 9 / 6;
     4/4 = 8 / 8. Whole measures remain intact and each page holds two lines. */
@@ -623,10 +625,131 @@ function drawFixedTwoPage(c,b){
  }
 }
 
-const drawKinds={road:heartRoad,score:heartScore,bar:heartBar,two:drawFixedTwoPage,next:heartNext};
+
+/* Heart stair score: two FULLY STATIC rows per page, same musical beats
+   as the canonical V-heart score; only Moa sprite is animated.
+   Timeline x is strict 1-heart-per-beat, y uses original 8-pitch positions.
+   For beats containing multiple note onsets, the heart keeps its original
+   quarter-beat color subdivisions and small event pitch dots show true height. */
+const STAIR_NOTE_ORDER=["도","레","미","파","솔","라","시","높은도"];
+function stairPitchIndex(note){return STAIR_NOTE_ORDER.indexOf(note)}
+function stairPrimary(beat){
+ const parts=beatParts(beat);
+ const musical=parts.find(p=>p.note!=="쉼");
+ return musical?musical.note:null;
+}
+function stairPage(info){
+ const cacheKey=twoBaseKey(info)+":stairs:"+stairStyle;
+ if(!stairPageCache||stairPageCache.key!==cacheKey){
+  stairPageCache={key:cacheKey,canvas:buildStairPage(info)};
+ }
+ return stairPageCache.canvas;
+}
+function stairGeometry(info,row){
+ const count=info.barsPerLine*song.meter,gap=count>=9?6:10;
+ const width=Math.min(123,(1052-gap*(count-1))/count);
+ const left=(1200-count*width-gap*(count-1))/2;
+ return {count,width,gap,left,rowTop:row===0?134:354,heartHeight:72};
+}
+function stairHeartTop(row,pitch){
+ const pitchIndex=stairPitchIndex(pitch);
+ return (row===0?134:354)+(7-(pitchIndex<0?3.5:pitchIndex))*15.4;
+}
+function stairPoint(info,e){
+ const beat=Math.floor(e.start+E),bar=Math.floor((beat+E)/song.meter),offset=bar-info.startBar;
+ const row=Math.floor(offset/info.barsPerLine),g=stairGeometry(info,row);
+ const ordinal=(offset%info.barsPerLine)*song.meter+(beat-bar*song.meter);
+ const fraction=Math.max(0,e.start-beat),within=Math.min(1-fraction,e.dur);
+ return {x:g.left+ordinal*(g.width+g.gap)+(fraction+within/2)*g.width,
+         y:stairHeartTop(row,e.note)+11,row};
+}
+function stairEvents(info){
+ const first=info.startBar*song.meter,end=info.endBar*song.meter;
+ return song.events.filter(e=>e.start>=first-E&&e.start<end-E&&e.note!=="쉼");
+}
+function buildStairPage(info){
+ const bg=document.createElement("canvas");bg.width=1200;bg.height=620;
+ const c=bg.getContext("2d");
+ c.fillStyle="#eff7f4";c.fillRect(0,0,1200,620);
+ rr(c,47,16,1106,77,22,"#fffdfa");
+ txt(c,"모아의 하트 계단악보",76,52,26,"#356b61","left");
+ txt(c,(info.startBar+1)+"~"+info.endBar+"마디 / "+song.bars.length+"마디",1121,52,21,"#60827a","right");
+ for(let row=0;row<2;row++){
+  const first=info.startBar+row*info.barsPerLine,last=Math.min(info.endBar,first+info.barsPerLine);
+  const top=row===0?110:330;
+  rr(c,44,top,1112,218,24,"#fff");
+  txt(c,row===0?"첫 번째 줄":"두 번째 줄",78,top+28,19,"#4b8075","left");
+  if(first>=last){txt(c,"이 줄은 비어 있어요",600,top+113,22,"#98aaa3");continue}
+  const g=stairGeometry(info,row);
+  // Small elevation guide, NOT moving lanes or a scrolling piano-roll.
+  txt(c,"높은 음",1119,top+36,13,"#8ba69d","right");
+  txt(c,"낮은 음",1119,top+196,13,"#8ba69d","right");
+  if(stairStyle==="path"){
+   let previous=null;
+   for(let beat=first*song.meter;beat<last*song.meter;beat++){
+    const p=stairPrimary(beat);if(!p){previous=null;continue}
+    const idx=beat-first*song.meter;
+    const item={x:g.left+idx*(g.width+g.gap)+g.width/2,y:stairHeartTop(row,p)+g.heartHeight*.54};
+    if(previous)ln(c,previous.x,previous.y,item.x,item.y,"#d8e5d7",5);
+    previous=item;
+   }
+  }
+  for(let beat=first*song.meter;beat<last*song.meter;beat++){
+   const idx=beat-first*song.meter,x=g.left+idx*(g.width+g.gap),p=stairPrimary(beat),
+         y=stairHeartTop(row,p);
+   heart(c,beat,x,y,g.width,g.heartHeight,-100,false);
+   // Secondary pitches inside an eighth/sixteenth beat remain visible
+   // at their own pitch height without falsely becoming extra whole beats.
+   const sub=beatParts(beat).filter(v=>v.onset&&v.note!=="쉼"&&v.note!==p);
+   for(const v of sub){
+    const subX=x+(v.from+Math.min(v.to-v.from,.5)/2)*g.width,
+          subY=stairHeartTop(row,v.note)+g.heartHeight*.36,
+          baseY=y+g.heartHeight*.45;
+    ln(c,subX,baseY,subX,subY,"#ffffffd9",2.5);
+    disk(c,subX,subY,Math.max(7,Math.min(11,g.width*.11)),col(v.note),"#fff",2);
+    txt(c,fixedNote(v.note),subX,subY,11,["도","라","높은도"].includes(v.note)?"#fff":"#24434b");
+   }
+   // Thin unobtrusive measure boundary for reading the score, not animation.
+   if(idx>0&&idx%song.meter===0){
+    const cut=x-g.gap/2;ln(c,cut,top+44,cut,top+207,"#d9e8de",1.5);
+   }
+  }
+ }
+ rr(c,72,556,1056,46,18,"#fffefbdc");
+ txt(c,"가로 = 박 순서     세로 = 음 높이     모아만 이동해요",599,579,18,"#527f73");
+ return bg;
+}
+function stairMoaPosition(beat,info){
+ const owned=assignedEvents().filter(e=>e.start>=info.startBar*song.meter-E&&e.start<info.endBar*song.meter-E);
+ if(!owned.length)return null;
+ let prev=owned[0],next=null;
+ for(const e of owned){if(e.start<=beat+.001)prev=e;else{next=e;break}}
+ const current=stairPoint(info,prev);
+ if(beat<prev.start||!next)return {...current,at:prev.start,progress:0};
+ const upcoming=stairPoint(info,next);
+ if(current.row!==upcoming.row){
+  if(beat<next.start-.27)return {...current,at:prev.start,progress:0};
+  return {...upcoming,at:next.start,progress:1};
+ }
+ const depart=Math.max(prev.start,next.start-.78);
+ const progress=motion?0:clamp((beat-depart)/Math.max(.001,next.start-depart),0,1);
+ const lift=(playing||exporting)&&!motion&&moaTravel==="hop"?Math.sin(Math.PI*progress)*22:0;
+ return {x:current.x+(upcoming.x-current.x)*progress,
+         y:current.y+(upcoming.y-current.y)*progress-lift,
+         row:current.row,at:progress>=1?next.start:prev.start,progress};
+}
+function drawStairPage(c,b){
+ const info=twoPageAt(b);
+ c.drawImage(stairPage(info),0,0);
+ const avatar=stairMoaPosition(b,info);
+ if(avatar){moaSprite(c,avatar.x,avatar.y,b,avatar.at)}
+ else{txt(c,"지금은 다른 악기 차례예요",599,302,23,"#688b83")}
+}
+
+const drawKinds={road:heartRoad,score:heartScore,bar:heartBar,two:drawFixedTwoPage,next:heartNext,stairs:drawStairPage};
 function draw(c,b,exportFrame=false){c.save();c.setTransform(c.canvas.width/1200,0,0,c.canvas.height/620,0,0);
- c.fillStyle="#f4f9f7";c.fillRect(0,0,1200,620);const oldPosition=position;position=b;if(view==="two"){drawFixedTwoPage(c,b)}else{head(c,view);drawKinds[view](c,b);canvasForecast(c,b)}
- if(view!=="two"&&flash.until>performance.now())txt(c,"직접 눌렀어요 · "+fixedNote(flash.note),600,542,19,"#3f877a");position=oldPosition;c.restore()
+ c.fillStyle="#f4f9f7";c.fillRect(0,0,1200,620);const oldPosition=position;position=b;if(view==="two"||view==="stairs"){drawKinds[view](c,b)}else{head(c,view);drawKinds[view](c,b);canvasForecast(c,b)}
+ if(view!=="two"&&view!=="stairs"&&flash.until>performance.now())txt(c,"직접 눌렀어요 · "+fixedNote(flash.note),600,542,19,"#3f877a");position=oldPosition;c.restore()
 }
 function videoMime(){if(!window.MediaRecorder)return"";return ["video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm","video/mp4"].find(m=>MediaRecorder.isTypeSupported(m))||""}
 async function exportVideo(){
@@ -676,16 +799,17 @@ function bind(){
  $("#loop").onchange=e=>{loop=e.target.checked;updateControls()};
  $("#motion").onchange=e=>{motion=e.target.checked;updateControls();draw(ctx,nowBeat())};
  $("#moaMove").onchange=e=>{moaTravel=e.target.value;draw(ctx,playing?nowBeat():position)};
+ $("#stairStyle").onchange=e=>{stairStyle=e.target.value;stairPageCache=null;draw(ctx,playing?nowBeat():position)};
  $$("#keys button").forEach(b=>b.onpointerdown=()=>tap(b.dataset.note));
  document.addEventListener("keydown",e=>{if(e.repeat||e.altKey||e.ctrlKey||e.metaKey||/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName))return;if(/^[1-8]$/.test(e.key)){e.preventDefault();tap(ORDER[Number(e.key)-1])}else if(e.code==="Space"){e.preventDefault();playing?pause():play()}});
  document.addEventListener("visibilitychange",()=>{if(document.hidden&&playing)pause()});
  window.addEventListener("pagehide",()=>{if(playing)stop()});
 }
 bind();rebuildSections();reset();
-window.addEventListener("resize",()=>{twoPageCache=null;draw(ctx,playing?nowBeat():position)});
-moaDefault.onload=()=>{if(view==="two")draw(ctx,position)};
+window.addEventListener("resize",()=>{twoPageCache=null;stairPageCache=null;draw(ctx,playing?nowBeat():position)});
+moaDefault.onload=()=>{if(view==="two"||view==="stairs")draw(ctx,position)};
 moaCheer.onload=()=>{if(view==="two")draw(ctx,position)};
-window.__performanceViewsQA__={twoPageAt,twoMoaPosition,twoBaseKey,twoBarsPerLine,twoBackground:()=>twoPageCache?.canvas,moaTravel:()=>moaTravel,beatParts,heartPath:HEART_PATH,modes:Object.keys(VIEW),scores:scores.map(s=>({key:s.key,bpm:s.bpm,meter:s.meter,measures:s.bars.length,beats:s.beats,events:s.events.length,rests:s.events.filter(e=>e.note==="쉼").length})),
+window.__performanceViewsQA__={stairPageAt:twoPageAt,stairBackground:()=>stairPageCache?.canvas,stairGeometry,stairHeartTop,stairPoint,stairMoaPosition,stairStyle:()=>stairStyle,stairPrimary,twoPageAt,twoMoaPosition,twoBaseKey,twoBarsPerLine,twoBackground:()=>twoPageCache?.canvas,moaTravel:()=>moaTravel,beatParts,heartPath:HEART_PATH,modes:Object.keys(VIEW),scores:scores.map(s=>({key:s.key,bpm:s.bpm,meter:s.meter,measures:s.bars.length,beats:s.beats,events:s.events.length,rests:s.events.filter(e=>e.note==="쉼").length})),
  cueAt,assignedEvents,beatUntil,state:()=>({view,song:song.key,notes,speed,section,playing,ended,position,measure:barAt(position).index,score:song.events.map(e=>[e.note,e.start,e.dur,e.lyric]),mask:selected(),clockAudio:!!acc,exporting}),
  selectView:chooseView,selectSong:chooseSong,play,pause,reset,at:(b)=>{if(playing)pause();position=b;draw(ctx,b);updateControls()},render:()=>draw(ctx,position),testMime:videoMime
 };

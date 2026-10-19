@@ -11,14 +11,14 @@ const {chromium}=require("playwright-core");
   page.on("pageerror",e=>errors.push(name+" pageerror "+e.message));page.on("console",m=>{if(m.type()==="error")errors.push(name+" console "+m.text())});
   await page.goto(base,{waitUntil:"domcontentloaded"});await page.waitForFunction(()=>Boolean(window.__performanceViewsQA__),{timeout:15000});
   const q=await page.evaluate(()=>window.__performanceViewsQA__);
-  assert.equal(q.modes.length,5);
+  assert.equal(q.modes.length,6);
   assert.equal(q.scores.length,8);
   assert(q.scores.every(s=>s.measures>=6&&s.events>0),"all original exercises intact");
   assert(q.scores.find(s=>s.key==="moa-signal").meter===2);
   assert(q.scores.find(s=>s.key==="moa-breeze").meter===3);
   assert(q.scores.find(s=>s.key==="moa-space").meter===4);
   assert.equal(await page.locator("#keys button").count(),8);
-  tests.push(name+": 8 exact original song selections, 2/4 3/4 4/4, 5 modes");
+  tests.push(name+": 8 exact original song selections, 2/4 3/4 4/4, 6 modes");
   const initial=await page.evaluate(()=>window.__performanceViewsQA__.state().score);
   const heart=await page.evaluate(()=>{
     const q=window.__performanceViewsQA__;
@@ -93,6 +93,54 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
   await page.screenshot({path:path.join(dir,name+"-static-two-line-next-page.png"),fullPage:true});
 
 
+
+  // Pitched-heart stair mode: static two-line backgrounds, real pitch height,
+  // exact 16th-note position and mascot-only movement on top.
+  await page.locator('.view-choice[data-view="stairs"]').click();
+  assert.equal(await page.locator("#stairStyleWrap").isVisible(),true);
+  const stairCheck=await page.evaluate(()=>{
+   const qa=window.__performanceViewsQA__,original=qa.state().song;
+   qa.selectSong("moa-space");
+   qa.at(.05);
+   const pageInfo=qa.stairPageAt(.05),a=qa.stairBackground().toDataURL();
+   qa.at(2.15);
+   const b=qa.stairBackground().toDataURL();
+   const own=qa.assignedEvents().filter(e=>e.start<pageInfo.endBar*4);
+   const pair=own.find((e,i)=>i>0&&e.note!==own[i-1].note);
+   const yPair=pair?[qa.stairPoint(pageInfo,own[own.indexOf(pair)-1]).y,qa.stairPoint(pageInfo,pair).y]:[];
+   const firstPageEnd=pageInfo.pageBars*4;
+   qa.at(firstPageEnd-.01);const before=qa.stairBackground().toDataURL();
+   qa.at(firstPageEnd+.01);const after=qa.stairBackground().toDataURL();
+   qa.selectSong("sixteenth");qa.at(16.01);
+   const fastInfo=qa.stairPageAt(16.01);
+   const fastOnsets=qa.assignedEvents().filter(e=>e.start>=16&&e.start<17);
+   const anchors=fastOnsets.map(e=>qa.stairPoint(fastInfo,e));
+   qa.selectSong(original);
+   return {same:a===b,beforeSame:a===before,pageChanged:before!==after,
+      pitchY:yPair,beatHearts:pageInfo.barsPerLine*4,
+      onsets:fastOnsets.map(e=>e.start),anchors:anchors.map(a=>({x:a.x,y:a.y})),
+      style:qa.stairStyle(),page:pageInfo.page};
+  });
+  assert(stairCheck.same&&stairCheck.beforeSame,"height-stepped heart score background must remain identical during both rows");
+  assert(stairCheck.pageChanged,"height-stepped score should swap only once both rows are complete");
+  assert.equal(stairCheck.page,0);
+  assert.equal(stairCheck.beatHearts,8,"show eight full quarter-beat hearts per row for 4/4");
+  assert.equal(stairCheck.pitchY.length,2);
+  assert(Math.abs(stairCheck.pitchY[0]-stairCheck.pitchY[1])>=14,"different pitches must be at visibly different heights");
+  assert(stairCheck.anchors.length>=2,"16th notes must have separate exact onset anchors inside a heart");
+  assert(new Set(stairCheck.anchors.map(p=>p.x.toFixed(1))).size>=2,"quarter-beat note onsets must not collapse onto the same horizontal position");
+  assert.equal(stairCheck.style,"simple");
+  await page.locator("#stairStyle").selectOption("path");
+  const lineCheck=await page.evaluate(()=>{const qa=window.__performanceViewsQA__;qa.selectSong("moa-space");qa.at(.01);return {style:qa.stairStyle(),image:qa.stairBackground().toDataURL()};});
+  await page.screenshot({path:path.join(dir,name+"-stair-connecting-path.png"),fullPage:true});
+  assert.equal(lineCheck.style,"path");
+  await page.locator("#stairStyle").selectOption("simple");
+  await page.locator("#song").selectOption("moa-space");
+  await page.evaluate(()=>window.__performanceViewsQA__.at(1.15));
+  await page.screenshot({path:path.join(dir,name+"-stair-basic.png"),fullPage:true});
+  tests.push(name+": new fixed two-row pitched V-heart score, real pitch elevations, precise 16ths and optional connecting path");
+  await page.locator('.view-choice[data-view="two"]').click();
+
   const cues=await page.evaluate(()=>{
     const q=window.__performanceViewsQA__,original=q.state();
     q.selectSong("sixteenth");
@@ -126,7 +174,7 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
   tests.push(name+": current onset, 16th-note next cue, masked role forecast, and real Moa assets");
 
 
-  assert.equal(await page.locator(".view-choice").count(),5);
+  assert.equal(await page.locator(".view-choice").count(),6);
   const images=[];
   for(const v of q.modes){
    await page.locator('.view-choice[data-view="'+v+'"]').click();
@@ -139,8 +187,8 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
    images.push(crypto.createHash("sha256").update(img).digest("hex"));
    await page.screenshot({path:path.join(dir,name+"-"+v+".png"),fullPage:true});
   }
-  assert.equal(new Set(images).size,5,"five genuinely visually distinct playing scenes");
-  tests.push(name+": five child-first performance views, same original notes and rhythms");
+  assert.equal(new Set(images).size,6,"six genuinely visually distinct playing scenes");
+  tests.push(name+": six child-first performance views, same original notes and rhythms");
   await page.locator("#notes").selectOption("3");
   assert.equal(await page.locator("#keys button.off").count(),5);
   assert.deepEqual(await page.evaluate(()=>window.__performanceViewsQA__.state().score),initial);
