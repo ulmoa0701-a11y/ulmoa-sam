@@ -303,6 +303,13 @@ function __hgPourAnimation(){
 }
 __uPourWater=function(){return __hgPourAnimation()};
 window.__ulmoaGardenV2={
+ previewBoss:(boss)=>{
+   const stage={woods:2,eye:4,smog:6}[boss],node={woods:Hp,eye:Up,smog:Wp}[boss];
+   if(!stage||__hgDefeated.has(boss))return false;
+   qp=true;Jp=false;Dm(stage);node.setEnabled(true);
+   Rp.position.copyFrom(node.position.add(new R(-6,0,-6)));ap.classList.remove("show");
+   return true;
+ },
  state:()=>({sprinting:__hgSprinting,stage:Kp,flowers:[...__hgFlowers.keys()],collected:__uLotusCount,bucket:__uHasBucket,pouring:__hgPouring,bosses:[...__hgDefeated],eyeSlashVisible:!document.querySelector('[data-action="slash"]')?.classList.contains("hidden")}),
  holdPickup:async(boss)=>{const node=__hgFlowers.get(boss);if(!node)return false;Rp.position.copyFrom(node.position.add(new R(-1.3,0,0)));__hgStartCollect();await new Promise(r=>setTimeout(r,1250));return !__hgFlowers.has(boss)},
  runSmoke:async()=>{
