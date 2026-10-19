@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-19T11:37:55.475Z",
+  "generatedAt": "2026-10-19T11:39:47.728Z",
   "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/",
   "kind": "real public browser loading and controls; internal event-path smoke (NOT full human playthrough)",
   "results": [
@@ -9,7 +9,8 @@
         "load": true,
         "hud": true,
         "movement": true,
-        "bossFlow": true,
+        "shiftSprint": true,
+        "bossFlow": false,
         "endState": true,
         "noFatalError": true
       },
@@ -46,7 +47,7 @@
             72
           ]
         },
-        "fps": 5.6,
+        "fps": 5.8,
         "canvas": 1,
         "overflow": false,
         "lotusText": "🌸 연꽃 0/3",
@@ -84,24 +85,25 @@
         "distance": 0.98
       },
       "smoke": {
-        "patch": true,
-        "canvas": true,
-        "labels": true,
-        "distinctPeople": true,
-        "shadows": true,
-        "boss3d": true,
-        "map3x": true,
-        "retryDialog": true,
-        "retryReset": true,
-        "spikes": true,
-        "woodsReward": true,
-        "eyeReward": true,
+        "geometry": true,
+        "restartDialog": true,
+        "restart": true,
+        "woodsHidden": true,
+        "woodsDropped": true,
+        "woodsPicked": true,
+        "slashInEye": true,
+        "eyeHidden": true,
+        "eyePicked": true,
         "bucket": true,
-        "smogReward": true,
-        "lotusHud": true,
-        "pass": true
+        "pour": true,
+        "smogHidden": true,
+        "smogPicked": true,
+        "slashHidden": false,
+        "threeLotus": true,
+        "stage7": true,
+        "pass": false
       },
-      "pass": true
+      "pass": false
     },
     {
       "viewport": "mobile",
@@ -109,7 +111,8 @@
         "load": true,
         "hud": true,
         "movement": true,
-        "bossFlow": true,
+        "shiftSprint": true,
+        "bossFlow": false,
         "endState": true,
         "noFatalError": true
       },
@@ -146,7 +149,7 @@
             72
           ]
         },
-        "fps": 14.7,
+        "fps": 10.4,
         "canvas": 1,
         "overflow": false,
         "lotusText": "🌸 연꽃 0/3",
@@ -178,31 +181,32 @@
           -6
         ],
         "after": [
-          -20.87,
-          -9.83
+          -20.29,
+          -9.06
         ],
-        "distance": 4.79
+        "distance": 3.82
       },
       "smoke": {
-        "patch": true,
-        "canvas": true,
-        "labels": true,
-        "distinctPeople": true,
-        "shadows": true,
-        "boss3d": true,
-        "map3x": true,
-        "retryDialog": true,
-        "retryReset": true,
-        "spikes": true,
-        "woodsReward": true,
-        "eyeReward": true,
+        "geometry": true,
+        "restartDialog": true,
+        "restart": true,
+        "woodsHidden": true,
+        "woodsDropped": true,
+        "woodsPicked": true,
+        "slashInEye": true,
+        "eyeHidden": true,
+        "eyePicked": true,
         "bucket": true,
-        "smogReward": true,
-        "lotusHud": true,
-        "pass": true
+        "pour": true,
+        "smogHidden": true,
+        "smogPicked": true,
+        "slashHidden": false,
+        "threeLotus": true,
+        "stage7": true,
+        "pass": false
       },
-      "pass": true
+      "pass": false
     }
   ],
-  "pass": true
+  "pass": false
 }
