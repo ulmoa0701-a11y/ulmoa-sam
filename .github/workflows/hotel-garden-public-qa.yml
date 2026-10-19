@@ -1,0 +1,38 @@
+name: Hotel Garden public PC and mobile QA
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/hotel-garden-public-qa.yml'
+      - 'qa/hotel-garden-public-qa.mjs'
+      - 'lab/babylon-hotel-garden/**'
+concurrency:
+  group: hotel-garden-public-qa
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  public-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install existing QA browser runner
+        run: npm install --no-save --no-audit --no-fund puppeteer-core@latest
+      - name: Find Chrome
+        run: |
+          CHROME_PATH=$(which google-chrome || which google-chrome-stable || which chromium || which chromium-browser)
+          echo "CHROME_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
+      - name: Browser-check the published Babylon game (PC + mobile)
+        run: node qa/hotel-garden-public-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hotel-garden-public-qa
+          path: |
+            hotel-garden-public-qa.json
+            hotel-garden-*.png
+          if-no-files-found: warn
