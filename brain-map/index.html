@@ -13,8 +13,8 @@
 <link href="https://hangeul.pstatic.net/hangeul_static/css/maru-buri.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
 <link rel="stylesheet" href="../assets/notebook-subpages.css?v=20261005-clean3">
-<link rel="stylesheet" href="brain.css?v=20261018-content-a11y1">
-<script src="brain.js?v=20261018-content-a11y1" defer></script>
+<link rel="stylesheet" href="brain.css?v=20261019-labels1">
+<script src="brain.js?v=20261019-labels1" defer></script>
 <script src="activity-guide.js?v=20261018-content-a11y1" defer></script>
 <link rel="stylesheet" href="../assets/habom-brand.css?v=20261010b">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/habom-favicon-v3-32.png">
@@ -112,7 +112,48 @@
 <circle class="zone-badge" cx="601" cy="529" r="22"/><text class="zone-number" x="601" y="537" text-anchor="middle">6</text>
 </g>
 </g>
+<!-- Labels are part of the actual interactive SVG, not a decorative screenshot. -->
+<g class="brain-diagram-labels" aria-hidden="true">
+ <g class="brain-diagram-label" data-label-region="frontal" transform="translate(271 320)">
+  <rect class="brain-label-back" x="-44" y="-19" width="88" height="51" rx="13"/>
+  <text class="brain-label-name" text-anchor="middle" y="0">전두엽</text>
+  <text class="brain-label-function" text-anchor="middle" y="20">계획·조절</text>
+ </g>
+ <g class="brain-diagram-label" data-label-region="parietal" transform="translate(513 240)">
+  <rect class="brain-label-back" x="-47" y="-19" width="94" height="51" rx="13"/>
+  <text class="brain-label-name" text-anchor="middle" y="0">두정엽</text>
+  <text class="brain-label-function" text-anchor="middle" y="20">감각·위치</text>
+ </g>
+ <g class="brain-diagram-label" data-label-region="temporal" transform="translate(512 420)">
+  <rect class="brain-label-back" x="-47" y="-19" width="94" height="51" rx="13"/>
+  <text class="brain-label-name" text-anchor="middle" y="0">측두엽</text>
+  <text class="brain-label-function" text-anchor="middle" y="20">소리·말</text>
+ </g>
+ <g class="brain-diagram-label" data-label-region="occipital" transform="translate(690 324)">
+  <rect class="brain-label-back" x="-44" y="-19" width="88" height="51" rx="13"/>
+  <text class="brain-label-name" text-anchor="middle" y="0">후두엽</text>
+  <text class="brain-label-function" text-anchor="middle" y="20">보기</text>
+ </g>
+ <g class="brain-diagram-label" data-label-region="cerebellum" transform="translate(700 473)">
+  <rect class="brain-label-back" x="-54" y="-19" width="108" height="51" rx="13"/>
+  <text class="brain-label-name" text-anchor="middle" y="0">소뇌</text>
+  <text class="brain-label-function" text-anchor="middle" y="20">균형·타이밍</text>
+ </g>
+ <g class="brain-diagram-label" data-label-region="brainstem" transform="translate(539 525)">
+  <rect class="brain-label-back" x="-56" y="-19" width="112" height="51" rx="13"/>
+  <text class="brain-label-name" text-anchor="middle" y="0">뇌줄기</text>
+  <text class="brain-label-function" text-anchor="middle" y="20">숨쉬기·각성</text>
+ </g>
+</g>
 </svg>
+    <div class="brain-mobile-legend" aria-label="뇌 부위와 대표 기능">
+     <div class="brain-mobile-legend-item" data-legend-region="frontal"><b>1 전두엽</b><span>계획·조절</span></div>
+     <div class="brain-mobile-legend-item" data-legend-region="parietal"><b>2 두정엽</b><span>감각·위치</span></div>
+     <div class="brain-mobile-legend-item" data-legend-region="temporal"><b>3 측두엽</b><span>소리·말</span></div>
+     <div class="brain-mobile-legend-item" data-legend-region="occipital"><b>4 후두엽</b><span>보기</span></div>
+     <div class="brain-mobile-legend-item" data-legend-region="cerebellum"><b>5 소뇌</b><span>균형·타이밍</span></div>
+     <div class="brain-mobile-legend-item" data-legend-region="brainstem"><b>6 뇌줄기</b><span>숨쉬기·각성</span></div>
+    </div>
      <p class="lobe-scene-caution" id="lobeSceneNotice">뇌는 여러 부분이 함께 일해요. 이 색 강조는 실제 뇌 활동을 측정한 결과가 아니에요.</p>
       </div>
      </div>
