@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-19T12:06:08.287Z",
+  "generatedAt": "2026-10-19T12:08:49.939Z",
   "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/",
   "kind": "real public browser loading and controls; internal event-path smoke (NOT full human playthrough)",
   "results": [
     {
       "viewport": "desktop",
       "tests": {
-        "load": true,
+        "load": false,
         "hud": true,
         "movement": true,
         "shiftSprint": true,
@@ -68,7 +68,13 @@
             72
           ]
         },
-        "fps": 28.3,
+        "shaderReady": true,
+        "shaderError": null,
+        "lotusNodes": 2,
+        "gameModules": [
+          "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/assets/index-DxiltY-5.js?v=20261019-child-feedback-v2f"
+        ],
+        "fps": 28.6,
         "canvas": 1,
         "overflow": false,
         "lotusText": "🌸 연꽃 0/3",
@@ -100,10 +106,10 @@
           -6
         ],
         "after": [
-          -18.47,
-          -6.63
+          -18.26,
+          -6.35
         ],
-        "distance": 0.79
+        "distance": 0.44
       },
       "smoke": {
         "geometry": true,
@@ -129,7 +135,7 @@
     {
       "viewport": "mobile",
       "tests": {
-        "load": true,
+        "load": false,
         "hud": true,
         "movement": true,
         "shiftSprint": true,
@@ -191,7 +197,13 @@
             72
           ]
         },
-        "fps": 19.3,
+        "shaderReady": true,
+        "shaderError": null,
+        "lotusNodes": 2,
+        "gameModules": [
+          "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/assets/index-DxiltY-5.js?v=20261019-child-feedback-v2f"
+        ],
+        "fps": 16.5,
         "canvas": 1,
         "overflow": false,
         "lotusText": "🌸 연꽃 0/3",
@@ -223,10 +235,10 @@
           -6
         ],
         "after": [
-          -20.3,
-          -9.07
+          -20.53,
+          -9.37
         ],
-        "distance": 3.84
+        "distance": 4.21
       },
       "smoke": {
         "geometry": true,
