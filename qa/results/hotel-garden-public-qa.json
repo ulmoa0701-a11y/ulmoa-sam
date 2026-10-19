@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-19T11:59:14.842Z",
+  "generatedAt": "2026-10-19T12:04:12.606Z",
   "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/",
   "kind": "real public browser loading and controls; internal event-path smoke (NOT full human playthrough)",
   "results": [
@@ -26,15 +26,15 @@
       "httpErrors": [
         {
           "status": 404,
-          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/defaultUboDeclaration.fx"
+          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/defaultVertexDeclaration.fx"
         },
         {
           "status": 404,
-          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/defaultUboDeclaration.fx"
+          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/defaultVertexDeclaration.fx"
         },
         {
           "status": 404,
-          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/defaultUboDeclaration.fx"
+          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/defaultVertexDeclaration.fx"
         }
       ],
       "start": {
@@ -68,7 +68,7 @@
             72
           ]
         },
-        "fps": 28.2,
+        "fps": 8.2,
         "canvas": 1,
         "overflow": false,
         "lotusText": "🌸 연꽃 0/3",
@@ -149,15 +149,15 @@
       "httpErrors": [
         {
           "status": 404,
-          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/defaultUboDeclaration.fx"
+          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/defaultVertexDeclaration.fx"
         },
         {
           "status": 404,
-          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/defaultUboDeclaration.fx"
+          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/defaultVertexDeclaration.fx"
         },
         {
           "status": 404,
-          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/defaultUboDeclaration.fx"
+          "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/defaultVertexDeclaration.fx"
         }
       ],
       "start": {
@@ -191,7 +191,7 @@
             72
           ]
         },
-        "fps": 19.1,
+        "fps": 20.5,
         "canvas": 1,
         "overflow": false,
         "lotusText": "🌸 연꽃 0/3",
@@ -223,10 +223,10 @@
           -6
         ],
         "after": [
-          -20.59,
-          -9.45
+          -20.83,
+          -9.77
         ],
-        "distance": 4.31
+        "distance": 4.71
       },
       "smoke": {
         "geometry": true,
