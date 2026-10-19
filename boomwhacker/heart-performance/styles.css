@@ -13,3 +13,20 @@
 .view-label{color:#bb5075}.main-controls button.primary{background:#bf5479;border-color:#bf5479}.links{color:#b15a7a}
 #keys button:nth-child(1),#keys button:nth-child(8){--col:#F32735}#keys button:nth-child(2){--col:#F6851F}#keys button:nth-child(3){--col:#FBED1B}#keys button:nth-child(4){--col:#73C84A}#keys button:nth-child(5){--col:#00A39A}#keys button:nth-child(6){--col:#4B4AA8}#keys button:nth-child(7){--col:#D83A9B}
 #keys button:nth-child(1) b,#keys button:nth-child(8) b,#keys button:nth-child(6) b{color:#fff}
+
+/* Predictive score cues appear before the score, not in a blocking popover.
+   They're readable on phones, not just canvas pixels. */
+.cue-strip{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.7fr);gap:8px;margin:0 0 7px;align-items:stretch}
+.cue-card{display:flex;align-items:center;gap:11px;min-width:0;min-height:48px;padding:8px 13px;border-radius:13px;border:1px solid #d9e8e0;background:#f6faf7}
+.cue-card:before{content:"";width:10px;height:10px;flex:none;border-radius:50%;background:var(--note-color,#91c5b6);box-shadow:0 0 0 3px #ffffff}
+.cue-card.current{background:#e9f7ee;border-color:#bee0c9}
+.cue-card.upcoming{background:#fffaf1;border-color:#f0dfc3}
+.cue-label{font-size:11px;white-space:nowrap;color:#658476;font-weight:900}
+.cue-card strong{font-size:clamp(14px,1.42vw,18px);color:#264f47;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cue-after{margin-left:auto;font-size:11px;white-space:nowrap;color:#728982}
+@media(max-width:620px){.cue-strip{gap:5px;margin-bottom:5px;grid-template-columns:minmax(0,.86fr) minmax(0,1.55fr)}
+ .cue-card{min-height:40px;padding:6px 6px;gap:4px;border-radius:8px}
+ .cue-card:before{width:7px;height:7px;box-shadow:none}
+ .cue-label{font-size:9px}.cue-card strong{font-size:11px;white-space:normal;line-height:1.2}
+ .cue-after{display:none}
+}

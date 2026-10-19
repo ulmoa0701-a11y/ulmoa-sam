@@ -17,6 +17,40 @@ let song=scores[0],view="road",notes=5,speed=1,section="all",metronome=false,loo
 let position=-song.meter,playing=false,ended=false,acc=null,audioBase=0,audioDest=null,raf=0,exporting=false,exportAudio=null,exportRaf=0,flash={note:"",until:0};
 const canvas=$("#display"),ctx=canvas.getContext("2d",{alpha:false});
 const result={updates:0};
+
+/* Performance cue model: uses exact NOTE ONSETS, never heart counts.
+   Existing full song/audio still plays; student mask changes the guide only. */
+const moaDefault=new Image(),moaCheer=new Image();
+moaDefault.src="../../thinking-garden/assets/moa-default.png";
+moaCheer.src="../../thinking-garden/assets/moa-cheer.png";
+function assignedEvents(){return song.events.filter(e=>e.note!=="쉼"&&isSelected(e.note)&&e.start>=startBeat()-.00001&&e.start<endBeat()-.00001)}
+function cueAt(b){
+ const owned=assignedEvents(),now=owned.find(e=>b>=e.start-.015&&b<e.start+Math.min(.22,e.dur)*.98);
+ const next=owned.find(e=>e.start>b+.015)||null;
+ const later=next?owned.find(e=>e.start>next.start+.001)||null:null;
+ return {now:now||null,next,later,waiting:!now,beats:next?Math.max(0,next.start-b):null};
+}
+function beatUntil(d){
+ if(d===null)return "내 차례 끝";if(d<=.19)return "곧!";
+ const quarters=Math.ceil((d-.00001)*4)/4;
+ if(quarters===.25)return "¼박 뒤";
+ if(quarters===.5)return "반 박 뒤";
+ if(quarters===.75)return "¾박 뒤";
+ if(quarters%1===.25)return Math.floor(quarters)+"¼박 뒤";
+ if(quarters%1===.5)return Math.floor(quarters)+"½박 뒤";
+ if(quarters%1===.75)return Math.floor(quarters)+"¾박 뒤";
+ return quarters+"박 뒤";
+}
+function updateCueUI(){
+ const c=cueAt(position),cur=$("#cueNow"),next=$("#cueNext"),after=$("#cueAfter");
+ if(!cur||!next||!after)return;
+ cur.textContent=c.now?"지금 "+fixedNote(c.now.note)+"!":position<startBeat()?"전주를 들어요":"다른 음을 듣는 중";
+ cur.style.setProperty("--note-color",c.now?col(c.now.note):"#a4c8bc");
+ next.textContent=c.next?"다음 내 음 "+fixedNote(c.next.note)+" · "+beatUntil(c.beats):"내 연주 순서가 끝났어요";
+ next.style.setProperty("--note-color",c.next?col(c.next.note):"#a4c8bc");
+ after.textContent=c.later?"그다음 "+fixedNote(c.later.note):"";
+}
+
 const fixedNote=n=>n==="높은도"?"도↑":n;
 const selected=()=>notes===3?["도","미","솔"]:notes===5?["도","레","미","솔","라"]:ORDER;
 const isSelected=n=>selected().includes(n);
@@ -40,6 +74,7 @@ function updateControls(){
  const bar=barAt(position),number=clamp(Math.floor(clamp(position,0,song.beats-.001)/song.meter)+1,1,song.bars.length);
  $("#measure").textContent=number+" / "+song.bars.length+" 마디";
  $("#currentBeat").textContent=position<startBeat()?"전주 · 준비":position>=endBeat()?"연주 끝":(Math.floor(((position-bar.start)%song.meter))+1)+"박 / "+song.meter+"박";
+ updateCueUI();
  $("#play").textContent=playing?"일시정지":ended?"처음부터 연주":position>startBeat()-song.meter+.01?"이어 연주":"연주 시작";
  $("#play").disabled=exporting;$("#record").disabled=exporting;$("#record").textContent=exporting?"영상 제작 중":"영상 저장";
  result.updates++;
@@ -374,12 +409,66 @@ function heart(c,beat,x,y,w,h,now,muted=false){
  }
  c.globalAlpha=1;
  if(parts.length===1&&!parts[0].onset)txt(c,"이어서",50,48,11,"#395660");
- if(active&&!muted){c.save();c.clip(HEART);ln(c,clamp(now-beat,0,1)*100,7,clamp(now-beat,0,1)*100,80,"#ffffffc9",1.8);c.restore();}
+ if(active&&!muted){
+  c.save();c.clip(HEART);ln(c,clamp(now-beat,0,1)*100,7,clamp(now-beat,0,1)*100,80,"#ffffffc9",1.8);c.restore();
+  const struck=parts.find(p=>p.onset&&isSelected(p.note)&&now>=p.source.start-.015&&now<p.source.start+Math.min(.24,p.source.dur)*.9);
+  if(struck){
+    const cx=50*(struck.from+struck.to),radius=Math.min(20,Math.max(13,(struck.to-struck.from)*45));
+    c.save();c.globalAlpha=.96;c.fillStyle="#fff";c.beginPath();c.arc(cx,37,radius+4,0,Math.PI*2);c.fill();
+    c.fillStyle=col(struck.note);c.beginPath();c.arc(cx,37,radius,0,Math.PI*2);c.fill();
+    txt(c,fixedNote(struck.note),cx,37,Math.min(22,radius*.95),["도","라","높은도"].includes(struck.note)?"white":"#203d46");
+    c.restore();
+  }
+}
  c.restore();
+}
+
+/* Moa follows student's actual onset positions (including 8th/16th notes)
+   on the original score without covering the beat subdivisions. */
+function moaSprite(c,x,y,b,at,dim=false){
+ if(dim)return;const alert=cueAt(b).now,cheer=alert&&Math.abs(alert.start-at)<.025;
+ const sprite=cheer?moaCheer:moaDefault,swing=!motion&&playing?(Math.sin(performance.now()/185)*2):0;
+ c.save();const size=65;
+ if(sprite.complete&&sprite.naturalWidth>0){
+  c.drawImage(sprite,x-size/2,y-size+12+swing,size,size);
+ }else{
+  disk(c,x,y-25,25,"#fff3de","#639c8a",3);txt(c,"모아",x,y-25,14,"#3c776c");
+ }
+ c.restore()
+}
+function moaOnRow(c,bar,y,width,left,gap,b,dim=false){
+ if(dim||b<bar.start-.01||b>=bar.end+.01)return;
+ const owned=assignedEvents().filter(e=>e.start>=bar.start-.0001&&e.start<bar.end-.0001);
+ if(!owned.length)return;
+ const anchor=(e)=>{
+  const step=e.start-bar.start,whole=Math.floor(step),part=step-whole;
+  const inBeat=Math.min(e.dur,1-part);
+  return left+whole*(width+gap)+(part+inBeat/2)*width;
+ };
+ let previous=owned[0],following=null;
+ for(const e of owned){if(e.start<=b+.015)previous=e;else{following=e;break}}
+ let x=anchor(previous);
+ if(following&&previous.start<b&&following.start>previous.start){
+  const ratio=clamp((b-previous.start)/(following.start-previous.start),0,1);
+  x=anchor(previous)+(anchor(following)-anchor(previous))*ratio;
+  if(!motion&&playing)y-=Math.sin(ratio*Math.PI)*25;
+ }
+ moaSprite(c,x,y,b,previous.start)
+}
+function canvasForecast(c,b){
+ const q=cueAt(b);
+ rr(c,203,76,794,36,15,"rgba(255,255,255,.95)");
+ const now=q.now?"지금 "+fixedNote(q.now.note)+"!":b<startBeat()?"전주 듣기":"내 차례 기다리기";
+ const next=q.next?"다음 "+fixedNote(q.next.note)+" · "+beatUntil(q.beats):"담당 음 끝";
+ disk(c,224,94,7,q.now?col(q.now.note):"#9cc8b8");
+ txt(c,now,247,94,18,"#356c60","left");
+ disk(c,568,94,7,q.next?col(q.next.note):"#b6ccc4");
+ txt(c,next,590,94,18,"#49796f","left");
 }
 function heartsInBar(c,bar,y,maxWidth,height,b,{muted=false,xleft=90,gap=14}={}){
  const n=song.meter,w=Math.min(maxWidth,(1200-2*xleft-(n-1)*gap)/n),left=(1200-(n*w+(n-1)*gap))/2;
  for(let i=0;i<n;i++){const x=left+i*(w+gap);heart(c,bar.start+i,x,y,w,height,b,muted);txt(c,(i+1)+"박",x+w/2,y+height+17,16,muted?"#94a7a0":"#56877a");}
+ moaOnRow(c,bar,y,w,left,gap,b,muted);
 }
 function heartRoad(c,b){
  rr(c,55,111,1090,424,30,"#ffffffbb");
@@ -394,6 +483,7 @@ function heartRoad(c,b){
    if(x<110||x>1120)continue;
    heart(c,beat,x-w/2,249,w,h,b);
  }
+ const g=cueAt(b),e=g.now||g.next;if(e){const x=mark+(e.start-b)*step; if(x>120&&x<1100)moaSprite(c,x,246,b,e.start);}
  txt(c,"하트 1개 = 1박     ·     안의 색깔 조각이 리듬을 보여줘요",602,493,21,"#528478");
 }
 function heartScore(c,b){
@@ -416,6 +506,7 @@ function heartNext(c,b){
  rr(c,70,116,1060,422,33,"#ffffffd9");
  const current=clamp(Math.floor(b+E),startBeat(),endBeat()-1),next=current+1;
  txt(c,"지금 박",367,177,30,"#3e8172");heart(c,current,182,212,370,292,b);txt(c,(current%song.meter+1)+"박",367,531,19,"#518779");
+ const g=cueAt(b);if(g.now&&Math.floor(g.now.start)===current)moaSprite(c,182+370*(g.now.start-current+Math.min(g.now.dur,1-(g.now.start-current))/2),214,b,g.now.start);
  txt(c,"다음 박",862,185,27,"#75968a");
  if(next<endBeat()){heart(c,next,729,261,263,210,b,true);txt(c,(next%song.meter+1)+"박",862,496,18,"#77978d")}
  else txt(c,"마지막 박이에요",862,365,28,"#71948a");
@@ -423,7 +514,7 @@ function heartNext(c,b){
 
 const drawKinds={road:heartRoad,score:heartScore,bar:heartBar,two:heartTwo,next:heartNext};
 function draw(c,b,exportFrame=false){c.save();c.setTransform(c.canvas.width/1200,0,0,c.canvas.height/620,0,0);
- c.fillStyle="#f4f9f7";c.fillRect(0,0,1200,620);const oldPosition=position;position=b;head(c,view);drawKinds[view](c,b);
+ c.fillStyle="#f4f9f7";c.fillRect(0,0,1200,620);const oldPosition=position;position=b;head(c,view);drawKinds[view](c,b);canvasForecast(c,b);
  if(flash.until>performance.now())txt(c,"직접 눌렀어요 · "+fixedNote(flash.note),600,542,19,"#3f877a");position=oldPosition;c.restore()
 }
 function videoMime(){if(!window.MediaRecorder)return"";return ["video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm","video/mp4"].find(m=>MediaRecorder.isTypeSupported(m))||""}
@@ -480,7 +571,7 @@ function bind(){
 }
 bind();rebuildSections();reset();
 window.__performanceViewsQA__={beatParts,heartPath:HEART_PATH,modes:Object.keys(VIEW),scores:scores.map(s=>({key:s.key,bpm:s.bpm,meter:s.meter,measures:s.bars.length,beats:s.beats,events:s.events.length,rests:s.events.filter(e=>e.note==="쉼").length})),
- state:()=>({view,song:song.key,notes,speed,section,playing,ended,position,measure:barAt(position).index,score:song.events.map(e=>[e.note,e.start,e.dur,e.lyric]),mask:selected(),clockAudio:!!acc,exporting}),
+ cueAt,assignedEvents,beatUntil,state:()=>({view,song:song.key,notes,speed,section,playing,ended,position,measure:barAt(position).index,score:song.events.map(e=>[e.note,e.start,e.dur,e.lyric]),mask:selected(),clockAudio:!!acc,exporting}),
  selectView:chooseView,selectSong:chooseSong,play,pause,reset,at:(b)=>{if(playing)pause();position=b;draw(ctx,b);updateControls()},render:()=>draw(ctx,position),testMime:videoMime
 };
 })();

@@ -26,10 +26,14 @@
  </section>
  <section class="player" aria-label="붐웨커 연주">
   <div class="player-header">
-   <div><span class="view-label" id="viewName">하트 리듬길</span><h1 id="title">모아의 출발 신호</h1><p id="subtitle">한 박 안의 색깔 하트를 읽고 함께 연주해요.</p></div>
+   <div><span class="view-label" id="viewName">하트 리듬길</span><h1 id="title">모아의 출발 신호</h1><p id="subtitle">다음 내 음을 미리 보고, 모아를 따라가며 연주해요.</p></div>
    <div class="bar-progress"><strong id="measure">1 / 8 마디</strong><span id="currentBeat">연주 준비</span></div>
   </div>
-  <div class="stage" id="stage">
+  <div class="cue-strip" role="group" aria-label="현재 연주와 다음 내 차례 안내">
+    <div class="cue-card current"><span class="cue-label">지금</span><strong id="cueNow">전주를 들어요</strong></div>
+    <div class="cue-card upcoming"><span class="cue-label">다음 내 차례</span><strong id="cueNext">곧 나올 음을 준비해요</strong><span id="cueAfter" class="cue-after"></span></div>
+   </div>
+   <div class="stage" id="stage">
    <canvas id="display" width="1200" height="620" role="img" aria-label="붐웨커 연주 안내 화면"></canvas>
    <div class="overlay" id="startOverlay"><div class="overlay-card"><strong id="overlayTitle">연주 준비</strong><p id="overlayDescription">전주를 듣고 함께 연주해요.</p><button id="overlayPlay" type="button">연주 시작 <span aria-hidden="true">▶</span></button></div></div>
   </div>
