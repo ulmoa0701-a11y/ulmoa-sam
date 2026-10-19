@@ -159,6 +159,8 @@ function __hgStartCollect(){
 }
 function __hgCancelCollect(){__hgCollecting=null;__hgFlowerHint.style.display="none"}
 function __hgFlowerUi(){
+ const slash=document.querySelector('[data-action="slash"]');
+ if(slash){if(Kp===4)slash.classList.remove("hidden");else slash.classList.add("hidden")}
  const c=__hgClosestFlower(),near=!!c&&c.d<=4.5;
  let button=document.querySelector('[data-action="talk"]');
  if(button){
