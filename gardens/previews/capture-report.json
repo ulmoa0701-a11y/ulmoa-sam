@@ -8,238 +8,272 @@
       "url": "/thinking-garden/?game=memory",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea > :first-child"
     },
     {
       "id": "sameShape",
       "url": "/thinking-garden/?game=sameShape",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea .basic-game"
     },
     {
       "id": "flower",
       "url": "/thinking-garden/?game=flower",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea .basic-game"
     },
     {
       "id": "hide",
       "url": "/thinking-garden/?game=hide",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea .basic-game"
     },
     {
       "id": "path",
       "url": "/thinking-garden/?game=path",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea .basic-game"
     },
     {
       "id": "calm",
       "url": "/thinking-garden/?game=calm",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea .basic-game"
     },
     {
       "id": "inside",
       "url": "/thinking-garden/?game=inside",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea .basic-game"
     },
     {
       "id": "targets",
       "url": "/thinking-garden/?game=targets",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea .basic-game"
     },
     {
       "id": "sceneDetect",
       "url": "/thinking-garden/?game=sceneDetect",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea > :first-child"
     },
     {
       "id": "slowScan",
       "url": "/thinking-garden/?game=slowScan",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea .slow-task"
     },
     {
       "id": "slowPlace",
       "url": "/thinking-garden/?game=slowPlace",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea .slow-task"
     },
     {
       "id": "slowBlock",
       "url": "/thinking-garden/?game=slowBlock",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea .slow-task"
     },
     {
       "id": "slowName",
       "url": "/thinking-garden/?game=slowName",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea .slow-task"
     },
     {
       "id": "slowMemory",
       "url": "/thinking-garden/?game=slowMemory",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea .slow-task"
     },
     {
       "id": "paint",
       "url": "/thinking-garden/?game=paint",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea .basic-game"
     },
     {
       "id": "water",
       "url": "/thinking-garden/?game=water",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea .basic-game"
     },
     {
       "id": "resetRescue",
       "url": "/thinking-garden/?game=resetRescue",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea > :first-child"
     },
     {
       "id": "classroomMove",
       "url": "/thinking-garden/?game=classroomMove",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea > :first-child"
     },
     {
       "id": "rulePost",
       "url": "/thinking-garden/?game=rulePost",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea > :first-child"
     },
     {
       "id": "mirrorPond",
       "url": "/thinking-garden/?game=mirrorPond",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea > :first-child"
     },
     {
       "id": "festivalPlan",
       "url": "/thinking-garden/?game=festivalPlan",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea > :first-child"
     },
     {
       "id": "spacing",
       "url": "/thinking-garden/?game=spacing",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea > :first-child"
     },
     {
       "id": "spelling",
       "url": "/thinking-garden/?game=spelling",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea > :first-child"
     },
     {
       "id": "slowEveryday",
       "url": "/thinking-garden/?game=slowEveryday",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea .slow-task"
     },
     {
       "id": "rescue",
       "url": "/thinking-garden/games/rescue/",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#game canvas"
     },
     {
       "id": "hand-mirror",
       "url": "/thinking-garden/games/hand-mirror/",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#viewer"
     },
     {
       "id": "change",
       "url": "/thinking-garden/games/moa-missions/?game=change",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea > :first-child"
     },
     {
       "id": "money",
       "url": "/thinking-garden/games/moa-missions/?game=money",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea > :first-child"
     },
     {
       "id": "feel",
       "url": "/thinking-garden/games/moa-missions/?game=feel",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "#gameArea > :first-child"
     },
     {
       "id": "rhythm-touch",
       "url": "/thinking-garden/games/rhythm-touch/",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "main"
     },
     {
       "id": "recorder",
       "url": "/thinking-garden/recorder/",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "main"
     },
     {
       "id": "beat",
       "url": "/breath-garden/?mode=beat",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "main"
     },
     {
       "id": "strength",
       "url": "/breath-garden/?mode=strength",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "main"
     },
     {
       "id": "long",
       "url": "/breath-garden/?mode=long",
       "preview": true,
       "play": true,
-      "errors": []
+      "errors": [],
+      "playSelector": "main"
     }
   ]
 }
