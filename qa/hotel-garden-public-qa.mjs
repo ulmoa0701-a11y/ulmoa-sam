@@ -20,7 +20,7 @@ for(const test of cases){
   const result={viewport:test.name,tests:{},errors,networkFailures};
   try {
     await page.goto(target+'?qa='+encodeURIComponent(process.env.GITHUB_SHA||Date.now()),{waitUntil:'domcontentloaded',timeout:60000});
-    await page.waitForFunction(()=>Boolean(window.__ulmoaGameQa?.state&&window.__ulmoaGameQa?.runSmoke),{timeout:60000});
+    await page.waitForFunction(()=>Boolean(window.__ulmoaGameQa?.state&&window.__ulmoaGardenV2?.runSmoke),{timeout:60000});
     await page.waitForFunction(()=>Number(window.__bench?.avgFps)>0,{timeout:15000});
     result.start=await page.evaluate(()=>{
       const rect=id=>{const el=document.getElementById(id);if(!el)return null;const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height}};
@@ -48,7 +48,12 @@ for(const test of cases){
     let after=await page.evaluate(()=>window.__ulmoaGameQa.state().player);
     result.move={before,after,distance:+Math.hypot(after[0]-before[0],after[1]-before[1]).toFixed(2)};
     result.tests.movement=result.move.distance>0.35;
-    result.smoke=await page.evaluate(async()=>await window.__ulmoaGameQa.runSmoke());
+    await page.keyboard.down('Shift');await sleep(100);
+    const shift=await page.evaluate(()=>window.__ulmoaGardenV2.state().sprinting);
+    await page.keyboard.up('Shift');
+    const shiftOff=await page.evaluate(()=>!window.__ulmoaGardenV2.state().sprinting);
+    result.tests.shiftSprint=shift&&shiftOff;
+    result.smoke=await page.evaluate(async()=>await window.__ulmoaGardenV2.runSmoke());
     result.tests.bossFlow=result.smoke?.pass===true;
     result.tests.endState=(await page.evaluate(()=>window.__ulmoaGameQa.state())).stage===7;
     await page.screenshot({path:'hotel-garden-'+test.name+'-smoke.jpg',type:'jpeg',quality:55,fullPage:true});
