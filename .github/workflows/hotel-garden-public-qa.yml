@@ -50,10 +50,10 @@ jobs:
           git switch -C qa/hotel-garden-results origin/qa/hotel-garden-results
           mkdir -p qa/results
           cp /tmp/hotel-garden-public-qa.json qa/results/hotel-garden-public-qa.json
-          cp /tmp/hotel-garden-qa-images/*.png qa/results/ 2>/dev/null || true
+          cp /tmp/hotel-garden-qa-images/*.jpg qa/results/ 2>/dev/null || true
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add qa/results/hotel-garden-public-qa.json qa/results/*.png
+          git add -A qa/results
           if ! git diff --staged --quiet; then
             git commit -m "test(hotel garden): record latest public browser QA"
             git push origin HEAD:refs/heads/qa/hotel-garden-results
