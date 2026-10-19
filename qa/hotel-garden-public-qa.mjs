@@ -54,6 +54,12 @@ for(const test of cases){
     await page.keyboard.up('Shift');
     const shiftOff=await page.evaluate(()=>!window.__ulmoaGardenV2.state().sprinting);
     result.tests.shiftSprint=shift&&shiftOff;
+    for(const boss of ['woods','eye','smog']){
+      const ready=await page.evaluate(name=>window.__ulmoaGardenV2.previewBoss(name),boss);
+      result.tests['preview_'+boss]=ready===true;
+      await sleep(1100);
+      await page.screenshot({path:'hotel-garden-'+test.name+'-boss-'+boss+'.jpg',type:'jpeg',quality:65,fullPage:true});
+    }
     result.smoke=await page.evaluate(async()=>await window.__ulmoaGardenV2.runSmoke());
     result.tests.bossFlow=result.smoke?.pass===true;
     result.tests.endState=(await page.evaluate(()=>window.__ulmoaGameQa.state())).stage===7;
