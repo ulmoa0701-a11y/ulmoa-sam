@@ -62,7 +62,9 @@
     document.querySelectorAll('#gardenGamePanel .library-card[data-open]').forEach(card=>{
       const key=card.dataset.open;
       if(!INDEX.has(key))return;
-      mount(card,key,'moa-clay-library-badge');
+      // Put the illustrated friend next to the title, NOT on top of the real
+      // gameplay preview (native cards use a split copy/preview layout).
+      mount(card.querySelector('h3'),key,'moa-clay-library-badge');
       // Swap generic repeated character thumbnails for the matching game cover.
       // The original character still appears in stories and in the MoA hero.
       card.classList.add('has-clay-leading-art');
