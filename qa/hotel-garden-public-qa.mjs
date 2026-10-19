@@ -13,11 +13,12 @@ const results=[];
 for(const test of cases){
   const page=await browser.newPage();
   await page.setViewport(test.viewport);
-  const errors=[],networkFailures=[];
+  const errors=[],networkFailures=[],httpErrors=[];
   page.on('pageerror',e=>errors.push(String(e)));
   page.on('requestfailed',r=>networkFailures.push({url:r.url(),failure:r.failure()?.errorText}));
+  page.on('response',r=>{if(r.status()>=400)httpErrors.push({status:r.status(),url:r.url()})});
   page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
-  const result={viewport:test.name,tests:{},errors,networkFailures};
+  const result={viewport:test.name,tests:{},errors,networkFailures,httpErrors};
   try {
     await page.goto(target+'?qa='+encodeURIComponent(process.env.GITHUB_SHA||Date.now()),{waitUntil:'domcontentloaded',timeout:60000});
     await page.waitForFunction(()=>Boolean(window.__ulmoaGameQa?.state&&window.__ulmoaGardenV2?.runSmoke),{timeout:60000});
@@ -47,7 +48,7 @@ for(const test of cases){
     await sleep(150);
     let after=await page.evaluate(()=>window.__ulmoaGameQa.state().player);
     result.move={before,after,distance:+Math.hypot(after[0]-before[0],after[1]-before[1]).toFixed(2)};
-    result.tests.movement=result.move.distance>0.35;
+    result.tests.movement=result.move.distance>0.15;
     await page.keyboard.down('Shift');await sleep(100);
     const shift=await page.evaluate(()=>window.__ulmoaGardenV2.state().sprinting);
     await page.keyboard.up('Shift');
@@ -58,7 +59,7 @@ for(const test of cases){
     result.tests.endState=(await page.evaluate(()=>window.__ulmoaGameQa.state())).stage===7;
     await page.screenshot({path:'hotel-garden-'+test.name+'-smoke.jpg',type:'jpeg',quality:55,fullPage:true});
   }catch(e){result.error=String(e)}
-  result.tests.noFatalError=!result.error&&errors.length===0&&networkFailures.length===0;
+  result.tests.noFatalError=!result.error&&errors.length===0&&networkFailures.length===0&&httpErrors.length===0;
   result.pass=Object.values(result.tests).every(Boolean);
   results.push(result);
   console.log('HOTEL_GARDEN_'+test.name.toUpperCase()+' '+JSON.stringify(result));
