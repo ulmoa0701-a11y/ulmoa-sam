@@ -70,7 +70,7 @@ const {chromium}=require("playwright-core");
   assert.equal(await page.evaluate(()=>window.__performanceViewsQA__.moaTravel()),"walk");
   await page.locator("#moaMove").selectOption("hop");
   assert.equal(await page.evaluate(()=>window.__performanceViewsQA__.moaTravel()),"hop");
-  const prelude=await page.evaluate(()=>{const q=window.__performanceViewsQA__;q.selectSong("moa-breeze");q.at(-3);return q.twoPageAt(-3)});
+  const prelude=await page.evaluate(()=>{const q=window.__performanceViewsQA__,original=q.state().song;q.selectSong("moa-breeze");q.at(-3);const first=q.twoPageAt(-3);q.selectSong(original);return first});
   assert.equal(prelude.page,0,"prelude shows first pair of fixed score lines");
   tests.push(name+": score visually frozen for both rows, whole-page swap exactly at end, sprite-only motion, hop/walk toggle");
   await page.locator(".view-choice[data-view=two]").click();
