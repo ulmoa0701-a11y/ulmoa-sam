@@ -11,6 +11,53 @@ const colors=[['노란색','#efc15d'],['파란색','#448dcc'],['초록색','#53a
 const simple=[[[0,1],[1,1]],[[1,0],[1,1]],[[0,0],[0,1]],[[1,1],[2,1]],[[0,0],[1,0]]];
 const medium=[[[0,1],[1,1],[1,2]],[[0,0],[0,1],[1,0]],[[1,0],[1,1],[2,1]],[[0,1],[1,0],[1,1]],[[0,0],[1,0],[1,1]]];
 const hard=[[[0,1],[1,0],[1,1],[2,1]],[[1,1],[1,2],[2,0],[2,1]],[[0,0],[0,1],[1,1],[2,1]],[[0,1],[1,1],[1,2],[2,2]],[[0,0],[1,0],[1,1],[2,1]]];
+// Keep the number of blocks constant: 12 reachable two-cell layouts at level 1,
+// 22 connected three-cell layouts at level 2, and 113 at level 3.
+function connectedShapes(side,count){
+ const result=[],total=side*side;
+ function visit(indices,start){
+  if(indices.length===count){
+   const set=new Set(indices),seen=new Set([indices[0]]),stack=[indices[0]];
+   while(stack.length){
+    const at=stack.pop(),row=Math.floor(at/side),col=at%side;
+    const next=[row>0?at-side:-1,row<side-1?at+side:-1,col>0?at-1:-1,col<side-1?at+1:-1];
+    for(const index of next)if(index>=0&&set.has(index)&&!seen.has(index)){seen.add(index);stack.push(index)}
+   }
+   if(seen.size===count)result.push(indices.map(index=>[Math.floor(index/side),index%side]));
+   return;
+  }
+  for(let i=start;i<total;i++)visit([...indices,i],i+1);
+ }
+ visit([],0);return result;
+}
+const spatialBanks={1:connectedShapes(3,2),2:connectedShapes(3,3),3:connectedShapes(4,4)};
+// A connected 4-cell shape is not automatically buildable from TWO dominoes.
+// Generate targets only when the real block palette has a complete solution.
+function blockCanBeAssembled(shape){
+ const keys=shape.map(([r,c])=>r+','+c).sort();
+ function solve(left,doubles,singles){
+  if(!left.length)return doubles===0&&singles===0;
+  const first=left[0],parts=first.split(',').map(Number);
+  if(doubles>0){
+   for(const next of [parts[0]+','+(parts[1]+1),(parts[0]+1)+','+parts[1]]){
+    if(left.includes(next)&&solve(left.filter(key=>key!==first&&key!==next),doubles-1,singles))return true;
+   }
+  }
+  return singles>0&&solve(left.slice(1),doubles,singles-1);
+ }
+ return solve(keys,Math.floor(keys.length/2),keys.length%2);
+}
+
+function spatialPattern(id,level,round,offset){
+ const blockHard=[[[0,1],[1,1],[2,1],[2,2]],...hard.slice(1)];
+ const early=level===1?simple:level===2?medium:id==='slowBlock'?blockHard:hard;
+ if(round<5)return early[round];
+ const sig=x=>x.map(([r,c])=>r+','+c).sort().join('|');
+ const used=new Set(early.map(sig));
+ const choices=spatialBanks[level].filter(shape=>!used.has(sig(shape))&&
+  (id!=='slowBlock'||blockCanBeAssembled(shape)));
+ return choices[(round-5+offset)%choices.length];
+}
 function isNew(id){return IDS.includes(id)}
 function rounds(id){return id==='slowName'?6:5}
 function newNameOrder(){
@@ -18,7 +65,7 @@ function newNameOrder(){
  for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
  return order;
 }
-function setUp(id, options){return {nameOrder:newNameOrder(),id,level:Math.max(1,Math.min(3,Number(options.level)||1)),cue:options.cue||'guide',kind:options.kind||'animal',response:options.response||'speech',records:[],activeRound:-1,selected:new Set(),attempts:0,firstCorrect:null,hint:false,selfChecks:0,teacherCues:0,pauses:0,finished:false}}
+function setUp(id, options){return {nameOrder:newNameOrder(),spatialOffset:Math.floor(Math.random()*101),id,level:Math.max(1,Math.min(3,Number(options.level)||1)),cue:options.cue||'guide',kind:options.kind||'animal',response:options.response||'speech',records:[],activeRound:-1,selected:new Set(),attempts:0,firstCorrect:null,hint:false,selfChecks:0,teacherCues:0,pauses:0,finished:false}}
 function csv(s){
  const headers=['활동','난이도','지원방식','제시번호','최초정확','최종정확','재시도','자기 다시 보기','교사 안내 버튼','쉬기','반응'];
  const rows=[headers,...s.records.map(r=>[names[s.id],s.level,{guide:'전략 안내',wait:'기다리기',self:'스스로'}[s.cue],r.round,r.first,r.final,r.retries,r.selfChecks||0,r.teacherCues||0,r.pauses||0,r.note])];
@@ -51,10 +98,11 @@ function render(id,d) {
  missionSub.textContent=cues[s.cue];
  if(s.cue==='guide'&&id!=='slowEveryday'&&newRound)say(missionText.textContent); // no automatic repetition in wait/self mode
  const n=s.level===3?4:3;
- const blockHard=[[[0,1],[1,1],[2,1],[2,2]],...hard.slice(1)];
- const baseShape=(s.level===1?simple:s.level===2?medium:id==='slowBlock'?blockHard:hard)[round%simple.length];
-  const rotation=Math.floor(round/5)%4;
-  const shape=baseShape.map(([r,c])=>{let a=r,b=c;for(let k=0;k<rotation;k++){const t=a;a=b;b=n-1-t}return[a,b]});
+ // Three spatial games share a bank of connected, varied physical patterns.
+ // Blocks must additionally be constructible with the actual available pieces.
+ const shape=['slowPlace','slowBlock','slowMemory'].includes(id)
+  ? spatialPattern(id,s.level,round,s.spatialOffset)
+  : (s.level===1?simple:s.level===2?medium:hard)[round%simple.length];
  const selected=s.selected;
  const pattern=shape.map(([r,c])=>r+','+c);
  const target=new Set(pattern);
