@@ -57,12 +57,15 @@ for(const [size,w,h] of [['desktop',1366,850],['tablet',768,1024],['mobile',390,
  const nativeCover=await page.locator('#gardenGamePanel .library-card[data-open="memory"]').evaluate(el=>{
     const img=el.querySelector('img'),art=el.querySelector('.moa-clay-library-badge');
     const bounds=art.getBoundingClientRect();
+    const stage=el.querySelector('.card-live-preview')?.getBoundingClientRect();
+    const intersects=stage?!(bounds.right<stage.left||bounds.left>stage.right||bounds.bottom<stage.top||bounds.top>stage.bottom):false;
     return {originalHidden:getComputedStyle(img).display==='none',
       newWidth:Math.round(bounds.width),newVisible:getComputedStyle(art).display!=='none',
+      besideHeading:el.querySelector('h3')?.contains(art),previewOverlap:intersects,
       leading:el.classList.contains('has-clay-leading-art')};
  });
- check(nativeCover.originalHidden&&nativeCover.newVisible&&nativeCover.leading&&nativeCover.newWidth>95,
-   size+': native game uses real per-game character cover '+JSON.stringify(nativeCover));
+ check(nativeCover.originalHidden&&nativeCover.newVisible&&nativeCover.leading&&nativeCover.besideHeading&&nativeCover.newWidth>=45&&!nativeCover.previewOverlap,
+   size+': native game uses artwork beside heading without covering gameplay preview '+JSON.stringify(nativeCover));
  if(size==='desktop'||size==='mobile')await page.screenshot({path:'qa/clay-34-artifacts/native-art-'+size+'.png',fullPage:true});
 
  await page.locator('#gardenGamePanel .library-card[data-open="memory"]').first().click();
