@@ -36,6 +36,50 @@ const {chromium}=require("playwright-core");
   assert(heart.dotted.includes(.75)&&heart.dotted.includes(.25),"dotted eighth + sixteenth must show 75% and 25% heart segments");
   tests.push(name+": canonical V-heart path, 16th and dotted 3:1 beat subdivisions");
 
+  assert.equal(await page.evaluate(()=>window.__performanceViewsQA__.state().view),"two","the fixed two-line path is the default view");
+  assert.equal(await page.locator(".view-choice.active").getAttribute("data-view"),"two");
+  const staticTwoPage=await page.evaluate(()=>{
+    const q=window.__performanceViewsQA__,original=q.state();
+    q.selectSong("moa-space");q.at(.12);
+    const first=q.twoPageAt(.12),key=q.twoBaseKey(first);
+    const unchanged=q.twoBackground().toDataURL();
+    q.at(first.pageBars*4-.025);
+    const beforeChange=q.twoBackground().toDataURL();
+    const lastInfo=q.twoPageAt(first.pageBars*4-.025);
+    q.at(first.pageBars*4+.025);
+    const nextInfo=q.twoPageAt(first.pageBars*4+.025);
+    const newPage=q.twoBackground().toDataURL();
+    q.selectSong("sixteenth");q.at(16.03);
+    const hopStart=q.twoMoaPosition(16.03,q.twoPageAt(16.03));
+    const hopEnd=q.twoMoaPosition(16.19,q.twoPageAt(16.19));
+    q.selectSong(original.song);
+    return {first,lastInfo,nextInfo,key,unchanged,beforeChange,newPage,
+      hopStart:hopStart&&{x:hopStart.x,y:hopStart.y,row:hopStart.row},
+      hopEnd:hopEnd&&{x:hopEnd.x,y:hopEnd.y,row:hopEnd.row},
+      movement:q.moaTravel()};
+  });
+  assert.equal(staticTwoPage.first.barsPerLine,name==="mobile"?1:2,"responsive measures per line");
+  assert.equal(staticTwoPage.first.pageBars,name==="mobile"?2:4,"both rows fit per page");
+  assert.equal(staticTwoPage.first.page,staticTwoPage.lastInfo.page,"the score must NOT page-flip before both lines are finished");
+  assert.equal(staticTwoPage.nextInfo.page,staticTwoPage.first.page+1,"page swaps only after TWO FULL LINES");
+  assert.equal(staticTwoPage.unchanged,staticTwoPage.beforeChange,"score pixels must be bit-identical for every beat in the two fixed lines");
+  assert.notEqual(staticTwoPage.unchanged,staticTwoPage.newPage,"the next two-line page must actually replace the completed page");
+  assert(staticTwoPage.hopStart&&staticTwoPage.hopEnd,"Moa sprite needs concrete event anchors");
+  assert(Math.abs(staticTwoPage.hopStart.x-staticTwoPage.hopEnd.x)>2,"Moa moves across the unmoving 16th-score beat");
+  await page.locator("#moaMove").selectOption("walk");
+  assert.equal(await page.evaluate(()=>window.__performanceViewsQA__.moaTravel()),"walk");
+  await page.locator("#moaMove").selectOption("hop");
+  assert.equal(await page.evaluate(()=>window.__performanceViewsQA__.moaTravel()),"hop");
+  const prelude=await page.evaluate(()=>{const q=window.__performanceViewsQA__;q.selectSong("moa-breeze");q.at(-3);return q.twoPageAt(-3)});
+  assert.equal(prelude.page,0,"prelude shows first pair of fixed score lines");
+  tests.push(name+": score visually frozen for both rows, whole-page swap exactly at end, sprite-only motion, hop/walk toggle");
+  await page.locator(".view-choice[data-view=two]").click();
+  await page.evaluate(()=>window.__performanceViewsQA__.at(2.15));
+  await page.screenshot({path:path.join(dir,name+"-static-two-line-current.png"),fullPage:true});
+  await page.evaluate(()=>{const q=window.__performanceViewsQA__;q.at(q.twoPageAt(0).pageBars*3+.05)});
+  await page.screenshot({path:path.join(dir,name+"-static-two-line-next-page.png"),fullPage:true});
+
+
   const cues=await page.evaluate(()=>{
     const q=window.__performanceViewsQA__,original=q.state();
     q.selectSong("sixteenth");
