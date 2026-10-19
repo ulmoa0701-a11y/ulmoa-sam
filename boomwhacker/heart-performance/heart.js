@@ -427,7 +427,7 @@ function heart(c,beat,x,y,w,h,now,muted=false){
    on the original score without covering the beat subdivisions. */
 function moaSprite(c,x,y,b,at,dim=false){
  if(dim)return;const alert=cueAt(b).now,cheer=alert&&Math.abs(alert.start-at)<.025;
- const sprite=cheer?moaCheer:moaDefault,swing=!motion&&playing?(Math.sin(performance.now()/185)*2):0;
+ const sprite=cheer?moaCheer:moaDefault,swing=!motion&&(playing||exporting)&&!(view==="two"&&moaTravel==="walk")?(Math.sin(performance.now()/185)*2):0;
  c.save();const size=view==="two"?(twoBarsPerLine()===1?88:79):65;
  if(sprite.complete&&sprite.naturalWidth>0){
   c.drawImage(sprite,x-size/2,y-size+12+swing,size,size);
@@ -602,7 +602,7 @@ function twoMoaPosition(b,info){
  }
  const departure=Math.max(previous.start,next.start-.75);
  const progress=motion?0:clamp((b-departure)/Math.max(.001,next.start-departure),0,1);
- const arc=playing&&!motion&&moaTravel==="hop"?Math.sin(Math.PI*progress)*29:0;
+ const arc=(playing||exporting)&&!motion&&moaTravel==="hop"?Math.sin(Math.PI*progress)*29:0;
  return {x:first.x+(second.x-first.x)*progress,y:first.y+(second.y-first.y)*progress-arc,
          row:first.row,progress,hop:arc,beat:progress>=1?next.start:previous.start};
 }
