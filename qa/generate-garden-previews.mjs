@@ -90,11 +90,28 @@ async function capture(id,url,{native=false}={}){
    }catch{}
   }else if(id==='rescue'){
    entry.preview=await snap(page,'.app-shell',id);
-   for(const sel of ['#startBtn','#startMission','#goBtn','#beginBtn','button:has-text("출동")','button:has-text("시작")']){
-     const b=page.locator(sel).first();
-     if(await b.isVisible().catch(()=>false)){await b.click({timeout:1000}).catch(()=>{});await page.waitForTimeout(320);break}
-   }
-   entry.play=await snap(page,'#game canvas,.rescue-scene,.game-world,#gameScreen,.app-shell',id+'-play',entry);
+   // The rescue title and briefing buttons are rendered inside Phaser's
+   // canvas, not as DOM buttons. Drive the real two-click player route.
+   const canvas=page.locator('#game canvas').first();
+   await canvas.waitFor({state:'visible',timeout:12000});
+   await page.waitForFunction(()=>{
+    const sm=window.moaRescueGame?.scene;
+    return !!sm&&(sm.isActive('landtitle')||sm.isActive('title'));
+   },null,{timeout:12000});
+   const wide=await page.evaluate(()=>window.moaRescueGame.scene.isActive('landtitle'));
+   const rect=await canvas.boundingBox();
+   if(!rect||rect.width<300||rect.height<250)throw Error('Rescue canvas is too small');
+   if(!wide)throw Error('Desktop rescue capture unexpectedly opened portrait scene');
+   await canvas.click({position:{x:Math.round(rect.width*.5),y:Math.round(rect.height*(619/760))}});
+   await page.waitForFunction(()=>window.moaRescueGame?.scene?.isActive('landmission'),null,{timeout:10000});
+   await canvas.click({position:{x:Math.round(rect.width*(754/1200)),y:Math.round(rect.height*(498/760))}});
+   await page.waitForFunction(()=>{
+    const scene=window.moaRescueGame?.scene?.getScene('landmission');
+    return scene?.sys?.isActive()&&scene.targets?.length>=2&&!scene.lock;
+   },null,{timeout:10000});
+   entry.play=await snap(page,'#game canvas',id+'-play',entry);
+   if(!entry.play)throw Error('Rescue mission animals were not photographed');
+   entry.playState='mission';
   }else{
    entry.preview=await snap(page,'main',id);
    if(id==='strength'){await page.locator('#chooseStrength').click({timeout:1000}).catch(()=>{});}
@@ -116,6 +133,11 @@ await browser.close();
 const ok=report.filter(x=>x.play&&x.preview),notOk=report.filter(x=>!x.play||!x.preview);
 const missedNative=report.filter(x=>nativeIds.includes(x.id)&&(!x.playSelector||!x.playSelector.startsWith('#gameArea')));
 if(missedNative.length){console.error('Native game screenshot shows an intro or full page, not play: '+missedNative.map(x=>x.id+':'+(x.playSelector||'none')).join(', '));process.exitCode=1;}
+const rescue=report.find(x=>x.id==='rescue');
+if(!rescue?.play||rescue.playState!=='mission'||rescue.playSelector!=='#game canvas'){
+ console.error('Rescue preview is not a validated, playable search mission');
+ process.exitCode=1;
+}
 const recorder=report.find(x=>x.id==='recorder');
 if(!recorder?.play||recorder.playState!=='practice'||recorder.playSelector!=='#practiceScreen'){
  console.error('Recorder preview is not a validated, interactive fingering exercise');
