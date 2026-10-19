@@ -146,7 +146,7 @@ try{
     assert.equal(await page.locator('#lobeSceneRoles button[aria-pressed="true"]').count(),1,'one chosen role');
     assert.equal(await page.locator('#brainMap [data-scene-focus]').count(),1,'ONE brain region spotlighted');
     assert.equal(await page.locator('.brain-diagram-label[data-label-active]').count(),1,'one matching label active');
-    assert.match(await page.locator('#brainFocusName').innerText(),new RegExp(name),'diagram names the focused region prominently');
+    assert.match(await page.locator('#brainFocusName').innerText(),new RegExp(region==='frontal'?'전두엽':region==='parietal'?'두정엽':region==='temporal'?'측두엽':region==='occipital'?'후두엽':region==='cerebellum'?'소뇌':'뇌줄기'),'diagram names the focused region prominently');
     assert.equal(await page.locator('.brain-mobile-legend-item[data-legend-active]').count(),1,'one matching mobile legend active');
     assert.equal(await page.locator('.lobe-card[data-scene-focus]').count(),1,'ONE matching large lobe card highlighted');
     assert.equal(await page.locator('#brainMap [data-scene-focus]').getAttribute('data-brain-region'),region);
