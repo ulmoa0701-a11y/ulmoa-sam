@@ -404,7 +404,7 @@ function heart(c,beat,x,y,w,h,now,muted=false){
  c.strokeStyle=active&&!muted?"#368470":"#75948a";c.lineWidth=active&&!muted?3:1.1;c.stroke(HEART);
  for(const p of parts){if(!p.onset)continue;const width=p.to-p.from,cx=50*(p.from+p.to);
    c.globalAlpha=!isSelected(p.note)&&p.note!=="쉼"?.35:1;
-   txt(c,p.note==="쉼"?"쉼":fixedNote(p.note),cx,37,Math.min(22,Math.max(9,width*48)),
+   txt(c,p.note==="쉼"?"쉼":fixedNote(p.note),cx,37,Math.min(37,Math.max(15,width*64)),
        ["도","라","높은도"].includes(p.note)?"#fff":"#213b45");
  }
  c.globalAlpha=1;
@@ -519,7 +519,13 @@ function heartNext(c,b){
    No scrolling, sliding, enlarging, fading or pulsing of score objects.
    The only moving drawing is the actual Moa mascot. */
 let twoPageCache=null,moaTravel="hop";
-const twoBarsPerLine=()=>window.matchMedia("(max-width:620px)").matches?1:2;
+/* Keep a FULL musical phrase on each stationary line rather than one measure.
+    2/4 = 10 hearts desktop / 8 hearts mobile; 3/4 = 9 / 6;
+    4/4 = 8 / 8. Whole measures remain intact and each page holds two lines. */
+const twoBarsPerLine=()=>{
+ const beatTarget=window.matchMedia("(max-width:620px)").matches?8:10;
+ return Math.max(1,Math.floor(beatTarget/song.meter));
+};
 function twoPageAt(b){
  const barsPerLine=twoBarsPerLine(),pageBars=2*barsPerLine,
        first=Math.round(startBeat()/song.meter),
@@ -532,10 +538,10 @@ function twoPageAt(b){
 }
 function twoBaseKey(info){return [song.key,notes,section,info.startBar,info.endBar,info.barsPerLine].join(":")}
 function twoGeometry(info,row){
- const count=info.barsPerLine*song.meter,gap=info.barsPerLine===1?22:9,
-       width=Math.min(info.barsPerLine===1?226:123,(1030-gap*(count-1))/count);
+ const count=info.barsPerLine*song.meter,gap=count>=9?5:9,
+       width=Math.min(130,(1040-gap*(count-1))/count);
  const left=(1200-count*width-(count-1)*gap)/2;
- return {width,gap,left,count,top:row===0?207:411,height:info.barsPerLine===1?123:103};
+ return {width,gap,left,count,top:row===0?204:408,height:count>=9?110:120};
 }
 function twoBarBeatPoint(info,absoluteBeat){
  const barIndex=Math.floor(absoluteBeat/song.meter),
@@ -558,7 +564,7 @@ function scorePageBackground(info){
    rr(c,50,top,1100,202,27,"#ffffff");
    txt(c,row===0?"첫 번째 줄":"두 번째 줄",88,top+32,20,"#467e71","left");
    if(beginning>=ending){txt(c,"이 줄은 비어 있어요",594,top+106,22,"#90a89e");continue}
-   txt(c,(beginning+1)+"~"+ending+"마디",1107,top+31,17,"#79958d","right");
+   txt(c,(beginning+1)+"~"+ending+"마디 · "+((ending-beginning)*song.meter)+"개 하트",1107,top+31,17,"#79958d","right");
    const g=twoGeometry(info,row);
    ln(c,76,g.top+g.height-12,1125,g.top+g.height-12,"#dfebdf",3);
    for(let i=0;i<g.count;i++){
