@@ -257,7 +257,7 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
   if(name==="desktop"){
    await page.locator("#song").selectOption("moa-signal");
    await page.locator("#section").selectOption("0");
-   await page.locator('.view-choice[data-view="score"]').click();
+   await page.locator('.view-choice[data-view="stairs"]').click();
    const [download]=await Promise.all([page.waitForEvent("download",{timeout:65000}),page.locator("#record").click()]);
    const video=await download.path();
    fs.copyFileSync(video,path.join(dir,"sample-16by9-heart-song."+(download.suggestedFilename().endsWith(".mp4")?"mp4":"webm")));
@@ -266,7 +266,7 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
    const probe=require("node:child_process").spawnSync("ffprobe",["-v","error","-select_streams","v:0","-show_entries","stream=width,height","-of","csv=p=0",video],{encoding:"utf8"});
    if(!probe.error){assert.equal(probe.status,0,"ffprobe must read the saved video");assert.equal(probe.stdout.trim(),"1920,1080","actual exported video file must be 16:9 Full HD");}
    else console.log("ffprobe unavailable; browser canvas output verified "+probe.error.message);
-   tests.push(name+": real 1920x1080 16:9 Full-HD video file exported, upload-ready WebM/MP4");
+   tests.push(name+": real 1920x1080 Full-HD video with BOTH FIXED pitched-heart rows and Moa animation exported");
   }
   await page.close();
  }
