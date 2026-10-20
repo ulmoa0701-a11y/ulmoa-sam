@@ -64,10 +64,11 @@ async function solve(page,id){
    for(const id of ['sameShape','memory','flower','hide','path','calm','inside','targets','paint','water']){
     await page.goto(base+'?game='+id,{waitUntil:'load'});
     assert.ok(await page.locator('#introScreen.active').isVisible(),viewport.name+' '+id+' intro');
-    await page.locator('#sessionRounds').selectOption('5');
+    const total=id==='sameShape'?20:id==='memory'?15:id==='flower'?10:5;
+    await page.locator('#sessionRounds').selectOption(String(total));
     await page.locator('#introStart').click();
-    assert.equal(await page.evaluate(()=>state.roundTotal),5,'wrong session length');
-    const rounds=['sameShape','memory','flower'].includes(id)?5:2;
+    assert.equal(await page.evaluate(()=>state.roundTotal),total,'wrong session length');
+    const rounds=['sameShape','memory','flower'].includes(id)?total:2;
     for(let round=0;round<rounds;round++){
      if(round===0&&id==='sameShape'){
       const shape=await page.locator('.shape-target').textContent();
@@ -84,16 +85,20 @@ async function solve(page,id){
       await page.evaluate(()=>[state.basicRecords[0].firstAttempt,state.basicRecords[0].finalCorrect]),
       ['X','O'],'self-correction must be recorded separately');
      await page.locator('.round-gate button').click();
-     if(round===rounds-1&&rounds===5){
+     if(round===rounds-1&&rounds===total){
       await page.locator('#resultScreen.active').waitFor();
       const result=await page.locator('#resultMessage').textContent();
-      assert.ok(result.includes('5개 미션'),viewport.name+' '+id+' incorrectly reports a fixed number: '+result);
+      assert.ok(result.includes(total+'개 미션'),viewport.name+' '+id+' incorrectly reports a fixed number: '+result);
       assert.equal(await page.locator('.basic-observation').count(),1,'missing teacher observation');
       await page.locator('#resultScreen [data-go="home"]').click();
-     }else await page.waitForFunction(n=>document.querySelector('#stageLabel')?.textContent.trim()===n,(round+2)+' / 5');
+     }else if(total>=10&&(round+1)%5===0){
+      await page.locator('#practiceContinue').waitFor({state:'visible'});
+      await page.locator('#practiceContinue').click();
+      await page.waitForFunction(n=>document.querySelector('#stageLabel')?.textContent.trim()===n,(round+2)+' / '+total);
+     }else await page.waitForFunction(n=>document.querySelector('#stageLabel')?.textContent.trim()===n,(round+2)+' / '+total);
     }
-    if(rounds!==5)await page.locator('#backHome').click();
-    summary.push({device:viewport.name,game:id,realSolved:rounds,finished:rounds===5});
+    if(rounds!==total)await page.locator('#backHome').click();
+    summary.push({device:viewport.name,game:id,realSolved:rounds,finished:rounds===total});
    }
    assert.deepEqual(failures,[],viewport.name+' JavaScript errors');
    await context.close();
