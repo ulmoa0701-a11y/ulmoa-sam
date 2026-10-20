@@ -533,9 +533,13 @@ const twoBarsPerLine=()=>{
  return Math.max(1,Math.floor(beatTarget/song.meter));
 };
 function twoPageAt(b){
- const barsPerLine=twoBarsPerLine(),pageBars=2*barsPerLine,
-       first=Math.round(startBeat()/song.meter),
+ const first=Math.round(startBeat()/song.meter),
        total=Math.round((endBeat()-startBeat())/song.meter),
+       maxBars=twoBarsPerLine(),
+       // Short selected practice sections are shared between both static rows.
+       // Do not waste the entire second row on an empty panel.
+       barsPerLine=total<=maxBars?Math.max(1,Math.ceil(total/2)):maxBars,
+       pageBars=2*barsPerLine,
        current=clamp(Math.floor((b-startBeat())/song.meter),0,Math.max(0,total-1)),
        page=Math.floor(current/pageBars),startBar=first+page*pageBars;
  return {page,startBar,barsPerLine,pageBars,first,total,
