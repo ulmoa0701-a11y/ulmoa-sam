@@ -393,7 +393,7 @@ function renderWater(){
  });
 }
 
-function goHome(){clearTimers();speechSynthesis?.cancel?.();state.game=null;updateHome();window.MoaAssignment?.returnToPlan();show('home')}
+function goHome(){clearTimers();window.speechSynthesis?.cancel?.();state.game=null;updateHome();window.MoaAssignment?.returnToPlan();show('home')}
 function addSeeds(n){recordBasic('correct');state.score+=n;state.total+=n;localStorage.setItem(STORE.seeds,state.total);$('#seedBank').textContent=`🌱 ${state.total}`;$('#scoreLabel').textContent=`🌱 ${state.score}`}
 function say(text){state.lastSpeech=text;if(!state.sound||!('speechSynthesis'in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='ko-KR';u.rate=.88;speechSynthesis.speak(u)}
 function sfx(kind='ok'){if(kind==='no')recordBasic('wrong');if(!state.sound)return;try{const C=window.AudioContext||window.webkitAudioContext,c=new C(),o=c.createOscillator(),g=c.createGain();o.type=kind==='ok'?'triangle':'sine';const a=kind==='ok'?640:230,b=kind==='ok'?960:160;o.frequency.setValueAtTime(a,c.currentTime);o.frequency.exponentialRampToValueAtTime(b,c.currentTime+.16);g.gain.setValueAtTime(.07,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.19);o.connect(g).connect(c.destination);o.start();o.stop(c.currentTime+.2)}catch{}}
