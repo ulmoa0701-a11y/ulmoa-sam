@@ -8,7 +8,11 @@ async function pickUntil(page,selector,max=30){
  for(let i=0;i<max;i++){
   if(await page.locator('.round-gate button').count())return;
   const target=page.locator(selector).first();
-  assert.ok(await target.count(),'Missing playable target '+selector);
+  if(!await target.count()){
+   // Successful last tap can start a 450-950ms reward animation before the next button exists.
+   await page.locator('.round-gate button').waitFor({state:'visible',timeout:3200});
+   return;
+  }
   await target.click();
  }
  assert.fail('Too many actions without completing '+selector);
