@@ -414,7 +414,7 @@ function heart(c,beat,x,y,w,h,now,muted=false){
    if(p.note==="높은도")txt(c,"↑",cx,58,Math.max(11,Math.min(15,fs*.62)),"#fff");
  }
  c.globalAlpha=1;
- if(parts.length===1&&!parts[0].onset)txt(c,"이어서",50,48,11,"#395660");
+ if(parts.length===1&&!parts[0].onset)txt(c,"길게",50,48,18,["도","라","높은도"].includes(parts[0].note)?"#fff":"#29434a");
  if(active&&!muted){
   c.save();c.clip(HEART);ln(c,clamp(now-beat,0,1)*100,7,clamp(now-beat,0,1)*100,80,"#ffffffc9",1.8);c.restore();
   const struck=parts.find(p=>p.onset&&isSelected(p.note)&&now>=p.source.start-.015&&now<p.source.start+Math.min(.24,p.source.dur)*.9);
@@ -706,17 +706,9 @@ function buildStairPage(info){
    const idx=beat-first*song.meter,x=g.left+idx*(g.width+g.gap),p=stairPrimary(beat),
          y=stairHeartTop(row,p);
    heart(c,beat,x,y,g.width,g.heartHeight,-100,false);
-   // Secondary pitches inside an eighth/sixteenth beat remain visible
-   // at their own pitch height without falsely becoming extra whole beats.
-   const sub=beatParts(beat).filter(v=>v.onset&&v.note!=="쉼"&&v.note!==p);
-   for(const v of sub){
-    const subX=x+(v.from+Math.min(v.to-v.from,.5)/2)*g.width,
-          subY=stairHeartTop(row,v.note)+g.heartHeight*.36,
-          baseY=y+g.heartHeight*.45;
-    ln(c,subX,baseY,subX,subY,"#ffffffd9",2.5);
-    disk(c,subX,subY,Math.max(7,Math.min(11,g.width*.11)),col(v.note),"#fff",2);
-    // Secondary pitch dots show height; the heart carries the readable note names.
-   }
+   // Keep the stepped score visually quiet. The original heart itself
+   // retains every eighth/sixteenth onset as a separate colored segment
+   // with its note name; extra floating dots would clutter this pitch map.
    // Thin unobtrusive measure boundary for reading the score, not animation.
    if(idx>0&&idx%song.meter===0){
     const cut=x-g.gap/2;ln(c,cut,top+44,cut,top+207,"#d9e8de",1.5);
