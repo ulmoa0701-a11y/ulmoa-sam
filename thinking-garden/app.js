@@ -395,7 +395,7 @@ function renderWater(){
 
 function goHome(){clearTimers();window.speechSynthesis?.cancel?.();state.game=null;updateHome();window.MoaAssignment?.returnToPlan();show('home')}
 function addSeeds(n){recordBasic('correct');state.score+=n;state.total+=n;localStorage.setItem(STORE.seeds,state.total);$('#seedBank').textContent=`🌱 ${state.total}`;$('#scoreLabel').textContent=`🌱 ${state.score}`}
-function say(text){state.lastSpeech=text;if(!state.sound||!('speechSynthesis'in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='ko-KR';u.rate=.88;speechSynthesis.speak(u)}
+function say(text){state.lastSpeech=text;if(!state.sound||!window.speechSynthesis||!window.SpeechSynthesisUtterance)return;const speech=window.speechSynthesis;speech.cancel();const u=new window.SpeechSynthesisUtterance(text);u.lang='ko-KR';u.rate=.88;speech.speak(u)}
 function sfx(kind='ok'){if(kind==='no')recordBasic('wrong');if(!state.sound)return;try{const C=window.AudioContext||window.webkitAudioContext,c=new C(),o=c.createOscillator(),g=c.createGain();o.type=kind==='ok'?'triangle':'sine';const a=kind==='ok'?640:230,b=kind==='ok'?960:160;o.frequency.setValueAtTime(a,c.currentTime);o.frequency.exponentialRampToValueAtTime(b,c.currentTime+.16);g.gain.setValueAtTime(.07,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.19);o.connect(g).connect(c.destination);o.start();o.stop(c.currentTime+.2)}catch{}}
 function flash(text){toast.textContent=text;toast.classList.add('show');clearTimeout(flash.t);flash.t=setTimeout(()=>toast.classList.remove('show'),1150)}
 function shuffle(a){const copy=[...a];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]]}return copy}
@@ -546,7 +546,7 @@ $$('[data-go="home"]').forEach(b=>b.addEventListener('click',goHome));
 $('#backHome').addEventListener('click',goHome);$('#retryGame').addEventListener('click',()=>startGame(state.game));
 $('#speakMission').addEventListener('click',()=>say(state.lastSpeech||missionText.textContent));
 $('#scrollToGarden').addEventListener('click',()=>$('#gardenMap').scrollIntoView({behavior:'smooth'}));
-$('#soundToggle').addEventListener('click',()=>{state.sound=!state.sound;localStorage.setItem(STORE.sound,state.sound?'on':'off');if(!state.sound)speechSynthesis?.cancel?.();updateSound();sfx('ok')});
+$('#soundToggle').addEventListener('click',()=>{state.sound=!state.sound;localStorage.setItem(STORE.sound,state.sound?'on':'off');if(!state.sound)window.speechSynthesis?.cancel?.();updateSound();sfx('ok')});
 function updateSound(){$('#soundToggle').textContent=state.sound?'🔊':'🔇';$('#soundToggle').setAttribute('aria-label',state.sound?'소리 끄기':'소리 켜기')}
 updateSound();updateHome();
 
