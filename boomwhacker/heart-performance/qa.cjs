@@ -260,6 +260,7 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
    await page.locator('.view-choice[data-view="score"]').click();
    const [download]=await Promise.all([page.waitForEvent("download",{timeout:65000}),page.locator("#record").click()]);
    const video=await download.path();
+   fs.copyFileSync(video,path.join(dir,"sample-16by9-heart-song."+(download.suggestedFilename().endsWith(".mp4")?"mp4":"webm")));
    assert(video&&fs.statSync(video).size>15000,"real MediaRecorder video must not be empty");
    assert(/\.(webm|mp4)$/i.test(download.suggestedFilename()));
    const probe=require("node:child_process").spawnSync("ffprobe",["-v","error","-select_streams","v:0","-show_entries","stream=width,height","-of","csv=p=0",video],{encoding:"utf8"});
