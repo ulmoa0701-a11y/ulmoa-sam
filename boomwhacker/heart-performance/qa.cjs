@@ -97,6 +97,20 @@ assert.equal(visibleHearts["moa-breeze"].beatsPerLine,name==="mobile"?6:9,"3/4 p
 assert.equal(visibleHearts["moa-space"].beatsPerLine,8,"4/4 phrase must display eight hearts per row");
 tests.push(name+": stationary two rows show 2/4="+visibleHearts["moa-signal"].beatsPerLine+" hearts per row, no tiny two-heart rows");
 tests.push(name+": score visually frozen for both rows, whole-page swap exactly at end, sprite-only motion, hop/walk toggle");
+  await page.locator("#song").selectOption("moa-signal");
+  await page.locator("#section").selectOption("0");
+  const shortSection=await page.evaluate(()=>{
+    const q=window.__performanceViewsQA__;q.at(.2);
+    return q.twoPageAt(.2);
+  });
+  assert.equal(shortSection.barsPerLine,2,"4-bar practice section should place two full bars on EACH stationary line");
+  assert.equal(shortSection.pageBars,4);
+  assert.equal(shortSection.endBar-shortSection.startBar,4);
+  await page.locator(".view-choice[data-view=two]").click();
+  await page.screenshot({path:path.join(dir,name+"-short-section-balanced-two-rows.png"),fullPage:true});
+  await page.locator("#section").selectOption("all");
+  tests.push(name+": shorter practice sections balance bars across both stationary score rows");
+
   await page.locator(".view-choice[data-view=two]").click();
   await page.evaluate(()=>window.__performanceViewsQA__.at(2.15));
   await page.screenshot({path:path.join(dir,name+"-static-two-line-current.png"),fullPage:true});
@@ -256,7 +270,7 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
   tests.push(name+": responsive stage remains visible without oversized top whitespace or overflow");
   if(name==="desktop"){
    await page.locator("#song").selectOption("moa-signal");
-   await page.locator("#section").selectOption("0");
+   await page.locator("#section").selectOption("all");
    await page.locator('.view-choice[data-view="stairs"]').click();
    const [download]=await Promise.all([page.waitForEvent("download",{timeout:65000}),page.locator("#record").click()]);
    const video=await download.path();
