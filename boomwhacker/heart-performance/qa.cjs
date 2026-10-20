@@ -35,6 +35,17 @@ const {chromium}=require("playwright-core");
   assert(heart.fast.some(n=>n===.25),"sixteenth rhythm must preserve a quarter-beat note inside a full-heart beat");
   assert(heart.dotted.includes(.75)&&heart.dotted.includes(.25),"dotted eighth + sixteenth must show 75% and 25% heart segments");
   tests.push(name+": canonical V-heart path, 16th and dotted 3:1 beat subdivisions");
+  const ratioTest=await page.evaluate(()=>{
+    const q=window.__performanceViewsQA__,r=q.videoExportSize(),scales=[
+      q.heartScale(120,72),q.heartScale(95,90),q.heartScale(180,90)];
+    return {r,scales,source:document.querySelector("#display").getAttribute("width")};
+  });
+  assert.deepEqual(ratioTest.r,{width:1920,height:1080,contentY:44,contentHeight:992});
+  assert.equal(ratioTest.r.width/ratioTest.r.height,16/9,"video must have exact standard YouTube wide aspect");
+  assert.deepEqual(ratioTest.scales,[.8,.95,1],"hearts use one UNIFORM x/y scale, never squash glyphs");
+  assert.equal(await page.locator("#fullscreen").count(),1);
+  tests.push(name+": non-distorted Korean syllables / V-hearts, 1920x1080 16:9 export target and fullscreen control");
+
 
   assert.equal(await page.evaluate(()=>window.__performanceViewsQA__.state().view),"two","the fixed two-line path is the default view");
   assert.equal(await page.locator(".view-choice.active").getAttribute("data-view"),"two");
@@ -86,6 +97,20 @@ assert.equal(visibleHearts["moa-breeze"].beatsPerLine,name==="mobile"?6:9,"3/4 p
 assert.equal(visibleHearts["moa-space"].beatsPerLine,8,"4/4 phrase must display eight hearts per row");
 tests.push(name+": stationary two rows show 2/4="+visibleHearts["moa-signal"].beatsPerLine+" hearts per row, no tiny two-heart rows");
 tests.push(name+": score visually frozen for both rows, whole-page swap exactly at end, sprite-only motion, hop/walk toggle");
+  await page.locator("#song").selectOption("moa-signal");
+  await page.locator("#section").selectOption("0");
+  const shortSection=await page.evaluate(()=>{
+    const q=window.__performanceViewsQA__;q.at(.2);
+    return q.twoPageAt(.2);
+  });
+  assert.equal(shortSection.barsPerLine,2,"4-bar practice section should place two full bars on EACH stationary line");
+  assert.equal(shortSection.pageBars,4);
+  assert.equal(shortSection.endBar-shortSection.startBar,4);
+  await page.locator(".view-choice[data-view=two]").click();
+  await page.screenshot({path:path.join(dir,name+"-short-section-balanced-two-rows.png"),fullPage:true});
+  await page.locator("#section").selectOption("all");
+  tests.push(name+": shorter practice sections balance bars across both stationary score rows");
+
   await page.locator(".view-choice[data-view=two]").click();
   await page.evaluate(()=>window.__performanceViewsQA__.at(2.15));
   await page.screenshot({path:path.join(dir,name+"-static-two-line-current.png"),fullPage:true});
@@ -138,6 +163,17 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
   await page.locator("#song").selectOption("moa-space");
   await page.evaluate(()=>window.__performanceViewsQA__.at(1.15));
   await page.screenshot({path:path.join(dir,name+"-stair-basic.png"),fullPage:true});
+  const layout=await page.evaluate(()=>{
+    const q=window.__performanceViewsQA__,p=q.stairPageAt(1.15),
+      high=q.stairHeartTop(0,"높은도"),low=q.stairHeartTop(0,"도"),
+      height=q.stairGeometry(p,0).heartHeight;
+    return {high,low,height};
+  });
+  assert.equal(layout.height,90,"pitched hearts should be 90 units high, not squeezed to 72");
+  assert(layout.low>layout.high+80,"pitch ladder should have readable tonal separation");
+  await page.locator("#display").screenshot({path:path.join(dir,name+"-stair-clean-typography.png")});
+  tests.push(name+": un-squashed pitched hearts with clean per-note lettering and intact static lines");
+
   tests.push(name+": new fixed two-row pitched V-heart score, real pitch elevations, precise 16ths and optional connecting path");
   await page.locator('.view-choice[data-view="two"]').click();
 
@@ -234,13 +270,17 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
   tests.push(name+": responsive stage remains visible without oversized top whitespace or overflow");
   if(name==="desktop"){
    await page.locator("#song").selectOption("moa-signal");
-   await page.locator("#section").selectOption("0");
-   await page.locator('.view-choice[data-view="score"]').click();
+   await page.locator("#section").selectOption("all");
+   await page.locator('.view-choice[data-view="stairs"]').click();
    const [download]=await Promise.all([page.waitForEvent("download",{timeout:65000}),page.locator("#record").click()]);
    const video=await download.path();
+   fs.copyFileSync(video,path.join(dir,"sample-16by9-heart-song."+(download.suggestedFilename().endsWith(".mp4")?"mp4":"webm")));
    assert(video&&fs.statSync(video).size>15000,"real MediaRecorder video must not be empty");
    assert(/\.(webm|mp4)$/i.test(download.suggestedFilename()));
-   tests.push(name+": real 2/4 instrumental intro + full melody video recording exported");
+   const probe=require("node:child_process").spawnSync("ffprobe",["-v","error","-select_streams","v:0","-show_entries","stream=width,height","-of","csv=p=0",video],{encoding:"utf8"});
+   if(!probe.error){assert.equal(probe.status,0,"ffprobe must read the saved video");assert.equal(probe.stdout.trim(),"1920,1080","actual exported video file must be 16:9 Full HD");}
+   else console.log("ffprobe unavailable; browser canvas output verified "+probe.error.message);
+   tests.push(name+": real 1920x1080 Full-HD video with BOTH FIXED pitched-heart rows and Moa animation exported");
   }
   await page.close();
  }

@@ -394,7 +394,9 @@ const HEART=new Path2D(HEART_PATH),E=.00001;
 function beatParts(beat){return song.events.filter(e=>e.start<beat+1-E&&e.start+e.dur>beat+E).map(e=>({note:e.note,from:Math.max(0,e.start-beat),to:Math.min(1,e.start+e.dur-beat),onset:e.start>=beat-E&&e.start<beat+1-E,source:e}));}
 function heart(c,beat,x,y,w,h,now,muted=false){
  const parts=beatParts(beat),active=now>=beat-E&&now<beat+1-E;
- c.save();c.translate(x,y);c.scale(w/100,h/90);
+ // Scale both axes uniformly: V-heart outline and Korean text never stretch.
+ const k=Math.min(w/100,h/90);
+ c.save();c.translate(x+(w-100*k)/2,y+(h-90*k)/2);c.scale(k,k);
  c.fillStyle="#fff";c.fill(HEART);
  c.save();c.clip(HEART);
  for(const p of parts){c.globalAlpha=!isSelected(p.note)&&p.note!=="쉼"?.23:muted?.55:1;c.fillStyle=col(p.note);c.fillRect(p.from*100,0,(p.to-p.from)*100+.01,90);}
@@ -406,11 +408,13 @@ function heart(c,beat,x,y,w,h,now,muted=false){
  c.strokeStyle=active&&!muted?"#368470":"#75948a";c.lineWidth=active&&!muted?3:1.1;c.stroke(HEART);
  for(const p of parts){if(!p.onset)continue;const width=p.to-p.from,cx=50*(p.from+p.to);
    c.globalAlpha=!isSelected(p.note)&&p.note!=="쉼"?.35:1;
-   txt(c,p.note==="쉼"?"쉼":fixedNote(p.note),cx,37,Math.min(37,Math.max(15,width*64)),
-       ["도","라","높은도"].includes(p.note)?"#fff":"#213b45");
+   const label=p.note==="높은도"?"도":p.note==="쉼"?"쉼":fixedNote(p.note);
+   const fs=Math.min(32,Math.max(12,Math.floor((width*100-6)/(label.length+0.15))));
+   txt(c,label,cx,38,fs,["도","라","높은도"].includes(p.note)?"#fff":"#243e48");
+   if(p.note==="높은도")txt(c,"↑",cx,58,Math.max(11,Math.min(15,fs*.62)),"#fff");
  }
  c.globalAlpha=1;
- if(parts.length===1&&!parts[0].onset)txt(c,"이어서",50,48,11,"#395660");
+ if(parts.length===1&&!parts[0].onset)txt(c,"길게",50,48,18,["도","라","높은도"].includes(parts[0].note)?"#fff":"#29434a");
  if(active&&!muted){
   c.save();c.clip(HEART);ln(c,clamp(now-beat,0,1)*100,7,clamp(now-beat,0,1)*100,80,"#ffffffc9",1.8);c.restore();
   const struck=parts.find(p=>p.onset&&isSelected(p.note)&&now>=p.source.start-.015&&now<p.source.start+Math.min(.24,p.source.dur)*.9);
@@ -418,7 +422,7 @@ function heart(c,beat,x,y,w,h,now,muted=false){
     const cx=50*(struck.from+struck.to),radius=Math.min(20,Math.max(13,(struck.to-struck.from)*45));
     c.save();c.globalAlpha=.96;c.fillStyle="#fff";c.beginPath();c.arc(cx,37,radius+4,0,Math.PI*2);c.fill();
     c.fillStyle=col(struck.note);c.beginPath();c.arc(cx,37,radius,0,Math.PI*2);c.fill();
-    txt(c,fixedNote(struck.note),cx,37,Math.min(22,radius*.95),["도","라","높은도"].includes(struck.note)?"white":"#203d46");
+    txt(c,struck.note==="높은도"?"도":fixedNote(struck.note),cx,37,Math.min(22,radius*.95),["도","라","높은도"].includes(struck.note)?"white":"#203d46");
     c.restore();
   }
 }
@@ -430,7 +434,7 @@ function heart(c,beat,x,y,w,h,now,muted=false){
 function moaSprite(c,x,y,b,at,dim=false){
  if(dim)return;const alert=cueAt(b).now,cheer=alert&&Math.abs(alert.start-at)<.025;
  const sprite=cheer?moaCheer:moaDefault,swing=!motion&&(playing||exporting)&&!(view==="two"&&moaTravel==="walk")?(Math.sin(performance.now()/185)*2):0;
- c.save();const size=view==="two"?(twoBarsPerLine()===1?88:79):65;
+ c.save();const size=view==="two"?(twoBarsPerLine()===1?88:79):view==="stairs"?82:65;
  if(sprite.complete&&sprite.naturalWidth>0){
   c.drawImage(sprite,x-size/2,y-size+12+swing,size,size);
  }else{
@@ -529,9 +533,13 @@ const twoBarsPerLine=()=>{
  return Math.max(1,Math.floor(beatTarget/song.meter));
 };
 function twoPageAt(b){
- const barsPerLine=twoBarsPerLine(),pageBars=2*barsPerLine,
-       first=Math.round(startBeat()/song.meter),
+ const first=Math.round(startBeat()/song.meter),
        total=Math.round((endBeat()-startBeat())/song.meter),
+       maxBars=twoBarsPerLine(),
+       // Short selected practice sections are shared between both static rows.
+       // Do not waste the entire second row on an empty panel.
+       barsPerLine=total<=maxBars?Math.max(1,Math.ceil(total/2)):maxBars,
+       pageBars=2*barsPerLine,
        current=clamp(Math.floor((b-startBeat())/song.meter),0,Math.max(0,total-1)),
        page=Math.floor(current/pageBars),startBar=first+page*pageBars;
  return {page,startBar,barsPerLine,pageBars,first,total,
@@ -649,11 +657,11 @@ function stairGeometry(info,row){
  const count=info.barsPerLine*song.meter,gap=count>=9?6:10;
  const width=Math.min(123,(1052-gap*(count-1))/count);
  const left=(1200-count*width-gap*(count-1))/2;
- return {count,width,gap,left,rowTop:row===0?134:354,heartHeight:72};
+ return {count,width,gap,left,rowTop:row===0?130:350,heartHeight:90};
 }
 function stairHeartTop(row,pitch){
  const pitchIndex=stairPitchIndex(pitch);
- return (row===0?134:354)+(7-(pitchIndex<0?3.5:pitchIndex))*15.4;
+ return (row===0?130:350)+(7-(pitchIndex<0?3.5:pitchIndex))*14;
 }
 function stairPoint(info,e){
  const beat=Math.floor(e.start+E),bar=Math.floor((beat+E)/song.meter),offset=bar-info.startBar;
@@ -698,17 +706,9 @@ function buildStairPage(info){
    const idx=beat-first*song.meter,x=g.left+idx*(g.width+g.gap),p=stairPrimary(beat),
          y=stairHeartTop(row,p);
    heart(c,beat,x,y,g.width,g.heartHeight,-100,false);
-   // Secondary pitches inside an eighth/sixteenth beat remain visible
-   // at their own pitch height without falsely becoming extra whole beats.
-   const sub=beatParts(beat).filter(v=>v.onset&&v.note!=="쉼"&&v.note!==p);
-   for(const v of sub){
-    const subX=x+(v.from+Math.min(v.to-v.from,.5)/2)*g.width,
-          subY=stairHeartTop(row,v.note)+g.heartHeight*.36,
-          baseY=y+g.heartHeight*.45;
-    ln(c,subX,baseY,subX,subY,"#ffffffd9",2.5);
-    disk(c,subX,subY,Math.max(7,Math.min(11,g.width*.11)),col(v.note),"#fff",2);
-    txt(c,fixedNote(v.note),subX,subY,11,["도","라","높은도"].includes(v.note)?"#fff":"#24434b");
-   }
+   // Keep the stepped score visually quiet. The original heart itself
+   // retains every eighth/sixteenth onset as a separate colored segment
+   // with its note name; extra floating dots would clutter this pitch map.
    // Thin unobtrusive measure boundary for reading the score, not animation.
    if(idx>0&&idx%song.meter===0){
     const cut=x-g.gap/2;ln(c,cut,top+44,cut,top+207,"#d9e8de",1.5);
@@ -757,11 +757,14 @@ async function exportVideo(){
  stop();overlay(true,"영상 저장 중","곡 길이만큼 자동으로 녹화해요.");exporting=true;updateControls();
  let recorder,stream,ac,workCanvas,workCtx,output,frameId=0;
  try{
-  workCanvas=document.createElement("canvas");workCanvas.width=1200;workCanvas.height=620;workCtx=workCanvas.getContext("2d");
+  workCanvas=document.createElement("canvas");
+  workCanvas.width=1920;workCanvas.height=1080;workCtx=workCanvas.getContext("2d");
+  const scoreCanvas=document.createElement("canvas");scoreCanvas.width=1200;scoreCanvas.height=620;
+  const scoreCtx=scoreCanvas.getContext("2d");
   stream=workCanvas.captureStream(30);const tracks=[...stream.getVideoTracks()];
   if(sound){const A=window.AudioContext||window.webkitAudioContext;if(A){ac=new A();await ac.resume();output=ac.createMediaStreamDestination();tracks.push(...output.stream.getAudioTracks())}}
   const videoStream=new MediaStream(tracks),mime=videoMime(),chunks=[];
-  recorder=new MediaRecorder(videoStream,{mimeType:mime,videoBitsPerSecond:4800000});
+  recorder=new MediaRecorder(videoStream,{mimeType:mime,videoBitsPerSecond:6000000});
   recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
   const stopped=new Promise((resolve,reject)=>{recorder.onstop=resolve;recorder.onerror=e=>reject(e.error||Error("영상 저장 오류"))});
   const pre=950,lead=song.meter*beatTime()*1000,main=frameBeats()*beatTime()*1000,tail=1150;
@@ -770,9 +773,13 @@ async function exportVideo(){
   recorder.start(250);await new Promise((resolve,reject)=>{
    const tick=()=>{try{const elapsed=performance.now()-begin;
     const p=elapsed<pre?startBeat()-song.meter:elapsed<pre+lead?startBeat()-song.meter+(elapsed-pre)/1000/beatTime():startBeat()+(elapsed-pre-lead)/1000/beatTime();
-    draw(workCtx,Math.min(endBeat(),p),true);
-    if(elapsed<pre){rr(workCtx,0,0,1200,620,0,"rgba(32,71,66,.63)");txt(workCtx,song.title,600,255,61,"white");txt(workCtx,VIEW[view].name+" · 울모아쌤",600,330,33,"white")}
-    if(elapsed>pre+lead+main){rr(workCtx,0,0,1200,620,0,"rgba(32,70,64,.87)");txt(workCtx,"함께 연주했어요",600,280,54,"white");txt(workCtx,"일단 해봄 · 울모아쌤",600,355,26,"#d9f4ed")}
+    draw(scoreCtx,Math.min(endBeat(),p),true);
+    if(elapsed<pre){rr(scoreCtx,0,0,1200,620,0,"rgba(32,71,66,.80)");txt(scoreCtx,song.title,600,255,61,"white");txt(scoreCtx,VIEW[view].name+" · 울모아쌤",600,330,33,"white")}
+    if(elapsed>pre+lead+main){rr(scoreCtx,0,0,1200,620,0,"rgba(32,70,64,.87)");txt(scoreCtx,"함께 연주했어요",600,280,54,"white");txt(scoreCtx,"일단 해봄 · 울모아쌤",600,355,26,"#d9f4ed")}
+    // Preserve the un-stretched score; center 1200×620 artwork in true Full-HD 16:9.
+    workCtx.setTransform(1,0,0,1,0,0);
+    workCtx.fillStyle="#e9f3ef";workCtx.fillRect(0,0,1920,1080);
+    workCtx.drawImage(scoreCanvas,0,44,1920,992);
     $("#record").textContent=Math.min(100,Math.floor(elapsed/all*100))+"% 저장 중";
     if(elapsed>=all){resolve();return}frameId=requestAnimationFrame(tick)
    }catch(err){reject(err)}};
@@ -782,7 +789,7 @@ async function exportVideo(){
   if(blob.size<2000)throw Error("영상 데이터가 비어 있습니다.");
   const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;
   a.download="ulmoa-"+song.key+"-"+view+"."+(mime.includes("mp4")?"mp4":"webm");a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);
-  setStatus("영상 녹화 완료 · "+(blob.size/1024/1024).toFixed(1)+"MB. 업로드 전 소리와 화면을 확인해 주세요.");
+  setStatus("16:9 Full HD 영상 저장 완료 · "+(blob.size/1024/1024).toFixed(1)+"MB. 업로드 전 소리와 글씨를 확인해 주세요.");
  }catch(e){setStatus("영상 저장에 실패했어요: "+e.message)}
  finally{cancelAnimationFrame(frameId);try{if(recorder?.state==="recording")recorder.stop()}catch(e){}for(const t of stream?.getTracks()||[])t.stop();if(ac)ac.close().catch(()=>{});exporting=false;overlay(true);updateControls();draw(ctx,position)}
 }
@@ -790,6 +797,14 @@ function bind(){
  $("#song").replaceChildren(...scores.map(s=>new Option(s.title+(s.category==="박자 연습"?" · 박자 연습":""),s.key)));
  $$(".view-choice").forEach(b=>b.onclick=()=>chooseView(b.dataset.view));
  $("#play").onclick=()=>playing?pause():play();$("#overlayPlay").onclick=()=>play();$("#reset").onclick=reset;$("#record").onclick=exportVideo;
+ $("#fullscreen").onclick=async()=>{
+   const el=$("#stage");try{
+     if(document.fullscreenElement){await document.exitFullscreen();return}
+     if(el.requestFullscreen)await el.requestFullscreen();
+     else setStatus("이 브라우저에서 전체 화면이 지원되지 않아요.");
+   }catch(e){setStatus("전체 화면을 사용할 수 없어요. 휴대폰을 가로로 돌려 주세요.")}
+ };
+ document.addEventListener("fullscreenchange",()=>{$("#fullscreen").textContent=document.fullscreenElement?"전체화면 종료":"악보 크게";});
  $("#sound").onclick=()=>{const was=playing;if(was)pause();sound=!sound;updateControls();if(was)play()};
  $("#song").onchange=e=>chooseSong(e.target.value);
  $("#notes").onchange=e=>{notes=Number(e.target.value);updateControls();draw(ctx,nowBeat());setStatus("원곡은 그대로 유지하고 "+notes+"음만 강조해요.")};
@@ -809,7 +824,7 @@ bind();rebuildSections();reset();
 window.addEventListener("resize",()=>{twoPageCache=null;stairPageCache=null;draw(ctx,playing?nowBeat():position)});
 moaDefault.onload=()=>{if(view==="two"||view==="stairs")draw(ctx,position)};
 moaCheer.onload=()=>{if(view==="two")draw(ctx,position)};
-window.__performanceViewsQA__={stairPageAt:twoPageAt,stairBackground:()=>stairPageCache?.canvas,stairGeometry,stairHeartTop,stairPoint,stairMoaPosition,stairStyle:()=>stairStyle,stairPrimary,twoPageAt,twoMoaPosition,twoBaseKey,twoBarsPerLine,twoBackground:()=>twoPageCache?.canvas,moaTravel:()=>moaTravel,beatParts,heartPath:HEART_PATH,modes:Object.keys(VIEW),scores:scores.map(s=>({key:s.key,bpm:s.bpm,meter:s.meter,measures:s.bars.length,beats:s.beats,events:s.events.length,rests:s.events.filter(e=>e.note==="쉼").length})),
+window.__performanceViewsQA__={videoExportSize:()=>({width:1920,height:1080,contentY:44,contentHeight:992}),heartScale:(w,h)=>Math.min(w/100,h/90),stairPageAt:twoPageAt,stairBackground:()=>stairPageCache?.canvas,stairGeometry,stairHeartTop,stairPoint,stairMoaPosition,stairStyle:()=>stairStyle,stairPrimary,twoPageAt,twoMoaPosition,twoBaseKey,twoBarsPerLine,twoBackground:()=>twoPageCache?.canvas,moaTravel:()=>moaTravel,beatParts,heartPath:HEART_PATH,modes:Object.keys(VIEW),scores:scores.map(s=>({key:s.key,bpm:s.bpm,meter:s.meter,measures:s.bars.length,beats:s.beats,events:s.events.length,rests:s.events.filter(e=>e.note==="쉼").length})),
  cueAt,assignedEvents,beatUntil,state:()=>({view,song:song.key,notes,speed,section,playing,ended,position,measure:barAt(position).index,score:song.events.map(e=>[e.note,e.start,e.dur,e.lyric]),mask:selected(),clockAudio:!!acc,exporting}),
  selectView:chooseView,selectSong:chooseSong,play,pause,reset,at:(b)=>{if(playing)pause();position=b;draw(ctx,b);updateControls()},render:()=>draw(ctx,position),testMime:videoMime
 };
