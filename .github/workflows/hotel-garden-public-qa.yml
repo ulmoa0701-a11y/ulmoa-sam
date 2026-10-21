@@ -33,6 +33,7 @@ jobs:
       - name: Browser-check the published Babylon game (PC + mobile)
         run: node qa/hotel-garden-public-qa.mjs
       - name: Real-keyboard classroom opening route (gardener to WOODS)
+        if: always() && !cancelled()
         continue-on-error: true
         run: node qa/hotel-garden-actual-play.mjs
       - uses: actions/upload-artifact@v4
