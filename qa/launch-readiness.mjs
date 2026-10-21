@@ -48,11 +48,11 @@ for(const [label,width,height] of [
   check(!!state.ogTitle&&!!state.ogDescription&&state.ogImage?.startsWith('https://'),
     label+': social preview metadata missing');
   check(state.shortcuts.length===8,label+': 8 shortcut destinations are not preserved');
-  check(state.primary.join('|')==='thinking-garden/|materials/|notes/',
+  check(state.primary.join('|')==='gardens/#cognitive|materials/|notes/',
     label+': game/material/learn first-visit order differs '+state.primary.join('|'));
-  check(['music-garden/','breath-garden/','brain-map/','parents/','request/'].every(h=>state.shortcuts.includes(h)),
+  check(['music-garden/','gardens/#heart','brain-map/','parents/','request/'].every(h=>state.shortcuts.includes(h)),
     label+': a secondary shortcut disappeared');
-  check(state.featured.join('|')==='thinking-garden/|music-garden/'&&state.approvedMusic,
+  check(state.featured.join('|')==='gardens/#cognitive|music-garden/'&&state.approvedMusic,
     label+': approved featured garden art or routes changed');
   check(state.scrollWidth<=width+3,label+': horizontal scrolling '+state.scrollWidth);
   check(state.socialOverlay==='static',label+': social bar covers homepage content');
