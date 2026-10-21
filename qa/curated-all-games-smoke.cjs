@@ -15,7 +15,7 @@ function planUrl(items,opts={}){
   await catalog.goto(base,{waitUntil:'load'});
   const coreGames=await catalog.locator('.library-card[data-open]').evaluateAll(cards=>cards.map(card=>card.dataset.open));
   const standalone=['moaMoney','moaChange','moaFeel','rhythmTouch','recorderPlay','breathStrength','breathLong','breathBeat'];
-  const realShotGames=new Set(['rhythmTouch','recorderPlay','breathStrength','breathLong','breathBeat']);
+  const realShotGames=new Set(['handMirror','moaMoney','moaChange','moaFeel','rhythmTouch','recorderPlay','breathStrength','breathLong','breathBeat']);
   assert.equal(new Set(coreGames).size,coreGames.length,'duplicate catalog game identifiers');
   assert.ok(coreGames.length>=26,'the main game catalog is missing games');
   await catalog.locator('#moaPlannerLaunch').click();
@@ -41,8 +41,11 @@ function planUrl(items,opts={}){
      const picture=preview.locator('img.moa-assigned-real-shot');
      assert.equal(await picture.count(),1,marker+' missing authentic preview picture');
      const loaded=await picture.evaluate(async el=>{await el.decode().catch(()=>{});return el.naturalWidth>180&&el.naturalHeight>120;});
-     assert.ok(loaded,marker+' standalone game screenshot could not load');
-    }else if(id==='handMirror'||standalone.includes(id)){
+     assert.ok(loaded,marker+' authentic game screenshot could not load');
+     assert.ok((await picture.getAttribute('src')).endsWith('-play.jpg?v=20261021-playstate4'),marker+' real play screenshot version mismatch');
+     const screenshot=await picture.evaluate(el=>({w:el.naturalWidth,h:el.naturalHeight}));
+     assert.ok(screenshot.w>=300&&screenshot.h>=180,marker+' game photo cropped too small');
+    }else if(standalone.includes(id)){
      assert.ok(await preview.locator('.moa-assigned-fallback-icons span').count()>=4,marker+' missing illustrated gameplay');
     }else{
      assert.equal(await preview.locator('.card-live-preview').count(),1,marker+' must reuse actual catalog gameplay example');
