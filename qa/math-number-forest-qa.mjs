@@ -15,10 +15,21 @@ async function solve(page,index,iteration){
  if(q.mode==='share')for(let k=0;k<q.n;k++)await page.locator('.friend-card:not([disabled])').first().click();
  if(q.mode==='glance'||q.mode==='numeral')await page.locator('.number-tile[data-n="'+q.n+'"]').click();
  if(q.mode==='compare'||q.mode==='length'){
-  if(index===2&&iteration===0){const wrong=q.right==='a'?'b':'a';await page.locator('.island-choice[data-key="'+wrong+'"]').click();await page.locator('.island-choice[data-key="'+wrong+'"]').click();assert.ok(await page.locator('.coach-target').count(),'wrong answers should reveal helpful visual focus '+JSON.stringify(await page.evaluate(()=>({state:window.__numberForestQA.getState(),task:window.__numberForestQA.getTask(),buttons:[...document.querySelectorAll('.island-choice')].map(n=>({html:n.outerHTML.slice(0,260),key:n.dataset.key,classes:n.className})),status:document.querySelector('#status')?.textContent}))))}
+  if(index===2&&iteration===0){
+   const wrong=q.right==='a'?'b':'a';
+   await page.locator('.island-choice[data-key="'+wrong+'"]').click();
+   await page.locator('.island-choice[data-key="'+wrong+'"]').click();
+   assert.ok(await page.locator('.learning-model').count(),'after two errors show a pictorial example, not an unearned correct answer');
+   assert.equal(await page.locator('.coach-target').count(),0,'first help must not point at correct choice');
+  }
   await page.locator('[data-key="'+q.right+'"]').click()
  }
- if(q.mode==='count')for(let k=0;k<q.n;k++)await page.locator('.harvest-btn:not([disabled])').first().click();
+ if(q.mode==='count'){
+  for(let k=0;k<q.n;k++)await page.locator('.harvest-btn:not([disabled])').first().click();
+  assert.equal(await page.locator('.storybook-reward').count(),0,'collecting all fruit alone must not prove cardinality');
+  assert.equal(await page.locator('.final-count .number-tile').count(),3,'total number must be checked');
+  await page.locator('.final-count .number-tile[data-n="'+q.n+'"]').click();
+ }
  if(q.mode==='zero'||q.mode==='path')await page.locator('.number-tile[data-n="'+q.n+'"]').click();
  if(q.mode==='ten'||q.mode==='compose'||q.mode==='equal'){
   if(q.advanced)await page.locator('.number-tile[data-n="'+(q.n-q.have)+'"]').click();
@@ -41,7 +52,7 @@ try{
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
   const resp=await page.goto(base+'/math-garden/',{waitUntil:'domcontentloaded'});
   assert.ok(resp?.ok(),'game route failed');
-  for(const asset of ['assets/forest-world.svg','assets/woodland-friends.svg','v2.css','game.js']){
+  for(const asset of ['assets/forest-world.svg','assets/woodland-friends.svg','v2.css','learning.css','learning-engine.js','game.js']){
    const a=await page.request.get(base+'/math-garden/'+asset);assert.equal(a.status(),200,'missing asset '+asset);
   }
   const js=await (await page.request.get(base+'/math-garden/game.js')).text();
@@ -56,18 +67,27 @@ try{
    assert.equal((await page.evaluate(()=>window.__numberForestQA.getState())).stage,i);
    if([0,1,3,7,10,12,13,14].includes(i))await page.screenshot({path:path.join(artifacts,'math-story-game-'+width+'-'+i+'.png')});
    for(let j=0;j<5;j++){
+    const before=await page.evaluate(()=>window.__numberForestQA.getState());
+    assert.equal(before.phase,['explore','model','independent','transfer','review'][j]);
+    if(j===1)assert.equal(before.modelUsed,true,'model phase must demonstrate before independent practice');
     await solve(page,i,j);completed++;
     if(j<4)await page.waitForFunction(expected=>{const s=window.__numberForestQA.getState();return s.round===expected&&!s.locked},j+1,{timeout:8000});
    }
    await page.locator('.storybook-finish').waitFor({state:'visible',timeout:8000});
+   const learning=await page.evaluate(()=>window.__numberForestQA.getLearning());
+   assert.equal(learning.attempts,5);
+   assert.equal(learning.transfer,1,'different representation phase should be solved unaided');
+   assert.equal(learning.independent,3,'only independent, transfer and review trials count');
+   assert.equal(learning.ready,true,'valid check result should be available');
    await page.locator('.storybook-finish [data-act=next]').click();
   }
   assert.equal((await page.evaluate(()=>window.__numberForestQA.getState())).stage,0,'stage cycle broken');
   await page.locator('#stageToggle').click();assert.equal(await page.locator('.stage-select').count(),15,'all stages should be freely accessible');
   await page.locator('.stage-select[data-i="12"]').click();assert.equal((await page.evaluate(()=>window.__numberForestQA.getState())).stage,12);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0,'horizontal overflow');
-  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('moa-number-forest-v2')));
+  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('moa-number-forest-v3')));
   assert.equal(Object.keys(saved).length,15,'progress missing for some activities');
+  assert.ok(Object.values(saved).every(v=>v.verifiedSessions===1&&v.supportedTotal===1),'supported model trial must be distinct from 3 independent solved rounds');
   if(width===390){await page.reload();assert.ok(await page.locator('#startButton').isVisible(),'game should survive reload')}
   await context.close()
  }
@@ -78,6 +98,6 @@ try{
  assert.ok(await site.locator('.math-home-feature[href="math-garden/"]').isVisible(),'home entry missing');
  await site.close();
  assert.deepEqual(errors,[],'browser JavaScript errors');
- console.log('PASS Number Forest V2 — '+completed+' actual completed rounds / 15 modes / 2 viewport sizes, files loaded, voice synthesis absent, progress and hint checks');
+ console.log('PASS Number Forest Learning V3 — '+completed+' actual completed rounds / 15 modes / 2 viewport sizes, files loaded, voice synthesis absent, progress and hint checks');
 }catch(e){console.error('FAIL Number Forest V2',e);process.exitCode=1}
 finally{await browser.close()}
