@@ -20,6 +20,47 @@ const {chromium}=require("playwright-core");
   assert.equal(await page.locator("#keys button").count(),8);
   tests.push(name+": 8 exact original song selections, 2/4 3/4 4/4, 6 modes");
   const initial=await page.evaluate(()=>window.__performanceViewsQA__.state().score);
+
+  const allThemeScreens=[];
+  for(const t of ["classroom","forest","night"]){
+   await page.locator('.theme-choice[data-theme="'+t+'"]').click();
+   const sample=await page.evaluate(()=>{
+     const q=window.__performanceViewsQA__,startScore=q.state().score;
+     q.selectView("stairs");q.at(1.12);
+     const x=q.stairBackground().toDataURL();
+     const bg0=q.stairBackground();
+     const c=bg0.getContext("2d");
+     const corner=Array.from(c.getImageData(3,3,1,1).data).slice(0,3);
+     q.at(2.26);const y=q.stairBackground().toDataURL();
+     q.selectView("two");q.at(1.2);
+     const two=q.twoBackground().toDataURL();
+     return {theme:q.theme(),x,y,two,corner,score:q.state().score};
+   });
+   assert.equal(sample.theme,t);
+   assert.equal(sample.x,sample.y,"the theme + heart score must stay PIXEL IDENTICAL while Moa moves");
+   assert.deepEqual(sample.score,initial,"visual themes may not alter the original melody or timing");
+   assert.equal(await page.locator(".theme-choice.active").count(),1);
+   allThemeScreens.push({theme:t,stair:crypto.createHash("sha256").update(sample.x).digest("hex"),two:crypto.createHash("sha256").update(sample.two).digest("hex"),corner:sample.corner});
+   await page.locator('.view-choice[data-view="stairs"]').click();
+   await page.screenshot({path:path.join(dir,name+"-theme-"+t+"-stairs.png"),fullPage:true});
+   await page.locator('.view-choice[data-view="two"]').click();
+   await page.screenshot({path:path.join(dir,name+"-theme-"+t+"-two.png"),fullPage:true});
+  }
+  assert.equal(new Set(allThemeScreens.map(x=>x.stair)).size,3,"all three illustrated BACKGROUNDS must be different in actual stair SCORE PIXELS");
+  assert.equal(new Set(allThemeScreens.map(x=>x.two)).size,3,"all three themes must apply to fixed two-row scores too");
+  assert.equal(new Set(allThemeScreens.map(x=>x.corner.join(","))).size,3,"forest, cozy classroom and night must have distinct original artwork palette");
+  await page.locator('.theme-choice[data-theme="classroom"]').click();
+  const rhythmSplit=await page.evaluate(()=>{
+   const q=window.__performanceViewsQA__,original=q.state().song;
+   q.selectSong("moa-signal");
+   const found=[];for(let n=0;n<q.state().score.length*2;n++){const pair=q.stairHalfBeatPair(n);if(pair)found.push({beat:n,notes:pair.map(p=>p.note),widths:pair.map(p=>p.to-p.from)})}
+   q.selectSong(original);return found;
+  });
+  assert(rhythmSplit.length>=1,"the real score must have at least one pair of true eighth notes");
+  assert(rhythmSplit.some(x=>x.notes[0]!==x.notes[1]),"half-hearts must support two DIFFERENT pitch heights");
+  assert(rhythmSplit.every(x=>x.widths.every(w=>Math.abs(w-.5)<.001)),"each pitch-separated heart HALF is still exactly half a beat");
+  tests.push(name+": illustrated cozy classroom / forest / starry night, static score through playback, stable original music, real pitch-positioned half-hearts");
+
   const heart=await page.evaluate(()=>{
     const q=window.__performanceViewsQA__;
     const original=q.state();
@@ -266,9 +307,10 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
   tests.push(name+": audio-clock play, view switching without replay, pause, resume, reset");
   const viewport=await page.evaluate(()=>({w:innerWidth,scroll:document.documentElement.scrollWidth,stage:document.querySelector("#stage").getBoundingClientRect()}));
   assert(viewport.scroll<=viewport.w+3,"horizontal overflow at "+width+"px "+JSON.stringify(viewport));
-  assert(viewport.stage.y<410,"stage should remain near the top after adding the predictive cue strip "+viewport.stage.y);
+  assert(viewport.stage.y<495,"stage should be visible after the additional compact theme selector "+viewport.stage.y);
   tests.push(name+": responsive stage remains visible without oversized top whitespace or overflow");
   if(name==="desktop"){
+   await page.locator('.theme-choice[data-theme="night"]').click();
    await page.locator("#song").selectOption("moa-signal");
    await page.locator("#section").selectOption("all");
    await page.locator('.view-choice[data-view="stairs"]').click();
@@ -280,7 +322,7 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
    const probe=require("node:child_process").spawnSync("ffprobe",["-v","error","-select_streams","v:0","-show_entries","stream=width,height","-of","csv=p=0",video],{encoding:"utf8"});
    if(!probe.error){assert.equal(probe.status,0,"ffprobe must read the saved video");assert.equal(probe.stdout.trim(),"1920,1080","actual exported video file must be 16:9 Full HD");}
    else console.log("ffprobe unavailable; browser canvas output verified "+probe.error.message);
-   tests.push(name+": real 1920x1080 Full-HD video with BOTH FIXED pitched-heart rows and Moa animation exported");
+   tests.push(name+": real 1920x1080 Full-HD video includes the selected NIGHT THEME with both static rows and Moa motion");
   }
   await page.close();
  }
