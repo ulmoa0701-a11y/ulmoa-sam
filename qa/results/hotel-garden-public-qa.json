@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-21T07:02:44.934Z",
+  "generatedAt": "2026-10-21T07:04:04.099Z",
   "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/",
   "kind": "real public browser loading and controls; internal event-path smoke (NOT full human playthrough)",
   "results": [
@@ -13,7 +13,7 @@
         "preview_woods": true,
         "preview_eye": true,
         "preview_smog": true,
-        "bossFlow": false,
+        "bossFlow": true,
         "endState": true,
         "noFatalError": true
       },
@@ -57,7 +57,7 @@
         "gameModules": [
           "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/assets/index-DxiltY-5.js"
         ],
-        "fps": 4.3,
+        "fps": 5,
         "canvas": 1,
         "overflow": false,
         "lotusText": "🌸 연꽃 0/3",
@@ -89,10 +89,10 @@
           -6
         ],
         "after": [
-          -18.38,
-          -6.51
+          -18.48,
+          -6.64
         ],
-        "distance": 0.64
+        "distance": 0.8
       },
       "smoke": {
         "geometry": true,
@@ -100,7 +100,7 @@
         "restart": true,
         "woodsHidden": true,
         "woodsDropped": true,
-        "woodsPicked": false,
+        "woodsPicked": true,
         "slashInEye": true,
         "eyeHidden": true,
         "eyePicked": true,
@@ -111,9 +111,11 @@
         "slashHidden": true,
         "threeLotus": true,
         "stage7": true,
-        "pass": false
+        "pass": true,
+        "v3Models": true,
+        "v3RewardUi": true
       },
-      "pass": false
+      "pass": true
     },
     {
       "viewport": "mobile",
@@ -169,7 +171,7 @@
         "gameModules": [
           "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/assets/index-DxiltY-5.js"
         ],
-        "fps": 13.7,
+        "fps": 11.4,
         "canvas": 1,
         "overflow": false,
         "lotusText": "🌸 연꽃 0/3",
@@ -201,10 +203,10 @@
           -6
         ],
         "after": [
-          -20.84,
-          -9.79
+          -20.27,
+          -9.03
         ],
-        "distance": 4.74
+        "distance": 3.79
       },
       "smoke": {
         "geometry": true,
@@ -223,10 +225,12 @@
         "slashHidden": true,
         "threeLotus": true,
         "stage7": true,
-        "pass": true
+        "pass": true,
+        "v3Models": true,
+        "v3RewardUi": true
       },
       "pass": true
     }
   ],
-  "pass": false
+  "pass": true
 }
