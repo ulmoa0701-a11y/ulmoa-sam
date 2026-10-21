@@ -68,7 +68,7 @@ try{
  await portal.goto(base+'/gardens/',{waitUntil:'domcontentloaded'});
  assert.ok(await portal.locator('#learning .math-feature[href="../math-garden/"]').isVisible(),'learning-garden entry missing');
  await portal.goto(base+'/',{waitUntil:'domcontentloaded'});
- assert.equal(await portal.locator('.hb-shortcut-card[href="math-garden/"]').count(),1,'homepage quick link missing');
+ assert.equal(await portal.locator('.math-home-feature[href="math-garden/"]').count(),1,'homepage quick link missing');
  await portal.close();
  console.log('PASS: seven games, 56 completed rounds, hint handling, local state, stage selection, responsive desktop/mobile and homepage/gardens links');
 }catch(e){console.error('NUMBER FOREST QA FAILED',e);process.exitCode=1}
