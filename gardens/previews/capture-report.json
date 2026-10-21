@@ -9,6 +9,7 @@
       "preview": true,
       "play": true,
       "errors": [],
+      "playState": "recall-with-basket",
       "playSelector": "#gameArea > :first-child"
     },
     {
@@ -57,6 +58,7 @@
       "preview": true,
       "play": true,
       "errors": [],
+      "playState": "planted-stars",
       "playSelector": "#gameArea .basic-game"
     },
     {
@@ -65,6 +67,7 @@
       "preview": true,
       "play": true,
       "errors": [],
+      "playState": "growing-garden",
       "playSelector": "#gameArea .basic-game"
     },
     {
@@ -121,6 +124,7 @@
       "preview": true,
       "play": true,
       "errors": [],
+      "playState": "flower-trail-growing",
       "playSelector": "#gameArea .basic-game"
     },
     {
