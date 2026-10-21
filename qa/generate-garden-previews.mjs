@@ -58,7 +58,41 @@ async function capture(id,url,{native=false}={}){
    entry.preview=await snap(page,'#introPreview',id);
    const start=page.locator('#introStart');
    if(await start.isVisible()){
-    await start.click({timeout:2000});await page.waitForTimeout(600);
+    await start.click({timeout:2000});await page.waitForTimeout(420);
+    if(id==='memory'){
+     // A genuine recall choice and a partly filled picnic basket communicate
+     // the game's distinctive action better than its static study phase.
+     const first=await page.locator('.memory-strip .memory-tile').first().evaluate(el=>{
+      const dot=el.querySelector('.memory-dot');
+      return dot?{type:'color',value:dot.style.backgroundColor}:{type:'animal',value:el.querySelector('.memory-animal')?.textContent?.trim()};
+     });
+     await page.locator('.memory-ready').click();
+     const index=await page.locator('.memory-choice').evaluateAll((items,answer)=>items.findIndex(el=>{
+      const dot=el.querySelector('.memory-dot');
+      const token=dot?{type:'color',value:dot.style.backgroundColor}:{type:'animal',value:el.querySelector('.memory-animal')?.textContent?.trim()};
+      return token.type===answer.type&&token.value===answer.value;
+     }),first);
+     if(index<0)throw Error('Memory answer not found in recalled choices');
+     await page.locator('.memory-choice').nth(index).click();
+     await page.locator('.basket-slot.filled').first().waitFor({state:'visible'});
+     entry.playState='recall-with-basket';
+    }else if(id==='paint'){
+     // A blank 12-cell frame is not an informative game photo.
+     const tiles=page.locator('#paintGrid i');
+     for(let i=0;i<4;i++)await tiles.nth(i).click();
+     if(await page.locator('#paintGrid i.painted').count()!==4)throw Error('Flower path did not grow');
+     entry.playState='flower-trail-growing';
+    }else if(id==='inside'){
+     await page.locator('#insideZone').click({position:{x:76,y:66}});
+     await page.locator('#insideZone').click({position:{x:135,y:74}});
+     if(await page.locator('#insideZone i').count()<2)throw Error('Stars were not planted');
+     entry.playState='planted-stars';
+    }else if(id==='targets'){
+     await page.locator('.wake-target[data-ready="0"]').first().click();
+     await page.locator('.wake-target[data-ready="0"]').first().click();
+     if(await page.locator('.wake-target.awake').count()<2)throw Error('Seeds did not bloom');
+     entry.playState='growing-garden';
+    }
     entry.play=await snap(page,'#gameArea .slow-task,#gameArea .basic-game,#gameArea .garden-adventure,#gameArea .novel-game,#gameArea > :first-child,#gameArea,#gameWorld',id+'-play',entry);
    }
   }else if(id==='recorder'){
@@ -133,6 +167,13 @@ await browser.close();
 const ok=report.filter(x=>x.play&&x.preview),notOk=report.filter(x=>!x.play||!x.preview);
 const missedNative=report.filter(x=>nativeIds.includes(x.id)&&(!x.playSelector||!x.playSelector.startsWith('#gameArea')));
 if(missedNative.length){console.error('Native game screenshot shows an intro or full page, not play: '+missedNative.map(x=>x.id+':'+(x.playSelector||'none')).join(', '));process.exitCode=1;}
+for(const [id,stage] of [['memory','recall-with-basket'],['paint','flower-trail-growing'],['inside','planted-stars'],['targets','growing-garden']]){
+ const item=report.find(x=>x.id===id);
+ if(!item?.play||item.playState!==stage||!item.playSelector?.startsWith('#gameArea')){
+  console.error('Game card is not a demonstrated play state: '+id);
+  process.exitCode=1;
+ }
+}
 const rescue=report.find(x=>x.id==='rescue');
 if(!rescue?.play||rescue.playState!=='mission'||rescue.playSelector!=='#game canvas'){
  console.error('Rescue preview is not a validated, playable search mission');

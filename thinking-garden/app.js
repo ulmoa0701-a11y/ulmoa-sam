@@ -327,16 +327,16 @@ function renderTargets(){
 }
 function renderPaint(){
  const total=12+practiceStep()*3;let done=0,drawing=false,activePointer=null,lastPoint=null;
- missionText.textContent='정원길을 쓱싹 채워요!';
- missionSub.textContent='손가락으로 길을 쭉 이으면 지나간 칸이 채워져요.';
+ missionText.textContent='꽃길을 손으로 이어요!';
+ missionSub.textContent='손가락으로 길을 따라 움직이면 꽃이 피어요. 키보드는 엔터키를 눌러요.';
  say(missionText.textContent);
- area.innerHTML=`<div class="basic-game"><div class="mini-count" id="miniCount">🖍️ 0%</div><div class="paint-grid-new" id="paintGrid">${Array.from({length:total},()=>'<i></i>').join('')}</div></div>`;
+ area.innerHTML=`<div class="basic-game paint-garden-game"><div class="paint-garden-head"><img src="assets/friend-saem.png" alt="" class="paint-garden-friend"><div><strong>샘의 꽃길 만들기</strong><span>손가락으로 칸을 이어 꽃을 피워요</span></div><div class="mini-count" id="miniCount" role="status" aria-live="polite">0 / ${total}칸</div></div><div class="paint-grid-new" id="paintGrid" role="button" tabindex="0" aria-label="꽃길 그리기. 손가락으로 문지르거나 엔터키를 누르면 꽃이 피어요">${Array.from({length:total},()=>'<i></i>').join('')}</div><p class="paint-garden-help" id="paintGardenHelp">손가락으로 하얀 칸을 문질러요. 한 칸씩 눌러도 돼요.</p></div>`;
  const g=$('#paintGrid');
  const fill=cell=>{
   if(state.lock||!cell||cell.parentElement!==g||cell.tagName!=='I'||cell.classList.contains('painted'))return;
   cell.classList.add('painted');done++;
-  $('#miniCount').textContent=`🖍️ ${Math.round(done/total*100)}%`;
-  if(done===total){addSeeds(10);sfx('ok');flash('정원길 완성!');roundGate(area.querySelector('.basic-game'),'다음 색칠길 ▶',500)}
+  $('#miniCount').textContent=`${done} / ${total}칸`;
+  if(done===total){area.querySelector('.paint-garden-game').classList.add('paint-garden-complete');$('#paintGardenHelp').textContent='꽃길 완성! 샘이 꽃길을 따라왔어요.';addSeeds(10);sfx('ok');flash('꽃길이 완성됐어요!');roundGate(area.querySelector('.basic-game'),'다음 꽃길 ▶',500)}
  };
  const paintAt=(x,y)=>fill(document.elementFromPoint(x,y));
  const paintTrail=(x,y)=>{
@@ -368,6 +368,14 @@ function renderPaint(){
  g.addEventListener('pointercancel',end);
  g.addEventListener('lostpointercapture',()=>{drawing=false;activePointer=null;lastPoint=null});
  g.addEventListener('click',e=>{if(e.target.tagName==='I')fill(e.target)});
+ // Equivalent keyboard interaction; no fine-motor dragging is required.
+ // A single focused grid can be operated without tabbing through 12-24 cells.
+ g.addEventListener('keydown',e=>{
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  e.preventDefault();
+  if(state.lock)return;
+  fill(g.querySelector('i:not(.painted)'));
+ });
 }
 
 function renderWater(){
