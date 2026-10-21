@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/hotel-garden-public-qa.yml'
       - 'qa/hotel-garden-public-qa.mjs'
+      - 'qa/hotel-garden-actual-play.mjs'
       - 'lab/babylon-hotel-garden/**'
 concurrency:
   group: hotel-garden-public-qa
@@ -31,6 +32,9 @@ jobs:
           echo "CHROME_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
       - name: Browser-check the published Babylon game (PC + mobile)
         run: node qa/hotel-garden-public-qa.mjs
+      - name: Real-keyboard classroom opening route (gardener to WOODS)
+        continue-on-error: true
+        run: node qa/hotel-garden-actual-play.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -38,6 +42,7 @@ jobs:
           path: |
             hotel-garden-public-qa.json
             hotel-garden-*.jpg
+            hotel-garden-actual-play.json
           if-no-files-found: warn
       - name: Save machine-readable QA report to isolated results branch
         if: always() && !cancelled()
@@ -46,12 +51,14 @@ jobs:
             printf '%s\n' '{"pass":false,"error":"browser QA did not produce a report"}' > hotel-garden-public-qa.json
           fi
           cp hotel-garden-public-qa.json /tmp/hotel-garden-public-qa.json
+          cp hotel-garden-actual-play.json /tmp/hotel-garden-actual-play.json 2>/dev/null || true
           mkdir -p /tmp/hotel-garden-qa-images
           cp hotel-garden-*.jpg /tmp/hotel-garden-qa-images/ 2>/dev/null || true
           git fetch origin qa/hotel-garden-results
           git switch -C qa/hotel-garden-results origin/qa/hotel-garden-results
           mkdir -p qa/results
           cp /tmp/hotel-garden-public-qa.json qa/results/hotel-garden-public-qa.json
+          cp /tmp/hotel-garden-actual-play.json qa/results/hotel-garden-actual-play.json 2>/dev/null || true
           cp /tmp/hotel-garden-qa-images/*.jpg qa/results/ 2>/dev/null || true
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
