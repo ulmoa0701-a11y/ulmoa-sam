@@ -144,7 +144,7 @@ function __hgClosestFlower(){
 }
 function __hgCollectFlower(boss){
  const node=__hgFlowers.get(boss);if(!node||node.isDisposed())return false;
- if(R.Distance(Rp.position,node.position)>4.5)return false;
+ if(R.Distance(Rp.position,node.position)>6)return false;
  __hgFlowers.delete(boss);node.dispose(false,true);
  __uLotusCount=Math.min(3,__uLotusCount+1);__uSyncHud();
  __uXp0("FLOWER_COLLECTED",{boss:boss,lotusCount:__uLotusCount});
@@ -153,7 +153,7 @@ function __hgCollectFlower(boss){
 }
 function __hgStartCollect(){
  if(!qp||Jp)return false;
- const c=__hgClosestFlower();if(!c||c.d>4.5)return false;
+ const c=__hgClosestFlower();if(!c||c.d>6)return false;
  if(__hgCollecting!==c.boss){__hgCollecting=c.boss;__hgCollectSince=performance.now()}
  return true;
 }
@@ -161,7 +161,7 @@ function __hgCancelCollect(){__hgCollecting=null;__hgFlowerHint.style.display="n
 function __hgFlowerUi(){
  const slash=document.querySelector('[data-action="slash"]');
  if(slash){if(Kp===4)slash.classList.remove("hidden");else slash.classList.add("hidden")}
- const c=__hgClosestFlower(),near=!!c&&c.d<=4.5;
+ const c=__hgClosestFlower(),near=!!c&&c.d<=6;
  let button=document.querySelector('[data-action="talk"]');
  if(button){
    const talking=Kp===0||Kp===3||Kp===5;
