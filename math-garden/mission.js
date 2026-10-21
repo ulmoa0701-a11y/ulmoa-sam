@@ -45,7 +45,7 @@ function demoVisual(task,key){
 function demo(){const x=current(),key=CONCEPTS[state.concept].key;
  state.view='demo';say('모아가 먼저 보여줄게','한 번 보고, 다음에는 직접 해볼까?');
  scene('<div class="lesson"><div class="lesson-lead">'+demoVisual(x,key)+'</div><div class="lesson-foot"><span class="observation">보는 차례 · 기록하지 않아요</span>'+stepAction('continue','내가 해볼래 →','모아의 시범을 보고 다음으로')+'</div></div>')}
-function fruitTray(type,selected,stock){return '<div class="supply"><div class="supply-items">'+Array.from({length:stock},(_,i)=>stepAction('take',unit(type),'간식 하나 담기','data-index="'+i+'"')).join('')+'</div><p class="supply-caption">숲속 나무</p></div><div class="delivery"><div class="packed-food">'+Array.from({length:selected},()=>stepAction('undo',unit(type,true),'담은 간식 하나 꺼내기')).join('')+'</div><div class="basket-body"></div><p class="supply-caption">내 배달 바구니</p></div>'}
+function fruitTray(type,selected,stock){return '<div class="supply"><div class="supply-items">'+Array.from({length:Math.max(0,stock-selected)},(_,i)=>stepAction('take',unit(type),'간식 하나 담기','data-index="'+i+'"')).join('')+'</div><p class="supply-caption">숲속 나무</p></div><div class="delivery"><div class="packed-food">'+Array.from({length:selected},()=>stepAction('undo',unit(type,true),'담은 간식 하나 꺼내기')).join('')+'</div><div class="basket-body"></div><p class="supply-caption">내 배달 바구니</p></div>'}
 function shareBoard(x){
  const n=x.n;
  return '<div class="friends-line">'+Array.from({length:n},(_,i)=>'<div class="hungry-friend">'+friend(x.animal,i)+'<span class="dish" aria-hidden="true"></span></div>').join('')+'</div><div class="delivery-line">'+fruitTray(x.fruit,state.selected,n+2)+'</div>';
