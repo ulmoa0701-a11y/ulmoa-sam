@@ -129,3 +129,14 @@ body.moa-assigned-calm .moa-assigned-visual-label{color:#52715e}
  .moa-assigned-home-help{padding:11px 13px}
  .moa-assigned-home-help-body p{font-size:13px;line-height:1.55}
 }
+
+
+/* Authentic snapshots for standalone music, recorder and breathing activities. */
+.moa-assigned-scene .moa-assigned-real-shot{
+ display:block;width:100%;height:auto;min-height:172px;max-height:260px;
+ object-fit:contain;object-position:center;background:linear-gradient(155deg,#f1f8e9,#ebf7f8);
+ border-radius:0 0 15px 15px
+}
+@media(max-width:450px){
+ .moa-assigned-scene .moa-assigned-real-shot{max-height:215px;min-height:155px}
+}
