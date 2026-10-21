@@ -140,7 +140,7 @@ function hint(){
  const q=scene.task;
  if(scene.errors<3&&scene.hints<2){demonstrate(true);return}
  const selectors={
- share:'.friend-card:not([disabled])',glance:'.number-tile[data-n="'+q.n+'"]',
+ share:q.trayReady?'.friend-card:not([disabled])':'.tray-choice[data-n="'+q.n+'"]',glance:'.number-tile[data-n="'+q.n+'"]',
  compare:'.island-choice[data-key="'+q.right+'"]',
  count:q.answering?'.number-tile[data-n="'+q.n+'"]':'.harvest-btn:not([disabled])',
  numeral:'.number-tile[data-n="'+q.n+'"]',zero:'.number-tile[data-n="'+q.n+'"]',
