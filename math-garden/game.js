@@ -2,6 +2,8 @@
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
+const Learning=window.NumberForestLearning;
+if(!Learning)throw new Error('Number Forest learning engine is missing');
 const board=$('playfield'),note=$('status'),stageGrid=$('stageGrid');
 const STAGES=[
  {id:'share',name:'간식 나눠 주기',goal:'일대일 대응',chapter:'숲속 간식'},
@@ -21,13 +23,13 @@ const STAGES=[
  {id:'length',name:'길이가 다른 다리',goal:'길이 비교',chapter:'모양 놀이터'}
 ];
 const CHAPTERS=[...new Set(STAGES.map(s=>s.chapter))];
-const roundsPerStage=5,storageKey='moa-number-forest-v2';
+const roundsPerStage=5,storageKey='moa-number-forest-v3';
 let stats={};
 try{const s=JSON.parse(localStorage.getItem(storageKey)||'{}');if(s&&typeof s==='object')stats=s}catch(_){}
-const info=id=>{const x=stats[id];return x&&typeof x==='object'?x:{completed:0,clean:0,errors:0}};
-let scene={stage:0,round:0,task:null,errors:0,hints:0,locked:false,started:false,sound:true,transition:0,idle:0,totalInStage:0,cleanInStage:0};
+const info=id=>{const x=stats[id];return x&&typeof x==='object'?x:{completedSessions:0,verifiedSessions:0,independentTotal:0,supportedTotal:0,transferAttempts:0}};
+let scene={stage:0,round:0,task:null,errors:0,hints:0,locked:false,started:false,sound:true,transition:0,idle:0,totalInStage:0,cleanInStage:0,learningSession:null,modelUsed:false,lastSummary:null};
 const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),shuf=(l)=>l.map(x=>({x,r:Math.random()})).sort((a,b)=>a.r-b.r).map(x=>x.x);
-const cap=(id,base=3,max=10)=>Math.min(max,Math.max(base,base+Math.floor(info(id).clean/5)-Math.floor(info(id).errors/12)));
+const cap=id=>Learning.nextTier(info(id));
 const dots=n=>'<span class="dots" aria-label="'+n+'개">'+Array.from({length:n},(_,i)=>'<i class="count-dot" aria-hidden="true"></i>').join('')+'</span>';
 const fruit=(i,kind='acorn')=>'<span class="new-fruit '+kind+'" aria-hidden="true"><i></i></span>';
 const fruits=(n,kind='acorn')=>Array.from({length:n},(_,i)=>fruit(i,kind)).join('');
@@ -37,21 +39,21 @@ const chars=['rabbit','bear','fox','frog','bird'];
 const char=(i)=>'<svg class="character-sprite" viewBox="'+(i%5*150)+' 0 150 180" aria-hidden="true"><use href="./assets/woodland-friends.svg#'+chars[i%5]+'"/></svg>';
 const touch=(act,label,inside,other='')=>'<button type="button" class="'+other+'" data-act="'+act+'" aria-label="'+label+'">'+inside+'</button>';
 const basket=(inside,label='열매 바구니')=>'<div class="storybook-basket" role="img" aria-label="'+label+'"><div class="basket-rim"></div><div class="basket-inside">'+inside+'</div></div>';
-const center=(inner)=>'<div class="storybook-scene">'+inner+'</div>';
+const center=(inner)=>'<div class="storybook-scene '+(scene.task?.variant==='berry'?'scene-variant-berry':scene.task?.variant==='gold'?'scene-variant-gold':'')+'">'+inner+'</div>';
 const stamp=(text)=>'<span class="wood-label">'+text+'</span>';
 const build=(total,filled)=>'<div class="tenframe" aria-label="전체 '+total+'자리 중 '+filled+'자리 찼어요">'+Array.from({length:total},(_,i)=>'<span class="ten-cell '+(i<filled?'cell-filled':'')+'">'+(i<filled?fruit(i):'')+'</span>').join('')+'</div>';
 function setMessage(t,cl=''){note.textContent=t;note.className='status '+cl}
-function guide(t){$('guideKicker').textContent=STAGES[scene.stage].chapter;$('guideText').textContent=t}
+function guide(t){$('guideKicker').textContent=STAGES[scene.stage].chapter+' · '+Learning.PHASE_LABELS[Learning.phaseFor(scene.round)];$('guideText').textContent=t}
 function fx(){if(!scene.sound)return;try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;let c=window.__moaPlayAudio||(window.__moaPlayAudio=new Audio());c.resume?.();const o=c.createOscillator(),g=c.createGain(),f=c.createBiquadFilter(),now=c.currentTime;o.type='sine';o.frequency.setValueAtTime(440,now);o.frequency.exponentialRampToValueAtTime(520,now+.065);f.type='lowpass';f.frequency.value=900;g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(.035,now+.015);g.gain.exponentialRampToValueAtTime(.0001,now+.14);o.connect(f);f.connect(g);g.connect(c.destination);o.start(now);o.stop(now+.15)}catch(_){}}
-function save(id){let v=info(id);stats[id]={completed:v.completed+1,clean:v.clean+scene.cleanInStage,errors:v.errors+Math.max(0,scene.totalInStage-scene.cleanInStage)};try{localStorage.setItem(storageKey,JSON.stringify(stats))}catch(_){}}
+function save(id){stats[id]=Learning.combine(info(id),scene.learningSession.rounds);scene.lastSummary=stats[id].lastSummary;try{localStorage.setItem(storageKey,JSON.stringify(stats))}catch(_){}}
 function showSeeds(){$('seedProgress').innerHTML=Array.from({length:roundsPerStage},(_,i)=>'<span class="seed '+(i<scene.round?'filled':'')+'"></span>').join('');$('seedProgress').setAttribute('aria-label','진행 '+scene.round+'/'+roundsPerStage)}
 function map(){
- stageGrid.innerHTML=CHAPTERS.map((ch,k)=>'<section class="map-chapter"><h3>'+ch+'</h3><div class="map-doors">'+STAGES.map((s,i)=>s.chapter===ch?'<button data-act="choose" data-i="'+i+'" class="stage-select '+(scene.started&&scene.stage===i?'active':'')+'" type="button"><span class="number">'+(i+1)+'</span><strong>'+s.name+'</strong></button>':'').join('')+'</div></section>').join('')
+ stageGrid.innerHTML=CHAPTERS.map((ch,k)=>'<section class="map-chapter"><h3>'+ch+'</h3><div class="map-doors">'+STAGES.map((s,i)=>s.chapter===ch?'<button data-act="choose" data-i="'+i+'" class="stage-select '+(scene.started&&scene.stage===i?'active':'')+'" type="button"><span class="number">'+(i+1)+'</span><strong>'+s.name+'</strong><small class="level-note">'+(info(s.id).verifiedSessions?'다시 연습하기':'새 놀이')+'</small></button>':'').join('')+'</div></section>').join('')
 }
 function updateStage(){scene.locked=false;$('stageName').textContent=STAGES[scene.stage].name;$('hintButton').hidden=false;$('restartButton').hidden=false;showSeeds();map()}
 function start(i){
  if(scene.transition)clearTimeout(scene.transition);if(scene.idle)clearTimeout(scene.idle);
- scene={...scene,stage:i,round:0,task:null,errors:0,hints:0,locked:false,started:true,totalInStage:0,cleanInStage:0,transition:0,idle:0};
+ scene={...scene,stage:i,round:0,task:null,errors:0,hints:0,locked:false,started:true,totalInStage:0,cleanInStage:0,learningSession:Learning.createSession(STAGES[i].id),lastSummary:null,modelUsed:false,transition:0,idle:0};
  $('stagePanel').hidden=true;$('stageToggle').setAttribute('aria-expanded','false');updateStage();round()
 }
 function getTask(){
@@ -60,21 +62,23 @@ function getTask(){
  if(m==='share'){q.n=rnd(2,Math.min(5,n));q.fed=[];q.prompt='배고픈 친구에게 하나씩'}
  if(m==='glance'){q.n=rnd(1,Math.min(5,n));q.opts=options(q.n,1,6);q.prompt='반짝 열매는 몇 개?'}
  if(m==='compare'){q.a=rnd(1,n);q.b=rnd(1,n);if(q.a===q.b)q.b=q.a===n?q.a-1:q.a+1;q.want=Math.random()<.5?'more':'less';q.right=q.want==='more'?(q.a>q.b?'a':'b'):(q.a<q.b?'a':'b');q.prompt=q.want==='more'?'열매가 더 많은 쪽':'열매가 더 적은 쪽'}
- if(m==='count'){q.n=rnd(2,n);q.picked=[];q.prompt='열매를 모두 수확해요'}
+ if(m==='count'){q.n=rnd(2,n);q.picked=[];q.answering=false;q.opts=options(q.n,1,Math.max(5,n));q.prompt='열매를 모두 모으면 몇 개일까?'}
  if(m==='numeral'){q.n=rnd(1,n);q.opts=options(q.n,1,Math.max(6,n));q.prompt='열매에 맞는 숫자'}
  if(m==='zero'){q.n=rnd(0,2);q.opts=shuf([0,1,2]);q.prompt='바구니에 몇 개 있을까?'}
  if(m==='path'){q.from=rnd(0,Math.max(1,n-3));q.missing=rnd(1,3);q.n=q.from+q.missing;q.opts=options(q.n,0,Math.max(6,n+3));q.prompt='없어진 숫자 징검다리'}
- if(m==='ten'){q.n=rnd(3,Math.min(10,n+2));q.have=rnd(1,q.n-1);q.added=0;q.advanced=info(m).clean>=4;q.opts=options(q.n-q.have,1,Math.min(9,q.n));q.prompt='꽃잎 빈자리 채우기'}
- if(m==='compose'){q.n=rnd(3,Math.min(10,n+2));q.have=rnd(1,q.n-1);q.added=0;q.advanced=info(m).clean>=4;q.opts=options(q.n-q.have,1,Math.min(9,q.n));q.prompt='창고에 모자란 열매'}
- if(m==='equal'){q.n=rnd(3,Math.min(10,n+2));q.have=rnd(1,q.n-1);q.added=0;q.advanced=info(m).clean>=4;q.opts=options(q.n-q.have,1,Math.min(9,q.n));q.prompt='양쪽을 똑같이'}
+ if(m==='ten'){q.n=rnd(3,Math.min(10,n+2));q.have=rnd(1,q.n-1);q.added=0;q.advanced=scene.round>=2||info(m).verifiedSessions>=1;q.opts=options(q.n-q.have,1,Math.min(9,q.n));q.prompt='꽃잎 빈자리 채우기'}
+ if(m==='compose'){q.n=rnd(3,Math.min(10,n+2));q.have=rnd(1,q.n-1);q.added=0;q.advanced=scene.round>=2||info(m).verifiedSessions>=1;q.opts=options(q.n-q.have,1,Math.min(9,q.n));q.prompt='창고에 모자란 열매'}
+ if(m==='equal'){q.n=rnd(3,Math.min(10,n+2));q.have=rnd(1,q.n-1);q.added=0;q.advanced=scene.round>=2||info(m).verifiedSessions>=1;q.opts=options(q.n-q.have,1,Math.min(9,q.n));q.prompt='양쪽을 똑같이'}
  if(m==='sum'){q.a=rnd(1,Math.max(2,Math.floor(n/2)+1));q.b=rnd(1,Math.max(2,Math.floor(n/2)+1));q.n=q.a+q.b;q.opts=options(q.n,2,Math.min(12,n+3));q.prompt='모두 합치면 몇 개?'}
  if(m==='take'){q.n=rnd(3,Math.min(10,n+2));q.take=rnd(1,q.n-1);q.gone=[];q.opts=options(q.n-q.take,0,Math.max(8,n+1));q.answering=false;q.prompt='다람쥐가 가져갈 열매'}
  if(m==='pattern'){q.a=Math.random()<.5?'berry':'gold';q.b=q.a==='berry'?'gold':'berry';q.answer=Math.random()<.5?q.a:q.b;q.seq=Array.from({length:5},(_,i)=>[q.a,q.b][(i+(q.answer===q.a?1:0))%2]);q.answer=q.seq[4];q.prompt='다음에 올 씨앗은?'}
  if(m==='shapes'){q.n=rnd(0,2);q.opts=shuf(['circle','triangle','square']);q.prompt='나무 문에 맞는 모양'}
  if(m==='length'){q.a=rnd(100,182);q.b=rnd(205,290);if(Math.random()<.5)[q.a,q.b]=[q.b,q.a];q.want=Math.random()<.5?'long':'short';q.right=q.want==='long'?(q.a>q.b?'a':'b'):(q.a<q.b?'a':'b');q.prompt=q.want==='long'?'더 긴 다리를 골라요':'더 짧은 다리를 골라요'}
+ q.phase=Learning.phaseFor(scene.round);
+ q.variant=q.phase==='transfer'?'berry':q.phase==='review'?'gold':'acorn';
  return q
 }
-function round(){scene.errors=0;scene.hints=0;scene.locked=false;scene.task=getTask();updateStage();guide(scene.task.prompt);draw();setMessage('');scene.idle=setTimeout(()=>{if(!scene.locked)hint(true)},8500)}
+function round(){scene.errors=0;scene.hints=0;scene.modelUsed=false;scene.locked=false;scene.task=getTask();updateStage();guide(scene.task.prompt);draw();setMessage('');if(scene.task.phase==='model')demonstrate(true)}
 function draw(){
  const q=scene.task;if(!q)return;
  const key=q.mode,which=(v,n)=>'<div class="food-plate">'+dots(n)+'</div>';
