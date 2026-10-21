@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-21T07:07:56.705Z",
+  "generatedAt": "2026-10-21T07:09:02.748Z",
   "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/",
   "kind": "real public browser loading and controls; internal event-path smoke (NOT full human playthrough)",
   "results": [
@@ -57,7 +57,7 @@
         "gameModules": [
           "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/assets/index-DxiltY-5.js"
         ],
-        "fps": 5,
+        "fps": 6.4,
         "canvas": 1,
         "overflow": false,
         "lotusText": "🌸 연꽃 0/3",
@@ -89,10 +89,10 @@
           -6
         ],
         "after": [
-          -18.24,
-          -6.32
+          -18.72,
+          -6.96
         ],
-        "distance": 0.4
+        "distance": 1.2
       },
       "smoke": {
         "geometry": true,
@@ -171,7 +171,7 @@
         "gameModules": [
           "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/assets/index-DxiltY-5.js"
         ],
-        "fps": 10,
+        "fps": 16.3,
         "canvas": 1,
         "overflow": false,
         "lotusText": "🌸 연꽃 0/3",
@@ -203,10 +203,10 @@
           -6
         ],
         "after": [
-          -20.47,
-          -9.29
+          -21.06,
+          -10.08
         ],
-        "distance": 4.11
+        "distance": 5.1
       },
       "smoke": {
         "geometry": true,
