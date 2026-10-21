@@ -9,7 +9,9 @@ const {chromium}=require("playwright-core");
  for(const [name,width,height] of [["desktop",1366,900],["mobile",390,844]]){
   const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:1,hasTouch:width<600,isMobile:width<600,acceptDownloads:true});
   page.on("pageerror",e=>errors.push(name+" pageerror "+e.message));page.on("console",m=>{if(m.type()==="error")errors.push(name+" console "+m.text())});
-  await page.goto(base,{waitUntil:"domcontentloaded"});await page.waitForFunction(()=>Boolean(window.__performanceViewsQA__),{timeout:15000});
+  await page.goto(base,{waitUntil:"domcontentloaded"});
+  try{await page.waitForFunction(()=>Boolean(window.__performanceViewsQA__),{timeout:9000})}
+  catch(e){throw new Error("Page boot failed: "+errors.join(" | ")+" / "+e.message)}
   const q=await page.evaluate(()=>window.__performanceViewsQA__);
   assert.equal(q.modes.length,6);
   assert.equal(q.scores.length,8);
