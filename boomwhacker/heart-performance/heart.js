@@ -76,11 +76,11 @@ function updateControls(){
  $("#song").value=song.key;$("#notes").value=String(notes);$("#tempo").value=String(speed);$("#section").value=section;
  $("#metronome").checked=metronome;$("#loop").checked=loop;$("#motion").checked=motion;
  $("#sound").textContent=sound?"소리 켜짐":"소리 꺼짐";$("#sound").setAttribute("aria-pressed",String(sound));
- $$(".view-choice").forEach(b=>{const yes=b.dataset.view===view;b.classList.toggle("active",yes);b.setAttribute("aria-pressed",String(yes))});
+ $$$(".view-choice").forEach(b=>{const yes=b.dataset.view===view;b.classList.toggle("active",yes);b.setAttribute("aria-pressed",String(yes))});
  $$("#keys button").forEach(k=>k.classList.toggle("off",!isSelected(k.dataset.note)));
  $("#noteHelp").textContent=notes+"음 강조 · 하트 1개=1박 · 원곡 그대로";
  $("#stairStyleWrap").hidden=view!=="stairs";
- $(".theme-choice").forEach(button=>{const active=button.dataset.theme===theme;button.classList.toggle("active",active);button.setAttribute("aria-pressed",String(active))});
+ $$(".theme-choice").forEach(button=>{const active=button.dataset.theme===theme;button.classList.toggle("active",active);button.setAttribute("aria-pressed",String(active))});
  document.body.dataset.theme=theme;
  const bar=barAt(position),number=clamp(Math.floor(clamp(position,0,song.beats-.001)/song.meter)+1,1,song.bars.length);
  $("#measure").textContent=number+" / "+song.bars.length+" 마디";
@@ -897,8 +897,8 @@ async function exportVideo(){
 }
 function bind(){
  $("#song").replaceChildren(...scores.map(s=>new Option(s.title+(s.category==="박자 연습"?" · 박자 연습":""),s.key)));
- $(".view-choice").forEach(b=>b.onclick=()=>chooseView(b.dataset.view));
- $(".theme-choice").forEach(b=>b.onclick=()=>chooseTheme(b.dataset.theme));
+ $$(".view-choice").forEach(b=>b.onclick=()=>chooseView(b.dataset.view));
+ $$(".theme-choice").forEach(b=>b.onclick=()=>chooseTheme(b.dataset.theme));
  $("#play").onclick=()=>playing?pause():play();$("#overlayPlay").onclick=()=>play();$("#reset").onclick=reset;$("#record").onclick=exportVideo;
  $("#fullscreen").onclick=async()=>{
    const el=$("#stage");try{
