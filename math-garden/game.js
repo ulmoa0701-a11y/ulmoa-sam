@@ -59,7 +59,13 @@ function start(i){
 function getTask(){
  const m=STAGES[scene.stage].id,n=cap(m,3,9);
  let q={mode:m,prompt:''};
- if(m==='share'){q.n=rnd(2,Math.min(5,n));q.fed=[];q.prompt='배고픈 친구에게 하나씩'}
+ if(m==='share'){
+ q.n=rnd(2,Math.min(5,n));q.fed=[];
+ q.needsTray=scene.round>=2;
+ q.trayReady=!q.needsTray;
+ q.trayChoices=shuf([q.n,q.n===2?3:(Math.random()<.5?q.n-1:q.n+1)]);
+ q.prompt=q.needsTray?'친구들에게 하나씩 줄 바구니를 골라요':'배고픈 친구에게 하나씩';
+}
  if(m==='glance'){q.n=rnd(1,Math.min(5,n));q.opts=options(q.n,1,6);q.prompt='반짝 열매는 몇 개?'}
  if(m==='compare'){q.a=rnd(1,n);q.b=rnd(1,n);if(q.a===q.b)q.b=q.a===n?q.a-1:q.a+1;q.want=Math.random()<.5?'more':'less';q.right=q.want==='more'?(q.a>q.b?'a':'b'):(q.a<q.b?'a':'b');q.prompt=q.want==='more'?'열매가 더 많은 쪽':'열매가 더 적은 쪽'}
  if(m==='count'){q.n=rnd(2,n);q.picked=[];q.answering=false;q.opts=options(q.n,1,Math.max(5,n));q.prompt='열매를 모두 모으면 몇 개일까?'}
@@ -83,10 +89,16 @@ function draw(){
  const q=scene.task;if(!q)return;
  const key=q.mode,which=(v,n)=>'<div class="food-plate">'+dots(n)+'</div>';
  const scenes={
- share:()=>center('<div class="friend-porch">'+Array.from({length:q.n},(_,i)=>touch('feed','친구 '+(i+1)+'에게 열매 주기',char(i)+'<span class="mini-plate">'+(q.fed.includes(i)?fruit(i):'<span class="plate-empty"></span>')+'</span>','friend-card '+(q.fed.includes(i)?'fed':'')) .replace('data-act="feed"','data-act="feed" data-i="'+i+'" '+(q.fed.includes(i)?'disabled':''))).join('')+'</div>'+basket(fruits(q.n-q.fed.length),'남은 열매 '+(q.n-q.fed.length)+'개')),
+ share:()=>center('<div class="friend-porch">'+Array.from({length:q.n},(_,i)=>
+ (q.trayReady?touch('feed','친구 '+(i+1)+'에게 열매 주기',char(i)+'<span class="mini-plate">'+(q.fed.includes(i)?fruit(i):'<span class="plate-empty"></span>')+'</span>','friend-card '+(q.fed.includes(i)?'fed':'')): '<div class="friend-card waiting-friend" aria-label="열매를 기다리는 친구">'+char(i)+'<span class="mini-plate"><span class="plate-empty"></span></span></div>')
+ .replace('data-act="feed"','data-act="feed" data-i="'+i+'" '+(q.fed.includes(i)?'disabled':''))).join('')+'</div>'+
+ (q.trayReady?basket(fruits(q.n-q.fed.length),'남은 열매 '+(q.n-q.fed.length)+'개'):
+ '<div class="delivery-pick" role="group" aria-label="모두에게 한 개씩 나눠줄 열매 바구니 고르기">'+
+ q.trayChoices.map((n,i)=>touch('chooseTray','열매 '+n+'개 담긴 바구니 고르기',basket(fruits(n),'열매 '+n+'개'),'tray-choice').replace('data-act="chooseTray"','data-act="chooseTray" data-n="'+n+'"')).join('')+'</div>')),
+
  glance:()=>center('<div class="display-gem">'+dots(q.n)+'</div>'+tiles(q.opts)),
  compare:()=>center('<div class="fork-choice">'+['a','b'].map(key=>touch('compare',key==='a'?'왼쪽 '+q.a+'개':'오른쪽 '+q.b+'개','<span class="island-cluster">'+dots(q[key])+'</span><span class="island-edge"></span>','island-choice').replace('data-act="compare"','data-act="compare" data-key="'+key+'"')).join('')+'</div>'),
- count:()=>center('<div class="harvest-yard"><div class="harvest-patch">'+Array.from({length:q.n},(_,i)=>touch('pick','열매 '+(i+1)+' 수확하기',fruit(i),'harvest-btn '+(q.picked.includes(i)?'collected':'' )).replace('data-act="pick"','data-act="pick" data-i="'+i+'" '+(q.picked.includes(i)?'disabled':''))).join('')+'</div>'+basket('<span class="basket-number">'+q.picked.length+'</span>'+fruits(q.picked.length),'수확한 열매 '+q.picked.length+'개')+'</div>'+(q.answering?'<div class="final-count">'+stamp('모두 몇 개일까?')+tiles(q.opts,'countanswer')+'</div>':'')),
+ count:()=>center('<div class="harvest-yard"><div class="harvest-patch">'+Array.from({length:q.n},(_,i)=>touch('pick','열매 '+(i+1)+' 수확하기',fruit(i),'harvest-btn '+(q.picked.includes(i)?'collected':'' )).replace('data-act="pick"','data-act="pick" data-i="'+i+'" '+(q.picked.includes(i)?'disabled':''))).join('')+'</div>'+basket((q.answering?'':'<span class="basket-number">'+q.picked.length+'</span>')+fruits(q.picked.length),'수확한 열매 '+q.picked.length+'개')+'</div>'+(q.answering?'<div class="final-count">'+stamp('모두 몇 개일까?')+tiles(q.opts,'countanswer')+'</div>':'')),
  numeral:()=>center('<div class="display-gem">'+dots(q.n)+'</div>'+tiles(q.opts)),
  zero:()=>center(basket(fruits(q.n),'열매 '+q.n+'개')+tiles(q.opts,'zero')),
  path:()=>center('<div class="number-path">'+Array.from({length:5},(_,i)=>i===q.missing?'<span class="missing-stone">?</span>':'<span class="path-stone">'+(q.from+i)+'</span>').join('')+'</div>'+tiles(q.opts,'path')),
@@ -175,6 +187,7 @@ function act(k,b){
  if(k==='again'){start(scene.stage);return}
  if(scene.locked||!scene.task)return;const q=scene.task;
  if(scene.idle){clearTimeout(scene.idle);scene.idle=0}
+ if(k==='chooseTray'){if(Number(b.dataset.n)===q.n){q.trayReady=true;draw();fx()}else mistake()}
  if(k==='feed'){const n=Number(b.dataset.i);if(q.fed.includes(n))return;q.fed.push(n);if(q.fed.length>=q.n)good();else{draw();fx()}}
  if(k==='compare'||k==='length'){if(b.dataset.key===q.right)good();else mistake()}
  if(k==='glance'||k==='number'||k==='zero'||k==='path'||k==='sum'||k==='takeanswer'||k==='countanswer'){const n=Number(b.dataset.n),answer=q.mode==='take'?q.n-q.take:q.n;if(n===answer)good();else mistake()}
