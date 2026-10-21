@@ -69,7 +69,7 @@ function getTask(){
  if(m==='equal'){q.n=rnd(3,Math.min(10,n+2));q.have=rnd(1,q.n-1);q.added=0;q.advanced=info(m).clean>=4;q.opts=options(q.n-q.have,1,Math.min(9,q.n));q.prompt='양쪽을 똑같이'}
  if(m==='sum'){q.a=rnd(1,Math.max(2,Math.floor(n/2)+1));q.b=rnd(1,Math.max(2,Math.floor(n/2)+1));q.n=q.a+q.b;q.opts=options(q.n,2,Math.min(12,n+3));q.prompt='모두 합치면 몇 개?'}
  if(m==='take'){q.n=rnd(3,Math.min(10,n+2));q.take=rnd(1,q.n-1);q.gone=[];q.opts=options(q.n-q.take,0,Math.max(8,n+1));q.answering=false;q.prompt='다람쥐가 가져갈 열매'}
- if(m==='pattern'){q.a=Math.random()<.5?'berry':'gold';q.b=q.a==='berry'?'gold':'berry';q.answer=Math.random()<.5?q.a:q.b;q.seq=Array.from({length:5},(_,i)=>[q.a,q.b][(i+(q.answer===q.a?1:0))%2]);q.answer=q.seq[4]===q.a?q.b:q.a;q.prompt='다음에 올 씨앗은?'}
+ if(m==='pattern'){q.a=Math.random()<.5?'berry':'gold';q.b=q.a==='berry'?'gold':'berry';q.answer=Math.random()<.5?q.a:q.b;q.seq=Array.from({length:5},(_,i)=>[q.a,q.b][(i+(q.answer===q.a?1:0))%2]);q.answer=q.seq[4];q.prompt='다음에 올 씨앗은?'}
  if(m==='shapes'){q.n=rnd(0,2);q.opts=shuf(['circle','triangle','square']);q.prompt='나무 문에 맞는 모양'}
  if(m==='length'){q.a=rnd(100,182);q.b=rnd(205,290);if(Math.random()<.5)[q.a,q.b]=[q.b,q.a];q.want=Math.random()<.5?'long':'short';q.right=q.want==='long'?(q.a>q.b?'a':'b'):(q.a<q.b?'a':'b');q.prompt=q.want==='long'?'더 긴 다리를 골라요':'더 짧은 다리를 골라요'}
  return q
