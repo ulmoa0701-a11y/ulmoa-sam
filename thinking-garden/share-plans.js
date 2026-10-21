@@ -184,7 +184,16 @@ function embed(path,title,isMaterial){
  if(isMaterial){
   const a=E('a','moa-assigned-pdf-link','새 창에서 열기 ↗');a.href=path;a.target='_blank';a.rel='noopener';bar.append(a);
  }
- const frame=E('iframe','moa-assigned-frame');frame.src=path;frame.title=title;frame.setAttribute('allow','camera; microphone; fullscreen');frame.loading='eager';
+ const frame=E('iframe','moa-assigned-frame');frame.src=path;frame.title=title;
+ // Camera and microphone are sensitive capabilities. Do not grant them to
+ // PDFs, ordinary missions or unrelated games. Browser permission prompts
+ // are still controlled by the user in the two supported activities.
+ const modulePath=new URL(path,location.href).pathname;
+ const mediaPermissions=[];
+ if(!isMaterial&&modulePath.includes('/games/hand-mirror/'))mediaPermissions.push('camera');
+ if(!isMaterial&&modulePath.includes('/recorder/'))mediaPermissions.push('microphone');
+ mediaPermissions.push('fullscreen');
+ frame.setAttribute('allow',mediaPermissions.join('; '));frame.loading='eager';
  // Standalone games run in this same-origin frame. Their normal 'back to all games'
  // links must not escape the caregiver's selected-only list.
  if(!isMaterial){
