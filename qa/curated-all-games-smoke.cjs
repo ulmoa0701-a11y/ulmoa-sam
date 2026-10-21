@@ -14,12 +14,14 @@ function planUrl(items,opts={}){
   const catalog=await browser.newPage();
   await catalog.goto(base,{waitUntil:'load'});
   const coreGames=await catalog.locator('.library-card[data-open]').evaluateAll(cards=>cards.map(card=>card.dataset.open));
-  const standalone=['moaMoney','moaChange','moaFeel'];
+  const standalone=['moaMoney','moaChange','moaFeel','rhythmTouch','recorderPlay','breathStrength','breathLong','breathBeat'];
+  const realShotGames=new Set(['rhythmTouch','recorderPlay','breathStrength','breathLong','breathBeat']);
   assert.equal(new Set(coreGames).size,coreGames.length,'duplicate catalog game identifiers');
   assert.ok(coreGames.length>=26,'the main game catalog is missing games');
   await catalog.locator('#moaPlannerLaunch').click();
   for(const id of standalone)assert.equal(await catalog.locator('#moaPlanSelection input[value="'+id+'"]').count(),1,id+' existing Moa Mission missing in selection');
   const games=[...coreGames,...standalone];
+  assert.equal(games.length,34,'exactly 34 games must be available for therapist selection');
   await catalog.close();
   for(const vp of [{name:'mobile',width:390,height:844},{name:'desktop',width:1280,height:900}]){
    const page=await browser.newPage({viewport:{width:vp.width,height:vp.height}});
@@ -35,7 +37,12 @@ function planUrl(items,opts={}){
     const preview=page.locator('.moa-assigned-item .moa-assigned-visual');
     assert.equal(await preview.count(),1,marker+' missing visual example');
     assert.equal(await preview.locator('.moa-assigned-visual-label').count(),1,marker+' missing image meaning');
-    if(id==='handMirror'||standalone.includes(id)){
+    if(realShotGames.has(id)){
+     const picture=preview.locator('img.moa-assigned-real-shot');
+     assert.equal(await picture.count(),1,marker+' missing authentic preview picture');
+     const loaded=await picture.evaluate(async el=>{await el.decode().catch(()=>{});return el.naturalWidth>180&&el.naturalHeight>120;});
+     assert.ok(loaded,marker+' standalone game screenshot could not load');
+    }else if(id==='handMirror'||standalone.includes(id)){
      assert.ok(await preview.locator('.moa-assigned-fallback-icons span').count()>=4,marker+' missing illustrated gameplay');
     }else{
      assert.equal(await preview.locator('.card-live-preview').count(),1,marker+' must reuse actual catalog gameplay example');
@@ -57,6 +64,13 @@ function planUrl(items,opts={}){
       await page.evaluate(()=>{document.querySelector('#moaAssignedEmbed iframe').contentWindow.location.href='?game=change';});
       await page.locator('#moaAssignedEmbed').waitFor({state:'detached'});
       assert.equal(await page.locator('.moa-assigned-item').count(),1,marker+' escaped to an unassigned mission');
+     }else if(id==='breathStrength'){
+      await frame.contentFrame().locator('body').waitFor();
+      // A shared strength-only link must not navigate silently into a
+      // different, unassigned mode of the same breathing-garden page.
+      await page.evaluate(()=>{document.querySelector('#moaAssignedEmbed iframe').contentWindow.location.href='?mode=long';});
+      await page.locator('#moaAssignedEmbed').waitFor({state:'detached'});
+      assert.equal(await page.locator('.moa-assigned-item').count(),1,marker+' escaped to another breathing activity');
      }else await page.locator('#moaAssignedEmbed .moa-assigned-exit').click();
     }else{
      assert.ok(await page.locator('#introScreen.active').isVisible(),marker+' game preview did not open');
