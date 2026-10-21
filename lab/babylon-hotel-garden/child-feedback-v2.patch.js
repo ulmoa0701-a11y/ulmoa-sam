@@ -241,3 +241,113 @@ window.__ulmoaGardenV2={
  }
 };
 __hgBucketSync();
+
+/* v3: boss silhouette, animation and reward wayfinding.
+   Extra meshes are lightweight and keep the child-defined boss identities. */
+const __hgV3Meshes={woods:[],eye:[],smog:[]};
+function __hgV3Tube(name,boss,points,color=.12,radius=.055) {
+ const mesh=Df.CreateTube(name,{path:points.map(p=>new R(p[0],p[1],p[2])),radius,tessellation:7,cap:2},Yf);
+ mesh.parent=boss;mesh.material=__uMat(name+"Material",new H(.06,.25+color*.4,.09));
+ mesh.isPickable=false;return mesh;
+}
+function __hgV3Leaves(name,boss,positions,shade) {
+ for(const [i,p] of positions.entries()){
+  const m=__uSphere(name+i,boss,new R(...p),new R(.19,.36,.10),shade);
+  m.rotation.z=(i%2?-.45:.65);m.isPickable=false;
+ }
+}
+function __hgV3Shape() {
+ // Narrow the duplicated circular pipe-like wraps from the previous build.
+ for(const name of ["hgWoodsCreeper0","hgWoodsCreeper1","hgWoodsCreeper2","hgWoodsCreeper3",
+                    "hgEyeVine0","hgEyeVine1","hgEyeVine2",
+                    "hgSmogWrappedVine0","hgSmogWrappedVine1","hgSmogWrappedVine2","hgSmogWrappedVine3"]) {
+  const mesh=Yf.getMeshByName(name);if(mesh)mesh.setEnabled(false);
+ }
+ const pale=new H(.85,.83,.73),ivory=new H(.96,.93,.83),green=new H(.12,.40,.15);
+ // WOODS has NO eyes. Its wide, irregular mushroom canopy and a bent branch are the silhouette.
+ const crown=Yf.getMeshByName("woodsCap");
+ if(crown){crown.scaling.x*=1.14;crown.scaling.z*=1.1}
+ for(const [i,pos] of [[-1.1,5.52,-.2],[-.3,5.67,-.48],[1.45,5.44,-.3],[2.08,5.37,-.04]].entries()){
+  let m=__uSphere("hgWoodsIvoryCanopy"+i,Hp,new R(...pos),new R(.52,.30,.36),i%2?pale:ivory);
+  m.rotation.z=(i-1)*.13;
+ }
+ const branch=__uCyl("hgWoodsAttackBranch",Hp,new R(-1.8,3.02,-.12),new R(.36,2.2,.38),pale);
+ branch.rotation.z=-1.0;
+ const woodVines=[
+  [[-.15,1.1,-.58],[.02,1.8,-.64],[.50,2.65,-.62],[.2,3.4,-.54],[-.15,4.2,-.43]],
+  [[.65,1.35,-.33],[1.05,2.2,-.54],[1.44,3.0,-.47],[.96,3.85,-.28],[1.38,4.7,-.36]],
+  [[-1.35,2.6,-.58],[-1.72,3.05,-.54],[-2.20,3.44,-.29],[-2.78,3.24,.04]],
+ ];
+ woodVines.forEach((v,i)=>__hgV3Meshes.woods.push(__hgV3Tube("hgV3WoodsVine"+i,Hp,v,.22,.068)));
+ __hgV3Leaves("hgV3WoodsLeaf",Hp,[[-.08,3.95,-.59],[.6,2.7,-.77],[1.2,3.85,-.37],[-1.96,3.25,-.54],[1.4,4.64,-.44]],green);
+ // EYE: the multiple eyes should read as eyes (pale sclera, green iris, black pupil)
+ // on the BODY, not as a decorative row of small blobs.
+ for(const [i,[x,y,z,scale]] of [[0,3.20,-1.12,.45],[-.52,2.56,-1.17,.36],[.55,2.30,-1.15,.39],[-.42,1.77,-1.1,.31],[.35,1.42,-1.12,.31]].entries()){
+  __uSphere("hgV3EyeWhite"+i,Up,new R(x,y,z),new R(scale*1.40,scale,scale*.34),ivory);
+  __uSphere("hgV3EyeIris"+i,Up,new R(x,y,z-scale*.30),new R(scale*.48,scale*.50,scale*.14),new H(.16,.47,.28));
+  __uSphere("hgV3EyePupil"+i,Up,new R(x,y,z-scale*.44),new R(scale*.22,scale*.25,scale*.09),new H(.025,.035,.035));
+ }
+ for(const [i,points] of [
+  [[-.3,.9,-.57],[-.8,1.8,-.65],[-.94,2.8,-.48],[-.5,3.65,-.4]],
+  [[.85,1.0,-.6],[1.38,1.78,-.52],[1.60,2.61,-.35],[1.25,3.27,-.42]],
+ ].entries()) __hgV3Meshes.eye.push(__hgV3Tube("hgV3EyeVine"+i,Up,points,.2,.06));
+ __hgV3Leaves("hgV3EyeLeaves",Up,[[-1.08,2.20,-.62],[1.65,2.42,-.44],[-.6,3.62,-.46]],green);
+ const eyePetal=Yf.getMeshByName("lotus0");if(eyePetal)eyePetal.scaling.multiplyInPlace(new R(1.1,1.15,1));
+ // SMOG: make flame and smoke unmistakable rather than an opaque pile of spheres.
+ for(const mesh of Wp.getChildMeshes()){
+  if(mesh.name.startsWith("smoke")||mesh.name.startsWith("hgSmogSmokePuff")){
+   mesh.material.alpha=Math.min(mesh.material.alpha,.30);
+   if(mesh.name.startsWith("hgSmogSmokePuff"))__hgV3Meshes.smog.push(mesh);
+  }
+ }
+ const flame=Yf.getMeshByName("flame");
+ if(flame){flame.scaling.y*=1.22;flame.material.emissiveColor=new H(.85,.43,.05)}
+ for(const [i,points] of [
+  [[-.5,.8,-.68],[-.9,1.7,-.78],[-1.16,2.6,-.52],[-.85,3.46,-.52],[-.35,4.15,-.24]],
+  [[.68,1.12,-.73],[1.07,1.78,-.73],[1.33,2.55,-.45],[.82,3.4,-.54]],
+ ].entries()) __hgV3Meshes.smog.push(__hgV3Tube("hgV3SmogVine"+i,Wp,points,.25,.068));
+ __hgV3Leaves("hgV3SmogLeaves",Wp,[[-1.07,2.31,-.70],[.98,2.95,-.57],[-.42,3.79,-.50]],green);
+}
+__hgV3Shape();
+const __hgRewardNav=document.createElement("div");
+__hgRewardNav.id="hgRewardNav";
+__hgRewardNav.style.cssText="display:none;position:fixed;top:155px;left:50%;transform:translateX(-50%);padding:7px 11px;border-radius:12px;border:2px solid #f6ca73;background:#203c30eb;color:#fff;font:900 14px Arial,sans-serif;z-index:20;pointer-events:none;white-space:nowrap";
+document.body.appendChild(__hgRewardNav);
+const __hgV3OrigAnimate=__hgAnimate;
+function __hgV3Animate(){
+ const seconds=performance.now()/1000;
+ if(Hp.isEnabled()){
+  const attacking=Kp===2&&(_m==="windup"||_m==="vulnerable");
+  const branch=Yf.getMeshByName("hgWoodsAttackBranch");
+  if(branch)branch.rotation.z=-1+(attacking?-.36*Math.sin(seconds*6):.07*Math.sin(seconds*1.8));
+  const crown=Yf.getMeshByName("woodsCap");
+  if(crown)crown.rotation.z=.035*Math.sin(seconds*1.7);
+ }
+ if(Up.isEnabled()&&Kp===4){
+  const charging=im==="windup"||im==="vulnerable",r=Yf.getMeshByName("eyeArmR");
+  if(r)r.rotation.z=.22+(charging?.58*Math.sin(seconds*9):.10*Math.sin(seconds*4));
+  const l=Yf.getMeshByName("eyeArmL");if(l)l.rotation.z=-.35-(charging?.55*Math.sin(seconds*9):.10*Math.sin(seconds*4));
+ }
+ if(Wp.isEnabled()){
+  __hgV3Meshes.smog.forEach((m,i)=>{if(!m||m.isDisposed()||!m.name.startsWith("hgSmogSmokePuff"))return;
+   m.position.x=(i-1)*.3+.24*Math.sin(seconds*.6+i);
+   m.position.y=6.0+i*.48+.23*Math.sin(seconds*.9+i);
+   m.scaling.y=.55+i*.12+.09*Math.sin(seconds*1.2+i);
+  });
+ }
+ const flower=__hgClosestFlower();
+ if(flower&&!__hgFlowers.get(flower.boss)?.isDisposed()){
+  const d=Math.round(flower.d);
+  __hgRewardNav.style.display="block";
+  __hgRewardNav.textContent=d<=4?"연꽃 가까이! E를 1초 누르기":"🌸 연꽃 보상 "+d+"m · 가까이 가서 E 누르기";
+ }else __hgRewardNav.style.display="none";
+}
+Yf.onBeforeRenderObservable.add(__hgV3Animate);
+const __hgV3OldSmoke=window.__ulmoaGardenV2.runSmoke;
+window.__ulmoaGardenV2.runSmoke=async()=>{
+ const out=await __hgV3OldSmoke();
+ out.v3Models=["hgWoodsAttackBranch","hgV3WoodsVine0","hgV3EyeWhite0","hgV3EyePupil0","hgV3SmogVine0"].every(n=>!!Yf.getMeshByName(n));
+ out.v3RewardUi=!!document.getElementById("hgRewardNav");
+ out.pass=out.pass&&out.v3Models&&out.v3RewardUi;
+ return out;
+};
