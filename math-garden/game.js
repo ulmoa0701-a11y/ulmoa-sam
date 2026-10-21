@@ -31,7 +31,7 @@ let scene={stage:0,round:0,task:null,errors:0,hints:0,locked:false,started:false
 const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),shuf=(l)=>l.map(x=>({x,r:Math.random()})).sort((a,b)=>a.r-b.r).map(x=>x.x);
 const cap=id=>Learning.nextTier(info(id));
 const dots=n=>'<span class="dots" aria-label="'+n+'개">'+Array.from({length:n},(_,i)=>'<i class="count-dot" aria-hidden="true"></i>').join('')+'</span>';
-const fruit=(i,kind='acorn')=>'<span class="new-fruit '+kind+'" aria-hidden="true"><i></i></span>';
+const fruit=(i,kind='acorn')=>'<span class="new-fruit '+(kind==='acorn'&&scene.task?.variant&&scene.task.variant!=='acorn'?scene.task.variant:kind)+'" aria-hidden="true"><i></i></span>';
 const fruits=(n,kind='acorn')=>Array.from({length:n},(_,i)=>fruit(i,kind)).join('');
 const options=(n,min=0,max=10)=>{const a=new Set([n]);const near=shuf(Array.from({length:max-min+1},(_,i)=>i+min).filter(v=>v!==n).sort((x,y)=>Math.abs(x-n)-Math.abs(y-n)).slice(0,7));for(const v of near){a.add(v);if(a.size===3)break}return shuf([...a])};
 const tiles=(arr,action='number')=>'<div class="number-options">'+arr.map(n=>'<button type="button" class="number-tile" data-act="'+action+'" data-n="'+n+'" aria-label="숫자 '+n+'">'+n+'</button>').join('')+'</div>';
