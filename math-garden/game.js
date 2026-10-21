@@ -13,7 +13,7 @@ const STAGES=[
  {id:'numeral',name:'숫자 표지판',goal:'수량과 숫자 연결',chapter:'숫자 오솔길'},
  {id:'zero',name:'텅 빈 바구니',goal:'0의 의미',chapter:'숫자 오솔길'},
  {id:'path',name:'사라진 징검다리',goal:'수의 순서',chapter:'숫자 오솔길'},
- {id:'ten',name:'꽃잎 빈자리',goal:'5·10 구조와 수 만들기',chapter:'숫자 오솔길'},
+ {id:'ten',name:'도토리 빈자리',goal:'5·10 구조와 수 만들기',chapter:'숫자 오솔길'},
  {id:'compose',name:'도토리 창고',goal:'전체와 부분',chapter:'도토리 작업장'},
  {id:'equal',name:'양쪽 똑같이',goal:'수량 맞추기',chapter:'도토리 작업장'},
  {id:'sum',name:'열매 기차',goal:'합치기',chapter:'도토리 작업장'},
@@ -72,7 +72,7 @@ function getTask(){
  if(m==='numeral'){q.n=rnd(1,n);q.opts=options(q.n,1,Math.max(6,n));q.prompt='열매에 맞는 숫자'}
  if(m==='zero'){q.n=rnd(0,2);q.opts=shuf([0,1,2]);q.prompt='바구니에 몇 개 있을까?'}
  if(m==='path'){q.from=rnd(0,Math.max(1,n-3));q.missing=rnd(1,3);q.n=q.from+q.missing;q.opts=options(q.n,0,Math.max(6,n+3));q.prompt='없어진 숫자 징검다리'}
- if(m==='ten'){q.n=rnd(3,Math.min(10,n+2));q.have=rnd(1,q.n-1);q.added=0;q.advanced=scene.round>=2||info(m).verifiedSessions>=1;q.opts=options(q.n-q.have,1,Math.min(9,q.n));q.prompt='꽃잎 빈자리 채우기'}
+ if(m==='ten'){q.n=rnd(3,Math.min(10,n+2));q.have=rnd(1,q.n-1);q.added=0;q.advanced=scene.round>=2||info(m).verifiedSessions>=1;q.opts=options(q.n-q.have,1,Math.min(9,q.n));q.prompt='도토리 빈자리 채우기'}
  if(m==='compose'){q.n=rnd(3,Math.min(10,n+2));q.have=rnd(1,q.n-1);q.added=0;q.advanced=scene.round>=2||info(m).verifiedSessions>=1;q.opts=options(q.n-q.have,1,Math.min(9,q.n));q.prompt='창고에 모자란 열매'}
  if(m==='equal'){q.n=rnd(3,Math.min(10,n+2));q.have=rnd(1,q.n-1);q.added=0;q.advanced=scene.round>=2||info(m).verifiedSessions>=1;q.opts=options(q.n-q.have,1,Math.min(9,q.n));q.prompt='양쪽을 똑같이'}
  if(m==='sum'){q.a=rnd(1,Math.max(2,Math.floor(n/2)+1));q.b=rnd(1,Math.max(2,Math.floor(n/2)+1));q.n=q.a+q.b;q.opts=options(q.n,2,Math.min(12,n+3));q.prompt='모두 합치면 몇 개?'}
@@ -102,11 +102,11 @@ function draw(){
  numeral:()=>center('<div class="display-gem">'+dots(q.n)+'</div>'+tiles(q.opts)),
  zero:()=>center(basket(fruits(q.n),'열매 '+q.n+'개')+tiles(q.opts,'zero')),
  path:()=>center('<div class="number-path">'+Array.from({length:5},(_,i)=>i===q.missing?'<span class="missing-stone">?</span>':'<span class="path-stone">'+(q.from+i)+'</span>').join('')+'</div>'+tiles(q.opts,'path')),
- ten:()=>center(stamp(q.n+'칸 꽃밭')+build(q.n,q.have+q.added)+(q.advanced?tiles(q.opts,'build'):'<div class="action-pad">'+touch('add','씨앗 한 개 더 심기',fruit(0)+'<span>한 개 심기</span>','tap-add')+'</div>')),
+ ten:()=>center(stamp(q.n+'칸 도토리 판')+build(q.n,q.have+q.added)+(q.advanced?tiles(q.opts,'build'):'<div class="action-pad">'+touch('add','씨앗 한 개 더 심기',fruit(0)+'<span>한 개 심기</span>','tap-add')+'</div>')),
  compose:()=>center(stamp(q.n+'개 모아야 해요')+build(q.n,q.have+q.added)+(q.advanced?tiles(q.opts,'build'):'<div class="action-pad">'+touch('add','도토리 한 개 더하기',fruit(0)+'<span>한 개 놓기</span>','tap-add')+'</div>')),
  equal:()=>center('<div class="equal-mats"><div class="equal-mat">'+dots(q.n)+'</div><div class="equal-mat">'+dots(q.have+q.added)+'</div></div>'+(q.advanced?tiles(q.opts,'build'):'<div class="action-pad">'+touch('add','오른쪽에 열매 한 개 더하기',fruit(0)+'<span>한 개 놓기</span>','tap-add')+'</div>')),
  sum:()=>center('<div class="two-baskets">'+basket(fruits(q.a),'첫 바구니 '+q.a+'개')+'<span class="math-operator">+</span>'+basket(fruits(q.b),'두 번째 바구니 '+q.b+'개')+'</div>'+tiles(q.opts,'sum')),
- take:()=>center('<div class="take-scene"><div class="take-garden">'+Array.from({length:q.n},(_,i)=>touch('takepick','열매 '+(i+1)+' 가져가기',fruit(i),'harvest-btn '+(q.gone.includes(i)?'collected':'' )).replace('data-act="takepick"','data-act="takepick" data-i="'+i+'" '+(q.gone.includes(i)?'disabled':''))).join('')+'</div><span class="take-indicator">'+fruit(0)+'<b>× '+q.take+'</b></span></div>'+(q.answering?tiles(q.opts,'takeanswer'):'<div class="tiny-visual-guide">'+stamp('열매 '+q.take+'개를 다람쥐에게 주세요')+'</div>')),
+ take:()=>center('<div class="take-scene"><div class="take-garden">'+Array.from({length:q.n},(_,i)=>touch('takepick','열매 '+(i+1)+' 가져가기',fruit(i),'harvest-btn '+(q.gone.includes(i)?'collected':'' )).replace('data-act="takepick"','data-act="takepick" data-i="'+i+'" '+(q.gone.includes(i)?'disabled':''))).join('')+'</div><span class="take-indicator">'+fruit(0)+'<b>− '+q.take+'</b></span></div>'+(q.answering?tiles(q.opts,'takeanswer'):'<div class="tiny-visual-guide">'+stamp('열매 '+q.take+'개를 다람쥐에게 주세요')+'</div>')),
  pattern:()=>center('<div class="pattern-track">'+q.seq.slice(0,4).map(x=>'<span class="pattern-pocket">'+fruit(0,x)+'</span>').join('')+'<span class="pattern-pocket pattern-hole">?</span></div><div class="seed-choice-row">'+['berry','gold'].map(kind=>touch('pattern','이 씨앗을 다음 자리에 넣기',fruit(0,kind),'seed-choice').replace('data-act="pattern"','data-act="pattern" data-kind="'+kind+'"')).join('')+'</div>'),
  shapes:()=>center('<div class="shape-lock">'+shape(q.opts[q.n])+'</div><div class="shape-options">'+q.opts.map((x,i)=>touch('shape','모양 '+x+' 선택',shape(x),'shape-choice').replace('data-act="shape"','data-act="shape" data-kind="'+x+'"')).join('')+'</div>'),
  length:()=>center('<div class="bridge-options">'+['a','b'].map(key=>touch('length',(key==='a'?'왼':'오른')+'쪽 다리','<span class="bridge-road" style="width:'+q[key]+'px"><span></span></span>','bridge-choice').replace('data-act="length"','data-act="length" data-key="'+key+'"')).join('')+'</div>')
