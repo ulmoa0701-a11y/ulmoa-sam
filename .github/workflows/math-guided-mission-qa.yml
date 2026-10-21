@@ -1,0 +1,48 @@
+name: Number Forest Guided Learning QA
+on:
+  pull_request:
+    paths:
+      - 'math-garden/mission.*'
+      - 'math-garden/index.html'
+      - 'qa/math-guided-mission-qa.mjs'
+      - '.github/workflows/math-guided-mission-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'math-garden/mission.*'
+      - 'math-garden/index.html'
+      - 'qa/math-guided-mission-qa.mjs'
+      - '.github/workflows/math-guided-mission-qa.yml'
+permissions:
+  contents: read
+jobs:
+  guided-learning:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Browser driver
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Chrome and syntax
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          node --check math-garden/mission.js
+      - name: Run local website
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/mission-test.log 2>&1 &
+          for i in {1..40}; do curl -fsS http://127.0.0.1:8765/math-garden/mission.html >/dev/null && exit 0; sleep .25; done
+          cat /tmp/mission-test.log
+          exit 1
+      - name: Play guided, independent and transfer challenges
+        run: node qa/math-guided-mission-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: guided-math-screenshots
+          path: qa/math-mission-artifacts
+          if-no-files-found: warn

@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="../assets/habom-gamja-font.css?v=20261012-readable2">
 <link rel="stylesheet" href="./style.css?v=20261021a">
 <link rel="stylesheet" href="./v2.css?v=20261021-story1">
+<style>.mission-front-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;padding:14px 20px;min-height:63px}.mission-front-desc{font-size:14px!important;margin:0 5px 10px!important;line-height:1.6}.mission-free-button{font-size:14px;padding:12px 16px;min-height:47px}.welcome-board{width:min(95%,530px)}@media(max-width:650px){.mission-front-link{font-size:17px;min-height:58px}.mission-front-desc{font-size:12px!important}}</style>
 <script src="./game.js?v=20261021-story1" defer></script>
 </head>
 <body>
@@ -27,7 +28,7 @@
   <div class="world-frame">
    <div class="story-guide"><img src="../thinking-garden/assets/moa-discovery.png" alt="" class="moa-character" loading="eager"><div class="guide-bubble"><p class="guide-kicker" id="guideKicker">숫자 숲에 온 걸 환영해!</p><p class="guide-text" id="guideText">숲속 친구들과 놀아 볼까?</p></div><button class="hear-button" id="hearButton" type="button" aria-label="그림 힌트 보기" title="그림 힌트 보기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Zm12-1c2 2 2 6 0 8m2-11c4 4 4 10 0 14"/></svg></button></div>
    <div id="playfield" class="playfield" role="group" aria-label="놀이 공간">
-    <div class="welcome"><div class="welcome-trees" aria-hidden="true"><span class="tree"></span><span class="tree small"></span><span class="tree"></span></div><div class="welcome-board"><div class="welcome-fruits" aria-hidden="true"><span class="fruit"></span><span class="fruit"></span><span class="fruit"></span></div><h2>친구들이 기다리고 있어!</h2><p>누르면 숲속 놀이가 시작돼요.</p><button class="primary-button" id="startButton" type="button">숲으로 출발 <span aria-hidden="true">→</span></button></div></div>
+    <div class="welcome"><div class="welcome-trees" aria-hidden="true"><span class="tree"></span><span class="tree small"></span><span class="tree"></span></div><div class="welcome-board"><div class="welcome-fruits" aria-hidden="true"><span class="fruit"></span><span class="fruit"></span><span class="fruit"></span></div><h2>친구들이 기다리고 있어!</h2><p>누르면 숲속 놀이가 시작돼요.</p><a class="primary-button mission-front-link" href="./mission.html">새로운 수학 모험 시작 <span aria-hidden="true">→</span></a><p class="mission-front-desc">시범을 보고, 직접 하고, 혼자 다시 해보는 도토리 배달 이야기</p><button class="secondary-button mission-free-button" id="startButton" type="button">기존 숫자 놀이 15종 둘러보기 →</button></div></div>
    </div>
    <div class="world-ground" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
   </div>
