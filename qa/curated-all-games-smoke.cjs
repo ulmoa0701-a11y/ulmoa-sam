@@ -56,7 +56,10 @@ function planUrl(items,opts={}){
     await page.locator('.moa-assigned-item button.moa-assigned-start').click();
     if(await page.locator('#moaAssignedEmbed').count()){
      const frame=page.locator('#moaAssignedEmbed iframe');
-     assert.ok((await frame.getAttribute('allow')).includes('camera'),marker+' iframe lacks camera permission');
+     const grant=(await frame.getAttribute('allow'))||'';
+     assert.equal(grant.includes('camera'),id==='handMirror',marker+' unnecessary/missing camera access');
+     assert.equal(grant.includes('microphone'),id==='recorderPlay',marker+' unnecessary/missing microphone access');
+     assert.ok(grant.includes('fullscreen'),marker+' lost fullscreen ability');
      if(id==='moaMoney'){
       await frame.contentFrame().locator('body').waitFor();
       // Different mission inside the same iframe directory must never bypass
@@ -99,6 +102,7 @@ function planUrl(items,opts={}){
    await materials.locator('.moa-assigned-item button').click();
    const iframe=materials.locator('#moaAssignedEmbed iframe');
    assert.ok(await iframe.getAttribute('src'),item+' iframe URL empty');
+   assert.equal(await iframe.getAttribute('allow'),'fullscreen',item+' must not get camera/microphone permissions');
    await materials.locator('#moaAssignedEmbed .moa-assigned-exit').click();
   }
   const pdf=await materials.request.get('http://127.0.0.1:8765/materials/slow-look/worksheets-16p.pdf');
