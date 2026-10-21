@@ -32,6 +32,9 @@ const external={
  breathBeat:'../breath-garden/?mode=beat'
 };
 const REAL_PLAY_IMAGES={
+ // Use the same real gameplay shots as the five-garden catalog, not emoji
+ // placeholders. Parent links should show what the child actually does.
+ handMirror:'hand-mirror',moaMoney:'money',moaChange:'change',moaFeel:'feel',
  rhythmTouch:'rhythm-touch',recorderPlay:'recorder',
  breathStrength:'strength',breathLong:'long',breathBeat:'beat'
 };
