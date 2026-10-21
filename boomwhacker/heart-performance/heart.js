@@ -164,7 +164,7 @@ function disk(c,x,y,r,fill,stroke="",sw=2){c.beginPath();c.arc(x,y,r,0,Math.PI*2
 function ln(c,x,y,X,Y,color,width=3){c.beginPath();c.moveTo(x,y);c.lineTo(X,Y);c.strokeStyle=color;c.lineWidth=width;c.lineCap="round";c.stroke()}
 function noteBadge(c,e,x,y,r=34,alpha=1,detail=true){if(!e)return;c.save();const visible=isSelected(e.note)||e.note==="쉼";c.globalAlpha=alpha*(visible?1:.18);disk(c,x,y,r,col(e.note),visible?"#fff":"#d1dcd7",3);txt(c,e.note==="쉼"?"쉼":fixedNote(e.note),x,y,r*.60,"#263f48");if(detail&&e.dur>1.01)txt(c,Number(e.dur).toString()+"박",x,y+r+18,13,"#658382");c.restore()}
 function head(c,v){
- let grad=c.createLinearGradient(0,0,0,620);grad.addColorStop(0,v==="clock"?"#edf1fb":v==="wave"?"#e8f2fb":"#eef8f5");grad.addColorStop(1,v==="lyrics"?"#f8f2ec":v==="ribbon"?"#fff6e8":"#e1f0ed");c.fillStyle=grad;c.fillRect(0,0,1200,620);
+ themeBackground(c);
  rr(c,28,20,330,43,20,"rgba(255,255,255,.84)");txt(c,VIEW[v].name,48,42,21,"#3f716b","left");
  txt(c,song.title,600,42,26,"#244650");
  rr(c,974,20,195,42,17,"rgba(255,255,255,.86)");
@@ -427,11 +427,11 @@ function heart(c,beat,x,y,w,h,now,muted=false){
    c.globalAlpha=!isSelected(p.note)&&p.note!=="쉼"?.35:1;
    const label=p.note==="높은도"?"도":p.note==="쉼"?"쉼":fixedNote(p.note);
    const fs=Math.min(32,Math.max(12,Math.floor((width*100-6)/(label.length+0.15))));
-   txt(c,label,cx,38,fs,["도","라","높은도"].includes(p.note)?"#fff":"#243e48");
+   txt(c,label,cx,38,fs,["도","라","높은도"].includes(p.note)?"#fff":"#243e48","center","700");
    if(p.note==="높은도")txt(c,"↑",cx,58,Math.max(11,Math.min(15,fs*.62)),"#fff");
  }
  c.globalAlpha=1;
- if(parts.length===1&&!parts[0].onset)txt(c,"길게",50,48,18,["도","라","높은도"].includes(parts[0].note)?"#fff":"#29434a");
+ if(parts.length===1&&!parts[0].onset)txt(c,"길게",50,48,18,["도","라","높은도"].includes(parts[0].note)?"#fff":"#29434a","center","700");
  if(active&&!muted){
   c.save();c.clip(HEART);ln(c,clamp(now-beat,0,1)*100,7,clamp(now-beat,0,1)*100,80,"#ffffffc9",1.8);c.restore();
   const struck=parts.find(p=>p.onset&&isSelected(p.note)&&now>=p.source.start-.015&&now<p.source.start+Math.min(.24,p.source.dur)*.9);
@@ -757,6 +757,30 @@ function stairEvents(info){
  const first=info.startBar*song.meter,end=info.endBar*song.meter;
  return song.events.filter(e=>e.start>=first-E&&e.start<end-E&&e.note!=="쉼");
 }
+
+/* Eighth + eighth inside ONE beat: render a fixed left and right heart half
+   independently at the respective note's height, without changing audio
+   timing or allocating any additional beats. Dotted/16th stay in one heart. */
+function stairHalfBeatPair(beat){
+ const events=beatParts(beat).filter(p=>p.onset&&p.note!=="쉼");
+ if(events.length!==2)return null;
+ if(Math.abs(events[0].from)>E||Math.abs(events[0].to-.5)>E||
+    Math.abs(events[1].from-.5)>E||Math.abs(events[1].to-1)>E)return null;
+ return events;
+}
+function paintStairBeat(c,beat,x,y,w,h,row){
+ const pair=stairHalfBeatPair(beat);
+ if(!pair){heart(c,beat,x,y,w,h,-100,false);return}
+ const top=Math.min(stairHeartTop(row,pair[0].note),stairHeartTop(row,pair[1].note))-3;
+ for(let i=0;i<2;i++){
+  const pitchY=stairHeartTop(row,pair[i].note);
+  c.save();
+  c.beginPath();c.rect(x+(i? w/2:0)-(i?0:2),top,w/2+2,h+112);c.clip();
+  heart(c,beat,x,pitchY,w,h,-100,false);
+  c.restore();
+ }
+}
+
 function buildStairPage(info){
  const bg=document.createElement("canvas");bg.width=1200;bg.height=620;
  const c=bg.getContext("2d");
@@ -784,7 +808,7 @@ function buildStairPage(info){
   for(let beat=first*song.meter;beat<last*song.meter;beat++){
    const idx=beat-first*song.meter,x=g.left+idx*(g.width+g.gap),p=stairPrimary(beat),
          y=stairHeartTop(row,p);
-   heart(c,beat,x,y,g.width,g.heartHeight,-100,false);
+   paintStairBeat(c,beat,x,y,g.width,g.heartHeight,row);
    // Keep the stepped score visually quiet. The original heart itself
    // retains every eighth/sixteenth onset as a separate colored segment
    // with its note name; extra floating dots would clutter this pitch map.
@@ -903,7 +927,7 @@ bind();rebuildSections();reset();
 window.addEventListener("resize",()=>{twoPageCache=null;stairPageCache=null;draw(ctx,playing?nowBeat():position)});
 moaDefault.onload=()=>{if(view==="two"||view==="stairs")draw(ctx,position)};
 moaCheer.onload=()=>{if(view==="two")draw(ctx,position)};
-window.__performanceViewsQA__={themes:Object.keys(THEMES),theme:()=>theme,selectTheme:chooseTheme,videoExportSize:()=>({width:1920,height:1080,contentY:44,contentHeight:992}),heartScale:(w,h)=>Math.min(w/100,h/90),stairPageAt:twoPageAt,stairBackground:()=>stairPageCache?.canvas,stairGeometry,stairHeartTop,stairPoint,stairMoaPosition,stairStyle:()=>stairStyle,stairPrimary,twoPageAt,twoMoaPosition,twoBaseKey,twoBarsPerLine,twoBackground:()=>twoPageCache?.canvas,moaTravel:()=>moaTravel,beatParts,heartPath:HEART_PATH,modes:Object.keys(VIEW),scores:scores.map(s=>({key:s.key,bpm:s.bpm,meter:s.meter,measures:s.bars.length,beats:s.beats,events:s.events.length,rests:s.events.filter(e=>e.note==="쉼").length})),
+window.__performanceViewsQA__={themes:Object.keys(THEMES),theme:()=>theme,selectTheme:chooseTheme,stairHalfBeatPair,videoExportSize:()=>({width:1920,height:1080,contentY:44,contentHeight:992}),heartScale:(w,h)=>Math.min(w/100,h/90),stairPageAt:twoPageAt,stairBackground:()=>stairPageCache?.canvas,stairGeometry,stairHeartTop,stairPoint,stairMoaPosition,stairStyle:()=>stairStyle,stairPrimary,twoPageAt,twoMoaPosition,twoBaseKey,twoBarsPerLine,twoBackground:()=>twoPageCache?.canvas,moaTravel:()=>moaTravel,beatParts,heartPath:HEART_PATH,modes:Object.keys(VIEW),scores:scores.map(s=>({key:s.key,bpm:s.bpm,meter:s.meter,measures:s.bars.length,beats:s.beats,events:s.events.length,rests:s.events.filter(e=>e.note==="쉼").length})),
  cueAt,assignedEvents,beatUntil,state:()=>({view,song:song.key,notes,speed,section,playing,ended,position,measure:barAt(position).index,score:song.events.map(e=>[e.note,e.start,e.dur,e.lyric]),mask:selected(),clockAudio:!!acc,exporting}),
  selectView:chooseView,selectSong:chooseSong,play,pause,reset,at:(b)=>{if(playing)pause();position=b;draw(ctx,b);updateControls()},render:()=>draw(ctx,position),testMime:videoMime
 };
