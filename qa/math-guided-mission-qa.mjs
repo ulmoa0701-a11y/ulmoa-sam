@@ -12,7 +12,7 @@ async function task(page){
  return page.evaluate(()=>window.__moaMissionQA());
 }
 async function loadConcept(page,index){
- if(index===0){await page.locator('#missionStart').count()===0?null:page.locator('#missionStart').click();if(await page.locator('[data-mission=start]').count())await page.locator('[data-mission=start]').click();}
+ if(index===0)await page.locator('[data-mission=start]').click();
  else await page.locator('[data-mission=next-chapter]').click();
  const s=await task(page);assert.equal(s.conceptIndex,index);
  assert.equal(s.phase,'demo','model must be displayed before child is asked');
