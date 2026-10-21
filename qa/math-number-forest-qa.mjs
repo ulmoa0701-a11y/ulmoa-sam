@@ -15,7 +15,7 @@ async function solve(page,index,iteration){
  if(q.mode==='share')for(let k=0;k<q.n;k++)await page.locator('.friend-card:not([disabled])').first().click();
  if(q.mode==='glance'||q.mode==='numeral')await page.locator('.number-tile[data-n="'+q.n+'"]').click();
  if(q.mode==='compare'||q.mode==='length'){
-  if(index===2&&iteration===0){const wrong=q.right==='a'?'b':'a';await page.locator('.island-choice[data-key="'+wrong+'"]').click();await page.locator('.island-choice[data-key="'+wrong+'"]').click();assert.ok(await page.locator('.coach-target').count(),'wrong answers should reveal helpful visual focus')}
+  if(index===2&&iteration===0){const wrong=q.right==='a'?'b':'a';await page.locator('.island-choice[data-key="'+wrong+'"]').click();await page.locator('.island-choice[data-key="'+wrong+'"]').click();assert.ok(await page.locator('.coach-target').count(),'wrong answers should reveal helpful visual focus '+JSON.stringify(await page.evaluate(()=>({state:window.__numberForestQA.getState(),task:window.__numberForestQA.getTask(),buttons:[...document.querySelectorAll('.island-choice')].map(n=>({html:n.outerHTML.slice(0,260),key:n.dataset.key,classes:n.className})),status:document.querySelector('#status')?.textContent}))))}
   await page.locator('[data-key="'+q.right+'"]').click()
  }
  if(q.mode==='count')for(let k=0;k<q.n;k++)await page.locator('.harvest-btn:not([disabled])').first().click();
