@@ -48,7 +48,18 @@ async function solve(page,id){
   for(let i=0;i<9&&!await page.locator('.round-gate button').count();i++)
    await page.locator('#insideZone').click({position:{x:45+i%3*38,y:50}});
  }else if(id==='targets')await pickUntil(page,'.wake-target:not(.wake-decoy):not(.awake)');
- else if(id==='paint')await pickUntil(page,'#paintGrid i:not(.painted)');
+ else if(id==='paint'){
+  const grid=page.locator('#paintGrid');
+  assert.equal(await grid.getAttribute('role'),'button','paint grid lacks keyboard semantics');
+  assert.equal(await grid.getAttribute('tabindex'),'0','paint grid cannot receive keyboard focus');
+  await grid.focus();
+  await grid.press('Enter');
+  assert.equal(await page.locator('#paintGrid i.painted').count(),1,'paint Enter did not grow a flower');
+  const total=await page.locator('#paintGrid i').count();
+  for(let i=1;i<total;i++)await grid.press('Space');
+  assert.equal(await page.locator('#paintGrid i.painted').count(),total,'paint keyboard did not fill every cell');
+  assert.equal(await page.locator('.paint-garden-complete').count(),1,'garden scene did not complete');
+ }
  else if(id==='water')await pickUntil(page,'.wilt[data-good="1"]:not(.bloom)');
  else throw Error('Unknown gameplay '+id);
  await page.locator('.round-gate button').waitFor({state:'visible',timeout:10000});
