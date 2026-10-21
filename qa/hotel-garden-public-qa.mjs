@@ -2,6 +2,7 @@ import puppeteer from 'puppeteer-core';
 import fs from 'node:fs';
 
 const target='https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/';
+// 2026-10-21: verify child feedback v3 boss appearance, combat and reward wayfinding.
 // Re-run against current public main to verify shader assets and single Babylon scene (2026-10-20).
 const chrome=process.env.CHROME_PATH||'/usr/bin/google-chrome';
 const browser=await puppeteer.launch({headless:true,executablePath:chrome,args:['--no-sandbox','--disable-dev-shm-usage','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
