@@ -26,16 +26,16 @@ for(const test of cases){
   try {
     await page.goto(target+'?qa='+encodeURIComponent(process.env.GITHUB_SHA||Date.now()),{waitUntil:'domcontentloaded',timeout:60000});
     await page.waitForFunction(()=>Boolean(window.__ulmoaGameQa?.state&&window.__ulmoaGardenV2?.runSmoke),{timeout:60000});
-    await page.waitForFunction(()=>Number(window.__bench?.avgFps)>0,{timeout:15000});
+    await page.waitForFunction(()=>Number(window.__bench?.frames)>2,{timeout:15000});
     result.start=await page.evaluate(()=>{
       const rect=id=>{const el=document.getElementById(id);if(!el)return null;const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height}};
       const boxOverlap=(a,b)=>!!a&&!!b&&Math.max(0,Math.min(a.x+a.width,b.x+b.width)-Math.max(a.x,b.x))>5&&Math.max(0,Math.min(a.y+a.height,b.y+b.height)-Math.max(a.y,b.y))>5;
       const target=rect('target'),lotus=rect('lotusHud'),bucket=rect('bucketHud');
-      return {state:window.__ulmoaGameQa.state(),shaderReady:window.__hgShadersReady||false,shaderError:window.__hgShaderError||null,lotusNodes:document.querySelectorAll('#lotusHud').length,gameModules:[...document.querySelectorAll('script[type="module"]')].map(x=>x.src),fps:window.__bench.avgFps,canvas:document.querySelectorAll('canvas').length,overflow:document.documentElement.scrollWidth>window.innerWidth,
+      return {state:window.__ulmoaGameQa.state(),shaderReady:window.__hgShadersReady||false,shaderError:window.__hgShaderError||null,lotusNodes:document.querySelectorAll('#lotusHud').length,gameModules:[...document.querySelectorAll('script[type="module"]')].map(x=>x.src),fps:window.__bench.avgFps,frames:window.__bench.frames,canvas:document.querySelectorAll('canvas').length,overflow:document.documentElement.scrollWidth>window.innerWidth,
         lotusText:document.querySelector('#lotusHud')?.textContent||'',timer:document.querySelector('#timer')?.textContent||'',
         hudCollision:boxOverlap(target,lotus),target,lotus,bucket,dialogVisible:document.querySelector('#dialog')?.classList.contains('show')};
     });
-    result.tests.load=result.start.canvas===1&&result.start.lotusNodes===1&&result.start.fps>0&&result.start.state?.stage===0&&result.start.dialogVisible&&result.start.shaderReady===true;
+    result.tests.load=result.start.canvas===1&&result.start.lotusNodes===1&&result.start.frames>2&&result.start.state?.stage===0&&result.start.dialogVisible&&result.start.shaderReady===true;
     result.tests.hud=!result.start.overflow&&result.start.lotusText.includes('0/3')&&!result.start.hudCollision&&result.start.timer==='07:00';
     await page.screenshot({path:'hotel-garden-'+test.name+'-start.jpg',type:'jpeg',quality:55,fullPage:true});
     await page.click('#dialogBtn');
