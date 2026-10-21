@@ -58,7 +58,7 @@ function planUrl(items,opts={}){
      const frame=page.locator('#moaAssignedEmbed iframe');
      const grant=(await frame.getAttribute('allow'))||'';
      assert.equal(grant.includes('camera'),id==='handMirror',marker+' unnecessary/missing camera access');
-     assert.equal(grant.includes('microphone'),id==='recorderPlay',marker+' unnecessary/missing microphone access');
+     assert.equal(grant.includes('microphone'),['recorderPlay','breathStrength','breathLong','breathBeat'].includes(id),marker+' unnecessary/missing microphone access');
      assert.ok(grant.includes('fullscreen'),marker+' lost fullscreen ability');
      if(id==='moaMoney'){
       await frame.contentFrame().locator('body').waitFor();
