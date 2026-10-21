@@ -86,7 +86,7 @@ function draw(){
  share:()=>center('<div class="friend-porch">'+Array.from({length:q.n},(_,i)=>touch('feed','친구 '+(i+1)+'에게 열매 주기',char(i)+'<span class="mini-plate">'+(q.fed.includes(i)?fruit(i):'<span class="plate-empty"></span>')+'</span>','friend-card '+(q.fed.includes(i)?'fed':'')) .replace('data-act="feed"','data-act="feed" data-i="'+i+'" '+(q.fed.includes(i)?'disabled':''))).join('')+'</div>'+basket(fruits(q.n-q.fed.length),'남은 열매 '+(q.n-q.fed.length)+'개')),
  glance:()=>center('<div class="display-gem">'+dots(q.n)+'</div>'+tiles(q.opts)),
  compare:()=>center('<div class="fork-choice">'+['a','b'].map(key=>touch('compare',key==='a'?'왼쪽 '+q.a+'개':'오른쪽 '+q.b+'개','<span class="island-cluster">'+dots(q[key])+'</span><span class="island-edge"></span>','island-choice').replace('data-act="compare"','data-act="compare" data-key="'+key+'"')).join('')+'</div>'),
- count:()=>center('<div class="harvest-yard"><div class="harvest-patch">'+Array.from({length:q.n},(_,i)=>touch('pick','열매 '+(i+1)+' 수확하기',fruit(i),'harvest-btn '+(q.picked.includes(i)?'collected':'' )).replace('data-act="pick"','data-act="pick" data-i="'+i+'" '+(q.picked.includes(i)?'disabled':''))).join('')+'</div>'+basket('<span class="basket-number">'+q.picked.length+'</span>'+fruits(q.picked.length),'수확한 열매 '+q.picked.length+'개')+'</div>'),
+ count:()=>center('<div class="harvest-yard"><div class="harvest-patch">'+Array.from({length:q.n},(_,i)=>touch('pick','열매 '+(i+1)+' 수확하기',fruit(i),'harvest-btn '+(q.picked.includes(i)?'collected':'' )).replace('data-act="pick"','data-act="pick" data-i="'+i+'" '+(q.picked.includes(i)?'disabled':''))).join('')+'</div>'+basket('<span class="basket-number">'+q.picked.length+'</span>'+fruits(q.picked.length),'수확한 열매 '+q.picked.length+'개')+'</div>'+(q.answering?'<div class="final-count">'+stamp('모두 몇 개일까?')+tiles(q.opts,'countanswer')+'</div>':'')),
  numeral:()=>center('<div class="display-gem">'+dots(q.n)+'</div>'+tiles(q.opts)),
  zero:()=>center(basket(fruits(q.n),'열매 '+q.n+'개')+tiles(q.opts,'zero')),
  path:()=>center('<div class="number-path">'+Array.from({length:5},(_,i)=>i===q.missing?'<span class="missing-stone">?</span>':'<span class="path-stone">'+(q.from+i)+'</span>').join('')+'</div>'+tiles(q.opts,'path')),
@@ -102,25 +102,57 @@ function draw(){
  board.innerHTML=(scenes[key]||scenes.share)();
 }
 function shape(which){const bodies={circle:'<circle cx="55" cy="55" r="34"/>',triangle:'<path d="M55 17L93 88H17Z"/>',square:'<rect x="20" y="20" width="70" height="70" rx="9"/>'};return '<svg class="shape-svg" viewBox="0 0 110 110" role="img" aria-label="'+which+'">'+bodies[which]+'</svg>'}
-function hint(quiet=false){
- if(scene.locked||!scene.task)return;scene.hints++;
- board.querySelectorAll('.coach-target').forEach(x=>x.classList.remove('coach-target'));
+function visualExample(q){
+ const small=v=>dots(Math.min(5,Math.max(1,v||1)));
+ if(q.mode==='share')return '<div class="model-steps">'+fruit(0)+'<span>→</span>'+char(0)+'<span class="model-small-plate">'+fruit(0)+'</span></div>';
+ if(q.mode==='compare')return '<div class="model-steps">'+small(2)+'<span>↔</span>'+small(3)+'</div>';
+ if(['count','glance','numeral','zero'].includes(q.mode))return '<div class="model-steps">'+small(3)+'<span>→</span><span class="model-steps-numbers">1 · 2 · 3</span></div>';
+ if(q.mode==='path')return '<div class="model-steps model-steps-numbers">1 → 2 → 3 → 4</div>';
+ if(['ten','compose','equal','sum','take'].includes(q.mode))return '<div class="model-steps">'+small(2)+'<span>＋</span>'+small(1)+'</div>';
+ if(q.mode==='pattern')return '<div class="model-steps">'+fruit(0,'berry')+fruit(0,'gold')+fruit(0,'berry')+fruit(0,'gold')+'</div>';
+ if(q.mode==='shapes')return '<div class="model-steps">'+shape('circle')+shape('triangle')+'</div>';
+ if(q.mode==='length')return '<div class="model-steps"><span class="model-line"></span><span class="model-line short"></span></div>';
+ return '<div class="model-steps">'+small(2)+'</div>';
+}
+function demonstrate(automatic=false){
+ if(scene.locked||!scene.task)return;
+ if(!automatic)scene.hints++;
+ scene.modelUsed=true;
+ board.querySelector('.learning-model')?.remove();
+ board.insertAdjacentHTML('afterbegin','<div class="learning-model" role="note" aria-label="그림 시범"><span class="model-eye" aria-hidden="true">◎</span>'+visualExample(scene.task)+'</div>');
+ if(!automatic)setMessage('그림을 보면서 다시 해 봐요');
+}
+function hint(){
+ if(scene.locked||!scene.task)return;
+ scene.hints++;scene.modelUsed=true;
  const q=scene.task;
- let query={
+ if(scene.errors<3&&scene.hints<2){demonstrate(true);return}
+ const selectors={
  share:'.friend-card:not([disabled])',glance:'.number-tile[data-n="'+q.n+'"]',
- compare:'.island-choice[data-key="'+q.right+'"]',count:'.harvest-btn:not([disabled])',numeral:'.number-tile[data-n="'+q.n+'"]',
- zero:'.number-tile[data-n="'+q.n+'"]',path:'.number-tile[data-n="'+q.n+'"]',
+ compare:'.island-choice[data-key="'+q.right+'"]',
+ count:q.answering?'.number-tile[data-n="'+q.n+'"]':'.harvest-btn:not([disabled])',
+ numeral:'.number-tile[data-n="'+q.n+'"]',zero:'.number-tile[data-n="'+q.n+'"]',
+ path:'.number-tile[data-n="'+q.n+'"]',
  ten:q.advanced?'.number-tile[data-n="'+(q.n-q.have)+'"]':'.tap-add',
  compose:q.advanced?'.number-tile[data-n="'+(q.n-q.have)+'"]':'.tap-add',
  equal:q.advanced?'.number-tile[data-n="'+(q.n-q.have)+'"]':'.tap-add',
  sum:'.number-tile[data-n="'+q.n+'"]',
  take:q.answering?'.number-tile[data-n="'+(q.n-q.take)+'"]':'.harvest-btn:not([disabled])',
- pattern:'.seed-choice[data-kind="'+q.answer+'"]',shapes:'.shape-choice[data-kind="'+(q.opts?.[q.n]??'')+'"]',length:'.bridge-choice[data-key="'+q.right+'"]'
- }[q.mode];
- const el=board.querySelector(query);if(el)el.classList.add('coach-target');
- if(!quiet)setMessage('빛나는 곳을 살펴봐요');
+ pattern:'.seed-choice[data-kind="'+q.answer+'"]',
+ shapes:'.shape-choice[data-kind="'+(q.opts?.[q.n]??'')+'"]',
+ length:'.bridge-choice[data-key="'+q.right+'"]'
+ };
+ demonstrate(true);
+ board.querySelectorAll('.coach-target').forEach(el=>el.classList.remove('coach-target'));
+ board.querySelector(selectors[q.mode])?.classList.add('coach-target');
+ setMessage('빛나는 곳을 살펴봐요');
 }
-function mistake(){scene.errors++;setMessage('천천히 다시 살펴볼까?','try');if(scene.errors>=2)hint()}
+function mistake(){
+ scene.errors++;
+ setMessage('다른 방법도 생각해 볼까?','try');
+ if(scene.errors===2)demonstrate();
+ if(scene.errors>=3)hint();
+}
 function good(){
  if(scene.locked)return;scene.locked=true;if(scene.idle)clearTimeout(scene.idle);
  scene.round++;scene.totalInStage++;if(!scene.hints&&!scene.errors)scene.cleanInStage++;
