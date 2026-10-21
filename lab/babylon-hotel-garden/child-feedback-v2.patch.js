@@ -206,7 +206,17 @@ window.__ulmoaGardenV2={
    return true;
  },
  state:()=>({sprinting:__hgSprinting,stage:Kp,flowers:[...__hgFlowers.keys()],collected:__uLotusCount,bucket:__uHasBucket,pouring:__hgPouring,bosses:[...__hgDefeated],eyeSlashVisible:!document.querySelector('[data-action="slash"]')?.classList.contains("hidden")}),
- holdPickup:async(boss)=>{const node=__hgFlowers.get(boss);if(!node)return false;Rp.position.copyFrom(node.position.add(new R(-1.3,0,0)));__hgStartCollect();await new Promise(r=>setTimeout(r,1250));return !__hgFlowers.has(boss)},
+ holdPickup:async(boss)=>{
+ const node=__hgFlowers.get(boss);if(!node)return false;
+ Rp.position.copyFrom(node.position.add(new R(-1.3,0,0)));
+ const touch=boss==="eye",button=document.querySelector('[data-action="talk"]');
+ if(touch&&button){button.dispatchEvent(new PointerEvent("pointerdown",{bubbles:true,pointerType:"touch"}))}
+ else document.dispatchEvent(new KeyboardEvent("keydown",{bubbles:true,code:"KeyE",key:"e"}));
+ await new Promise(r=>setTimeout(r,1250));
+ if(touch&&button){button.dispatchEvent(new PointerEvent("pointerup",{bubbles:true,pointerType:"touch"}))}
+ else document.dispatchEvent(new KeyboardEvent("keyup",{bubbles:true,code:"KeyE",key:"e"}));
+ return !__hgFlowers.has(boss);
+},
  runSmoke:async()=>{
    const sleep=ms=>new Promise(r=>setTimeout(r,ms)),out={};
    try{
