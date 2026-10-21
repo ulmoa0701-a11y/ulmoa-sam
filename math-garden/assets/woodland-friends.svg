@@ -9,7 +9,7 @@
 <g id="blush" fill="#e89088" opacity=".38"><ellipse cx="-34" cy="16" rx="11" ry="7"/><ellipse cx="34" cy="16" rx="11" ry="7"/></g>
 </defs>
 <!-- Bunny: long soft ears, tiny body -->
-<g transform="translate(75 17)" stroke-linejoin="round" stroke-linecap="round">
+<g id="rabbit" transform="translate(75 17)" stroke-linejoin="round" stroke-linecap="round">
 <ellipse cx="0" cy="143" rx="46" ry="8" fill="#52745e" opacity=".22"/>
 <ellipse cx="-24" cy="32" rx="16" ry="60" transform="rotate(-10 -24 32)" fill="url(#furB)" stroke="#9f9b99" stroke-width="3"/>
 <ellipse cx="22" cy="30" rx="16" ry="60" transform="rotate(12 22 30)" fill="url(#furB)" stroke="#9f9b99" stroke-width="3"/>
@@ -22,7 +22,7 @@
 <ellipse cx="-30" cy="126" rx="13" ry="9" fill="#eee3d9"/><ellipse cx="30" cy="126" rx="13" ry="9" fill="#eee3d9"/>
 </g>
 <!-- Bear: rounded ears -->
-<g transform="translate(225 20)" stroke-linejoin="round" stroke-linecap="round">
+<g id="bear" transform="translate(225 20)" stroke-linejoin="round" stroke-linecap="round">
 <ellipse cy="143" rx="50" ry="8" fill="#52745e" opacity=".22"/>
 <circle cx="-36" cy="38" r="22" fill="#c9906d" stroke="#9c6a52" stroke-width="3"/><circle cx="36" cy="38" r="22" fill="#c9906d" stroke="#9c6a52" stroke-width="3"/><circle cx="-36" cy="38" r="10" fill="#e8b4a4"/><circle cx="36" cy="38" r="10" fill="#e8b4a4"/>
 <ellipse cy="121" rx="40" ry="32" fill="url(#furA)" stroke="#9c6a52" stroke-width="3"/>
@@ -33,7 +33,7 @@
 <ellipse cx="-37" cy="133" rx="14" ry="12" fill="#e8bd9b"/><ellipse cx="37" cy="133" rx="14" ry="12" fill="#e8bd9b"/>
 </g>
 <!-- Fox: pointed ears, white muzzle -->
-<g transform="translate(375 24)" stroke-linejoin="round" stroke-linecap="round">
+<g id="fox" transform="translate(375 24)" stroke-linejoin="round" stroke-linecap="round">
 <ellipse cy="138" rx="48" ry="9" fill="#52745e" opacity=".22"/>
 <path d="M-52 67L-51-16L-10 15L21 15L53-16L52 67Z" fill="url(#furC)" stroke="#9c624b" stroke-width="3"/>
 <path d="M-44 40l-1-38L-18 24M46 40L45 2L19 24" fill="#f7d4b9"/>
@@ -46,7 +46,7 @@
 <ellipse cx="-25" cy="137" rx="13" ry="8" fill="#fff2dc"/><ellipse cx="25" cy="137" rx="13" ry="8" fill="#fff2dc"/>
 </g>
 <!-- Frog: side eyes and bright mint color -->
-<g transform="translate(525 29)" stroke-linejoin="round" stroke-linecap="round">
+<g id="frog" transform="translate(525 29)" stroke-linejoin="round" stroke-linecap="round">
 <ellipse cy="135" rx="53" ry="8" fill="#52745e" opacity=".22"/>
 <ellipse cx="-34" cy="26" rx="21" ry="24" fill="url(#furD)" stroke="#5a9783" stroke-width="3"/><ellipse cx="34" cy="26" rx="21" ry="24" fill="url(#furD)" stroke="#5a9783" stroke-width="3"/>
 <ellipse cx="-34" cy="26" rx="11" ry="13" fill="#fff"/><ellipse cx="34" cy="26" rx="11" ry="13" fill="#fff"/><circle cx="-31" cy="25" r="5" fill="#3d4842"/><circle cx="31" cy="25" r="5" fill="#3d4842"/>
@@ -58,7 +58,7 @@
 <ellipse cx="-35" cy="133" rx="19" ry="9" fill="#8fc5a9"/><ellipse cx="35" cy="133" rx="19" ry="9" fill="#8fc5a9"/>
 </g>
 <!-- Bird: blue round wings, orange beak -->
-<g transform="translate(675 26)" stroke-linejoin="round" stroke-linecap="round">
+<g id="bird" transform="translate(675 26)" stroke-linejoin="round" stroke-linecap="round">
 <ellipse cy="140" rx="49" ry="8" fill="#52745e" opacity=".22"/>
 <ellipse cy="97" rx="47" ry="42" fill="#a7b9da" stroke="#738fb1" stroke-width="3"/>
 <path d="M-34 104q-43-15-30-47q28 7 37 34M34 104q43-15 30-47q-28 7-37 34" fill="#799fc9" stroke="#738fb1" stroke-width="3"/>
