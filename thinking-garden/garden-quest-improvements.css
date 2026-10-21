@@ -26,3 +26,76 @@
  #gameWorld .path-moving-runner img{width:25px;height:25px}
 }
 @media(prefers-reduced-motion:reduce){#gameWorld .trail-runner.path-moving-runner{transition:none}}
+
+
+
+/* Illustrated touch trail: child actions visibly grow a flower path.
+   The trail works by swipe, individual taps, or Enter/Space on one control. */
+#gameWorld .paint-garden-game{gap:13px}
+#gameWorld .paint-garden-head{
+ display:flex;align-items:center;gap:13px;width:min(100%,650px);
+ border:2px solid #c7dfca;border-radius:23px;padding:11px 14px;
+ background:linear-gradient(110deg,#f2f9e9,#e6f6f3)
+}
+#gameWorld .paint-garden-friend{width:57px;height:57px;object-fit:contain;flex:none}
+#gameWorld .paint-garden-head>div{display:grid;gap:4px;flex:1;min-width:0}
+#gameWorld .paint-garden-head strong{font-size:clamp(15px,2.3vw,20px);color:#2c604b;line-height:1.25}
+#gameWorld .paint-garden-head span{font-size:13px;color:#526b61;line-height:1.3}
+#gameWorld .paint-garden-head .mini-count{
+ flex:none;margin:0;font-size:clamp(13px,2vw,16px);
+ background:#fff;padding:9px 12px;border-radius:20px;min-width:86px;
+ font-variant-numeric:tabular-nums;color:#245f48
+}
+#gameWorld .paint-garden-game .paint-grid-new{
+ width:min(650px,100%);border:9px solid #a1cfa9;
+ background:linear-gradient(180deg,#dcefe1,#c5e0bc);
+ border-radius:25px;padding:11px;gap:7px;
+ box-shadow:inset 0 2px 7px #47785624,0 7px 16px #396c4b20;
+ position:relative
+}
+#gameWorld .paint-garden-game .paint-grid-new i{
+ position:relative;overflow:hidden;
+ background:linear-gradient(160deg,#fffaf0,#eef4e7);
+ border:2px dashed #c2d8b5;border-radius:14px;min-width:0;
+ box-shadow:0 2px 4px #41704b12;
+ transition:background-color .12s,border-color .12s
+}
+#gameWorld .paint-garden-game .paint-grid-new i.painted{
+ background:linear-gradient(150deg,#e0f7d9,#c4eab7);
+ border:2px solid #a0d3a3;transform:none;
+ box-shadow:inset 0 0 8px #5da36e16
+}
+#gameWorld .paint-garden-game .paint-grid-new i.painted::after{
+ content:"";position:absolute;z-index:1;bottom:15%;left:calc(50% - 3px);
+ width:6px;height:44%;border-radius:6px;background:#4c9f6e;
+}
+#gameWorld .paint-garden-game .paint-grid-new i.painted::before{
+ content:"";position:absolute;z-index:2;top:13%;left:27%;width:46%;
+ height:46%;border-radius:50%;
+ background:
+ radial-gradient(circle at 50% 50%,#ffcd62 0 17%,transparent 19%),
+ radial-gradient(circle at 50% 18%,#f18caa 0 20%,transparent 22%),
+ radial-gradient(circle at 50% 82%,#f18caa 0 20%,transparent 22%),
+ radial-gradient(circle at 18% 50%,#f18caa 0 20%,transparent 22%),
+ radial-gradient(circle at 82% 50%,#f18caa 0 20%,transparent 22%);
+ filter:drop-shadow(0 2px 1px #a65c7340)
+}
+#gameWorld .paint-garden-help{
+ font-size:clamp(13px,2.4vw,16px);font-weight:750;
+ color:#476f58;text-align:center;margin:0;line-height:1.5
+}
+#gameWorld .paint-garden-complete .paint-grid-new{
+ border-color:#75b783;box-shadow:0 0 0 4px #c6edc8,0 7px 16px #396c4b20
+}
+#gameWorld .paint-garden-game .paint-grid-new:focus-visible{
+ outline:4px solid #e6af46;outline-offset:5px
+}
+@media(max-width:600px){
+ #gameWorld .paint-garden-head{gap:7px;padding:8px}
+ #gameWorld .paint-garden-friend{width:43px;height:43px}
+ #gameWorld .paint-garden-head span{font-size:11px}
+ #gameWorld .paint-garden-head .mini-count{min-width:72px;padding:7px 8px}
+ #gameWorld .paint-garden-game .paint-grid-new{border-width:6px;padding:6px;gap:4px}
+ #gameWorld .paint-garden-game .paint-grid-new i{border-radius:8px}
+ #gameWorld .paint-garden-game .paint-grid-new i.painted::after{width:4px;left:calc(50% - 2px)}
+}
