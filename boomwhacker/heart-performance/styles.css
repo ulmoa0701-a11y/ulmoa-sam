@@ -51,3 +51,24 @@
  .main-controls button.primary{font-size:12px}
  .video-guidance{font-size:10px;margin:8px 2px 4px}
 }
+
+/* Three signature music-sheet themes: never animate the notes or paper. */
+.theme-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:3px 1px 12px}
+.theme-caption{font-weight:850;font-size:12px;color:#4b7569;margin-right:3px;white-space:nowrap}
+.theme-choice{appearance:none;display:inline-flex;align-items:center;gap:7px;min-height:35px;padding:6px 13px;border:1.5px solid #dde7de;border-radius:12px;font-weight:850;font-size:12px;letter-spacing:-.02em;background:#fff;color:#51695f;white-space:nowrap}
+.theme-choice.active{border-color:#4c8c78;background:#f0f8f1;box-shadow:0 2px 0 #dae9df;color:#235d50}
+.theme-choice:hover{background:#f5faf6}.theme-dot{width:20px;height:20px;flex:none;border-radius:7px;position:relative;overflow:hidden}
+.classroom-dot{background:linear-gradient(145deg,#f5d6b3 5%,#e8f0cd 55%,#9abfaa)}
+.classroom-dot:before{content:"";position:absolute;width:11px;height:9px;left:4px;top:5px;border:2px solid #fffefa;border-radius:2px}
+.forest-dot{background:linear-gradient(150deg,#c8ead9,#76b99d)}
+.forest-dot:before{content:"";position:absolute;left:7px;top:3px;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:13px solid #296c55}
+.night-dot{background:linear-gradient(130deg,#35466b,#a697cc)}
+.night-dot:before{content:"✦";position:absolute;right:3px;top:0;color:#ffe1a6;font-size:15px}
+.theme-hint{margin-left:auto;color:#729187;font-size:10px}
+@media(max-width:620px){
+ .theme-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:5px;row-gap:5px;padding:3px 0 9px}
+ .theme-caption{grid-column:1/-1;font-size:11px}
+ .theme-choice{justify-content:center;min-height:36px;padding:5px 2px;gap:4px;font-size:10px;border-radius:9px}
+ .theme-dot{width:15px;height:15px;border-radius:5px}
+ .theme-hint{grid-column:1/-1;margin:0;text-align:center;font-size:9px}
+}
