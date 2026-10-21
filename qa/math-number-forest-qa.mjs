@@ -12,7 +12,14 @@ const errors=[];
 async function solve(page,index,iteration){
  const q=await page.evaluate(()=>window.__numberForestQA.getTask());
  assert.equal(q.mode,stages[index],`expected ${stages[index]}, got ${q.mode}`);
- if(q.mode==='share')for(let k=0;k<q.n;k++)await page.locator('.friend-card:not([disabled])').first().click();
+ if(q.mode==='share'){
+  if(q.needsTray){
+   assert.equal(await page.locator('.tray-choice').count(),2,'later sessions need just-enough food planning');
+   assert.equal(await page.locator('.friend-card:not([disabled])').count(),0,'child must choose supply before handing out food');
+   await page.locator('.tray-choice[data-n="'+q.n+'"]').click();
+  }
+  for(let k=0;k<q.n;k++)await page.locator('.friend-card:not([disabled])').first().click();
+ }
  if(q.mode==='glance'||q.mode==='numeral')await page.locator('.number-tile[data-n="'+q.n+'"]').click();
  if(q.mode==='compare'||q.mode==='length'){
   if(index===2&&iteration===0){
@@ -28,6 +35,7 @@ async function solve(page,index,iteration){
   for(let k=0;k<q.n;k++)await page.locator('.harvest-btn:not([disabled])').first().click();
   assert.equal(await page.locator('.storybook-reward').count(),0,'collecting all fruit alone must not prove cardinality');
   assert.equal(await page.locator('.final-count .number-tile').count(),3,'total number must be checked');
+  assert.equal(await page.locator('.basket-number').count(),0,'the answer number must not remain visible during cardinality check');
   await page.locator('.final-count .number-tile[data-n="'+q.n+'"]').click();
  }
  if(q.mode==='zero'||q.mode==='path')await page.locator('.number-tile[data-n="'+q.n+'"]').click();
