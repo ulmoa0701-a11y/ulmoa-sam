@@ -1,75 +1,83 @@
 import {createRequire} from 'node:module';
+import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import assert from 'node:assert/strict';
-const require=createRequire(import.meta.url),{chromium}=require('playwright-core');
-const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',args:['--no-sandbox']});
+const require=createRequire(import.meta.url);
+const {chromium}=require('playwright-core');
 const base=process.env.TEST_BASE_URL||'http://127.0.0.1:8765';
+const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',args:['--no-sandbox']});
 const artifacts='qa/math-forest-artifacts';fs.mkdirSync(artifacts,{recursive:true});
-let roundCount=0;
-async function doRound(page,idx){
- const task=await page.evaluate(()=>window.__numberForestQA.getTask());
- assert.ok(task,'missing task');assert.equal(task.mode,['share','compare','count','numeral','compose','equal','sum'][idx]);
- if(idx===0)for(let i=0;i<task.n;i++)await page.locator('.friend-card:not([disabled])').first().click();
- if(idx===1){
-  if(roundCount===4){await page.locator('.choice-island[data-side="'+(task.side==='left'?'right':'left')+'"]').click();await page.locator('.choice-island[data-side="'+(task.side==='left'?'right':'left')+'"]').click();assert.ok(await page.locator('.coach-target').count(),'2 errors should reveal help')}
-  await page.locator('.choice-island[data-side="'+task.side+'"]').click()
+const stages=['share','glance','compare','count','numeral','zero','path','ten','compose','equal','sum','take','pattern','shapes','length'];
+const errors=[];
+async function solve(page,index,iteration){
+ const q=await page.evaluate(()=>window.__numberForestQA.getTask());
+ assert.equal(q.mode,stages[index],`expected ${stages[index]}, got ${q.mode}`);
+ if(q.mode==='share')for(let k=0;k<q.n;k++)await page.locator('.friend-card:not([disabled])').first().click();
+ if(q.mode==='glance'||q.mode==='numeral')await page.locator('.number-tile[data-n="'+q.n+'"]').click();
+ if(q.mode==='compare'||q.mode==='length'){
+  if(index===2&&iteration===0){const wrong=q.right==='a'?'b':'a';await page.locator('.island-choice[data-key="'+wrong+'"]').click();await page.locator('.island-choice[data-key="'+wrong+'"]').click();assert.ok(await page.locator('.coach-target').count(),'wrong answers should reveal helpful visual focus')}
+  await page.locator('[data-key="'+q.right+'"]').click()
  }
- if(idx===2)for(let i=0;i<task.n;i++)await page.locator('.crop-btn:not([disabled])').first().click();
- if(idx===3)await page.locator('.number-tile[data-value="'+task.n+'"]').click();
- if(idx===4)for(let i=task.left;i<task.target;i++)await page.locator('[data-action=add]').click();
- if(idx===5)for(let i=task.right;i<task.target;i++)await page.locator('[data-action=equal]').click();
- if(idx===6)await page.locator('.number-tile[data-value="'+task.total+'"]').click();
- assert.equal(await page.locator('.round-done').count(),1,'no feedback after successful round '+idx);
- roundCount++;
+ if(q.mode==='count')for(let k=0;k<q.n;k++)await page.locator('.harvest-btn:not([disabled])').first().click();
+ if(q.mode==='zero'||q.mode==='path')await page.locator('.number-tile[data-n="'+q.n+'"]').click();
+ if(q.mode==='ten'||q.mode==='compose'||q.mode==='equal'){
+  if(q.advanced)await page.locator('.number-tile[data-n="'+(q.n-q.have)+'"]').click();
+  else for(let k=q.have;k<q.n;k++)await page.locator('.tap-add').click()
+ }
+ if(q.mode==='sum')await page.locator('.number-tile[data-n="'+q.n+'"]').click();
+ if(q.mode==='take'){
+  for(let k=0;k<q.take;k++)await page.locator('.harvest-btn:not([disabled])').first().click();
+  assert.ok(await page.locator('.number-tile').count(),'take-away should not automatically mark correct when fruits removed');
+  await page.locator('.number-tile[data-n="'+(q.n-q.take)+'"]').click()
+ }
+ if(q.mode==='pattern')await page.locator('.seed-choice[data-kind="'+q.answer+'"]').click();
+ if(q.mode==='shapes')await page.locator('.shape-choice[data-kind="'+q.opts[q.n]+'"]').click();
+ assert.ok(await page.locator('.storybook-reward').count(),`stage ${index}, round ${iteration} did not complete`);
 }
 try{
+ let completed=0;
  for(const width of [390,1280]){
-  const page=await browser.newPage({viewport:{width,height:width<600?844:880},reducedMotion:'reduce'});
-  const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  const response=await page.goto(base+'/math-garden/',{waitUntil:'domcontentloaded'});
-  assert.ok(response.ok());assert.ok(await page.locator('#startButton').isVisible());
-  await page.screenshot({path:path.join(artifacts,'math-forest-start-'+width+'.png')});
+  const context=await browser.newContext({viewport:{width,height:width===390?844:900},reducedMotion:'reduce'});
+  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
+  const resp=await page.goto(base+'/math-garden/',{waitUntil:'domcontentloaded'});
+  assert.ok(resp?.ok(),'game route failed');
+  for(const asset of ['assets/forest-world.svg','assets/woodland-friends.svg','v2.css','game.js']){
+   const a=await page.request.get(base+'/math-garden/'+asset);assert.equal(a.status(),200,'missing asset '+asset);
+  }
+  const js=await (await page.request.get(base+'/math-garden/game.js')).text();
+  assert.ok(!js.includes('speechSynthesis'),'computer Korean narrator still present');
+  assert.ok(await page.locator('#startButton').isVisible(),'start button missing');
+  await page.screenshot({path:path.join(artifacts,'math-story-home-'+width+'.png')});
   await page.locator('#startButton').click();
-  assert.equal(await page.locator('.friend-card').count(),(await page.evaluate(()=>window.__numberForestQA.getTask())).n);
-  if(width===390){
-   await page.locator('#soundToggle').click();
-   assert.equal(await page.locator('#soundToggle').getAttribute('aria-pressed'),'false');
-   await page.locator('#soundToggle').click();
-   assert.equal(await page.locator('#soundToggle').getAttribute('aria-pressed'),'true');
-  }
-  for(let i=0;i<7;i++){
+  assert.equal((await page.evaluate(()=>window.__numberForestQA.stages())).length,15);
+  await page.locator('#soundToggle').click();assert.equal(await page.locator('#soundToggle').getAttribute('aria-pressed'),'false');
+  await page.locator('#soundToggle').click();assert.equal(await page.locator('#soundToggle').getAttribute('aria-pressed'),'true');
+  for(let i=0;i<stages.length;i++){
    assert.equal((await page.evaluate(()=>window.__numberForestQA.getState())).stage,i);
-   await page.screenshot({path:path.join(artifacts,'math-forest-stage-'+width+'-'+i+'.png')});
-   for(let r=0;r<4;r++){
-    await doRound(page,i);
-    if(r<3)await page.waitForFunction(exp=>{const s=window.__numberForestQA.getState();return s.round===exp&&!s.locked},r+1,{timeout:5000});
+   if([0,1,3,7,10,12,13,14].includes(i))await page.screenshot({path:path.join(artifacts,'math-story-game-'+width+'-'+i+'.png')});
+   for(let j=0;j<5;j++){
+    await solve(page,i,j);completed++;
+    if(j<4)await page.waitForFunction(expected=>{const s=window.__numberForestQA.getState();return s.round===expected&&!s.locked},j+1,{timeout:8000});
    }
-   await page.locator('.stage-done').waitFor({state:'visible',timeout:5000});
-   await page.locator('.stage-done [data-action=next]').click();
+   await page.locator('.storybook-finish').waitFor({state:'visible',timeout:8000});
+   await page.locator('.storybook-finish [data-act=next]').click();
   }
-  assert.equal((await page.evaluate(()=>window.__numberForestQA.getState())).stage,0,'last stage did not wrap');
-  await page.locator('#stageToggle').click();
-  assert.equal(await page.locator('.stage-select').count(),7);
-  await page.locator('.stage-select[data-stage="4"]').click();
-  assert.equal((await page.evaluate(()=>window.__numberForestQA.getState())).stage,4,'free stage choice failed');
-  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
-  assert.ok(overflow<=3,'screen horizontally overflowed by '+overflow+'px');
-  assert.deepEqual(errors,[],'page JS errors');
-  if(width===390){
-   const p=await page.evaluate(()=>JSON.parse(localStorage.getItem('moa-number-forest-v1')));
-   assert.equal(Object.keys(p).length,7,'no locally saved progress');
-   await page.reload();
-   assert.ok(await page.locator('#startButton').isVisible(),'reload broke opening screen');
-  }
-  await page.close()
+  assert.equal((await page.evaluate(()=>window.__numberForestQA.getState())).stage,0,'stage cycle broken');
+  await page.locator('#stageToggle').click();assert.equal(await page.locator('.stage-select').count(),15,'all stages should be freely accessible');
+  await page.locator('.stage-select[data-i="12"]').click();assert.equal((await page.evaluate(()=>window.__numberForestQA.getState())).stage,12);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0,'horizontal overflow');
+  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('moa-number-forest-v2')));
+  assert.equal(Object.keys(saved).length,15,'progress missing for some activities');
+  if(width===390){await page.reload();assert.ok(await page.locator('#startButton').isVisible(),'game should survive reload')}
+  await context.close()
  }
- const portal=await browser.newPage({viewport:{width:390,height:844}});
- await portal.goto(base+'/gardens/',{waitUntil:'domcontentloaded'});
- assert.ok(await portal.locator('#learning .math-feature[href="../math-garden/"]').isVisible(),'learning-garden entry missing');
- await portal.goto(base+'/',{waitUntil:'domcontentloaded'});
- assert.equal(await portal.locator('.math-home-feature[href="math-garden/"]').count(),1,'homepage quick link missing');
- await portal.close();
- console.log('PASS: seven games, 56 completed rounds, hint handling, local state, stage selection, responsive desktop/mobile and homepage/gardens links');
-}catch(e){console.error('NUMBER FOREST QA FAILED',e);process.exitCode=1}
+ const site=await browser.newPage({viewport:{width:390,height:844}});
+ await site.goto(base+'/gardens/',{waitUntil:'domcontentloaded'});
+ assert.ok(await site.locator('#learning .math-feature[href="../math-garden/"]').isVisible(),'garden entry missing');
+ await site.goto(base+'/',{waitUntil:'domcontentloaded'});
+ assert.ok(await site.locator('.math-home-feature[href="math-garden/"]').isVisible(),'home entry missing');
+ await site.close();
+ assert.deepEqual(errors,[],'browser JavaScript errors');
+ console.log('PASS Number Forest V2 — '+completed+' actual completed rounds / 15 modes / 2 viewport sizes, files loaded, voice synthesis absent, progress and hint checks');
+}catch(e){console.error('FAIL Number Forest V2',e);process.exitCode=1}
 finally{await browser.close()}
