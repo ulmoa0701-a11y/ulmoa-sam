@@ -76,7 +76,7 @@ function updateControls(){
  $("#song").value=song.key;$("#notes").value=String(notes);$("#tempo").value=String(speed);$("#section").value=section;
  $("#metronome").checked=metronome;$("#loop").checked=loop;$("#motion").checked=motion;
  $("#sound").textContent=sound?"소리 켜짐":"소리 꺼짐";$("#sound").setAttribute("aria-pressed",String(sound));
- $$$(".view-choice").forEach(b=>{const yes=b.dataset.view===view;b.classList.toggle("active",yes);b.setAttribute("aria-pressed",String(yes))});
+ $$(".view-choice").forEach(b=>{const yes=b.dataset.view===view;b.classList.toggle("active",yes);b.setAttribute("aria-pressed",String(yes))});
  $$("#keys button").forEach(k=>k.classList.toggle("off",!isSelected(k.dataset.note)));
  $("#noteHelp").textContent=notes+"음 강조 · 하트 1개=1박 · 원곡 그대로";
  $("#stairStyleWrap").hidden=view!=="stairs";
