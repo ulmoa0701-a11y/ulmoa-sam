@@ -155,14 +155,17 @@ function mistake(){
 }
 function good(){
  if(scene.locked)return;scene.locked=true;if(scene.idle)clearTimeout(scene.idle);
- scene.round++;scene.totalInStage++;if(!scene.hints&&!scene.errors)scene.cleanInStage++;
+ const record=Learning.classifyRound({phase:scene.task.phase,attempts:scene.errors,hints:scene.hints,model:scene.modelUsed,completed:true,representation:scene.task.variant});
+ scene.learningSession.rounds.push(record);
+ scene.round++;scene.totalInStage++;if(record.independentlySolved)scene.cleanInStage++;
  fx();showSeeds();setMessage('숲에 꽃이 한 송이 피었어요','win');
  board.innerHTML='<div class="storybook-reward"><div class="petal-bloom" aria-hidden="true"><span></span><span></span><span></span><span></span><i></i></div><p>다음 숲길이 열려요</p></div>';
  if(scene.round===roundsPerStage){save(STAGES[scene.stage].id);scene.transition=setTimeout(stageEnd,1000)}
  else scene.transition=setTimeout(round,850)
 }
 function stageEnd(){scene.transition=0;const next=(scene.stage+1)%STAGES.length;guide('꽃길이 이어졌어요!');
- board.innerHTML='<div class="storybook-finish"><div class="finish-forest"><div class="flower-coin"></div>'+char(2)+'</div><h2>'+STAGES[scene.stage].name+'</h2><p>꽃 한 송이를 피웠어요</p><div class="finish-actions">'+touch('next','다음 놀이','다음 숲길 →','primary-button')+touch('again','같은 놀이 반복','한 번 더','secondary-button')+'</div></div>';
+ const outcome=scene.lastSummary||Learning.summarize(scene.learningSession.rounds);
+ board.innerHTML='<div class="storybook-finish"><div class="finish-forest"><div class="flower-coin"></div>'+char(2)+'</div><h2>'+STAGES[scene.stage].name+'</h2><p>'+(outcome.ready?'이번엔 스스로 해결한 문제들이 있었어!':'다른 모습에서도 한 번 더 연습할 수 있어!')+'</p><p class="finish-report">도움 없이 '+outcome.independent+'번 · 다른 그림에서 '+outcome.transfer+'번</p><div class="finish-actions">'+touch('next','다음 놀이','다음 숲길 →','primary-button')+touch('again','같은 놀이 반복','한 번 더','secondary-button')+'</div></div>';
  setMessage('천천히 다시 놀아도 좋아요');
 }
 function doneOrRender(){if(scene.task.added+scene.task.have>=scene.task.n)good();else{draw();fx()}}
@@ -174,14 +177,14 @@ function act(k,b){
  if(scene.idle){clearTimeout(scene.idle);scene.idle=0}
  if(k==='feed'){const n=Number(b.dataset.i);if(q.fed.includes(n))return;q.fed.push(n);if(q.fed.length>=q.n)good();else{draw();fx()}}
  if(k==='compare'||k==='length'){if(b.dataset.key===q.right)good();else mistake()}
- if(k==='glance'||k==='number'||k==='zero'||k==='path'||k==='sum'||k==='takeanswer'){const n=Number(b.dataset.n),answer=q.mode==='take'?q.n-q.take:q.n;if(n===answer)good();else mistake()}
- if(k==='pick'){const n=Number(b.dataset.i);if(q.picked.includes(n))return;q.picked.push(n);if(q.picked.length===q.n)good();else{draw();fx()}}
+ if(k==='glance'||k==='number'||k==='zero'||k==='path'||k==='sum'||k==='takeanswer'||k==='countanswer'){const n=Number(b.dataset.n),answer=q.mode==='take'?q.n-q.take:q.n;if(n===answer)good();else mistake()}
+ if(k==='pick'){const n=Number(b.dataset.i);if(q.picked.includes(n))return;q.picked.push(n);if(q.picked.length===q.n){q.answering=true;draw();setMessage('모은 열매는 모두 몇 개일까?')}else{draw();fx()}}
  if(k==='add'){q.added++;doneOrRender()}
  if(k==='build'){if(Number(b.dataset.n)===q.n-q.have)good();else mistake()}
  if(k==='takepick'){const n=Number(b.dataset.i);if(q.gone.includes(n))return;q.gone.push(n);if(q.gone.length===q.take){q.answering=true;draw();fx();setMessage('몇 개가 남았을까?')}else{draw();fx()}}
  if(k==='pattern'){if(b.dataset.kind===q.answer)good();else mistake()}
  if(k==='shape'){if(b.dataset.kind===q.opts[q.n])good();else mistake()}
- if(!scene.locked&&!scene.idle)scene.idle=setTimeout(()=>hint(true),8500)
+ // No penalty, interruption, or forced hint based only on response speed.
 }
 board.addEventListener('click',e=>{if(e.target.closest('#startButton')){start(0);return}const b=e.target.closest('[data-act]');if(b)act(b.dataset.act,b)});
 stageGrid.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(b)act(b.dataset.act,b)});
@@ -194,5 +197,5 @@ $('hearButton').setAttribute('aria-label','그림 힌트 보기');$('hearButton'
 $('hearButton').innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13c2-3 4-4 8-4s7 1 9 4c-2 4-5 6-9 6s-7-2-8-6Z"/><circle cx="12" cy="13" r="2.5"/></svg>';
 $('soundToggle').textContent='효과음 켜짐';
 map();showSeeds();guide('누르면 바로 놀이 시작!');
-Object.defineProperty(window,'__numberForestQA',{configurable:false,value:{getState:()=>({stage:scene.stage,round:scene.round,mode:scene.task?.mode,locked:scene.locked,errors:scene.errors,hints:scene.hints}),getTask:()=>scene.task?JSON.parse(JSON.stringify(scene.task)):null,getStats:()=>JSON.parse(JSON.stringify(stats)),stages:()=>STAGES.map(s=>s.id)}});
+Object.defineProperty(window,'__numberForestQA',{configurable:false,value:{getState:()=>({stage:scene.stage,round:scene.round,phase:scene.task?.phase,mode:scene.task?.mode,locked:scene.locked,errors:scene.errors,hints:scene.hints,modelUsed:scene.modelUsed,learningRounds:scene.learningSession?.rounds.length||0}),getTask:()=>scene.task?JSON.parse(JSON.stringify(scene.task)):null,getStats:()=>JSON.parse(JSON.stringify(stats)),getLearning:()=>scene.learningSession?JSON.parse(JSON.stringify(Learning.summarize(scene.learningSession.rounds))):null,stages:()=>STAGES.map(s=>s.id)}});
 })();
