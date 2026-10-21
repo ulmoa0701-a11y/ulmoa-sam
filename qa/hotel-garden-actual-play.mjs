@@ -39,17 +39,31 @@ try{
  await clickDialog();await record("WOODS encounter");
  // Do not change game states for this test. Wait for natural windups, use Q on real vulnerable cues.
  let tries=0,hits=0;
- while((await state()).stage===2&&tries++<12){
-  await page.waitForFunction(()=>document.querySelector("#mission")?.textContent?.includes("지금 빈틈"),{timeout:15000});
-  await page.keyboard.press("q");await sleep(750);
-  const s=await state();hits=s.woods.hits;
-  if(s.stage===3)break;
+ while((await state()).stage===2&&tries++<7){
+  await page.waitForFunction(()=>{
+   const m=document.querySelector("#mission")?.textContent||"";
+   return m.includes("공격 준비!")||document.querySelector("#dialog")?.classList.contains("show");
+  },{timeout:16000});
+  if(await page.$eval("#dialog",e=>e.classList.contains("show"))){
+   await clickDialog();continue;
+  }
+  // Real dodge during the 1.2s warning: move toward the boss so Q remains in range.
+  await move("ArrowDown",670);
+  await page.waitForFunction(()=>{
+   const m=document.querySelector("#mission")?.textContent||"";
+   return m.includes("지금 빈틈")||document.querySelector("#dialog")?.classList.contains("show");
+  },{timeout:12000});
+  if(await page.$eval("#dialog",e=>e.classList.contains("show"))){
+   await clickDialog();continue;
+  }
+  await page.keyboard.press("q");await sleep(500);
+  const snap=await state();hits=snap.woods.hits;
   if(await page.$eval("#dialog",e=>e.classList.contains("show"))){
    const message=await page.$eval("#dialogText",e=>e.textContent);
    if(message.includes("보스 공략 실패")){await clickDialog();continue}
    if(message.includes("공략 성공"))break;
   }
-  await sleep(1500);
+  await sleep(900);
  }
  report.hits=hits;await record("WOODS real Q traps");
  if(await page.$eval("#dialog",e=>e.classList.contains("show")))await clickDialog();
