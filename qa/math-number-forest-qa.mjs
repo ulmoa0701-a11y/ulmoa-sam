@@ -15,10 +15,10 @@ async function solve(page,index,iteration){
  if(q.mode==='share'){
   if(q.needsTray){
    assert.equal(await page.locator('.tray-choice').count(),2,'later sessions need just-enough food planning');
-   assert.equal(await page.locator('.friend-card:not([disabled])').count(),0,'child must choose supply before handing out food');
+   assert.equal(await page.locator('button.friend-card:not([disabled])').count(),0,'child must choose supply before handing out food');
    await page.locator('.tray-choice[data-n="'+q.n+'"]').click();
   }
-  for(let k=0;k<q.n;k++)await page.locator('.friend-card:not([disabled])').first().click();
+  for(let k=0;k<q.n;k++)await page.locator('button.friend-card:not([disabled])').first().click();
  }
  if(q.mode==='glance'||q.mode==='numeral')await page.locator('.number-tile[data-n="'+q.n+'"]').click();
  if(q.mode==='compare'||q.mode==='length'){
