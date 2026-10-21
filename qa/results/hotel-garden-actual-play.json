@@ -3,7 +3,7 @@
   "steps": [
     {
       "step": "started",
-      "time": "2026-10-21T07:18:25.378Z",
+      "time": "2026-10-21T07:26:35.513Z",
       "state": {
         "stage": 0,
         "patch": "2026-10-12-child-feedback-v1",
@@ -38,13 +38,13 @@
     },
     {
       "step": "gardener talk",
-      "time": "2026-10-21T07:18:30.706Z",
+      "time": "2026-10-21T07:26:39.766Z",
       "state": {
         "stage": 1,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          -14.84,
-          -2.87
+          -14.78,
+          -2.25
         ],
         "woods": {
           "enabled": true,
@@ -73,13 +73,13 @@
     },
     {
       "step": "WOODS encounter",
-      "time": "2026-10-21T07:19:09.588Z",
+      "time": "2026-10-21T07:27:09.490Z",
       "state": {
         "stage": 2,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          15.71,
-          16.95
+          15.05,
+          17.7
         ],
         "woods": {
           "enabled": true,
@@ -108,17 +108,17 @@
     },
     {
       "step": "WOODS real Q traps",
-      "time": "2026-10-21T07:19:56.357Z",
+      "time": "2026-10-21T07:27:14.838Z",
       "state": {
         "stage": 2,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          15,
-          13
+          15.59,
+          20.19
         ],
         "woods": {
-          "enabled": true,
-          "hits": 0,
+          "enabled": false,
+          "hits": 2,
           "damage": 0
         },
         "eye": {
@@ -139,21 +139,21 @@
           72
         ]
       },
-      "mission": "③ 공격을 피하고 Q 함정 2번"
+      "mission": "③ 지금 빈틈! Q 함정"
     },
     {
       "step": "WOODS actual hold E",
-      "time": "2026-10-21T07:19:58.033Z",
+      "time": "2026-10-21T07:27:16.793Z",
       "state": {
-        "stage": 2,
+        "stage": 3,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          15,
-          13
+          15.59,
+          20.19
         ],
         "woods": {
-          "enabled": true,
-          "hits": 0,
+          "enabled": false,
+          "hits": 2,
           "damage": 0
         },
         "eye": {
@@ -174,20 +174,20 @@
           72
         ]
       },
-      "mission": "③ WOODS가 공격 준비! 움직여서 피하기"
+      "mission": "④ 연못 관리인에게 가서 E 말걸기"
     }
   ],
   "errors": [],
   "http": [],
   "gardener": {
     "near": true,
-    "iterations": 10,
+    "iterations": 8,
     "last": {
       "stage": 0,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        -14.84,
-        -2.87
+        -14.78,
+        -2.25
       ],
       "woods": {
         "enabled": false,
@@ -215,13 +215,13 @@
   },
   "woods": {
     "near": false,
-    "iterations": 72,
+    "iterations": 55,
     "last": {
       "stage": 1,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        15.71,
-        16.95
+        15.05,
+        17.7
       ],
       "woods": {
         "enabled": true,
@@ -247,7 +247,7 @@
       ]
     }
   },
-  "hits": 0,
+  "hits": 2,
   "pass": false,
-  "generatedAt": "2026-10-21T07:19:59.225Z"
+  "generatedAt": "2026-10-21T07:27:17.901Z"
 }
