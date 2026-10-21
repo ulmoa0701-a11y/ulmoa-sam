@@ -111,7 +111,7 @@ function hint(quiet=false){
  equal:q.advanced?'.number-tile[data-n="'+(q.n-q.have)+'"]':'.tap-add',
  sum:'.number-tile[data-n="'+q.n+'"]',
  take:q.answering?'.number-tile[data-n="'+(q.n-q.take)+'"]':'.harvest-btn:not([disabled])',
- pattern:'.seed-choice[data-kind="'+q.answer+'"]',shapes:'.shape-choice[data-kind="'+q.opts[q.n]+'"]',length:'.bridge-choice[data-key="'+q.right+'"]'
+ pattern:'.seed-choice[data-kind="'+q.answer+'"]',shapes:'.shape-choice[data-kind="'+(q.opts?.[q.n]??'')+'"]',length:'.bridge-choice[data-key="'+q.right+'"]'
  }[q.mode];
  const el=board.querySelector(query);if(el)el.classList.add('coach-target');
  if(!quiet)setMessage('빛나는 곳을 살펴봐요');
