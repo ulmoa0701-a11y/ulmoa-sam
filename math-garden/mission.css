@@ -13,3 +13,13 @@
 }
 @media(max-width:355px){.identity{display:none}.stage{min-height:640px}.friends-line{gap:2px}.hungry-friend{min-width:65px}.hungry-friend .forest-friend{width:62px}.packed-food .food.mini{transform:scale(.85)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+/* QA-discovered readability and instructional differentiation */
+.guided-preview{background:#eaf3db;border:2px dashed #a7c497;color:#66764c;border-radius:18px;padding:7px 11px;max-width:520px;margin:0 auto;display:grid;gap:4px;justify-items:center}
+.guided-preview p{font-size:13px;margin:2px}.guided-preview .match-row{gap:5px}.guided-preview .matching-row .match-slot{min-width:27px;min-height:27px}.guided-preview .one-to-one{flex-direction:row;gap:5px}.guided-preview .matching-row{gap:6px}
+.lesson .demo-pair .match-slot.occupied{animation:delivery-arrive .75s ease-out both}.lesson .demo-pair:nth-child(2) .match-slot.occupied{animation-delay:.45s}.lesson .demo-pair:nth-child(3) .match-slot.occupied{animation-delay:.9s}
+.success .served{animation:served-jump .6s ease-out both}.success .served:nth-child(2){animation-delay:.14s}.success .served:nth-child(3){animation-delay:.28s}.success .served:nth-child(4){animation-delay:.42s}
+@keyframes delivery-arrive{from{opacity:0;transform:translateY(-36px) scale(.55)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes served-jump{0%{transform:translateY(10px);opacity:.4}60%{transform:translateY(-9px);opacity:1}100%{transform:translateY(0)}}
+@media(max-width:650px){.lower{flex-direction:column;align-items:stretch;gap:9px}.lower p{width:100%;min-height:22px;line-height:1.5}.lower-actions{justify-content:flex-end;width:100%}.lower-actions button{white-space:nowrap;min-height:43px;padding:7px 11px;font-size:12px}.guided-preview{max-width:100%;padding:6px}.guided-preview p{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.lesson .demo-pair .match-slot.occupied,.success .served{animation:none!important}}
