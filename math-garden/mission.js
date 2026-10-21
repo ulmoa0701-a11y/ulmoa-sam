@@ -93,7 +93,7 @@ function feedback(isCorrect){
  state.attempts++;state.flagged=true;sfx(false);
  const xtext=key==='share'?(state.selected<x.n?'아직 간식을 못 받은 친구가 있어.':'간식이 조금 남겠어.') :key==='make'?(state.selected<x.total-x.have?'빈자리가 남아 있어.':'간식이 자리를 넘쳤어.'):'짝을 지어 보면 차이가 보여.';
  setStatus(xtext);
- const slot=$('feedbackSlot');if(slot){slot.innerHTML='<div class="feedback-error">'+xtext+'</div>'+(state.attempts>=2?renderPairing(x,key):'');}
+ const slot=$('feedbackSlot');if(slot){slot.innerHTML='<div class="feedback-error">'+xtext+'</div>'+(state.attempts>=2?'<div class="scaffold">'+renderPairing(x,key)+'</div>':'');}
  if(state.attempts>=2)state.hints++;
 }
 function assess(){const r=state.results.filter(z=>z.kind==='probe'||z.kind==='transfer');const clean=r.filter(z=>z.clean),transfer=r.find(z=>z.kind==='transfer');
