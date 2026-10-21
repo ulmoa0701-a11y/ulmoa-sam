@@ -38,3 +38,16 @@
  .finish-report{font-size:12px!important}
 }
 @media(prefers-reduced-motion:reduce){.learning-model{transition:none;animation:none}}
+
+/* Later delivery adventures: the child chooses a real quantity before giving one to each friend. */
+.delivery-pick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;width:min(100%,570px);margin:3px auto 10px}
+.tray-choice{display:grid;place-items:center;min-height:156px;padding:15px 8px;background:linear-gradient(#fff6dc,#eed6b0);border:4px solid #c99d72;border-radius:27px;box-shadow:0 8px 0 #977353}
+.tray-choice .storybook-basket{width:100%;max-width:220px;min-width:100px;padding:17px 8px 7px}
+.tray-choice .new-fruit{transform:scale(.82);margin:-2px}
+.waiting-friend{pointer-events:none;cursor:default}
+@media(max-width:650px){
+ .delivery-pick{gap:10px}
+ .tray-choice{padding:8px 3px;min-height:117px;border-width:3px;border-radius:17px}
+ .tray-choice .storybook-basket{min-height:70px;width:96%;padding:12px 3px 6px;border-width:4px}
+ .tray-choice .new-fruit{transform:scale(.7);margin:-3px}
+}
