@@ -79,7 +79,9 @@ async function solve(page,id){
     await page.locator('#sessionRounds').selectOption(String(total));
     await page.locator('#introStart').click();
     assert.equal(await page.evaluate(()=>state.roundTotal),total,'wrong session length');
-    const rounds=['sameShape','memory','flower'].includes(id)?total:2;
+    // All ten playable native games must reach their real result page by
+    // visible child-like interactions, not injected nextRound() shortcuts.
+    const rounds=total;
     for(let round=0;round<rounds;round++){
      if(round===0&&id==='sameShape'){
       const shape=await page.locator('.shape-target').textContent();
@@ -108,7 +110,7 @@ async function solve(page,id){
       await page.waitForFunction(n=>document.querySelector('#stageLabel')?.textContent.trim()===n,(round+2)+' / '+total);
      }else await page.waitForFunction(n=>document.querySelector('#stageLabel')?.textContent.trim()===n,(round+2)+' / '+total);
     }
-    if(rounds!==total)await page.locator('#backHome').click();
+    // Every tested session must now finish and verify its result and records.
     summary.push({device:viewport.name,game:id,realSolved:rounds,finished:rounds===total});
    }
    assert.deepEqual(failures,[],viewport.name+' JavaScript errors');
