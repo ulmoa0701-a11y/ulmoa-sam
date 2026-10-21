@@ -1,0 +1,150 @@
+/* Number Forest V2: original storybook illustration system, consistent no-emoji game artwork */
+:root{--bark:#5d4030;--cream:#fff8df;--mint:#b8d0ac;--gold:#ffdf90;--shadow:#744d2d38}
+body{background:linear-gradient(180deg,#f6f3dc,#dfe9d2)!important;color:#354c45}
+.game-shell{max-width:1200px}
+.topbar{background:#fffaf1;border-bottom:3px solid #e6dabb}
+.world{background:#b9d6bf url('./assets/forest-world.svg') center center / cover no-repeat;border:7px solid #fff3d9;min-height:650px;border-radius:35px;box-shadow:0 12px 0 #b5b99b,0 24px 45px #355c3a25}
+.sky-decor,.world-ground{display:none}
+.world:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#1e473b28,transparent 12%,transparent 88%,#1e473b23);z-index:0}
+.world-frame{position:relative;z-index:2;padding:18px 20px 32px;min-height:635px;display:flex;flex-direction:column;justify-content:flex-start}
+.story-guide{max-width:720px;margin:0 auto 8px;gap:10px;justify-content:center}
+.moa-character{width:81px;height:81px;object-fit:contain;filter:drop-shadow(0 5px 5px #25443344)}
+.guide-bubble{background:linear-gradient(#fffefa,#fbf1d9);border:3px solid #eed7a9;box-shadow:0 6px 0 #90704455,0 9px 15px #453d2830;max-width:570px;padding:13px 23px}
+.guide-kicker{color:#8f805c;font-size:13px}
+.guide-text{color:#524532;font-size:clamp(18px,2.5vw,25px);font-weight:900}
+.hear-button{background:#fff3d8;color:#796845;border:3px solid #d5bb81;box-shadow:0 5px 0 #947d5366;display:grid;place-items:center}
+.hear-button svg{stroke-width:2.3}
+.playfield{margin:auto;max-width:900px;min-height:425px;display:grid;place-items:center;padding:5px 10px 25px}
+.storybook-scene{width:100%;max-width:850px;min-height:377px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:17px;background:radial-gradient(ellipse at center,#fff2d4ab,#ffebc034 72%,transparent);padding:14px 8px;border-radius:38px}
+.storybook-scene button{touch-action:manipulation}
+.storybook-scene button:active{transform:translateY(4px) scale(.98)!important}
+.friend-porch{display:flex;align-items:flex-end;justify-content:center;gap:clamp(7px,2vw,22px);flex-wrap:wrap;width:100%}
+.friend-card{min-width:115px;min-height:167px;padding:3px 10px 9px;background:linear-gradient(#fff8e9ee,#f9e9c9dd);border:3px solid #e2c498;border-radius:28px;box-shadow:0 7px 0 #a7865f,0 11px 15px #3e593824;transition:transform .16s,background .16s}
+.friend-card.fed{border-color:#80bd92;background:#e8f5dddf}
+.character-sprite{height:112px;width:103px;overflow:visible;filter:drop-shadow(0 4px 3px #57432e35);animation:bob 2.2s ease-in-out infinite alternate}
+.friend-card:nth-child(2) .character-sprite{animation-delay:.4s}.friend-card:nth-child(3) .character-sprite{animation-delay:.8s}.friend-card:nth-child(4) .character-sprite{animation-delay:1.1s}
+.mini-plate{display:flex;align-items:center;justify-content:center;width:63px;height:23px;border-radius:50%;background:radial-gradient(#fff8e8,#dbc39c);box-shadow:0 4px 0 #ba9f7c;margin:3px auto}
+.plate-empty{width:21px;height:8px;border:2px dashed #bcaa8c;border-radius:50%}
+.new-fruit{display:inline-grid;place-items:center;position:relative;width:40px;height:42px;background:radial-gradient(circle at 33% 25%,#eab97b 0,#bf804e 50%,#91562f 95%);border-radius:47% 48% 44% 44%;box-shadow:inset -6px -6px 0 #6d3e253b,0 4px 0 #694f2c40;flex:none}
+.new-fruit:before{content:'';position:absolute;top:-4px;left:5%;width:90%;height:36%;border-radius:50% 50% 21% 21%;background:repeating-linear-gradient(36deg,#67482d,#67482d 3px,#997249 4px,#997249 7px);border:2px solid #684b32}
+.new-fruit:after{content:'';position:absolute;top:-9px;left:48%;width:5px;height:12px;border-radius:4px;background:#69533a}
+.new-fruit.berry{border-radius:50%;background:radial-gradient(circle at 33% 26%,#ffb58e,#eb7364 53%,#b74c51 96%);box-shadow:inset -4px -4px 0 #a64f5152,0 4px 0 #694f2c40}
+.new-fruit.berry:before{width:15px;height:7px;top:-5px;left:22px;background:#659579;border:0;border-radius:70% 0;transform:rotate(-28deg)}
+.new-fruit.berry:after{display:none}
+.new-fruit.gold{border-radius:30% 55% 34% 58%;background:radial-gradient(circle at 35% 28%,#fff0b0,#e8b65f 60%,#c88d3f);box-shadow:inset -5px -6px 0 #91692a3a,0 4px 0 #694f2c40;transform:rotate(-10deg)}
+.new-fruit.gold:before{width:20px;height:8px;top:-5px;left:19px;border-radius:90% 0;background:#7da879;border:0;transform:rotate(-20deg)}
+.new-fruit.gold:after{display:none}
+.storybook-basket{position:relative;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:3px;min-width:170px;max-width:320px;min-height:113px;padding:22px 23px 15px;border-radius:18px 18px 46px 46px;background:repeating-linear-gradient(28deg,#c99257 0,#c99257 9px,#e0ae76 9px,#e0ae76 17px);border:7px solid #94663d;box-shadow:inset 0 8px 0 #f4cf99,0 9px 0 #7e5c3e64,0 17px 15px #69493230}
+.basket-rim{display:none}.basket-inside{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;align-items:center;max-width:280px}
+.basket-inside>.new-fruit{width:31px;height:33px}.basket-inside>.new-fruit:before{width:88%;top:-3px}
+.food-plate,.display-gem{border:6px solid #edd6aa;border-radius:60px;background:linear-gradient(135deg,#fffcf0,#f9e7c3);box-shadow:0 11px 0 #ae9069,0 17px 20px #4f4b3040;padding:26px 35px;min-width:240px;min-height:137px;display:grid;place-items:center}
+.dots{display:flex;justify-content:center;align-items:center;align-content:center;flex-wrap:wrap;gap:12px;max-width:240px;min-width:46px;min-height:42px}
+.count-dot{width:35px;height:35px;border-radius:50%;background:radial-gradient(circle at 33% 27%,#ffddb5 0,#d37e62 57%,#b35945 98%);border:3px solid #ae5b4d;box-shadow:inset -3px -4px 0 #8a463122,0 5px 0 #a05b3f24}
+.number-options{margin:12px 0;gap:16px}
+.number-tile,.path-stone,.missing-stone{border:5px solid #af8c64;border-radius:24px;background:linear-gradient(145deg,#fff8e4,#f0daae);box-shadow:0 8px 0 #876e53,0 14px 14px #493e303d;min-width:99px;min-height:106px;display:grid;place-items:center;color:#35606a;font:900 clamp(40px,6vw,60px)/1 system-ui,sans-serif;transition:transform .18s}
+.number-tile:hover,.stage-select:hover,.island-choice:hover{filter:brightness(1.055)}
+.number-tile:active{box-shadow:0 3px 0 #876e53;transform:translateY(5px)!important}
+.fork-choice{display:flex;align-items:center;justify-content:center;gap:clamp(12px,5vw,40px);width:100%}
+.island-choice{min-height:200px;min-width:240px;max-width:40%;display:grid;align-content:center;justify-items:center;gap:16px;border:5px solid #d2b887;border-radius:39px;background:linear-gradient(#f7e5be,#eac994);box-shadow:0 11px 0 #9d936e,0 17px 18px #514d3136}
+.island-cluster{min-height:100px;display:grid;align-items:center;justify-content:center;place-items:center;padding:10px}
+.island-edge{width:82%;height:13px;border-radius:50%;background:#a4b792}
+.harvest-yard{display:flex;align-items:center;justify-content:center;gap:35px;flex-wrap:wrap}
+.harvest-patch,.take-garden{display:grid;grid-template-columns:repeat(4,minmax(57px,1fr));align-content:center;align-items:center;justify-items:center;gap:17px;padding:22px;border-radius:45px;background:#a7bc85a8;border:5px solid #8eac7a;box-shadow:inset 0 6px 16px #607d5f4d;min-height:200px}
+.harvest-btn{background:transparent;border:none;display:grid;place-items:center;min-width:53px;min-height:65px;transition:transform .2s}
+.harvest-btn .new-fruit{transform:scale(1.15);filter:drop-shadow(0 6px 3px #5a594844)}
+.harvest-btn.collected{visibility:hidden;pointer-events:none}
+.basket-number{font:900 34px/1 system-ui;color:#fff9e5;text-shadow:0 2px 3px #654b36}
+.wood-label,.tiny-visual-guide{display:inline-block;background:#fff1cfed;border:3px solid #e9c18c;color:#785b3e;font-weight:900;border-radius:30px;padding:10px 20px;font-size:18px;box-shadow:0 5px 0 #a68c62}
+.number-path{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin:10px auto 20px}
+.path-stone,.missing-stone{height:96px;min-width:79px;min-height:auto;transform:rotate(-3deg)}
+.path-stone:nth-child(even){transform:rotate(3deg)}.missing-stone{border-style:dashed;color:#b8794f;background:#fff7e6a6}
+.tenframe{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;background:#fff9e8ed;border:6px solid #d5b386;box-shadow:0 9px 0 #9f8f71;border-radius:23px;max-width:470px;min-width:min(100%,320px);padding:10px;margin:12px auto}
+.ten-cell{min-height:73px;border:3px dashed #d4baa0;border-radius:13px;background:#fff;display:grid;place-items:center;overflow:visible}
+.ten-cell.cell-filled{background:#fff1cb;border-style:solid;border-color:#e0b67b}
+.ten-cell .new-fruit{transform:scale(.8)}
+.equal-mats{display:flex;justify-content:center;align-items:stretch;gap:25px;flex-wrap:wrap}
+.equal-mat{display:grid;place-items:center;min-width:230px;min-height:180px;padding:22px;background:#fff1ce;border:5px solid #b78f62;border-radius:30px;box-shadow:0 10px 0 #8c845e}
+.tap-add{min-width:190px;min-height:79px;background:linear-gradient(#fce2a5,#eec181);border:4px solid #c4955f;color:#674e32;display:flex;align-items:center;justify-content:center;gap:16px;padding:11px 22px}
+.tap-add .new-fruit{transform:scale(.76)}
+.two-baskets{display:flex;justify-content:center;align-items:center;gap:15px;flex-wrap:wrap}
+.two-baskets .storybook-basket{min-width:150px;max-width:240px}
+.math-operator{font-size:56px;color:#fff7d8;font-weight:1000;text-shadow:0 5px 0 #5b7155}
+.take-scene{display:flex;justify-content:center;align-items:center;gap:18px;flex-wrap:wrap}
+.take-garden{max-width:390px}
+.take-indicator{font-size:28px;background:#fff4dbdf;border:4px solid #d4b589;display:flex;align-items:center;gap:14px;padding:15px 19px;border-radius:27px}
+.pattern-track{display:flex;gap:9px;justify-content:center;align-items:center;flex-wrap:wrap}
+.pattern-pocket{width:95px;height:98px;background:linear-gradient(#f9e3ba,#eac992);border:4px solid #a58762;border-radius:30px;box-shadow:0 7px 0 #92734f;display:grid;place-items:center}
+.pattern-pocket .new-fruit{transform:scale(1.2)}
+.pattern-hole{border-style:dashed;background:#fff4d8bd;color:#815e4a;font:900 60px system-ui}
+.seed-choice-row,.shape-options{display:flex;justify-content:center;gap:30px;flex-wrap:wrap}
+.seed-choice,.shape-choice{min-width:121px;min-height:120px;border-radius:33px;border:5px solid #cdae7c;background:#fff7df;box-shadow:0 9px 0 #9b825f;display:grid;place-items:center}
+.seed-choice .new-fruit{transform:scale(1.45)}
+.shape-lock{width:172px;height:164px;border:11px solid #aa7a50;background:radial-gradient(#785c42,#533f32);border-radius:41px;box-shadow:0 11px 0 #7a5947;display:grid;place-items:center}
+.shape-svg{width:110px;height:110px;fill:#eeaf77;stroke:#a66d55;stroke-width:5}
+.shape-lock .shape-svg{fill:#b58b69;stroke:#f8ddb3;stroke-width:7}
+.shape-choice .shape-svg{width:94px;height:94px}
+.bridge-options{display:flex;flex-direction:column;gap:26px;width:100%;align-items:center}
+.bridge-choice{width:96%;min-height:95px;display:grid;place-items:center;background:#e7dec0a8;border:4px solid #ba9c73;border-radius:25px;box-shadow:0 7px 0 #887959}
+.bridge-road{display:block;background:repeating-linear-gradient(90deg,#b7885e,#b7885e 23px,#f1d7a2 24px,#f1d7a2 28px);border:5px solid #9b714f;height:40px;border-radius:7px;max-width:90%;box-shadow:0 7px 0 #7e865763}
+.storybook-reward,.storybook-finish{width:min(96%,620px);margin:auto;min-height:320px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:17px;background:linear-gradient(#fff9e9f5,#f8e9c8f5);border:5px solid #e7d09f;box-shadow:0 10px 0 #ad976f,0 17px 28px #584b3150;border-radius:40px;padding:29px}
+.storybook-reward p{font-size:28px;margin:0;font-weight:900;color:#567e69}
+.petal-bloom{width:113px;height:113px;position:relative;animation:flowerBounce .65s ease-out both}
+.petal-bloom span{position:absolute;left:39px;top:0;background:linear-gradient(#f6b9a3,#e37f7b);border:4px solid #df817d;width:40px;height:75px;border-radius:50%;transform-origin:20px 58px}
+.petal-bloom span:nth-child(2){transform:rotate(90deg)}.petal-bloom span:nth-child(3){transform:rotate(180deg)}.petal-bloom span:nth-child(4){transform:rotate(270deg)}.petal-bloom i{position:absolute;background:#f1ce75;width:39px;height:39px;border:5px solid #e2ad54;border-radius:50%;left:38px;top:38px}
+.storybook-finish .finish-forest{position:relative;height:155px;display:grid;place-items:center}
+.storybook-finish .character-sprite{width:150px;height:162px}
+.storybook-finish h2{font-size:27px;margin:0}.storybook-finish p{font-size:19px;margin:0}
+.finish-actions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+.stage-panel{background:linear-gradient(130deg,#fff6e3,#eef3dc);border-color:#c8b18b;max-height:65vh;overflow:auto}
+.stage-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.map-chapter{background:#fff8eb;border:2px solid #e7cfaa;border-radius:24px;padding:15px}
+.map-chapter h3{margin:0 0 10px;color:#7b624e;font-size:18px}
+.map-doors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.stage-select{border-color:#dfccab;background:#fffaf1;min-height:88px}
+.stage-select.active{border-color:#6caa8a;background:#e5f1da}
+.stage-select strong{font-size:13px}
+.coach-target{outline:6px solid #fff1a0!important;outline-offset:5px;animation:helpGlow .75s ease-in-out infinite alternate}
+.welcome-board{background:linear-gradient(#fff7dd,#f3dfb6);border:5px solid #d4aa79;box-shadow:0 12px 0 #8c805d,0 20px 25px #3c503840}
+.welcome-board .fruit{display:none}.welcome-fruits{display:none}
+.welcome-board:before{content:'';display:block;width:135px;height:110px;margin:-12px auto 15px;background:url('./assets/forest-world.svg') center/cover;border:7px solid #e3be80;box-shadow:0 6px 0 #8d6743;border-radius:27px}
+.welcome-board h2{font-size:30px}
+.tool-button,.secondary-button{background:#fffbec;border:2px solid #c5b290;color:#655944}
+.primary-button{background:linear-gradient(#e58f77,#d56757);border-color:#ce675a;box-shadow:0 7px 0 #9c5149;color:#fff9e2}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-5px)}}@keyframes flowerBounce{from{transform:scale(.4) rotate(-20deg)}to{transform:scale(1) rotate(0)}}@keyframes helpGlow{from{filter:brightness(1)}to{filter:brightness(1.2)}}
+@media(max-width:650px){
+ .game-top h1{font-size:30px}.game-top h1 span{color:#437b68}
+ .world{min-height:610px;border-width:5px;border-radius:24px;background-position:center}
+ .world-frame{min-height:603px;padding:9px 5px 21px}
+ .story-guide{gap:4px;margin-bottom:0}.moa-character{height:57px;width:57px}.guide-bubble{min-height:68px;padding:7px 9px}.guide-text{font-size:17px}.guide-kicker{font-size:11px}
+ .hear-button{width:42px;flex-basis:42px;height:42px}
+ .playfield{min-height:455px;padding:4px 4px 12px}
+ .storybook-scene{padding:8px 3px;gap:14px;min-height:438px}
+ .friend-porch{gap:8px;max-width:100%;justify-content:center}
+ .friend-card{min-width:73px;min-height:119px;padding:3px 2px 7px;border-width:2px;border-radius:20px}
+ .character-sprite{width:66px;height:78px}.mini-plate{width:45px;height:18px;margin-top:2px}
+ .mini-plate .new-fruit{transform:scale(.55)}.storybook-basket{min-width:122px;min-height:83px;padding:13px 9px 8px;border-width:5px;border-radius:12px 12px 30px 30px}.basket-inside{gap:4px}.basket-inside>.new-fruit{width:25px;height:27px}
+ .new-fruit{width:32px;height:34px}
+ .dots{gap:6px;max-width:186px}
+ .count-dot{width:28px;height:28px}
+ .number-tile{min-width:72px;width:76px;min-height:94px;height:94px;font-size:47px;border-width:4px}
+ .number-options{gap:10px}
+ .island-choice{min-width:143px;min-height:170px;border-width:4px;padding:10px 4px}
+ .fork-choice{gap:8px}
+ .harvest-yard{gap:12px}
+ .harvest-patch,.take-garden{grid-template-columns:repeat(3,1fr);gap:6px;padding:11px;min-height:164px;border-width:3px;border-radius:27px}
+ .harvest-btn{min-width:44px;min-height:52px}.harvest-btn .new-fruit{transform:scale(.94)}
+ .basket-number{font-size:29px}
+ .number-path{gap:4px}.path-stone,.missing-stone{min-width:53px;height:72px;font-size:31px;border-width:3px}
+ .tenframe{width:95%;min-width:0}.ten-cell{min-height:52px;border-width:2px}.ten-cell .new-fruit{transform:scale(.65)}
+ .equal-mats{gap:7px;flex-wrap:nowrap}.equal-mat{min-width:0;width:47%;min-height:130px;padding:9px 4px;border-width:3px}
+ .two-baskets{gap:5px;flex-wrap:nowrap}.two-baskets .storybook-basket{min-width:0;width:43%;padding:13px 5px;max-width:200px}.math-operator{font-size:31px}
+ .take-scene{gap:8px}.take-indicator{font-size:20px;padding:8px;border-width:3px}.take-indicator .new-fruit{transform:scale(.72)}.tiny-visual-guide{font-size:13px}
+ .pattern-track{gap:4px}.pattern-pocket{width:53px;height:67px;border-width:3px;border-radius:19px}.pattern-pocket .new-fruit{transform:scale(.73)}.pattern-hole{font-size:35px}
+ .seed-choice,.shape-choice{min-width:99px;min-height:105px}
+ .bridge-road{max-width:88%}
+ .stage-grid{grid-template-columns:1fr}.map-doors{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .storybook-reward,.storybook-finish{min-height:292px;padding:15px}.storybook-reward p{font-size:22px}
+ .welcome-board h2{font-size:24px}.welcome-board:before{width:100px;height:83px}
+}
+@media(max-width:355px){.friend-card{min-width:65px}.character-sprite{width:59px;height:71px}.number-tile{min-width:65px;width:67px}.path-stone,.missing-stone{min-width:47px}.pattern-pocket{width:48px}}
+@media(prefers-reduced-motion:reduce){.character-sprite,.petal-bloom,.coach-target{animation:none!important}}

@@ -3,13 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#214e67">
+<meta name="theme-color" content="#4c846d">
 <meta name="description" content="모아의 숫자 숲. 손으로 나누고, 세고, 모으며 자연스럽게 수 개념을 만나는 무료 놀이 게임. 글을 읽지 않아도 시작할 수 있어요.">
 <title>모아의 숫자 숲 — 일단 해봄</title>
 <link rel="icon" href="../assets/habom-favicon-v3-32.png">
 <link rel="stylesheet" href="../assets/habom-gamja-font.css?v=20261012-readable2">
 <link rel="stylesheet" href="./style.css?v=20261021a">
-<script src="./game.js?v=20261021a" defer></script>
+<link rel="stylesheet" href="./v2.css?v=20261021-story1">
+<script src="./game.js?v=20261021-story1" defer></script>
 </head>
 <body>
 <div class="app">
@@ -24,7 +25,7 @@
  <section class="world" id="world" aria-label="숫자 숲 게임 화면">
   <div class="sky-decor"><span class="cloud cloud-one"></span><span class="cloud cloud-two"></span><span class="sun"></span><span class="hill hill-one"></span><span class="hill hill-two"></span></div>
   <div class="world-frame">
-   <div class="story-guide"><img src="../thinking-garden/assets/moa-discovery.png" alt="" class="moa-character" loading="eager"><div class="guide-bubble"><p class="guide-kicker" id="guideKicker">숫자 숲에 온 걸 환영해!</p><p class="guide-text" id="guideText">숲속 친구들과 놀아 볼까?</p></div><button class="hear-button" id="hearButton" type="button" aria-label="안내 다시 듣기" title="안내 다시 듣기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Zm12-1c2 2 2 6 0 8m2-11c4 4 4 10 0 14"/></svg></button></div>
+   <div class="story-guide"><img src="../thinking-garden/assets/moa-discovery.png" alt="" class="moa-character" loading="eager"><div class="guide-bubble"><p class="guide-kicker" id="guideKicker">숫자 숲에 온 걸 환영해!</p><p class="guide-text" id="guideText">숲속 친구들과 놀아 볼까?</p></div><button class="hear-button" id="hearButton" type="button" aria-label="그림 힌트 보기" title="그림 힌트 보기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Zm12-1c2 2 2 6 0 8m2-11c4 4 4 10 0 14"/></svg></button></div>
    <div id="playfield" class="playfield" role="group" aria-label="놀이 공간">
     <div class="welcome"><div class="welcome-trees" aria-hidden="true"><span class="tree"></span><span class="tree small"></span><span class="tree"></span></div><div class="welcome-board"><div class="welcome-fruits" aria-hidden="true"><span class="fruit"></span><span class="fruit"></span><span class="fruit"></span></div><h2>친구들이 기다리고 있어!</h2><p>누르면 숲속 놀이가 시작돼요.</p><button class="primary-button" id="startButton" type="button">숲으로 출발 <span aria-hidden="true">→</span></button></div></div>
    </div>
@@ -32,7 +33,7 @@
   </div>
  </section>
  <div class="bottom-bar"><p id="status" class="status" role="status" aria-live="polite">준비되면 출발!</p><div class="bottom-actions"><button id="hintButton" type="button" class="secondary-button" hidden>힌트 보기</button><button id="restartButton" type="button" class="secondary-button" hidden>처음부터</button></div></div>
- <p class="small-note">글을 읽지 않아도 그림을 눌러 놀 수 있어요. 기록은 이 기기에만 저장돼요.</p>
+ <p class="small-note">말로 설명하지 않아도 장면을 따라가며 놀아요. 필요한 순간에는 눈 모양을 눌러 힌트를 볼 수 있어요. 놀이 기록은 이 기기에만 저장됩니다.</p>
 </main>
 <footer><a href="../gardens/#learning">모아의 학습정원</a><span>직접 해보고, 조금씩 고쳐가는 일단 해봄</span></footer>
 </div>
