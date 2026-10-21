@@ -87,7 +87,9 @@ try{
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0,'horizontal overflow');
   const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('moa-number-forest-v3')));
   assert.equal(Object.keys(saved).length,15,'progress missing for some activities');
-  assert.ok(Object.values(saved).every(v=>v.verifiedSessions===1&&v.supportedTotal===1),'supported model trial must be distinct from 3 independent solved rounds');
+  assert.ok(Object.values(saved).every(v=>v.verifiedSessions===1),'each completed learning check must be recorded independently');
+  assert.equal(saved.share.supportedTotal,1,'model trials should be recorded as supported');
+  assert.equal(saved.compare.supportedTotal,2,'wrong-answer trial and guided model must not inflate independent learning');
   if(width===390){await page.reload();assert.ok(await page.locator('#startButton').isVisible(),'game should survive reload')}
   await context.close()
  }
