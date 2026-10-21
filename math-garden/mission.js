@@ -64,7 +64,7 @@ function draw(){
  const board=key==='share'?shareBoard(x):key==='compare'?compareBoard(x):makeBoard(x);
  const feedback=state.attempts>0?'':null;
  scene('<div class="quest"><div class="quest-head"><span class="quest-chip">'+lab+'</span><div class="quest-pips">'+Array.from({length:Math.min(state.step,5)},()=>'<i></i>').join('')+'</div></div><div class="quest-board">'+board+'</div>'+(key==='compare'?'':'<div class="quest-actions">'+stepAction('submit','배달하기 →','선택한 간식으로 배달하기')+'</div>')+'<div class="feedback-slot" id="feedbackSlot" aria-live="polite"></div></div>');
- if(state.flagged){const label=document.querySelector('#feedbackSlot');if(label)label.textContent='아직 연습 중이야. 다시 해봐도 돼.'}
+ if(x.kind==='guided'&&!state.flagged){const label=$('feedbackSlot');if(label)label.innerHTML='<div class="guided-preview">'+renderPairing(x,key)+'</div>';} else if(state.flagged){const label=$('feedbackSlot');if(label)label.textContent='다시 살펴볼 수 있어.'}
 }
 function renderPairing(x,key){
  if(key==='compare'){
