@@ -13,9 +13,28 @@ const MATERIALS=[
 const STANDALONE_GAMES=[
  {id:'moaMoney',title:'모아의 화폐 가게',desc:'동전·지폐를 알아보고 물건값을 맞추는 생활학습',category:'life'},
  {id:'moaChange',title:'바뀐 준비물 찾기',desc:'기억한 물건 목록에 추가·변경된 정보를 반영해요',category:'memory'},
- {id:'moaFeel',title:'마음 이야기 탐험',desc:'친구의 마음과 여러 선택을 생각해요',category:'life'}
+ {id:'moaFeel',title:'마음 이야기 탐험',desc:'친구의 마음과 여러 선택을 생각해요',category:'life'},
+ {id:'rhythmTouch',title:'박자꽃 톡톡',desc:'소리와 박자에 맞춰 색깔 건반을 연주해요',category:'music'},
+ {id:'recorderPlay',title:'리코더 손가락 연습',desc:'운지 구멍을 눌러 실제 연주 동작을 익혀요',category:'music'},
+ {id:'breathStrength',title:'바람의 힘',desc:'마이크로 바람의 세기를 조절하는 놀이',category:'breath'},
+ {id:'breathLong',title:'오래 후~',desc:'길고 편안하게 숨을 내쉬는 놀이',category:'breath'},
+ {id:'breathBeat',title:'박자 바람',desc:'노래와 박자의 변화에 맞춰 숨을 내쉬어요',category:'breath'}
 ];
-const external={rescue:'games/rescue/',handMirror:'games/hand-mirror/',moaMoney:'games/moa-missions/?game=money',moaChange:'games/moa-missions/?game=change',moaFeel:'games/moa-missions/?game=feel'};
+const external={
+ rescue:'games/rescue/',handMirror:'games/hand-mirror/',
+ moaMoney:'games/moa-missions/?game=money',
+ moaChange:'games/moa-missions/?game=change',
+ moaFeel:'games/moa-missions/?game=feel',
+ rhythmTouch:'games/rhythm-touch/',
+ recorderPlay:'recorder/',
+ breathStrength:'../breath-garden/?mode=strength',
+ breathLong:'../breath-garden/?mode=long',
+ breathBeat:'../breath-garden/?mode=beat'
+};
+const REAL_PLAY_IMAGES={
+ rhythmTouch:'rhythm-touch',recorderPlay:'recorder',
+ breathStrength:'strength',breathLong:'long',breathBeat:'beat'
+};
 let active=null,library=[],materialMap=new Map(MATERIALS.map(x=>[x.id,x])),hooks={},lastPlayed=null,visited=new Set();
 const $=q=>document.querySelector(q), E=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e};
 const allGames=()=>[...[...document.querySelectorAll('.library-card[data-open]')].map(c=>({id:c.dataset.open,title:c.querySelector('h3')?.textContent.trim()||c.dataset.open,desc:c.querySelector('p')?.textContent.trim()||'',category:c.dataset.category||'all'})),...STANDALONE_GAMES].filter((x,i,a)=>a.findIndex(y=>y.id===x.id)===i);
@@ -84,6 +103,15 @@ function makeAssignedVisual(id,isGame){
  wrap.setAttribute('aria-hidden','true');
  wrap.append(E('small','moa-assigned-visual-label',isGame?'🎮 이런 놀이예요':'📄 이런 자료예요'));
  const scene=E('div','moa-assigned-scene');
+ // Five music/breath games are standalone pages, not native library cards.
+ // Use their real play screenshots instead of generic pictograms.
+ if(REAL_PLAY_IMAGES[id]){
+  const shot=E('img','moa-assigned-real-shot');
+  shot.src='../gardens/previews/'+REAL_PLAY_IMAGES[id]+'-play.jpg?v=20261021-playstate4';
+  shot.alt='';shot.loading='eager';shot.decoding='async';
+  shot.addEventListener('error',()=>{shot.remove();wrap.classList.remove('moa-assigned-has-source');},{once:true});
+  scene.append(shot);wrap.classList.add('moa-assigned-has-source');
+ }
  const model=FALLBACK_SCENES[id]||{icons:['🌱','👀','🧩'],caption:'보고 생각하며 풀어보기'};
  const drawing=E('div','moa-assigned-fallback');
  const icons=E('div','moa-assigned-fallback-icons');
@@ -162,6 +190,7 @@ function embed(path,title,isMaterial){
  if(!isMaterial){
   const allowed=new URL(path,location.href);
   const selectedMission=allowed.pathname.includes('/moa-missions/')?allowed.searchParams.get('game'):null;
+  const selectedMode=allowed.searchParams.get('mode');
   frame.addEventListener('load',()=>{
    if(!overlay.isConnected)return;
    try{
@@ -169,7 +198,8 @@ function embed(path,title,isMaterial){
     // Match the exact selected game path. A different mission within the same
     // standalone module is not part of this child's curated assignment.
     const sameGame=current.origin===allowed.origin&&current.pathname===allowed.pathname
-      &&(!selectedMission||current.searchParams.get('game')===selectedMission);
+      &&(!selectedMission||current.searchParams.get('game')===selectedMission)
+      &&(!selectedMode||current.searchParams.get('mode')===selectedMode);
     if(sameGame)return;
    }catch{}
    overlay.remove();hooks.goHome();
