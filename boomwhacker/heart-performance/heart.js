@@ -596,116 +596,134 @@ function drawSparkle(c,x,y,r,color="#fff7ce"){
  c.restore();
 }
 function themeBackground(c){
- const p=themePalette(),g=c.createLinearGradient(0,0,0,620);
+ const p=themePalette(),g=c.createLinearGradient(0,0,170,620);
  g.addColorStop(0,p.sky[0]);g.addColorStop(1,p.sky[1]);
  c.fillStyle=g;c.fillRect(0,0,1200,620);
  c.save();
- if(theme==="classroom"){
-   // Soft classroom: window, pastel chalk marks and a restrained wooden sill.
-   // The classroom's illustrated sunlit window sits between title and page counter.
-   rr(c,771,6,167,103,22,"#fff8e9bd");
-   rr(c,784,16,140,80,14,"#cce7e4");
-   c.fillStyle="#fff4cc";c.beginPath();c.arc(879,42,15,0,Math.PI*2);c.fill();
-   ln(c,843,17,843,97,"#fffef7",5);ln(c,785,62,923,62,"#fffef7",5);
-   rr(c,772,101,170,9,4,"#e1c6a6");
-   c.fillStyle="#e3c7a9";c.fillRect(0,606,1200,14);
-   for(const [x,y] of [[38,95],[1150,201],[62,540],[1135,577]]){
-     disk(c,x,y,18,"#e4e5b88c");disk(c,x+25,y-11,11,"#c9dbbf91");
+ if(theme==="night"){
+   // Quiet cinematic night: a halo, crescent, small stellar glints and distant hills.
+   const halo=c.createRadialGradient(882,73,5,882,73,155);
+   halo.addColorStop(0,"#f5d3b93b");halo.addColorStop(1,"#f5d3b900");
+   c.fillStyle=halo;c.fillRect(680,0,360,220);
+   disk(c,882,64,25,"#f8e1ad");
+   disk(c,892,51,24,p.sky[0]);
+   for(const [x,y,r] of [[53,72,2],[204,34,2],[350,101,1.6],[722,29,1.5],[981,83,2],[1122,51,2.6],[1164,174,1.5],[29,390,2],[1162,475,2.3]]){
+     disk(c,x,y,r,"#f8e8c7");
    }
-   drawSparkle(c,48,39,7,"#c7ac88");drawSparkle(c,1151,486,9,"#d9c49b");
+   for(const [x,y,r] of [[760,78,4],[1065,115,4],[1110,24,3]])drawSparkle(c,x,y,r,"#edd9b7");
+   c.fillStyle="#354461";c.beginPath();c.moveTo(0,594);
+   c.bezierCurveTo(220,541,470,605,700,570);c.bezierCurveTo(910,550,1040,568,1200,545);
+   c.lineTo(1200,620);c.lineTo(0,620);c.fill();
+   c.fillStyle="#273953";c.beginPath();c.moveTo(0,612);
+   c.bezierCurveTo(290,585,480,620,750,593);c.bezierCurveTo(940,571,1100,613,1200,584);
+   c.lineTo(1200,620);c.lineTo(0,620);c.fill();
  }else if(theme==="forest"){
-   // Ferns and rolling woodland hills stay at the edges, away from colored notes.
-   c.fillStyle="#b1d5b5";c.beginPath();c.moveTo(0,570);
-   c.bezierCurveTo(240,515,410,585,655,558);c.bezierCurveTo(850,530,1030,505,1200,560);
-   c.lineTo(1200,620);c.lineTo(0,620);c.fill();
-   c.fillStyle="#95bea8";c.beginPath();c.moveTo(0,608);c.bezierCurveTo(340,542,730,645,1200,570);
-   c.lineTo(1200,620);c.lineTo(0,620);c.fill();
-   const leaf=(x,y,size,color)=>{
-    c.save();c.translate(x,y);c.fillStyle=color;
-    c.beginPath();c.moveTo(0,0);c.bezierCurveTo(size*.8,-size*.7,size*1.1,size*.3,0,size);c.bezierCurveTo(-size*.55,size*.5,-size*.6,size*.2,0,0);c.fill();c.restore()
-   };
-   leaf(26,50,23,"#82b692");leaf(70,17,18,"#add5a6");leaf(1140,36,27,"#80b898");leaf(1177,520,30,"#83ad99");leaf(47,492,20,"#a4cda3");
-   // Quiet tree canopy graphic in the open central title gap.
-   leaf(794,27,20,"#8ac1a0");leaf(819,14,18,"#accf9c");
-   leaf(881,19,22,"#86baa1");leaf(906,47,14,"#b3d3ac");
-   ln(c,835,103,835,72,"#719b82",3);
-   for(const [x,y,r] of [[143,32,4],[940,54,5],[1069,586,3]])disk(c,x,y,r,"#fff4c9");
+   // Layered watercolor landscape stays BEHIND the score, not on the notes.
+   c.fillStyle="#cbe1cd";c.beginPath();c.moveTo(0,580);c.bezierCurveTo(220,516,405,577,635,551);c.bezierCurveTo(870,527,990,522,1200,571);c.lineTo(1200,620);c.lineTo(0,620);c.fill();
+   c.fillStyle="#9dc6b3";c.beginPath();c.moveTo(0,610);c.bezierCurveTo(300,555,450,613,710,591);c.bezierCurveTo(960,568,1017,593,1200,568);c.lineTo(1200,620);c.lineTo(0,620);c.fill();
+   const leaf=(x,y,size,color,angle=0)=>{c.save();c.translate(x,y);c.rotate(angle);c.fillStyle=color;c.beginPath();c.moveTo(0,0);c.bezierCurveTo(size*.8,-size*.7,size*1.25,size*.1,size*.24,size);c.bezierCurveTo(-size*.6,size*.55,-size*.45,size*.15,0,0);c.fill();c.restore()};
+   ln(c,0,0,80,118,"#739d8b",8);
+   for(const [x,y,z,colr,angle] of [[3,26,43,"#8cb99e",-.45],[50,9,39,"#a7ccb1",.3],[72,67,29,"#a3c4a5",.65],[1148,0,39,"#91bda4",.35],[1183,75,28,"#6fa88e",.8],[1119,43,31,"#b4cfad",-.35]]){
+     leaf(x,y,z,colr,angle);
+   }
+   for(const [x,y] of [[50,532],[1127,561],[874,40]])disk(c,x,y,5,"#fbf4d8a6");
  }else{
-   // Starry music path: gradient twilight sky, moon and a quiet valley.
-   c.fillStyle="#fff1c0";c.beginPath();c.arc(868,56,28,0,Math.PI*2);c.fill();
-   c.fillStyle="#4a5888";c.beginPath();c.arc(881,44,26,0,Math.PI*2);c.fill();
-   [[58,35,8],[160,91,4],[338,24,5],[713,61,4],[958,37,7],[1169,193,5],[44,456,5],[1090,577,5],[520,586,4]].forEach(([x,y,z])=>drawSparkle(c,x,y,z,"#fff2c6"));
-   c.fillStyle="#495a7b";c.beginPath();c.moveTo(0,574);c.bezierCurveTo(250,547,395,584,610,559);c.bezierCurveTo(820,540,1010,548,1200,570);c.lineTo(1200,620);c.lineTo(0,620);c.fill();
-   c.fillStyle="#617395";c.beginPath();c.moveTo(0,608);c.bezierCurveTo(260,576,559,630,1200,580);c.lineTo(1200,620);c.lineTo(0,620);c.fill();
+   // Warm classroom: an arched sunlit window and the hint of a reading corner.
+   const haze=c.createRadialGradient(826,79,12,826,79,230);
+   haze.addColorStop(0,"#fff5db9c");haze.addColorStop(1,"#fff5db00");
+   c.fillStyle=haze;c.fillRect(590,0,500,350);
+   c.save();c.globalAlpha=.76;
+   rr(c,760,13,157,91,38,"#fffaf0");
+   rr(c,776,19,126,78,30,"#b6d6ca");
+   c.fillStyle="#f9dfa6";c.beginPath();c.arc(848,44,18,0,Math.PI*2);c.fill();
+   ln(c,840,21,840,97,"#fffef5",5);ln(c,780,61,901,61,"#fffef5",5);
+   rr(c,750,100,179,8,4,"#c6a88b");c.restore();
+   // Natural paper-toned floor, never emoji or flat clip-art decorations.
+   c.fillStyle="#eadcc9";c.fillRect(0,597,1200,23);
+   ln(c,0,595,1200,595,"#cfb89d",2);
+   c.fillStyle="#bdd5ba";c.beginPath();c.ellipse(1182,557,27,51,-.3,0,Math.PI*2);c.fill();
+   c.fillStyle="#93baa3";c.beginPath();c.ellipse(23,561,25,43,.3,0,Math.PI*2);c.fill();
  }
  c.restore();
 }
 
+/* A single quiet sheet, not two floating white dashboards. */
+function themeSheet(c,x,y,w,h,splitY){
+ const paper=theme==="night"?"#fbfaf8":theme==="forest"?"#fffef9":"#fffdf9";
+ c.save();c.shadowColor=theme==="night"?"#121e3766":"#55705e2d";
+ c.shadowBlur=24;c.shadowOffsetY=9;rr(c,x,y,w,h,26,paper);c.restore();
+ c.save();c.strokeStyle=theme==="night"?"#d8d8e4":"#e0e4d9";c.lineWidth=1.3;
+ c.beginPath();c.roundRect(x+.6,y+.6,w-1.2,h-1.2,26);c.stroke();c.restore();
+ ln(c,x+28,splitY,x+w-28,splitY,theme==="night"?"#e9e8ef":"#e8eee7",1.5);
+}
+
 function themeCard(c,x,y,w,h,row,mode="two"){
- const p=themePalette(),color=row===0?p.first:p.second;
- c.save();c.shadowColor=theme==="night"?"#172b4359":"#5a77632b";c.shadowBlur=16;c.shadowOffsetY=5;
- rr(c,x,y,w,h,27,color);c.restore();
- c.strokeStyle=p.border;c.lineWidth=1.8;c.beginPath();c.roundRect(x,y,w,h,27);c.stroke();
- c.save();c.beginPath();c.roundRect(x,y,w,h,27);c.clip();
- const wash=c.createLinearGradient(x,y,x+w,y+h);
- wash.addColorStop(0,theme==="night"?"#f9f0ff15":"#f6ffdd25");
- wash.addColorStop(1,theme==="night"?"#9f9ac719":"#b8d4be12");
- c.fillStyle=wash;c.fillRect(x,y,w,h);
- c.restore();
- const accent=row===0?(theme==="night"?"#c19cb1":theme==="classroom"?"#deaaa0":"#89b69b"):(theme==="night"?"#92bed5":"#78bba8");
- const badgeY=y+(mode==="stairs"?16:27);
- disk(c,x+34,badgeY,12,accent);
- txt(c,String(row+1),x+34,badgeY+.5,14,"#fff","center","750");
- const ruleY=y+(mode==="stairs"?37:59);
- ln(c,x+25,ruleY,x+w-25,ruleY,theme==="night"?"#d9d8e9":"#e6e9df",1.3);
+ // Row distinction is typography and spacious grouping within ONE sheet.
+ const ink=theme==="night"?"#4b526e":"#46665c";
+ const tag=row===0?"01":"02",tagY=y+(mode==="stairs"?20:28);
+ rr(c,x+21,tagY-12,38,25,10,theme==="night"?"#e9e7f0":theme==="forest"?"#e8f2e8":"#f2ebdf");
+ txt(c,tag,x+40,tagY,15,ink,"center","700");
+ ln(c,x+83,y+(mode==="stairs"?42:60),x+w-29,y+(mode==="stairs"?42:60),"#e9ece8",1);
 }
+
 function themeHeader(c,title,start,end){
- const p=themePalette();
- c.save();c.shadowColor=theme==="night"?"#10233d4d":"#7a9a8726";c.shadowBlur=10;c.shadowOffsetY=3;
- rr(c,48,19,695,75,24,p.top);
- rr(c,952,24,200,65,22,p.top);
- c.restore();
- rr(c,64,37,6,35,3,theme==="night"?"#9f9ed2":theme==="forest"?"#85c59d":"#dcae95");
- txt(c,title,93,57,28,p.heading,"left","750");
- txt(c,(start+1)+"~"+end+" / "+song.bars.length+"마디",1053,56,20,p.sub,"center","700");
- if(theme==="night"){
-  for(const [x,y,z] of [[776,42,5],[918,71,4],[825,83,3]])drawSparkle(c,x,y,z,"#fff2ca");
- }else if(theme==="forest"){
-  ln(c,779,79,917,79,"#a1cfad",2);
-  disk(c,807,53,6,"#b8d6a2");disk(c,889,57,4,"#a5c9a3");
- }else{
-  disk(c,810,59,8,"#e6d1ad");disk(c,849,44,5,"#add0b2");
-  drawSparkle(c,892,63,7,"#d5b08c");
- }
+ const white=theme==="night",headline=white?"#f6f4f1":"#355d55",caption=white?"#c8cce0":"#66877c";
+ ln(c,58,27,58,91,white?"#dcbb97":"#b48d6b",4);
+ txt(c,title,78,51,35,headline,"left","700");
+ txt(c,"ULMOA  ·  HEART PLAY-ALONG",80,86,12,caption,"left","650");
+ const progress=(Math.max(0,end-start)/Math.max(song.bars.length,1));
+ rr(c,995,31,158,54,18,white?"#ffffff1b":"#ffffffad");
+ txt(c,(start+1)+"–"+end+" / "+song.bars.length+"마디",1074,52,19,headline,"center","700");
+ rr(c,1019,71,108,3,2,white?"#ffffff45":"#9fbdb150");
+ rr(c,1019,71,Math.max(9,108*progress),3,2,white?"#e1c9a7":"#6ca999");
 }
+
 function themeFooter(c,message){
- const p=themePalette();rr(c,145,561,910,39,17,p.footer);
- txt(c,message,600,580,17,p.heading,"center","700");
+ const textColor=theme==="night"?"#d7dcec":"#597e70";
+ txt(c,"♪  "+message,600,582,17,textColor,"center","650");
 }
+/* One beat uses one visual slot. Two eighths are TWO complete little hearts,
+   not a jagged two-color heart, with a subtle shared-beat connector. */
+function paintFixedBeat(c,beat,x,y,w,h){
+ const pair=stairHalfBeatPair(beat);
+ if(!pair){heart(c,beat,x,y,w,h,-100,false);return}
+ const miniW=Math.min(55,(w-9)/2);
+ const miniH=miniW*.9,yy=y+(h-miniH)/2-4;
+ const left=x+(w/2-miniW)/2,right=x+w/2+(w/2-miniW)/2;
+ miniStairHeart(c,pair[0].note,left,yy,miniW);
+ miniStairHeart(c,pair[1].note,right,yy,miniW);
+ // One beat shared by two 1/2-beat notes.
+ const bottom=yy+miniH+8;
+ c.save();c.strokeStyle="#abc6b9";c.lineWidth=1.8;c.lineCap="round";
+ c.beginPath();c.moveTo(left+7,bottom-5);c.lineTo(left+7,bottom);c.lineTo(right+miniW-7,bottom);c.lineTo(right+miniW-7,bottom-5);c.stroke();c.restore();
+ txt(c,"½",left+miniW/2,yy-12,13,"#688b7f","center","700");
+ txt(c,"½",right+miniW/2,yy-12,13,"#688b7f","center","700");
+}
+
 function scorePageBackground(info){
  const background=document.createElement("canvas");background.width=1200;background.height=620;
  const c=background.getContext("2d");
  themeBackground(c);themeHeader(c,"모아의 하트길",info.startBar,info.endBar);
+ themeSheet(c,50,120,1100,423,331);
  for(let row=0;row<2;row++){
    const beginning=info.startBar+row*info.barsPerLine,ending=Math.min(info.endBar,beginning+info.barsPerLine),
          top=row===0?123:335;
    themeCard(c,50,top,1100,202,row);
-   txt(c,row===0?"첫 번째 줄":"두 번째 줄",110,top+27,18,themePalette().heading,"left","700");
+   txt(c,row===0?"첫 번째 줄":"두 번째 줄",149,top+27,17,"#47665d","left","700");
    if(beginning>=ending){txt(c,"이 줄은 비어 있어요",594,top+106,22,"#90a89e");continue}
-   txt(c,(beginning+1)+"~"+ending+"마디 · "+((ending-beginning)*song.meter)+"개 하트",1107,top+27,16,themePalette().sub,"right","650");
+   txt(c,(beginning+1)+"–"+ending+"마디",1092,top+27,16,"#7f928d","right","600");
    const g=twoGeometry(info,row);
-   ln(c,76,g.top+g.height-12,1125,g.top+g.height-12,"#dfebdf",3);
    for(let i=0;i<g.count;i++){
      const beatIndex=beginning*song.meter+i;if(beatIndex>=ending*song.meter)break;
      const x=g.left+i*(g.width+g.gap);
-     heart(c,beatIndex,x,g.top,g.width,g.height,-100,false);
+     paintFixedBeat(c,beatIndex,x,g.top,g.width,g.height);
      if(i>0&&i%song.meter===0){
-       const dividerX=x-g.gap/2;ln(c,dividerX,g.top-9,dividerX,g.top+g.height+9,"#cfdfd6",2);
+       const dividerX=x-g.gap/2;
+       ln(c,dividerX,g.top-4,dividerX,g.top+g.height-5,"#d8e2dc",1.35);
      }
-     // The heart itself encodes its own 16th-note subdivisions.
    }
  }
- themeFooter(c,"악보는 고정 · 모아만 이동 · 두 줄 끝나면 다음 악보");
+ themeFooter(c,"악보는 그대로 · 모아만 따라가요");
  return background;
 }
 function fixedTwoBackground(info){
@@ -827,8 +845,8 @@ function miniStairHeart(c,note,x,y,width){
  const sheen=c.createLinearGradient(0,0,0,90);
  sheen.addColorStop(0,"#ffffff2a");sheen.addColorStop(1,"#152a240b");
  c.fillStyle=sheen;c.fillRect(0,0,100,90);c.restore();
- txt(c,note==="높은도"?"도":fixedNote(note),50,38,31,
-   ["도","솔","라","시","높은도"].includes(note)?"#fff":"#263e47","center","700");
+ txt(c,note==="높은도"?"도":fixedNote(note),50,38,39,
+   ["도","솔","라","시","높은도"].includes(note)?"#fff":"#263e47","center","650");
  if(note==="높은도")txt(c,"↑",50,63,14,"#fff");
  c.restore();
  return hh;
@@ -843,7 +861,7 @@ function paintStairBeat(c,beat,x,y,w,h,row){
  const h1=miniStairHeart(c,pair[1].note,right,y1,miniW);
  // Beat grouping line: the two notes are each a half beat, not two quarters.
  const foot=Math.max(y0+h0,y1+h1)+7;
- c.save();c.strokeStyle=theme==="night"?"#a2a5c5":"#bdd5c2";c.lineWidth=2;c.lineCap="round";
+ c.save();c.strokeStyle="#aac2b8";c.lineWidth=1.8;c.lineCap="round";
  c.beginPath();c.moveTo(left+9,foot-6);c.lineTo(left+9,foot);c.lineTo(right+miniW-9,foot);c.lineTo(right+miniW-9,foot-6);c.stroke();
  c.restore();
 }
@@ -851,16 +869,17 @@ function buildStairPage(info){
  const bg=document.createElement("canvas");bg.width=1200;bg.height=620;
  const c=bg.getContext("2d");
  themeBackground(c);themeHeader(c,"모아의 하트 계단악보",info.startBar,info.endBar);
+ themeSheet(c,44,103,1112,451,330);
  for(let row=0;row<2;row++){
   const first=info.startBar+row*info.barsPerLine,last=Math.min(info.endBar,first+info.barsPerLine);
   const top=row===0?104:334;
   themeCard(c,44,top,1112,row===0?218:215,row,"stairs");
-  txt(c,row===0?"첫 번째 줄":"두 번째 줄",103,top+16,16,themePalette().heading,"left","750");
+  txt(c,row===0?"첫 번째 줄":"두 번째 줄",150,top+19,16,"#47665d","left","700");
   if(first>=last){txt(c,"이 줄은 비어 있어요",600,top+113,22,"#98aaa3");continue}
   const g=stairGeometry(info,row);
   // Small elevation guide, NOT moving lanes or a scrolling piano-roll.
-  txt(c,"높은 음",1119,top+34,12,themePalette().sub,"right","650");
-  txt(c,"낮은 음",1119,top+191,12,themePalette().sub,"right","650");
+  txt(c,"높은 음",1111,top+66,12,"#8e9b95","right","600");
+  txt(c,"낮은 음",1111,top+193,12,"#8e9b95","right","600");
   if(stairStyle==="path"){
    let previous=null;
    for(let beat=first*song.meter;beat<last*song.meter;beat++){

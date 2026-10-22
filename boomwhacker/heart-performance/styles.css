@@ -120,3 +120,26 @@
  .mobile-score-tip{flex-direction:column;align-items:stretch}
  .mobile-score-tip button{min-height:35px}
 }
+
+
+/* Music-room polish: instruments should look tactile, never like eight flat tiles. */
+.keys button{position:relative;isolation:isolate;overflow:hidden;
+ background:linear-gradient(160deg,color-mix(in srgb,var(--col) 84%,white) 0%,var(--col) 64%,color-mix(in srgb,var(--col) 80%,#142f38) 100%);
+ border:1px solid #ffffffa3;border-bottom:4px solid #243a3e45;border-radius:13px;
+ box-shadow:inset 2px 3px 4px #ffffff41,0 3px 6px #27443d16;
+ transition:transform .12s ease,filter .12s ease}
+.keys button:before{content:"";position:absolute;inset:5px auto 9px 8px;width:4px;border-radius:5px;
+ background:#ffffff62;pointer-events:none}
+.keys button b{position:relative;z-index:1;text-shadow:0 1px 0 #ffffff1c;line-height:1.2}
+.keys button small{position:relative;z-index:1;color:#344b4ba8;font-weight:700}
+.keys button.off{opacity:.4;filter:grayscale(.32)}
+.keys button.hit{transform:translateY(2px);filter:brightness(1.07)}
+.cue-card{border-radius:14px;box-shadow:inset 0 1px #fff,0 2px 8px #4065570b}
+.player{box-shadow:0 18px 45px #33554a16;border-color:#d9e6df}
+.stage{border-radius:16px;border-color:#dce5dd;box-shadow:0 8px 20px #244f401c}
+.theme-choice.active{border-color:#7caa96;box-shadow:0 2px 6px #406c5420}
+@media(max-width:620px){
+ .keys button{border-radius:9px;border-bottom-width:3px}
+ .keys button:before{inset:4px auto 6px 3px;width:2px}
+ .stage{border-radius:10px}
+}
