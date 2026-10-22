@@ -1,0 +1,31 @@
+import {writtenDay,recordVolume,calendarIndex,monthVolume} from './record-calendar.mjs';
+import {photosMarkup} from './trial-media.mjs';
+const esc=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse=s=>{const d=new Date(`${s}T12:00:00`);return Number.isNaN(d.getTime())?new Date():d};
+const today=()=>iso(new Date());
+const states={student:{day:today(),student:'all'},therapist:{day:today(),student:'all'}};
+const previewKeys=['note','title','thought','observation','message','event','mood','experience'];
+export function renderWritingCalendar(root,{role,records,students=[],onNewRecord}={}){
+ if(!root||!['student','therapist'].includes(role))return;
+ const isTeacher=role==='therapist',st=states[role];
+ const list=records.filter(r=>r.kind==='student'&&(!isTeacher||st.student==='all'||r.studentId===st.student));
+ const index=calendarIndex(list),d=parse(st.day),year=d.getFullYear(),month=d.getMonth(),sum=monthVolume(index,year,month);
+ const first=new Date(year,month,1,12),offset=(first.getDay()+6)%7,end=new Date(year,month+1,0,12),slots=Math.ceil((offset+end.getDate())/7)*7;
+ const grid=Array.from({length:slots},(_,i)=>{const dt=new Date(year,month,i-offset+1,12),date=iso(dt),n=index.get(date)?.count||0;
+  return `<button type="button" class="calendar-day${date===st.day?' is-selected':''}${dt.getMonth()!==month?' is-outside':''}${date===today()?' is-today':''}" data-wday="${date}" aria-pressed="${date===st.day}" aria-label="${date}, ${n}건"><span class="calendar-day-num">${dt.getDate()}</span>${n?`<span class="calendar-day-count">${n}건</span>`:''}</button>`;
+ }).join('');
+ const dayRecords=(index.get(st.day)?.records||[]).slice().sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
+ const details=dayRecords.map(r=>{const v=recordVolume(r),txt=previewKeys.map(k=>r.entry?.[k]).find(Boolean)||'사진 또는 그림 기록';
+  const fields=Object.entries(r.entry||{}).map(([k,val])=>k==='photos'?photosMarkup(val):k==='sketch'?'<p>그림이 있는 기록입니다. 원본은 내 기록 또는 공유 자료에서 확인할 수 있어요.</p>':`<p><b>${esc(k==='note'?'자유 기록':k==='date'?'기록 날짜':k)}</b> ${esc(val)}</p>`).join('');
+  return `<details class="calendar-record"><summary><span class="calendar-record-copy"><span class="calendar-record-snippet">${isTeacher?esc(r.student||'학생')+' · ':''}${esc(String(txt).slice(0,90))}</span><span class="calendar-record-meta">${v.characters}자 · 사진 ${v.photos}장 · 그림 ${v.drawings}개${isTeacher?' · 공유됨':r.local?' · 기기 보관':r.shared?' · 공유 중':' · 나만 보기'}</span></span><span class="calendar-open">열어보기</span></summary><div class="calendar-record-full">${fields}${r.entry?.date&&r.entry.date!==writtenDay(r)?`<p>기록 내용에 적힌 날짜: ${esc(r.entry.date)}</p>`:''}</div></details>`;
+ }).join('');
+ root.innerHTML=`<div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>calendar / ${isTeacher?'shared':'mine'}</span></div><div class="editor-paper writing-calendar-shell"><span class="tag">RECORD CALENDAR</span><h2>${isTeacher?'학생 공유 기록 달력':'나의 기록 달력'}</h2><p class="calendar-explain">${isTeacher?'학생이 공유한 기록만 보여요. 빈 날짜는 기록하지 않았다는 뜻이 아닙니다.':'내가 기록을 남긴 날이 보여. 매일 써야 하는 건 아니야.'}</p>${isTeacher?`<label class="calendar-student-picker">학생별 보기<select id="writingCalendarStudent"><option value="all">모든 담당 학생</option>${students.map(x=>`<option value="${esc(x.id)}"${x.id===st.student?' selected':''}>${esc(x.nickname)}</option>`).join('')}</select></label>`:''}<div class="writing-month-control"><button type="button" data-wprev aria-label="이전 달">‹</button><strong>${year}년 ${month+1}월</strong><button type="button" data-wnext aria-label="다음 달">›</button><button type="button" data-wtoday>이번 달</button></div><div class="writing-summary"><span><strong>${sum.days}일</strong> 기록한 날</span><span><strong>${sum.count}건</strong> 기록</span><span><strong>${sum.characters}자</strong> 글</span><span><strong>${sum.photos}장</strong> 사진</span><span><strong>${sum.drawings}개</strong> 그림</span></div><div class="calendar-weekdays">${['월','화','수','목','금','토','일'].map(x=>`<span>${x}</span>`).join('')}</div><div class="calendar-month-grid writing-month-grid">${grid}</div><div class="calendar-details"><div class="calendar-details-heading"><strong>${esc(st.day)} · ${dayRecords.length}건</strong>${isTeacher?'':'<button type="button" data-wnew>새 기록 쓰기</button>'}</div>${details||`<p class="calendar-empty">${isTeacher?'공유받은 기록이 없습니다. 비공개 작성 여부는 알 수 없습니다.':'이 날은 기록이 없어. 꼭 매일 쓸 필요 없어.'}</p>`}</div></div>`;
+ const redraw=()=>renderWritingCalendar(root,{role,records,students,onNewRecord});
+ root.querySelectorAll('[data-wday]').forEach(b=>b.onclick=()=>{st.day=b.dataset.wday;redraw();if(window.innerWidth<741)root.querySelector('.calendar-details')?.scrollIntoView({block:'nearest',behavior:'smooth'})});
+ for(const [selector,step] of [['[data-wprev]',-1],['[data-wnext]',1]])root.querySelector(selector).onclick=()=>{const v=parse(st.day),day=v.getDate();v.setDate(1);v.setMonth(v.getMonth()+step);v.setDate(Math.min(day,new Date(v.getFullYear(),v.getMonth()+1,0).getDate()));st.day=iso(v);redraw()};
+ root.querySelector('[data-wtoday]').onclick=()=>{st.day=today();redraw()};
+ root.querySelector('#writingCalendarStudent')?.addEventListener('change',e=>{st.student=e.target.value;redraw()});
+ root.querySelector('[data-wnew]')?.addEventListener('click',()=>onNewRecord?.());
+}

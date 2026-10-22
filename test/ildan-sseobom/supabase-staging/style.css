@@ -970,3 +970,23 @@ form[hidden], .form[hidden] {display:none !important;}
 .shared-clinician-content .saved-photo-grid img{height:170px}
 .shared-photo-error{display:block;padding:14px;font-size:13px;color:#8b4241;background:#fff7f4;border:1px solid #f2d3cf;border-radius:10px}
 @media(max-width:540px){.shared-clinician-record{padding:12px}.shared-clinician-content .saved-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.shared-clinician-content .saved-photo-grid img{height:125px}}
+
+/* Device migration and private/shared writing calendar */
+.device-transfer-all,.device-originals{margin-top:16px;padding:15px 17px;background:#f5f8fd;border:1px solid #dbe6ee;border-radius:14px}
+.device-transfer-all p,.device-originals p{font-size:13px;margin:8px 0 0;color:#4e6272;line-height:1.5}
+.device-originals summary{font-size:14px;cursor:pointer;font-weight:700}
+.writing-calendar-shell{padding:clamp(14px,3vw,26px)}
+.writing-calendar-shell h2{margin-bottom:10px}
+.calendar-explain{font-size:14px;line-height:1.65;color:#4b6170;margin:0 0 17px}
+.writing-month-control{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:12px 0 18px}
+.writing-month-control button{border:1px solid #d7e1eb;background:#fff;border-radius:10px;padding:8px 14px;min-height:42px;cursor:pointer;color:#20425a;font-weight:700}
+.writing-month-control strong{min-width:120px;text-align:center;font-size:19px}
+.writing-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin:12px 0 20px}
+.writing-summary span{background:#f3f7fb;border:1px solid #dce7f1;padding:11px 7px;border-radius:12px;text-align:center;color:#4c6578;font-size:12px;line-height:1.5}
+.writing-summary strong{display:block;color:#214364;font-size:21px}
+.calendar-student-picker{display:block;margin:13px 0;max-width:330px;font-size:14px;font-weight:700}
+.calendar-student-picker select{display:block;margin-top:8px;width:100%;max-width:100%;padding:10px;border:1px solid #c9d8e5;border-radius:10px;background:white}
+.writing-month-grid .calendar-day{min-width:0}
+.writing-calendar-shell .calendar-record-full{overflow-wrap:anywhere}
+.writing-calendar-shell .calendar-record-full img{max-width:100%}
+@media(max-width:640px){.writing-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.writing-summary span{font-size:11px;padding:8px 4px}.writing-summary strong{font-size:17px}.writing-month-control{gap:5px}.writing-month-control button{padding:7px 10px}.writing-month-control strong{min-width:100px;font-size:16px}}
