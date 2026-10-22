@@ -217,6 +217,17 @@ try{
   await page.locator('[data-lobe-scene="ball"]').click();
   await page.locator('#lobeSceneRoles button[data-scene-region="parietal"]').click();
   await page.screenshot({path:out+'/'+name+'-scene-ball.png',fullPage:true});
+  // Critical real-user case: a small occipital lobe must remain immediately recognizable.
+  await page.locator('#lobeSceneRoles button[data-scene-region="occipital"]').click();
+  assert.equal(await page.locator('#brainMap [data-scene-focus]').getAttribute('data-brain-region'),'occipital');
+  assert.match(await page.locator('#brainFocusName').innerText(),/후두엽/);
+  await page.screenshot({path:out+'/'+name+'-occipital-focus.png',fullPage:true});
+  if(name==='desktop'||name==='mobile'||name==='small-mobile'){
+    const regionPreview=await page.locator('.lobe-scene-visual').screenshot({type:'jpeg',quality:65,animations:'disabled'});
+    console.log('BRAIN_OCCIPITAL_PREVIEW_'+name+'='+regionPreview.toString('base64'));
+  }
+  // Other regression tests below expect the parietal choice as the preserved context.
+  await page.locator('#lobeSceneRoles button[data-scene-region="parietal"]').click();
   if(name==='desktop'||name==='mobile'){
    const preview=await page.locator('.lobe-figure').screenshot({type:'jpeg',quality:55,animations:'disabled'});
    console.log('BRAIN_SCENE_PREVIEW_'+name+'='+preview.toString('base64'));
