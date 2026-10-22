@@ -8,66 +8,94 @@
   box-shadow:inset 0 1px 0 #fff,0 5px 15px #45695115!important;
   pointer-events:none;
 }
-#gardenGamePanel .card-shot-preview:before,
-#gardenGamePanel .card-shot-preview:after{display:none!important}
-#gardenGamePanel .card-shot-preview .card-shot-screen{
+:is(#gardenGamePanel,#moaAssignedHome) .card-shot-preview:before,
+:is(#gardenGamePanel,#moaAssignedHome) .card-shot-preview:after{display:none!important}
+:is(#gardenGamePanel,#moaAssignedHome) .card-shot-preview .card-shot-screen{
   display:flex; justify-content:center; align-items:center;
   flex:1 1 auto; min-height:128px; max-height:235px; border-radius:16px;
   background:linear-gradient(180deg,#e9f5fc,#f1f7e6);
   box-shadow:inset 0 0 0 1px #ffffffb8; overflow:hidden;
 }
-#gardenGamePanel .card-shot-preview .card-shot-screen img{
+:is(#gardenGamePanel,#moaAssignedHome) .card-shot-preview .card-shot-screen img{
   display:block;width:100%;height:100%;min-height:128px;max-height:235px;
   object-fit:contain;object-position:center; background:transparent;
 }
-#gardenGamePanel .card-shot-info{
+:is(#gardenGamePanel,#moaAssignedHome) .card-shot-info{
   display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
 }
-#gardenGamePanel .card-shot-label{
+:is(#gardenGamePanel,#moaAssignedHome) .card-shot-label{
   color:#516b61;font-size:11px;font-weight:750;
 }
-#gardenGamePanel .card-shot-mode{
+:is(#gardenGamePanel,#moaAssignedHome) .card-shot-mode{
   padding:5px 9px;border-radius:100px;background:#d5ecdb;color:#245d45;
   font-size:12px;line-height:1.25;font-weight:850;word-break:keep-all;
 }
-#gardenGamePanel .card-shot-steps{
+:is(#gardenGamePanel,#moaAssignedHome) .card-shot-steps{
   display:grid;grid-template-columns:minmax(0,1fr) 18px minmax(0,1fr);
   align-items:stretch;gap:5px;width:100%;
 }
-#gardenGamePanel .card-shot-steps span:not(.card-shot-arrow),
-#gardenGamePanel .card-shot-steps strong{
+:is(#gardenGamePanel,#moaAssignedHome) .card-shot-steps span:not(.card-shot-arrow),
+:is(#gardenGamePanel,#moaAssignedHome) .card-shot-steps strong{
   display:flex!important;align-items:center;justify-content:center;text-align:center;
   min-height:42px!important;margin:0!important;padding:7px 8px!important;
   background:#fff!important;border:1px solid #dfe9df!important;border-radius:12px!important;
   font-size:12px!important;line-height:1.35!important;font-weight:750!important;
   color:#345244!important;overflow-wrap:anywhere;word-break:keep-all;
 }
-#gardenGamePanel .card-shot-steps strong{
+:is(#gardenGamePanel,#moaAssignedHome) .card-shot-steps strong{
   color:#174e36!important;background:#e5f5e9!important;
   border-color:#b2d7ba!important;font-weight:850!important;
 }
-#gardenGamePanel .card-shot-steps .card-shot-arrow{
+:is(#gardenGamePanel,#moaAssignedHome) .card-shot-steps .card-shot-arrow{
   display:flex;align-items:center;justify-content:center;color:#417e5c;
   font-weight:900;font-size:17px;
 }
-#gardenGamePanel .card-shot-preview.preview-slowPlace .card-shot-mode,
-#gardenGamePanel .card-shot-preview.preview-slowMemory .card-shot-mode{background:#e4e8ff;color:#484b88}
-#gardenGamePanel .card-shot-preview.preview-slowBlock .card-shot-mode,
-#gardenGamePanel .card-shot-preview.preview-mirrorPond .card-shot-mode{background:#ffedd4;color:#865127}
-#gardenGamePanel .card-shot-preview.card-shot-missing .card-shot-screen{
+:is(#gardenGamePanel,#moaAssignedHome) .card-shot-preview.preview-slowPlace .card-shot-mode,
+:is(#gardenGamePanel,#moaAssignedHome) .card-shot-preview.preview-slowMemory .card-shot-mode{background:#e4e8ff;color:#484b88}
+:is(#gardenGamePanel,#moaAssignedHome) .card-shot-preview.preview-slowBlock .card-shot-mode,
+:is(#gardenGamePanel,#moaAssignedHome) .card-shot-preview.preview-mirrorPond .card-shot-mode{background:#ffedd4;color:#865127}
+:is(#gardenGamePanel,#moaAssignedHome) .card-shot-preview.card-shot-missing .card-shot-screen{
  color:#4a6756;text-align:center;padding:12px;font-size:14px;font-weight:700;
 }
 @media(max-width:960px){
  #gardenGamePanel .library-card .card-shot-preview{min-height:235px!important}
- #gardenGamePanel .card-shot-preview .card-shot-screen{max-height:240px}
+ :is(#gardenGamePanel,#moaAssignedHome) .card-shot-preview .card-shot-screen{max-height:240px}
 }
 @media(max-width:560px){
  #gardenGamePanel .library-card .card-shot-preview{padding:10px!important;min-height:205px!important}
- #gardenGamePanel .card-shot-preview .card-shot-screen{min-height:115px;max-height:200px}
- #gardenGamePanel .card-shot-preview .card-shot-screen img{min-height:115px;max-height:200px}
- #gardenGamePanel .card-shot-steps span:not(.card-shot-arrow),
- #gardenGamePanel .card-shot-steps strong{font-size:12px!important;min-height:44px!important}
+ :is(#gardenGamePanel,#moaAssignedHome) .card-shot-preview .card-shot-screen{min-height:115px;max-height:200px}
+ :is(#gardenGamePanel,#moaAssignedHome) .card-shot-preview .card-shot-screen img{min-height:115px;max-height:200px}
+ :is(#gardenGamePanel,#moaAssignedHome) .card-shot-steps span:not(.card-shot-arrow),
+ :is(#gardenGamePanel,#moaAssignedHome) .card-shot-steps strong{font-size:12px!important;min-height:44px!important}
 }
 @media(prefers-reduced-motion:reduce){
- #gardenGamePanel .card-shot-preview *{animation:none!important;transition:none!important}
+ :is(#gardenGamePanel,#moaAssignedHome) .card-shot-preview *{animation:none!important;transition:none!important}
+}
+
+/* The exact same preview is cloned into the selected-activities / parent link
+   surface. Do not let the legacy mockup styles stretch or hide real screenshots. */
+#moaAssignedHome .moa-assigned-scene .card-shot-preview{
+ display:flex!important;flex-direction:column!important;gap:9px!important;
+ min-height:215px!important;max-width:100%!important;
+ padding:12px!important;border-radius:16px!important;
+ background:linear-gradient(155deg,#f1f8f5,#fff9ed)!important;
+ border:1px solid #dce7de!important;box-shadow:none!important;
+}
+#moaAssignedHome .moa-assigned-scene .card-shot-preview:before,
+#moaAssignedHome .moa-assigned-scene .card-shot-preview:after{display:none!important}
+#moaAssignedHome .moa-assigned-scene .card-shot-preview .card-shot-screen{
+ min-height:125px;max-height:190px;flex:1 1 auto;
+}
+#moaAssignedHome .moa-assigned-scene .card-shot-preview .card-shot-screen img{
+ display:block;width:100%;min-height:125px;max-height:190px;object-fit:contain;
+}
+#moaAssignedHome .moa-assigned-scene .card-shot-preview .card-shot-steps span:not(.card-shot-arrow),
+#moaAssignedHome .moa-assigned-scene .card-shot-preview .card-shot-steps strong{
+ font-size:11px!important;min-height:39px!important;
+}
+@media(max-width:560px){
+ #moaAssignedHome .moa-assigned-scene .card-shot-preview{padding:9px!important}
+ #moaAssignedHome .moa-assigned-scene .card-shot-preview .card-shot-steps{
+  gap:3px;grid-template-columns:minmax(0,1fr) 15px minmax(0,1fr);
+ }
 }
