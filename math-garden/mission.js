@@ -21,7 +21,20 @@ const friend=(name,i)=>'<svg class="forest-friend" viewBox="'+(150*['rabbit','be
 const dot=(filled,type)=>'<span class="match-slot '+(filled?'occupied':'empty')+'">'+(filled?unit(type,true):'')+'</span>';
 const current=()=>templates[CONCEPTS[state.concept].key][Math.min(state.step,6)];
 const practice=()=>state.step===5||state.step===6;
-function save(){try{const prior=JSON.parse(localStorage.getItem(storeKey)||'{}');const safe=prior&&typeof prior==='object'&&!Array.isArray(prior)?prior:{};safe[CONCEPTS[state.concept].key]={...state.review,updated:Date.now()};localStorage.setItem(storeKey,JSON.stringify(safe))}catch(e){}}
+function save(){
+ try{
+  const prior=JSON.parse(localStorage.getItem(storeKey)||'{}');
+  const safe=prior&&typeof prior==='object'&&!Array.isArray(prior)?prior:{};
+  const key=CONCEPTS[state.concept].key,old=safe[key]&&typeof safe[key]==='object'?safe[key]:{};
+  const sessions=Array.isArray(old.sessions)?old.sessions.filter(x=>x&&typeof x==='object').slice(-11):[];
+  const now=Date.now();
+  safe[key]={...state.review,updated:now,sessions:[...sessions,{
+    at:now,independent:state.review.independent,transfer:state.review.transfer,
+    attempted:state.review.attempted,supported:state.review.supported,criteriaMet:state.review.criteriaMet
+  }]};
+  localStorage.setItem(storeKey,JSON.stringify(safe));
+ }catch(e){}
+}
 function sfx(ok=true){if(!state.sound)return;try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;const ctx=window.__moaMissionSound||(window.__moaMissionSound=new Audio());ctx.resume?.();let t=ctx.currentTime;for(let i=0;i<(ok?2:1);i++){const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sine';osc.frequency.value=ok?[493.9,659.3][i]:220;gain.gain.setValueAtTime(.0001,t+i*.09);gain.gain.exponentialRampToValueAtTime(.045,t+i*.09+.015);gain.gain.exponentialRampToValueAtTime(.0001,t+i*.09+.18);osc.connect(gain);gain.connect(ctx.destination);osc.start(t+i*.09);osc.stop(t+i*.09+.2)}}catch(e){}}
 function setStatus(s=''){ $('status').textContent=s }
 function say(k,t){$('kicker').textContent=k;$('instruction').textContent=t}
@@ -113,8 +126,12 @@ function feedback(isCorrect){
  const slot=$('feedbackSlot');if(slot){slot.innerHTML='<div class="feedback-error">'+xtext+'</div>'+(state.attempts>=2?'<div class="scaffold">'+renderPairing(x,key)+'</div>':'');}
  if(state.attempts>=2)state.hints++;
 }
-function assess(){const r=state.results.filter(z=>z.kind==='probe'||z.kind==='transfer');const clean=r.filter(z=>z.clean),transfer=r.find(z=>z.kind==='transfer');
- return {independent:clean.length,transfer:!!transfer?.clean,attempted:r.length,supported:state.results.length-clean.length,criteriaMet:clean.length>=2&&!!transfer?.clean}
+function assess(){
+ const r=state.results.filter(z=>z.kind==='probe'||z.kind==='transfer');
+ const clean=r.filter(z=>z.clean);
+ const transfer=r.some(z=>z.kind==='transfer'&&z.clean===true);
+ const supported=state.results.filter(z=>!z.clean).length;
+ return {independent:clean.length,transfer,attempted:r.length,supported,criteriaMet:clean.length>=2&&transfer}
 }
 function advance(){
  clearTimeout(state.timer);state.locked=false;state.selected=0;state.taken=0;state.served=[];state.attempts=0;state.hints=0;state.flagged=false;
