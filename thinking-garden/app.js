@@ -159,13 +159,15 @@ function renderSameShape(){
  // between sessions while leaving the single target attribute (shape) stable.
  const n=Math.min(3+practiceStep(),6),idx=(state.round+state.shapeOffset)%basicShapes.length;
  const target=basicShapes[idx],targetShape=target[0],targetColor=target[1];
- const correctColor=basicShapes[(idx+2)%basicShapes.length][1];
+ // Entry level isolates shape, while later levels generalize shape
+ // recognition across different colors without changing the target shape.
+ const correctColor=practiceStep()<=1?targetColor:basicShapes[(idx+2)%basicShapes.length][1];
  missionText.textContent='모양이 같은 쌍둥이를 찾아요!';
- missionSub.textContent='색이 달라도 모양이 같을 수 있어요. 모양에 주목해요.';
+ missionSub.textContent=practiceStep()<=1?'같은 색에서 모양만 보고 골라요.':'색이 달라도 모양이 같을 수 있어요. 모양에 주목해요.';
  say(missionText.textContent);
  const others=shuffle(basicShapes.filter(x=>x[0]!==targetShape));
- const opts=shuffle([{shape:targetShape,color:correctColor},{shape:others[0][0],color:targetColor},...others.slice(1,n-1).map(x=>({shape:x[0],color:x[1]}))].slice(0,n));
- area.innerHTML='<div class="basic-game shape-adventure"><div class="shape-scene-title">🔎 모아의 쌍둥이 찾기</div><div class="shape-instructions"><strong>이 모양과 같은 친구는?</strong><span>색이 달라도 괜찮아요</span></div><div class="shape-target" style="color:'+targetColor+'" aria-label="기준 모양">'+targetShape+'</div><p class="shape-subhead">아래 모양 중에서 골라요</p><div class="basic-choice-grid">'+opts.map(x=>'<button type="button" class="basic-choice" data-shape="'+x.shape+'" aria-label="모양 '+x.shape+'" style="color:'+x.color+'">'+x.shape+'</button>').join('')+'</div></div>';
+ const opts=shuffle([{shape:targetShape,color:correctColor},{shape:others[0][0],color:targetColor},...others.slice(1,n-1).map(x=>({shape:x[0],color:practiceStep()<=1?targetColor:x[1]}))].slice(0,n));
+ area.innerHTML='<div class="basic-game shape-adventure"><div class="shape-scene-title">🔎 모아의 쌍둥이 찾기</div><div class="shape-instructions"><strong>이 모양과 같은 친구는?</strong><span>'+(practiceStep()<=1?'모양만 똑같이':'색이 달라도 괜찮아요')+'</span></div><div class="shape-target" style="color:'+targetColor+'" aria-label="기준 모양">'+targetShape+'</div><p class="shape-subhead">아래 모양 중에서 골라요</p><div class="basic-choice-grid">'+opts.map(x=>'<button type="button" class="basic-choice" data-shape="'+x.shape+'" aria-label="모양 '+x.shape+'" style="color:'+x.color+'">'+x.shape+'</button>').join('')+'</div></div>';
  $$('.basic-choice').forEach(b=>b.onclick=()=>{
   if(state.lock)return;
   recordShapeAttempt(b.dataset.shape===targetShape);
@@ -198,6 +200,13 @@ function renderFlower(){
    b.classList.add('picked');found++;$('#flowerCollected').textContent='🌼 '+found+' / '+need+'송이';
    const basket=area.querySelector('.flower-basket > span');basket.textContent=found===need?'💐':'🧺';
    const picked=document.createElement('span');picked.className='flower-picked';picked.textContent=b.textContent;$('#flowerHarvest').appendChild(picked);
+    // Chosen flower visibly moves into its basket. No grading hint.
+    if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&picked.animate){
+     const source=b.getBoundingClientRect(),dest=picked.getBoundingClientRect();
+     picked.animate([{transform:'translate('+(source.left-dest.left)+'px,'+(source.top-dest.top)+'px) scale(1.2)',opacity:.85},
+      {transform:'translate(0px,0px) scale(1)',opacity:1}],
+      {duration:330,easing:'cubic-bezier(.16,.65,.28,1)'});
+    }
    addSeeds(Math.ceil(10/need));sfx('ok');
    if(found===need){completeGardenQuest();flash('꽃바구니 가득! 💐');roundGate(area.querySelector('.basic-game'),'다음 꽃밭 ▶',500)}
   }else{b.classList.add('wrong');sfx('no');flash('꽃 종류만 골라봐요.');later(()=>b.classList.remove('wrong'),350)}
@@ -284,7 +293,11 @@ function renderInside(){
   if(state.lock||placed>=need)return;
   noteChoice(true,keyboard);
   const rect=z.getBoundingClientRect(),star=document.createElement('i');
-  star.textContent='⭐';star.style.left=(x-rect.left)+'px';star.style.top=(y-rect.top)+'px';
+  star.textContent='⭐';
+   // Keep placed stars inside the actual fence on phones and edge taps.
+   const inset=13;
+   star.style.left=Math.min(Math.max(x-rect.left,inset),Math.max(inset,rect.width-inset))+'px';
+   star.style.top=Math.min(Math.max(y-rect.top,inset),Math.max(inset,rect.height-inset))+'px';
   star.setAttribute('aria-hidden','true');z.appendChild(star);
   placed++;$('#miniCount').textContent='⭐ '+placed+' / '+need;
   addSeeds(Math.ceil(10/need));sfx('ok');
@@ -507,7 +520,10 @@ function renderMemory(){
  const study=document.createElement('div');study.className='memory-study-actions';study.innerHTML='<button class="memory-ready" type="button">준비됐어요 ✓</button><small>시간 제한 없음 · 충분히 보고 시작해요.</small>';
  const path=document.createElement('div');path.className='garden-path picnic-path';path.innerHTML='<span class="vine"></span><span class="picnic-goal">🧺</span><img class="walker" src="assets/moa-default.png" alt="">';
  stage.append(ticket,strip,study,basket,path);area.appendChild(stage);
- let choices=null,pos=0,peekUsed=false;
+ let choices=null,pos=0,peekUsed=false,picks=[];
+ const delayedRecall=state.basicLevel>=3;
+ const memoryRecord=basicObservation();
+ if(memoryRecord){memoryRecord.memoryMode=delayedRecall?'끝에 확인':'매 선택 확인';memoryRecord.memoryRetries=0;memoryRecord.memoryErrors=0;memoryRecord.memoryPeekUsed=false;}
  const hideTicket=()=>{[...strip.children].forEach((d,i)=>{d.classList.add('hidden');d.innerHTML=`<span class="memory-question">${i+1}</span>`})};
  const revealTicket=()=>{[...strip.children].forEach((d,i)=>{d.classList.remove('hidden');d.innerHTML=visual(seq[i])})};
  const beginRecall=()=>{if(choices)return;hideTicket();ticket.classList.add('folded');study.innerHTML='<button class="memory-peek" type="button">👀 주문표 한 번 더 보기</button><small>막히면 한 번만 다시 볼 수 있어요.</small>';
@@ -515,7 +531,7 @@ function renderMemory(){
   const peek=study.querySelector('.memory-peek');peek.onclick=()=>{
    if(state.lock||peek.disabled)return;
    if(!peekUsed){
-    peekUsed=true;revealTicket();ticket.classList.remove('folded');
+    peekUsed=true;if(memoryRecord)memoryRecord.memoryPeekUsed=true;revealTicket();ticket.classList.remove('folded');
     choices.classList.add('paused');
     peek.textContent='다 봤어요 · 이어하기 ▶';
     return;
@@ -523,7 +539,40 @@ function renderMemory(){
    hideTicket();ticket.classList.add('folded');choices.classList.remove('paused');
    peek.disabled=true;peek.textContent='한 번 더 확인했어요 ✓';
   };
-  choices.onclick=e=>{const b=e.target.closest('button');if(!b||state.lock||choices.classList.contains('paused')||b.classList.contains('used'))return;if(b.dataset.value===seq[pos][0]){const bs=basket.querySelector(`[data-basket="${pos}"]`);bs.innerHTML=visual(seq[pos]);bs.classList.add('filled');b.classList.add('used','correct');pos++;sfx('ok');addSeeds(Math.ceil(10/len));path.querySelector('.vine').style.width=`${pos/len*100}%`;path.querySelector('.walker').style.left=`${Math.min(86,pos/len*86)}%`;flash(pos===len?'주문을 정확히 담았어요! 피크닉 출발 🌿':`${pos}번째 물건을 담았어요!`);if(pos===len){stage.classList.add('delivered');choices.classList.add('paused');revealTicket();ticket.classList.remove('folded');const review=seq.map(x=>x[0]).join(', ');roundGate(stage,'다음 주문 ▶',650,`${review}. 이 순서였어요.`)}}else{b.classList.add('wrong');sfx('no');flash('주문 순서를 다시 떠올려봐요.');later(()=>b.classList.remove('wrong'),430)}};
+  choices.onclick=e=>{const b=e.target.closest('button');if(!b||state.lock||choices.classList.contains('paused')||b.classList.contains('used'))return;
+   if(delayedRecall){
+    const value=b.dataset.value,bs=basket.querySelector('[data-basket="'+pos+'"]');
+    const token=(type==='color'?memoryColors:animals).find(x=>x[0]===value);
+    bs.innerHTML=visual(token);bs.classList.add('filled');b.classList.add('used');
+    picks.push(value);pos++;sfx('tap');
+    path.querySelector('.vine').style.width=pos/len*100+'%';
+    path.querySelector('.walker').style.left=Math.min(86,pos/len*86)+'%';
+    if(pos!==len)return;
+    const correct=picks.every((x,i)=>x===seq[i][0]);
+    if(memoryRecord&&memoryRecord.memoryFirstTryCorrect===undefined)memoryRecord.memoryFirstTryCorrect=correct?'O':'X';
+    choices.classList.add('paused');revealTicket();ticket.classList.remove('folded');
+    if(correct){
+     stage.classList.add('delivered');sfx('ok');addSeeds(10);
+     flash('주문을 순서대로 담았어요!');
+     roundGate(stage,'다음 주문 ▶',650,seq.map(x=>x[0]).join(', '));
+    }else{
+     if(memoryRecord)memoryRecord.memoryErrors++;
+     basket.querySelectorAll('.basket-slot').forEach((el,i)=>el.classList.toggle('memory-review-different',picks[i]!==seq[i][0]));
+     sfx('no');flash('다른 자리를 찾아볼까요?');
+     study.innerHTML='<button type="button" class="memory-retry">같은 주문 다시 담기 ▶</button><small>주문표를 비교하고 같은 순서로 다시 골라요.</small>';
+     study.querySelector('.memory-retry').onclick=()=>{
+      if(memoryRecord)memoryRecord.memoryRetries++;
+      pos=0;picks=[];choices.classList.remove('paused');
+      choices.querySelectorAll('button').forEach(el=>el.classList.remove('used','correct','wrong'));
+      basket.querySelectorAll('.basket-slot').forEach(el=>{el.textContent='?';el.classList.remove('filled','memory-review-different')});
+      path.querySelector('.vine').style.width='0%';path.querySelector('.walker').style.left='0%';
+      hideTicket();ticket.classList.add('folded');
+      study.innerHTML='<small>다시 순서대로 담아요.</small>';
+     };
+    }
+    return;
+   }
+   if(b.dataset.value===seq[pos][0]){const bs=basket.querySelector(`[data-basket="${pos}"]`);bs.innerHTML=visual(seq[pos]);bs.classList.add('filled');b.classList.add('used','correct');pos++;sfx('ok');addSeeds(Math.ceil(10/len));path.querySelector('.vine').style.width=`${pos/len*100}%`;path.querySelector('.walker').style.left=`${Math.min(86,pos/len*86)}%`;flash(pos===len?'주문을 정확히 담았어요! 피크닉 출발 🌿':`${pos}번째 물건을 담았어요!`);if(pos===len){stage.classList.add('delivered');choices.classList.add('paused');revealTicket();ticket.classList.remove('folded');const review=seq.map(x=>x[0]).join(', ');roundGate(stage,'다음 주문 ▶',650,`${review}. 이 순서였어요.`)}}else{b.classList.add('wrong');sfx('no');flash('주문 순서를 다시 떠올려봐요.');later(()=>b.classList.remove('wrong'),430)}};
  };
  study.querySelector('.memory-ready').onclick=beginRecall;
 }
