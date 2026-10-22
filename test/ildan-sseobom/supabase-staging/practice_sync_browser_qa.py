@@ -172,7 +172,7 @@ with sync_playwright() as p:
   page=browser.new_page(viewport={'width':width,'height':900})
   init(page,'student');page.goto(url,wait_until='domcontentloaded',timeout=30000)
   page.locator('[data-workspace-target=history]').click()
-  page.locator('.practice-cloud-record').wait_for(timeout=12000)
+  page.locator('.practice-cloud-record').first.wait_for(timeout=12000)
   assert '수정한 가상 기록' in page.locator('.practice-cloud-record').inner_text()
   page.close()
   teacher=browser.new_page(viewport={'width':width,'height':900})
