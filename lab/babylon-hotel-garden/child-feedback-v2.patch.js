@@ -205,7 +205,7 @@ window.__ulmoaGardenV2={
    Rp.position.copyFrom(node.position.add(new R(-6,0,-6)));ap.classList.remove("show");
    return true;
  },
- state:()=>({sprinting:__hgSprinting,stage:Kp,flowers:[...__hgFlowers.keys()],collected:__uLotusCount,bucket:__uHasBucket,pouring:__hgPouring,bosses:[...__hgDefeated],eyeSlashVisible:!document.querySelector('[data-action="slash"]')?.classList.contains("hidden")}),
+ state:()=>({sprinting:__hgSprinting,stage:Kp,flowers:[...__hgFlowers.keys()],flowerPositions:Object.fromEntries([...__hgFlowers].map(([k,node])=>[k,[node.position.x,node.position.z]])),collected:__uLotusCount,bucket:__uHasBucket,pouring:__hgPouring,bosses:[...__hgDefeated],eyeSlashVisible:!document.querySelector('[data-action="slash"]')?.classList.contains("hidden")}),
  holdPickup:async(boss)=>{
  const node=__hgFlowers.get(boss);if(!node)return false;
  Rp.position.copyFrom(node.position.add(new R(-1.3,0,0)));
