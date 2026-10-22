@@ -5,6 +5,7 @@ on:
     paths:
       - 'lab/babylon-hotel-garden/**'
       - 'qa/hotel-garden-public-qa.mjs'
+      - 'qa/hotel-garden-eye-smog-real.mjs'
       - '.github/workflows/hotel-garden-art-pr-qa.yml'
 permissions:
   contents: write
@@ -14,7 +15,7 @@ concurrency:
 jobs:
   visual-preview:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -34,6 +35,13 @@ jobs:
           HOTEL_GARDEN_TARGET: http://127.0.0.1:8765/lab/babylon-hotel-garden/
           CHROME_PATH: /usr/bin/google-chrome
         run: node qa/hotel-garden-public-qa.mjs
+      - name: EYE to SMOG real-input play after QA-assisted EYE entry
+        if: always() && !cancelled()
+        continue-on-error: true
+        env:
+          HOTEL_GARDEN_TARGET: http://127.0.0.1:8765/lab/babylon-hotel-garden/
+          CHROME_PATH: /usr/bin/google-chrome
+        run: node qa/hotel-garden-eye-smog-real.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -41,11 +49,13 @@ jobs:
           path: |
             hotel-garden-public-qa.json
             hotel-garden-*.jpg
+            hotel-eye-smog-real-play.json
+            hotel-eye-smog-real-play.jpg
       - name: Save preview images to isolated QA branch
         if: always() && !cancelled()
         run: |
           mkdir -p /tmp/hotel-art-review
-          cp hotel-garden-public-qa.json hotel-garden-*.jpg /tmp/hotel-art-review/ 2>/dev/null || true
+          cp hotel-garden-public-qa.json hotel-garden-*.jpg hotel-eye-smog-real-play.json hotel-eye-smog-real-play.jpg /tmp/hotel-art-review/ 2>/dev/null || true
           git fetch origin qa/hotel-garden-art-preview
           git switch -C qa/hotel-garden-art-preview origin/qa/hotel-garden-art-preview
           mkdir -p qa/art-preview
