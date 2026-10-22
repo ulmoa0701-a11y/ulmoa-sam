@@ -364,13 +364,14 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
   assert(viewport.stage.y<495,"stage should be visible after the additional compact theme selector "+viewport.stage.y);
   tests.push(name+": responsive stage remains visible without oversized top whitespace or overflow");
   if(name==="desktop"){
-   await page.locator('.theme-choice[data-theme="night"]').click();
+  for(const exportTheme of ["classroom","forest","night"]){
+   await page.locator('.theme-choice[data-theme="'+exportTheme+'"]').click();
    await page.locator("#song").selectOption("moa-signal");
    await page.locator("#section").selectOption("all");
    await page.locator('.view-choice[data-view="stairs"]').click();
    const [download]=await Promise.all([page.waitForEvent("download",{timeout:65000}),page.locator("#record").click()]);
    const video=await download.path();
-   fs.copyFileSync(video,path.join(dir,"sample-16by9-heart-song."+(download.suggestedFilename().endsWith(".mp4")?"mp4":"webm")));
+   fs.copyFileSync(video,path.join(dir,"sample-16by9-heart-song-"+exportTheme+"."+(download.suggestedFilename().endsWith(".mp4")?"mp4":"webm")));
    assert(video&&fs.statSync(video).size>15000,"real MediaRecorder video must not be empty");
    assert(/\.(webm|mp4)$/i.test(download.suggestedFilename()));
    const probe=require("node:child_process").spawnSync("ffprobe",["-v","error","-select_streams","v:0","-show_entries","stream=width,height","-of","csv=p=0",video],{encoding:"utf8"});
@@ -389,7 +390,8 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
      assert(peakDb>-13&&peakDb<-.8,"video must be audible without digital clipping: "+peakDb+" dBFS");
      tests.push(name+": decoded Opus sound measured "+peakDb.toFixed(1)+" dBFS peak without overload");
    }else console.log("ffmpeg unavailable; dedicated audio level test skipped "+audio.error.message);
-   tests.push(name+": real 1920x1080 Full-HD video includes the selected NIGHT THEME with both static rows and Moa motion");
+   tests.push(name+": real 1920x1080 Full-HD video includes "+exportTheme+" with two static rows, Moa motion and audible Opus");
+  }
   }
   await page.close();
  }
