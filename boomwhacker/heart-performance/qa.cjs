@@ -376,6 +376,19 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
    const probe=require("node:child_process").spawnSync("ffprobe",["-v","error","-select_streams","v:0","-show_entries","stream=width,height","-of","csv=p=0",video],{encoding:"utf8"});
    if(!probe.error){assert.equal(probe.status,0,"ffprobe must read the saved video");assert.equal(probe.stdout.trim(),"1920,1080","actual exported video file must be 16:9 Full HD");}
    else console.log("ffprobe unavailable; browser canvas output verified "+probe.error.message);
+   // Do not call a file YouTube-ready just because MediaRecorder produced bytes.
+   // Check recorded audio really exists and has usable headroom, not the old near-silent mix.
+   const audio=require("node:child_process").spawnSync("ffmpeg",
+     ["-hide_banner","-nostats","-i",video,"-af","volumedetect","-vn","-f","null","-"],
+     {encoding:"utf8",timeout:30000});
+   if(!audio.error){
+     assert.equal(audio.status,0,"saved video audio must decode");
+     const peak=/max_volume:\\s*(-?\\d+(?:\\.\\d+)?)\\s*dB/.exec(audio.stderr||"");
+     assert(peak,"saved video must have a real measurable audio track");
+     const peakDb=Number(peak[1]);
+     assert(peakDb>-13&&peakDb<-.8,"video must be audible without digital clipping: "+peakDb+" dBFS");
+     tests.push(name+": decoded Opus sound measured "+peakDb.toFixed(1)+" dBFS peak without overload");
+   }else console.log("ffmpeg unavailable; dedicated audio level test skipped "+audio.error.message);
    tests.push(name+": real 1920x1080 Full-HD video includes the selected NIGHT THEME with both static rows and Moa motion");
   }
   await page.close();
