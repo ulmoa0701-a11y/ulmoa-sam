@@ -1,6 +1,7 @@
 const $=(id)=>document.getElementById(id);const app=$('app'),account=$('account');
 let me=null,records=[],students=[],therapists=[],view='login',drive={connected:false,configured:false};
 let activeView='write',editingPracticeRecord=null;
+let clinicianRecordsLoadedAt=0,clinicianRefreshPending=null,clinicianRefreshVisible=null;
 const sanitize=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 const hint=(s)=>`<div class="callout">${s}</div>`;
 function toast(s){$('toast').textContent=s;$('toast').classList.add('visible');setTimeout(()=>$('toast').classList.remove('visible'),3400)}
@@ -603,16 +604,14 @@ function recordCards(list=records){
   if(r.practice&&me.role!=='therapist')return `<article class="record archive-record practice-cloud-record"><div class="meta">연습용 서버 저장 · ${observed}${r.updatedAt&&new Date(r.updatedAt).getTime()-new Date(r.createdAt).getTime()>1000?' · 수정 '+sanitize(new Date(r.updatedAt).toLocaleString('ko-KR')):''} · ${r.shared?'치료사에게 공유 중':'나만 보기'}</div>${prettyRecordEntry(r.entry)}<div class="practice-record-actions"><button class="button-ghost" type="button" data-practice-edit="${sanitize(r.id)}">✎ 기록 수정하기</button>${r.shared?`<button class="button-ghost" data-practice-unshare="${sanitize(r.id)}">치료사 공유 취소</button>`:`<button class="button-ghost" data-practice-share="${sanitize(r.id)}">치료사에게 공유하기</button>`}<button class="button-ghost" data-practice-delete="${sanitize(r.id)}">연습 기록 삭제</button></div></article>`;
   if(r.local)return `<article class="record archive-record device-only-record"><div class="meta">이 기기에만 임시 보관 · ${observed}${r.updatedAt?' · 수정됨':''} · 치료사에게 전달되지 않음</div>${prettyRecordEntry(r.entry)}<div class="practice-record-actions"><button class="button-ghost" type="button" data-practice-edit="${sanitize(r.id)}">✎ 기록 수정하기</button><button class="button-ghost" type="button" data-delete-practice="${sanitize(r.id)}">이 기기에서 기록·사진 삭제</button></div></article>`;
   if(me.role==='therapist'&&r.kind==='student'){
-   const text=String(r.entry?.note||r.entry?.experience||r.entry?.thought||r.entry?.action||r.entry?.mood||'');
-   const short=text.length>120?text.slice(0,120)+'…':text;
-   return `<article class="record archive-record"><div class="meta">학생 공유 기록 · ${observed} · ${sanitize(r.student)}</div><div class="parent-inbox-skim">${sanitize(short)||'선택된 공유 내용이 있어.'}</div><details class="parent-inbox-details"><summary>공유한 내용 전체 보기</summary><div class="parent-inbox-full">${prettyRecordEntry(r.entry)}</div></details><p class="muted">학생이 공유를 선택한 가상 기록 전체가 표시돼.</p></article>`;
+   const photoCount=Array.isArray(r.entry?.photos)?r.entry.photos.length:0;
+   const extras=[photoCount?`사진 ${photoCount}장`:'',r.entry?.sketch?'그림 포함':''].filter(Boolean).join(' · ');
+   return `<article class="record archive-record shared-clinician-record" data-shared-record-id="${sanitize(r.id)}"><div class="meta">학생 공유 기록 · ${observed} · ${sanitize(r.student)}${extras?' · '+extras:''}</div><div class="shared-clinician-content">${prettyRecordEntry(r.entry)}</div></article>`;
   }
   if(me.role==='therapist'&&r.kind==='parent'){
-   const field=String(r.entry?.observation||r.entry?.message||r.entry?.impact||r.entry?.response||'');
-   const preview=field.length>110?field.slice(0,110)+'…':field;
-   const place=r.entry?.place?' · '+sanitize(r.entry.place):'';
-   const kinds=r.entry?.signals?' · '+sanitize(r.entry.signals):'';
-   return `<article class="record parent-inbox-record"><div class="meta">보호자 기록 · ${observed}${place}${kinds} · ${sanitize(r.student)}</div><div class="parent-inbox-skim">${sanitize(preview)||'공유된 메모가 있어요.'}</div><details class="parent-inbox-details"><summary>전달 내용 더 보기</summary><div class="parent-inbox-full">${parentObservationFacts(r.entry)}${prettyRecordEntry(Object.fromEntries(['photos','sketch'].filter(k=>r.entry?.[k]).map(k=>[k,r.entry[k]])))}<div class="muted">학생: ${sanitize(r.student)} · 작성자: ${sanitize(r.author)}</div></div></details></article>`;
+   const photoCount=Array.isArray(r.entry?.photos)?r.entry.photos.length:0;
+   const extras=[photoCount?`사진 ${photoCount}장`:'',r.entry?.sketch?'그림 포함':''].filter(Boolean).join(' · ');
+   return `<article class="record parent-inbox-record shared-clinician-record" data-shared-record-id="${sanitize(r.id)}"><div class="meta">보호자 공유 기록 · ${observed} · ${sanitize(r.student)}${extras?' · '+extras:''}</div><div class="shared-clinician-content">${parentObservationFacts(r.entry)}${prettyRecordEntry(Object.fromEntries(['photos','sketch'].filter(k=>r.entry?.[k]).map(k=>[k,r.entry[k]])))}</div></article>`;
   }
   return `<article class="record archive-record"><div class="meta">${observed} · ${r.kind==='student'?'학생':'학부모'} · ${r.shared?'치료사와 일부 공유':'나만 보기'}${r.driveSynced?' · 드라이브 백업':''}</div>${prettyRecordEntry(r.entry)}${!r.shared&&me.role!=='therapist'?`<div class="inline-share"><button class="button-ghost" type="button" data-share="${sanitize(r.id)}">선택해서 공유</button><div class="share-choices" data-share-panel="${sanitize(r.id)}" hidden><p>치료사에게 전달할 내용만 골라줘.</p>${me.role==='student'?`<div class="student-share-bar"><strong>내 기록 공유</strong><div class="student-share-actions"><button type="button" class="button-ghost" data-archive-all="${sanitize(r.id)}">전체 선택</button><button type="button" class="button-ghost" data-archive-clear="${sanitize(r.id)}">선택 해제</button></div></div>`:''}${Object.keys(r.entry??{}).map(k=>`<label><input type="checkbox" value="${sanitize(k)}"><span>${sanitize(NOTE_LABELS[k]||k)}</span></label>`).join('')}<button class="button" type="button" data-share-confirm="${sanitize(r.id)}">선택한 항목 전달</button></div></div>`:''}${r.shared&&me.role!=='therapist'?`<div class="inline-share"><button type="button" class="button-ghost" data-unshare="${sanitize(r.id)}">이후 공유 취소</button><small>이미 전달된 복사본은 별도 관리가 필요해.</small></div>`:''}${me.role==='therapist'?`<div class="muted">학생: ${sanitize(r.student)} · 작성자: ${sanitize(r.author)}</div>`:''}</article>`;
  }).join('');
@@ -783,7 +782,7 @@ async function initSessionNotes(){
  form.onsubmit=e=>{e.preventDefault();const entry={};["studentReport","parentReport","observation","question","plan","functionalImpact","familyResponse","workingHypothesis","alternatives","uncertainty","burdenReview","erpReview","erpTarget","erpSafety","cbitReview","cbitTarget","cbitContext"].forEach(k=>{const v=formValue(form,k);if(v)entry[k]=v});if(!Object.keys(entry).length){toast('한 가지 이상 남겨주세요.');return;}loading(form.querySelector('button'),async()=>{await api('session-notes',{method:'POST',body:{studentId:formValue(form,'studentId'),entry}});form.reset();toast('회기 메모를 보관했어요.');await display()})};
  await display();
 }
-async function therapistHome(){const r=await Promise.all([api('students'),api('drive/status'),api('accounts')]);students=r[0].students;drive=r[1];const accounts=r[2].accounts;app.innerHTML=hero('오늘의 사례 공간','학생이 공유한 내용과 보호자 관찰을 구분해 보고, 다음 회기를 준비해요.')+`<div class="workspace-shell therapist-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">02</span></div>${workspaceNav([['inbox','▣','공유 자료','학생·보호자'],['session','▤','회기 준비','치료사 메모'],['accounts','♙','계정 연결','초대·재등록'],['drive','↗','Google Drive','담당자 전용']],activeView)}<div class="sidebar-note">배정된 학생의 공유 기록만<br><small>담당 치료사가 확인할 수 있어요.</small></div></aside><div class="workspace-content"><div class="grid"><section class="panel highlight full" data-workspace-view="inbox"><span class="tag">01 / INBOX</span><h2>학생·보호자가 공유한 기록 <small>(${records.length}건)</small></h2><p>원문을 유지하며 작성자의 관점에 따라 구분해요. 자동으로 진단하거나 평가하지 않아요.</p><div class="buttons"><button id="refresh" class="button-ghost">↻ 새 기록 확인</button><button id="csv" class="button-ghost">CSV 다운로드</button></div><p class="parent-inbox-policy">보호자 메모는 <b>짧은 내용만 먼저</b> 보여요. 길게 작성한 원문은 필요할 때 펼쳐볼 수 있어요.</p><div class="filter-strip"><label>학생별 보기<select id="filterStudent"><option value="all">전체 학생</option>${students.map(s=>`<option value="${sanitize(s.nickname)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><label>작성자 구분<select id="filterKind"><option value="all">전체</option><option value="student">학생 기록</option><option value="parent">학부모 전달</option></select></label></div><div id="inboxResults">${recordCards()}</div></section><section class="panel full case-panel" data-workspace-view="session" hidden><span class="tag">SESSION / THERAPIST ONLY</span><h2>회기 준비·메모</h2><p>학생이 선택해 공유한 내용과 실제 회기에서 확인한 내용을 분리해 기록합니다. 치료사의 가설은 관찰 사실이 아니며, 앱이 진단이나 치료 효과를 판단하지 않습니다. <b>로그인한 역할과 기록 접근은 서버에서 확인합니다.</b></p>
+async function therapistHome(){const r=await Promise.all([api('students'),api('drive/status'),api('accounts')]);students=r[0].students;drive=r[1];const accounts=r[2].accounts;app.innerHTML=hero('오늘의 사례 공간','학생이 공유한 내용과 보호자 관찰을 구분해 보고, 다음 회기를 준비해요.')+`<div class="workspace-shell therapist-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">02</span></div>${workspaceNav([['inbox','▣','공유 자료','학생·보호자'],['session','▤','회기 준비','치료사 메모'],['accounts','♙','계정 연결','초대·재등록'],['drive','↗','Google Drive','담당자 전용']],activeView)}<div class="sidebar-note">배정된 학생의 공유 기록만<br><small>담당 치료사가 확인할 수 있어요.</small></div></aside><div class="workspace-content"><div class="grid"><section class="panel highlight full" data-workspace-view="inbox"><span class="tag">01 / INBOX</span><h2>학생·보호자가 공유한 기록 <small id="inboxSharedCount">(${records.length}건)</small></h2><p>원문을 유지하며 작성자의 관점에 따라 구분해요. 자동으로 진단하거나 평가하지 않아요.</p><div class="buttons"><button id="refresh" class="button-ghost">↻ 새 기록 확인</button><button id="csv" class="button-ghost">CSV 다운로드</button></div><p class="parent-inbox-policy">공유받은 글·사진·그림은 펼치지 않아도 확인할 수 있습니다. 이 화면은 가상 기록 전용입니다.</p><div class="filter-strip"><label>학생별 보기<select id="filterStudent"><option value="all">전체 학생</option>${students.map(s=>`<option value="${sanitize(s.nickname)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><label>작성자 구분<select id="filterKind"><option value="all">전체</option><option value="student">학생 기록</option><option value="parent">학부모 전달</option></select></label></div><div id="inboxResults">${recordCards()}</div></section><section class="panel full case-panel" data-workspace-view="session" hidden><span class="tag">SESSION / THERAPIST ONLY</span><h2>회기 준비·메모</h2><p>학생이 선택해 공유한 내용과 실제 회기에서 확인한 내용을 분리해 기록합니다. 치료사의 가설은 관찰 사실이 아니며, 앱이 진단이나 치료 효과를 판단하지 않습니다. <b>로그인한 역할과 기록 접근은 서버에서 확인합니다.</b></p>
 <form id="sessionForm" class="form clinician-form">
 <label>담당 학생<select name="studentId" required>${students.map(s=>`<option value="${sanitize(s.id)}">${sanitize(s.nickname)}</option>`).join('')}</select></label>
 <div class="clinician-quick-fields">
@@ -838,7 +837,47 @@ async function therapistHome(){const r=await Promise.all([api('students'),api('d
  <p class="muted">이름은 학생 목록과 연결 메뉴에 표시됩니다. 현재 체험 단계에서는 실제 아동의 개인정보 대신 가상 이름을 사용해 주세요.</p><div class="student-list-summary" aria-label="등록된 학생"><strong>등록된 학생 (${students.length}명)</strong>${students.length?`<div class="student-list-chips">${students.map(s=>`<span class="student-list-chip">${sanitize(s.nickname)}</span>`).join("")}</div>`:`<p class="muted">등록된 학생이 없어요. 위에서 먼저 추가해 주세요.</p>`}</div><h3>2. 학생·보호자에게 보낼 링크 만들기</h3><p class="muted" id="inviteExplainer">등록된 학생을 선택해 주세요.</p><form id="inviteForm" class="form"><label>초대할 사람<select name="role" id="inviteRole"><option value="student">학생</option><option value="parent">보호자</option></select></label><label id="studentPicker">대상 학생<select name="studentId" ${students.length?"":"disabled"}>${students.map(s=>`<option value="${sanitize(s.id)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><button id="inviteSubmit" class="button" ${students.length?"":"disabled"}>학생 접속 링크 만들기</button></form><div id="inviteOutput"></div><section aria-label="발급한 초대 링크"><h3>초대 링크 관리</h3>
  <p>누구에게 보낸 링크인지 학생 이름과 구분해 표시합니다. 링크 자체는 발급 직후에만 복사할 수 있고, 잘못 전달한 링크는 취소할 수 있어요.</p>
  <div id="inviteList" role="status" aria-live="polite">목록을 불러오는 중입니다.</div></section></section><section class="panel" data-workspace-view="accounts"><span class="tag">02 / ACCOUNT HELP</span><h2>계정 접근 도움말</h2><p>기기를 바꾸거나 로그아웃해서 다시 접속해야 할 때 신원 확인 후 기존 계정용 링크를 새로 발급할 수 있어요.</p><label>대상 계정<select id="resetUser">${accounts.map(a=>`<option value="${sanitize(a.id)}">${sanitize(a.nickname)} · ${a.role==='student'?'학생':'학부모'}</option>`).join('')}</select></label><div class="buttons"><button id="resetIssue" class="button-ghost" ${accounts.length?'':'disabled'}>기존 계정 새 접속 링크 만들기</button></div><div id="resetOutput"></div></section><section class="panel full" data-workspace-view="drive"><span class="tag">03 / GOOGLE DRIVE</span><h2>Google Drive</h2><p>${drive.connected?'내 구글 계정이 연결돼 있습니다.':'구글 계정 연결 전입니다. 학생 기록은 아직 자동 업로드되지 않습니다.'}</p><div class="buttons"><button id="googleConnect" class="button-ghost" ${drive.configured&&drive.backupEnabled?'':'disabled'}>${drive.connected?'구글 계정 다시 연결':'내 구글 계정 연결'}</button><button id="driveSync" class="button" ${drive.connected&&drive.backupEnabled?'':'disabled'}>공유 기록 백업</button>${drive.folderUrl?`<a class="button-ghost" href="${sanitize(drive.folderUrl)}" target="_blank" rel="noopener noreferrer">내 드라이브 폴더 열기 ↗</a>`:''}</div>${!drive.backupEnabled?hint('보존·삭제·동의 및 사본 처리 정책 검증 전까지 Google Drive 백업이 비활성화되어 있습니다. 서버 공유를 취소해도 기존 다운로드 파일은 자동으로 회수되지 않습니다.'):!drive.configured?hint('구글 OAuth 관리자 설정이 아직 끝나지 않았습니다.'):''}<p>삭제 확인이 필요한 사본은 치료사의 기록 관리자에게 문의하세요.</p></section></div></div></div>`;
-attachShares();bindWorkspace();paintSketches();initSessionNotes();const rerenderInbox=()=>{const name=$('filterStudent').value,kind=$('filterKind').value;const list=records.filter(r=>(name==='all'||r.student===name)&&(kind==='all'||r.kind===kind));$('inboxResults').innerHTML=recordCards(list);paintSketches();};$('filterStudent').onchange=rerenderInbox;$('filterKind').onchange=rerenderInbox;$('refresh').onclick=()=>dashboard();$('csv').onclick=exportCSV;$('createStudentForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;
+attachShares();bindWorkspace();paintSketches();initSessionNotes();
+const rerenderInbox=()=>{
+ const name=$('filterStudent').value,kind=$('filterKind').value;
+ const list=records.filter(r=>(name==='all'||r.student===name)&&(kind==='all'||r.kind===kind));
+ $('inboxResults').innerHTML=recordCards(list);
+ const count=$('inboxSharedCount');if(count)count.textContent=`(${records.length}건 · 현재 ${list.length}건)`;
+ paintSketches();
+};
+const refreshClinicianInbox=(force=false)=>{
+ if(!force&&Date.now()-clinicianRecordsLoadedAt<120000)return Promise.resolve(true);
+ if(clinicianRefreshPending)return clinicianRefreshPending;
+ clinicianRefreshPending=(async()=>{
+  const incoming=await api('practice-records');
+  if(me?.role!=='therapist')return false;
+  records=incoming.records??[];
+  clinicianRecordsLoadedAt=Date.now();
+  rerenderInbox();
+  return true;
+ })().catch(e=>{toast('공유 기록을 새로 확인하지 못했습니다. 기존 화면은 유지됩니다. '+e.message);return false;})
+ .finally(()=>{clinicianRefreshPending=null;});
+ return clinicianRefreshPending;
+};
+clinicianRefreshVisible=refreshClinicianInbox;
+const retriedPhotoIds=new Set();
+$('inboxResults').addEventListener('error',event=>{
+ const image=event.target;
+ if(!(image instanceof HTMLImageElement)||!image.closest('.saved-photo-grid'))return;
+ const id=image.closest('[data-shared-record-id]')?.dataset.sharedRecordId;
+ if(!id)return;
+ if(retriedPhotoIds.has(id)){
+  const msg=document.createElement('span');msg.className='shared-photo-error';
+  msg.textContent='이 사진을 불러올 수 없습니다. 새 기록 확인을 눌러 다시 시도할 수 있습니다.';
+  image.replaceWith(msg);return;
+ }
+ retriedPhotoIds.add(id);
+ void refreshClinicianInbox(true);
+},true);
+$('filterStudent').onchange=rerenderInbox;
+$('filterKind').onchange=rerenderInbox;
+$('refresh').onclick=()=>{retriedPhotoIds.clear();void refreshClinicianInbox(true);}
+$('csv').onclick=exportCSV;$('createStudentForm').onsubmit=e=>{e.preventDefault();const f=e.currentTarget;
   loading(f.querySelector('button'),async()=>{
    const created=await api('students',{method:'POST',body:{alias:formValue(f,'alias')}});
    toast('학생이 추가됐습니다. 이제 학생 또는 보호자 접속 링크를 만들 수 있어요.');
@@ -906,9 +945,13 @@ async function refreshInviteList(){
 }
 function adminHome(){app.innerHTML=hero('계정 운영','최초 관리자 계정은 기록을 읽을 수 없습니다. 치료사 초대만 발급할 수 있어요.')+`<div class="panel"><h2>치료사 초대코드 발급</h2><p>치료사도 학생·학부모와 같은 패스키 방식으로 등록합니다.</p><button id="inviteTherapist" class="button">치료사 초대코드 만들기</button><div id="adminInvite"></div></div>`;$('inviteTherapist').onclick=e=>loading(e.target,async()=>{const r=await api('invites',{method:'POST',body:{role:'therapist'}});const d=$('adminInvite');d.innerHTML='<p>코드를 복사해 치료사에게 개별 전달하세요. 7일간 유효합니다.</p><textarea readonly id="adminCode"></textarea>';$('adminCode').value=r.invite;})}
 async function dashboard(){header();records=me.role==='admin'?[]:(await api('practice-records')).records??[];
+ if(me.role==='therapist')clinicianRecordsLoadedAt=Date.now();
  if(me.role==='student'||me.role==='parent'){try{records=[...(await listPracticeRecords(me.id)),...records]}catch(e){toast(e.message)}}
  if(editingPracticeRecord&&['student','parent'].includes(me.role))
   editingPracticeRecord=records.find(r=>r.id===editingPracticeRecord.id&&(r.practice||r.local))||null;
  if(me.role==='therapist')await therapistHome();else if(me.role==='admin')adminHome();else studentHome();}
 function render(){header();if(!me)loginScreen();else dashboard().catch(e=>{app.innerHTML=hint('화면을 불러오지 못했어요. '+sanitize(e.message))})}
+document.addEventListener('visibilitychange',()=>{
+ if(document.visibilityState==='visible'&&me?.role==='therapist'&&clinicianRefreshVisible)void clinicianRefreshVisible(false);
+});
 (async()=>{await refreshAuth()})();

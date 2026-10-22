@@ -960,3 +960,13 @@ form[hidden], .form[hidden] {display:none !important;}
 @media(max-width:540px){.practice-edit-header{padding:13px 14px}}
 
 .practice-sync-box[hidden]{display:none!important}
+
+/* Clinician inbox: full shared writing, drawing and media are visible at first glance. */
+.shared-clinician-record{padding:16px 18px;margin:12px 0;border:1px solid #dbe6e6;background:#fff}
+.shared-clinician-record .meta{margin-bottom:10px;font-weight:700;line-height:1.6}
+.shared-clinician-content{font-size:14px;line-height:1.65;color:#223a45;overflow-wrap:anywhere}
+.shared-clinician-content>p{margin:9px 0;white-space:pre-wrap}
+.shared-clinician-content .saved-photo-grid{grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr));max-width:760px}
+.shared-clinician-content .saved-photo-grid img{height:170px}
+.shared-photo-error{display:block;padding:14px;font-size:13px;color:#8b4241;background:#fff7f4;border:1px solid #f2d3cf;border-radius:10px}
+@media(max-width:540px){.shared-clinician-record{padding:12px}.shared-clinician-content .saved-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.shared-clinician-content .saved-photo-grid img{height:125px}}
