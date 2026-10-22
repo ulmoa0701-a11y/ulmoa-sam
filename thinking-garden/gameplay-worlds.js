@@ -36,18 +36,42 @@ function total(root,id){
  return visible;
 }
 function update(root,id){
- const meter=root.querySelector('.moa-world-meter');if(!meter)return;
- const isMemoryHidden=id==='slowMemory'&&!!root.querySelector('[data-slow="hide"]');
- meter.hidden=id==='slowName'||isMemoryHidden;
- if(meter.hidden)return;
- const n=total(root,id),v=amount(root,id);
- const max=Math.max(1,n);meter.querySelector('.moa-world-count').textContent=v+' / '+n;
- meter.querySelector('.moa-world-fill').style.width=Math.min(100,Math.round(v/max*100))+'%';
+ const meter=root.querySelector('.moa-world-meter');
+ const memory=id==='slowMemory';
+ const recalling=memory&&!!root.querySelector('[data-slow="show"]');
+ if(meter){
+  // During encoding, no progress hints. During recall, never reveal how many
+  // locations were in the sample: target count is a retrieval cue.
+  meter.hidden=id==='slowName'||(memory&&!recalling);
+  if(!meter.hidden){
+   const v=amount(root,id),count=meter.querySelector('.moa-world-count');
+   const rail=meter.querySelector('.moa-world-rail');
+   if(memory){
+    meter.querySelector('.moa-world-goal').textContent='내가 표시한 자리';
+    count.textContent=String(v);
+    rail.hidden=true;
+    meter.setAttribute('aria-label','내가 표시한 자리 '+v+'개');
+   }else{
+    const n=total(root,id);
+    count.textContent=v+' / '+n;
+    rail.hidden=false;
+    meter.querySelector('.moa-world-fill').style.width=Math.min(100,Math.round(v/Math.max(1,n)*100))+'%';
+   }
+  }
+ }
+ const message=root.querySelector('.slow-feedback')?.textContent||'';
  const completed=!!root.querySelector('[data-slow="next"]');
- root.classList.toggle('moa-scene-finished',completed);
- if(completed&&!root.querySelector('.moa-world-ending')){
+ const correct=completed&&message.includes('정원을 정확하게 살폈어요');
+ root.classList.toggle('moa-scene-finished',correct);
+ root.classList.toggle('moa-scene-needs-review',!completed&&message.includes('다시 확인해요'));
+ const awaitingName=id==='slowName'&&!!root.querySelector('.slow-name-choice,.slow-teacher-choice');
+ root.classList.toggle('moa-scene-name-answer',awaitingName);
+ // A skipped or incorrectly completed round must never display success art.
+ const existing=root.querySelector('.moa-world-ending');
+ if(!correct){existing?.remove();return;}
+ if(!existing){
   const ending=document.createElement('div');ending.className='moa-world-ending';ending.setAttribute('aria-hidden','true');
-  ending.innerHTML='<span class="moa-ending-flowers">✿ ✦ ✿</span>';
+  ending.innerHTML='<span class="moa-world-trophy"></span>';
   root.appendChild(ending);
  }
 }
