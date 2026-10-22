@@ -25,6 +25,7 @@ for(const [name,width] of [['pc',1366],['mobile',390]]){
  await page.locator('.basic-choice[data-shape="'+shape+'"]').click();
  check(await page.locator('.shape-reunited').count()===1,name+' shape reunion is not tied to a correct match');
  await page.locator('.round-gate button').waitFor({state:'visible',timeout:4000});
+ await page.locator('.round-gate button').waitFor({state:'visible',timeout:4000}).catch(()=>null);
  check(await page.locator('.round-gate button').count()===1,name+' shape completion does not advance');
  await page.screenshot({path:'qa/native-scenes-screens/'+name+'-shape.png'});
  await open('flower');
