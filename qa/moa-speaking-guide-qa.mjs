@@ -19,7 +19,7 @@ try{
    const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:1});
    await page.addInitScript(()=>{
      const mock={
-       getVoices:()=>[{lang:'ko-KR',name:'test Korean voice'}],
+       getVoices:()=>[],
        cancel:()=>{window.__moaCancelled=(window.__moaCancelled||0)+1},
        speak:utterance=>{window.__moaSpoken=utterance.text;window.__moaUtterance=utterance}
      };
