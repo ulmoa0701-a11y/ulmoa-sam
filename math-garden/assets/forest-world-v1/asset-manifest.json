@@ -1,0 +1,45 @@
+{
+  "updated": "2026-10-22",
+  "style": "cute-3d-clay-toy, identical to mission-v4/village-v1 (no new assets this round)",
+  "productionTool": "none — pure reuse of existing mission-v4/village-v1 assets, no Canva calls this round",
+  "status": "v1 fusion of mission.html (structured quest engine: share/compare/make, demo->guided->independent, unchanged scoring) and village.html (free-play gather/pet/build sandbox) into one page, math-garden/forest-world.html. Neither source file was modified. New bridge: finishing a quest chapter credits a flat +3 acorns/+2 berries to the shared village currency, regardless of how well the child did.",
+  "newAssets": [],
+  "reusedAssets": [
+    "mission-v4/objects/acorn_tree.png, berry_single.png (also doubles as the gather tab's berry node), acorn_single.png, basket_empty.png, reward_flower.png, plate_empty.png",
+    "mission-v4/characters/{bear,rabbit,fox,frog,bird}_{waiting,happy}.png",
+    "mission-v4/background/forest_background_clay.png",
+    "mission-v4/map/path_fork.png",
+    "village-v1/objects/cottage.png"
+  ],
+  "ported": {
+    "fromMissionJs": "CONCEPTS, templates, MAP_ICONS, TRAVEL_LINES, showMap(), travelBeat(), demo(), demoVisual(), fruitTray(), shareBoard(), compareBoard(), makeBoard(), draw(), renderPairing(), help(), flashFeedback(), feedback(), assess(), advance() — byte-identical logic, only renamed handle()->questHandle() to avoid any naming ambiguity with the village click handler, and removed the showIntro()/'start' branch since the quest tab opens straight to the map now (no separate welcome screen needed when the village itself is the hub).",
+    "fromVillageJs": "PALETTE, resourceRow(), floatPop(), renderGather(), petStage(), renderPet(), renderBuild(), tab click delegation for data-spot/data-feed/data-build — byte-identical logic, renamed renderAll()->renderVillageAll() to avoid confusion with the quest side."
+  },
+  "newBridgePoint": {
+    "location": "chapterEnd(), forest-world.js",
+    "reward": {"acorns": 3, "berries": 2},
+    "scalesWithPerformance": false,
+    "rationale": "Flat reward regardless of independent-vs-assisted outcome. Scaling the reward by performance would make it an implicit penalty signal for a struggling child, which conflicts with the project's established no-punishment principle (see LEARNING-DESIGN.md rule 7 and this session's icon-first/no-text-judgment work). The amount itself (+3/+2) is an arbitrary balance choice, not a researched value — EARLY-MATH-EVIDENCE-BRIEF.md says nothing about reward-economy sizing."
+  },
+  "deliberateBehaviorChanges": [
+    "unlocked (map progress) and per-concept review summaries are now persisted to localStorage across reloads, unlike the original mission.html where reloading always reset the map to locked/current/locked. This is an intentional small improvement consistent with village.js's full-persistence pattern, not a bug carried over by accident — documented here so it isn't mistaken for scope creep.",
+    "progress() (the small chapter-dot row) now reflects state.unlocked instead of state.concept, so it shows overall map progress rather than momentary active-chapter position. Visually near-identical except when replaying an already-completed chapter, where the dot now correctly shows 'done' (green) instead of 'active' (orange) for that chapter.",
+    "The mission.html header's '새 모험'(restart) button was dropped — in the fused world there's no single 'the mission' to restart from scratch; the quest map's per-node 'repeat' action and the tab bar already cover 'start over on this chapter' and 'go do something else'."
+  ],
+  "bugFoundNotFixedUpstream": {
+    "file": "mission.css (and therefore the live mission.html)",
+    "rule": "#sound,#restart,#help,#change{display:inline-flex;...}",
+    "problem": "This ID-selector rule overrides the native [hidden] attribute's display:none (higher specificity), so #help/#change stay visually visible on screens where helpButton(false) was called (map, travel, success, chapter-end) instead of only on the task screen as intended.",
+    "confirmedOnLiveMissionHtml": true,
+    "fixedInForestWorldCssOnly": "#help[hidden],#change[hidden]{display:none!important}",
+    "note": "mission.css itself was NOT touched per this round's hard constraint (don't modify the original files) — this needs a separate decision/fix if the parent session wants it patched upstream too."
+  },
+  "notDone": [
+    "No new quest content beyond the existing 3 concepts (share/compare/make) — the user's brief's B/C/D/E adventure ideas (bridge repair, fox shop, number conservation 'transforming forest', new-village transfer) are still future work, now unblocked by this fusion's architecture (a 4th+ quest location is just another map node) but not built this round.",
+    "math-garden/index.html (the 15-game hub) is not updated to link to forest-world.html — a separate decision since it affects public discoverability. mission.html and village.html remain independently reachable exactly as before.",
+    "Quest reward amounts (+3/+2) are a first-guess balance, not playtested against how fast a child would max out useful spending (3 concepts x1 playthrough = 9 acorns/6 berries, enough to afford all 3 current build items once with acorns to spare — not stress-tested for repeat play / inflation).",
+    "No new sound design — quest and village both still use their own near-identical simple beep sfx(), now literally duplicated as one shared function in forest-world.js rather than two separate near-copies.",
+    "Pet hunger still only increases via feeding (no time decay), same gap already logged in village-v1/asset-manifest.json notDone, unchanged by this fusion.",
+    "Korean literacy (자음/모음/띄어쓰기) — still explicitly out of scope, same reasoning as village-v1: not confirmed by the user to belong in this same game."
+  ]
+}
