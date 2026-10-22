@@ -56,7 +56,7 @@ function render(id,ctx){
  function complete(correct,note='활동 완료'){
   if(r.done)return;
   if(r.first===null&&correct!==null)r.first=correct===true;
-  r.done=true;r.note=note;
+  r.done=true;r.outcome=correct;r.note=note;
   s.records.push({round:state.round+1,level:r.level,first:r.first===null?'-':r.first?'O':'X',final:correct===null?'-':correct?'O':'X',errors:r.errors,support:r.support,teacherCues:r.teacherCues,pauses:r.pauses,note});
   if(correct===true){addSeeds(r.errors?7:10);sfx('ok');}else if(correct===false)sfx('tap');
   // Only independent, error-free first responses count towards an increase.
@@ -76,7 +76,17 @@ function render(id,ctx){
   rerender();
  }
  if(r.done){
-  body.innerHTML='<div class="strategy-done"><span>🌼</span><h3>이번 이야기 마침!</h3><p>'+r.message+'</p></div>';
+  // No celebration on an unanswered/incorrect round.
+  const earned=r.outcome===true,rested=r.outcome===null;
+  const gameArtwork={
+   resetRescue:'<div class="strategy-win-rescue"><img src="assets/friend-hong.png" alt=""><span aria-hidden="true">🚐</span></div>',
+   classroomMove:'<div class="strategy-win-classroom" aria-hidden="true"><span>🪑</span><span>📚</span><span>✏️</span></div>',
+   festivalPlan:'<div class="strategy-win-festival" aria-hidden="true">'+(r.tasks||[]).map(t=>'<span>'+t[1]+'</span>').join('')+'</div>'
+  };
+  const status=earned?'success':rested?'rest':'review';
+  const heading=earned?({resetRescue:'친구 구조 완료!',classroomMove:'새 교실 정리 완료!',festivalPlan:'축제 준비 완성!'})[id]:rested?'잠깐 쉬어가기':'다음에 다시 도전';
+  const art=earned?gameArtwork[id]:'<span class="strategy-neutral-mark" aria-hidden="true">'+(rested?'🌿':'🔎')+'</span>';
+  body.innerHTML='<div class="strategy-done strategy-outcome-'+status+'">'+art+'<h3>'+heading+'</h3><p>'+r.message+'</p></div>';
   actions.innerHTML='<button type="button" data-core="next" class="strategy-primary">'+(state.round+1===state.roundTotal?'활동 결과 보기 →':'다음 이야기로 →')+'</button>';
  }else if(r.paused){
   body.innerHTML='<div class="strategy-done"><span>🌿</span><h3>잠깐 쉬어가요</h3><p>준비되면 같은 문제부터 이어갈 수 있어요.</p></div>';
