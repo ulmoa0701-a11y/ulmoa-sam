@@ -45,6 +45,8 @@ const fs=require('node:fs');
              await page.locator('[data-novel-action=pause]').click();
            }
            await page.locator('.novel-mailbox[data-idx="'+correct+'"]').click();
+            assert.equal(await page.locator('.novel-delivery-trail .sent').count(),parcel+1,
+              'every correctly delivered parcel should fill its delivery slot');
          }
        }else if(id==='mirrorPond'){
          const rule=await page.locator('.novel-rule-banner strong').innerText();
@@ -56,6 +58,10 @@ const fs=require('node:fs');
          assert.ok(correct>=0,'correct mirror exists for '+rule);
          if(round===0){await page.locator('.novel-pond-choices>button').nth(wrong).click();assert.ok(await page.locator('.novel-recovery').isVisible());await page.locator('[data-novel-action=pause]').click();}
          await page.locator('.novel-pond-choices>button').nth(correct).click();
+          assert.equal(await page.locator('.novel-water-revealed .novel-result-reflection .novel-pad').count(),4,
+            'correct mirror image must appear in pond');
+          assert.equal(await page.locator('.novel-reflection-solved').count(),1,
+            'correctly selected pond option is identified');
        }else{
          const before=await page.locator('.novel-story-object').allTextContents();
          await page.locator('[data-novel-action=reveal]').click();
@@ -72,6 +78,10 @@ const fs=require('node:fs');
            await page.locator('[data-novel-action=back]').click();
          }
          await page.locator('[data-novel-action=change][data-idx="'+target+'"]').click();
+          assert.equal(await page.locator('.novel-scene-review').count(),1,
+            'correct scene comparison should reveal before/after');
+          assert.equal(await page.locator('.novel-difference-solved').count(),1,
+            'correctly identified scene object must respond');
        }
        assert.ok(await page.locator('.novel-main-button[data-novel-action=next]').isVisible(),id+' round completion '+round);
        if(round===0)await page.screenshot({path:out+'/'+vp.label+'-'+id+'-mission.png',fullPage:true});
