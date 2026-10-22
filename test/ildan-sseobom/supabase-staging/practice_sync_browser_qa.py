@@ -97,8 +97,9 @@ with sync_playwright() as p:
   page.locator('#photoUpload').set_input_files({'name':'sample.png','mimeType':'image/png','buffer':png()})
   page.locator('.photo-thumbnail img').wait_for(timeout=10000)
   page.locator('#showDrawing').click()
-  canvas=page.locator('#noteCanvas');bb=canvas.bounding_box()
+  canvas=page.locator('#noteCanvas');canvas.scroll_into_view_if_needed();bb=canvas.bounding_box()
   page.mouse.move(bb['x']+10,bb['y']+15);page.mouse.down();page.mouse.move(bb['x']+90,bb['y']+65,steps=8);page.mouse.up()
+  assert page.locator('#noteCanvas').evaluate("canvas=>{const ctx=canvas.getContext('2d');const rgba=ctx.getImageData(25,35,1,1).data;return rgba[0]<250||rgba[1]<250||rgba[2]<250}")
   page.locator('#saveEntry').click()
   try:page.locator('.practice-cloud-record').wait_for(timeout=12000)
   except Exception as e:
