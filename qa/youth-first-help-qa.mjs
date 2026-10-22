@@ -42,9 +42,20 @@ for(const width of [390,1280]){
   await check(await page.locator('input,textarea,form').count()===0,width+'px no practice intake form');
   await check(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth+3),width+'px practice no horizontal overflow');
   await page.screenshot({path:path.join(out,'practice-'+width+'.png'),fullPage:true});
+  await page.goto(new URL('support-first/service/',BASE).href,{waitUntil:'domcontentloaded'});
+  await check(await page.locator('[data-need]').count()===5,width+'px 5 support need options');
+  await check(await page.locator('[data-method]').count()===5,width+'px 5 communication preferences');
+  await page.locator('[data-need="학교생활·등교"]').click();
+  await page.locator('[data-method="글·채팅부터"]').click();
+  const msg=await page.locator('#message').innerText();
+  await check(msg.includes('학교생활·등교')&&msg.includes('글·채팅부터'),width+'px generated starter message');
+  await check(await page.locator('a[href="https://pf.kakao.com/_wEGJn"]').count()===1,width+'px official kakao channel');
+  await check(await page.locator('input,textarea,form').count()===0,width+'px no sensitive-data intake form');
+  await check(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth+3),width+'px support guide no horizontal overflow');
+  await page.screenshot({path:path.join(out,'service-'+width+'.png'),fullPage:true});
   await check(errors.length===0,width+'px JS errors: '+errors.join('|'));
   await context.close();
 }
 await browser.close();
-console.log(JSON.stringify({base:BASE,failures,screenshots:4},null,2));
+console.log(JSON.stringify({base:BASE,failures,screenshots:6},null,2));
 if(failures.length)process.exit(1);
