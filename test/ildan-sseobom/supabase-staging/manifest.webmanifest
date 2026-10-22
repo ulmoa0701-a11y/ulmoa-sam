@@ -1,0 +1,19 @@
+{
+  "name": "일단써봄 – 기록·탐색·시도",
+  "short_name": "일단써봄",
+  "description": "글·사진·그림으로 남기는 연습용 기록 공간",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2f7fb",
+  "theme_color": "#1c385c",
+  "icons": [
+    {
+      "src": "./app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
