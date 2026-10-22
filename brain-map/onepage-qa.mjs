@@ -64,6 +64,24 @@ try{
   assert.match(await page.locator('.brain-bottom > p').innerText(),/여러 부분은 연결되어 함께 일해요/,'retain one concise cooperation reminder');
   assert.equal(await page.locator('#brainMap [data-brain-region]').count(),6,'six interactive regions');
   assert.equal(await page.locator('.brain-diagram-label').count(),6,'all six regions have visible in-map name and function');
+  assert.equal(await page.locator('#brainMap .brain-label-back').count(),0,'no opaque sticker panels obscure the brain');
+  assert.equal(await page.locator('#brainMap .cortex-grooves').count(),6,'illustrated folds are tied to each existing region');
+  const atlasFit=await page.locator('#brainMap').evaluate(svg=>{
+    const view=svg.viewBox.baseVal, labels=[...svg.querySelectorAll('.brain-diagram-label')].map(el=>{
+      const box=el.getBBox(),t=el.transform.baseVal.consolidate()?.matrix;const x=box.x+(t?.e||0),y=box.y+(t?.f||0);return {name:el.dataset.labelRegion,x,y,right:x+box.width,bottom:y+box.height};
+    });
+    return {x:view.x,y:view.y,right:view.x+view.width,bottom:view.y+view.height,labels};
+  });
+  assert.ok(atlasFit.labels.every(box=>box.x>atlasFit.x&&box.y>atlasFit.y&&box.right<atlasFit.right&&box.bottom<atlasFit.bottom),
+    'all region labels must fit the actual SVG viewport: '+JSON.stringify(atlasFit));
+  if(width<=760){
+    assert.equal(await page.locator('.brain-mobile-legend-details').count(),1,'narrow view retains readable complete region details');
+    assert.equal(await page.locator('.brain-mobile-legend-details').getAttribute('open'),null,'full legend stays folded instead of duplicating six visible cards');
+    await page.locator('.brain-mobile-legend-details summary').click();
+    assert.equal(await page.locator('.brain-mobile-legend-item').count(),6,'all mobile legend items present');
+    await page.locator('.brain-mobile-legend-details summary').click();
+  }
+
   for(const label of ['전두엽','두정엽','측두엽','후두엽','소뇌','뇌줄기'])assert.ok((await page.locator('.brain-diagram-labels').textContent()).includes(label),'missing diagram name '+label);
   assert.equal(await page.locator('.brain-hero,.brain3d-feature,.brain-explorer,.brain-networks,.brain-faq').count(),0,'no prior scrolling sections');
   assert.equal(await page.locator('#simpleDetail').isHidden(),true,'optional detail starts closed');
@@ -145,6 +163,9 @@ try{
     await choices.nth(step).click();
     assert.equal(await page.locator('#lobeSceneRoles button[aria-pressed="true"]').count(),1,'one chosen role');
     assert.equal(await page.locator('#brainMap [data-scene-focus]').count(),1,'ONE brain region spotlighted');
+    assert.equal(await page.locator('.brain-diagram-label[data-label-active]').getAttribute('data-label-region'),region,
+      'the selected diagram label and selected process point to the same territory');
+
     assert.equal(await page.locator('.brain-diagram-label[data-label-active]').count(),1,'one matching label active');
     assert.match(await page.locator('#brainFocusName').innerText(),new RegExp(region==='frontal'?'전두엽':region==='parietal'?'두정엽':region==='temporal'?'측두엽':region==='occipital'?'후두엽':region==='cerebellum'?'소뇌':'뇌줄기'),'diagram names the focused region prominently');
     assert.equal(await page.locator('.brain-mobile-legend-item[data-legend-active]').count(),1,'one matching mobile legend active');
@@ -196,6 +217,17 @@ try{
   await page.locator('[data-lobe-scene="ball"]').click();
   await page.locator('#lobeSceneRoles button[data-scene-region="parietal"]').click();
   await page.screenshot({path:out+'/'+name+'-scene-ball.png',fullPage:true});
+  // Critical real-user case: a small occipital lobe must remain immediately recognizable.
+  await page.locator('#lobeSceneRoles button[data-scene-region="occipital"]').click();
+  assert.equal(await page.locator('#brainMap [data-scene-focus]').getAttribute('data-brain-region'),'occipital');
+  assert.match(await page.locator('#brainFocusName').innerText(),/후두엽/);
+  await page.screenshot({path:out+'/'+name+'-occipital-focus.png',fullPage:true});
+  if(name==='desktop'||name==='mobile'||name==='small-mobile'){
+    const regionPreview=await page.locator('.lobe-scene-visual').screenshot({type:'jpeg',quality:65,animations:'disabled'});
+    console.log('BRAIN_OCCIPITAL_PREVIEW_'+name+'='+regionPreview.toString('base64'));
+  }
+  // Other regression tests below expect the parietal choice as the preserved context.
+  await page.locator('#lobeSceneRoles button[data-scene-region="parietal"]').click();
   if(name==='desktop'||name==='mobile'){
    const preview=await page.locator('.lobe-figure').screenshot({type:'jpeg',quality:55,animations:'disabled'});
    console.log('BRAIN_SCENE_PREVIEW_'+name+'='+preview.toString('base64'));
