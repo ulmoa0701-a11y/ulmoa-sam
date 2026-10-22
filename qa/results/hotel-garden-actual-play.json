@@ -3,7 +3,7 @@
   "steps": [
     {
       "step": "started",
-      "time": "2026-10-22T13:22:56.498Z",
+      "time": "2026-10-22T13:36:49.768Z",
       "state": {
         "stage": 0,
         "patch": "2026-10-12-child-feedback-v1",
@@ -38,13 +38,13 @@
     },
     {
       "step": "gardener talk",
-      "time": "2026-10-22T13:23:01.241Z",
+      "time": "2026-10-22T13:36:55.072Z",
       "state": {
         "stage": 1,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          -14.94,
-          -3.01
+          -14.91,
+          -2.96
         ],
         "woods": {
           "enabled": true,
@@ -73,13 +73,13 @@
     },
     {
       "step": "WOODS encounter",
-      "time": "2026-10-22T13:23:53.711Z",
+      "time": "2026-10-22T13:37:46.041Z",
       "state": {
         "stage": 2,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          15.25,
-          17.3
+          15.13,
+          17.66
         ],
         "woods": {
           "enabled": true,
@@ -108,7 +108,7 @@
     },
     {
       "step": "WOODS real Q traps",
-      "time": "2026-10-22T13:24:09.619Z",
+      "time": "2026-10-22T13:38:02.151Z",
       "state": {
         "stage": 2,
         "patch": "2026-10-12-child-feedback-v1",
@@ -143,7 +143,7 @@
     },
     {
       "step": "WOODS actual hold E",
-      "time": "2026-10-22T13:24:11.773Z",
+      "time": "2026-10-22T13:38:04.328Z",
       "state": {
         "stage": 3,
         "patch": "2026-10-12-child-feedback-v1",
@@ -181,13 +181,13 @@
   "http": [],
   "gardener": {
     "near": true,
-    "iterations": 9,
+    "iterations": 10,
     "last": {
       "stage": 0,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        -14.94,
-        -3.01
+        -14.91,
+        -2.96
       ],
       "woods": {
         "enabled": false,
@@ -215,13 +215,13 @@
   },
   "woods": {
     "near": false,
-    "iterations": 98,
+    "iterations": 95,
     "last": {
       "stage": 1,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        15.25,
-        17.3
+        15.13,
+        17.66
       ],
       "woods": {
         "enabled": true,
@@ -249,5 +249,5 @@
   },
   "hits": 2,
   "pass": true,
-  "generatedAt": "2026-10-22T13:24:13.589Z"
+  "generatedAt": "2026-10-22T13:38:06.144Z"
 }

@@ -4,7 +4,7 @@
   "steps": [
     {
       "label": "start",
-      "time": "2026-10-22T13:26:33.487Z",
+      "time": "2026-10-22T13:40:25.929Z",
       "stage": 0,
       "player": [
         -18,
@@ -32,11 +32,11 @@
     },
     {
       "label": "gardener",
-      "time": "2026-10-22T13:26:38.796Z",
+      "time": "2026-10-22T13:40:29.586Z",
       "stage": 1,
       "player": [
-        -14.76,
-        -2.62
+        -14.86,
+        -2.75
       ],
       "woods": {
         "enabled": true,
@@ -60,11 +60,11 @@
     },
     {
       "label": "woods encounter",
-      "time": "2026-10-22T13:27:12.426Z",
+      "time": "2026-10-22T13:40:58.688Z",
       "stage": 2,
       "player": [
-        15.09,
-        17.59
+        15.31,
+        17.63
       ],
       "woods": {
         "enabled": true,
@@ -88,7 +88,7 @@
     },
     {
       "label": "woods defeated",
-      "time": "2026-10-22T13:27:28.376Z",
+      "time": "2026-10-22T13:41:14.442Z",
       "stage": 3,
       "player": [
         15.92,
@@ -116,7 +116,7 @@
     },
     {
       "label": "woods flower",
-      "time": "2026-10-22T13:27:29.994Z",
+      "time": "2026-10-22T13:41:16.042Z",
       "stage": 3,
       "player": [
         15.92,
@@ -144,11 +144,11 @@
     },
     {
       "label": "pond keeper",
-      "time": "2026-10-22T13:27:46.511Z",
+      "time": "2026-10-22T13:41:32.784Z",
       "stage": 4,
       "player": [
-        3.59,
-        -4.17
+        3.31,
+        -4.37
       ],
       "woods": {
         "enabled": false,
@@ -177,13 +177,13 @@
   "pass": false,
   "gardener": {
     "near": true,
-    "pulses": 17,
+    "pulses": 11,
     "last": {
       "stage": 0,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        -14.76,
-        -2.62
+        -14.86,
+        -2.75
       ],
       "woods": {
         "enabled": false,
@@ -211,13 +211,13 @@
   },
   "woodsArrival": {
     "near": false,
-    "pulses": 67,
+    "pulses": 58,
     "last": {
       "stage": 1,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        15.09,
-        17.59
+        15.31,
+        17.63
       ],
       "woods": {
         "enabled": true,
@@ -247,13 +247,13 @@
   "woodsFlower": true,
   "pondArrival": {
     "near": true,
-    "pulses": 37,
+    "pulses": 38,
     "last": {
       "stage": 3,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        3.59,
-        -4.17
+        3.31,
+        -4.37
       ],
       "woods": {
         "enabled": false,
@@ -280,5 +280,5 @@
     }
   },
   "error": "TimeoutError: Waiting failed: 23000ms exceeded",
-  "generatedAt": "2026-10-22T13:28:11.460Z"
+  "generatedAt": "2026-10-22T13:41:57.566Z"
 }
