@@ -86,6 +86,7 @@ function updateControls(){
  $("#measure").textContent=number+" / "+song.bars.length+" 마디";
  $("#currentBeat").textContent=position<startBeat()?"전주 · 준비":position>=endBeat()?"연주 끝":(Math.floor(((position-bar.start)%song.meter))+1)+"박 / "+song.meter+"박";
  updateCueUI();
+ $("#stagePlay").textContent=playing?"일시정지":ended?"다시 연주":"연주 시작";
  $("#play").textContent=playing?"일시정지":ended?"처음부터 연주":position>startBeat()-song.meter+.01?"이어 연주":"연주 시작";
  $("#play").disabled=exporting;$("#record").disabled=exporting;$("#record").textContent=exporting?"영상 제작 중":"영상 저장";
  result.updates++;
@@ -915,6 +916,9 @@ function bind(){
  $$(".view-choice").forEach(b=>b.onclick=()=>chooseView(b.dataset.view));
  $$(".theme-choice").forEach(b=>b.onclick=()=>chooseTheme(b.dataset.theme));
  $("#play").onclick=()=>playing?pause():play();$("#overlayPlay").onclick=()=>play();$("#reset").onclick=reset;$("#record").onclick=exportVideo;
+ $("#stagePlay").onclick=()=>playing?pause():play();
+ $("#stageReset").onclick=reset;
+ $("#stageExit").onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen()}catch(e){setStatus("전체 화면을 종료하지 못했어요.")}};
  $("#fullscreen").onclick=async()=>{
    const el=$("#stage");try{
      if(document.fullscreenElement){await document.exitFullscreen();return}
@@ -922,7 +926,10 @@ function bind(){
      else setStatus("이 브라우저에서 전체 화면이 지원되지 않아요.");
    }catch(e){setStatus("전체 화면을 사용할 수 없어요. 휴대폰을 가로로 돌려 주세요.")}
  };
- document.addEventListener("fullscreenchange",()=>{$("#fullscreen").textContent=document.fullscreenElement?"전체화면 종료":"악보 크게";});
+ document.addEventListener("fullscreenchange",()=>{
+  $("#fullscreen").textContent=document.fullscreenElement?"전체화면 종료":"악보 크게";
+  $("#stagePlay").textContent=playing?"일시정지":ended?"다시 연주":"연주 시작";
+ });
  $("#sound").onclick=()=>{const was=playing;if(was)pause();sound=!sound;updateControls();if(was)play()};
  $("#song").onchange=e=>chooseSong(e.target.value);
  $("#notes").onchange=e=>{notes=Number(e.target.value);updateControls();draw(ctx,nowBeat());setStatus("원곡은 그대로 유지하고 "+notes+"음만 강조해요.")};
