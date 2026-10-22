@@ -68,7 +68,7 @@ try{
   assert.equal(await page.locator('#brainMap .cortex-grooves').count(),6,'illustrated folds are tied to each existing region');
   const atlasFit=await page.locator('#brainMap').evaluate(svg=>{
     const view=svg.viewBox.baseVal, labels=[...svg.querySelectorAll('.brain-diagram-label')].map(el=>{
-      const box=el.getBBox();return {name:el.dataset.labelRegion,x:box.x,y:box.y,right:box.x+box.width,bottom:box.y+box.height};
+      const box=el.getBBox(),t=el.transform.baseVal.consolidate()?.matrix;const x=box.x+(t?.e||0),y=box.y+(t?.f||0);return {name:el.dataset.labelRegion,x,y,right:x+box.width,bottom:y+box.height};
     });
     return {x:view.x,y:view.y,right:view.x+view.width,bottom:view.y+view.height,labels};
   });
