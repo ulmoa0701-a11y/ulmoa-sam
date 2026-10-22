@@ -1,0 +1,532 @@
+{
+  "startedViaQaPreviewAtEye": true,
+  "tests": {
+    "eyeStagePrepared": true,
+    "eyeReal": true,
+    "eyeLotus": true,
+    "bucket": true,
+    "smogObserved": false,
+    "smogWater": false,
+    "smogLotus": false
+  },
+  "steps": [
+    {
+      "name": "EYE ready",
+      "state": {
+        "stage": 4,
+        "patch": "2026-10-12-child-feedback-v1",
+        "player": [
+          18,
+          -21
+        ],
+        "woods": {
+          "enabled": false,
+          "hits": 0,
+          "damage": 0
+        },
+        "eye": {
+          "enabled": true,
+          "hits": 0,
+          "damage": 0
+        },
+        "smog": {
+          "enabled": false,
+          "mode": "approach",
+          "cycle": 0,
+          "damage": 0
+        },
+        "lotus": 0,
+        "bucket": false,
+        "map": [
+          90,
+          72
+        ]
+      },
+      "mission": "⑤ EYE 추격을 피하고 빈틈에 F 베기 3번"
+    },
+    {
+      "name": "EYE actual Space+F",
+      "state": {
+        "stage": 4,
+        "patch": "2026-10-12-child-feedback-v1",
+        "player": [
+          18,
+          -21
+        ],
+        "woods": {
+          "enabled": false,
+          "hits": 0,
+          "damage": 0
+        },
+        "eye": {
+          "enabled": true,
+          "hits": 1,
+          "damage": 0
+        },
+        "smog": {
+          "enabled": false,
+          "mode": "approach",
+          "cycle": 0,
+          "damage": 0
+        },
+        "lotus": 0,
+        "bucket": false,
+        "map": [
+          90,
+          72
+        ]
+      },
+      "mission": "⑤ 지금 빈틈! F 베기"
+    },
+    {
+      "name": "EYE actual Space+F",
+      "state": {
+        "stage": 4,
+        "patch": "2026-10-12-child-feedback-v1",
+        "player": [
+          18,
+          -21
+        ],
+        "woods": {
+          "enabled": false,
+          "hits": 0,
+          "damage": 0
+        },
+        "eye": {
+          "enabled": true,
+          "hits": 2,
+          "damage": 0
+        },
+        "smog": {
+          "enabled": false,
+          "mode": "approach",
+          "cycle": 0,
+          "damage": 0
+        },
+        "lotus": 0,
+        "bucket": false,
+        "map": [
+          90,
+          72
+        ]
+      },
+      "mission": "⑤ 지금 빈틈! F 베기"
+    },
+    {
+      "name": "EYE actual Space+F",
+      "state": {
+        "stage": 4,
+        "patch": "2026-10-12-child-feedback-v1",
+        "player": [
+          18,
+          -21
+        ],
+        "woods": {
+          "enabled": false,
+          "hits": 0,
+          "damage": 0
+        },
+        "eye": {
+          "enabled": false,
+          "hits": 3,
+          "damage": 0
+        },
+        "smog": {
+          "enabled": false,
+          "mode": "approach",
+          "cycle": 0,
+          "damage": 0
+        },
+        "lotus": 0,
+        "bucket": false,
+        "map": [
+          90,
+          72
+        ]
+      },
+      "mission": "⑤ 지금 빈틈! F 베기"
+    },
+    {
+      "name": "EYE flower",
+      "state": {
+        "stage": 5,
+        "patch": "2026-10-12-child-feedback-v1",
+        "player": [
+          20.19,
+          -18.08
+        ],
+        "woods": {
+          "enabled": false,
+          "hits": 0,
+          "damage": 0
+        },
+        "eye": {
+          "enabled": false,
+          "hits": 3,
+          "damage": 0
+        },
+        "smog": {
+          "enabled": false,
+          "mode": "approach",
+          "cycle": 0,
+          "damage": 0
+        },
+        "lotus": 1,
+        "bucket": false,
+        "map": [
+          90,
+          72
+        ]
+      },
+      "mission": "⑥ 여행객에게 가서 E 말걸기"
+    },
+    {
+      "name": "traveler bucket",
+      "state": {
+        "stage": 6,
+        "patch": "2026-10-12-child-feedback-v1",
+        "player": [
+          -1.36,
+          14.09
+        ],
+        "woods": {
+          "enabled": false,
+          "hits": 0,
+          "damage": 0
+        },
+        "eye": {
+          "enabled": false,
+          "hits": 3,
+          "damage": 0
+        },
+        "smog": {
+          "enabled": true,
+          "mode": "approach",
+          "cycle": 0,
+          "damage": 0
+        },
+        "lotus": 1,
+        "bucket": true,
+        "map": [
+          90,
+          72
+        ]
+      },
+      "mission": "⑦ SMOG 변화를 3번 관찰하고 열기 피하기"
+    },
+    {
+      "name": "SMOG heat dodge",
+      "state": {
+        "stage": 6,
+        "patch": "2026-10-12-child-feedback-v1",
+        "player": [
+          26.75,
+          -18.13
+        ],
+        "woods": {
+          "enabled": false,
+          "hits": 0,
+          "damage": 0
+        },
+        "eye": {
+          "enabled": false,
+          "hits": 3,
+          "damage": 0
+        },
+        "smog": {
+          "enabled": true,
+          "mode": "danger",
+          "cycle": 0,
+          "damage": 0
+        },
+        "lotus": 1,
+        "bucket": true,
+        "map": [
+          90,
+          72
+        ]
+      },
+      "mission": "⑦ 🔥 열기! SMOG에서 멀리 피하기"
+    },
+    {
+      "name": "SMOG heat dodge",
+      "state": {
+        "stage": 6,
+        "patch": "2026-10-12-child-feedback-v1",
+        "player": [
+          27.04,
+          -18.24
+        ],
+        "woods": {
+          "enabled": false,
+          "hits": 0,
+          "damage": 0
+        },
+        "eye": {
+          "enabled": false,
+          "hits": 3,
+          "damage": 0
+        },
+        "smog": {
+          "enabled": true,
+          "mode": "danger",
+          "cycle": 1,
+          "damage": 1
+        },
+        "lotus": 1,
+        "bucket": true,
+        "map": [
+          90,
+          72
+        ]
+      },
+      "mission": "⑦ 🔥 열기! SMOG에서 멀리 피하기"
+    },
+    {
+      "name": "SMOG heat dodge",
+      "state": {
+        "stage": 6,
+        "patch": "2026-10-12-child-feedback-v1",
+        "player": [
+          26.93,
+          -17.94
+        ],
+        "woods": {
+          "enabled": false,
+          "hits": 0,
+          "damage": 0
+        },
+        "eye": {
+          "enabled": false,
+          "hits": 3,
+          "damage": 0
+        },
+        "smog": {
+          "enabled": true,
+          "mode": "danger",
+          "cycle": 2,
+          "damage": 2
+        },
+        "lotus": 1,
+        "bucket": true,
+        "map": [
+          90,
+          72
+        ]
+      },
+      "mission": "⑦ 🔥 열기! SMOG에서 멀리 피하기"
+    },
+    {
+      "name": "SMOG heat dodge",
+      "state": {
+        "stage": 6,
+        "patch": "2026-10-12-child-feedback-v1",
+        "player": [
+          24.97,
+          -19.48
+        ],
+        "woods": {
+          "enabled": false,
+          "hits": 0,
+          "damage": 0
+        },
+        "eye": {
+          "enabled": false,
+          "hits": 3,
+          "damage": 0
+        },
+        "smog": {
+          "enabled": true,
+          "mode": "danger",
+          "cycle": 0,
+          "damage": 0
+        },
+        "lotus": 1,
+        "bucket": true,
+        "map": [
+          90,
+          72
+        ]
+      },
+      "mission": "⑦ 🔥 열기! SMOG에서 멀리 피하기"
+    },
+    {
+      "name": "SMOG heat dodge",
+      "state": {
+        "stage": 6,
+        "patch": "2026-10-12-child-feedback-v1",
+        "player": [
+          25.21,
+          -19.45
+        ],
+        "woods": {
+          "enabled": false,
+          "hits": 0,
+          "damage": 0
+        },
+        "eye": {
+          "enabled": false,
+          "hits": 3,
+          "damage": 0
+        },
+        "smog": {
+          "enabled": true,
+          "mode": "danger",
+          "cycle": 1,
+          "damage": 1
+        },
+        "lotus": 1,
+        "bucket": true,
+        "map": [
+          90,
+          72
+        ]
+      },
+      "mission": "⑦ 🔥 열기! SMOG에서 멀리 피하기"
+    },
+    {
+      "name": "SMOG heat dodge",
+      "state": {
+        "stage": 6,
+        "patch": "2026-10-12-child-feedback-v1",
+        "player": [
+          25.47,
+          -19.3
+        ],
+        "woods": {
+          "enabled": false,
+          "hits": 0,
+          "damage": 0
+        },
+        "eye": {
+          "enabled": false,
+          "hits": 3,
+          "damage": 0
+        },
+        "smog": {
+          "enabled": true,
+          "mode": "danger",
+          "cycle": 2,
+          "damage": 2
+        },
+        "lotus": 1,
+        "bucket": true,
+        "map": [
+          90,
+          72
+        ]
+      },
+      "mission": "⑦ 🔥 열기! SMOG에서 멀리 피하기"
+    },
+    {
+      "name": "SMOG water poured",
+      "state": {
+        "stage": 6,
+        "patch": "2026-10-12-child-feedback-v1",
+        "player": [
+          23,
+          -18
+        ],
+        "woods": {
+          "enabled": false,
+          "hits": 0,
+          "damage": 0
+        },
+        "eye": {
+          "enabled": false,
+          "hits": 3,
+          "damage": 0
+        },
+        "smog": {
+          "enabled": true,
+          "mode": "approach",
+          "cycle": 0,
+          "damage": 0
+        },
+        "lotus": 1,
+        "bucket": true,
+        "map": [
+          90,
+          72
+        ]
+      },
+      "mission": "⑦ 1/3 · SMOG 가까이 가서 변화 관찰"
+    },
+    {
+      "name": "SMOG flower",
+      "state": {
+        "stage": 6,
+        "patch": "2026-10-12-child-feedback-v1",
+        "player": [
+          23,
+          -18
+        ],
+        "woods": {
+          "enabled": false,
+          "hits": 0,
+          "damage": 0
+        },
+        "eye": {
+          "enabled": false,
+          "hits": 3,
+          "damage": 0
+        },
+        "smog": {
+          "enabled": true,
+          "mode": "approach",
+          "cycle": 0,
+          "damage": 0
+        },
+        "lotus": 1,
+        "bucket": true,
+        "map": [
+          90,
+          72
+        ]
+      },
+      "mission": "⑦ 1/3 · SMOG 가까이 가서 변화 관찰"
+    }
+  ],
+  "errors": [],
+  "http": [
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:8765/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/uvAttributeDeclaration.fx"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:8765/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/uvAttributeDeclaration.fx"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:8765/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/uvAttributeDeclaration.fx"
+    }
+  ],
+  "target": "http://127.0.0.1:8765/lab/babylon-hotel-garden/",
+  "eyeRewardWalk": {
+    "within": true,
+    "iterations": 6,
+    "player": [
+      20.19,
+      -18.08
+    ]
+  },
+  "traveler": {
+    "within": true,
+    "iterations": 101,
+    "player": [
+      -1.36,
+      14.09
+    ]
+  },
+  "smogWalk": {
+    "within": true,
+    "iterations": 74,
+    "player": [
+      27.79,
+      -18.91
+    ]
+  },
+  "pass": false,
+  "generatedAt": "2026-10-22T13:50:52.309Z"
+}

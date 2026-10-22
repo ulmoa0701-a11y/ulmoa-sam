@@ -1,0 +1,276 @@
+{
+  "generatedAt": "2026-10-22T13:48:06.586Z",
+  "url": "http://127.0.0.1:8765/lab/babylon-hotel-garden/",
+  "kind": "real public browser loading and controls; internal event-path smoke (NOT full human playthrough)",
+  "results": [
+    {
+      "viewport": "desktop",
+      "tests": {
+        "load": false,
+        "hud": true,
+        "movement": true,
+        "shiftSprint": true,
+        "preview_woods": true,
+        "preview_eye": true,
+        "preview_smog": true,
+        "bossFlow": true,
+        "endState": true,
+        "noFatalError": false
+      },
+      "errors": [
+        "Failed to load resource: the server responded with a status of 404 (File not found)",
+        "Failed to load resource: the server responded with a status of 404 (File not found)",
+        "Failed to load resource: the server responded with a status of 404 (File not found)"
+      ],
+      "networkFailures": [],
+      "httpErrors": [
+        {
+          "status": 404,
+          "url": "http://127.0.0.1:8765/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/uvAttributeDeclaration.fx"
+        },
+        {
+          "status": 404,
+          "url": "http://127.0.0.1:8765/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/uvAttributeDeclaration.fx"
+        },
+        {
+          "status": 404,
+          "url": "http://127.0.0.1:8765/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/uvAttributeDeclaration.fx"
+        }
+      ],
+      "start": {
+        "state": {
+          "stage": 0,
+          "patch": "2026-10-12-child-feedback-v1",
+          "player": [
+            -18,
+            -6
+          ],
+          "woods": {
+            "enabled": false,
+            "hits": 0,
+            "damage": 0
+          },
+          "eye": {
+            "enabled": false,
+            "hits": 0,
+            "damage": 0
+          },
+          "smog": {
+            "enabled": false,
+            "mode": "approach",
+            "cycle": 0,
+            "damage": 0
+          },
+          "lotus": 0,
+          "bucket": false,
+          "map": [
+            90,
+            72
+          ]
+        },
+        "shaderReady": true,
+        "shaderError": null,
+        "lotusNodes": 2,
+        "gameModules": [
+          "http://127.0.0.1:8765/lab/babylon-hotel-garden/assets/index-DxiltY-5-4d7caa74.js"
+        ],
+        "fps": 34.7,
+        "frames": 6,
+        "canvas": 1,
+        "overflow": false,
+        "lotusText": "🌸 연꽃 0/3",
+        "timer": "07:00",
+        "hudCollision": false,
+        "target": {
+          "x": 643.3828125,
+          "y": 98,
+          "width": 153.234375,
+          "height": 53
+        },
+        "lotus": {
+          "x": 12,
+          "y": 92,
+          "width": 101.515625,
+          "height": 39
+        },
+        "bucket": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "dialogVisible": true
+      },
+      "move": {
+        "before": [
+          -18,
+          -6
+        ],
+        "after": [
+          -18.66,
+          -6.87
+        ],
+        "distance": 1.09
+      },
+      "smoke": {
+        "geometry": true,
+        "restartDialog": true,
+        "restart": true,
+        "woodsHidden": true,
+        "woodsDropped": true,
+        "woodsPicked": true,
+        "slashInEye": true,
+        "eyeHidden": true,
+        "eyePicked": true,
+        "bucket": true,
+        "pour": true,
+        "smogHidden": true,
+        "smogPicked": true,
+        "slashHidden": true,
+        "threeLotus": true,
+        "stage7": true,
+        "pass": true,
+        "v3Models": true,
+        "v3RewardUi": true,
+        "originalArtDetails": true,
+        "woodsNoEyes": true
+      },
+      "pass": false
+    },
+    {
+      "viewport": "mobile",
+      "tests": {
+        "load": false,
+        "hud": true,
+        "movement": true,
+        "shiftSprint": true,
+        "preview_woods": true,
+        "preview_eye": true,
+        "preview_smog": true,
+        "bossFlow": true,
+        "endState": true,
+        "noFatalError": false
+      },
+      "errors": [
+        "Failed to load resource: the server responded with a status of 404 (File not found)",
+        "Failed to load resource: the server responded with a status of 404 (File not found)",
+        "Failed to load resource: the server responded with a status of 404 (File not found)"
+      ],
+      "networkFailures": [],
+      "httpErrors": [
+        {
+          "status": 404,
+          "url": "http://127.0.0.1:8765/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/uvAttributeDeclaration.fx"
+        },
+        {
+          "status": 404,
+          "url": "http://127.0.0.1:8765/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/uvAttributeDeclaration.fx"
+        },
+        {
+          "status": 404,
+          "url": "http://127.0.0.1:8765/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/uvAttributeDeclaration.fx"
+        }
+      ],
+      "start": {
+        "state": {
+          "stage": 0,
+          "patch": "2026-10-12-child-feedback-v1",
+          "player": [
+            -18,
+            -6
+          ],
+          "woods": {
+            "enabled": false,
+            "hits": 0,
+            "damage": 0
+          },
+          "eye": {
+            "enabled": false,
+            "hits": 0,
+            "damage": 0
+          },
+          "smog": {
+            "enabled": false,
+            "mode": "approach",
+            "cycle": 0,
+            "damage": 0
+          },
+          "lotus": 0,
+          "bucket": false,
+          "map": [
+            90,
+            72
+          ]
+        },
+        "shaderReady": true,
+        "shaderError": null,
+        "lotusNodes": 2,
+        "gameModules": [
+          "http://127.0.0.1:8765/lab/babylon-hotel-garden/assets/index-DxiltY-5-4d7caa74.js"
+        ],
+        "fps": 21.5,
+        "frames": 10,
+        "canvas": 1,
+        "overflow": false,
+        "lotusText": "🌸 연꽃 0/3",
+        "timer": "07:00",
+        "hudCollision": false,
+        "target": {
+          "x": 132.03125,
+          "y": 78,
+          "width": 125.9375,
+          "height": 45
+        },
+        "lotus": {
+          "x": 10,
+          "y": 654,
+          "width": 85.4375,
+          "height": 33
+        },
+        "bucket": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "dialogVisible": true
+      },
+      "move": {
+        "before": [
+          -18,
+          -6
+        ],
+        "after": [
+          -20.71,
+          -9.61
+        ],
+        "distance": 4.51
+      },
+      "smoke": {
+        "geometry": true,
+        "restartDialog": true,
+        "restart": true,
+        "woodsHidden": true,
+        "woodsDropped": true,
+        "woodsPicked": true,
+        "slashInEye": true,
+        "eyeHidden": true,
+        "eyePicked": true,
+        "bucket": true,
+        "pour": true,
+        "smogHidden": true,
+        "smogPicked": true,
+        "slashHidden": true,
+        "threeLotus": true,
+        "stage7": true,
+        "pass": true,
+        "v3Models": true,
+        "v3RewardUi": true,
+        "originalArtDetails": true,
+        "woodsNoEyes": true
+      },
+      "pass": false
+    }
+  ],
+  "pass": false
+}
