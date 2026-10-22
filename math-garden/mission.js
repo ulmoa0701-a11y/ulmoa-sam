@@ -47,8 +47,26 @@ function shareBoard(x){
    friend(x.animal,i)+'<span class="dish '+(fed?'dish-filled':'')+'" aria-hidden="true">'+(fed?unit(x.fruit,true):'')+'</span></button>';
  }).join('')+'</div><div class="delivery-line">'+fruitTray(x.fruit,state.selected,n+2,state.taken)+'</div>';
 }
-function compareBoard(x){return '<div class="compare-path">'+['a','b'].map((k,i)=>stepAction('choose','<div class="path-stand"><div class="fruit-pile">'+Array.from({length:x[k]},()=>unit(x.fruit)).join('')+'</div><span class="path-arch"></span></div>',i===0?'왼쪽':'오른쪽','data-side="'+k+'"')).join('')+'</div>'}
-function makeBoard(x){return '<div class="make-layout"><div class="make-board">'+Array.from({length:x.total},(_,i)=>dot(i<x.have+state.selected,x.fruit)).join('')+'</div><div class="delivery-line">'+fruitTray(x.fruit,state.selected,x.total-x.have+3)+'</div></div>'}
+function compareBoard(x){
+ // Show the rule by example rather than making the child read 'more' or 'less'.
+ // The example does not reveal whether left or right is correct in the actual scene.
+ const more=x.want==='more';
+ const sample='<div class="quantity-guide" role="img" aria-label="'+(more?'더 많은 수량의 길':'더 적은 수량의 길')+'">'+
+ '<div class="quantity-example '+(more?'goal-example':'')+'">'+unit(x.fruit,true)+unit(x.fruit,true)+unit(x.fruit,true)+'</div>'+
+ '<div class="quantity-example '+(!more?'goal-example':'')+'">'+unit(x.fruit,true)+'</div></div>';
+ return sample+'<div class="compare-path">'+['a','b'].map((k,i)=>
+ stepAction('choose','<div class="path-stand"><div class="fruit-pile">'+
+ Array.from({length:x[k]},()=>unit(x.fruit)).join('')+'</div><span class="path-arch"></span></div>',i===0?'왼쪽':'오른쪽','data-side="'+k+'"')).join('')+'</div>';
+}
+function makeBoard(x){
+ // The object visibly occupies one empty slot per tap; there is no separate "correct answer" button.
+ const stock=x.total-x.have+3-state.selected;
+ return '<div class="make-layout"><div class="make-board">'+
+ Array.from({length:x.total},(_,i)=>dot(i<x.have+state.selected,x.fruit)).join('')+
+ '</div><div class="delivery-line make-pickup"><div class="supply"><div class="supply-items">'+
+ Array.from({length:Math.max(0,stock)},(_,i)=>stepAction('take',unit(x.fruit),'열매로 빈자리 하나 채우기','data-index="'+i+'"')).join('')+
+ '</div></div></div></div>';
+}
 function phaseText(x){if(x.kind==='guided')return '숲속 친구들';if(x.kind==='transfer')return '새 친구 등장';if(x.kind==='probe')return '숲길 탐험';return '다음 장소'}
 function draw(){
  if(!state.view||state.view==='intro')return;
@@ -58,7 +76,7 @@ function draw(){
  let headline=key==='share'?'친구마다 하나씩 담아 줘':key==='compare'?(x.want==='more'?'더 많은 쪽으로 출발!':'더 적은 쪽으로 출발!'):'빈자리를 채울 만큼 담아 줘';
  say(lab,headline);
  const board=key==='share'?shareBoard(x):key==='compare'?compareBoard(x):makeBoard(x);
- scene('<div class="quest"><div class="quest-head"><span class="quest-chip">'+lab+'</span><div class="quest-pips">'+Array.from({length:Math.min(state.step,5)},()=>'<i></i>').join('')+'</div></div><div class="quest-board">'+board+'</div>'+(key==='compare'?'':'<div class="quest-actions compact-alt">'+stepAction('submit',key==='share'?'한 번에 주기':'빈자리 채우기',key==='share'?'모든 친구에게 한 번에 간식을 주기':'빈자리만큼 넣고 완료하기')+'</div>')+'<div class="feedback-slot" id="feedbackSlot" aria-live="polite"></div></div>');
+ scene('<div class="quest"><div class="quest-head"><span class="quest-chip">'+lab+'</span><div class="quest-pips">'+Array.from({length:Math.min(state.step,5)},()=>'<i></i>').join('')+'</div></div><div class="quest-board">'+board+'</div>'+(key==='share'?'<div class="quest-actions compact-alt">'+stepAction('submit','한 번에 주기','모든 친구에게 한 번에 간식을 주기')+'</div>':'')+'<div class="feedback-slot" id="feedbackSlot" aria-live="polite"></div></div>');
  if(state.flagged){const label=$('feedbackSlot');if(label){label.innerHTML='<div class="feedback-error">다시 살펴볼 수 있어.</div>'+(state.hints?'<div class="scaffold">'+renderPairing(x,key)+'</div>':'')}}
 }
 function renderPairing(x,key){
@@ -130,7 +148,9 @@ function handle(act,el){
  if(act==='take'){
   const max=key==='share'?x.n+2:x.total-x.have+3;
   if(state.taken>=max){setStatus('나무에 더는 간식이 없어. 바구니에서 다시 꺼낼 수 있어.');return}
-  state.selected++;state.taken++;sfx(true);draw();return;
+  state.selected++;state.taken++;sfx(true);
+  if(key==='make'&&state.selected===x.total-x.have){feedback(true);return}
+  draw();return;
  }
  if(act==='undo'){
   if(state.selected>0){
