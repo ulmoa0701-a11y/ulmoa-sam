@@ -9,3 +9,8 @@
 @media(max-width:600px){.moa-page-guide{gap:9px;margin:10px auto 16px;padding:0 3px}.moa-page-guide__portrait{width:70px;height:86px}.moa-page-guide__bubble{padding:12px 13px;border-radius:14px}.moa-page-guide__title{font-size:15px}.moa-page-guide__message{font-size:12.5px;line-height:1.6}}
 @media(max-width:350px){.moa-page-guide__portrait{width:55px;height:75px}.moa-page-guide__message{font-size:12px}}
 @media print{.moa-page-guide{display:none!important}}
+
+/* Sections whose approved hero already includes Moa: no second character, no pointer tail. */
+.moa-page-guide--existing{max-width:1100px;padding:0;margin:10px auto 20px}
+.moa-page-guide--existing .moa-page-guide__bubble{background:#f7fbf5;border-color:#d9e5d9;box-shadow:none}
+.moa-page-guide--existing .moa-page-guide__bubble::before{display:none}
