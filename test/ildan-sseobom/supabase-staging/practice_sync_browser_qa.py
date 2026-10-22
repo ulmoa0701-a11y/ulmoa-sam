@@ -73,6 +73,7 @@ def init(page,role):
   headers={'Access-Control-Allow-Origin':'http://127.0.0.1:8829','Access-Control-Allow-Headers':'apikey,authorization,content-type,x-upsert',
   'Access-Control-Allow-Methods':'POST,GET,PUT,OPTIONS'}
   if method=='OPTIONS':route.fulfill(status=204,headers=headers);return
+  if method=='GET' and 'token=expired' in route.request.url:route.fulfill(status=403,headers=headers,body='expired');return
   if method=='GET':route.fulfill(status=200,headers=headers,content_type='image/png',body=png());return
   route.fulfill(status=200,headers=headers,content_type='application/json',body='{"Key":"test"}')
  page.route('**/functions/v1/ildan-api/**',route_api)
@@ -157,8 +158,20 @@ with sync_playwright() as p:
   page.close()
   teacher=browser.new_page(viewport={'width':width,'height':900})
   init(teacher,'therapist');teacher.goto(url,wait_until='domcontentloaded',timeout=30000)
-  teacher.locator('#inboxResults .record').first.wait_for(timeout=18000)
-  assert '수정한 가상 기록' in teacher.locator('#inboxResults').inner_text() or '학생 공유 기록' in teacher.locator('#inboxResults').inner_text()
+  teacher.locator('#inboxResults .shared-clinician-record').first.wait_for(timeout=18000)
+  assert '수정한 가상 기록' in teacher.locator('.shared-clinician-content').inner_text(), 'full shared text must be visible without a detail click'
+  assert teacher.locator('.shared-clinician-content .saved-photo-grid img').count()==1, 'shared photo must be immediately visible'
+  assert teacher.locator('.shared-clinician-content .sketch-record').count()==1, 'shared drawing must be immediately visible'
+  teacher.wait_for_function("document.querySelector('.shared-clinician-content .saved-photo-grid img')?.naturalWidth>0",timeout=10000)
+  teacher.locator('#filterKind').select_option('parent')
+  assert teacher.locator('#inboxResults .shared-clinician-record').count()==0, 'author filter must work'
+  teacher.locator('#filterKind').select_option('all')
+  assert teacher.locator('#inboxResults .shared-clinician-record').count()==1
+  before_refresh=len([x for x in api_calls if x==('practice-records','GET')])
+  teacher.locator('.shared-clinician-content .saved-photo-grid img').first.evaluate("img=>{img.src=img.src.replace('token=test','token=expired')}")
+  teacher.wait_for_function("document.querySelector('.shared-clinician-content .saved-photo-grid img')?.getAttribute('src')?.includes('token=test')",timeout=12000)
+  assert len([x for x in api_calls if x==('practice-records','GET')])>before_refresh, 'expired signed photo URL must trigger an authorized re-read'
+  assert teacher.locator('.shared-clinician-content .saved-photo-grid img').first.evaluate('img=>img.complete&&img.naturalWidth>0'), 'photo should recover after renewal'
   teacher.close()
   checks.append(f'{width}px practice save with drawing/photo, cross-device reload, therapist share, no clinical write')
   stored.clear()
