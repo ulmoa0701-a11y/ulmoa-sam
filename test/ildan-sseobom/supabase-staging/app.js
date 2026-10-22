@@ -1101,6 +1101,6 @@ document.addEventListener('visibilitychange',()=>{
 });
 if(new URLSearchParams(location.search).has('alerts')){activeView='alerts';history.replaceState(null,'',location.pathname+location.hash);}
 navigator.serviceWorker?.addEventListener('message',event=>{
- if(event.data?.kind==='ildan-open-alerts'&&me?.role==='therapist'){activateWorkspace('alerts');void loadNotifications(true);}
+ if(event.data?.kind==='ildan-open-alerts'){activeView='alerts';if(me?.role==='therapist'){activateWorkspace('alerts');void loadNotifications(true);}}
 });
 (async()=>{await refreshAuth()})();
