@@ -37,8 +37,12 @@ for(const width of [390,1366]){
    check(await compass.locator('.moa-compass-steps li').count()===3,width+' '+id+' action steps missing');
    const horizontal=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
    check(horizontal<=6,width+' '+id+' horizontal overflow '+horizontal);
-   if(width===390&&['hide','memory','calm','slowBlock','mirrorPond'].includes(id))
-    await page.screenshot({path:path.join(artifact,id+'-mobile.png'),fullPage:false});
+   // All 24 shared gameplay areas are captured, not only their gallery cards.
+   // Keeping one capture per viewport makes visual regression review possible.
+   const gameRoot=page.locator('#gameArea');
+   check(await gameRoot.count()===1,width+' '+id+' no actual playable area');
+   check((await gameRoot.innerHTML()).length>80,width+' '+id+' empty gameplay stage');
+   await gameRoot.screenshot({path:path.join(artifact,id+'-'+(width===390?'mobile':'desktop')+'-play.png'),timeout:12000});
    if(id==='hide'){
      const clues=await page.locator('.leaf-has-clue').count();
      check(clues>=2,width+' leaf game has no observable clues');
@@ -98,13 +102,13 @@ for(const [id,url] of standalone){
   check(await help.locator('.moa-quick-steps').isVisible(),id+' standalone steps not expanded');
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
   check(overflow<=9,id+' standalone mobile overflow '+overflow);
-  if(['money','feel','rhythm-touch','hand-mirror'].includes(id))await page.screenshot({path:path.join(artifact,id+'-mobile.png'),fullPage:false});
+  await page.screenshot({path:path.join(artifact,id+'-mobile-entry.png'),fullPage:false});
   check(errors.length===0,id+' page script errors '+errors.join('; '));
   results.push({id,width:390,result:'checked'});
  }catch(e){failures.push(id+' standalone exception '+String(e).slice(0,350))}
  await context.close();
 }
 await browser.close();
-fs.writeFileSync(path.join(artifact,'report.json'),JSON.stringify({checked:results.length,expected:shared.length*2+standalone.length,failures,results},null,2));
+fs.writeFileSync(path.join(artifact,'report.json'),JSON.stringify({checked:results.length,expected:shared.length*2+standalone.length,playAreasCaptured:shared.length*2,standaloneEntryScreens:standalone.length,failures,results},null,2));
 if(failures.length){console.error('MOA 34-GAME QA FAILED '+JSON.stringify(failures));process.exit(1)}
 console.log('PASS: '+shared.length+' shared games in mobile+desktop and '+standalone.length+' independent playable game help screens, no script errors');
