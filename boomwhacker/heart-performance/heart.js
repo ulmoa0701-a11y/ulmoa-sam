@@ -938,7 +938,18 @@ async function exportVideo(){
   const stopped=new Promise((resolve,reject)=>{recorder.onstop=resolve;recorder.onerror=e=>reject(e.error||Error("영상 저장 오류"))});
   const pre=950,lead=song.meter*beatTime()*1000,main=frameBeats()*beatTime()*1000,tail=1150;
   const all=pre+lead+main+tail,begin=performance.now();
-  if(ac&&output){const zero=ac.currentTime+(pre+lead)/1000-startBeat()*beatTime();scheduleMusic(ac,output,zero,startBeat()-song.meter,true)}
+  if(ac&&output){
+   // Video playback was substantially quieter than normal classroom clips.
+   // Raise export-only volume; a fast limiter prevents peak overload when
+   // several notes and the metronome overlap. Live classroom volume is unchanged.
+   const master=ac.createGain();master.gain.value=3.6;
+   const limiter=ac.createDynamicsCompressor();
+   limiter.threshold.value=-8;limiter.knee.value=5;limiter.ratio.value=10;
+   limiter.attack.value=.003;limiter.release.value=.22;
+   master.connect(limiter);limiter.connect(output);
+   const zero=ac.currentTime+(pre+lead)/1000-startBeat()*beatTime();
+   scheduleMusic(ac,master,zero,startBeat()-song.meter,true)
+  }
   recorder.start(250);await new Promise((resolve,reject)=>{
    const tick=()=>{try{const elapsed=performance.now()-begin;
     const p=elapsed<pre?startBeat()-song.meter:elapsed<pre+lead?startBeat()-song.meter+(elapsed-pre)/1000/beatTime():startBeat()+(elapsed-pre-lead)/1000/beatTime();
@@ -970,13 +981,20 @@ function bind(){
  $("#stagePlay").onclick=()=>playing?pause():play();
  $("#stageReset").onclick=reset;
  $("#stageExit").onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen()}catch(e){setStatus("전체 화면을 종료하지 못했어요.")}};
- $("#fullscreen").onclick=async()=>{
+ const enterScoreFullscreen=async()=>{
    const el=$("#stage");try{
      if(document.fullscreenElement){await document.exitFullscreen();return}
-     if(el.requestFullscreen)await el.requestFullscreen();
-     else setStatus("이 브라우저에서 전체 화면이 지원되지 않아요.");
+     if(!el.requestFullscreen){setStatus("이 브라우저에서 전체 화면이 지원되지 않아요.");return}
+     await el.requestFullscreen();
+     // Orientation lock is optional: Safari and some mobile browsers do not permit it.
+     // Failure must never close the usable fullscreen score.
+     if(matchMedia("(max-width: 620px) and (orientation: portrait)").matches&&screen.orientation?.lock){
+       try{await screen.orientation.lock("landscape")}catch(e){}
+     }
    }catch(e){setStatus("전체 화면을 사용할 수 없어요. 휴대폰을 가로로 돌려 주세요.")}
  };
+ $("#fullscreen").onclick=enterScoreFullscreen;
+ $("#mobileLandscape").onclick=enterScoreFullscreen;
  document.addEventListener("fullscreenchange",()=>{
   $("#fullscreen").textContent=document.fullscreenElement?"전체화면 종료":"악보 크게";
   $("#stagePlay").textContent=playing?"일시정지":ended?"다시 연주":"연주 시작";

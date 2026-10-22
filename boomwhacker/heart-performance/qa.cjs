@@ -91,6 +91,20 @@ const {chromium}=require("playwright-core");
   assert.equal(await page.locator("#stagePlay").count(),1);
   assert.equal(await page.locator("#stageReset").count(),1);
   assert.equal(await page.locator("#stageExit").count(),1);
+  assert.equal(await page.locator("#mobileLandscape").count(),1);
+  if(name==="mobile"){
+   assert.equal(await page.locator(".mobile-score-tip").isVisible(),true,"portrait score must explain the actual 390px readability limitation");
+   const cueLayout=await page.locator(".cue-card.current").evaluate(el=>({font:getComputedStyle(el.querySelector("strong")).fontSize,width:el.getBoundingClientRect().width}));
+   assert(parseFloat(cueLayout.font)>=15,"mobile current note must be legible independent of the tiny full score");
+   await page.locator("#mobileLandscape").click();
+   assert.equal(await page.evaluate(()=>Boolean(document.fullscreenElement)),true,"portrait mobile score must open actual fullscreen");
+   assert.equal(await page.locator("#stagePlay").isVisible(),true,"mobile fullscreen must keep playback accessible");
+   await page.locator("#stageExit").click();
+   assert.equal(await page.evaluate(()=>Boolean(document.fullscreenElement)),false,"mobile should return to controls");
+  }else{
+   assert.equal(await page.locator(".mobile-score-tip").isVisible(),false,"desktop must not show portrait-only controls");
+  }
+  tests.push(name+": portrait readable cue and dedicated landscape fullscreen, score itself stays fixed");
   const advancedLayout=await page.evaluate(()=>{
    const q=window.__performanceViewsQA__,original=q.state().song,out={};
    q.selectView("two");q.selectSong("moa-signal");
@@ -350,19 +364,34 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
   assert(viewport.stage.y<495,"stage should be visible after the additional compact theme selector "+viewport.stage.y);
   tests.push(name+": responsive stage remains visible without oversized top whitespace or overflow");
   if(name==="desktop"){
-   await page.locator('.theme-choice[data-theme="night"]').click();
+  for(const exportTheme of ["classroom","forest","night"]){
+   await page.locator('.theme-choice[data-theme="'+exportTheme+'"]').click();
    await page.locator("#song").selectOption("moa-signal");
    await page.locator("#section").selectOption("all");
    await page.locator('.view-choice[data-view="stairs"]').click();
    const [download]=await Promise.all([page.waitForEvent("download",{timeout:65000}),page.locator("#record").click()]);
    const video=await download.path();
-   fs.copyFileSync(video,path.join(dir,"sample-16by9-heart-song."+(download.suggestedFilename().endsWith(".mp4")?"mp4":"webm")));
+   fs.copyFileSync(video,path.join(dir,"sample-16by9-heart-song-"+exportTheme+"."+(download.suggestedFilename().endsWith(".mp4")?"mp4":"webm")));
    assert(video&&fs.statSync(video).size>15000,"real MediaRecorder video must not be empty");
    assert(/\.(webm|mp4)$/i.test(download.suggestedFilename()));
    const probe=require("node:child_process").spawnSync("ffprobe",["-v","error","-select_streams","v:0","-show_entries","stream=width,height","-of","csv=p=0",video],{encoding:"utf8"});
    if(!probe.error){assert.equal(probe.status,0,"ffprobe must read the saved video");assert.equal(probe.stdout.trim(),"1920,1080","actual exported video file must be 16:9 Full HD");}
    else console.log("ffprobe unavailable; browser canvas output verified "+probe.error.message);
-   tests.push(name+": real 1920x1080 Full-HD video includes the selected NIGHT THEME with both static rows and Moa motion");
+   // Do not call a file YouTube-ready just because MediaRecorder produced bytes.
+   // Check recorded audio really exists and has usable headroom, not the old near-silent mix.
+   const audio=require("node:child_process").spawnSync("ffmpeg",
+     ["-hide_banner","-nostats","-i",video,"-af","volumedetect","-vn","-f","null","-"],
+     {encoding:"utf8",timeout:30000});
+   if(!audio.error){
+     assert.equal(audio.status,0,"saved video audio must decode");
+     const peak=/max_volume:\s*(-?\d+(?:\.\d+)?)\s*dB/.exec(audio.stderr||"");
+     assert(peak,"saved video must have a real measurable audio track");
+     const peakDb=Number(peak[1]);
+     assert(peakDb>-13&&peakDb<-.8,"video must be audible without digital clipping: "+peakDb+" dBFS");
+     tests.push(name+": decoded Opus sound measured "+peakDb.toFixed(1)+" dBFS peak without overload");
+   }else console.log("ffmpeg unavailable; dedicated audio level test skipped "+audio.error.message);
+   tests.push(name+": real 1920x1080 Full-HD video includes "+exportTheme+" with two static rows, Moa motion and audible Opus");
+  }
   }
   await page.close();
  }
