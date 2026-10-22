@@ -10,6 +10,7 @@
  const reset=(button)=>{
   if(!button)return;
   button.setAttribute('aria-pressed','false');
+  button.setAttribute('aria-label','모아 안내 듣기');
   button.textContent='▶ 듣기';
   const status=button.parentElement?.querySelector('.moa-page-guide__status');
   if(status)status.textContent='';
@@ -28,7 +29,7 @@
    const korean=voices.find(v=>v.lang.toLowerCase()==='ko-kr')||voices.find(v=>v.lang.toLowerCase().startsWith('ko'));
    if(korean)utterance.voice=korean;
    active=button;
-   button.setAttribute('aria-pressed','true');button.textContent='■ 멈추기';
+   button.setAttribute('aria-pressed','true');button.setAttribute('aria-label','모아 안내 읽어주기 멈추기');button.textContent='■ 멈추기';
    const status=button.parentElement?.querySelector('.moa-page-guide__status');
    if(status)status.textContent='안내를 읽고 있어요';
    const finish=()=>{if(active===button){active=null;reset(button);}};
