@@ -25,7 +25,6 @@ for(const [name,width] of [['pc',1366],['mobile',390]]){
  await page.locator('.basic-choice[data-shape="'+shape+'"]').click();
  check(await page.locator('.shape-reunited').count()===1,name+' shape reunion is not tied to a correct match');
  await page.locator('.round-gate button').waitFor({state:'visible',timeout:4000});
- await page.locator('.round-gate button').waitFor({state:'visible',timeout:4000}).catch(()=>null);
  check(await page.locator('.round-gate button').count()===1,name+' shape completion does not advance');
  await page.screenshot({path:'qa/native-scenes-screens/'+name+'-shape.png'});
  await open('flower');
@@ -51,9 +50,35 @@ for(const [name,width] of [['pc',1366],['mobile',390]]){
  await open('targets');
  await page.locator('.wake-target:not(.wake-decoy)').first().click();
  check(await page.locator('.wake-target.awake').count()===1,name+' seed did not grow when selected');
+ // Challenge recall: no answer is given before all four taps. A wrong
+ // full sequence can be corrected without rolling a new secret sequence.
+ await page.goto(base+'/thinking-garden/?game=memory',{waitUntil:'domcontentloaded'});
+ await page.locator('#slowLevel').selectOption('3');
+ await page.locator('#introStart').click();
+ const expected=await page.locator('.memory-strip .memory-dot').evaluateAll(nodes=>nodes.map(n=>n.style.background));
+ check(expected.length===4,name+' challenge memory target not four symbols');
+ await page.locator('.memory-ready').click();
+ async function tapColors(sequence){
+  await page.evaluate(values=>{
+   for(const v of values){
+    const el=[...document.querySelectorAll('.memory-choice')].find(button=>button.querySelector('.memory-dot')?.style.background===v);
+    if(!el)throw Error('Missing color choice '+v);
+    el.click();
+   }
+  },sequence);
+ }
+ await tapColors([...expected].reverse());
+ check(await page.locator('.memory-retry').count()===1,name+' challenge memory does not compare the whole sequence');
+ check(await page.locator('.round-gate button').count()===0,name+' incorrect memory got a completion gate');
+ await page.locator('.memory-retry').click();
+ await tapColors(expected);
+ await page.locator('.round-gate button').waitFor({state:'visible',timeout:4000});
+ const memoryRecord=await page.evaluate(()=>state.basicRecords[0]);
+ check(memoryRecord.memoryFirstTryCorrect==='X'&&memoryRecord.memoryRetries===1,name+' self-correction record missing');
+ await page.screenshot({path:'qa/native-scenes-screens/'+name+'-memory.png'});
  check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+4),name+' horizontal overflow');
  check(faults.length===0,name+' JavaScript exceptions '+faults.join(','));
- results.push({name,width,checked:['sameShape','flower','hide','path','inside','targets'],scriptErrors:faults});
+ results.push({name,width,checked:['sameShape','flower','hide','path','inside','targets','memory'],scriptErrors:faults});
  await context.close();
 }
 await browser.close();
