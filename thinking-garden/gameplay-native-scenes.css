@@ -122,3 +122,8 @@
  #gameWorld .wake-garden .wake-target.awake,
  #gameWorld .memory-picnic .basket-slot.filled{animation:none!important}
 }
+
+/* In challenge recall, compare the finished sequence without giving away single taps. */
+#gameWorld .memory-picnic .basket-slot.memory-review-different{background:#fff1de;border:3px dashed #c88b55;box-shadow:0 0 0 3px #fff4e5}
+#gameWorld .memory-picnic .memory-retry{border:2px solid #88bb91;background:#f1fbe8;color:#285b40;border-radius:18px;padding:13px 20px;font-weight:850;min-height:49px;cursor:pointer}
+#gameWorld .memory-picnic .memory-retry:focus-visible{outline:4px solid #558671;outline-offset:2px}
