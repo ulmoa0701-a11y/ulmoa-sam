@@ -27,7 +27,13 @@ function total(root,id){
  if(id==='slowBlock')return root.querySelectorAll('.slow-block-board .slow-tile.shown').length;
  if(id==='slowScan')return (root.querySelector('.slow-mission-label')?.textContent.match(/(\d+)송이/)||[])[1]*1||0;
  if(id==='slowEveryday')return (root.querySelector('.slow-mission-label')?.textContent.match(/(\d+)개/)||[])[1]*1||0;
- return root.querySelectorAll('.slow-map-pair .slow-board .slow-tile.shown').length;
+ const visible=root.querySelectorAll('.slow-map-pair .slow-board .slow-tile.shown').length;
+ if(id==='slowMemory'){
+  const stage=document.getElementById('stageLabel')?.textContent||'';
+  if(visible){world.dataset.moaMemoryCount=String(visible);world.dataset.moaMemoryRound=stage;}
+  return world.dataset.moaMemoryRound===stage?Number(world.dataset.moaMemoryCount)||0:visible;
+ }
+ return visible;
 }
 function update(root,id){
  const meter=root.querySelector('.moa-world-meter');if(!meter)return;
