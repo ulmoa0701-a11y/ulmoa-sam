@@ -2,6 +2,7 @@ const $=(id)=>document.getElementById(id);const app=$('app'),account=$('account'
 let me=null,records=[],students=[],therapists=[],view='login',drive={connected:false,configured:false};
 let activeView='write',editingPracticeRecord=null;
 let clinicianRecordsLoadedAt=0,clinicianRefreshPending=null,clinicianRefreshVisible=null;
+let notifyRefreshVisible=null,notifyTimer=null,notifyLoading=null,noticeCache=[];
 const sanitize=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 const hint=(s)=>`<div class="callout">${s}</div>`;
 function toast(s){$('toast').textContent=s;$('toast').classList.add('visible');setTimeout(()=>$('toast').classList.remove('visible'),3400)}
@@ -857,6 +858,66 @@ function studentHome(){
  if(!isParent){attachSituation();attachCoding();}
 
 }
+// Browser polling is a supplement: the database notification entry is the source of truth.
+function renderNotificationPanel(){
+ const list=$('notificationList');if(!list||me?.role!=='therapist')return;
+ const unread=noticeCache.filter(n=>!n.readAt).length;
+ const counter=$('notificationCount');if(counter)counter.textContent=`(미확인 ${unread}건)`;
+ const nav=document.querySelector('[data-workspace-target="alerts"] small');
+ if(nav)nav.textContent=unread?`미확인 ${unread}건`:'공유 알림';
+ list.innerHTML=noticeCache.length?noticeCache.map(n=>{
+  const student=students.find(s=>s.id===n.studentId);
+  const label=student?.nickname||'담당 학생';
+  const when=new Date(n.createdAt);
+  return `<article class="notification-row${n.readAt?' is-read':''}" data-notice-id="${sanitize(n.id)}">
+   <div><strong>${sanitize(label)} · ${n.type==='updated'?'공유 기록 수정':'새 공유 기록'}</strong>
+   <small>${sanitize(Number.isNaN(when.getTime())?'':when.toLocaleString('ko-KR'))} · ${n.readAt?'확인함':'미확인'}</small></div>
+   <button type="button" class="button-ghost" data-notice-open="${sanitize(n.id)}">기록 확인</button>
+  </article>`;
+ }).join(''):'<p class="empty-state">새 공유 알림이 없습니다. 비공개 기록은 표시되지 않습니다.</p>';
+ list.querySelectorAll('[data-notice-open]').forEach(b=>b.onclick=()=>loading(b,async()=>{
+  const n=noticeCache.find(x=>x.id===b.dataset.noticeOpen);if(!n)return;
+  await api('practice-notification-read',{method:'POST',body:{notificationId:n.id}});
+  // Fetch CURRENT permissions before navigating to the shared content.
+  const result=await api('practice-records');records=result.records??[];
+  const stillVisible=records.some(x=>x.id===n.recordId);
+  await loadNotifications(true);
+  if(!stillVisible){toast('공유가 취소되었거나 담당 연결이 변경되었습니다.');return;}
+  activateWorkspace('inbox');
+  const select=$('filterStudent');const student=students.find(x=>x.id===n.studentId);
+  if(select&&student)select.value=student.nickname;
+  const kind=$('filterKind');if(kind)kind.value='all';
+  const items=records.filter(r=>(select.value==='all'||r.student===select.value));
+  $('inboxResults').innerHTML=recordCards(items);paintSketches();
+  document.querySelectorAll('[data-shared-record-id]').forEach(e=>e.classList.toggle('notification-target',e.dataset.sharedRecordId===n.recordId));
+  document.querySelector(`[data-shared-record-id="${n.recordId}"]`)?.scrollIntoView({block:'start',behavior:'smooth'});
+ }));
+}
+async function loadNotifications(force=false){
+ if(me?.role!=='therapist')return;
+ if(notifyLoading)return notifyLoading;
+ notifyLoading=(async()=>{
+  const out=await api('practice-notifications');
+  if(me?.role!=='therapist')return;
+  noticeCache=Array.isArray(out.notifications)?out.notifications:[];
+  renderNotificationPanel();
+ })().catch(e=>{
+  const list=$('notificationList');
+  if(list)list.textContent='알림을 불러오지 못했습니다. 새 알림 확인을 눌러 다시 시도해 주세요.';
+  if(force)toast('알림 확인 실패: '+e.message);
+ }).finally(()=>{notifyLoading=null});
+ return notifyLoading;
+}
+function startNotificationChecks(){
+ if(notifyTimer)clearInterval(notifyTimer);
+ notifyRefreshVisible=()=>loadNotifications(false);
+ notifyTimer=setInterval(()=>{
+  if(me?.role==='therapist'&&document.visibilityState==='visible')void loadNotifications(false);
+ },60000);
+ const btn=$('notificationRefresh');if(btn)btn.onclick=()=>void loadNotifications(true);
+ void loadNotifications(false);
+}
+
 function exportCSV(){const labels=NOTE_LABELS;function cell(s){let x=String(s??'');if(/^[\s]*[=+\-@\t\r]/.test(x))x="'"+x;return '"'+x.replaceAll('"','""')+'"'}const rows=[['작성일','학생','작성자','유형','기록 내용'],...records.map(r=>[r.createdAt,r.student,r.author,r.kind,Object.entries(r.entry??{}).map(([k,v])=>(labels[k]||k)+': '+(k==='sketch'?'[그림 메모]':v)).join('\n')])];const csv='\uFEFF'+rows.map(row=>row.map(cell).join(',')).join('\r\n');const u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=u;a.download='일단써봄_담당치료사_공유기록.csv';a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
 async function initSessionNotes(){
  const wrap=$('sessionSaved'),form=$('sessionForm');if(!wrap||!form)return;
@@ -864,7 +925,7 @@ async function initSessionNotes(){
  form.onsubmit=e=>{e.preventDefault();const entry={};["studentReport","parentReport","observation","question","plan","functionalImpact","familyResponse","workingHypothesis","alternatives","uncertainty","burdenReview","erpReview","erpTarget","erpSafety","cbitReview","cbitTarget","cbitContext"].forEach(k=>{const v=formValue(form,k);if(v)entry[k]=v});if(!Object.keys(entry).length){toast('한 가지 이상 남겨주세요.');return;}loading(form.querySelector('button'),async()=>{await api('session-notes',{method:'POST',body:{studentId:formValue(form,'studentId'),entry}});form.reset();toast('회기 메모를 보관했어요.');await display()})};
  await display();
 }
-async function therapistHome(){const r=await Promise.all([api('students'),api('drive/status'),api('accounts')]);students=r[0].students;drive=r[1];const accounts=r[2].accounts;app.innerHTML=hero('오늘의 사례 공간','학생이 공유한 내용과 보호자 관찰을 구분해 보고, 다음 회기를 준비해요.')+`<div class="workspace-shell therapist-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">02</span></div>${workspaceNav([['inbox','▣','공유 자료','학생·보호자'],['writingCalendar','▦','공유 기록 달력','학생별 월간'],['session','▤','회기 준비','치료사 메모'],['accounts','♙','계정 연결','초대·재등록'],['drive','↗','Google Drive','담당자 전용']],activeView)}<div class="sidebar-note">배정된 학생의 공유 기록만<br><small>담당 치료사가 확인할 수 있어요.</small></div></aside><div class="workspace-content"><div class="grid"><section class="panel highlight full" data-workspace-view="inbox"><span class="tag">01 / INBOX</span><h2>학생·보호자가 공유한 기록 <small id="inboxSharedCount">(${records.length}건)</small></h2><p>원문을 유지하며 작성자의 관점에 따라 구분해요. 자동으로 진단하거나 평가하지 않아요.</p><div class="buttons"><button id="refresh" class="button-ghost">↻ 새 기록 확인</button><button id="csv" class="button-ghost">CSV 다운로드</button></div><p class="parent-inbox-policy">공유받은 글·사진·그림은 펼치지 않아도 확인할 수 있습니다. 이 화면은 가상 기록 전용입니다.</p><div class="filter-strip"><label>학생별 보기<select id="filterStudent"><option value="all">전체 학생</option>${students.map(s=>`<option value="${sanitize(s.nickname)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><label>작성자 구분<select id="filterKind"><option value="all">전체</option><option value="student">학생 기록</option><option value="parent">학부모 전달</option></select></label></div><div id="inboxResults">${recordCards()}</div></section><section data-workspace-view="writingCalendar" id="writingCalendar" class="panel full" hidden></section><section class="panel full case-panel" data-workspace-view="session" hidden><span class="tag">SESSION / THERAPIST ONLY</span><h2>회기 준비·메모</h2><p>학생이 선택해 공유한 내용과 실제 회기에서 확인한 내용을 분리해 기록합니다. 치료사의 가설은 관찰 사실이 아니며, 앱이 진단이나 치료 효과를 판단하지 않습니다. <b>로그인한 역할과 기록 접근은 서버에서 확인합니다.</b></p>
+async function therapistHome(){const r=await Promise.all([api('students'),api('drive/status'),api('accounts')]);students=r[0].students;drive=r[1];const accounts=r[2].accounts;app.innerHTML=hero('오늘의 사례 공간','학생이 공유한 내용과 보호자 관찰을 구분해 보고, 다음 회기를 준비해요.')+`<div class="workspace-shell therapist-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">02</span></div>${workspaceNav([['alerts','♧','새 공유 알림','미확인 기록'],['inbox','▣','공유 자료','학생·보호자'],['writingCalendar','▦','공유 기록 달력','학생별 월간'],['session','▤','회기 준비','치료사 메모'],['accounts','♙','계정 연결','초대·재등록'],['drive','↗','Google Drive','담당자 전용']],activeView)}<div class="sidebar-note">배정된 학생의 공유 기록만<br><small>담당 치료사가 확인할 수 있어요.</small></div></aside><div class="workspace-content"><div class="grid"><section class="panel highlight full" data-workspace-view="inbox"><span class="tag">01 / INBOX</span><h2>학생·보호자가 공유한 기록 <small id="inboxSharedCount">(${records.length}건)</small></h2><p>원문을 유지하며 작성자의 관점에 따라 구분해요. 자동으로 진단하거나 평가하지 않아요.</p><div class="buttons"><button id="refresh" class="button-ghost">↻ 새 기록 확인</button><button id="csv" class="button-ghost">CSV 다운로드</button></div><p class="parent-inbox-policy">공유받은 글·사진·그림은 펼치지 않아도 확인할 수 있습니다. 이 화면은 가상 기록 전용입니다.</p><div class="filter-strip"><label>학생별 보기<select id="filterStudent"><option value="all">전체 학생</option>${students.map(s=>`<option value="${sanitize(s.nickname)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><label>작성자 구분<select id="filterKind"><option value="all">전체</option><option value="student">학생 기록</option><option value="parent">학부모 전달</option></select></label></div><div id="inboxResults">${recordCards()}</div></section><section data-workspace-view="alerts" class="panel full notification-panel" hidden><span class="tag">SHARED RECORD ALERTS</span><h2>새 공유 알림 <small id="notificationCount">(0)</small></h2><p>학생이나 보호자가 치료사에게 공유한 기록만 알려드립니다. 기록하지 않았거나 비공개로 저장한 내용은 알리지 않습니다.</p><div class="buttons"><button id="notificationRefresh" type="button" class="button-ghost">새 알림 확인</button></div><div id="notificationList" aria-live="polite" aria-label="공유 알림 목록"><p class="muted">알림을 확인하고 있습니다.</p></div></section><section data-workspace-view="writingCalendar" id="writingCalendar" class="panel full" hidden></section><section class="panel full case-panel" data-workspace-view="session" hidden><span class="tag">SESSION / THERAPIST ONLY</span><h2>회기 준비·메모</h2><p>학생이 선택해 공유한 내용과 실제 회기에서 확인한 내용을 분리해 기록합니다. 치료사의 가설은 관찰 사실이 아니며, 앱이 진단이나 치료 효과를 판단하지 않습니다. <b>로그인한 역할과 기록 접근은 서버에서 확인합니다.</b></p>
 <form id="sessionForm" class="form clinician-form">
 <label>담당 학생<select name="studentId" required>${students.map(s=>`<option value="${sanitize(s.id)}">${sanitize(s.nickname)}</option>`).join('')}</select></label>
 <div class="clinician-quick-fields">
@@ -919,7 +980,7 @@ async function therapistHome(){const r=await Promise.all([api('students'),api('d
  <p class="muted">이름은 학생 목록과 연결 메뉴에 표시됩니다. 현재 체험 단계에서는 실제 아동의 개인정보 대신 가상 이름을 사용해 주세요.</p><div class="student-list-summary" aria-label="등록된 학생"><strong>등록된 학생 (${students.length}명)</strong>${students.length?`<div class="student-list-chips">${students.map(s=>`<span class="student-list-chip">${sanitize(s.nickname)}</span>`).join("")}</div>`:`<p class="muted">등록된 학생이 없어요. 위에서 먼저 추가해 주세요.</p>`}</div><h3>2. 학생·보호자에게 보낼 링크 만들기</h3><p class="muted" id="inviteExplainer">등록된 학생을 선택해 주세요.</p><form id="inviteForm" class="form"><label>초대할 사람<select name="role" id="inviteRole"><option value="student">학생</option><option value="parent">보호자</option></select></label><label id="studentPicker">대상 학생<select name="studentId" ${students.length?"":"disabled"}>${students.map(s=>`<option value="${sanitize(s.id)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><button id="inviteSubmit" class="button" ${students.length?"":"disabled"}>학생 접속 링크 만들기</button></form><div id="inviteOutput"></div><section aria-label="발급한 초대 링크"><h3>초대 링크 관리</h3>
  <p>누구에게 보낸 링크인지 학생 이름과 구분해 표시합니다. 링크 자체는 발급 직후에만 복사할 수 있고, 잘못 전달한 링크는 취소할 수 있어요.</p>
  <div id="inviteList" role="status" aria-live="polite">목록을 불러오는 중입니다.</div></section></section><section class="panel" data-workspace-view="accounts"><span class="tag">02 / ACCOUNT HELP</span><h2>계정 접근 도움말</h2><p>기기를 바꾸거나 로그아웃해서 다시 접속해야 할 때 신원 확인 후 기존 계정용 링크를 새로 발급할 수 있어요.</p><label>대상 계정<select id="resetUser">${accounts.map(a=>`<option value="${sanitize(a.id)}">${sanitize(a.nickname)} · ${a.role==='student'?'학생':'학부모'}</option>`).join('')}</select></label><div class="buttons"><button id="resetIssue" class="button-ghost" ${accounts.length?'':'disabled'}>기존 계정 새 접속 링크 만들기</button></div><div id="resetOutput"></div></section><section class="panel full" data-workspace-view="drive"><span class="tag">03 / GOOGLE DRIVE</span><h2>Google Drive</h2><p>${drive.connected?'내 구글 계정이 연결돼 있습니다.':'구글 계정 연결 전입니다. 학생 기록은 아직 자동 업로드되지 않습니다.'}</p><div class="buttons"><button id="googleConnect" class="button-ghost" ${drive.configured&&drive.backupEnabled?'':'disabled'}>${drive.connected?'구글 계정 다시 연결':'내 구글 계정 연결'}</button><button id="driveSync" class="button" ${drive.connected&&drive.backupEnabled?'':'disabled'}>공유 기록 백업</button>${drive.folderUrl?`<a class="button-ghost" href="${sanitize(drive.folderUrl)}" target="_blank" rel="noopener noreferrer">내 드라이브 폴더 열기 ↗</a>`:''}</div>${!drive.backupEnabled?hint('보존·삭제·동의 및 사본 처리 정책 검증 전까지 Google Drive 백업이 비활성화되어 있습니다. 서버 공유를 취소해도 기존 다운로드 파일은 자동으로 회수되지 않습니다.'):!drive.configured?hint('구글 OAuth 관리자 설정이 아직 끝나지 않았습니다.'):''}<p>삭제 확인이 필요한 사본은 치료사의 기록 관리자에게 문의하세요.</p></section></div></div></div>`;
-attachShares();bindWorkspace();paintSketches();initSessionNotes();renderWritingCalendar();
+attachShares();bindWorkspace();paintSketches();initSessionNotes();renderWritingCalendar();startNotificationChecks();
 const rerenderInbox=()=>{
  const name=$('filterStudent').value,kind=$('filterKind').value;
  const list=records.filter(r=>(name==='all'||r.student===name)&&(kind==='all'||r.kind===kind));
@@ -1031,9 +1092,10 @@ async function dashboard(){header();records=me.role==='admin'?[]:(await api('pra
  if(me.role==='student'||me.role==='parent'){try{records=[...(await listPracticeRecords(me.id)),...records]}catch(e){toast(e.message)}}
  if(editingPracticeRecord&&['student','parent'].includes(me.role))
   editingPracticeRecord=records.find(r=>r.id===editingPracticeRecord.id&&(r.practice||r.local))||null;
- if(me.role==='therapist')await therapistHome();else if(me.role==='admin')adminHome();else studentHome();}
+ if(me.role==='therapist')await therapistHome();else{if(notifyTimer){clearInterval(notifyTimer);notifyTimer=null;}notifyRefreshVisible=null;if(me.role==='admin')adminHome();else studentHome();}}
 function render(){header();if(!me)loginScreen();else dashboard().catch(e=>{app.innerHTML=hint('화면을 불러오지 못했어요. '+sanitize(e.message))})}
 document.addEventListener('visibilitychange',()=>{
  if(document.visibilityState==='visible'&&me?.role==='therapist'&&clinicianRefreshVisible)void clinicianRefreshVisible(false);
+ if(document.visibilityState==='visible'&&me?.role==='therapist'&&notifyRefreshVisible)void notifyRefreshVisible();
 });
 (async()=>{await refreshAuth()})();
