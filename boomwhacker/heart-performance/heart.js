@@ -158,7 +158,7 @@ function tap(key){flash={note:key,until:performance.now()+180};const k=$$("#keys
 }
 const labels={rest:"쉼"};
 function col(n){return COLORS[n]||"#d9e4e4"}
-function font(ctx,size=22,weight="800"){ctx.font=weight+" "+size+"px 'Noto Sans KR','Malgun Gothic',sans-serif"}
+function font(ctx,size=22,weight="800"){ctx.font=weight+" "+size+"px 'Noto Sans CJK KR','NanumGothic','Malgun Gothic',sans-serif"}
 function txt(c,t,x,y,size=20,color="#2a4755",align="center",weight="800"){c.save();c.textAlign=align;c.textBaseline="middle";font(c,size,weight);c.fillStyle=color;c.fillText(String(t),x,y);c.restore()}
 function rr(c,x,y,w,h,r,fill){c.beginPath();if(c.roundRect)c.roundRect(x,y,w,h,r);else c.rect(x,y,w,h);if(fill){c.fillStyle=fill;c.fill()}return c}
 function disk(c,x,y,r,fill,stroke="",sw=2){c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fillStyle=fill;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=sw;c.stroke()}}
@@ -423,7 +423,11 @@ function heart(c,beat,x,y,w,h,now,muted=false){
  for(const p of parts)if(p.onset&&p.from>0.001)ln(c,p.from*100,10,p.from*100,81,"#fff",complex?2:3);
  if(complex){for(let j=1;j<4;j++){if(parts.some(p=>Math.abs(p.from*100-j*25)<.01))continue;c.setLineDash([1.2,3]);ln(c,j*25,12,j*25,77,"#ffffffbd",.9);c.setLineDash([])}}
  c.restore();
- c.strokeStyle=active&&!muted?"#368470":"#75948a";c.lineWidth=active&&!muted?3:1.1;c.stroke(HEART);
+ c.save();c.clip(HEART);
+ const gloss=c.createLinearGradient(0,0,0,90);
+ gloss.addColorStop(0,"#ffffff21");gloss.addColorStop(.35,"#ffffff06");gloss.addColorStop(1,"#1829230b");
+ c.fillStyle=gloss;c.fillRect(0,0,100,90);c.restore();
+ c.strokeStyle=active&&!muted?"#368470":"#719083";c.lineWidth=active&&!muted?3:1.2;c.stroke(HEART);
  for(const p of parts){if(!p.onset)continue;const width=p.to-p.from,cx=50*(p.from+p.to);
    c.globalAlpha=!isSelected(p.note)&&p.note!=="쉼"?.35:1;
    const label=p.note==="높은도"?"도":p.note==="쉼"?"쉼":fixedNote(p.note);
@@ -598,10 +602,12 @@ function themeBackground(c){
  c.save();
  if(theme==="classroom"){
    // Soft classroom: window, pastel chalk marks and a restrained wooden sill.
-   rr(c,986,22,148,128,24,"#fff8e9b3");
-   rr(c,1000,34,120,98,16,"#c9e4e1");
-   c.fillStyle="#fff3d5";c.beginPath();c.arc(1082,62,16,0,Math.PI*2);c.fill();
-   ln(c,1060,35,1060,132,"#fffdf1",5);ln(c,1002,81,1120,81,"#fffdf1",5);
+   // The classroom's illustrated sunlit window sits between title and page counter.
+   rr(c,771,6,167,103,22,"#fff8e9bd");
+   rr(c,784,16,140,80,14,"#cce7e4");
+   c.fillStyle="#fff4cc";c.beginPath();c.arc(879,42,15,0,Math.PI*2);c.fill();
+   ln(c,843,17,843,97,"#fffef7",5);ln(c,785,62,923,62,"#fffef7",5);
+   rr(c,772,101,170,9,4,"#e1c6a6");
    c.fillStyle="#e3c7a9";c.fillRect(0,606,1200,14);
    for(const [x,y] of [[38,95],[1150,201],[62,540],[1135,577]]){
      disk(c,x,y,18,"#e4e5b88c");disk(c,x+25,y-11,11,"#c9dbbf91");
@@ -619,37 +625,63 @@ function themeBackground(c){
     c.beginPath();c.moveTo(0,0);c.bezierCurveTo(size*.8,-size*.7,size*1.1,size*.3,0,size);c.bezierCurveTo(-size*.55,size*.5,-size*.6,size*.2,0,0);c.fill();c.restore()
    };
    leaf(26,50,23,"#82b692");leaf(70,17,18,"#add5a6");leaf(1140,36,27,"#80b898");leaf(1177,520,30,"#83ad99");leaf(47,492,20,"#a4cda3");
+   // Quiet tree canopy graphic in the open central title gap.
+   leaf(794,27,20,"#8ac1a0");leaf(819,14,18,"#accf9c");
+   leaf(881,19,22,"#86baa1");leaf(906,47,14,"#b3d3ac");
+   ln(c,835,103,835,72,"#719b82",3);
    for(const [x,y,r] of [[143,32,4],[940,54,5],[1069,586,3]])disk(c,x,y,r,"#fff4c9");
  }else{
    // Starry music path: gradient twilight sky, moon and a quiet valley.
-   c.fillStyle="#e9e9df";c.beginPath();c.arc(1096,72,26,0,Math.PI*2);c.fill();
-   c.fillStyle=p.sky[0];c.beginPath();c.arc(1107,59,26,0,Math.PI*2);c.fill();
+   c.fillStyle="#fff1c0";c.beginPath();c.arc(868,56,28,0,Math.PI*2);c.fill();
+   c.fillStyle="#4a5888";c.beginPath();c.arc(881,44,26,0,Math.PI*2);c.fill();
    [[58,35,8],[160,91,4],[338,24,5],[713,61,4],[958,37,7],[1169,193,5],[44,456,5],[1090,577,5],[520,586,4]].forEach(([x,y,z])=>drawSparkle(c,x,y,z,"#fff2c6"));
    c.fillStyle="#495a7b";c.beginPath();c.moveTo(0,574);c.bezierCurveTo(250,547,395,584,610,559);c.bezierCurveTo(820,540,1010,548,1200,570);c.lineTo(1200,620);c.lineTo(0,620);c.fill();
    c.fillStyle="#617395";c.beginPath();c.moveTo(0,608);c.bezierCurveTo(260,576,559,630,1200,580);c.lineTo(1200,620);c.lineTo(0,620);c.fill();
  }
  c.restore();
 }
-function themeCard(c,x,y,w,h,row){
- const p=themePalette();
- c.save();c.shadowColor=theme==="night"?"#172b4366":"#5a776330";c.shadowBlur=14;c.shadowOffsetY=5;
- rr(c,x,y,w,h,27,row===0?p.first:p.second);c.restore();
- c.strokeStyle=p.border;c.lineWidth=1.7;c.beginPath();c.roundRect(x,y,w,h,27);c.stroke();
- // Restrained paper corner tabs with different treatment for each row.
- rr(c,x+18,y+12,8,29,5,row===0?(theme==="night"?"#b5b6e2":"#a9d4bd"):(theme==="classroom"?"#e7c4a4":"#c9d7ed"));
+
+function themeCard(c,x,y,w,h,row,mode="two"){
+ const p=themePalette(),color=row===0?p.first:p.second;
+ c.save();c.shadowColor=theme==="night"?"#172b4359":"#5a77632b";c.shadowBlur=16;c.shadowOffsetY=5;
+ rr(c,x,y,w,h,27,color);c.restore();
+ c.strokeStyle=p.border;c.lineWidth=1.8;c.beginPath();c.roundRect(x,y,w,h,27);c.stroke();
+ c.save();c.beginPath();c.roundRect(x,y,w,h,27);c.clip();
+ const wash=c.createLinearGradient(x,y,x+w,y+h);
+ wash.addColorStop(0,theme==="night"?"#f9f0ff15":"#f6ffdd25");
+ wash.addColorStop(1,theme==="night"?"#9f9ac719":"#b8d4be12");
+ c.fillStyle=wash;c.fillRect(x,y,w,h);
+ c.restore();
+ const accent=row===0?(theme==="night"?"#c19cb1":theme==="classroom"?"#deaaa0":"#89b69b"):(theme==="night"?"#92bed5":"#78bba8");
+ const badgeY=y+(mode==="stairs"?16:27);
+ disk(c,x+34,badgeY,12,accent);
+ txt(c,String(row+1),x+34,badgeY+.5,14,"#fff","center","750");
+ const ruleY=y+(mode==="stairs"?37:59);
+ ln(c,x+25,ruleY,x+w-25,ruleY,theme==="night"?"#d9d8e9":"#e6e9df",1.3);
 }
 function themeHeader(c,title,start,end){
  const p=themePalette();
- c.save();c.shadowColor=theme==="night"?"#10233d4d":"#7a9a8733";c.shadowBlur=11;c.shadowOffsetY=3;
- rr(c,51,18,1098,73,24,p.top);c.restore();
- txt(c,title,88,53,27,p.heading,"left","750");
- txt(c,(start+1)+"~"+end+"마디 / "+song.bars.length+"마디",1116,53,20,p.sub,"right","700");
+ c.save();c.shadowColor=theme==="night"?"#10233d4d":"#7a9a8726";c.shadowBlur=10;c.shadowOffsetY=3;
+ rr(c,48,19,695,75,24,p.top);
+ rr(c,952,24,200,65,22,p.top);
+ c.restore();
+ rr(c,64,37,6,35,3,theme==="night"?"#9f9ed2":theme==="forest"?"#85c59d":"#dcae95");
+ txt(c,title,93,57,28,p.heading,"left","750");
+ txt(c,(start+1)+"~"+end+" / "+song.bars.length+"마디",1053,56,20,p.sub,"center","700");
+ if(theme==="night"){
+  for(const [x,y,z] of [[776,42,5],[918,71,4],[825,83,3]])drawSparkle(c,x,y,z,"#fff2ca");
+ }else if(theme==="forest"){
+  ln(c,779,79,917,79,"#a1cfad",2);
+  disk(c,807,53,6,"#b8d6a2");disk(c,889,57,4,"#a5c9a3");
+ }else{
+  disk(c,810,59,8,"#e6d1ad");disk(c,849,44,5,"#add0b2");
+  drawSparkle(c,892,63,7,"#d5b08c");
+ }
 }
 function themeFooter(c,message){
- const p=themePalette();rr(c,75,557,1050,44,15,p.footer);
- txt(c,message,600,579,18,p.heading,"center","700");
+ const p=themePalette();rr(c,145,561,910,39,17,p.footer);
+ txt(c,message,600,580,17,p.heading,"center","700");
 }
-
 function scorePageBackground(info){
  const background=document.createElement("canvas");background.width=1200;background.height=620;
  const c=background.getContext("2d");
@@ -658,7 +690,7 @@ function scorePageBackground(info){
    const beginning=info.startBar+row*info.barsPerLine,ending=Math.min(info.endBar,beginning+info.barsPerLine),
          top=row===0?123:335;
    themeCard(c,50,top,1100,202,row);
-   txt(c,row===0?"첫 번째 줄":"두 번째 줄",88,top+27,18,themePalette().heading,"left","700");
+   txt(c,row===0?"첫 번째 줄":"두 번째 줄",110,top+27,18,themePalette().heading,"left","700");
    if(beginning>=ending){txt(c,"이 줄은 비어 있어요",594,top+106,22,"#90a89e");continue}
    txt(c,(beginning+1)+"~"+ending+"마디 · "+((ending-beginning)*song.meter)+"개 하트",1107,top+27,16,themePalette().sub,"right","650");
    const g=twoGeometry(info,row);
@@ -783,19 +815,38 @@ function stairHalfBeatPair(beat){
     Math.abs(events[1].from-.5)>E||Math.abs(events[1].to-1)>E)return null;
  return events;
 }
+
+/* Two eighth notes share ONE beat cell. Draw complete, round small hearts
+   at their independent pitches, never hard-clipped wedges or stretched glyphs. */
+function miniStairHeart(c,note,x,y,width){
+ const k=width/100,hh=90*k;
+ c.save();c.translate(x,y);c.scale(k,k);
+ c.fillStyle=col(note);c.fill(HEART);
+ c.strokeStyle="#7b9c8e";c.lineWidth=1.5;c.stroke(HEART);
+ c.save();c.clip(HEART);
+ const sheen=c.createLinearGradient(0,0,0,90);
+ sheen.addColorStop(0,"#ffffff2a");sheen.addColorStop(1,"#152a240b");
+ c.fillStyle=sheen;c.fillRect(0,0,100,90);c.restore();
+ txt(c,note==="높은도"?"도":fixedNote(note),50,38,31,
+   ["도","솔","라","시","높은도"].includes(note)?"#fff":"#263e47","center","700");
+ if(note==="높은도")txt(c,"↑",50,63,14,"#fff");
+ c.restore();
+ return hh;
+}
 function paintStairBeat(c,beat,x,y,w,h,row){
  const pair=stairHalfBeatPair(beat);
  if(!pair){heart(c,beat,x,y,w,h,-100,false);return}
- const top=Math.min(stairHeartTop(row,pair[0].note),stairHeartTop(row,pair[1].note))-3;
- for(let i=0;i<2;i++){
-  const pitchY=stairHeartTop(row,pair[i].note);
-  c.save();
-  c.beginPath();c.rect(x+(i? w/2:0)-(i?0:2),top,w/2+2,h+112);c.clip();
-  heart(c,beat,x,pitchY,w,h,-100,false);
-  c.restore();
- }
+ const miniW=Math.min(54,(w-7)/2);
+ const y0=stairHeartTop(row,pair[0].note),y1=stairHeartTop(row,pair[1].note);
+ const left=x+(w/2-miniW)/2,right=x+w/2+(w/2-miniW)/2;
+ const h0=miniStairHeart(c,pair[0].note,left,y0,miniW);
+ const h1=miniStairHeart(c,pair[1].note,right,y1,miniW);
+ // Beat grouping line: the two notes are each a half beat, not two quarters.
+ const foot=Math.max(y0+h0,y1+h1)+7;
+ c.save();c.strokeStyle=theme==="night"?"#a2a5c5":"#bdd5c2";c.lineWidth=2;c.lineCap="round";
+ c.beginPath();c.moveTo(left+9,foot-6);c.lineTo(left+9,foot);c.lineTo(right+miniW-9,foot);c.lineTo(right+miniW-9,foot-6);c.stroke();
+ c.restore();
 }
-
 function buildStairPage(info){
  const bg=document.createElement("canvas");bg.width=1200;bg.height=620;
  const c=bg.getContext("2d");
@@ -803,8 +854,8 @@ function buildStairPage(info){
  for(let row=0;row<2;row++){
   const first=info.startBar+row*info.barsPerLine,last=Math.min(info.endBar,first+info.barsPerLine);
   const top=row===0?104:334;
-  themeCard(c,44,top,1112,row===0?218:215,row);
-  txt(c,row===0?"첫 번째 줄":"두 번째 줄",78,top+13,16,themePalette().heading,"left","750");
+  themeCard(c,44,top,1112,row===0?218:215,row,"stairs");
+  txt(c,row===0?"첫 번째 줄":"두 번째 줄",103,top+16,16,themePalette().heading,"left","750");
   if(first>=last){txt(c,"이 줄은 비어 있어요",600,top+113,22,"#98aaa3");continue}
   const g=stairGeometry(info,row);
   // Small elevation guide, NOT moving lanes or a scrolling piano-roll.
