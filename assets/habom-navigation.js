@@ -42,7 +42,7 @@
       ['음악활동 자료','하트색깔악보',U('materials/#musicShelf')]]},
     {id:'terms',name:'알아봄',icon:'📖',href:U('notes/')},
     {id:'story',name:'이야기해봄',icon:'💬',href:U('request/')},
-    {id:'brain',name:'3D 뇌지도',icon:'🧠',href:U('brain-map/')},
+    {id:'brain',name:'뇌지도',icon:'🧠',href:U('brain-map/')},
     {id:'parents',name:'찾아봄',icon:'🔎',items:[
       ['찾아봄 전체','발달·행동·일상별 안내',U('parents/')],
       ['말·의사소통','언어·표현 살펴보기',U('parents/#speech')],
@@ -160,7 +160,7 @@
     ['생활·자기관리 활동지','자립 일상 자기관리 자료',U('materials/#lifeShelf')],
     ['음악활동 자료','악보 나비야 작은별 pdf png',U('materials/#musicShelf')],
     ['알아봄 · 용어사전','용어 단어 인지 작업기억 촉구 aac 언어 심리 사전',U('notes/')],
-    ['3D 뇌지도','뇌그림 전두엽 두정엽 측두엽 후두엽 뇌 공부',U('brain-map/')],
+    ['뇌지도','3D 뇌지도 생활 장면 뇌그림 전두엽 두정엽 측두엽 후두엽 뇌 공부',U('brain-map/')],
     ['이야기해봄','질문 답변 소통 자료 요청 아이디어 제안 비밀글',U('request/')],
     ['찾아봄 · 상황별 정보','보호자 가족 교사 부모 가정 활동 양육 언어 감정 행동 사회성',U('parents/')],
     ['관찰 메모','보호자 교사 부모 상담 준비 관찰 기록 인쇄',U('parents/#observation')],
