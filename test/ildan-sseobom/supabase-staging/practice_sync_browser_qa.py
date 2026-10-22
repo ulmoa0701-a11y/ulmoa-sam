@@ -6,7 +6,7 @@ from functools import partial
 from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright, expect
 import re
-import os,time,json,base64,struct,zlib
+import os,time,json,base64,struct,zlib,hashlib
 from datetime import datetime,timezone
 root=Path(__file__).resolve().parents[3]
 srv=ThreadingHTTPServer(('127.0.0.1',8829),partial(SimpleHTTPRequestHandler,directory=str(root)))
@@ -74,7 +74,7 @@ def init(page,role):
   elif name=='push-config':
    data={'enabled':True,'publicKey':'B'*86}
   elif name=='push-status':
-   data={'count':len(push_devices),'subscriptions':[{'id':'00000000-0000-4000-8000-000000000088','deviceLabel':'QA 폰'}] if push_devices else []}
+   data={'count':len(push_devices),'subscriptions':[{'id':'00000000-0000-4000-8000-000000000088','deviceLabel':'QA 폰','endpointHash':hashlib.sha256(next(iter(push_devices)).encode()).hexdigest()}] if push_devices else []}
   elif name=='push-subscribe':
    push_calls.append('subscribe');push_devices.add(payload['subscription']['endpoint']);data={'ok':True}
   elif name=='push-unsubscribe':
