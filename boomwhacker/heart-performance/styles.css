@@ -72,3 +72,24 @@
  .theme-dot{width:15px;height:15px;border-radius:5px}
  .theme-hint{grid-column:1/-1;margin:0;text-align:center;font-size:9px}
 }
+
+
+/* The music canvas, not the chrome, is the primary classroom experience. */
+.fullstage-controls{display:none}
+#stage:fullscreen{position:relative;background:#eef3eb}
+#stage:fullscreen #display{max-width:100%;width:min(100vw,calc((100vh - 76px) * 1200 / 620));max-height:calc(100vh - 76px)}
+#stage:fullscreen .overlay{display:block!important;inset:auto auto 79px 50%;transform:translateX(-50%);z-index:6}
+#stage:fullscreen .overlay[hidden]{display:none!important}
+#stage:fullscreen .overlay-card button{font-size:16px;padding:12px 18px}
+#stage:fullscreen .fullstage-controls{display:flex;gap:10px;align-items:center;justify-content:center;
+ position:absolute;bottom:9px;left:50%;transform:translateX(-50%);padding:8px 11px;border-radius:17px;
+ background:#fffef8eb;box-shadow:0 6px 16px #1b4e3b38;z-index:5}
+.fullstage-controls button{appearance:none;border:1px solid #d3e2d7;background:#fff;
+ color:#24584a;border-radius:11px;font-size:13px;font-weight:800;padding:10px 15px;white-space:nowrap}
+.fullstage-controls button.fullstage-primary{background:#287a65;color:#fff;border-color:#287a65}
+.fullstage-controls button:focus-visible{outline:3px solid #edba61;outline-offset:3px}
+@media(max-width:620px){
+ #stage:fullscreen #display{width:min(100vw,calc((100vh - 72px) * 1200 / 620));max-height:calc(100vh - 72px)}
+ #stage:fullscreen .fullstage-controls{width:max-content;max-width:96vw;gap:5px;padding:6px}
+ .fullstage-controls button{font-size:11px;padding:9px 11px}
+}
