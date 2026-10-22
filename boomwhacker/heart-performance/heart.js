@@ -815,19 +815,38 @@ function stairHalfBeatPair(beat){
     Math.abs(events[1].from-.5)>E||Math.abs(events[1].to-1)>E)return null;
  return events;
 }
+
+/* Two eighth notes share ONE beat cell. Draw complete, round small hearts
+   at their independent pitches, never hard-clipped wedges or stretched glyphs. */
+function miniStairHeart(c,note,x,y,width){
+ const k=width/100,hh=90*k;
+ c.save();c.translate(x,y);c.scale(k,k);
+ c.fillStyle=col(note);c.fill(HEART);
+ c.strokeStyle="#7b9c8e";c.lineWidth=1.5;c.stroke(HEART);
+ c.save();c.clip(HEART);
+ const sheen=c.createLinearGradient(0,0,0,90);
+ sheen.addColorStop(0,"#ffffff2a");sheen.addColorStop(1,"#152a240b");
+ c.fillStyle=sheen;c.fillRect(0,0,100,90);c.restore();
+ txt(c,note==="높은도"?"도":fixedNote(note),50,38,31,
+   ["도","솔","라","시","높은도"].includes(note)?"#fff":"#263e47","center","700");
+ if(note==="높은도")txt(c,"↑",50,63,14,"#fff");
+ c.restore();
+ return hh;
+}
 function paintStairBeat(c,beat,x,y,w,h,row){
  const pair=stairHalfBeatPair(beat);
  if(!pair){heart(c,beat,x,y,w,h,-100,false);return}
- const top=Math.min(stairHeartTop(row,pair[0].note),stairHeartTop(row,pair[1].note))-3;
- for(let i=0;i<2;i++){
-  const pitchY=stairHeartTop(row,pair[i].note);
-  c.save();
-  c.beginPath();c.rect(x+(i? w/2:0)-(i?0:2),top,w/2+2,h+112);c.clip();
-  heart(c,beat,x,pitchY,w,h,-100,false);
-  c.restore();
- }
+ const miniW=Math.min(54,(w-7)/2);
+ const y0=stairHeartTop(row,pair[0].note),y1=stairHeartTop(row,pair[1].note);
+ const left=x+(w/2-miniW)/2,right=x+w/2+(w/2-miniW)/2;
+ const h0=miniStairHeart(c,pair[0].note,left,y0,miniW);
+ const h1=miniStairHeart(c,pair[1].note,right,y1,miniW);
+ // Beat grouping line: the two notes are each a half beat, not two quarters.
+ const foot=Math.max(y0+h0,y1+h1)+7;
+ c.save();c.strokeStyle=theme==="night"?"#a2a5c5":"#bdd5c2";c.lineWidth=2;c.lineCap="round";
+ c.beginPath();c.moveTo(left+9,foot-6);c.lineTo(left+9,foot);c.lineTo(right+miniW-9,foot);c.lineTo(right+miniW-9,foot-6);c.stroke();
+ c.restore();
 }
-
 function buildStairPage(info){
  const bg=document.createElement("canvas");bg.width=1200;bg.height=620;
  const c=bg.getContext("2d");
