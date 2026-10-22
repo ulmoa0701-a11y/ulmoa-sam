@@ -44,6 +44,7 @@ try{
  assert.equal(result.criteriaMet,true,'later independent transfer must count');
  assert.equal(result.transfer,true,'transfer recovery should be reported');
  assert.equal(result.independent,3,'two probe trials plus final transfer, not prompted first transfer');
+ assert.equal(result.supported,2,'guided and assisted first transfer are supported, but successfully solved practice is not');
  let saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('moa-numbers-guided-pilot-v1')));
  assert.equal(saved.share.sessions.length,1,'store one anonymous session summary');
  assert.equal(saved.share.sessions[0].transfer,true,'persist corrected evaluation');
