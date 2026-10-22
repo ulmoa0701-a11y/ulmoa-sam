@@ -93,7 +93,7 @@
 #gameWorld .moa-redesigned-world .slow-primary:active{transform:translateY(2px);box-shadow:0 2px 0 #194632}
 #gameWorld .moa-redesigned-world .slow-teacher-details{max-width:720px;background:#ffffffd9}
 #gameWorld .moa-scene-slowPlace{--world-edge:#a5d1a2;--world-sky:#e6f8ff;--world-ground:#d4edc6;--world-primary:#367646}
-#gameWorld .moa-scene-slowPlace .moa-world-art{background-position:40% 60%}
+#gameWorld .moa-scene-slowPlace .moa-world-art{background-position:80% 0%}
 #gameWorld .moa-scene-slowPlace .slow-map-pair>div:first-child .slow-board{
  background:linear-gradient(45deg,#f5e5be,#fff4db);border-color:#cdbf94;
  box-shadow:0 7px 0 #c9b28239,0 12px 17px #907c5730;
@@ -107,7 +107,7 @@
 #gameWorld .moa-scene-slowBlock{
  --world-primary:#9a5d36;--world-edge:#deb98c;--world-sky:#fff4dc;--world-ground:#f3d5b3;
 }
-#gameWorld .moa-scene-slowBlock .moa-world-art{background-position:80% 60%}
+#gameWorld .moa-scene-slowBlock .moa-world-art{background-position:20% 40%}
 #gameWorld .moa-scene-slowBlock .slow-block-board{
  background:repeating-linear-gradient(0deg,#f1ddbd 0 20px,#e8ceaa 21px 22px);
  border:3px solid #bd956b;border-radius:16px;box-shadow:0 7px 0 #a37c513b;
@@ -133,7 +133,7 @@
 #gameWorld .moa-scene-slowMemory{
  --world-primary:#6254a4;--world-edge:#c8bbec;--world-sky:#f0eaff;--world-ground:#d7d9fb;
 }
-#gameWorld .moa-scene-slowMemory .moa-world-art{background-position:0 80%}
+#gameWorld .moa-scene-slowMemory .moa-world-art{background-position:60% 40%}
 #gameWorld .moa-scene-slowMemory .slow-map-pair .slow-board{
  background:linear-gradient(155deg,#d6cff9,#f1edff);border-color:#aaa1dc;
 }
@@ -143,17 +143,17 @@
 }
 #gameWorld .moa-scene-slowMemory .slow-board.slow-covered small{color:#fff;font-size:13px}
 #gameWorld .moa-scene-slowName{--world-primary:#397398;--world-edge:#b9dce8;--world-sky:#e7f7ff;--world-ground:#dbf3d8}
-#gameWorld .moa-scene-slowName .moa-world-art{background-position:20% 60%}
+#gameWorld .moa-scene-slowName .moa-world-art{background-position:40% 40%}
 #gameWorld .moa-scene-slowName .slow-name-picture{border-radius:42px;box-shadow:0 10px 0 #add3d540,0 16px 22px #4f89701e}
 #gameWorld .moa-scene-slowScan{--world-primary:#397b58;--world-edge:#badfb5;--world-sky:#e8f8e5;--world-ground:#c9ebac}
-#gameWorld .moa-scene-slowScan .moa-world-art{background-position:20% 20%}
+#gameWorld .moa-scene-slowScan .moa-world-art{background-position:100% 20%}
 #gameWorld .moa-scene-slowScan .slow-board.slow-scan{
  max-width:520px;background:linear-gradient(145deg,#95c78a,#cdecb0);
  padding:14px;border-radius:25px
 }
 #gameWorld .moa-scene-slowScan .slow-scan .slow-tile{min-height:67px;border-radius:20px;background:#e7f4d2}
 #gameWorld .moa-scene-slowEveryday{--world-primary:#347e80;--world-edge:#b7dcdb;--world-sky:#e5f8fa;--world-ground:#e1f1cc}
-#gameWorld .moa-scene-slowEveryday .moa-world-art{background-position:60% 80%}
+#gameWorld .moa-scene-slowEveryday .moa-world-art{background-position:40% 80%}
 #gameWorld .moa-scene-slowEveryday .slow-bag-quest{max-width:720px}
 #gameWorld .moa-scene-slowEveryday .slow-bag .slow-tile{background:#fff9e9;border-radius:17px;min-height:60px}
 #gameWorld .moa-scene-slowEveryday .slow-bag .slow-tile.picked{background:#b9e7d3!important;transform:scale(.96)}
