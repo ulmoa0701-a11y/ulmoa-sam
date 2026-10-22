@@ -6,7 +6,7 @@ from functools import partial
 from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright, expect
 import re
-import os,time,json,base64,struct,zlib
+import os,time,json,base64,struct,zlib,hashlib
 from datetime import datetime,timezone
 root=Path(__file__).resolve().parents[3]
 srv=ThreadingHTTPServer(('127.0.0.1',8829),partial(SimpleHTTPRequestHandler,directory=str(root)))
@@ -15,7 +15,7 @@ url='http://127.0.0.1:8829/test/ildan-sseobom/supabase-staging/'
 student='10000000-0000-4000-8000-000000000015'
 therapist='10000000-0000-4000-8000-000000000016'
 bucket='ildan-practice-media'
-stored=[];uploaded=[];remote_clinical=[];api_calls=[];browser_requests=[];read_notifications=[]
+stored=[];uploaded=[];remote_clinical=[];api_calls=[];browser_requests=[];read_notifications=[];push_calls=[];push_devices=set()
 def png():
  raw=b''.join(b'\0'+b'\xe1\x93\x65'*24 for _ in range(24))
  def chunk(tag,data):return struct.pack('>I',len(data))+tag+data+struct.pack('>I',zlib.crc32(tag+data)&0xffffffff)
@@ -71,6 +71,16 @@ def init(page,role):
    if role!='therapist':code=403;data={'error':'치료사 전용입니다.'}
    elif payload.get('notificationId')!='10000000-0000-4000-8000-000000000091':code=404;data={'error':'알림 없음'}
    else:read_notifications.append(datetime.now(timezone.utc).isoformat());data={'ok':True}
+  elif name=='push-config':
+   data={'enabled':True,'publicKey':'B'*86}
+  elif name=='push-status':
+   data={'count':len(push_devices),'subscriptions':[{'id':'00000000-0000-4000-8000-000000000088','deviceLabel':'QA 폰','endpointHash':hashlib.sha256(next(iter(push_devices)).encode()).hexdigest()}] if push_devices else []}
+  elif name=='push-subscribe':
+   push_calls.append('subscribe');push_devices.add(payload['subscription']['endpoint']);data={'ok':True}
+  elif name=='push-unsubscribe':
+   push_calls.append('unsubscribe');push_devices.discard(payload.get('endpoint'));data={'ok':True}
+  elif name=='push-test':
+   push_calls.append('test');data={'ok':True,'providerAccepted':True,'deviceArrivalUnverified':True}
   elif name=='students':data={'students':[{'id':student,'nickname':'가상 학생'}]}
   elif name=='accounts':data={'accounts':[]}
   elif name=='drive/status':data={'connected':False,'configured':False,'backupEnabled':False}
@@ -203,9 +213,36 @@ with sync_playwright() as p:
   assert '수정한 가상 기록' in page.locator('.practice-cloud-record').first.inner_text()
   page.close()
   read_notifications.clear() # Independent simulated clinician account per viewport.
+  push_devices.clear()
   teacher=browser.new_page(viewport={'width':width,'height':900})
+  teacher.add_init_script("""(()=>{
+   const endpoint='https://fcm.googleapis.com/fcm/send/'+'Q'.repeat(100);
+   let installed=false,active=false;
+   const sub={endpoint,keys:{p256dh:'A'.repeat(87),auth:'B'.repeat(22)},toJSON(){return {endpoint,keys:this.keys}},unsubscribe:async()=>{active=false;return true}};
+   const registration={pushManager:{getSubscription:async()=>active?sub:null,subscribe:async()=>{active=true;return sub}}};
+   if(navigator.serviceWorker){
+    Object.defineProperty(navigator.serviceWorker,'getRegistration',{configurable:true,value:async()=>installed?registration:null});
+    Object.defineProperty(navigator.serviceWorker,'register',{configurable:true,value:async()=>{installed=true;return registration}});
+   }
+   if(window.Notification){
+    Object.defineProperty(Notification,'requestPermission',{configurable:true,value:async()=> 'granted'});
+    Object.defineProperty(Notification,'permission',{configurable:true,get:()=> 'granted'});
+   }
+  })();""")
+
   init(teacher,'therapist');teacher.goto(url,wait_until='domcontentloaded',timeout=30000)
   teacher.locator('[data-workspace-target="alerts"]').click()
+  teacher.locator('#pushEnable').wait_for(state='visible',timeout=12000)
+  teacher.locator('#pushEnable').click()
+  teacher.locator('#pushDisable').wait_for(state='visible',timeout=12000)
+  assert 'subscribe' in push_calls, 'must register device only after real button click'
+  teacher.locator('#pushTest').click()
+  teacher.locator('#toast').get_by_text('푸시 제공자에 테스트 메시지',exact=False).wait_for(timeout=12000)
+  assert 'test' in push_calls, 'tester may send a generic test notification'
+  teacher.locator('#pushDisable').click()
+  teacher.locator('#pushEnable').wait_for(state='visible',timeout=10000)
+  assert 'unsubscribe' in push_calls, 'disabling must revoke server-side endpoint'
+
   teacher.locator('#notificationList .notification-row').first.wait_for(timeout=10000)
   assert teacher.locator('#notificationCount').inner_text().find('1')>=0,'new shared record must be unread'
   assert '공유 기록' in teacher.locator('#notificationList').inner_text()
