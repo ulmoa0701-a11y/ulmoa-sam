@@ -4,6 +4,7 @@
 // membership checks both matter: admin client BYPASSES RLS.
 import {createClient} from 'npm:@supabase/supabase-js@2';
 import {validateEntry,sharedSelection,validateSessionEntry} from './record-contract.mjs';
+import {pushMember,pushCron} from './push-service.ts';
 
 const encoder=new TextEncoder(),decoder=new TextDecoder();
 const env=(s:string)=>Deno.env.get(s)||'';
@@ -92,7 +93,7 @@ async function openJSON(nonce:string,ciphertext:string){
 }
 const requireText=(o:Obj,key:string)=>typeof o[key]==='string'?String(o[key]):'';
 const roles=new Set(['student','parent','therapist']);
-const endpoints=new Set(['test-therapist-signup','test-therapist-delete','me','records','share','unshare','session-notes','students','accounts','invites','claim-invite','invite-preview','invite-register','delete-record','revoke-invite','drive/status','health','practice-records','practice-media-sign','practice-share','practice-unshare','practice-delete','practice-update','practice-notifications','practice-notification-read']);
+const endpoints=new Set(['test-therapist-signup','test-therapist-delete','me','records','share','unshare','session-notes','students','accounts','invites','claim-invite','invite-preview','invite-register','delete-record','revoke-invite','drive/status','health','practice-records','practice-media-sign','practice-share','practice-unshare','practice-delete','practice-update','practice-notifications','practice-notification-read','push-config','push-status','push-subscribe','push-unsubscribe','push-test','push-dispatch']);
 const getRole=async(userDb:any,id:string)=>{
  const {data,error}=await userDb.from('ildan_members').select('user_id,role,therapist_id,student_id,display_alias').eq('user_id',id).maybeSingle();
  if(error)throw Error('ROLE_LOOKUP_FAILED');
@@ -139,6 +140,7 @@ export async function handle(request:Request):Promise<Response>{
  if(!endpoints.has(apiName))return send({error:'경로를 찾을 수 없습니다.'},404);
  if(!['GET','POST'].includes(request.method))return send({error:'지원하지 않는 요청입니다.'},405);
  if(apiName==='health'&&request.method==='GET')return send({ready:!!(env('SUPABASE_URL')&&env('SUPABASE_ANON_KEY')&&env('SUPABASE_SERVICE_ROLE_KEY')&&env('RECORD_ENCRYPTION_KEY')),mode:'not-approved-for-clinical-use'});
+ if(apiName==='push-dispatch')return pushCron(request,adminDb(),send);
  // Staging-only account signup: no real email, no OTP, no SMS, no clinical data writes.
  // This explicitly DOES NOT grant any privileges in future clinical deployments.
  if(apiName==='test-therapist-signup'&&request.method==='POST'){
@@ -315,6 +317,10 @@ export async function handle(request:Request):Promise<Response>{
     .update({read_at:new Date().toISOString()}).eq('id',id).eq('therapist_id',uid).is('read_at',null);
    if(re)throw Error('NOTIFY_READ_FAILED');
    return send({ok:true});
+  }
+  if(apiName.startsWith('push-')){
+   if(!sandboxSignupAllowed())return send({error:'연습 환경 전용입니다.'},403);
+   return pushMember(apiName,request,admin,uid,member.role,send,body);
   }
   if(apiName==='students'&&request.method==='GET'){
    if(member.role!=='therapist')return send({error:'치료사 전용입니다.'},403);
