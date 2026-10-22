@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'assets/moa-page-guide.css'
+      - 'assets/moa-guide-audio.js'
       - 'qa/moa-speaking-guide-qa.mjs'
       - 'index.html'
       - 'brain-map/index.html'
@@ -19,6 +20,7 @@ on:
     branches: [main]
     paths:
       - 'assets/moa-page-guide.css'
+      - 'assets/moa-guide-audio.js'
       - 'qa/moa-speaking-guide-qa.mjs'
       - 'index.html'
       - 'brain-map/index.html'
@@ -70,7 +72,7 @@ jobs:
           for n in $(seq 1 40); do
             curl --silent --show-error --location --max-time 15 -o /tmp/moa-guide-live.html "${MOA_BASE}brain-map/" || true
             curl --silent --show-error --location --max-time 15 -o /tmp/moa-nav-live.js "${MOA_BASE}assets/habom-navigation.js?v=20261022-menu1" || true
-            if grep -Fq 'moa-page-guide.css?v=20261022-speak1' /tmp/moa-guide-live.html && grep -Fq "name:'뇌지도'" /tmp/moa-nav-live.js; then
+            if grep -Fq 'moa-page-guide.css?v=20261022-short1' /tmp/moa-guide-live.html && grep -Fq "name:'뇌지도'" /tmp/moa-nav-live.js; then
               echo "Current guide found on public Pages, now running real browser QA."
               node qa/moa-speaking-guide-qa.mjs
               exit 0
