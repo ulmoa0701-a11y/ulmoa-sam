@@ -15,7 +15,7 @@ function planUrl(items,opts={}){
   await catalog.goto(base,{waitUntil:'load'});
   const coreGames=await catalog.locator('.library-card[data-open]').evaluateAll(cards=>cards.map(card=>card.dataset.open));
   const standalone=['moaMoney','moaChange','moaFeel','rhythmTouch','recorderPlay','breathStrength','breathLong','breathBeat'];
-  const realShotGames=new Set(['rhythmTouch','recorderPlay','breathStrength','breathLong','breathBeat']);
+  const realShotGames=new Set(['handMirror','moaMoney','moaChange','moaFeel','rhythmTouch','recorderPlay','breathStrength','breathLong','breathBeat']);
   assert.equal(new Set(coreGames).size,coreGames.length,'duplicate catalog game identifiers');
   assert.ok(coreGames.length>=26,'the main game catalog is missing games');
   await catalog.locator('#moaPlannerLaunch').click();
@@ -41,14 +41,11 @@ function planUrl(items,opts={}){
      const picture=preview.locator('img.moa-assigned-real-shot');
      assert.equal(await picture.count(),1,marker+' missing authentic preview picture');
      const loaded=await picture.evaluate(async el=>{await el.decode().catch(()=>{});return el.naturalWidth>180&&el.naturalHeight>120;});
-     assert.ok(loaded,marker+' standalone game screenshot could not load');
-    }else if(id==='handMirror'){
-     // Hand following now uses its captured actual game screen too.
-     const photo=preview.locator('.card-shot-preview .card-shot-screen img');
-     assert.equal(await photo.count(),1,marker+' hand mirror real preview missing');
-     const good=await photo.evaluate(async img=>{await img.decode().catch(()=>{});return img.naturalWidth>180&&img.naturalHeight>120});
-     assert.ok(good,marker+' hand mirror real preview failed to load');
-     assert.equal(await preview.locator('.card-shot-steps strong').count(),1,marker+' hand mirror instructions missing');
+     assert.ok(loaded,marker+' real gameplay screenshot could not load');
+     const details=await picture.evaluate(el=>({w:el.naturalWidth,h:el.naturalHeight,visible:getComputedStyle(el).display!=='none'}));
+     assert.ok(details.w>=300&&details.h>=180&&details.visible,marker+' game screenshot too small or hidden '+JSON.stringify(details));
+     assert.ok((await picture.getAttribute('src')).endsWith('-play.jpg?v=20261022-curated-realplay5'),marker+' photo version outdated');
+     assert.equal(await preview.locator('.card-live-preview').count(),0,marker+' real shot replaced by generic simulated scene');
     }else if(standalone.includes(id)){
      assert.ok(await preview.locator('.moa-assigned-fallback-icons span').count()>=4,marker+' missing illustrated gameplay');
     }else{
@@ -96,7 +93,7 @@ function planUrl(items,opts={}){
    assert.equal(await page.locator('.moa-assigned-item').count(),2);
    assert.equal(await page.locator('.moa-assigned-item .moa-assigned-visual').count(),2);
    assert.equal(await page.locator('.moa-assigned-item .card-live-preview').count(),1,'rescue must display catalog sample');
-   assert.equal(await page.locator('.moa-assigned-item .moa-assigned-fallback-icons').count(),1,'changing supplies needs pictorial preview');
+   assert.equal(await page.locator('.moa-assigned-item .moa-assigned-real-shot').count(),1,'changing supplies must use real gameplay screenshot');
    await page.screenshot({path:'qa/curated-share-screenshots/'+vp.name+'-visual-parent.png',fullPage:true});
    assert.deepEqual(failures,[],vp.name+' console exceptions');
    console.log('PASS '+vp.name+': '+games.length+' curated game entries, launch and selected-list return');
