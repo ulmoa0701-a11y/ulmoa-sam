@@ -1,0 +1,53 @@
+/* Moa Number Forest learning flow: picture guidance without synthetic narration, no time pressure. */
+.guide-kicker{letter-spacing:0;font-size:13px;color:#847450}
+.level-note{display:block;font-size:11px;font-weight:650;line-height:1.3;color:#759084}
+.stage-select{gap:6px}
+.learning-model{position:relative;z-index:3;margin:0 auto 7px;max-width:min(100%,580px);padding:9px 16px;background:linear-gradient(115deg,#fff9ddec,#fff3ccfa);border:3px solid #dcc79f;box-shadow:0 5px 0 #947c5775;border-radius:24px;display:flex;align-items:center;justify-content:center;gap:14px;min-height:76px;pointer-events:none}
+.model-eye{display:grid;place-items:center;width:30px;height:30px;background:#e2f2db;color:#4b8266;border:2px solid #9abc9e;border-radius:50%;font-size:19px;flex:0 0 auto}
+.model-steps{display:flex;gap:12px;justify-content:center;align-items:center;max-width:500px;color:#755b3e;font-weight:900;font-size:25px}
+.model-steps .dots{gap:4px;min-height:26px}
+.model-steps .count-dot{height:19px;width:19px;border-width:2px}
+.model-steps .new-fruit{transform:scale(.66);margin:-5px}
+.model-steps .character-sprite{width:62px;height:60px}
+.model-steps .shape-svg{width:56px;height:56px}
+.model-steps-numbers{font-size:22px;color:#385d6b}
+.model-small-plate{width:49px;min-height:22px;background:#efdcba;border-radius:50%;display:grid;place-items:center}
+.model-line{width:90px;height:16px;background:#b88b68;border:3px solid #987555;border-radius:5px}
+.model-line.short{width:45px}
+.scene-variant-berry .count-dot{background:radial-gradient(circle at 35% 27%,#ffcdb4,#e68f7e 60%,#b95756);border-color:#b16a5d;border-radius:40% 50% 45% 55%;transform:rotate(17deg)}
+.scene-variant-gold .count-dot{background:radial-gradient(circle at 38% 29%,#ffe9ad,#e6bf69 63%,#b9944b);border-color:#aa8751;border-radius:10px;transform:rotate(8deg)}
+.scene-variant-berry .ten-cell.cell-filled{background:#fff0df}
+.scene-variant-gold .ten-cell.cell-filled{background:#fff6cb}
+.final-count{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
+.final-count .wood-label{font-size:16px;padding:7px 13px}
+.final-count .number-options{margin:5px auto}
+.final-count .number-tile{min-height:85px;height:86px;width:95px}
+.finish-report{background:#f4f4da;color:#406d60;font-size:14px!important;border-radius:14px;border:2px solid #cbd9b8;padding:7px 14px;font-weight:900}
+.storybook-scene{overflow:visible}
+.hud .seed.filled{background:#ffd280}
+@media(max-width:650px){
+ .guide-kicker{font-size:11px}
+ .learning-model{max-width:96%;padding:7px 10px;gap:7px;min-height:58px;margin:3px auto;border-width:2px;border-radius:17px}
+ .model-eye{min-width:26px;width:26px;height:26px;font-size:16px}
+ .model-steps{gap:7px;font-size:17px}.model-steps .character-sprite{width:42px;height:47px}
+ .model-steps-numbers{font-size:16px}.model-steps .count-dot{width:17px;height:17px}
+ .model-steps .shape-svg{width:41px;height:41px}
+ .final-count .number-tile{height:73px;min-height:73px;width:72px}
+ .final-count .wood-label{font-size:14px}
+ .final-count .number-options{gap:9px}
+ .finish-report{font-size:12px!important}
+}
+@media(prefers-reduced-motion:reduce){.learning-model{transition:none;animation:none}}
+
+/* Later delivery adventures: the child chooses a real quantity before giving one to each friend. */
+.delivery-pick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;width:min(100%,570px);margin:3px auto 10px}
+.tray-choice{display:grid;place-items:center;min-height:156px;padding:15px 8px;background:linear-gradient(#fff6dc,#eed6b0);border:4px solid #c99d72;border-radius:27px;box-shadow:0 8px 0 #977353}
+.tray-choice .storybook-basket{width:100%;max-width:220px;min-width:100px;padding:17px 8px 7px}
+.tray-choice .new-fruit{transform:scale(.82);margin:-2px}
+.waiting-friend{pointer-events:none;cursor:default}
+@media(max-width:650px){
+ .delivery-pick{gap:10px}
+ .tray-choice{padding:8px 3px;min-height:117px;border-width:3px;border-radius:17px}
+ .tray-choice .storybook-basket{min-height:70px;width:96%;padding:12px 3px 6px;border-width:4px}
+ .tray-choice .new-fruit{transform:scale(.7);margin:-3px}
+}
