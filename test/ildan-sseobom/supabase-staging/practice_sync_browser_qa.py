@@ -4,7 +4,8 @@ from threading import Thread
 from http.server import ThreadingHTTPServer,SimpleHTTPRequestHandler
 from functools import partial
 from urllib.parse import urlsplit
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
+import re
 import os,time,json,base64,struct,zlib
 root=Path(__file__).resolve().parents[3]
 srv=ThreadingHTTPServer(('127.0.0.1',8829),partial(SimpleHTTPRequestHandler,directory=str(root)))
@@ -163,14 +164,14 @@ with sync_playwright() as p:
   assert '수정한 가상 기록' in teacher.locator('.shared-clinician-content').inner_text(), 'full shared text must be visible without a detail click'
   assert teacher.locator('.shared-clinician-content .saved-photo-grid img').count()==1, 'shared photo must be immediately visible'
   assert teacher.locator('.shared-clinician-content .sketch-record').count()==1, 'shared drawing must be immediately visible'
-  teacher.wait_for_function("document.querySelector('.shared-clinician-content .saved-photo-grid img')?.naturalWidth>0",timeout=10000)
+  expect(teacher.locator('.shared-clinician-content .saved-photo-grid img').first).to_have_js_property('naturalWidth',24,timeout=12000)
   teacher.locator('#filterKind').select_option('parent')
   assert teacher.locator('#inboxResults .shared-clinician-record').count()==0, 'author filter must work'
   teacher.locator('#filterKind').select_option('all')
   assert teacher.locator('#inboxResults .shared-clinician-record').count()==1
   before_refresh=len([x for x in api_calls if x==('practice-records','GET')])
   teacher.locator('.shared-clinician-content .saved-photo-grid img').first.evaluate("img=>{img.src=img.src.replace('token=test','token=expired')}")
-  teacher.wait_for_function("document.querySelector('.shared-clinician-content .saved-photo-grid img')?.getAttribute('src')?.includes('token=test')",timeout=12000)
+  expect(teacher.locator('.shared-clinician-content .saved-photo-grid img').first).to_have_attribute('src',re.compile(r'token=test'),timeout=12000)
   assert len([x for x in api_calls if x==('practice-records','GET')])>before_refresh, 'expired signed photo URL must trigger an authorized re-read'
   assert teacher.locator('.shared-clinician-content .saved-photo-grid img').first.evaluate('img=>img.complete&&img.naturalWidth>0'), 'photo should recover after renewal'
   teacher.close()
