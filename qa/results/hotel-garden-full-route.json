@@ -1,0 +1,284 @@
+{
+  "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/",
+  "kind": "Actual full route: keyboard-only actions; state and DOM observed read-only",
+  "steps": [
+    {
+      "label": "start",
+      "time": "2026-10-22T13:26:33.487Z",
+      "stage": 0,
+      "player": [
+        -18,
+        -6
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 0,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 0,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": false,
+        "mode": "approach",
+        "cycle": 0,
+        "damage": 0
+      },
+      "lotus": 0,
+      "bucket": false,
+      "mission": "① 정원사에게 가서 E 말걸기"
+    },
+    {
+      "label": "gardener",
+      "time": "2026-10-22T13:26:38.796Z",
+      "stage": 1,
+      "player": [
+        -14.76,
+        -2.62
+      ],
+      "woods": {
+        "enabled": true,
+        "hits": 0,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 0,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": false,
+        "mode": "approach",
+        "cycle": 0,
+        "damage": 0
+      },
+      "lotus": 0,
+      "bucket": false,
+      "mission": "② WOODS에게 가까이 가기"
+    },
+    {
+      "label": "woods encounter",
+      "time": "2026-10-22T13:27:12.426Z",
+      "stage": 2,
+      "player": [
+        15.09,
+        17.59
+      ],
+      "woods": {
+        "enabled": true,
+        "hits": 0,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 0,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": false,
+        "mode": "approach",
+        "cycle": 0,
+        "damage": 0
+      },
+      "lotus": 0,
+      "bucket": false,
+      "mission": "③ 공격을 피하고 Q 함정 2번"
+    },
+    {
+      "label": "woods defeated",
+      "time": "2026-10-22T13:27:28.376Z",
+      "stage": 3,
+      "player": [
+        15.92,
+        14.31
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 2,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 0,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": false,
+        "mode": "approach",
+        "cycle": 0,
+        "damage": 0
+      },
+      "lotus": 0,
+      "bucket": false,
+      "mission": "④ 연못 관리인에게 가서 E 말걸기"
+    },
+    {
+      "label": "woods flower",
+      "time": "2026-10-22T13:27:29.994Z",
+      "stage": 3,
+      "player": [
+        15.92,
+        14.31
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 2,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 0,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": false,
+        "mode": "approach",
+        "cycle": 0,
+        "damage": 0
+      },
+      "lotus": 1,
+      "bucket": false,
+      "mission": "④ 연못 관리인에게 가서 E 말걸기"
+    },
+    {
+      "label": "pond keeper",
+      "time": "2026-10-22T13:27:46.511Z",
+      "stage": 4,
+      "player": [
+        3.59,
+        -4.17
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 2,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": true,
+        "hits": 0,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": false,
+        "mode": "approach",
+        "cycle": 0,
+        "damage": 0
+      },
+      "lotus": 1,
+      "bucket": false,
+      "mission": "⑤ EYE 추격을 피하고 빈틈에 F 베기 3번"
+    }
+  ],
+  "errors": [],
+  "httpErrors": [],
+  "networkFailures": [],
+  "pass": false,
+  "gardener": {
+    "near": true,
+    "pulses": 17,
+    "last": {
+      "stage": 0,
+      "patch": "2026-10-12-child-feedback-v1",
+      "player": [
+        -14.76,
+        -2.62
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 0,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 0,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": false,
+        "mode": "approach",
+        "cycle": 0,
+        "damage": 0
+      },
+      "lotus": 0,
+      "bucket": false,
+      "map": [
+        90,
+        72
+      ]
+    }
+  },
+  "woodsArrival": {
+    "near": false,
+    "pulses": 67,
+    "last": {
+      "stage": 1,
+      "patch": "2026-10-12-child-feedback-v1",
+      "player": [
+        15.09,
+        17.59
+      ],
+      "woods": {
+        "enabled": true,
+        "hits": 0,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 0,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": false,
+        "mode": "approach",
+        "cycle": 0,
+        "damage": 0
+      },
+      "lotus": 0,
+      "bucket": false,
+      "map": [
+        90,
+        72
+      ]
+    }
+  },
+  "woodsWon": true,
+  "woodsFlower": true,
+  "pondArrival": {
+    "near": true,
+    "pulses": 37,
+    "last": {
+      "stage": 3,
+      "patch": "2026-10-12-child-feedback-v1",
+      "player": [
+        3.59,
+        -4.17
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 2,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 0,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": false,
+        "mode": "approach",
+        "cycle": 0,
+        "damage": 0
+      },
+      "lotus": 1,
+      "bucket": false,
+      "map": [
+        90,
+        72
+      ]
+    }
+  },
+  "error": "TimeoutError: Waiting failed: 23000ms exceeded",
+  "generatedAt": "2026-10-22T13:28:11.460Z"
+}

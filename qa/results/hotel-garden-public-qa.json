@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-21T07:32:02.501Z",
+  "generatedAt": "2026-10-22T13:22:53.665Z",
   "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/",
   "kind": "real public browser loading and controls; internal event-path smoke (NOT full human playthrough)",
   "results": [
@@ -13,7 +13,7 @@
         "preview_woods": true,
         "preview_eye": true,
         "preview_smog": true,
-        "bossFlow": true,
+        "bossFlow": false,
         "endState": true,
         "noFatalError": true
       },
@@ -57,7 +57,7 @@
         "gameModules": [
           "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/assets/index-DxiltY-5.js"
         ],
-        "fps": 9.7,
+        "fps": 4.6,
         "frames": 5,
         "canvas": 1,
         "overflow": false,
@@ -90,10 +90,10 @@
           -6
         ],
         "after": [
-          -18.2,
-          -6.26
+          -18.39,
+          -6.52
         ],
-        "distance": 0.33
+        "distance": 0.65
       },
       "smoke": {
         "geometry": true,
@@ -108,15 +108,15 @@
         "bucket": true,
         "pour": true,
         "smogHidden": true,
-        "smogPicked": true,
+        "smogPicked": false,
         "slashHidden": true,
-        "threeLotus": true,
+        "threeLotus": false,
         "stage7": true,
-        "pass": true,
+        "pass": false,
         "v3Models": true,
         "v3RewardUi": true
       },
-      "pass": true
+      "pass": false
     },
     {
       "viewport": "mobile",
@@ -172,7 +172,7 @@
         "gameModules": [
           "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/assets/index-DxiltY-5.js"
         ],
-        "fps": 10.7,
+        "fps": 10.6,
         "frames": 10,
         "canvas": 1,
         "overflow": false,
@@ -205,10 +205,10 @@
           -6
         ],
         "after": [
-          -20.22,
-          -8.96
+          -20.27,
+          -9.03
         ],
-        "distance": 3.7
+        "distance": 3.79
       },
       "smoke": {
         "geometry": true,
@@ -234,5 +234,5 @@
       "pass": true
     }
   ],
-  "pass": true
+  "pass": false
 }
