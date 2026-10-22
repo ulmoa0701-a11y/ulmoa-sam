@@ -160,6 +160,8 @@ with sync_playwright() as p:
   init(teacher,'therapist');teacher.goto(url,wait_until='domcontentloaded',timeout=30000)
   teacher.locator('#inboxResults .shared-clinician-record').first.wait_for(timeout=18000)
   assert '수정한 가상 기록' in teacher.locator('.shared-clinician-content').inner_text(), 'full shared text must be visible without a detail click'
+  if teacher.locator('.shared-clinician-content .saved-photo-grid img').count()!=1:
+   print('CLINICIAN_MEDIA_DIAGNOSTIC',{'mock_photos':stored[0]['entry'].get('photos',[]),'clinician_html':teacher.locator('.shared-clinician-content').inner_html()[:2500], 'clinician_text':teacher.locator('#inboxResults').inner_text()[:1200], 'api_tail':api_calls[-8:]})
   assert teacher.locator('.shared-clinician-content .saved-photo-grid img').count()==1, 'shared photo must be immediately visible'
   assert teacher.locator('.shared-clinician-content .sketch-record').count()==1, 'shared drawing must be immediately visible'
   teacher.wait_for_function("document.querySelector('.shared-clinician-content .saved-photo-grid img')?.naturalWidth>0",timeout=10000)
