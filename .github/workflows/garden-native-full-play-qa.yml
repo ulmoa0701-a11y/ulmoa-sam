@@ -1,0 +1,49 @@
+name: Native Cognitive Games Full-Play QA
+on:
+  pull_request:
+    paths:
+      - 'thinking-garden/app.js'
+      - 'thinking-garden/gameplay-worlds.js'
+      - 'thinking-garden/game-clarity.js'
+      - 'thinking-garden/index.html'
+      - 'qa/garden-actual-play-qa.cjs'
+      - '.github/workflows/garden-native-full-play-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'thinking-garden/app.js'
+      - 'thinking-garden/gameplay-worlds.js'
+      - 'thinking-garden/game-clarity.js'
+      - 'thinking-garden/index.html'
+      - 'qa/garden-actual-play-qa.cjs'
+      - '.github/workflows/garden-native-full-play-qa.yml'
+permissions:
+  contents: read
+jobs:
+  real-choices-mobile-desktop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Install Playwright core
+        run: npm install --no-save --no-package-lock playwright-core@1.56.1
+      - name: Find Chromium
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Verify actual-play test syntax
+        run: node --check qa/garden-actual-play-qa.cjs
+      - name: Start isolated preview site
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/garden-actual-play.log 2>&1 &
+          for i in $(seq 1 40); do
+            curl -fsS http://127.0.0.1:8765/thinking-garden/ >/dev/null && exit 0
+            sleep 0.5
+          done
+          cat /tmp/garden-actual-play.log
+          exit 1
+      - name: Complete ten native games by actual choices on mobile and desktop
+        run: node qa/garden-actual-play-qa.cjs
