@@ -40,8 +40,15 @@ for(const [name,width] of [['pc',1366],['mobile',390]]){
  check((await page.locator('#pathStepCount').innerText()).startsWith('1 /'),name+' runner route failed to advance');
  await open('inside');
  const zone=page.locator('#insideZone');
- await zone.click({position:{x:24,y:24}});
- const placed=await zone.locator('i').first().evaluate(el=>{
+ // Verify an ordinary real click lands inside the fence. Test the very
+ // edge separately by dispatching a target-zone event; rounded corners
+ // visually belong to the outside stage and should not intercept click().
+ await zone.click();
+ await page.evaluate(()=>{
+  const el=document.querySelector('#insideZone'),r=el.getBoundingClientRect();
+  el.dispatchEvent(new MouseEvent('click',{bubbles:true,clientX:r.left+1,clientY:r.top+1}));
+ });
+ const placed=await zone.locator('i').last().evaluate(el=>{
   const rect=el.parentElement.getBoundingClientRect();
   return {left:parseFloat(el.style.left),top:parseFloat(el.style.top),width:rect.width,height:rect.height};
  });
