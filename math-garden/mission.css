@@ -63,3 +63,13 @@
 .result-actions button{display:inline-flex;align-items:center;justify-content:center}
 #sound,#restart,#help,#change{display:inline-flex;align-items:center;gap:6px;justify-content:center}
 @media(max-width:650px){.intro .interaction[data-mission="start"],.travel-scene .interaction[data-mission="arrive"],.success .interaction[data-mission="advance"]{width:56px;height:56px;min-width:56px;min-height:56px}.feedback-flash{width:68px;height:68px;margin:-34px 0 0 -34px}.feedback-flash svg{width:36px;height:36px}}
+
+button.feed-friend{appearance:none;-webkit-appearance:none;font:inherit;color:inherit;text-align:center}
+button.feed-friend:not(:disabled){cursor:pointer}
+button.feed-friend:not(:disabled):active{transform:translateY(3px)}
+button.feed-friend.friend-fed{cursor:default;background:#eef6e2;border-color:#8fb389}
+button.feed-friend.friend-fed .forest-friend{transform:translateY(-3px)}
+.dish.dish-filled{box-shadow:0 0 0 3px #a9d6bb77,0 4px 3px #5c431c38;border-radius:50%}
+.supply.need-food{outline:5px solid #ffdc8c;outline-offset:3px;border-radius:18px;animation:forest-nudge .75s ease-in-out infinite alternate}
+@keyframes forest-nudge{from{filter:brightness(1)}to{filter:brightness(1.16)}}
+@media(prefers-reduced-motion:reduce){.supply.need-food{animation:none!important}}
