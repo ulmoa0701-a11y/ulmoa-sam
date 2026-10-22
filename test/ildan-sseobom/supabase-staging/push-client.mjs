@@ -28,6 +28,7 @@ export async function setupPushPanel({api,toast}){
   try{
    reg=await navigator.serviceWorker.getRegistration('./');
    sub=reg?await reg.pushManager.getSubscription():null;
+   own=false;
    const backend=await api('push-status');
    if(sub){const hash=await endpointHash(sub.endpoint);own=(backend.subscriptions||[]).some(x=>x.endpointHash===hash);}
    if(sub&&!own){
