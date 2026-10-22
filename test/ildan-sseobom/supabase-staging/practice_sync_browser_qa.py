@@ -202,6 +202,7 @@ with sync_playwright() as p:
   page.locator('.practice-cloud-record').first.wait_for(timeout=12000)
   assert '수정한 가상 기록' in page.locator('.practice-cloud-record').first.inner_text()
   page.close()
+  read_notifications.clear() # Independent simulated clinician account per viewport.
   teacher=browser.new_page(viewport={'width':width,'height':900})
   init(teacher,'therapist');teacher.goto(url,wait_until='domcontentloaded',timeout=30000)
   teacher.locator('[data-workspace-target="alerts"]').click()
