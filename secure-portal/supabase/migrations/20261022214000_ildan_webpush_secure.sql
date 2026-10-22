@@ -61,3 +61,24 @@ revoke all on function public.ildan_push_secret_dispatch() from public,anon,auth
 grant execute on function public.ildan_push_secret_vapid() to service_role;
 grant execute on function public.ildan_push_secret_dispatch() to service_role;
 -- All data access occurs through the existing JWT-authenticating Edge API.
+
+-- First authenticated therapist opt-in triggers automatic VAPID+dispatcher creation.
+-- Only the service_role may call this initializer; existing keys are never rotated.
+create or replace function public.ildan_push_initialize(p_vapid jsonb,p_dispatch text)
+returns boolean language plpgsql security definer set search_path=public,pg_temp as $$
+begin
+ if jsonb_typeof(p_vapid)<>'object' or length(p_vapid::text)>600
+   or length(coalesce(p_vapid->>'d',''))<38
+   or length(coalesce(p_dispatch,''))<40 then
+   raise exception 'INVALID_PUSH_KEYS';
+ end if;
+ if not exists(select 1 from vault.secrets where name='ildan_push_vapid_jwk_v1') then
+   perform vault.create_secret(p_vapid::text,'ildan_push_vapid_jwk_v1','Ildan practice Web Push VAPID secret');
+ end if;
+ if not exists(select 1 from vault.secrets where name='ildan_push_dispatch_token_v1') then
+   perform vault.create_secret(p_dispatch,'ildan_push_dispatch_token_v1','Ildan internal push dispatch token');
+ end if;
+ return true;
+end $$;
+revoke all on function public.ildan_push_initialize(jsonb,text) from public,anon,authenticated;
+grant execute on function public.ildan_push_initialize(jsonb,text) to service_role;
