@@ -383,7 +383,7 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
      {encoding:"utf8",timeout:30000});
    if(!audio.error){
      assert.equal(audio.status,0,"saved video audio must decode");
-     const peak=/max_volume:\\s*(-?\\d+(?:\\.\\d+)?)\\s*dB/.exec(audio.stderr||"");
+     const peak=/max_volume:\s*(-?\d+(?:\.\d+)?)\s*dB/.exec(audio.stderr||"");
      assert(peak,"saved video must have a real measurable audio track");
      const peakDb=Number(peak[1]);
      assert(peakDb>-13&&peakDb<-.8,"video must be audible without digital clipping: "+peakDb+" dBFS");
