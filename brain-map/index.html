@@ -13,8 +13,8 @@
 <link href="https://hangeul.pstatic.net/hangeul_static/css/maru-buri.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
 <link rel="stylesheet" href="../assets/notebook-subpages.css?v=20261005-clean3">
-<link rel="stylesheet" href="brain.css?v=20261019-focus2">
-<script src="brain.js?v=20261019-focus2" defer></script>
+<link rel="stylesheet" href="brain.css?v=20261022-atlas1">
+<script src="brain.js?v=20261022-atlas1" defer></script>
 <script src="activity-guide.js?v=20261018-content-a11y1" defer></script>
 <link rel="stylesheet" href="../assets/habom-brand.css?v=20261010b">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/habom-favicon-v3-32.png">
@@ -83,70 +83,87 @@
       <div class="lobe-scene-visual">
     <div class="brain-focus-banner" id="brainFocusBanner" aria-live="polite"><strong id="brainFocusName">3 측두엽</strong><span id="brainFocusPurpose">현재 선택한 과정과 관련된 대표 부위</span></div>
     <div class="figure-orientation"><span>← 이마 쪽 (앞)</span><span>뒤통수 쪽 (뒤) →</span></div>
-    <svg id="brainMap" class="brain-svg" viewBox="125 70 685 500" xmlns="http://www.w3.org/2000/svg" role="group" tabindex="-1" aria-label="옆에서 바라본 뇌. 보라색 전두엽, 노란색 두정엽, 초록색 측두엽, 복숭아색 후두엽, 하늘색 소뇌, 연보라색 뇌줄기.">
+    <svg id="brainMap" class="brain-svg" viewBox="120 75 720 535" xmlns="http://www.w3.org/2000/svg" role="group" tabindex="-1" aria-label="옆에서 본 뇌를 단순화한 그림. 여섯 부위의 이름과 기능을 표시했어요. 선택한 과정과 관련된 한 부위가 강조되지만 다른 부위도 함께 일해요.">
 <defs>
-<filter id="brainShadow" x="-15%" y="-20%" width="130%" height="150%"><feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#6a7564" flood-opacity=".17"/></filter>
+ <linearGradient id="brainFrontal" x1="0" x2=".85" y1="0" y2="1"><stop stop-color="#E3D2FA"/><stop offset=".55" stop-color="#CDB2F3"/><stop offset="1" stop-color="#BBA4E4"/></linearGradient>
+ <linearGradient id="brainParietal" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#FFF2B6"/><stop offset=".58" stop-color="#FFE18A"/><stop offset="1" stop-color="#F4CE72"/></linearGradient>
+ <linearGradient id="brainTemporal" x1="0" x2=".8" y1="0" y2="1"><stop stop-color="#D6F0DB"/><stop offset=".55" stop-color="#B3E4C1"/><stop offset="1" stop-color="#9FD3AE"/></linearGradient>
+ <linearGradient id="brainOccipital" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#FFDBC8"/><stop offset=".6" stop-color="#FFC1A8"/><stop offset="1" stop-color="#EFAD98"/></linearGradient>
+ <linearGradient id="brainCerebellum" x1="0" x2=".7" y1="0" y2="1"><stop stop-color="#D0E4FA"/><stop offset=".6" stop-color="#A7CEF6"/><stop offset="1" stop-color="#94B9E3"/></linearGradient>
+ <linearGradient id="brainStemFill" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#E2DDEB"/><stop offset=".55" stop-color="#CEC7DE"/><stop offset="1" stop-color="#BCB5CF"/></linearGradient>
+ <filter id="brainAtlasShadow" x="-18%" y="-20%" width="140%" height="148%"><feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="#778C7E" flood-opacity=".13"/></filter>
 </defs>
-<text x="151" y="103" class="direction-note" text-anchor="middle">앞쪽</text><path d="M176 116h-42m0 0 12-9m-12 9 12 9" class="direction-arrow"/>
-<text x="780" y="103" class="direction-note" text-anchor="middle">뒤쪽</text><path d="M757 116h41m0 0-12-9m12 9-12 9" class="direction-arrow"/>
-<g filter="url(#brainShadow)">
-<path d="M584 429 C598 416 620 426 628 450 C629 476 632 500 624 529 L624 552 C619 560 595 567 580 551 L581 531 C583 500 570 462 584 429 Z" fill="#CEC7DE" stroke="#fffdf8" stroke-width="7"/>
-<g class="brain-zone frontal" data-brain-region="frontal" tabindex="0" role="button" aria-label="전두엽 살펴보기">
-<path class="zone-shape" d="M195 173 C231 124 291 96 362 109 C387 150 389 202 382 253 C367 301 345 358 346 412 C268 447 211 399 181 341 C158 287 165 219 195 173 Z" fill="#CDB2F3"/><circle class="zone-badge" cx="271" cy="268" r="24"/><text class="zone-number" x="271" y="276" text-anchor="middle">1</text></g>
-<g class="brain-zone parietal" data-brain-region="parietal" tabindex="0" role="button" aria-label="두정엽 살펴보기">
-<path class="zone-shape" d="M362 109 C412 78 494 77 543 107 C608 94 651 143 655 177 C648 209 634 252 607 278 C547 304 470 296 382 253 C390 203 385 151 362 109 Z" fill="#FFE18A"/><circle class="zone-badge" cx="513" cy="180" r="24"/><text class="zone-number" x="513" y="188" text-anchor="middle">2</text></g>
-<g class="brain-zone occipital" data-brain-region="occipital" tabindex="0" role="button" aria-label="후두엽 살펴보기">
-<path class="zone-shape" d="M655 177 C728 164 779 231 755 309 C763 349 741 392 699 416 C665 388 631 338 607 278 C635 253 648 206 655 177 Z" fill="#FFC1A8"/><circle class="zone-badge" cx="693" cy="268" r="24"/><text class="zone-number" x="693" y="276" text-anchor="middle">4</text></g>
-<g class="brain-zone temporal" data-brain-region="temporal" tabindex="0" role="button" aria-label="측두엽 살펴보기">
-<path class="zone-shape" d="M382 253 C451 286 535 300 607 278 C629 329 663 381 699 416 C684 461 611 462 549 458 C460 481 382 466 346 412 C348 358 363 302 382 253 Z" fill="#B3E4C1"/><circle class="zone-badge" cx="512" cy="379" r="24"/><text class="zone-number" x="512" y="387" text-anchor="middle">3</text></g>
-<g class="brain-zone cerebellum" data-brain-region="cerebellum" tabindex="0" role="button" aria-label="소뇌 살펴보기">
-<path class="zone-shape" d="M665 375 C704 350 754 366 763 408 C770 447 743 486 702 492 C660 502 622 473 627 439 C631 409 642 388 665 375 Z" fill="#A7CEF6"/><circle class="zone-badge" cx="702" cy="430" r="24"/><text class="zone-number" x="702" y="438" text-anchor="middle">5</text></g>
-<g class="folds" pointer-events="none" fill="none" stroke="#64594a" stroke-opacity=".22" stroke-width="4" stroke-linecap="round">
-<path d="M226 196q42-22 72 14t66 10 M205 266q43-29 78 14m-57 61q38-16 63 14 M306 140q-7 27 19 49m-16 51q29 11 34 46m-13 73q-29 14-12 35"/>
-<path d="M432 136q-3 32 34 44m27-66q-17 27 5 46t0 29m54-56q-16 30 16 41m-110 48q43-14 73 10m40-35q-21 30 6 47"/>
-<path d="M656 228q30-9 50 14m-57 42q35-9 53 17m-43 35q32-12 54 5"/>
-<path d="M406 307q28-18 59 8m32 25q23-14 53-2m-140 34q37-12 57 18m56 12q31-13 54 11m-127 22q45 8 70-2"/>
-<path d="M668 398q32-5 51 13m-64 13q33-4 58 17m-48 9q29 1 41 20"/>
+<g class="brain-atlas-body" filter="url(#brainAtlasShadow)">
+<!-- The six pedagogical territories share one outline; approximate, not diagnostic anatomy. -->
+<g class="brain-zone brainstem stem-hit" data-brain-region="brainstem" tabindex="0" role="button" aria-label="6 뇌줄기, 호흡과 각성, 자세히 살펴보기">
+ <path class="zone-shape" d="M562 435 C578 416 605 425 617 444 C631 463 628 491 620 514 C618 536 634 565 621 581 C611 594 581 588 571 570 C561 555 565 531 564 508 C552 484 549 453 562 435 Z" fill="url(#brainStemFill)"/>
+ <g class="cortex-grooves" pointer-events="none"><path d="M576 465q19 11 17 31m-18 8q18 8 18 30m1 5q9 10 8 25"/></g>
+ <circle class="zone-badge" cx="595" cy="541" r="19"/><text class="zone-number" x="595" y="548" text-anchor="middle">6</text>
 </g>
-<g class="brain-zone brainstem stem-hit" data-brain-region="brainstem" tabindex="0" role="button" aria-label="뇌줄기 살펴보기">
-<path d="M584 429 C598 416 620 426 628 450 C629 476 632 500 624 529 L624 552 C619 560 595 567 580 551 L581 531 C583 500 570 462 584 429 Z" fill="transparent" stroke="transparent" stroke-width="12"/>
-<circle class="zone-badge" cx="601" cy="529" r="22"/><text class="zone-number" x="601" y="537" text-anchor="middle">6</text>
+<g class="brain-zone frontal" data-brain-region="frontal" tabindex="0" role="button" aria-label="1 전두엽, 계획과 조절, 자세히 살펴보기">
+ <path class="zone-shape" d="M189 208 C205 154 247 128 291 127 C316 108 358 103 386 123 C398 151 410 185 407 216 C394 262 377 306 360 341 C354 381 346 413 333 441 C296 459 264 442 240 420 C197 420 171 400 161 367 C145 346 143 308 153 274 C148 248 166 221 189 208 Z" fill="url(#brainFrontal)"/>
+ <g class="cortex-grooves" pointer-events="none">
+  <path d="M229 175c19-17 44-21 61-6s9 29-1 37m14-60c19-7 35-3 47 12s13 33 2 44m-159 44c22-20 48-13 62 5s14 38 2 52m-82 3c13-16 31-20 51-12s19 28 10 41m31-107c-9 23 2 39 23 50s24 29 13 50m40-101c-19 21-22 45-7 62m-89 84c13-20 36-21 56-9m36-51c-13 16-12 32 6 50m-87 21c13-9 33-4 45 12"/>
+  <path class="groove-light" d="M231 181q36-21 56 2m-103 69q39-17 57 17m50-117q29 2 37 29m-139 167q26-19 47 5"/>
+ </g>
+ <circle class="zone-badge" cx="270" cy="254" r="20"/><text class="zone-number" x="270" y="261" text-anchor="middle">1</text>
+</g>
+<g class="brain-zone parietal" data-brain-region="parietal" tabindex="0" role="button" aria-label="2 두정엽, 감각과 위치, 자세히 살펴보기">
+ <path class="zone-shape" d="M386 123 C429 92 473 99 500 107 C531 92 566 104 584 123 C625 119 658 155 676 187 C674 220 652 252 621 288 C587 299 532 296 494 282 C458 273 419 253 407 216 C407 177 395 147 386 123 Z" fill="url(#brainParietal)"/>
+ <g class="cortex-grooves" pointer-events="none">
+  <path d="M426 128c-13 27 1 43 19 51s26 26 11 40m33-91c-17 22-8 40 13 50s27 24 14 42m41-92c-12 19-5 33 9 49s18 34 0 52m30-93q42 8 45 41m-188 55q32-17 55-2m31 21q20-19 47-11m-115-67q8 29-10 42"/>
+  <path class="groove-light" d="M418 144q-4 23 21 36m51-39q-5 23 19 33m58-40q-8 25 11 41m-105 79q34-4 55 10"/>
+ </g>
+ <circle class="zone-badge" cx="521" cy="166" r="20"/><text class="zone-number" x="521" y="173" text-anchor="middle">2</text>
+</g>
+<g class="brain-zone occipital" data-brain-region="occipital" tabindex="0" role="button" aria-label="4 후두엽, 시각 정보 처리, 자세히 살펴보기">
+ <path class="zone-shape" d="M676 187 C718 174 760 215 766 251 C790 280 787 327 759 357 C765 385 745 409 716 417 C681 402 649 358 621 288 C646 258 669 224 676 187 Z" fill="url(#brainOccipital)"/>
+ <g class="cortex-grooves" pointer-events="none">
+  <path d="M701 219q29-16 48 8m-64 19q25-15 42 6t2 39m-32 13q36-18 58 4m-46 24q33-7 40 20m-39-122q-8 14 2 25m25 99q-15 17-8 32"/>
+  <path class="groove-light" d="M702 225q23-8 34 5m-40 79q25-11 44 2"/>
+ </g>
+ <circle class="zone-badge" cx="713" cy="269" r="20"/><text class="zone-number" x="713" y="276" text-anchor="middle">4</text>
+</g>
+<g class="brain-zone temporal" data-brain-region="temporal" tabindex="0" role="button" aria-label="3 측두엽, 소리와 언어, 자세히 살펴보기">
+ <path class="zone-shape" d="M407 216 C450 260 532 303 621 288 C649 356 684 399 716 417 C686 442 654 468 611 472 C570 480 539 479 515 477 C478 492 439 483 415 460 C376 469 351 453 333 441 C348 413 353 380 360 341 C380 293 389 263 407 216 Z" fill="url(#brainTemporal)"/>
+ <g class="cortex-grooves" pointer-events="none">
+  <path d="M410 291q17-19 40-7t24 33m38-23q31-15 54 11m27 9q-9 19 9 34t36 8m-211-17q-15 21-1 43t33 13m40-50q27-17 49 0m42 42q15-16 41-8m-211 49q20-15 48-3m65-13q31-10 47 11m36-48q14 19 35 18"/>
+  <path class="groove-light" d="M419 297q35-17 45 12m65 4q24-13 39 9m-136 76q23-13 42 2m89 29q33-12 56 5"/>
+ </g>
+ <circle class="zone-badge" cx="510" cy="350" r="20"/><text class="zone-number" x="510" y="357" text-anchor="middle">3</text>
+</g>
+<g class="brain-zone cerebellum" data-brain-region="cerebellum" tabindex="0" role="button" aria-label="5 소뇌, 균형과 움직임의 타이밍, 자세히 살펴보기">
+ <path class="zone-shape" d="M682 389 C728 374 771 400 779 435 C795 471 774 510 744 520 C713 547 665 538 644 512 C620 497 615 465 626 439 C633 416 656 397 682 389 Z" fill="url(#brainCerebellum)"/>
+ <g class="cortex-grooves" pointer-events="none">
+  <path d="M659 423q53-23 92 7m-107 24q66-25 112 1m-108 23q65-13 108 9m-91 19q41-3 62 13m-37-114q17 52-8 94m30-77q18 41 3 71"/>
+  <path class="groove-light" d="M659 430q41-18 80 1m-84 30q58-15 87 1m-81 28q44-8 75 7"/>
+ </g>
+ <circle class="zone-badge" cx="714" cy="442" r="20"/><text class="zone-number" x="714" y="449" text-anchor="middle">5</text>
 </g>
 </g>
-<!-- Labels are part of the actual interactive SVG, not a decorative screenshot. -->
+<!-- Type is printed directly on the anatomy; there are no floating sticker cards. -->
 <g class="brain-diagram-labels" aria-hidden="true">
- <g class="brain-diagram-label" data-label-region="frontal" transform="translate(271 320)">
-  <rect class="brain-label-back" x="-44" y="-19" width="88" height="51" rx="13"/>
-  <text class="brain-label-name" text-anchor="middle" y="0">전두엽</text>
-  <text class="brain-label-function" text-anchor="middle" y="20">계획·조절</text>
+ <g class="brain-diagram-label" data-label-region="frontal" transform="translate(270 302)">
+  <text class="brain-label-name" text-anchor="middle">전두엽</text><text class="brain-label-function" y="22" text-anchor="middle">계획 · 조절</text><path class="brain-label-rule" d="M-28 32H28"/>
  </g>
- <g class="brain-diagram-label" data-label-region="parietal" transform="translate(513 240)">
-  <rect class="brain-label-back" x="-47" y="-19" width="94" height="51" rx="13"/>
-  <text class="brain-label-name" text-anchor="middle" y="0">두정엽</text>
-  <text class="brain-label-function" text-anchor="middle" y="20">감각·위치</text>
+ <g class="brain-diagram-label" data-label-region="parietal" transform="translate(521 217)">
+  <text class="brain-label-name" text-anchor="middle">두정엽</text><text class="brain-label-function" y="22" text-anchor="middle">감각 · 위치</text><path class="brain-label-rule" d="M-28 32H28"/>
  </g>
- <g class="brain-diagram-label" data-label-region="temporal" transform="translate(512 420)">
-  <rect class="brain-label-back" x="-47" y="-19" width="94" height="51" rx="13"/>
-  <text class="brain-label-name" text-anchor="middle" y="0">측두엽</text>
-  <text class="brain-label-function" text-anchor="middle" y="20">소리·말</text>
+ <g class="brain-diagram-label" data-label-region="temporal" transform="translate(510 400)">
+  <text class="brain-label-name" text-anchor="middle">측두엽</text><text class="brain-label-function" y="22" text-anchor="middle">소리 · 말</text><path class="brain-label-rule" d="M-28 32H28"/>
  </g>
- <g class="brain-diagram-label" data-label-region="occipital" transform="translate(690 324)">
-  <rect class="brain-label-back" x="-44" y="-19" width="88" height="51" rx="13"/>
-  <text class="brain-label-name" text-anchor="middle" y="0">후두엽</text>
-  <text class="brain-label-function" text-anchor="middle" y="20">보기</text>
+ <g class="brain-diagram-label" data-label-region="occipital" transform="translate(713 316)">
+  <text class="brain-label-name" text-anchor="middle">후두엽</text><text class="brain-label-function" y="22" text-anchor="middle">시각 정보</text><path class="brain-label-rule" d="M-24 32H24"/>
  </g>
- <g class="brain-diagram-label" data-label-region="cerebellum" transform="translate(700 473)">
-  <rect class="brain-label-back" x="-54" y="-19" width="108" height="51" rx="13"/>
-  <text class="brain-label-name" text-anchor="middle" y="0">소뇌</text>
-  <text class="brain-label-function" text-anchor="middle" y="20">균형·타이밍</text>
+ <g class="brain-diagram-label" data-label-region="cerebellum" transform="translate(714 484)">
+  <text class="brain-label-name" text-anchor="middle">소뇌</text><text class="brain-label-function" y="22" text-anchor="middle">균형 · 타이밍</text><path class="brain-label-rule" d="M-25 32H25"/>
  </g>
- <g class="brain-diagram-label" data-label-region="brainstem" transform="translate(539 525)">
-  <rect class="brain-label-back" x="-56" y="-19" width="112" height="51" rx="13"/>
-  <text class="brain-label-name" text-anchor="middle" y="0">뇌줄기</text>
-  <text class="brain-label-function" text-anchor="middle" y="20">숨쉬기·각성</text>
+ <g class="brain-diagram-label brain-stem-caption" data-label-region="brainstem" transform="translate(535 555)">
+  <text class="brain-label-name" text-anchor="middle">뇌줄기</text><text class="brain-label-function" y="22" text-anchor="middle">호흡 · 각성</text><path class="brain-label-rule" d="M-27 32H27"/>
  </g>
 </g>
 </svg>
+    <details class="brain-mobile-legend-details"><summary>6개 부위의 이름과 기능 보기</summary>
     <div class="brain-mobile-legend" aria-label="뇌 부위와 대표 기능">
      <div class="brain-mobile-legend-item" data-legend-region="frontal"><b>1 전두엽</b><span>계획·조절</span></div>
      <div class="brain-mobile-legend-item" data-legend-region="parietal"><b>2 두정엽</b><span>감각·위치</span></div>
@@ -155,11 +172,12 @@
      <div class="brain-mobile-legend-item" data-legend-region="cerebellum"><b>5 소뇌</b><span>균형·타이밍</span></div>
      <div class="brain-mobile-legend-item" data-legend-region="brainstem"><b>6 뇌줄기</b><span>숨쉬기·각성</span></div>
     </div>
+    </details>
      <p class="lobe-scene-caution" id="lobeSceneNotice">뇌는 여러 부분이 함께 일해요. 이 색 강조는 실제 뇌 활동을 측정한 결과가 아니에요.</p>
       </div>
      </div>
     </section>
-    <figcaption>옆에서 본 모습 · 실제 뇌의 경계를 정확히 표시한 그림은 아니에요.</figcaption>
+    <figcaption>옆에서 본 뇌의 교육용 그림 · 실제 해부학적 경계나 활성도를 측정한 모습은 아니에요.</figcaption>
     <details class="lobe-science-note">
      <summary>왜 세 가지 과정만 보여줄까? · 조금 더 자세히</summary>
      <p>여기 보이는 세 가지는 생활 장면을 이해하기 위한 <strong>대표 예시</strong>예요. 실제로는 양쪽 대뇌와 더 많은 영역, 신경회로가 함께 관여해요. 그림의 색이나 강조 표시로 뇌 활성 정도를 재거나 개인의 원인을 판단하지 않아요.</p>
