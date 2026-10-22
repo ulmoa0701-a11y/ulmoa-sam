@@ -197,3 +197,85 @@
 #gameWorld .moa-scene-slowBlock .slow-block-board .brick-joined-horizontal.brick-end{border-top-left-radius:5px;border-bottom-left-radius:5px}
 #gameWorld .moa-scene-slowBlock .slow-block-board .brick-joined-vertical.brick-start{border-bottom-right-radius:5px;border-bottom-left-radius:5px}
 #gameWorld .moa-scene-slowBlock .slow-block-board .brick-joined-vertical.brick-end{border-top-right-radius:5px;border-top-left-radius:5px}
+
+
+/* Game states follow actual graded responses. A wrong/paused round never gets
+   the same visual reward as a correct round. Memory targets stay concealed. */
+#gameWorld .moa-world-rail[hidden]{display:none!important}
+#gameWorld .moa-scene-slowMemory .moa-world-meter{max-width:270px}
+#gameWorld .moa-scene-slowMemory .moa-world-meter:has(.moa-world-rail[hidden]){
+ background:#f5f0ff;border:2px solid #b7a8df;
+ grid-template-columns:1fr auto;align-items:center;
+}
+#gameWorld .moa-scene-slowMemory .moa-world-meter .moa-world-count{
+ font-size:19px;font-variant-numeric:tabular-nums;
+}
+#gameWorld .moa-redesigned-world .moa-world-ending{
+ top:8px;right:12px;display:grid;place-items:center;
+ width:74px;height:74px;border-radius:50%;
+ background:#fff8e9;border:2px solid #e2c88c;
+ box-shadow:0 6px 16px #75562928;
+}
+#gameWorld .moa-world-trophy{
+ display:block;width:62px;height:62px;
+ background-image:url("../assets/moa-clay-34-atlas.webp");
+ background-size:600% 600%;background-repeat:no-repeat;
+ filter:drop-shadow(0 2px 4px #70562a45)
+}
+#gameWorld .moa-scene-slowScan .moa-world-trophy{background-position:100% 20%}
+#gameWorld .moa-scene-slowPlace .moa-world-trophy{background-position:80% 0%}
+#gameWorld .moa-scene-slowBlock .moa-world-trophy{background-position:20% 40%}
+#gameWorld .moa-scene-slowName .moa-world-trophy{background-position:40% 40%}
+#gameWorld .moa-scene-slowMemory .moa-world-trophy{background-position:60% 40%}
+#gameWorld .moa-scene-slowEveryday .moa-world-trophy{background-position:40% 80%}
+/* The actual input tile becomes a planted flower plot, without changing the
+   sample pattern, adding answer hints, or requiring precise drag gestures. */
+#gameWorld .moa-scene-slowPlace .slow-map-pair>div:nth-child(2) button.slow-tile{
+ position:relative;box-shadow:inset 0 -7px 0 #619a6752,0 2px 0 #4f81522b;
+}
+#gameWorld .moa-scene-slowPlace .slow-map-pair>div:nth-child(2) button.slow-tile.picked{
+ background:linear-gradient(180deg,#f5ffde 0%,#c1e9b6 61%,#8fc080 100%)!important;
+ box-shadow:inset 0 -9px 0 #57976288,0 4px 6px #427e4b36;
+}
+#gameWorld .moa-scene-slowScan .slow-scan button.slow-tile.picked{
+ box-shadow:inset 0 0 0 3px #ffffffc7,0 4px 0 #5e9e6b6b;
+}
+#gameWorld .moa-scene-slowMemory .slow-covered{
+ position:relative;overflow:hidden;border:3px solid #7669af!important;
+ background:repeating-linear-gradient(90deg,#afa7d6 0 22px,#a299d0 22px 44px)!important;
+ color:#342b64!important;text-shadow:0 1px #e8e3ff;
+}
+#gameWorld .moa-scene-slowMemory .slow-covered small{color:#292351!important}
+#gameWorld .moa-scene-slowName .slow-name-picture{
+ border:5px solid #c9e4e7;box-shadow:inset 0 -18px 0 #add3cf77,0 10px 0 #8cb6b753;
+}
+#gameWorld .moa-scene-slowName.moa-scene-name-answer .slow-name-picture{
+ border-color:#7bb2bd;box-shadow:inset 0 -18px 0 #add3cf77,0 10px 0 #76a2aa70;
+}
+#gameWorld .moa-scene-slowBlock .slow-block-board button.slow-tile.picked{
+ box-shadow:inset 0 4px 0 #fff0d7a4,inset 0 -6px 0 #a76b3a68,0 3px 4px #985a2a38;
+}
+#gameWorld .moa-scene-slowEveryday .slow-bag-progress{
+ border:2px solid #83bbae;background:#effff5;
+ box-shadow:inset 0 -9px 0 #9ecbb54d;
+}
+#gameWorld .moa-redesigned-world.moa-scene-needs-review .slow-feedback{
+ border:2px solid #e6c998;color:#745424;background:#fff8e8;
+}
+#gameWorld .moa-redesigned-world.moa-scene-finished{
+ box-shadow:0 12px 32px #315d3e20,inset 0 0 0 3px #c3dbaf;
+}
+@media(max-width:650px){
+ #gameWorld .moa-redesigned-world .moa-world-ending{
+  top:7px;right:7px;width:43px;height:43px;
+ }
+ #gameWorld .moa-world-trophy{width:38px;height:38px}
+}
+@media(prefers-reduced-motion:no-preference){
+ #gameWorld .moa-scene-slowPlace .slow-map-pair>div:nth-child(2) button.slow-tile.picked{
+  animation:moa-plant-pop .2s ease-out;
+ }
+ #gameWorld .moa-redesigned-world.moa-scene-finished .moa-world-ending{
+  animation:moa-end-pop .32s ease-out both;
+ }
+}
