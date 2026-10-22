@@ -1,0 +1,14 @@
+/* Child-first mission interaction. Art assets deliberately untouched while illustration redesign is in progress. */
+button.feed-friend{appearance:none;-webkit-appearance:none;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-width:105px;min-height:135px;padding:3px 10px 12px;background:#fffae8;border:3px solid #edd0a6;border-radius:23px;box-shadow:0 7px 0 #bbad8c;color:inherit;cursor:pointer;transition:transform .17s ease,background .17s ease,border-color .17s ease}
+button.feed-friend:not(:disabled):hover{background:#fffce9;border-color:#83b59a}
+button.feed-friend:active{transform:translateY(4px);box-shadow:0 3px 0 #bbad8c}
+button.feed-friend:focus-visible{outline:4px solid #e7a34f;outline-offset:4px}
+button.feed-friend.friend-fed{background:#e6f1da;border-color:#86b69a;cursor:default;opacity:1;box-shadow:0 5px 0 #a2bca0}
+button.feed-friend.friend-fed .forest-friend{transform:translateY(-3px)}
+button.feed-friend .dish{display:grid;place-items:center;min-height:23px;min-width:61px;overflow:visible}
+button.feed-friend .dish-filled{background:linear-gradient(#e3f5d8,#eef4df);border-color:#7fae87}
+button.feed-friend .dish .food.mini{transform:scale(.65);transform-origin:center bottom;margin-top:-11px}
+.supply.need-food{outline:5px solid #ffdc8c;outline-offset:2px;animation:forest-nudge .75s ease-in-out infinite alternate}
+@keyframes forest-nudge{from{filter:brightness(1)}to{filter:brightness(1.14)}}
+@media(max-width:650px){button.feed-friend{min-width:76px;min-height:110px;padding:4px 4px 9px;border-radius:16px;border-width:2px}button.feed-friend .forest-friend{width:70px;height:75px}button.feed-friend .dish{min-width:54px;min-height:21px}}
+@media(prefers-reduced-motion:reduce){button.feed-friend,.supply.need-food{transition:none;animation:none}}
