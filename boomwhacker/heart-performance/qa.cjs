@@ -58,6 +58,17 @@ const {chromium}=require("playwright-core");
    const found=[];for(let n=0;n<q.state().score.length*2;n++){const pair=q.stairHalfBeatPair(n);if(pair)found.push({beat:n,notes:pair.map(p=>p.note),widths:pair.map(p=>p.to-p.from)})}
    q.selectSong(original);return found;
   });
+  // The fixed two-line view must show each eighth as a whole miniature heart
+  // inside one beat, not as the former jagged red/yellow half-heart wedge.
+  const fixedPairScreenshot=await page.evaluate(()=>{
+    const q=window.__performanceViewsQA__,before=q.state().song;
+    q.selectSong("moa-signal");q.selectView("two");q.at(-2);
+    const image=q.twoBackground().toDataURL("image/png");
+    q.selectSong(before);
+    return image;
+  });
+  assert(fixedPairScreenshot.startsWith("data:image/png;base64,"),"paired full-heart score must rasterize");
+  tests.push(name+": fixed double-eighth notes render within one beat as two intact mini-hearts, separate from pitch-stair view");
   assert(rhythmSplit.length>=1,"the real score must have at least one pair of true eighth notes");
   assert(rhythmSplit.some(x=>x.notes[0]!==x.notes[1]),"half-hearts must support two DIFFERENT pitch heights");
   assert(rhythmSplit.every(x=>x.widths.every(w=>Math.abs(w-.5)<.001)),"each pitch-separated heart HALF is still exactly half a beat");
