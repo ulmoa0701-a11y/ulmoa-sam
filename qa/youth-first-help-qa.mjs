@@ -66,9 +66,52 @@ for(const width of [390,1280]){
   await check(await page.locator('input,textarea,form').count()===0,width+'px no patient data form');
   await check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),width+'px curriculum no overflow');
   await page.screenshot({path:path.join(out,'curricula-'+width+'.png'),fullPage:true});
+  await page.goto(new URL('support-first/make/',BASE).href,{waitUntil:'domcontentloaded'});
+  await check(await page.locator('button[data-world]').count()===3,width+'px 3 worlds');
+  await check(await page.locator('button[data-hero]').count()===3,width+'px 3 characters');
+  await check(await page.locator('[data-quest]').count()===3,width+'px 3 story goals');
+  await check(await page.locator('a[href="make/"]').count()===0,width+'px no broken self-link');
+  for(const world of ['space','ocean','forest']){
+    await page.locator('button[data-world="'+world+'"]').click();
+    await check(await page.locator('.stage').getAttribute('data-world')===world,width+'px world changes '+world);
+    await check(await page.locator('button[data-world="'+world+'"]').getAttribute('aria-pressed')==='true',width+'px world selected '+world);
+  }
+  for(const hero of ['guardian','explorer','maker']){
+    await page.locator('button[data-hero="'+hero+'"]').click();
+    await check(await page.locator('.stage').getAttribute('data-hero')===hero,width+'px hero changes '+hero);
+  }
+  for(const quest of ['friend','signal','bridge']){
+    await page.locator('button[data-quest="'+quest+'"]').click();
+    await check((await page.locator('#story-text').innerText()).length>30,width+'px story updates '+quest);
+  }
+  await page.locator('#my-idea').fill('작은 비밀 문을 만들자');
+  await check((await page.locator('#idea-preview').innerText()).includes('작은 비밀 문'),width+'px typing appears safely in preview');
+  await check((await page.locator('#char-count').innerText()).includes(' / 160'),width+'px length counter');
+  for(const response of ['try','help','rest']){
+    await page.locator('button[data-response="'+response+'"]').click();
+    await check(await page.locator('#challenge-result').isVisible(),width+'px obstacle reflection '+response);
+  }
+  await page.locator('#again').click();
+  await check(await page.locator('#challenge-result').isHidden(),width+'px allow different approach');
+  for(const cheer of ['kind','ask','idea','quiet']){
+    await page.locator('button[data-cheer="'+cheer+'"]').click();
+    await check((await page.locator('#reaction-preview').innerText()).length>12,width+'px fictional encouragement '+cheer);
+  }
+  await page.locator('button[data-next="learn"]').click();
+  await check((await page.locator('#closing-message').innerText()).includes('배우'),width+'px voluntary next challenge');
+  await check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),width+'px workshop no horizontal overflow');
+  await page.screenshot({path:path.join(out,'co-create-'+width+'.png'),fullPage:true});
+  await page.reload({waitUntil:'domcontentloaded'});
+  await check((await page.locator('#my-idea').inputValue())==='',width+'px no persisted student free text');
+  await check((await page.locator('#scene-label').innerText()).includes('달빛 숲'),width+'px default scene after reload');
+  await page.locator('#surprise').click();
+  await check(await page.locator('.stage').getAttribute('data-world')==='space',width+'px predictable alternative combination');
+  await page.locator('#reset').click();
+  await check(await page.locator('.stage').getAttribute('data-world')==='forest',width+'px reset to initial world');
+  await check((await page.locator('#my-idea').inputValue())==='',width+'px reset blank text');
   await check(errors.length===0,width+'px JS errors: '+errors.join('|'));
   await context.close();
 }
 await browser.close();
-console.log(JSON.stringify({base:BASE,failures,screenshots:8},null,2));
+console.log(JSON.stringify({base:BASE,failures,screenshots:10},null,2));
 if(failures.length)process.exit(1);
