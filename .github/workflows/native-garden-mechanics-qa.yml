@@ -1,0 +1,47 @@
+name: Native Garden Distinct Play Scenes QA
+on:
+  pull_request:
+    paths:
+      - 'thinking-garden/app.js'
+      - 'thinking-garden/gameplay-native-scenes.css'
+      - 'thinking-garden/index.html'
+      - 'qa/native-garden-mechanics-qa.mjs'
+  push:
+    branches: [main]
+    paths:
+      - 'thinking-garden/app.js'
+      - 'thinking-garden/gameplay-native-scenes.css'
+      - 'thinking-garden/index.html'
+      - 'qa/native-garden-mechanics-qa.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-play:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright-core@1.56.1
+      - name: Find Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Serve locally
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/native-garden.log 2>&1 &
+          for i in {1..40}; do curl -fsS http://127.0.0.1:8765/thinking-garden/ >/dev/null && exit 0; sleep .25; done
+          cat /tmp/native-garden.log; exit 1
+      - name: Exercise unique gameplay interactions
+        run: node qa/native-garden-mechanics-qa.mjs
+      - name: Capture gameplay
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-garden-gameplay
+          path: qa/native-scenes-screens
+          if-no-files-found: warn
