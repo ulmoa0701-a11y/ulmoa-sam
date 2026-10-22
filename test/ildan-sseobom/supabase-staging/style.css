@@ -1001,3 +1001,12 @@ form[hidden], .form[hidden] {display:none !important;}
 .notification-row .button-ghost{white-space:nowrap;min-height:40px}
 .notification-target{outline:3px solid #74a7ca;outline-offset:3px;scroll-margin-top:25px}
 @media(max-width:550px){.notification-row{align-items:stretch;flex-direction:column;gap:9px;padding:12px}.notification-row .button-ghost{align-self:flex-start}.notification-panel{padding-inline:12px}}
+
+/* Explicit opt-in, device-scoped Web Push controls */
+.push-control{margin-top:22px;padding:17px;background:#f4f8fc;border:1px solid #d4e4ee;border-radius:13px}
+.push-control h3{margin:0 0 7px;color:#21425d}
+.push-control p{font-size:14px;line-height:1.65;color:#4c6072}
+.push-control #pushStatus{padding:12px 13px;border-radius:10px;background:#fff;border:1px solid #e2ebf2;margin:12px 0;color:#21435b;font-size:14px}
+.push-control .buttons{display:flex;gap:8px;flex-wrap:wrap}
+.push-control [hidden]{display:none!important}
+@media(max-width:550px){.push-control{padding:14px}.push-control .buttons button{flex:1 1 100%}}
