@@ -137,9 +137,15 @@ export async function pushMember(name:string,request:Request,db:any,uid:string,r
   const input=await body(request);
   if(!validEndpoint(input.endpoint))return send({error:'구독을 찾지 못했습니다.'},400);
   const {data:sub,error}=await db.from('ildan_push_subscriptions')
-   .select('endpoint,p256dh,auth_key').eq('therapist_id',uid).eq('endpoint_hash',await hash(input.endpoint)).maybeSingle();
+   .select('id,endpoint,p256dh,auth_key,last_test_at').eq('therapist_id',uid).eq('endpoint_hash',await hash(input.endpoint)).maybeSingle();
   if(error||!sub)return send({error:'이 기기의 구독을 확인할 수 없습니다.'},404);
-  // Dedicated testing only; cap one test message per device per minute.
+  // Atomically limit test pushes to one message per device every 60 seconds.
+  const older=new Date(Date.now()-60000).toISOString();
+  const {data:claimed,error:cooldownError}=await db.from('ildan_push_subscriptions')
+   .update({last_test_at:new Date().toISOString()}).eq('id',sub.id).eq('therapist_id',uid)
+   .or('last_test_at.is.null,last_test_at.lt.'+older).select('id').maybeSingle();
+  if(cooldownError)throw Error('PUSH_TEST_RATE_FAILED');
+  if(!claimed)return send({error:'테스트 알림은 기기당 1분에 한 번만 보낼 수 있습니다.'},429);
   const cfg=await serverConfig(db);
   if(!cfg)return send({error:'푸시 서버 설정이 없습니다.'},503);
   try{await sendOne(cfg,sub,'test');}
