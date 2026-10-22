@@ -25,6 +25,9 @@ for(const [profile,width] of [['desktop',1366],['mobile',390]]){
    await root.locator('[data-block="place"]').first().click();
    assert(await page.locator('#gameArea .brick-joined-horizontal').count()===2,
      profile+'/'+id+' long brick must render as one joined pair, not two independent squares');
+   const joined=await page.locator('#gameArea .brick-joined-horizontal').allTextContents();
+   assert(joined.join('').split('🧱').length-1===1,
+     profile+'/'+id+' a single connected brick is drawn as two separate objects');
   }else if(id==='slowMemory'){
    assert(await root.locator('.moa-world-meter:visible').count()===0,profile+'/'+id+' cue leaks memory');
    await root.locator('[data-slow="hide"]').click();
