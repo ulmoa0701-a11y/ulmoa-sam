@@ -17,7 +17,7 @@ const templates={
 const state={concept:0,step:0,selected:0,attempts:0,hints:0,flagged:false,sound:true,locked:false,view:'intro',results:[],timer:0,review:null};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','"':'&quot;'}[c]));
 const unit=(type='acorn',small=false)=>'<span class="food '+(type==='berry'?'berry':'acorn')+' '+(small?'mini':'')+'" aria-hidden="true"></span>';
-const friend=(name,i,happy)=>{if(name==='bear')return '<img class="forest-friend bear-photo" src="./assets/mission-v4/characters/bear_'+(happy?'happy':'waiting')+'.png" alt="">';return '<svg class="forest-friend" viewBox="'+(150*['rabbit','bear','fox','frog','bird'].indexOf(name))+' 0 150 180" aria-hidden="true"><use href="./assets/woodland-friends.svg#'+name+'"/></svg>'};
+const friend=(name,i,happy)=>'<img class="forest-friend clay-photo" src="./assets/mission-v4/characters/'+name+'_'+(happy?'happy':'waiting')+'.png" alt="">';
 const dot=(filled,type)=>'<span class="match-slot '+(filled?'occupied':'empty')+'">'+(filled?unit(type,true):'')+'</span>';
 const current=()=>templates[CONCEPTS[state.concept].key][Math.min(state.step,6)];
 const practice=()=>state.step===5||state.step===6;
@@ -111,7 +111,7 @@ function chapterEnd(){
  const heading=result.criteriaMet?'혼자 해결한 장면이 늘었어!':'이 부분은 조금 더 연습할 수 있어';
  say(CONCEPTS[state.concept].kicker,'숲길의 작은 목표를 마쳤어');
  const pct=result.attempted?Math.round(100*result.independent/result.attempted):0;
- scene('<div class="chapter-result"><div class="bloom" aria-hidden="true"></div><h2>'+heading+'</h2><p>도움 없이 해결한 새 문제 '+result.independent+'개 · 새로운 상황 '+(result.transfer?'혼자 해결':'추가 연습 필요')+'</p><small>기록은 놀이 중 반응만 나타내며 수학 능력의 확정적 판정이 아니에요.</small><div class="result-actions">'+stepAction('repeat','이 숲길 다시 놀기','현재 개념을 다시 연습')+stepAction('next-chapter',state.concept===2?'모험 처음으로':'다음 숲길로 →','다음 모험으로')+'</div></div>');
+ scene('<div class="chapter-result"><div class="bloom" aria-hidden="true"><div class="confetti"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div><h2>'+heading+'</h2><p>도움 없이 해결한 새 문제 '+result.independent+'개 · 새로운 상황 '+(result.transfer?'혼자 해결':'추가 연습 필요')+'</p><small>기록은 놀이 중 반응만 나타내며 수학 능력의 확정적 판정이 아니에요.</small><div class="result-actions">'+stepAction('repeat','이 숲길 다시 놀기','현재 개념을 다시 연습')+stepAction('next-chapter',state.concept===2?'모험 처음으로':'다음 숲길로 →','다음 모험으로')+'</div></div>');
 }
 function handle(act,el){
  if(act==='start'){resetConcept(0);return}

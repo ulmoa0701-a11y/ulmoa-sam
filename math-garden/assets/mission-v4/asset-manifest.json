@@ -2,7 +2,7 @@
   "updated": "2026-10-22",
   "style": "cute-3d-clay-toy (see style-guide.md)",
   "productionTool": "Canva generate-image + remove-background (user-approved exception, see style-guide.md)",
-  "status": "P0 first-four checkpoint set — awaiting user design approval before 2nd-tier expansion",
+  "status": "Full share-concept roster approved and shipped on branch. Game-feel polish (motion/celebration) added. 2nd-tier (background redo, inactive feature art, UI icons) still pending.",
   "assets": [
     {
       "file": "objects/acorn_tree.png",
@@ -29,28 +29,61 @@
       "prompt": "A cute 3D clay-style toy wicker picnic basket, empty with open top showing the inside, with a curved handle, smooth matte toy material, soft pastel brown color palette, gentle studio lighting with soft shadows, centered single subject, three-quarter view, plain soft pastel solid background, no text, no realistic photography"
     },
     {
-      "file": "characters/bear_waiting.png",
-      "nativeSize": "161x200",
+      "file": "objects/plate_empty.png",
+      "nativeSize": "approx 300x230",
       "alpha": true,
-      "usedIn": "mission.html story-character icon (static); mission.js friend('bear', i, false) in intro/guided/task screens",
-      "role": "Default waiting expression.",
-      "prompt": "A cute 3D clay-style toy bear character sitting and waiting patiently with a neutral friendly expression, smooth matte toy material, soft pastel brown color palette, gentle studio lighting with soft shadows, centered single subject, plain soft pastel solid background, no text, no realistic photography"
+      "usedIn": "mission.css .dish (background-image) — the small dish shown in front of every waiting friend",
+      "role": "Replaces the old flat CSS gradient dish shape.",
+      "prompt": "A cute 3D clay-style toy empty wooden plate, small round dish, smooth matte toy material, soft pastel cream color palette, gentle studio lighting with soft shadows, centered single subject, plain soft pastel solid background, no text, no realistic photography"
     },
     {
-      "file": "characters/bear_happy.png",
+      "file": "characters/bear_waiting.png / bear_happy.png",
       "nativeSize": "161x200",
       "alpha": true,
-      "usedIn": "mission.js friend('bear', i, true) — success/served state only",
-      "role": "Happy expression shown only after a successful delivery.",
-      "prompt": "A cute 3D clay-style toy bear character cheering happily with a big joyful smile and raised arms, smooth matte toy material, soft pastel brown color palette, gentle studio lighting with soft shadows, centered single subject, plain soft pastel solid background, no text, no realistic photography"
+      "usedIn": "mission.html story-character icon (waiting, static); mission.js friend('bear', i, happy)",
+      "prompt": "waiting: sitting and waiting patiently, neutral friendly expression. happy: cheering with big joyful smile and raised arms. Same clay-toy template as all characters below."
+    },
+    {
+      "file": "characters/rabbit_waiting.png / rabbit_happy.png",
+      "nativeSize": "160x200",
+      "alpha": true,
+      "usedIn": "mission.js friend('rabbit', i, happy) — share concept demo/probe steps"
+    },
+    {
+      "file": "characters/fox_waiting.png / fox_happy.png",
+      "nativeSize": "160x200",
+      "alpha": true,
+      "usedIn": "mission.js friend('fox', i, happy) — share concept probe step, soft pastel orange palette"
+    },
+    {
+      "file": "characters/frog_waiting.png / frog_happy.png",
+      "nativeSize": "160x200",
+      "alpha": true,
+      "usedIn": "mission.js friend('frog', i, happy) — share concept practice step, soft pastel green palette"
+    },
+    {
+      "file": "characters/bird_waiting.png / bird_happy.png",
+      "nativeSize": "160x200",
+      "alpha": true,
+      "usedIn": "mission.js friend('bird', i, happy) — share concept transfer step, soft pastel blue palette"
     }
   ],
+  "gameFeelChanges": [
+    "Every take/undo acorn button now has tactile press feedback (scale .86 on :active) and pops in with a spring easing when it appears in the tree/basket pile (.tree-pile .interaction, .basket-pile .interaction — new @keyframes pop-in, 0.32s).",
+    "Guide bear icon (top-left) has a very subtle idle breathing animation (idle-breathe, 2.6s loop) so the scene doesn't feel static while waiting for input.",
+    "Each waiting friend card bobs gently (idle-bob, staggered per friend) instead of sitting frozen.",
+    "Success and chapter-result cards now pop in with a spring animation (card-pop) instead of appearing instantly.",
+    "Chapter-end celebration ('bloom') redesigned: was a plain dotted orange circle — now a glowing circle with a flower emoji and an 8-dot CSS confetti burst (bloom-pop + confetti-burst keyframes). This is the biggest 'feels like a game, not a worksheet' change.",
+    "All new animations are covered by the existing global prefers-reduced-motion:reduce rule (already present in mission.css, disables all animation/transition site-wide) — nothing new bypasses it.",
+    "No change to timing logic, scoring, state machine, or any of the five teaching rules in LEARNING-DESIGN.md — purely presentational."
+  ],
   "notDone": [
-    "rabbit_waiting/happy, squirrel_waiting/happy, fox_waiting/happy (2nd-tier, pending style approval of this P0 set)",
-    "forest_background.webp full-scene redo in matching clay style (background currently unchanged, still the original hand-drawn forest-world.svg)",
-    "plate_empty/plate_front (dish in front of each waiting friend — still the original flat CSS .dish shape, unchanged)",
-    "delivery_sign, stump, forest_path, bridge, shop_counter, reward_flower, UI svg icons (hint/undo/next/home/sound)",
-    "basket/tree quantity display verified only up to 4 items (current content's actual max); 0-10 range not empirically tested",
-    "intro-bag decorative visual on the welcome screen still uses the old CSS-drawn acorn/basket shapes, unchanged"
+    "squirrel_waiting/happy — in the work order's 2nd-tier list but not actually referenced anywhere in mission.js (the real animal set used is bear/rabbit/fox/frog/bird); skipped as unused rather than speculatively added",
+    "forest_background.webp full-scene redo in matching clay style — background is still the original hand-drawn forest-world.svg. Objects/characters are now glossy 3D clay renders over a flatter painted-vector background; the overall warm palette doesn't clash but the rendering technique isn't unified. Flagged for user decision, not silently left out.",
+    "delivery_sign, stump, forest_path, bridge_broken/fixed, shop_counter — these are for features (bridge repair, fox shop) that don't exist in the current game code yet (LEARNING-DESIGN.md lists them as future-version candidates, not implemented). Generating art for unbuilt features was skipped rather than producing unused files.",
+    "UI monochrome icons (hint_eye/undo/next/home/sound svg) — current buttons are text-based, not icon-based; not changed",
+    "intro-bag decorative visual on the very first welcome screen still uses the old CSS-drawn acorn/basket shapes, unchanged",
+    "basket/tree quantity display verified only up to 4 items (current content's actual max); 0-10 range not empirically tested since no template currently needs more than ~6",
+    "drag-and-drop gesture (tap-only still required to work end-to-end, and does) — not added; could be a further 'feels like a game' upgrade if wanted"
   ]
 }
