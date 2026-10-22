@@ -12,7 +12,11 @@ function model(s,target,n){
  const q=quota(target.length),used2=s.blockParts.filter(p=>p.keys.length===2).length,used1=s.blockParts.filter(p=>p.keys.length===1).length;
  const grid=(example)=>'<div class="slow-board slow-block-board" style="--side:'+n+'" role="group" aria-label="'+(example?'따라 만들 모양':'블록 조립 자리')+'">'+Array.from({length:n*n},(_,i)=>{
   const row=Math.floor(i/n),col=i%n,key=row+','+col,marked=example&&target.includes(key),placed=s.selected.has(key);
-  return example?'<div class="slow-tile '+(marked?'shown':'')+'">'+(marked?'🧱':'')+'</div>':'<button type="button" data-block="place" data-key="'+key+'" class="slow-tile '+(placed?'picked':'')+'" aria-label="'+(row+1)+'행 '+(col+1)+'열에서 조립" aria-pressed="'+placed+'">'+(placed?'🧱':'')+'</button>';
+  const piece=!example&&placed?s.blockParts.find(p=>p.keys.includes(key)):null;
+  const horizontal=piece?.keys.length===2&&piece.keys.every(k=>k.split(',')[0]===String(row));
+  const segment=piece?.keys.length===2?(horizontal?'brick-joined-horizontal':'brick-joined-vertical'):piece?'brick-single':'';
+  const pieceClass=segment+(piece?.keys[0]===key?' brick-start':' brick-end');
+  return example?'<div class="slow-tile '+(marked?'shown':'')+'">'+(marked?'🧱':'')+'</div>':'<button type="button" data-block="place" data-key="'+key+'" class="slow-tile '+(placed?'picked '+pieceClass:'')+'" aria-label="'+(row+1)+'행 '+(col+1)+'열에서 조립" aria-pressed="'+placed+'">'+(placed?'🧱':'')+'</button>';
  }).join('')+'</div>';
  const dir=s.blockDir==='right'?'↔️ 가로':'↕️ 세로';
  const controls='<div class="slow-block-tools"><div class="slow-block-pieces"><button type="button" data-block="double" class="'+(s.blockMode==='double'?'selected':'')+'" '+(used2>=q.double?'disabled':'')+' aria-pressed="'+(s.blockMode==='double')+'">🧱🧱 긴 블록 <small>'+(q.double-used2)+'개 남음</small></button>'+(q.single?'<button type="button" data-block="single" class="'+(s.blockMode==='single'?'selected':'')+'" '+(used1>=q.single?'disabled':'')+' aria-pressed="'+(s.blockMode==='single')+'">🧱 작은 블록 <small>'+(q.single-used1)+'개 남음</small></button>':'')+'</div><div class="slow-block-other"><button type="button" data-block="rotate" '+(s.blockMode==='single'?'disabled':'')+'>🔄 방향 바꾸기 '+dir+'</button><button type="button" data-block="undo" '+(s.blockParts.length?'':'disabled')+'>↩ 되돌리기</button></div></div>';
