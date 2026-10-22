@@ -12,3 +12,15 @@ button.feed-friend .dish .food.mini{transform:scale(.65);transform-origin:center
 @keyframes forest-nudge{from{filter:brightness(1)}to{filter:brightness(1.14)}}
 @media(max-width:650px){button.feed-friend{min-width:76px;min-height:110px;padding:4px 4px 9px;border-radius:16px;border-width:2px}button.feed-friend .forest-friend{width:70px;height:75px}button.feed-friend .dish{min-width:54px;min-height:21px}}
 @media(prefers-reduced-motion:reduce){button.feed-friend,.supply.need-food{transition:none;animation:none}}
+
+/* Non-verbal action affordances: after touching a nut, a waiting friend's plate quietly invites the next move. */
+.quest-actions.compact-alt{justify-content:flex-end;width:100%}
+.quest-actions.compact-alt .btn{font-size:15px;padding:8px 14px;min-height:40px;border-width:2px;border-radius:14px;box-shadow:0 3px 0 #a85c4d}
+.friend-fed .dish-filled{background:linear-gradient(#d8f0d1,#f4f5e9)}
+.quest-board:has(.packed-food .interaction) .feed-friend:not(:disabled) .dish{animation:next-plate 1.3s ease-in-out infinite alternate}
+.quest-board:has(.packed-food:empty) .supply-items .interaction:first-child .food{animation:next-acorn 1.5s ease-in-out infinite alternate}
+@keyframes next-plate{0%{transform:scale(1);border-color:#b9ac91}100%{transform:scale(1.07);border-color:#7baf8e}}
+@keyframes next-acorn{0%{transform:translateY(0)}100%{transform:translateY(-5px)}}
+.forest-chapter-reward{display:flex;gap:16px;justify-content:center;align-items:center}
+.forest-chapter-reward .forest-friend{width:92px;height:102px}
+@media(prefers-reduced-motion:reduce){.quest-board:has(.packed-food .interaction) .feed-friend:not(:disabled) .dish,.quest-board:has(.packed-food:empty) .supply-items .interaction:first-child .food{animation:none}}
