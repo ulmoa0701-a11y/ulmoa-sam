@@ -166,6 +166,23 @@ with sync_playwright() as p:
   assert synced==1, 'verified transfer retains a device original'
   page.locator('[data-workspace-target="writingCalendar"]').click()
   assert page.locator('#writingCalendar .writing-summary strong').nth(1).inner_text().strip()=='2건', 'transferred local original must not count twice'
+  page.evaluate("""async(uid)=>{
+   const media=await import('./trial-media.mjs');
+   const photo=document.createElement('canvas');photo.width=24;photo.height=24;photo.getContext('2d').fillRect(0,0,24,24);
+   await media.savePracticeRecord(uid,'student',{photos:[photo.toDataURL('image/jpeg',0.7)]});
+   await media.savePracticeRecord(uid,'student',{sketch:JSON.stringify([[[12,12],[80,80]]])});
+  }""",student)
+  page.reload(wait_until='domcontentloaded')
+  page.locator('[data-workspace-target="history"]').click()
+  page.once('dialog',lambda d:d.accept())
+  page.locator('#transferAllDevice').click()
+  page.wait_for_timeout(850)
+  assert len(stored)==4, ('bulk transfer of photo-only and sketch-only records',len(stored))
+  assert all(not item['shared'] for item in stored[1:]), 'every imported item must remain private'
+  assert len(stored[-2]['entry'].get('photos',[]))==1 and stored[-2]['entry'].get('date'), 'photo-only import requires valid server date without invented words'
+  assert 'sketch' in stored[-1]['entry'], 'drawing-only legacy note must survive cloud transfer'
+  originals=page.evaluate("""async(uid)=>{const m=await import('./trial-media.mjs');return (await m.listPracticeRecords(uid)).filter(x=>x.syncedTo&&x.transferState==='done').length}""",student)
+  assert originals==3, 'all three original device records must be preserved'
   assert not errors,('page errors',width,errors)
   page.close()
   # A totally new context/device sees server-synced record without previous IndexedDB.
