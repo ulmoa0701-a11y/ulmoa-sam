@@ -990,3 +990,14 @@ form[hidden], .form[hidden] {display:none !important;}
 .writing-calendar-shell .calendar-record-full{overflow-wrap:anywhere}
 .writing-calendar-shell .calendar-record-full img{max-width:100%}
 @media(max-width:640px){.writing-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.writing-summary span{font-size:11px;padding:8px 4px}.writing-summary strong{font-size:17px}.writing-month-control{gap:5px}.writing-month-control button{padding:7px 10px}.writing-month-control strong{min-width:100px;font-size:16px}}
+
+/* Private, therapist-only share notification inbox. */
+.notification-panel{min-width:0}
+.notification-panel h2 small{font-size:.65em;color:#607587}
+.notification-row{display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid #d8e5ed;border-radius:13px;padding:14px 16px;margin:10px 0;background:#fff}
+.notification-row:not(.is-read){border-left:4px solid #4478a4;background:#f7faff}
+.notification-row strong{font-size:15px;display:block;color:#21425a;line-height:1.5}
+.notification-row small{display:block;color:#5a7383;font-size:12px;margin-top:6px}
+.notification-row .button-ghost{white-space:nowrap;min-height:40px}
+.notification-target{outline:3px solid #74a7ca;outline-offset:3px;scroll-margin-top:25px}
+@media(max-width:550px){.notification-row{align-items:stretch;flex-direction:column;gap:9px;padding:12px}.notification-row .button-ghost{align-self:flex-start}.notification-panel{padding-inline:12px}}
