@@ -133,7 +133,7 @@ with sync_playwright() as p:
   assert stored[0]['entry']['note']=='수정한 가상 기록 - 편집 완료'
   assert len(stored[0]['entry']['photos'])==1 and stored[0]['entry']['photos'][0]!=old_photo, 'photo replaced'
   assert stored[0]['shared'] and 'sketch' in stored[0]['entry'], 'drawing and sharing preserved'
-  assert '수정한 가상 기록' in page.locator('.practice-cloud-record').inner_text()
+  assert '수정한 가상 기록' in page.locator('.practice-cloud-record').first.inner_text()
   # Old IndexedDB records in the same student's browser also support edit-in-place.
   page.evaluate("""async(uid)=>{
    const m=await import('./trial-media.mjs');
