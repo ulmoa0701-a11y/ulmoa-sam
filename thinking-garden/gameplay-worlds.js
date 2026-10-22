@@ -36,18 +36,42 @@ function total(root,id){
  return visible;
 }
 function update(root,id){
- const meter=root.querySelector('.moa-world-meter');if(!meter)return;
- const isMemoryHidden=id==='slowMemory'&&!!root.querySelector('[data-slow="hide"]');
- meter.hidden=id==='slowName'||isMemoryHidden;
- if(meter.hidden)return;
- const n=total(root,id),v=amount(root,id);
- const max=Math.max(1,n);meter.querySelector('.moa-world-count').textContent=v+' / '+n;
- meter.querySelector('.moa-world-fill').style.width=Math.min(100,Math.round(v/max*100))+'%';
+ const meter=root.querySelector('.moa-world-meter');
+ const memory=id==='slowMemory';
+ const recalling=memory&&!!root.querySelector('[data-slow="show"]');
+ if(meter){
+  // During encoding, no progress hints. During recall, never reveal how many
+  // locations were in the sample: target count is a retrieval cue.
+  meter.hidden=id==='slowName'||(memory&&!recalling);
+  if(!meter.hidden){
+   const v=amount(root,id),count=meter.querySelector('.moa-world-count');
+   const rail=meter.querySelector('.moa-world-rail');
+   if(memory){
+    meter.querySelector('.moa-world-goal').textContent='내가 표시한 자리';
+    count.textContent=String(v);
+    rail.hidden=true;
+    meter.setAttribute('aria-label','내가 표시한 자리 '+v+'개');
+   }else{
+    const n=total(root,id);
+    count.textContent=v+' / '+n;
+    rail.hidden=false;
+    meter.querySelector('.moa-world-fill').style.width=Math.min(100,Math.round(v/Math.max(1,n)*100))+'%';
+   }
+  }
+ }
+ const message=root.querySelector('.slow-feedback')?.textContent||'';
  const completed=!!root.querySelector('[data-slow="next"]');
- root.classList.toggle('moa-scene-finished',completed);
- if(completed&&!root.querySelector('.moa-world-ending')){
+ const correct=completed&&message.includes('정원을 정확하게 살폈어요');
+ root.classList.toggle('moa-scene-finished',correct);
+ root.classList.toggle('moa-scene-needs-review',!completed&&message.includes('다시 확인해요'));
+ const awaitingName=id==='slowName'&&!!root.querySelector('.slow-name-choice,.slow-teacher-choice');
+ root.classList.toggle('moa-scene-name-answer',awaitingName);
+ // A skipped or incorrectly completed round must never display success art.
+ const existing=root.querySelector('.moa-world-ending');
+ if(!correct){existing?.remove();return;}
+ if(!existing){
   const ending=document.createElement('div');ending.className='moa-world-ending';ending.setAttribute('aria-hidden','true');
-  ending.innerHTML='<span class="moa-ending-flowers">✿ ✦ ✿</span>';
+  ending.innerHTML='<span class="moa-world-trophy"></span>';
   root.appendChild(ending);
  }
 }
@@ -73,9 +97,40 @@ function decorate(){
  }
  update(root,id);
 }
+// Make a chosen object visibly travel from the shelf into the packed bag.
+// Works for correct and incorrect selections alike: this is interaction feedback,
+// not an answer hint. Never touches scoring or the task's selection set.
+function moveSelectedItem(tile,root){
+ if(window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)return;
+ if(typeof tile.animate!=='function')return;
+ const bag=root.querySelector('.slow-bag-progress'),icon=tile.textContent.trim();
+ if(!bag||!icon)return;
+ const from=tile.getBoundingClientRect(),to=bag.getBoundingClientRect();
+ if(!from.width||!to.width)return;
+ const move=document.createElement('span');
+ move.className='moa-moving-item';
+ move.textContent=icon;
+ move.setAttribute('aria-hidden','true');
+ move.style.left=(from.left+from.width/2-22)+'px';
+ move.style.top=(from.top+from.height/2-22)+'px';
+ document.body.appendChild(move);
+ const dx=to.left+to.width/2-(from.left+from.width/2);
+ const dy=to.top+to.height/2-(from.top+from.height/2);
+ const animation=move.animate([
+  {transform:'translate(0px,0px) scale(1)',opacity:1},
+  {transform:'translate('+dx+'px,'+dy+'px) scale(.55)',opacity:.35}
+ ],{duration:400,easing:'cubic-bezier(.25,.6,.3,1)'});
+ animation.onfinish=()=>move.remove();
+ animation.oncancel=()=>move.remove();
+}
 new MutationObserver(decorate).observe(gameArea,{childList:true});
 document.addEventListener('click',e=>{
- if(!e.target.closest('#gameArea .slow-task'))return;
+ const root=e.target.closest('#gameArea .slow-task');
+ if(!root)return;
+ const tile=e.target.closest('button.slow-tile[data-slow="cell"]');
+ if(tile&&root.classList.contains('moa-scene-slowEveryday')&&tile.classList.contains('picked')){
+  moveSelectedItem(tile,root);
+ }
  // The original handler owns game state; visual feedback follows it.
  window.setTimeout(decorate,0);
 },false);
