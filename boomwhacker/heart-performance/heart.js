@@ -970,13 +970,20 @@ function bind(){
  $("#stagePlay").onclick=()=>playing?pause():play();
  $("#stageReset").onclick=reset;
  $("#stageExit").onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen()}catch(e){setStatus("전체 화면을 종료하지 못했어요.")}};
- $("#fullscreen").onclick=async()=>{
+ const enterScoreFullscreen=async()=>{
    const el=$("#stage");try{
      if(document.fullscreenElement){await document.exitFullscreen();return}
-     if(el.requestFullscreen)await el.requestFullscreen();
-     else setStatus("이 브라우저에서 전체 화면이 지원되지 않아요.");
+     if(!el.requestFullscreen){setStatus("이 브라우저에서 전체 화면이 지원되지 않아요.");return}
+     await el.requestFullscreen();
+     // Orientation lock is optional: Safari and some mobile browsers do not permit it.
+     // Failure must never close the usable fullscreen score.
+     if(matchMedia("(max-width: 620px) and (orientation: portrait)").matches&&screen.orientation?.lock){
+       try{await screen.orientation.lock("landscape")}catch(e){}
+     }
    }catch(e){setStatus("전체 화면을 사용할 수 없어요. 휴대폰을 가로로 돌려 주세요.")}
  };
+ $("#fullscreen").onclick=enterScoreFullscreen;
+ $("#mobileLandscape").onclick=enterScoreFullscreen;
  document.addEventListener("fullscreenchange",()=>{
   $("#fullscreen").textContent=document.fullscreenElement?"전체화면 종료":"악보 크게";
   $("#stagePlay").textContent=playing?"일시정지":ended?"다시 연주":"연주 시작";
