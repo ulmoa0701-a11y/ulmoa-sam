@@ -67,8 +67,8 @@ for(const width of [390,1280]){
   await check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),width+'px curriculum no overflow');
   await page.screenshot({path:path.join(out,'curricula-'+width+'.png'),fullPage:true});
   await page.goto(new URL('support-first/make/',BASE).href,{waitUntil:'domcontentloaded'});
-  await check(await page.locator('[data-world]').count()===3,width+'px 3 worlds');
-  await check(await page.locator('[data-hero]').count()===3,width+'px 3 characters');
+  await check(await page.locator('button[data-world]').count()===3,width+'px 3 worlds');
+  await check(await page.locator('button[data-hero]').count()===3,width+'px 3 characters');
   await check(await page.locator('[data-quest]').count()===3,width+'px 3 story goals');
   await check(await page.locator('a[href="make/"]').count()===0,width+'px no broken self-link');
   for(const world of ['space','ocean','forest']){
