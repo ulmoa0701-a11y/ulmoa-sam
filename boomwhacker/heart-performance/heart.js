@@ -158,7 +158,7 @@ function tap(key){flash={note:key,until:performance.now()+180};const k=$$("#keys
 }
 const labels={rest:"쉼"};
 function col(n){return COLORS[n]||"#d9e4e4"}
-function font(ctx,size=22,weight="800"){ctx.font=weight+" "+size+"px 'Noto Sans KR','Malgun Gothic',sans-serif"}
+function font(ctx,size=22,weight="800"){ctx.font=weight+" "+size+"px 'Noto Sans CJK KR','NanumGothic','Malgun Gothic',sans-serif"}
 function txt(c,t,x,y,size=20,color="#2a4755",align="center",weight="800"){c.save();c.textAlign=align;c.textBaseline="middle";font(c,size,weight);c.fillStyle=color;c.fillText(String(t),x,y);c.restore()}
 function rr(c,x,y,w,h,r,fill){c.beginPath();if(c.roundRect)c.roundRect(x,y,w,h,r);else c.rect(x,y,w,h);if(fill){c.fillStyle=fill;c.fill()}return c}
 function disk(c,x,y,r,fill,stroke="",sw=2){c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fillStyle=fill;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=sw;c.stroke()}}
@@ -423,7 +423,11 @@ function heart(c,beat,x,y,w,h,now,muted=false){
  for(const p of parts)if(p.onset&&p.from>0.001)ln(c,p.from*100,10,p.from*100,81,"#fff",complex?2:3);
  if(complex){for(let j=1;j<4;j++){if(parts.some(p=>Math.abs(p.from*100-j*25)<.01))continue;c.setLineDash([1.2,3]);ln(c,j*25,12,j*25,77,"#ffffffbd",.9);c.setLineDash([])}}
  c.restore();
- c.strokeStyle=active&&!muted?"#368470":"#75948a";c.lineWidth=active&&!muted?3:1.1;c.stroke(HEART);
+ c.save();c.clip(HEART);
+ const gloss=c.createLinearGradient(0,0,0,90);
+ gloss.addColorStop(0,"#ffffff21");gloss.addColorStop(.35,"#ffffff06");gloss.addColorStop(1,"#1829230b");
+ c.fillStyle=gloss;c.fillRect(0,0,100,90);c.restore();
+ c.strokeStyle=active&&!muted?"#368470":"#719083";c.lineWidth=active&&!muted?3:1.2;c.stroke(HEART);
  for(const p of parts){if(!p.onset)continue;const width=p.to-p.from,cx=50*(p.from+p.to);
    c.globalAlpha=!isSelected(p.note)&&p.note!=="쉼"?.35:1;
    const label=p.note==="높은도"?"도":p.note==="쉼"?"쉼":fixedNote(p.note);
@@ -630,26 +634,48 @@ function themeBackground(c){
  }
  c.restore();
 }
-function themeCard(c,x,y,w,h,row){
- const p=themePalette();
- c.save();c.shadowColor=theme==="night"?"#172b4366":"#5a776330";c.shadowBlur=14;c.shadowOffsetY=5;
- rr(c,x,y,w,h,27,row===0?p.first:p.second);c.restore();
- c.strokeStyle=p.border;c.lineWidth=1.7;c.beginPath();c.roundRect(x,y,w,h,27);c.stroke();
- // Restrained paper corner tabs with different treatment for each row.
- rr(c,x+18,y+12,8,29,5,row===0?(theme==="night"?"#b5b6e2":"#a9d4bd"):(theme==="classroom"?"#e7c4a4":"#c9d7ed"));
+
+function themeCard(c,x,y,w,h,row,mode="two"){
+ const p=themePalette(),color=row===0?p.first:p.second;
+ c.save();c.shadowColor=theme==="night"?"#172b4359":"#5a77632b";c.shadowBlur=16;c.shadowOffsetY=5;
+ rr(c,x,y,w,h,27,color);c.restore();
+ c.strokeStyle=p.border;c.lineWidth=1.8;c.beginPath();c.roundRect(x,y,w,h,27);c.stroke();
+ c.save();c.beginPath();c.roundRect(x,y,w,h,27);c.clip();
+ const wash=c.createLinearGradient(x,y,x+w,y+h);
+ wash.addColorStop(0,theme==="night"?"#f9f0ff15":"#f6ffdd25");
+ wash.addColorStop(1,theme==="night"?"#9f9ac719":"#b8d4be12");
+ c.fillStyle=wash;c.fillRect(x,y,w,h);
+ c.restore();
+ const accent=row===0?(theme==="night"?"#c19cb1":theme==="classroom"?"#deaaa0":"#89b69b"):(theme==="night"?"#92bed5":"#78bba8");
+ const badgeY=y+(mode==="stairs"?16:27);
+ disk(c,x+34,badgeY,12,accent);
+ txt(c,String(row+1),x+34,badgeY+.5,14,"#fff","center","750");
+ const ruleY=y+(mode==="stairs"?37:59);
+ ln(c,x+25,ruleY,x+w-25,ruleY,theme==="night"?"#d9d8e9":"#e6e9df",1.3);
 }
 function themeHeader(c,title,start,end){
  const p=themePalette();
- c.save();c.shadowColor=theme==="night"?"#10233d4d":"#7a9a8733";c.shadowBlur=11;c.shadowOffsetY=3;
- rr(c,51,18,1098,73,24,p.top);c.restore();
- txt(c,title,88,53,27,p.heading,"left","750");
- txt(c,(start+1)+"~"+end+"마디 / "+song.bars.length+"마디",1116,53,20,p.sub,"right","700");
+ c.save();c.shadowColor=theme==="night"?"#10233d4d":"#7a9a8726";c.shadowBlur=10;c.shadowOffsetY=3;
+ rr(c,48,19,695,75,24,p.top);
+ rr(c,952,24,200,65,22,p.top);
+ c.restore();
+ rr(c,64,37,6,35,3,theme==="night"?"#9f9ed2":theme==="forest"?"#85c59d":"#dcae95");
+ txt(c,title,93,57,28,p.heading,"left","750");
+ txt(c,(start+1)+"~"+end+" / "+song.bars.length+"마디",1053,56,20,p.sub,"center","700");
+ if(theme==="night"){
+  for(const [x,y,z] of [[776,42,5],[918,71,4],[825,83,3]])drawSparkle(c,x,y,z,"#fff2ca");
+ }else if(theme==="forest"){
+  ln(c,779,79,917,79,"#a1cfad",2);
+  disk(c,807,53,6,"#b8d6a2");disk(c,889,57,4,"#a5c9a3");
+ }else{
+  disk(c,810,59,8,"#e6d1ad");disk(c,849,44,5,"#add0b2");
+  drawSparkle(c,892,63,7,"#d5b08c");
+ }
 }
 function themeFooter(c,message){
- const p=themePalette();rr(c,75,557,1050,44,15,p.footer);
- txt(c,message,600,579,18,p.heading,"center","700");
+ const p=themePalette();rr(c,145,561,910,39,17,p.footer);
+ txt(c,message,600,580,17,p.heading,"center","700");
 }
-
 function scorePageBackground(info){
  const background=document.createElement("canvas");background.width=1200;background.height=620;
  const c=background.getContext("2d");
@@ -658,7 +684,7 @@ function scorePageBackground(info){
    const beginning=info.startBar+row*info.barsPerLine,ending=Math.min(info.endBar,beginning+info.barsPerLine),
          top=row===0?123:335;
    themeCard(c,50,top,1100,202,row);
-   txt(c,row===0?"첫 번째 줄":"두 번째 줄",88,top+27,18,themePalette().heading,"left","700");
+   txt(c,row===0?"첫 번째 줄":"두 번째 줄",110,top+27,18,themePalette().heading,"left","700");
    if(beginning>=ending){txt(c,"이 줄은 비어 있어요",594,top+106,22,"#90a89e");continue}
    txt(c,(beginning+1)+"~"+ending+"마디 · "+((ending-beginning)*song.meter)+"개 하트",1107,top+27,16,themePalette().sub,"right","650");
    const g=twoGeometry(info,row);
@@ -803,8 +829,8 @@ function buildStairPage(info){
  for(let row=0;row<2;row++){
   const first=info.startBar+row*info.barsPerLine,last=Math.min(info.endBar,first+info.barsPerLine);
   const top=row===0?104:334;
-  themeCard(c,44,top,1112,row===0?218:215,row);
-  txt(c,row===0?"첫 번째 줄":"두 번째 줄",78,top+13,16,themePalette().heading,"left","750");
+  themeCard(c,44,top,1112,row===0?218:215,row,"stairs");
+  txt(c,row===0?"첫 번째 줄":"두 번째 줄",103,top+16,16,themePalette().heading,"left","750");
   if(first>=last){txt(c,"이 줄은 비어 있어요",600,top+113,22,"#98aaa3");continue}
   const g=stairGeometry(info,row);
   // Small elevation guide, NOT moving lanes or a scrolling piano-roll.
