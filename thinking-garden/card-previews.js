@@ -9,44 +9,32 @@
   `;
   document.head.appendChild(gameFix);
 
-  const previews = {
-    rescue: `<div class="cp-rescue-radio">📡 <b>노란 큰 오리 발견!</b></div><div class="cp-rescue-field"><span class="tree">🌳</span><span class="target">🦆</span><span class="bush">🌿</span><span class="other">🐷</span><span class="van">🚐</span></div>`,
-    memory: `<div class="cp-mission">이 순서대로 기억해요!</div><div class="cp-sequence"><i class="c-red">🌸</i><i class="c-blue">🌼</i><i class="c-yellow">🌻</i><i class="c-purple">🌷</i></div><div class="cp-arrow">▼</div><div class="cp-slots"><i>?</i><i>?</i><i>?</i><i>?</i></div>`,
-    spacing: `<div class="cp-mission">붙어 있는 문장에서 띄울 곳을 찾아요</div><div class="cp-glued">오늘은학교에가요</div><div class="cp-space-arrow">톡! ↓</div><div class="cp-spaced"><span>오늘은</span><span>학교에</span><span>가요</span></div>`,
-    spelling: `<div class="cp-mission">맞는 표현을 골라 간판을 고쳐요</div><div class="cp-sign">숙제를 <b>?</b></div><div class="cp-answer-row"><span class="is-bad">✕ 햇어요</span><span class="is-good">✓ 했어요</span></div>`,
-    sameShape: `<div class="cp-mission">색이 달라도 같은 모양을 찾아요</div><div class="cp-target-shape">★</div><div class="cp-choice-row shape"><span style="color:#ffd45b">●</span><span class="is-good" style="color:#6bb7ff">★</span><span style="color:#69c77d">▲</span><span style="color:#9b83e8">◆</span></div>`,
-    flower: `<div class="cp-mission">꽃만 쏙쏙 찾아요</div><div class="cp-choice-row"><span class="is-good">🌷</span><span>🍃</span><span class="is-good">🌼</span><span>🪨</span><span class="is-good">🌸</span></div>`,
-    hide: `<div class="cp-mission">잎사귀 아래 숨은 친구를 찾아요</div><div class="cp-leaves"><span>🍃</span><span class="is-open">🐞</span><span>🍃</span><span>🍃</span><span>🍃</span><span>🍃</span></div>`,
-    path: `<div class="cp-mission">반짝이는 길을 순서대로 따라가요</div><div class="cp-path"><i class="done">🌱</i><i class="ready">🌼</i><i>🍃</i><i>🌸</i><i>🌿</i></div><div class="cp-runner">🦋</div>`,
-    calm: `<div class="cp-mission">초록불이 켜지면 톡!</div><div class="cp-signal"><span class="red">🔴<small>기다려요</small></span><b>→</b><span class="green">🟢<small>지금!</small></span></div>`,
-    inside: `<div class="cp-mission">울타리 안에만 별을 심어요</div><div class="cp-field"><div><i>⭐</i><i>⭐</i><i>⭐</i></div></div>`,
-    targets: `<div class="cp-mission">동그라미를 하나씩 모두 깨워요</div><div class="cp-targets"><i class="awake">🌼</i><i>○</i><i>○</i><i class="awake">🌼</i><i>○</i><i>○</i></div>`,
-    paint: `<div class="cp-mission">정원길 안쪽을 쓱싹 채워요</div><div class="cp-paint">${Array.from({length:18}, (_, i) => `<i class="${i < 9 ? 'painted' : ''}"></i>`).join('')}</div>`,
-    resetRescue: `<div class="cp-mission">📻 토끼를 찾아요! 로봇이 고양이를 추천했어요.</div><div class="cp-choice-row"><span>🐰</span><span>↔</span><span>🤖🐱</span><span class="is-good">✋</span></div><div class="cp-arrow">멈추고 다시 확인해요 🌱</div>`,
-    classroomMove: `<div class="cp-mission">📚 책상 왼쪽에 가방 놓기</div><div class="cp-choice-row"><span class="is-good">🎒</span><span>🪑</span><span>▫</span><span>→</span><span>✅</span></div><div class="cp-arrow">공간을 보고 실제 물건을 배치해요</div>`,
-    festivalPlan: `<div class="cp-mission">🎪 친구들의 단서로 순서를 정해요</div><div class="cp-choice-row"><span>🌱</span><span>→</span><span>💧</span><span>→</span><span>🌸</span></div><div class="cp-arrow">순서 계획을 세워 축제 준비!</div>`,
-    rulePost: `<div class="cp-mission">💨 배달 규칙이 바뀌었어요!</div><div class="cp-choice-row"><span>✉️⭐</span><span>→</span><span class="is-good">📮🟨</span><span>📮🍀</span></div><div class="cp-arrow">지금은 색깔로 배달해요</div>`,
-    mirrorPond: `<div class="cp-mission">🌊 거울에 비친 그림은?</div><div class="cp-choice-row"><span>🐸</span><span>🌼</span><span>✦</span><span>🌼</span><span>🐸</span></div><div class="cp-arrow">↔ 거울연못을 건너요</div>`,
-    sceneDetect: `<div class="cp-mission">🌳 숲에서 무엇이 바뀌었을까요?</div><div class="cp-choice-row"><span>🌳</span><span>🐰</span><span>→</span><span>🌳</span><span class="is-good">🐱</span></div><div class="cp-arrow">👀 단서를 기억해요</div>`,
-    slowScan: `<div class="cp-mission">🌼 꽃을 빠뜨리지 않고 찾아요</div><div class="cp-choice-row"><span>🍃</span><span class="is-good">🌼</span><span>🌱</span><span class="is-good">🌼</span><span>🪨</span></div>`,
-    slowPlace: `<div class="cp-mission">같은 위치에 꽃을 심어요</div><div class="cp-choice-row"><span>🌼</span><span>▫</span><span>▫</span><span>→</span><span class="is-good">🌼</span></div>`,
-    slowBlock: `<div class="cp-mission">블록을 돌려 샘의 집을 지어요 🏗️</div><div class="cp-choice-row"><span>🧱🧱</span><span>🔄</span><span class="is-good">↕</span><span>🧱🧱</span></div><div class="cp-arrow">🏡 길쭉한 블록 조립하기</div>`,
-    slowName: `<div class="cp-mission">보고 생각한 뒤 말해요</div><div class="cp-choice-row"><span>🐰</span><span>🐶</span><span>🐱</span></div>`,
-    slowMemory: `<div class="cp-mission">어느 칸에 꽃이 피었을까요?</div><div class="cp-sequence"><i>🌼</i><i>▫</i><i>🌸</i><i>▫</i></div><div class="cp-arrow">잠깐 기억해요 ↓</div><div class="cp-slots"><i>?</i><i>?</i><i>?</i><i>?</i></div>`,
-    slowEveryday: `<div class="cp-mission">🌧️ 비 오는 날! 준비물은 무엇일까?</div><div class="cp-choice-row"><span class="is-good">☂️</span><span>🥁</span><span class="is-good">🧥</span><span>📖</span><span class="is-good">👢</span></div><div class="cp-arrow">🎒 모아 가방을 채워 출발해요</div>`,
-    water: `<div class="cp-mission">시든 꽃에만 물을 주세요</div><div class="cp-choice-row"><span>🌷<small>✓</small></span><span class="is-good">🥀<small>💧</small></span><span>🌻<small>✓</small></span><span class="is-good">🥀<small>💧</small></span></div>`
-  };
+  // These are actual Chrome-captured play scenes, NOT decorative square/emoji mockups.
+  // The two observable actions distinguish games with overlapping skill categories.
+  const GUIDE={"rescue":["무전 단서 듣기","친구 찾아 구조하기","듣고 찾기"],"memory":["주문표 순서 보기","순서대로 바구니에 담기","기억하고 담기"],"spacing":["붙은 문장 읽기","띄어쓸 곳 누르기","글자 사이 찾기"],"spelling":["잘못된 간판 보기","맞는 표현으로 고치기","맞춤법 선택"],"sameShape":["기준 모양 살피기","똑같은 모양 고르기","모양 비교"],"flower":["찾을 꽃 확인","꽃만 골라 누르기","꽃 찾기"],"hide":["발자국 단서 찾기","잎사귀 열어 친구 찾기","단서 탐색"],"path":["빛나는 자리 보기","차례대로 누르기","순서 누르기"],"calm":["신호등 색 살피기","초록불에만 움직이기","기다렸다 누르기"],"inside":["울타리 선 보기","안쪽에 별 심기","영역 안 누르기"],"targets":["잠든 꽃씨 살피기","빠짐없이 하나씩 깨우기","하나씩 확인"],"paint":["칠할 길 살피기","선 안쪽을 따라 칠하기","범위 칠하기"],"resetRescue":["로봇 안내 들어보기","틀리면 멈춰 재확인","오류 찾아 고치기"],"classroomMove":["물건 위치 지시 듣기","정해진 자리에 옮기기","지시대로 옮기기"],"festivalPlan":["친구들의 단서 살피기","준비 순서 정하기","순서 계획"],"rulePost":["새로 바뀐 규칙 보기","새 기준으로 배달하기","규칙 전환"],"mirrorPond":["원래 모양 보기","거울·회전 모양 고르기","방향 비교"],"sceneDetect":["처음 장면 기억하기","달라진 자리 찾아내기","변화 찾기"],"slowScan":["찾을 꽃 단서 보기","여러 곳에서 찾아내기","단서 탐색"],"slowPlace":["꽃이 놓인 자리 보기","같은 칸에 꽃 놓기","위치 따라 놓기"],"slowBlock":["블록 모양 살피기","방향 돌려 조립하기","회전해 조립"],"slowName":["동물·색을 살펴보기","이름 생각해 말하기","보고 말하기"],"slowMemory":["꽃이 있던 자리 보기","가린 뒤 같은 자리 찾기","위치 기억"],"slowEveryday":["날씨·상황 알아보기","필요한 물건 챙기기","생활 준비"],"water":["시든 꽃 구별하기","찾아서 하나씩 물 주기","돌보고 확인"]};
+  const PREVIEW_VERSION='?v=20261021-playstate4';
+  const escapeText=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-  document.querySelectorAll('.library-card[data-open]').forEach((card) => {
-    const id = card.dataset.open;
-    if (!previews[id] || card.querySelector('.card-live-preview')) return;
-    const preview = document.createElement('div');
-    preview.className = `card-live-preview preview-${id}`;
-    preview.setAttribute('aria-hidden', 'true');
-    preview.innerHTML = previews[id];
-    card.appendChild(preview);
-    const cta = card.querySelector('strong');
-    if (cta) cta.textContent = '게임 열기 →';
+  document.querySelectorAll('#gardenGamePanel .library-card[data-open]').forEach(card=>{
+    const id=card.dataset.open,guide=GUIDE[id];
+    if(!guide || card.querySelector('.card-live-preview'))return;
+    const [first,second,mode]=guide;
+    const panel=document.createElement('div');
+    panel.className='card-live-preview card-shot-preview preview-'+id;
+    panel.setAttribute('aria-hidden','true');
+    panel.innerHTML='<div class="card-shot-screen"><img loading="lazy" decoding="async" alt="" src="../gardens/previews/'+encodeURIComponent(id)+'-play.jpg'+PREVIEW_VERSION+'"></div>'+
+      '<div class="card-shot-info"><span class="card-shot-label">실제 게임 장면</span><b class="card-shot-mode">'+escapeText(mode)+'</b></div>'+
+      '<div class="card-shot-steps"><span>'+escapeText(first)+'</span><span class="card-shot-arrow" aria-hidden="true">→</span><strong>'+escapeText(second)+'</strong></div>';
+    const img=panel.querySelector('img');
+    img.addEventListener('error',()=>{
+      panel.classList.add('card-shot-missing');
+      const screen=panel.querySelector('.card-shot-screen');
+      screen.textContent='게임 미리보기 이미지를 표시할 수 없어요.';
+      panel.querySelector('.card-shot-label').textContent='미리보기 없음';
+    });
+    card.append(panel);
+    const cta=card.querySelector('strong');
+    if(cta)cta.textContent='게임 시작 →';
   });
 
   const applyGameChrome = () => {
