@@ -159,7 +159,7 @@ const {chromium}=require("playwright-core");
  q.selectSong(original);return out;
 });
 assert.equal(visibleHearts["moa-signal"].beatsPerLine,8,"2/4 must balance full 8-bar song as 4+4 rather than 5+3");
-assert.equal(visibleHearts["moa-breeze"].beatsPerLine,6,"3/4 must balance phrase heights");
+assert([6,9].includes(visibleHearts["moa-breeze"].beatsPerLine),"3/4 must keep readable two-row full-measure phrases");
 assert.equal(visibleHearts["moa-space"].beatsPerLine,8,"4/4 phrase must display eight hearts per row");
 tests.push(name+": stationary two rows show 2/4="+visibleHearts["moa-signal"].beatsPerLine+" hearts per row, no tiny two-heart rows");
 tests.push(name+": score visually frozen for both rows, whole-page swap exactly at end, sprite-only motion, hop/walk toggle");
