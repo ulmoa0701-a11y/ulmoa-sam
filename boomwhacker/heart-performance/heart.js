@@ -157,7 +157,7 @@ function tap(key){flash={note:key,until:performance.now()+180};const k=$$("#keys
 }
 const labels={rest:"쉼"};
 function col(n){return COLORS[n]||"#d9e4e4"}
-function font(ctx,size=22,weight="800"){ctx.font=weight+" "+size+"px Pretendard,SUIT,'Malgun Gothic',sans-serif"}
+function font(ctx,size=22,weight="800"){ctx.font=weight+" "+size+"px 'Noto Sans KR','Malgun Gothic',sans-serif"}
 function txt(c,t,x,y,size=20,color="#2a4755",align="center",weight="800"){c.save();c.textAlign=align;c.textBaseline="middle";font(c,size,weight);c.fillStyle=color;c.fillText(String(t),x,y);c.restore()}
 function rr(c,x,y,w,h,r,fill){c.beginPath();if(c.roundRect)c.roundRect(x,y,w,h,r);else c.rect(x,y,w,h);if(fill){c.fillStyle=fill;c.fill()}return c}
 function disk(c,x,y,r,fill,stroke="",sw=2){c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fillStyle=fill;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=sw;c.stroke()}}
@@ -426,8 +426,8 @@ function heart(c,beat,x,y,w,h,now,muted=false){
  for(const p of parts){if(!p.onset)continue;const width=p.to-p.from,cx=50*(p.from+p.to);
    c.globalAlpha=!isSelected(p.note)&&p.note!=="쉼"?.35:1;
    const label=p.note==="높은도"?"도":p.note==="쉼"?"쉼":fixedNote(p.note);
-   const fs=Math.min(32,Math.max(12,Math.floor((width*100-6)/(label.length+0.15))));
-   txt(c,label,cx,38,fs,["도","라","높은도"].includes(p.note)?"#fff":"#243e48","center","700");
+   const fs=Math.min(30,Math.max(12,Math.floor((width*100-10)/(label.length+0.22))));
+   txt(c,label,cx,38,fs,["도","솔","라","시","높은도"].includes(p.note)?"#fff":"#253e47","center","700");
    if(p.note==="높은도")txt(c,"↑",cx,58,Math.max(11,Math.min(15,fs*.62)),"#fff");
  }
  c.globalAlpha=1;
@@ -450,8 +450,8 @@ function heart(c,beat,x,y,w,h,now,muted=false){
    on the original score without covering the beat subdivisions. */
 function moaSprite(c,x,y,b,at,dim=false){
  if(dim)return;const alert=cueAt(b).now,cheer=alert&&Math.abs(alert.start-at)<.025;
- const sprite=cheer?moaCheer:moaDefault,swing=!motion&&(playing||exporting)&&!(view==="two"&&moaTravel==="walk")?(Math.sin(performance.now()/185)*2):0;
- c.save();const size=view==="two"?(twoBarsPerLine()===1?88:79):view==="stairs"?82:65;
+ const sprite=cheer?moaCheer:moaDefault,swing=!motion&&(playing||exporting)&&!(view==="two"&&moaTravel==="walk")?(Math.sin(performance.now()/185)*1.1):0;
+ c.save();const size=view==="two"?49:view==="stairs"?38:65;
  if(sprite.complete&&sprite.naturalWidth>0){
   c.drawImage(sprite,x-size/2,y-size+12+swing,size,size);
  }else{
@@ -549,13 +549,15 @@ const twoBarsPerLine=()=>{
  const beatTarget=window.matchMedia("(max-width:620px)").matches?8:10;
  return Math.max(1,Math.floor(beatTarget/song.meter));
 };
+// Equal page capacity keeps both lines balanced (8 bars in 2/4 -> 4+4).
+function balancedBarsPerLine(total){
+ const capacity=twoBarsPerLine(),pages=Math.ceil(total/(capacity*2));
+ return Math.max(1,Math.min(capacity,Math.ceil(total/(pages*2))));
+}
 function twoPageAt(b){
  const first=Math.round(startBeat()/song.meter),
        total=Math.round((endBeat()-startBeat())/song.meter),
-       maxBars=twoBarsPerLine(),
-       // Short selected practice sections are shared between both static rows.
-       // Do not waste the entire second row on an empty panel.
-       barsPerLine=total<=maxBars?Math.max(1,Math.ceil(total/2)):maxBars,
+       barsPerLine=balancedBarsPerLine(total),
        pageBars=2*barsPerLine,
        current=clamp(Math.floor((b-startBeat())/song.meter),0,Math.max(0,total-1)),
        page=Math.floor(current/pageBars),startBar=first+page*pageBars;
@@ -565,8 +567,8 @@ function twoPageAt(b){
 }
 function twoBaseKey(info){return [song.key,notes,section,theme,info.startBar,info.endBar,info.barsPerLine].join(":")}
 function twoGeometry(info,row){
- const count=info.barsPerLine*song.meter,gap=count>=9?5:9,
-       width=Math.min(130,(1040-gap*(count-1))/count);
+ const count=info.barsPerLine*song.meter,gap=count>=9?7:11,
+       width=Math.min(126,(960-gap*(count-1))/count);
  const left=(1200-count*width-(count-1)*gap)/2;
  return {width,gap,left,count,top:row===0?204:408,height:count>=9?110:120};
 }
@@ -633,7 +635,7 @@ function themeCard(c,x,y,w,h,row){
  rr(c,x,y,w,h,27,row===0?p.first:p.second);c.restore();
  c.strokeStyle=p.border;c.lineWidth=1.7;c.beginPath();c.roundRect(x,y,w,h,27);c.stroke();
  // Restrained paper corner tabs with different treatment for each row.
- rr(c,x+18,y+12,11,31,5,row===0?(theme==="night"?"#b5b6e2":"#a9d4bd"):(theme==="classroom"?"#e7c4a4":"#c9d7ed"));
+ rr(c,x+18,y+12,8,29,5,row===0?(theme==="night"?"#b5b6e2":"#a9d4bd"):(theme==="classroom"?"#e7c4a4":"#c9d7ed"));
 }
 function themeHeader(c,title,start,end){
  const p=themePalette();
@@ -655,9 +657,9 @@ function scorePageBackground(info){
    const beginning=info.startBar+row*info.barsPerLine,ending=Math.min(info.endBar,beginning+info.barsPerLine),
          top=row===0?123:335;
    themeCard(c,50,top,1100,202,row);
-   txt(c,row===0?"첫 번째 줄":"두 번째 줄",88,top+32,20,themePalette().heading,"left","750");
+   txt(c,row===0?"첫 번째 줄":"두 번째 줄",88,top+27,18,themePalette().heading,"left","700");
    if(beginning>=ending){txt(c,"이 줄은 비어 있어요",594,top+106,22,"#90a89e");continue}
-   txt(c,(beginning+1)+"~"+ending+"마디 · "+((ending-beginning)*song.meter)+"개 하트",1107,top+31,17,"#79958d","right");
+   txt(c,(beginning+1)+"~"+ending+"마디 · "+((ending-beginning)*song.meter)+"개 하트",1107,top+27,16,themePalette().sub,"right","650");
    const g=twoGeometry(info,row);
    ln(c,76,g.top+g.height-12,1125,g.top+g.height-12,"#dfebdf",3);
    for(let i=0;i<g.count;i++){
@@ -681,12 +683,12 @@ function fixedTwoBackground(info){
 function twoSpriteAnchor(info,e){
  const beat=Math.floor(e.start),p=twoBarBeatPoint(info,beat),part=e.start-beat;
  const visible=Math.min(e.dur,1-part);
- return {x:p.x+(part+visible/2)*p.width,y:p.y-3-4,p:p,row:p.row};
+ return {x:p.x+(part+visible/2)*p.width,y:p.y+2,p:p,row:p.row};
 }
 function twoMoaPosition(b,info){
  const min=info.startBar*song.meter,max=info.endBar*song.meter;
  const owned=assignedEvents().filter(e=>e.start>=min-.00001&&e.start<max-.00001);
- if(!owned.length)return null;
+ if(!owned.length||b<owned[0].start-.001)return null;
  let previous=owned[0],next=null;
  for(const e of owned){if(e.start<=b+.001)previous=e;else{next=e;break}}
  const first=twoSpriteAnchor(info,previous);
@@ -704,13 +706,25 @@ function twoMoaPosition(b,info){
  return {x:first.x+(second.x-first.x)*progress,y:first.y+(second.y-first.y)*progress-arc,
          row:first.row,progress,hop:arc,beat:progress>=1?next.start:previous.start};
 }
+
+function drawScorePosition(c,b,info,stair=false){
+ if(b<startBeat()||b>=endBeat())return;
+ const owned=assignedEvents().filter(e=>e.start>=info.startBar*song.meter-.001&&e.start<info.endBar*song.meter-.001);
+ const active=owned.findLast(e=>e.start<=b+.002);
+ if(!active)return;
+ const point=stair?stairPoint(info,active):twoSpriteAnchor(info,active);
+ const geo=stair?stairGeometry(info,point.row):twoGeometry(info,point.row);
+ const base=(stair?stairHeartTop(point.row,active.note):geo.top)+geo.height+8;
+ c.save();rr(c,point.x-20,base,40,5,3,theme==="night"?"#657c9b":"#428872");c.restore();
+}
 function drawFixedTwoPage(c,b){
  const info=twoPageAt(b);
  c.drawImage(fixedTwoBackground(info),0,0);
+ drawScorePosition(c,b,info,false);
  const place=twoMoaPosition(b,info);
  if(place){
   moaSprite(c,place.x,place.y,b,place.beat);
- }else{
+ }else if(b>=startBeat()){
   txt(c,"모아가 함께할게요",598,298,23,"#6c9688");
  }
 }
@@ -737,13 +751,13 @@ function stairPage(info){
 }
 function stairGeometry(info,row){
  const count=info.barsPerLine*song.meter,gap=count>=9?6:10;
- const width=Math.min(123,(1052-gap*(count-1))/count);
+ const width=Math.min(113,(950-gap*(count-1))/count);
  const left=(1200-count*width-gap*(count-1))/2;
- return {count,width,gap,left,rowTop:row===0?130:350,heartHeight:90};
+ return {count,width,gap,left,rowTop:row===0?146:377,heartHeight:80};
 }
 function stairHeartTop(row,pitch){
  const pitchIndex=stairPitchIndex(pitch);
- return (row===0?138:370)+(7-(pitchIndex<0?3.5:pitchIndex))*11.6;
+ return (row===0?146:377)+(7-(pitchIndex<0?3.5:pitchIndex))*11.2;
 }
 function stairPoint(info,e){
  const beat=Math.floor(e.start+E),bar=Math.floor((beat+E)/song.meter),offset=bar-info.startBar;
@@ -751,7 +765,7 @@ function stairPoint(info,e){
  const ordinal=(offset%info.barsPerLine)*song.meter+(beat-bar*song.meter);
  const fraction=Math.max(0,e.start-beat),within=Math.min(1-fraction,e.dur);
  return {x:g.left+ordinal*(g.width+g.gap)+(fraction+within/2)*g.width,
-         y:stairHeartTop(row,e.note)+11,row};
+         y:stairHeartTop(row,e.note)+6,row};
 }
 function stairEvents(info){
  const first=info.startBar*song.meter,end=info.endBar*song.meter;
@@ -787,14 +801,14 @@ function buildStairPage(info){
  themeBackground(c);themeHeader(c,"모아의 하트 계단악보",info.startBar,info.endBar);
  for(let row=0;row<2;row++){
   const first=info.startBar+row*info.barsPerLine,last=Math.min(info.endBar,first+info.barsPerLine);
-  const top=row===0?104:332;
-  themeCard(c,44,top,1112,row===0?212:216,row);
-  txt(c,row===0?"첫 번째 줄":"두 번째 줄",78,top+25,19,themePalette().heading,"left","750");
+  const top=row===0?104:334;
+  themeCard(c,44,top,1112,row===0?218:215,row);
+  txt(c,row===0?"첫 번째 줄":"두 번째 줄",78,top+13,16,themePalette().heading,"left","750");
   if(first>=last){txt(c,"이 줄은 비어 있어요",600,top+113,22,"#98aaa3");continue}
   const g=stairGeometry(info,row);
   // Small elevation guide, NOT moving lanes or a scrolling piano-roll.
-  txt(c,"높은 음",1119,top+36,13,"#8ba69d","right");
-  txt(c,"낮은 음",1119,top+196,13,"#8ba69d","right");
+  txt(c,"높은 음",1119,top+34,12,themePalette().sub,"right","650");
+  txt(c,"낮은 음",1119,top+191,12,themePalette().sub,"right","650");
   if(stairStyle==="path"){
    let previous=null;
    for(let beat=first*song.meter;beat<last*song.meter;beat++){
@@ -823,7 +837,7 @@ function buildStairPage(info){
 }
 function stairMoaPosition(beat,info){
  const owned=assignedEvents().filter(e=>e.start>=info.startBar*song.meter-E&&e.start<info.endBar*song.meter-E);
- if(!owned.length)return null;
+ if(!owned.length||beat<owned[0].start-.001)return null;
  let prev=owned[0],next=null;
  for(const e of owned){if(e.start<=beat+.001)prev=e;else{next=e;break}}
  const current=stairPoint(info,prev);
@@ -843,9 +857,10 @@ function stairMoaPosition(beat,info){
 function drawStairPage(c,b){
  const info=twoPageAt(b);
  c.drawImage(stairPage(info),0,0);
+ drawScorePosition(c,b,info,true);
  const avatar=stairMoaPosition(b,info);
  if(avatar){moaSprite(c,avatar.x,avatar.y,b,avatar.at)}
- else{txt(c,"지금은 다른 악기 차례예요",599,302,23,"#688b83")}
+ else if(b>=startBeat()){txt(c,"지금은 다른 악기 차례예요",599,302,20,"#688b83")}
 }
 
 const drawKinds={road:heartRoad,score:heartScore,bar:heartBar,two:drawFixedTwoPage,next:heartNext,stairs:drawStairPage};
@@ -927,7 +942,7 @@ bind();rebuildSections();reset();
 window.addEventListener("resize",()=>{twoPageCache=null;stairPageCache=null;draw(ctx,playing?nowBeat():position)});
 moaDefault.onload=()=>{if(view==="two"||view==="stairs")draw(ctx,position)};
 moaCheer.onload=()=>{if(view==="two")draw(ctx,position)};
-window.__performanceViewsQA__={themes:Object.keys(THEMES),theme:()=>theme,selectTheme:chooseTheme,stairHalfBeatPair,videoExportSize:()=>({width:1920,height:1080,contentY:44,contentHeight:992}),heartScale:(w,h)=>Math.min(w/100,h/90),stairPageAt:twoPageAt,stairBackground:()=>stairPageCache?.canvas,stairGeometry,stairHeartTop,stairPoint,stairMoaPosition,stairStyle:()=>stairStyle,stairPrimary,twoPageAt,twoMoaPosition,twoBaseKey,twoBarsPerLine,twoBackground:()=>twoPageCache?.canvas,moaTravel:()=>moaTravel,beatParts,heartPath:HEART_PATH,modes:Object.keys(VIEW),scores:scores.map(s=>({key:s.key,bpm:s.bpm,meter:s.meter,measures:s.bars.length,beats:s.beats,events:s.events.length,rests:s.events.filter(e=>e.note==="쉼").length})),
+window.__performanceViewsQA__={balancedBarsPerLine,drawScorePosition,themes:Object.keys(THEMES),theme:()=>theme,selectTheme:chooseTheme,stairHalfBeatPair,videoExportSize:()=>({width:1920,height:1080,contentY:44,contentHeight:992}),heartScale:(w,h)=>Math.min(w/100,h/90),stairPageAt:twoPageAt,stairBackground:()=>stairPageCache?.canvas,stairGeometry,stairHeartTop,stairPoint,stairMoaPosition,stairStyle:()=>stairStyle,stairPrimary,twoPageAt,twoMoaPosition,twoBaseKey,twoBarsPerLine,twoBackground:()=>twoPageCache?.canvas,moaTravel:()=>moaTravel,beatParts,heartPath:HEART_PATH,modes:Object.keys(VIEW),scores:scores.map(s=>({key:s.key,bpm:s.bpm,meter:s.meter,measures:s.bars.length,beats:s.beats,events:s.events.length,rests:s.events.filter(e=>e.note==="쉼").length})),
  cueAt,assignedEvents,beatUntil,state:()=>({view,song:song.key,notes,speed,section,playing,ended,position,measure:barAt(position).index,score:song.events.map(e=>[e.note,e.start,e.dur,e.lyric]),mask:selected(),clockAudio:!!acc,exporting}),
  selectView:chooseView,selectSong:chooseSong,play,pause,reset,at:(b)=>{if(playing)pause();position=b;draw(ctx,b);updateControls()},render:()=>draw(ctx,position),testMime:videoMime
 };
