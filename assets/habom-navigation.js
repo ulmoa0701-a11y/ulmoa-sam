@@ -42,7 +42,7 @@
       ['음악활동 자료','하트색깔악보',U('materials/#musicShelf')]]},
     {id:'terms',name:'알아봄',icon:'📖',href:U('notes/')},
     {id:'story',name:'이야기해봄',icon:'💬',href:U('request/')},
-    {id:'brain',name:'3D 뇌지도',icon:'🧠',href:U('brain-map/')},
+    {id:'brain',name:'뇌지도',icon:'🧠',href:U('brain-map/')},
     {id:'parents',name:'찾아봄',icon:'🔎',items:[
       ['찾아봄 전체','발달·행동·일상별 안내',U('parents/')],
       ['말·의사소통','언어·표현 살펴보기',U('parents/#speech')],

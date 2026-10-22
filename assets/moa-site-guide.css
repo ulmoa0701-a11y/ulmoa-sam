@@ -1,0 +1,93 @@
+/* 모아의 길잡이 · 2026-10-22
+   Page introductions only. Existing approved waving Moa, no overlay, popup, autoplay or tracking. */
+.moa-site-guide,.moa-guide-line{box-sizing:border-box;font-family:"Pretendard Variable",Pretendard,SUIT,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+.moa-site-guide *,.moa-guide-line *{box-sizing:border-box}
+.moa-site-guide{
+ display:flex;align-items:center;gap:13px;width:min(100%,790px);min-width:0;
+ margin:12px 0 19px;padding:0;color:#29473b;
+}
+.moa-site-guide__character{
+ flex:0 0 auto;display:block;width:92px;height:112px;object-fit:contain;align-self:flex-end;
+ filter:drop-shadow(0 5px 5px rgba(58,78,61,.08));
+}
+.moa-site-guide__speech{
+ position:relative;min-width:0;flex:1;padding:12px 17px 13px;
+ border:1px solid #d5e4d6;border-radius:16px;background:#fffefb;
+ box-shadow:0 6px 16px rgba(35,64,47,.045);
+}
+.moa-site-guide__speech:before{
+ content:"";position:absolute;left:-7px;top:42%;width:12px;height:12px;
+ transform:rotate(45deg);background:#fffefb;border-left:1px solid #d5e4d6;border-bottom:1px solid #d5e4d6;
+}
+.moa-site-guide__name,.moa-guide-line__name{
+ display:block;margin:0 0 3px;color:#426c51;font-size:12px;font-weight:800;line-height:1.45;
+}
+.moa-site-guide__speech p,.moa-guide-line p{
+ margin:0!important;color:#304c3e!important;font-family:inherit!important;font-size:14px!important;
+ font-weight:560!important;line-height:1.65!important;letter-spacing:-.015em!important;word-break:keep-all;
+}
+.moa-site-guide--wide{width:100%;max-width:940px}
+.moa-site-guide--tight{margin:7px 0 12px}
+.moa-site-guide--tight .moa-site-guide__character{width:65px;height:81px}
+.moa-site-guide--tight .moa-site-guide__speech{padding:9px 13px}
+.moa-site-guide--home{margin:15px 0 10px;width:min(100%,540px)}
+.moa-site-guide--home .moa-site-guide__character{width:72px;height:87px}
+.moa-site-guide--home .moa-site-guide__speech{padding:10px 13px}
+.moa-guide-line{
+ position:relative;max-width:440px;margin:10px 0 16px;padding:10px 15px;
+ background:#fffefa;border:1px solid #d4e6d7;border-radius:14px;
+ box-shadow:0 5px 12px rgba(56,77,59,.05);color:#304c3e;
+}
+.moa-guide-line::after{
+ content:"";position:absolute;right:24px;top:-7px;width:12px;height:12px;
+ transform:rotate(45deg);border-left:1px solid #d4e6d7;border-top:1px solid #d4e6d7;background:#fffefa;
+}
+.moa-guide-line p{font-size:13.5px!important}
+.moa-guide-line--garden{max-width:410px}
+.moa-guide-line--garden::after{left:22px;right:auto;top:auto;bottom:-7px;border:0;border-right:1px solid #d4e6d7;border-bottom:1px solid #d4e6d7}
+.moa-site-guide--tool{max-width:none;width:100%;margin:0 0 12px;gap:8px}
+.moa-site-guide--tool .moa-site-guide__character{width:53px;height:63px}
+.moa-site-guide--tool .moa-site-guide__speech{padding:8px 12px}
+.moa-site-guide--tool .moa-site-guide__speech p{font-size:12.5px!important}
+.moa-site-guide--tool .moa-site-guide__name{font-size:11px}
+@media(max-width:650px){
+ .moa-site-guide{gap:8px;margin:9px 0 14px}
+ .moa-site-guide__character{width:69px;height:85px}
+ .moa-site-guide__speech{border-radius:13px;padding:9px 11px}
+ .moa-site-guide__speech:before{left:-6px;width:10px;height:10px}
+ .moa-site-guide__name{font-size:11px}
+ .moa-site-guide__speech p{font-size:12.5px!important;line-height:1.55!important}
+ .moa-guide-line{padding:9px 11px;margin:9px 0 12px}
+ .moa-guide-line p{font-size:12.5px!important;line-height:1.55!important}
+ .moa-site-guide--home .moa-site-guide__character{width:59px;height:72px}
+ .moa-site-guide--tool .moa-site-guide__character{width:48px;height:59px}
+}
+@media(max-width:350px){
+ .moa-site-guide__character{width:54px;height:66px}
+ .moa-site-guide__speech p{font-size:12px!important}
+ .moa-site-guide--home .moa-site-guide__character{width:52px;height:63px}
+}
+
+/* Music hero retains its mascot; position a readable full-width guide just below it. */
+.music-app>.music-header+.music-hero+.moa-guide-line--music,
+.music-app .moa-guide-line--music{width:min(100%,760px);max-width:none;margin:12px 0 6px}
+.music-app .moa-guide-line--music::after{right:19%;left:auto;top:-7px;bottom:auto;border:0;border-left:1px solid #d4e6d7;border-top:1px solid #d4e6d7}
+@media(max-width:520px){
+ .music-app .moa-guide-line--music{width:100%;margin:10px 0 5px}
+}
+
+/* A full-size greeting must never push the active Boomwhacker mobile stage below the fold. */
+.moa-mini-guide-label{display:none}
+@media(max-width:900px){
+ body .app>.moa-site-guide--tool{display:none}
+ body .app>.top .brand p{
+   position:relative;max-width:330px;margin-top:4px;padding:4px 6px 4px 36px;
+   border-radius:9px;background:#fffefa;color:#354c5c;border:1px solid #dce8df;
+   line-height:1.35;font-size:11px
+ }
+ body .app>.top .brand p::before{
+   content:"";position:absolute;left:2px;top:0px;width:31px;height:36px;
+   background:url('moa-hello-wave-20261012.webp') center/contain no-repeat
+ }
+ body .app>.top .brand p .moa-mini-guide-label{display:inline;font-weight:800;color:#3d7457}
+}
