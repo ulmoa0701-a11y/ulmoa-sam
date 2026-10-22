@@ -10,6 +10,7 @@ on:
       - 'qa/math-learning-engine-qa.mjs'
       - 'qa/math-guided-mission-qa.mjs'
       - 'qa/math-direct-delivery-qa.mjs'
+      - 'qa/math-instant-play-qa.mjs'
       - '.github/workflows/math-number-forest-qa.yml'
   pull_request:
     paths:
@@ -20,6 +21,7 @@ on:
       - 'qa/math-learning-engine-qa.mjs'
       - 'qa/math-guided-mission-qa.mjs'
       - 'qa/math-direct-delivery-qa.mjs'
+      - 'qa/math-instant-play-qa.mjs'
       - '.github/workflows/math-number-forest-qa.yml'
   workflow_dispatch:
 permissions:
@@ -58,6 +60,8 @@ jobs:
         run: node qa/math-guided-mission-qa.mjs
       - name: Test one-by-one feeding and accessible delivery alternative
         run: node qa/math-direct-delivery-qa.mjs
+      - name: Test instant play without instructions or next buttons
+        run: node qa/math-instant-play-qa.mjs
       - name: Confirm current public release
         if: github.event_name == 'push'
         run: |
