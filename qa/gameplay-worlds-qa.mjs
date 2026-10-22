@@ -33,6 +33,9 @@ for(const [profile,width] of [['desktop',1366],['mobile',390]]){
    await root.locator('[data-slow="hide"]').click();
    const newRoot=page.locator('#gameArea .slow-task.moa-scene-slowMemory');
    await newRoot.locator('[data-slow="cell"]').first().click();
+   // Visual counters refresh after the native click handler; wait for the
+   // rendered response rather than reading the previous animation frame.
+   await page.waitForFunction(()=>document.querySelector('#gameArea .moa-world-count')?.textContent?.trim()==='1');
    assert(await newRoot.locator('.moa-world-meter:visible').count()===1,profile+'/'+id+' progress unavailable after concealment');
    const recallLabel=await newRoot.locator('.moa-world-meter').innerText();
    assert(!recallLabel.includes('/'),profile+'/'+id+' target-count cue leaks during recall: '+recallLabel);
