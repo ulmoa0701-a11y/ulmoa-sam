@@ -63,3 +63,34 @@
 .strategy-auto-control{display:flex;align-items:center;gap:8px;margin:12px 0;padding:10px 12px;background:#f0f8e9;border-radius:13px;font-size:13px;font-weight:850;color:#42674f}
 .strategy-auto-control[hidden]{display:none}.strategy-auto-control input{appearance:auto;width:20px;height:20px;accent-color:#398664;flex:0 0 auto}
 @media(max-width:600px){.library-experience{gap:6px}.experience-tab{font-size:12px;padding:9px 10px}.strategy-auto-control{font-size:12px}}
+
+
+/* Completion art is earned only by a solved round; rest/review stays neutral. */
+.strategy-outcome-success{border:2px solid #94c993;background:linear-gradient(160deg,#f8ffeb,#daf0cf)}
+.strategy-outcome-rest{border:2px solid #d4dfc8;background:#f6f8ee;color:#526452}
+.strategy-outcome-review{border:2px solid #e2d5b9;background:#fff7e9;color:#685c42}
+.strategy-win-rescue,.strategy-win-classroom,.strategy-win-festival{
+ display:flex;align-items:center;justify-content:center;gap:12px;
+ min-height:76px;padding:8px 14px;border:2px solid #c0ddb8;border-radius:22px;
+ width:min(100%,420px);margin:0 auto;background:#fbfff4;
+}
+.strategy-win-rescue img{height:61px;width:61px;object-fit:contain}
+.strategy-win-rescue>span,.strategy-win-classroom>span,.strategy-win-festival>span{
+ display:inline-flex;justify-content:center;align-items:center;
+ min-width:56px;min-height:56px;font-size:clamp(26px,4vw,39px);
+ line-height:1;border-radius:14px;background:#edf7e7;
+}
+.strategy-win-festival{gap:7px;flex-wrap:wrap}
+.strategy-win-festival>span{min-width:45px;min-height:52px}
+.strategy-neutral-mark{display:block;margin:auto;font-size:42px}
+@media(max-width:480px){
+ .strategy-win-rescue,.strategy-win-classroom,.strategy-win-festival{padding:6px;gap:6px;min-height:60px}
+ .strategy-win-rescue img{width:43px;height:43px}
+ .strategy-win-rescue>span,.strategy-win-classroom>span,.strategy-win-festival>span{min-width:39px;min-height:44px;font-size:27px}
+}
+@media(prefers-reduced-motion:no-preference){
+ .strategy-outcome-success .strategy-win-rescue,
+ .strategy-outcome-success .strategy-win-classroom,
+ .strategy-outcome-success .strategy-win-festival{animation:strategy-earn .28s ease-out both}
+ @keyframes strategy-earn{from{opacity:.5;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+}
