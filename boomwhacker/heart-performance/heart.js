@@ -938,7 +938,18 @@ async function exportVideo(){
   const stopped=new Promise((resolve,reject)=>{recorder.onstop=resolve;recorder.onerror=e=>reject(e.error||Error("영상 저장 오류"))});
   const pre=950,lead=song.meter*beatTime()*1000,main=frameBeats()*beatTime()*1000,tail=1150;
   const all=pre+lead+main+tail,begin=performance.now();
-  if(ac&&output){const zero=ac.currentTime+(pre+lead)/1000-startBeat()*beatTime();scheduleMusic(ac,output,zero,startBeat()-song.meter,true)}
+  if(ac&&output){
+   // Video playback was substantially quieter than normal classroom clips.
+   // Raise export-only volume; a fast limiter prevents peak overload when
+   // several notes and the metronome overlap. Live classroom volume is unchanged.
+   const master=ac.createGain();master.gain.value=3.6;
+   const limiter=ac.createDynamicsCompressor();
+   limiter.threshold.value=-8;limiter.knee.value=5;limiter.ratio.value=10;
+   limiter.attack.value=.003;limiter.release.value=.22;
+   master.connect(limiter);limiter.connect(output);
+   const zero=ac.currentTime+(pre+lead)/1000-startBeat()*beatTime();
+   scheduleMusic(ac,master,zero,startBeat()-song.meter,true)
+  }
   recorder.start(250);await new Promise((resolve,reject)=>{
    const tick=()=>{try{const elapsed=performance.now()-begin;
     const p=elapsed<pre?startBeat()-song.meter:elapsed<pre+lead?startBeat()-song.meter+(elapsed-pre)/1000/beatTime():startBeat()+(elapsed-pre-lead)/1000/beatTime();
