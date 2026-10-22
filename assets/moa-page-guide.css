@@ -1,16 +1,61 @@
-/* Moa's quiet page guide. Reuses the approved 2026-10-12 waving character. */
-.moa-page-guide{display:flex;align-items:center;gap:clamp(8px,2vw,20px);max-width:1160px;margin:14px auto 20px;padding:4px 14px 4px 2px;box-sizing:border-box;min-width:0}
-.moa-page-guide__portrait{width:clamp(72px,9vw,112px);height:clamp(85px,11vw,126px);object-fit:contain;flex:none}
-.moa-page-guide__bubble{position:relative;min-width:0;flex:1;border:1px solid #d4e2d6;background:#fffefa;border-radius:18px;padding:15px 20px;color:#345344;box-shadow:0 4px 14px rgba(44,69,50,.055)}
-.moa-page-guide__bubble::before{content:"";position:absolute;left:-8px;top:40%;width:13px;height:13px;transform:rotate(45deg);border-left:1px solid #d4e2d6;border-bottom:1px solid #d4e2d6;background:#fffefa}
-.moa-page-guide__title{margin:0 0 3px!important;font-family:var(--habom-heading-font,"MaruBuri",serif);font-size:clamp(16px,1.6vw,20px);font-weight:700;line-height:1.4;color:#274935}
-.moa-page-guide__message{margin:0!important;font-family:var(--habom-body-font,Pretendard,sans-serif);font-size:clamp(13px,1.15vw,15px);font-weight:450;line-height:1.65;word-break:keep-all;color:#496454}
-.moa-page-guide--compact{max-width:none;margin:6px 0 18px}
-@media(max-width:600px){.moa-page-guide{gap:9px;margin:10px auto 16px;padding:0 3px}.moa-page-guide__portrait{width:70px;height:86px}.moa-page-guide__bubble{padding:12px 13px;border-radius:14px}.moa-page-guide__title{font-size:15px}.moa-page-guide__message{font-size:12.5px;line-height:1.6}}
-@media(max-width:350px){.moa-page-guide__portrait{width:55px;height:75px}.moa-page-guide__message{font-size:12px}}
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
+/* Moa's speaking guide: existing approved waving mascot. No new illustration or popup.
+   The bubble conveys purpose immediately and doesn't cover any activity controls. */
+.moa-page-guide,.moa-page-guide *{box-sizing:border-box}
+.moa-page-guide{
+ display:flex;align-items:center;gap:0;max-width:1180px;width:100%;
+ min-width:0;margin:6px auto 20px;padding:0 4px 0 0;
+ position:relative;color:#2e4b3c
+}
+.moa-page-guide__portrait{
+ display:block;position:relative;z-index:1;flex:none;
+ width:clamp(106px,11vw,145px);height:clamp(125px,13vw,170px);
+ margin-right:-8px;object-fit:contain;
+ filter:drop-shadow(0 5px 4px rgba(47,75,56,.13))
+}
+.moa-page-guide__bubble{
+ position:relative;flex:1;min-width:0;max-width:1010px;
+ padding:15px clamp(17px,2.5vw,29px) 17px;
+ border:2px solid #b9d6be;border-radius:28px 28px 28px 12px;
+ background:#fffef8;box-shadow:0 8px 20px rgba(46,74,52,.08);
+}
+.moa-page-guide__bubble::before{
+ content:"";position:absolute;left:-12px;top:53%;
+ width:19px;height:19px;transform:rotate(45deg);
+ background:#fffef8;border-left:2px solid #b9d6be;border-bottom:2px solid #b9d6be
+}
+.moa-page-guide__title{
+ display:block;width:max-content;max-width:100%;margin:0 0 5px!important;
+ font-family:"Pretendard Variable",Pretendard,SUIT,sans-serif!important;
+ font-size:12px!important;line-height:1.4!important;letter-spacing:.01em;
+ font-weight:850!important;color:#427350!important
+}
+.moa-page-guide__message{
+ display:block;margin:0!important;
+ font-family:"Nanum Pen Script","교보 손글씨 2020","Gamja Flower",cursive!important;
+ font-size:clamp(27px,2.5vw,34px)!important;
+ font-weight:400!important;line-height:1.22!important;letter-spacing:-.015em!important;
+ color:#2b4937!important;word-break:keep-all!important;
+}
+.moa-page-guide--existing{margin:4px auto 18px;padding:0 1px 0 5px}
+.moa-page-guide--existing .moa-page-guide__bubble{background:#fffef8;border:2px solid #c8dbc7;max-width:none;box-shadow:0 5px 13px rgba(46,74,52,.055)}
+/* Speech tail reaches toward the already-present Moa in the hero above. */
+.moa-page-guide--existing .moa-page-guide__bubble::before{
+ display:block;left:auto;right:16%;top:-11px;width:18px;height:18px;
+ transform:rotate(45deg);border:0;border-left:2px solid #c8dbc7;border-top:2px solid #c8dbc7
+}
+@media(max-width:650px){
+ .moa-page-guide{margin:3px auto 16px;padding:0 2px}
+ .moa-page-guide__portrait{width:79px;height:103px;margin-right:-4px}
+ .moa-page-guide__bubble{padding:11px 13px 12px;border-radius:19px 19px 19px 8px}
+ .moa-page-guide__bubble::before{left:-8px;width:13px;height:13px;border-width:2px}
+ .moa-page-guide__title{font-size:10.5px!important;margin-bottom:3px!important}
+ .moa-page-guide__message{font-size:clamp(21px,5.7vw,27px)!important;line-height:1.22!important}
+ .moa-page-guide--existing .moa-page-guide__bubble::before{left:auto;right:17%;top:-8px;width:13px;height:13px}
+}
+@media(max-width:350px){
+ .moa-page-guide__portrait{width:65px;height:91px}
+ .moa-page-guide__bubble{padding:10px 11px}
+ .moa-page-guide__message{font-size:20px!important}
+}
 @media print{.moa-page-guide{display:none!important}}
-
-/* Sections whose approved hero already includes Moa: no second character, no pointer tail. */
-.moa-page-guide--existing{max-width:1100px;padding:0;margin:10px auto 20px}
-.moa-page-guide--existing .moa-page-guide__bubble{background:#f7fbf5;border-color:#d9e5d9;box-shadow:none}
-.moa-page-guide--existing .moa-page-guide__bubble::before{display:none}
