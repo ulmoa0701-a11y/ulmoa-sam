@@ -32,6 +32,9 @@ const external={
  breathBeat:'../breath-garden/?mode=beat'
 };
 const REAL_PLAY_IMAGES={
+ // Captured from actual input stages; not text-heavy intro or emoji collage.
+ rescue:'rescue',handMirror:'hand-mirror',
+ moaMoney:'money',moaChange:'change',moaFeel:'feel',
  rhythmTouch:'rhythm-touch',recorderPlay:'recorder',
  breathStrength:'strength',breathLong:'long',breathBeat:'beat'
 };
@@ -90,7 +93,7 @@ function fillAssignedScene(host){
  const source=[...document.querySelectorAll('.library-card[data-open]')].find(x=>x.dataset.open===id)?.querySelector('.card-live-preview');
  if(!source)return;
  const scene=host.querySelector('.moa-assigned-scene');
- if(!scene||scene.querySelector('.card-live-preview'))return;
+ if(!scene||scene.querySelector('.card-live-preview')||scene.querySelector('img.moa-assigned-real-shot'))return;
  scene.replaceChildren(source.cloneNode(true));
  host.classList.add('moa-assigned-has-source');
 }
@@ -103,11 +106,11 @@ function makeAssignedVisual(id,isGame){
  wrap.setAttribute('aria-hidden','true');
  wrap.append(E('small','moa-assigned-visual-label',isGame?'🎮 이런 놀이예요':'📄 이런 자료예요'));
  const scene=E('div','moa-assigned-scene');
- // Five music/breath games are standalone pages, not native library cards.
- // Use their real play screenshots instead of generic pictograms.
+ // Capture the real first interactive scene for supported games.
+ // Keep the picture visible even when a native catalog illustration exists.
  if(REAL_PLAY_IMAGES[id]){
   const shot=E('img','moa-assigned-real-shot');
-  shot.src='../gardens/previews/'+REAL_PLAY_IMAGES[id]+'-play.jpg?v=20261021-playstate4';
+  shot.src='../gardens/previews/'+REAL_PLAY_IMAGES[id]+'-play.jpg?v=20261022-curated-play1';
   shot.alt='';shot.loading='eager';shot.decoding='async';
   shot.addEventListener('error',()=>{shot.remove();wrap.classList.remove('moa-assigned-has-source');},{once:true});
   scene.append(shot);wrap.classList.add('moa-assigned-has-source');
