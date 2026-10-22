@@ -18,7 +18,7 @@ try{
   await page.locator('[data-mission="continue"]').click();
   let q=(await inspect(page)).task;
   assert.equal(q.kind,'guided');
-  assert.equal((await page.locator('button.feed-friend')).count(),q.n);
+  assert.equal(await page.locator('button.feed-friend').count(),q.n);
   await page.locator('button.feed-friend:not([disabled])').first().click();
   assert.equal((await inspect(page)).selected,0,'tapping a friend with empty basket must not invent food');
   assert.ok(await page.locator('.supply.need-food').count(),'show a picture-based empty-basket cue');
