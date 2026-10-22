@@ -99,7 +99,9 @@ with sync_playwright() as p:
   page.locator('#showDrawing').click()
   canvas=page.locator('#noteCanvas');canvas.scroll_into_view_if_needed();bb=canvas.bounding_box()
   page.mouse.move(bb['x']+10,bb['y']+15);page.mouse.down();page.mouse.move(bb['x']+90,bb['y']+65,steps=8);page.mouse.up()
-  assert page.locator('#noteCanvas').evaluate("canvas=>{const ctx=canvas.getContext('2d');const rgba=ctx.getImageData(25,35,1,1).data;return rgba[0]<250||rgba[1]<250||rgba[2]<250}")
+  ink=page.locator('#noteCanvas').evaluate("c=>{const v=c.getContext('2d').getImageData(0,0,c.width,c.height).data;let n=0;for(let i=0;i<v.length;i+=16)if(v[i]<150||v[i+1]<150||v[i+2]<150)n++;return n}")
+  if ink<1:print('SKETCH_DIAGNOSTIC',{'viewport':width,'canvas_bounds':bb,'scrollY':page.evaluate('scrollY'),'drawPanel':page.locator('#drawPanel').is_visible(),'ink_pixels':ink})
+  assert ink>0, 'pointer stroke must alter the actual canvas bitmap'
   page.locator('#saveEntry').click()
   try:page.locator('.practice-cloud-record').wait_for(timeout=12000)
   except Exception as e:
