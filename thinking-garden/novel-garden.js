@@ -96,7 +96,7 @@ function render(id,d){
   const icons=isColor?['🟨','🟦']:stamps;
   const parcel=data.packages[data.parcel];
   parts.push('<div class="novel-rule-banner"><span>📯 지금 배달 규칙</span><strong>'+(isColor?'색깔을 보고 배달하기':'그림을 보고 배달하기')+'</strong><p>'+(isColor?'소포 그림은 잠시 잊고 색깔만 살펴봐요.':'소포 색깔은 잠시 잊고 그림만 살펴봐요.')+'</p></div>');
-  parts.push('<div class="novel-airmail"><div class="novel-post-progress">보낸 소포 '+data.parcel+' / 3</div><div class="novel-parcel" style="--stamp:'+colors[parcel.color].color+'"><span class="novel-post-shape">'+stamps[parcel.stamp]+'</span><small>오늘의 소포</small></div></div>');
+  parts.push('<div class="novel-airmail"><div class="novel-post-progress">보낸 소포 '+data.parcel+' / 3</div><div class="novel-parcel" style="--stamp:'+colors[parcel.color].color+'"><span class="novel-post-shape">'+stamps[parcel.stamp]+'</span><small>오늘의 소포</small></div><div class="novel-delivery-trail" role="status" aria-label="배달한 소포 표시">'+[0,1,2].map(i=>'<span class="'+(i<data.shipped.length?'sent':'waiting')+'" aria-label="'+(i<data.shipped.length?'배달 완료':'남은 배달')+'">'+(i<data.shipped.length?'✓':'·')+'</span>').join('')+'</div></div>');
   parts.push('<div class="novel-letterboxes">'+labels.map((t,i)=>'<button type="button" class="novel-mailbox" data-novel-action="deliver" data-idx="'+i+'"><span>'+icons[i]+'</span><strong>'+t+'</strong><small>이곳으로 배달하기 →</small></button>').join('')+'</div>');
   if(data.lastRule!==null&&data.rule!==data.lastRule)parts.push('<p class="novel-change-note">💨 바람이 불었어요! 규칙이 바뀌었는지 다시 확인해요.</p>');
  }else if(id==='mirrorPond'){
@@ -154,7 +154,11 @@ function render(id,d){
     if(s.firstCorrect===null)s.firstCorrect=true;
     data.shipped.push(p);data.parcel++;
     if(level===3&&data.parcel===1){data.lastRule=data.rule;data.rule=data.rule==='color'?'stamp':'color';}
-    if(data.parcel===data.packages.length){success(s.retries?'규칙 확인 후 3개 배달':'첫 시도로 3개 배달');return;}
+    if(data.parcel===data.packages.length){
+      const trail=root.querySelector('.novel-delivery-trail');
+      if(trail){trail.innerHTML='<span class="sent">✓</span><span class="sent">✓</span><span class="sent">✓</span>';trail.classList.add('all-sent');}
+      success(s.retries?'규칙 확인 후 3개 배달':'첫 시도로 3개 배달');return;
+     }
     s.awaitingPause=false;render(id,d);return;
    }
    const other=data.rule==='color'?p.stamp:p.color;
@@ -162,7 +166,19 @@ function render(id,d){
    return;
   }
   if(action==='chooseReflection'){
-   if(data.choices[index].type===data.operation){success(s.retries?'다시 비교 후 선택':'첫 선택 정답');return;}
+   if(data.choices[index].type===data.operation){
+      b.classList.add('novel-reflection-solved');
+      const water=root.querySelector('.novel-water');
+      if(water){
+       water.classList.add('novel-water-revealed');
+       water.querySelector('span').textContent='거울에 비친 모양';
+       const reflection=document.createElement('div');
+       reflection.className='novel-result-reflection';
+       reflection.innerHTML=pond(data.choices[index].icons);
+       water.appendChild(reflection);
+      }
+      success(s.retries?'다시 비교 후 선택':'첫 선택 정답');return;
+     }
    failure('좌우·위아래·회전 중 어떤 움직임인지 다시 확인해요.');return;
   }
   if(action==='reveal'){data.phase='after';render(id,d);return;}
@@ -170,7 +186,17 @@ function render(id,d){
   if(action==='back'){data.phase='after';render(id,d);return;}
   if(action==='change'){
    if(data.phase==='peek')return;
-   if(index===data.changed){success((data.peeks?'이전 장면 재확인 '+data.peeks+'회 후 ':'')+'달라진 위치 선택');return;}
+   if(index===data.changed){
+      b.classList.add('novel-difference-solved');
+      const review=document.createElement('div');review.className='novel-scene-review';review.setAttribute('role','status');
+      const before=document.createElement('span'),arrow=document.createElement('span'),after=document.createElement('span');
+      before.className='novel-difference-before';after.className='novel-difference-after';
+      before.textContent=data.before[index]||'빈 자리';after.textContent=data.after[index]||'빈 자리';
+      arrow.textContent='→';arrow.setAttribute('aria-hidden','true');
+      review.append(before,arrow,after);
+      root.querySelector('.novel-story-scene')?.appendChild(review);
+      success((data.peeks?'이전 장면 재확인 '+data.peeks+'회 후 ':'')+'달라진 위치 선택');return;
+     }
    failure('한 곳씩 처음 장면과 비교해 보세요.');return;
   }
  });
