@@ -62,11 +62,13 @@ function setScene(title,desc,label){
  $('seedCount').textContent='🌼 '+petals+'송이';
  $('progressFill').style.width=(state.index/roundMax*100)+'%';
  $('gameArea').innerHTML='';$('feedback').textContent='';$('feedback').className='feedback';$('gameActions').innerHTML='';
+ $('gameArea').classList.remove('mission-cleared');
  const voiceKey=state.index+'/'+(state.stage||'main');if(state.audio&&lastSpokenStage!==voiceKey){lastSpokenStage=voiceKey;speak(title+'. '+desc);}
 }
 function feedback(message,positive=false){$('feedback').textContent=message;$('feedback').className='feedback'+(positive?' good':'');}
 function nextAction(message){
  state.locked=true;
+ $('gameArea').classList.add('mission-cleared');
  $('gameActions').innerHTML='<button type="button" data-action="next" class="primary-action">'+(state.index===roundMax-1?'오늘 놀이 마치기':'다음 미션 →')+'</button>';
  if(message)feedback(message,true);
 }
@@ -143,7 +145,7 @@ function drawMoney(){
  const curr=state.selected.reduce((sum,n)=>sum+n,0);
  const itemHTML=state.level==='hard'?'<p class="item-banner">'+esc(r.item)+'</p>':'';
  const changeNote=change?'<div class="change-receipt">손님이 낸 돈 <b>'+fmt(r.paid)+'</b> − 물건값 <b>'+fmt(r.price)+'</b></div>':'';
- $('gameArea').innerHTML='<div class="money-target">'+itemHTML+changeNote+'<small>'+(change?'돌려줄 거스름돈':'필요한 금액')+'</small><strong>'+fmt(r.value)+'</strong></div><div class="money-cart"><small>지금 담은 돈</small><strong id="cartSum">'+fmt(curr)+'</strong><div id="cartItems" class="cart-pieces">'+(state.selected.map(n=>moneyChip(n)).join('')||'<span class="empty-cart">아직 담은 돈이 없어요.</span>')+'</div></div><p class="tiny-instruction">아래 돈을 눌러 담아요.</p><div class="money-palette">'+denominations.map(n=>'<button type="button" class="money-pick" data-money="'+n+'">'+moneyChip(n)+'</button>').join('')+'</div>';
+ $('gameArea').innerHTML='<div class="money-target">'+itemHTML+changeNote+'<small>'+(change?'돌려줄 거스름돈':'필요한 금액')+'</small><strong>'+fmt(r.value)+'</strong></div><div class="money-cart"><small>지금 담은 돈</small><strong id="cartSum">'+fmt(curr)+'</strong><div id="cartItems" class="cart-pieces">'+(state.selected.map((n,i)=>'<button type="button" class="bag-money-piece" data-remove-index="'+i+'" aria-label="'+fmt(n)+' 가방에서 꺼내기">'+moneyChip(n)+'<span class="bag-remove">×</span></button>').join('')||'<span class="empty-cart">아직 담은 돈이 없어요.</span>')+'</div></div><p class="tiny-instruction">아래 돈을 눌러 담아요.</p><div class="money-palette">'+denominations.map(n=>'<button type="button" class="money-pick" data-money="'+n+'">'+moneyChip(n)+'</button>').join('')+'</div>';
  $('gameActions').innerHTML=htmlButton('↶ 마지막 돈 빼기','undo','class="secondary-action"')+htmlButton('모두 다시 담기','clear','class="secondary-action"')+htmlButton(change?'거스름돈 확인':'금액 확인','check','class="primary-action"');
 }
 
@@ -353,10 +355,10 @@ function drawFeel(){
  const r=storyRound();if(!state.stage)state.stage='emotion';
  if(state.stage==='emotion'){
   setScene('어떤 마음일 수 있을까요?','여러 마음이 가능해요. 가장 먼저 떠오르는 생각을 골라봐요.','상황 살펴보기');
-  $('gameArea').innerHTML='<div class="story-card"><span class="story-icon" aria-hidden="true">'+r.icon+'</span><p>'+esc(r.scene)+'</p></div><div class="emotion-options">'+r.feelings.map((v,i)=>'<button type="button" class="choice" data-feeling="'+i+'">'+esc(v)+'</button>').join('')+'</div>';
+  $('gameArea').innerHTML='<div class="story-card story-stage"><div class="story-cast"><img src="../../assets/moa-discovery.png" alt="" aria-hidden="true"><span class="story-icon" aria-hidden="true">'+r.icon+'</span></div><p>'+esc(r.scene)+'</p><button type="button" class="story-listen" data-say-scene>상황 듣기 ▶</button></div><div class="emotion-options">'+r.feelings.map((v,i)=>'<button type="button" class="choice" data-feeling="'+i+'">'+esc(v)+'</button>').join('')+'</div>';
  }else if(state.stage==='response'){
   setScene('어떻게 해볼까요?','방법을 골라보고 어떤 일이 생길지 생각해봐요.','함께 생각하기');
-  $('gameArea').innerHTML='<div class="story-card small"><span class="story-icon" aria-hidden="true">'+r.icon+'</span><p>'+esc(r.scene)+'</p></div><p class="selected-feeling">조금 전 생각한 마음: <strong>'+esc(state.chosenFeeling)+'</strong></p><div class="response-options">'+r.actions.map((a,i)=>'<button type="button" class="choice" data-response="'+i+'">'+esc(a[0])+'</button>').join('')+'</div>';
+  $('gameArea').innerHTML='<div class="story-card small story-stage"><div class="story-cast"><img src="../../assets/moa-discovery.png" alt="" aria-hidden="true"><span class="story-icon" aria-hidden="true">'+r.icon+'</span></div><p>'+esc(r.scene)+'</p><button type="button" class="story-listen" data-say-scene>상황 듣기 ▶</button></div><p class="selected-feeling">조금 전 생각한 마음: <strong>'+esc(state.chosenFeeling)+'</strong></p><div class="response-options">'+r.actions.map((a,i)=>'<button type="button" class="choice" data-response="'+i+'">'+esc(a[0])+'</button>').join('')+'</div>';
  }else{setScene('생각을 나눠봤어요','정답이 하나로 정해진 상황은 아니에요. 사람마다 다르게 느끼고 반응할 수 있어요.','함께 돌아보기');
  $('gameArea').innerHTML='<div class="reflect-note"><span aria-hidden="true">💬</span><strong>'+esc(state.chosenFeeling)+'</strong><p>'+esc(state.chosenResponse[1])+'</p><small>만약 상대가 예상과 다르게 반응한다면? 마음을 다시 물어보거나 다른 방법을 생각할 수도 있어요.</small></div>';
  nextAction('어떤 방법이 좋을지는 상대의 마음과 상황에 따라 달라질 수 있어요.');
@@ -371,16 +373,27 @@ $('startGame').addEventListener('click',start);
 $('exitGame').addEventListener('click',()=>show('intro'));
 $('playAgain').addEventListener('click',start);
 $('gameArea').addEventListener('click',e=>{
- const b=e.target.closest('button');if(!b||state.locked)return;
+ const b=e.target.closest('button');if(!b)return;
+ if(chosen==='feel'&&b.hasAttribute('data-say-scene')){speak(storyRound().scene,{force:true});return;}
+ if(state.locked)return;
  if(chosen==='money'){
   if(b.dataset.value!==undefined){const n=Number(b.dataset.value),expected=moneyRound().value;state.attempts++;if(n===expected){if(state.attempts===1)state.correct++;nextAction('맞았어요! '+fmt(expected)+'이에요.')}else feedback('다시 살펴봐요. 그림에 적힌 금액과 비교해도 좋아요.');return;}
-  if(b.dataset.money!==undefined){if(state.selected.length>=20){feedback('너무 많이 담았어요. 하나씩 다시 살펴봐요.');return}state.selected.push(Number(b.dataset.money));drawMoney();return;}
+  if(b.dataset.removeIndex!==undefined){state.selected.splice(Number(b.dataset.removeIndex),1);drawMoney();return;}
+  if(b.dataset.money!==undefined){
+   if(state.selected.length>=20){feedback('너무 많이 담았어요. 하나씩 다시 살펴봐요.');return}
+   const value=Number(b.dataset.money);state.selected.push(value);drawMoney();
+   if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches)$('cartItems')?.lastElementChild?.classList.add('bag-money-arrived');
+   $('gameArea').querySelector('[data-money="'+value+'"]')?.focus({preventScroll:true});return;
+  }
  }
  if(chosen==='change'&&b.dataset.item!==undefined){
  const item=b.dataset.item;
- if(state.selected.includes(item))state.selected=state.selected.filter(x=>x!==item);
+ const removing=state.selected.includes(item);
+ if(removing)state.selected=state.selected.filter(x=>x!==item);
  else state.selected.push(item);
- drawChange();return;
+ drawChange();
+ if(!removing&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)$('gameArea').querySelector('.assembled-cart .item-chip:last-child')?.classList.add('bag-money-arrived');
+ $('gameArea').querySelector('[data-item="'+item+'"]')?.focus({preventScroll:true});return;
  }
  if(chosen==='change'&&b.dataset.listIndex!==undefined){
   const answer=changedRound().after;const chosenList=state.options[Number(b.dataset.listIndex)];
@@ -417,10 +430,16 @@ $('gameActions').addEventListener('click',e=>{
  }
  if(action==='changed-back'){state.stage='remember';draw();return;}
 });
-function speak(text){
- if(!state.audio||!('speechSynthesis' in window))return;
- window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(text);utterance.lang='ko-KR';utterance.rate=0.9;window.speechSynthesis.speak(utterance);
+function speak(text,{force=false}={}){
+ if((!state.audio&&!force)||!('speechSynthesis' in window))return;
+ try{window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(text);utterance.lang='ko-KR';utterance.rate=.88;window.speechSynthesis.speak(utterance)}
+ catch{feedback('이 기기에서는 소리 안내를 재생할 수 없어요.')}
 }
+document.getElementById('missionListen')?.addEventListener('click',()=>{
+ const title=$('missionHeading').textContent;
+ const cue=chosen==='feel'?storyRound().scene:chosen==='change'?changedRound().note:($('missionDescription').textContent||'');
+ speak(title+'. '+cue,{force:true});
+});
 $('soundButton').addEventListener('click',()=>{
  state.audio=!state.audio;$('soundButton').setAttribute('aria-pressed',String(state.audio));
  $('soundButton').textContent=state.audio?'🔊 안내 읽기 켜짐':'🔇 안내 읽기';
