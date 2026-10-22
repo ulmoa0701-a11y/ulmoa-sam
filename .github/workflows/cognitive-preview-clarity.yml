@@ -1,0 +1,48 @@
+name: Cognitive 26 Real Preview QA
+on:
+  pull_request:
+    paths:
+      - 'thinking-garden/card-previews.js'
+      - 'thinking-garden/game-preview-clarity.css'
+      - 'thinking-garden/index.html'
+      - 'qa/cognitive-preview-clarity.mjs'
+  push:
+    branches: [main]
+    paths:
+      - 'thinking-garden/card-previews.js'
+      - 'thinking-garden/game-preview-clarity.css'
+      - 'thinking-garden/index.html'
+      - 'qa/cognitive-preview-clarity.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-real-game-covers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser automation
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Find Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Start local site
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/cognitive-preview-server.log 2>&1 &
+          for i in {1..40}; do curl -fsS http://127.0.0.1:8765/thinking-garden/ >/dev/null && exit 0; sleep .25; done
+          cat /tmp/cognitive-preview-server.log; exit 1
+      - name: Verify 26 real screenshots, distinct actions and game launch across device sizes
+        run: node qa/cognitive-preview-clarity.mjs
+      - name: Screenshot artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cognitive-real-preview-cards
+          path: qa/cognitive-preview-screens
+          if-no-files-found: warn
