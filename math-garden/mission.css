@@ -61,7 +61,7 @@
 @keyframes flash-pop{0%{opacity:0;transform:scale(.4)}25%{opacity:1;transform:scale(1.08)}40%{transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:scale(1)}}
 .btn.action{display:inline-flex;align-items:center;justify-content:center}
 .result-actions button{display:inline-flex;align-items:center;justify-content:center}
-#sound,#restart,#help,#change{display:inline-flex;align-items:center;gap:6px;justify-content:center}
+#sound,#restart,#help,#change{display:inline-flex;align-items:center;gap:6px;justify-content:center}#help[hidden],#change[hidden]{display:none!important}
 @media(max-width:650px){.intro .interaction[data-mission="start"],.travel-scene .interaction[data-mission="arrive"],.success .interaction[data-mission="advance"]{width:56px;height:56px;min-width:56px;min-height:56px}.feedback-flash{width:68px;height:68px;margin:-34px 0 0 -34px}.feedback-flash svg{width:36px;height:36px}}
 
 button.feed-friend{appearance:none;-webkit-appearance:none;font:inherit;color:inherit;text-align:center}
