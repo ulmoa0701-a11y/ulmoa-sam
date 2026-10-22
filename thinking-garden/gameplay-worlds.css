@@ -1,0 +1,199 @@
+/* 일단 해봄 / 모아의 생각정원 — 실제 게임 내부 통합 무대.
+   미션 자극·보기 형태·정답 판별은 원본 보존, 게임별 세계관·피드백·조작성만 강화. */
+#gameWorld .slow-task.moa-redesigned-world{
+ --world-primary:#286d51;--world-edge:#c3dec4;
+ --world-ground:#e3f5d9;--world-sky:#eaf7ff;
+ position:relative;isolation:isolate;width:min(100%,900px);max-width:900px;
+ padding:clamp(12px,2.2vw,24px)!important;gap:15px;
+ background:linear-gradient(180deg,var(--world-sky) 0%,#f8fcf8 43%,var(--world-ground) 100%)!important;
+ border:2px solid var(--world-edge);border-radius:28px;
+ box-shadow:0 16px 40px #274d411d,inset 0 2px 0 #ffffffa8;
+ overflow:hidden;
+}
+#gameWorld .moa-redesigned-world>*{position:relative;z-index:1}
+#gameWorld .moa-redesigned-world:before{
+ content:"";position:absolute;z-index:0;pointer-events:none;
+ left:0;right:0;bottom:0;height:37%;
+ background:radial-gradient(ellipse at 20% 100%,#8ecb8c4d,transparent 63%),
+ radial-gradient(ellipse at 85% 100%,#bce0a56e,transparent 60%);
+}
+#gameWorld .moa-world-scene-head{
+ display:flex;align-items:center;justify-content:flex-start;gap:15px;
+ width:min(100%,740px);min-height:104px;
+ padding:12px 20px;border-radius:24px;border:2px solid #ffffffda;
+ background:#fffffff0;box-shadow:0 6px 20px #3c665522;
+}
+#gameWorld .moa-world-art{
+ flex:none;width:80px;height:80px;
+ background-image:url("../assets/moa-clay-34-atlas.webp");
+ background-size:600% 600%;background-repeat:no-repeat;
+ filter:drop-shadow(0 5px 4px #345b3b28);
+}
+#gameWorld .moa-world-scene-copy{display:grid;gap:3px;min-width:0}
+#gameWorld .moa-world-scene-copy small{
+ font-size:12px;font-weight:800;color:var(--world-primary);line-height:1.5;word-break:keep-all;
+}
+#gameWorld .moa-world-scene-copy strong{font-size:clamp(19px,3vw,26px);line-height:1.2;color:#244b3e;word-break:keep-all}
+#gameWorld .moa-world-do{font-size:clamp(12px,1.7vw,14px);font-weight:750;color:#4a6258;line-height:1.45;word-break:keep-all}
+#gameWorld .moa-world-do b{color:var(--world-primary)}
+#gameWorld .moa-world-meter{
+ width:min(100%,620px);display:grid;grid-template-columns:1fr auto;gap:6px 12px;
+ padding:10px 16px;border-radius:16px;background:#fffefaed;border:1px solid var(--world-edge);
+ color:var(--world-primary);font-weight:850;font-size:13px;
+}
+#gameWorld .moa-world-meter[hidden]{display:none!important}
+#gameWorld .moa-world-rail{grid-column:1/-1;height:9px;background:#e2eee6;border-radius:50px;overflow:hidden}
+#gameWorld .moa-world-fill{display:block;background:linear-gradient(90deg,#9bd6a0,var(--world-primary));
+ height:100%;border-radius:50px;max-width:100%;transition:width .2s}
+#gameWorld .moa-redesigned-world .slow-step[hidden]{display:none!important}
+#gameWorld .moa-redesigned-world .slow-map-pair{max-width:740px;gap:clamp(10px,3vw,32px)}
+#gameWorld .moa-redesigned-world .slow-map-pair>div{
+ display:grid;align-content:start;justify-items:center;gap:6px;
+ min-width:0;padding:12px 8px 15px;border-radius:23px;
+ background:#ffffffb6;border:2px solid #ffffffb9;box-shadow:0 6px 14px #466b4a13;
+}
+#gameWorld .moa-redesigned-world .slow-map-pair b{
+ display:inline-flex;align-items:center;justify-content:center;padding:7px 11px;
+ border-radius:999px;background:#e6f4e8;color:var(--world-primary);
+ font-size:clamp(12px,1.9vw,15px);margin-bottom:3px;word-break:keep-all;
+}
+#gameWorld .moa-redesigned-world .slow-board{
+ width:100%;max-width:310px;gap:clamp(4px,1vw,9px);padding:clamp(7px,1.4vw,12px);
+ border:2px solid var(--world-edge);border-radius:22px;
+ background:linear-gradient(160deg,#c1e4b3,#eaf5da);
+ box-shadow:inset 0 5px 12px #648e5b12,0 7px 0 #87b68118;
+}
+#gameWorld .moa-redesigned-world .slow-tile{
+ border:2px solid #c3debd;min-width:0;min-height:0;border-radius:15px;
+ font-size:clamp(23px,4vw,38px);line-height:1;
+ background:radial-gradient(ellipse at 50% 67%,#a4c889 0 35%,#d7efd0 65%,#eff9eb 100%);
+ box-shadow:inset 0 2px 0 #ffffffa8,0 3px 4px #315f3c17;
+}
+#gameWorld .moa-redesigned-world .slow-tile.shown{
+ background:radial-gradient(ellipse at center,#d9f3c6 0 54%,#96c68a 94%);
+ border-color:#78ba7a;
+}
+#gameWorld .moa-redesigned-world button.slow-tile{min-height:45px;cursor:pointer}
+#gameWorld .moa-redesigned-world button.slow-tile:hover{filter:brightness(1.05);border-color:var(--world-primary)}
+#gameWorld .moa-redesigned-world button.slow-tile.picked{
+ background:radial-gradient(ellipse at center,#fcf6cf,#bfe7a9 84%)!important;
+ border-color:var(--world-primary);box-shadow:inset 0 0 0 2px #ffffff91,0 5px 8px #315e3830;
+}
+#gameWorld .moa-redesigned-world button:focus-visible{outline:4px solid #f0c753;outline-offset:3px}
+#gameWorld .moa-world-ending{
+ position:absolute;pointer-events:none;right:7%;top:10%;z-index:2;color:#2b7d55;
+ font-size:30px;animation:moa-end-pop .5s ease-out both;
+}
+#gameWorld .moa-scene-finished .moa-world-rail{box-shadow:0 0 0 2px #87c9a64f}
+#gameWorld .moa-redesigned-world .slow-feedback{
+ background:#fffef6e8;border-radius:14px;padding:9px 12px;min-height:34px;max-width:680px;
+}
+#gameWorld .moa-redesigned-world .slow-actions{gap:11px}
+#gameWorld .moa-redesigned-world .slow-primary{min-height:52px;box-shadow:0 4px 0 #194632}
+#gameWorld .moa-redesigned-world .slow-primary:active{transform:translateY(2px);box-shadow:0 2px 0 #194632}
+#gameWorld .moa-redesigned-world .slow-teacher-details{max-width:720px;background:#ffffffd9}
+#gameWorld .moa-scene-slowPlace{--world-edge:#a5d1a2;--world-sky:#e6f8ff;--world-ground:#d4edc6;--world-primary:#367646}
+#gameWorld .moa-scene-slowPlace .moa-world-art{background-position:80% 0%}
+#gameWorld .moa-scene-slowPlace .slow-map-pair>div:first-child .slow-board{
+ background:linear-gradient(45deg,#f5e5be,#fff4db);border-color:#cdbf94;
+ box-shadow:0 7px 0 #c9b28239,0 12px 17px #907c5730;
+}
+#gameWorld .moa-scene-slowPlace .slow-map-pair>div:first-child .slow-tile{
+ background:#faefd4;border-color:#d3c7a5
+}
+#gameWorld .moa-scene-slowPlace .slow-map-pair>div:nth-child(2) .slow-board{
+ background:linear-gradient(145deg,#90bf83,#bde3a5);border-color:#5ea363
+}
+#gameWorld .moa-scene-slowBlock{
+ --world-primary:#9a5d36;--world-edge:#deb98c;--world-sky:#fff4dc;--world-ground:#f3d5b3;
+}
+#gameWorld .moa-scene-slowBlock .moa-world-art{background-position:20% 40%}
+#gameWorld .moa-scene-slowBlock .slow-block-board{
+ background:repeating-linear-gradient(0deg,#f1ddbd 0 20px,#e8ceaa 21px 22px);
+ border:3px solid #bd956b;border-radius:16px;box-shadow:0 7px 0 #a37c513b;
+}
+#gameWorld .moa-scene-slowBlock .slow-block-board .slow-tile{
+ border-radius:9px;background:#fff9e8;border-color:#d7c3a8
+}
+#gameWorld .moa-scene-slowBlock .slow-block-board .slow-tile.shown{
+ background:linear-gradient(165deg,#f3c47e,#d68c51);border-color:#bc793f;
+}
+#gameWorld .moa-scene-slowBlock .slow-block-board .slow-tile.picked{
+ background:linear-gradient(145deg,#ffd7a3,#d88945)!important;border-color:#ae6732;
+}
+#gameWorld .moa-scene-slowBlock .slow-block-tools{
+ background:#fffaf0e8;border:2px solid #e8ca9f;padding:12px;border-radius:19px;
+}
+#gameWorld .moa-scene-slowBlock .slow-block-tools button{
+ background:#fff3dc;border-color:#cba67b;color:#734c31;
+}
+#gameWorld .moa-scene-slowBlock .slow-block-tools button.selected{
+ background:#e9b47a;border-color:#a76839;box-shadow:inset 0 2px 0 #ffffff94;
+}
+#gameWorld .moa-scene-slowMemory{
+ --world-primary:#6254a4;--world-edge:#c8bbec;--world-sky:#f0eaff;--world-ground:#d7d9fb;
+}
+#gameWorld .moa-scene-slowMemory .moa-world-art{background-position:60% 40%}
+#gameWorld .moa-scene-slowMemory .slow-map-pair .slow-board{
+ background:linear-gradient(155deg,#d6cff9,#f1edff);border-color:#aaa1dc;
+}
+#gameWorld .moa-scene-slowMemory .slow-board.slow-covered{
+ background:radial-gradient(circle at 25% 20%,#fff 0 5px,transparent 6px),linear-gradient(155deg,#867bbd,#a9a4d6)!important;
+ color:#fff;border-color:#8e80c2;justify-content:center;
+}
+#gameWorld .moa-scene-slowMemory .slow-board.slow-covered small{color:#fff;font-size:13px}
+#gameWorld .moa-scene-slowName{--world-primary:#397398;--world-edge:#b9dce8;--world-sky:#e7f7ff;--world-ground:#dbf3d8}
+#gameWorld .moa-scene-slowName .moa-world-art{background-position:40% 40%}
+#gameWorld .moa-scene-slowName .slow-name-picture{border-radius:42px;box-shadow:0 10px 0 #add3d540,0 16px 22px #4f89701e}
+#gameWorld .moa-scene-slowScan{--world-primary:#397b58;--world-edge:#badfb5;--world-sky:#e8f8e5;--world-ground:#c9ebac}
+#gameWorld .moa-scene-slowScan .moa-world-art{background-position:100% 20%}
+#gameWorld .moa-scene-slowScan .slow-board.slow-scan{
+ max-width:520px;background:linear-gradient(145deg,#95c78a,#cdecb0);
+ padding:14px;border-radius:25px
+}
+#gameWorld .moa-scene-slowScan .slow-scan .slow-tile{min-height:67px;border-radius:20px;background:#e7f4d2}
+#gameWorld .moa-scene-slowEveryday{--world-primary:#347e80;--world-edge:#b7dcdb;--world-sky:#e5f8fa;--world-ground:#e1f1cc}
+#gameWorld .moa-scene-slowEveryday .moa-world-art{background-position:40% 80%}
+#gameWorld .moa-scene-slowEveryday .slow-bag-quest{max-width:720px}
+#gameWorld .moa-scene-slowEveryday .slow-bag .slow-tile{background:#fff9e9;border-radius:17px;min-height:60px}
+#gameWorld .moa-scene-slowEveryday .slow-bag .slow-tile.picked{background:#b9e7d3!important;transform:scale(.96)}
+@media(max-width:650px){
+ #gameWorld .slow-task.moa-redesigned-world{border-radius:19px;padding:9px!important;gap:12px}
+ #gameWorld .moa-world-scene-head{min-height:82px;padding:9px;gap:9px;border-radius:17px}
+ #gameWorld .moa-world-art{width:58px;height:58px}
+ #gameWorld .moa-world-scene-copy strong{font-size:18px}
+ #gameWorld .moa-world-scene-copy small{font-size:11px}
+ #gameWorld .moa-world-do{font-size:11px}
+ #gameWorld .moa-redesigned-world .slow-map-pair{gap:7px}
+ #gameWorld .moa-redesigned-world .slow-map-pair>div{padding:6px 4px 9px;border-radius:13px;gap:4px}
+ #gameWorld .moa-redesigned-world .slow-map-pair b{font-size:11px;padding:6px 7px}
+ #gameWorld .moa-redesigned-world .slow-board{padding:5px;gap:3px;border-radius:13px}
+ #gameWorld .moa-redesigned-world .slow-tile{border-radius:9px;border-width:1px;font-size:clamp(20px,5vw,29px)}
+ #gameWorld .moa-world-meter{padding:8px 11px;font-size:12px}
+ #gameWorld .moa-redesigned-world .slow-actions>*{flex:1 1 40%}
+}
+@media(prefers-reduced-motion:no-preference){
+ #gameWorld .moa-redesigned-world button.slow-tile.picked{animation:moa-plant-pop .2s ease-out}
+ @keyframes moa-plant-pop{0%{transform:scale(.86)}65%{transform:scale(1.06)}100%{transform:scale(1)}}
+ @keyframes moa-end-pop{0%{opacity:0;transform:translateY(20px) scale(.8)}100%{opacity:1;transform:translateY(0) scale(1)}}
+}
+@media(prefers-reduced-motion:reduce){
+ #gameWorld .moa-redesigned-world *,
+ #gameWorld .moa-redesigned-world *:before{animation:none!important;transition:none!important}
+}
+
+/* The piece the child actually placed reads as one connected brick, not two
+   unrelated buttons. This never annotates the sample pattern or reveals an answer. */
+#gameWorld .moa-scene-slowBlock .slow-block-board button.slow-tile.picked{position:relative;z-index:1}
+#gameWorld .moa-scene-slowBlock .slow-block-board .brick-joined-horizontal.brick-start:after{
+ content:"";position:absolute;z-index:2;right:-10px;top:23%;height:54%;width:13px;
+ background:#d88945;box-shadow:0 2px 2px #9e552d50;pointer-events:none;
+}
+#gameWorld .moa-scene-slowBlock .slow-block-board .brick-joined-vertical.brick-start:after{
+ content:"";position:absolute;z-index:2;bottom:-10px;left:22%;width:56%;height:13px;
+ background:#d88945;box-shadow:2px 0 2px #9e552d50;pointer-events:none;
+}
+#gameWorld .moa-scene-slowBlock .slow-block-board .brick-joined-horizontal.brick-start{border-top-right-radius:5px;border-bottom-right-radius:5px}
+#gameWorld .moa-scene-slowBlock .slow-block-board .brick-joined-horizontal.brick-end{border-top-left-radius:5px;border-bottom-left-radius:5px}
+#gameWorld .moa-scene-slowBlock .slow-block-board .brick-joined-vertical.brick-start{border-bottom-right-radius:5px;border-bottom-left-radius:5px}
+#gameWorld .moa-scene-slowBlock .slow-block-board .brick-joined-vertical.brick-end{border-top-right-radius:5px;border-top-left-radius:5px}
