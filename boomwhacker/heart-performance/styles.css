@@ -93,3 +93,30 @@
  #stage:fullscreen .fullstage-controls{width:max-content;max-width:96vw;gap:5px;padding:6px}
  .fullstage-controls button{font-size:11px;padding:9px 11px}
 }
+
+
+/* Portrait accessibility: never pretend a 1200px two-line score is legible at 390px.
+   Keep the fixed original music sheet unchanged; provide a prominent real landscape
+   fullscreen action and readable, independent now/next cues on narrow screens. */
+.mobile-score-tip{display:none}
+@media(max-width:620px) and (orientation:portrait){
+ .view-choice{min-height:52px}
+ .view-choice b{font-size:11px;line-height:1.15}
+ .view-choice small{font-size:9px;line-height:1.15}
+ .cue-strip{grid-template-columns:1fr;gap:5px}
+ .cue-card{min-height:36px;padding:6px 10px;gap:8px}
+ .cue-label{font-size:11px;min-width:68px}
+ .cue-card strong{font-size:15px;line-height:1.25;white-space:normal;overflow:visible}
+ .cue-after{display:block;white-space:nowrap;font-size:10px}
+ .mobile-score-tip{display:flex;align-items:center;justify-content:space-between;
+   gap:9px;margin:7px 1px 2px;padding:9px 10px;background:#fff8ea;
+   border:1px solid #e8d9b9;border-radius:10px;color:#62583f}
+ .mobile-score-tip span{font-size:11px;line-height:1.4}
+ .mobile-score-tip button{flex:none;align-self:stretch;background:#356f63;color:white;
+   border:0;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:850}
+}
+@media(max-width:359px) and (orientation:portrait){
+ .cue-after{display:none}
+ .mobile-score-tip{flex-direction:column;align-items:stretch}
+ .mobile-score-tip button{min-height:35px}
+}
