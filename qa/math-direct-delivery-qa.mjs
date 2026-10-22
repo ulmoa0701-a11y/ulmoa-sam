@@ -14,8 +14,10 @@ try{
   const res=await page.goto(base+'/math-garden/mission.html',{waitUntil:'domcontentloaded'});
   assert.equal(res.status(),200);
   assert.equal((await page.request.get(base+'/math-garden/mission-play.css')).status(),200);
-  await page.locator('[data-mission="start"]').click();
-  await page.locator('[data-mission="continue"]').click();
+  assert.equal((await inspect(page)).phase,'task','child can touch an acorn immediately');
+  assert.equal((await inspect(page)).step,1);
+  assert.equal(await page.locator('[data-mission="start"]').count(),0);
+  assert.equal(await page.locator('[data-mission="continue"]').count(),0);
   let q=(await inspect(page)).task;
   assert.equal(q.kind,'guided');
   assert.equal(await page.locator('button.feed-friend').count(),q.n);
