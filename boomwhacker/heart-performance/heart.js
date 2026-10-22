@@ -432,11 +432,11 @@ function heart(c,beat,x,y,w,h,now,muted=false){
    c.globalAlpha=!isSelected(p.note)&&p.note!=="쉼"?.35:1;
    const label=p.note==="높은도"?"도":p.note==="쉼"?"쉼":fixedNote(p.note);
    const fs=Math.min(30,Math.max(12,Math.floor((width*100-10)/(label.length+0.22))));
-   txt(c,label,cx,38,fs,["도","솔","라","시","높은도"].includes(p.note)?"#fff":"#253e47","center","700");
+   txt(c,label,cx,38,fs,p.note==="높은도"?"#fff":"#17233b","center","500");
    if(p.note==="높은도")txt(c,"↑",cx,58,Math.max(11,Math.min(15,fs*.62)),"#fff");
  }
  c.globalAlpha=1;
- if(parts.length===1&&!parts[0].onset)txt(c,"길게",50,48,18,["도","라","높은도"].includes(parts[0].note)?"#fff":"#29434a","center","700");
+ if(parts.length===1&&!parts[0].onset)txt(c,"길게",50,48,18,"#17233b","center","600");
  if(active&&!muted){
   c.save();c.clip(HEART);ln(c,clamp(now-beat,0,1)*100,7,clamp(now-beat,0,1)*100,80,"#ffffffc9",1.8);c.restore();
   const struck=parts.find(p=>p.onset&&isSelected(p.note)&&now>=p.source.start-.015&&now<p.source.start+Math.min(.24,p.source.dur)*.9);
@@ -444,7 +444,7 @@ function heart(c,beat,x,y,w,h,now,muted=false){
     const cx=50*(struck.from+struck.to),radius=Math.min(20,Math.max(13,(struck.to-struck.from)*45));
     c.save();c.globalAlpha=.96;c.fillStyle="#fff";c.beginPath();c.arc(cx,37,radius+4,0,Math.PI*2);c.fill();
     c.fillStyle=col(struck.note);c.beginPath();c.arc(cx,37,radius,0,Math.PI*2);c.fill();
-    txt(c,struck.note==="높은도"?"도":fixedNote(struck.note),cx,37,Math.min(22,radius*.95),["도","라","높은도"].includes(struck.note)?"white":"#203d46");
+    txt(c,struck.note==="높은도"?"도":fixedNote(struck.note),cx,37,Math.min(22,radius*.95),struck.note==="높은도"?"#fff":"#17233b");
     c.restore();
   }
 }
@@ -684,20 +684,11 @@ function themeFooter(c,message){
 }
 /* One beat uses one visual slot. Two eighths are TWO complete little hearts,
    not a jagged two-color heart, with a subtle shared-beat connector. */
+/* Linkage contract with /heart-score/: four quarter-beat slots inside
+   ONE canonical 100×90 V-heart. Never replace its rhythm with two small
+   hearts, even when two eighth notes occupy the same beat. */
 function paintFixedBeat(c,beat,x,y,w,h){
- const pair=stairHalfBeatPair(beat);
- if(!pair){heart(c,beat,x,y,w,h,-100,false);return}
- const miniW=Math.min(55,(w-9)/2);
- const miniH=miniW*.9,yy=y+(h-miniH)/2-4;
- const left=x+(w/2-miniW)/2,right=x+w/2+(w/2-miniW)/2;
- miniStairHeart(c,pair[0].note,left,yy,miniW);
- miniStairHeart(c,pair[1].note,right,yy,miniW);
- // One beat shared by two 1/2-beat notes.
- const bottom=yy+miniH+8;
- c.save();c.strokeStyle="#abc6b9";c.lineWidth=1.8;c.lineCap="round";
- c.beginPath();c.moveTo(left+7,bottom-5);c.lineTo(left+7,bottom);c.lineTo(right+miniW-7,bottom);c.lineTo(right+miniW-7,bottom-5);c.stroke();c.restore();
- txt(c,"½",left+miniW/2,yy-12,13,"#688b7f","center","700");
- txt(c,"½",right+miniW/2,yy-12,13,"#688b7f","center","700");
+ heart(c,beat,x,y,w,h,-100,false);
 }
 
 function scorePageBackground(info){
@@ -851,20 +842,24 @@ function miniStairHeart(c,note,x,y,width){
  c.restore();
  return hh;
 }
+/* The pitch-stair view retains the ORIGINAL one-heart-per-beat symbol.
+   Pitch is an EXTRA positional hint; it never alters the note/rhythm token. */
 function paintStairBeat(c,beat,x,y,w,h,row){
  const pair=stairHalfBeatPair(beat);
  if(!pair){heart(c,beat,x,y,w,h,-100,false);return}
- const miniW=Math.min(54,(w-7)/2);
  const y0=stairHeartTop(row,pair[0].note),y1=stairHeartTop(row,pair[1].note);
- const left=x+(w/2-miniW)/2,right=x+w/2+(w/2-miniW)/2;
- const h0=miniStairHeart(c,pair[0].note,left,y0,miniW);
- const h1=miniStairHeart(c,pair[1].note,right,y1,miniW);
- // Beat grouping line: the two notes are each a half beat, not two quarters.
- const foot=Math.max(y0+h0,y1+h1)+7;
- c.save();c.strokeStyle="#aac2b8";c.lineWidth=1.8;c.lineCap="round";
- c.beginPath();c.moveTo(left+9,foot-6);c.lineTo(left+9,foot);c.lineTo(right+miniW-9,foot);c.lineTo(right+miniW-9,foot-6);c.stroke();
+ // Keep the same canonical colored V-heart (50/50 subdivisions) at the
+ // first note's height, including its original syllable and color.
+ heart(c,beat,x,y0,w,h,-100,false);
+ // Separate quiet, note-height guides for the 2nd onset.
+ // They are not notes or extra beats: the score still contains one heart.
+ const cx=x+w*.79,cy=y1+12;
+ c.save();c.strokeStyle="#627b73";c.lineWidth=2;
+ c.setLineDash([3,4]);ln(c,cx,y0+19,cx,cy,"#9ab5a6",1.4);c.setLineDash([]);
+ disk(c,cx,cy,8,col(pair[1].note),"#ffffff",2.2);
  c.restore();
 }
+
 function buildStairPage(info){
  const bg=document.createElement("canvas");bg.width=1200;bg.height=620;
  const c=bg.getContext("2d");

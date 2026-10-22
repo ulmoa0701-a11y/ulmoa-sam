@@ -69,6 +69,22 @@ const {chromium}=require("playwright-core");
   });
   assert(fixedPairScreenshot.startsWith("data:image/png;base64,"),"paired full-heart score must rasterize");
   tests.push(name+": fixed double-eighth notes render within one beat as two intact mini-hearts, separate from pitch-stair view");
+  // Original heart-score notation uses one full V-heart per beat, four
+  // quarter-beat slots, and a vertical divider at every rhythm onset.
+  // The two-line performance is a linked reader, not a new notation system.
+  const originalNotation=fs.readFileSync(path.join(__dirname,"../../heart-score/index.html"),"utf8");
+  const linkedNotation=fs.readFileSync(path.join(__dirname,"heart.js"),"utf8");
+  assert(originalNotation.includes("function heartSvg(slots,beatIndex)")&&
+    originalNotation.includes("viewBox=\"0 0 100 90\""),"original V-heart contract missing");
+  const fixedPaint=linkedNotation.match(/function paintFixedBeat\([\s\S]*?\n\}/)?.[0]||"";
+  const stairPaint=linkedNotation.match(/function paintStairBeat\([\s\S]*?\n\}/)?.[0]||"";
+  assert(fixedPaint.includes("heart(c,beat,x,y,w,h,-100,false)")&&!fixedPaint.includes("miniStairHeart"),
+    "two-line reader must keep ONE original colored heart per beat, including eighth notes");
+  assert(stairPaint.includes("heart(c,beat,x,y0,w,h,-100,false)")&&!stairPaint.includes("miniStairHeart"),
+    "pitch hints must not introduce a different two-mini-heart rhythm grammar");
+  assert(linkedNotation.includes('const HEART_PATH="M50 84 C44 77 9 55 6 29'),
+    "performance V-heart must preserve the original SVG geometry");
+  tests.push(name+": original heart-score V-heart rhythm linkage (1 heart per beat / quarter slots / no mini-heart substitution)");
   assert(rhythmSplit.length>=1,"the real score must have at least one pair of true eighth notes");
   assert(rhythmSplit.some(x=>x.notes[0]!==x.notes[1]),"half-hearts must support two DIFFERENT pitch heights");
   assert(rhythmSplit.every(x=>x.widths.every(w=>Math.abs(w-.5)<.001)),"each pitch-separated heart HALF is still exactly half a beat");
