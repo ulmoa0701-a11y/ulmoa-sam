@@ -14,6 +14,8 @@ for(const [type,width,height] of [['desktop',1366,900],['tablet',768,1000],['mob
  must(response?.ok(),type+' HTTP response');
  const cards=page.locator('#gardenGamePanel .library-card[data-open]');
  must(await cards.count()===26,type+' 26 games present');
+ // Catalog decoration is added by a separate script; wait for its 26 final cards.
+ await page.waitForFunction(() => document.querySelectorAll('#gardenGamePanel .card-shot-preview').length === 26, null, {timeout: 15000});
  must(await page.locator('#gardenGamePanel .card-shot-preview').count()===26,type+' 26 authentic previews present');
  must(await page.locator('#gardenGamePanel .card-shot-preview .cp-mission').count()===0,type+' old emoji mockups removed');
  const inspect=await page.locator('#gardenGamePanel .card-shot-preview').evaluateAll(async elements=>{
