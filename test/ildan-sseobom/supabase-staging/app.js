@@ -6,7 +6,8 @@ const sanitize=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').r
 const hint=(s)=>`<div class="callout">${s}</div>`;
 function toast(s){$('toast').textContent=s;$('toast').classList.add('visible');setTimeout(()=>$('toast').classList.remove('visible'),3400)}
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.105.0/+esm';
-import {mediaWidget,attachPracticePhotos,getPracticePhotos,setPracticePhotos,savePracticeRecord,updatePracticeRecord,listPracticeRecords,deletePracticeRecord,photosMarkup} from './trial-media.mjs';
+import {mediaWidget,attachPracticePhotos,getPracticePhotos,setPracticePhotos,savePracticeRecord,updatePracticeRecord,listPracticeRecords,deletePracticeRecord,markPracticeTransfer,photosMarkup} from './trial-media.mjs';
+import {writtenDay,recordVolume,calendarIndex,monthVolume} from './record-calendar.mjs';
 const CFG=window.ILDAN_SUPABASE_CONFIG||{};
 const configured=Boolean(/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(CFG.url||'')
  && /^sb_publishable_|^eyJ/.test(CFG.publishableKey||'')
@@ -458,8 +459,8 @@ function confirmSharedEntry(fields,entry){
  });
 }
 
-async function uploadPracticePhotos(existing=null){
- const photos=getPracticePhotos(),paths=[];
+async function uploadPracticePhotos(existing=null,sources=getPracticePhotos()){
+ const photos=sources,paths=[];
  for(const src of photos){
   if(!src.startsWith('data:image/jpeg;base64,')){
    const i=existing?.entry?.photos?.indexOf(src)??-1;
@@ -590,6 +591,75 @@ function wireEntryForm(isParent){
  };
 }
 
+// Preserve IndexedDB originals until server write is independently verified.
+const transferInFlight=new Set();
+const transferKeys=['date','event','thought','next','observation','message','note','category','mood','energy','body','action','response','impact','sketch','time','context','origin','place','signals','after','title','experience','experienceImpact','childWords','abcBefore','abcBehavior','abcAfter'];
+function transferSignature(entry){
+ const e=compactSketchForCloud(entry||{}),clean={};
+ for(const k of transferKeys)if(typeof e[k]==='string'&&e[k].trim())clean[k]=e[k].trim();
+ return JSON.stringify(clean);
+}
+function matchesDeviceCopy(local,cloud){
+ if(!cloud?.practice||cloud.kind!==local.kind)return false;
+ return transferSignature(local.entry)===transferSignature(cloud.entry)
+  &&(Array.isArray(local.entry?.photos)?local.entry.photos.length:0)===(Array.isArray(cloud.entry?.photos)?cloud.entry.photos.length:0);
+}
+async function migrateDeviceRecord(local){
+ if(!['student','parent'].includes(me?.role)||!local?.local||local.owner!==me.id)throw Error('본인 기기에 저장된 기록만 옮길 수 있어요.');
+ if(transferInFlight.has(local.id))return;
+ transferInFlight.add(local.id);
+ let savedOnServer=false;
+ try{
+  const before=(await api('practice-records')).records||[];
+  const prior=before.filter(r=>matchesDeviceCopy(local,r));
+  if(local.syncedTo&&before.some(r=>r.id===local.syncedTo)){await markPracticeTransfer(me.id,local.id,'done',local.syncedTo);return 'already';}
+  // A previous request may have succeeded after the browser lost its reply.
+  if(['sending','needs-review'].includes(local.transferState)){
+   if(prior.length===1){await markPracticeTransfer(me.id,local.id,'done',prior[0].id);return 'recovered';}
+   if(prior.length>1)throw Error('비슷한 서버 기록이 여러 개 있어요. 중복 전송을 막기 위해 자동 이전을 중단했어요.');
+  }
+  const photos=Array.isArray(local.entry?.photos)?local.entry.photos:[];
+  if(photos.some(p=>typeof p!=='string'||!/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(p)))
+   throw Error('예전 사진 형식을 자동으로 옮길 수 없어요. 원본은 유지되며, 사진을 다시 선택해야 해요.');
+  await markPracticeTransfer(me.id,local.id,'sending');
+  const entry=compactSketchForCloud({...local.entry});
+  delete entry.photos;
+  if(photos.length)entry.photos=await uploadPracticePhotos(null,photos);
+  savedOnServer=true;
+  const out=await api('practice-records',{method:'POST',body:{entry,share:false}});
+  const cloudId=out.record?.id;
+  if(!cloudId)throw Error('서버 저장 결과를 확인할 수 없어요. 기기 원본은 그대로 있어요.');
+  const after=(await api('practice-records')).records||[];
+  if(!after.some(r=>r.id===cloudId&&matchesDeviceCopy(local,r)))
+   throw Error('서버에서 복사본을 확인하지 못했어요. 기기 원본은 그대로 있어요.');
+  await markPracticeTransfer(me.id,local.id,'done',cloudId);
+  return 'copied';
+ }catch(e){
+  await markPracticeTransfer(me.id,local.id,savedOnServer?'needs-review':'ready').catch(()=>{});
+  throw e;
+ }finally{transferInFlight.delete(local.id)}
+}
+function deviceOriginals(){return records.filter(r=>r.local&&r.syncedTo&&records.some(s=>s.practice&&s.id===r.syncedTo))}
+function shownRecords(list=records){return list.filter(r=>!r.local||!r.syncedTo||!records.some(s=>s.practice&&s.id===r.syncedTo))}
+function bindDeviceTransfer(){
+ document.querySelectorAll('[data-practice-transfer]').forEach(b=>b.onclick=()=>loading(b,async()=>{
+  const local=records.find(r=>r.id===b.dataset.practiceTransfer&&r.local);
+  if(!local)throw Error('기기 원본을 찾지 못했어요. 새로고침해 주세요.');
+  if(!confirm('이 기기의 기록을 연습용 서버에 비공개로 복사할까? 기기 원본은 삭제되지 않고, 치료사에게 자동 공유되지 않아.'))return;
+  const status=await migrateDeviceRecord(local);
+  await dashboard();toast(status==='recovered'?'이미 저장된 서버 기록을 확인했어.':'서버로 비공개 복사했어. 원본은 기기에 남아 있어.');
+ }));
+ const all=$('transferAllDevice');if(all)all.onclick=()=>loading(all,async()=>{
+  const list=shownRecords(records).filter(r=>r.local&&!r.syncedTo);
+  if(!list.length)return;
+  if(!confirm(`기기의 임시 기록 ${list.length}건을 서버로 비공개 복사할까? 원본은 삭제하지 않으며 치료사에게 자동 공유하지 않아.`))return;
+  let done=0;for(const record of list){
+   try{await migrateDeviceRecord(record);done++;}
+   catch(e){await dashboard();throw Error(`${done}건 확인 완료. 다음 기록에서 멈췄어요: ${e.message}`)}
+  }
+  await dashboard();toast(`${done}건을 서버에서 확인했어. 기기 원본은 유지돼.`);
+ }));
+}
 function prettyRecordEntry(entry){return Object.entries(entry??{}).map(([k,v])=> k==='photos'?photosMarkup(v):k==='sketch'?`<div class="sketch-record" data-sketch="${sanitize(v)}"><div class="sketch-mini-label">그림 메모</div><canvas width="760" height="380"></canvas></div>`:`<p><b>${sanitize(NOTE_LABELS[k]||k)}</b><br>${sanitize(v)}</p>`).join('');}
 function paintSketches(){document.querySelectorAll('[data-sketch]').forEach(el=>{try{const arr=JSON.parse(el.dataset.sketch);if(!Array.isArray(arr)||arr.length>250)return;const ctx=el.querySelector('canvas').getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,760,380);ctx.strokeStyle='#5362cc';ctx.lineWidth=3.5;ctx.lineCap='round';ctx.lineJoin='round';arr.forEach(stroke=>{if(!Array.isArray(stroke)||!stroke.length)return;ctx.beginPath();stroke.slice(0,1200).forEach((p,i)=>{if(!Array.isArray(p)||p.length!==2||!Number.isFinite(p[0])||!Number.isFinite(p[1]))return;const x=Math.max(0,Math.min(760,p[0])),y=Math.max(0,Math.min(380,p[1]));i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke()});}catch(_){}})}
 function parentObservationFacts(entry={}){
@@ -597,12 +667,13 @@ function parentObservationFacts(entry={}){
  return `<div class="observed-facts"><p class="clinical-neutral">보호자가 전달한 기록입니다. 직접 관찰했는지 또는 전해 들었는지 확인하고, 해석과 판단은 치료사가 별도로 검토합니다.</p>${fields.filter(([k])=>entry[k]).map(([k,name])=>`<div class="observed-fact-row"><strong>${name}</strong><span>${sanitize(entry[k])}</span></div>`).join('')}</div>`;
 }
 function recordCards(list=records){
+ list=shownRecords(list);
  if(!list.length)return '<div class="empty-state">아직 남겨둔 기록이 없습니다. 필요할 때만 작성해도 괜찮아요.</div>';
  return list.map(r=>{
   const time=sanitize(new Date(r.createdAt).toLocaleString('ko-KR'));
   const observed=r.entry?.date?`${r.kind==='parent'?'관찰':'기록'} ${sanitize(r.entry.date)}${r.entry.time?' '+sanitize(r.entry.time):''}${r.entry.place?' · '+sanitize(r.entry.place):''} · 작성 ${time}`:time;
   if(r.practice&&me.role!=='therapist')return `<article class="record archive-record practice-cloud-record"><div class="meta">연습용 서버 저장 · ${observed}${r.updatedAt&&new Date(r.updatedAt).getTime()-new Date(r.createdAt).getTime()>1000?' · 수정 '+sanitize(new Date(r.updatedAt).toLocaleString('ko-KR')):''} · ${r.shared?'치료사에게 공유 중':'나만 보기'}</div>${prettyRecordEntry(r.entry)}<div class="practice-record-actions"><button class="button-ghost" type="button" data-practice-edit="${sanitize(r.id)}">✎ 기록 수정하기</button>${r.shared?`<button class="button-ghost" data-practice-unshare="${sanitize(r.id)}">치료사 공유 취소</button>`:`<button class="button-ghost" data-practice-share="${sanitize(r.id)}">치료사에게 공유하기</button>`}<button class="button-ghost" data-practice-delete="${sanitize(r.id)}">연습 기록 삭제</button></div></article>`;
-  if(r.local)return `<article class="record archive-record device-only-record"><div class="meta">이 기기에만 임시 보관 · ${observed}${r.updatedAt?' · 수정됨':''} · 치료사에게 전달되지 않음</div>${prettyRecordEntry(r.entry)}<div class="practice-record-actions"><button class="button-ghost" type="button" data-practice-edit="${sanitize(r.id)}">✎ 기록 수정하기</button><button class="button-ghost" type="button" data-delete-practice="${sanitize(r.id)}">이 기기에서 기록·사진 삭제</button></div></article>`;
+  if(r.local)return `<article class="record archive-record device-only-record"><div class="meta">이 기기에만 임시 보관 · ${observed}${r.updatedAt?' · 수정됨':''} · 치료사에게 전달되지 않음</div>${prettyRecordEntry(r.entry)}<div class="practice-record-actions"><button class="button" type="button" data-practice-transfer="${sanitize(r.id)}">${r.transferState==='needs-review'||r.transferState==='sending'?'서버 이전 결과 확인':'서버로 비공개 복사'}</button><button class="button-ghost" type="button" data-practice-edit="${sanitize(r.id)}">✎ 기록 수정하기</button><button class="button-ghost" type="button" data-delete-practice="${sanitize(r.id)}">이 기기에서 기록·사진 삭제</button></div></article>`;
   if(me.role==='therapist'&&r.kind==='student'){
    const photoCount=Array.isArray(r.entry?.photos)?r.entry.photos.length:0;
    const extras=[photoCount?`사진 ${photoCount}장`:'',r.entry?.sketch?'그림 포함':''].filter(Boolean).join(' · ');
@@ -618,6 +689,7 @@ function recordCards(list=records){
 }
 
 function attachShares(){
+ bindDeviceTransfer();
  document.querySelectorAll('[data-practice-edit]').forEach(btn=>btn.onclick=()=>loading(btn,async()=>{
   const record=records.find(r=>(r.practice||r.local)&&r.id===btn.dataset.practiceEdit);
   if(!record)return toast('기록을 찾을 수 없어. 다시 열어 줘.');
@@ -766,7 +838,7 @@ function studentHome(){
  `<div class="workspace-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">01</span></div>${workspaceNav(items,activeView)}<div class="sidebar-note"><span class="privacy-dot" aria-hidden="true"></span>공유는 내가 선택해요.<br><small>혼자만 볼 수도 있어요.</small></div></aside><div class="workspace-content">
  <section data-workspace-view="write" class="workspace-section"><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>${isParent?'observation.note':'my-note.md'}</span><span class="editor-status">NEW NOTE</span></div><div class="editor-paper"><span class="tag">01 / WRITE</span><h2>${isParent?'간단한 생활 메모':'새 페이지'}</h2><p>${isParent?'한 가지를 짧게 적어도 충분해요. 치료사에게 전달하지 않아도 돼요.':'글이나 그림으로 남겨도 되고, 그냥 둘러봐도 돼.'}</p>${dataForm(me.role)}</div></section>
  ${isParent?`<section data-workspace-view="calendar" id="parentCalendar" class="workspace-section" hidden>${parentCalendarHTML()}</section>`:''}
- <section data-workspace-view="history" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>my-notes.json</span></div><div class="editor-paper"><span class="tag">02 / ARCHIVE</span><h2>${isParent?'내 생활 메모':'내 서랍'}</h2><p>${isParent?'내가 남긴 메모만 보여요.':'내가 남긴 페이지들을 모아두는 곳이야.'}</p><div id="recordsHere">${recordCards()}</div></div></section>
+ <section data-workspace-view="history" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>my-notes.json</span></div><div class="editor-paper"><span class="tag">02 / ARCHIVE</span><h2>${isParent?'내 생활 메모':'내 서랍'}</h2><p>${isParent?'내가 남긴 메모만 보여요.':'내가 남긴 페이지들을 모아두는 곳이야.'}</p><div id="recordsHere">${recordCards()}</div>${records.some(r=>r.local&&!r.syncedTo)?`<div class="device-transfer-all"><button id="transferAllDevice" class="button">기기 임시 기록 모두 서버로 복사</button><p>원본을 지우지 않고 비공개 복사합니다. 담당 치료사에게는 따로 공유해야 보여요.</p></div>`:''}${deviceOriginals().length?`<details class="device-originals"><summary>기기에 남긴 이전 원본 ${deviceOriginals().length}건</summary><p>서버로 복사한 뒤에도 원본은 자동 삭제하지 않습니다.</p></details>`:''} </div></section>
  ${isParent?'':`<section data-workspace-view="coding" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>studio / playground</span></div><div class="editor-paper"><span class="tag">OPTIONAL / PLAY</span><h2>코딩 실험실</h2><p>조건을 바꿔 결과를 확인하는 작은 실험 공간이야. 기록하지 않고 그냥 놀아도 돼.</p>${codingMarkup()}<details class="optional-fields"><summary>간단한 선택 예시 살펴보기 <small>선택</small></summary><div class="optional-wrap">${situationMarkup()}</div></details></div></section>`}
  </div></div><p class="workspace-footer">일단써봄은 원하는 방식으로 경험을 남기는 개인 작업공간이야. 사용하고 싶은 때에만 열어도 돼.</p>`;
  wireEntryForm(isParent);attachShares();bindWorkspace();
