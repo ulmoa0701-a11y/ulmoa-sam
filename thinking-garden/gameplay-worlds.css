@@ -279,3 +279,15 @@
   animation:moa-end-pop .32s ease-out both;
  }
 }
+
+
+/* A real, short travel animation for an item placed in the journey bag.
+   It is deliberately silent, does not identify correct targets, and never
+   intercepts clicks or appear in reduced-motion preferences. */
+.moa-moving-item{
+ position:fixed;z-index:9999;pointer-events:none;
+ display:grid;place-items:center;width:44px;height:44px;
+ border-radius:14px;border:2px solid #87b8aa;
+ background:#fbfff2;box-shadow:0 5px 15px #2c67572d;
+ font-size:29px;line-height:1;
+}
