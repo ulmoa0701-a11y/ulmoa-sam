@@ -237,6 +237,7 @@ with sync_playwright() as p:
   teacher.locator('#pushDisable').wait_for(state='visible',timeout=12000)
   assert 'subscribe' in push_calls, 'must register device only after real button click'
   teacher.locator('#pushTest').click()
+  teacher.locator('#toast').get_by_text('푸시 제공자에 테스트 메시지',exact=False).wait_for(timeout=12000)
   assert 'test' in push_calls, 'tester may send a generic test notification'
   teacher.locator('#pushDisable').click()
   teacher.locator('#pushEnable').wait_for(state='visible',timeout=10000)
