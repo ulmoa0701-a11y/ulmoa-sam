@@ -87,6 +87,29 @@ const {chromium}=require("playwright-core");
   assert.equal(ratioTest.r.width/ratioTest.r.height,16/9,"video must have exact standard YouTube wide aspect");
   assert.deepEqual(ratioTest.scales,[.8,.95,1],"hearts use one UNIFORM x/y scale, never squash glyphs");
   assert.equal(await page.locator("#fullscreen").count(),1);
+
+  assert.equal(await page.locator("#stagePlay").count(),1);
+  assert.equal(await page.locator("#stageReset").count(),1);
+  assert.equal(await page.locator("#stageExit").count(),1);
+  const advancedLayout=await page.evaluate(()=>{
+   const q=window.__performanceViewsQA__,original=q.state().song,out={};
+   q.selectView("two");q.selectSong("moa-signal");
+   const before=q.twoPageAt(-2);
+   out.balanced={barsPerLine:before.barsPerLine,total:before.total,pageBars:before.pageBars,pageCount:before.pageCount};
+   out.preludeFixed=q.twoMoaPosition(-2,before);
+   q.selectView("stairs");out.preludeStair=q.stairMoaPosition(-2,q.stairPageAt(-2));
+   q.selectView("two");q.at(.12);
+   const info=q.twoPageAt(.12),moa=q.twoMoaPosition(.12,info);
+   out.firstMoa=moa?{x:moa.x,y:moa.y,row:moa.row}:null;
+   q.selectSong(original);return out;
+  });
+  assert.deepEqual(advancedLayout.balanced,{barsPerLine:4,total:8,pageBars:8,pageCount:1},
+     "eight 2/4 measures must be 4+4, never 5+3");
+  assert.equal(advancedLayout.preludeFixed,null,"no Moa on first-row label while prelude plays");
+  assert.equal(advancedLayout.preludeStair,null,"no premature pitch mascot during prelude");
+  assert(advancedLayout.firstMoa?.y>=203,"the sprite stays below the title in the score lane");
+  tests.push(name+": balanced two-row layout, prelude mascot title protection, responsive score position");
+
   tests.push(name+": non-distorted Korean syllables / V-hearts, 1920x1080 16:9 export target and fullscreen control");
 
 
@@ -135,8 +158,8 @@ const {chromium}=require("playwright-core");
  }
  q.selectSong(original);return out;
 });
-assert.equal(visibleHearts["moa-signal"].beatsPerLine,name==="mobile"?8:10,"2/4 must show EIGHT OR TEN hearts per row, not two");
-assert.equal(visibleHearts["moa-breeze"].beatsPerLine,name==="mobile"?6:9,"3/4 phrase must fill the stationary score");
+assert.equal(visibleHearts["moa-signal"].beatsPerLine,8,"2/4 must balance full 8-bar song as 4+4 rather than 5+3");
+assert.equal(visibleHearts["moa-breeze"].beatsPerLine,6,"3/4 must balance phrase heights");
 assert.equal(visibleHearts["moa-space"].beatsPerLine,8,"4/4 phrase must display eight hearts per row");
 tests.push(name+": stationary two rows show 2/4="+visibleHearts["moa-signal"].beatsPerLine+" hearts per row, no tiny two-heart rows");
 tests.push(name+": score visually frozen for both rows, whole-page swap exactly at end, sprite-only motion, hop/walk toggle");
@@ -212,8 +235,8 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
       height=q.stairGeometry(p,0).heartHeight;
     return {high,low,height};
   });
-  assert.equal(layout.height,90,"pitched hearts should be 90 units high, not squeezed to 72");
-  assert(layout.low>layout.high+80,"pitch ladder should have readable tonal separation");
+  assert.equal(layout.height,80,"pitched hearts must fit pitch guide plus protected headers");
+  assert(layout.low>layout.high+75,"pitch ladder should have readable tonal separation");
   await page.locator("#display").screenshot({path:path.join(dir,name+"-stair-clean-typography.png")});
   tests.push(name+": un-squashed pitched hearts with clean per-note lettering and intact static lines");
 
@@ -307,6 +330,21 @@ tests.push(name+": score visually frozen for both rows, whole-page swap exactly 
   await page.locator("#keys button").first().dispatchEvent("pointerdown");
   assert.equal(await page.evaluate(()=>window.__performanceViewsQA__.state().playing),false);
   tests.push(name+": audio-clock play, view switching without replay, pause, resume, reset");
+
+  if(name==="desktop"){
+   await page.locator("#fullscreen").click();
+   assert.equal(await page.evaluate(()=>Boolean(document.fullscreenElement)),true,"actual fullscreen mode");
+   assert.equal(await page.locator("#stagePlay").isVisible(),true,"play should be reachable in fullscreen");
+   assert.equal(await page.locator("#stageReset").isVisible(),true,"reset should be reachable in fullscreen");
+   await page.locator("#stagePlay").click();
+   assert.equal(await page.evaluate(()=>window.__performanceViewsQA__.state().playing),true);
+   await page.locator("#stagePlay").click();
+   assert.equal(await page.evaluate(()=>window.__performanceViewsQA__.state().playing),false);
+   await page.locator("#stageExit").click();
+   assert.equal(await page.evaluate(()=>Boolean(document.fullscreenElement)),false);
+   tests.push(name+": real fullscreen play pause reset and exit remain functional");
+  }
+
   const viewport=await page.evaluate(()=>({w:innerWidth,scroll:document.documentElement.scrollWidth,stage:document.querySelector("#stage").getBoundingClientRect()}));
   assert(viewport.scroll<=viewport.w+3,"horizontal overflow at "+width+"px "+JSON.stringify(viewport));
   assert(viewport.stage.y<495,"stage should be visible after the additional compact theme selector "+viewport.stage.y);
