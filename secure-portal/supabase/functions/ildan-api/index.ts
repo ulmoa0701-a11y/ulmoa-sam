@@ -92,7 +92,7 @@ async function openJSON(nonce:string,ciphertext:string){
 }
 const requireText=(o:Obj,key:string)=>typeof o[key]==='string'?String(o[key]):'';
 const roles=new Set(['student','parent','therapist']);
-const endpoints=new Set(['test-therapist-signup','test-therapist-delete','me','records','share','unshare','session-notes','students','accounts','invites','claim-invite','invite-preview','invite-register','delete-record','revoke-invite','drive/status','health','practice-records','practice-media-sign','practice-share','practice-unshare','practice-delete','practice-update']);
+const endpoints=new Set(['test-therapist-signup','test-therapist-delete','me','records','share','unshare','session-notes','students','accounts','invites','claim-invite','invite-preview','invite-register','delete-record','revoke-invite','drive/status','health','practice-records','practice-media-sign','practice-share','practice-unshare','practice-delete','practice-update','practice-notifications','practice-notification-read']);
 const getRole=async(userDb:any,id:string)=>{
  const {data,error}=await userDb.from('ildan_members').select('user_id,role,therapist_id,student_id,display_alias').eq('user_id',id).maybeSingle();
  if(error)throw Error('ROLE_LOOKUP_FAILED');
@@ -274,6 +274,48 @@ export async function handle(request:Request):Promise<Response>{
   if(!member||!roles.has(member.role))return send({error:'승인된 학생·보호자·치료사 계정이 아닙니다.'},403);
   const admin=adminDb();
   if(apiName==='me'&&request.method==='GET')return send({user:{id:uid,role:member.role,nickname:member.display_alias||member.role,trial:user.app_metadata?.enrollment==='sandbox-self-signup',therapistId:member.therapist_id,studentId:member.student_id}});
+  // Only the assigned therapist sees metadata for records still shared.
+  if(apiName==='practice-notifications'&&request.method==='GET'){
+   if(member.role!=='therapist')return send({error:'치료사 전용입니다.'},403);
+   const {data:assigned,error:ae}=await admin.from('ildan_members')
+    .select('user_id').eq('role','student').eq('therapist_id',uid);
+   if(ae)throw Error('NOTIFY_ASSIGNMENT_FAILED');
+   const ids=(assigned||[]).map((x:any)=>x.user_id);
+   if(!ids.length)return send({notifications:[],unreadCount:0});
+   const {data:events,error:ne}=await admin.from('ildan_share_notifications')
+    .select('id,record_id,student_id,event_type,created_at,read_at')
+    .eq('therapist_id',uid).in('student_id',ids)
+    .order('created_at',{ascending:false}).limit(100);
+   if(ne)throw Error('NOTIFY_LIST_FAILED');
+   const recIds=[...new Set((events||[]).map((e:any)=>e.record_id))];
+   if(!recIds.length)return send({notifications:[],unreadCount:0});
+   const {data:visible,error:ve}=await admin.from('ildan_practice_records')
+    .select('id,student_id').eq('therapist_id',uid)
+    .in('student_id',ids).in('id',recIds).not('shared_at','is',null);
+   if(ve)throw Error('NOTIFY_VISIBILITY_FAILED');
+   const allowed=new Set((visible||[]).map((r:any)=>r.id));
+   const notifications=(events||[]).filter((x:any)=>allowed.has(x.record_id))
+    .map((e:any)=>({id:e.id,recordId:e.record_id,studentId:e.student_id,
+      type:e.event_type,createdAt:e.created_at,readAt:e.read_at}));
+   return send({notifications,unreadCount:notifications.filter((e:any)=>!e.readAt).length});
+  }
+  if(apiName==='practice-notification-read'&&request.method==='POST'){
+   if(member.role!=='therapist')return send({error:'치료사 전용입니다.'},403);
+   const b=await body(request),id=requireText(b,'notificationId');
+   if(!UUID_RE.test(id))return send({error:'알림을 확인해 주세요.'},400);
+   const {data:notice,error:ne}=await admin.from('ildan_share_notifications')
+    .select('id,student_id,record_id').eq('id',id).eq('therapist_id',uid).maybeSingle();
+   if(ne||!notice)return send({error:'확인할 수 없는 알림입니다.'},404);
+   if(!(await checkStudent(admin,notice.student_id,uid)))return send({error:'담당 학생 연결이 변경됐습니다.'},403);
+   const {data:shared,error:se}=await admin.from('ildan_practice_records')
+    .select('id').eq('id',notice.record_id).eq('therapist_id',uid)
+    .eq('student_id',notice.student_id).not('shared_at','is',null).maybeSingle();
+   if(se||!shared)return send({error:'공유가 종료된 기록입니다.'},404);
+   const {error:re}=await admin.from('ildan_share_notifications')
+    .update({read_at:new Date().toISOString()}).eq('id',id).eq('therapist_id',uid).is('read_at',null);
+   if(re)throw Error('NOTIFY_READ_FAILED');
+   return send({ok:true});
+  }
   if(apiName==='students'&&request.method==='GET'){
    if(member.role!=='therapist')return send({error:'치료사 전용입니다.'},403);
    const {data,error}=await userDb.from('ildan_members').select('user_id,display_alias').eq('therapist_id',uid).eq('role','student');
