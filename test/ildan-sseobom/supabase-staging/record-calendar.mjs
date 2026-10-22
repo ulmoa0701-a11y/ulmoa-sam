@@ -8,7 +8,7 @@ export function writtenDay(record){
 export function recordVolume(record){
  const e=record?.entry||{};
  const textKeys=['note','title','event','thought','next','observation','message','mood','energy','body','action','response','impact','context','origin','place','signals','after','experience','experienceImpact','childWords','abcBefore','abcBehavior','abcAfter'];
- const characters=textKeys.reduce((n,k)=>n+(typeof e[k]==='string'?[...e[k]].filter(c=>!/^\\s$/.test(c)).length:0),0);
+ const characters=textKeys.reduce((n,k)=>n+(typeof e[k]==='string'?[...e[k]].filter(c=>!/\s/.test(c)).length:0),0);
  return {characters,photos:Array.isArray(e.photos)?e.photos.length:0,drawings:e.sketch?1:0};
 }
 export function calendarIndex(records){
