@@ -1,0 +1,73 @@
+/* 모아의 생각정원 — 실제 게임 장면과 '무엇을 하는지' 중심의 26개 표지.
+   정답 자극, 기존 게임 엔진, 모아 캐릭터를 변경하지 않는다. */
+#gardenGamePanel .library-card .card-shot-preview{
+  display:flex!important; flex-direction:column!important; justify-content:space-between!important;
+  gap:10px!important; padding:13px!important; overflow:hidden!important;
+  min-height:245px!important; border:2px solid #d9e7dc!important;
+  background:linear-gradient(155deg,#f1f8f5,#fff9ed)!important;
+  box-shadow:inset 0 1px 0 #fff,0 5px 15px #45695115!important;
+  pointer-events:none;
+}
+#gardenGamePanel .card-shot-preview:before,
+#gardenGamePanel .card-shot-preview:after{display:none!important}
+#gardenGamePanel .card-shot-preview .card-shot-screen{
+  display:flex; justify-content:center; align-items:center;
+  flex:1 1 auto; min-height:128px; max-height:235px; border-radius:16px;
+  background:linear-gradient(180deg,#e9f5fc,#f1f7e6);
+  box-shadow:inset 0 0 0 1px #ffffffb8; overflow:hidden;
+}
+#gardenGamePanel .card-shot-preview .card-shot-screen img{
+  display:block;width:100%;height:100%;min-height:128px;max-height:235px;
+  object-fit:contain;object-position:center; background:transparent;
+}
+#gardenGamePanel .card-shot-info{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
+}
+#gardenGamePanel .card-shot-label{
+  color:#516b61;font-size:11px;font-weight:750;
+}
+#gardenGamePanel .card-shot-mode{
+  padding:5px 9px;border-radius:100px;background:#d5ecdb;color:#245d45;
+  font-size:12px;line-height:1.25;font-weight:850;word-break:keep-all;
+}
+#gardenGamePanel .card-shot-steps{
+  display:grid;grid-template-columns:minmax(0,1fr) 18px minmax(0,1fr);
+  align-items:stretch;gap:5px;width:100%;
+}
+#gardenGamePanel .card-shot-steps span:not(.card-shot-arrow),
+#gardenGamePanel .card-shot-steps strong{
+  display:flex!important;align-items:center;justify-content:center;text-align:center;
+  min-height:42px!important;margin:0!important;padding:7px 8px!important;
+  background:#fff!important;border:1px solid #dfe9df!important;border-radius:12px!important;
+  font-size:12px!important;line-height:1.35!important;font-weight:750!important;
+  color:#345244!important;overflow-wrap:anywhere;word-break:keep-all;
+}
+#gardenGamePanel .card-shot-steps strong{
+  color:#174e36!important;background:#e5f5e9!important;
+  border-color:#b2d7ba!important;font-weight:850!important;
+}
+#gardenGamePanel .card-shot-steps .card-shot-arrow{
+  display:flex;align-items:center;justify-content:center;color:#417e5c;
+  font-weight:900;font-size:17px;
+}
+#gardenGamePanel .card-shot-preview.preview-slowPlace .card-shot-mode,
+#gardenGamePanel .card-shot-preview.preview-slowMemory .card-shot-mode{background:#e4e8ff;color:#484b88}
+#gardenGamePanel .card-shot-preview.preview-slowBlock .card-shot-mode,
+#gardenGamePanel .card-shot-preview.preview-mirrorPond .card-shot-mode{background:#ffedd4;color:#865127}
+#gardenGamePanel .card-shot-preview.card-shot-missing .card-shot-screen{
+ color:#4a6756;text-align:center;padding:12px;font-size:14px;font-weight:700;
+}
+@media(max-width:960px){
+ #gardenGamePanel .library-card .card-shot-preview{min-height:235px!important}
+ #gardenGamePanel .card-shot-preview .card-shot-screen{max-height:240px}
+}
+@media(max-width:560px){
+ #gardenGamePanel .library-card .card-shot-preview{padding:10px!important;min-height:205px!important}
+ #gardenGamePanel .card-shot-preview .card-shot-screen{min-height:115px;max-height:200px}
+ #gardenGamePanel .card-shot-preview .card-shot-screen img{min-height:115px;max-height:200px}
+ #gardenGamePanel .card-shot-steps span:not(.card-shot-arrow),
+ #gardenGamePanel .card-shot-steps strong{font-size:12px!important;min-height:44px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #gardenGamePanel .card-shot-preview *{animation:none!important;transition:none!important}
+}
