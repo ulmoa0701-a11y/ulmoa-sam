@@ -76,8 +76,8 @@ const {chromium}=require("playwright-core");
   const linkedNotation=fs.readFileSync(path.join(__dirname,"heart.js"),"utf8");
   assert(originalNotation.includes("function heartSvg(slots,beatIndex)")&&
     originalNotation.includes("viewBox=\"0 0 100 90\""),"original V-heart contract missing");
-  const fixedPaint=linkedNotation.match(/function paintFixedBeat\\([\\s\\S]*?\\n\\}/)?.[0]||"";
-  const stairPaint=linkedNotation.match(/function paintStairBeat\\([\\s\\S]*?\\n\\}/)?.[0]||"";
+  const fixedPaint=linkedNotation.match(/function paintFixedBeat\([\s\S]*?\n\}/)?.[0]||"";
+  const stairPaint=linkedNotation.match(/function paintStairBeat\([\s\S]*?\n\}/)?.[0]||"";
   assert(fixedPaint.includes("heart(c,beat,x,y,w,h,-100,false)")&&!fixedPaint.includes("miniStairHeart"),
     "two-line reader must keep ONE original colored heart per beat, including eighth notes");
   assert(stairPaint.includes("heart(c,beat,x,y0,w,h,-100,false)")&&!stairPaint.includes("miniStairHeart"),
