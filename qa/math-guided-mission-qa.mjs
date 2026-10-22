@@ -46,8 +46,12 @@ async function submit(page,index,kind,wrong=false){
  }
  if(index===2){
   const needed=x.total-x.have;
-  await pick(page,needed);
-  await page.locator('[data-mission=submit]').click();
+  assert.equal(await page.locator('[data-mission=submit]').count(),0,'no read-and-submit gate for filling slots');
+  for(let j=0;j<needed-1;j++){
+   await page.locator('.supply-items [data-mission=take]').first().click();
+   assert.equal(await page.locator('.success').count(),0,'not complete until every slot is filled');
+  }
+  await page.locator('.supply-items [data-mission=take]').first().click();
  }
  assert.equal((await task(page)).phase,'success','success state requires a visible reaction in the world');
  assert.ok(await page.locator('.success').count(),index+' '+kind+' did not yield story consequence');
