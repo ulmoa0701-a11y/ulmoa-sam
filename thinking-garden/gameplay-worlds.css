@@ -181,3 +181,19 @@
  #gameWorld .moa-redesigned-world *,
  #gameWorld .moa-redesigned-world *:before{animation:none!important;transition:none!important}
 }
+
+/* The piece the child actually placed reads as one connected brick, not two
+   unrelated buttons. This never annotates the sample pattern or reveals an answer. */
+#gameWorld .moa-scene-slowBlock .slow-block-board button.slow-tile.picked{position:relative;z-index:1}
+#gameWorld .moa-scene-slowBlock .slow-block-board .brick-joined-horizontal.brick-start:after{
+ content:"";position:absolute;z-index:2;right:-10px;top:23%;height:54%;width:13px;
+ background:#d88945;box-shadow:0 2px 2px #9e552d50;pointer-events:none;
+}
+#gameWorld .moa-scene-slowBlock .slow-block-board .brick-joined-vertical.brick-start:after{
+ content:"";position:absolute;z-index:2;bottom:-10px;left:22%;width:56%;height:13px;
+ background:#d88945;box-shadow:2px 0 2px #9e552d50;pointer-events:none;
+}
+#gameWorld .moa-scene-slowBlock .slow-block-board .brick-joined-horizontal.brick-start{border-top-right-radius:5px;border-bottom-right-radius:5px}
+#gameWorld .moa-scene-slowBlock .slow-block-board .brick-joined-horizontal.brick-end{border-top-left-radius:5px;border-bottom-left-radius:5px}
+#gameWorld .moa-scene-slowBlock .slow-block-board .brick-joined-vertical.brick-start{border-bottom-right-radius:5px;border-bottom-left-radius:5px}
+#gameWorld .moa-scene-slowBlock .slow-block-board .brick-joined-vertical.brick-end{border-top-right-radius:5px;border-top-left-radius:5px}
