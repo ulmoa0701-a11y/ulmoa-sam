@@ -119,7 +119,7 @@ function assess(){
  // transfer trials must count, while a hinted/guessed retry must never count.
  const transfer=r.some(z=>z.kind==='transfer'&&z.clean===true);
  return {independent:clean.length,transfer,attempted:r.length,
-   supported:state.results.length-clean.length,
+   supported:state.results.filter(z=>!z.clean).length,
    criteriaMet:clean.length>=2&&transfer};
 }
 function advance(){
