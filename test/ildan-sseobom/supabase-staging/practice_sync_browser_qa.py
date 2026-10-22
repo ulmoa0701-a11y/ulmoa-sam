@@ -7,6 +7,7 @@ from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright, expect
 import re
 import os,time,json,base64,struct,zlib
+from datetime import datetime,timezone
 root=Path(__file__).resolve().parents[3]
 srv=ThreadingHTTPServer(('127.0.0.1',8829),partial(SimpleHTTPRequestHandler,directory=str(root)))
 Thread(target=srv.serve_forever,daemon=True).start()
@@ -35,7 +36,7 @@ def init(page,role):
   if name=='me':data={'user':{'id':uid,'role':role,'nickname':'연습계정','trial':True}}
   elif name=='practice-records' and method=='GET':
    data={'records':[{'id':row['id'],'kind':'student','student':'가상 학생','studentId':student,'author':'연습 학생',
-    'createdAt':'2026-10-15T10:00:00Z','updatedAt':row.get('updatedAt','2026-10-15T10:00:00Z'),'shared':row['shared'],'practice':True,
+    'createdAt':row.get('createdAt',datetime.now(timezone.utc).isoformat()),'updatedAt':row.get('updatedAt',datetime.now(timezone.utc).isoformat()),'shared':row['shared'],'practice':True,
     'photoPaths':row['entry'].get('photos',[]) if role!='therapist' else [],
     'entry':{**row['entry'],'photos':['https://miohovwmhmtcvkurjamm.supabase.co/storage/v1/object/sign/'+bucket+'/'+p+'?token=test' for p in row['entry'].get('photos',[])]}}
     for row in stored if role!='therapist' or row['shared']]}
@@ -43,7 +44,8 @@ def init(page,role):
    n=len(uploaded)+1
    data={'path':student+'/00000000-0000-4000-8000-'+str(n).zfill(12)+'.jpg','bucket':bucket,'token':'qa-upload','maxBytes':2097152}
   elif name=='practice-records' and method=='POST':
-   stored.append({'id':'00000000-0000-4000-8000-000000000057','entry':payload['entry'],'shared':payload['share'],'updatedAt':'2026-10-15T10:00:00Z'})
+   new_id=f'00000000-0000-4000-8000-{57+len(stored):012d}'
+   stored.append({'id':new_id,'entry':payload['entry'],'shared':payload['share'],'updatedAt':datetime.now(timezone.utc).isoformat()})
    code=201;data={'record':{'id':stored[-1]['id'],'shared':payload['share']}}
   elif name=='practice-update':
    if not stored or payload['recordId']!=stored[0]['id']:
@@ -148,6 +150,19 @@ with sync_playwright() as p:
   assert page.locator('.device-only-record').count()==1,'device edit must not create duplicate'
   assert '이 기기에 수정된 기록' in page.locator('.device-only-record').inner_text()
   assert len([x for x in api_calls if x==('practice-update','POST')])==previous_api,'local edit must not be uploaded'
+  page.locator('[data-workspace-target="writingCalendar"]').click()
+  assert page.locator('#writingCalendar .writing-summary').is_visible(), 'student calendar must open'
+  page.locator('[data-workspace-target="history"]').click()
+  page.once('dialog',lambda d:d.accept())
+  page.locator('.device-only-record [data-practice-transfer]').click()
+  page.locator('.practice-cloud-record').first.wait_for(timeout=15000)
+  page.wait_for_timeout(700)
+  assert len(stored)==2, ('one cloud copy',stored)
+  assert stored[-1]['shared'] is False, 'transfer must stay private'
+  synced=page.evaluate("""async(uid)=>{const m=await import('./trial-media.mjs');return (await m.listPracticeRecords(uid)).filter(x=>x.syncedTo&&x.transferState==='done').length}""",student)
+  assert synced==1, 'verified transfer retains a device original'
+  page.locator('[data-workspace-target="writingCalendar"]').click()
+  assert int(page.locator('#writingCalendar .writing-summary strong').nth(1).inner_text())==2, 'transferred local original must not count twice'
   assert not errors,('page errors',width,errors)
   page.close()
   # A totally new context/device sees server-synced record without previous IndexedDB.
@@ -161,6 +176,10 @@ with sync_playwright() as p:
   init(teacher,'therapist');teacher.goto(url,wait_until='domcontentloaded',timeout=30000)
   teacher.locator('#inboxResults .shared-clinician-record').first.wait_for(timeout=18000)
   assert teacher.locator('.shared-clinician-content').count()==1
+  teacher.locator('[data-workspace-target="writingCalendar"]').click()
+  assert teacher.locator('#writingCalendar .writing-summary').is_visible(), 'shared-only calendar accessible'
+  assert int(teacher.locator('#writingCalendar .writing-summary strong').nth(1).inner_text())==1, 'private copy cannot show in therapist calendar'
+  teacher.locator('[data-workspace-target="inbox"]').click()
   assert '수정한 가상 기록' in teacher.locator('.shared-clinician-content').inner_text(), 'full shared text must be visible without a detail click'
   assert teacher.locator('.shared-clinician-content .saved-photo-grid img').count()==1, 'shared photo must be immediately visible'
   assert teacher.locator('.shared-clinician-content .sketch-record').count()==1, 'shared drawing must be immediately visible'
