@@ -1,0 +1,59 @@
+name: Hotel Garden original-art branch visual QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'lab/babylon-hotel-garden/**'
+      - 'qa/hotel-garden-public-qa.mjs'
+      - '.github/workflows/hotel-garden-art-pr-qa.yml'
+permissions:
+  contents: write
+concurrency:
+  group: hotel-art-review
+  cancel-in-progress: true
+jobs:
+  visual-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser and Korean font
+        run: |
+          npm install --no-save --no-audit --no-fund puppeteer-core@latest
+          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
+      - name: Serve only the PR branch locally
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/hotel-art-server.log 2>&1 &
+          sleep 2
+          curl --fail http://127.0.0.1:8765/lab/babylon-hotel-garden/index.html >/dev/null
+      - name: Render PC and mobile actual branch code
+        env:
+          HOTEL_GARDEN_TARGET: http://127.0.0.1:8765/lab/babylon-hotel-garden/
+          CHROME_PATH: /usr/bin/google-chrome
+        run: node qa/hotel-garden-public-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hotel-garden-child-original-art-preview
+          path: |
+            hotel-garden-public-qa.json
+            hotel-garden-*.jpg
+      - name: Save preview images to isolated QA branch
+        if: always() && !cancelled()
+        run: |
+          mkdir -p /tmp/hotel-art-review
+          cp hotel-garden-public-qa.json hotel-garden-*.jpg /tmp/hotel-art-review/ 2>/dev/null || true
+          git fetch origin qa/hotel-garden-art-preview
+          git switch -C qa/hotel-garden-art-preview origin/qa/hotel-garden-art-preview
+          mkdir -p qa/art-preview
+          cp /tmp/hotel-art-review/* qa/art-preview/ 2>/dev/null || true
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A qa/art-preview
+          if ! git diff --staged --quiet; then
+            git commit -m 'test(hotel garden): record original-art branch preview'
+            git push origin HEAD:refs/heads/qa/hotel-garden-art-preview
+          fi
