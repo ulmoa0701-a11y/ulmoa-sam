@@ -59,3 +59,24 @@
  .moa-page-guide__message{font-size:20px!important}
 }
 @media print{.moa-page-guide{display:none!important}}
+
+/* Existing page-level typography declarations must not turn Moa's dialogue
+   back into an ordinary body paragraph; preserve the speech font explicitly. */
+body .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message,
+#glossaryCatalog .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message{
+ font-family:"Nanum Pen Script","교보 손글씨 2020","Gamja Flower",cursive!important;
+ font-size:clamp(27px,2.5vw,34px)!important;
+ font-weight:400!important;line-height:1.22!important;
+ letter-spacing:-.015em!important;color:#2b4937!important;
+ word-break:keep-all!important;
+}
+@media(max-width:650px){
+ body .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message,
+ #glossaryCatalog .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message{
+ font-size:clamp(21px,5.7vw,27px)!important;
+ }
+}
+@media(max-width:350px){
+ body .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message,
+ #glossaryCatalog .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message{font-size:20px!important}
+}
