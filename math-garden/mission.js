@@ -17,7 +17,7 @@ const templates={
 const state={concept:0,step:0,selected:0,attempts:0,hints:0,flagged:false,sound:true,locked:false,view:'intro',results:[],timer:0,review:null};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','"':'&quot;'}[c]));
 const unit=(type='acorn',small=false)=>'<span class="food '+(type==='berry'?'berry':'acorn')+' '+(small?'mini':'')+'" aria-hidden="true"></span>';
-const friend=(name,i)=>'<svg class="forest-friend" viewBox="'+(150*['rabbit','bear','fox','frog','bird'].indexOf(name))+' 0 150 180" aria-hidden="true"><use href="./assets/woodland-friends.svg#'+name+'"/></svg>';
+const friend=(name,i,happy)=>{if(name==='bear')return '<img class="forest-friend bear-photo" src="./assets/mission-v4/characters/bear_'+(happy?'happy':'waiting')+'.png" alt="">';return '<svg class="forest-friend" viewBox="'+(150*['rabbit','bear','fox','frog','bird'].indexOf(name))+' 0 150 180" aria-hidden="true"><use href="./assets/woodland-friends.svg#'+name+'"/></svg>'};
 const dot=(filled,type)=>'<span class="match-slot '+(filled?'occupied':'empty')+'">'+(filled?unit(type,true):'')+'</span>';
 const current=()=>templates[CONCEPTS[state.concept].key][Math.min(state.step,6)];
 const practice=()=>state.step===5||state.step===6;
@@ -45,7 +45,7 @@ function demoVisual(task,key){
 function demo(){const x=current(),key=CONCEPTS[state.concept].key;
  state.view='demo';say('모아가 먼저 보여줄게','한 번 보고, 다음에는 직접 해볼까?');
  scene('<div class="lesson"><div class="lesson-lead">'+demoVisual(x,key)+'</div><div class="lesson-foot"><span class="observation">보는 차례 · 기록하지 않아요</span>'+stepAction('continue','내가 해볼래 →','모아의 시범을 보고 다음으로')+'</div></div>')}
-function fruitTray(type,selected,stock){return '<div class="supply"><div class="supply-items">'+Array.from({length:Math.max(0,stock-selected)},(_,i)=>stepAction('take',unit(type),'간식 하나 담기','data-index="'+i+'"')).join('')+'</div><p class="supply-caption">숲속 나무</p></div><div class="delivery"><div class="packed-food">'+Array.from({length:selected},()=>stepAction('undo',unit(type,true),'담은 간식 하나 꺼내기')).join('')+'</div><div class="basket-body"></div><p class="supply-caption">내 배달 바구니</p></div>'}
+function fruitTray(type,selected,stock){return '<div class="supply"><div class="supply-items"><div class="tree-pile">'+Array.from({length:Math.max(0,stock-selected)},(_,i)=>stepAction('take',unit(type),'간식 하나 담기','data-index="'+i+'"')).join('')+'</div></div><p class="supply-caption">숲속 나무</p></div><div class="delivery"><div class="packed-food"><div class="basket-pile">'+Array.from({length:selected},()=>stepAction('undo',unit(type,true),'담은 간식 하나 꺼내기')).join('')+'</div></div><p class="supply-caption">내 배달 바구니</p></div>'}
 function shareBoard(x){
  const n=x.n;
  return '<div class="friends-line">'+Array.from({length:n},(_,i)=>'<div class="hungry-friend">'+friend(x.animal,i)+'<span class="dish" aria-hidden="true"></span></div>').join('')+'</div><div class="delivery-line">'+fruitTray(x.fruit,state.selected,n+2)+'</div>';
@@ -86,7 +86,7 @@ function feedback(isCorrect){
   state.results.push({kind:x.kind,clean,concept:key});
   if(x.kind==='guided')setStatus('잘했어. 이제 혼자 해볼 차례야.');else if(clean)setStatus('이번에는 혼자 해결했어!');else setStatus('도움을 받고 해결했어. 다음에는 새로 해볼 수 있어.');
   const outcome=key==='compare'?'숲길이 반짝 열렸어!':key==='share'?'모두 간식을 받았어!':'꽃밭에 꽃이 피었어!';
-  const story=key==='share'?'<div class="success-line">'+Array.from({length:x.n},(_,i)=>'<div class="served">'+friend(x.animal,i)+unit(x.fruit,true)+'</div>').join('')+'</div>':key==='compare'?'<div class="open-gate"></div>':'<div class="make-board">'+Array.from({length:x.total},()=>dot(true,x.fruit)).join('')+'</div>';
+  const story=key==='share'?'<div class="success-line">'+Array.from({length:x.n},(_,i)=>'<div class="served">'+friend(x.animal,i,true)+unit(x.fruit,true)+'</div>').join('')+'</div>':key==='compare'?'<div class="open-gate"></div>':'<div class="make-board">'+Array.from({length:x.total},()=>dot(true,x.fruit)).join('')+'</div>';
   scene('<div class="success"><h2>'+outcome+'</h2>'+story+'<p>다음 장소가 기다리고 있어!</p>'+stepAction('advance','계속 탐험 →','다음 놀이로 이동')+'</div>');
   return
  }

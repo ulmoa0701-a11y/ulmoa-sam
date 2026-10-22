@@ -1,0 +1,56 @@
+{
+  "updated": "2026-10-22",
+  "style": "cute-3d-clay-toy (see style-guide.md)",
+  "productionTool": "Canva generate-image + remove-background (user-approved exception, see style-guide.md)",
+  "status": "P0 first-four checkpoint set — awaiting user design approval before 2nd-tier expansion",
+  "assets": [
+    {
+      "file": "objects/acorn_tree.png",
+      "nativeSize": "149x199",
+      "alpha": true,
+      "usedIn": "mission.css .supply-items (background-image, position: center top / contain)",
+      "role": "Replaces the old flat green box labeled '숲속 나무'. Decorative — not individually clickable per branch.",
+      "prompt": "A cute 3D clay-style toy miniature tree with acorns hanging from its round fluffy canopy, smooth matte toy material, soft pastel green color palette, gentle studio lighting with soft shadows, centered single subject, plain soft pastel solid background, no text, no realistic photography"
+    },
+    {
+      "file": "objects/acorn_single.png",
+      "nativeSize": "200x200",
+      "alpha": true,
+      "usedIn": "mission.css .food.acorn (background-image, used for every acorn chip across all mission screens: supply, basket, demo, compare piles, make-board slots, served dishes)",
+      "role": "Single countable unit, reused many times via CSS, not pre-rendered per count.",
+      "prompt": "A cute 3D clay-style toy acorn, smooth matte toy material, soft pastel brown and cream color palette, gentle studio lighting with soft shadows, centered single subject, plain soft pastel solid background, no text, no realistic photography"
+    },
+    {
+      "file": "objects/basket_empty.png",
+      "nativeSize": "199x149",
+      "alpha": true,
+      "usedIn": "mission.css .packed-food (background-image, position: center bottom / contain)",
+      "role": "Replaces the old flat brown box + thin strip labeled '내 배달 바구니'. Single open-basket asset; depth illusion achieved by layering acorn chips over the rendered opening area via .basket-pile (absolute-positioned region, calibrated against this exact image at 1280px desktop).",
+      "prompt": "A cute 3D clay-style toy wicker picnic basket, empty with open top showing the inside, with a curved handle, smooth matte toy material, soft pastel brown color palette, gentle studio lighting with soft shadows, centered single subject, three-quarter view, plain soft pastel solid background, no text, no realistic photography"
+    },
+    {
+      "file": "characters/bear_waiting.png",
+      "nativeSize": "161x200",
+      "alpha": true,
+      "usedIn": "mission.html story-character icon (static); mission.js friend('bear', i, false) in intro/guided/task screens",
+      "role": "Default waiting expression.",
+      "prompt": "A cute 3D clay-style toy bear character sitting and waiting patiently with a neutral friendly expression, smooth matte toy material, soft pastel brown color palette, gentle studio lighting with soft shadows, centered single subject, plain soft pastel solid background, no text, no realistic photography"
+    },
+    {
+      "file": "characters/bear_happy.png",
+      "nativeSize": "161x200",
+      "alpha": true,
+      "usedIn": "mission.js friend('bear', i, true) — success/served state only",
+      "role": "Happy expression shown only after a successful delivery.",
+      "prompt": "A cute 3D clay-style toy bear character cheering happily with a big joyful smile and raised arms, smooth matte toy material, soft pastel brown color palette, gentle studio lighting with soft shadows, centered single subject, plain soft pastel solid background, no text, no realistic photography"
+    }
+  ],
+  "notDone": [
+    "rabbit_waiting/happy, squirrel_waiting/happy, fox_waiting/happy (2nd-tier, pending style approval of this P0 set)",
+    "forest_background.webp full-scene redo in matching clay style (background currently unchanged, still the original hand-drawn forest-world.svg)",
+    "plate_empty/plate_front (dish in front of each waiting friend — still the original flat CSS .dish shape, unchanged)",
+    "delivery_sign, stump, forest_path, bridge, shop_counter, reward_flower, UI svg icons (hint/undo/next/home/sound)",
+    "basket/tree quantity display verified only up to 4 items (current content's actual max); 0-10 range not empirically tested",
+    "intro-bag decorative visual on the welcome screen still uses the old CSS-drawn acorn/basket shapes, unchanged"
+  ]
+}
