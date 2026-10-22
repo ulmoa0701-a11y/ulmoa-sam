@@ -41,7 +41,7 @@ for(const [name,width] of [['pc',1366],['mobile',390]]){
  check((await page.locator('#pathStepCount').innerText()).startsWith('1 /'),name+' runner route failed to advance');
  await open('inside');
  const zone=page.locator('#insideZone');
- await zone.click({position:{x:5,y:5}});
+ await zone.click({position:{x:24,y:24}});
  const placed=await zone.locator('i').first().evaluate(el=>{
   const rect=el.parentElement.getBoundingClientRect();
   return {left:parseFloat(el.style.left),top:parseFloat(el.style.top),width:rect.width,height:rect.height};
