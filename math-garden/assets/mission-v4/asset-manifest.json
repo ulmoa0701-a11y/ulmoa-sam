@@ -2,7 +2,7 @@
   "updated": "2026-10-22",
   "style": "cute-3d-clay-toy (see style-guide.md)",
   "productionTool": "Canva generate-image + remove-background (user-approved exception, see style-guide.md)",
-  "status": "3rd round: structural redesign added (overworld map + travel beats), not just asset reskinning. Background kept as clay style (decision below). Berry fruit type (previously missed) now converted. Intro welcome screen basket visual swapped. UI icons and 0-10 full quantity sweep still pending.",
+  "status": "4th round: core action buttons (start/submit/arrive/advance/repeat/next-chapter/sound/restart/hint/shuffle) converted to icon-first (inline SVG, no PNG assets needed) with sr-only text kept for screen readers, plus a non-text correct/incorrect flash overlay — aimed at pre-readers playing without any text comprehension. 3rd round: structural redesign (overworld map + travel beats). Background kept as clay style. Berry fruit type converted. Intro welcome screen basket visual swapped. Still pending: 0-10 full quantity sweep, map-node/quest-chip caption text left as-is (lower priority, icons already primary there).",
   "assets": [
     {
       "file": "objects/acorn_tree.png",
@@ -113,7 +113,9 @@
     "basket/tree quantity display verified only up to 4 items (current content's actual max); 0-10 range not empirically tested since no template currently needs more than ~6",
     "drag-and-drop gesture (tap-only still required to work end-to-end, and does) — not added",
     "travel beat is inserted once per chapter (between the demo step and the first real task), not before every single step — a deliberate scope bound to avoid slowing the game down with repeated interstitials; not every step has a 'walking' moment",
-    "map node icons/labels for compare and make concepts were only spot-checked at PC 1280 width during this round's testing (see qa/test-results.md 3rd update) — tablet/mobile screenshots exist only for the share-concept map state"
+    "map node icons/labels for compare and make concepts were only spot-checked at PC 1280 width during this round's testing (see qa/test-results.md 3rd update) — tablet/mobile screenshots exist only for the share-concept map state",
+    "4th round scope limit: only the PRIMARY action buttons were converted to icon-first. Instructional sentences (storybar kicker/instruction, status messages, chapter-end summary paragraph), map-node captions, and quest-chip phase labels (e.g. '함께 연습') were deliberately left as visible text — they remain in the DOM for caregivers/screen readers and are not required reading to operate the core loop, but were not visually shrunk or hidden either. Numeric progress dots (1/2/3) also left as-is.",
+    "color-blindness (deuteranopia/protanopia) re-verification of the new correct/incorrect flash was not done with a simulator — shape (check vs cross) was used deliberately so it doesn't rely on color alone, but this wasn't re-tested."
   ],
   "structuralChanges3rdRound": {
     "trigger": "User explicitly pushed back that the whole redesign still read as a worksheet with no journey/story ('길가다 나무발견하고 그런 스토리도없고... 학습지 풀듯 문제나오고'), after rounds 1-2 had only reskinned assets + added micro-animation juice onto the exact same linear scene-swap flow. User was asked to scope the fix (AskUserQuestion) and chose full structural redesign (overworld/map), not just a light narrative wrapper.",

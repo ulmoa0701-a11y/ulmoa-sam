@@ -49,3 +49,17 @@
 @keyframes footstep-bounce{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-6px);opacity:1}}
 .travel-scene p{max-width:300px;font-size:15px;color:var(--ink);line-height:1.5}
 @media(max-width:650px){.map-node{width:180px;padding:9px 10px}.map-node-badge{width:58px;height:58px}.travel-badge{width:76px;height:76px}}
+
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.intro .interaction[data-mission="start"],.travel-scene .interaction[data-mission="arrive"],.success .interaction[data-mission="advance"]{background:linear-gradient(#ed9b77,#d87760);border:4px solid #ce745e;box-shadow:0 7px 0 #a85c4d;color:#fff8dc;border-radius:50%;width:66px;height:66px;min-width:66px;min-height:66px}
+.intro .interaction[data-mission="start"]:active,.travel-scene .interaction[data-mission="arrive"]:active,.success .interaction[data-mission="advance"]:active{transform:scale(.9)}
+.feedback-flash{position:absolute;z-index:6;top:50%;left:50%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;display:grid;place-items:center;opacity:0;transform:scale(.4);pointer-events:none}
+.feedback-flash.show{animation:flash-pop .65s cubic-bezier(.34,1.56,.64,1) both}
+.feedback-flash.ok{background:#5b9b79;color:#fff;box-shadow:0 10px 0 #487b60,0 0 0 10px #a9d6bb66}
+.feedback-flash.no{background:#d97a6c;color:#fff;box-shadow:0 10px 0 #b35c50,0 0 0 10px #f0b4ab66}
+.feedback-flash svg{width:44px;height:44px}
+@keyframes flash-pop{0%{opacity:0;transform:scale(.4)}25%{opacity:1;transform:scale(1.08)}40%{transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:scale(1)}}
+.btn.action{display:inline-flex;align-items:center;justify-content:center}
+.result-actions button{display:inline-flex;align-items:center;justify-content:center}
+#sound,#restart,#help,#change{display:inline-flex;align-items:center;gap:6px;justify-content:center}
+@media(max-width:650px){.intro .interaction[data-mission="start"],.travel-scene .interaction[data-mission="arrive"],.success .interaction[data-mission="advance"]{width:56px;height:56px;min-width:56px;min-height:56px}.feedback-flash{width:68px;height:68px;margin:-34px 0 0 -34px}.feedback-flash svg{width:36px;height:36px}}
