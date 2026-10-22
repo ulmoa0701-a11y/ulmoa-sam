@@ -1,0 +1,16 @@
+/* Moa's quiet page guide. Reuses the approved 2026-10-12 waving character. */
+.moa-page-guide{display:flex;align-items:center;gap:clamp(8px,2vw,20px);max-width:1160px;margin:14px auto 20px;padding:4px 14px 4px 2px;box-sizing:border-box;min-width:0}
+.moa-page-guide__portrait{width:clamp(72px,9vw,112px);height:clamp(85px,11vw,126px);object-fit:contain;flex:none}
+.moa-page-guide__bubble{position:relative;min-width:0;flex:1;border:1px solid #d4e2d6;background:#fffefa;border-radius:18px;padding:15px 20px;color:#345344;box-shadow:0 4px 14px rgba(44,69,50,.055)}
+.moa-page-guide__bubble::before{content:"";position:absolute;left:-8px;top:40%;width:13px;height:13px;transform:rotate(45deg);border-left:1px solid #d4e2d6;border-bottom:1px solid #d4e2d6;background:#fffefa}
+.moa-page-guide__title{margin:0 0 3px!important;font-family:var(--habom-heading-font,"MaruBuri",serif);font-size:clamp(16px,1.6vw,20px);font-weight:700;line-height:1.4;color:#274935}
+.moa-page-guide__message{margin:0!important;font-family:var(--habom-body-font,Pretendard,sans-serif);font-size:clamp(13px,1.15vw,15px);font-weight:450;line-height:1.65;word-break:keep-all;color:#496454}
+.moa-page-guide--compact{max-width:none;margin:6px 0 18px}
+@media(max-width:600px){.moa-page-guide{gap:9px;margin:10px auto 16px;padding:0 3px}.moa-page-guide__portrait{width:70px;height:86px}.moa-page-guide__bubble{padding:12px 13px;border-radius:14px}.moa-page-guide__title{font-size:15px}.moa-page-guide__message{font-size:12.5px;line-height:1.6}}
+@media(max-width:350px){.moa-page-guide__portrait{width:55px;height:75px}.moa-page-guide__message{font-size:12px}}
+@media print{.moa-page-guide{display:none!important}}
+
+/* Sections whose approved hero already includes Moa: no second character, no pointer tail. */
+.moa-page-guide--existing{max-width:1100px;padding:0;margin:10px auto 20px}
+.moa-page-guide--existing .moa-page-guide__bubble{background:#f7fbf5;border-color:#d9e5d9;box-shadow:none}
+.moa-page-guide--existing .moa-page-guide__bubble::before{display:none}
