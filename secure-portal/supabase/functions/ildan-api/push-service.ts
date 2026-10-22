@@ -99,9 +99,9 @@ export async function pushMember(name:string,request:Request,db:any,uid:string,r
  }
  if(name==='push-status'&&request.method==='GET'){
   const {data,error}=await db.from('ildan_push_subscriptions')
-   .select('id,device_label,created_at').eq('therapist_id',uid).limit(10);
+   .select('id,device_label,created_at,endpoint_hash').eq('therapist_id',uid).limit(10);
   if(error)throw Error('PUSH_STATUS_FAILED');
-  return send({count:data?.length||0,subscriptions:(data||[]).map((d:any)=>({id:d.id,deviceLabel:d.device_label,createdAt:d.created_at}))});
+  return send({count:data?.length||0,subscriptions:(data||[]).map((d:any)=>({id:d.id,deviceLabel:d.device_label,createdAt:d.created_at,endpointHash:d.endpoint_hash}))});
  }
  if(name==='push-subscribe'&&request.method==='POST'){
   const input=await body(request),sub=validSubscription(input.subscription);
