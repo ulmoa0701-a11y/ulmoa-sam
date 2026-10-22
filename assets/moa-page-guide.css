@@ -1,82 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
-/* Moa's speaking guide: existing approved waving mascot. No new illustration or popup.
-   The bubble conveys purpose immediately and doesn't cover any activity controls. */
+/* 모아의 한마디 · 한 줄만 읽고 바로 시작할 수 있는 최소 안내 */
 .moa-page-guide,.moa-page-guide *{box-sizing:border-box}
-.moa-page-guide{
- display:flex;align-items:center;gap:0;max-width:1180px;width:100%;
- min-width:0;margin:6px auto 20px;padding:0 4px 0 0;
- position:relative;color:#2e4b3c
-}
-.moa-page-guide__portrait{
- display:block;position:relative;z-index:1;flex:none;
- width:clamp(106px,11vw,145px);height:clamp(125px,13vw,170px);
- margin-right:-8px;object-fit:contain;
- filter:drop-shadow(0 5px 4px rgba(47,75,56,.13))
-}
-.moa-page-guide__bubble{
- position:relative;flex:1;min-width:0;max-width:1010px;
- padding:15px clamp(17px,2.5vw,29px) 17px;
- border:2px solid #b9d6be;border-radius:28px 28px 28px 12px;
- background:#fffef8;box-shadow:0 8px 20px rgba(46,74,52,.08);
-}
-.moa-page-guide__bubble::before{
- content:"";position:absolute;left:-12px;top:53%;
- width:19px;height:19px;transform:rotate(45deg);
- background:#fffef8;border-left:2px solid #b9d6be;border-bottom:2px solid #b9d6be
-}
-.moa-page-guide__title{
- display:block;width:max-content;max-width:100%;margin:0 0 5px!important;
- font-family:"Pretendard Variable",Pretendard,SUIT,sans-serif!important;
- font-size:12px!important;line-height:1.4!important;letter-spacing:.01em;
- font-weight:850!important;color:#427350!important
-}
-.moa-page-guide__message{
- display:block;margin:0!important;
- font-family:"Nanum Pen Script","교보 손글씨 2020","Gamja Flower",cursive!important;
- font-size:clamp(27px,2.5vw,34px)!important;
- font-weight:400!important;line-height:1.22!important;letter-spacing:-.015em!important;
- color:#2b4937!important;word-break:keep-all!important;
-}
-.moa-page-guide--existing{margin:4px auto 18px;padding:0 1px 0 5px}
-.moa-page-guide--existing .moa-page-guide__bubble{background:#fffef8;border:2px solid #c8dbc7;max-width:none;box-shadow:0 5px 13px rgba(46,74,52,.055)}
-/* Speech tail reaches toward the already-present Moa in the hero above. */
-.moa-page-guide--existing .moa-page-guide__bubble::before{
- display:block;left:auto;right:16%;top:-11px;width:18px;height:18px;
- transform:rotate(45deg);border:0;border-left:2px solid #c8dbc7;border-top:2px solid #c8dbc7
-}
-@media(max-width:650px){
- .moa-page-guide{margin:3px auto 16px;padding:0 2px}
- .moa-page-guide__portrait{width:79px;height:103px;margin-right:-4px}
- .moa-page-guide__bubble{padding:11px 13px 12px;border-radius:19px 19px 19px 8px}
- .moa-page-guide__bubble::before{left:-8px;width:13px;height:13px;border-width:2px}
- .moa-page-guide__title{font-size:10.5px!important;margin-bottom:3px!important}
- .moa-page-guide__message{font-size:clamp(21px,5.7vw,27px)!important;line-height:1.22!important}
- .moa-page-guide--existing .moa-page-guide__bubble::before{left:auto;right:17%;top:-8px;width:13px;height:13px}
-}
-@media(max-width:350px){
- .moa-page-guide__portrait{width:65px;height:91px}
- .moa-page-guide__bubble{padding:10px 11px}
- .moa-page-guide__message{font-size:20px!important}
-}
+.moa-page-guide{display:flex;align-items:center;gap:8px;position:relative;width:min(100%,850px);max-width:850px;min-width:0;margin:5px 0 14px;padding:0}
+.moa-page-guide__portrait{display:block;width:clamp(59px,7vw,78px);height:clamp(69px,8vw,90px);flex:none;object-fit:contain;filter:drop-shadow(0 3px 4px #45604d18)}
+.moa-page-guide__bubble{position:relative;display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;min-width:0;flex:1;padding:10px 13px 10px 18px;border:1px solid #d7e5d8;border-radius:17px;background:#fffefa;box-shadow:0 4px 10px #5369580b}
+.moa-page-guide__bubble::before{content:"";position:absolute;left:-6px;top:38%;width:10px;height:10px;background:#fffefa;border-left:1px solid #d7e5d8;border-bottom:1px solid #d7e5d8;transform:rotate(45deg)}
+.moa-page-guide__title{display:none!important}
+.moa-page-guide .moa-page-guide__message,body .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message,#glossaryCatalog .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message{display:block;flex:1 1 235px;min-width:0;margin:0!important;font-family:"Pretendard Variable",Pretendard,SUIT,"Apple SD Gothic Neo",sans-serif!important;font-size:clamp(15px,1.55vw,19px)!important;font-weight:740!important;line-height:1.45!important;letter-spacing:-.04em!important;color:#2e4e39!important;word-break:keep-all!important}
+.moa-page-guide__listen{display:inline-flex;justify-content:center;align-items:center;flex:none;gap:5px;min-height:36px;padding:6px 12px;border:1px solid #cbdccc;border-radius:999px;color:#45654f;background:#f5faf4;font:750 12px/1.1 "Pretendard Variable",Pretendard,SUIT,sans-serif;cursor:pointer;white-space:nowrap}
+.moa-page-guide__listen:hover{background:#e8f4e9;border-color:#a8c9ad}
+.moa-page-guide__listen:focus-visible{outline:3px solid #3f7a56;outline-offset:2px}
+.moa-page-guide__listen[aria-pressed="true"]{background:#dceede;border-color:#78ae84}
+.moa-page-guide__listen:disabled{opacity:.58;cursor:not-allowed}
+.moa-page-guide__status{position:absolute;width:1px;height:1px;overflow:hidden;white-space:nowrap;clip-path:inset(50%)}
+.moa-page-guide--existing{width:min(100%,820px);margin:5px 0 15px}
+.moa-page-guide--existing .moa-page-guide__bubble{background:#fffefa}
+.moa-page-guide--existing .moa-page-guide__bubble::before{display:none}
+@media(max-width:650px){.moa-page-guide{gap:5px;margin:4px 0 11px}.moa-page-guide__portrait{width:55px;height:68px}.moa-page-guide__bubble{gap:4px 8px;padding:9px 10px 9px 13px;border-radius:13px}.moa-page-guide .moa-page-guide__message,body .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message,#glossaryCatalog .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message{font-size:14px!important;line-height:1.4!important;flex-basis:160px}.moa-page-guide__listen{min-height:32px;padding:5px 9px;font-size:11.5px}}
+@media(max-width:350px){.moa-page-guide__portrait{width:47px;height:63px}.moa-page-guide .moa-page-guide__message,body .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message,#glossaryCatalog .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message{font-size:13.5px!important}}
 @media print{.moa-page-guide{display:none!important}}
-
-/* Existing page-level typography declarations must not turn Moa's dialogue
-   back into an ordinary body paragraph; preserve the speech font explicitly. */
-body .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message,
-#glossaryCatalog .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message{
- font-family:"Nanum Pen Script","교보 손글씨 2020","Gamja Flower",cursive!important;
- font-size:clamp(27px,2.5vw,34px)!important;
- font-weight:400!important;line-height:1.22!important;
- letter-spacing:-.015em!important;color:#2b4937!important;
- word-break:keep-all!important;
-}
-@media(max-width:650px){
- body .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message,
- #glossaryCatalog .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message{
- font-size:clamp(21px,5.7vw,27px)!important;
- }
-}
-@media(max-width:350px){
- body .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message,
- #glossaryCatalog .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message{font-size:20px!important}
-}
