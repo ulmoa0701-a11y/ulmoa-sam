@@ -603,9 +603,15 @@ function transferSignature(entry){
  for(const k of transferKeys)if(typeof e[k]==='string'&&e[k].trim())clean[k]=e[k].trim();
  return JSON.stringify(clean);
 }
+function sourceEntryForTransfer(local){
+ const entry={...(local.entry||{})};
+ // Photo-only legacy notes need a date for the existing server-side validation; no invented words.
+ if(Array.isArray(entry.photos)&&entry.photos.length&&!transferKeys.some(k=>typeof entry[k]==='string'&&entry[k].trim()))entry.date=writtenDay(local)||todayLocal();
+ return entry;
+}
 function matchesDeviceCopy(local,cloud){
  if(!cloud?.practice||cloud.kind!==local.kind)return false;
- return transferSignature(local.entry)===transferSignature(cloud.entry)
+ return transferSignature(sourceEntryForTransfer(local))===transferSignature(cloud.entry)
   &&(Array.isArray(local.entry?.photos)?local.entry.photos.length:0)===(Array.isArray(cloud.entry?.photos)?cloud.entry.photos.length:0);
 }
 async function migrateDeviceRecord(local){
@@ -626,7 +632,7 @@ async function migrateDeviceRecord(local){
   if(photos.some(p=>typeof p!=='string'||!/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(p)))
    throw Error('예전 사진 형식을 자동으로 옮길 수 없어요. 원본은 유지되며, 사진을 다시 선택해야 해요.');
   await markPracticeTransfer(me.id,local.id,'sending');
-  const entry=compactSketchForCloud({...local.entry});
+  const entry=compactSketchForCloud(sourceEntryForTransfer(local));
   delete entry.photos;
   if(photos.length)entry.photos=await uploadPracticePhotos(null,photos);
   savedOnServer=true;
