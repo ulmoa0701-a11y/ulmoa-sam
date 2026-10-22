@@ -17,6 +17,14 @@ try{
  for(const [size,width,height] of viewports){
   for(const [name,path,hasPortrait] of pages){
    const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:1});
+   await page.addInitScript(()=>{
+     const mock={
+       getVoices:()=>[{lang:'ko-KR',name:'test Korean voice'}],
+       cancel:()=>{window.__moaCancelled=(window.__moaCancelled||0)+1},
+       speak:utterance=>{window.__moaSpoken=utterance.text;window.__moaUtterance=utterance}
+     };
+     Object.defineProperty(window,'speechSynthesis',{value:mock,configurable:true});
+   });
    try{
     const res=await page.goto(base+path,{waitUntil:'domcontentloaded',timeout:30000});
     assert.equal(res?.status(),200,name+' HTTP 200');
@@ -34,14 +42,24 @@ try{
         background:style.backgroundColor,
         messageSize:parseFloat(ms.fontSize),font:ms.fontFamily,text:m.textContent.trim(),
         imageSrc:image?.getAttribute('src')||'',imageLoaded:!!image?.naturalWidth,
-        cssPresent:[...document.styleSheets].some(x=>(x.href||'').includes('moa-page-guide.css?v=20261022-speak1'))};
+        cssPresent:[...document.styleSheets].some(x=>(x.href||'').includes('moa-page-guide.css?v=20261022-short1'))};
     });
     assert.ok(state.cssPresent,'updated guide stylesheet used: '+name);
     assert.ok(state.x>=-1&&state.right<=width+1,'horizontal guide fits: '+name+' '+size+' '+JSON.stringify(state));
-    assert.ok(state.height>=55&&state.borderWidth>=2,'visible conversation bubble: '+name+' '+size);
-    assert.ok(state.text.length>=25,'clear purpose in speech bubble: '+name);
-    assert.ok(state.font.includes('Nanum Pen Script'),'hand-lettering applied: '+name+' '+state.font);
-    assert.ok(state.messageSize>=20,'handwritten speech is legible: '+name);
+    assert.ok(state.height>=45&&state.height<=125&&state.borderWidth>=1,'compact visible bubble: '+name+' '+size+' '+JSON.stringify(state));
+    assert.ok(state.text.length>=10&&state.text.length<=38,'short nonfatiguing utterance: '+name+' length '+state.text.length);
+    assert.ok(state.font.includes('Pretendard'),'clear readable type for one-line utterance: '+name+' '+state.font);
+    assert.ok(state.messageSize>=13,'compact speech remains legible: '+name);
+    const button=guide.locator('.moa-page-guide__listen');
+    assert.equal(await button.count(),1,name+' has one optional speech button');
+    assert.equal(await button.getAttribute('aria-pressed'),'false','no speech autoplay');
+    assert.equal(await page.evaluate(()=>window.__moaSpoken||null),null,'speech never starts by itself');
+    await button.click();
+    assert.equal(await button.getAttribute('aria-pressed'),'true','speech starts only on click');
+    assert.equal(await page.evaluate(()=>window.__moaSpoken),state.text,'speech matches visible short line');
+    await button.click();
+    assert.equal(await button.getAttribute('aria-pressed'),'false','speech stop button resets');
+    assert.ok(await page.evaluate(()=>window.__moaCancelled>=1),'speech stop cancels browser synthesis');
     if(hasPortrait){
      const img=guide.locator('.moa-page-guide__portrait');
      await img.evaluate(async im=>{if(!im.complete){await new Promise(r=>{im.addEventListener('load',r,{once:true});im.addEventListener('error',r,{once:true});});}});
