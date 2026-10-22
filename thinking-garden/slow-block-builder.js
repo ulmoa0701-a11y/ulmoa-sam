@@ -15,7 +15,7 @@ function model(s,target,n){
   const piece=!example&&placed?s.blockParts.find(p=>p.keys.includes(key)):null;
   const horizontal=piece?.keys.length===2&&piece.keys.every(k=>k.split(',')[0]===String(row));
   const segment=piece?.keys.length===2?(horizontal?'brick-joined-horizontal':'brick-joined-vertical'):piece?'brick-single':'';
-  const pieceClass=segment+(piece?.keys[0]===key?' brick-start':' brick-end');
+  const pieceClass=piece?segment+(piece.keys[0]===key?' brick-start':' brick-end'):'';
   return example?'<div class="slow-tile '+(marked?'shown':'')+'">'+(marked?'🧱':'')+'</div>':'<button type="button" data-block="place" data-key="'+key+'" class="slow-tile '+(placed?'picked '+pieceClass:'')+'" aria-label="'+(row+1)+'행 '+(col+1)+'열에서 조립" aria-pressed="'+placed+'">'+(placed?'🧱':'')+'</button>';
  }).join('')+'</div>';
  const dir=s.blockDir==='right'?'↔️ 가로':'↕️ 세로';
