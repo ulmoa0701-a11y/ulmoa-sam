@@ -53,9 +53,22 @@ for(const width of [390,1280]){
   await check(await page.locator('input,textarea,form').count()===0,width+'px no sensitive-data intake form');
   await check(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth+3),width+'px support guide no horizontal overflow');
   await page.screenshot({path:path.join(out,'service-'+width+'.png'),fullPage:true});
+  await page.goto(new URL('support-first/programs/',BASE).href,{waitUntil:'domcontentloaded'});
+  await check(await page.locator('[data-code]').count()===5,width+'px five curriculum options');
+  for(const code of ['C01','C02','C03','C04','C05']){
+    await page.locator('[data-code="'+code+'"]').click();
+    await check(await page.locator('#detail').isVisible(),width+'px details open '+code);
+    await check(await page.locator('#lessons tr').count()===8,width+'px eight practical sessions '+code);
+    await check((await page.locator('#objective').innerText()).length>12,width+'px measurable objective '+code);
+    await check((await page.locator('#caution').innerText()).length>15,width+'px caution note '+code);
+    await check(await page.locator('[data-code="'+code+'"]').getAttribute('aria-pressed')==='true',width+'px chosen '+code);
+  }
+  await check(await page.locator('input,textarea,form').count()===0,width+'px no patient data form');
+  await check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),width+'px curriculum no overflow');
+  await page.screenshot({path:path.join(out,'curricula-'+width+'.png'),fullPage:true});
   await check(errors.length===0,width+'px JS errors: '+errors.join('|'));
   await context.close();
 }
 await browser.close();
-console.log(JSON.stringify({base:BASE,failures,screenshots:6},null,2));
+console.log(JSON.stringify({base:BASE,failures,screenshots:8},null,2));
 if(failures.length)process.exit(1);
