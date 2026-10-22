@@ -3,9 +3,9 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#f3f8f6">
 <meta name="description" content="붐웨커를 누구나 쉽게 연주하는 하트 안에 박을 나누는 여섯 가지 연주 화면. 가로 리듬길, 색깔 악보, 한 마디씩, 두 줄 악보, 지금·다음 음.">
 <title>모아의 하트 붐웨커 | 일단 해봄 · 울모아쌤</title>
-<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="./styles.css?v=heart-mobile-landscape-20261022">
 <script src="../performance-views/scores.js" defer></script>
-<script src="./heart.js?v=heart-qa-redesign-20261022" defer></script>
+<script src="./heart.js?v=heart-mobile-landscape-20261022" defer></script>
 </head><body>
 <a class="skip" href="#stage">연주 화면으로 바로가기</a>
 <div class="app">
@@ -50,6 +50,7 @@
    </div>
    <div class="overlay" id="startOverlay"><div class="overlay-card"><strong id="overlayTitle">연주 준비</strong><p id="overlayDescription">전주를 듣고 함께 연주해요.</p><button id="overlayPlay" type="button">연주 시작 <span aria-hidden="true">▶</span></button></div></div>
   </div>
+  <div class="mobile-score-tip" role="note"><span>세로 화면에서는 계이름이 작게 보여요. 가로 전체화면에서 두 줄 악보를 크게 볼 수 있어요.</span><button type="button" id="mobileLandscape">가로 전체화면</button></div>
   <div class="instrument">
    <div class="instrument-head"><strong>내 색깔 악기</strong><span id="noteHelp">하트 속 색깔은 음, 조각의 너비는 박 길이</span></div>
    <div class="keys" id="keys">
