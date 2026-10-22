@@ -39,7 +39,7 @@ try{
  const response=await page.goto(base+'/math-garden/mission.html',{waitUntil:'domcontentloaded'});assert.equal(response.status(),200);
  await page.locator('[data-mission="start"]').click();
  let step=await completeSession(page,true);
- assert.equal(step,7,'a failed initial transfer should allow more practice and later transfer');
+ assert.equal(step,6,'a failed first transfer should allow practice at step 5 and a later independent transfer at step 6');
  let result=(await getState(page)).review;
  assert.equal(result.criteriaMet,true,'later independent transfer must count');
  assert.equal(result.transfer,true,'transfer recovery should be reported');
