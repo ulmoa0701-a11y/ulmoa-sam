@@ -15,7 +15,7 @@ url='http://127.0.0.1:8829/test/ildan-sseobom/supabase-staging/'
 student='10000000-0000-4000-8000-000000000015'
 therapist='10000000-0000-4000-8000-000000000016'
 bucket='ildan-practice-media'
-stored=[];uploaded=[];remote_clinical=[];api_calls=[];browser_requests=[]
+stored=[];uploaded=[];remote_clinical=[];api_calls=[];browser_requests=[];read_notifications=[]
 def png():
  raw=b''.join(b'\0'+b'\xe1\x93\x65'*24 for _ in range(24))
  def chunk(tag,data):return struct.pack('>I',len(data))+tag+data+struct.pack('>I',zlib.crc32(tag+data)&0xffffffff)
@@ -61,6 +61,16 @@ def init(page,role):
    stored[0]['shared']=False;data={'ok':True,'shared':False}
   elif name=='practice-delete':
    stored.clear();data={'ok':True,'deleted':True}
+  elif name=='practice-notifications' and method=='GET':
+   if role!='therapist':code=403;data={'error':'치료사 전용입니다.'}
+   else:
+    notices=[{'id':'10000000-0000-4000-8000-000000000091','recordId':stored[0]['id'],'studentId':student,
+     'type':'shared','createdAt':datetime.now(timezone.utc).isoformat(),'readAt':read_notifications[-1] if read_notifications else None}] if stored and stored[0]['shared'] else []
+    data={'notifications':notices,'unreadCount':sum(not n['readAt'] for n in notices)}
+  elif name=='practice-notification-read' and method=='POST':
+   if role!='therapist':code=403;data={'error':'치료사 전용입니다.'}
+   elif payload.get('notificationId')!='10000000-0000-4000-8000-000000000091':code=404;data={'error':'알림 없음'}
+   else:read_notifications.append(datetime.now(timezone.utc).isoformat());data={'ok':True}
   elif name=='students':data={'students':[{'id':student,'nickname':'가상 학생'}]}
   elif name=='accounts':data={'accounts':[]}
   elif name=='drive/status':data={'connected':False,'configured':False,'backupEnabled':False}
@@ -194,6 +204,16 @@ with sync_playwright() as p:
   page.close()
   teacher=browser.new_page(viewport={'width':width,'height':900})
   init(teacher,'therapist');teacher.goto(url,wait_until='domcontentloaded',timeout=30000)
+  teacher.locator('[data-workspace-target="alerts"]').click()
+  teacher.locator('#notificationList .notification-row').first.wait_for(timeout=10000)
+  assert teacher.locator('#notificationCount').inner_text().find('1')>=0,'new shared record must be unread'
+  assert '공유 기록' in teacher.locator('#notificationList').inner_text()
+  teacher.locator('[data-notice-open]').click()
+  teacher.locator('[data-workspace-view="inbox"]').wait_for(state='visible',timeout=15000)
+  assert read_notifications,'inbox navigation must mark ONLY the selected notification as read'
+  teacher.locator('[data-workspace-target="alerts"]').click()
+  assert '미확인 0건' in teacher.locator('#notificationCount').inner_text()
+  teacher.locator('[data-workspace-target="inbox"]').click()
   teacher.locator('#inboxResults .shared-clinician-record').first.wait_for(timeout=18000)
   assert teacher.locator('.shared-clinician-content').count()==1
   teacher.locator('[data-workspace-target="writingCalendar"]').click()
