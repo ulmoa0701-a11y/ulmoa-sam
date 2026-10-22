@@ -78,7 +78,7 @@ jobs:
         if: github.event_name == 'push'
         run: |
           for i in $(seq 1 75); do
-            if curl -fsSL --max-time 10 "https://ulmoa0701-a11y.github.io/ulmoa-sam/math-garden/mission.html?v=$GITHUB_SHA" | grep -Fq 'mission.js?v=20261022-direct1'; then
+            if curl -fsSL --max-time 10 "https://ulmoa0701-a11y.github.io/ulmoa-sam/math-garden/mission.html?v=$GITHUB_SHA" | grep -Fq 'mission.js?v=20261022-play2'; then
               if curl -fsSL --max-time 10 "https://ulmoa0701-a11y.github.io/ulmoa-sam/math-garden/?v=$GITHUB_SHA" | grep -Fq 'mission-front-link'; then
                 echo "Public guided mission and entry verified";exit 0
               fi
