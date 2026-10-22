@@ -32,6 +32,9 @@ const external={
  breathBeat:'../breath-garden/?mode=beat'
 };
 const REAL_PLAY_IMAGES={
+ // Match the real in-game photos already used by the five-garden cards.
+ // A parent's assigned menu should show the task, not placeholder symbols.
+ handMirror:'hand-mirror',moaMoney:'money',moaChange:'change',moaFeel:'feel',
  rhythmTouch:'rhythm-touch',recorderPlay:'recorder',
  breathStrength:'strength',breathLong:'long',breathBeat:'beat'
 };
@@ -90,7 +93,8 @@ function fillAssignedScene(host){
  const source=[...document.querySelectorAll('.library-card[data-open]')].find(x=>x.dataset.open===id)?.querySelector('.card-live-preview');
  if(!source)return;
  const scene=host.querySelector('.moa-assigned-scene');
- if(!scene||scene.querySelector('.card-live-preview'))return;
+ // A genuine screenshot takes priority over the catalog's simulated preview.
+ if(!scene||scene.querySelector('img.moa-assigned-real-shot')||scene.querySelector('.card-live-preview'))return;
  scene.replaceChildren(source.cloneNode(true));
  host.classList.add('moa-assigned-has-source');
 }
@@ -103,11 +107,11 @@ function makeAssignedVisual(id,isGame){
  wrap.setAttribute('aria-hidden','true');
  wrap.append(E('small','moa-assigned-visual-label',isGame?'🎮 이런 놀이예요':'📄 이런 자료예요'));
  const scene=E('div','moa-assigned-scene');
- // Five music/breath games are standalone pages, not native library cards.
- // Use their real play screenshots instead of generic pictograms.
+ // Reuse the validated game-play photos for hand movements, missions,
+ // rhythm, recorder and breath work; retain illustrations as offline fallback.
  if(REAL_PLAY_IMAGES[id]){
   const shot=E('img','moa-assigned-real-shot');
-  shot.src='../gardens/previews/'+REAL_PLAY_IMAGES[id]+'-play.jpg?v=20261021-playstate4';
+  shot.src='../gardens/previews/'+REAL_PLAY_IMAGES[id]+'-play.jpg?v=20261022-curated-realplay5';
   shot.alt='';shot.loading='eager';shot.decoding='async';
   shot.addEventListener('error',()=>{shot.remove();wrap.classList.remove('moa-assigned-has-source');},{once:true});
   scene.append(shot);wrap.classList.add('moa-assigned-has-source');
