@@ -165,7 +165,7 @@ with sync_playwright() as p:
   synced=page.evaluate("""async(uid)=>{const m=await import('./trial-media.mjs');return (await m.listPracticeRecords(uid)).filter(x=>x.syncedTo&&x.transferState==='done').length}""",student)
   assert synced==1, 'verified transfer retains a device original'
   page.locator('[data-workspace-target="writingCalendar"]').click()
-  assert int(page.locator('#writingCalendar .writing-summary strong').nth(1).inner_text())==2, 'transferred local original must not count twice'
+  assert page.locator('#writingCalendar .writing-summary strong').nth(1).inner_text().strip()=='2건', 'transferred local original must not count twice'
   assert not errors,('page errors',width,errors)
   page.close()
   # A totally new context/device sees server-synced record without previous IndexedDB.
@@ -181,7 +181,7 @@ with sync_playwright() as p:
   assert teacher.locator('.shared-clinician-content').count()==1
   teacher.locator('[data-workspace-target="writingCalendar"]').click()
   assert teacher.locator('#writingCalendar .writing-summary').is_visible(), 'shared-only calendar accessible'
-  assert int(teacher.locator('#writingCalendar .writing-summary strong').nth(1).inner_text())==1, 'private copy cannot show in therapist calendar'
+  assert teacher.locator('#writingCalendar .writing-summary strong').nth(1).inner_text().strip()=='1건', 'private copy cannot show in therapist calendar'
   teacher.locator('[data-workspace-target="inbox"]').click()
   assert '수정한 가상 기록' in teacher.locator('.shared-clinician-content').inner_text(), 'full shared text must be visible without a detail click'
   assert teacher.locator('.shared-clinician-content .saved-photo-grid img').count()==1, 'shared photo must be immediately visible'
