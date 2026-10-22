@@ -5,7 +5,7 @@
 <title>모아의 하트 붐웨커 | 일단 해봄 · 울모아쌤</title>
 <link rel="stylesheet" href="./styles.css">
 <script src="../performance-views/scores.js" defer></script>
-<script src="./heart.js?v=signature-themes-3-20261021" defer></script>
+<script src="./heart.js?v=heart-qa-redesign-20261022" defer></script>
 </head><body>
 <a class="skip" href="#stage">연주 화면으로 바로가기</a>
 <div class="app">
@@ -43,6 +43,11 @@
    </div>
    <div class="stage" id="stage">
    <canvas id="display" width="1200" height="620" role="img" aria-label="붐웨커 연주 안내 화면"></canvas>
+   <div class="fullstage-controls" aria-label="악보 전체 화면 조작">
+     <button type="button" id="stagePlay" class="fullstage-primary" aria-label="전체 화면에서 연주 또는 일시정지">연주 시작</button>
+     <button type="button" id="stageReset" aria-label="전체 화면에서 처음부터 다시 연주">처음부터</button>
+     <button type="button" id="stageExit" aria-label="전체 화면 종료">닫기</button>
+   </div>
    <div class="overlay" id="startOverlay"><div class="overlay-card"><strong id="overlayTitle">연주 준비</strong><p id="overlayDescription">전주를 듣고 함께 연주해요.</p><button id="overlayPlay" type="button">연주 시작 <span aria-hidden="true">▶</span></button></div></div>
   </div>
   <div class="instrument">
