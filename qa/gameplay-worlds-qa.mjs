@@ -31,6 +31,10 @@ for(const [profile,width] of [['desktop',1366],['mobile',390]]){
    const newRoot=page.locator('#gameArea .slow-task.moa-scene-slowMemory');
    await newRoot.locator('[data-slow="cell"]').first().click();
    assert(await newRoot.locator('.moa-world-meter:visible').count()===1,profile+'/'+id+' progress unavailable after concealment');
+   const recallLabel=await newRoot.locator('.moa-world-meter').innerText();
+   assert(!recallLabel.includes('/'),profile+'/'+id+' target-count cue leaks during recall: '+recallLabel);
+   assert(await newRoot.locator('.moa-world-count').innerText()==='1',profile+'/'+id+' selected count incorrect');
+   assert(await newRoot.locator('.moa-world-rail:visible').count()===0,profile+'/'+id+' target-size rail leaks');
   }else if(id==='slowName'){
    assert(await root.locator('.slow-name-picture').count()===1,profile+'/'+id+' naming stimulus missing');
   }else{
@@ -41,7 +45,31 @@ for(const [profile,width] of [['desktop',1366],['mobile',390]]){
    const counter=page.locator('#gameArea .moa-world-count').first();
    assert(await counter.count()===1,profile+'/'+id+' selection counter missing');
    const text=await counter.innerText();
-   assert(/^\d+\s*\/\s*\d+$/.test(text),profile+'/'+id+' malformed counter '+text);
+   assert(id==='slowMemory'?/^\d+$/.test(text):/^\d+\s*\/\s*\d+$/.test(text),
+      profile+'/'+id+' malformed counter '+text);
+  }
+  // Verify true success and a non-success ending using real game controls.
+  if(id==='slowPlace'){
+   const samples=root.locator('.slow-map-pair > div:first-child .slow-board .slow-tile');
+   const replies=root.locator('.slow-map-pair > div:nth-child(2) .slow-board button.slow-tile');
+   for(let i=0;i<await samples.count();i++){
+    const expected=(await samples.nth(i).getAttribute('class')).includes('shown');
+    const pressed=await replies.nth(i).getAttribute('aria-pressed')==='true';
+    if(expected!==pressed)await replies.nth(i).click();
+   }
+   await root.locator('[data-slow="check"]').click();
+   await page.waitForTimeout(40);
+   assert(await root.evaluate(el=>el.classList.contains('moa-scene-finished')),
+     profile+'/'+id+' correct solution lacks completion styling');
+   assert(await root.locator('.moa-world-ending').count()===1,profile+'/'+id+' correct solution lacks earned ending');
+  }
+  if(id==='slowScan'){
+   await root.locator('[data-slow="skip"]').click();
+   await page.waitForTimeout(40);
+   assert(!await root.evaluate(el=>el.classList.contains('moa-scene-finished')),
+     profile+'/'+id+' skipped attempt incorrectly celebrated');
+   assert(await root.locator('.moa-world-ending').count()===0,
+     profile+'/'+id+' skipped attempt shows success art');
   }
   const fit=await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3);
   assert(fit,profile+'/'+id+' horizontal scrolling');
