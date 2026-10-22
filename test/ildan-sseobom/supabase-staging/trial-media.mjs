@@ -152,6 +152,27 @@ export async function deletePracticeRecord(owner,id){
   tx.onerror=()=>reject(Error('기기에서 기록을 삭제하지 못했어.'));
  });}finally{db.close();}
 }
+// A verified cloud copy never removes or replaces its original IndexedDB record.
+export async function markPracticeTransfer(owner,id,state,serverId=null){
+ if(!['sending','needs-review','ready','done'].includes(state))throw Error('올바르지 않은 이전 상태입니다.');
+ const db=await openDb();
+ try{return await new Promise((resolve,reject)=>{
+  const tx=db.transaction('records','readwrite'),store=tx.objectStore('records');
+  store.get(id).onsuccess=event=>{
+   const old=event.target.result;
+   if(old?.owner!==owner||!old.local){tx.abort();return;}
+   const next={...old,transferState:state};
+   if(state==='done'&&typeof serverId==='string'&&/^[0-9a-f-]{36}$/i.test(serverId)){
+    next.syncedTo=serverId;next.syncedAt=new Date().toISOString();
+   }
+   store.put(next);
+  };
+  tx.oncomplete=()=>resolve(true);
+  tx.onerror=()=>reject(Error('기기 이전 상태를 보관하지 못했어요.'));
+  tx.onabort=()=>reject(Error('기기에 남은 원본 기록을 찾지 못했어요.'));
+ });}finally{db.close();}
+}
+
 export function photosMarkup(value){
  if(!Array.isArray(value))return '';
  const safe=value.slice(0,LIMIT).filter(src=>typeof src==='string'&&src.length<=1700000&&(
