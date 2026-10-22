@@ -12,12 +12,13 @@ async function task(page){
  return page.evaluate(()=>window.__moaMissionQA());
 }
 async function loadConcept(page,index){
- if(index===0)await page.locator('[data-mission=start]').click();
- else await page.locator('[data-mission=next-chapter]').click();
- const s=await task(page);assert.equal(s.conceptIndex,index);
- assert.equal(s.phase,'demo','model must be displayed before child is asked');
- await page.locator('[data-mission=continue]').click();
- assert.equal((await task(page)).step,1);
+ // The world is interactive immediately, without a mandatory intro or lesson.
+ if(index>0)await page.locator('[data-mission=next-chapter]').click();
+ const s=await task(page);
+ assert.equal(s.conceptIndex,index);
+ assert.equal(s.phase,'task','a child must be able to explore the world immediately');
+ assert.equal(s.step,1,'first playable scene begins without a forced demonstration');
+ assert.equal(await page.locator('[data-mission=continue]').count(),0,'no read-to-continue tutorial');
 }
 async function pick(page,quantity){
  for(let i=0;i<quantity;i++){
@@ -45,10 +46,14 @@ async function submit(page,index,kind,wrong=false){
  }
  if(index===2){
   const needed=x.total-x.have;
-  await pick(page,needed);
-  await page.locator('[data-mission=submit]').click();
+  assert.equal(await page.locator('[data-mission=submit]').count(),0,'no read-and-submit gate for filling slots');
+  for(let j=0;j<needed-1;j++){
+   await page.locator('.supply-items [data-mission=take]').first().click();
+   assert.equal(await page.locator('.success').count(),0,'not complete until every slot is filled');
+  }
+  await page.locator('.supply-items [data-mission=take]').first().click();
  }
- assert.equal((await task(page)).phase,'task','success state requires a success outcome scene');
+ assert.equal((await task(page)).phase,'success','success state requires a visible reaction in the world');
  assert.ok(await page.locator('.success').count(),index+' '+kind+' did not yield story consequence');
  successes++;
  await page.locator('[data-mission=advance]').click();
@@ -63,10 +68,11 @@ async function exercise(viewport){
  }
  const code=await (await page.request.get(base+'/math-garden/mission.js')).text();
  assert.ok(!code.includes('speechSynthesis'),'AI narrator should not appear');
- assert.ok(await page.locator('[data-mission=start]').isVisible());
+ assert.ok(await page.locator('[data-mission=take]').first().isVisible(),'first acorn must be touchable without a start button');
+ assert.equal(await page.locator('[data-mission=start]').count(),0,'no start gate');
  await page.screenshot({path:path.join(out,'mission-intro-'+viewport+'.png')});
  await loadConcept(page,0);
- await page.screenshot({path:path.join(out,'mission-demo-'+viewport+'.png')});
+ await page.screenshot({path:path.join(out,'mission-first-touch-'+viewport+'.png')});
  for(let i=0;i<3;i++){
   if(i>0)await loadConcept(page,i);
   for(let step=1;step<=4;step++){
@@ -83,7 +89,8 @@ async function exercise(viewport){
   assert.ok(saved[['share','compare','make'][i]],'per-concept record missing');
  }
  await page.locator('[data-mission=next-chapter]').click();
- assert.equal((await task(page)).phase,'intro','story must wrap to beginning');
+ assert.equal((await task(page)).phase,'task','story must wrap directly to play, not to an intro screen');
+ assert.equal((await task(page)).conceptIndex,0);
  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
  assert.ok(overflow<=3,'horizontal overflow '+viewport+' '+overflow);
  assert.deepEqual(errs,[],'JavaScript errors');
