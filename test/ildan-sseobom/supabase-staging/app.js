@@ -1088,7 +1088,7 @@ async function refreshInviteList(){
  }catch(e){el.textContent='접속 링크 목록을 불러오지 못했어요. '+e.message;}
 }
 function adminHome(){app.innerHTML=hero('계정 운영','최초 관리자 계정은 기록을 읽을 수 없습니다. 치료사 초대만 발급할 수 있어요.')+`<div class="panel"><h2>치료사 초대코드 발급</h2><p>치료사도 학생·학부모와 같은 패스키 방식으로 등록합니다.</p><button id="inviteTherapist" class="button">치료사 초대코드 만들기</button><div id="adminInvite"></div></div>`;$('inviteTherapist').onclick=e=>loading(e.target,async()=>{const r=await api('invites',{method:'POST',body:{role:'therapist'}});const d=$('adminInvite');d.innerHTML='<p>코드를 복사해 치료사에게 개별 전달하세요. 7일간 유효합니다.</p><textarea readonly id="adminCode"></textarea>';$('adminCode').value=r.invite;})}
-async function dashboard(){header();records=me.role==='admin'?[]:(await api('practice-records')).records??[];
+async function dashboard(){if(me?.role!=='therapist'&&activeView==='alerts')activeView='write';header();records=me.role==='admin'?[]:(await api('practice-records')).records??[];
  if(me.role==='therapist')clinicianRecordsLoadedAt=Date.now();
  if(me.role==='student'||me.role==='parent'){try{records=[...(await listPracticeRecords(me.id)),...records]}catch(e){toast(e.message)}}
  if(editingPracticeRecord&&['student','parent'].includes(me.role))
