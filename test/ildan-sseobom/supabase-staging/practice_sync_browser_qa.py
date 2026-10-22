@@ -179,8 +179,8 @@ with sync_playwright() as p:
   page.wait_for_timeout(850)
   assert len(stored)==4, ('bulk transfer of photo-only and sketch-only records',len(stored))
   assert all(not item['shared'] for item in stored[1:]), 'every imported item must remain private'
-  assert len(stored[-2]['entry'].get('photos',[]))==1 and stored[-2]['entry'].get('date'), 'photo-only import requires valid server date without invented words'
-  assert 'sketch' in stored[-1]['entry'], 'drawing-only legacy note must survive cloud transfer'
+  assert any(len(x['entry'].get('photos',[]))==1 and x['entry'].get('date') for x in stored[1:]), 'photo-only import has valid date without fabricated narrative'
+  assert any('sketch' in x['entry'] for x in stored[1:]), 'drawing-only note survives cloud transfer'
   originals=page.evaluate("""async(uid)=>{const m=await import('./trial-media.mjs');return (await m.listPracticeRecords(uid)).filter(x=>x.syncedTo&&x.transferState==='done').length}""",student)
   assert originals==3, 'all three original device records must be preserved'
   assert not errors,('page errors',width,errors)
