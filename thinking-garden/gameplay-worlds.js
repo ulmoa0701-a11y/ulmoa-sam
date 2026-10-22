@@ -97,9 +97,40 @@ function decorate(){
  }
  update(root,id);
 }
+// Make a chosen object visibly travel from the shelf into the packed bag.
+// Works for correct and incorrect selections alike: this is interaction feedback,
+// not an answer hint. Never touches scoring or the task's selection set.
+function moveSelectedItem(tile,root){
+ if(window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)return;
+ if(typeof tile.animate!=='function')return;
+ const bag=root.querySelector('.slow-bag-progress'),icon=tile.textContent.trim();
+ if(!bag||!icon)return;
+ const from=tile.getBoundingClientRect(),to=bag.getBoundingClientRect();
+ if(!from.width||!to.width)return;
+ const move=document.createElement('span');
+ move.className='moa-moving-item';
+ move.textContent=icon;
+ move.setAttribute('aria-hidden','true');
+ move.style.left=(from.left+from.width/2-22)+'px';
+ move.style.top=(from.top+from.height/2-22)+'px';
+ document.body.appendChild(move);
+ const dx=to.left+to.width/2-(from.left+from.width/2);
+ const dy=to.top+to.height/2-(from.top+from.height/2);
+ const animation=move.animate([
+  {transform:'translate(0px,0px) scale(1)',opacity:1},
+  {transform:'translate('+dx+'px,'+dy+'px) scale(.55)',opacity:.35}
+ ],{duration:400,easing:'cubic-bezier(.25,.6,.3,1)'});
+ animation.onfinish=()=>move.remove();
+ animation.oncancel=()=>move.remove();
+}
 new MutationObserver(decorate).observe(gameArea,{childList:true});
 document.addEventListener('click',e=>{
- if(!e.target.closest('#gameArea .slow-task'))return;
+ const root=e.target.closest('#gameArea .slow-task');
+ if(!root)return;
+ const tile=e.target.closest('button.slow-tile[data-slow="cell"]');
+ if(tile&&root.classList.contains('moa-scene-slowEveryday')&&tile.classList.contains('picked')){
+  moveSelectedItem(tile,root);
+ }
  // The original handler owns game state; visual feedback follows it.
  window.setTimeout(decorate,0);
 },false);
