@@ -9,6 +9,7 @@ on:
       - 'qa/math-number-forest-qa.mjs'
       - 'qa/math-learning-engine-qa.mjs'
       - 'qa/math-guided-mission-qa.mjs'
+      - 'qa/math-direct-delivery-qa.mjs'
       - '.github/workflows/math-number-forest-qa.yml'
   pull_request:
     paths:
@@ -18,6 +19,7 @@ on:
       - 'qa/math-number-forest-qa.mjs'
       - 'qa/math-learning-engine-qa.mjs'
       - 'qa/math-guided-mission-qa.mjs'
+      - 'qa/math-direct-delivery-qa.mjs'
       - '.github/workflows/math-number-forest-qa.yml'
   workflow_dispatch:
 permissions:
@@ -54,6 +56,8 @@ jobs:
         run: node qa/math-number-forest-qa.mjs
       - name: Test guided mathematical learning cycle and independent transfer
         run: node qa/math-guided-mission-qa.mjs
+      - name: Test one-by-one feeding and accessible delivery alternative
+        run: node qa/math-direct-delivery-qa.mjs
       - name: Confirm current public release
         if: github.event_name == 'push'
         run: |
@@ -70,7 +74,7 @@ jobs:
         if: github.event_name == 'push'
         run: |
           for i in $(seq 1 75); do
-            if curl -fsSL --max-time 10 "https://ulmoa0701-a11y.github.io/ulmoa-sam/math-garden/mission.html?v=$GITHUB_SHA" | grep -Fq 'mission.js?v=20261021-m1'; then
+            if curl -fsSL --max-time 10 "https://ulmoa0701-a11y.github.io/ulmoa-sam/math-garden/mission.html?v=$GITHUB_SHA" | grep -Fq 'mission.js?v=20261022-direct1'; then
               if curl -fsSL --max-time 10 "https://ulmoa0701-a11y.github.io/ulmoa-sam/math-garden/?v=$GITHUB_SHA" | grep -Fq 'mission-front-link'; then
                 echo "Public guided mission and entry verified";exit 0
               fi
