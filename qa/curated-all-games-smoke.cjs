@@ -42,7 +42,14 @@ function planUrl(items,opts={}){
      assert.equal(await picture.count(),1,marker+' missing authentic preview picture');
      const loaded=await picture.evaluate(async el=>{await el.decode().catch(()=>{});return el.naturalWidth>180&&el.naturalHeight>120;});
      assert.ok(loaded,marker+' standalone game screenshot could not load');
-    }else if(id==='handMirror'||standalone.includes(id)){
+    }else if(id==='handMirror'){
+     // Hand following now uses its captured actual game screen too.
+     const photo=preview.locator('.card-shot-preview .card-shot-screen img');
+     assert.equal(await photo.count(),1,marker+' hand mirror real preview missing');
+     const good=await photo.evaluate(async img=>{await img.decode().catch(()=>{});return img.naturalWidth>180&&img.naturalHeight>120});
+     assert.ok(good,marker+' hand mirror real preview failed to load');
+     assert.equal(await preview.locator('.card-shot-steps strong').count(),1,marker+' hand mirror instructions missing');
+    }else if(standalone.includes(id)){
      assert.ok(await preview.locator('.moa-assigned-fallback-icons span').count()>=4,marker+' missing illustrated gameplay');
     }else{
      assert.equal(await preview.locator('.card-live-preview').count(),1,marker+' must reuse actual catalog gameplay example');
