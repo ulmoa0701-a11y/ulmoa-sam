@@ -43,6 +43,37 @@ for(const vp of [{name:'mobile',width:390,height:844},{name:'desktop',width:1280
    await page.locator('#backHome').click();
   }
  }
+
+ // Earned completion is verified by actual child-style actions, not by
+ // programmatically forcing a success state or using an instructor shortcut.
+ for(const id of ['resetRescue','classroomMove','festivalPlan']){
+  await page.goto('http://127.0.0.1:8765/thinking-garden/?game='+id,{waitUntil:'domcontentloaded'});
+  await page.locator('#introStart').click();
+  await page.locator('[data-core="rest"]').click();
+  assert.equal(await page.locator('.strategy-outcome-rest').count(),1,id+' skipped attempt should look neutral');
+  assert.equal(await page.locator('.strategy-outcome-success').count(),0,id+' skipping must not earn celebration');
+  await page.goto('http://127.0.0.1:8765/thinking-garden/?game='+id,{waitUntil:'domcontentloaded'});
+  await page.locator('#introStart').click();
+  if(id==='resetRescue'){
+   await page.locator('[data-rec="question"]').click();
+   const target=await page.evaluate(()=>state.strategy.r.target);
+   await page.locator('[data-rec="pick"][data-id="'+target+'"]').click();
+  }else if(id==='classroomMove'){
+   const targets=await page.evaluate(()=>state.strategy.r.tasks.map(t=>({item:t.item,pos:t.pos})));
+   for(const target of targets){
+    await page.locator('[data-room="item"][data-i="'+target.item+'"]').click();
+    await page.locator('[data-room="pos"][data-i="'+target.pos+'"]').click();
+    await page.locator('[data-room="check"]').click();
+   }
+  }else{
+   const count=await page.evaluate(()=>state.strategy.r.tasks.length);
+   for(let n=0;n<count;n++)await page.locator('[data-plan="choose"][data-i="'+n+'"]').click();
+   await page.locator('[data-plan="check"]').click();
+  }
+  assert.equal(await page.locator('.strategy-outcome-success').count(),1,id+' real solved scene should celebrate');
+  assert.equal(await page.locator('.strategy-done [class^="strategy-win-"]').count(),1,id+' does not show unique earned scene');
+ }
+
  assert.deepEqual(errors,[],'JS exceptions');
  console.log('PASS '+vp.name+' : classroom / rescue 20 unique game scenarios for all 3 difficulty levels');
  await page.close();
