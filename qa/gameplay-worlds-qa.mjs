@@ -69,6 +69,15 @@ for(const [profile,width] of [['desktop',1366],['mobile',390]]){
      profile+'/'+id+' correct solution lacks completion styling');
    assert(await root.locator('.moa-world-ending').count()===1,profile+'/'+id+' correct solution lacks earned ending');
   }
+  if(id==='slowName'){
+   await root.locator('[data-slow="ready"]').click();
+   await root.locator('[data-slow="name-right"]').click();
+   await page.waitForTimeout(40);
+   assert(await root.evaluate(el=>el.classList.contains('moa-scene-finished')),
+     profile+'/'+id+' correctly named friend lacks success state');
+   assert(await root.locator('.moa-world-ending').count()===1,
+     profile+'/'+id+' correctly named friend lacks earned clay reward');
+  }
   if(id==='slowScan'){
    await root.locator('[data-slow="skip"]').click();
    await page.waitForTimeout(40);
