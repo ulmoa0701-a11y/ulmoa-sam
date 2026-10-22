@@ -9,6 +9,8 @@ const artifacts='qa/five-gardens-artifacts';
 fs.mkdirSync(artifacts,{recursive:true});
 const failures=[];
 const check=(condition,message)=>{if(!condition)failures.push(message)};
+const previewVersion=fs.readFileSync('gardens/catalog.js','utf8').match(/const PREVIEW_VERSION='([^']+)'/)?.[1];
+if(!previewVersion || !/^\?v=\d{8}-[\w-]+$/.test(previewVersion))throw Error('Invalid catalog screenshot version');
 for(const width of [360,390,1366]){
  const context=await browser.newContext({viewport:{width,height:width<500?844:900}});
  const page=await context.newPage();
@@ -35,7 +37,7 @@ for(const width of [360,390,1366]){
  check(data.navPresent,width+' shared navigation missing');
  check(await page.locator('.play-card-enhanced').count()===34,width+' enhanced game card count mismatch');
  const photoURLs=await page.locator('.play-card-enhanced img.real-shot').evaluateAll(nodes=>nodes.map(x=>x.getAttribute('src')||''));
- check(photoURLs.length===34&&photoURLs.every(u=>u.endsWith('?v=20261021-playstate4')),width+' cropped game preview version not used across all 34 cards');
+ check(photoURLs.length===34&&photoURLs.every(u=>u.endsWith(previewVersion)),width+' cropped game preview version not used across all 34 cards');
  check(await page.locator('#gardenSearch').count()===1,width+' overall search missing');
  const firstVisible=await page.locator('#cognitive .play-card-enhanced:not([hidden])').count();
  check(firstVisible===6,width+' cognitive preview should begin with six cards, got '+firstVisible);
