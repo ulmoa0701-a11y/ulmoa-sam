@@ -159,13 +159,15 @@ function renderSameShape(){
  // between sessions while leaving the single target attribute (shape) stable.
  const n=Math.min(3+practiceStep(),6),idx=(state.round+state.shapeOffset)%basicShapes.length;
  const target=basicShapes[idx],targetShape=target[0],targetColor=target[1];
- const correctColor=basicShapes[(idx+2)%basicShapes.length][1];
+ // Entry level isolates shape, while later levels generalize shape
+ // recognition across different colors without changing the target shape.
+ const correctColor=practiceStep()<=1?targetColor:basicShapes[(idx+2)%basicShapes.length][1];
  missionText.textContent='모양이 같은 쌍둥이를 찾아요!';
- missionSub.textContent='색이 달라도 모양이 같을 수 있어요. 모양에 주목해요.';
+ missionSub.textContent=practiceStep()<=1?'같은 색에서 모양만 보고 골라요.':'색이 달라도 모양이 같을 수 있어요. 모양에 주목해요.';
  say(missionText.textContent);
  const others=shuffle(basicShapes.filter(x=>x[0]!==targetShape));
- const opts=shuffle([{shape:targetShape,color:correctColor},{shape:others[0][0],color:targetColor},...others.slice(1,n-1).map(x=>({shape:x[0],color:x[1]}))].slice(0,n));
- area.innerHTML='<div class="basic-game shape-adventure"><div class="shape-scene-title">🔎 모아의 쌍둥이 찾기</div><div class="shape-instructions"><strong>이 모양과 같은 친구는?</strong><span>색이 달라도 괜찮아요</span></div><div class="shape-target" style="color:'+targetColor+'" aria-label="기준 모양">'+targetShape+'</div><p class="shape-subhead">아래 모양 중에서 골라요</p><div class="basic-choice-grid">'+opts.map(x=>'<button type="button" class="basic-choice" data-shape="'+x.shape+'" aria-label="모양 '+x.shape+'" style="color:'+x.color+'">'+x.shape+'</button>').join('')+'</div></div>';
+ const opts=shuffle([{shape:targetShape,color:correctColor},{shape:others[0][0],color:targetColor},...others.slice(1,n-1).map(x=>({shape:x[0],color:practiceStep()<=1?targetColor:x[1]}))].slice(0,n));
+ area.innerHTML='<div class="basic-game shape-adventure"><div class="shape-scene-title">🔎 모아의 쌍둥이 찾기</div><div class="shape-instructions"><strong>이 모양과 같은 친구는?</strong><span>'+(practiceStep()<=1?'모양만 똑같이':'색이 달라도 괜찮아요')+'</span></div><div class="shape-target" style="color:'+targetColor+'" aria-label="기준 모양">'+targetShape+'</div><p class="shape-subhead">아래 모양 중에서 골라요</p><div class="basic-choice-grid">'+opts.map(x=>'<button type="button" class="basic-choice" data-shape="'+x.shape+'" aria-label="모양 '+x.shape+'" style="color:'+x.color+'">'+x.shape+'</button>').join('')+'</div></div>';
  $$('.basic-choice').forEach(b=>b.onclick=()=>{
   if(state.lock)return;
   recordShapeAttempt(b.dataset.shape===targetShape);
@@ -198,6 +200,13 @@ function renderFlower(){
    b.classList.add('picked');found++;$('#flowerCollected').textContent='🌼 '+found+' / '+need+'송이';
    const basket=area.querySelector('.flower-basket > span');basket.textContent=found===need?'💐':'🧺';
    const picked=document.createElement('span');picked.className='flower-picked';picked.textContent=b.textContent;$('#flowerHarvest').appendChild(picked);
+    // Chosen flower visibly moves into its basket. No grading hint.
+    if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&picked.animate){
+     const source=b.getBoundingClientRect(),dest=picked.getBoundingClientRect();
+     picked.animate([{transform:'translate('+(source.left-dest.left)+'px,'+(source.top-dest.top)+'px) scale(1.2)',opacity:.85},
+      {transform:'translate(0px,0px) scale(1)',opacity:1}],
+      {duration:330,easing:'cubic-bezier(.16,.65,.28,1)'});
+    }
    addSeeds(Math.ceil(10/need));sfx('ok');
    if(found===need){completeGardenQuest();flash('꽃바구니 가득! 💐');roundGate(area.querySelector('.basic-game'),'다음 꽃밭 ▶',500)}
   }else{b.classList.add('wrong');sfx('no');flash('꽃 종류만 골라봐요.');later(()=>b.classList.remove('wrong'),350)}
@@ -284,7 +293,11 @@ function renderInside(){
   if(state.lock||placed>=need)return;
   noteChoice(true,keyboard);
   const rect=z.getBoundingClientRect(),star=document.createElement('i');
-  star.textContent='⭐';star.style.left=(x-rect.left)+'px';star.style.top=(y-rect.top)+'px';
+  star.textContent='⭐';
+   // Keep placed stars inside the actual fence on phones and edge taps.
+   const inset=13;
+   star.style.left=Math.min(Math.max(x-rect.left,inset),Math.max(inset,rect.width-inset))+'px';
+   star.style.top=Math.min(Math.max(y-rect.top,inset),Math.max(inset,rect.height-inset))+'px';
   star.setAttribute('aria-hidden','true');z.appendChild(star);
   placed++;$('#miniCount').textContent='⭐ '+placed+' / '+need;
   addSeeds(Math.ceil(10/need));sfx('ok');

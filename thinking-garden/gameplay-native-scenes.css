@@ -1,0 +1,124 @@
+/* Each game has its own action surface. These are gameplay responses, not
+   extra instructional overlays. Keep target shape/color and task data native. */
+#gameWorld .shape-adventure{
+ --clay-ink:#345d55;
+ border-radius:27px;
+ background:linear-gradient(160deg,#fff8e8,#e6f5ef);
+ border:2px solid #c8e1d5;
+ box-shadow:0 8px 0 #a9c8b84d,0 15px 30px #345d5517;
+}
+#gameWorld .shape-adventure .shape-target{
+ transform-origin:50% 80%;
+ filter:drop-shadow(0 8px 1px #416d5931);
+}
+#gameWorld .shape-adventure .basic-choice{
+ position:relative;
+ border-bottom-width:5px;
+ touch-action:manipulation;
+}
+#gameWorld .shape-adventure .basic-choice:active{
+ transform:translateY(3px);
+ border-bottom-width:2px;
+}
+#gameWorld .shape-adventure.shape-reunited .shape-target{
+ background:#effde6;
+ box-shadow:0 0 0 6px #bddca58c;
+}
+#gameWorld .flower-quest{
+ border:2px solid #c4e4b7;
+ border-radius:28px;
+ background:linear-gradient(180deg,#f0f9e7 0%,#e2f5d0 66%,#d5eac1 100%);
+}
+#gameWorld .flower-quest .object-grid{
+ background:radial-gradient(ellipse at bottom,#bada9c 0%,#e2efcf 64%,transparent 85%);
+ border-radius:27px;padding:14px;
+}
+#gameWorld .flower-quest .object-btn{
+ border-radius:50% 50% 37% 37%;
+ box-shadow:inset 0 -9px 0 #76b5864f,0 5px 0 #5d9c6e28;
+ touch-action:manipulation;
+}
+#gameWorld .flower-quest .object-btn.picked{
+ opacity:.36;
+ filter:saturate(.6);
+}
+#gameWorld .flower-quest .flower-picked{
+ background:#fff9e5;
+ border:1px solid #d7c7a2;
+ border-radius:50%;
+}
+#gameWorld .leaf-clue-game{
+ background:linear-gradient(180deg,#ebf8ea,#dceec8);
+ border:2px solid #b8dcb2;
+ border-radius:27px;
+}
+#gameWorld .leaf-clue-game .leaf-btn{
+ border-radius:45% 55% 48% 52%;
+ box-shadow:0 6px 0 #91bf87a1,0 9px 14px #4b7a4730;
+ transform-origin:50% 90%;
+}
+#gameWorld .leaf-clue-game .leaf-btn.opened{
+ border-radius:50%;
+ background:#f8ffed;
+ box-shadow:inset 0 4px 12px #6ba57627;
+}
+#gameWorld .path-quest .trail-node{
+ border-radius:37% 44% 31% 42%;
+ box-shadow:0 7px 0 #8cbba790,0 10px 12px #53776529;
+ touch-action:manipulation;
+}
+#gameWorld .path-quest .trail-node.visited{
+ background:#e7f2e4;
+ border-color:#56997c;
+ box-shadow:inset 0 3px 0 #9fd0af82,0 3px 0 #76ab8c70;
+}
+#gameWorld .inside-garden .inside-zone{
+ outline-offset:4px;
+ background:repeating-radial-gradient(circle at 50% 50%,#e5f5d8 0 32px,#d0eaba 33px 65px);
+ border:5px solid #85bb79;
+ box-shadow:inset 0 6px 18px #7db76b55,0 7px 0 #72a76d4d;
+}
+#gameWorld .inside-garden .inside-zone i{
+ z-index:2;
+ filter:drop-shadow(0 3px 2px #568c4138);
+}
+#gameWorld .wake-garden .wake-target{
+ border-radius:50%;
+ box-shadow:inset 0 -8px 0 #7caf7844,0 4px 0 #56884f2b;
+}
+#gameWorld .wake-garden .wake-target.awake{
+ background:radial-gradient(circle at center,#fffeec,#e8f5d8);
+ border-color:#80b97e;
+}
+#gameWorld .memory-picnic .basket-slot.filled{
+ background:#f5fee7;
+ border:2px solid #a5ca81;
+ border-bottom:5px solid #80a869;
+}
+#gameWorld .bridge-adventure .game-plank.built{
+ box-shadow:inset 0 3px 0 #f5d6a8,0 5px 0 #a67646;
+}
+#gameWorld .shop-quest.shop-open .storefront{
+ box-shadow:0 0 0 4px #e4eabf,0 0 23px #eccb7759;
+}
+@media(max-width:480px){
+ #gameWorld .flower-quest .object-grid{padding:7px}
+ #gameWorld .shape-adventure{border-radius:17px}
+ #gameWorld .flower-quest,.leaf-clue-game{border-radius:17px}
+}
+@media(prefers-reduced-motion:no-preference){
+ #gameWorld .leaf-clue-game .leaf-btn.opened .leaf-discovery{
+  animation:moa-uncover .3s ease-out both;
+ }
+ #gameWorld .inside-garden .inside-zone i{animation:moa-plant-pop .24s ease-out both}
+ #gameWorld .wake-garden .wake-target.awake{animation:moa-seed-grow .27s ease-out both}
+ #gameWorld .memory-picnic .basket-slot.filled{animation:moa-seed-grow .21s ease-out both}
+ @keyframes moa-uncover{from{opacity:.4;transform:scale(.6) rotate(-10deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+ @keyframes moa-seed-grow{from{transform:scale(.7)}to{transform:scale(1)}}
+}
+@media(prefers-reduced-motion:reduce){
+ #gameWorld .leaf-clue-game .leaf-btn.opened .leaf-discovery,
+ #gameWorld .inside-garden .inside-zone i,
+ #gameWorld .wake-garden .wake-target.awake,
+ #gameWorld .memory-picnic .basket-slot.filled{animation:none!important}
+}
