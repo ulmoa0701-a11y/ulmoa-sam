@@ -39,7 +39,10 @@ with sync_playwright() as p:
    page.route('**/functions/v1/ildan-api/invite-preview',mock_preview)
    page.route('**/functions/v1/ildan-api/invite-register',mock_register)
    page.goto(url+'#invite='+token,wait_until='domcontentloaded',timeout=35000)
-   page.locator('#inviteRoleTitle').get_by_text(label+' 계정 연결').wait_for(timeout=25000)
+   try:page.locator('#inviteRoleTitle').get_by_text(label+' 계정 연결').wait_for(timeout=25000)
+   except Exception:
+    print('INVITE_BROWSER_DIAGNOSTIC',{'role':role,'errors':errors,'body':page.locator('body').inner_text()[:700], 'preview_count':len(preview),'register_count':len(register)})
+    raise
    page.locator('#inviteRetry').wait_for(state='visible',timeout=15000)
    assert len(preview)==1 and len(register)==1,(role,preview,register)
    assert page.locator('#verificationCode').count()==0,'No separate PIN'
