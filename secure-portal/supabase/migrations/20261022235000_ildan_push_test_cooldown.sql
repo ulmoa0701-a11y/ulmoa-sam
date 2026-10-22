@@ -1,0 +1,1 @@
+alter table public.ildan_push_subscriptions add column if not exists last_test_at timestamptz;
