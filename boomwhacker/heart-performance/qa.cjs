@@ -91,6 +91,20 @@ const {chromium}=require("playwright-core");
   assert.equal(await page.locator("#stagePlay").count(),1);
   assert.equal(await page.locator("#stageReset").count(),1);
   assert.equal(await page.locator("#stageExit").count(),1);
+  assert.equal(await page.locator("#mobileLandscape").count(),1);
+  if(name==="mobile"){
+   assert.equal(await page.locator(".mobile-score-tip").isVisible(),true,"portrait score must explain the actual 390px readability limitation");
+   const cueLayout=await page.locator(".cue-card.current").evaluate(el=>({font:getComputedStyle(el.querySelector("strong")).fontSize,width:el.getBoundingClientRect().width}));
+   assert(parseFloat(cueLayout.font)>=15,"mobile current note must be legible independent of the tiny full score");
+   await page.locator("#mobileLandscape").click();
+   assert.equal(await page.evaluate(()=>Boolean(document.fullscreenElement)),true,"portrait mobile score must open actual fullscreen");
+   assert.equal(await page.locator("#stagePlay").isVisible(),true,"mobile fullscreen must keep playback accessible");
+   await page.locator("#stageExit").click();
+   assert.equal(await page.evaluate(()=>Boolean(document.fullscreenElement)),false,"mobile should return to controls");
+  }else{
+   assert.equal(await page.locator(".mobile-score-tip").isVisible(),false,"desktop must not show portrait-only controls");
+  }
+  tests.push(name+": portrait readable cue and dedicated landscape fullscreen, score itself stays fixed");
   const advancedLayout=await page.evaluate(()=>{
    const q=window.__performanceViewsQA__,original=q.state().song,out={};
    q.selectView("two");q.selectSong("moa-signal");
