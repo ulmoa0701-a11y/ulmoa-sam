@@ -602,10 +602,12 @@ function themeBackground(c){
  c.save();
  if(theme==="classroom"){
    // Soft classroom: window, pastel chalk marks and a restrained wooden sill.
-   rr(c,986,22,148,128,24,"#fff8e9b3");
-   rr(c,1000,34,120,98,16,"#c9e4e1");
-   c.fillStyle="#fff3d5";c.beginPath();c.arc(1082,62,16,0,Math.PI*2);c.fill();
-   ln(c,1060,35,1060,132,"#fffdf1",5);ln(c,1002,81,1120,81,"#fffdf1",5);
+   // The classroom's illustrated sunlit window sits between title and page counter.
+   rr(c,771,6,167,103,22,"#fff8e9bd");
+   rr(c,784,16,140,80,14,"#cce7e4");
+   c.fillStyle="#fff4cc";c.beginPath();c.arc(879,42,15,0,Math.PI*2);c.fill();
+   ln(c,843,17,843,97,"#fffef7",5);ln(c,785,62,923,62,"#fffef7",5);
+   rr(c,772,101,170,9,4,"#e1c6a6");
    c.fillStyle="#e3c7a9";c.fillRect(0,606,1200,14);
    for(const [x,y] of [[38,95],[1150,201],[62,540],[1135,577]]){
      disk(c,x,y,18,"#e4e5b88c");disk(c,x+25,y-11,11,"#c9dbbf91");
@@ -623,11 +625,15 @@ function themeBackground(c){
     c.beginPath();c.moveTo(0,0);c.bezierCurveTo(size*.8,-size*.7,size*1.1,size*.3,0,size);c.bezierCurveTo(-size*.55,size*.5,-size*.6,size*.2,0,0);c.fill();c.restore()
    };
    leaf(26,50,23,"#82b692");leaf(70,17,18,"#add5a6");leaf(1140,36,27,"#80b898");leaf(1177,520,30,"#83ad99");leaf(47,492,20,"#a4cda3");
+   // Quiet tree canopy graphic in the open central title gap.
+   leaf(794,27,20,"#8ac1a0");leaf(819,14,18,"#accf9c");
+   leaf(881,19,22,"#86baa1");leaf(906,47,14,"#b3d3ac");
+   ln(c,835,103,835,72,"#719b82",3);
    for(const [x,y,r] of [[143,32,4],[940,54,5],[1069,586,3]])disk(c,x,y,r,"#fff4c9");
  }else{
    // Starry music path: gradient twilight sky, moon and a quiet valley.
-   c.fillStyle="#e9e9df";c.beginPath();c.arc(1096,72,26,0,Math.PI*2);c.fill();
-   c.fillStyle=p.sky[0];c.beginPath();c.arc(1107,59,26,0,Math.PI*2);c.fill();
+   c.fillStyle="#fff1c0";c.beginPath();c.arc(868,56,28,0,Math.PI*2);c.fill();
+   c.fillStyle="#4a5888";c.beginPath();c.arc(881,44,26,0,Math.PI*2);c.fill();
    [[58,35,8],[160,91,4],[338,24,5],[713,61,4],[958,37,7],[1169,193,5],[44,456,5],[1090,577,5],[520,586,4]].forEach(([x,y,z])=>drawSparkle(c,x,y,z,"#fff2c6"));
    c.fillStyle="#495a7b";c.beginPath();c.moveTo(0,574);c.bezierCurveTo(250,547,395,584,610,559);c.bezierCurveTo(820,540,1010,548,1200,570);c.lineTo(1200,620);c.lineTo(0,620);c.fill();
    c.fillStyle="#617395";c.beginPath();c.moveTo(0,608);c.bezierCurveTo(260,576,559,630,1200,580);c.lineTo(1200,620);c.lineTo(0,620);c.fill();
