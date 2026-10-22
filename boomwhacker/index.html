@@ -567,10 +567,12 @@ body[data-display-mode="instrument"] .fallLabel{font-size:32px;min-width:46px;mi
 @media(max-width:450px){.publishPanel .publishButtons{grid-template-columns:1fr}}
 </style>
 <link rel="stylesheet" href="./mobile-layout.css?v=20261009" />
+<link rel="stylesheet" href="../assets/moa-site-guide.css?v=20261022a">
 </head>
 <body>
 <div class="app">
-<header class="top"><div class="brand"><small>일단 해봄노트 · 울모아쌤</small><h1>🥁 붐웨커 Studio</h1><p>색을 보고 치고, 떨어지는 노트를 따라 연주해요.</p></div><a class="back" href="../heart-score/">← 하트악보</a></header>
+<header class="top"><div class="brand"><small>일단 해봄노트 · 울모아쌤</small><h1>🥁 붐웨커 Studio</h1><p><span class="moa-mini-guide-label">모아의 안내 · </span>색을 보고 치고, 떨어지는 노트를 따라 연주해요.</p></div><a class="back" href="../heart-score/">← 하트악보</a></header>
+<aside class="moa-site-guide moa-site-guide--tool" aria-label="모아의 페이지 안내"><img class="moa-site-guide__character" src="../assets/moa-hello-wave-20261012.webp" width="92" height="112" alt="손을 흔드는 모아 캐릭터" decoding="async"><div class="moa-site-guide__speech"><strong class="moa-site-guide__name">모아가 알려줄게</strong><p>곡과 연습할 음을 고르면 박자에 맞춰 공이 내려와. 소리와 속도도 조절할 수 있어.</p></div></aside>
 <div class="mobileActions" aria-label="모바일 빠른 조작">
   <div class="mobileSongWrap"><select id="mobileSongSelect" class="mobileSongSelect" aria-label="연주할 곡 선택"><option value="">현재 곡</option></select></div>
   <button id="mobileScoreBtn" class="mobileActionBtn" type="button" aria-controls="mobileScoreSheet" aria-expanded="false">🎼 악보</button>

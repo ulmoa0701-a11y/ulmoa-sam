@@ -267,7 +267,13 @@ const path=require("node:path");
       assert.equal(await cards.count(),6,"original album still uses six images per page");
       assert.equal(await paged.isVisible(),true,"album pagination still works");
       await page.locator('.gcat-tab[data-tab="cognitive"]').click();
-      await page.evaluate(()=>scrollTo(0,280));
+      await page.evaluate(()=>{
+        const rail=document.querySelector('.gcat-search-rail');
+        const naturalTop=rail.getBoundingClientRect().top+scrollY;
+        // With the newly added page introduction, scroll past its real position
+        // before checking sticky behavior; a fixed 280px scroll is no longer enough.
+        scrollTo(0,Math.max(280,naturalTop+80));
+      });
       await page.waitForTimeout(120);
       const sticky=await page.locator(".gcat-search-rail").evaluate(x=>({top:x.getBoundingClientRect().top,position:getComputedStyle(x).position,scroll:scrollY}));
       assert.equal(sticky.position,"sticky");
