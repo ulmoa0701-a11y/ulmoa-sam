@@ -2,8 +2,23 @@
   "updated": "2026-10-22",
   "style": "cute-3d-clay-toy, identical to mission-v4/village-v1 (no new assets this round)",
   "productionTool": "none — pure reuse of existing mission-v4/village-v1 assets, no Canva calls this round",
-  "status": "v1 fusion of mission.html (structured quest engine: share/compare/make, demo->guided->independent, unchanged scoring) and village.html (free-play gather/pet/build sandbox) into one page, math-garden/forest-world.html. Neither source file was modified. New bridge: finishing a quest chapter credits a flat +3 acorns/+2 berries to the shared village currency, regardless of how well the child did.",
-  "newAssets": [],
+  "status": "v1 fusion of mission.html (structured quest engine: share/compare/make, demo->guided->independent, unchanged scoring) and village.html (free-play gather/pet/build sandbox) into one page, math-garden/forest-world.html. Neither source file was modified. New bridge: finishing a quest chapter credits a flat +3 acorns/+2 berries to the shared village currency, regardless of how well the child did. 2nd round: added a 4th quest concept, 'bridge repair' (다리 복구) — heterogeneous-length sum-to-target mechanic (multiple valid plank combinations per target, not one fixed answer), with overshoot-then-undo forgiveness mirroring share's over-collect logic. 2 new assets generated under the same Canva exception. mission.css's hidden-button bug (found during the 1st round) has since been fixed upstream in a separate commit.",
+  "newAssets": [
+    {
+      "file": "objects/bridge_gap.png",
+      "nativeSize": "200x200",
+      "alpha": true,
+      "usedIn": "forest-world.css .map-node-badge.icon-bridge (map node + travel badge) AND .bridge-icon (decorative header in the task/demo/success screens) — triple-reused rather than generating separate assets per screen, same pattern as acorn_tree.png in mission-v4.",
+      "prompt": "A cute 3D clay-style toy miniature wooden bridge with a broken gap in the middle, two small stone riverbanks on either side of the gap, a tiny stream of water below, smooth matte toy material, soft pastel brown and blue-green color palette, gentle studio lighting with soft shadows, centered single subject, three-quarter view, plain soft pastel solid background, no text, no realistic photography"
+    },
+    {
+      "file": "objects/wood_plank.png",
+      "nativeSize": "200x200",
+      "alpha": true,
+      "usedIn": "forest-world.css .plank (background-image, background-size:100% 100% so a single asset stretches to represent lengths 1-4 via .plank-1..plank-4 width classes). The 'mossy' material variant for the transfer step reuses this same asset with a CSS sepia+hue-rotate filter instead of a second generation.",
+      "prompt": "A cute 3D clay-style toy single wooden plank log piece, short elongated rectangular shape with rounded edges, smooth matte toy material, soft pastel brown wood color palette, gentle studio lighting with soft shadows, centered single subject, plain soft pastel solid background, no text, no realistic photography"
+    }
+  ],
   "reusedAssets": [
     "mission-v4/objects/acorn_tree.png, berry_single.png (also doubles as the gather tab's berry node), acorn_single.png, basket_empty.png, reward_flower.png, plate_empty.png",
     "mission-v4/characters/{bear,rabbit,fox,frog,bird}_{waiting,happy}.png",
@@ -17,7 +32,10 @@
   },
   "newBridgePoint": {
     "location": "chapterEnd(), forest-world.js",
-    "reward": {"acorns": 3, "berries": 2},
+    "reward": {
+      "acorns": 3,
+      "berries": 2
+    },
     "scalesWithPerformance": false,
     "rationale": "Flat reward regardless of independent-vs-assisted outcome. Scaling the reward by performance would make it an implicit penalty signal for a struggling child, which conflicts with the project's established no-punishment principle (see LEARNING-DESIGN.md rule 7 and this session's icon-first/no-text-judgment work). The amount itself (+3/+2) is an arbitrary balance choice, not a researched value — EARLY-MATH-EVIDENCE-BRIEF.md says nothing about reward-economy sizing."
   },
@@ -32,14 +50,15 @@
     "problem": "This ID-selector rule overrides the native [hidden] attribute's display:none (higher specificity), so #help/#change stay visually visible on screens where helpButton(false) was called (map, travel, success, chapter-end) instead of only on the task screen as intended.",
     "confirmedOnLiveMissionHtml": true,
     "fixedInForestWorldCssOnly": "#help[hidden],#change[hidden]{display:none!important}",
-    "note": "mission.css itself was NOT touched per this round's hard constraint (don't modify the original files) — this needs a separate decision/fix if the parent session wants it patched upstream too."
+    "note": "mission.css itself was NOT touched per this round's hard constraint (don't modify the original files) — this needs a separate decision/fix if the parent session wants it patched upstream too. UPDATE: mission.css was subsequently patched with the same fix in a separate commit on this branch (outside forest-world-v1's own scope) — the bug no longer exists on the live mission.html either."
   },
   "notDone": [
-    "No new quest content beyond the existing 3 concepts (share/compare/make) — the user's brief's B/C/D/E adventure ideas (bridge repair, fox shop, number conservation 'transforming forest', new-village transfer) are still future work, now unblocked by this fusion's architecture (a 4th+ quest location is just another map node) but not built this round.",
+    "Quest concepts C/D/E from the user's original brief (fox shop — numeral/dot-array order interpretation; transforming number forest — conservation of number across appearance changes; new-village transfer) are still not built. The evidence brief (EARLY-MATH-EVIDENCE-BRIEF.md) specifically flagged concept D as needing careful age-appropriate design, not a quick port.",
     "math-garden/index.html (the 15-game hub) is not updated to link to forest-world.html — a separate decision since it affects public discoverability. mission.html and village.html remain independently reachable exactly as before.",
     "Quest reward amounts (+3/+2) are a first-guess balance, not playtested against how fast a child would max out useful spending (3 concepts x1 playthrough = 9 acorns/6 berries, enough to afford all 3 current build items once with acorns to spare — not stress-tested for repeat play / inflation).",
     "No new sound design — quest and village both still use their own near-identical simple beep sfx(), now literally duplicated as one shared function in forest-world.js rather than two separate near-copies.",
     "Pet hunger still only increases via feeding (no time decay), same gap already logged in village-v1/asset-manifest.json notDone, unchanged by this fusion.",
-    "Korean literacy (자음/모음/띄어쓰기) — still explicitly out of scope, same reasoning as village-v1: not confirmed by the user to belong in this same game."
+    "Korean literacy (자음/모음/띄어쓰기) — still explicitly out of scope, same reasoning as village-v1: not confirmed by the user to belong in this same game.",
+    "Bridge concept's 7 piece pools were checked exhaustively by brute-force subset-sum (all combinations, not just the intended ones) — confirmed no unintended trivial single-piece solution exists anywhere (every target genuinely requires combining 2+ pieces) and the full set of valid combinations matches what was designed. Not re-verified by an actual child, only by code."
   ]
 }

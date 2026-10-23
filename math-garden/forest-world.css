@@ -165,3 +165,18 @@ button.feed-friend.friend-fed .forest-friend{transform:translateY(-3px)}
    flagged for the parent session to decide whether to fix mission.css separately, since
    this file must not touch it. Fixed here only. */
 #help[hidden],#change[hidden]{display:none!important}
+
+.map-node-badge.icon-bridge{background-image:url('./assets/forest-world-v1/objects/bridge_gap.png')}
+.bridge-scene{display:flex;flex-direction:column;align-items:center;gap:6px}
+.bridge-icon{width:120px;height:90px;background:url('./assets/forest-world-v1/objects/bridge_gap.png') center/contain no-repeat;filter:drop-shadow(0 5px 3px #5b554046)}
+.gap-fill{display:flex;align-items:flex-end;justify-content:center;gap:4px;flex-wrap:wrap;min-height:34px;max-width:280px;padding:8px 12px;background:#eef6e2cc;border:3px dashed #8fb389;border-radius:18px}
+.plank-palette{display:flex;align-items:flex-end;justify-content:center;gap:8px;flex-wrap:wrap;max-width:320px;padding:8px;background:#fff7e0cc;border:3px dashed #caa978;border-radius:20px}
+.plank{display:block;height:26px;background:url('./assets/forest-world-v1/objects/wood_plank.png') center/100% 100% no-repeat;filter:drop-shadow(0 3px 2px #5c431c38)}
+.plank.mossy{filter:drop-shadow(0 3px 2px #5c431c38) sepia(.35) hue-rotate(55deg) saturate(1.4) brightness(.94)}
+.plank-1{width:30px}
+.plank-2{width:48px}
+.plank-3{width:66px}
+.plank-4{width:84px}
+.plank-palette .interaction,.gap-fill .interaction{min-width:0;min-height:0;padding:2px}
+.gap-fill .interaction{animation:pop-in .32s cubic-bezier(.34,1.56,.64,1) both}
+@media(max-width:650px){.bridge-icon{width:96px;height:72px}.gap-fill{max-width:220px}.plank{height:20px}.plank-1{width:24px}.plank-2{width:38px}.plank-3{width:52px}.plank-4{width:66px}}

@@ -24,9 +24,36 @@
 - 새 이미지 자산 없음 — `mission-v4/`와 `village-v1/`의 기존 자산만 재사용
 - `style-guide.md`, `asset-manifest.json`, `qa/test-results.md`, `previews/`
 
-## 점검 중 발견한 기존 버그 (mission.css, 수정 안 함)
+## 점검 중 발견한 기존 버그 (mission.css)
 
-`mission.css`의 `#sound,#restart,#help,#change{display:inline-flex}` 규칙(4차 아이콘화 작업 때 추가)이 `[hidden]` 속성보다 CSS 명시도가 높아서, 지도 화면에서도 `#help`/`#change` 버튼이 숨겨지지 않고 보이는 버그를 발견했다. **라이브 mission.html에서도 재현 확인**(Playwright로 `.isVisible()` 체크). 이 파일은 건드리지 않기로 한 작업 범위라 `forest-world.css`에만 `#help[hidden],#change[hidden]{display:none!important}`로 고쳤다. mission.css 자체를 고칠지는 별도 결정 필요 — qa/test-results.md에 상세 기록.
+`mission.css`의 `#sound,#restart,#help,#change{display:inline-flex}` 규칙(4차 아이콘화 작업 때 추가)이 `[hidden]` 속성보다 CSS 명시도가 높아서, 지도 화면에서도 `#help`/`#change` 버튼이 숨겨지지 않고 보이는 버그를 이 작업 중 발견했다. **라이브 mission.html에서도 재현 확인**(Playwright로 `.isVisible()` 체크). `forest-world.css`에는 `#help[hidden],#change[hidden]{display:none!important}`로 로컬 수정했고, 이후 **mission.css 자체도 같은 방식으로 수정되어 커밋됨**(세션 내 별도 커밋) — 더 이상 라이브 mission.html에도 남아있지 않다.
+
+## 2차 업데이트 — 모험 B: 끊어진 다리 복구 (같은 세션, 사용자 "링크걸고만들어" 지시)
+
+사용자가 15종 허브에 이 페이지를 링크하고(완료, 별도 커밋) B~E 모험 콘텐츠를 계속 만들라고 지시 → `LEARNING-DESIGN.md`가 이미 다음 과제로 명시해둔 "다리 복구(합치기·길이)"를 네 번째 퀘스트 개념으로 추가했다.
+
+### 왜 이 개념인가
+
+기존 `make`(빈자리 채우기)는 정답이 항상 하나뿐이다(목표 수량까지 단위 1개씩 채우기). 다리 복구는 **같은 목표 길이를 여러 다른 조합으로 만들 수 있다**는 걸 가르친다 — 길이가 다른 나무 판자 여러 개 중에서, 합이 목표 길이와 정확히 같아지는 조합이면 무엇이든 정답이다(5=2+3도 맞고 4+1도 맞음). 정답 판정은 `state.planksPlaced`에 실제로 놓인 조각들의 합을 그때그때 계산하는 방식이라, 하드코딩된 "하나의 정답"이 없다.
+
+### 구현
+
+- `templates.bridge`에 demo→guided→probe×2→transfer→practice→transfer 7개 항목(기존 3개 개념과 동일한 구조). guided는 단일 경로, 나머지는 의도적으로 여러 유효 조합이 존재하도록 설계(자동화 테스트로 "의도된 정답과 다른 조합"으로도 성공하는 것을 확인).
+- 판자를 과하게 놓아 목표를 넘기면(overshoot) 실패 처리하지 않고 그대로 둔다 — 판자를 다시 빼서(undo) 고칠 수 있고, 이렇게 **넘쳤다가 스스로 고친 경우는 "독립 성공(clean)"으로 집계하지 않는다**(share 개념의 과다수집 로직과 동일 원칙, 자동화 테스트로 확인).
+- 소재 전환(transfer 단계)은 새 이미지를 만드는 대신 CSS 필터(`sepia`+`hue-rotate`)로 같은 판자 이미지를 이끼 낀 색조로 바꿔 재사용했다.
+- 길이 차이는 판자 너비(CSS 클래스 `plank-1`~`plank-4`)로만 표현 — 숫자를 읽지 않아도 눈으로 비교 가능.
+- 시각적 명료성 문제를 점검 중 발견·수정: 처음에는 다리 그림 위에 판자를 겹쳐 그렸는데 배경 그림(돌기둥·개울)과 섞여 잘 안 보였다. 장식용 다리 아이콘과 "놓은 판자" 상자(연두 테두리)를 분리해 명확하게 고쳤다 — `previews/bridge-overshoot.png` 전/후 비교 가능.
+- 지도에 4번째 노드 추가(`CONCEPTS`/`templates`/`MAP_ICONS`/`TRAVEL_LINES` 배열에 항목 추가만으로 끝 — 지도·잠금해제·보상 로직에 하드코딩된 "3개"가 없는 것을 먼저 확인했다).
+- 완료 보상은 기존과 동일하게 고정 +3 도토리/+2 딸기.
+
+### 새 자산 (Canva 예외 승인 범위 내, mission-v4/style-guide.md 템플릿 그대로 사용)
+
+- `objects/bridge_gap.png` — 끊어진 다리 디오라마(지도 아이콘 + 이동 장면 + 과제 화면 장식 겸용, 3중 재사용)
+- `objects/wood_plank.png` — 나무 판자 1개(CSS 너비로 길이 1~4 표현, 소재 변형은 CSS 필터로)
+
+### 건드리지 않은 것 (재확인)
+
+`feedback()`/`assess()`/`advance()`의 기존 share/compare/make 분기와 점수 로직은 한 글자도 안 바꿨다 — 새 `bridge` 분기만 추가. 4개 개념 전체 자동 플레이로 재검증.
 
 ## 공개 배포 안 함
 
