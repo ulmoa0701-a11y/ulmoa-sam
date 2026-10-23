@@ -53,6 +53,7 @@ for(const width of [390,1280]){
   await check(await page.locator('a.go-make[href="../make/"]').count()===1,width+'px: voluntary link to making');
   await page.locator('.export summary').click();
   await page.locator('#copy').click();
+  await page.waitForFunction(()=>document.querySelector('#export-status')?.textContent?.length>5,{timeout:4000});
   await check((await page.locator('#export-status').innerText()).length>5,width+'px: optional copy feedback');
   await page.screenshot({path:path.join(out,'myself-map-'+width+'.png'),fullPage:true});
   await page.locator('#edit').click();
