@@ -466,4 +466,88 @@ window.__ulmoaGardenV2.runSmoke=async()=>{
  out.pass=out.pass&&out.v3Models&&out.v3RewardUi;
  return out;
 };
+
+/* V4: Grounded in repository original child artwork bosses/{woods,eye,smog}.webp.
+   Procedural mesh upgrades are supplementary; do not use a front-facing 2D billboard.
+   Keep all meshes light for mobile. */
+const __hgV4Smoke=[];
+function __hgV4ArtworkTranslation(){
+ const bark=new H(.84,.80,.69),cream=new H(.94,.88,.75),ivy=new H(.08,.32,.11),eyesBrown=new H(.38,.22,.12);
+ const get=name=>Yf.getMeshByName(name);
+ const hide=name=>{let m=get(name);if(m)m.setEnabled(false)};
+ // WOODS original: asymmetric flaring mushroom head, cracked cream trunk,
+ // hanging ivy and an enormous branch on the left. No eyes.
+ for(let i=0;i<5;i++){hide("hgWoodsHeadLobe"+i);hide("hgWoodsIvoryCanopy"+i)}
+ const capTop=get("woodsCapTop");if(capTop)capTop.material=__uMat("hgV4WoodsCapStone",bark);
+ const cap=get("woodsCap");if(cap){cap.material=__uMat("hgV4WoodsCream",cream);cap.rotation.z=-.13}
+ const trunk=get("woodsTrunk");if(trunk)trunk.material=__uMat("hgV4WoodsBark",bark);
+ // Fine foliage hangs from the mushroom rim instead of broad, regular pipe rings.
+ for(let i=0;i<5;i++){
+   let ang=(i/5)*Math.PI*2;
+   const x=.95+1.95*Math.cos(ang),z=1.32*Math.sin(ang),length=.65+(i%3)*.22;
+   __hgV3Tube("hgV4WoodsHangingIvy"+i,Hp,
+      [[x,5.51,z],[x+.16,5.25,z+.08],[x+.28,4.92-length*.32,z+.18],[x+.16,4.85-length,z+.21]],.20,.035);
+   let leaf=__uSphere("hgV4WoodsHangingLeaf"+i,Hp,new R(x+.18,4.88-length,z+.23),new R(.23,.40,.12),ivy);
+   leaf.rotation.z=i%2?.45:-.4;
+ }
+ for(let i=0;i<4;i++){
+   let m=__uBox("hgV4WoodsBarkSeam"+i,Hp,new R((i%2?.28:-.27),1.72+i*.65,-.57),new R(.034,.40,.035),eyesBrown);
+   m.rotation.z=(i%2?-.30:.25);
+ }
+ // EYE original has tapered birch head and 4 almond-shaped brown eyes.
+ // Previous round green/white toy eyes are removed, and the pink lotus stays on the chest.
+ for(let i=0;i<5;i++){
+   hide("eyeFace"+i);hide("hgV3EyeWhite"+i);hide("hgV3EyeIris"+i);hide("hgV3EyePupil"+i);
+ }
+ for(const [i,x,y,w] of [[0,-.17,3.65,.50],[1,.16,3.06,.52],[2,-.22,2.63,.47],[3,.20,2.22,.44]].map((z,j)=>[j,z[1],z[2],z[3]])){
+   const frame=__uSphere("hgV4EyeAlmondFrame"+i,Up,new R(x,y,-1.12),new R(w*1.27,w*.45,w*.26),eyesBrown);
+   frame.rotation.z=(i%2?-.10:.09);
+   __uSphere("hgV4EyeAlmondWhite"+i,Up,new R(x,y,-1.19),new R(w*1.04,w*.32,w*.24),cream);
+   __uSphere("hgV4EyeAlmondIris"+i,Up,new R(x,y,-1.28),new R(w*.24,w*.27,w*.08),eyesBrown);
+   __uSphere("hgV4EyeAlmondPupil"+i,Up,new R(x,y,-1.34),new R(w*.10,w*.15,w*.05),new H(.06,.05,.04));
+ }
+ const fist=get("eyeArmR");if(fist)fist.scaling.x*=1.25;
+ // The source drawing wraps leaves diagonally around shoulders rather than in uniform hoops.
+ for(let i=0;i<3;i++)__hgV3Tube("hgV4EyeDiagonalIvy"+i,Up,[
+   [-.87,3.50-i*.58,-.85],[-.27,3.27-i*.58,-1.13],[.32,3.04-i*.58,-1.19],[.92,2.90-i*.58,-.75]
+ ],.23,.085);
+ // SMOG original: candle-head, winding ivy, wisps of charcoal-gray smoke (not dense balls).
+ for(const m of Wp.getChildMeshes()){
+  if(m.name.startsWith("smoke")||m.name.startsWith("hgSmogSmokePuff")){
+    if(m.material)m.material.alpha=Math.min(.17,m.material.alpha??.17);
+  }
+ }
+ const flame=get("flame");if(flame){flame.scaling.y*=1.18;flame.material=__uMat("hgV4CandleFire",new H(1,.59,.08))}
+ for(let i=0;i<3;i++){
+   const side=i-1;
+   const sm=Df.CreateTube("hgV4FlowingSmoke"+i,{path:[
+    new R(side*.2,4.88,0),new R(side*.42,5.38,-.05),
+    new R(side*.47+.33,5.83,.05),new R(side*.30+.58,6.22,-.10),
+    new R(side*.51+.23,6.67,.02),new R(side*.49-.10,7.05,.10)
+   ],radius:.19+i*.027,tessellation:8,cap:0},Yf);
+   sm.parent=Wp;sm.material=__uMat("hgV4SmokeGray"+i,new H(.26+i*.03,.27+i*.03,.28+i*.03));
+   sm.material.alpha=.23;sm.isPickable=false;__hgV4Smoke.push(sm);
+ }
+ for(let i=0;i<3;i++)__hgV3Tube("hgV4SmogDiagonalIvy"+i,Wp,[
+   [-.8,3.50-i*.68,-.56],[-.30,3.19-i*.68,-.98],[.45,2.89-i*.68,-1.02],[.95,2.77-i*.68,-.73]
+ ],.21,.09);
+}
+__hgV4ArtworkTranslation();
+Yf.onBeforeRenderObservable.add(()=>{
+ if(!Wp.isEnabled())return;
+ const time=performance.now()/1000;
+ for(let i=0;i<__hgV4Smoke.length;i++){
+  const mesh=__hgV4Smoke[i];if(mesh.isDisposed())continue;
+  mesh.rotation.z=.04*Math.sin(time*.8+i*1.3);
+  mesh.scaling.x=1+.05*Math.sin(time*.65+i);
+ }
+});
+const __hgV4OriginalSmoke=window.__ulmoaGardenV2.runSmoke;
+window.__ulmoaGardenV2.runSmoke=async()=>{
+ const out=await __hgV4OriginalSmoke();
+ out.originalArtDetails=["hgV4WoodsHangingIvy0","hgV4WoodsBarkSeam0","hgV4EyeAlmondFrame0","hgV4EyeDiagonalIvy0","hgV4FlowingSmoke0","hgV4SmogDiagonalIvy0"].every(n=>Boolean(Yf.getMeshByName(n)));
+ out.woodsNoEyes=Hp.getChildMeshes().every(m=>!m.name.startsWith("hgV4WoodsEye"));
+ out.pass=out.pass&&out.originalArtDetails&&out.woodsNoEyes;
+ return out;
+};
 var Ym=0,Xm=performance.now(),Zm=Xm;Yf.onBeforeRenderObservable.add(()=>{let e=Math.min(.05,Jf.getDeltaTime()/1e3);Ym++,qp&&!Jp&&(Jm(),Km(e),Hm(e),Gm(e),Wm(e),Vm(),Mm(),qm());let t=performance.now();t-Zm>1e3&&(window.__bench={engine:`Babylon.js`,readyMs:Xm,avgFps:+Jf.getFps().toFixed(1),frames:Ym,meshes:Yf.meshes.length,stage:Kp},Zm=t)}),Dm(0),Mm(),Promise.all([import("./default.vertex-Cet2a78q.js"),import("./default.fragment-Dmq640E3.js")]).then(()=>{window.__hgShadersReady=true;Jf.runRenderLoop(()=>Yf.render())}).catch(e=>{window.__hgShaderError=String(e);Jf.runRenderLoop(()=>Yf.render())}),window.addEventListener(`resize`,()=>Jf.resize());export{F as C,ne as E,Re as S,P as T,Zt as _,vr as a,Bt as b,G as c,W as d,In as f,R as g,L as h,Ci as i,rr as l,H as m,nc as n,pr as o,Ln as p,Ti as r,dr as s,nd as t,U as u,en as v,Te as w,Ue as x,Xt as y};

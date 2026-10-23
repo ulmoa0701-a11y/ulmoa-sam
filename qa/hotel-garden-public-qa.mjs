@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer-core';
 import fs from 'node:fs';
 
-const target='https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/';
+const target=process.env.HOTEL_GARDEN_TARGET||'https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/';
 // 2026-10-21: verify child feedback v3 boss appearance, combat and reward wayfinding.
 // Recheck actual held-E keydown/up and touch pointerdown/up against public bundle.
 // Ensure stage transition camera captures the full WOODS silhouette rather than clipping it.
