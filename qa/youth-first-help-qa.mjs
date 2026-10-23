@@ -26,6 +26,38 @@ for(const width of [390,1280]){
   await check(await page.locator('input,textarea,form').count()===0,width+'px no intake form');
   await check(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth+3),width+'px first no horizontal overflow');
   await page.screenshot({path:path.join(out,'first-'+width+'.png'),fullPage:true});
+  await check(await page.locator('a[href="me/"]').count()===1,width+'px: discover-self first-step link');
+  await page.goto(new URL('support-first/me/',BASE).href,{waitUntil:'domcontentloaded'});
+  await check(await page.locator('button[data-choice]').count()===6,width+'px: self-intro six accessible options');
+  await check(await page.locator('#question-card').isVisible(),width+'px: self-discovery first page visible');
+  await page.screenshot({path:path.join(out,'myself-start-'+width+'.png'),fullPage:true});
+  await page.locator('button[data-choice="game"]').click();
+  await page.locator('button[data-choice="make"]').click();
+  await check(await page.locator('button[data-choice][aria-pressed="true"]').count()===2,width+'px: interest multiple choices');
+  await page.locator('#next').click();
+  await check((await page.locator('#question-title').innerText()).includes('편해'),width+'px: comfort before diagnosis');
+  await page.locator('button[data-choice="text"]').click();
+  await page.locator('#next').click();
+  await page.locator('button[data-choice="time"]').click();
+  await page.locator('#next').click();
+  await page.locator('button[data-choice="create"]').click();
+  await page.locator('#next').click();
+  await check(await page.locator('#profile').isVisible(),width+'px: personal map visible');
+  await check(await page.locator('.profile-tile').count()===4,width+'px: four self-exploration facets');
+  await check((await page.locator('#profile-grid').innerText()).includes('게임을 하거나 보기'),width+'px: selected interests reflected');
+  await check((await page.locator('#profile-grid').innerText()).includes('생각할 시간을 주기'),width+'px: support preference reflected');
+  await page.locator('#one-idea').fill('내가 만든 이야기를 누군가에게 보여주고 싶어');
+  await check((await page.locator('#idea-count').innerText()).includes('/ 120'),width+'px: optional note counter');
+  await page.screenshot({path:path.join(out,'myself-map-'+width+'.png'),fullPage:true});
+  await page.locator('#edit-answers').click();
+  await check(await page.locator('button[data-choice="game"]').getAttribute('aria-pressed')==='true',width+'px: student can revise preferences');
+  await page.reload({waitUntil:'domcontentloaded'});
+  await check(await page.locator('button[data-choice][aria-pressed="true"]').count()===0,width+'px: no persisted preferences after reload');
+  for(let step=0;step<4;step++)await page.locator('#next').click();
+  await check((await page.locator('#profile-grid').innerText()).includes('아직 고르지 않았어'),width+'px: skipping all self-questions is allowed');
+  await check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),width+'px: self-discovery no horizontal overflow');
+  await page.goto(new URL('support-first/make/',BASE).href,{waitUntil:'domcontentloaded'});
+  await check(await page.locator('a[href="../me/"]').count()>=1,width+'px: workshop links back to self discovery');
   await page.goto(new URL('support-first/try/',BASE).href,{waitUntil:'domcontentloaded'});
   await check(await page.locator('[data-topic]').count()===4,width+'px four practice scenarios');
   for(const k of ['reply','school','exam','trade']){
@@ -113,5 +145,5 @@ for(const width of [390,1280]){
   await context.close();
 }
 await browser.close();
-console.log(JSON.stringify({base:BASE,failures,screenshots:10},null,2));
+console.log(JSON.stringify({base:BASE,failures,screenshots:14},null,2));
 if(failures.length)process.exit(1);
