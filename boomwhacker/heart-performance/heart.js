@@ -596,92 +596,59 @@ function drawSparkle(c,x,y,r,color="#fff7ce"){
  c.restore();
 }
 function themeBackground(c){
- const p=themePalette(),g=c.createLinearGradient(0,0,170,620);
- g.addColorStop(0,p.sky[0]);g.addColorStop(1,p.sky[1]);
+ // Completely new editorial score stage. Decorative pictures are intentionally
+ // removed: colored notation is the illustration and remains the focal point.
+ const palettes={
+  classroom:["#ebe6db","#d5d9d1","#b29e82"],
+  forest:["#123f38","#32685a","#83b29a"],
+  night:["#101c32","#394968","#b3a7d7"]
+ };
+ const [upper,lower,accent]=palettes[theme];
+ const g=c.createLinearGradient(0,0,1200,620);
+ g.addColorStop(0,upper);g.addColorStop(1,lower);
  c.fillStyle=g;c.fillRect(0,0,1200,620);
  c.save();
- if(theme==="night"){
-   // Quiet cinematic night: a halo, crescent, small stellar glints and distant hills.
-   const halo=c.createRadialGradient(882,73,5,882,73,155);
-   halo.addColorStop(0,"#f5d3b93b");halo.addColorStop(1,"#f5d3b900");
-   c.fillStyle=halo;c.fillRect(680,0,360,220);
-   disk(c,882,64,25,"#f8e1ad");
-   disk(c,892,51,24,p.sky[0]);
-   for(const [x,y,r] of [[53,72,2],[204,34,2],[350,101,1.6],[722,29,1.5],[981,83,2],[1122,51,2.6],[1164,174,1.5],[29,390,2],[1162,475,2.3]]){
-     disk(c,x,y,r,"#f8e8c7");
-   }
-   for(const [x,y,r] of [[760,78,4],[1065,115,4],[1110,24,3]])drawSparkle(c,x,y,r,"#edd9b7");
-   c.fillStyle="#354461";c.beginPath();c.moveTo(0,594);
-   c.bezierCurveTo(220,541,470,605,700,570);c.bezierCurveTo(910,550,1040,568,1200,545);
-   c.lineTo(1200,620);c.lineTo(0,620);c.fill();
-   c.fillStyle="#273953";c.beginPath();c.moveTo(0,612);
-   c.bezierCurveTo(290,585,480,620,750,593);c.bezierCurveTo(940,571,1100,613,1200,584);
-   c.lineTo(1200,620);c.lineTo(0,620);c.fill();
- }else if(theme==="forest"){
-   // Layered watercolor landscape stays BEHIND the score, not on the notes.
-   c.fillStyle="#cbe1cd";c.beginPath();c.moveTo(0,580);c.bezierCurveTo(220,516,405,577,635,551);c.bezierCurveTo(870,527,990,522,1200,571);c.lineTo(1200,620);c.lineTo(0,620);c.fill();
-   c.fillStyle="#9dc6b3";c.beginPath();c.moveTo(0,610);c.bezierCurveTo(300,555,450,613,710,591);c.bezierCurveTo(960,568,1017,593,1200,568);c.lineTo(1200,620);c.lineTo(0,620);c.fill();
-   const leaf=(x,y,size,color,angle=0)=>{c.save();c.translate(x,y);c.rotate(angle);c.fillStyle=color;c.beginPath();c.moveTo(0,0);c.bezierCurveTo(size*.8,-size*.7,size*1.25,size*.1,size*.24,size);c.bezierCurveTo(-size*.6,size*.55,-size*.45,size*.15,0,0);c.fill();c.restore()};
-   ln(c,0,0,80,118,"#739d8b",8);
-   for(const [x,y,z,colr,angle] of [[3,26,43,"#8cb99e",-.45],[50,9,39,"#a7ccb1",.3],[72,67,29,"#a3c4a5",.65],[1148,0,39,"#91bda4",.35],[1183,75,28,"#6fa88e",.8],[1119,43,31,"#b4cfad",-.35]]){
-     leaf(x,y,z,colr,angle);
-   }
-   for(const [x,y] of [[50,532],[1127,561],[874,40]])disk(c,x,y,5,"#fbf4d8a6");
- }else{
-   // Warm classroom: an arched sunlit window and the hint of a reading corner.
-   const haze=c.createRadialGradient(826,79,12,826,79,230);
-   haze.addColorStop(0,"#fff5db9c");haze.addColorStop(1,"#fff5db00");
-   c.fillStyle=haze;c.fillRect(590,0,500,350);
-   c.save();c.globalAlpha=.76;
-   rr(c,760,13,157,91,38,"#fffaf0");
-   rr(c,776,19,126,78,30,"#b6d6ca");
-   c.fillStyle="#f9dfa6";c.beginPath();c.arc(848,44,18,0,Math.PI*2);c.fill();
-   ln(c,840,21,840,97,"#fffef5",5);ln(c,780,61,901,61,"#fffef5",5);
-   rr(c,750,100,179,8,4,"#c6a88b");c.restore();
-   // Natural paper-toned floor, never emoji or flat clip-art decorations.
-   c.fillStyle="#eadcc9";c.fillRect(0,597,1200,23);
-   ln(c,0,595,1200,595,"#cfb89d",2);
-   c.fillStyle="#bdd5ba";c.beginPath();c.ellipse(1182,557,27,51,-.3,0,Math.PI*2);c.fill();
-   c.fillStyle="#93baa3";c.beginPath();c.ellipse(23,561,25,43,.3,0,Math.PI*2);c.fill();
+ // Engraved concentric forms at opposite corners, unobtrusive behind the paper.
+ c.strokeStyle=accent;c.globalAlpha=theme==="classroom"?.25:.24;c.lineWidth=1.3;
+ for(const radius of [75,110,145,180,215]){
+  c.beginPath();c.arc(1175,15,radius,0,Math.PI*2);c.stroke();
+  c.beginPath();c.arc(0,640,radius,0,Math.PI*2);c.stroke();
  }
+ c.restore();
+ c.save();c.globalAlpha=theme==="classroom"?.23:.2;
+ const bar=theme==="night"?"#f0e6c9":"#e8f1da";
+ for(let i=0;i<9;i++)rr(c,30+i*18,566-(i%4)*6,7,14+(i%4)*6,3,bar);
  c.restore();
 }
 
-/* A single quiet sheet, not two floating white dashboards. */
 function themeSheet(c,x,y,w,h,splitY){
- const paper=theme==="night"?"#fbfaf8":theme==="forest"?"#fffef9":"#fffdf9";
- c.save();c.shadowColor=theme==="night"?"#121e3766":"#55705e2d";
- c.shadowBlur=24;c.shadowOffsetY=9;rr(c,x,y,w,h,26,paper);c.restore();
- c.save();c.strokeStyle=theme==="night"?"#d8d8e4":"#e0e4d9";c.lineWidth=1.3;
- c.beginPath();c.roundRect(x+.6,y+.6,w-1.2,h-1.2,26);c.stroke();c.restore();
- ln(c,x+28,splitY,x+w-28,splitY,theme==="night"?"#e9e8ef":"#e8eee7",1.5);
+ // Single substantial white music surface: no independent soft-edged cards.
+ c.save();c.shadowColor=theme==="classroom"?"#6d665a25":"#030c1d42";c.shadowBlur=23;c.shadowOffsetY=10;
+ rr(c,x,y,w,h,14,theme==="night"?"#faf9f6":"#fbfcf8");c.restore();
+ c.save();c.strokeStyle="#dce2de";c.lineWidth=1;
+ c.beginPath();c.roundRect(x+.5,y+.5,w-1,h-1,14);c.stroke();c.restore();
+ ln(c,x+27,splitY,x+w-27,splitY,"#e3e9e4",1.4);
 }
-
 function themeCard(c,x,y,w,h,row,mode="two"){
- // Row distinction is typography and spacious grouping within ONE sheet.
- const ink=theme==="night"?"#4b526e":"#46665c";
  const tag=row===0?"01":"02",tagY=y+(mode==="stairs"?20:28);
- rr(c,x+21,tagY-12,38,25,10,theme==="night"?"#e9e7f0":theme==="forest"?"#e8f2e8":"#f2ebdf");
- txt(c,tag,x+40,tagY,15,ink,"center","700");
- ln(c,x+83,y+(mode==="stairs"?42:60),x+w-29,y+(mode==="stairs"?42:60),"#e9ece8",1);
+ txt(c,tag,x+43,tagY,18,"#61756e","center","700");
+ ln(c,x+82,y+(mode==="stairs"?42:60),x+w-30,y+(mode==="stairs"?42:60),"#e5ebe7",1);
 }
-
 function themeHeader(c,title,start,end){
- const white=theme==="night",headline=white?"#f6f4f1":"#355d55",caption=white?"#c8cce0":"#66877c";
- ln(c,58,27,58,91,white?"#dcbb97":"#b48d6b",4);
- txt(c,title,78,51,35,headline,"left","700");
- txt(c,"ULMOA  ·  HEART PLAY-ALONG",80,86,12,caption,"left","650");
- const progress=(Math.max(0,end-start)/Math.max(song.bars.length,1));
- rr(c,995,31,158,54,18,white?"#ffffff1b":"#ffffffad");
- txt(c,(start+1)+"–"+end+" / "+song.bars.length+"마디",1074,52,19,headline,"center","700");
- rr(c,1019,71,108,3,2,white?"#ffffff45":"#9fbdb150");
- rr(c,1019,71,Math.max(9,108*progress),3,2,white?"#e1c9a7":"#6ca999");
+ const dark=theme!=="classroom",light=dark?"#faf9f5":"#253d38",muted=dark?"#c9d7d2":"#627970";
+ txt(c,"ULMOA  /  HEART SCORE",56,41,15,muted,"left","700");
+ txt(c,title,56,86,38,light,"left","700");
+ txt(c,(start+1)+"—"+end+" / "+song.bars.length+"마디",1120,53,21,light,"right","700");
+ const progress=Math.max(0,end-start)/Math.max(1,song.bars.length);
+ rr(c,972,77,148,4,2,dark?"#ffffff32":"#476a5740");
+ rr(c,972,77,Math.max(8,148*progress),4,2,dark?"#c6dfcf":"#487c68");
+}
+function themeFooter(c,message){
+ const dark=theme!=="classroom";
+ ln(c,52,562,1148,562,dark?"#ffffff36":"#42594f36",1);
+ txt(c,"HEART COLOR SCORE     ·     "+message,600,587,15,dark?"#e2ebe6":"#46645a","center","600");
 }
 
-function themeFooter(c,message){
- const textColor=theme==="night"?"#d7dcec":"#597e70";
- txt(c,"♪  "+message,600,582,17,textColor,"center","650");
-}
 /* One beat uses one visual slot. Two eighths are TWO complete little hearts,
    not a jagged two-color heart, with a subtle shared-beat connector. */
 /* Linkage contract with /heart-score/: four quarter-beat slots inside
