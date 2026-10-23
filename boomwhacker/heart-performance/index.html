@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="ko"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#f3f8f6">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#131e25">
 <meta name="description" content="붐웨커를 누구나 쉽게 연주하는 하트 안에 박을 나누는 여섯 가지 연주 화면. 가로 리듬길, 색깔 악보, 한 마디씩, 두 줄 악보, 지금·다음 음.">
 <title>모아의 하트 붐웨커 | 일단 해봄 · 울모아쌤</title>
-<link rel="stylesheet" href="./styles.css?v=heart-art-directed-20261022">
+<link rel="stylesheet" href="./styles.css?v=heart-player-rebuild-20261023">
 <script src="../performance-views/scores.js" defer></script>
 <script src="./heart.js?v=heart-art-directed-20261022" defer></script>
 </head><body>
@@ -14,27 +14,9 @@
  <a class="legacy" href="../">기존 붐웨커 Studio <span aria-hidden="true">↗</span></a>
 </header>
 <main>
- <section class="selection" aria-label="연주 화면 선택">
-  <div class="selection-heading"><strong>어떤 화면이 편할까?</strong><span>하트는 그대로 · 모아만 따라가요 · 두 줄 끝나면 악보 교체</span></div>
-  <div class="view-options" id="viewOptions">
-   <button class="view-choice" data-view="road" type="button" aria-pressed="false"><span class="choice-icon road-icon" aria-hidden="true"></span><b>하트 리듬길</b><small>박이 옆으로 와요</small></button>
-   <button class="view-choice" data-view="score" type="button" aria-pressed="false"><span class="choice-icon score-icon" aria-hidden="true"></span><b>하트 색깔악보</b><small>원래 하트 박자표</small></button>
-   <button class="view-choice" data-view="bar" type="button" aria-pressed="false"><span class="choice-icon bar-icon" aria-hidden="true"></span><b>한 마디 하트판</b><small>한 박에 하트 하나</small></button>
-   <button class="view-choice active" data-view="two" type="button" aria-pressed="true"><span class="choice-icon two-icon" aria-hidden="true"></span><b>두 줄 고정 하트길</b><small>악보 고정 · 모아 이동</small></button>
-   <button class="view-choice" data-view="next" type="button" aria-pressed="false"><span class="choice-icon next-icon" aria-hidden="true"></span><b>지금·다음 하트</b><small>현재 박 크게 보기</small></button>
-   <button class="view-choice" data-view="stairs" type="button" aria-pressed="false"><span class="choice-icon stair-icon" aria-hidden="true"></span><b>하트 계단악보</b><small>높낮이 따라 모아 이동</small></button>
-  </div>
-  <div class="theme-bar" role="group" aria-label="하트 악보 배경 테마">
-   <span class="theme-caption">악보 배경</span>
-   <button class="theme-choice active" type="button" data-theme="classroom" aria-pressed="true"><span class="theme-dot classroom-dot" aria-hidden="true"></span>포근한 교실</button>
-   <button class="theme-choice" type="button" data-theme="forest" aria-pressed="false"><span class="theme-dot forest-dot" aria-hidden="true"></span>숲 산책길</button>
-   <button class="theme-choice" type="button" data-theme="night" aria-pressed="false"><span class="theme-dot night-dot" aria-hidden="true"></span>별밤 음악길</button>
-   <span class="theme-hint">노래와 박자는 그대로 · 저장 영상에도 적용</span>
-  </div>
- </section>
- <section class="player" aria-label="붐웨커 연주">
+ <section class="player" aria-label="붐웨커 연주"><div class="performance-headline"><span class="edition">ULMOA MUSIC STUDIO <span class="ed-dot">●</span> PLAY ALONG</span><span class="notation-contract">하트 하나 = 한 박 · 원본 하트색깔악보 연계</span></div>
   <div class="player-header">
-   <div><span class="view-label" id="viewName">두 줄 고정 하트길</span><h1 id="title">모아의 출발 신호</h1><p id="subtitle">악보 두 줄은 고정, 모아가 끝까지 따라간 뒤 다음 두 줄로 교체돼요.</p></div>
+   <div><span class="view-label" id="viewName">두 줄 고정 하트길</span><h1 id="title">모아의 출발 신호</h1><p id="subtitle">두 줄을 따라 연주해요.</p></div>
    <div class="bar-progress"><strong id="measure">1 / 8 마디</strong><span id="currentBeat">연주 준비</span></div>
   </div>
   <div class="cue-strip" role="group" aria-label="현재 연주와 다음 내 차례 안내">
@@ -50,9 +32,9 @@
    </div>
    <div class="overlay" id="startOverlay"><div class="overlay-card"><strong id="overlayTitle">연주 준비</strong><p id="overlayDescription">전주를 듣고 함께 연주해요.</p><button id="overlayPlay" type="button">연주 시작 <span aria-hidden="true">▶</span></button></div></div>
   </div>
-  <div class="mobile-score-tip" role="note"><span>세로 화면에서는 계이름이 작게 보여요. 가로 전체화면에서 두 줄 악보를 크게 볼 수 있어요.</span><button type="button" id="mobileLandscape">가로 전체화면</button></div>
+  <div class="mobile-score-tip" role="note"><span>악보를 크게 보려면</span><button type="button" id="mobileLandscape">가로 전체화면 ↗</button></div>
   <div class="instrument">
-   <div class="instrument-head"><strong>내 색깔 악기</strong><span id="noteHelp">하트 속 색깔은 음, 조각의 너비는 박 길이</span></div>
+   <div class="instrument-head"><strong>내 붐웨커</strong><span id="noteHelp">원본 하트색깔악보 색상</span></div>
    <div class="keys" id="keys">
     <button type="button" data-note="도" aria-label="도 연주"><b>도</b><small>1</small></button>
     <button type="button" data-note="레" aria-label="레 연주"><b>레</b><small>2</small></button>
@@ -65,7 +47,7 @@
    </div>
   </div>
   <div class="play-controls">
-   <div class="main-controls"><button type="button" class="primary" id="play">연주 시작</button><button type="button" id="reset">다시 하기</button><button type="button" id="record">영상 저장</button><button type="button" id="fullscreen" aria-label="악보만 전체 화면으로 크게 보기">악보 크게</button></div>
+   <div class="main-controls"><button type="button" class="primary" id="play">▶ 연주 시작</button><button type="button" id="reset">↺ 처음부터</button><button type="button" id="record">↓ 영상 저장</button><button type="button" id="fullscreen" aria-label="악보만 전체 화면으로 크게 보기">⛶ 악보 크게</button></div>
    <div class="settings">
     <label>연주곡<select id="song" aria-label="연주곡 선택"></select></label>
     <label>음 선택<select id="notes" aria-label="연주할 음 개수"><option value="3">3음 · 도 미 솔</option><option value="5" selected>5음 · 도 레 미 솔 라</option><option value="8">8음 · 모두</option></select></label>
@@ -82,7 +64,25 @@
    <button type="button" id="sound" aria-pressed="true">소리 켜짐</button>
   </div></details>
   <div class="message" id="status" role="status" aria-live="polite">화면을 고르고 연주 시작을 누르면 돼요.</div>
-  <p class="video-guidance">영상 저장은 <strong>1920×1080 · 16:9 Full HD</strong>로 제작돼요. 휴대폰은 가로 방향으로 돌려 <strong>악보 크게</strong> 보기를 이용하면 더 읽기 편해요.</p>
+  <p class="video-guidance">VIDEO EXPORT · 1920 × 1080 FULL HD</p>
+ </section>
+ <section class="selection" aria-label="연주 화면 선택">
+  <div class="selection-heading"><strong>연주 화면</strong><span>원하는 연주 방식 선택</span></div>
+  <div class="view-options" id="viewOptions">
+   <button class="view-choice" data-view="road" type="button" aria-pressed="false"><span class="choice-icon road-icon" aria-hidden="true"></span><b>하트 리듬길</b><small>박이 옆으로 와요</small></button>
+   <button class="view-choice" data-view="score" type="button" aria-pressed="false"><span class="choice-icon score-icon" aria-hidden="true"></span><b>하트 색깔악보</b><small>원래 하트 박자표</small></button>
+   <button class="view-choice" data-view="bar" type="button" aria-pressed="false"><span class="choice-icon bar-icon" aria-hidden="true"></span><b>한 마디 하트판</b><small>한 박에 하트 하나</small></button>
+   <button class="view-choice active" data-view="two" type="button" aria-pressed="true"><span class="choice-icon two-icon" aria-hidden="true"></span><b>두 줄 고정 하트길</b><small>악보 고정 · 모아 이동</small></button>
+   <button class="view-choice" data-view="next" type="button" aria-pressed="false"><span class="choice-icon next-icon" aria-hidden="true"></span><b>지금·다음 하트</b><small>현재 박 크게 보기</small></button>
+   <button class="view-choice" data-view="stairs" type="button" aria-pressed="false"><span class="choice-icon stair-icon" aria-hidden="true"></span><b>하트 계단악보</b><small>높낮이 따라 모아 이동</small></button>
+  </div>
+  <div class="theme-bar" role="group" aria-label="하트 악보 배경 테마">
+   <span class="theme-caption">배경 무드</span>
+   <button class="theme-choice active" type="button" data-theme="classroom" aria-pressed="true"><span class="theme-dot classroom-dot" aria-hidden="true"></span>포근한 교실</button>
+   <button class="theme-choice" type="button" data-theme="forest" aria-pressed="false"><span class="theme-dot forest-dot" aria-hidden="true"></span>숲 산책길</button>
+   <button class="theme-choice" type="button" data-theme="night" aria-pressed="false"><span class="theme-dot night-dot" aria-hidden="true"></span>별밤 음악길</button>
+   
+  </div>
  </section>
  <div class="links"><a href="../">기존 낙하형 붐웨커</a><a href="../easy-performance/">쉬운 색깔 연주</a><a href="../performance-views/">기존 10가지 실험실</a><a href="../rhythm-worlds/">음악여행 6종</a></div>
 </main><footer>일단 해봄 · 울모아쌤 <span>기존 하트 색깔악보의 V형 하트와 4분할 박자 규칙을 재사용했어요. 실제 악기 소리는 자동 채점하지 않아요.</span></footer>
