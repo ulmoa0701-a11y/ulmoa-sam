@@ -48,8 +48,15 @@
        <details class="my-words" id="own-words">
          <summary>보기와 다른 내 이야기도 있어 <span>+</span></summary>
          <label for="own-input">내 말로 짧게 남기기 (선택)</label>
-         <input id="own-input" maxlength="90" autocomplete="off" placeholder="예: 나는 이런 순간이 더 좋아" aria-describedby="own-help">
-         <p id="own-help">모아가 자유롭게 쓴 문장을 이해하거나 분석하지는 않아. 마지막에 그대로 확인할 수 있어. 이름·학교·연락처는 적지 말아줘.</p>
+         <div class="own-input-row">
+           <input id="own-input" maxlength="90" autocomplete="off" placeholder="예: 나는 이런 순간이 더 좋아" aria-describedby="own-help">
+           <button type="button" id="own-send">모아에게 전하기</button>
+         </div>
+         <div id="typed-exchange" class="typed-exchange" hidden aria-live="polite">
+           <p class="typed-own" id="typed-preview"></p>
+           <p class="typed-ack">모아 · 네 말은 내가 해석하지 않을게. 마지막 소개에서 네가 직접 확인하고 고칠 수 있어.</p>
+         </div>
+         <p id="own-help">정해진 반응을 보여주는 안내 캐릭터야. 자유롭게 쓴 문장을 분석하지는 않아. 이름·학교·연락처는 적지 말아줘.</p>
        </details>
      </div>
      <div class="navigation">
