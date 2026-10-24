@@ -198,5 +198,5 @@ $('help').innerHTML=ICONS.hint+srLabel('그림 힌트');
 $('change').innerHTML=ICONS.shuffle+srLabel('잠깐 다른 놀이');
 progress();showIntro();
 // Read-only state for deterministic browser QA. No personal data is recorded.
-Object.defineProperty(window,'__moaMissionQA',{value:()=>({concept:CONCEPTS[state.concept].key,conceptIndex:state.concept,step:state.step,selected:state.selected,taken:state.taken,served:[...state.served],phase:state.view,attempts:state.attempts,hints:state.hints,flagged:state.flagged,task:{...current()},results:state.results.map(x=>({...x})),review:state.review?{...state.review}:null}),configurable:false});
+Object.defineProperty(window,'__moaMissionQA',{value:()=>({concept:CONCEPTS[state.concept].key,conceptIndex:state.concept,unlocked:state.unlocked,step:state.step,selected:state.selected,taken:state.taken,served:[...state.served],phase:state.view,attempts:state.attempts,hints:state.hints,flagged:state.flagged,task:{...current()},results:state.results.map(x=>({...x})),review:state.review?{...state.review}:null}),configurable:false});
 })();
