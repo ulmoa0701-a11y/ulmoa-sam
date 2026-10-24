@@ -127,7 +127,7 @@ function makeOption(o){
  const art=document.createElement("span");art.className="option-art";art.innerHTML=iconHTML(o.id);
  const title=document.createElement("span");title.className="option-label";title.textContent=o.label;
  button.append(art,title);
- button.addEventListener("click",()=>{const v=values[step];v.choice=v.choice===o.id?null:o.id;v.reason=null;paintSelection();});
+ button.addEventListener("click",()=>{const v=values[step];v.choice=v.choice===o.id?null:o.id;v.reason=null;v.own="";v.sent=false;paintSelection();});
  return button;
 }
 function paintSelection(){
