@@ -167,16 +167,29 @@ button.feed-friend.friend-fed .forest-friend{transform:translateY(-3px)}
 #help[hidden],#change[hidden]{display:none!important}
 
 .map-node-badge.icon-bridge{background-image:url('./assets/forest-world-v1/objects/bridge_gap.png')}
-.bridge-scene{display:flex;flex-direction:column;align-items:center;gap:6px}
-.bridge-icon{width:120px;height:90px;background:url('./assets/forest-world-v1/objects/bridge_gap.png') center/contain no-repeat;filter:drop-shadow(0 5px 3px #5b554046)}
-.gap-fill{display:flex;align-items:flex-end;justify-content:center;gap:4px;flex-wrap:wrap;min-height:34px;max-width:280px;padding:8px 12px;background:#eef6e2cc;border:3px dashed #8fb389;border-radius:18px}
-.plank-palette{display:flex;align-items:flex-end;justify-content:center;gap:8px;flex-wrap:wrap;max-width:320px;padding:8px;background:#fff7e0cc;border:3px dashed #caa978;border-radius:20px}
+/* Bridge scene: the gap-dock sits as an absolutely-positioned overlay directly on the real
+   bridge_gap.png image (same physical-overlay technique already used for .tree-pile on the
+   tree and .basket-pile on the basket) so placed planks visually span the actual gap in the
+   bridge, instead of floating in a separate disconnected box below a small decorative icon. */
+.bridge-stage{position:relative;width:100%;max-width:260px;aspect-ratio:1/1;margin:0 auto;background:url('./assets/forest-world-v1/objects/bridge_gap.png') center/contain no-repeat;filter:drop-shadow(0 6px 4px #5b554046)}
+.plank-dock{position:absolute;left:37%;right:37%;top:33%;height:14%;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:2px}
+.plank-dock .interaction{min-width:0;min-height:0;padding:1px;animation:pop-in .32s cubic-bezier(.34,1.56,.64,1) both}
+.plank-tray{display:flex;align-items:flex-end;justify-content:center;gap:8px;flex-wrap:wrap;max-width:320px;padding:8px;background:#fff7e0cc;border:3px dashed #caa978;border-radius:20px;margin:4px auto 0}
+.plank-tray .interaction{min-width:0;min-height:0;padding:2px}
 .plank{display:block;height:26px;background:url('./assets/forest-world-v1/objects/wood_plank.png') center/100% 100% no-repeat;filter:drop-shadow(0 3px 2px #5c431c38)}
 .plank.mossy{filter:drop-shadow(0 3px 2px #5c431c38) sepia(.35) hue-rotate(55deg) saturate(1.4) brightness(.94)}
 .plank-1{width:30px}
 .plank-2{width:48px}
 .plank-3{width:66px}
 .plank-4{width:84px}
-.plank-palette .interaction,.gap-fill .interaction{min-width:0;min-height:0;padding:2px}
-.gap-fill .interaction{animation:pop-in .32s cubic-bezier(.34,1.56,.64,1) both}
-@media(max-width:650px){.bridge-icon{width:96px;height:72px}.gap-fill{max-width:220px}.plank{height:20px}.plank-1{width:24px}.plank-2{width:38px}.plank-3{width:52px}.plank-4{width:66px}}
+@media(max-width:650px){.bridge-stage{max-width:190px}.plank-tray{max-width:220px}.plank{height:20px}.plank-1{width:24px}.plank-2{width:38px}.plank-3{width:52px}.plank-4{width:66px}}
+
+/* Compare: a small wordless "more vs fewer" legend, separate from the actual two paths so it
+   never leaks which side is correct — uses plain abstract pile silhouettes at fixed sizes,
+   not countable fruit units, so a child can't map it 1:1 onto the real quantities in play. */
+.want-hint{display:flex;align-items:flex-end;gap:8px;margin:0 2px;padding:4px 8px;background:#fff8e7cc;border-radius:12px}
+.want-pile{display:block;background:#cdbf9b;border-radius:3px 3px 1px 1px}
+.want-pile.small{width:13px;height:11px}
+.want-pile.big{width:13px;height:26px}
+.want-pile.target{background:#e7a167;box-shadow:0 0 0 2px #fff3d6,0 0 0 4px #e7a16788}
+@media(max-width:650px){.want-pile.small{width:8px;height:7px}.want-pile.big{width:8px;height:16px}}

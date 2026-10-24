@@ -72,6 +72,7 @@ function sfx(ok=true){if(!state.sound)return;try{const Audio=window.AudioContext
 const unit=(type='acorn',small=false)=>'<span class="food '+(type==='berry'?'berry':'acorn')+' '+(small?'mini':'')+'" aria-hidden="true"></span>';
 const friend=(name,i,happy)=>'<img class="forest-friend clay-photo" src="'+A+'characters/'+name+'_'+(happy?'happy':'waiting')+'.png" alt="">';
 const dot=(filled,type)=>'<span class="match-slot '+(filled?'occupied':'empty')+'">'+(filled?unit(type,true):'')+'</span>';
+const wantHint=more=>'<div class="want-hint" aria-hidden="true"><span class="want-pile small '+(!more?'target':'')+'"></span><span class="want-pile big '+(more?'target':'')+'"></span></div>';
 const current=()=>templates[CONCEPTS[state.concept].key][Math.min(state.step,6)];
 function setStatus(s=''){ $('status').textContent=s }
 function say(k,t){$('kicker').textContent=k;$('instruction').textContent=t}
@@ -106,7 +107,7 @@ function travelBeat(){
 function demoVisual(task,key){
  if(key==='share'){return '<div class="demo-friends">'+Array.from({length:task.n},(_,i)=>'<div class="demo-pair">'+friend(task.animal,i)+dot(true,task.fruit)+'</div>').join('')+'</div><div class="visual-equation">'+task.n+'명의 친구 · '+task.n+'개의 간식</div>'}
  if(key==='compare'){return '<div class="compare-pair"><div class="quantity pile">'+Array.from({length:task.a},()=>unit(task.fruit)).join('')+'</div><div class="match-instruction">›</div><div class="quantity pile">'+Array.from({length:task.b},()=>unit(task.fruit)).join('')+'</div></div><div class="one-to-one">'+Array.from({length:Math.max(task.a,task.b)},(_,i)=>'<div class="matching-row">'+dot(i<task.a,task.fruit)+dot(i<task.b,task.fruit)+'</div>').join('')+'</div>'}
- if(key==='bridge'){return '<div class="bridge-scene"><div class="bridge-icon" aria-hidden="true"></div><div class="gap-fill">'+task.pieces.map(len=>'<span class="plank plank-'+len+' '+(task.material==='mossy'?'mossy':'')+'" aria-hidden="true"></span>').join('')+'</div></div><div class="visual-equation">'+task.pieces.join(' + ')+' = '+task.target+'</div>'}
+ if(key==='bridge'){return '<div class="bridge-stage"><div class="plank-dock">'+task.pieces.map(len=>'<span class="plank plank-'+len+' '+(task.material==='mossy'?'mossy':'')+'" aria-hidden="true"></span>').join('')+'</div></div><div class="visual-equation">'+task.pieces.join(' + ')+' = '+task.target+'</div>'}
  return '<div class="make-board">'+Array.from({length:task.total},(_,i)=>dot(i<task.have,task.fruit)).join('')+'</div><div class="visual-equation">'+task.have+'개가 있어요. 빈자리만큼 더 필요해요.</div>';
 }
 function demo(){const x=current(),key=CONCEPTS[state.concept].key;
@@ -130,7 +131,7 @@ function bridgeBoard(x){
   ?''
   :stepAction('place-plank','<span class="plank plank-'+len+' '+(x.material==='mossy'?'mossy':'')+'" aria-hidden="true"></span>','판자 하나 놓기','data-piece="'+i+'"')
  ).join('');
- return '<div class="bridge-scene"><div class="bridge-icon" aria-hidden="true"></div><p class="supply-caption">끊어진 다리</p><div class="gap-fill">'+placed+'</div></div><div class="plank-palette">'+palette+'</div><p class="supply-caption">나무 판자</p>';
+ return '<div class="bridge-stage"><div class="plank-dock">'+placed+'</div></div><p class="supply-caption">끊어진 다리</p><div class="plank-tray">'+palette+'</div><p class="supply-caption">나무 판자</p>';
 }
 
 function phaseText(x){if(x.kind==='guided')return '함께 연습';if(x.kind==='transfer')return '새로운 상황';if(x.kind==='probe')return '혼자 해보기';return '한 번 더 연습'}
@@ -143,7 +144,7 @@ function draw(){
  let headline=key==='share'?'친구마다 하나씩 담아 줘':key==='compare'?(x.want==='more'?'더 많은 쪽으로 출발!':'더 적은 쪽으로 출발!'):key==='bridge'?'길이에 맞게 판자를 놓아 줘':'빈자리를 채울 만큼 담아 줘';
  say(lab,headline);
  const board=key==='share'?shareBoard(x):key==='compare'?compareBoard(x):key==='bridge'?bridgeBoard(x):makeBoard(x);
- scene('<div class="quest"><div class="quest-head"><span class="quest-chip">'+lab+'</span><div class="quest-pips">'+Array.from({length:Math.min(state.step,5)},()=>'<i></i>').join('')+'</div></div><div class="quest-board">'+board+'</div>'+(key==='share'?'<div class="quest-actions">'+stepAction('submit',ICONS.check+srLabel('한 번에 주기'),'모든 친구에게 한 번에 간식 주기')+'</div>':'')+'<div class="feedback-slot" id="feedbackSlot" aria-live="polite"></div></div>');
+ scene('<div class="quest"><div class="quest-head"><span class="quest-chip">'+lab+'</span>'+(key==='compare'?wantHint(x.want==='more'):'')+'<div class="quest-pips">'+Array.from({length:Math.min(state.step,5)},()=>'<i></i>').join('')+'</div></div><div class="quest-board">'+board+'</div>'+(key==='share'?'<div class="quest-actions">'+stepAction('submit',ICONS.check+srLabel('한 번에 주기'),'모든 친구에게 한 번에 간식 주기')+'</div>':'')+'<div class="feedback-slot" id="feedbackSlot" aria-live="polite"></div></div>');
  if(x.kind==='guided'&&!state.flagged){const label=$('feedbackSlot');if(label)label.innerHTML='<div class="guided-preview">'+renderPairing(x,key)+'</div>';} else if(state.flagged){const label=$('feedbackSlot');if(label)label.textContent='다시 살펴볼 수 있어.'}
 }
 function renderPairing(x,key){
@@ -178,15 +179,16 @@ function feedback(isCorrect){
   state.results.push({kind:x.kind,clean,concept:key});
   if(x.kind==='guided')setStatus('잘했어. 이제 혼자 해볼 차례야.');else if(clean)setStatus('이번에는 혼자 해결했어!');else setStatus('도움을 받고 해결했어. 다음에는 새로 해볼 수 있어.');
   const outcome=key==='compare'?'숲길이 반짝 열렸어!':key==='share'?'모두 간식을 받았어!':key==='bridge'?'다리가 다시 이어졌어!':'꽃밭에 꽃이 피었어!';
-  const story=key==='share'?'<div class="success-line">'+Array.from({length:x.n},(_,i)=>'<div class="served">'+friend(x.animal,i,true)+unit(x.fruit,true)+'</div>').join('')+'</div>':key==='compare'?'<div class="open-gate"></div>':key==='bridge'?'<div class="bridge-scene solved"><div class="bridge-icon" aria-hidden="true"></div><div class="gap-fill">'+x.pieces.map((len,i)=>state.planksPlaced.includes(i)?'<span class="plank plank-'+len+' '+(x.material==='mossy'?'mossy':'')+'" aria-hidden="true"></span>':'').join('')+'</div></div>':'<div class="make-board">'+Array.from({length:x.total},()=>dot(true,x.fruit)).join('')+'</div>';
+  const story=key==='share'?'<div class="success-line">'+Array.from({length:x.n},(_,i)=>'<div class="served">'+friend(x.animal,i,true)+unit(x.fruit,true)+'</div>').join('')+'</div>':key==='compare'?'<div class="open-gate"></div>':key==='bridge'?'<div class="bridge-stage solved"><div class="plank-dock">'+x.pieces.map((len,i)=>state.planksPlaced.includes(i)?'<span class="plank plank-'+len+' '+(x.material==='mossy'?'mossy':'')+'" aria-hidden="true"></span>':'').join('')+'</div></div>':'<div class="make-board">'+Array.from({length:x.total},()=>dot(true,x.fruit)).join('')+'</div>';
   scene('<div class="success"><h2>'+outcome+'</h2>'+story+'<p>다음 장소가 기다리고 있어!</p>'+stepAction('advance',ICONS.arrowRight+srLabel('계속 탐험'),'다음 놀이로 이동')+'</div>');
   return
  }
  state.attempts++;state.flagged=true;sfx(false);
  const xtext=key==='share'?(state.selected+state.served.length<x.n?'아직 간식을 못 받은 친구가 있어.':'간식이 조금 남겠어.') :key==='make'?(state.selected<x.total-x.have?'빈자리가 남아 있어.':'간식이 자리를 넘쳤어.'):'짝을 지어 보면 차이가 보여.';
  setStatus(xtext);
- const slot=$('feedbackSlot');if(slot){slot.innerHTML='<div class="feedback-error">'+xtext+'</div>'+(state.attempts>=2?'<div class="scaffold">'+renderPairing(x,key)+'</div>':'');}
- if(state.attempts>=2)state.hints++;
+ const scaffoldAt=key==='compare'?1:2;
+ const slot=$('feedbackSlot');if(slot){slot.innerHTML='<div class="feedback-error">'+xtext+'</div>'+(state.attempts>=scaffoldAt?'<div class="scaffold">'+renderPairing(x,key)+'</div>':'');}
+ if(state.attempts>=scaffoldAt)state.hints++;
 }
 function assess(){const r=state.results.filter(z=>z.kind==='probe'||z.kind==='transfer');const clean=r.filter(z=>z.clean),transfer=r.find(z=>z.kind==='transfer');
  return {independent:clean.length,transfer:!!transfer?.clean,attempted:r.length,supported:state.results.length-clean.length,criteriaMet:clean.length>=2&&!!transfer?.clean}
