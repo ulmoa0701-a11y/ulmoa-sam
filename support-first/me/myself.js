@@ -91,7 +91,7 @@ function paintMoa(){
  msg.textContent=v.reason===null?"":reasonResponses[ch.id];
 }
 
-const values=chapters.map(()=>({choice:null,reason:null,own:""}));let step=0,tone="casual",lastAuto="",manual=false;
+const values=chapters.map(()=>({choice:null,reason:null,own:"",sent:false}));let step=0,tone="casual",lastAuto="",manual=false;
 const el=id=>document.getElementById(id);
 const iconNames={game:"gamepad-2",media:"headphones",build:"blocks",hangout:"users",idea:"lightbulb",design:"palette",solve:"wrench",observe:"scan-eye",text:"keyboard",voice:"mic",show:"image",together:"handshake",time:"timer",example:"book-open",along:"puzzle",pause:"coffee",project:"sparkles",friend:"users-round",learn:"graduation-cap",own:"compass"};
 function iconHTML(key) {
@@ -136,7 +136,11 @@ function paintSelection(){
  const branch=option&&moa[ch.id][option.id];
  details.hidden=!branch;
  paintMoa();
- if(!branch)return;
+ if(!branch){
+   el("own-input").value="";
+   el("typed-exchange").hidden=true;
+   return;
+ }
  el("reason-question").textContent=branch.prompt;
  const reasons=el("reasons");clear(reasons);
  branch.reasons.forEach((word,i)=>{
@@ -149,7 +153,9 @@ function paintSelection(){
    });
    reasons.append(b);
  });
- el("own-input").value=v.own;el("own-words").open=false;
+ el("own-input").value=v.own;el("own-words").open=Boolean(v.sent);
+ el("typed-exchange").hidden=!v.sent||!v.own.trim();
+ el("typed-preview").textContent=v.own.trim();
 }
 function paint(focus=false){
  const ch=chapters[step],v=values[step];
@@ -160,7 +166,8 @@ function paint(focus=false){
  el("scene-heading").textContent=ch.title;
  el("scene-narrative").textContent=ch.scene;
  el("scene-tag").textContent=ch.tag;el("question").textContent=ch.question;el("question-help").textContent=ch.help;
- el("moa-prompt").textContent=promptIntro[ch.id];
+ const previous=step>0?chosen(step-1):null;
+ el("moa-prompt").textContent=previous?"아까 ‘"+previous.label+"’을 골랐지. "+promptIntro[ch.id]:promptIntro[ch.id];
  el("back").disabled=step===0;
  el("next").innerHTML=step===chapters.length-1?'나의 이야기 보기 <span aria-hidden="true">→</span>':'다음 장면 <span aria-hidden="true">→</span>';
  document.querySelectorAll("[data-progress]").forEach((r,i)=>{r.classList.toggle("on",i===step);r.classList.toggle("done",i<step);});
@@ -168,7 +175,10 @@ function paint(focus=false){
  paintSelection();
  if(focus)el("question").focus({preventScroll:true});
 }
-function capture(){values[step].own=el("own-input").value.slice(0,90);}
+function capture(){
+ if(values[step].choice)values[step].own=el("own-input").value.slice(0,90);
+ else{values[step].own="";values[step].sent=false;}
+}
 function goto(i){if(i<0||i>=chapters.length)return;capture();step=i;paint(true);}
 function chosen(i){return chapters[i].choices.find(o=>o.id===values[i].choice);}
 function detail(i){const ch=chapters[i],v=values[i],item=chosen(i);if(!item)return null;return {topic:ch.tag.slice(5),label:item.label,description:"이 장면에서는 ‘"+item.label+"’을 골랐어.",reason:v.reason===null?"":moa[ch.id][item.id].reasons[v.reason],own:v.own};}
@@ -212,9 +222,21 @@ function paintSummary(){
 }
 function finish(){capture();el("experience").hidden=true;el("result").hidden=false;paintSummary();rebuild();el("result-title").focus({preventScroll:true});}
 el("back").addEventListener("click",()=>goto(step-1));
-el("skip").addEventListener("click",()=>{values[step]={choice:null,reason:null,own:""};el("own-input").value="";if(step===chapters.length-1)finish();else goto(step+1);});
+el("skip").addEventListener("click",()=>{values[step]={choice:null,reason:null,own:"",sent:false};el("own-input").value="";if(step===chapters.length-1)finish();else goto(step+1);});
 el("next").addEventListener("click",()=>step===chapters.length-1?finish():goto(step+1));
-el("own-input").addEventListener("input",e=>values[step].own=e.target.value.slice(0,90));
+el("own-input").addEventListener("input",e=>{
+ values[step].own=e.target.value.slice(0,90);
+ values[step].sent=false;
+ el("typed-exchange").hidden=true;
+});
+el("own-send").addEventListener("click",()=>{
+ const value=el("own-input").value.trim();
+ if(!value)return;
+ values[step].own=value.slice(0,90);
+ values[step].sent=true;
+ el("typed-preview").textContent=values[step].own;
+ el("typed-exchange").hidden=false;
+});
 el("revisit").addEventListener("click",()=>{el("result").hidden=true;el("experience").hidden=false;paint(true);});
 document.querySelectorAll("[data-tone]").forEach(button=>button.addEventListener("click",()=>{
  tone=button.dataset.tone;
