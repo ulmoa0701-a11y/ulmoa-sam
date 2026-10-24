@@ -173,7 +173,7 @@ button.feed-friend.friend-fed .forest-friend{transform:translateY(-3px)}
    bridge, instead of floating in a separate disconnected box below a small decorative icon. */
 .bridge-stage{position:relative;width:100%;max-width:260px;aspect-ratio:1/1;margin:0 auto;background:url('./assets/forest-world-v1/objects/bridge_gap.png') center/contain no-repeat;filter:drop-shadow(0 6px 4px #5b554046)}
 .plank-dock{position:absolute;left:37%;right:37%;top:33%;height:14%;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:2px}
-.plank-dock .interaction{min-width:0;min-height:0;padding:1px;animation:pop-in .32s cubic-bezier(.34,1.56,.64,1) both}
+.plank-dock .interaction{min-width:0;min-height:0;padding:1px;animation:pop-in .32s cubic-bezier(.34,1.56,.64,1) both}.plank-dock .plank{filter:drop-shadow(0 0 0 #fff) drop-shadow(0 2px 3px #00000055);outline:3px solid #fff3d6;outline-offset:1px;border-radius:3px;box-shadow:0 0 0 5px #ffce7488}
 .plank-tray{display:flex;align-items:flex-end;justify-content:center;gap:8px;flex-wrap:wrap;max-width:320px;padding:8px;background:#fff7e0cc;border:3px dashed #caa978;border-radius:20px;margin:4px auto 0}
 .plank-tray .interaction{min-width:0;min-height:0;padding:2px}
 .plank{display:block;height:26px;background:url('./assets/forest-world-v1/objects/wood_plank.png') center/100% 100% no-repeat;filter:drop-shadow(0 3px 2px #5c431c38)}
