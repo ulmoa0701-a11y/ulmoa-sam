@@ -55,16 +55,30 @@ const templates={
    to what's persisted, since village.js's pattern already does full persistence and losing
    map progress on every reload would be a regression relative to that. */
 const DEFAULT_PERSIST={acorns:0,berries:0,feedCount:0,hunger:60,buildings:[],sound:true,lastFed:0,tab:'gather',unlocked:0,reviewLog:{}};
+/* Mid-task quest progress (which step, what's selected/served/placed, attempts/hints/flagged,
+   the accumulated per-step results this chapter attempt) is now ALSO persisted, so returning to
+   the quest tab mid-task -- or reloading mid-task -- resumes at the same step with the same
+   in-progress state instead of restarting at that chapter's demo. This does not change what
+   feedback()/assess()/advance() compute, only what survives a reload/tab-switch. 'locked' and
+   'review' stay session-only: 'locked' is a transient success-animation flag (safe to drop --
+   worst case a reload right after solving re-shows the task board instead of the success screen,
+   which is a known minor gap, not a correctness issue), and 'review' is only set at chapterEnd. */
+const QUEST_PERSIST_FIELDS=['concept','step','selected','taken','served','planksPlaced','attempts','hints','flagged','view','results'];
 const SESSION_DEFAULTS={concept:0,step:0,selected:0,taken:0,served:[],planksPlaced:[],attempts:0,hints:0,flagged:false,locked:false,view:'map',results:[],timer:0,review:null};
 const state=(()=>{
  let persisted={};
  try{const s=JSON.parse(localStorage.getItem(storeKey)||'{}');if(s&&typeof s==='object'&&!Array.isArray(s))persisted=s}catch(e){}
- return Object.assign({},DEFAULT_PERSIST,persisted,SESSION_DEFAULTS);
+ return Object.assign({},DEFAULT_PERSIST,SESSION_DEFAULTS,persisted);
 })();
 if(!Array.isArray(state.buildings))state.buildings=[];
 if(!state.reviewLog||typeof state.reviewLog!=='object')state.reviewLog={};
+if(!Array.isArray(state.served))state.served=[];
+if(!Array.isArray(state.planksPlaced))state.planksPlaced=[];
+if(!Array.isArray(state.results))state.results=[];
+if(!Number.isInteger(state.concept)||state.concept<0||state.concept>=4)state.concept=0;
 function save(){try{
  const persist={acorns:state.acorns,berries:state.berries,feedCount:state.feedCount,hunger:state.hunger,buildings:state.buildings,sound:state.sound,lastFed:state.lastFed,tab:state.tab,unlocked:state.unlocked,reviewLog:state.reviewLog};
+ QUEST_PERSIST_FIELDS.forEach(k=>{persist[k]=state[k]});
  localStorage.setItem(storeKey,JSON.stringify(persist));
 }catch(e){}}
 function sfx(ok=true){if(!state.sound)return;try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;const ctx=window.__moaForestSound||(window.__moaForestSound=new Audio());ctx.resume?.();let t=ctx.currentTime;for(let i=0;i<(ok?2:1);i++){const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sine';osc.frequency.value=ok?[493.9,659.3][i]:220;gain.gain.setValueAtTime(.0001,t+i*.09);gain.gain.exponentialRampToValueAtTime(.045,t+i*.09+.015);gain.gain.exponentialRampToValueAtTime(.0001,t+i*.09+.18);osc.connect(gain);gain.connect(ctx.destination);osc.start(t+i*.09);osc.stop(t+i*.09+.2)}}catch(e){}}
@@ -159,7 +173,7 @@ function renderPairing(x,key){
 }
 function help(){
  if(state.locked||state.view!=='task')return;
- state.flagged=true;state.hints++;
+ state.flagged=true;state.hints++;save();
  const x=current(),key=CONCEPTS[state.concept].key;let slot=$('feedbackSlot');
  if(!slot)return;slot.innerHTML='<div class="scaffold">'+renderPairing(x,key)+'</div>';
  setStatus('하나씩 짝지어 살펴볼 수 있어.');
@@ -259,7 +273,7 @@ function questHandle(act,el){
   state.planksPlaced.splice(idx,1);sfx(true);draw();return;
  }
 }
-play.addEventListener('click',e=>{const b=e.target.closest('[data-mission]');if(b)questHandle(b.dataset.mission,b)});
+play.addEventListener('click',e=>{const b=e.target.closest('[data-mission]');if(b){questHandle(b.dataset.mission,b);save()}});
 $('visualHint').addEventListener('click',help);$('help').addEventListener('click',help);
 $('change').addEventListener('click',()=>{if(state.view==='task'||state.view==='demo')chapterEnd()});
 $('help').innerHTML=ICONS.hint+srLabel('그림 힌트');
@@ -269,7 +283,9 @@ $('change').innerHTML=ICONS.shuffle+srLabel('잠깐 다른 놀이');
 const PALETTE=[
  {type:'flower',cost:{acorns:2,berries:0},img:A+'objects/reward_flower.png',w:46},
  {type:'basket',cost:{acorns:3,berries:0},img:A+'objects/basket_empty.png',w:50},
- {type:'cottage',cost:{acorns:5,berries:2},img:V+'objects/cottage.png',w:72}
+ {type:'cottage',cost:{acorns:5,berries:2},img:V+'objects/cottage.png',w:72},
+ {type:'bridge-deco',cost:{acorns:4,berries:1},img:'./assets/forest-world-v1/objects/bridge_gap.png',w:62},
+ {type:'path-sign',cost:{acorns:3,berries:1},img:A+'map/path_fork.png',w:50}
 ];
 function resourceRow(){
  $('resourceBar').innerHTML=
@@ -287,7 +303,7 @@ function renderGather(){
   '<button type="button" class="spot" data-spot="acorns" aria-label="'+esc('나무에서 도토리 모으기')+'"><img src="'+A+'objects/acorn_tree.png" alt=""></button>'+
   '<button type="button" class="spot" data-spot="berries" aria-label="'+esc('딸기 모으기')+'"><img src="'+A+'objects/berry_single.png" alt="" class="berry-spot-img"></button>';
 }
-function petStage(){return state.feedCount>=12?2:state.feedCount>=5?1:0}
+function petStage(){return state.feedCount>=20?3:state.feedCount>=12?2:state.feedCount>=5?1:0}
 function renderPet(){
  const happy=Date.now()-state.lastFed<900;
  const stage=petStage();
@@ -295,6 +311,7 @@ function renderPet(){
  $('petScene').innerHTML=
   '<div class="pet-wrap stage-'+stage+'">'+
    (stage>=2?'<img class="pet-crown" src="'+A+'objects/reward_flower.png" alt="">':'')+
+   (stage>=3?'<img class="pet-side-flower" src="'+A+'objects/reward_flower.png" alt="">':'')+
    '<img class="pet-photo" src="'+A+'characters/bear_'+(happy?'happy':'waiting')+'.png" alt="">'+
   '</div>'+
   '<div class="hunger-row" aria-label="배고픔 정도">'+pips+'</div>'+
@@ -384,7 +401,13 @@ $('sound').addEventListener('click',()=>{
 /* ---------- init ---------- */
 $('sound').innerHTML=(state.sound?ICONS.speakerOn:ICONS.speakerOff)+srLabel(state.sound?'소리 켜짐':'소리 꺼짐');
 buildTabbar();
-progress();showMap();
+progress();
+/* Resume mid-quest state (see QUEST_PERSIST_FIELDS) instead of always restarting at the map --
+   demo/travel/task are each pure functions of the restored state, safe to re-render directly. */
+if(state.view==='task'&&state.step>0){helpButton(true);draw()}
+else if(state.view==='demo'){helpButton(true);demo()}
+else if(state.view==='travel'){helpButton(false);travelBeat()}
+else{showMap()}
 resourceRow();
 showTab(state.tab||'gather');
 
