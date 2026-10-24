@@ -202,3 +202,10 @@ button.feed-friend.friend-fed .forest-friend{transform:translateY(-3px)}
 .order-dot{width:14px;height:14px;border-radius:50%;background:#e98e65;box-shadow:0 2px 0 #c06b46}
 .shop-counter .forest-friend{width:80px;height:88px}
 @media(max-width:650px){.order-card{min-width:52px;min-height:52px;padding:7px}.order-card.numeral{font-size:26px}.order-dot{width:11px;height:11px}.shop-counter .forest-friend{width:66px;height:72px}}
+
+.map-node-badge.icon-transform{background-image:url('./assets/mission-v4/objects/basket_empty.png')}
+.transform-ref-row{display:flex;justify-content:center}
+.transform-arr-cluster{gap:2px;max-width:104px}
+.transform-arr-spread{gap:16px;max-width:260px}
+.transform-options .path-stand{min-width:0}
+@media(max-width:650px){.transform-arr-cluster{max-width:76px}.transform-arr-spread{gap:9px;max-width:170px}}

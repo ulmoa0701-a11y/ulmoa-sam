@@ -39,16 +39,26 @@ const CONCEPTS=[
  {key:'compare',name:'두 번째 숲길',title:'어느 쪽이 더 많을까?',kicker:'두 갈래 오솔길',short:'수량 비교'},
  {key:'make',name:'세 번째 숲길',title:'빈자리 채우기',kicker:'반짝 꽃밭',short:'수의 구성'},
  {key:'bridge',name:'네 번째 숲길',title:'끊어진 다리 복구',kicker:'끊어진 다리',short:'길이 합치기'},
- {key:'shop',name:'다섯 번째 숲길',title:'여우네 수상한 가게',kicker:'여우네 가게',short:'숫자·그림 주문'}
+ {key:'shop',name:'다섯 번째 숲길',title:'여우네 수상한 가게',kicker:'여우네 가게',short:'숫자·그림 주문'},
+ {key:'transform',name:'여섯 번째 숲길',title:'변신하는 숫자 숲',kicker:'변신하는 숲',short:'모양이 달라도 똑같은 수'}
 ];
-const MAP_ICONS={share:'tree',compare:'fork',make:'flower',bridge:'bridge',shop:'shop'};
-const TRAVEL_LINES={share:'오솔길을 따라 걷다 보니, 배고픈 친구들이 나무 아래 모여 있어요!',compare:'두 갈래로 갈라지는 오솔길 앞에 도착했어요. 더미를 비교해서 길을 선택해요!',make:'반짝이는 꽃밭에 도착했어요. 빈자리를 채우면 꽃이 활짝 필 거예요!',bridge:'숲길을 걷다 보니 다리가 끊어져 있어요! 나무 판자를 이어서 다리를 고쳐 볼까?',shop:'오솔길 끝에 여우네 가게가 보여요! 손님이 적어준 주문만큼 담아 드려 볼까?'};
+const MAP_ICONS={share:'tree',compare:'fork',make:'flower',bridge:'bridge',shop:'shop',transform:'transform'};
+const TRAVEL_LINES={share:'오솔길을 따라 걷다 보니, 배고픈 친구들이 나무 아래 모여 있어요!',compare:'두 갈래로 갈라지는 오솔길 앞에 도착했어요. 더미를 비교해서 길을 선택해요!',make:'반짝이는 꽃밭에 도착했어요. 빈자리를 채우면 꽃이 활짝 필 거예요!',bridge:'숲길을 걷다 보니 다리가 끊어져 있어요! 나무 판자를 이어서 다리를 고쳐 볼까?',shop:'오솔길 끝에 여우네 가게가 보여요! 손님이 적어준 주문만큼 담아 드려 볼까?',transform:'숲 속 빈터에 도착했어요! 모양이 달라져도 수가 똑같은 걸 찾아볼까?'};
 const templates={
  share:[{kind:'demo',n:2,animal:'rabbit',fruit:'acorn'},{kind:'guided',n:2,animal:'bear',fruit:'acorn'},{kind:'probe',n:3,animal:'fox',fruit:'acorn'},{kind:'probe',n:4,animal:'rabbit',fruit:'acorn'},{kind:'transfer',n:3,animal:'bird',fruit:'berry'},{kind:'practice',n:2,animal:'frog',fruit:'berry'},{kind:'transfer',n:4,animal:'bear',fruit:'berry'}],
  compare:[{kind:'demo',a:2,b:3,want:'more',fruit:'acorn'},{kind:'guided',a:2,b:4,want:'more',fruit:'acorn'},{kind:'probe',a:4,b:2,want:'less',fruit:'acorn'},{kind:'probe',a:3,b:4,want:'more',fruit:'berry'},{kind:'transfer',a:4,b:3,want:'less',fruit:'berry'},{kind:'practice',a:2,b:3,want:'less',fruit:'berry'},{kind:'transfer',a:3,b:2,want:'more',fruit:'acorn'}],
  make:[{kind:'demo',total:4,have:2,fruit:'acorn'},{kind:'guided',total:4,have:3,fruit:'acorn'},{kind:'probe',total:5,have:2,fruit:'acorn'},{kind:'probe',total:5,have:4,fruit:'berry'},{kind:'transfer',total:6,have:2,fruit:'berry'},{kind:'practice',total:4,have:1,fruit:'berry'},{kind:'transfer',total:5,have:3,fruit:'acorn'}],
  bridge:[{kind:'demo',target:4,pieces:[1,3],material:'plain'},{kind:'guided',target:5,pieces:[2,3,1],material:'plain'},{kind:'probe',target:5,pieces:[1,4,2,3],material:'plain'},{kind:'probe',target:6,pieces:[2,4,1,3],material:'plain'},{kind:'transfer',target:4,pieces:[1,1,2,3],material:'mossy'},{kind:'practice',target:5,pieces:[2,2,3,1],material:'mossy'},{kind:'transfer',target:6,pieces:[3,3,2,1],material:'plain'}],
- shop:[{kind:'demo',qty:3,repr:'dots',customer:'fox',fruit:'acorn'},{kind:'guided',qty:3,repr:'numeral',customer:'rabbit',fruit:'acorn'},{kind:'probe',qty:4,repr:'dots',customer:'frog',fruit:'acorn'},{kind:'probe',qty:2,repr:'numeral',customer:'bird',fruit:'berry'},{kind:'transfer',qty:5,repr:'dots',customer:'bear',fruit:'berry'},{kind:'practice',qty:3,repr:'numeral',customer:'fox',fruit:'berry'},{kind:'transfer',qty:4,repr:'numeral',customer:'rabbit',fruit:'acorn'}]
+ shop:[{kind:'demo',qty:3,repr:'dots',customer:'fox',fruit:'acorn'},{kind:'guided',qty:3,repr:'numeral',customer:'rabbit',fruit:'acorn'},{kind:'probe',qty:4,repr:'dots',customer:'frog',fruit:'acorn'},{kind:'probe',qty:2,repr:'numeral',customer:'bird',fruit:'berry'},{kind:'transfer',qty:5,repr:'dots',customer:'bear',fruit:'berry'},{kind:'practice',qty:3,repr:'numeral',customer:'fox',fruit:'berry'},{kind:'transfer',qty:4,repr:'numeral',customer:'rabbit',fruit:'acorn'}],
+ transform:[
+  {kind:'demo',ref:{count:3,fruit:'acorn'}},
+  {kind:'guided',ref:{count:3,fruit:'acorn'},options:{a:{count:3,arr:'spread'},b:{count:4,arr:'cluster'}},correct:'a'},
+  {kind:'probe',ref:{count:4,fruit:'acorn'},options:{a:{count:5,arr:'spread'},b:{count:4,arr:'cluster'}},correct:'b'},
+  {kind:'probe',ref:{count:2,fruit:'acorn'},options:{a:{count:2,arr:'spread'},b:{count:3,arr:'cluster'}},correct:'a'},
+  {kind:'transfer',ref:{count:5,fruit:'berry'},options:{a:{count:4,arr:'cluster'},b:{count:5,arr:'spread'}},correct:'b'},
+  {kind:'practice',ref:{count:3,fruit:'berry'},options:{a:{count:3,arr:'cluster'},b:{count:2,arr:'spread'}},correct:'a'},
+  {kind:'transfer',ref:{count:4,fruit:'acorn'},options:{a:{count:3,arr:'spread'},b:{count:4,arr:'cluster'}},correct:'b'}
+ ]
 };
 
 /* ---------- unified state: village fields persist fully; quest mid-task fields are
@@ -125,6 +135,7 @@ function demoVisual(task,key){
  if(key==='compare'){return '<div class="compare-pair"><div class="quantity pile">'+Array.from({length:task.a},()=>unit(task.fruit)).join('')+'</div><div class="match-instruction">›</div><div class="quantity pile">'+Array.from({length:task.b},()=>unit(task.fruit)).join('')+'</div></div><div class="one-to-one">'+Array.from({length:Math.max(task.a,task.b)},(_,i)=>'<div class="matching-row">'+dot(i<task.a,task.fruit)+dot(i<task.b,task.fruit)+'</div>').join('')+'</div>'}
  if(key==='bridge'){return '<div class="bridge-stage"><div class="plank-dock">'+task.pieces.map(len=>'<span class="plank plank-'+len+' '+(task.material==='mossy'?'mossy':'')+'" aria-hidden="true"></span>').join('')+'</div></div><div class="visual-equation">'+task.pieces.join(' + ')+' = '+task.target+'</div>'}
  if(key==='shop'){return '<div class="order-demo">'+friend(task.customer,0)+orderCard(task)+'</div><div class="visual-equation">'+task.qty+'개를 주문했어요</div>'}
+ if(key==='transform'){return '<div class="compare-pair">'+groupVisual(task.ref.count,task.ref.fruit,'cluster')+'<div class="match-instruction" aria-hidden="true">›</div>'+groupVisual(task.ref.count,task.ref.fruit,'spread')+'</div><div class="visual-equation">'+task.ref.count+'개, 모양만 바뀌었어요</div>'}
  return '<div class="make-board">'+Array.from({length:task.total},(_,i)=>dot(i<task.have,task.fruit)).join('')+'</div><div class="visual-equation">'+task.have+'개가 있어요. 빈자리만큼 더 필요해요.</div>';
 }
 function orderCard(x){
@@ -133,6 +144,14 @@ function orderCard(x){
 }
 function shopBoard(x){
  return '<div class="shop-counter">'+friend(x.customer,0)+orderCard(x)+'</div><div class="delivery-line">'+fruitTray(x.fruit,state.selected,x.qty+3,state.taken)+'</div>';
+}
+function groupVisual(count,fruit,arr){return '<div class="quantity pile transform-arr-'+arr+'">'+Array.from({length:count},()=>unit(fruit)).join('')+'</div>'}
+function transformBoard(x){
+ return '<div class="transform-ref-row">'+groupVisual(x.ref.count,x.ref.fruit,'cluster')+'</div><p class="supply-caption">기준</p><div class="compare-path transform-options">'+
+  ['a','b'].map(k=>{
+   const o=x.options[k];
+   return stepAction('pick-match','<div class="path-stand">'+groupVisual(o.count,x.ref.fruit,o.arr)+'</div>',k==='a'?'왼쪽 묶음 선택':'오른쪽 묶음 선택','data-group="'+k+'"');
+  }).join('')+'</div>';
 }
 function demo(){const x=current(),key=CONCEPTS[state.concept].key;
  state.view='demo';say('모아가 먼저 보여줄게','한 번 보고, 다음에는 직접 해볼까?');
@@ -165,9 +184,9 @@ function draw(){
  if(x.kind==='demo'){demo();return}
  state.view='task';
  const lab=phaseText(x);
- let headline=key==='share'?'친구마다 하나씩 담아 줘':key==='compare'?(x.want==='more'?'더 많은 쪽으로 출발!':'더 적은 쪽으로 출발!'):key==='bridge'?'길이에 맞게 판자를 놓아 줘':key==='shop'?'주문한 만큼 담아 줘':'빈자리를 채울 만큼 담아 줘';
+ let headline=key==='share'?'친구마다 하나씩 담아 줘':key==='compare'?(x.want==='more'?'더 많은 쪽으로 출발!':'더 적은 쪽으로 출발!'):key==='bridge'?'길이에 맞게 판자를 놓아 줘':key==='shop'?'주문한 만큼 담아 줘':key==='transform'?'기준과 똑같은 수를 찾아 줘':'빈자리를 채울 만큼 담아 줘';
  say(lab,headline);
- const board=key==='share'?shareBoard(x):key==='compare'?compareBoard(x):key==='bridge'?bridgeBoard(x):key==='shop'?shopBoard(x):makeBoard(x);
+ const board=key==='share'?shareBoard(x):key==='compare'?compareBoard(x):key==='bridge'?bridgeBoard(x):key==='shop'?shopBoard(x):key==='transform'?transformBoard(x):makeBoard(x);
  scene('<div class="quest"><div class="quest-head"><span class="quest-chip">'+lab+'</span>'+(key==='compare'?wantHint(x.want==='more'):'')+'<div class="quest-pips">'+Array.from({length:Math.min(state.step,5)},()=>'<i></i>').join('')+'</div></div><div class="quest-board">'+board+'</div>'+(key==='share'||key==='shop'?'<div class="quest-actions">'+stepAction('submit',ICONS.check+srLabel(key==='shop'?'주문 담아 드리기':'한 번에 주기'),key==='shop'?'주문한 만큼 담아 드리기':'모든 친구에게 한 번에 간식 주기')+'</div>':'')+'<div class="feedback-slot" id="feedbackSlot" aria-live="polite"></div></div>');
  if(x.kind==='guided'&&!state.flagged){const label=$('feedbackSlot');if(label)label.innerHTML='<div class="guided-preview">'+renderPairing(x,key)+'</div>';} else if(state.flagged){const label=$('feedbackSlot');if(label)label.textContent='다시 살펴볼 수 있어.'}
 }
@@ -178,6 +197,10 @@ function renderPairing(x,key){
  }
  if(key==='compare'){
   return '<div class="one-to-one">'+Array.from({length:Math.max(x.a,x.b)},(_,i)=>'<div class="matching-row">'+dot(i<x.a,x.fruit)+dot(i<x.b,x.fruit)+'</div>').join('')+'</div><p>하나씩 짝지어 보면 어디가 남을까?</p>';
+ }
+ if(key==='transform'){
+  const correctCount=x.options[x.correct].count;
+  return '<div class="one-to-one">'+Array.from({length:Math.max(x.ref.count,correctCount)},(_,i)=>'<div class="matching-row">'+dot(i<x.ref.count,x.ref.fruit)+dot(i<correctCount,x.ref.fruit)+'</div>').join('')+'</div><p>하나씩 짝지어 보면 똑같을까?</p>';
  }
  const wanted=key==='share'?x.n:key==='shop'?x.qty:x.total-x.have;return '<div class="help-model"><span>필요한 자리</span><div class="match-row">'+Array.from({length:wanted},(_,i)=>dot(i<(key==='share'?state.selected+state.served.length:state.selected),x.fruit)).join('')+'</div></div><p>빈자리와 담은 간식을 하나씩 짝지어 볼까?</p>'
 }
@@ -202,13 +225,13 @@ function feedback(isCorrect){
   const clean=x.kind!=='guided'&&x.kind!=='demo'&&!state.flagged&&state.attempts===0&&state.hints===0;
   state.results.push({kind:x.kind,clean,concept:key});
   if(x.kind==='guided')setStatus('잘했어. 이제 혼자 해볼 차례야.');else if(clean)setStatus('이번에는 혼자 해결했어!');else setStatus('도움을 받고 해결했어. 다음에는 새로 해볼 수 있어.');
-  const outcome=key==='compare'?'숲길이 반짝 열렸어!':key==='share'?'모두 간식을 받았어!':key==='bridge'?'다리가 다시 이어졌어!':key==='shop'?'여우가 활짝 웃었어요!':'꽃밭에 꽃이 피었어!';
-  const story=key==='share'?'<div class="success-line">'+Array.from({length:x.n},(_,i)=>'<div class="served">'+friend(x.animal,i,true)+unit(x.fruit,true)+'</div>').join('')+'</div>':key==='compare'?'<div class="open-gate"></div>':key==='bridge'?'<div class="bridge-stage solved"><div class="plank-dock">'+x.pieces.map((len,i)=>state.planksPlaced.includes(i)?'<span class="plank plank-'+len+' '+(x.material==='mossy'?'mossy':'')+'" aria-hidden="true"></span>':'').join('')+'</div></div>':key==='shop'?'<div class="shop-counter"><div class="served">'+friend(x.customer,0,true)+'</div></div>':'<div class="make-board">'+Array.from({length:x.total},()=>dot(true,x.fruit)).join('')+'</div>';
+  const outcome=key==='compare'?'숲길이 반짝 열렸어!':key==='share'?'모두 간식을 받았어!':key==='bridge'?'다리가 다시 이어졌어!':key==='shop'?'여우가 활짝 웃었어요!':key==='transform'?'모양이 달라도 똑같은 수야!':'꽃밭에 꽃이 피었어!';
+  const story=key==='share'?'<div class="success-line">'+Array.from({length:x.n},(_,i)=>'<div class="served">'+friend(x.animal,i,true)+unit(x.fruit,true)+'</div>').join('')+'</div>':key==='compare'?'<div class="open-gate"></div>':key==='bridge'?'<div class="bridge-stage solved"><div class="plank-dock">'+x.pieces.map((len,i)=>state.planksPlaced.includes(i)?'<span class="plank plank-'+len+' '+(x.material==='mossy'?'mossy':'')+'" aria-hidden="true"></span>':'').join('')+'</div></div>':key==='shop'?'<div class="shop-counter"><div class="served">'+friend(x.customer,0,true)+'</div></div>':key==='transform'?groupVisual(x.ref.count,x.ref.fruit,'cluster'):'<div class="make-board">'+Array.from({length:x.total},()=>dot(true,x.fruit)).join('')+'</div>';
   scene('<div class="success"><h2>'+outcome+'</h2>'+story+'<p>다음 장소가 기다리고 있어!</p>'+stepAction('advance',ICONS.arrowRight+srLabel('계속 탐험'),'다음 놀이로 이동')+'</div>');
   return
  }
  state.attempts++;state.flagged=true;sfx(false);
- const xtext=key==='share'?(state.selected+state.served.length<x.n?'아직 간식을 못 받은 친구가 있어.':'간식이 조금 남겠어.') :key==='make'?(state.selected<x.total-x.have?'빈자리가 남아 있어.':'간식이 자리를 넘쳤어.'):key==='shop'?(state.selected<x.qty?'주문한 만큼 안 담겼어.':'너무 많이 담았어.'):'짝을 지어 보면 차이가 보여.';
+ const xtext=key==='share'?(state.selected+state.served.length<x.n?'아직 간식을 못 받은 친구가 있어.':'간식이 조금 남겠어.') :key==='make'?(state.selected<x.total-x.have?'빈자리가 남아 있어.':'간식이 자리를 넘쳤어.'):key==='shop'?(state.selected<x.qty?'주문한 만큼 안 담겼어.':'너무 많이 담았어.'):key==='transform'?'다시 세어 볼까?':'짝을 지어 보면 차이가 보여.';
  setStatus(xtext);
  const scaffoldAt=key==='compare'?1:2;
  const slot=$('feedbackSlot');if(slot){slot.innerHTML='<div class="feedback-error">'+xtext+'</div>'+(state.attempts>=scaffoldAt?'<div class="scaffold">'+renderPairing(x,key)+'</div>':'');}
@@ -267,6 +290,7 @@ function questHandle(act,el){
   feedback(state.selected===x.total-x.have);return;
  }
  if(act==='choose'){const correct=x.want==='more'?(x.a>x.b?'a':'b'):(x.a<x.b?'a':'b');feedback(el.dataset.side===correct);return}
+ if(act==='pick-match'&&key==='transform'){feedback(el.dataset.group===x.correct);return}
  if(act==='place-plank'&&key==='bridge'){
   const i=Number(el.dataset.piece);
   if(!Number.isInteger(i)||i<0||i>=x.pieces.length||state.planksPlaced.includes(i))return;
