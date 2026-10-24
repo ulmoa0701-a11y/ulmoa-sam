@@ -453,14 +453,23 @@ function heart(c,beat,x,y,w,h,now,muted=false){
 
 /* Moa follows student's actual onset positions (including 8th/16th notes)
    on the original score without covering the beat subdivisions. */
+/* A constant two-pulse visual bounce within every single full beat.
+   This is a movement/counting guide, not two note onsets: existing song
+   data, held-note length, and real audio timing are untouched. */
+function moaBeatHop(beat){
+ if(beat<startBeat()||beat>=endBeat())return 0;
+ const phase=((beat%1)+1)%1;
+ return Math.pow(Math.sin(2*Math.PI*phase),2);
+}
 function moaSprite(c,x,y,b,at,dim=false){
  if(dim)return;const alert=cueAt(b).now,cheer=alert&&Math.abs(alert.start-at)<.025;
  const sprite=cheer?moaCheer:moaDefault,swing=!motion&&(playing||exporting)&&!(view==="two"&&moaTravel==="walk")?(Math.sin(performance.now()/185)*1.1):0;
+ const doubleHop=(view==="two"||view==="stairs")&&!motion&&(playing||exporting)?moaBeatHop(b)*21:0;
  c.save();const size=view==="two"?49:view==="stairs"?38:65;
  if(sprite.complete&&sprite.naturalWidth>0){
-  c.drawImage(sprite,x-size/2,y-size+12+swing,size,size);
+  c.drawImage(sprite,x-size/2,y-size+12+swing-doubleHop,size,size);
  }else{
-  disk(c,x,y-25,25,"#fff3de","#639c8a",3);txt(c,"모아",x,y-25,14,"#3c776c");
+  disk(c,x,y-25-doubleHop,25,"#fff3de","#639c8a",3);txt(c,"모아",x,y-25-doubleHop,14,"#3c776c");
  }
  c.restore()
 }
@@ -711,7 +720,7 @@ function twoMoaPosition(b,info){
  }
  const departure=Math.max(previous.start,next.start-.75);
  const progress=motion?0:clamp((b-departure)/Math.max(.001,next.start-departure),0,1);
- const arc=(playing||exporting)&&!motion&&moaTravel==="hop"?Math.sin(Math.PI*progress)*29:0;
+ const arc=0; // visual hopping is now timed at two pulses per beat in moaSprite
  return {x:first.x+(second.x-first.x)*progress,y:first.y+(second.y-first.y)*progress-arc,
          row:first.row,progress,hop:arc,beat:progress>=1?next.start:previous.start};
 }
@@ -882,7 +891,7 @@ function stairMoaPosition(beat,info){
  }
  const depart=Math.max(prev.start,next.start-.78);
  const progress=motion?0:clamp((beat-depart)/Math.max(.001,next.start-depart),0,1);
- const lift=(playing||exporting)&&!motion&&moaTravel==="hop"?Math.sin(Math.PI*progress)*22:0;
+ const lift=0; // visual hopping is now timed at two pulses per beat in moaSprite
  return {x:current.x+(upcoming.x-current.x)*progress,
          y:current.y+(upcoming.y-current.y)*progress-lift,
          row:current.row,at:progress>=1?next.start:prev.start,progress};
@@ -1000,7 +1009,7 @@ window.addEventListener("resize",()=>{twoPageCache=null;stairPageCache=null;draw
 moaDefault.onload=()=>{if(view==="two"||view==="stairs")draw(ctx,position)};
 moaCheer.onload=()=>{if(view==="two")draw(ctx,position)};
 window.__performanceViewsQA__={balancedBarsPerLine,drawScorePosition,themes:Object.keys(THEMES),theme:()=>theme,selectTheme:chooseTheme,stairHalfBeatPair,videoExportSize:()=>({width:1920,height:1080,contentY:44,contentHeight:992}),heartScale:(w,h)=>Math.min(w/100,h/90),stairPageAt:twoPageAt,stairBackground:()=>stairPageCache?.canvas,stairGeometry,stairHeartTop,stairPoint,stairMoaPosition,stairStyle:()=>stairStyle,stairPrimary,twoPageAt,twoMoaPosition,twoBaseKey,twoBarsPerLine,twoBackground:()=>twoPageCache?.canvas,moaTravel:()=>moaTravel,beatParts,heartPath:HEART_PATH,modes:Object.keys(VIEW),scores:scores.map(s=>({key:s.key,bpm:s.bpm,meter:s.meter,measures:s.bars.length,beats:s.beats,events:s.events.length,rests:s.events.filter(e=>e.note==="쉼").length})),
- cueAt,assignedEvents,beatUntil,state:()=>({view,song:song.key,notes,speed,section,playing,ended,position,measure:barAt(position).index,score:song.events.map(e=>[e.note,e.start,e.dur,e.lyric]),mask:selected(),clockAudio:!!acc,exporting}),
+ cueAt,assignedEvents,beatUntil,moaBeatHop,state:()=>({view,song:song.key,notes,speed,section,playing,ended,position,measure:barAt(position).index,score:song.events.map(e=>[e.note,e.start,e.dur,e.lyric]),mask:selected(),clockAudio:!!acc,exporting}),
  selectView:chooseView,selectSong:chooseSong,play,pause,reset,at:(b)=>{if(playing)pause();position=b;draw(ctx,b);updateControls()},render:()=>draw(ctx,position),testMime:videoMime
 };
 })();
