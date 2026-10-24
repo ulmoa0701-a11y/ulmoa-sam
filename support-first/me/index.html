@@ -27,17 +27,36 @@
     </div>
     <div class="question-area">
      <span class="scene-tag" id="scene-tag">01 · 내가 좋아하는 순간</span>
+     <div class="moa-dialogue" aria-label="모아의 이야기">
+       <img class="moa-avatar" src="../../assets/moa-hello-wave-20261012.webp" alt="안내 캐릭터 모아" width="72" height="76">
+       <div class="moa-bubble">
+         <span class="moa-name">모아 · 함께 이야기하는 안내 캐릭터</span>
+         <p id="moa-prompt">처음부터 나를 다 설명할 필요는 없어. 오늘은 네가 좋아하는 순간부터 찾아볼까?</p>
+       </div>
+     </div>
      <h1 id="question" tabindex="-1">그때 나는 뭘 하고 있을까?</h1>
      <p class="question-help" id="question-help">가장 가까운 걸 골라봐. 나중에 바꿔도 돼.</p>
      <div class="options" id="options" role="group" aria-label="이 상황에서 내 선택"></div>
+     <div class="reply-flow" id="reply-flow" hidden aria-label="모아와 이어가는 이야기">
+        <div class="my-chat"><span>나</span><p id="my-reply"></p></div>
+        <div class="moa-chat"><img src="../../assets/moa-hello-wave-20261012.webp" width="45" height="46" alt=""><div><span>모아</span><p id="moa-reaction"></p></div></div>
+     </div>
      <div id="deeper" class="deeper" hidden>
        <div class="deeper-top"><span class="deeper-label" id="reason-question">그게 좋은 이유는?</span><span class="optional">선택 사항</span></div>
-       <div class="reasons" id="reasons" role="group" aria-label="선택한 이유"></div>
+       <div class="reasons" id="reasons" role="group" aria-label="모아 질문에 답하기"></div>
+       <p class="moa-followup" id="moa-followup" role="status"></p>
        <details class="my-words" id="own-words">
-         <summary>내 말로 덧붙이기 <span>+</span></summary>
-         <label for="own-input">더 하고 싶은 말이 있으면</label>
-         <input id="own-input" maxlength="90" autocomplete="off" placeholder="짧게 적어도 돼">
-         <p>이름·학교·연락처 같은 개인정보는 적지 않아줘.</p>
+         <summary>보기와 다른 내 이야기도 있어 <span>+</span></summary>
+         <label for="own-input">내 말로 짧게 남기기 (선택)</label>
+         <div class="own-input-row">
+           <input id="own-input" maxlength="90" autocomplete="off" placeholder="예: 나는 이런 순간이 더 좋아" aria-describedby="own-help">
+           <button type="button" id="own-send">모아에게 전하기</button>
+         </div>
+         <div id="typed-exchange" class="typed-exchange" hidden aria-live="polite">
+           <p class="typed-own" id="typed-preview"></p>
+           <p class="typed-ack">모아 · 네 말은 내가 해석하지 않을게. 마지막 소개에서 네가 직접 확인하고 고칠 수 있어.</p>
+         </div>
+         <p id="own-help">정해진 반응을 보여주는 안내 캐릭터야. 자유롭게 쓴 문장을 분석하지는 않아. 이름·학교·연락처는 적지 말아줘.</p>
        </details>
      </div>
      <div class="navigation">
@@ -49,7 +68,7 @@
    </div>
  </section>
  <section class="result" id="result" hidden aria-labelledby="result-title">
-   <div class="result-head"><span class="kicker">MY STORY / 초안</span><h1 id="result-title" tabindex="-1">누군가에게 나를 소개한다면</h1><p>정해진 성격이 아니라, 오늘 내가 고른 장면에서 나온 이야기야. 마음에 안 들면 고쳐도 돼.</p></div>
+   <div class="result-head"><span class="kicker">MY STORY / 초안</span><div class="result-moa"><img src="../../assets/moa-hello-wave-20261012.webp" width="60" height="63" alt="모아"><p>방금 나눈 얘기로 자기소개를 적어봤어. 네가 원하는 말만 남겨도 돼.</p></div><h1 id="result-title" tabindex="-1">누군가에게 나를 소개한다면</h1><p>정해진 성격이 아니라, 오늘 네가 선택한 말들이야. 원하면 언제든 바꿔.</p></div>
    <details class="discovery-toggle"><summary>내가 고른 다섯 장면 돌아보기 <span aria-hidden="true">⌄</span></summary><div class="discoveries" id="discoveries" aria-label="오늘 발견한 나의 단서들"></div></details>
    <div class="intro-builder">
      <div class="builder-header"><h2>내 말로 소개하기</h2><p>누구에게 보여줄지도 내가 정해.</p></div>
