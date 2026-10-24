@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
+:root{--ink:#355349;--paper:#fff7df;--leaf:#5b9b79;--cream:#ffefc9;--orange:#e98e65;--brown:#926947;--line:#ead1a2}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:linear-gradient(145deg,#e4efd8,#f5efd9);font-family:'Gowun Dodum','Pretendard',system-ui,sans-serif;color:var(--ink)}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;font-family:inherit}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.shell{max-width:900px;margin:0 auto;padding:0 14px 26px}
+.mast{display:flex;align-items:center;justify-content:space-between;padding:16px 4px}
+.mast .back{color:var(--ink);text-decoration:none;font-weight:800;opacity:.75}
+.identity{font-weight:900;font-size:15px;color:#6d7a5d}
+.identity span{color:#9aa78a;font-weight:600}
+.controls{display:flex;gap:8px}
+#sound{width:44px;height:44px;border-radius:50%;border:2px solid #d8bf98;background:#fff9ec;color:#72614c;display:grid;place-items:center}
+
+.stage{position:relative;isolation:isolate;overflow:hidden;min-height:560px;border-radius:42px;border:8px solid #fff8e7;box-shadow:0 11px 0 #bfcda9,0 25px 42px #395d4a30;background:#b7d6a5 url('./assets/mission-v4/background/forest_background_clay.png') center 52%/cover no-repeat}
+.village-world{position:relative;height:100%;min-height:560px;display:flex;flex-direction:column}
+.resource-bar{display:flex;gap:10px;justify-content:center;padding:16px 10px 4px}
+.res{display:flex;align-items:center;gap:6px;background:#fff8e7ee;border:2px solid var(--line);border-radius:18px;padding:6px 14px;font-weight:900;font-size:17px;box-shadow:0 4px 0 #e3cfa0}
+.res img{width:28px;height:28px;object-fit:contain}
+
+.panel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:10px 12px 100px}
+.panel[hidden]{display:none}
+
+.gather-spots{display:flex;gap:34px;align-items:center;justify-content:center;flex-wrap:wrap}
+.spot{background:transparent;border:0;padding:6px;border-radius:22px;transition:transform .12s}
+.spot:active{transform:scale(.9)}
+.spot img{width:140px;height:auto;object-fit:contain;filter:drop-shadow(0 8px 6px #3f3a2440)}
+.spot .berry-spot-img{width:92px}
+.spot.bounce{animation:spot-bounce .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes spot-bounce{0%{transform:scale(1)}40%{transform:scale(.85) rotate(-4deg)}70%{transform:scale(1.08) rotate(3deg)}100%{transform:scale(1)}}
+.float-pop{position:absolute;width:34px;height:34px;left:50%;top:10%;margin-left:-17px;pointer-events:none;animation:float-up .7s ease-out both}
+@keyframes float-up{0%{opacity:0;transform:translateY(0) scale(.6)}25%{opacity:1}100%{opacity:0;transform:translateY(-60px) scale(1.1)}}
+
+.pet-scene{display:flex;flex-direction:column;align-items:center;gap:16px}
+.pet-wrap{position:relative;width:170px;height:190px;display:grid;place-items:center}
+.pet-photo{width:150px;height:auto;object-fit:contain;filter:drop-shadow(0 8px 6px #3f3a2440);transition:transform .2s}
+.pet-wrap.stage-1 .pet-photo{width:168px}
+.pet-wrap.stage-2 .pet-photo{width:182px}
+.pet-crown{position:absolute;top:-14px;left:50%;width:54px;margin-left:-27px;z-index:2;filter:drop-shadow(0 4px 3px #8a6a3340);animation:crown-wiggle 2.4s ease-in-out infinite}
+@keyframes crown-wiggle{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+.hunger-row{display:flex;gap:6px}
+.pip{width:26px;height:26px;border-radius:50%;background:#e9ddc3;display:grid;place-items:center;color:#cdbf9b}
+.pip.filled{background:#f0a97b;color:#fff;box-shadow:0 3px 0 #cf8a5c}
+.feed-tray{display:flex;gap:16px}
+.feed-btn{width:62px;height:62px;border-radius:50%;background:#fff8e7;border:3px solid var(--line);box-shadow:0 5px 0 #e3cfa0;display:grid;place-items:center;transition:transform .12s}
+.feed-btn:active{transform:scale(.88)}
+.feed-btn:disabled{opacity:.35;box-shadow:none}
+.feed-btn img{width:36px;height:36px;object-fit:contain}
+
+.build-plot{min-height:150px;width:100%;max-width:520px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;gap:8px;padding:10px;background:#fff8e7aa;border:3px dashed #cdbf9b;border-radius:24px}
+.placed{object-fit:contain;filter:drop-shadow(0 6px 4px #3f3a2440)}
+.placed.pop{animation:placed-pop .4s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes placed-pop{0%{opacity:0;transform:scale(.4) translateY(20px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+.plot-empty-hint{width:1px;height:1px;margin:0}
+.build-palette{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.palette-item{display:flex;flex-direction:column;align-items:center;gap:4px;background:#fff8e7;border:3px solid var(--line);border-radius:18px;padding:8px 10px;box-shadow:0 5px 0 #e3cfa0}
+.palette-item.cant{opacity:.55}
+.palette-item img{object-fit:contain}
+.cost-row{display:flex;gap:6px}
+.cost-chip{display:flex;align-items:center;gap:2px;font-size:12px;font-weight:800;color:#8a7a56}
+.cost-chip img{width:16px;height:16px}
+.palette-item.shake{animation:shake-no .4s}
+@keyframes shake-no{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.tabbar{position:sticky;bottom:10px;display:flex;justify-content:center;gap:10px;margin-top:14px}
+.tab-btn{width:58px;height:58px;border-radius:50%;background:#fff8e7;border:3px solid var(--line);box-shadow:0 6px 0 #e3cfa0;color:#8a7a56;display:grid;place-items:center;transition:transform .12s}
+.tab-btn:active{transform:scale(.9)}
+.tab-btn[aria-pressed="true"]{background:linear-gradient(#ed9b77,#d87760);border-color:#ce745e;color:#fff8dc;box-shadow:0 6px 0 #a85c4d}
+
+.small-info{text-align:center;font-size:12px;color:#8a9a85;margin-top:14px}
+footer{text-align:center;font-size:12px;color:#8a9a85;padding:14px 0 4px}
+footer a{color:#6d7a5d}
+
+@media(max-width:650px){
+ .stage{min-height:480px;border-radius:27px;border-width:4px}
+ .village-world{min-height:480px}
+ .spot img{width:100px}
+ .spot .berry-spot-img{width:68px}
+ .pet-wrap{width:130px;height:150px}
+ .pet-photo{width:110px}
+ .pet-wrap.stage-1 .pet-photo{width:124px}
+ .pet-wrap.stage-2 .pet-photo{width:136px}
+ .feed-btn{width:52px;height:52px}
+ .tab-btn{width:50px;height:50px}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}

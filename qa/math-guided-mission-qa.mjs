@@ -14,9 +14,13 @@ async function task(page){
 async function loadConcept(page,index){
  if(index===0)await page.locator('[data-mission=start]').click();
  else await page.locator('[data-mission=next-chapter]').click();
+ assert.equal((await task(page)).phase,'map','start/next-chapter must open the forest map, not jump straight to a concept');
+ await page.locator('.map-node.current').click({force:true});
  const s=await task(page);assert.equal(s.conceptIndex,index);
  assert.equal(s.phase,'demo','model must be displayed before child is asked');
  await page.locator('[data-mission=continue]').click();
+ assert.equal((await task(page)).phase,'travel','continue must lead to the wordless travel beat before the task');
+ await page.locator('[data-mission=arrive]').click();
  assert.equal((await task(page)).step,1);
 }
 async function pick(page,quantity){
@@ -46,7 +50,8 @@ async function submit(page,index,kind,wrong=false){
  if(index===2){
   const needed=x.total-x.have;
   await pick(page,needed);
-  await page.locator('[data-mission=submit]').click();
+  // 'make' now completes on its own the moment the last slot is filled exactly
+  // (no separate submit button is rendered for this concept any more).
  }
  assert.equal((await task(page)).phase,'task','success state requires a success outcome scene');
  assert.ok(await page.locator('.success').count(),index+' '+kind+' did not yield story consequence');
@@ -83,7 +88,10 @@ async function exercise(viewport){
   assert.ok(saved[['share','compare','make'][i]],'per-concept record missing');
  }
  await page.locator('[data-mission=next-chapter]').click();
- assert.equal((await task(page)).phase,'intro','story must wrap to beginning');
+ const after=await task(page);
+ assert.equal(after.phase,'map','the three forest paths must wrap back to the map, now fully unlocked');
+ assert.equal(after.unlocked,3,'all three concepts should be marked unlocked/completed on the map');
+ assert.equal(await page.locator('.overworld-complete').count(),1,'map should greet the child with a completion message');
  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
  assert.ok(overflow<=3,'horizontal overflow '+viewport+' '+overflow);
  assert.deepEqual(errs,[],'JavaScript errors');
@@ -93,8 +101,10 @@ try{
  for(const size of [390,1280])await exercise(size);
  const page=await browser.newPage();
  await page.goto(base+'/math-garden/',{waitUntil:'domcontentloaded'});
- assert.equal(await page.locator('.mission-front-link[href="./mission.html"]').count(),1,'game entry point missing');
+ // The hub's primary entry point now opens the combined village+quest world (forest-world.html),
+ // a superset of this guided mission which still ships unchanged at mission.html.
+ assert.equal(await page.locator('.mission-front-link[href="./forest-world.html"]').count(),1,'game entry point missing');
  assert.ok(await page.locator('#startButton').count(),'old 15 play modes are still reachable');
  await page.close();
- console.log('PASS: guided adventure 3 concepts, model/guided/independent/transfer, wrong attempts, pairing hint, progress record, return to 15 modes; '+successes+' solved rounds');
+ console.log('PASS: guided adventure 3 concepts via forest map, model/travel/guided/independent/transfer, wrong attempts, pairing hint, progress record, return to 15 modes; '+successes+' solved rounds');
 }catch(e){console.error('MATH MISSION QA FAILURE',e);process.exitCode=1}finally{await browser.close()}

@@ -1,0 +1,130 @@
+{
+  "updated": "2026-10-22",
+  "style": "cute-3d-clay-toy (see style-guide.md)",
+  "productionTool": "Canva generate-image + remove-background (user-approved exception, see style-guide.md)",
+  "status": "4th round: core action buttons (start/submit/arrive/advance/repeat/next-chapter/sound/restart/hint/shuffle) converted to icon-first (inline SVG, no PNG assets needed) with sr-only text kept for screen readers, plus a non-text correct/incorrect flash overlay — aimed at pre-readers playing without any text comprehension. 3rd round: structural redesign (overworld map + travel beats). Background kept as clay style. Berry fruit type converted. Intro welcome screen basket visual swapped. Still pending: 0-10 full quantity sweep, map-node/quest-chip caption text left as-is (lower priority, icons already primary there). 5th round: discovered a concurrent open draft PR (#400, different AI worker) rewriting the same mission.js with a conflicting zero-demo/auto-advance design; user decided to keep this branch's direction and selectively adopt useful parts - tap-friend-to-feed (share), auto-complete-on-exact-fill (make), empty-basket visual nudge. Did NOT adopt: demo-step removal, timer auto-advance (both conflict with the user's own brief requirements).",
+  "assets": [
+    {
+      "file": "objects/acorn_tree.png",
+      "nativeSize": "149x199",
+      "alpha": true,
+      "usedIn": "mission.css .supply-items (background-image, position: center top / contain)",
+      "role": "Replaces the old flat green box labeled '숲속 나무'. Decorative — not individually clickable per branch.",
+      "prompt": "A cute 3D clay-style toy miniature tree with acorns hanging from its round fluffy canopy, smooth matte toy material, soft pastel green color palette, gentle studio lighting with soft shadows, centered single subject, plain soft pastel solid background, no text, no realistic photography"
+    },
+    {
+      "file": "objects/acorn_single.png",
+      "nativeSize": "200x200",
+      "alpha": true,
+      "usedIn": "mission.css .food.acorn (background-image, used for every acorn chip across all mission screens: supply, basket, demo, compare piles, make-board slots, served dishes)",
+      "role": "Single countable unit, reused many times via CSS, not pre-rendered per count.",
+      "prompt": "A cute 3D clay-style toy acorn, smooth matte toy material, soft pastel brown and cream color palette, gentle studio lighting with soft shadows, centered single subject, plain soft pastel solid background, no text, no realistic photography"
+    },
+    {
+      "file": "objects/basket_empty.png",
+      "nativeSize": "199x149",
+      "alpha": true,
+      "usedIn": "mission.css .packed-food (background-image, position: center bottom / contain)",
+      "role": "Replaces the old flat brown box + thin strip labeled '내 배달 바구니'. Single open-basket asset; depth illusion achieved by layering acorn chips over the rendered opening area via .basket-pile (absolute-positioned region, calibrated against this exact image at 1280px desktop).",
+      "prompt": "A cute 3D clay-style toy wicker picnic basket, empty with open top showing the inside, with a curved handle, smooth matte toy material, soft pastel brown color palette, gentle studio lighting with soft shadows, centered single subject, three-quarter view, plain soft pastel solid background, no text, no realistic photography"
+    },
+    {
+      "file": "objects/plate_empty.png",
+      "nativeSize": "approx 300x230",
+      "alpha": true,
+      "usedIn": "mission.css .dish (background-image) — the small dish shown in front of every waiting friend",
+      "role": "Replaces the old flat CSS gradient dish shape.",
+      "prompt": "A cute 3D clay-style toy empty wooden plate, small round dish, smooth matte toy material, soft pastel cream color palette, gentle studio lighting with soft shadows, centered single subject, plain soft pastel solid background, no text, no realistic photography"
+    },
+    {
+      "file": "characters/bear_waiting.png / bear_happy.png",
+      "nativeSize": "161x200",
+      "alpha": true,
+      "usedIn": "mission.html story-character icon (waiting, static); mission.js friend('bear', i, happy)",
+      "prompt": "waiting: sitting and waiting patiently, neutral friendly expression. happy: cheering with big joyful smile and raised arms. Same clay-toy template as all characters below."
+    },
+    {
+      "file": "characters/rabbit_waiting.png / rabbit_happy.png",
+      "nativeSize": "160x200",
+      "alpha": true,
+      "usedIn": "mission.js friend('rabbit', i, happy) — share concept demo/probe steps"
+    },
+    {
+      "file": "characters/fox_waiting.png / fox_happy.png",
+      "nativeSize": "160x200",
+      "alpha": true,
+      "usedIn": "mission.js friend('fox', i, happy) — share concept probe step, soft pastel orange palette"
+    },
+    {
+      "file": "characters/frog_waiting.png / frog_happy.png",
+      "nativeSize": "160x200",
+      "alpha": true,
+      "usedIn": "mission.js friend('frog', i, happy) — share concept practice step, soft pastel green palette"
+    },
+    {
+      "file": "characters/bird_waiting.png / bird_happy.png",
+      "nativeSize": "160x200",
+      "alpha": true,
+      "usedIn": "mission.js friend('bird', i, happy) — share concept transfer step, soft pastel blue palette"
+    },
+    {
+      "file": "objects/berry_single.png",
+      "nativeSize": "200x200",
+      "alpha": true,
+      "usedIn": "mission.css .food.berry (background-image) — real gap found in 3rd round: 'berry' is a second fruit type actually used across share/compare/make transfer+practice steps (templates array), not just the intro teaser. Previously still the old flat CSS gradient shape while acorn had already been converted; now matches.",
+      "prompt": "A cute 3D clay-style toy berry (red berry cluster with a small green leaf), smooth matte toy material, soft pastel red and cream color palette, gentle studio lighting with soft shadows, centered single subject, plain soft pastel solid background, no text, no realistic photography"
+    },
+    {
+      "file": "background/forest_background_clay.png",
+      "nativeSize": "199x112",
+      "alpha": false,
+      "usedIn": "mission.css .stage (background-image, center 52% / cover)",
+      "role": "DECISION: kept as the shipped default, replacing forest-world.svg. A/B compared at PC 1280 / tablet / mobile — the clay style now matches the glossy 3D foreground objects instead of clashing with a flat vector background, and it reads acceptably sharp at all tested widths once actually placed behind the real UI (earlier concern about desktop blur from the raw low native resolution did not hold up in context — see previews/overworld_map_pc.png, previews/travel_beat_pc.png).",
+      "prompt": "A cute 3D clay-style toy miniature forest diorama with small trees, grass, and a winding dirt path, smooth matte toy material, soft pastel green color palette, gentle studio lighting with soft shadows, wide scene, plain soft pastel sky background, no text, no realistic photography"
+    },
+    {
+      "file": "objects/reward_flower.png",
+      "nativeSize": "approx 200x200",
+      "alpha": true,
+      "usedIn": "mission.css .bloom:after (chapter-end celebration) AND .map-node-badge.icon-flower (overworld map node for the 'make' concept) — reused across both rather than generating a separate asset",
+      "role": "Replaces the emoji-based celebration flower (cross-OS rendering inconsistency) with a proper image."
+    },
+    {
+      "file": "map/path_fork.png",
+      "nativeSize": "200x200",
+      "alpha": true,
+      "usedIn": "mission.css .map-node-badge.icon-fork — overworld map node icon for the 'compare' concept ('두 갈래 오솔길')",
+      "prompt": "A cute 3D clay-style toy miniature diorama of a forest path splitting into two paths (a fork in the road), small round pebbles marking the path, tiny grass tufts, smooth matte toy material, soft pastel green and brown color palette, gentle studio lighting with soft shadows, centered single subject, plain soft pastel solid background, no text, no realistic photography"
+    }
+  ],
+  "gameFeelChanges": [
+    "Every take/undo acorn button now has tactile press feedback (scale .86 on :active) and pops in with a spring easing when it appears in the tree/basket pile (.tree-pile .interaction, .basket-pile .interaction — new @keyframes pop-in, 0.32s).",
+    "Guide bear icon (top-left) has a very subtle idle breathing animation (idle-breathe, 2.6s loop) so the scene doesn't feel static while waiting for input.",
+    "Each waiting friend card bobs gently (idle-bob, staggered per friend) instead of sitting frozen.",
+    "Success and chapter-result cards now pop in with a spring animation (card-pop) instead of appearing instantly.",
+    "Chapter-end celebration ('bloom') redesigned: was a plain dotted orange circle — now a glowing circle with a flower emoji and an 8-dot CSS confetti burst (bloom-pop + confetti-burst keyframes). This is the biggest 'feels like a game, not a worksheet' change.",
+    "All new animations are covered by the existing global prefers-reduced-motion:reduce rule (already present in mission.css, disables all animation/transition site-wide) — nothing new bypasses it.",
+    "No change to timing logic, scoring, state machine, or any of the five teaching rules in LEARNING-DESIGN.md — purely presentational."
+  ],
+  "notDone": [
+    "squirrel_waiting/happy — in the work order's 2nd-tier list but not actually referenced anywhere in mission.js (the real animal set used is bear/rabbit/fox/frog/bird); skipped as unused rather than speculatively added",
+    "delivery_sign, stump, forest_path, bridge_broken/fixed, shop_counter — these are for features (bridge repair, fox shop) that don't exist in the current game code yet (LEARNING-DESIGN.md lists them as future-version candidates, not implemented). Generating art for unbuilt features was skipped rather than producing unused files.",
+    "UI monochrome icons (hint_eye/undo/next/home/sound svg) — current buttons are text-based, not icon-based; not changed",
+    "basket/tree quantity display verified only up to 4 items (current content's actual max); 0-10 range not empirically tested since no template currently needs more than ~6",
+    "drag-and-drop gesture (tap-only still required to work end-to-end, and does) — not added",
+    "travel beat is inserted once per chapter (between the demo step and the first real task), not before every single step — a deliberate scope bound to avoid slowing the game down with repeated interstitials; not every step has a 'walking' moment",
+    "map node icons/labels for compare and make concepts were only spot-checked at PC 1280 width during this round's testing (see qa/test-results.md 3rd update) — tablet/mobile screenshots exist only for the share-concept map state",
+    "4th round scope limit: only the PRIMARY action buttons were converted to icon-first. Instructional sentences (storybar kicker/instruction, status messages, chapter-end summary paragraph), map-node captions, and quest-chip phase labels (e.g. '함께 연습') were deliberately left as visible text — they remain in the DOM for caregivers/screen readers and are not required reading to operate the core loop, but were not visually shrunk or hidden either. Numeric progress dots (1/2/3) also left as-is.",
+    "color-blindness (deuteranopia/protanopia) re-verification of the new correct/incorrect flash was not done with a simulator — shape (check vs cross) was used deliberately so it doesn't rely on color alone, but this wasn't re-tested."
+  ],
+  "structuralChanges3rdRound": {
+    "trigger": "User explicitly pushed back that the whole redesign still read as a worksheet with no journey/story ('길가다 나무발견하고 그런 스토리도없고... 학습지 풀듯 문제나오고'), after rounds 1-2 had only reskinned assets + added micro-animation juice onto the exact same linear scene-swap flow. User was asked to scope the fix (AskUserQuestion) and chose full structural redesign (overworld/map), not just a light narrative wrapper.",
+    "whatChanged": [
+      "New 'overworld' screen (showMap() in mission.js): a vertical forest-path map with one node per concept (share/compare/make), using CONCEPTS[].name/short fields that already existed in the code but were never surfaced in the UI before. Nodes show locked/current/done state with a progress checkmark; locked nodes are inert, current/done nodes are clickable to travel there.",
+      "New 'travel' screen (travelBeat() in mission.js): a short one-line discovery beat ('오솔길을 따라 걷다 보니, 배고픈 친구들이 나무 아래 모여 있어요!' etc, one line per concept in TRAVEL_LINES) shown once per chapter, between the demo step and the first real task — replaces the previous instant demo->task cut with an actual 'arriving somewhere' moment.",
+      "Navigation rewiring only: 'start' now opens the map instead of jumping straight into chapter 1; 'next-chapter' (chapter-end button) now returns to the map instead of auto-advancing to the next chapter, so the player chooses the next node themselves; a new 'unlocked' counter on the persistent state object tracks map progress. 'repeat' (replay same chapter) is unchanged.",
+      "ZERO changes to feedback()/assess()/advance()/the take|undo|submit|choose branches of handle() — scoring, probe/transfer independence tracking, hint logic, and the five teaching rules in LEARNING-DESIGN.md are byte-for-byte untouched. Only presentation-layer entry points (showIntro/chapterEnd's button routing, demo's continue button) got new intermediate screens inserted around them."
+    ],
+    "verification": "Full Playwright run-through of all 3 concepts end-to-end (share -> compare -> make) via the game's own exposed __moaMissionQA() state readout, confirming: map unlock progression (locked -> current -> done) after each chapter, zero console/page errors across the whole run, clicking a 'done' map node correctly replays that chapter from its demo step, and the pre-existing early-mastery-exit rule in advance() (skipping remaining practice items once criteria are met) still fires exactly as before — confirming no scoring-path regression."
+  }
+}

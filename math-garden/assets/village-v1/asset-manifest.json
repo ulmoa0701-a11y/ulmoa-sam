@@ -1,0 +1,39 @@
+{
+  "updated": "2026-10-22",
+  "style": "cute-3d-clay-toy, same as mission-v4 (see mission-v4/style-guide.md)",
+  "productionTool": "Canva generate-image + remove-background (scoped exception carried over from mission-v4/style-guide.md — 1 new asset only)",
+  "status": "v1 free-play prototype: gather + pet-raising + village-building, all tabs freely switchable, no forced order, no correct/incorrect gate. Math-only (counting/quantity). Korean literacy explicitly deferred pending user confirmation of scope.",
+  "newAssets": [
+    {
+      "file": "objects/cottage.png",
+      "nativeSize": "200x200",
+      "alpha": true,
+      "usedIn": "village.js PALETTE (build tab) — the most expensive buildable item (5 acorns + 2 berries)",
+      "prompt": "A cute 3D clay-style toy miniature cottage house, small round wooden cabin with a triangular thatched roof and a round door, smooth matte toy material, soft pastel cream and brown color palette, gentle studio lighting with soft shadows, centered single subject, three-quarter view, plain soft pastel solid background, no text, no realistic photography"
+    }
+  ],
+  "reusedAssets": [
+    "mission-v4/objects/acorn_tree.png (gather node)",
+    "mission-v4/objects/berry_single.png (gather node, doubles as resource icon)",
+    "mission-v4/objects/acorn_single.png (resource icon, feed icon, cost chips)",
+    "mission-v4/objects/basket_empty.png (build palette item)",
+    "mission-v4/objects/reward_flower.png (build palette item AND pet stage-2 crown decoration)",
+    "mission-v4/characters/bear_waiting.png / bear_happy.png (the pet)",
+    "mission-v4/background/forest_background_clay.png (world background)"
+  ],
+  "gameLoops": {
+    "gather": "Tap tree -> +1 acorn (state.acorns). Tap berry node -> +1 berry (state.berries). No limit, no cooldown, fully repeatable.",
+    "pet": "Tap a feed icon (costs 1 of that resource) -> hunger +20 (capped 100), feedCount +1, bear shows happy PNG for ~850ms then reverts to waiting. feedCount>=5 unlocks visual stage 1 (slightly bigger), feedCount>=12 unlocks stage 2 (bigger + flower crown). No decay over time in v1 (hunger only goes up) — see notDone.",
+    "build": "Tap a palette item. If state has enough of both resource costs, deduct and push {type} into state.buildings (rendered stacked in the plot, never removed). If not enough, button shakes once, no state change, no error text."
+  },
+  "notDone": [
+    "Korean literacy (자음/모음/띄어쓰기) content — user mentioned it as a parallel principle but didn't confirm folding it into this same game; deferred as a separate future game using the same free-play mechanic rather than guessing and building the wrong scope.",
+    "Single pet species only (bear, reusing mission-v4 asset) — no pet choice/selection screen.",
+    "Only 3 buildable item types (flower/basket/cottage) — no larger building variety or decoration categories.",
+    "Village plot auto-stacks placed items left-to-right/wrap; no drag-to-reposition, no removing a placed item once built.",
+    "Hunger only increases via feeding in v1 — no time-based decay, so there's no 'tend to your pet regularly' pressure yet (deliberately simple for v1; decay could make it feel more alive but also adds a notion of 'neglect' that needs careful framing for young kids).",
+    "No sound design beyond reusing the same simple beep pattern as mission.js's sfx() — no distinct village music/ambience.",
+    "Not linked from math-garden/index.html (the 15-game hub) yet — only reachable by direct URL until the user decides whether/how to surface it.",
+    "0-100 resource/building count scaling not stress-tested (only tested up to 5 acorns / 3 berries / 1 building in this round's QA)."
+  ]
+}

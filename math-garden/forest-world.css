@@ -1,0 +1,211 @@
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
+:root{--ink:#355349;--paper:#fff7df;--leaf:#5b9b79;--cream:#ffefc9;--orange:#e98e65;--brown:#926947;--line:#ead1a2}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(145deg,#e4efd8,#f5efd9);font-family:'Gowun Dodum','Pretendard',system-ui,sans-serif;color:var(--ink)}button,a{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}button:focus-visible,a:focus-visible{outline:4px solid #f9cd78;outline-offset:3px}.shell{min-height:100vh}.mast{min-height:74px;padding:12px max(17px,calc((100vw - 1160px)/2));background:#fff8e8;display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:2px solid #e6dabd}.back{color:#557c69;text-decoration:none;font-weight:900;white-space:nowrap}.identity{font-size:18px;font-weight:1000;color:#416857}.identity span{font-size:15px;color:#a18667}.controls{display:flex;gap:8px}.controls button{border:2px solid #d8bf98;background:#fff9ec;color:#665640;padding:9px 13px;min-height:44px;border-radius:14px;font-weight:900}.main{max-width:1160px;margin:auto;padding:14px 16px 20px}.topline{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:4px 10px 14px}.overline{font-size:13px;color:#638e79;font-weight:900;letter-spacing:.04em}.topline h1{font-size:clamp(28px,4.5vw,41px);line-height:1.2;letter-spacing:-.05em;margin:4px 0}.chapters{display:flex;gap:10px}.chapter-dot{width:35px;height:35px;border-radius:50%;background:#eee8d3;display:grid;place-items:center;color:#a79b80;font-weight:900;border:3px solid #d9ceb4}.chapter-dot.active{color:#fff;background:#e7a167;border-color:#ca8559;transform:scale(1.08)}.chapter-dot.completed{color:#fff;background:#7eb092;border-color:#609b7c}.stage{position:relative;isolation:isolate;overflow:hidden;min-height:625px;border-radius:42px;border:8px solid #fff8e7;box-shadow:0 11px 0 #bfcda9,0 25px 42px #395d4a30;background:#b7d6a5 url('./assets/mission-v4/background/forest_background_clay.png') center 52%/cover no-repeat}.scenery{position:absolute;inset:0;background:linear-gradient(#fff4cf14,#273e2620);pointer-events:none;z-index:0}.scenecontent{position:relative;z-index:1;padding:18px 18px 24px;max-width:1060px;margin:auto}.storybar{max-width:730px;margin:auto;display:flex;align-items:center;gap:9px}.story-character{flex:0 0 85px;height:92px;display:grid;place-items:center;filter:drop-shadow(0 5px 4px #3b4c3555)}.story-character{animation:idle-breathe 2.6s ease-in-out infinite}.story-character svg,.story-character img{width:92px;height:92px;object-fit:contain}.story-cloud{flex:1;background:linear-gradient(#fffef5,#fff1cc);border:4px solid #f0d8a8;box-shadow:0 6px 0 #8a75587a,0 10px 20px #796b5247;border-radius:29px;padding:11px 22px;min-height:82px}.story-cloud small{display:block;font-size:12px;color:#8f825f;font-weight:800}.story-cloud p{font-size:clamp(17px,2.7vw,24px);font-weight:900;margin:2px 0 0;color:#5d5642;letter-spacing:-.03em}.look{width:52px;height:52px;border-radius:50%;border:4px solid #e4c28a;background:linear-gradient(#fff9e5,#f0dbb9);color:#a77e51;box-shadow:0 5px 0 #9b8a66;font-size:30px;font-weight:900}.play{max-width:940px;margin:12px auto 0;min-height:429px;display:grid;place-items:center}.btn{background:linear-gradient(#ed9b77,#d87760);border:4px solid #ce745e;box-shadow:0 7px 0 #a85c4d;color:#fff8dc;font-size:22px;font-weight:1000;border-radius:21px;padding:14px 27px;min-height:66px}.btn:active{transform:translateY(5px);box-shadow:0 2px 0 #a85c4d}.intro,.lesson,.quest,.success,.chapter-result{width:min(100%,790px);border-radius:40px;border:5px solid #efd5a6;background:linear-gradient(138deg,#fff9e9f7,#ffefcfed);box-shadow:0 11px 0 #9a926b,0 20px 32px #3e503438;text-align:center;padding:22px;min-height:374px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}.intro-title{font-size:clamp(24px,4vw,34px);font-weight:1000}.intro p{margin:0 0 7px;color:#6d654e;font-size:18px}.intro-bag{display:flex;gap:12px;align-items:center;justify-content:center;width:205px;height:140px;background:url('./assets/mission-v4/objects/basket_empty.png') center bottom/contain no-repeat;border:0;box-shadow:none;position:relative;padding:0 5px 24px}.intro-bag .food{transform:scale(1.1)}.food{position:relative;display:inline-block;width:43px;height:48px;flex:0 0 43px;border-radius:49% 48% 44% 44%;background:radial-gradient(circle at 29% 28%,#f4c494,#c18a54 55%,#946239 96%);box-shadow:inset -5px -5px 0 #7a4c2830,0 5px 0 #7b5a3933;border:2px solid #aa784c}.food:before{content:'';position:absolute;top:-6px;left:3px;width:33px;height:17px;border-radius:54% 54% 27% 27%;background:repeating-linear-gradient(42deg,#715234 0 3px,#98724b 4px 7px);border:2px solid #715234}.food:after{content:'';position:absolute;top:-13px;left:20px;width:5px;height:10px;border-radius:6px;background:#715234}.food.berry{background:url('./assets/mission-v4/objects/berry_single.png') center/contain no-repeat;border:0;box-shadow:0 4px 3px #5c431c38;border-radius:0}.food.berry:before{content:none}.food.berry:after{display:none}.food.flower{background:url('./assets/mission-v4/objects/reward_flower.png') center/contain no-repeat;border:0;box-shadow:0 4px 3px #5c431c38;border-radius:0}.food.flower:before,.food.flower:after{content:none}.food.seashell{background:url('./assets/forest-world-v1/objects/shell_single.png') center/contain no-repeat;border:0;box-shadow:0 4px 3px #5c431c38;border-radius:0}.food.seashell:before,.food.seashell:after{content:none}.food.mini{width:24px;height:27px;flex-basis:24px;box-shadow:0 2px 0 #7b5a392b}.food.mini:before{width:19px;height:10px;left:0;top:-4px}.food.mini:after{width:3px;height:6px;top:-8px;left:10px}.food.acorn{background:url('./assets/mission-v4/objects/acorn_single.png') center/contain no-repeat;border:0;box-shadow:0 4px 3px #5c431c38;border-radius:0}.food.acorn:before,.food.acorn:after{content:none}.forest-friend{width:95px;height:104px;filter:drop-shadow(0 5px 3px #5b554046);overflow:visible}.forest-friend.clay-photo{object-fit:contain;filter:drop-shadow(0 6px 4px #5b554055)}.demo-friends,.friends-line{display:flex;justify-content:center;align-items:end;flex-wrap:wrap;gap:12px}.demo-pair,.hungry-friend{min-width:105px;min-height:135px;padding:3px 10px 12px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;background:#fffae8;border-radius:23px;border:3px solid #edd0a6;box-shadow:0 7px 0 #bbad8c}.hungry-friend .forest-friend{animation:idle-bob 2.2s ease-in-out infinite}.hungry-friend:nth-child(2) .forest-friend{animation-delay:.3s}.hungry-friend:nth-child(3) .forest-friend{animation-delay:.6s}.hungry-friend:nth-child(4) .forest-friend{animation-delay:.9s}.demo-pair .forest-friend,.hungry-friend .forest-friend{width:100px;height:95px}.match-slot{display:grid;place-items:center;min-width:47px;min-height:47px;background:#fff9e6;border-radius:15px;border:3px dashed #d2bea0}.match-slot.occupied{border-style:solid;background:#ddefd9;border-color:#85b394}.dish{height:30px;width:61px;background:url('./assets/mission-v4/objects/plate_empty.png') center/contain no-repeat;border:0;border-radius:0;box-shadow:none}.visual-equation{font-size:20px;font-weight:800;color:#826950}.lesson-foot{display:flex;align-items:center;gap:15px;flex-wrap:wrap;justify-content:center}.observation{background:#eef4e6;border:2px solid #b5d0b2;border-radius:100px;padding:10px 15px;font-size:14px;color:#558467}.one-to-one{display:flex;flex-direction:column;align-items:center;gap:7px}.matching-row{display:flex;gap:28px}.matching-row .match-slot{min-width:32px;min-height:32px}.lesson-lead{display:grid;gap:12px;justify-content:center}.compare-pair{display:flex;align-items:center;justify-content:center;gap:12px}.match-instruction{font-size:45px;color:#bc9b72}.quantity.pile{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:190px;min-width:100px;padding:12px;background:#fffcf0;border:4px solid #edce98;border-radius:22px}.quest{padding:17px 18px;justify-content:space-between;gap:9px;max-width:830px}.quest-head{display:flex;justify-content:space-between;align-items:center;width:100%;gap:12px}.quest-chip{background:#e4f3d7;padding:7px 14px;border:2px solid #b0c7a0;border-radius:30px;font-size:15px;font-weight:900;color:#5d876f}.quest-pips{display:flex;gap:5px}.quest-pips i{display:block;width:15px;height:15px;border-radius:50%;background:#edca87}.quest-board{display:grid;place-items:center;gap:13px;min-height:215px;width:100%}.delivery-line{display:flex;justify-content:center;gap:25px;align-items:end;width:100%;flex-wrap:wrap}.supply,.delivery{position:relative;display:grid;justify-items:center;align-content:end;gap:4px;min-width:180px;min-height:140px}.supply-items{position:relative;width:100%;max-width:190px;aspect-ratio:149/210;margin:0 auto;padding:0;background:url('./assets/mission-v4/objects/acorn_tree.png') center top/contain no-repeat;border:0;border-radius:0}.supply-items .tree-pile{position:absolute;left:4%;right:4%;bottom:2%;display:flex;flex-wrap:wrap;justify-content:center;align-content:flex-end;gap:2px;max-height:40%}.interaction{background:transparent;border:0;min-width:49px;min-height:49px;display:grid;place-items:center;padding:3px;border-radius:14px}.interaction:focus-visible{outline:4px solid #ffce74}.interaction .food{transition:transform .18s}.interaction:hover .food{transform:translateY(-3px)}.interaction{transition:transform .12s}.interaction:active{transform:scale(.86)}.tree-pile .interaction,.basket-pile .interaction{animation:pop-in .32s cubic-bezier(.34,1.56,.64,1) both}.supply-caption{font-size:12px;font-weight:800;color:#816d52;background:#fff4d6;padding:4px 10px;border-radius:20px;margin:3px}.packed-food{position:relative;width:100%;max-width:210px;aspect-ratio:199/178;margin:0 auto;padding:0;background:url('./assets/mission-v4/objects/basket_empty.png') center bottom/contain no-repeat;border:0;border-radius:0;box-shadow:none}.packed-food .basket-pile{position:absolute;left:25%;width:50%;top:45%;height:20%;display:flex;flex-wrap:wrap;justify-content:center;align-content:flex-end;gap:0}.packed-food .interaction{min-width:28px;min-height:32px;padding:2px}.basket-body{display:none}.quest-actions{display:flex;justify-content:center}.quest-actions .btn{min-height:56px;padding:9px 30px;font-size:19px}.feedback-slot{min-height:23px;width:100%;font-size:15px}.feedback-error{background:#fff2dd;color:#91664a;border:2px solid #f2d4a2;border-radius:20px;padding:9px;font-weight:900;max-width:430px;margin:auto}.scaffold{display:grid;place-items:center;gap:9px;background:#edf5df;border:3px solid #bad4ae;border-radius:21px;padding:10px;margin:5px auto;max-width:550px}.scaffold p{margin:2px;font-size:14px}.scaffold .one-to-one{max-height:120px;overflow:auto}.help-model{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px}.help-model span{font-size:13px}.match-row{display:flex;gap:5px}.compare-path{display:flex;justify-content:center;gap:18px;align-items:center;flex-wrap:nowrap;width:100%}.compare-path .interaction{width:46%;min-height:150px;border:4px solid #c7a273;background:linear-gradient(#fff7d8,#ead4ae);box-shadow:0 8px 0 #ad9472;border-radius:27px;padding:16px}.path-stand{display:grid;place-items:center;min-width:100%;gap:7px}.fruit-pile{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;max-width:250px;min-height:75px;align-items:center}.path-arch{height:10px;width:85%;background:#b8c79e;border-radius:55%}.make-layout{width:100%;display:grid;justify-items:center;gap:9px}.make-board{background:#fff7e0;padding:12px;border:5px solid #caa978;border-radius:24px;box-shadow:0 7px 0 #a38966;display:flex;flex-wrap:wrap;gap:7px;max-width:510px;justify-content:center}.make-board .match-slot{width:58px;height:58px}.quest .make-layout .delivery-line{gap:18px}.quest .make-layout .supply,.quest .make-layout .delivery{min-height:122px}.success,.chapter-result{min-height:364px}.success,.chapter-result{animation:card-pop .36s cubic-bezier(.34,1.56,.64,1) both}.success h2,.chapter-result h2{font-size:clamp(23px,4vw,33px);margin:0}.success p,.chapter-result p{font-size:17px;margin:0;color:#7c745e}.success-line{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}.served{display:grid;place-items:center;padding:7px;border:2px solid #e3cfac;background:#fff9e8;border-radius:23px}.served .forest-friend{width:75px;height:85px;object-fit:contain}.open-gate{width:190px;height:150px;border:17px solid #8eaf8b;border-bottom:0;border-radius:100px 100px 0 0;background:linear-gradient(#eef7d7,#a7cfb9);box-shadow:0 8px 0 #759572}.bloom{width:105px;height:105px;display:grid;place-items:center;position:relative;animation:bloom-pop .5s cubic-bezier(.34,1.56,.64,1) both}.bloom:before{content:'';grid-area:1/1;width:88px;height:88px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe3a8,#f4c478 60%,#eaa865);border:10px solid #fff3d6;box-shadow:0 6px 0 #d89a5e,0 0 0 8px #f6e1ae55}.bloom:after{content:'';grid-area:1/1;width:64px;height:64px;background:url('./assets/mission-v4/objects/reward_flower.png') center/contain no-repeat;filter:drop-shadow(0 3px 2px #8a6a3340);z-index:1}.confetti{position:absolute;inset:-18px;pointer-events:none}.confetti i{position:absolute;width:9px;height:9px;border-radius:3px;top:50%;left:50%;margin:-4px 0 0 -4px;animation:confetti-burst .8s ease-out both}.confetti i:nth-child(1){background:#f2a7a0;animation-delay:.02s;transform:rotate(10deg)}.confetti i:nth-child(2){background:#9bd2a6;animation-delay:.08s}.confetti i:nth-child(3){background:#f7cf72;animation-delay:.04s}.confetti i:nth-child(4){background:#8fb7e6;animation-delay:.12s}.confetti i:nth-child(5){background:#e7a9e0;animation-delay:.06s}.confetti i:nth-child(6){background:#f7cf72;animation-delay:.14s}.confetti i:nth-child(7){background:#9bd2a6;animation-delay:.1s}.confetti i:nth-child(8){background:#f2a7a0;animation-delay:.16s}.result-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}.result-actions button{border:3px solid #d09f72;background:#ffefcf;color:#72614c;font-size:18px;font-weight:900;border-radius:20px;min-height:62px;padding:13px 19px}.lower{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:17px 10px}.lower p{margin:0;font-weight:900;font-size:16px}.lower-actions{display:flex;gap:8px}.lower-actions button{background:#fff8e8;border:2px solid #cbb793;color:#6c614a;border-radius:15px;padding:9px 12px;min-height:47px;font-size:14px}.small-info{text-align:center;font-size:12px;color:#727a64;padding:0 15px 24px}footer{display:flex;justify-content:center;gap:18px;align-items:center;min-height:70px;color:#718471;font-size:12px;border-top:1px solid #d5e2ce}footer a{color:#5a8c74}
+@media(max-width:650px){
+.mast{padding:10px 12px;min-height:64px}.back{font-size:13px}.identity{font-size:14px}.identity span{display:none}.controls{gap:5px}.controls button{font-size:11px;min-height:44px;padding:7px}
+.main{padding:10px 7px}.topline{padding:6px 7px 10px}.topline h1{font-size:27px}.overline{font-size:11px}.chapter-dot{width:31px;height:31px;font-size:12px}.chapters{gap:5px}
+.stage{border-width:5px;border-radius:25px;min-height:600px;background-position:50% center}.scenecontent{padding:9px 5px 15px}.storybar{gap:4px}.story-character{flex-basis:49px;height:63px}.story-character svg,.story-character img{width:56px;height:63px;object-fit:contain}.story-cloud{padding:8px 10px;min-height:65px;border-width:3px;border-radius:20px}.story-cloud p{font-size:16px}.story-cloud small{font-size:11px}.look{width:39px;height:39px;flex:none;border-width:3px;font-size:22px}.play{margin-top:8px;min-height:460px}
+.intro,.lesson,.quest,.success,.chapter-result{width:100%;border-width:4px;padding:13px 9px;min-height:380px;border-radius:27px;box-shadow:0 7px 0 #998b6a}.intro-title{font-size:24px}.intro p{font-size:14px}.btn{min-height:58px;font-size:18px;padding:10px 19px}.lesson-foot{gap:8px}.visual-equation{font-size:14px}.observation{font-size:12px}.demo-pair,.hungry-friend{min-width:78px;min-height:108px;padding:4px;border-width:2px;border-radius:16px}.demo-pair .forest-friend,.hungry-friend .forest-friend{width:73px;height:78px;object-fit:contain}.match-slot{min-width:37px;min-height:37px}.food{width:32px;height:36px;flex-basis:32px}.food:before{width:25px;height:13px;top:-4px}.food:after{top:-10px;left:15px}.food.mini{width:23px;height:26px;flex-basis:23px}.food.mini:before{width:17px;height:8px}.quest{gap:8px;min-height:418px}.quest-chip{font-size:12px}.quest-board{min-height:275px;gap:5px}.friends-line,.demo-friends{gap:5px}
+.delivery-line{gap:7px;flex-wrap:nowrap}.supply,.delivery{min-width:0;width:49%;min-height:112px}.supply-items{max-width:150px;aspect-ratio:149/210}.supply-items .tree-pile{max-height:42%}.supply-items .interaction{min-width:34px;min-height:36px;padding:1px}.packed-food{max-width:160px;width:94%}.packed-food .basket-pile{height:52%}.packed-food .interaction{min-width:24px;min-height:28px}.supply-caption{font-size:10px;padding:3px 5px;margin:1px}.quest-actions .btn{font-size:17px;min-height:51px}
+.compare-path{gap:8px}.compare-path .interaction{width:47%;padding:10px 5px;min-height:160px}.fruit-pile{gap:4px;max-width:160px}.make-board{padding:7px;gap:3px;border-width:4px;max-width:100%}.make-board .match-slot{width:43px;height:43px}.scaffold{padding:6px}.scaffold p{font-size:11px}.feedback-error{font-size:13px}
+.success-line{gap:6px}.served .forest-friend{width:62px;height:70px;object-fit:contain}.served{padding:4px}.success h2,.chapter-result h2{font-size:23px}.result-actions button{font-size:15px;min-height:51px;padding:9px}
+.lower{padding:16px 7px;align-items:flex-start}.lower p{font-size:13px}.lower-actions button{font-size:12px}.small-info{font-size:11px}
+}
+@media(max-width:355px){.identity{display:none}.stage{min-height:640px}.friends-line{gap:2px}.hungry-friend{min-width:65px}.hungry-friend .forest-friend{width:62px}.packed-food .food.mini{transform:scale(.85)}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+/* QA-discovered readability and instructional differentiation */
+.guided-preview{background:#eaf3db;border:2px dashed #a7c497;color:#66764c;border-radius:18px;padding:7px 11px;max-width:520px;margin:0 auto;display:grid;gap:4px;justify-items:center}
+.guided-preview p{font-size:13px;margin:2px}.guided-preview .match-row{gap:5px}.guided-preview .matching-row .match-slot{min-width:27px;min-height:27px}.guided-preview .one-to-one{flex-direction:row;gap:5px}.guided-preview .matching-row{gap:6px}
+.lesson .demo-pair .match-slot.occupied{animation:delivery-arrive .75s ease-out both}.lesson .demo-pair:nth-child(2) .match-slot.occupied{animation-delay:.45s}.lesson .demo-pair:nth-child(3) .match-slot.occupied{animation-delay:.9s}
+.success .served{animation:served-jump .6s ease-out both}.success .served:nth-child(2){animation-delay:.14s}.success .served:nth-child(3){animation-delay:.28s}.success .served:nth-child(4){animation-delay:.42s}
+@keyframes delivery-arrive{from{opacity:0;transform:translateY(-36px) scale(.55)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes pop-in{0%{opacity:0;transform:scale(.4)}70%{transform:scale(1.12)}100%{opacity:1;transform:scale(1)}}@keyframes idle-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}@keyframes idle-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}@keyframes bloom-pop{0%{opacity:0;transform:scale(.3) rotate(-8deg)}70%{transform:scale(1.1) rotate(3deg)}100%{opacity:1;transform:scale(1) rotate(0)}}@keyframes card-pop{0%{opacity:0;transform:scale(.9) translateY(10px)}100%{opacity:1;transform:scale(1) translateY(0)}}@keyframes confetti-burst{0%{opacity:1;transform:translate(0,0) rotate(0) scale(1)}100%{opacity:0;transform:translate(var(--cx,40px),var(--cy,-50px)) rotate(200deg) scale(.4)}}.confetti i:nth-child(1){--cx:-46px;--cy:-54px}.confetti i:nth-child(2){--cx:40px;--cy:-60px}.confetti i:nth-child(3){--cx:-62px;--cy:10px}.confetti i:nth-child(4){--cx:58px;--cy:4px}.confetti i:nth-child(5){--cx:-30px;--cy:52px}.confetti i:nth-child(6){--cx:34px;--cy:56px}.confetti i:nth-child(7){--cx:-10px;--cy:-70px}.confetti i:nth-child(8){--cx:14px;--cy:64px}
+@keyframes served-jump{0%{transform:translateY(10px);opacity:.4}60%{transform:translateY(-9px);opacity:1}100%{transform:translateY(0)}}
+@media(max-width:650px){.lower{flex-direction:column;align-items:stretch;gap:9px}.lower p{width:100%;min-height:22px;line-height:1.5}.lower-actions{justify-content:flex-end;width:100%}.lower-actions button{white-space:nowrap;min-height:43px;padding:7px 11px;font-size:12px}.guided-preview{max-width:100%;padding:6px}.guided-preview p{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.lesson .demo-pair .match-slot.occupied,.success .served,.tree-pile .interaction,.basket-pile .interaction,.story-character,.hungry-friend .forest-friend,.bloom,.confetti i,.success,.chapter-result{animation:none!important}}
+
+.overworld{display:flex;flex-direction:column;align-items:center;gap:4px;padding:18px 8px 10px}
+.overworld-complete{font-size:14px;color:#5b9b79;font-weight:700;margin:0 0 10px;text-align:center}
+.map-path{display:flex;flex-direction:column;align-items:center;gap:0;width:100%;max-width:280px}
+.map-connector{width:4px;height:34px;background:repeating-linear-gradient(#cdbd8f 0 6px,transparent 6px 12px);border-radius:2px}
+.map-node{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;width:220px;padding:12px 14px;border-radius:24px;background:#fff8e7;border:3px solid #ead1a2;box-shadow:0 6px 0 #e3cfa0;text-align:center;cursor:pointer}
+.map-node.locked{opacity:.45;filter:grayscale(.6);cursor:default;box-shadow:none}
+.map-node.current{border-color:#e98e65;box-shadow:0 6px 0 #d97a50;animation:map-pulse 1.8s ease-in-out infinite}
+.map-node.done{border-color:#8fb389}
+.map-node-badge{display:block;width:72px;height:72px;background-size:contain;background-position:center;background-repeat:no-repeat;margin-bottom:2px}
+.map-node-badge.icon-tree{background-image:url('./assets/mission-v4/objects/acorn_tree.png')}
+.map-node-badge.icon-fork{background-image:url('./assets/mission-v4/map/path_fork.png')}
+.map-node-badge.icon-flower{background-image:url('./assets/mission-v4/objects/reward_flower.png')}
+.map-node-label{display:block;font-size:15px;font-weight:700;color:var(--ink)}
+.map-node-sub{display:block;font-size:12px;color:#8a9a85}
+.map-node-check{position:absolute;top:8px;right:14px;width:22px;height:22px;border-radius:50%;background:#5b9b79;color:#fff;font-size:13px;line-height:22px}
+@keyframes map-pulse{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.travel-scene{display:flex;flex-direction:column;align-items:center;gap:10px;padding:26px 16px;text-align:center}
+.travel-badge{width:96px;height:96px;background-size:contain;background-position:center;background-repeat:no-repeat;filter:drop-shadow(0 6px 4px #5b554055)}
+.travel-steps{display:flex;gap:7px}
+.travel-steps i{width:8px;height:8px;border-radius:50%;background:#bf8c57;display:block;animation:footstep-bounce 1s ease-in-out infinite}
+.travel-steps i:nth-child(2){animation-delay:.15s}
+.travel-steps i:nth-child(3){animation-delay:.3s}
+@keyframes footstep-bounce{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-6px);opacity:1}}
+.travel-scene p{max-width:300px;font-size:15px;color:var(--ink);line-height:1.5}
+@media(max-width:650px){.map-node{width:180px;padding:9px 10px}.map-node-badge{width:58px;height:58px}.travel-badge{width:76px;height:76px}}
+
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.intro .interaction[data-mission="start"],.travel-scene .interaction[data-mission="arrive"],.success .interaction[data-mission="advance"]{background:linear-gradient(#ed9b77,#d87760);border:4px solid #ce745e;box-shadow:0 7px 0 #a85c4d;color:#fff8dc;border-radius:50%;width:66px;height:66px;min-width:66px;min-height:66px}
+.intro .interaction[data-mission="start"]:active,.travel-scene .interaction[data-mission="arrive"]:active,.success .interaction[data-mission="advance"]:active{transform:scale(.9)}
+.feedback-flash{position:absolute;z-index:6;top:50%;left:50%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;display:grid;place-items:center;opacity:0;transform:scale(.4);pointer-events:none}
+.feedback-flash.show{animation:flash-pop .65s cubic-bezier(.34,1.56,.64,1) both}
+.feedback-flash.ok{background:#5b9b79;color:#fff;box-shadow:0 10px 0 #487b60,0 0 0 10px #a9d6bb66}
+.feedback-flash.no{background:#d97a6c;color:#fff;box-shadow:0 10px 0 #b35c50,0 0 0 10px #f0b4ab66}
+.feedback-flash svg{width:44px;height:44px}
+@keyframes flash-pop{0%{opacity:0;transform:scale(.4)}25%{opacity:1;transform:scale(1.08)}40%{transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:scale(1)}}
+.btn.action{display:inline-flex;align-items:center;justify-content:center}
+.result-actions button{display:inline-flex;align-items:center;justify-content:center}
+#sound,#restart,#help,#change{display:inline-flex;align-items:center;gap:6px;justify-content:center}
+@media(max-width:650px){.intro .interaction[data-mission="start"],.travel-scene .interaction[data-mission="arrive"],.success .interaction[data-mission="advance"]{width:56px;height:56px;min-width:56px;min-height:56px}.feedback-flash{width:68px;height:68px;margin:-34px 0 0 -34px}.feedback-flash svg{width:36px;height:36px}}
+
+button.feed-friend{appearance:none;-webkit-appearance:none;font:inherit;color:inherit;text-align:center}
+button.feed-friend:not(:disabled){cursor:pointer}
+button.feed-friend:not(:disabled):active{transform:translateY(3px)}
+button.feed-friend.friend-fed{cursor:default;background:#eef6e2;border-color:#8fb389}
+button.feed-friend.friend-fed .forest-friend{transform:translateY(-3px)}
+.dish.dish-filled{box-shadow:0 0 0 3px #a9d6bb77,0 4px 3px #5c431c38;border-radius:50%}
+.supply.need-food{outline:5px solid #ffdc8c;outline-offset:3px;border-radius:18px;animation:forest-nudge .75s ease-in-out infinite alternate}
+@keyframes forest-nudge{from{filter:brightness(1)}to{filter:brightness(1.16)}}
+@media(prefers-reduced-motion:reduce){.supply.need-food{animation:none!important}}
+
+/* ---------- forest-world fusion additions ---------- */
+/* resource bar: always visible across all 4 tabs, sits above the panels */
+.resource-bar{position:relative;z-index:1;display:flex;gap:10px;justify-content:center;padding:16px 10px 4px}
+.res{display:flex;align-items:center;gap:6px;background:#fff8e7ee;border:2px solid var(--line);border-radius:18px;padding:6px 14px;font-weight:900;font-size:17px;box-shadow:0 4px 0 #e3cfa0}
+.res img{width:28px;height:28px;object-fit:contain}
+
+/* panel system (quest / gather / pet / build share this) */
+.panel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:10px 12px 24px}
+.panel[hidden]{display:none}
+.panel-quest{padding:0;gap:0;display:block}
+.panel-quest .topline{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:4px 10px 14px}
+
+/* quest chapter-end reward row */
+.quest-reward{display:flex;gap:14px;align-items:center;justify-content:center}
+.reward-chip{display:inline-flex;align-items:center;gap:4px;background:#eef6e2;border:2px solid #b7d6a5;border-radius:16px;padding:5px 12px;font-weight:900;font-size:16px;color:#4a7a5c}
+.reward-chip .food{width:24px;height:24px;flex:0 0 24px;margin:0}
+.reward-chip b{font-size:16px}
+
+/* gather tab */
+.gather-spots{display:flex;gap:34px;align-items:center;justify-content:center;flex-wrap:wrap}
+.spot{background:transparent;border:0;padding:6px;border-radius:22px;transition:transform .12s}
+.spot:active{transform:scale(.9)}
+.spot img{width:140px;height:auto;object-fit:contain;filter:drop-shadow(0 8px 6px #3f3a2440)}
+.spot .berry-spot-img{width:92px}
+.spot.bounce{animation:spot-bounce .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes spot-bounce{0%{transform:scale(1)}40%{transform:scale(.85) rotate(-4deg)}70%{transform:scale(1.08) rotate(3deg)}100%{transform:scale(1)}}
+.float-pop{position:absolute;width:34px;height:34px;left:50%;top:10%;margin-left:-17px;pointer-events:none;animation:float-up .7s ease-out both}
+@keyframes float-up{0%{opacity:0;transform:translateY(0) scale(.6)}25%{opacity:1}100%{opacity:0;transform:translateY(-60px) scale(1.1)}}
+
+/* pet tab */
+.pet-scene{display:flex;flex-direction:column;align-items:center;gap:16px}
+.pet-wrap{position:relative;width:170px;height:190px;display:grid;place-items:center}
+.pet-photo{width:150px;height:auto;object-fit:contain;filter:drop-shadow(0 8px 6px #3f3a2440);transition:transform .2s}
+.pet-wrap.stage-1 .pet-photo{width:168px}
+.pet-wrap.stage-2 .pet-photo{width:182px}.pet-wrap.stage-3 .pet-photo{width:200px}.pet-side-flower{position:absolute;bottom:4px;right:-10px;width:34px;z-index:2;filter:drop-shadow(0 3px 2px #8a6a3340);animation:crown-wiggle 2.8s ease-in-out infinite reverse}
+.pet-crown{position:absolute;top:-14px;left:50%;width:54px;margin-left:-27px;z-index:2;filter:drop-shadow(0 4px 3px #8a6a3340);animation:crown-wiggle 2.4s ease-in-out infinite}
+@keyframes crown-wiggle{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+.hunger-row{display:flex;gap:6px}
+.pip{width:26px;height:26px;border-radius:50%;background:#e9ddc3;display:grid;place-items:center;color:#cdbf9b}
+.pip.filled{background:#f0a97b;color:#fff;box-shadow:0 3px 0 #cf8a5c}
+.feed-tray{display:flex;gap:16px}
+.feed-btn{width:62px;height:62px;border-radius:50%;background:#fff8e7;border:3px solid var(--line);box-shadow:0 5px 0 #e3cfa0;display:grid;place-items:center;transition:transform .12s}
+.feed-btn:active{transform:scale(.88)}
+.feed-btn:disabled{opacity:.35;box-shadow:none}
+.feed-btn img{width:36px;height:36px;object-fit:contain}
+
+/* build tab */
+.build-plot{min-height:150px;width:100%;max-width:520px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;gap:8px;padding:10px;background:#fff8e7aa;border:3px dashed #cdbf9b;border-radius:24px}
+.placed{object-fit:contain;filter:drop-shadow(0 6px 4px #3f3a2440)}
+.placed.pop{animation:placed-pop .4s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes placed-pop{0%{opacity:0;transform:scale(.4) translateY(20px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+.plot-empty-hint{width:1px;height:1px;margin:0}
+.build-palette{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.palette-item{display:flex;flex-direction:column;align-items:center;gap:4px;background:#fff8e7;border:3px solid var(--line);border-radius:18px;padding:8px 10px;box-shadow:0 5px 0 #e3cfa0}
+.palette-item.cant{opacity:.55}
+.palette-item img{object-fit:contain}
+.cost-row{display:flex;gap:6px}
+.cost-chip{display:flex;align-items:center;gap:2px;font-size:12px;font-weight:800;color:#8a7a56}
+.cost-chip img{width:16px;height:16px}
+.palette-item.shake{animation:shake-no .4s}
+@keyframes shake-no{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* tab bar (4 tabs) */
+.tabbar{position:sticky;bottom:10px;display:flex;justify-content:center;gap:10px;margin-top:14px}
+.tab-btn{width:58px;height:58px;border-radius:50%;background:#fff8e7;border:3px solid var(--line);box-shadow:0 6px 0 #e3cfa0;color:#8a7a56;display:grid;place-items:center;transition:transform .12s}
+.tab-btn:active{transform:scale(.9)}
+.tab-btn[aria-pressed="true"]{background:linear-gradient(#ed9b77,#d87760);border-color:#ce745e;color:#fff8dc;box-shadow:0 6px 0 #a85c4d}
+
+#sound{width:44px;height:44px;border-radius:50%;border:2px solid #d8bf98;background:#fff9ec;color:#72614c;display:grid;place-items:center;padding:0}
+
+@media(max-width:650px){
+ .spot img{width:100px}
+ .spot .berry-spot-img{width:68px}
+ .pet-wrap{width:130px;height:150px}
+ .pet-photo{width:110px}
+ .pet-wrap.stage-1 .pet-photo{width:124px}
+ .pet-wrap.stage-2 .pet-photo{width:136px} .pet-wrap.stage-3 .pet-photo{width:150px} .pet-side-flower{width:26px;right:-6px}
+ .feed-btn{width:52px;height:52px}
+ .tab-btn{width:50px;height:50px}
+ .resource-bar{padding:10px 6px 2px}
+ .res{font-size:14px;padding:5px 10px}
+ .res img{width:22px;height:22px}
+}
+
+/* Fix: mission.css's `#sound,#restart,#help,#change{display:inline-flex}` (added in an
+   earlier round for icon buttons) has ID specificity that overrides the native [hidden]
+   display:none, so #help/#change stay visible on non-task screens. Confirmed this is a
+   pre-existing bug on the live mission.html too (not something this fusion introduced) —
+   flagged for the parent session to decide whether to fix mission.css separately, since
+   this file must not touch it. Fixed here only. */
+#help[hidden],#change[hidden]{display:none!important}
+
+.map-node-badge.icon-bridge{background-image:url('./assets/forest-world-v1/objects/bridge_gap.png')}
+/* Bridge scene: the gap-dock sits as an absolutely-positioned overlay directly on the real
+   bridge_gap.png image (same physical-overlay technique already used for .tree-pile on the
+   tree and .basket-pile on the basket) so placed planks visually span the actual gap in the
+   bridge, instead of floating in a separate disconnected box below a small decorative icon. */
+.bridge-stage{position:relative;width:100%;max-width:260px;aspect-ratio:1/1;margin:0 auto;background:url('./assets/forest-world-v1/objects/bridge_gap.png') center/contain no-repeat;filter:drop-shadow(0 6px 4px #5b554046)}
+.plank-dock{position:absolute;left:37%;right:37%;top:33%;height:14%;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:2px}
+.plank-dock .interaction{min-width:0;min-height:0;padding:1px;animation:pop-in .32s cubic-bezier(.34,1.56,.64,1) both}.plank-dock .plank{filter:drop-shadow(0 0 0 #fff) drop-shadow(0 2px 3px #00000055);outline:3px solid #fff3d6;outline-offset:1px;border-radius:3px;box-shadow:0 0 0 5px #ffce7488}
+.plank-tray{display:flex;align-items:flex-end;justify-content:center;gap:8px;flex-wrap:wrap;max-width:320px;padding:8px;background:#fff7e0cc;border:3px dashed #caa978;border-radius:20px;margin:4px auto 0}
+.plank-tray .interaction{min-width:0;min-height:0;padding:2px}
+.plank{display:block;height:26px;background:url('./assets/forest-world-v1/objects/wood_plank.png') center/100% 100% no-repeat;filter:drop-shadow(0 3px 2px #5c431c38)}
+.plank.mossy{filter:drop-shadow(0 3px 2px #5c431c38) sepia(.35) hue-rotate(55deg) saturate(1.4) brightness(.94)}
+.plank-1{width:30px}
+.plank-2{width:48px}
+.plank-3{width:66px}
+.plank-4{width:84px}
+@media(max-width:650px){.bridge-stage{max-width:190px}.plank-tray{max-width:220px}.plank{height:20px}.plank-1{width:24px}.plank-2{width:38px}.plank-3{width:52px}.plank-4{width:66px}}
+
+/* Compare: a small wordless "more vs fewer" legend, separate from the actual two paths so it
+   never leaks which side is correct — uses plain abstract pile silhouettes at fixed sizes,
+   not countable fruit units, so a child can't map it 1:1 onto the real quantities in play. */
+.want-hint{display:flex;align-items:flex-end;gap:8px;margin:0 2px;padding:4px 8px;background:#fff8e7cc;border-radius:12px}
+.want-pile{display:block;background:#cdbf9b;border-radius:3px 3px 1px 1px}
+.want-pile.small{width:13px;height:11px}
+.want-pile.big{width:13px;height:26px}
+.want-pile.target{background:#e7a167;box-shadow:0 0 0 2px #fff3d6,0 0 0 4px #e7a16788}
+@media(max-width:650px){.want-pile.small{width:8px;height:7px}.want-pile.big{width:8px;height:16px}}
+
+.map-node-badge.icon-shop{background-image:url('./assets/village-v1/objects/cottage.png')}
+.order-demo,.shop-counter{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
+.order-card{display:flex;align-items:center;justify-content:center;min-width:64px;min-height:64px;padding:10px;background:#fff8e7;border:3px solid #ead1a2;border-radius:18px;box-shadow:0 5px 0 #e3cfa0}
+.order-card.numeral{font-size:34px;font-weight:1000;color:#355349}
+.order-card.dots{display:flex;flex-wrap:wrap;gap:5px;max-width:92px}
+.order-dot{width:14px;height:14px;border-radius:50%;background:#e98e65;box-shadow:0 2px 0 #c06b46}
+.shop-counter .forest-friend{width:80px;height:88px}
+@media(max-width:650px){.order-card{min-width:52px;min-height:52px;padding:7px}.order-card.numeral{font-size:26px}.order-dot{width:11px;height:11px}.shop-counter .forest-friend{width:66px;height:72px}}
+
+.map-node-badge.icon-transform{background-image:url('./assets/mission-v4/objects/basket_empty.png')}.map-node-badge.icon-journey{background-image:url('./assets/forest-world-v1/objects/new_village.png')}
+.transform-ref-row{display:flex;justify-content:center}
+.transform-arr-cluster{gap:2px;max-width:104px}
+.transform-arr-spread{gap:16px;max-width:260px}
+.transform-options .path-stand{min-width:0}
+@media(max-width:650px){.transform-arr-cluster{max-width:76px}.transform-arr-spread{gap:9px;max-width:170px}}
