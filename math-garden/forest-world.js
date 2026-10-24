@@ -40,10 +40,11 @@ const CONCEPTS=[
  {key:'make',name:'세 번째 숲길',title:'빈자리 채우기',kicker:'반짝 꽃밭',short:'수의 구성'},
  {key:'bridge',name:'네 번째 숲길',title:'끊어진 다리 복구',kicker:'끊어진 다리',short:'길이 합치기'},
  {key:'shop',name:'다섯 번째 숲길',title:'여우네 수상한 가게',kicker:'여우네 가게',short:'숫자·그림 주문'},
- {key:'transform',name:'여섯 번째 숲길',title:'변신하는 숫자 숲',kicker:'변신하는 숲',short:'모양이 달라도 똑같은 수'}
+ {key:'transform',name:'여섯 번째 숲길',title:'변신하는 숫자 숲',kicker:'변신하는 숲',short:'모양이 달라도 똑같은 수'},
+ {key:'journey',name:'일곱 번째 숲길',title:'새로운 마을 탐험',kicker:'새 마을 입구',short:'배운 걸 새 마을에서'}
 ];
-const MAP_ICONS={share:'tree',compare:'fork',make:'flower',bridge:'bridge',shop:'shop',transform:'transform'};
-const TRAVEL_LINES={share:'오솔길을 따라 걷다 보니, 배고픈 친구들이 나무 아래 모여 있어요!',compare:'두 갈래로 갈라지는 오솔길 앞에 도착했어요. 더미를 비교해서 길을 선택해요!',make:'반짝이는 꽃밭에 도착했어요. 빈자리를 채우면 꽃이 활짝 필 거예요!',bridge:'숲길을 걷다 보니 다리가 끊어져 있어요! 나무 판자를 이어서 다리를 고쳐 볼까?',shop:'오솔길 끝에 여우네 가게가 보여요! 손님이 적어준 주문만큼 담아 드려 볼까?',transform:'숲 속 빈터에 도착했어요! 모양이 달라져도 수가 똑같은 걸 찾아볼까?'};
+const MAP_ICONS={share:'tree',compare:'fork',make:'flower',bridge:'bridge',shop:'shop',transform:'transform',journey:'journey'};
+const TRAVEL_LINES={share:'오솔길을 따라 걷다 보니, 배고픈 친구들이 나무 아래 모여 있어요!',compare:'두 갈래로 갈라지는 오솔길 앞에 도착했어요. 더미를 비교해서 길을 선택해요!',make:'반짝이는 꽃밭에 도착했어요. 빈자리를 채우면 꽃이 활짝 필 거예요!',bridge:'숲길을 걷다 보니 다리가 끊어져 있어요! 나무 판자를 이어서 다리를 고쳐 볼까?',shop:'오솔길 끝에 여우네 가게가 보여요! 손님이 적어준 주문만큼 담아 드려 볼까?',transform:'숲 속 빈터에 도착했어요! 모양이 달라져도 수가 똑같은 걸 찾아볼까?',journey:'오솔길 끝에 처음 보는 마을이 나타났어요! 그동안 배운 걸로 새 마을 친구들을 도와줄까?'};
 const templates={
  share:[{kind:'demo',n:2,animal:'rabbit',fruit:'acorn'},{kind:'guided',n:2,animal:'bear',fruit:'acorn'},{kind:'probe',n:3,animal:'fox',fruit:'acorn'},{kind:'probe',n:4,animal:'rabbit',fruit:'acorn'},{kind:'transfer',n:3,animal:'bird',fruit:'berry'},{kind:'practice',n:2,animal:'frog',fruit:'berry'},{kind:'transfer',n:4,animal:'bear',fruit:'berry'}],
  compare:[{kind:'demo',a:2,b:3,want:'more',fruit:'acorn'},{kind:'guided',a:2,b:4,want:'more',fruit:'acorn'},{kind:'probe',a:4,b:2,want:'less',fruit:'acorn'},{kind:'probe',a:3,b:4,want:'more',fruit:'berry'},{kind:'transfer',a:4,b:3,want:'less',fruit:'berry'},{kind:'practice',a:2,b:3,want:'less',fruit:'berry'},{kind:'transfer',a:3,b:2,want:'more',fruit:'acorn'}],
@@ -58,6 +59,15 @@ const templates={
   {kind:'transfer',ref:{count:5,fruit:'berry'},options:{a:{count:4,arr:'cluster'},b:{count:5,arr:'spread'}},correct:'b'},
   {kind:'practice',ref:{count:3,fruit:'berry'},options:{a:{count:3,arr:'cluster'},b:{count:2,arr:'spread'}},correct:'a'},
   {kind:'transfer',ref:{count:4,fruit:'acorn'},options:{a:{count:3,arr:'spread'},b:{count:4,arr:'cluster'}},correct:'b'}
+ ],
+ journey:[
+  {kind:'demo',mech:'share',n:2,animal:'rabbit',fruit:'shell'},
+  {kind:'guided',mech:'share',n:3,animal:'bear',fruit:'flower'},
+  {kind:'probe',mech:'compare',a:3,b:5,want:'more',fruit:'shell'},
+  {kind:'probe',mech:'make',total:5,have:3,fruit:'flower'},
+  {kind:'transfer',mech:'shop',qty:4,repr:'numeral',customer:'frog',fruit:'shell'},
+  {kind:'practice',mech:'share',n:3,animal:'bird',fruit:'shell'},
+  {kind:'transfer',mech:'make',total:6,have:2,fruit:'flower'}
  ]
 };
 
@@ -95,7 +105,14 @@ function save(){try{
 }catch(e){}}
 function sfx(ok=true){if(!state.sound)return;try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;const ctx=window.__moaForestSound||(window.__moaForestSound=new Audio());ctx.resume?.();let t=ctx.currentTime;for(let i=0;i<(ok?2:1);i++){const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sine';osc.frequency.value=ok?[493.9,659.3][i]:220;gain.gain.setValueAtTime(.0001,t+i*.09);gain.gain.exponentialRampToValueAtTime(.045,t+i*.09+.015);gain.gain.exponentialRampToValueAtTime(.0001,t+i*.09+.18);osc.connect(gain);gain.connect(ctx.destination);osc.start(t+i*.09);osc.stop(t+i*.09+.2)}}catch(e){}}
 
-const unit=(type='acorn',small=false)=>'<span class="food '+(type==='berry'?'berry':'acorn')+' '+(small?'mini':'')+'" aria-hidden="true"></span>';
+/* 'shell' is a data-model fruit id (see templates' fruit:'shell'), but it cannot double as the
+   CSS class name: forest-world.css already has an unrelated page-wrapper rule `.shell{min-height:
+   100vh}` (shared with mission.html/village.html), and a span sharing that class name inherited
+   100vh, inflating its ancestor .interaction button to match -- the root cause of the "take"
+   button on journey's shop step reporting an off-screen, full-viewport-height bounding box.
+   Mapped to a distinct CSS class ('seashell') here only; the fruit id itself is untouched. */
+const FRUIT_CSS_CLASS={berry:'berry',flower:'flower',shell:'seashell'};
+const unit=(type='acorn',small=false)=>'<span class="food '+(FRUIT_CSS_CLASS[type]||'acorn')+' '+(small?'mini':'')+'" aria-hidden="true"></span>';
 const friend=(name,i,happy)=>'<img class="forest-friend clay-photo" src="'+A+'characters/'+name+'_'+(happy?'happy':'waiting')+'.png" alt="">';
 const dot=(filled,type)=>'<span class="match-slot '+(filled?'occupied':'empty')+'">'+(filled?unit(type,true):'')+'</span>';
 const wantHint=more=>'<div class="want-hint" aria-hidden="true"><span class="want-pile small '+(!more?'target':'')+'"></span><span class="want-pile big '+(more?'target':'')+'"></span></div>';
@@ -153,9 +170,9 @@ function transformBoard(x){
    return stepAction('pick-match','<div class="path-stand">'+groupVisual(o.count,x.ref.fruit,o.arr)+'</div>',k==='a'?'왼쪽 묶음 선택':'오른쪽 묶음 선택','data-group="'+k+'"');
   }).join('')+'</div>';
 }
-function demo(){const x=current(),key=CONCEPTS[state.concept].key;
+function demo(){const x=current(),key=CONCEPTS[state.concept].key,dKey=x.mech||key;
  state.view='demo';say('모아가 먼저 보여줄게','한 번 보고, 다음에는 직접 해볼까?');
- scene('<div class="lesson"><div class="lesson-lead">'+demoVisual(x,key)+'</div><div class="lesson-foot"><span class="observation">보는 차례 · 기록하지 않아요</span>'+stepAction('continue',ICONS.arrowRight+srLabel('내가 해볼래'),'모아의 시범을 보고 다음으로')+'</div></div>')}
+ scene('<div class="lesson"><div class="lesson-lead">'+demoVisual(x,dKey)+'</div><div class="lesson-foot"><span class="observation">보는 차례 · 기록하지 않아요</span>'+stepAction('continue',ICONS.arrowRight+srLabel('내가 해볼래'),'모아의 시범을 보고 다음으로')+'</div></div>')}
 function fruitTray(type,selected,stock,taken=selected){return '<div class="supply"><div class="supply-items"><div class="tree-pile">'+Array.from({length:Math.max(0,stock-taken)},(_,i)=>stepAction('take',unit(type),'간식 하나 담기','data-index="'+i+'"')).join('')+'</div></div><p class="supply-caption">숲속 나무</p></div><div class="delivery"><div class="packed-food"><div class="basket-pile">'+Array.from({length:selected},()=>stepAction('undo',unit(type,true),'담은 간식 하나 꺼내기')).join('')+'</div></div><p class="supply-caption">내 배달 바구니</p></div>'}
 function shareBoard(x){
  const n=x.n;
@@ -180,15 +197,15 @@ function bridgeBoard(x){
 function phaseText(x){if(x.kind==='guided')return '함께 연습';if(x.kind==='transfer')return '새로운 상황';if(x.kind==='probe')return '혼자 해보기';return '한 번 더 연습'}
 function draw(){
  if(!state.view)return;
- const x=current(),key=CONCEPTS[state.concept].key;
+ const x=current(),key=CONCEPTS[state.concept].key,dKey=x.mech||key;
  if(x.kind==='demo'){demo();return}
  state.view='task';
  const lab=phaseText(x);
- let headline=key==='share'?'친구마다 하나씩 담아 줘':key==='compare'?(x.want==='more'?'더 많은 쪽으로 출발!':'더 적은 쪽으로 출발!'):key==='bridge'?'길이에 맞게 판자를 놓아 줘':key==='shop'?'주문한 만큼 담아 줘':key==='transform'?'기준과 똑같은 수를 찾아 줘':'빈자리를 채울 만큼 담아 줘';
+ let headline=dKey==='share'?'친구마다 하나씩 담아 줘':dKey==='compare'?(x.want==='more'?'더 많은 쪽으로 출발!':'더 적은 쪽으로 출발!'):dKey==='bridge'?'길이에 맞게 판자를 놓아 줘':dKey==='shop'?'주문한 만큼 담아 줘':dKey==='transform'?'기준과 똑같은 수를 찾아 줘':'빈자리를 채울 만큼 담아 줘';
  say(lab,headline);
- const board=key==='share'?shareBoard(x):key==='compare'?compareBoard(x):key==='bridge'?bridgeBoard(x):key==='shop'?shopBoard(x):key==='transform'?transformBoard(x):makeBoard(x);
- scene('<div class="quest"><div class="quest-head"><span class="quest-chip">'+lab+'</span>'+(key==='compare'?wantHint(x.want==='more'):'')+'<div class="quest-pips">'+Array.from({length:Math.min(state.step,5)},()=>'<i></i>').join('')+'</div></div><div class="quest-board">'+board+'</div>'+(key==='share'||key==='shop'?'<div class="quest-actions">'+stepAction('submit',ICONS.check+srLabel(key==='shop'?'주문 담아 드리기':'한 번에 주기'),key==='shop'?'주문한 만큼 담아 드리기':'모든 친구에게 한 번에 간식 주기')+'</div>':'')+'<div class="feedback-slot" id="feedbackSlot" aria-live="polite"></div></div>');
- if(x.kind==='guided'&&!state.flagged){const label=$('feedbackSlot');if(label)label.innerHTML='<div class="guided-preview">'+renderPairing(x,key)+'</div>';} else if(state.flagged){const label=$('feedbackSlot');if(label)label.textContent='다시 살펴볼 수 있어.'}
+ const board=dKey==='share'?shareBoard(x):dKey==='compare'?compareBoard(x):dKey==='bridge'?bridgeBoard(x):dKey==='shop'?shopBoard(x):dKey==='transform'?transformBoard(x):makeBoard(x);
+ scene('<div class="quest"><div class="quest-head"><span class="quest-chip">'+lab+'</span>'+(dKey==='compare'?wantHint(x.want==='more'):'')+'<div class="quest-pips">'+Array.from({length:Math.min(state.step,5)},()=>'<i></i>').join('')+'</div></div><div class="quest-board">'+board+'</div>'+(dKey==='share'||dKey==='shop'?'<div class="quest-actions">'+stepAction('submit',ICONS.check+srLabel(dKey==='shop'?'주문 담아 드리기':'한 번에 주기'),dKey==='shop'?'주문한 만큼 담아 드리기':'모든 친구에게 한 번에 간식 주기')+'</div>':'')+'<div class="feedback-slot" id="feedbackSlot" aria-live="polite"></div></div>');
+ if(x.kind==='guided'&&!state.flagged){const label=$('feedbackSlot');if(label)label.innerHTML='<div class="guided-preview">'+renderPairing(x,dKey)+'</div>';} else if(state.flagged){const label=$('feedbackSlot');if(label)label.textContent='다시 살펴볼 수 있어.'}
 }
 function renderPairing(x,key){
  if(key==='bridge'){
@@ -207,8 +224,8 @@ function renderPairing(x,key){
 function help(){
  if(state.locked||state.view!=='task')return;
  state.flagged=true;state.hints++;save();
- const x=current(),key=CONCEPTS[state.concept].key;let slot=$('feedbackSlot');
- if(!slot)return;slot.innerHTML='<div class="scaffold">'+renderPairing(x,key)+'</div>';
+ const x=current(),key=CONCEPTS[state.concept].key,dKey=x.mech||key;let slot=$('feedbackSlot');
+ if(!slot)return;slot.innerHTML='<div class="scaffold">'+renderPairing(x,dKey)+'</div>';
  setStatus('하나씩 짝지어 살펴볼 수 있어.');
 }
 function flashFeedback(ok){
@@ -220,21 +237,21 @@ function flashFeedback(ok){
 }
 function feedback(isCorrect){
  flashFeedback(isCorrect);
- const x=current(),key=CONCEPTS[state.concept].key;
+ const x=current(),key=CONCEPTS[state.concept].key,dKey=x.mech||key;
  if(isCorrect){state.locked=true;sfx(true);
   const clean=x.kind!=='guided'&&x.kind!=='demo'&&!state.flagged&&state.attempts===0&&state.hints===0;
   state.results.push({kind:x.kind,clean,concept:key});
   if(x.kind==='guided')setStatus('잘했어. 이제 혼자 해볼 차례야.');else if(clean)setStatus('이번에는 혼자 해결했어!');else setStatus('도움을 받고 해결했어. 다음에는 새로 해볼 수 있어.');
-  const outcome=key==='compare'?'숲길이 반짝 열렸어!':key==='share'?'모두 간식을 받았어!':key==='bridge'?'다리가 다시 이어졌어!':key==='shop'?'여우가 활짝 웃었어요!':key==='transform'?'모양이 달라도 똑같은 수야!':'꽃밭에 꽃이 피었어!';
-  const story=key==='share'?'<div class="success-line">'+Array.from({length:x.n},(_,i)=>'<div class="served">'+friend(x.animal,i,true)+unit(x.fruit,true)+'</div>').join('')+'</div>':key==='compare'?'<div class="open-gate"></div>':key==='bridge'?'<div class="bridge-stage solved"><div class="plank-dock">'+x.pieces.map((len,i)=>state.planksPlaced.includes(i)?'<span class="plank plank-'+len+' '+(x.material==='mossy'?'mossy':'')+'" aria-hidden="true"></span>':'').join('')+'</div></div>':key==='shop'?'<div class="shop-counter"><div class="served">'+friend(x.customer,0,true)+'</div></div>':key==='transform'?groupVisual(x.ref.count,x.ref.fruit,'cluster'):'<div class="make-board">'+Array.from({length:x.total},()=>dot(true,x.fruit)).join('')+'</div>';
+  const outcome=dKey==='compare'?'숲길이 반짝 열렸어!':dKey==='share'?'모두 간식을 받았어!':dKey==='bridge'?'다리가 다시 이어졌어!':dKey==='shop'?'여우가 활짝 웃었어요!':dKey==='transform'?'모양이 달라도 똑같은 수야!':'꽃밭에 꽃이 피었어!';
+  const story=dKey==='share'?'<div class="success-line">'+Array.from({length:x.n},(_,i)=>'<div class="served">'+friend(x.animal,i,true)+unit(x.fruit,true)+'</div>').join('')+'</div>':dKey==='compare'?'<div class="open-gate"></div>':dKey==='bridge'?'<div class="bridge-stage solved"><div class="plank-dock">'+x.pieces.map((len,i)=>state.planksPlaced.includes(i)?'<span class="plank plank-'+len+' '+(x.material==='mossy'?'mossy':'')+'" aria-hidden="true"></span>':'').join('')+'</div></div>':dKey==='shop'?'<div class="shop-counter"><div class="served">'+friend(x.customer,0,true)+'</div></div>':dKey==='transform'?groupVisual(x.ref.count,x.ref.fruit,'cluster'):'<div class="make-board">'+Array.from({length:x.total},()=>dot(true,x.fruit)).join('')+'</div>';
   scene('<div class="success"><h2>'+outcome+'</h2>'+story+'<p>다음 장소가 기다리고 있어!</p>'+stepAction('advance',ICONS.arrowRight+srLabel('계속 탐험'),'다음 놀이로 이동')+'</div>');
   return
  }
  state.attempts++;state.flagged=true;sfx(false);
- const xtext=key==='share'?(state.selected+state.served.length<x.n?'아직 간식을 못 받은 친구가 있어.':'간식이 조금 남겠어.') :key==='make'?(state.selected<x.total-x.have?'빈자리가 남아 있어.':'간식이 자리를 넘쳤어.'):key==='shop'?(state.selected<x.qty?'주문한 만큼 안 담겼어.':'너무 많이 담았어.'):key==='transform'?'다시 세어 볼까?':'짝을 지어 보면 차이가 보여.';
+ const xtext=dKey==='share'?(state.selected+state.served.length<x.n?'아직 간식을 못 받은 친구가 있어.':'간식이 조금 남겠어.') :dKey==='make'?(state.selected<x.total-x.have?'빈자리가 남아 있어.':'간식이 자리를 넘쳤어.'):dKey==='shop'?(state.selected<x.qty?'주문한 만큼 안 담겼어.':'너무 많이 담았어.'):dKey==='transform'?'다시 세어 볼까?':'짝을 지어 보면 차이가 보여.';
  setStatus(xtext);
- const scaffoldAt=key==='compare'?1:2;
- const slot=$('feedbackSlot');if(slot){slot.innerHTML='<div class="feedback-error">'+xtext+'</div>'+(state.attempts>=scaffoldAt?'<div class="scaffold">'+renderPairing(x,key)+'</div>':'');}
+ const scaffoldAt=dKey==='compare'?1:2;
+ const slot=$('feedbackSlot');if(slot){slot.innerHTML='<div class="feedback-error">'+xtext+'</div>'+(state.attempts>=scaffoldAt?'<div class="scaffold">'+renderPairing(x,dKey)+'</div>':'');}
  if(state.attempts>=scaffoldAt)state.hints++;
 }
 function assess(){const r=state.results.filter(z=>z.kind==='probe'||z.kind==='transfer');const clean=r.filter(z=>z.clean),transfer=r.find(z=>z.kind==='transfer');
@@ -272,10 +289,10 @@ function questHandle(act,el){
  if(act==='repeat'){resetConcept(state.concept);return}
  if(act==='advance'){advance();return}
  if(state.view!=='task'||state.locked)return;
- const x=current(),key=CONCEPTS[state.concept].key;
- if(act==='take'){const max=x.kind==='demo'?10:key==='share'?x.n+2:key==='shop'?x.qty+3:x.total-x.have+3;if(state.taken>=max){setStatus('나무에 간식이 더 없어. 바구니에서 다시 꺼낼 수 있어.');return}state.selected++;state.taken++;sfx(true);if(key==='make'&&state.selected===x.total-x.have){feedback(true);return}draw();return}
- if(act==='undo'){if(state.selected>0){state.selected--;state.taken--;if(key==='share'&&state.served.length===x.n&&state.selected===0){feedback(true);return}draw()}return}
- if(act==='serve'&&key==='share'){
+ const x=current(),key=CONCEPTS[state.concept].key,dKey=x.mech||key;
+ if(act==='take'){const max=x.kind==='demo'?10:dKey==='share'?x.n+2:dKey==='shop'?x.qty+3:x.total-x.have+3;if(state.taken>=max){setStatus('나무에 간식이 더 없어. 바구니에서 다시 꺼낼 수 있어.');return}state.selected++;state.taken++;sfx(true);if(dKey==='make'&&state.selected===x.total-x.have){feedback(true);return}draw();return}
+ if(act==='undo'){if(state.selected>0){state.selected--;state.taken--;if(dKey==='share'&&state.served.length===x.n&&state.selected===0){feedback(true);return}draw()}return}
+ if(act==='serve'&&dKey==='share'){
   const i=Number(el.dataset.friend);
   if(!Number.isInteger(i)||i<0||i>=x.n||state.served.includes(i))return;
   if(state.selected<1){setStatus('바구니가 비었어. 나무에서 간식을 가져와 줘.');play.querySelector('.supply')?.classList.add('need-food');return}
@@ -285,13 +302,13 @@ function questHandle(act,el){
   sfx(true);draw();return;
  }
  if(act==='submit'){
-  if(key==='share'){const needed=x.n-state.served.length;if(state.selected===needed){state.served=Array.from({length:x.n},(_,i)=>i);state.selected=0;feedback(true)}else feedback(false);return}
-  if(key==='shop'){feedback(state.selected===x.qty);return}
+  if(dKey==='share'){const needed=x.n-state.served.length;if(state.selected===needed){state.served=Array.from({length:x.n},(_,i)=>i);state.selected=0;feedback(true)}else feedback(false);return}
+  if(dKey==='shop'){feedback(state.selected===x.qty);return}
   feedback(state.selected===x.total-x.have);return;
  }
  if(act==='choose'){const correct=x.want==='more'?(x.a>x.b?'a':'b'):(x.a<x.b?'a':'b');feedback(el.dataset.side===correct);return}
- if(act==='pick-match'&&key==='transform'){feedback(el.dataset.group===x.correct);return}
- if(act==='place-plank'&&key==='bridge'){
+ if(act==='pick-match'&&dKey==='transform'){feedback(el.dataset.group===x.correct);return}
+ if(act==='place-plank'&&dKey==='bridge'){
   const i=Number(el.dataset.piece);
   if(!Number.isInteger(i)||i<0||i>=x.pieces.length||state.planksPlaced.includes(i))return;
   state.planksPlaced.push(i);sfx(true);
@@ -299,7 +316,7 @@ function questHandle(act,el){
   if(sum===x.target){feedback(true);return}
   draw();return;
  }
- if(act==='remove-plank'&&key==='bridge'){
+ if(act==='remove-plank'&&dKey==='bridge'){
   const i=Number(el.dataset.piece);
   const idx=state.planksPlaced.indexOf(i);
   if(idx<0)return;
