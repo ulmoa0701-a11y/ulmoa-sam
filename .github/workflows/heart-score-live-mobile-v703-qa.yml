@@ -1,0 +1,43 @@
+name: Heart Score Live Mobile v703 E2E (QA-only)
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/heart-score-live-mobile-v703-qa.yml'
+  workflow_dispatch:
+jobs:
+  live-mobile-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install local-only QA tools
+        run: |
+          npm ci --prefix heart-score/qa --ignore-scripts --no-audit --no-fund
+          npm install --prefix heart-score/qa --no-save --ignore-scripts --no-audit --no-fund vexflow@5.0.0 @vexflow-fonts/bravura@1.0.2 @vexflow-fonts/academico@1.0.1
+          npx --prefix heart-score/qa playwright install chromium
+      - name: Prepare verified local ONNX weights
+        run: node heart-score/qa/prepare-runtime.cjs
+      - name: Generate non-user 19-measure test scores
+        run: node heart-score/qa/render-typeset-score-e2e.cjs heart-score/qa/.qa-generated
+      - name: Verify actual published Pages v703 in Android-sized mobile Chromium
+        shell: bash
+        run: |
+          set +e
+          node heart-score/qa/omr-image-e2e.cjs --mobile --url 'https://ulmoa0701-a11y.github.io/ulmoa-sam/heart-score/ai/?v=703' --fixture heart-score/qa/.qa-generated/typeset-normal-19.png --variant live-mobile-normal --runtime heart-score/qa/.runtime --output heart-score/qa/.qa-generated/live-normal-result
+          STATUS1=$?
+          node heart-score/qa/omr-image-e2e.cjs --mobile --url 'https://ulmoa0701-a11y.github.io/ulmoa-sam/heart-score/ai/?v=703' --fixture heart-score/qa/.qa-generated/typeset-faint-19.png --variant live-mobile-faint --runtime heart-score/qa/.runtime --output heart-score/qa/.qa-generated/live-faint-result
+          STATUS2=$?
+          echo "PUBLIC_MOBILE_NORMAL=$STATUS1 PUBLIC_MOBILE_FAINT=$STATUS2"
+          if [[ $STATUS1 -ne 0 || $STATUS2 -ne 0 ]]; then exit 1; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-v703-mobile-e2e-results
+          path: |
+            heart-score/qa/.qa-generated/**/result.json
+            heart-score/qa/.qa-generated/**/failure.json
+            heart-score/qa/.qa-generated/**/screen.png
+          if-no-files-found: warn
