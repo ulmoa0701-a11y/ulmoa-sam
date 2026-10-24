@@ -1,99 +1,44 @@
 (() => {
 "use strict";
-// Private local reflection: never save or transmit responses; no tracking, no scoring.
-const chapters = [
-  {id:"interest",tag:"01 · 나다운 시간",title:"내 시간이 생겼다",scene:"토요일 오후. 아무도 무엇을 하라고 하지 않는다면.",question:"그때 나는 뭘 하고 있을까?",help:"잘하는 일 말고, 나도 모르게 손이 가는 것.",reason:"그 시간이 좋은 이유는?",reasons:["내 속도로 할 수 있어서","시간 가는 줄 모르겠어서","평가받지 않아서"],choices:[
-    {id:"game",label:"게임에서 새로운 방법 찾기",visual:"game",tone:"moss",intro:"게임에서 새로운 방법과 규칙을 찾는 것",discovery:"게임 속에서 새로운 방법을 찾는 시간이 즐거운 편이야"},
-    {id:"media",label:"음악·영상에 몰입하기",visual:"media",tone:"rose",intro:"음악이나 영상에 푹 빠져보는 것",discovery:"음악이나 영상에 몰입하는 시간이 즐거운 편이야"},
-    {id:"build",label:"직접 만들고 고치기",visual:"build",tone:"sand",intro:"내 방식으로 무언가 만들고 고치는 것",discovery:"새로운 것을 만들어보고 수정하는 데 관심이 있어"},
-    {id:"hangout",label:"누군가와 함께 놀기",visual:"hangout",tone:"blue",intro:"누군가와 함께 시간을 보내는 것",discovery:"다른 사람과 함께 활동할 때 즐거움을 느끼기도 해"}
-  ]},
-  {id:"team",tag:"02 · 다른 사람과 함께할 때",title:"우리의 첫 프로젝트",scene:"둘이 작은 게임이나 영상을 만들어보기로 했다. 내가 맡을 수 있는 역할은 무엇일까?",question:"어떤 역할부터 해볼까?",help:"앞에 나서는 역할만 중요한 건 아니야.",reason:"그 역할이 마음에 드는 이유는?",reasons:["아이디어를 생각하는 게 좋아서","차근차근 해볼 수 있어서","함께 결과를 만들고 싶어서"],choices:[
-    {id:"idea",label:"아이디어 제안하기",visual:"bulb",tone:"sand",intro:"새로운 아이디어를 제안하는 역할",discovery:"무언가 함께 할 때 아이디어를 제안해보고 싶어"},
-    {id:"design",label:"화면·캐릭터 만들기",visual:"design",tone:"rose",intro:"화면과 캐릭터를 구체적으로 만드는 역할",discovery:"함께 만드는 일에서 눈에 보이는 결과를 만드는 게 좋겠어"},
-    {id:"solve",label:"문제 해결하기",visual:"puzzle",tone:"blue",intro:"막히는 문제를 해결해보는 역할",discovery:"함께하는 프로젝트에서 문제를 살펴보고 해결해보는 역할이 끌려"},
-    {id:"observe",label:"먼저 살펴보고 돕기",visual:"watch",tone:"moss",intro:"먼저 살펴보고 필요한 순간 돕는 역할",discovery:"처음부터 앞에 나서기보다 충분히 살펴보고 참여하는 게 편해"}
-  ]},
-  {id:"voice",tag:"03 · 내 생각을 전할 때",title:"내 의견이 생겼다",scene:"함께 만든 장면에서 바꾸고 싶은 점이 생겼어. 다른 사람이 그걸 물어본다면.",question:"어떻게 표현하면 더 편할까?",help:"말하지 않아도 생각은 전할 수 있어.",reason:"그 방식이 편한 이유는?",reasons:["생각할 시간이 있어서","하고 싶은 말을 더 정확히 전해서","직접 해보이는 게 쉬워서"],choices:[
-    {id:"text",label:"문자로 천천히 적기",visual:"text",tone:"blue",intro:"글로 차분하게 내 생각을 표현하는 것",discovery:"말로 바로 대답하는 것보다 글로 표현하는 쪽이 편할 수 있어"},
-    {id:"voice",label:"말로 이야기하기",visual:"voice",tone:"sand",intro:"말로 생각을 주고받는 것",discovery:"말로 이야기하면서 생각을 풀어가는 방식이 편해"},
-    {id:"show",label:"그림·결과로 보여주기",visual:"show",tone:"rose",intro:"그림이나 만든 결과를 보여주는 것",discovery:"그림이나 만든 결과로 내 생각을 전하는 방식이 좋아"},
-    {id:"together",label:"함께 하면서 나누기",visual:"together",tone:"moss",intro:"같이 활동하면서 대화하는 것",discovery:"마주 앉아 질문받기보다 함께 무언가 할 때 이야기하기가 편해"}
-  ]},
-  {id:"stuck",tag:"04 · 막히는 순간에",title:"생각처럼 안 되는 날",scene:"작품을 만들다가 마음대로 되지 않는다. 내게 필요한 건 노력 부족이라는 말이 아니라.",question:"어떤 도움이 있으면 좋을까?",help:"잠깐 쉬는 것도 하나의 방법이야.",reason:"그게 도움이 될 것 같은 이유는?",reasons:["압박이 줄어들어서","다시 시도할 여유가 생겨서","어디서 막혔는지 알 수 있어서"],choices:[
-    {id:"time",label:"생각할 시간 조금 더",visual:"clock",tone:"moss",intro:"서두르지 않고 생각할 시간을 갖는 것",discovery:"어려운 순간에는 생각할 시간을 조금 더 받으면 도움이 될 것 같아"},
-    {id:"example",label:"예시부터 같이 보기",visual:"example",tone:"sand",intro:"예시를 함께 보면서 시작하는 것",discovery:"처음에는 예시를 보고 방법을 알아가면 도움이 될 것 같아"},
-    {id:"along",label:"누군가와 같이 풀기",visual:"along",tone:"blue",intro:"누군가와 같이 방법을 찾아보는 것",discovery:"혼자 막힐 때 누군가와 방법을 찾는 게 도움이 될 것 같아"},
-    {id:"pause",label:"잠깐 쉬고 다시 보기",visual:"pause",tone:"rose",intro:"잠시 쉬었다가 다시 살펴보는 것",discovery:"힘들 때는 잠깐 멈출 수 있는 시간이 필요해"}
-  ]},
-  {id:"hope",tag:"05 · 다음에 해볼 일",title:"내가 정하는 다음 장면",scene:"아직 모든 걸 잘할 필요는 없어. 다음 한 걸음을 내가 정할 수 있다면.",question:"어떤 걸 한번 해보고 싶어?",help:"작아도 좋아. 지금은 정하지 않아도 돼.",reason:"그걸 해보고 싶은 마음은 어디서 왔을까?",reasons:["재미있을 것 같아서","한 번은 해보고 싶어서","나한테 의미가 있을 것 같아서"],choices:[
-    {id:"project",label:"내가 구상한 작품 완성",visual:"project",tone:"sand",intro:"내 아이디어로 작품 하나를 만들어보는 것",discovery:"내가 생각한 작품을 작은 것부터 직접 완성해보고 싶어"},
-    {id:"friend",label:"편한 사람과 함께하기",visual:"friend",tone:"blue",intro:"편한 사람과 함께 무언가 시도하는 것",discovery:"마음이 편한 사람과 무언가를 함께 해보고 싶어"},
-    {id:"learn",label:"궁금한 것 더 배워보기",visual:"learn",tone:"moss",intro:"관심 있는 것을 조금 더 배워보는 것",discovery:"관심이 생긴 것은 조금 더 배우고 시도해보고 싶어"},
-    {id:"own",label:"아직 모르는 나 더 발견",visual:"discover",tone:"rose",intro:"내가 좋아하는 것부터 더 찾아보는 것",discovery:"아직 몰랐던 내 취향과 하고 싶은 일을 더 발견해보고 싶어"}
-  ]}
+// Confidentiality: this static page stores NOTHING. No backend, analytics,
+// external API calls, persistent storage, automatic assessment, or submission.
+const chapters=[
+ {id:"interest",title:"서로 처음 만났어",scene:"처음부터 어려운 이야기를 할 필요는 없어.",tag:"01 · 편한 이야기부터",question:"어떤 때 조금 편해져?",help:"가까운 걸 골라도 되고, 그냥 넘어가도 돼.",prompt:"안녕, 모아야. 네가 요즘 좋아하는 것부터 천천히 알아볼까?",choices:[
+  ["game","게임하는 시간","game","moss"],["music","음악·영상 보는 시간","media","rose"],["make","무언가 만드는 시간","build","sand"],["rest","혼자 쉬는 시간","pause","blue"]]},
+ {id:"concern",title:"요즘 내 마음에 걸리는 것",scene:"누구에게나 신경 쓰이는 일이 있을 수 있어. 말하고 싶지 않아도 괜찮아.",tag:"02 · 요즘 신경 쓰이는 일",question:"요즘 가장 신경 쓰이는 건?",help:"여러 가지여도 괜찮아. 지금은 하나만 골라봐.",prompt:"지금 바꾸고 싶은 일이 있어? 아무것도 고르지 않아도 괜찮아.",choices:[
+  ["school","학교·공부","example","blue"],["people","친구·사람 관계","friend","rose"],["feeling","기분·에너지","watch","moss"],["daily","집·일상생활","time","sand"]]},
+ {id:"moment",title:"어떤 순간이 특히 그럴까?",scene:"정확한 이유를 몰라도 괜찮아. 기억나는 장면 하나만 살펴보자.",tag:"03 · 어려운 순간",question:"어느 순간이 더 어려워?",help:"가까운 게 없으면 넘어가도 돼.",prompt:"아까 고른 일과 관련해서 조금 더 물어봐도 될까?",choices:[
+  ["start","시작하기 전","time","moss"],["during","하고 있는 중","solve","blue"],["talk","누군가와 있을 때","hangout","rose"],["after","끝나고 나서","pause","sand"]]},
+ {id:"support",title:"나에게 맞는 도움",scene:"어려운 순간에 어떤 방식이 편한지도 중요해.",tag:"04 · 편한 소통과 도움",question:"어떻게 해주면 좀 편할까?",help:"지금은 모르겠다면 지나가도 돼.",prompt:"상담도 네게 편한 방식으로 시작하면 좋겠어.",choices:[
+  ["time","기다려 주기","time","moss"],["text","글·선택지로 이야기","text","blue"],["example","예시를 함께 보기","example","sand"],["together","같이 무언가 하면서","together","rose"]]},
+ {id:"wish",title:"다음은 함께 정해보자",scene:"오늘 다 말할 필요도, 당장 바뀌어야 할 필요도 없어.",tag:"05 · 상담에서 원하는 것",question:"여기서 어떤 도움을 받고 싶어?",help:"작고 구체적인 바람이어도 좋아.",prompt:"네 생각이 가장 중요해. 어떤 것부터 같이 해보면 좋겠어?",choices:[
+  ["understand","내 마음·상황 정리하기","watch","moss"],["express","내 생각 표현하기","voice","blue"],["connect","사람과 함께하는 연습","hangout","rose"],["try","좋아하는 일 함께 해보기","build","sand"]]}
 ];
-
-const moa = {
- interest: {
-  game:{reaction:"게임이 좋아도 재미있는 순간은 사람마다 다르더라.",prompt:"게임할 때 더 끌리는 순간은?",reasons:["내 방식으로 해낼 때","그 세계에 빠져들 때","누군가와 함께할 때"]},
-  media:{reaction:"음악이나 영상도 그때의 기분에 따라 다르게 다가오지.",prompt:"그 시간을 좋아하는 이유는?",reasons:["머리가 복잡할 때 편해져서","좋아하는 장면을 다시 볼 수 있어서","새로운 걸 발견해서"]},
-  build:{reaction:"내 손으로 바꾼 게 보이면 느낌이 다르지.",prompt:"만들 때 어떤 순간이 좋아?",reasons:["내 아이디어가 보일 때","고치다가 방법을 찾을 때","완성한 걸 보여줄 때"]},
-  hangout:{reaction:"같이 있는 시간이 좋을 때도, 혼자 쉬고 싶을 때도 있지.",prompt:"함께할 때 더 좋은 순간은?",reasons:["같은 걸 보며 웃을 때","서로 아이디어를 더할 때","말 없이 같이 있어도 될 때"]}
- },
- team: {
-  idea:{reaction:"시작할 아이디어를 찾는 역할을 골랐네.",prompt:"아이디어를 낼 때 도움이 되는 건?",reasons:["혼자 생각할 시간","상대가 질문해 주는 것","함께 이것저것 시도해보기"]},
-  design:{reaction:"생각을 눈에 보이게 만드는 역할이네.",prompt:"무엇부터 만드는 게 더 편해?",reasons:["캐릭터부터","배경과 분위기부터","작은 장면 하나부터"]},
-  solve:{reaction:"막혔을 때 방법을 찾아보는 역할을 골랐구나.",prompt:"문제가 생기면 먼저 해보고 싶은 건?",reasons:["왜 안 되는지 살펴보기","작은 부분부터 바꾸기","함께 해결책 찾기"]},
-  observe:{reaction:"처음에는 지켜보며 흐름을 파악할 수도 있어.",prompt:"그럴 때 편한 방식은?",reasons:["설명부터 듣기","다른 사람 하는 걸 보기","준비됐을 때 의견 내기"]}
- },
- voice: {
-  text:{reaction:"바로 말하지 않아도 글로 생각을 정리할 수 있지.",prompt:"글로 이야기할 때 더 편한 건?",reasons:["고칠 수 있어서","생각할 시간이 있어서","짧게라도 전할 수 있어서"]},
-  voice:{reaction:"말을 주고받으면서 생각이 떠오를 수도 있어.",prompt:"어떤 대화가 더 편해?",reasons:["짧게 한 질문씩","관심 있는 주제로","서로 번갈아가면서"]},
-  show:{reaction:"설명보다 직접 보여주는 게 더 정확할 때도 있지.",prompt:"어떤 걸 보여주고 싶어?",reasons:["내가 만든 화면","그림이나 사진","직접 하는 모습"]},
-  together:{reaction:"같이 뭔가 하는 동안 자연스럽게 말이 나올 수도 있겠어.",prompt:"어떤 활동이라면 좋을까?",reasons:["게임을 같이 하면서","무언가 함께 만들면서","산책하거나 움직이면서"]}
- },
- stuck: {
-  time:{reaction:"막힐 때 기다려주는 사람은 큰 도움이 될 수 있어.",prompt:"그때 어떤 방식으로 기다려주면 좋을까?",reasons:["재촉하지 않기","잠깐 혼자 생각하게","말보다 시간을 주기"]},
-  example:{reaction:"설명보다 실제 예시가 더 이해될 때가 있지.",prompt:"어떤 예시가 가장 도움이 될까?",reasons:["직접 시범 보여주기","완성된 결과 먼저 보기","한 부분만 같이 해보기"]},
-  along:{reaction:"혼자 해내야만 좋은 건 아니야.",prompt:"도움을 요청할 때 어떤 방식이 편해?",reasons:["옆에서 같이 하기","처음만 도와주기","내가 막힌 부분만 알려주기"]},
-  pause:{reaction:"멈추는 걸 스스로 고를 수도 있어.",prompt:"쉬고 돌아올 때 도움이 되는 건?",reasons:["조용히 쉬는 시간","다른 활동 잠깐 하기","다시 시작할 때 알려주기"]}
- },
- hope: {
-  project:{reaction:"생각만 했던 걸 작게라도 만들어보면 어떨까?",prompt:"첫 작품은 어떤 크기가 좋아?",reasons:["캐릭터 한 명","게임 장면 하나","이야기 한 장면"]},
-  friend:{reaction:"함께하고 싶다는 마음이 생길 때 시작해도 돼.",prompt:"첫 시도는 어떤 방식이면 좋을까?",reasons:["만든 걸 보여주기","짧게 의견 물어보기","같이 작은 것 만들기"]},
-  learn:{reaction:"궁금한 것이 생기면 배울 이유도 생기지.",prompt:"배울 때 더 끌리는 방식은?",reasons:["보고 따라해보기","바로 만들어보기","차근차근 설명 듣기"]},
-  own:{reaction:"아직 무엇을 좋아하는지 알아가는 중일 수 있지.",prompt:"다음에는 어떻게 찾아보고 싶어?",reasons:["새로운 활동 구경하기","좋아하는 걸 다시 해보기","누군가와 이야기해보기"]}
- }
+const concernContexts={
+ school:{prompt:"학교와 관련해 어떤 순간이 제일 부담스러워?",choices:[["before","등교를 준비할 때"],["enter","교실에 들어갈 때"],["class","수업·과제할 때"],["peer","학교에서 사람을 만날 때"]]},
+ people:{prompt:"사람들과 있을 때 어떤 부분이 어려워?",choices:[["start","먼저 말을 꺼낼 때"],["reply","질문에 대답할 때"],["misunderstand","오해·갈등이 생겼을 때"],["alone","함께 있어도 혼자인 느낌일 때"]]},
+ feeling:{prompt:"기분이나 에너지가 언제 가장 신경 쓰여?",choices:[["morning","하루를 시작할 때"],["activity","무언가 해야 할 때"],["night","저녁이나 잠들기 전"],["unknown","이유를 설명하기 어려울 때"]]},
+ daily:{prompt:"일상에서 어떤 순간이 가장 막막해?",choices:[["home","집에서 누군가와 이야기할 때"],["schedule","해야 할 일을 시작할 때"],["change","예상과 달라졌을 때"],["alone","혼자 해결해야 할 때"]]}
 };
-const promptIntro={
- interest:"모아야. 처음부터 멋진 소개를 할 필요는 없어. 쉬는 날 네가 자연스럽게 하는 일부터 이야기해볼까?",
- team:"이번에는 우리가 뭔가 같이 만든다고 상상해보자. 앞에 나서지 않아도 괜찮아.",
- voice:"누군가 네 생각을 물었다고 해보자. 말 말고 다른 방식도 있어.",
- stuck:"만들다가 안 될 때도 있지. 그 순간 네게 필요한 걸 골라도 돼.",
- hope:"마지막이야. 큰 목표 말고, 다음에 한 번 해보고 싶은 일이 있을까?"
+const reactions={
+ interest:{game:"게임이 편한 시간일 수도 있겠네. 어떤 점이 좋은지도 골라볼래?",music:"좋아하는 음악이나 영상이 있구나. 그 시간의 어떤 점이 좋을까?",make:"직접 만들어보는 쪽이 끌리나 봐. 어떤 순간이 좋을까?",rest:"혼자 쉴 수 있는 시간도 중요하지. 어떤 점이 편할까?"},
+ concern:{school:"학교나 공부에 관한 일이라고 골랐네. 구체적인 건 네가 말하고 싶은 만큼만 이야기해줘.",people:"친구나 사람 관계가 떠올랐구나. 특정한 사람의 이름을 말할 필요는 없어.",feeling:"기분이나 에너지가 신경 쓰인다고 골랐네. 이유를 지금 알 필요는 없어.",daily:"집이나 일상생활이 신경 쓰인다고 골랐네. 사적인 일을 자세히 적지 않아도 괜찮아."},
+ moment:{before:"일이 시작되기 전이라고 골랐네. 그때 무엇이 부담인지 상담자와 함께 확인할 수 있어.",during:"하고 있는 도중이라고 골랐구나. 어떤 도움이 필요할지 같이 알아볼 수 있어.",talk:"다른 사람과 함께 있을 때가 떠오르는구나. 특정 인물을 말하지 않아도 돼.",after:"일이 끝난 뒤라고 골랐네. 자세한 이유는 상담할 때 천천히 이야기해도 돼."},
+ support:{time:"생각할 시간이 필요하다는 말을 상담자에게 전할 수 있어.",text:"글이나 선택지를 사용하는 방법도 있어. 꼭 말로만 답할 필요는 없어.",example:"먼저 예시를 보는 게 편할 수 있겠네. 상담에서도 그렇게 해볼 수 있어.",together:"마주 앉아 질문만 하는 것보다 같이 활동하는 방식부터 시작할 수도 있어."},
+ wish:{understand:"지금 상황을 차근차근 정리해보고 싶은 거구나. 어디부터 시작할지 함께 정하면 돼.",express:"내 생각을 좀 더 잘 전하고 싶다는 바람을 적어둘게.",connect:"사람과 연결되는 방법을 연습해보고 싶은 거구나. 네가 원하는 속도로 해볼 수 있어.",try:"좋아하는 일을 함께 시도해보고 싶구나. 그것부터 시작해도 좋아."}
 };
-const reasonResponses={
- interest:"아, 그 부분이 더 마음에 닿는구나. 네가 고른 이유로 남겨둘게.",
- team:"이제 어떤 방식으로 함께하고 싶은지 조금 더 구체적이네.",
- voice:"그렇게 이야기하는 게 지금은 더 편할 수 있겠네.",
- stuck:"그런 도움을 부탁할 수 있다는 걸 기억해두면 좋겠어.",
- hope:"다음에 해볼 일을 네가 직접 고르고 있네. 오늘 정하지 않아도 괜찮아."
+const followups={
+ interest:{prompt:"그 시간이 좋은 이유는?",choices:["내 마음대로 할 수 있어서","집중하다 보면 편해져서","즐겁거나 신나서"]},
+ concern:{prompt:"이 문제를 어떻게 이야기하고 싶어?",choices:["말로 조금 해볼래","선택지·그림으로 할래","오늘은 더 얘기하지 않을래"]},
+ moment:{prompt:"그때 나에게 가장 필요했던 건?",choices:["그냥 기다려 주는 것","설명이나 도움","잠시 자리를 벗어나는 것"]},
+ support:{prompt:"그 방법을 쓸 수 있다면?",choices:["시작하기가 더 편할 것 같아","내 생각을 전하기 쉬울 것 같아","아직 잘 모르겠어"]},
+ wish:{prompt:"어디부터 시도하고 싶어?",choices:["작은 것 하나만","함께 하나씩","지금은 생각해볼래"]}
 };
-function paintMoa(){
- const ch=chapters[step],v=values[step],selected=ch.choices.find(o=>o.id===v.choice),dialogue=selected&&moa[ch.id][selected.id];
- const flow=el("reply-flow");
- flow.hidden=!dialogue;
- if(!dialogue){el("moa-followup").textContent="";return;}
- el("my-reply").textContent=selected.label;
- el("moa-reaction").textContent=dialogue.reaction;
- const msg=el("moa-followup");
- msg.textContent=v.reason===null?"":reasonResponses[ch.id];
-}
-
-const values=chapters.map(()=>({choice:null,reason:null,own:"",sent:false}));let step=0,tone="casual",lastAuto="",manual=false;
-const el=id=>document.getElementById(id);
-const iconNames={game:"gamepad-2",media:"headphones",build:"blocks",hangout:"users",idea:"lightbulb",design:"palette",solve:"wrench",observe:"scan-eye",text:"keyboard",voice:"mic",show:"image",together:"handshake",time:"timer",example:"book-open",along:"puzzle",pause:"coffee",project:"sparkles",friend:"users-round",learn:"graduation-cap",own:"compass"};
+const answers=chapters.map(()=>({choice:null,detail:null,own:"",sent:false}));
+const disclose={interest:false,concern:false,moment:false,support:false,wish:false};
+const discloseNotes={interest:false,concern:false,moment:false,support:false,wish:false};
+let step=0,freeEdited=false;
+const $=id=>document.getElementById(id);
 function iconHTML(key) {
  // Inline SVG with icons as paths: distinctive editorial graphics, not childish emoji.
  const shape={
@@ -120,139 +65,177 @@ function iconHTML(key) {
  }[key]||'<circle cx="50" cy="50" r="25"/>';
  return '<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.7">'+shape+'</g></svg>';
 }
-function clear(element){while(element.firstChild)element.removeChild(element.firstChild);}
-function makeOption(o){
- const button=document.createElement("button");button.type="button";button.className="option";button.dataset.option=o.id;button.dataset.tone=o.tone;
- button.setAttribute("aria-pressed",String(values[step].choice===o.id));
- const art=document.createElement("span");art.className="option-art";art.innerHTML=iconHTML(o.id);
- const title=document.createElement("span");title.className="option-label";title.textContent=o.label;
- button.append(art,title);
- button.addEventListener("click",()=>{const v=values[step];v.choice=v.choice===o.id?null:o.id;v.reason=null;v.own="";v.sent=false;paintSelection();});
+
+function clear(node){while(node.firstChild)node.removeChild(node.firstChild);}
+const label=(chapter,choice)=>chapters.find(x=>x.id===chapter)?.choices.find(x=>x[0]===choice)?.[1]||"";
+const activeConcern=()=>answers[1].choice;
+function config(index){
+ const data=chapters[index];
+ if(index!==2)return {...data};
+ const concern=activeConcern(),branch=concernContexts[concern];
+ if(!branch)return {...data};
+ return {...data,question:branch.prompt,choices:branch.choices.map((item,i)=>[item[0],item[1],["time","example","friend","watch"][i],["moss","blue","rose","sand"][i]])};
+}
+function buttonFor([key,title,icon,tone],chapter){
+ const button=document.createElement("button");button.type="button";button.className="option";button.dataset.option=key;button.dataset.tone=tone;
+ button.setAttribute("aria-pressed",String(answers[step].choice===key));
+ const art=document.createElement("span");art.className="option-art";art.innerHTML=iconHTML(icon);
+ const txt=document.createElement("span");txt.className="option-label";txt.textContent=title;
+ button.append(art,txt);
+ button.addEventListener("click",()=>{
+  const old=answers[step].choice;
+  answers[step]={choice:old===key?null:key,detail:null,own:"",sent:false};
+  if(step===1&&old!==key){answers[2]={choice:null,detail:null,own:"",sent:false};}
+  showReply();
+ });
  return button;
 }
-function paintSelection(){
- document.querySelectorAll(".option[data-option]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.option===values[step].choice)));
- const details=el("deeper"),v=values[step],ch=chapters[step],option=ch.choices.find(o=>o.id===v.choice);
- const branch=option&&moa[ch.id][option.id];
- details.hidden=!branch;
- paintMoa();
- if(!branch){
-   el("own-input").value="";
-   el("typed-exchange").hidden=true;
-   return;
- }
- el("reason-question").textContent=branch.prompt;
- const reasons=el("reasons");clear(reasons);
- branch.reasons.forEach((word,i)=>{
-   const b=document.createElement("button");b.type="button";b.className="reason";b.dataset.reason=String(i);
-   b.textContent=word;b.setAttribute("aria-pressed",String(v.reason===i));
-   b.addEventListener("click",()=>{
-     v.reason=v.reason===i?null:i;
-     reasons.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(Number(x.dataset.reason)===v.reason)));
-     paintMoa();
-   });
-   reasons.append(b);
+function replyText(){
+ const choice=answers[step].choice;
+ if(!choice)return"";
+ return reactions[chapters[step].id]?.[choice]||"네가 고른 내용을 그대로 기억해둘게. 왜 그랬는지는 단정하지 않을게.";
+}
+function showReply(){
+ const conf=config(step),answer=answers[step],item=conf.choices.find(x=>x[0]===answer.choice);
+ document.querySelectorAll(".option").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.option===answer.choice)));
+ $("reply-flow").hidden=!item;$("deeper").hidden=!item;
+ if(!item){$("typed-exchange").hidden=true;return;}
+ $("my-reply").textContent=item[1];$("moa-reaction").textContent=replyText();
+ const info=followups[chapters[step].id];
+ $("reason-question").textContent=info.prompt;
+ const reasons=$("reasons");clear(reasons);
+ info.choices.forEach((text,i)=>{
+  const b=document.createElement("button");b.type="button";b.className="reason";b.dataset.reason=String(i);
+  b.textContent=text;b.setAttribute("aria-pressed",String(answer.detail===i));
+  b.addEventListener("click",()=>{
+   answer.detail=answer.detail===i?null:i;
+   reasons.querySelectorAll("button").forEach(z=>z.setAttribute("aria-pressed",String(Number(z.dataset.reason)===answer.detail)));
+   $("moa-followup").textContent=answer.detail===null?"":"고른 내용을 그대로 적어둘게. 자세한 이야기는 나중에 해도 괜찮아.";
+  });
+  reasons.append(b);
  });
- el("own-input").value=v.own;el("own-words").open=Boolean(v.sent);
- el("typed-exchange").hidden=!v.sent||!v.own.trim();
- el("typed-preview").textContent=v.own.trim();
+ $("moa-followup").textContent=answer.detail===null?"":"고른 내용을 그대로 적어둘게. 자세한 이야기는 나중에 해도 괜찮아.";
+ $("own-input").value=answer.own;
+ $("own-words").open=answer.sent;
+ $("typed-preview").textContent=answer.own;
+ $("typed-exchange").hidden=!answer.sent||!answer.own.trim();
 }
 function paint(focus=false){
- const ch=chapters[step],v=values[step];
- el("chapter-count").textContent=String(step+1).padStart(2,"0")+" / 05";
- el("scene").dataset.scene=ch.id;
- el("scene").setAttribute("aria-label",ch.title+": "+ch.scene);
- el("scene-number").textContent="SCENE "+String(step+1).padStart(2,"0");
- el("scene-heading").textContent=ch.title;
- el("scene-narrative").textContent=ch.scene;
- el("scene-tag").textContent=ch.tag;el("question").textContent=ch.question;el("question-help").textContent=ch.help;
- const previous=step>0?chosen(step-1):null;
- el("moa-prompt").textContent=previous?"아까 ‘"+previous.label+"’을 골랐지. "+promptIntro[ch.id]:promptIntro[ch.id];
- el("back").disabled=step===0;
- el("next").innerHTML=step===chapters.length-1?'나의 이야기 보기 <span aria-hidden="true">→</span>':'다음 장면 <span aria-hidden="true">→</span>';
- document.querySelectorAll("[data-progress]").forEach((r,i)=>{r.classList.toggle("on",i===step);r.classList.toggle("done",i<step);});
- const options=el("options");clear(options);ch.choices.forEach(o=>options.append(makeOption(o)));
- paintSelection();
- if(focus)el("question").focus({preventScroll:true});
+ const data=config(step);
+ $("experience").hidden=false;$("result").hidden=true;
+ $("scene").dataset.scene=["interest","team","voice","stuck","hope"][step];
+ $("scene-number").textContent="SCENE "+String(step+1).padStart(2,"0");
+ $("chapter-count").textContent=String(step+1).padStart(2,"0")+" / 05";
+ $("scene-heading").textContent=data.title;$("scene-narrative").textContent=data.scene;
+ $("scene-tag").textContent=data.tag;$("question").textContent=data.question;
+ $("question-help").textContent=data.help;
+ $("moa-prompt").textContent=step===2&&activeConcern()?"아까 ‘"+label("concern",activeConcern())+"’이라고 골랐지. 무엇이 가장 어려운 순간인지 하나만 생각해볼까?":data.prompt;
+ $("back").disabled=step===0;
+ $("next").innerHTML=step===4?'이야기 정리하기 <span aria-hidden="true">→</span>':'다음 이야기 <span aria-hidden="true">→</span>';
+ document.querySelectorAll("[data-progress]").forEach((el,i)=>{el.classList.toggle("on",i===step);el.classList.toggle("done",i<step);});
+ const options=$("options");clear(options);
+ data.choices.forEach(c=>options.append(buttonFor(c,data)));
+ showReply();
+ if(focus)$("question").focus({preventScroll:true});
 }
 function capture(){
- if(values[step].choice)values[step].own=el("own-input").value.slice(0,90);
- else{values[step].own="";values[step].sent=false;}
+ const answer=answers[step];
+ if(!answer.choice){answer.own="";answer.sent=false;return;}
+ answer.own=$("own-input").value.slice(0,120);
 }
-function goto(i){if(i<0||i>=chapters.length)return;capture();step=i;paint(true);}
-function chosen(i){return chapters[i].choices.find(o=>o.id===values[i].choice);}
-function detail(i){const ch=chapters[i],v=values[i],item=chosen(i);if(!item)return null;return {topic:ch.tag.slice(5),label:item.label,description:"이 장면에서는 ‘"+item.label+"’을 골랐어.",reason:v.reason===null?"":moa[ch.id][item.id].reasons[v.reason],own:v.own};}
-function chosenLines(key){
- const d=detail(chapters.findIndex(c=>c.id===key));return d;
+function next(){capture();if(step===4)finish();else{step++;paint(true);}}
+function back(){if(step===0)return;capture();step--;paint(true);}
+function skip(){answers[step]={choice:null,detail:null,own:"",sent:false};$("own-input").value="";if(step===1)answers[2]={choice:null,detail:null,own:"",sent:false};next();}
+function summaryItem(index){
+ const answer=answers[index],cfg=config(index),selection=cfg.choices.find(x=>x[0]===answer.choice);
+ return {id:chapters[index].id,label:chapters[index].tag.replace(/^\d+ · /,""),selection:selection?.[1]||null,why:answer.detail===null?null:followups[chapters[index].id].choices[answer.detail],own:answer.own.trim()};
 }
-function createText(){
- const [i,t,v,s,h]=chapters.map((c,index)=>detail(index));
- const include=key=>document.querySelector('[data-include="'+key+'"]').checked;
- const segments=[];
- if(tone==="casual"){
-   if(i&&include("interest"))segments.push("저는 "+chapters[0].choices.find(o=>o.id===values[0].choice).intro+"에 관심이 있어요.");
-   if(t&&include("team"))segments.push("함께 무언가 할 때는 "+chapters[1].choices.find(o=>o.id===values[1].choice).intro+"부터 해보고 싶어요.");
-   if(v&&include("voice"))segments.push("생각을 전할 때는 "+chapters[2].choices.find(o=>o.id===values[2].choice).intro+"이 더 편해요.");
-   if(s&&include("stuck"))segments.push("어려울 때는 "+chapters[3].choices.find(o=>o.id===values[3].choice).intro+"이 도움이 될 것 같아요.");
-   if(h&&include("hope"))segments.push("앞으로는 "+chapters[4].choices.find(o=>o.id===values[4].choice).intro+"부터 시작해보고 싶어요.");
- }else{
-   if(i&&include("interest"))segments.push("제가 관심 있는 건 "+chapters[0].choices.find(o=>o.id===values[0].choice).intro+"이에요.");
-   if(t&&include("team"))segments.push("팀에서는 "+chapters[1].choices.find(o=>o.id===values[1].choice).intro+"을 맡아보고 싶어요.");
-   if(v&&include("voice"))segments.push("의견을 나눌 때는 "+chapters[2].choices.find(o=>o.id===values[2].choice).intro+"이 편해요.");
-   if(s&&include("stuck"))segments.push("막히는 순간에는 "+chapters[3].choices.find(o=>o.id===values[3].choice).intro+"이 도움이 돼요.");
-   if(h&&include("hope"))segments.push("다음에는 "+chapters[4].choices.find(o=>o.id===values[4].choice).intro+"부터 시도해보고 싶어요.");
- }
- const reasons=chapters.map((c,index)=>({x:detail(index),included:include(c.id)})).filter(r=>r.x&&r.included&&r.x.reason);
- if(reasons.length)segments.push("제가 고른 이유는 ‘"+reasons[0].x.reason+"’예요.");
- const extras=chapters.map((c,index)=>({x:detail(index),included:include(c.id)})).filter(r=>r.x&&r.included&&r.x.own.trim()).map(r=>r.x.own.trim());
- if(extras.length)segments.push("그리고 제 말로 덧붙이면, "+extras.join(" / "));
- return segments.length?segments.join("\n\n"):"아직 어떤 말로 소개할지 모르겠어요. 천천히 알아가고 싶어요.";
-}
-function rebuild(){lastAuto=createText();el("intro-text").value=lastAuto;manual=false;el("copy-feedback").textContent="";}
-function paintSummary(){
- const grid=el("discoveries");clear(grid);
- chapters.forEach((ch,i)=>{
-   const d=detail(i),tile=document.createElement("article");tile.className="discovery";
-   const k=document.createElement("span");k.className="discovery-tag";k.textContent=ch.tag;
-   const summary=document.createElement("p");summary.className="discovery-content";summary.textContent=d?d.description:"이번 장면은 건너뛰었어. 나중에 다시 골라도 돼.";
-   tile.append(k,summary);
-   if(d&&d.reason){const why=document.createElement("p");why.className="discovery-why";why.textContent="왜? "+d.reason;tile.append(why);}
-   grid.append(tile);
+function renderPreview(){
+ const selected=chapters.map((c,i)=>summaryItem(i)).filter(it=>disclose[it.id]);
+ const lines=["상담에서 내가 먼저 이야기하고 싶은 것"];
+ selected.forEach(item=>{
+   const line=item.selection?item.selection:"아직 정하지 않았어";
+   lines.push("• "+item.label+": "+line);
+   if(item.why)lines.push("  - 추가로 고른 답: "+item.why);
+   if(item.own&&discloseNotes[item.id])lines.push("  - 내가 직접 쓴 말: "+item.own);
  });
+ const content=selected.length?lines.join("\n"):"";
+ $("intro-text").value=content;$("intro-text").readOnly=!selected.length;
+ $("summary-empty").hidden=selected.length>0;
+ $("copy").disabled=!selected.length;
+ freeEdited=false;$("copy-feedback").textContent="";
 }
-function finish(){capture();el("experience").hidden=true;el("result").hidden=false;paintSummary();rebuild();el("result-title").focus({preventScroll:true});}
-el("back").addEventListener("click",()=>goto(step-1));
-el("skip").addEventListener("click",()=>{values[step]={choice:null,reason:null,own:"",sent:false};el("own-input").value="";if(step===chapters.length-1)finish();else goto(step+1);});
-el("next").addEventListener("click",()=>step===chapters.length-1?finish():goto(step+1));
-el("own-input").addEventListener("input",e=>{
- values[step].own=e.target.value.slice(0,90);
- values[step].sent=false;
- el("typed-exchange").hidden=true;
+function buildShare(){
+ const area=$("handoff-select");clear(area);
+ chapters.forEach((chapter,i)=>{
+  const d=summaryItem(i),outer=document.createElement("div");outer.className="handoff-row";
+  const main=document.createElement("label");main.className="handoff-option";
+  const c=document.createElement("input");c.type="checkbox";c.checked=disclose[chapter.id];c.dataset.share=chapter.id;
+  const text=document.createElement("span");text.textContent=d.label+" · "+(d.selection||"건너뛰었어");
+  main.append(c,text);outer.append(main);
+  if(d.own){
+    const note=document.createElement("label");note.className="handoff-note";
+    const check=document.createElement("input");check.type="checkbox";check.checked=discloseNotes[chapter.id];check.dataset.note=chapter.id;
+    const l=document.createElement("span");l.textContent="내가 직접 쓴 문장도 포함";note.append(check,l);outer.append(note);
+    check.addEventListener("change",()=>{discloseNotes[chapter.id]=check.checked;renderPreview();});
+  }
+  c.addEventListener("change",()=>{disclose[chapter.id]=c.checked;renderPreview();});
+  area.append(outer);
+ });
+ renderPreview();
+}
+function buildHistory(){
+ const area=$("discoveries");clear(area);
+ chapters.forEach((chapter,i)=>{
+  const d=summaryItem(i),card=document.createElement("article");card.className="discovery";
+  const title=document.createElement("span");title.className="discovery-tag";title.textContent=d.label;
+  const body=document.createElement("p");body.className="discovery-content";body.textContent=d.selection||"이번 이야기는 넘어갔어";
+  card.append(title,body);
+  if(d.why){const why=document.createElement("p");why.className="discovery-why";why.textContent=d.why;card.append(why);}
+  if(d.own){const own=document.createElement("p");own.className="discovery-why";own.textContent="직접 적은 말: "+d.own;card.append(own);}
+  area.append(card);
+ });
+ const questions=$("clinician-questions");clear(questions);
+ const hints=[
+ "학생이 스스로 좋아한다고 느끼는 경험의 구체적 맥락은 무엇인가? 없거나 모르겠다면 지금은 어떤 활동이 편한가?",
+ "학생과 보호자가 호소하는 주제가 일치하는가? 학교·또래·기분·생활 문제의 발생 맥락과 강점은 무엇인가?",
+ "선택한 순간의 환경·빈도·기능상 어려움은 어떠한가? 안전·괴롭힘·학대 가능성은 별도 면담에서 확인.",
+ "학생이 실제로 편하게 응답하는 방식(말·글·그림·관찰·공동활동)과 필요한 조정은 무엇인가?",
+ "학생이 원한 목표는 무엇인가? 첫 회기에서 바로 해볼 수 있는 작은 공동활동은 무엇인가?"
+ ];
+ hints.forEach((txt,i)=>{const p=document.createElement("p");p.textContent=String(i+1)+". "+txt;questions.append(p);});
+}
+function finish(){
+ capture();$("experience").hidden=true;$("result").hidden=false;
+ buildHistory();buildShare();
+ $("result-title").focus({preventScroll:true});
+}
+$("back").addEventListener("click",back);
+$("next").addEventListener("click",next);
+$("skip").addEventListener("click",skip);
+$("finish-early").addEventListener("click",finish);
+$("revisit").addEventListener("click",()=>paint(true));
+$("own-input").addEventListener("input",e=>{
+ answers[step].own=e.target.value.slice(0,120);
+ answers[step].sent=false;$("typed-exchange").hidden=true;
 });
-el("own-send").addEventListener("click",()=>{
- const value=el("own-input").value.trim();
- if(!value)return;
- values[step].own=value.slice(0,90);
- values[step].sent=true;
- el("typed-preview").textContent=values[step].own;
- el("typed-exchange").hidden=false;
+$("own-send").addEventListener("click",()=>{
+ const text=$("own-input").value.trim();
+ if(!text)return;
+ answers[step].own=text.slice(0,120);
+ answers[step].sent=true;$("typed-preview").textContent=answers[step].own;$("typed-exchange").hidden=false;
 });
-el("revisit").addEventListener("click",()=>{el("result").hidden=true;el("experience").hidden=false;paint(true);});
-document.querySelectorAll("[data-tone]").forEach(button=>button.addEventListener("click",()=>{
- tone=button.dataset.tone;
- document.querySelectorAll("[data-tone]").forEach(b=>b.setAttribute("aria-pressed",String(b===button)));
- if(!manual)rebuild();else el("copy-feedback").textContent="직접 고친 소개문은 그대로 뒀어. 새 방식으로 바꾸려면 '다시 만들기'를 눌러줘.";
-}));
-document.querySelectorAll("[data-include]").forEach(box=>box.addEventListener("change",()=>{
- if(!manual)rebuild();else el("copy-feedback").textContent="수정한 글은 그대로 있어. 새 선택으로 다시 만들려면 '다시 만들기'를 눌러줘.";
-}));
-el("intro-text").addEventListener("input",()=>{manual=true;el("copy-feedback").textContent="";});
-el("rebuild").addEventListener("click",rebuild);
-el("copy").addEventListener("click",async()=>{
- const value=el("intro-text").value,status=el("copy-feedback");
- try{if(!navigator.clipboard||!window.isSecureContext)throw new Error("clipboard");await navigator.clipboard.writeText(value);status.textContent="소개문을 복사했어. 보내기 전에 내용을 직접 확인해줘.";}
- catch{status.textContent="복사가 안 됐어. 위 글을 직접 선택해 복사할 수 있어.";}
+$("intro-text").addEventListener("input",()=>{freeEdited=true;$("copy-feedback").textContent="";});
+$("rebuild").addEventListener("click",renderPreview);
+$("copy").addEventListener("click",async()=>{
+ if($("copy").disabled)return;
+ const status=$("copy-feedback");
+ try{
+  if(!navigator.clipboard||!window.isSecureContext)throw new Error("clipboard");
+  await navigator.clipboard.writeText($("intro-text").value);
+  status.textContent="복사했어. 직접 공유할 때 보여줄 내용을 확인해줘.";
+ }catch{status.textContent="자동 복사가 어려워. 위 글을 직접 복사하거나 화면으로 보여줄 수 있어.";}
 });
-el("print").addEventListener("click",()=>window.print());
+$("print").addEventListener("click",()=>window.print());
 paint();
 })();
