@@ -32,7 +32,7 @@ for(const width of [390,1280]){
   await check(await page.locator('form').count()===0,width+'px no form posts or collection');
   await check(await page.locator('button.option svg').count()===4,width+'px illustrated visual options');
   await check(await page.locator('.moa-dialogue .moa-avatar').isVisible(),width+'px Moa visible as conversation companion');
-  await check((await page.locator('#moa-prompt').innerText()).includes('좋아하는'),width+'px Moa opens teen-friendly conversation');
+  await check((await page.locator('#moa-prompt').innerText()).includes('쉬는 날'),width+'px Moa opens teen-friendly conversation');
   await check(await page.locator('#reply-flow').isHidden(),width+'px no forced dialogue before choosing');
   await check(await page.locator('#question').isVisible(),width+'px single prompt');
   await check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),width+'px responsive intro no overflow');
