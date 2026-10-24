@@ -128,7 +128,7 @@ function createText(){
    if(h&&include("hope"))segments.push("다음에는 "+chapters[4].choices.find(o=>o.id===values[4].choice).intro+"을 시도해보고 싶어요.");
  }
  const reasons=chapters.map((c,index)=>({x:detail(index),included:include(c.id)})).filter(r=>r.x&&r.included&&r.x.reason);
- if(reasons.length)segments.push("그 이유 중 하나는 "+reasons[0].x.reason+"예요.");
+ if(reasons.length)segments.push("제가 고른 이유는 ‘"+reasons[0].x.reason+"’예요.");
  const extras=chapters.map((c,index)=>({x:detail(index),included:include(c.id)})).filter(r=>r.x&&r.included&&r.x.own.trim()).map(r=>r.x.own.trim());
  if(extras.length)segments.push("그리고 제 말로 덧붙이면, "+extras.join(" / "));
  return segments.length?segments.join("\n\n"):"아직 어떤 말로 소개할지 모르겠어요. 천천히 알아가고 싶어요.";
@@ -147,7 +147,7 @@ function paintSummary(){
 }
 function finish(){capture();el("experience").hidden=true;el("result").hidden=false;paintSummary();rebuild();el("result-title").focus({preventScroll:true});}
 el("back").addEventListener("click",()=>goto(step-1));
-el("skip").addEventListener("click",()=>{values[step]={choice:null,reason:null,own:""};if(step===chapters.length-1)finish();else goto(step+1);});
+el("skip").addEventListener("click",()=>{values[step]={choice:null,reason:null,own:""};el("own-input").value="";if(step===chapters.length-1)finish();else goto(step+1);});
 el("next").addEventListener("click",()=>step===chapters.length-1?finish():goto(step+1));
 el("own-input").addEventListener("input",e=>values[step].own=e.target.value.slice(0,90));
 el("revisit").addEventListener("click",()=>{el("result").hidden=true;el("experience").hidden=false;paint(true);});
