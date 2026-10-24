@@ -19,3 +19,7 @@
 .intro-builder{margin-top:12px}
 @media(max-width:440px){.discovery-toggle .discoveries{grid-template-columns:1fr}.discovery-toggle{padding:12px}.intro-customize{padding:11px}.result-head{padding:6px 0 9px}}
 @media print{.discovery-toggle{display:none!important}.intro-customize{display:none!important}}
+
+/* Match final-page secondary navigation to the rounded card system. */
+.after-result>.back{border:1px solid #cbd9cb;border-radius:11px;background:#fff;color:#4f7359;min-height:43px;padding:9px 13px;font-weight:750}
+.after-result>.back:hover{background:#edf4ed}
