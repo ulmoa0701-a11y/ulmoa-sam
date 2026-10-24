@@ -193,3 +193,12 @@ button.feed-friend.friend-fed .forest-friend{transform:translateY(-3px)}
 .want-pile.big{width:13px;height:26px}
 .want-pile.target{background:#e7a167;box-shadow:0 0 0 2px #fff3d6,0 0 0 4px #e7a16788}
 @media(max-width:650px){.want-pile.small{width:8px;height:7px}.want-pile.big{width:8px;height:16px}}
+
+.map-node-badge.icon-shop{background-image:url('./assets/village-v1/objects/cottage.png')}
+.order-demo,.shop-counter{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
+.order-card{display:flex;align-items:center;justify-content:center;min-width:64px;min-height:64px;padding:10px;background:#fff8e7;border:3px solid #ead1a2;border-radius:18px;box-shadow:0 5px 0 #e3cfa0}
+.order-card.numeral{font-size:34px;font-weight:1000;color:#355349}
+.order-card.dots{display:flex;flex-wrap:wrap;gap:5px;max-width:92px}
+.order-dot{width:14px;height:14px;border-radius:50%;background:#e98e65;box-shadow:0 2px 0 #c06b46}
+.shop-counter .forest-friend{width:80px;height:88px}
+@media(max-width:650px){.order-card{min-width:52px;min-height:52px;padding:7px}.order-card.numeral{font-size:26px}.order-dot{width:11px;height:11px}.shop-counter .forest-friend{width:66px;height:72px}}
