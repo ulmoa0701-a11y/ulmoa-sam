@@ -1,0 +1,9 @@
+[build]
+  command = "node netlify/postgres-smoke.mjs"
+  publish = "site"
+  functions = "netlify/functions"
+
+# Functions use Netlify custom URL /api/*, so no client-side CORS secrets.
+# The isolated testing site remains SSO-protected; live data checks require authenticated validation.
+[functions]
+  node_bundler = "esbuild"

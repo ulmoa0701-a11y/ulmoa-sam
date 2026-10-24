@@ -1,0 +1,46 @@
+# 이야기해봄 배포 경로 결정 기록 — 2026-10-12
+
+## 목표
+외부 공개 전 검증, 아동·보호자 개인정보 보호, 추가 결제 0원, 기존 공개글/비밀글 이관 시 데이터 보존.
+
+## 우선 경로: 기존 연결 Netlify Free 계정에 분리된 스테이징
+- 실제 확인: Netlify Free 팀 `ulmoa0701`, 기존 테스트 프로젝트 `ulmoa-ildan-secure-test` 존재. 기존 사이트를 덮어쓰지 않는다.
+- 공식 가격표: https://www.netlify.com/pricing/ — Free 300크레딧/월, 한도는 강제 정지이며 자동 초과결제 없음. Function, Database, Blobs 포함.
+- 후보 구조: 하나의 Netlify 호스트 페이지 + 서버 함수 + 격리된 SQL DB(게시글/답글/승인 상태/복구키 해시) + 비공개 Blobs(첨부파일). URL은 기존 홈페이지에서 한 번만 연다. 공개/비밀 모두 같은 UI와 저장 경로를 거친다.
+- Netlify Blobs는 자체 접근제어 없음. 조회 서버 함수가 인증·권한을 반드시 검사해야 한다: https://docs.netlify.com/build/data-and-storage/netlify-blobs/
+- 기존 Cloudflare Worker+D1+R2 코드는 보안 설계 후보/비교 기준으로 남겨두되 현재 임의 배포 금지. R2는 별도 구독 checkout이 필요할 수 있어 0원 요구에 더 불리함: https://developers.cloudflare.com/r2/get-started/
+- AppDeploy는 14크레딧 미만으로 현재 신규 배포 불가.
+
+## Free 팀의 주의사항
+- 같은 Netlify 팀의 여러 사이트가 300크레딧을 공유하므로 한도를 넘으면 다른 Netlify 서비스까지 함께 일시 중단될 수 있다. 비용은 0원이지만 가용성은 보장되지 않는다.
+- **운영 이전**에 계정 잔여량, 월별 함수·스토리지·DB 사용 예상량, 한도 경보/차단 정책을 확인한다.
+- 프리뷰가 운영 DB의 민감정보 복사본을 가지거나 공유 URL이 공개되는지 먼저 점검한다. 테스트 글은 완전히 격리된 스테이징 DB에만 저장한다.
+- 신규 서버 생성이나 외부 공개는 실제 파일/권한/요금 상태를 확인하지 못한 상태에서 실행하지 않는다.
+- 통합 API를 재사용하는 Netlify 함수 어댑터는 `netlify/adapter.mjs`, `netlify/functions/board.mjs`에 추가했고 PostgreSQL 마이그레이션도 별도로 작성했다. 모의 DB/파일 테스트는 수행 중이다. 실제 Netlify DB·Blobs 연결과 실환경 테스트가 남아 있어 **서버 통합은 아직 완료되지 않음**.
+
+## 배포 게이트
+1. Netlify Free 계정·할당량 확인.
+2. 분리된 개발용 Netlify 프로젝트와 DB/Blobs 연결 여부 확인, 스테이징 접속 제한.
+3. 공개글·비밀글(잠금/완전비공개)·운영자 인증·첨부·본인 조회·답변·삭제·재발 방지 테스트.
+4. 개인정보 처리방침(수집 목적, 보유기간, 문의/삭제, 외부 서비스, 14세 미만 처리)을 실제 운영 방식에 맞게 확정.
+5. 기존 GAS/Jotform 원본 백업과 글 이관 검증, 게시글 유실 없는 과도기 운영.
+6. PC/모바일 실환경 접근성/침해 시나리오, 최종 공개 URL 테스트.
+7. 위 조건이 충족된 경우에만 사용자의 명확한 공개 승인 후 기존 페이지를 변경.
+
+## 이번 UI 피드백 반영
+'질문게시판'이 아니라 '울모아쌤에게 메모 전달' 컨셉:
+- 상단 받는 사람, 쪽지 봉투, 부담 없는 한 줄 안내.
+- 제목 기본 접기, 문장 시작칩 5개, 기존 내용 비파괴, 2,000자 글자 수 표시.
+- 공개/비밀 옵션은 한 폼을 유지, 제출 후에만 접수확인문.
+- 일관된 타이포, PC/모바일, 접근성에 초점. 캐릭터/메인 홈페이지/기존 공개본 변경 없음.
+
+## 2026-10-13 실제 독립 Netlify 프로젝트 확보
+- Netlify Free 팀에서 기존 사이트를 변경하지 않고 새 테스트 프로젝트 habom-unified-private-staging 생성.
+- 프로젝트: https://app.netlify.com/projects/habom-unified-private-staging
+- Netlify site ID: f9c910bc-97fe-482e-8b84-dc2ba8584907
+- 연결된 Netlify 도구로 readback: 프로젝트 존재, Free plan, SSO login required for all deploys 확인.
+- 아직 Git 저장소 연결, Functions, Database, Blob 구성 및 배포를 실행하지 않았으며 live deployed URL이 없음.
+- 배포용 Git branch는 feature/habom-unified-secure-20261012, Base directory request-next, publish site, Netlify functions netlify/functions.
+- 중요: 원본 ulmoa-sam main 브랜치로 연결되면 다른 게임/파일을 잘못 배포할 수 있으므로 반드시 배포 브랜치와 base directory를 지정해야 함.
+- 연결된 Netlify 도구는 Git repository linking 및 environment-secret mutation을 제공하지 않으며, Remote Desktop Commander 실행 잔여 호출도 0%. 이 단계는 계정 관리자 Netlify UI 동작이 필요함.
+- 비밀키 HABOM_ADMIN_KEY와 HABOM_RATE_SALT는 32자 이상 무작위 값으로 해당 신규 프로젝트의 Functions 환경변수에만 저장; GitHub에 커밋하거나 채팅에 입력하지 않음.

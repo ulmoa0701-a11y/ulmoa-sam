@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>이야기해봄 | 통합 게시판 개발판</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=Gamja+Flower&display=swap">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="wrap">
+    <header class="heading">
+      <a class="home" href="https://ulmoa0701-a11y.github.io/ulmoa-sam/">← 일단 해봄</a>
+      <div class="note-hero">
+        <div class="note-hero-copy">
+          <span class="eyebrow">울모아쌤에게 전하는 작은 쪽지</span>
+          <h1>이야기해봄<span class="hero-doodle" aria-hidden="true"> 생각 한 장</span></h1>
+          <p class="hero-lead">써보다가 떠오른 생각, 작은 질문 하나.<br>길게 정리하지 않아도 괜찮아요.</p>
+        </div>
+        <div class="hero-envelope" aria-hidden="true"><span class="envelope-flap"></span><span class="envelope-paper">To. 울모아쌤</span><span class="envelope-front"></span><span class="envelope-seal">모아</span></div>
+      </div>
+      <p class="hero-caption">남겨주신 의견은 프로그램과 자료를 다듬을 때 참고해요. 모든 쪽지에 답하거나 모든 요청을 만들어 드리지는 못해요.</p>
+      <p class="staging-notice" role="note"><strong>시험 운영 중</strong> · 실제 아동 이름, 진단, 학교, 연락처, 상담 기록 등 개인정보는 입력하지 말아 주세요. 정식 공개 준비 중입니다.</p>
+    </header>
+
+    <section class="sheet writing-sheet" aria-labelledby="writeTitle">
+      <div class="note-address"><span class="note-stamp" aria-hidden="true">✉</span><span><small>받는 사람</small><strong>울모아쌤</strong></span><span class="note-address-caption">한 줄 메모도 좋아요</span></div>
+      <h2 id="writeTitle">작은 쪽지 한 장 남길까요?</h2>
+      <p class="writing-intro">무슨 말을 써야 할지 고민된다면 아래 문장으로 시작해도 좋아요.</p>
+      <form id="postForm">
+        <div class="step">
+          <h3><span class="step-number">1</span> 어떤 쪽지인가요?</h3>
+          <label for="category">가장 가까운 내용을 골라주세요</label>
+          <select id="category" name="category" required>
+            <option>자료 요청</option><option>정보 공유</option><option>질문</option>
+            <option>함께 만들기</option><option>사용 후기</option><option>기타</option>
+          </select>
+          <details class="more title-more">
+            <summary>제목도 적어둘래요 <span>선택</span></summary>
+            <label for="title">쪽지 제목</label>
+            <input id="title" name="title" maxlength="80" placeholder="제목 없이 보내도 돼요">
+          </details>
+        </div>
+        <div class="step">
+          <h3><span class="step-number">2</span> 생각을 적어주세요</h3>
+          <p class="prompt-hint">눌러서 시작할 수도 있어요.</p>
+          <div class="prompt-chips" role="group" aria-label="쪽지 시작 문장">
+            <button type="button" class="prompt-chip" data-kind="자료 요청" data-start="이런 자료가 있으면 좋겠어요. ">📎 이런 자료도 있을까요?</button>
+            <button type="button" class="prompt-chip" data-kind="질문" data-start="궁금한 게 있어요. ">💭 궁금한 게 있어요</button>
+            <button type="button" class="prompt-chip" data-kind="사용 후기" data-start="직접 써보니 ">🌱 직접 써봤어요</button>
+            <button type="button" class="prompt-chip" data-kind="함께 만들기" data-start="이런 방법은 어떨까요? ">💡 생각이 났어요</button>
+            <button type="button" class="prompt-chip" data-kind="정보 공유" data-start="이 정보도 나누고 싶어요. ">📝 함께 나눌게요</button>
+          </div>
+          <label for="body">쪽지 내용 <span class="required">필수</span></label>
+          <div class="memo-editor"><textarea id="body" name="body" maxlength="2000" required rows="6" placeholder="예) 써봤는데 이 부분이 조금 어려웠어요.&#10;한두 문장만 남겨도 괜찮아요."></textarea><div class="memo-editor-foot"><span>To. 울모아쌤</span><span id="memoCount">0 / 2,000</span></div></div>
+          <details class="more">
+            <summary>관련 링크·파일 함께 보내기 <span>선택</span></summary>
+            <label for="link">관련 링크</label>
+            <input id="link" type="url" name="link" maxlength="500" placeholder="https://">
+            <label for="attachment">PDF 또는 이미지 (4MB 이하)</label>
+            <input id="attachment" type="file" name="attachment" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp">
+            <p class="help">첨부파일은 검토 전까지 다른 방문자에게 공개되지 않습니다. 개인정보는 가리고 올려주세요.</p>
+          </details>
+        </div>
+        <div class="step">
+          <h3><span class="step-number">3</span> 어떤 이름으로 전할까요?</h3>
+          <label class="check"><input id="anonymous" type="checkbox" name="anonymous"><span>익명으로 남길게요</span></label>
+          <label for="nickname">닉네임 <span class="optional">익명이 아니라면 필수</span></label>
+          <input id="nickname" name="nickname" maxlength="24" required placeholder="표시할 이름">
+          <details class="more">
+            <summary>내 역할 선택하기 <span>선택</span></summary>
+            <label for="role">어떤 분이신가요?</label>
+            <select name="role" id="role">
+              <option value="">선택하지 않을래요</option>
+              <optgroup label="치료·상담 전문가">
+                <option>인지치료사</option><option>학습치료사</option><option>언어재활사</option><option>청능재활사</option><option>음악치료사</option><option>놀이치료사</option><option>미술치료사</option><option>심리상담사</option><option>임상심리사</option><option>가족상담사</option><option>행동중재 전문가</option><option>작업치료사</option><option>물리치료사</option><option>감각통합 중재 종사자</option><option>심리운동사</option><option>독서치료사</option><option>모래놀이치료사</option><option>기타 치료·상담</option>
+              </optgroup>
+              <optgroup label="교육·보육 종사자">
+                <option>특수교사</option><option>유치원교사</option><option>초등교사</option><option>중등교사</option><option>보육교사</option><option>장애영유아보육교사</option><option>특수교육실무사</option><option>통합교육 담당교사</option><option>방과후교사</option><option>돌봄교사</option><option>교수·강사</option><option>기타 교육·보육</option>
+              </optgroup>
+              <optgroup label="예비 전문가·전공생">
+                <option>예비 인지치료사</option><option>예비 언어재활사</option><option>예비 음악치료사</option><option>예비 놀이치료사</option><option>예비 미술치료사</option><option>예비 작업치료사</option><option>예비 심리상담사</option><option>예비 특수교사</option><option>예비 일반교사</option><option>관련 전공 대학생</option><option>대학원생</option><option>실습생</option><option>수련생</option><option>자격 취득 준비생</option><option>기타 예비 전문가</option>
+              </optgroup>
+              <optgroup label="의료·복지·연구">
+                <option>의사</option><option>간호사</option><option>사회복지사</option><option>의료사회복지사</option><option>복지·행정 담당자</option><option>기관장·센터 운영자</option><option>연구자</option><option>교육콘텐츠 개발자</option><option>관련 기관 종사자</option><option>자원봉사자</option><option>기타 관련 종사자</option>
+              </optgroup>
+              <optgroup label="다른 방문자">
+                <option>보호자</option><option>아동·청소년</option><option>성인 이용자</option><option>일반 방문자</option><option>자료 이용자</option><option>교육·발달 분야 관심자</option><option>기타</option>
+              </optgroup>
+            </select>
+          </details>
+        </div>
+        <fieldset class="privacy-choice">
+          <legend>누가 이 쪽지를 볼 수 있나요?</legend>
+          <label class="choice selected"><input type="radio" name="visibility" value="public" checked><span><strong>💬 공개글</strong><small>운영자가 확인한 후 누구나 볼 수 있어요</small></span></label>
+          <label class="choice"><input type="radio" name="visibility" value="list"><span><strong>🔒 잠금글</strong><small>운영자가 승인한 목록 정보만 보여요</small></span></label>
+          <label class="choice"><input type="radio" name="visibility" value="hidden"><span><strong>🛡️ 완전 비공개</strong><small>목록에도 표시하지 않아요</small></span></label>
+        </fieldset>
+        <section id="secretOptions" class="secret-options" hidden aria-label="비밀글 추가 항목">
+          <p>본문과 첨부파일은 공개되지 않아요. 제출 후 표시되는 확인 코드를 보관하면 답변을 조회할 수 있어요.</p>
+          <details class="more">
+            <summary>연락처 남기기 <span>선택</span></summary>
+            <label for="email">이메일</label><input type="email" id="email" name="email" autocomplete="email" maxlength="150">
+            <label for="phone">전화번호</label><input type="tel" id="phone" name="phone" autocomplete="tel" maxlength="40">
+          </details>
+          <label class="check consent"><input type="checkbox" id="consent" name="consent"><span>비공개 글의 내용·선택한 연락처·첨부파일을 문의 확인 및 답변 목적으로 보관하는 데 동의합니다. 비밀글 내용은 일반 방문자에게 공개되지 않아요.</span></label>
+          <p class="help">운영 전에 처리 목적·보유기간·삭제 방법을 안내하는 개인정보 처리방침을 확정해야 합니다.</p>
+        </section>
+        <p class="public-safety" id="publicSafety">공개글에 아동 실명·연락처·학교·진단·상담 기록 등 개인을 알아볼 수 있는 정보는 적지 말아 주세요.</p>
+        <input class="trap" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button id="sendButton" class="submit" type="submit"><span aria-hidden="true">✉</span> 쪽지 보내기</button>
+        <p id="formStatus" class="status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section class="receipt sheet" id="receiptPanel" hidden aria-labelledby="receiptTitle">
+      <h2 id="receiptTitle">쪽지를 잘 받았어요 <span aria-hidden="true">✉</span></h2>
+      <p>이 확인 코드는 다시 발급되지 않아요. 비밀글에 답변이 달렸는지 확인할 때 필요합니다.</p>
+      <label for="receiptCode">내 글 확인 코드</label>
+      <input id="receiptCode" readonly>
+      <div class="actions"><button type="button" id="copyReceipt">확인 링크 복사</button><button type="button" id="openMine">내 글 확인하기</button></div>
+    </section>
+
+    <section class="sheet browse" aria-labelledby="feedTitle">
+      <div class="section-row"><h2 id="feedTitle">서로 남긴 쪽지들</h2><button type="button" id="refresh">새로고침</button></div>
+      <div class="feed" id="publicFeed" aria-live="polite"><p class="muted">글을 불러오고 있어요.</p></div>
+      <h3 class="locked-title">🔒 공개가 승인된 잠금 쪽지</h3>
+      <div class="feed" id="lockedFeed"></div>
+      <details class="archive"><summary>이전에 남겨주신 글은 어디에 있나요?</summary><p>기존 공개글은 옛 게시판에 그대로 남겨두었어요. 이곳으로 안전하게 이전하기 전까지는 <a href="https://script.google.com/macros/s/AKfycbyPlQU1RapkSjSMDD_BeCSMnR4NGycAczTWxL1oUxWiganzjJezfhDaI3262kyA5Igrtw/exec" target="_blank" rel="noopener noreferrer">기존 글 보기 ↗</a>에서 확인할 수 있어요.</p></details>
+    </section>
+
+    <section class="sheet" id="minePanel" aria-labelledby="mineTitle">
+      <h2 id="mineTitle">내 쪽지와 답장 확인</h2>
+      <p class="muted">글 번호와 확인 코드가 있어야 비밀글을 다시 볼 수 있어요.</p>
+      <form id="mineForm">
+        <label for="postId">글 번호</label><input id="postId" required autocomplete="off">
+        <label for="postToken">확인 코드</label><input id="postToken" required autocomplete="off" type="password">
+        <button class="secondary" type="submit">확인하기</button>
+      </form>
+      <p class="status" id="mineStatus" role="status"></p>
+      <div id="mineResult" hidden></div>
+    </section>
+
+    <details class="sheet admin-section">
+      <summary>운영자 관리</summary>
+      <label for="adminKey">운영자 키</label><input id="adminKey" type="password" autocomplete="off">
+      <button type="button" id="adminLoad" class="secondary">글 관리 열기</button>
+      <p class="status" id="adminStatus" role="status"></p>
+      <div class="self-test-panel" id="selfTestPanel" hidden>
+        <p><strong>실제 서버 자동 검증</strong></p>
+        <p class="muted">가상의 완전 비공개 쪽지와 작은 PDF를 잠깐 저장해 비공개 권한·답장·첨부·삭제를 확인한 뒤 자동으로 지워요. 실제 이용자 데이터는 건드리지 않습니다.</p>
+        <button type="button" id="adminSelfTest" class="secondary">테스트 한 번 실행하기</button>
+        <p class="status" id="selfTestStatus" role="status" aria-live="polite"></p>
+      </div>
+      <div id="adminPosts"></div>
+    </details>
+    <footer>일단 해봄 · 울모아쌤</footer>
+  </main>
+  <script src="./app.js" defer></script>
+</body>
+</html>
