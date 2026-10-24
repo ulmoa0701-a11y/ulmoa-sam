@@ -1,100 +1,78 @@
 <!doctype html>
 <html lang="ko"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#142c34">
-<title>나를 설명하는 다섯 장면 · 일단 해봄</title>
-<meta name="description" content="내 취향, 관계 방식, 도움이 되는 것과 해보고 싶은 일을 실제 상황 속에서 발견해 나의 소개문을 만드는 청소년 자기탐색">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#294e48">
+<title>모아와 첫 이야기 · 일단 해봄</title>
+<meta name="description" content="처음 상담하기 전, 요즘 생활과 고민, 편한 이야기 방법, 원하는 도움을 모아와 천천히 살펴보는 청소년용 첫 대화">
 <link rel="icon" href="../../assets/habom-favicon-v3-32.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link rel="stylesheet" href="./myself.css"><script defer src="./myself.js"></script>
-</head><body>
-<div class="shell">
-<header class="topbar">
- <a class="wordmark" href="../../"><img src="../../assets/habom-approved-wordmark.webp" alt="일단 해봄"></a>
- <div class="top-links"><span>내 이야기, 내 속도로</span><a href="../">나가기</a></div>
-</header>
+<link rel="stylesheet" href="./myself.css"><script src="./myself.js" defer></script>
+</head><body><div class="shell">
+<header class="topbar"><a class="wordmark" href="../../"><img src="../../assets/habom-approved-wordmark.webp" alt="일단 해봄"></a><div class="top-links"><span>처음 나누는 이야기</span><a href="../">나가기</a></div></header>
 <main>
- <div class="page-intro"><span class="kicker">ABOUT ME / 지금의 나</span><span class="privacy">선택은 저장되지 않아요</span></div>
- <section id="experience" class="experience" aria-label="장면을 통해 나 알아보기">
-   <div class="experience-top"><div class="progress" aria-label="다섯 장면 진행">
-    <span data-progress="0" class="on"></span><span data-progress="1"></span><span data-progress="2"></span><span data-progress="3"></span><span data-progress="4"></span>
-   </div><span class="chapter-count" id="chapter-count">01 / 05</span></div>
-   <div class="stage-layout">
-    <div class="scene" id="scene" data-scene="interest" role="img" aria-label="나만의 시간에 대한 장면">
-     <span class="scene-grid" aria-hidden="true"></span><span class="scene-halo" aria-hidden="true"></span>
-     <div class="scene-content"><span class="scene-number" id="scene-number">SCENE 01</span><span class="scene-decoration" aria-hidden="true"><span></span><span></span><span></span></span><h2 id="scene-heading">내 시간이 생겼다</h2><p id="scene-narrative">토요일 오후. 해야 할 일이 없다면 자연스럽게 무엇을 할까?</p></div>
-     <span class="scene-floor" aria-hidden="true"></span><span class="scene-caption">이 장면에 정답은 없어</span>
-    </div>
-    <div class="question-area">
-     <span class="scene-tag" id="scene-tag">01 · 내가 좋아하는 순간</span>
-     <div class="moa-dialogue" aria-label="모아의 이야기">
-       <img class="moa-avatar" src="../../assets/moa-hello-wave-20261012.webp" alt="안내 캐릭터 모아" width="72" height="76">
-       <div class="moa-bubble">
-         <span class="moa-name">모아 · 함께 이야기하는 안내 캐릭터</span>
-         <p id="moa-prompt">처음부터 나를 다 설명할 필요는 없어. 오늘은 네가 좋아하는 순간부터 찾아볼까?</p>
-       </div>
-     </div>
-     <h1 id="question" tabindex="-1">그때 나는 뭘 하고 있을까?</h1>
-     <p class="question-help" id="question-help">가장 가까운 걸 골라봐. 나중에 바꿔도 돼.</p>
-     <div class="options" id="options" role="group" aria-label="이 상황에서 내 선택"></div>
-     <div class="reply-flow" id="reply-flow" hidden aria-label="모아와 이어가는 이야기">
-        <div class="my-chat"><span>나</span><p id="my-reply"></p></div>
-        <div class="moa-chat"><img src="../../assets/moa-hello-wave-20261012.webp" width="45" height="46" alt=""><div><span>모아</span><p id="moa-reaction"></p></div></div>
-     </div>
-     <div id="deeper" class="deeper" hidden>
-       <div class="deeper-top"><span class="deeper-label" id="reason-question">그게 좋은 이유는?</span><span class="optional">선택 사항</span></div>
-       <div class="reasons" id="reasons" role="group" aria-label="모아 질문에 답하기"></div>
-       <p class="moa-followup" id="moa-followup" role="status"></p>
-       <details class="my-words" id="own-words">
-         <summary>보기와 다른 내 이야기도 있어 <span>+</span></summary>
-         <label for="own-input">내 말로 짧게 남기기 (선택)</label>
-         <div class="own-input-row">
-           <input id="own-input" maxlength="90" autocomplete="off" placeholder="예: 나는 이런 순간이 더 좋아" aria-describedby="own-help">
-           <button type="button" id="own-send">모아에게 전하기</button>
-         </div>
-         <div id="typed-exchange" class="typed-exchange" hidden aria-live="polite">
-           <p class="typed-own" id="typed-preview"></p>
-           <p class="typed-ack">모아 · 네 말은 내가 해석하지 않을게. 마지막 소개에서 네가 직접 확인하고 고칠 수 있어.</p>
-         </div>
-         <p id="own-help">정해진 반응을 보여주는 안내 캐릭터야. 자유롭게 쓴 문장을 분석하지는 않아. 이름·학교·연락처는 적지 말아줘.</p>
-       </details>
-     </div>
-     <div class="navigation">
-       <button class="back" type="button" id="back" disabled>이전</button>
-       <button class="skip" type="button" id="skip">이번 장면은 넘기기</button>
-       <button class="next" type="button" id="next">다음 장면 <span aria-hidden="true">→</span></button>
-     </div>
-    </div>
+<div class="page-intro"><span class="kicker">MOA / FIRST CONVERSATION</span><span class="privacy">저장·전송하지 않아요</span></div>
+<section class="welcome-note" aria-label="이용 안내"><span class="welcome-graphic" aria-hidden="true"></span><p>오늘 네 이야기를 조금만 들려줄래? 정답도, 꼭 대답해야 하는 질문도 없어.</p><button type="button" id="finish-early" class="quiet-finish">여기서 마치기</button></section>
+<section class="experience" id="experience" aria-labelledby="question">
+ <div class="experience-top"><div class="progress" aria-label="진행 단계">
+   <span data-progress="0" class="on"></span><span data-progress="1"></span><span data-progress="2"></span><span data-progress="3"></span><span data-progress="4"></span>
+ </div><span id="chapter-count" class="chapter-count">01 / 05</span></div>
+ <div class="stage-layout">
+  <div id="scene" class="scene" data-scene="interest" aria-label="이야기의 배경">
+   <span class="scene-grid" aria-hidden="true"></span><span class="scene-halo" aria-hidden="true"></span>
+   <div class="scene-content"><span id="scene-number" class="scene-number">SCENE 01</span><span class="scene-decoration" aria-hidden="true"><span></span><span></span><span></span></span>
+   <h2 id="scene-heading">처음 만났어</h2><p id="scene-narrative">아직 서로 잘 모르니까, 편한 이야기부터 시작하자.</p></div><span class="scene-floor" aria-hidden="true"></span><span class="scene-caption">네 속도로 이야기해도 돼</span>
+  </div>
+  <div class="question-area">
+   <span id="scene-tag" class="scene-tag">01 · 편한 이야기부터</span>
+   <div class="moa-dialogue"><img class="moa-avatar" src="../../assets/moa-hello-wave-20261012.webp" alt="안내 캐릭터 모아" width="64" height="67">
+     <div class="moa-bubble"><span class="moa-name">모아 · 첫 이야기 길잡이</span><p id="moa-prompt">처음부터 어려운 말을 할 필요 없어.</p></div>
    </div>
- </section>
- <section class="result" id="result" hidden aria-labelledby="result-title">
-   <div class="result-head"><span class="kicker">MY STORY / 초안</span><div class="result-moa"><img src="../../assets/moa-hello-wave-20261012.webp" width="60" height="63" alt="모아"><p>방금 나눈 얘기로 자기소개를 적어봤어. 네가 원하는 말만 남겨도 돼.</p></div><h1 id="result-title" tabindex="-1">누군가에게 나를 소개한다면</h1><p>정해진 성격이 아니라, 오늘 네가 선택한 말들이야. 원하면 언제든 바꿔.</p></div>
-   <details class="discovery-toggle"><summary>내가 고른 다섯 장면 돌아보기 <span aria-hidden="true">⌄</span></summary><div class="discoveries" id="discoveries" aria-label="오늘 발견한 나의 단서들"></div></details>
-   <div class="intro-builder">
-     <div class="builder-header"><h2>내 말로 소개하기</h2><p>누구에게 보여줄지도 내가 정해.</p></div>
-     <details class="intro-customize"><summary>소개할 내용·말투 바꾸기 <span aria-hidden="true">⌄</span></summary><div class="tone-tabs" role="group" aria-label="소개하는 상황">
-       <button type="button" data-tone="casual" aria-pressed="true">처음 만난 사람에게</button>
-       <button type="button" data-tone="team" aria-pressed="false">같이 뭘 만들 사람에게</button>
-     </div>
-     <div class="include-options" aria-label="소개문에 포함할 내용">
-       <label><input type="checkbox" data-include="interest" checked>좋아하는 것</label>
-       <label><input type="checkbox" data-include="team" checked>함께하는 방식</label>
-       <label><input type="checkbox" data-include="voice">편한 소통</label>
-       <label><input type="checkbox" data-include="stuck">도움이 필요할 때</label>
-       <label><input type="checkbox" data-include="hope" checked>해보고 싶은 것</label>
-     </div>
-     </details><label class="intro-label" for="intro-text">내 말로 고쳐 써도 돼</label>
-     <textarea id="intro-text" rows="6" maxlength="900"></textarea>
-     <div class="builder-actions">
-       <button type="button" id="copy" class="copy-btn">내 소개문 복사</button>
-       <button type="button" id="print" class="outline-btn">인쇄</button>
-       <button type="button" id="rebuild" class="text-btn">선택대로 다시 만들기</button>
-     </div>
-     <p class="copy-feedback" id="copy-feedback" role="status"></p>
-     <p class="privacy-tip">자동 저장하거나 다른 사람에게 보내지지 않아. 공유하기 전에는 직접 내용을 확인해 줘.</p>
+   <h1 id="question" tabindex="-1">언제 시간이 금방 지나가?</h1><p id="question-help" class="question-help">가까운 것을 골라도 되고, 넘어가도 돼.</p>
+   <div class="options" id="options" role="group" aria-label="내 대답"></div>
+   <div id="reply-flow" class="reply-flow" hidden aria-live="polite">
+     <div class="my-chat"><span>나</span><p id="my-reply"></p></div>
+     <div class="moa-chat"><img src="../../assets/moa-hello-wave-20261012.webp" width="42" height="45" alt=""><div><span>모아</span><p id="moa-reaction"></p></div></div>
    </div>
-   <div class="after-result"><button type="button" class="back" id="revisit">다시 탐색하기</button><a class="make-link" href="../make/">내 관심사로 무언가 만들기 <span aria-hidden="true">→</span></a></div>
- </section>
+   <div id="deeper" class="deeper" hidden>
+      <div class="deeper-top"><span class="deeper-label" id="reason-question">조금만 더 이야기할까?</span><span class="optional">선택 사항</span></div>
+      <div class="reasons" id="reasons" role="group" aria-label="더 구체적인 내 이야기"></div>
+      <p class="moa-followup" id="moa-followup" role="status"></p>
+      <details class="my-words" id="own-words"><summary>보기와 다른 내 이야기가 있어 <span>+</span></summary>
+       <label for="own-input">직접 한마디 남기기 (선택)</label><div class="own-input-row"><input id="own-input" maxlength="120" autocomplete="off" placeholder="길지 않아도 괜찮아" aria-describedby="own-help">
+       <button type="button" id="own-send">말풍선에 담기</button></div>
+       <div id="typed-exchange" class="typed-exchange" hidden><p class="typed-own" id="typed-preview"></p><p class="typed-ack">모아 · 적은 문장을 자동으로 해석하지는 않아. 나중에 네가 직접 확인할 수 있어.</p></div>
+       <p id="own-help">이름·학교·연락처나 자세한 민감정보는 입력하지 마. 이 페이지는 전문 상담이나 긴급 신고 창구가 아니야.</p>
+      </details>
+   </div>
+   <div class="navigation"><button type="button" id="back" class="back" disabled>이전</button><button type="button" id="skip" class="skip">이건 넘어갈래</button><button type="button" id="next" class="next">다음 이야기 <span aria-hidden="true">→</span></button></div>
+  </div>
+ </div>
+</section>
+<section class="result" id="result" hidden aria-labelledby="result-title">
+ <div class="result-head"><span class="kicker">MY FIRST STORY / 나의 선택</span>
+ <div class="result-moa"><img src="../../assets/moa-hello-wave-20261012.webp" width="58" height="61" alt="모아"><p>고마워. 이건 네가 오늘 고른 내용이지, 누군가 정해준 네 모습은 아니야.</p></div>
+ <h1 id="result-title" tabindex="-1">상담에서 이런 얘기를 해볼까?</h1><p>보여주고 싶은 것만 골라. 아무것도 선택하지 않아도 돼.</p></div>
+ <div class="intro-builder handoff">
+  <div class="builder-header"><h2>내가 전하고 싶은 것</h2><p>상담자에게 보여주기 전 확인해봐.</p></div>
+  <div class="handoff-select" id="handoff-select" aria-label="공유할 내용 선택"></div>
+  <div id="summary-empty" class="summary-empty">아직 공유할 내용을 고르지 않았어.</div>
+  <label for="intro-text" class="intro-label">내가 보여주기로 고른 내용 · 직접 고쳐도 돼</label>
+  <textarea id="intro-text" rows="5" maxlength="1200" readonly></textarea>
+  <div class="builder-actions">
+    <button type="button" id="copy" class="copy-btn" disabled>선택한 내용 복사</button>
+    <button type="button" id="print" class="outline-btn">화면 인쇄</button>
+    <button type="button" id="rebuild" class="text-btn">내가 고른 내용 다시 반영</button>
+  </div>
+  <p id="copy-feedback" class="copy-feedback" role="status"></p>
+  <p class="privacy-tip">자동 저장·전송은 하지 않아. 복사하거나 화면을 보여주는 경우에는 직접 공유되는 것이니 먼저 내용을 확인해줘.</p>
+ </div>
+ <details class="discovery-toggle"><summary>내가 선택한 내용 전체 돌아보기 <span aria-hidden="true">⌄</span></summary><div id="discoveries" class="discoveries"></div></details>
+ <details class="clinician-guide"><summary>상담자와 함께 확인할 질문 <span aria-hidden="true">⌄</span></summary>
+ <div class="clinician-body"><p>이 도구는 학생의 관점을 듣는 초기 접촉 보조도구야. 진단·위험도 점수·상담 적합성을 자동 판정하지 않아.</p>
+ <div id="clinician-questions"></div>
+ <p>보호자의 호소·학생의 경험·관찰된 기능을 분리해서 확인하고, 괴롭힘·학대·자해 위험 등의 민감한 주제는 적격 전문가가 비밀보장 한계와 응급대응 절차를 안내한 뒤 별도로 평가해야 해. 공개 웹페이지에 실제 사례기록을 저장하지 마.</p></div></details>
+ <div class="after-result"><button type="button" id="revisit" class="back">다시 이야기하기</button><a href="../make/" class="make-link">내 관심사로 함께 만들어보기 →</a></div>
+</section>
 </main>
-<footer><span>일단 해봄 · 청소년을 위한 선택형 자기탐색 · 진단이나 성격검사가 아닙니다</span><details><summary>함께하는 어른에게</summary><p>선택을 강요하거나 결과를 성격·진단으로 해석하지 않습니다. 학생이 장면을 바꾸고 스스로 이유를 설명할 수 있는지 대화하며, 말·글·침묵 중 원하는 방식을 존중합니다. 개인적 사례기록은 이 페이지에 저장하지 않습니다.</p></details></footer>
+<footer><span>일단 해봄 · 청소년 초기상담 대화 보조 · 검사·진단 아님</span><span>당장 안전이 걱정되면 <a href="tel:112">112</a> · <a href="tel:119">119</a> · <a href="https://www.1388.go.kr/" target="_blank" rel="noopener noreferrer">청소년1388</a></span></footer>
 </div></body></html>
