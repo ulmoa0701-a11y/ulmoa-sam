@@ -119,13 +119,13 @@ function createText(){
    if(t&&include("team"))segments.push("함께 무언가 할 때는 "+chapters[1].choices.find(o=>o.id===values[1].choice).intro+"부터 해보고 싶어요.");
    if(v&&include("voice"))segments.push("생각을 전할 때는 "+chapters[2].choices.find(o=>o.id===values[2].choice).intro+"이 더 편해요.");
    if(s&&include("stuck"))segments.push("어려울 때는 "+chapters[3].choices.find(o=>o.id===values[3].choice).intro+"이 도움이 될 것 같아요.");
-   if(h&&include("hope"))segments.push("앞으로는 "+chapters[4].choices.find(o=>o.id===values[4].choice).intro+"을 해보고 싶어요.");
+   if(h&&include("hope"))segments.push("앞으로는 "+chapters[4].choices.find(o=>o.id===values[4].choice).intro+"부터 시작해보고 싶어요.");
  }else{
    if(i&&include("interest"))segments.push("제가 관심 있는 건 "+chapters[0].choices.find(o=>o.id===values[0].choice).intro+"이에요.");
    if(t&&include("team"))segments.push("팀에서는 "+chapters[1].choices.find(o=>o.id===values[1].choice).intro+"을 맡아보고 싶어요.");
    if(v&&include("voice"))segments.push("의견을 나눌 때는 "+chapters[2].choices.find(o=>o.id===values[2].choice).intro+"이 편해요.");
    if(s&&include("stuck"))segments.push("막히는 순간에는 "+chapters[3].choices.find(o=>o.id===values[3].choice).intro+"이 도움이 돼요.");
-   if(h&&include("hope"))segments.push("다음에는 "+chapters[4].choices.find(o=>o.id===values[4].choice).intro+"을 시도해보고 싶어요.");
+   if(h&&include("hope"))segments.push("다음에는 "+chapters[4].choices.find(o=>o.id===values[4].choice).intro+"부터 시도해보고 싶어요.");
  }
  const reasons=chapters.map((c,index)=>({x:detail(index),included:include(c.id)})).filter(r=>r.x&&r.included&&r.x.reason);
  if(reasons.length)segments.push("제가 고른 이유는 ‘"+reasons[0].x.reason+"’예요.");

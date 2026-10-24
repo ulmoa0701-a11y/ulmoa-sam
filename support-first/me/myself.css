@@ -4,3 +4,18 @@
 @media(max-width:420px){.shell{padding:0 11px 30px}.wordmark img{width:119px}.top-links>span{display:none}.page-intro{padding:14px 3px 10px}.kicker,.privacy{font-size:.72rem}.experience{border-radius:20px}.scene{height:173px;margin:0 11px}.scene-content{padding:17px 18px 24px}.scene-content h2{font-size:1.38rem}.scene-content p{font-size:.76rem;line-height:1.4}.scene-number{font-size:.68rem}.question-area{padding:15px 14px 18px}.question-area h1{font-size:1.42rem;margin:7px 0 3px}.question-help{font-size:.78rem;margin-bottom:12px}.option{min-height:120px;padding:10px 8px;border-radius:13px;gap:5px}.option-art{width:65px;height:68px}.option-art svg{width:55px;height:55px}.option-label{font-size:.81rem}.deeper{margin-top:11px;padding:12px 11px}.deeper-label{font-size:.79rem}.reason{padding:6px 8px;font-size:.73rem}.navigation{margin-top:8px;padding-top:8px}.navigation button{font-size:.78rem}.skip{max-width:126px}.next{min-width:112px;padding:8px 11px}.discoveries{grid-template-columns:1fr}.discovery{min-height:0}.result-head h1{font-size:1.65rem}.intro-builder{padding:19px 15px}.tone-tabs{flex-wrap:wrap}.builder-actions{gap:5px}.builder-actions button{font-size:.78rem;padding:8px 10px}.after-result{flex-wrap:wrap}.after-result .make-link{margin-left:auto}footer{flex-wrap:wrap}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.option{transition:none}.option:hover{transform:none}}
 @media print{body{background:white;color:#222}.topbar,.page-intro,.experience,.tone-tabs,.include-options,.builder-actions,.copy-feedback,.privacy-tip,.after-result,footer{display:none!important}.shell{max-width:none;padding:0}.result{display:block!important;padding:0;border:0}.discoveries{grid-template-columns:1fr 1fr}.discovery{break-inside:avoid;background:white}.intro-builder{background:white;border:none;padding:15px 0}.intro-builder textarea{border:1px solid #ddd}.result-head h1{font-size:1.6rem}}
+
+/* Progressive disclosure keeps the student-facing result short and approachable. */
+.discovery-toggle{margin:15px 0 19px;background:#f6faf4;border:1px solid #dce6da;border-radius:13px;padding:12px 16px}
+.discovery-toggle>summary{display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;color:#496951;font-size:.85rem;font-weight:760;list-style:none}
+.discovery-toggle>summary::-webkit-details-marker{display:none}
+.discovery-toggle[open]>summary{margin-bottom:14px}
+.discovery-toggle .discoveries{display:grid;grid-template-columns:1fr 1fr}
+.discovery-toggle .discovery{background:#fffefa}
+.intro-customize{margin:16px 0 14px;background:#f7faf5;border:1px solid #d9e5d6;border-radius:12px;padding:10px 13px}
+.intro-customize>summary{cursor:pointer;list-style:none;font-size:.85rem;color:#52755b;font-weight:780;display:flex;gap:12px;justify-content:space-between}
+.intro-customize>summary::-webkit-details-marker{display:none}
+.intro-customize .include-options{margin-bottom:4px}
+.intro-builder{margin-top:12px}
+@media(max-width:440px){.discovery-toggle .discoveries{grid-template-columns:1fr}.discovery-toggle{padding:12px}.intro-customize{padding:11px}.result-head{padding:6px 0 9px}}
+@media print{.discovery-toggle{display:none!important}.intro-customize{display:none!important}}

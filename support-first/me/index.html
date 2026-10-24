@@ -50,10 +50,10 @@
  </section>
  <section class="result" id="result" hidden aria-labelledby="result-title">
    <div class="result-head"><span class="kicker">MY STORY / 초안</span><h1 id="result-title" tabindex="-1">누군가에게 나를 소개한다면</h1><p>정해진 성격이 아니라, 오늘 내가 고른 장면에서 나온 이야기야. 마음에 안 들면 고쳐도 돼.</p></div>
-   <div class="discoveries" id="discoveries" aria-label="오늘 발견한 나의 단서들"></div>
+   <details class="discovery-toggle"><summary>내가 고른 다섯 장면 돌아보기 <span aria-hidden="true">⌄</span></summary><div class="discoveries" id="discoveries" aria-label="오늘 발견한 나의 단서들"></div></details>
    <div class="intro-builder">
      <div class="builder-header"><h2>내 말로 소개하기</h2><p>누구에게 보여줄지도 내가 정해.</p></div>
-     <div class="tone-tabs" role="group" aria-label="소개하는 상황">
+     <details class="intro-customize"><summary>소개할 내용·말투 바꾸기 <span aria-hidden="true">⌄</span></summary><div class="tone-tabs" role="group" aria-label="소개하는 상황">
        <button type="button" data-tone="casual" aria-pressed="true">처음 만난 사람에게</button>
        <button type="button" data-tone="team" aria-pressed="false">같이 뭘 만들 사람에게</button>
      </div>
@@ -64,7 +64,7 @@
        <label><input type="checkbox" data-include="stuck">도움이 필요할 때</label>
        <label><input type="checkbox" data-include="hope" checked>해보고 싶은 것</label>
      </div>
-     <label class="intro-label" for="intro-text">직접 고쳐 써도 돼</label>
+     </details><label class="intro-label" for="intro-text">내 말로 고쳐 써도 돼</label>
      <textarea id="intro-text" rows="6" maxlength="900"></textarea>
      <div class="builder-actions">
        <button type="button" id="copy" class="copy-btn">내 소개문 복사</button>

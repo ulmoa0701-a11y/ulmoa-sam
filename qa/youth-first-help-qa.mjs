@@ -53,11 +53,17 @@ for(const width of [390,1280]){
   await page.locator('button[data-option="project"]').click();
   await page.locator('#next').click();
   await check(await page.locator('#result').isVisible(),width+'px teen reflection shown');
+  await check(await page.locator('.discovery-toggle').isVisible(),width+'px optional detail disclosure shown');
+  await check(await page.locator('.intro-customize').isVisible(),width+'px optional customization disclosure shown');
+  await check(await page.locator('#intro-text').isVisible(),width+'px introduction visible first');
+  await page.screenshot({path:path.join(out,'myself-story-'+width+'.png'),fullPage:true});
+  await page.locator('.discovery-toggle summary').click();
   await check(await page.locator('.discovery').count()===5,width+'px five discovery details');
   await check((await page.locator('#discoveries').innerText()).includes('게임'),width+'px selected interest reflected');
   await check((await page.locator('#discoveries').innerText()).includes('생각할 시간'),width+'px preferred support reflected');
   await check((await page.locator('#intro-text').inputValue()).includes('게임'),width+'px self-introduction generated from choices');
   await check((await page.locator('#intro-text').inputValue()).includes('친구와 게임 규칙'),width+'px original student phrasing included');
+  await page.locator('.intro-customize summary').click();
   await page.locator('[data-include="voice"]').check();
   await check((await page.locator('#intro-text').inputValue()).includes('글로'),width+'px optional introduction details');
   await page.locator('button[data-tone="team"]').click();
@@ -67,7 +73,6 @@ for(const width of [390,1280]){
   await check((await page.locator('#intro-text').inputValue()).includes('저는 제가 만든 게임을'),width+'px manual edit preserved');
   await page.locator('#rebuild').click();
   await check((await page.locator('#intro-text').inputValue()).includes('막히는 순간'),width+'px deliberate rebuild');
-  await page.screenshot({path:path.join(out,'myself-story-'+width+'.png'),fullPage:true});
   await page.locator('#copy').click();
   await page.waitForFunction(()=>document.querySelector('#copy-feedback')?.textContent?.length>5,{timeout:4000});
   await check(await page.locator('a[href="../make/"]').count()===1,width+'px route to co-creation');
