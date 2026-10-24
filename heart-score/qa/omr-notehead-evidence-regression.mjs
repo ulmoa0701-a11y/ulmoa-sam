@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {findFilledHeadNearModelRest} from '../omr-notehead-evidence-v1.mjs';
+const w=1000,h=140,sp=6,lines=[30,36,42,48,54],p=new Uint8Array(w*h).fill(255);
+for(const y of lines)for(let x=40;x<970;x++)p[y*w+x]=90;
+const image={width:w,height:h,data:p};
+globalThis.window={omrGrayAt:(img,x,y)=>img.data[y*img.width+x]};
+const staff={img:image,lines,spacing:sp,x0:40,x1:970};
+assert.equal(findFilledHeadNearModelRest(staff,796,[727,882]),null);
+for(let dy=-3;dy<=3;dy++)for(let dx=-4;dx<=4;dx++)if((dx/4)**2+(dy/2.6)**2<=1)p[(39+dy)*w+760+dx]=10;
+const hit=findFilledHeadNearModelRest(staff,796,[727,882]);
+assert.ok(hit&&Math.abs(hit.x-760)<=2,JSON.stringify(hit));
+assert.equal(hit.k,5);
+assert.equal(findFilledHeadNearModelRest(staff,435,[477]),null);
+console.log(JSON.stringify({ok:true,hit}));
