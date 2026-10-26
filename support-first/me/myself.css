@@ -89,3 +89,16 @@ footer a{color:#627e6c}
 @media(max-width:720px){.handoff-select{grid-template-columns:1fr}.welcome-note{gap:11px}.welcome-note p{font-size:.83rem}.quiet-finish{font-size:.77rem;padding:7px 9px}}
 @media(max-width:420px){.welcome-note{padding:11px 12px;flex-wrap:wrap}.quiet-finish{margin-left:auto;min-height:35px}.welcome-note p{flex-basis:calc(100% - 30px)}.handoff-select{gap:7px}.handoff-row{padding:10px 12px}.handoff-option{font-size:.8rem}.result-head h1{font-size:1.5rem}}
 @media print{.welcome-note,.handoff-select,.summary-empty,.clinician-guide,.discovery-toggle{display:none!important} .result{display:block!important}}
+\n
+/* Student-controlled disclosure: print ONLY the explicitly selected, editable handoff. */
+.print-safe{display:none}
+.privacy-details{font-size:.77rem;max-width:730px;margin:9px auto 0;color:#587169}
+.privacy-details summary{cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.privacy-details p{margin:8px 0 0;line-height:1.55}
+.builder-actions button:disabled{opacity:.5;cursor:not-allowed}
+@media print{
+ .welcome-note,.result > :not(.print-safe){display:none!important}
+ .print-safe{display:block!important;color:#222;padding:18px 6px}
+ .print-safe h1{font-size:20pt;margin:0 0 22px}
+ .print-safe pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13pt/1.65 system-ui,sans-serif;margin:0}
+}
