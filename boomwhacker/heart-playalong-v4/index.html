@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#152b29">
+<meta name="description" content="원본 하트색깔악보 규칙을 지키면서 모아와 함께 연주하는 새로운 무대형 플레이어">
+<title>모아의 하트 산책 · 일단 해봄 음악정원</title>
+<style>
+:root{font-family:"Pretendard Variable","Pretendard","SUIT Variable","SUIT","Noto Sans KR",system-ui,sans-serif;color:#edf3ed;background:#102420;font-synthesis:none}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#35574a 0%,#142c27 50%,#0c1e1c 100%)}
+button,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,select:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #f4d68d;outline-offset:3px}
+button:disabled{cursor:not-allowed;opacity:.5}
+a{color:inherit}
+.shell{width:min(1540px,100%);margin:0 auto;padding:19px clamp(12px,3.5vw,54px) 50px}
+.masthead{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:11px}
+.brand-mark{width:38px;height:38px;border:1px solid #a1baa247;border-radius:14px;display:grid;place-items:center;background:#bedcb216}
+.brand-mark img{width:25px;height:25px}
+.brand-name{display:flex;flex-direction:column;line-height:1.25;gap:4px}
+.brand-name strong{font-size:14px;font-weight:800;letter-spacing:-.04em}
+.brand-name span{font-size:10px;font-weight:700;color:#9cbba7;letter-spacing:.09em}
+.toplink{color:#d5e4db;font-size:12px;text-decoration:none;border-bottom:1px solid #a5bdae75;padding-bottom:4px;white-space:nowrap}
+.heading{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin:0 0 18px}
+.heading .kicker{color:#d8c598;letter-spacing:.18em;font-size:10px;font-weight:850;margin:0 0 5px}
+.heading h1{font-family:"MaruBuri SemiBold","MaruBuri","Noto Serif KR",serif;font-size:clamp(24px,3vw,43px);font-weight:650;line-height:1.2;letter-spacing:-.07em;margin:0}
+.heading p{margin:0 0 3px;color:#9fbbaa;font-size:12px}
+.stage{position:relative;width:100%;isolation:isolate;border-radius:28px;overflow:hidden;border:1px solid #a4d7b339;box-shadow:0 35px 100px #020e0e78;background:#1d4740}
+#score{display:block;width:100%;height:auto;aspect-ratio:1440/820;object-fit:contain}
+.hud{position:absolute;inset:0 0 auto;pointer-events:none;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:clamp(11px,2.2vw,30px)}
+.hud .song{display:flex;align-items:center;gap:10px;max-width:70%;min-width:0;padding:8px 16px 9px;border:1px solid #ffffff40;border-radius:999px;color:white;background:#1529229e;box-shadow:0 5px 25px #0003;backdrop-filter:blur(9px)}
+.hud .song strong{font-size:clamp(12px,1.5vw,19px);font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hud .song i{display:block;width:7px;height:7px;background:#f0d296;border-radius:50%;flex:none}
+.hud .progress{color:#f7efe0;font-size:clamp(11px,1.2vw,15px);font-weight:750;border-radius:30px;background:#132923a6;padding:10px 15px;backdrop-filter:blur(9px);font-variant-numeric:tabular-nums;white-space:nowrap}
+.transport{position:absolute;left:50%;bottom:clamp(12px,2.9vw,33px);transform:translateX(-50%);display:flex;align-items:center;gap:9px;border:1px solid #f8fbeb73;border-radius:999px;background:#15312bd1;padding:8px;box-shadow:0 10px 42px #001e1a6b;backdrop-filter:blur(17px)}
+.transport button{color:white;border:0;background:transparent;display:flex;align-items:center;justify-content:center;gap:9px;font-weight:750;font-size:13px;white-space:nowrap;min-width:46px;min-height:46px;border-radius:999px;padding:0 15px}
+.transport button.primary{background:#f1d79a;color:#19382f;padding:0 24px;box-shadow:0 5px 20px #0002}
+.transport button img{width:21px;height:21px}
+.transport button.primary img{filter:brightness(0) saturate(100%) invert(17%) sepia(21%) saturate(1313%) hue-rotate(103deg)}
+.transport button:hover{background:#ffffff1a}
+.transport button.primary:hover{background:#fbe7b5}
+.transport .divider{width:1px;height:21px;background:#d1ecdf51;flex:none}
+.below{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:18px 2px 18px}
+.status{color:#b3ccbe;font-size:12px;line-height:1.6}
+.status strong{color:#f2d89f}
+.stage-tip{font-size:10px;letter-spacing:.1em;color:#7caa94;font-weight:750;white-space:nowrap}
+.instrument{border-top:1px solid #71948245;padding-top:18px;margin-top:10px}
+.instrument-label{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:0 1px 14px}
+.instrument-label strong{font-size:15px;letter-spacing:-.04em}
+.instrument-label span{color:#a0bcae;font-size:11px}
+.keys{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:9px}
+.key{min-width:0;border:1px solid #dbe9dd27;border-radius:14px;background:#f7f7f0;color:#233b32;display:flex;align-items:center;justify-content:center;gap:12px;padding:13px 5px;position:relative;transition:transform .12s,background .12s}
+.key:before{content:"";width:12px;height:25px;background:var(--note);border-radius:99px;box-shadow:inset 0 1px #fff7}
+.key b{font-size:clamp(15px,1.6vw,24px);font-weight:850}
+.key:active,.key.is-hit{transform:translateY(3px);background:#edf2e9}
+.key[aria-disabled="true"]{opacity:.48}
+.drawer{margin-top:21px;border:1px solid #aac5b946;border-radius:15px;background:#183b33a3}
+.drawer summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;padding:16px 18px;font-weight:750;font-size:13px}
+.drawer summary::-webkit-details-marker{display:none}
+.drawer summary span{display:flex;align-items:center;gap:10px}
+.drawer summary img{width:20px;height:20px}
+.drawer summary:after{content:"＋";color:#d4cea2;font-size:19px;font-weight:400}
+.drawer[open] summary:after{content:"−"}
+.config{padding:0 18px 20px;display:grid;grid-template-columns:2fr 1fr 1fr;gap:15px}
+.field{min-width:0;display:flex;flex-direction:column;gap:8px}
+.field label{font-size:11px;color:#a1bead;font-weight:750}
+.field select{width:100%;min-width:0;color:#f7f8f3;background:#234b41;border:1px solid #a7c3ae60;border-radius:10px;padding:13px 14px;font-size:12px}
+.themes{display:flex;gap:8px;flex-wrap:wrap}
+.themes button{border:1px solid #99bea478;background:#1b4339;color:#e1eddf;border-radius:999px;padding:12px 17px;font-size:12px;font-weight:750}
+.themes button[aria-pressed="true"]{background:#ead69c;color:#25483d;border-color:#ead69c}
+.config-foot{grid-column:1/-1;border-top:1px solid #a7c3ae40;padding-top:15px;font-size:11px;line-height:1.65;color:#a8c2b2}
+.config-foot strong{color:#e6d6ab}
+.footlinks{display:flex;gap:17px;flex-wrap:wrap;margin:20px 2px 0;font-size:11px;color:#8eafa0}
+.footlinks a{text-decoration:none;border-bottom:1px solid #8eafa06b}
+.stage:fullscreen{display:flex;align-items:center;justify-content:center;background:#132c29;border-radius:0;border:0}
+.stage:fullscreen #score{max-height:100dvh;object-fit:contain}
+.stage:fullscreen .hud{z-index:2}
+.stage:fullscreen .transport{z-index:3}
+@media(max-width:740px){
+.shell{padding:12px 0 28px}
+.masthead{margin:0 15px 14px}
+.brand-name strong{font-size:12px}
+.brand-name span{font-size:9px}
+.brand-mark{width:33px;height:33px}
+.brand-mark img{width:20px;height:20px}
+.toplink{font-size:10px}
+.heading{padding:0 16px;display:block;margin-bottom:15px}
+.heading .kicker{font-size:9px}
+.heading h1{font-size:26px}
+.heading p{font-size:11px;margin:7px 0 0}
+.stage{border-radius:0;border-left:0;border-right:0}
+#score{aspect-ratio:820/1040}
+.hud{padding:9px 9px}
+.hud .song{padding:6px 10px;border-radius:20px}
+.hud .song strong{font-size:11px}
+.hud .progress{padding:8px 10px;font-size:10px}
+.transport{gap:4px;padding:5px;bottom:12px}
+.transport button{min-height:37px;min-width:37px;font-size:10px;padding:0 9px;gap:5px}
+.transport button img{width:17px;height:17px}
+.transport button.primary{padding:0 14px}
+.transport .divider{height:18px}
+.below{margin:13px 14px 20px}
+.status{font-size:11px}
+.stage-tip{display:none}
+.instrument{margin:0 12px}
+.instrument-label strong{font-size:13px}
+.instrument-label span{font-size:10px}
+.keys{gap:4px}
+.key{border-radius:9px;padding:10px 1px;gap:4px;flex-direction:column}
+.key:before{width:18px;height:5px}
+.key b{font-size:clamp(12px,3.7vw,18px)}
+.drawer{margin:18px 12px 0}
+.config{grid-template-columns:1fr 1fr;gap:12px}
+.field:first-child{grid-column:1/-1}
+.themes{grid-column:1/-1}
+.config-foot{grid-column:1/-1}
+.footlinks{margin:17px 14px}
+.stage:fullscreen #score{max-height:calc(100dvh - 20px)}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+<script defer src="../performance-views/scores.js"></script>
+</head>
+<body>
+<div class="shell">
+<header class="masthead"><div class="brand"><div class="brand-mark"><img src="./assets/note.svg" alt=""></div><div class="brand-name"><strong>일단 해봄 · 음악정원</strong><span>ULMOA HEART PLAYALONG</span></div></div><a class="toplink" href="../heart-performance/">원래 버전 보기</a></header>
+<div class="heading"><div><p class="kicker">A NEW LITTLE MUSICAL JOURNEY · V4</p><h1>모아의 하트 산책</h1></div><p>하트는 그대로, 모아는 왼쪽에서 오른쪽으로 깡충깡충</p></div>
+<main>
+<section class="stage" id="stage" aria-label="장면 속에 직접 놓인 원본 하트색깔악보 연주 무대">
+<canvas id="score" width="1440" height="820" role="img" aria-label="두 줄 하트 악보와 두 봉우리를 차례로 이동하며 뛰는 모아"></canvas>
+<div class="hud" aria-hidden="true"><div class="song"><i></i><strong id="hudTitle">모아의 출발 신호</strong></div><span class="progress" id="hudProgress">01 / 08 마디</span></div>
+<div class="transport">
+<button type="button" class="primary" id="play"><img src="./assets/play.svg" alt=""><span>연주 시작</span></button>
+<div class="divider"></div>
+<button type="button" id="restart" aria-label="처음부터 다시"><img src="./assets/restart.svg" alt=""><span>처음부터</span></button>
+<button type="button" id="full" aria-label="악보 크게 보기"><img src="./assets/expand.svg" alt=""><span>크게</span></button>
+</div>
+</section>
+<div class="below"><div class="status" id="status" role="status"><strong>한 박에 두 번</strong> · 왼쪽 봉우리에서 오른쪽 봉우리까지</div><span class="stage-tip">ORIGINAL HEART-COLOR NOTATION</span></div>
+<section class="instrument" aria-label="붐웨커 음"><div class="instrument-label"><strong>내 색깔 악기</strong><span>도 · 레 · 미 · 파 · 솔 · 라 · 시</span></div><div class="keys" id="keys"></div></section>
+<details class="drawer" id="drawer"><summary><span><img src="./assets/settings.svg" alt="">곡 · 속도 · 배경 바꾸기</span></summary>
+<div class="config"><div class="field"><label for="song">연주곡</label><select id="song"></select></div>
+<div class="field"><label for="notes">악기 음</label><select id="notes"><option value="3">3음 · 도 미 솔</option><option value="5" selected>5음 · 도 레 미 솔 라</option><option value="8">8음 · 전체</option></select></div>
+<div class="field"><label for="tempo">연주 속도</label><select id="tempo"><option value="0.75">천천히</option><option value="1" selected>보통</option><option value="1.15">빠르게</option></select></div>
+<div class="field themes" style="grid-column:1/-1"><label>장면 고르기</label><div class="themes"><button data-theme="forest" aria-pressed="true">깊은 숲</button><button data-theme="night" aria-pressed="false">별밤</button><button data-theme="classroom" aria-pressed="false">햇살 교실</button></div></div>
+<div class="config-foot"><strong>기존 하트색깔악보와 같은 규칙</strong> · 한 박은 하트 하나, 반 박은 같은 하트 안의 색으로 구분해요. 모아의 두 번 점프는 박자를 몸으로 느끼는 시각적 안내이며, 실제 음을 두 번 연주하는 뜻은 아니에요.</div></div></details>
+</main>
+<footer class="footlinks"><a href="../heart-performance/">기존 V1</a><a href="../heart-playalong-v2/">V2</a><a href="../heart-playalong-v3/">V3</a><a href="../../heart-score/">원본 하트색깔악보</a></footer>
+</div>
+<script>
+window.addEventListener("DOMContentLoaded",()=>{
+"use strict";
+const $=selector=>document.querySelector(selector), canvas=$("#score"),ctx=canvas.getContext("2d");
+const SCORES=window.__PERFORMANCE_SCORES__;
+const status=$("#status"),playButton=$("#play");
+if(!Array.isArray(SCORES)||SCORES.length<8){status.textContent="연주곡을 불러오지 못했습니다";playButton.disabled=true;return}
+const NOTES=["도","레","미","파","솔","라","시","높은도"];
+const COLORS=["#EB2427","#F6851F","#FBED1B","#73C84A","#00A39A","#4B4AA8","#D83A9B","#EB2427"];
+const FREQUENCIES=[261.6256,293.6648,329.6276,349.2282,391.9954,440,493.8833,523.2511];
+const colorOf=note=>COLORS[NOTES.indexOf(note)]||"#a9c8bb";
+const frequencyOf=note=>FREQUENCIES[NOTES.indexOf(note)]||0;
+const heartPath=new Path2D("M50 84 C44 77 9 55 6 29 C3 9 20 0 35 5 C43 7 48 13 50 19 C52 13 57 7 65 5 C80 0 97 9 94 29 C91 55 56 77 50 84Z");
+const imageNames=["forest","night","classroom","heart-frame","moa"];
+const images={};
+let song=SCORES[0],beat=-song.meter,playing=false,speed=1,theme="forest",audio=null,startedAt=0,rafId=0,played=new Set(),reduced=matchMedia("(prefers-reduced-motion: reduce)").matches,display={width:1440,height:820,mobile:false};
+const meter=()=>song.meter,endBeat=()=>song.bars.length*song.meter,beatSeconds=()=>60/(song.bpm*speed);
+const text=(label,x,y,size=20,color="#f7f5ef",align="left",weight=700)=>{
+ ctx.save();ctx.font=weight+" "+size+"px 'Pretendard','SUIT','Noto Sans CJK KR',sans-serif";
+ ctx.textAlign=align;ctx.textBaseline="middle";ctx.fillStyle=color;ctx.fillText(label,x,y);ctx.restore()
+};
+function line(x1,y1,x2,y2,color,width=2){ctx.save();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore()}
+function getAssets(){for(const name of imageNames){const img=new Image();img.src=name==="moa"?"../../thinking-garden/assets/moa-default.png":"./assets/"+name+".svg";img.onload=()=>{if(!playing)render(beat)};images[name]=img}}
+function ready(name){return images[name]&&images[name].complete&&images[name].naturalWidth>0}
+function layout(){
+ const mobile=window.matchMedia("(max-width:740px)").matches;
+ const width=mobile?820:1440,height=mobile?1040:820;
+ if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height}
+ display={width,height,mobile};return display
+}
+function beatParts(k){
+ return song.events.filter(e=>e.start<k+1-1e-7&&e.start+e.dur>k+1e-7)
+ .map(e=>({note:e.note,source:e,from:Math.max(0,e.start-k),to:Math.min(1,e.start+e.dur-k)}))
+}
+function pageAt(b){
+ const barsPerLine=display.mobile?1:2,pageBars=2*barsPerLine;
+ const firstBar=Math.floor(Math.max(0,b)/song.meter/pageBars)*pageBars;
+ return {barsPerLine,pageBars,firstBar};
+}
+function geometry(k,page){
+ const firstBeat=page.firstBar*song.meter;
+ const relative=k-firstBeat,perRow=song.meter*page.barsPerLine;
+ const row=Math.floor(relative/perRow),column=relative%perRow;
+ const w=display.width, m=display.mobile;
+ const gap=m?23:(perRow>=8?20:30);
+ const usable=m?680:1220;
+ const size=Math.min(m?190:177,(usable-(perRow-1)*gap)/perRow);
+ const start=(w-(perRow*size+(perRow-1)*gap))/2;
+ const y=m?(row===0?246:599):(row===0?224:484);
+ return {x:start+column*(size+gap),y,w:size,h:size*.90,row,column};
+}
+/* Both one-color and split-color hearts share the SAME left-to-right two-hop trajectory.
+   One V-heart is still precisely ONE beat; this function never schedules notes. */
+function crestTravel(phase,g){
+ const p=Math.max(0,Math.min(1,phase));
+ const lift=Math.pow(Math.sin(2*Math.PI*p),2)*Math.max(25,g.w*.24);
+ return {x:g.x+g.w*(.06+.88*p),y:g.y+g.w*.12-lift,lift};
+}
+function paintBackdrop(){
+ const {width:W,height:H,mobile:m}=display;
+ if(ready(theme)){ctx.drawImage(images[theme],0,0,W,H)}
+ else{ctx.fillStyle=theme==="night"?"#172c49":theme==="classroom"?"#e0cfb6":"#305848";ctx.fillRect(0,0,W,H)}
+ const gradient=ctx.createLinearGradient(0,0,0,H);
+ gradient.addColorStop(0,theme==="classroom"?"#1c332920":"#081a1b46");
+ gradient.addColorStop(.25,"#102b2805");gradient.addColorStop(.85,"#082a274a");gradient.addColorStop(1,theme==="classroom"?"#223d35a8":"#071b1ed7");
+ ctx.fillStyle=gradient;ctx.fillRect(0,0,W,H);
+ // Light trails: no central white cards or boxed notation backgrounds.
+ const yRows=m?[347,699]:[327,589];
+ for(const yy of yRows){ctx.save();ctx.strokeStyle=theme==="night"?"#d9d4ff80":"#e9eccc8a";ctx.lineWidth=m?3:2.5;
+ ctx.shadowBlur=14;ctx.shadowColor="#fff3bf8e";
+ ctx.beginPath();ctx.moveTo(m?54:85,yy);ctx.bezierCurveTo(W*.28,yy-10,W*.66,yy+14,W-(m?54:85),yy-4);ctx.stroke();ctx.restore()}
+}
+function paintHeart(k,g,active,partOfCurrent){
+ const w=g.w,scale=w/100;
+ ctx.save();ctx.translate(g.x,g.y);ctx.scale(scale,scale);
+ if(active){ctx.save();ctx.shadowColor="#fff3c3";ctx.shadowBlur=22;ctx.fillStyle="#ffffff2e";ctx.fill(heartPath);ctx.restore()}
+ ctx.fillStyle="#d5e2d8";ctx.fill(heartPath);
+ ctx.save();ctx.clip(heartPath);
+ const parts=beatParts(k);
+ for(const p of parts){ctx.fillStyle=p.note==="쉼"?"#b9c6bc":colorOf(p.note);ctx.fillRect(p.from*100,0,(p.to-p.from)*100+.3,90)}
+ // 1/4-beat notation divisions remain faithful to original.
+ ctx.strokeStyle="#fff7e1";ctx.lineWidth=2.1;
+ for(const p of parts){if(p.from>.00001&&Math.abs((p.source.start-k)-p.from)<.0001){
+  ctx.beginPath();ctx.moveTo(p.from*100,2);ctx.lineTo(p.from*100,87);ctx.stroke()
+ }}
+ ctx.restore();
+ if(ready("heart-frame"))ctx.drawImage(images["heart-frame"],0,0,100,90);
+ else{ctx.strokeStyle="#174b403f";ctx.lineWidth=1.2;ctx.stroke(heartPath)}
+ const onsets=parts.filter(p=>Math.abs((p.source.start-k)-p.from)<.0001&&p.source.start>=k-1e-6);
+ if(!onsets.length&&parts.length){text("길게",50,39,20,"#152f31","center",680)}
+ else for(const p of onsets){const dur=p.to-p.from,center=(p.from+p.to)*50;
+ const label=p.note==="높은도"?"도":p.note;
+ text(label,center,37,dur<=.25?14:dur<=.5?22:29,p.note==="높은도"?"#fff":"#142b3a","center",740)}
+ ctx.restore();
+}
+function paintMoa(g,phase){
+ const t=crestTravel(phase,g),size=Math.min(display.mobile?91:90,g.w*.72);
+ // Shadow on the heart surface makes the landing point legible.
+ ctx.save();ctx.fillStyle="#0f362a5a";ctx.beginPath();ctx.ellipse(t.x,g.y+g.w*.32,Math.max(8,20-t.lift*.13),4,0,0,2*Math.PI);ctx.fill();
+ if(ready("moa")){ctx.drawImage(images.moa,t.x-size/2,t.y-size*.94,size,size)}
+ else{ctx.fillStyle="#fff3da";ctx.beginPath();ctx.arc(t.x,t.y-size*.35,size*.26,0,Math.PI*2);ctx.fill();text("모아",t.x,t.y-size*.35,14,"#234d42","center",700)}
+ ctx.restore()
+}
+function render(b){
+ layout();const W=display.width,H=display.height,m=display.mobile;
+ ctx.clearRect(0,0,W,H);paintBackdrop();
+ const page=pageAt(b),start=page.firstBar*song.meter,perRow=song.meter*page.barsPerLine;
+ const current=Math.floor(Math.max(0,b)),active=(b>=0&&b<endBeat())?current:-1;
+ text("HEART  /  WALK",m?48:89,m?132:134,m?20:19,theme==="classroom"?"#234a3c":"#f8edd1","left",760);
+ const totalPageBars=Math.min(page.firstBar+page.pageBars,song.bars.length);
+ for(let row=0;row<2;row++){
+  const barFirst=page.firstBar+row*page.barsPerLine;
+  const yText=m?(row===0?206:558):(row===0?185:448);
+  if(barFirst>=song.bars.length)continue;
+  const label=String(barFirst+1).padStart(2,"0")+" — "+String(Math.min(song.bars.length,barFirst+page.barsPerLine)).padStart(2,"0")+" 마디";
+  text(row===0?"첫 번째 길":"두 번째 길",m?50:89,yText,m?19:17,theme==="classroom"?"#345c4b":"#f2e8d1","left",770);
+  text(label,W-(m?50:93),yText,m?16:16,theme==="classroom"?"#476953":"#e6e6cc","right",600);
+  for(let col=0;col<perRow;col++){const k=start+row*perRow+col;if(k>=endBeat())continue;
+   const g=geometry(k,page);paintHeart(k,g,k===active,k===active)}
+ }
+ if(active>=start&&active<start+page.pageBars*song.meter&&!reduced&&playing){
+  const g=geometry(active,page);paintMoa(g,b-active)
+ }else if(active>=start&&active<start+page.pageBars*song.meter&&!playing){
+  const g=geometry(active,page);paintMoa(g,0)
+ }
+ text("하트 한 개 = 한 박     ·     모아의 두 봉우리 점프 = 박자 연습",W/2,H-(m?144:134),m?17:15,theme==="classroom"?"#214b3d":"#ecf2df","center",680);
+ $("#hudProgress").textContent=String(Math.min(song.bars.length,Math.floor(Math.max(0,b)/song.meter)+1)).padStart(2,"0")+" / "+String(song.bars.length).padStart(2,"0")+" 마디";
+ return page
+}
+function makeTone(note,time,dur=0.36){
+ const hz=frequencyOf(note);if(!hz||!audio)return;
+ const osc=audio.createOscillator(),gain=audio.createGain();osc.type="sine";osc.frequency.setValueAtTime(hz,time);
+ const length=Math.max(.07,Math.min(dur,1.6));
+ gain.gain.setValueAtTime(.0001,time);gain.gain.exponentialRampToValueAtTime(.14,time+.014);
+ gain.gain.exponentialRampToValueAtTime(.0001,time+length);
+ osc.connect(gain).connect(audio.destination);osc.start(time);osc.stop(time+length+.02)
+}
+function scheduleNotes(nowBeat){
+ if(!audio||nowBeat<0)return;
+ // Each authored onset is scheduled only once, regardless of Moa's TWO visual hops.
+ for(const e of song.events){if(e.note==="쉼"||e.start>nowBeat+.05||e.start<nowBeat-.12||played.has(e.id))continue;
+  played.add(e.id);makeTone(e.note,audio.currentTime+.018,e.dur*beatSeconds()*.84)
+ }
+}
+function setPlayLabel(){playButton.querySelector("span").textContent=playing?"일시정지":"연주 시작";playButton.querySelector("img").src="./assets/"+(playing?"pause":"play")+".svg"}
+function stop(){playing=false;cancelAnimationFrame(rafId);setPlayLabel()}
+function loop(now){
+ if(!playing)return;
+ beat=-song.meter+(now-startedAt)/(beatSeconds()*1000);
+ if(beat>=endBeat()){beat=endBeat();stop();render(beat);status.innerHTML="<strong>연주를 마쳤어요</strong> · 다시 시작할 수 있어요";return}
+ scheduleNotes(beat);render(beat);rafId=requestAnimationFrame(loop)
+}
+async function togglePlay(){
+ if(playing){stop();return}
+ if(!audio)audio=new(window.AudioContext||window.webkitAudioContext)();
+ await audio.resume();
+ if(beat>=endBeat())beat=-song.meter;
+ played=new Set(song.events.filter(e=>e.start<beat-.02).map(e=>e.id));
+ startedAt=performance.now()-(beat+song.meter)*beatSeconds()*1000;
+ playing=true;setPlayLabel();
+ status.innerHTML="<strong>모아와 함께</strong> · 왼쪽, 오른쪽!";rafId=requestAnimationFrame(loop)
+}
+function reset(){stop();beat=-song.meter;played.clear();status.innerHTML="<strong>연주 준비</strong> · 왼쪽에서 오른쪽으로 두 번 깡충";render(beat)}
+playButton.addEventListener("click",()=>togglePlay().catch(e=>{status.textContent="오디오를 시작할 수 없어요: "+e.message;stop()}));
+$("#restart").addEventListener("click",reset);
+$("#full").addEventListener("click",async()=>{try{if(!document.fullscreenElement)await $("#stage").requestFullscreen();else await document.exitFullscreen()}catch(e){status.textContent="전체 화면을 지원하지 않는 브라우저입니다"}});
+const songPicker=$("#song");
+songPicker.innerHTML=SCORES.map((s,i)=>'<option value="'+i+'">'+s.title.replaceAll("<","&lt;")+'</option>').join("");
+songPicker.addEventListener("change",()=>{song=SCORES[+songPicker.value];$("#hudTitle").textContent=song.title;reset()});
+$("#tempo").addEventListener("change",e=>{speed=+e.target.value;reset()});
+$("#notes").addEventListener("change",()=>{document.querySelectorAll(".key").forEach(k=>k.setAttribute("aria-disabled",String(!allowedNotes().includes(k.dataset.note))))});
+const allowedNotes=()=>{const v=+$("#notes").value;return v===3?["도","미","솔"]:v===5?["도","레","미","솔","라"]:NOTES};
+document.querySelectorAll("[data-theme]").forEach(btn=>btn.addEventListener("click",()=>{
+ theme=btn.dataset.theme;document.querySelectorAll("[data-theme]").forEach(x=>x.setAttribute("aria-pressed",String(x===btn)));render(beat)
+}));
+$("#keys").innerHTML=NOTES.map((n,i)=>'<button class="key" data-note="'+n+'" style="--note:'+COLORS[i]+'" aria-label="'+(n==="높은도"?"높은 도":n)+' 듣기"><b>'+(n==="높은도"?"도↑":n)+'</b></button>').join("");
+document.querySelectorAll(".key").forEach(k=>k.addEventListener("click",async()=>{
+ try{if(!audio)audio=new(window.AudioContext||window.webkitAudioContext)();await audio.resume();
+ makeTone(k.dataset.note,audio.currentTime+.015,.35);k.classList.add("is-hit");setTimeout(()=>k.classList.remove("is-hit"),180)}
+ catch(e){status.textContent="악기 소리를 낼 수 없어요"}
+}));
+window.__HEART_V4_QA__={beatParts,geometry,crestTravel,pageAt,getState:()=>({beat,playing,theme,meter:song.meter,title:song.title}),render:(b)=>render(b),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
+window.addEventListener("resize",()=>render(beat));
+getAssets();$("#hudTitle").textContent=song.title;reset();
+});
+</script>
+</body></html>
