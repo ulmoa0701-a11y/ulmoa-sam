@@ -38,10 +38,7 @@ jobs:
         if: always() && !cancelled()
         continue-on-error: true
         run: node qa/hotel-garden-actual-play.mjs
-      - name: Real full-route keyboard play (EYE and SMOG)
-        if: always() && !cancelled()
-        continue-on-error: true
-        run: node qa/hotel-garden-full-route.mjs
+      # Legacy route script is preserved in the repo; the canonical full route below runs once per CI cycle.
       - name: Full child-gameplay route using real keyboard actions (all 3 bosses)
         if: always() && !cancelled()
         continue-on-error: true
