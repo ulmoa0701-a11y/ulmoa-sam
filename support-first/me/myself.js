@@ -183,7 +183,7 @@ function saveOwn(){
  if(!value){$("panel-tip").textContent="남기고 싶은 말이 있을 때만 적어도 돼.";return;}
  const id=stageAt(position),a=records[id];
  revoke();clearFrom(position+1);
- a.choice="own";a.detail=null;a.note=value;
+ if(!a.choice||a.choice==="pass"||a.choice==="unknown"){a.choice="own";a.detail=null;}a.note=value;
  render();$("panel-tip").textContent="네 말 그대로 남겼어. 상담자에게 자동 전달되진 않아.";
 }
 function activeIds(){return stages.filter(id=>records[id].choice!==null);}
