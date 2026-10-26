@@ -40,12 +40,36 @@ close.addEventListener('click',closeFeedback);
 backdrop.addEventListener('click',e=>{if(e.target===backdrop)closeFeedback()});
 backdrop.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();closeFeedback()}});
 function addResultButton(){
- const target=document.querySelector('#resultScreen .result-actions, #resultScreen .resultActions, #results .resultActions, #finish .start-actions, #finishScreen .action-row, .result .action-row');
- if(!target||document.getElementById('habomFeedbackAtFinish'))return;
- const b=document.createElement('button');b.type='button';b.id='habomFeedbackAtFinish';b.textContent='이 게임 고쳐줬으면 하는 점';
- b.addEventListener('click',openFeedback);target.appendChild(b);
+ const selectors=[
+  '#resultScreen .result-actions','#resultScreen .resultActions','#results .resultActions',
+  '#finish .start-actions','#finishScreen .action-row','.result .action-row',
+  '#successScreen'
+ ];
+ const target=selectors.map(selector=>document.querySelector(selector)).find(Boolean);
+ if(!target||target.querySelector('#habomFeedbackAtFinish'))return;
+ const b=document.createElement('button');
+ b.type='button';b.id='habomFeedbackAtFinish';b.textContent='피드백 남기기';
+ b.setAttribute('aria-label','이 게임에 대한 피드백 남기기');
+ b.addEventListener('click',openFeedback);
+ target.appendChild(b);
+}
+function syncRescueResultButton(){
+ if(!location.pathname.includes('/games/rescue/'))return;
+ const frameRoot=document.querySelector('.game-frame');
+ if(!frameRoot)return;
+ let b=document.getElementById('habomFeedbackRescueFinish');
+ if(!b){b=document.createElement('button');b.type='button';b.id='habomFeedbackRescueFinish';
+  b.textContent='피드백 남기기';b.hidden=true;b.addEventListener('click',openFeedback);frameRoot.appendChild(b);}
+ let atResult=false;
+ try{
+  const game=window.moaRescueGame;
+  atResult=!!game?.scene?.getScenes?.(true)?.some(scene=>['result','landresult'].includes(scene?.sys?.settings?.key));
+ }catch(_){}
+ b.hidden=!atResult;
 }
 addResultButton();const obs=new MutationObserver(addResultButton);
 obs.observe(document.body,{subtree:true,childList:true});
-window.addEventListener('pagehide',()=>obs.disconnect());
+syncRescueResultButton();
+const rescuePoll=location.pathname.includes('/games/rescue/')?setInterval(syncRescueResultButton,1100):null;
+window.addEventListener('pagehide',()=>{obs.disconnect();if(rescuePoll)clearInterval(rescuePoll)});
 })();

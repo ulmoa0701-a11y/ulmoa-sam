@@ -38,11 +38,16 @@ try{
    assert.equal(url.searchParams.get('q2_textbox0'),name,'Incorrect game auto context '+route);
    if(vp.width===390&&route==='/thinking-garden/?game=memory'){
     const actualForm=page.frameLocator('#habomFeedbackFrame');
-    await actualForm.locator('#input_2').waitFor({state:'visible',timeout:20000});
+    await actualForm.locator('#input_2').waitFor({state:'attached',timeout:20000});
     assert.equal(await actualForm.locator('#input_2').inputValue(),name,'Game title was not actually filled in embedded Jotform');
-    assert.ok(await actualForm.locator('input[type=radio]').count()>=7,'Quick category choices missing in embedded form');
+    assert.equal(await actualForm.locator('#input_2').isVisible(),false,'Redundant game-name question must be hidden');
+    assert.ok(await actualForm.locator('input[type=radio]').count()>=5,'Quick category choices missing in embedded form');
+    assert.equal(await page.locator('#habomFeedbackAtFinish').count(),1,'Completion feedback CTA missing from shared games');
    }
    assert.ok(await page.locator('#habomFeedbackExternal').getAttribute('href'));
+   if(route.includes('/breath-garden/')||route.includes('/moa-missions/')||route.includes('/hand-mirror/')||route.includes('/rhythm-touch/')||route.includes('/recorder/')||route.includes('thinking-garden/?')){
+    assert.equal(await page.locator('#habomFeedbackAtFinish').count(),1,'Game-specific end feedback button not attached: '+route);
+   }
    await page.keyboard.press('Escape');
    assert.equal(await page.locator('#habomFeedbackBackdrop').isVisible(),false,'Escape should close '+route);
    results.push({route,name,device:vp.width,formContext:name});
