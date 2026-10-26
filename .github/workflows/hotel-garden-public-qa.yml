@@ -55,8 +55,9 @@ jobs:
             hotel-garden-*.jpg
             hotel-garden-actual-play.json
             hotel-garden-full-route.json
+            hotel-garden-full-route-scripted.json
             hotel-garden-full-route.jpg
-            hotel-garden-full-route.json
+            hotel-garden-full-route-scripted.jpg
           if-no-files-found: warn
       - name: Save machine-readable QA report to isolated results branch
         if: always() && !cancelled()
@@ -67,7 +68,7 @@ jobs:
           cp hotel-garden-public-qa.json /tmp/hotel-garden-public-qa.json
           cp hotel-garden-actual-play.json /tmp/hotel-garden-actual-play.json 2>/dev/null || true
           cp hotel-garden-full-route.json /tmp/hotel-garden-full-route.json 2>/dev/null || true
-          cp hotel-garden-full-route.json /tmp/hotel-garden-full-route.json 2>/dev/null || true
+          cp hotel-garden-full-route-scripted.json /tmp/hotel-garden-full-route-scripted.json 2>/dev/null || true
           mkdir -p /tmp/hotel-garden-qa-images
           cp hotel-garden-*.jpg /tmp/hotel-garden-qa-images/ 2>/dev/null || true
           git fetch origin qa/hotel-garden-results
@@ -76,7 +77,7 @@ jobs:
           cp /tmp/hotel-garden-public-qa.json qa/results/hotel-garden-public-qa.json
           cp /tmp/hotel-garden-actual-play.json qa/results/hotel-garden-actual-play.json 2>/dev/null || true
           cp /tmp/hotel-garden-full-route.json qa/results/hotel-garden-full-route.json 2>/dev/null || true
-          cp /tmp/hotel-garden-full-route.json qa/results/hotel-garden-full-route.json 2>/dev/null || true
+          cp /tmp/hotel-garden-full-route-scripted.json qa/results/hotel-garden-full-route-scripted.json 2>/dev/null || true
           cp /tmp/hotel-garden-qa-images/*.jpg qa/results/ 2>/dev/null || true
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
