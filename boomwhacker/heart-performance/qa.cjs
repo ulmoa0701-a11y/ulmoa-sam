@@ -20,6 +20,15 @@ const {chromium}=require("playwright-core");
   assert(q.scores.find(s=>s.key==="moa-breeze").meter===3);
   assert(q.scores.find(s=>s.key==="moa-space").meter===4);
   assert.equal(await page.locator("#keys button").count(),8);
+  const hop=await page.evaluate(()=>{
+    const q=window.__performanceViewsQA__,original=q.state();
+    const samples=[0,.25,.5,.75,1].map(t=>q.moaBeatHop(t));
+    return {samples};
+  });
+  assert(hop.samples[0]<.001&&hop.samples[1]>.98&&hop.samples[2]<.001&&hop.samples[3]>.98&&hop.samples[4]<.001,
+    "One-color full heart must show TWO Moa hops at quarter/three-quarter beat without extra note onsets");
+  tests.push(name+": every full beat has exactly two visual Moa pulses (regardless of note color subdivisions)");
+
   tests.push(name+": 8 exact original song selections, 2/4 3/4 4/4, 6 modes");
   const initial=await page.evaluate(()=>window.__performanceViewsQA__.state().score);
 
