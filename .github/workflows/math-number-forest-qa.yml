@@ -43,6 +43,7 @@ jobs:
           node --check math-garden/game.js
           node --check math-garden/mission.js
           node --check math-garden/learning-engine.js
+          node --check math-garden/forest-world.js
           node qa/math-learning-engine-qa.mjs
       - name: Start test site
         run: |
@@ -54,6 +55,8 @@ jobs:
         run: node qa/math-number-forest-qa.mjs
       - name: Test guided mathematical learning cycle and independent transfer
         run: node qa/math-guided-mission-qa.mjs
+      - name: Test seven-chapter forest world, device widths, and reload
+        run: node qa/math-forest-world-qa.mjs
       - name: Confirm current public release
         if: github.event_name == 'push'
         run: |
@@ -85,4 +88,5 @@ jobs:
           path: |
             qa/math-forest-artifacts
             qa/math-mission-artifacts
+            qa/math-forest-world-artifacts
           if-no-files-found: warn
