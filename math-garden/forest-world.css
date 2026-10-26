@@ -98,7 +98,7 @@ button.feed-friend.friend-fed .forest-friend{transform:translateY(-3px)}
 .spot:active{transform:scale(.9)}
 .spot img{width:140px;height:auto;object-fit:contain;filter:drop-shadow(0 8px 6px #3f3a2440)}
 .spot .berry-spot-img{width:92px}
-.spot.bounce{animation:spot-bounce .4s cubic-bezier(.34,1.56,.64,1)}
+.spot.bounce{animation:spot-bounce .4s cubic-bezier(.34,1.56,.64,1)}.spot:disabled{opacity:.4;filter:grayscale(.5)}
 @keyframes spot-bounce{0%{transform:scale(1)}40%{transform:scale(.85) rotate(-4deg)}70%{transform:scale(1.08) rotate(3deg)}100%{transform:scale(1)}}
 .float-pop{position:absolute;width:34px;height:34px;left:50%;top:10%;margin-left:-17px;pointer-events:none;animation:float-up .7s ease-out both}
 @keyframes float-up{0%{opacity:0;transform:translateY(0) scale(.6)}25%{opacity:1}100%{opacity:0;transform:translateY(-60px) scale(1.1)}}

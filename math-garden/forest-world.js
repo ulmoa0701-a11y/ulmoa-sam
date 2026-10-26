@@ -10,6 +10,8 @@
 const $=id=>document.getElementById(id);
 const play=$('play'),stage=$('stage'),feedbackFlash=$('feedbackFlash');
 let flashTimer=0;
+const GATHER_COOLDOWN_MS=9000;
+const gatherCooldownUntil={acorns:0,berries:0};
 const storeKey='moa-forest-world-v1';
 const A='./assets/mission-v4/',V='./assets/village-v1/';
 
@@ -351,9 +353,11 @@ function floatPop(hostEl,imgSrc){
  setTimeout(()=>p.remove(),700);
 }
 function renderGather(){
+ const now=Date.now();
+ const cool=kind=>gatherCooldownUntil[kind]>now?'disabled':'';
  $('gatherSpots').innerHTML=
-  '<button type="button" class="spot" data-spot="acorns" aria-label="'+esc('나무에서 도토리 모으기')+'"><img src="'+A+'objects/acorn_tree.png" alt=""></button>'+
-  '<button type="button" class="spot" data-spot="berries" aria-label="'+esc('딸기 모으기')+'"><img src="'+A+'objects/berry_single.png" alt="" class="berry-spot-img"></button>';
+  '<button type="button" class="spot" data-spot="acorns" '+cool('acorns')+' aria-label="'+esc('나무에서 도토리 모으기')+'"><img src="'+A+'objects/acorn_tree.png" alt=""></button>'+
+  '<button type="button" class="spot" data-spot="berries" '+cool('berries')+' aria-label="'+esc('딸기 모으기')+'"><img src="'+A+'objects/berry_single.png" alt="" class="berry-spot-img"></button>';
 }
 function petStage(){return state.feedCount>=20?3:state.feedCount>=12?2:state.feedCount>=5?1:0}
 function renderPet(){
@@ -409,12 +413,16 @@ function buildTabbar(){
 
 $('world').addEventListener('click',e=>{
  const spot=e.target.closest('[data-spot]');
- if(spot){
+ if(spot && !spot.disabled){
   const kind=spot.dataset.spot;
+  if(gatherCooldownUntil[kind]>Date.now())return;
   state[kind]++;save();sfx(true);
+  gatherCooldownUntil[kind]=Date.now()+GATHER_COOLDOWN_MS;
   spot.classList.remove('bounce');void spot.offsetWidth;spot.classList.add('bounce');
   floatPop(spot,kind==='acorns'?A+'objects/acorn_single.png':A+'objects/berry_single.png');
   resourceRow();renderBuild();renderPet();
+  spot.disabled=true;
+  setTimeout(()=>{if(state.tab==='gather')renderGather();},GATHER_COOLDOWN_MS);
   return;
  }
  const feedBtn=e.target.closest('[data-feed]');
