@@ -1,0 +1,47 @@
+name: Math Forest World Regression QA
+on:
+  pull_request:
+    paths:
+      - 'math-garden/forest-world.*'
+      - 'qa/math-forest-world-qa.mjs'
+      - '.github/workflows/math-forest-world-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'math-garden/forest-world.*'
+      - 'qa/math-forest-world-qa.mjs'
+      - '.github/workflows/math-forest-world-qa.yml'
+permissions:
+  contents: read
+jobs:
+  forest-world:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser automation
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Resolve Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Check syntax
+        run: node --check math-garden/forest-world.js
+      - name: Run site locally
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/math-forest-world-server.log 2>&1 &
+          for i in {1..40}; do curl -fsS http://127.0.0.1:8765/math-garden/forest-world.html >/dev/null && exit 0; sleep 0.25; done
+          cat /tmp/math-forest-world-server.log
+          exit 1
+      - name: Exercise all seven forest chapters and village
+        run: node qa/math-forest-world-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: math-forest-world-responsive-screenshots
+          path: qa/math-forest-world-artifacts
+          if-no-files-found: warn
