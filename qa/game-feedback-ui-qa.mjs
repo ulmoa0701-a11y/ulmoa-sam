@@ -35,7 +35,7 @@ try{
    assert.equal(await dialog.getAttribute('role'),'dialog');
    const url=new URL(await page.locator('#habomFeedbackFrame').getAttribute('src'));
    assert.equal(url.hostname,'form.jotform.com');
-   assert.equal(url.searchParams.get('gameName'),name,'Incorrect game auto context '+route);
+   assert.equal(url.searchParams.get('q2_textbox0'),name,'Incorrect game auto context '+route);
    assert.ok(await page.locator('#habomFeedbackExternal').getAttribute('href'));
    await page.keyboard.press('Escape');
    assert.equal(await page.locator('#habomFeedbackBackdrop').isVisible(),false,'Escape should close '+route);
