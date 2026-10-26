@@ -1048,11 +1048,16 @@ async function heartV4Smoke(){
    const q=window.__HEART_V4_QA__;if(!q)return null;
    const layout=q.pageAt(1);
    const g=q.geometry(0,layout);
-   const a=q.crestTravel(0,g),left=q.crestTravel(.25,g),center=q.crestTravel(.5,g),right=q.crestTravel(.75,g),end=q.crestTravel(1,g);
+   const a=q.crestTravel(0,g,0,layout),left=q.crestTravel(.25,g,0,layout),
+         center=q.crestTravel(.5,g,0,layout),right=q.crestTravel(.75,g,0,layout),end=q.crestTravel(1,g,0,layout);
+   const nextGeo=q.geometry(1,layout),nextStart=q.crestTravel(0,nextGeo,1,layout);
+   const prevEnd=q.crestTravel(1,g,0,layout);
+   const split=q.beatParts(0),sameColor=q.beatParts(1);
    return {canvas:{w:document.querySelector("#score").width,h:document.querySelector("#score").height},
      stage:document.querySelector("#stage").getBoundingClientRect().toJSON(),
      keys:document.querySelectorAll("#keys .key").length,
-     layout,heartWidth:g.w,hop:[a,left,center,right,end],
+     layout,heartWidth:g.w,hop:[a,left,center,right,end],nextStart,prevEnd,
+     sameColorCount:sameColor.length,splitCount:split.length,heartDelta:Math.abs(prevEnd.x-nextStart.x),
      assets:q.assets(),initialState:q.getState()};
   });
   check(!!data,"V4 "+cfg.name+": QA hooks missing");
@@ -1063,10 +1068,15 @@ async function heartV4Smoke(){
     "V4 "+cfg.name+": beats not arranged for native viewport");
    check(data.heartWidth*(data.stage.width/data.canvas.w)>=60,
     "V4 "+cfg.name+": hearts too tiny");
-   check(data.hop[1].x+5<data.hop[3].x &&
-      data.hop[1].lift>25&&data.hop[3].lift>25 &&
-      data.hop[0].lift<.001&&data.hop[2].lift<.001&&data.hop[4].lift<.001,
-      "V4 "+cfg.name+": two separate SPATIAL crest jumps are required, not in-place bounce");
+   check(data.hop[1].x+8<data.hop[3].x &&
+      data.hop[1].lift<.01&&data.hop[3].lift<.01 &&
+      data.hop[2].lift>3&&data.hop[2].lift<data.heartWidth*.06,
+      "V4 "+cfg.name+": quiet crest LANDINGS at 1/4 and 3/4 beat expected");
+   check(data.heartDelta<.1,"V4 "+cfg.name+": inter-heart motion must be CONTINUOUS");
+   check(data.splitCount>=2&&data.sameColorCount===1,
+      "V4 "+cfg.name+": original split/solid beat music data missing");
+   check(data.initialState.motion==="calm",
+      "V4 "+cfg.name+": calm default should minimize distraction");
    check(["forest","night","classroom","heart-frame","moa"].every(n=>data.assets[n]),
       "V4 "+cfg.name+": some external image assets missing "+JSON.stringify(data.assets));
   }
@@ -1080,6 +1090,13 @@ async function heartV4Smoke(){
   await page.screenshot({path:out+"/heartV4-"+cfg.name+"-classroom.png",fullPage:true});
   await page.locator("#song").selectOption("1");
   check((await page.locator("#hudTitle").textContent()).length>1,"V4 "+cfg.name+": original song selection not updating title");
+  await page.locator("#moaMotion").selectOption("normal");
+  check((await page.evaluate(()=>window.__HEART_V4_QA__.getState().motion))==="normal",
+    "V4 "+cfg.name+": motion strength control did not change");
+  await page.locator("#moaMotion").selectOption("still");
+  check((await page.evaluate(()=>window.__HEART_V4_QA__.getState().motion))==="still",
+    "V4 "+cfg.name+": stationary motion mode missing");
+  await page.locator("#moaMotion").selectOption("calm");
   await page.locator("#tempo").selectOption("0.75");
   await page.locator("#notes").selectOption("3");
   await page.locator(".key").first().click();
