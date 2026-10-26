@@ -10,13 +10,16 @@ try{
  for(const key of keys){
   const url='https://form.jotform.com/262983367931066?'+new URLSearchParams({[key]:name}).toString();
   const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000});
-  await page.locator('#input_2').waitFor({timeout:15000});
+  await page.locator('#input_2').waitFor({state:'attached',timeout:15000});
   await page.waitForTimeout(500);
   const value=await page.locator('#input_2').inputValue();
   attempts.push({key,http:response?.status(),autofilled:value===name});
   if(value===name){working=key;break}
  }
- console.log('JOTFORM PREFILL CHECK '+JSON.stringify({attempts,working}));
+ const gameFieldHidden=!(await page.locator('#input_2').isVisible());
+ const visibleFields=await page.locator('li.form-line').evaluateAll(nodes=>nodes.filter(n=>getComputedStyle(n).display!=='none'&&n.getClientRects().length>0).map(n=>(n.querySelector('label')?.textContent||'').trim().replace(/\\s+/g,' ').slice(0,70)).filter(Boolean));
+ console.log('JOTFORM PREFILL CHECK '+JSON.stringify({attempts,working,gameFieldHidden,visibleFields}));
  assert.ok(working,'None of the tested unique field names prefilled the public game title');
+ assert.ok(gameFieldHidden,'Automatic game field should not be shown to respondents');
  if(working!=='q2_textbox0')console.log('CHANGE FIELD KEY TO '+working);
 }finally{await browser.close()}
