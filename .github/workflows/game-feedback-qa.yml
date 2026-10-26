@@ -37,6 +37,7 @@ jobs:
           node --check assets/habom-game-feedback.js
           node --check assets/habom-game-feedback-v2.js
           node --check qa/game-feedback-screenshot-qa.mjs
+          node --check qa/game-feedback-live-insert-qa.mjs
           node --check qa/game-feedback-ui-qa.mjs
           node --check qa/game-feedback-form-prefill-check.mjs
       - name: Serve all games
@@ -62,3 +63,5 @@ jobs:
           assert.equal(bad.status,400,"Malformed payload must not be stored");
           console.log("PASS: edge function CORS and invalid payload rejection");
           '
+      - name: Submit one synthetic test report into private database (removed after verification)
+        run: node qa/game-feedback-live-insert-qa.mjs
