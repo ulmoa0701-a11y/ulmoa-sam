@@ -175,7 +175,15 @@ function transformBoard(x){
 function demo(){const x=current(),key=CONCEPTS[state.concept].key,dKey=x.mech||key;
  state.view='demo';helpButton(true);say('모아가 먼저 보여줄게','한 번 보고, 다음에는 직접 해볼까?');
  scene('<div class="lesson"><div class="lesson-lead">'+demoVisual(x,dKey)+'</div><div class="lesson-foot"><span class="observation">보는 차례 · 기록하지 않아요</span>'+stepAction('continue',ICONS.arrowRight+srLabel('내가 해볼래'),'모아의 시범을 보고 다음으로')+'</div></div>')}
-function fruitTray(type,selected,stock,taken=selected){return '<div class="supply"><div class="supply-items"><div class="tree-pile">'+Array.from({length:Math.max(0,stock-taken)},(_,i)=>stepAction('take',unit(type),'간식 하나 담기','data-index="'+i+'"')).join('')+'</div></div><p class="supply-caption">숲속 나무</p></div><div class="delivery"><div class="packed-food"><div class="basket-pile">'+Array.from({length:selected},()=>stepAction('undo',unit(type,true),'담은 간식 하나 꺼내기')).join('')+'</div></div><p class="supply-caption">내 배달 바구니</p></div>'}
+function fruitTray(type,selected,stock,taken=selected){
+ return '<div class="supply"><div class="supply-items"><div class="tree-pile">'+
+ Array.from({length:Math.max(0,stock-taken)},(_,i)=>stepAction('take',unit(type),'간식 하나 담기','data-index="'+i+'"')).join('')+
+ '</div></div><p class="supply-caption">숲속 나무</p></div><div class="delivery"><div class="packed-food"><div class="basket-pile" aria-hidden="true">'+
+ Array.from({length:selected},()=>unit(type,true)).join('')+
+ '</div></div><p class="supply-caption">내 배달 바구니</p>'+
+ (selected?'<button type="button" class="undo-one" data-mission="undo" aria-label="바구니에서 간식 하나 꺼내기">− 하나 빼기</button>':'')+
+ '</div>';
+}
 function shareBoard(x){
  const n=x.n;
  return '<div class="friends-line">'+Array.from({length:n},(_,i)=>{
@@ -186,14 +194,13 @@ function shareBoard(x){
 function compareBoard(x){return '<div class="compare-path">'+['a','b'].map((k,i)=>stepAction('choose','<div class="path-stand"><div class="fruit-pile">'+Array.from({length:x[k]},()=>unit(x.fruit)).join('')+'</div><span class="path-arch"></span></div>',i===0?'왼쪽':'오른쪽','data-side="'+k+'"')).join('')+'</div>'}
 function makeBoard(x){return '<div class="make-layout"><div class="make-board">'+Array.from({length:x.total},(_,i)=>dot(i<x.have+state.selected,x.fruit)).join('')+'</div><div class="delivery-line">'+fruitTray(x.fruit,state.selected,x.total-x.have+3)+'</div></div>'}
 function bridgeBoard(x){
- const placed=x.pieces.map((len,i)=>state.planksPlaced.includes(i)
-  ?stepAction('remove-plank','<span class="plank plank-'+len+' '+(x.material==='mossy'?'mossy':'')+'" aria-hidden="true"></span>','놓은 판자 다시 빼기','data-piece="'+i+'"')
-  :'').join('');
- const palette=x.pieces.map((len,i)=>state.planksPlaced.includes(i)
-  ?''
-  :stepAction('place-plank','<span class="plank plank-'+len+' '+(x.material==='mossy'?'mossy':'')+'" aria-hidden="true"></span>','판자 하나 놓기','data-piece="'+i+'"')
- ).join('');
- return '<div class="bridge-stage"><div class="plank-dock">'+placed+'</div></div><p class="supply-caption">끊어진 다리</p><div class="plank-tray">'+palette+'</div><p class="supply-caption">나무 판자</p>';
+ const plankClass=len=>'plank plank-'+len+' '+(x.material==='mossy'?'mossy':'');
+ const placed=x.pieces.map((len,i)=>state.planksPlaced.includes(i)?'<span class="'+plankClass(len)+'" aria-hidden="true"></span>':'').join('');
+ const removals=x.pieces.map((len,i)=>state.planksPlaced.includes(i)?'<button type="button" class="plank-return-button" data-mission="remove-plank" data-piece="'+i+'" aria-label="'+len+'칸 판자 다시 빼기"><span class="'+plankClass(len)+'" aria-hidden="true"></span><span>빼기</span></button>':'').join('');
+ const palette=x.pieces.map((len,i)=>state.planksPlaced.includes(i)?'':stepAction('place-plank','<span class="'+plankClass(len)+'" aria-hidden="true"></span>','판자 하나 놓기','data-piece="'+i+'"')).join('');
+ return '<div class="bridge-stage"><div class="plank-dock">'+placed+'</div></div><p class="supply-caption">끊어진 다리</p>'+
+ (removals?'<div class="plank-return">'+removals+'</div>':'')+
+ '<div class="plank-tray">'+palette+'</div><p class="supply-caption">나무 판자</p>';
 }
 
 function phaseText(x){if(x.kind==='guided')return '함께 연습';if(x.kind==='transfer')return '새로운 상황';if(x.kind==='probe')return '혼자 해보기';return '한 번 더 연습'}
