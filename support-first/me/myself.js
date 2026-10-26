@@ -42,6 +42,16 @@ function withdrawDisclosure(index){
  const id=chapters[index].id;
  disclose[id]=false;
  discloseNotes[id]=false;
+ // Student revisions cancel earlier permission immediately, not only at finish().
+ // Clear the old printable draft too, including when Ctrl+P is used mid-conversation.
+ const draft=document.getElementById("intro-text");
+ const printable=document.getElementById("print-safe-body");
+ const copy=document.getElementById("copy");
+ const print=document.getElementById("print");
+ if(draft){draft.value="";draft.readOnly=true;}
+ if(printable)printable.textContent="";
+ if(copy)copy.disabled=true;
+ if(print)print.disabled=true;
 }
 const $=id=>document.getElementById(id);
 function iconHTML(key) {
