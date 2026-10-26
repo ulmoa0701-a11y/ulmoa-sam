@@ -70,7 +70,8 @@ try{
       assert.equal(await control.count(),1,'missing available bag item '+item);
       await control.click();
      }
-     assert.ok(setsEqual(await visibleItems(page.locator('.assembled-cart')),expected),'bag content differs from instruction');
+     const assembled=await visibleItems(page.locator('.assembled-cart'));
+     assert.ok(setsEqual(assembled,expected),'bag differs '+JSON.stringify({device:vp.label,level,round,before,note,expected,assembled}));
      await page.locator('[data-action="check-list"]').click();
     }else{
      const options=page.locator('.list-choice');
