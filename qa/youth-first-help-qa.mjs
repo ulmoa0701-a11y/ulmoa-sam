@@ -120,6 +120,7 @@ for(const width of [390,1280]){
   await page.locator('#revisit').click();
   for(let i=0;i<3;i++)await page.locator('#back').click();
   await check((await page.locator('#question').innerText()).includes('신경'),width+'px revisiting concern for privacy test');
+  await page.locator('#own-words summary').click();
   await page.locator('#own-input').fill('상담에서 천천히 얘기하고 싶어');
   for(let i=0;i<4;i++)await page.locator('#next').click();
   await check(!(await page.locator('input[data-share="concern"]').isChecked()),width+'px editing private note revokes all concern sharing');
