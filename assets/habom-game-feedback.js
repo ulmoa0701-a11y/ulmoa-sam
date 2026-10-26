@@ -19,7 +19,7 @@ function currentGameId(){
  return '';
 }
 function gameName(){return NAMES[currentGameId()]||document.title.split('|')[0].trim().slice(0,75)||'모아 게임'}
-const launcher=document.createElement('button');launcher.id='habomFeedbackLauncher';launcher.type='button';launcher.textContent='오류·아이디어 알리기';launcher.setAttribute('aria-haspopup','dialog');launcher.setAttribute('aria-controls','habomFeedbackBackdrop');
+const launcher=document.createElement('button');launcher.id='habomFeedbackLauncher';launcher.type='button';launcher.textContent='제보';launcher.setAttribute('aria-label','오류나 아이디어 알리기');launcher.setAttribute('aria-haspopup','dialog');launcher.setAttribute('aria-controls','habomFeedbackBackdrop');
 document.body.appendChild(launcher);
 const backdrop=document.createElement('div');
 backdrop.id='habomFeedbackBackdrop';backdrop.hidden=true;
@@ -29,7 +29,7 @@ const close=backdrop.querySelector('#habomFeedbackClose'),frame=backdrop.querySe
 function openFeedback(){
  const name=gameName();
  // Only a public game title is passed. No player ID, answers, grades or medical data.
- const link=FORM+'?'+new URLSearchParams({gameName:name}).toString();
+ const link=FORM+'?'+new URLSearchParams({q2_textbox0:name}).toString();
  backdrop.querySelector('#habomFeedbackGame').textContent='게임: '+name;
  frame.src=link;backdrop.querySelector('#habomFeedbackExternal').href=link;
  backdrop.hidden=false;close.focus();
@@ -40,7 +40,7 @@ close.addEventListener('click',closeFeedback);
 backdrop.addEventListener('click',e=>{if(e.target===backdrop)closeFeedback()});
 backdrop.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();closeFeedback()}});
 function addResultButton(){
- const target=document.querySelector('#resultScreen .result-actions, #resultScreen .resultActions, #results .resultActions, #finish .start-actions, .result .action-row');
+ const target=document.querySelector('#resultScreen .result-actions, #resultScreen .resultActions, #results .resultActions, #finish .start-actions, #finishScreen .action-row, .result .action-row');
  if(!target||document.getElementById('habomFeedbackAtFinish'))return;
  const b=document.createElement('button');b.type='button';b.id='habomFeedbackAtFinish';b.textContent='이 게임 고쳐줬으면 하는 점';
  b.addEventListener('click',openFeedback);target.appendChild(b);
