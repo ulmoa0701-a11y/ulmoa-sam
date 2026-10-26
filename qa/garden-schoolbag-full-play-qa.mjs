@@ -67,7 +67,7 @@ try{
       assert.equal(await page.locator('[data-action="next"]').count(),0,'empty bag earned completion');
      }
      for(const item of expected){
-      const control=page.locator('.inventory-options .item-pick').filter({has:page.locator('b', {hasText:new RegExp('^'+item+'});
+      const control=page.locator('.inventory-options .item-pick').filter({has:page.locator('b',{hasText:new RegExp('^'+item+'$')})});
       assert.equal(await control.count(),1,'missing available bag item '+item);
       await control.click();
      }
