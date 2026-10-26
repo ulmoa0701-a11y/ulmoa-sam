@@ -347,6 +347,7 @@ play.addEventListener('click',e=>{const b=e.target.closest('[data-mission]');if(
 $('visualHint').addEventListener('click',help);$('help').addEventListener('click',help);
 $('change').addEventListener('click',()=>{if(state.view==='task'||state.view==='demo'){showMap();save()}});
 $('help').innerHTML=ICONS.hint+srLabel('그림 힌트');
+$('visualHint').innerHTML=ICONS.hint+srLabel('그림 힌트');
 $('change').innerHTML=ICONS.mapReturn+srLabel('숲길 지도로 돌아가기');
 
 /* ---------- village content (ported from village.js) ---------- */
