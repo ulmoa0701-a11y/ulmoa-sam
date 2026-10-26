@@ -1001,6 +1001,33 @@ for(const [name,w,h] of [['publishMobile390',390,844],['publishDesktop1366',1366
  await context.close();
 }
 
+// Separate V2 preview smoke; original heart player is not modified.
+async function heartV2Smoke(){
+ const context=await browser.newContext({viewport:{width:390,height:844}});
+ const page=await context.newPage(),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ const response=await page.goto(ROOT+'/boomwhacker/heart-playalong-v2/',{waitUntil:'networkidle'});
+ check(response?.ok(),'heartV2: preview page must load');
+ check(await page.locator('#score').count()===1,'heartV2: score stage missing');
+ check(await page.locator('#keys .note').count()===8,'heartV2: original note buttons missing');
+ check(await page.locator('#song option').count()>=8,'heartV2: original songs missing');
+ const dimensions=await page.locator('#score').evaluate(c=>({width:c.width,height:c.height}));
+ check(dimensions.width===1200&&dimensions.height===620,'heartV2: unexpected canvas size');
+ await page.locator('[data-theme="night"]').click();
+ check(await page.locator('[data-theme="night"]').getAttribute('aria-pressed')==='true','heartV2: theme switch failed');
+ await page.locator('#notes').selectOption('3');
+ await page.locator('#keys .note').first().click();
+ await page.locator('#play').click();
+ await page.waitForTimeout(180);
+ check((await page.locator('#play').textContent()).includes('일시정지'),'heartV2: start button did not start');
+ await page.locator('#play').click();
+ await page.screenshot({path:out+'/heartV2-mobile-390.png',fullPage:true});
+ check(!errors.length,'heartV2: runtime exceptions '+errors.join(' / '));
+ report.push({name:'heartV2Preview',dimensions,errors});
+ await context.close();
+}
+await heartV2Smoke();
+
 await browser.close();
 fs.writeFileSync(`${out}/report.json`,JSON.stringify({failures,report},null,2));
 console.log(JSON.stringify({failures,report},null,2));
