@@ -1081,6 +1081,14 @@ async function heartV4Smoke(){
       "V4 "+cfg.name+": some external image assets missing "+JSON.stringify(data.assets));
   }
   await page.screenshot({path:out+"/heartV4-"+cfg.name+"-forest.png",fullPage:true});
+  // Separate photographic proofs of LEFT and RIGHT crest landing, at their
+  // exact 1/4 and 3/4 beat times; original frame screenshots were in preroll.
+  await page.evaluate(()=>window.__HEART_V4_QA__.render(.25));
+  await page.locator("#stage").screenshot({path:out+"/heartV4-"+cfg.name+"-moa-left.png"});
+  await page.evaluate(()=>window.__HEART_V4_QA__.render(.75));
+  await page.locator("#stage").screenshot({path:out+"/heartV4-"+cfg.name+"-moa-right.png"});
+  await page.evaluate(()=>window.__HEART_V4_QA__.render(-2));
+
   await page.locator("#drawer summary").click();
   await page.locator('[data-theme="night"]').click();
   check(await page.locator('[data-theme="night"]').getAttribute("aria-pressed")==="true",
