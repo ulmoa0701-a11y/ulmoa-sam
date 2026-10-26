@@ -223,6 +223,7 @@ function geometry(k,page){
  const y=m?(row===0?246:599):(row===0?224:484);
  return {x:start+column*(size+gap),y,w:size,h:size*.90,row,column};
 }
+function smoothUnit(v){const t=Math.max(0,Math.min(1,v));return t*t*(3-2*t)}
 /* Two *quiet* beat landmarks per canonical full heart.
    Each stays visible long enough to read, without a constantly travelling sprite.
    0.25/0.75 beat are contact moments, not new audio onsets. */
