@@ -158,3 +158,42 @@ footer span{max-width:68%;text-align:right}
  .cue-card{min-height:50px}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
+
+/* Stage focus v4: responsive landscape-like score on narrow devices. */
+@media(max-width:740px){
+ .app{padding:0 10px}
+ .header{height:55px}
+ .brand small{font-size:9px}
+ main{gap:18px;padding-top:14px}
+ .performance-headline{display:none}
+ .player-header{padding:0 4px}
+ .player-header h1{font-size:clamp(21px,5.7vw,29px);line-height:1.12}
+ .bar-progress{min-width:70px}
+ .stage{width:calc(100vw - 8px)!important;max-width:none!important;
+   position:relative;left:50%;transform:translateX(-50%);
+   aspect-ratio:1200/620;border-radius:0;box-shadow:none}
+ .cue-strip{gap:0;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .cue-card{border-radius:0;min-height:65px;gap:5px}
+ .cue-card:first-child{border-radius:9px 0 0 9px}
+ .cue-card:last-child{border-radius:0 9px 9px 0}
+ .mobile-score-tip{border:0;background:transparent;padding:0 4px}
+ .mobile-score-tip button{background:#204b3e;border-radius:999px;padding:10px 15px}
+ .main-controls{grid-template-columns:1.4fr 1fr 1fr 1fr;gap:5px}
+ .main-controls button{min-width:0;padding:7px 2px;font-size:clamp(9px,2.7vw,12px)}
+ .instrument{padding-top:6px}
+ .keys button{border-radius:5px;box-shadow:none;min-height:52px}
+ .keys button:before{display:none}
+ .selection{padding-top:20px}
+ .view-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .view-choice{min-height:64px;padding:10px 12px}
+ .view-choice.active{padding:9px 11px}
+ .choice-icon{display:none}
+ .view-choice small{font-size:10px}
+ .theme-bar{gap:6px}
+}
+@media(min-width:741px){
+ .player{grid-template-columns:minmax(0,1fr) minmax(230px,260px)}
+ .stage{aspect-ratio:1200/620}
+ .cue-card{padding:20px}
+ .instrument-head{margin-top:8px}
+}
