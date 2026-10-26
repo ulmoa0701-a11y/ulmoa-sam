@@ -45,7 +45,7 @@ feedbackUi.innerHTML='<div id="habomFeedbackV2Dialog" role="dialog" aria-modal="
  '<label class="habom-fb-confirm"><input type="checkbox" id="habomFbReviewed">캡처를 확인했고, 사람 얼굴·이름 등 개인정보가 남아 있지 않아요</label></div>'+
  '<p class="habom-fb-warning" id="habomFbWarning" role="status"></p>'+
  '<div class="habom-fb-bottom"><button type="button" id="habomFbSubmit">보내고 게임 계속하기</button><a id="habomFbFallback" target="_blank" rel="noopener noreferrer">기존 제보 양식</a></div>'+
- '<p class="habom-fb-footnote">접수한 내용과 확인한 캡처만 비공개 보관하며, 검토 후 수정해요. 자동으로 코드를 변경하지 않아요.</p>'+
+ '<p class="habom-fb-footnote">접수 내용과 확인한 캡처는 Supabase 비공개 저장소에 보관하고 검토해요. 자동으로 코드를 변경하지 않아요.</p>'+
  '</div>';
 document.body.appendChild(feedbackUi);
 const $fb=id=>document.getElementById(id);
@@ -66,7 +66,7 @@ function meta(){
 const launcher=document.createElement("button");launcher.id="habomFeedbackLauncher";launcher.type="button";launcher.textContent="이 화면 제보";launcher.setAttribute("aria-haspopup","dialog");launcher.setAttribute("aria-controls","habomFeedbackV2");document.body.appendChild(launcher);
 let activeRound=null;
 function clearPreview(){reportImage=null;preview.width=1;preview.height=1;preview.style.display="none";$fb("habomFbReviewed").checked=false;$fb("habomFbCaptureStatus").textContent="캡처 없음";$fb("habomFbReset").disabled=true}
-async function setImage(image){
+async function setImage(image,expectedSession){
  const maxWidth=900,scale=Math.min(1,maxWidth/image.width,850/image.height);
  preview.width=Math.max(1,Math.floor(image.width*scale));preview.height=Math.max(1,Math.floor(image.height*scale));
  ctx.clearRect(0,0,preview.width,preview.height);ctx.drawImage(image,0,0,preview.width,preview.height);
@@ -77,6 +77,7 @@ async function setImage(image){
    for(const face of faces){const b=face.boundingBox,pad=Math.max(12,Math.round(b.width*.2));ctx.fillStyle="#203b31";ctx.fillRect(Math.max(0,b.x-pad),Math.max(0,b.y-pad),b.width+pad*2,b.height+pad*2)}
   }catch(_){}
  }
+ if(expectedSession!==session||feedbackUi.hidden)return;
  preview.style.display="block";$fb("habomFbCaptureStatus").textContent="카메라·입력칸 자동 가림 · 사진을 확인해 주세요";
  $fb("habomFbReset").disabled=false;
  // This canvas contains the privacy-scrubbed preview. No raw stage capture is sent to the server.
@@ -131,7 +132,7 @@ async function captureCurrent(mySession){
     onclone:scrubDocument});
   }
   if(mySession!==session||feedbackUi.hidden)return;
-  await setImage(shot);
+  await setImage(shot,mySession);
  }catch(err){
   if(mySession!==session)return;
   clearPreview();
