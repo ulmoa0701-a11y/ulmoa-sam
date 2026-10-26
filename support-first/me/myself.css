@@ -102,3 +102,7 @@ footer a{color:#627e6c}
  .print-safe h1{font-size:20pt;margin:0 0 22px}
  .print-safe pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13pt/1.65 system-ui,sans-serif;margin:0}
 }
+
+/* Compact uncertainty option rather than another illustrated questionnaire card */
+.unsure-choice{display:inline-flex;align-self:flex-start;margin:12px 0 0;padding:8px 13px;min-height:42px;background:transparent;color:#526a60;border:1px solid #cbd8cd;border-radius:999px;font-size:.86rem;font-weight:710}
+.unsure-choice:hover,.unsure-choice[aria-pressed=true]{background:#eaf2e9;border-color:#59816a;color:#234b36}
