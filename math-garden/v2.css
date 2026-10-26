@@ -106,7 +106,6 @@ body{background:linear-gradient(180deg,#f6f3dc,#dfe9d2)!important;color:#354c45}
 .coach-target{outline:6px solid #fff1a0!important;outline-offset:5px;animation:helpGlow .75s ease-in-out infinite alternate}
 .welcome-board{background:linear-gradient(#fff7dd,#f3dfb6);border:5px solid #d4aa79;box-shadow:0 12px 0 #8c805d,0 20px 25px #3c503840}
 .welcome-board .fruit{display:none}.welcome-fruits{display:none}
-.welcome-board:before{content:'';display:block;width:135px;height:110px;margin:-12px auto 15px;background:url('./assets/forest-world.svg') center/cover;border:7px solid #e3be80;box-shadow:0 6px 0 #8d6743;border-radius:27px}
 .welcome-board h2{font-size:30px}
 .tool-button,.secondary-button{background:#fffbec;border:2px solid #c5b290;color:#655944}
 .primary-button{background:linear-gradient(#e58f77,#d56757);border-color:#ce675a;box-shadow:0 7px 0 #9c5149;color:#fff9e2}
@@ -144,7 +143,7 @@ body{background:linear-gradient(180deg,#f6f3dc,#dfe9d2)!important;color:#354c45}
  .bridge-road{max-width:88%}
  .stage-grid{grid-template-columns:1fr}.map-doors{grid-template-columns:repeat(2,minmax(0,1fr))}
  .storybook-reward,.storybook-finish{min-height:292px;padding:15px}.storybook-reward p{font-size:22px}
- .welcome-board h2{font-size:24px}.welcome-board:before{width:100px;height:83px}
+ .welcome-board h2{font-size:24px}
 }
 @media(max-width:355px){.friend-card{min-width:65px}.character-sprite{width:59px;height:71px}.number-tile{min-width:65px;width:67px}.path-stone,.missing-stone{min-width:47px}.pattern-pocket{width:48px}}
 @media(prefers-reduced-motion:reduce){.character-sprite,.petal-bloom,.coach-target{animation:none!important}}
