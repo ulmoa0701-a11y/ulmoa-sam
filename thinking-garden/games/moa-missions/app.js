@@ -3,6 +3,11 @@
 const $=id=>document.getElementById(id);
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Number(n).toLocaleString('ko-KR')+'원';
+function withParticle(noun,withJong,withoutJong){
+ const code=noun.charCodeAt(noun.length-1);
+ const jong=code>=0xAC00&&code<=0xD7A3?(code-0xAC00)%28:0;
+ return noun+(jong&&(withJong!=='으로'||jong!==8)?withJong:withoutJong);
+}
 const query=new URLSearchParams(location.search);
 const chosen=['money','change','feel'].includes(query.get('game'))?query.get('game'):'money';
 const config={
@@ -177,24 +182,36 @@ function changedRound(){
  const ids=Object.keys(itemLabels),len=state.level==='easy'?3:state.level==='normal'?4:5;
  const index=n-bank.length,start=(index*3+Math.floor(index/5))%ids.length;
  const base=Array.from({length:len},(_,i)=>ids[(start+i*7)%ids.length]);
- const add=[],after=[...base];let note='';
- const replacement=(skip)=>ids.find((name,i)=>!skip.includes(name)&&(i+index)%3===0)||ids.find(name=>!skip.includes(name));
+ const after=[...base];let note='',wrong;
+ const replacement=skip=>ids.find((name,i)=>!skip.includes(name)&&(i+index)%3===0)||ids.find(name=>!skip.includes(name));
  if(state.level==='easy'){
-  const old=base[index%len],fresh=replacement(base);after[index%len]=fresh;
-  note=itemLabels[old][1]+' 대신 '+itemLabels[fresh][1]+'를 챙기세요.';
+  const at=index%len,old=base[at],fresh=replacement(base);
+  after[at]=fresh;
+  note=itemLabels[old][1]+' 대신 '+withParticle(itemLabels[fresh][1],'을','를')+' 챙기세요.';
+  wrong=[...base];wrong[at]=replacement([...base,fresh]);
  }else if(state.level==='normal'){
   const ix=index%len,jx=(ix+2)%len;
   const oldA=base[ix],oldB=base[jx],newA=replacement(base),newB=replacement([...base,newA]);
   after[ix]=newA;after[jx]=newB;
-  note=itemLabels[oldA][1]+'는 '+itemLabels[newA][1]+'로, '+itemLabels[oldB][1]+'는 '+itemLabels[newB][1]+'로 바뀌었어요.';
+  note=withParticle(itemLabels[oldA][1],'은','는')+' '+withParticle(itemLabels[newA][1],'으로','로')+', '+
+   withParticle(itemLabels[oldB][1],'은','는')+' '+withParticle(itemLabels[newB][1],'으로','로')+' 바뀌었어요.';
+  wrong=[...base];wrong[ix]=newA;
  }else{
-  const removed=base[index%len],added=replacement(base);
-  after.splice(index%len,1,added);
-  note=itemLabels[removed][1]+'는 빼고 '+itemLabels[added][1]+'를 추가하세요.';
+  const at=index%len,removed=base[at],added=replacement(base);
+  wrong=[...base];
+  // The challenge level intentionally alternates actual add, remove and replace tasks.
+  if(index%3===0){
+   after.push(added);wrong.push(replacement([...base,added]));
+   note=withParticle(itemLabels[added][1],'을','를')+' 추가하세요.';
+  }else if(index%3===1){
+   after.splice(at,1);wrong.splice((at+1)%len,1);
+   note=withParticle(itemLabels[removed][1],'은','는')+' 빼세요.';
+  }else{
+   after.splice(at,1,added);
+   wrong[(at+1)%len]=replacement([...base,...after]);
+   note=withParticle(itemLabels[removed][1],'은','는')+' 빼고 '+withParticle(itemLabels[added][1],'을','를')+' 추가하세요.';
+  }
  }
- const wrong=[...base];if(state.level==='easy')wrong[index%len]=replacement([...base,after[index%len]]);
- else if(state.level==='normal')wrong[index%len]=after[index%len];
- else wrong[(index+1)%len]=replacement([...base,...after]);
  return {base,after,note,wrong};
 }
 function itemView(id){const item=itemLabels[id];return '<span class="item-chip"><span aria-hidden="true">'+item[0]+'</span><b>'+esc(item[1])+'</b></span>'}
