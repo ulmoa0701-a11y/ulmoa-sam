@@ -1,0 +1,51 @@
+name: MoA 34 Games Multi-Age Persona Simulation
+on:
+  pull_request:
+    paths:
+      - 'qa/persona-34-game-simulation.mjs'
+      - '.github/workflows/gardens-multi-age-persona-qa.yml'
+      - 'thinking-garden/**'
+      - 'gardens/**'
+  push:
+    branches: [main]
+    paths:
+      - 'qa/persona-34-game-simulation.mjs'
+      - '.github/workflows/gardens-multi-age-persona-qa.yml'
+      - 'thinking-garden/**'
+      - 'gardens/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  seven-fictional-user-profiles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser runner
+        run: npm install --no-save --no-package-lock playwright-core@1.56.1
+      - name: Select available Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Check test script syntax
+        run: node --check qa/persona-34-game-simulation.mjs
+      - name: Serve the site locally
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/persona-garden.log 2>&1 &
+          for i in {1..50}; do curl -fsS http://127.0.0.1:8765/gardens/ >/dev/null && exit 0; sleep .3; done
+          cat /tmp/persona-garden.log
+          exit 1
+      - name: Simulate 7 distinct access profiles across 34 game entries
+        run: node qa/persona-34-game-simulation.mjs
+      - name: Upload complete JSON, review report, and examples
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 34-games-seven-persona-simulation
+          path: qa/persona-34-artifacts
+          if-no-files-found: warn
