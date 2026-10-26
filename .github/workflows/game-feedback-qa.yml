@@ -2,7 +2,7 @@ name: Instant Game Feedback QA
 on:
   pull_request:
     paths:
-      - 'assets/habom-game-feedback.*'
+      - 'assets/habom-game-feedback*'
       - 'qa/game-feedback-*.mjs'
       - '.github/workflows/game-feedback-qa.yml'
       - 'thinking-garden/**/index.html'
@@ -11,7 +11,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'assets/habom-game-feedback.*'
+      - 'assets/habom-game-feedback*'
       - 'qa/game-feedback-*.mjs'
       - '.github/workflows/game-feedback-qa.yml'
 permissions:
@@ -35,6 +35,8 @@ jobs:
       - name: Check scripts
         run: |
           node --check assets/habom-game-feedback.js
+          node --check assets/habom-game-feedback-v2.js
+          node --check qa/game-feedback-screenshot-qa.mjs
           node --check qa/game-feedback-ui-qa.mjs
           node --check qa/game-feedback-form-prefill-check.mjs
       - name: Serve all games
@@ -43,7 +45,20 @@ jobs:
           for i in {1..40}; do curl -fsS http://127.0.0.1:8765/thinking-garden/ >/dev/null && exit 0; sleep .25; done
           cat /tmp/game-feedback-server.log
           exit 1
-      - name: Launch feedback from each standalone game and main hub on mobile and desktop
-        run: node qa/game-feedback-ui-qa.mjs
+      - name: Verify private screenshot feedback without touching live user data
+        run: node qa/game-feedback-screenshot-qa.mjs
       - name: Inspect public Jotform prefill aliases without submitting user data
         run: node qa/game-feedback-form-prefill-check.mjs
+      - name: Check private feedback endpoint CORS and rejects invalid input without saving data
+        run: |
+          node --input-type=module -e '
+          import assert from "node:assert/strict";
+          const u="https://miohovwmhmtcvkurjamm.supabase.co/functions/v1/moa-game-feedback";
+          const origin="https://ulmoa0701-a11y.github.io";
+          const pre=await fetch(u,{method:"OPTIONS",headers:{Origin:origin,"Access-Control-Request-Method":"POST","Access-Control-Request-Headers":"content-type"}});
+          assert.equal(pre.status,204,"CORS preflight failed");
+          assert.equal(pre.headers.get("access-control-allow-origin"),origin);
+          const bad=await fetch(u,{method:"POST",headers:{Origin:origin,"Content-Type":"application/json"},body:JSON.stringify({kind:"bug"})});
+          assert.equal(bad.status,400,"Malformed payload must not be stored");
+          console.log("PASS: edge function CORS and invalid payload rejection");
+          '
