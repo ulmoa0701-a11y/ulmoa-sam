@@ -439,9 +439,12 @@ function gatherCheck(){
 function petStage(){return state.feedCount>=20?3:state.feedCount>=12?2:state.feedCount>=5?1:0}
 function renderPet(){
  const happy=Date.now()-state.lastFed<900;
+ const activeOrder=gather.phase==='ready'||gather.phase==='feed';
+ const goal=gatherGoal();
  const stage=petStage();
  const pips=Array.from({length:5},(_,i)=>'<span class="pip '+(i<Math.ceil(state.hunger/20)?'filled':'')+'">'+ICONS.paw+'</span>').join('');
  $('petScene').innerHTML=
+  (activeOrder?'<div class="pet-order">곰돌이에게 하나씩 주세요 <span>도토리 '+gather.fedAcorns+'/'+goal.acorns+' · 딸기 '+gather.fedBerries+'/'+goal.berries+'</span></div>':gather.phase==='done'?'<div class="pet-order done">고마워! 간식을 다 받았어! <button type="button" data-gather="next">새 부탁 받기</button></div>':'<div class="pet-order">모은 간식을 눌러 곰돌이에게 주세요.</div>')+
   '<div class="pet-wrap stage-'+stage+'">'+
    (stage>=2?'<img class="pet-crown" src="'+A+'objects/reward_flower.png" alt="">':'')+
    (stage>=3?'<img class="pet-side-flower" src="'+A+'objects/reward_flower.png" alt="">':'')+
@@ -449,8 +452,8 @@ function renderPet(){
   '</div>'+
   '<div class="hunger-row" aria-label="배고픔 정도">'+pips+'</div>'+
   '<div class="feed-tray">'+
-   '<button type="button" class="feed-btn" data-feed="acorns" '+(state.acorns<=0?'disabled':'')+' aria-label="도토리로 먹이주기"><img src="'+A+'objects/acorn_single.png" alt=""></button>'+
-   '<button type="button" class="feed-btn" data-feed="berries" '+(state.berries<=0?'disabled':'')+' aria-label="딸기로 먹이주기"><img src="'+A+'objects/berry_single.png" alt=""></button>'+
+   '<button type="button" class="feed-btn" data-feed="acorns" '+(state.acorns<=0||(activeOrder&&gather.fedAcorns>=goal.acorns)?'disabled':'')+' aria-label="도토리로 먹이주기"><img src="'+A+'objects/acorn_single.png" alt=""></button>'+
+   '<button type="button" class="feed-btn" data-feed="berries" '+(state.berries<=0||(activeOrder&&gather.fedBerries>=goal.berries)?'disabled':'')+' aria-label="딸기로 먹이주기"><img src="'+A+'objects/berry_single.png" alt=""></button>'+
   '</div>';
 }
 function renderBuild(){
@@ -491,23 +494,41 @@ function buildTabbar(){
 
 $('world').addEventListener('click',e=>{
  const spot=e.target.closest('[data-spot]');
- if(spot && !spot.disabled){
-  const kind=spot.dataset.spot;
-  if(gatherCooldownUntil[kind]>Date.now())return;
-  state[kind]++;save();sfx(true);
-  gatherCooldownUntil[kind]=Date.now()+GATHER_COOLDOWN_MS;
-  spot.classList.remove('bounce');void spot.offsetWidth;spot.classList.add('bounce');
-  floatPop(spot,kind==='acorns'?A+'objects/acorn_single.png':A+'objects/berry_single.png');
-  resourceRow();renderBuild();renderPet();
-  spot.disabled=true;
-  setTimeout(()=>{if(state.tab==='gather')renderGather();},GATHER_COOLDOWN_MS);
-  return;
+ if(spot && !spot.disabled && gather.phase==='collect'){
+  const kind=spot.dataset.spot,x=gatherGoal();
+  if(!['acorns','berries'].includes(kind)||gather[kind]>=x[kind]+2)return;
+  gather[kind]++;gatherMessage='';save();sfx(true);renderGather();return;
  }
+ const gatherBtn=e.target.closest('[data-gather]');
+ if(gatherBtn && !gatherBtn.disabled){
+  const action=gatherBtn.dataset.gather;
+  if(action==='check'){gatherCheck();return}
+  if(action==='undo-acorns'||action==='undo-berries'){
+   const kind=action==='undo-acorns'?'acorns':'berries';
+   if(gather.phase==='collect'&&gather[kind]>0){gather[kind]--;gatherMessage='';save();renderGather()}
+   return;
+  }
+  if(action==='pet'){if(gather.phase==='ready')gather.phase='feed';save();showTab('pet');return}
+  if(action==='next'){
+   gather.round++;gather.acorns=0;gather.berries=0;
+   gather.fedAcorns=0;gather.fedBerries=0;gather.phase='collect';
+   gatherMessage='';save();showTab('gather');return;
+  }
+ }
+
  const feedBtn=e.target.closest('[data-feed]');
  if(feedBtn && !feedBtn.disabled){
   const kind=feedBtn.dataset.feed;
   if(state[kind]<=0)return;
-  state[kind]--;state.hunger=Math.min(100,state.hunger+20);state.feedCount++;state.lastFed=Date.now();save();sfx(true);
+  const ordered=gather.phase==='ready'||gather.phase==='feed';
+  const x=gatherGoal(),field=kind==='acorns'?'fedAcorns':'fedBerries';
+  if(ordered&&gather[field]>=x[kind])return;
+  state[kind]--;state.hunger=Math.min(100,state.hunger+20);state.feedCount++;state.lastFed=Date.now();
+  if(ordered){
+   gather.phase='feed';gather[field]++;
+   if(gather.fedAcorns>=x.acorns&&gather.fedBerries>=x.berries)gather.phase='done';
+  }
+  save();sfx(true);
   resourceRow();renderPet();renderBuild();
   setTimeout(renderPet,850);
   return;
@@ -555,6 +576,6 @@ showTab(state.tab||'gather');
 
 Object.defineProperty(window,'__moaForestWorldQA',{value:()=>({
  acorns:state.acorns,berries:state.berries,feedCount:state.feedCount,hunger:state.hunger,petStage:petStage(),buildings:state.buildings.map(b=>b.type),tab:state.tab,
- unlocked:state.unlocked,concept:CONCEPTS[state.concept].key,conceptIndex:state.concept,step:state.step,selected:state.selected,taken:state.taken,served:[...state.served],planksPlaced:[...state.planksPlaced],phase:state.view,attempts:state.attempts,hints:state.hints,flagged:state.flagged,task:{...current()},results:state.results.map(x=>({...x})),review:state.review?{...state.review}:null
+ unlocked:state.unlocked,gatherOrder:{...gather},concept:CONCEPTS[state.concept].key,conceptIndex:state.concept,step:state.step,selected:state.selected,taken:state.taken,served:[...state.served],planksPlaced:[...state.planksPlaced],phase:state.view,attempts:state.attempts,hints:state.hints,flagged:state.flagged,task:{...current()},results:state.results.map(x=>({...x})),review:state.review?{...state.review}:null
 }),configurable:false});
 })();
