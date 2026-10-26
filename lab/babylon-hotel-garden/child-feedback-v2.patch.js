@@ -212,7 +212,7 @@ window.__ulmoaGardenV2={
  const touch=false,button=document.querySelector('[data-action="talk"]');
  if(touch&&button){button.dispatchEvent(new PointerEvent("pointerdown",{bubbles:true,pointerType:"touch"}))}
  else document.dispatchEvent(new KeyboardEvent("keydown",{bubbles:true,code:"KeyE",key:"e"}));
- await new Promise(r=>setTimeout(r,1250));
+ await new Promise(r=>setTimeout(r,2000));
  if(touch&&button){button.dispatchEvent(new PointerEvent("pointerup",{bubbles:true,pointerType:"touch"}))}
  else document.dispatchEvent(new KeyboardEvent("keyup",{bubbles:true,code:"KeyE",key:"e"}));
  return !__hgFlowers.has(boss);
