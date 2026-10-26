@@ -1028,6 +1028,30 @@ async function heartV2Smoke(){
 }
 await heartV2Smoke();
 
+
+async function heartV3Smoke(){
+ const context=await browser.newContext({viewport:{width:390,height:844}});
+ const page=await context.newPage(),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ const response=await page.goto(ROOT+'/boomwhacker/heart-playalong-v3/',{waitUntil:'networkidle'});
+ check(response?.ok(),'heartV3: separate preview route must load');
+ check(await page.locator('#score').count()===1,'heartV3: score canvas missing');
+ check(await page.locator('#song option').count()>=8,'heartV3: original score collection did not load');
+ const assets=await page.evaluate(async()=>Promise.all(['forest','night','classroom','heart','note-icon'].map(async n=>{
+  const response=await fetch('./assets/'+n+'.svg');return {name:n,ok:response.ok,svg:(await response.text()).includes('<svg')}
+ })));
+ check(assets.every(x=>x.ok&&x.svg),'heartV3: missing modular illustration SVG '+JSON.stringify(assets));
+ await page.locator('[data-theme="forest"]').click();
+ await page.locator('#play').click();await page.waitForTimeout(200);
+ check((await page.locator('#play').textContent()).includes('일시정지'),'heartV3: audio transport start failed');
+ await page.locator('#play').click();
+ await page.screenshot({path:out+'/heartV3-mobile-390.png',fullPage:true});
+ check(errors.length===0,'heartV3: runtime errors '+errors.join('; '));
+ report.push({name:'heartV3Preview',assets,errors});
+ await context.close();
+}
+await heartV3Smoke();
+
 await browser.close();
 fs.writeFileSync(`${out}/report.json`,JSON.stringify({failures,report},null,2));
 console.log(JSON.stringify({failures,report},null,2));
