@@ -216,4 +216,5 @@ md.push('','## 차단 오류');if(failures.length)md.push(...failures.map(x=>'- 
 fs.writeFileSync(path.join(OUT,'report.md'),md.join('\n')+'\n');
 console.log(JSON.stringify({profiles:PROFILES.length,games:34,scenarios:rows.length,
  loaded:report.loaded,blockingFailures:failures.length,issues:byType},null,2));
+console.log('PERSONA-FINDINGS '+JSON.stringify(issues));
 if(failures.length){console.error('PERSONA 34 SIMULATION FAIL '+JSON.stringify(failures.slice(0,24)));process.exitCode=1;}
