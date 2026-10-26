@@ -4,7 +4,7 @@
   "steps": [
     {
       "label": "start",
-      "time": "2026-10-22T13:40:25.929Z",
+      "time": "2026-10-26T12:29:03.449Z",
       "stage": 0,
       "player": [
         -18,
@@ -32,7 +32,7 @@
     },
     {
       "label": "gardener",
-      "time": "2026-10-22T13:40:29.586Z",
+      "time": "2026-10-26T12:29:07.784Z",
       "stage": 1,
       "player": [
         -14.86,
@@ -60,11 +60,11 @@
     },
     {
       "label": "woods encounter",
-      "time": "2026-10-22T13:40:58.688Z",
+      "time": "2026-10-26T12:29:41.059Z",
       "stage": 2,
       "player": [
-        15.31,
-        17.63
+        15.29,
+        17.58
       ],
       "woods": {
         "enabled": true,
@@ -88,11 +88,11 @@
     },
     {
       "label": "woods defeated",
-      "time": "2026-10-22T13:41:14.442Z",
+      "time": "2026-10-26T12:29:57.587Z",
       "stage": 3,
       "player": [
-        15.92,
-        14.31
+        16.09,
+        14.6
       ],
       "woods": {
         "enabled": false,
@@ -116,11 +116,11 @@
     },
     {
       "label": "woods flower",
-      "time": "2026-10-22T13:41:16.042Z",
+      "time": "2026-10-26T12:29:59.205Z",
       "stage": 3,
       "player": [
-        15.92,
-        14.31
+        16.09,
+        14.6
       ],
       "woods": {
         "enabled": false,
@@ -144,11 +144,11 @@
     },
     {
       "label": "pond keeper",
-      "time": "2026-10-22T13:41:32.784Z",
+      "time": "2026-10-26T12:30:16.167Z",
       "stage": 4,
       "player": [
-        3.31,
-        -4.37
+        3.32,
+        -4.29
       ],
       "woods": {
         "enabled": false,
@@ -169,15 +169,144 @@
       "lotus": 1,
       "bucket": false,
       "mission": "⑤ EYE 추격을 피하고 빈틈에 F 베기 3번"
+    },
+    {
+      "label": "EYE approached by keyboard",
+      "time": "2026-10-26T12:30:25.894Z",
+      "stage": 4,
+      "player": [
+        19.35,
+        -15.62
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 2,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": true,
+        "hits": 0,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": false,
+        "mode": "approach",
+        "cycle": 0,
+        "damage": 0
+      },
+      "lotus": 1,
+      "bucket": false,
+      "mission": "⑤ 지금 빈틈! F 베기"
+    },
+    {
+      "label": "eye defeated",
+      "time": "2026-10-26T12:30:32.727Z",
+      "stage": 5,
+      "player": [
+        19.35,
+        -15.62
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 2,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 3,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": false,
+        "mode": "approach",
+        "cycle": 0,
+        "damage": 0
+      },
+      "lotus": 1,
+      "bucket": false,
+      "mission": "⑥ 여행객에게 가서 E 말걸기"
+    },
+    {
+      "label": "eye flower",
+      "time": "2026-10-26T12:30:36.073Z",
+      "stage": 5,
+      "player": [
+        19.35,
+        -15.62
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 2,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 3,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": false,
+        "mode": "approach",
+        "cycle": 0,
+        "damage": 0
+      },
+      "lotus": 1,
+      "bucket": false,
+      "mission": "⑥ 여행객에게 가서 E 말걸기"
+    },
+    {
+      "label": "traveler bucket",
+      "time": "2026-10-26T12:31:06.170Z",
+      "stage": 6,
+      "player": [
+        -1.86,
+        14.08
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 2,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 3,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": true,
+        "mode": "approach",
+        "cycle": 0,
+        "damage": 0
+      },
+      "lotus": 1,
+      "bucket": true,
+      "mission": "⑦ 1/3 · SMOG 가까이 가서 변화 관찰"
     }
   ],
-  "errors": [],
-  "httpErrors": [],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()"
+  ],
+  "httpErrors": [
+    {
+      "status": 404,
+      "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/uvAttributeDeclaration.fx"
+    },
+    {
+      "status": 404,
+      "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/uvAttributeDeclaration.fx"
+    },
+    {
+      "status": 404,
+      "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/uvAttributeDeclaration.fx"
+    }
+  ],
   "networkFailures": [],
   "pass": false,
   "gardener": {
     "near": true,
-    "pulses": 11,
+    "pulses": 13,
     "last": {
       "stage": 0,
       "patch": "2026-10-12-child-feedback-v1",
@@ -211,13 +340,13 @@
   },
   "woodsArrival": {
     "near": false,
-    "pulses": 58,
+    "pulses": 65,
     "last": {
       "stage": 1,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        15.31,
-        17.63
+        15.29,
+        17.58
       ],
       "woods": {
         "enabled": true,
@@ -247,13 +376,13 @@
   "woodsFlower": true,
   "pondArrival": {
     "near": true,
-    "pulses": 38,
+    "pulses": 40,
     "last": {
       "stage": 3,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        3.31,
-        -4.37
+        3.32,
+        -4.29
       ],
       "woods": {
         "enabled": false,
@@ -279,6 +408,76 @@
       ]
     }
   },
-  "error": "TimeoutError: Waiting failed: 23000ms exceeded",
-  "generatedAt": "2026-10-22T13:41:57.566Z"
+  "eyeArrival": {
+    "near": true,
+    "pulses": 21,
+    "last": {
+      "stage": 4,
+      "patch": "2026-10-12-child-feedback-v1",
+      "player": [
+        19.35,
+        -15.62
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 2,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": true,
+        "hits": 0,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": false,
+        "mode": "approach",
+        "cycle": 0,
+        "damage": 0
+      },
+      "lotus": 1,
+      "bucket": false,
+      "map": [
+        90,
+        72
+      ]
+    }
+  },
+  "eyeWon": true,
+  "eyeFlower": false,
+  "travelerArrival": {
+    "near": true,
+    "pulses": 63,
+    "last": {
+      "stage": 5,
+      "patch": "2026-10-12-child-feedback-v1",
+      "player": [
+        -1.86,
+        14.08
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 2,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 3,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": false,
+        "mode": "approach",
+        "cycle": 0,
+        "damage": 0
+      },
+      "lotus": 1,
+      "bucket": false,
+      "map": [
+        90,
+        72
+      ]
+    }
+  },
+  "error": "Error: SMOG cannot approach cycle 1",
+  "generatedAt": "2026-10-26T12:31:29.611Z"
 }

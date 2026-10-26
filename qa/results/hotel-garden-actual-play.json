@@ -3,7 +3,7 @@
   "steps": [
     {
       "step": "started",
-      "time": "2026-10-22T13:36:49.768Z",
+      "time": "2026-10-26T12:27:49.312Z",
       "state": {
         "stage": 0,
         "patch": "2026-10-12-child-feedback-v1",
@@ -38,13 +38,13 @@
     },
     {
       "step": "gardener talk",
-      "time": "2026-10-22T13:36:55.072Z",
+      "time": "2026-10-26T12:27:55.341Z",
       "state": {
         "stage": 1,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          -14.91,
-          -2.96
+          -14.59,
+          -2.54
         ],
         "woods": {
           "enabled": true,
@@ -73,13 +73,13 @@
     },
     {
       "step": "WOODS encounter",
-      "time": "2026-10-22T13:37:46.041Z",
+      "time": "2026-10-26T12:28:40.885Z",
       "state": {
         "stage": 2,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          15.13,
-          17.66
+          15.19,
+          17.33
         ],
         "woods": {
           "enabled": true,
@@ -108,7 +108,7 @@
     },
     {
       "step": "WOODS real Q traps",
-      "time": "2026-10-22T13:38:02.151Z",
+      "time": "2026-10-26T12:28:57.039Z",
       "state": {
         "stage": 2,
         "patch": "2026-10-12-child-feedback-v1",
@@ -143,7 +143,7 @@
     },
     {
       "step": "WOODS actual hold E",
-      "time": "2026-10-22T13:38:04.328Z",
+      "time": "2026-10-26T12:28:59.140Z",
       "state": {
         "stage": 3,
         "patch": "2026-10-12-child-feedback-v1",
@@ -178,16 +178,29 @@
     }
   ],
   "errors": [],
-  "http": [],
+  "http": [
+    {
+      "status": 404,
+      "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/uvAttributeDeclaration.fx"
+    },
+    {
+      "status": 404,
+      "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/uvAttributeDeclaration.fx"
+    },
+    {
+      "status": 404,
+      "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/src/Shaders/ShadersInclude/uvAttributeDeclaration.fx"
+    }
+  ],
   "gardener": {
     "near": true,
-    "iterations": 10,
+    "iterations": 11,
     "last": {
       "stage": 0,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        -14.91,
-        -2.96
+        -14.59,
+        -2.54
       ],
       "woods": {
         "enabled": false,
@@ -215,13 +228,13 @@
   },
   "woods": {
     "near": false,
-    "iterations": 95,
+    "iterations": 84,
     "last": {
       "stage": 1,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        15.13,
-        17.66
+        15.19,
+        17.33
       ],
       "woods": {
         "enabled": true,
@@ -248,6 +261,6 @@
     }
   },
   "hits": 2,
-  "pass": true,
-  "generatedAt": "2026-10-22T13:38:06.144Z"
+  "pass": false,
+  "generatedAt": "2026-10-26T12:29:00.566Z"
 }
