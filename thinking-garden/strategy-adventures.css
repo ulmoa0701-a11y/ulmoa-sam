@@ -94,3 +94,24 @@
  .strategy-outcome-success .strategy-win-festival{animation:strategy-earn .28s ease-out both}
  @keyframes strategy-earn{from{opacity:.5;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 }
+
+
+/* Multi-age / motor-access QA 2026-10-26:
+   The adult's teacher-cue control appeared only 21px tall in three quests.
+   Keep this optional clinician UI comfortable without changing game logic. */
+.strategy-quest .strategy-teacher summary{
+  display:flex;align-items:center;min-height:44px;box-sizing:border-box;
+  padding:8px 12px;border-radius:11px;
+}
+.strategy-quest .strategy-teacher [data-core="teacher-cue"]{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:44px;min-width:116px;box-sizing:border-box;
+  padding:9px 16px;margin:4px 0;
+  border:2px solid #91bfa2;border-radius:12px;
+  background:#eff9ef;color:#2e6449;font-size:14px;font-weight:800;
+  cursor:pointer;touch-action:manipulation;
+}
+.strategy-quest .strategy-teacher [data-core="teacher-cue"]:focus-visible,
+.strategy-quest .strategy-teacher summary:focus-visible{
+  outline:3px solid #bb8b2a;outline-offset:3px;
+}
