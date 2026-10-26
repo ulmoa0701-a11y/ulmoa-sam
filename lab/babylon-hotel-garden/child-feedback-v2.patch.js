@@ -209,7 +209,7 @@ window.__ulmoaGardenV2={
  holdPickup:async(boss)=>{
  const node=__hgFlowers.get(boss);if(!node)return false;
  Rp.position.copyFrom(node.position.add(new R(-1.3,0,0)));
- const touch=boss==="eye",button=document.querySelector('[data-action="talk"]');
+ const touch=false,button=document.querySelector('[data-action="talk"]');
  if(touch&&button){button.dispatchEvent(new PointerEvent("pointerdown",{bubbles:true,pointerType:"touch"}))}
  else document.dispatchEvent(new KeyboardEvent("keydown",{bubbles:true,code:"KeyE",key:"e"}));
  await new Promise(r=>setTimeout(r,1250));
