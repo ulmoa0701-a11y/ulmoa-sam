@@ -79,13 +79,13 @@ async function playEye(){
    const m=document.querySelector('#mission')?.textContent||'';
    return m.includes('가지 공격 준비!')||m.includes('지금 빈틈')||document.querySelector('#dialog')?.classList.contains('show');
   },{timeout:23000});
-  if(await modal())break;
+  if(await modal()){await nextDialog();continue}
   if((await page.$eval('#mission',e=>e.textContent)).includes('가지 공격 준비!'))await page.keyboard.press('Space');
   await page.waitForFunction(()=>document.querySelector('#mission')?.textContent.includes('지금 빈틈')||document.querySelector('#dialog')?.classList.contains('show'),{timeout:10000});
-  if(await modal())break;
+  if(await modal()){await nextDialog();continue}
   await page.keyboard.press('f');await wait(400);
   hits=(await state()).eye.hits;
-  if(await modal())break;
+  if(await modal()){await nextDialog();if((await state()).stage===5)break;continue}
  }
  const defeated=(await state()).eye.hits===3;
  if(await modal())await nextDialog();
@@ -117,6 +117,8 @@ try{
  report.woodsWon=await playWoods();await record('woods defeated');
  report.woodsFlower=await pickFlower();await record('woods flower');
  report.pondArrival=await walkTo(4,-8,4.0,65000);await page.keyboard.press('e');await nextDialog();await record('pond keeper');
+ report.eyeArrival=await walkTo(24,-15,4.8,65000);
+ await record('EYE approached by keyboard');
  report.eyeWon=await playEye();await record('eye defeated');
  report.eyeFlower=await pickFlower();await record('eye flower');
  report.travelerArrival=await walkTo(-2,18,4.0,65000);await page.keyboard.press('e');await nextDialog();await record('traveler bucket');
