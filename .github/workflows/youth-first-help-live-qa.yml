@@ -24,18 +24,35 @@ jobs:
           CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           test -n "$CHROME_BIN"
           echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
-      - name: Wait for the public Pages release
+      - name: Wait for exact deployed release assets
         shell: bash
         run: |
-          URL="https://ulmoa0701-a11y.github.io/ulmoa-sam/support-first/me/"
-          for n in $(seq 1 45); do
-            if curl --retry 2 -fsSL "$URL?qa=$GITHUB_SHA" -o /tmp/youth-first-live.html && grep -Fq 'id="print-safe-body"' /tmp/youth-first-live.html; then
-              echo "Public page includes privacy-safe printing markup"
+          set -euo pipefail
+          BASE="https://ulmoa0701-a11y.github.io/ulmoa-sam/"
+          # A marker in HTML can already exist in an OLD release. Compare
+          # actual bytes of all relevant files to the checked-out commit.
+          FILES=(support-first/me/index.html support-first/me/myself.css support-first/me/myself.js)
+          for attempt in $(seq 1 45); do
+            all_ready=1
+            for path in "${FILES[@]}"; do
+              expected="$(sha256sum "$path" | cut -d ' ' -f 1)"
+              downloaded="$(mktemp)"
+              if curl --retry 2 -fsSL "${BASE}${path}?qa=${GITHUB_SHA}-${attempt}" -o "$downloaded"; then
+                actual="$(sha256sum "$downloaded" | cut -d ' ' -f 1)"
+                if [ "$actual" != "$expected" ]; then all_ready=0; fi
+              else
+                all_ready=0
+              fi
+              rm -f "$downloaded"
+            done
+            if [ "$all_ready" = 1 ]; then
+              echo "All three public assets match current checkout: ${GITHUB_SHA}"
               exit 0
             fi
+            echo "Public assets still updating (attempt ${attempt}/45)"
             sleep 8
           done
-          echo "::error::Public Pages content was not updated in time"
+          echo "::error::Public Pages files do not yet match the commit under test"
           exit 1
       - name: Chromium mobile and desktop QA on live public site
         env:
