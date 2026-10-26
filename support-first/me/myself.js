@@ -38,6 +38,11 @@ const answers=chapters.map(()=>({choice:null,detail:null,own:"",sent:false}));
 const disclose={interest:false,concern:false,moment:false,support:false,wish:false};
 const discloseNotes={interest:false,concern:false,moment:false,support:false,wish:false};
 let step=0,freeEdited=false;
+function withdrawDisclosure(index){
+ const id=chapters[index].id;
+ disclose[id]=false;
+ discloseNotes[id]=false;
+}
 const $=id=>document.getElementById(id);
 function iconHTML(key) {
  // Inline SVG with icons as paths: distinctive editorial graphics, not childish emoji.
@@ -84,8 +89,9 @@ function buttonFor([key,title,icon,tone],chapter){
  button.append(art,txt);
  button.addEventListener("click",()=>{
   const old=answers[step].choice;
+  withdrawDisclosure(step);
   answers[step]={choice:old===key?null:key,detail:null,own:"",sent:false};
-  if(step===1&&old!==key){answers[2]={choice:null,detail:null,own:"",sent:false};}
+  if(step===1&&old!==key){answers[2]={choice:null,detail:null,own:"",sent:false};withdrawDisclosure(2);}
   showReply();
  });
  return button;
@@ -128,7 +134,15 @@ function replyText(){
 function showReply(){
  const conf=config(step),answer=answers[step],item=conf.choices.find(x=>x[0]===answer.choice);
  document.querySelectorAll(".option").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.option===answer.choice)));
- $("reply-flow").hidden=!item;$("deeper").hidden=!item;
+ const isUnsure=answer.choice==="unsure";
+ $("unsure").setAttribute("aria-pressed",String(isUnsure));
+ $("reply-flow").hidden=!item&&!isUnsure;$("deeper").hidden=!item;
+ if(isUnsure){
+  $("my-reply").textContent="아직 잘 모르겠어";
+  $("moa-reaction").textContent="알겠어. 오늘 바로 정하지 않아도 돼.";
+  $("typed-exchange").hidden=true;
+  return;
+ }
  if(!item){$("typed-exchange").hidden=true;return;}
  $("my-reply").textContent=item[1];$("moa-reaction").textContent=replyText();
  const info=followups[chapters[step].id];
@@ -138,6 +152,7 @@ function showReply(){
   const b=document.createElement("button");b.type="button";b.className="reason";b.dataset.reason=String(i);
   b.textContent=text;b.setAttribute("aria-pressed",String(answer.detail===i));
   b.addEventListener("click",()=>{
+   withdrawDisclosure(step);
    answer.detail=answer.detail===i?null:i;
    reasons.querySelectorAll("button").forEach(z=>z.setAttribute("aria-pressed",String(Number(z.dataset.reason)===answer.detail)));
    $("moa-followup").textContent=answer.detail===null?"":"고른 내용을 그대로 적어둘게. 자세한 이야기는 나중에 해도 괜찮아.";
@@ -159,7 +174,7 @@ function paint(focus=false){
  $("scene-heading").textContent=data.title;$("scene-narrative").textContent=data.scene;
  $("scene-tag").textContent=data.tag;$("question").textContent=data.question;
  $("question-help").textContent=data.help;
- $("moa-prompt").textContent=step===2&&activeConcern()?"아까 ‘"+label("concern",activeConcern())+"’이라고 골랐지. 무엇이 가장 어려운 순간인지 하나만 생각해볼까?":data.prompt;
+ $("moa-prompt").textContent=step===2&&concernContexts[activeConcern()]?"아까 ‘"+label("concern",activeConcern())+"’이라고 골랐지. 무엇이 가장 어려운 순간인지 하나만 생각해볼까?":data.prompt;
  $("back").disabled=step===0;
  $("next").innerHTML=step===4?'이야기 정리하기 <span aria-hidden="true">→</span>':'다음 이야기 <span aria-hidden="true">→</span>';
  document.querySelectorAll("[data-progress]").forEach((el,i)=>{el.classList.toggle("on",i===step);el.classList.toggle("done",i<step);});
@@ -175,10 +190,23 @@ function capture(){
 }
 function next(){capture();if(step===4)finish();else{step++;paint(true);}}
 function back(){if(step===0)return;capture();step--;paint(true);}
-function skip(){answers[step]={choice:null,detail:null,own:"",sent:false};$("own-input").value="";if(step===1)answers[2]={choice:null,detail:null,own:"",sent:false};next();}
+function skip(){
+ withdrawDisclosure(step);
+ answers[step]={choice:null,detail:null,own:"",sent:false};
+ $("own-input").value="";
+ if(step===1){answers[2]={choice:null,detail:null,own:"",sent:false};withdrawDisclosure(2);}
+ next();
+}
+function unsure(){
+ const wasUnsure=answers[step].choice==="unsure";
+ withdrawDisclosure(step);
+ answers[step]={choice:wasUnsure?null:"unsure",detail:null,own:"",sent:false};
+ if(step===1){answers[2]={choice:null,detail:null,own:"",sent:false};withdrawDisclosure(2);}
+ showReply();
+}
 function summaryItem(index){
  const answer=answers[index],cfg=config(index),selection=cfg.choices.find(x=>x[0]===answer.choice);
- return {id:chapters[index].id,label:chapters[index].tag.replace(/^\d+ · /,""),selection:selection?.[1]||null,why:answer.detail===null?null:followups[chapters[index].id].choices[answer.detail],own:answer.own.trim()};
+ return {id:chapters[index].id,label:chapters[index].tag.replace(/^\d+ · /,""),selection:selection?.[1]||(answer.choice==="unsure"?"아직 잘 모르겠어":null),why:answer.detail===null?null:followups[chapters[index].id].choices[answer.detail],own:answer.own.trim()};
 }
 function renderPreview(){
  const selected=chapters.map((c,i)=>summaryItem(i)).filter(it=>disclose[it.id]);
@@ -252,9 +280,11 @@ function finish(){
 $("back").addEventListener("click",back);
 $("next").addEventListener("click",next);
 $("skip").addEventListener("click",skip);
+$("unsure").addEventListener("click",unsure);
 $("finish-early").addEventListener("click",finish);
 $("revisit").addEventListener("click",()=>paint(true));
 $("own-input").addEventListener("input",e=>{
+ withdrawDisclosure(step);
  answers[step].own=e.target.value.slice(0,120);
  answers[step].sent=false;$("typed-exchange").hidden=true;
 });
