@@ -71,6 +71,16 @@ for(const width of [390,1280]){
   await check(!(await page.locator('#intro-text').inputValue()).includes('학교 가는 길'),width+'px student free text excluded by default');
   await page.locator('input[data-note="concern"]').check();
   await check((await page.locator('#intro-text').inputValue()).includes('학교 가는 길'),width+'px separately consented free text included');
+  await page.locator('input[data-share="concern"]').uncheck();
+  await check(await page.locator('input[data-note="concern"]').isDisabled(),width+'px note consent disabled after topic withdrawal');
+  await check(!(await page.locator('#intro-text').inputValue()).includes('학교 가는 길'),width+'px withdrawn note no longer present in shared text');
+  await check(!(await page.locator('#print-safe-body').textContent()).includes('학교 가는 길'),width+'px withdrawn note no longer printable');
+  await page.locator('input[data-share="concern"]').check();
+  await check(await page.locator('input[data-note="concern"]').isEnabled(),width+'px note permission available only after topic reselected');
+  await check(!(await page.locator('input[data-note="concern"]').isChecked()),width+'px old note consent not restored silently');
+  await check(!(await page.locator('#intro-text').inputValue()).includes('학교 가는 길'),width+'px unapproved note excluded after reselect');
+  await page.locator('input[data-note="concern"]').check();
+  await check((await page.locator('#intro-text').inputValue()).includes('학교 가는 길'),width+'px explicit new note consent required');
   await page.locator('input[data-share="support"]').check();
   await check((await page.locator('#intro-text').inputValue()).includes('글·선택지'),width+'px requested communication style');
   // Print media must never reveal hidden/unshared notes, choice lists or clinician sections.
@@ -121,10 +131,22 @@ for(const width of [390,1280]){
     await page.locator('button[data-option="'+expected+'"]').click();
     const selectedLabel=await page.locator('button[data-option="'+expected+'"] .option-label').textContent();
     await check((await page.locator('#moa-reaction').textContent()).includes(selectedLabel),width+'px grounded Moa reaction '+topic);
+    const extra={school:'더 편하게',people:'생각할 시간',feeling:'잠과 기분',daily:'필요한 도움'}[topic];
+    await check((await page.locator('#moa-reaction').textContent()).includes(extra),width+'px specific non-diagnostic reflection '+topic);
     await page.locator('#next').click();
     await page.locator('#skip').click();
     await page.locator('#skip').click();
     await check(await page.locator('#result').isVisible(),width+'px branch '+topic+' completes without forced text');
+    if(topic==='people'){
+      await page.locator('#revisit').click();
+      await page.locator('#back').click();
+      await page.locator('#back').click();
+      await page.locator('#back').click();
+      await page.locator('button[data-option="school"]').click();
+      await page.locator('#next').click();
+      await check((await page.locator('#question').innerText()).includes('학교'),width+'px changing concern adjusts follow-up context');
+      await check(await page.locator('button.option[aria-pressed="true"]').count()===0,width+'px previous context answer erased after changing concern');
+    }
   }
   await page.goto(new URL('support-first/make/',BASE).href,{waitUntil:'domcontentloaded'});
   await check(await page.locator('a[href="../me/"]').count()>=1,width+'px: workshop links back to self discovery');
