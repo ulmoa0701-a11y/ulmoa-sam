@@ -98,7 +98,7 @@ try{
   assert.equal((await status(page)).acorns,0);
   assert.equal((await status(page)).berries,0);
   await page.locator('[data-tab="gather"]').click();
-  await page.locator('[data-gather="next"]').click();
+  await page.locator('#panelGather [data-gather="next"]').click();
   assert.equal((await status(page)).gatherOrder.round,1,'next request must exist');
   assert.match(await page.locator('#gatherGuide').textContent(),/도토리 3개, 딸기 2개/);
   // Original quest QA starts with a truly empty save.
