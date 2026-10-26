@@ -36,6 +36,12 @@ try{
    const url=new URL(await page.locator('#habomFeedbackFrame').getAttribute('src'));
    assert.equal(url.hostname,'form.jotform.com');
    assert.equal(url.searchParams.get('q2_textbox0'),name,'Incorrect game auto context '+route);
+   if(vp.width===390&&route==='/thinking-garden/?game=memory'){
+    const actualForm=page.frameLocator('#habomFeedbackFrame');
+    await actualForm.locator('#input_2').waitFor({state:'visible',timeout:20000});
+    assert.equal(await actualForm.locator('#input_2').inputValue(),name,'Game title was not actually filled in embedded Jotform');
+    assert.ok(await actualForm.locator('input[type=radio]').count()>=7,'Quick category choices missing in embedded form');
+   }
    assert.ok(await page.locator('#habomFeedbackExternal').getAttribute('href'));
    await page.keyboard.press('Escape');
    assert.equal(await page.locator('#habomFeedbackBackdrop').isVisible(),false,'Escape should close '+route);
