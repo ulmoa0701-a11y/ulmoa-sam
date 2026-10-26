@@ -89,7 +89,7 @@ footer a{color:#627e6c}
 @media(max-width:720px){.handoff-select{grid-template-columns:1fr}.welcome-note{gap:11px}.welcome-note p{font-size:.83rem}.quiet-finish{font-size:.77rem;padding:7px 9px}}
 @media(max-width:420px){.welcome-note{padding:11px 12px;flex-wrap:wrap}.quiet-finish{margin-left:auto;min-height:35px}.welcome-note p{flex-basis:calc(100% - 30px)}.handoff-select{gap:7px}.handoff-row{padding:10px 12px}.handoff-option{font-size:.8rem}.result-head h1{font-size:1.5rem}}
 @media print{.welcome-note,.handoff-select,.summary-empty,.clinician-guide,.discovery-toggle{display:none!important} .result{display:block!important}}
-\n
+
 /* Student-controlled disclosure: print ONLY the explicitly selected, editable handoff. */
 .print-safe{display:none}
 .privacy-details{font-size:.77rem;max-width:730px;margin:9px auto 0;color:#587169}
