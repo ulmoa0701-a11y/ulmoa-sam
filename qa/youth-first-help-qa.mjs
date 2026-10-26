@@ -51,6 +51,7 @@ for(const width of [390,1280]){
   await check((await page.locator('#question').innerText()).includes('학교'),width+'px school specific context branch');
   await check(await page.locator('button[data-option="enter"]').count()===1,width+'px entering-classroom choice');
   await page.locator('button[data-option="enter"]').click();
+  await check((await page.locator('#moa-reaction').innerText()).includes('교실'),width+'px classroom-specific Moa response');
   await page.locator('#next').click();
   await check((await page.locator('#question').innerText()).includes('편'),width+'px support preferences');
   await page.locator('button[data-option="text"]').click();
@@ -104,9 +105,9 @@ for(const width of [390,1280]){
   await check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),width+'px intake result no horizontal overflow');
   // Realistic non-school intake routes: peer relations, mood/energy, daily life.
   const concernRoutes=[
-    {id:'people',word:'사람들과',option:'reply'},
-    {id:'feeling',word:'기분이나 에너지가',option:'night'},
-    {id:'daily',word:'일상에서',option:'change'},
+    {id:'people',word:'사람들과',option:'reply',moa:'질문에 답할 때'},
+    {id:'feeling',word:'기분이나 에너지가',option:'night',moa:'저녁이나 잠들기 전'},
+    {id:'daily',word:'일상에서',option:'change',moa:'예상과 달라졌을 때'},
   ];
   for(const route of concernRoutes){
     await page.reload({waitUntil:'domcontentloaded'});
@@ -116,6 +117,7 @@ for(const width of [390,1280]){
     await check((await page.locator('#question').innerText()).includes(route.word),width+'px branch question '+route.id);
     await check(await page.locator('button[data-option="'+route.option+'"]').count()===1,width+'px contextual answer '+route.id);
     await page.locator('button[data-option="'+route.option+'"]').click();
+    await check((await page.locator('#moa-reaction').innerText()).includes(route.moa),width+'px topic-specific Moa response '+route.id);
     await page.locator('#back').click();
     await page.locator('button[data-option="school"]').click();
     await page.locator('#next').click();
