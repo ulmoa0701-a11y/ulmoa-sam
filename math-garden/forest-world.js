@@ -124,7 +124,7 @@ function say(k,t){$('kicker').textContent=k;$('instruction').textContent=t}
 function progress(){ $('chapters').innerHTML=CONCEPTS.map((x,i)=>'<span class="chapter-dot '+(i<state.unlocked?'completed':i===state.unlocked?'active':'')+'" title="'+x.short+'">'+(i+1)+'</span>').join('') }
 function scene(t){play.innerHTML=t}
 function stepAction(action,body,label='',extra=''){return '<button type="button" data-mission="'+action+'" '+extra+' class="'+(action==='submit'||action==='continue'?'btn action':'interaction')+'" aria-label="'+esc(label)+'">'+body+'</button>'}
-function helpButton(show=true){$('help').hidden=!show;$('change').hidden=!show}
+function helpButton(show=true){$('help').hidden=!show||state.view!=='task';$('change').hidden=!show}
 function resetConcept(i){
  clearTimeout(state.timer);Object.assign(state,{concept:i,step:0,selected:0,taken:0,served:[],planksPlaced:[],attempts:0,hints:0,flagged:false,locked:false,view:'game',results:[],review:null});
  $('missionTitle').textContent=CONCEPTS[i].title;helpButton(true);progress();draw();
@@ -141,7 +141,7 @@ function showMap(){
   if(st==='locked')return '<div class="map-node locked" aria-hidden="true">'+badge+label+'</div>';
   return '<button type="button" data-mission="travel-to" data-node="'+i+'" class="map-node interaction '+st+'" aria-label="'+esc(cpt.name+' 으로 이동')+'">'+badge+label+check+'</button>';
  }).join('<div class="map-connector" aria-hidden="true"></div>');
- scene('<div class="overworld">'+(allDone?'<p class="overworld-complete">세 숲길을 모두 걸었어요! 다시 놀러 가 볼까?</p>':'')+'<div class="map-path">'+nodes+'</div></div>');
+ scene('<div class="overworld">'+(allDone?'<p class="overworld-complete">일곱 숲길을 모두 걸었어요! 다시 놀러 가 볼까?</p>':'')+'<div class="map-path">'+nodes+'</div></div>');
 }
 function travelBeat(){
  state.view='travel';helpButton(false);
@@ -237,16 +237,20 @@ function flashFeedback(ok){
  clearTimeout(flashTimer);
  flashTimer=setTimeout(()=>{feedbackFlash.className='feedback-flash'},650);
 }
-function feedback(isCorrect){
- flashFeedback(isCorrect);
- const x=current(),key=CONCEPTS[state.concept].key,dKey=x.mech||key;
- if(isCorrect){state.locked=true;sfx(true);
-  const clean=x.kind!=='guided'&&x.kind!=='demo'&&!state.flagged&&state.attempts===0&&state.hints===0;
-  state.results.push({kind:x.kind,clean,concept:key});
-  if(x.kind==='guided')setStatus('잘했어. 이제 혼자 해볼 차례야.');else if(clean)setStatus('이번에는 혼자 해결했어!');else setStatus('도움을 받고 해결했어. 다음에는 새로 해볼 수 있어.');
+/* Pure result rendering: reloading a solved step never records it or awards it twice. */
+function successScene(x,dKey){
   const outcome=dKey==='compare'?'숲길이 반짝 열렸어!':dKey==='share'?'모두 간식을 받았어!':dKey==='bridge'?'다리가 다시 이어졌어!':dKey==='shop'?'여우가 활짝 웃었어요!':dKey==='transform'?'모양이 달라도 똑같은 수야!':'꽃밭에 꽃이 피었어!';
   const story=dKey==='share'?'<div class="success-line">'+Array.from({length:x.n},(_,i)=>'<div class="served">'+friend(x.animal,i,true)+unit(x.fruit,true)+'</div>').join('')+'</div>':dKey==='compare'?'<div class="open-gate"></div>':dKey==='bridge'?'<div class="bridge-stage solved"><div class="plank-dock">'+x.pieces.map((len,i)=>state.planksPlaced.includes(i)?'<span class="plank plank-'+len+' '+(x.material==='mossy'?'mossy':'')+'" aria-hidden="true"></span>':'').join('')+'</div></div>':dKey==='shop'?'<div class="shop-counter"><div class="served">'+friend(x.customer,0,true)+'</div></div>':dKey==='transform'?groupVisual(x.ref.count,x.ref.fruit,'cluster'):'<div class="make-board">'+Array.from({length:x.total},()=>dot(true,x.fruit)).join('')+'</div>';
   scene('<div class="success"><h2>'+outcome+'</h2>'+story+'<p>다음 장소가 기다리고 있어!</p>'+stepAction('advance',ICONS.arrowRight+srLabel('계속 탐험'),'다음 놀이로 이동')+'</div>');
+}
+function feedback(isCorrect){
+ flashFeedback(isCorrect);
+ const x=current(),key=CONCEPTS[state.concept].key,dKey=x.mech||key;
+ if(isCorrect){state.locked=true;state.view='success';sfx(true);
+  const clean=x.kind!=='guided'&&x.kind!=='demo'&&!state.flagged&&state.attempts===0&&state.hints===0;
+  state.results.push({kind:x.kind,clean,concept:key});
+  if(x.kind==='guided')setStatus('잘했어. 이제 혼자 해볼 차례야.');else if(clean)setStatus('이번에는 혼자 해결했어!');else setStatus('도움을 받고 해결했어. 다음에는 새로 해볼 수 있어.');
+  successScene(x,dKey);
   return
  }
  state.attempts++;state.flagged=true;sfx(false);
@@ -256,8 +260,8 @@ function feedback(isCorrect){
  const slot=$('feedbackSlot');if(slot){slot.innerHTML='<div class="feedback-error">'+xtext+'</div>'+(state.attempts>=scaffoldAt?'<div class="scaffold">'+renderPairing(x,dKey)+'</div>':'');}
  if(state.attempts>=scaffoldAt)state.hints++;
 }
-function assess(){const r=state.results.filter(z=>z.kind==='probe'||z.kind==='transfer');const clean=r.filter(z=>z.clean),transfer=r.find(z=>z.kind==='transfer');
- return {independent:clean.length,transfer:!!transfer?.clean,attempted:r.length,supported:state.results.length-clean.length,criteriaMet:clean.length>=2&&!!transfer?.clean}
+function assess(){const r=state.results.filter(z=>z.kind==='probe'||z.kind==='transfer');const clean=r.filter(z=>z.clean),transfer=r.some(z=>z.kind==='transfer'&&z.clean);
+ return {independent:clean.length,transfer,attempted:r.length,supported:state.results.length-clean.length,criteriaMet:clean.length>=2&&transfer}
 }
 function advance(){
  clearTimeout(state.timer);state.locked=false;state.selected=0;state.taken=0;state.served=[];state.planksPlaced=[];state.attempts=0;state.hints=0;state.flagged=false;
@@ -304,7 +308,7 @@ function questHandle(act,el){
   sfx(true);draw();return;
  }
  if(act==='submit'){
-  if(dKey==='share'){const needed=x.n-state.served.length;if(state.selected===needed){state.served=Array.from({length:x.n},(_,i)=>i);state.selected=0;feedback(true)}else feedback(false);return}
+  if(dKey==='share'){const needed=x.n-state.served.length;if(state.selected===needed){state.served=Array.from({length:x.n},(_,i)=>i);state.selected=0;state.flagged=true;feedback(true)}else feedback(false);return}
   if(dKey==='shop'){feedback(state.selected===x.qty);return}
   feedback(state.selected===x.total-x.have);return;
  }
@@ -329,9 +333,9 @@ function questHandle(act,el){
 }
 play.addEventListener('click',e=>{const b=e.target.closest('[data-mission]');if(b){questHandle(b.dataset.mission,b);save()}});
 $('visualHint').addEventListener('click',help);$('help').addEventListener('click',help);
-$('change').addEventListener('click',()=>{if(state.view==='task'||state.view==='demo')chapterEnd()});
+$('change').addEventListener('click',()=>{if(state.view==='task'||state.view==='demo'){showMap();save()}});
 $('help').innerHTML=ICONS.hint+srLabel('그림 힌트');
-$('change').innerHTML=ICONS.shuffle+srLabel('잠깐 다른 놀이');
+$('change').innerHTML=ICONS.mapReturn+srLabel('숲길 지도로 돌아가기');
 
 /* ---------- village content (ported from village.js) ---------- */
 const PALETTE=[
@@ -465,7 +469,8 @@ buildTabbar();
 progress();
 /* Resume mid-quest state (see QUEST_PERSIST_FIELDS) instead of always restarting at the map --
    demo/travel/task are each pure functions of the restored state, safe to re-render directly. */
-if(state.view==='task'&&state.step>0){helpButton(true);draw()}
+if(state.view==='success'){helpButton(false);const x=current();successScene(x,x.mech||CONCEPTS[state.concept].key)}
+else if(state.view==='task'&&state.step>0){helpButton(true);draw()}
 else if(state.view==='demo'){helpButton(true);demo()}
 else if(state.view==='travel'){helpButton(false);travelBeat()}
 else{showMap()}
