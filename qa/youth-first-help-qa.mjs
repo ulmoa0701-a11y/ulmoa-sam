@@ -62,6 +62,8 @@ for(const width of [390,1280]){
   await check(await page.locator('.discovery').count()===5,width+'px five observation facets');
   await check(await page.locator('[data-share]').count()===5,width+'px youth controls handoff subjects');
   await check(await page.locator('#copy').isDisabled(),width+'px default no disclosure');
+  await check(await page.locator('#print').isDisabled(),width+'px default printing disabled');
+  await check((await page.locator('#print-safe-body').textContent())==='',width+'px no printable personal data without consent');
   await check((await page.locator('#intro-text').inputValue())==='',width+'px default blank handoff');
   await page.locator('input[data-share="concern"]').check();
   await check((await page.locator('#intro-text').inputValue()).includes('학교·공부'),width+'px chosen concern reflected');
@@ -71,9 +73,24 @@ for(const width of [390,1280]){
   await check((await page.locator('#intro-text').inputValue()).includes('학교 가는 길'),width+'px separately consented free text included');
   await page.locator('input[data-share="support"]').check();
   await check((await page.locator('#intro-text').inputValue()).includes('글·선택지'),width+'px requested communication style');
+  // Print media must never reveal hidden/unshared notes, choice lists or clinician sections.
+  await check((await page.locator('#print-safe-body').textContent()).includes('학교·공부'),width+'px print contains consented subject');
+  await check(!(await page.locator('#print-safe-body').textContent()).includes('게임하는'),width+'px print excludes unshared interest');
+  await page.locator('.clinician-guide summary').click();
+  await page.locator('.discovery-toggle summary').click();
+  await page.emulateMedia({media:'print'});
+  await check(await page.locator('#print-safe').isVisible(),width+'px safe print document visible');
+  await check(await page.locator('#handoff-select').isHidden(),width+'px hidden checkbox labels in print');
+  await check(await page.locator('.clinician-guide').isHidden(),width+'px hidden clinician guidance in print');
+  await check(await page.locator('.discovery-toggle').isHidden(),width+'px hidden unshared reflection in print');
+  await check(await page.locator('.welcome-note').isHidden(),width+'px hidden starting note in print');
+  await page.emulateMedia({media:'screen'});
+  await page.locator('.clinician-guide summary').click();
+  await page.locator('.discovery-toggle summary').click();
   await page.screenshot({path:path.join(out,'myself-story-'+width+'.png'),fullPage:true});
   await page.locator('#intro-text').fill('먼저 문자로 얘기하고 싶어요.');
   await check((await page.locator('#intro-text').inputValue()).includes('먼저 문자'),width+'px student edits disclosure');
+  await check((await page.locator('#print-safe-body').textContent()).includes('먼저 문자'),width+'px print reflects student-edited summary');
   await page.locator('#rebuild').click();
   await check((await page.locator('#intro-text').inputValue()).includes('학교·공부'),width+'px explicit reset to selected fields');
   await page.locator('#copy').click();
@@ -92,7 +109,23 @@ for(const width of [390,1280]){
   for(let i=0;i<5;i++)await page.locator('#skip').click();
   await check(await page.locator('#result').isVisible(),width+'px all consultation prompts optional');
   await check((await page.locator('#intro-text').inputValue())==='',width+'px no automatic handoff after all skips');
+  await check(await page.locator('#print').isDisabled(),width+'px print remains disabled after all skipped');
   await check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),width+'px intake result no horizontal overflow');
+  // Conversation branches: school attendance, friendship stress, energy and routine.
+  for(const [topic,expected] of [['school','enter'],['people','reply'],['feeling','night'],['daily','change']]){
+    await page.goto(new URL('support-first/me/',BASE).href,{waitUntil:'domcontentloaded'});
+    await page.locator('#skip').click();
+    await page.locator('button[data-option="'+topic+'"]').click();
+    await page.locator('#next').click();
+    await check(await page.locator('button[data-option="'+expected+'"]').count()===1,width+'px context-specific option '+topic);
+    await page.locator('button[data-option="'+expected+'"]').click();
+    const selectedLabel=await page.locator('button[data-option="'+expected+'"] .option-label').textContent();
+    await check((await page.locator('#moa-reaction').textContent()).includes(selectedLabel),width+'px grounded Moa reaction '+topic);
+    await page.locator('#next').click();
+    await page.locator('#skip').click();
+    await page.locator('#skip').click();
+    await check(await page.locator('#result').isVisible(),width+'px branch '+topic+' completes without forced text');
+  }
   await page.goto(new URL('support-first/make/',BASE).href,{waitUntil:'domcontentloaded'});
   await check(await page.locator('a[href="../me/"]').count()>=1,width+'px: workshop links back to self discovery');
   await page.goto(new URL('support-first/try/',BASE).href,{waitUntil:'domcontentloaded'});
