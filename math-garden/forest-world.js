@@ -404,7 +404,7 @@ function buildTabbar(){
   ['quest',ICONS.mapReturn,'숲길 모험'],
   ['pet',ICONS.heart,'반려동물'],
   ['build',ICONS.house,'짓기']
- ].map(([t,icon,label])=>'<button type="button" class="tab-btn" data-tab="'+t+'" aria-pressed="false" aria-label="'+label+'">'+icon+srLabel(label)+'</button>').join('');
+ ].map(([t,icon,label])=>'<button type="button" class="tab-btn" data-tab="'+t+'" aria-pressed="false" aria-label="'+label+'">'+icon+'<span class="tab-label" aria-hidden="true">'+label+'</span></button>').join('');
  $('tabbar').addEventListener('click',e=>{
   const b=e.target.closest('[data-tab]');if(!b)return;
   showTab(b.dataset.tab);
