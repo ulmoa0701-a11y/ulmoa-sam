@@ -29,7 +29,7 @@ jobs:
         run: |
           URL="https://ulmoa0701-a11y.github.io/ulmoa-sam/support-first/me/"
           for n in $(seq 1 45); do
-            if curl --retry 2 -fsSL "$URL?qa=$GITHUB_SHA" | grep -Fq 'id="print-safe-body"'; then
+            if curl --retry 2 -fsSL "$URL?qa=$GITHUB_SHA" -o /tmp/youth-first-live.html && grep -Fq 'id="print-safe-body"' /tmp/youth-first-live.html; then
               echo "Public page includes privacy-safe printing markup"
               exit 0
             fi
