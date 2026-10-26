@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#54846d">
+<title>숫자 숲 현장 사용성 관찰표 | 일단 해봄</title>
+<style>
+:root{color-scheme:light;--ink:#314f41;--leaf:#54846d;--line:#ccd9c5;--paper:#fffdfa}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#e9f2e5,#fbf2da);color:var(--ink);font:16px/1.55 'Pretendard','SUIT','Apple SD Gothic Neo',system-ui,sans-serif}
+.container{max-width:1040px;margin:0 auto;padding:24px 16px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+a{color:#346b55}h1{font-size:clamp(24px,4vw,34px);letter-spacing:-.04em;margin:18px 0 4px}h2{font-size:18px;margin:0 0 10px}
+.lead{max-width:730px;margin:0 0 18px;color:#506657}
+.sheet{background:var(--paper);border:1px solid #e1e8d7;border-radius:25px;padding:20px;margin:16px 0;box-shadow:0 6px 20px #41654114}
+.pill{display:inline-block;border-radius:30px;background:#e0efdb;padding:5px 11px;font-size:13px;font-weight:700}
+.steps{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.steps span{background:#f3f6ea;border:1px solid var(--line);border-radius:14px;padding:8px 12px;font-size:14px}
+.note{font-size:13px;color:#61766a}
+.metadata{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+label{font-weight:650;font-size:14px;display:block}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:#fff;border:1.5px solid #b6cbb9;border-radius:12px;padding:9px;min-height:44px}
+textarea{min-height:75px;resize:vertical}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.grid label span,.metadata label span{display:block;margin-bottom:5px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:separate;border-spacing:0;min-width:760px;font-size:14px}
+th,td{padding:10px 7px;text-align:left;vertical-align:middle;border-bottom:1px solid #dfe5d7}
+th{background:#eef3e9;font-size:13px;white-space:nowrap}
+td:first-child{font-weight:800;min-width:144px}
+td small{display:block;font-weight:400;color:#64756c}
+td select{padding:6px;min-height:44px;font-size:14px}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+button,.linkbutton{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:9px 17px;border-radius:14px;border:2px solid #54846d;font:inherit;font-weight:750;cursor:pointer}
+.primary{background:#54846d;color:white}
+.secondary{background:#fff;color:#365d48}
+.warning{color:#784e2f;border-color:#e0aa78}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #e3a861;outline-offset:2px}
+#notice{font-weight:700;min-height:1.6em;color:#365d48}
+@media(max-width:650px){.container{padding:14px 10px 36px}.sheet{padding:15px 11px;border-radius:18px}.grid,.metadata{grid-template-columns:1fr}.steps{flex-direction:column;align-items:stretch}.actions>*{flex:1}}
+@media print{
+ @page{size:A4 landscape;margin:11mm}
+ body{background:white;font-size:11px;color:black}.container{max-width:none;padding:0}
+ header a,.actions,.screenonly,#notice{display:none!important}
+ .sheet{box-shadow:none;border:1px solid #ccc;border-radius:8px;break-inside:avoid;padding:8px;margin:7px 0}
+ h1{font-size:19px;margin:4px 0}h2{font-size:14px}.lead,.note{font-size:10px;margin:0 0 6px}
+ .steps span{font-size:10px;padding:2px 4px}.metadata,.grid{grid-template-columns:repeat(3,1fr);gap:4px}
+ table{min-width:0;font-size:10px}th,td{padding:4px;border-bottom:1px solid #ccc}th{font-size:10px}
+ input,select,textarea{border:1px solid #ccc;border-radius:3px;padding:2px;min-height:24px;font-size:10px}
+ td select{font-size:10px;min-height:24px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header><span class="pill">일단 해봄 · 현장 평가용</span><a href="./forest-world.html" target="_blank" rel="noopener">숫자 숲 게임 열기 ↗</a></header>
+<h1>모아의 숫자 숲 · 아동 사용성 관찰표</h1>
+<p class="lead">별도 계정 없이 사용하는 교사용 기록지입니다. 실제 아동이 무엇을 이해하고 어디서 멈추는지 확인합니다. 학습 효과나 진단 결과를 측정하는 도구는 아닙니다.</p>
+<section class="sheet">
+<h2>사용 방법</h2>
+<div class="steps"><span>1. 아이에게 게임을 보여주고 자유롭게 시작</span><span>2. 가능하면 먼저 설명 없이 관찰</span><span>3. 한 회기에 1~2개 숲길만 기록해도 충분</span><span>4. CSV 저장 또는 인쇄</span></div>
+<p class="note">이 기록지는 답을 대신 알려주기 위한 도구가 아닙니다. 안전과 정서 안정이 우선이며, 불편감이 커지면 중단합니다. 이름·생년월일·연락처·진단명 등 개인정보는 적지 마세요. 입력 내용은 자동 업로드되거나 자동 저장되지 않습니다.</p>
+</section>
+<section class="sheet">
+<h2>기본 관찰</h2>
+<div class="metadata">
+<label><span>관찰 날짜</span><input type="date" id="day"></label>
+<label><span>사용 기기</span><select id="device"><option value="">선택</option><option>스마트폰</option><option>태블릿</option><option>PC</option></select></label>
+<label><span>관찰 방식</span><select id="setting"><option value="">선택</option><option>치료실 개별</option><option>가정 개별</option><option>소집단</option></select></label>
+</div>
+<div class="grid" style="margin-top:12px">
+<label><span>놀이 메뉴를 처음 찾을 때</span><select id="navigation"><option value="">미관찰</option><option>혼자 찾음</option><option>가벼운 안내 후 찾음</option><option>계속 안내 필요</option></select></label>
+<label><span>터치·클릭 정확성</span><select id="touch"><option value="">미관찰</option><option>대체로 정확</option><option>오터치 반복</option><option>버튼을 찾거나 누르기 어려움</option></select></label>
+<label><span>시작 및 다시 참여</span><select id="engagement"><option value="">미관찰</option><option>자발적 참여</option><option>안내 후 참여</option><option>참여 거부·중단</option></select></label>
+</div>
+</section>
+<section class="sheet">
+<h2>개념별 관찰</h2>
+<p class="note">정답률보다 지시 이해, 첫 시도, 도움 수준, 조작 어려움을 구분해 확인합니다. 관찰하지 않은 항목은 그대로 둡니다.</p>
+<div class="scroll"><table><thead><tr><th>숲길 · 목표</th><th>지시 이해</th><th>첫 시도</th><th>도움 수준</th><th>조작 어려움</th><th>재도전 반응</th></tr></thead><tbody id="body"></tbody></table></div>
+</section>
+<section class="sheet">
+<h2>관찰 메모 · 개선할 장면</h2>
+<label for="notes">아동이 했던 말, 멈춘 화면, 실수한 버튼, 보호자의 도움 등 구체적인 사실만 간결히 적습니다.</label>
+<textarea id="notes" rows="3" placeholder="예: 수량 비교 화면에서 10초가량 멈춤. 그림 힌트를 누른 뒤 한 번씩 세기 시작함."></textarea>
+<div class="actions">
+<button type="button" class="primary" id="export">CSV 저장</button>
+<button type="button" class="secondary" id="print">인쇄 / PDF</button>
+<button type="button" class="secondary warning" id="clear">입력 초기화</button>
+</div>
+<p id="notice" role="status" aria-live="polite"></p>
+<p class="note">CSV는 현재 기기로만 내려받으며 외부로 전송하지 않습니다. 페이지를 새로고침하면 입력값이 사라집니다. 인쇄·PDF 저장 시 필요한 정보만 기록하세요.</p>
+</section>
+</div>
+<script>
+(()=>{
+'use strict';
+const concepts=[
+ ['간식 나눠주기','일대일 대응'],['많고 적음','수량 비교'],['빈자리 채우기','수의 구성'],
+ ['다리 복구','길이 합치기'],['여우네 가게','숫자·점 수량'],['변신하는 숫자','수량 보존'],['새 마을 탐험','새 장면 적용']
+];
+const choices={
+ understand:['미관찰','혼자 이해','그림 힌트 후 이해','말로 설명 필요','이해 어려움'],
+ first:['미관찰','혼자 해결','시도 후 수정','정답까지 도움 필요','시도하지 않음'],
+ support:['미관찰','도움 없음','힌트 사용','구두 안내','직접 시범/신체 도움'],
+ control:['미관찰','없음','오터치','조작 순서 혼동','터치·움직임 어려움'],
+ retry:['미관찰','스스로 재시도','격려 후 재시도','부정적 반응','중단']
+};
+const escapeHtml=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+document.querySelector('#body').innerHTML=concepts.map(([title,target],i)=>'<tr><td>'+(i+1)+'. '+escapeHtml(title)+'<small>'+escapeHtml(target)+'</small></td>'+Object.entries(choices).map(([name,options])=>'<td><select data-row="'+i+'" data-field="'+name+'" aria-label="'+escapeHtml(title)+' '+escapeHtml(name)+'">'+options.map(v=>'<option>'+escapeHtml(v)+'</option>').join('')+'</select></td>').join('')+'</tr>').join('');
+document.querySelector('#day').value=new Date().toLocaleDateString('sv-SE');
+const $=id=>document.getElementById(id);
+const escCsv=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
+$('export').addEventListener('click',()=>{
+ const rows=[['날짜','기기','관찰방식','메뉴 찾기','터치','참여','숲길','목표','지시이해','첫 시도','도움','조작','재도전','메모']];
+ const common=[$('day').value,$('device').value,$('setting').value,$('navigation').value,$('touch').value,$('engagement').value];
+ concepts.forEach(([title,target],i)=>{
+  const attrs=Object.keys(choices).map(k=>document.querySelector('select[data-row="'+i+'"][data-field="'+k+'"]').value);
+  if(attrs.every(v=>v==='미관찰'))return;
+  rows.push([...common,title,target,...attrs,$('notes').value]);
+ });
+ if(rows.length===1){rows.push([...common,'미관찰','','','','','','',$('notes').value])}
+ const blob=new Blob(['\ufeff'+rows.map(row=>row.map(escCsv).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='숫자숲_사용성관찰_'+($('day').value||'기록')+'.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
+ $('notice').textContent='CSV 파일 저장을 요청했어요. 브라우저 다운로드 목록을 확인해 주세요.';
+});
+$('print').addEventListener('click',()=>window.print());
+$('clear').addEventListener('click',()=>{
+ if(!window.confirm('입력한 관찰 내용을 모두 지울까요?'))return;
+ document.querySelectorAll('select').forEach(e=>e.selectedIndex=0);
+ $('notes').value='';$('notice').textContent='입력값을 초기화했어요.';
+});
+})();
+</script>
+</body>
+</html>
