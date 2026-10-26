@@ -214,3 +214,30 @@ dialog form{display:flex;justify-content:flex-end}
  .print-sheet h1{font-family:system-ui,sans-serif;font-size:17pt;margin:0 0 17pt}
  .print-sheet pre{white-space:pre-wrap;word-break:break-word;font:11pt/1.8 system-ui,sans-serif;margin:0}
 }
+
+
+/* Final-step editorial layout: avoid an empty full-height illustration column.
+   The youth's recap and selective disclosure should be visible together. */
+@media (min-width:761px){
+ .result{display:block}
+ .result-hero{min-height:280px;padding:38px 48px;background:
+  radial-gradient(circle at 79% 36%,#f4deb5 0 34px,#f0d6a01c 35px 68px,transparent 70px),
+  linear-gradient(118deg,#1e4246 0%,#35695e 60%,#547e71 100%);overflow:hidden}
+ .result-hero:after{content:"";position:absolute;inset:auto -9% -65px 42%;height:155px;background:#254e4a;border-radius:55% 55% 0 0;transform:rotate(-11deg);pointer-events:none}
+ .result-hero h1{max-width:690px;margin:12px 0 12px;font-size:2.5rem}
+ .result-hero p{max-width:540px;margin:0}
+ .result-hero img{position:absolute;width:126px;height:auto;object-fit:contain;right:10%;bottom:6px;margin:0;z-index:1}
+ .result-content{display:grid;grid-template-columns:minmax(0,.84fr) minmax(0,1.16fr);gap:10px 34px;padding:35px 44px 40px}
+ .recap{border-bottom:0;border-right:1px solid #e2e8e0;padding:0 25px 0 0}
+ .recap h2{margin-top:0}
+ .share-box{padding-top:0}
+ .share-intro .small-accent{font-size:.74rem}
+ .guide,.last-actions{grid-column:1 / -1}
+ .guide{margin-top:20px}
+ .last-actions{margin-top:18px}
+}
+@media (min-width:761px) and (max-width:1020px){
+ .result-content{grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr);padding:26px 24px;gap:20px}
+ .result-hero img{right:5%}
+ .result-hero h1{font-size:2.15rem}
+}
