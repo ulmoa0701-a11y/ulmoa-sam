@@ -28,3 +28,9 @@
 .teacher-clear{justify-self:start;border:0;background:#e9f1e9;color:#435e4c;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
 .teacher-panel button:focus-visible,.teacher-panel select:focus-visible{outline:3px solid #e1ba4a;outline-offset:2px}
 @media(max-width:520px){.topbar{grid-template-columns:38px minmax(0,1fr) auto}.audio-tools{gap:3px}.icon-btn{width:35px;height:38px;font-size:21px}.brand{font-size:clamp(12px,3.6vw,16px)}.teacher-panel{top:64px}}
+
+/* Keep the always-visible feedback trigger separate from the floating
+   three-step guide. On portrait tablets their previous bottom-right
+   positions overlapped, preventing a real touch on the guide button. */
+body.moa-rescue-page #habomFeedbackLauncher{left:12px;right:auto}
+@media(max-width:440px){body.moa-rescue-page #habomFeedbackLauncher{left:8px;right:auto}}
