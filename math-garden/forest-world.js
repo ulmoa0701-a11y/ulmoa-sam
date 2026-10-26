@@ -10,8 +10,10 @@
 const $=id=>document.getElementById(id);
 const play=$('play'),stage=$('stage'),feedbackFlash=$('feedbackFlash');
 let flashTimer=0;
-const GATHER_COOLDOWN_MS=9000;
-const gatherCooldownUntil={acorns:0,berries:0};
+const GATHER_ORDERS=[
+ {acorns:2,berries:1},{acorns:3,berries:2},
+ {acorns:2,berries:2},{acorns:4,berries:1}
+];
 const storeKey='moa-forest-world-v1';
 const A='./assets/mission-v4/',V='./assets/village-v1/';
 
@@ -78,7 +80,7 @@ const templates={
    fresh at its demo). unlocked (map progress) and per-concept review logs are new additions
    to what's persisted, since village.js's pattern already does full persistence and losing
    map progress on every reload would be a regression relative to that. */
-const DEFAULT_PERSIST={acorns:0,berries:0,feedCount:0,hunger:60,buildings:[],sound:true,lastFed:0,tab:'gather',unlocked:0,reviewLog:{}};
+const DEFAULT_PERSIST={acorns:0,berries:0,feedCount:0,hunger:60,buildings:[],sound:true,lastFed:0,tab:'gather',unlocked:0,reviewLog:{},gatherOrder:{round:0,acorns:0,berries:0,fedAcorns:0,fedBerries:0,phase:'collect'}};
 /* Mid-task quest progress (which step, what's selected/served/placed, attempts/hints/flagged,
    the accumulated per-step results this chapter attempt) is now ALSO persisted, so returning to
    the quest tab mid-task -- or reloading mid-task -- resumes at the same step with the same
@@ -95,13 +97,23 @@ const state=(()=>{
  return Object.assign({},DEFAULT_PERSIST,SESSION_DEFAULTS,persisted);
 })();
 if(!Array.isArray(state.buildings))state.buildings=[];
+if(!state.gatherOrder||typeof state.gatherOrder!=='object')state.gatherOrder={};
+state.gatherOrder=Object.assign({round:0,acorns:0,berries:0,fedAcorns:0,fedBerries:0,phase:'collect'},state.gatherOrder);
+const gather=state.gatherOrder;
+if(!Number.isInteger(gather.round)||gather.round<0)gather.round=0;
+for(const k of ['acorns','berries','fedAcorns','fedBerries']){
+ if(!Number.isInteger(gather[k])||gather[k]<0)gather[k]=0;
+}
+if(!['collect','ready','feed','done'].includes(gather.phase))gather.phase='collect';
+let gatherMessage='';
+const gatherGoal=()=>GATHER_ORDERS[gather.round%GATHER_ORDERS.length];
 if(!state.reviewLog||typeof state.reviewLog!=='object')state.reviewLog={};
 if(!Array.isArray(state.served))state.served=[];
 if(!Array.isArray(state.planksPlaced))state.planksPlaced=[];
 if(!Array.isArray(state.results))state.results=[];
 if(!Number.isInteger(state.concept)||state.concept<0||state.concept>=CONCEPTS.length)state.concept=0;
 function save(){try{
- const persist={acorns:state.acorns,berries:state.berries,feedCount:state.feedCount,hunger:state.hunger,buildings:state.buildings,sound:state.sound,lastFed:state.lastFed,tab:state.tab,unlocked:state.unlocked,reviewLog:state.reviewLog};
+ const persist={acorns:state.acorns,berries:state.berries,feedCount:state.feedCount,hunger:state.hunger,buildings:state.buildings,sound:state.sound,lastFed:state.lastFed,tab:state.tab,unlocked:state.unlocked,reviewLog:state.reviewLog,gatherOrder:state.gatherOrder};
  QUEST_PERSIST_FIELDS.forEach(k=>{persist[k]=state[k]});
  localStorage.setItem(storeKey,JSON.stringify(persist));
 }catch(e){}}
@@ -369,13 +381,61 @@ function floatPop(hostEl,imgSrc){
  hostEl.appendChild(p);
  setTimeout(()=>p.remove(),700);
 }
-function renderGather(){
- const now=Date.now();
- const cool=kind=>gatherCooldownUntil[kind]>now?'disabled':'';
- $('gatherSpots').innerHTML=
-  '<button type="button" class="spot" data-spot="acorns" '+cool('acorns')+' aria-label="'+esc('나무에서 도토리 모으기')+'"><img src="'+A+'objects/acorn_tree.png" alt=""></button>'+
-  '<button type="button" class="spot" data-spot="berries" '+cool('berries')+' aria-label="'+esc('딸기 모으기')+'"><img src="'+A+'objects/berry_single.png" alt="" class="berry-spot-img"></button>';
+/* Gathered pieces stay in a temporary basket until the child checks the number.
+   Neither guessing nor tapping repeatedly earns spendable goods. */
+function gatherSlots(type,count,goal){
+ return '<div class="gather-slots" aria-hidden="true">'+Array.from({length:Math.max(goal,count)},(_,i)=>
+  '<span class="gather-slot '+(i<count?(i<goal?'filled':'extra'):'')+'">'+(i<count?unit(type,true):'')+'</span>'
+ ).join('')+'</div>';
 }
+function renderGather(){
+ const x=gatherGoal(),collect=gather.phase==='collect';
+ const ready=gather.phase==='ready'||gather.phase==='feed',done=gather.phase==='done';
+ const story=collect?'도토리 '+x.acorns+'개, 딸기 '+x.berries+'개를 부탁해!'
+  :done?'곰돌이가 간식을 받았어!':'꾸러미 완성! 곰돌이에게 줄까?';
+ const desc=collect?'그림의 수만큼 담고, 다 담았어를 눌러 봐.'
+  :done?'곰돌이가 든든해졌어.':'모은 간식을 하나씩 나누어 주면 부탁이 끝나.';
+ $('gatherGuide').innerHTML=
+  '<img class="gather-bear" src="'+A+'characters/bear_'+(done?'happy':'waiting')+'.png" alt="">'+
+  '<div class="gather-cloud"><small>곰돌이의 '+(gather.round+1)+'번째 부탁</small><strong>'+story+'</strong><span>'+desc+'</span></div>';
+ $('gatherTargets').innerHTML=collect?['acorns','berries'].map(kind=>{
+  const label=kind==='acorns'?'도토리':'딸기',icon=kind==='acorns'?'acorn_single.png':'berry_single.png';
+  return '<div class="gather-target '+(gather[kind]===x[kind]?'exact':'')+'">'+
+   '<div class="gather-count"><img src="'+A+'objects/'+icon+'" alt=""><b>'+label+' '+gather[kind]+' / '+x[kind]+'</b></div>'+
+   gatherSlots(kind,gather[kind],x[kind])+'</div>';
+ }).join(''):ready
+  ?'<p class="gather-packed">'+unit('acorn')+' '+x.acorns+'개 '+unit('berry')+' '+x.berries+'개 <span>준비 끝!</span></p>'
+  :'<p class="gather-packed">간식을 모두 전해 줬어!</p>';
+ $('gatherSpots').innerHTML=collect
+  ?'<button type="button" class="spot" data-spot="acorns" aria-label="도토리 한 개 담기" '+(gather.acorns>=x.acorns+2?'disabled':'')+'><img src="'+A+'objects/acorn_tree.png" alt=""><span class="spot-label">도토리 담기 <b>+1</b></span></button>'+
+   '<button type="button" class="spot" data-spot="berries" aria-label="딸기 한 개 담기" '+(gather.berries>=x.berries+2?'disabled':'')+'><img src="'+A+'objects/berry_single.png" alt="" class="berry-spot-img"><span class="spot-label">딸기 담기 <b>+1</b></span></button>'
+  :'';
+ $('gatherActions').innerHTML=collect
+  ?'<button type="button" class="gather-undo" data-gather="undo-acorns" '+(gather.acorns?'':'disabled')+' aria-label="도토리 하나 빼기">도토리 −1</button>'+
+   '<button type="button" class="gather-undo" data-gather="undo-berries" '+(gather.berries?'':'disabled')+' aria-label="딸기 하나 빼기">딸기 −1</button>'+
+   '<button type="button" class="gather-confirm" data-gather="check">다 담았어 '+ICONS.check+'</button>'
+  :'<button type="button" class="gather-confirm" data-gather="pet">'+(done?'곰돌이 다시 보기':'곰돌이에게 주기')+' '+ICONS.arrowRight+'</button>'+
+   '<button type="button" class="gather-next" data-gather="next">새 부탁 받기</button>';
+ $('gatherStatus').textContent=gatherMessage||(collect?'스스로 개수를 보고 확인해 봐.':'');
+}
+function gatherCheck(){
+ if(gather.phase!=='collect')return;
+ const x=gatherGoal();
+ if(gather.acorns===x.acorns&&gather.berries===x.berries){
+  state.acorns+=gather.acorns;state.berries+=gather.berries;
+  gather.phase='ready';gather.fedAcorns=0;gather.fedBerries=0;
+  gatherMessage='꾸러미가 완성됐어! 곰돌이에게 전해 보자.';
+  sfx(true);save();renderVillageAll();return;
+ }
+ const lines=[];
+ for(const [k,label] of [['acorns','도토리'],['berries','딸기']]){
+  const missing=x[k]-gather[k];
+  if(missing>0)lines.push(label+' '+missing+'개 더 필요해.');
+  if(missing<0)lines.push(label+' '+(-missing)+'개 많아. 빼 볼까?');
+ }
+ gatherMessage=lines.join(' ');sfx(false);renderGather();
+}
+
 function petStage(){return state.feedCount>=20?3:state.feedCount>=12?2:state.feedCount>=5?1:0}
 function renderPet(){
  const happy=Date.now()-state.lastFed<900;
