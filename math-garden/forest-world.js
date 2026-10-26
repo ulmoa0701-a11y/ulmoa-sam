@@ -124,7 +124,7 @@ function say(k,t){$('kicker').textContent=k;$('instruction').textContent=t}
 function progress(){ $('chapters').innerHTML=CONCEPTS.map((x,i)=>'<span class="chapter-dot '+(i<state.unlocked?'completed':i===state.unlocked?'active':'')+'" title="'+x.short+'">'+(i+1)+'</span>').join('') }
 function scene(t){play.innerHTML=t}
 function stepAction(action,body,label='',extra=''){return '<button type="button" data-mission="'+action+'" '+extra+' class="'+(action==='submit'||action==='continue'?'btn action':'interaction')+'" aria-label="'+esc(label)+'">'+body+'</button>'}
-function helpButton(show=true){$('help').hidden=!show||state.view!=='task';$('change').hidden=!show}
+function helpButton(show=true){const task=show&&state.view==='task';$('help').hidden=!task;$('visualHint').hidden=!task;$('change').hidden=!show}
 function resetConcept(i){
  clearTimeout(state.timer);Object.assign(state,{concept:i,step:0,selected:0,taken:0,served:[],planksPlaced:[],attempts:0,hints:0,flagged:false,locked:false,view:'game',results:[],review:null});
  $('missionTitle').textContent=CONCEPTS[i].title;helpButton(true);progress();draw();
@@ -173,7 +173,7 @@ function transformBoard(x){
   }).join('')+'</div>';
 }
 function demo(){const x=current(),key=CONCEPTS[state.concept].key,dKey=x.mech||key;
- state.view='demo';say('모아가 먼저 보여줄게','한 번 보고, 다음에는 직접 해볼까?');
+ state.view='demo';helpButton(true);say('모아가 먼저 보여줄게','한 번 보고, 다음에는 직접 해볼까?');
  scene('<div class="lesson"><div class="lesson-lead">'+demoVisual(x,dKey)+'</div><div class="lesson-foot"><span class="observation">보는 차례 · 기록하지 않아요</span>'+stepAction('continue',ICONS.arrowRight+srLabel('내가 해볼래'),'모아의 시범을 보고 다음으로')+'</div></div>')}
 function fruitTray(type,selected,stock,taken=selected){return '<div class="supply"><div class="supply-items"><div class="tree-pile">'+Array.from({length:Math.max(0,stock-taken)},(_,i)=>stepAction('take',unit(type),'간식 하나 담기','data-index="'+i+'"')).join('')+'</div></div><p class="supply-caption">숲속 나무</p></div><div class="delivery"><div class="packed-food"><div class="basket-pile">'+Array.from({length:selected},()=>stepAction('undo',unit(type,true),'담은 간식 하나 꺼내기')).join('')+'</div></div><p class="supply-caption">내 배달 바구니</p></div>'}
 function shareBoard(x){
@@ -201,7 +201,7 @@ function draw(){
  if(!state.view)return;
  const x=current(),key=CONCEPTS[state.concept].key,dKey=x.mech||key;
  if(x.kind==='demo'){demo();return}
- state.view='task';
+ state.view='task';helpButton(true);
  const lab=phaseText(x);
  let headline=dKey==='share'?'친구마다 하나씩 담아 줘':dKey==='compare'?(x.want==='more'?'더 많은 쪽으로 출발!':'더 적은 쪽으로 출발!'):dKey==='bridge'?'길이에 맞게 판자를 놓아 줘':dKey==='shop'?'주문한 만큼 담아 줘':dKey==='transform'?'기준과 똑같은 수를 찾아 줘':'빈자리를 채울 만큼 담아 줘';
  say(lab,headline);
@@ -280,8 +280,13 @@ function chapterEnd(){
  state.reviewLog[CONCEPTS[state.concept].key]={...result,updated:Date.now()};
  if(state.concept>=state.unlocked)state.unlocked=state.concept+1;
  state.acorns+=CHAPTER_REWARD.acorns;state.berries+=CHAPTER_REWARD.berries;
- save();
- state.view='chapter-end';helpButton(false);
+ state.view='chapter-end';save();
+ renderChapterEnd();
+}
+/* Reloading a finished chapter must never execute the reward transaction again. */
+function renderChapterEnd(){
+ const result=state.review||assess();state.review=result;
+ helpButton(false);
  const heading=result.criteriaMet?'혼자 해결한 장면이 늘었어!':'이 부분은 조금 더 연습할 수 있어';
  say(CONCEPTS[state.concept].kicker,'숲길의 작은 목표를 마쳤어');
  scene('<div class="chapter-result"><div class="bloom" aria-hidden="true"><div class="confetti">'+('<i></i>'.repeat(8))+'</div></div><h2>'+heading+'</h2><p>도움 없이 해결한 새 문제 '+result.independent+'개 · 새로운 상황 '+(result.transfer?'혼자 해결':'추가 연습 필요')+'</p><div class="quest-reward" aria-label="보상으로 받은 자원"><span class="reward-chip">'+unit('acorn')+'<b>+'+CHAPTER_REWARD.acorns+'</b></span><span class="reward-chip">'+unit('berry')+'<b>+'+CHAPTER_REWARD.berries+'</b></span></div><small>기록은 놀이 중 반응만 나타내며 수학 능력의 확정적 판정이 아니에요.</small><div class="result-actions">'+stepAction('repeat',ICONS.retry+srLabel('이 숲길 다시 놀기'),'현재 개념을 다시 연습')+stepAction('next-chapter',ICONS.mapReturn+srLabel('지도로 돌아가기'),'숲속 지도로 돌아가기')+'</div></div>');
@@ -465,11 +470,14 @@ $('sound').addEventListener('click',()=>{
 
 /* ---------- init ---------- */
 $('sound').innerHTML=(state.sound?ICONS.speakerOn:ICONS.speakerOff)+srLabel(state.sound?'소리 켜짐':'소리 꺼짐');
+$('sound').setAttribute('aria-pressed',String(state.sound));
+$('sound').setAttribute('aria-label',state.sound?'효과음 끄기':'효과음 켜기');
 buildTabbar();
 progress();
 /* Resume mid-quest state (see QUEST_PERSIST_FIELDS) instead of always restarting at the map --
    demo/travel/task are each pure functions of the restored state, safe to re-render directly. */
-if(state.view==='success'){helpButton(false);const x=current();successScene(x,x.mech||CONCEPTS[state.concept].key)}
+if(state.view==='chapter-end'){renderChapterEnd()}
+else if(state.view==='success'){helpButton(false);const x=current();successScene(x,x.mech||CONCEPTS[state.concept].key)}
 else if(state.view==='task'&&state.step>0){helpButton(true);draw()}
 else if(state.view==='demo'){helpButton(true);demo()}
 else if(state.view==='travel'){helpButton(false);travelBeat()}
