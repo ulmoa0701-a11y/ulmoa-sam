@@ -79,16 +79,16 @@ try{
  await page.keyboard.press("e");await sleep(260);await clickDialog();await record("pond keeper talk");
  report.tests.pondKeeper=(await state()).stage===4;
  // EYE: travel via normal movement until the pursuing enemy can start a telegraphed swing.
- report.eyeWalk=await walkTo(24,-15,4.2,70000);
+ report.eyeWalk=await walkTo(24,-15,8,50000);
  await record("EYE pursued");
  let eyeAttempts=0;
  while((await state()).stage===4&&eyeAttempts++<10){
   await page.waitForFunction(()=>{
    const m=document.querySelector("#mission")?.textContent||"";
-   return m.includes("가지 공격 준비!")||document.querySelector("#dialog")?.classList.contains("show");
+   return m.includes("가지 공격 준비!")||m.includes("지금 빈틈!")||document.querySelector("#dialog")?.classList.contains("show");
   },{timeout:21000});
   if(await page.$eval("#dialog",e=>e.classList.contains("show"))){await clickDialog();continue}
-  await page.keyboard.press("Space");await sleep(1000);
+  if((await page.$eval("#mission",e=>e.textContent)).includes("가지 공격 준비!")){await page.keyboard.press("Space");await sleep(1000)}
   await page.waitForFunction(()=>{
    const m=document.querySelector("#mission")?.textContent||"";
    return m.includes("지금 빈틈!")||document.querySelector("#dialog")?.classList.contains("show");
