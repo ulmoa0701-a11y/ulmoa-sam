@@ -495,6 +495,6 @@ showTab(state.tab||'gather');
 
 Object.defineProperty(window,'__moaForestWorldQA',{value:()=>({
  acorns:state.acorns,berries:state.berries,feedCount:state.feedCount,hunger:state.hunger,petStage:petStage(),buildings:state.buildings.map(b=>b.type),tab:state.tab,
- unlocked:state.unlocked,concept:CONCEPTS[state.concept].key,conceptIndex:state.concept,step:state.step,selected:state.selected,taken:state.taken,served:[...state.served],phase:state.view,attempts:state.attempts,hints:state.hints,flagged:state.flagged,task:{...current()},results:state.results.map(x=>({...x})),review:state.review?{...state.review}:null
+ unlocked:state.unlocked,concept:CONCEPTS[state.concept].key,conceptIndex:state.concept,step:state.step,selected:state.selected,taken:state.taken,served:[...state.served],planksPlaced:[...state.planksPlaced],phase:state.view,attempts:state.attempts,hints:state.hints,flagged:state.flagged,task:{...current()},results:state.results.map(x=>({...x})),review:state.review?{...state.review}:null
 }),configurable:false});
 })();
