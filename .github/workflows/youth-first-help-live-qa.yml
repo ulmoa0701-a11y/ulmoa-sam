@@ -1,0 +1,50 @@
+name: Youth First Help Live Public QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'support-first/me/**'
+      - 'qa/youth-first-help-qa.mjs'
+      - '.github/workflows/youth-first-help-live-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser driver
+        run: |
+          npm install --no-save --no-package-lock playwright-core@1.56.1
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Wait for the public Pages release
+        shell: bash
+        run: |
+          URL="https://ulmoa0701-a11y.github.io/ulmoa-sam/support-first/me/"
+          for n in $(seq 1 45); do
+            if curl --retry 2 -fsSL "$URL?qa=$GITHUB_SHA" -o /tmp/youth-first-live.html && grep -Fq 'id="print-safe-body"' /tmp/youth-first-live.html; then
+              echo "Public page includes privacy-safe printing markup"
+              exit 0
+            fi
+            sleep 8
+          done
+          echo "::error::Public Pages content was not updated in time"
+          exit 1
+      - name: Chromium mobile and desktop QA on live public site
+        env:
+          YOUTH_BASE: https://ulmoa0701-a11y.github.io/ulmoa-sam/
+        run: node qa/youth-first-help-qa.mjs
+      - name: Screenshots from public page
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: youth-first-help-live-screenshots
+          path: qa/youth-first-help-artifacts/
+          if-no-files-found: warn
