@@ -66,13 +66,20 @@ function meta(){
 const launcher=document.createElement("button");launcher.id="habomFeedbackLauncher";launcher.type="button";launcher.textContent="이 화면 제보";launcher.setAttribute("aria-haspopup","dialog");launcher.setAttribute("aria-controls","habomFeedbackV2");document.body.appendChild(launcher);
 let activeRound=null;
 function clearPreview(){reportImage=null;preview.width=1;preview.height=1;preview.style.display="none";$fb("habomFbReviewed").checked=false;$fb("habomFbCaptureStatus").textContent="캡처 없음";$fb("habomFbReset").disabled=true}
-function setImage(image){
+async function setImage(image){
  const maxWidth=900,scale=Math.min(1,maxWidth/image.width,850/image.height);
  preview.width=Math.max(1,Math.floor(image.width*scale));preview.height=Math.max(1,Math.floor(image.height*scale));
  ctx.clearRect(0,0,preview.width,preview.height);ctx.drawImage(image,0,0,preview.width,preview.height);
- preview.style.display="block";$fb("habomFbCaptureStatus").textContent="자동 가림 완료 · 추가로 가릴 곳을 문질러 주세요";
+ if(typeof window.FaceDetector==="function"){
+  try{
+   const detector=new window.FaceDetector({fastMode:true,maxDetectedFaces:25});
+   const faces=await detector.detect(preview);
+   for(const face of faces){const b=face.boundingBox,pad=Math.max(12,Math.round(b.width*.2));ctx.fillStyle="#203b31";ctx.fillRect(Math.max(0,b.x-pad),Math.max(0,b.y-pad),b.width+pad*2,b.height+pad*2)}
+  }catch(_){}
+ }
+ preview.style.display="block";$fb("habomFbCaptureStatus").textContent="카메라·입력칸 자동 가림 · 사진을 확인해 주세요";
  $fb("habomFbReset").disabled=false;
- // We never retain or submit an original raw image. Only this privacy-scrubbed drawing is kept.
+ // This canvas contains the privacy-scrubbed preview. No raw stage capture is sent to the server.
  reportImage=true;
 }
 function renderBlock(el){
@@ -124,7 +131,7 @@ async function captureCurrent(mySession){
     onclone:scrubDocument});
   }
   if(mySession!==session||feedbackUi.hidden)return;
-  setImage(shot);
+  await setImage(shot);
  }catch(err){
   if(mySession!==session)return;
   clearPreview();
@@ -181,13 +188,13 @@ async function submit(){
   $fb("habomFbWarning").textContent="고마워요! 접수됐어요. 게임으로 돌아갈게요.";
   setTimeout(()=>{if(!feedbackUi.hidden)close()},1050);
  }catch(_){
-  $fb("habomFbWarning").textContent="지금은 접수할 수 없어요. 다시 보내거나 기존 제보 양식을 이용해주세요. 사진은 외부로 전송되지 않았어요.";
+  $fb("habomFbWarning").textContent="접수 완료를 확인할 수 없어요. 다시 보내면 중복 접수될 수 있어요. 기존 제보 양식을 이용할 수도 있습니다.";
   feedbackBusy=false;$fb("habomFbSubmit").disabled=false;$fb("habomFbSubmit").textContent="다시 보내기";
  }
 }
 $fb("habomFbClose").addEventListener("click",close);
 $fb("habomFbSubmit").addEventListener("click",submit);
-$fb("habomFbNoImage").addEventListener("click",()=>{clearPreview();$fb("habomFbCaptureStatus").textContent="사진 제외됨 · 글로만 제보해요"});
+$fb("habomFbNoImage").addEventListener("click",()=>{session++;clearPreview();$fb("habomFbCaptureStatus").textContent="사진 제외됨 · 글로만 제보해요"});
 $fb("habomFbReset").addEventListener("click",()=>{clearPreview();$fb("habomFbCaptureStatus").textContent="화면을 다시 준비하고 있어요…";captureCurrent(session)});
 feedbackUi.addEventListener("keydown",e=>{if(e.key==="Escape"&&!feedbackBusy){e.preventDefault();close()}});
 feedbackUi.addEventListener("click",e=>{if(e.target===feedbackUi&&!feedbackBusy)close()});
