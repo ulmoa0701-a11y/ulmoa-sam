@@ -23,6 +23,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install Korean glyph fonts for visual QA
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          fc-match 'Noto Sans CJK KR' | head -1
       - name: Install browser driver
         run: |
           npm install --no-save --no-package-lock playwright-core@1.56.1
