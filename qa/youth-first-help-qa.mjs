@@ -69,6 +69,15 @@ for(const width of [390,1280]){
   await check(!(await page.locator('#intro-text').inputValue()).includes('학교 가는 길'),width+'px student free text excluded by default');
   await page.locator('input[data-note="concern"]').check();
   await check((await page.locator('#intro-text').inputValue()).includes('학교 가는 길'),width+'px separately consented free text included');
+  await page.locator('input[data-share="concern"]').uncheck();
+  await check(await page.locator('input[data-note="concern"]').isDisabled(),width+'px note consent disabled when topic not shared');
+  await check(!(await page.locator('#intro-text').inputValue()).includes('학교 가는 길'),width+'px withdrawing topic removes its private note');
+  await page.locator('input[data-share="concern"]').check();
+  await check(await page.locator('input[data-note="concern"]').isEnabled(),width+'px topic reselect allows new note consent');
+  await check(!(await page.locator('input[data-note="concern"]').isChecked()),width+'px prior note consent not silently restored');
+  await check(!(await page.locator('#intro-text').inputValue()).includes('학교 가는 길'),width+'px private note stays hidden until reconsented');
+  await page.locator('input[data-note="concern"]').check();
+  await check((await page.locator('#intro-text').inputValue()).includes('학교 가는 길'),width+'px renewed consent adds private note');
   await page.locator('input[data-share="support"]').check();
   await check((await page.locator('#intro-text').inputValue()).includes('글·선택지'),width+'px requested communication style');
   await page.screenshot({path:path.join(out,'myself-story-'+width+'.png'),fullPage:true});
@@ -93,6 +102,31 @@ for(const width of [390,1280]){
   await check(await page.locator('#result').isVisible(),width+'px all consultation prompts optional');
   await check((await page.locator('#intro-text').inputValue())==='',width+'px no automatic handoff after all skips');
   await check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),width+'px intake result no horizontal overflow');
+  // Realistic non-school intake routes: peer relations, mood/energy, daily life.
+  const concernRoutes=[
+    {id:'people',word:'사람들과',option:'reply'},
+    {id:'feeling',word:'기분이나 에너지가',option:'night'},
+    {id:'daily',word:'일상에서',option:'change'},
+  ];
+  for(const route of concernRoutes){
+    await page.reload({waitUntil:'domcontentloaded'});
+    await page.locator('#next').click();
+    await page.locator('button[data-option="'+route.id+'"]').click();
+    await page.locator('#next').click();
+    await check((await page.locator('#question').innerText()).includes(route.word),width+'px branch question '+route.id);
+    await check(await page.locator('button[data-option="'+route.option+'"]').count()===1,width+'px contextual answer '+route.id);
+    await page.locator('button[data-option="'+route.option+'"]').click();
+    await page.locator('#back').click();
+    await page.locator('button[data-option="school"]').click();
+    await page.locator('#next').click();
+    await check((await page.locator('#question').innerText()).includes('학교'),width+'px route switches back to school from '+route.id);
+    await check(await page.locator('button.option[aria-pressed="true"]').count()===0,width+'px old contextual answer cleared after switch '+route.id);
+  }
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.locator('#next').click();
+  await page.locator('#next').click();
+  await check((await page.locator('#question').innerText()).includes('어느 순간'),width+'px unspecified worry uses neutral situation choices');
+  await check(await page.locator('button.option').count()===4,width+'px neutral options still available without disclosing concern');
   await page.goto(new URL('support-first/make/',BASE).href,{waitUntil:'domcontentloaded'});
   await check(await page.locator('a[href="../me/"]').count()>=1,width+'px: workshop links back to self discovery');
   await page.goto(new URL('support-first/try/',BASE).href,{waitUntil:'domcontentloaded'});
