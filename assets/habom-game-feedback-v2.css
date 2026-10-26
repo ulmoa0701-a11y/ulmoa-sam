@@ -74,3 +74,6 @@
  #habomFbSubmit{flex-basis:100%}
  #habomFbFallback{width:100%;text-align:center}
 }
+
+/* Rescue has a floating instructions panel on the bottom-right. Keep report control opposite. */
+body:has(.game-frame) #habomFeedbackLauncher{right:auto;left:10px;bottom:calc(12px + env(safe-area-inset-bottom,0px))}
