@@ -1046,49 +1046,66 @@ async function heartV4Smoke(){
   check(!(await page.locator("#drawer").evaluate(el=>el.open)),"V4 "+cfg.name+": settings drawer must start closed");
   const data=await page.evaluate(()=>{
    const q=window.__HEART_V4_QA__;if(!q)return null;
-   const layout=q.pageAt(1);
-   const g=q.geometry(0,layout);
-   const a=q.crestTravel(0,g,0,layout),left=q.crestTravel(.25,g,0,layout),
-         center=q.crestTravel(.5,g,0,layout),right=q.crestTravel(.75,g,0,layout),end=q.crestTravel(1,g,0,layout);
-   const nextGeo=q.geometry(1,layout),nextStart=q.crestTravel(0,nextGeo,1,layout);
-   const prevEnd=q.crestTravel(1,g,0,layout);
-   const split=q.beatParts(0),sameColor=q.beatParts(1);
+   const page=q.pageAt(1),g=q.geometry(0,page);
+   const left=q.stepPose(.25,g),right=q.stepPose(.75,g);
+   const holdFirst=q.stepPose(.35,g),holdLast=q.stepPose(.88,g);
+   const noLift=q.stepPose(.5,g);
+   const stepRange=[0,.1,.18,.25,.35,.5,.63,.75,.88,.99].map(x=>q.stepPose(x,g).lift);
    return {canvas:{w:document.querySelector("#score").width,h:document.querySelector("#score").height},
-     stage:document.querySelector("#stage").getBoundingClientRect().toJSON(),
-     keys:document.querySelectorAll("#keys .key").length,
-     layout,heartWidth:g.w,hop:[a,left,center,right,end],nextStart,prevEnd,
-     sameColorCount:sameColor.length,splitCount:split.length,heartDelta:Math.abs(prevEnd.x-nextStart.x),
-     assets:q.assets(),initialState:q.getState()};
+    stage:document.querySelector("#stage").getBoundingClientRect().toJSON(),
+    page,heartWidth:g.w,footstepMode:q.getState().motion,
+    left,right,holdFirst,holdLast,noLift,stepRange,
+    eventsSolid:q.beatParts(1),eventsSplit:q.beatParts(0),assets:q.assets()};
   });
-  check(!!data,"V4 "+cfg.name+": QA hooks missing");
+  check(!!data,"V4 "+cfg.name+": QA hook missing");
   if(data){
    check((cfg.name==="mobile"?data.canvas.w===820:data.canvas.w===1440),
-    "V4 "+cfg.name+": wrong native score resolution");
-   check((cfg.name==="mobile"?data.layout.barsPerLine===1:data.layout.barsPerLine===2),
-    "V4 "+cfg.name+": beats not arranged for native viewport");
-   check(data.heartWidth*(data.stage.width/data.canvas.w)>=60,
-    "V4 "+cfg.name+": hearts too tiny");
-   check(data.hop[1].x+8<data.hop[3].x &&
-      data.hop[1].lift<.01&&data.hop[3].lift<.01 &&
-      data.hop[2].lift>3&&data.hop[2].lift<data.heartWidth*.06,
-      "V4 "+cfg.name+": quiet crest LANDINGS at 1/4 and 3/4 beat expected");
-   check(data.heartDelta<.1,"V4 "+cfg.name+": inter-heart motion must be CONTINUOUS");
-   check(data.splitCount>=2&&data.sameColorCount===1,
-      "V4 "+cfg.name+": original split/solid beat music data missing");
-   check(data.initialState.motion==="calm",
-      "V4 "+cfg.name+": calm default should minimize distraction");
+    "V4 "+cfg.name+": wrong native canvas resolution");
+   check((cfg.name==="mobile"?data.page.barsPerLine===1:data.page.barsPerLine===2),
+    "V4 "+cfg.name+": viewport score rows incorrect");
+   check(data.heartWidth*data.stage.width/data.canvas.w>=60,
+    "V4 "+cfg.name+": notation too small");
+   check(data.footstepMode==="footsteps","V4 "+cfg.name+": quiet footstep mode not default");
+   check(data.left.x+10<data.right.x &&
+      data.left.lift<.01&&data.right.lift<.01,
+    "V4 "+cfg.name+": left and right contact points incorrect");
+   check(data.stepRange.filter(x=>x>1).length>=2 &&
+     data.stepRange.every(x=>x<data.heartWidth*.031) &&
+     Math.abs(data.holdFirst.x-data.left.x)<.1 &&
+     Math.abs(data.holdLast.x-data.right.x)<.1,
+    "V4 "+cfg.name+": two brief steps must HOLD between contacts, with small lifts");
+   check(data.eventsSolid.length===1&&data.eventsSplit.length>=2,
+    "V4 "+cfg.name+": original whole-heart and split-heart musical grammar changed");
    check(["forest","night","classroom","heart-frame","moa"].every(n=>data.assets[n]),
-      "V4 "+cfg.name+": some external image assets missing "+JSON.stringify(data.assets));
+    "V4 "+cfg.name+": original visual assets missing");
   }
+  check(await page.locator('[data-guide]').count()===3,
+    "V4 "+cfg.name+": user must have three distinct guide options");
+  // Rendering must truly differ, not just change a selected label.
+  const fingerprints=await page.evaluate(()=>{
+    const q=window.__HEART_V4_QA__,out={};
+    for(const m of ["footsteps","heart","moa"]){
+      document.querySelector('[data-guide="'+m+'"]').click();
+      q.render(.6);
+      out[m]=document.querySelector("#score").toDataURL();
+    }
+    document.querySelector('[data-guide="footsteps"]').click();
+    q.render(-2);
+    return Object.fromEntries(Object.entries(out).map(([k,v])=>[k,v]));
+  });
+  check(new Set(Object.values(fingerprints)).size===3,
+    "V4 "+cfg.name+": all three options must render different actual frames");
   await page.screenshot({path:out+"/heartV4-"+cfg.name+"-forest.png",fullPage:true});
-  // Separate photographic proofs of LEFT and RIGHT crest landing, at their
-  // exact 1/4 and 3/4 beat times; original frame screenshots were in preroll.
-  await page.evaluate(()=>window.__HEART_V4_QA__.render(.25));
-  await page.locator("#stage").screenshot({path:out+"/heartV4-"+cfg.name+"-moa-left.png"});
   await page.evaluate(()=>window.__HEART_V4_QA__.render(.75));
-  await page.locator("#stage").screenshot({path:out+"/heartV4-"+cfg.name+"-moa-right.png"});
+  await page.locator("#stage").screenshot({path:out+"/heartV4-"+cfg.name+"-footsteps.png"});
+  await page.locator('[data-guide="heart"]').click();
+  await page.evaluate(()=>window.__HEART_V4_QA__.render(.75));
+  await page.locator("#stage").screenshot({path:out+"/heartV4-"+cfg.name+"-heart-guide.png"});
+  await page.locator('[data-guide="moa"]').click();
+  await page.evaluate(()=>window.__HEART_V4_QA__.render(.75));
+  await page.locator("#stage").screenshot({path:out+"/heartV4-"+cfg.name+"-moa-quiet.png"});
+  await page.locator('[data-guide="footsteps"]').click();
   await page.evaluate(()=>window.__HEART_V4_QA__.render(-2));
-
   await page.locator("#drawer summary").click();
   await page.locator('[data-theme="night"]').click();
   check(await page.locator('[data-theme="night"]').getAttribute("aria-pressed")==="true",
@@ -1098,13 +1115,15 @@ async function heartV4Smoke(){
   await page.screenshot({path:out+"/heartV4-"+cfg.name+"-classroom.png",fullPage:true});
   await page.locator("#song").selectOption("1");
   check((await page.locator("#hudTitle").textContent()).length>1,"V4 "+cfg.name+": original song selection not updating title");
-  await page.locator("#moaMotion").selectOption("normal");
-  check((await page.evaluate(()=>window.__HEART_V4_QA__.getState().motion))==="normal",
-    "V4 "+cfg.name+": motion strength control did not change");
-  await page.locator("#moaMotion").selectOption("still");
-  check((await page.evaluate(()=>window.__HEART_V4_QA__.getState().motion))==="still",
-    "V4 "+cfg.name+": stationary motion mode missing");
-  await page.locator("#moaMotion").selectOption("calm");
+  await page.locator('[data-guide="moa"]').click();
+  check((await page.evaluate(()=>window.__HEART_V4_QA__.getState().motion))==="moa",
+    "V4 "+cfg.name+": Moa guide mode not selected");
+  await page.locator('[data-guide="heart"]').click();
+  check((await page.evaluate(()=>window.__HEART_V4_QA__.getState().motion))==="heart",
+    "V4 "+cfg.name+": heart-only guide mode not selected");
+  await page.locator('[data-guide="footsteps"]').click();
+  check((await page.locator('[data-guide="footsteps"]').getAttribute("aria-pressed"))==="true",
+    "V4 "+cfg.name+": footstep guide mode control not accessible");
   await page.locator("#tempo").selectOption("0.75");
   await page.locator("#notes").selectOption("3");
   await page.locator(".key").first().click();
