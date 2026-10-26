@@ -1028,6 +1028,73 @@ async function heartV2Smoke(){
 }
 await heartV2Smoke();
 
+
+/* Independent V4 immersive stage test. Existing V1/V2/V3 remain unchanged. */
+async function heartV4Smoke(){
+ for(const cfg of [{name:"desktop",width:1440,height:900},{name:"mobile",width:390,height:844}]){
+  const ctx=await browser.newContext({viewport:{width:cfg.width,height:cfg.height},deviceScaleFactor:1});
+  const page=await ctx.newPage();const errors=[];
+  page.on("pageerror",e=>errors.push("pageerror: "+e.message));
+  page.on("console",m=>{if(m.type()==="error")errors.push("console: "+m.text())});
+  const resp=await page.goto(ROOT+"/boomwhacker/heart-playalong-v4/",{waitUntil:"networkidle"});
+  check(resp?.ok(),"V4 "+cfg.name+": isolated immersive route HTTP error");
+  check((await page.title()).includes("모아의 하트 산책"),"V4 "+cfg.name+": title missing");
+  check(await page.locator("#score").count()===1,"V4 "+cfg.name+": canvas missing");
+  check(await page.locator(".transport #play").count()===1,"V4 "+cfg.name+": stage controls missing");
+  check(await page.locator("#keys .key").count()===8,"V4 "+cfg.name+": canonical 8 note buttons missing");
+  check(await page.locator("#song option").count()>=8,"V4 "+cfg.name+": original score collection missing");
+  check(!(await page.locator("#drawer").evaluate(el=>el.open)),"V4 "+cfg.name+": settings drawer must start closed");
+  const data=await page.evaluate(()=>{
+   const q=window.__HEART_V4_QA__;if(!q)return null;
+   const layout=q.pageAt(1);
+   const g=q.geometry(0,layout);
+   const a=q.crestTravel(0,g),left=q.crestTravel(.25,g),center=q.crestTravel(.5,g),right=q.crestTravel(.75,g),end=q.crestTravel(1,g);
+   return {canvas:{w:document.querySelector("#score").width,h:document.querySelector("#score").height},
+     stage:document.querySelector("#stage").getBoundingClientRect().toJSON(),
+     keys:document.querySelectorAll("#keys .key").length,
+     layout,heartWidth:g.w,hop:[a,left,center,right,end],
+     assets:q.assets(),initialState:q.getState()};
+  });
+  check(!!data,"V4 "+cfg.name+": QA hooks missing");
+  if(data){
+   check((cfg.name==="mobile"?data.canvas.w===820:data.canvas.w===1440),
+    "V4 "+cfg.name+": wrong native score resolution");
+   check((cfg.name==="mobile"?data.layout.barsPerLine===1:data.layout.barsPerLine===2),
+    "V4 "+cfg.name+": beats not arranged for native viewport");
+   check(data.heartWidth*(data.stage.width/data.canvas.w)>=60,
+    "V4 "+cfg.name+": hearts too tiny");
+   check(data.hop[1].x+5<data.hop[3].x &&
+      data.hop[1].lift>25&&data.hop[3].lift>25 &&
+      data.hop[0].lift<.001&&data.hop[2].lift<.001&&data.hop[4].lift<.001,
+      "V4 "+cfg.name+": two separate SPATIAL crest jumps are required, not in-place bounce");
+   check(["forest","night","classroom","heart-frame","moa"].every(n=>data.assets[n]),
+      "V4 "+cfg.name+": some external image assets missing "+JSON.stringify(data.assets));
+  }
+  await page.screenshot({path:out+"/heartV4-"+cfg.name+"-forest.png",fullPage:true});
+  await page.locator("#drawer summary").click();
+  await page.locator('[data-theme="night"]').click();
+  check(await page.locator('[data-theme="night"]').getAttribute("aria-pressed")==="true",
+    "V4 "+cfg.name+": night theme unavailable");
+  await page.screenshot({path:out+"/heartV4-"+cfg.name+"-night.png",fullPage:true});
+  await page.locator('[data-theme="classroom"]').click();
+  await page.screenshot({path:out+"/heartV4-"+cfg.name+"-classroom.png",fullPage:true});
+  await page.locator("#song").selectOption("1");
+  check((await page.locator("#hudTitle").textContent()).length>1,"V4 "+cfg.name+": original song selection not updating title");
+  await page.locator("#tempo").selectOption("0.75");
+  await page.locator("#notes").selectOption("3");
+  await page.locator(".key").first().click();
+  await page.locator("#play").click();await page.waitForTimeout(160);
+  check((await page.locator("#play span").textContent())==="일시정지","V4 "+cfg.name+": play should start");
+  await page.locator("#play").click();
+  check((await page.locator("#play span").textContent())==="연주 시작","V4 "+cfg.name+": pause failed");
+  await page.locator("#restart").click();
+  check(!errors.length,"V4 "+cfg.name+": JavaScript/browser error: "+errors.join(" / "));
+  report.push({name:"heartV4-"+cfg.name,checks:"complete",data,errors});
+  await ctx.close();
+ }
+}
+await heartV4Smoke();
+
 await browser.close();
 fs.writeFileSync(`${out}/report.json`,JSON.stringify({failures,report},null,2));
 console.log(JSON.stringify({failures,report},null,2));
