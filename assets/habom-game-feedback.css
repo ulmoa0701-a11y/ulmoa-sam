@@ -1,0 +1,17 @@
+/* One low-clutter feedback entry; all styles are isolated from games. */
+#habomFeedbackLauncher{position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:98;min-height:44px;padding:9px 15px;border:1px solid #9bc7ae;border-radius:28px;background:#fffdf5;color:#285943;box-shadow:0 3px 13px #1d3d3233;font:700 14px/1.25 sans-serif;cursor:pointer;touch-action:manipulation}
+#habomFeedbackBackdrop[hidden]{display:none}
+#habomFeedbackBackdrop{position:fixed;z-index:99998;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;box-sizing:border-box;background:rgba(14,31,23,.72)}
+#habomFeedbackSheet{display:flex;flex-direction:column;width:min(100%,610px);max-height:min(92dvh,880px);background:#fffef8;color:#233a2d;border-radius:19px;overflow:hidden;box-shadow:0 12px 42px #0004;font:400 15px/1.55 sans-serif}
+#habomFeedbackTop{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 18px 8px}
+#habomFeedbackTop h2{margin:0;font:800 19px/1.4 sans-serif;color:#254a34}
+#habomFeedbackClose{min-height:44px;min-width:44px;border:0;border-radius:14px;background:#ecf4e9;color:#23543e;font-size:22px;cursor:pointer}
+#habomFeedbackInfo{padding:0 18px 7px;font-size:14px;color:#506457}
+#habomFeedbackInfo p{margin:3px 0 4px;line-height:1.5}
+#habomFeedbackGame{color:#2c6044}
+#habomFeedbackFrame{width:100%;height:clamp(340px,64dvh,620px);border:0;display:block;background:#fff}
+#habomFeedbackFoot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 17px 15px;font-size:12px;color:#65766a}
+#habomFeedbackFoot a{color:#27664f;text-underline-offset:3px}
+#habomFeedbackAtFinish{min-height:44px;padding:10px 15px;border:1px solid #8db79d;background:#f8fff5;color:#256347;border-radius:14px;font:700 14px sans-serif;cursor:pointer}
+#habomFeedbackLauncher:focus-visible,#habomFeedbackBackdrop button:focus-visible,#habomFeedbackBackdrop a:focus-visible,#habomFeedbackAtFinish:focus-visible{outline:3px solid #d8ab4c;outline-offset:3px}
+@media(max-width:440px){#habomFeedbackLauncher{font-size:12px;right:8px;bottom:calc(9px + env(safe-area-inset-bottom,0px));padding:8px 11px}#habomFeedbackBackdrop{padding:6px}#habomFeedbackSheet{max-height:98dvh;border-radius:13px}#habomFeedbackFrame{height:71dvh}#habomFeedbackTop{padding:10px 12px 5px}#habomFeedbackFoot{padding:7px 12px 9px}}
