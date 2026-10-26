@@ -151,9 +151,9 @@ try{
  report.pass=Object.values(report.tests).every(Boolean)&&errors.length===0&&http.length===0;
 
 }catch(e){report.error=String(e);report.pass=false}
-await page.screenshot({path:"hotel-garden-full-route.jpg",type:"jpeg",quality:62,fullPage:true}).catch(()=>{});
+await page.screenshot({path:"hotel-garden-full-route-scripted.jpg",type:"jpeg",quality:62,fullPage:true}).catch(()=>{});
 await browser.close();
 report.generatedAt=new Date().toISOString();
-fs.writeFileSync("hotel-garden-full-route.json",JSON.stringify(report,null,2));
-console.log("HOTEL_GARDEN_FULL_REAL_ROUTE "+JSON.stringify(report));
+fs.writeFileSync("hotel-garden-full-route-scripted.json",JSON.stringify(report,null,2));
+console.log("HOTEL_GARDEN_FULL_SCRIPTED_ROUTE "+JSON.stringify(report));
 if(!report.pass)process.exitCode=1;
