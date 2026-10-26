@@ -146,6 +146,7 @@ a{color:inherit}
 <div class="config"><div class="field"><label for="song">연주곡</label><select id="song"></select></div>
 <div class="field"><label for="notes">악기 음</label><select id="notes"><option value="3">3음 · 도 미 솔</option><option value="5" selected>5음 · 도 레 미 솔 라</option><option value="8">8음 · 전체</option></select></div>
 <div class="field"><label for="tempo">연주 속도</label><select id="tempo"><option value="0.75">천천히</option><option value="1" selected>보통</option><option value="1.15">빠르게</option></select></div>
+<div class="field"><label for="moaMotion">모아 움직임</label><select id="moaMotion"><option value="calm" selected>차분하게 · 낮은 두 걸음</option><option value="normal">기본 · 조금 더 통통</option><option value="still">표시만 · 점프 없이</option></select></div>
 <div class="field themes" style="grid-column:1/-1"><label>장면 고르기</label><div class="themes"><button data-theme="forest" aria-pressed="true">깊은 숲</button><button data-theme="night" aria-pressed="false">별밤</button><button data-theme="classroom" aria-pressed="false">햇살 교실</button></div></div>
 <div class="config-foot"><strong>기존 하트색깔악보와 같은 규칙</strong> · 한 박은 하트 하나, 반 박은 같은 하트 안의 색으로 구분해요. 모아의 두 번 점프는 박자를 몸으로 느끼는 시각적 안내이며, 실제 음을 두 번 연주하는 뜻은 아니에요.</div></div></details>
 </main>
@@ -166,7 +167,7 @@ const frequencyOf=note=>FREQUENCIES[NOTES.indexOf(note)]||0;
 const heartPath=new Path2D("M50 84 C44 77 9 55 6 29 C3 9 20 0 35 5 C43 7 48 13 50 19 C52 13 57 7 65 5 C80 0 97 9 94 29 C91 55 56 77 50 84Z");
 const imageNames=["forest","night","classroom","heart-frame","moa"];
 const images={};
-let song=SCORES[0],beat=-song.meter,playing=false,speed=1,theme="forest",audio=null,startedAt=0,rafId=0,played=new Set(),reduced=matchMedia("(prefers-reduced-motion: reduce)").matches,display={width:1440,height:820,mobile:false};
+let song=SCORES[0],beat=-song.meter,playing=false,speed=1,theme="forest",motion="calm",audio=null,startedAt=0,rafId=0,played=new Set(),reduced=matchMedia("(prefers-reduced-motion: reduce)").matches,display={width:1440,height:820,mobile:false};
 const meter=()=>song.meter,endBeat=()=>song.bars.length*song.meter,beatSeconds=()=>60/(song.bpm*speed);
 const text=(label,x,y,size=20,color="#f7f5ef",align="left",weight=700)=>{
  ctx.save();ctx.font=weight+" "+size+"px 'Pretendard','SUIT','Noto Sans CJK KR',sans-serif";
@@ -202,12 +203,35 @@ function geometry(k,page){
  const y=m?(row===0?246:599):(row===0?224:484);
  return {x:start+column*(size+gap),y,w:size,h:size*.90,row,column};
 }
-/* Both one-color and split-color hearts share the SAME left-to-right two-hop trajectory.
-   One V-heart is still precisely ONE beat; this function never schedules notes. */
-function crestTravel(phase,g){
+/* Stage movement design:
+   - Left/right crest contacts at .25 / .75 of EVERY beat, whatever its color.
+   - Small, unhurried arcs: landing at the crests, NOT huge vertical leaps.
+   - Cross-beat movement interpolates continuously on one score row.
+   - Row/page jumps are concealed with fade-out/in, never instantaneous sprite teleport.
+   - This function is visual only; no audio onsets are introduced. */
+function smoothUnit(v){const t=Math.max(0,Math.min(1,v));return t*t*(3-2*t)}
+function crestTravel(phase,g,beatIndex=0,page=pageAt(beatIndex),mode=motion){
  const p=Math.max(0,Math.min(1,phase));
- const lift=Math.pow(Math.sin(2*Math.PI*p),2)*Math.max(25,g.w*.24);
- return {x:g.x+g.w*(.06+.88*p),y:g.y+g.w*.12-lift,lift};
+ const left=g.x+g.w*.28,right=g.x+g.w*.72;
+ const rowStart=page.firstBar*song.meter+g.row*song.meter*page.barsPerLine;
+ const rowEnd=rowStart+song.meter*page.barsPerLine;
+ const samePrev=beatIndex>rowStart&&beatIndex>0;
+ const sameNext=beatIndex+1<Math.min(rowEnd,endBeat());
+ const prev=samePrev?geometry(beatIndex-1,page):null;
+ const next=sameNext?geometry(beatIndex+1,page):null;
+ const before=prev?prev.x+prev.w*.72:left;
+ const after=next?next.x+next.w*.28:right;
+ let x;
+ if(mode==="still"||reduced){x=p<.5?left:right}
+ else if(p<.25){x=before+(left-before)*smoothUnit((p+.25)/.5)}
+ else if(p<=.75){x=left+(right-left)*smoothUnit((p-.25)/.5)}
+ else{x=right+(after-right)*smoothUnit((p-.75)/.5)}
+ const height=mode==="normal"?g.w*.083:g.w*.047;
+ const lift=mode==="still"||reduced?0:height*Math.pow(Math.cos(2*Math.PI*p),2);
+ const opacity=mode==="still"||reduced?1:
+   !samePrev&&p<.25?smoothUnit(p/.25):
+   !sameNext&&p>.75?smoothUnit((1-p)/.25):1;
+ return {x,y:g.y+g.w*.14-lift,lift,opacity,left,right,samePrev,sameNext};
 }
 function paintBackdrop(){
  const {width:W,height:H,mobile:m}=display;
@@ -246,13 +270,16 @@ function paintHeart(k,g,active,partOfCurrent){
  text(label,center,37,dur<=.25?14:dur<=.5?22:29,p.note==="높은도"?"#fff":"#142b3a","center",740)}
  ctx.restore();
 }
-function paintMoa(g,phase){
- const t=crestTravel(phase,g),size=Math.min(display.mobile?91:90,g.w*.72);
- // Shadow on the heart surface makes the landing point legible.
- ctx.save();ctx.fillStyle="#0f362a5a";ctx.beginPath();ctx.ellipse(t.x,g.y+g.w*.32,Math.max(8,20-t.lift*.13),4,0,0,2*Math.PI);ctx.fill();
- if(ready("moa")){ctx.drawImage(images.moa,t.x-size/2,t.y-size*.94,size,size)}
- else{ctx.fillStyle="#fff3da";ctx.beginPath();ctx.arc(t.x,t.y-size*.35,size*.26,0,Math.PI*2);ctx.fill();text("모아",t.x,t.y-size*.35,14,"#234d42","center",700)}
- ctx.restore()
+function paintMoa(g,phase,beatIndex,page){
+ const t=crestTravel(phase,g,beatIndex,page);
+ // Character smaller than notation and quieter than the notes.
+ const size=Math.min(display.mobile?53:49,g.w*(motion==="normal"?.34:.29));
+ ctx.save();ctx.globalAlpha=t.opacity;
+ ctx.fillStyle="#0f362a36";ctx.beginPath();
+ ctx.ellipse(t.x,g.y+g.w*.32,Math.max(7,size*.24-t.lift*.11),3,0,0,Math.PI*2);ctx.fill();
+ if(ready("moa"))ctx.drawImage(images.moa,t.x-size/2,t.y-size*.94,size,size);
+ else{ctx.fillStyle="#fff3da";ctx.beginPath();ctx.arc(t.x,t.y-size*.35,size*.26,0,Math.PI*2);ctx.fill();text("모아",t.x,t.y-size*.35,11,"#234d42","center",700)}
+ ctx.restore();
 }
 function render(b){
  layout();const W=display.width,H=display.height,m=display.mobile;
@@ -271,12 +298,10 @@ function render(b){
   for(let col=0;col<perRow;col++){const k=start+row*perRow+col;if(k>=endBeat())continue;
    const g=geometry(k,page);paintHeart(k,g,k===active,k===active)}
  }
- if(active>=start&&active<start+page.pageBars*song.meter&&!reduced&&playing){
-  const g=geometry(active,page);paintMoa(g,b-active)
- }else if(active>=start&&active<start+page.pageBars*song.meter&&!playing){
-  const g=geometry(active,page);paintMoa(g,0)
+ if(active>=start&&active<start+page.pageBars*song.meter){
+  const g=geometry(active,page);paintMoa(g,Math.max(0,Math.min(.9999,b-active)),active,page)
  }
- text("하트 한 개 = 한 박     ·     모아의 두 봉우리 점프 = 박자 연습",W/2,H-(m?144:134),m?17:15,theme==="classroom"?"#214b3d":"#ecf2df","center",680);
+ text("한 하트 · 두 번의 가벼운 발걸음     ·     실제 음의 길이는 그대로",W/2,H-(m?144:134),m?17:15,theme==="classroom"?"#214b3d":"#ecf2df","center",680);
  $("#hudProgress").textContent=String(Math.min(song.bars.length,Math.floor(Math.max(0,b)/song.meter)+1)).padStart(2,"0")+" / "+String(song.bars.length).padStart(2,"0")+" 마디";
  return page
 }
@@ -311,9 +336,9 @@ async function togglePlay(){
  played=new Set(song.events.filter(e=>e.start<beat-.02).map(e=>e.id));
  startedAt=performance.now()-(beat+song.meter)*beatSeconds()*1000;
  playing=true;setPlayLabel();
- status.innerHTML="<strong>모아와 함께</strong> · 왼쪽, 오른쪽!";rafId=requestAnimationFrame(loop)
+ status.innerHTML="<strong>모아와 함께</strong> · 왼쪽과 오른쪽 봉우리를 차분히 밟아요";rafId=requestAnimationFrame(loop)
 }
-function reset(){stop();beat=-song.meter;played.clear();status.innerHTML="<strong>연주 준비</strong> · 왼쪽에서 오른쪽으로 두 번 깡충";render(beat)}
+function reset(){stop();beat=-song.meter;played.clear();status.innerHTML="<strong>연주 준비</strong> · 한 박에 두 걸음, 조금 낮고 차분하게";render(beat)}
 playButton.addEventListener("click",()=>togglePlay().catch(e=>{status.textContent="오디오를 시작할 수 없어요: "+e.message;stop()}));
 $("#restart").addEventListener("click",reset);
 $("#full").addEventListener("click",async()=>{try{if(!document.fullscreenElement)await $("#stage").requestFullscreen();else await document.exitFullscreen()}catch(e){status.textContent="전체 화면을 지원하지 않는 브라우저입니다"}});
@@ -321,6 +346,7 @@ const songPicker=$("#song");
 songPicker.innerHTML=SCORES.map((s,i)=>'<option value="'+i+'">'+s.title.replaceAll("<","&lt;")+'</option>').join("");
 songPicker.addEventListener("change",()=>{song=SCORES[+songPicker.value];$("#hudTitle").textContent=song.title;reset()});
 $("#tempo").addEventListener("change",e=>{speed=+e.target.value;reset()});
+$("#moaMotion").addEventListener("change",e=>{motion=e.target.value;render(beat)});
 $("#notes").addEventListener("change",()=>{document.querySelectorAll(".key").forEach(k=>k.setAttribute("aria-disabled",String(!allowedNotes().includes(k.dataset.note))))});
 const allowedNotes=()=>{const v=+$("#notes").value;return v===3?["도","미","솔"]:v===5?["도","레","미","솔","라"]:NOTES};
 document.querySelectorAll("[data-theme]").forEach(btn=>btn.addEventListener("click",()=>{
@@ -332,7 +358,7 @@ document.querySelectorAll(".key").forEach(k=>k.addEventListener("click",async()=
  makeTone(k.dataset.note,audio.currentTime+.015,.35);k.classList.add("is-hit");setTimeout(()=>k.classList.remove("is-hit"),180)}
  catch(e){status.textContent="악기 소리를 낼 수 없어요"}
 }));
-window.__HEART_V4_QA__={beatParts,geometry,crestTravel,pageAt,getState:()=>({beat,playing,theme,meter:song.meter,title:song.title}),render:(b)=>render(b),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
+window.__HEART_V4_QA__={beatParts,geometry,crestTravel,pageAt,getState:()=>({beat,playing,theme,motion,meter:song.meter,title:song.title}),render:(b)=>render(b),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
 window.addEventListener("resize",()=>render(beat));
 getAssets();$("#hudTitle").textContent=song.title;reset();
 });
