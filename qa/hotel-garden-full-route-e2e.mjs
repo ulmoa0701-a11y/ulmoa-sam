@@ -93,7 +93,7 @@ async function playEye(){
 }
 async function playSmog(){
  for(let cycle=0;cycle<3;cycle++){
-  const arrival=await walkTo(29,-23,5.0,22000);
+  const arrival=await walkTo(29,-23,5.2,65000);
   if(!arrival.near && (await state()).smog.mode==='approach')throw Error('SMOG cannot approach cycle '+(cycle+1));
   await page.waitForFunction(()=>window.__ulmoaGameQa.state().smog.mode==='danger',{timeout:10000});
   const s=await state(),away=direction(s.player[0]-29,s.player[1]+23);
