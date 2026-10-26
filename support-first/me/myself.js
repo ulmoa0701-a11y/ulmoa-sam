@@ -93,6 +93,10 @@ function buttonFor([key,title,icon,tone],chapter){
 function replyText(){
  const choice=answers[step].choice;
  if(!choice)return"";
+ if(step===2&&activeConcern()){
+  const selected=config(2).choices.find(item=>item[0]===choice);
+  return selected?"‘"+selected[1]+"’이 떠오르는구나. 어떤 일이 있는지는 네가 이야기하고 싶을 때 더 알아봐도 돼.":"";
+ }
  return reactions[chapters[step].id]?.[choice]||"네가 고른 내용을 그대로 기억해둘게. 왜 그랬는지는 단정하지 않을게.";
 }
 function showReply(){
@@ -163,6 +167,8 @@ function renderPreview(){
  $("intro-text").value=content;$("intro-text").readOnly=!selected.length;
  $("summary-empty").hidden=selected.length>0;
  $("copy").disabled=!selected.length;
+ $("print").disabled=!selected.length;
+ $("print-safe-body").textContent=content;
  freeEdited=false;$("copy-feedback").textContent="";
 }
 function buildShare(){
@@ -225,7 +231,7 @@ $("own-send").addEventListener("click",()=>{
  answers[step].own=text.slice(0,120);
  answers[step].sent=true;$("typed-preview").textContent=answers[step].own;$("typed-exchange").hidden=false;
 });
-$("intro-text").addEventListener("input",()=>{freeEdited=true;$("copy-feedback").textContent="";});
+$("intro-text").addEventListener("input",()=>{freeEdited=true;$("print-safe-body").textContent=$("intro-text").value;$("copy-feedback").textContent="";});
 $("rebuild").addEventListener("click",renderPreview);
 $("copy").addEventListener("click",async()=>{
  if($("copy").disabled)return;
@@ -236,6 +242,12 @@ $("copy").addEventListener("click",async()=>{
   status.textContent="복사했어. 직접 공유할 때 보여줄 내용을 확인해줘.";
  }catch{status.textContent="자동 복사가 어려워. 위 글을 직접 복사하거나 화면으로 보여줄 수 있어.";}
 });
-$("print").addEventListener("click",()=>window.print());
+$("print").addEventListener("click",()=>{
+ if($("print").disabled)return;
+ $("print-safe-body").textContent=$("intro-text").value;
+ window.print();
+});
+// Browser back-forward cache can preserve sensitive answers on shared devices.
+window.addEventListener("pageshow",event=>{if(event.persisted)window.location.reload();});
 paint();
 })();
