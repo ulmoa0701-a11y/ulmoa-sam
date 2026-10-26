@@ -34,3 +34,11 @@
    positions overlapped, preventing a real touch on the guide button. */
 body.moa-rescue-page #habomFeedbackLauncher{left:12px;right:auto}
 @media(max-width:440px){body.moa-rescue-page #habomFeedbackLauncher{left:8px;right:auto}}
+
+/* A completed game can still show its result-feedback button when the
+   therapist opens settings. Do not let it cover the panel's close control.
+   The feedback button reappears automatically when panels close. */
+#teacherPanel:not([hidden]) ~ .game-frame #habomFeedbackRescueFinish,
+#voicePanel:not([hidden]) ~ .game-frame #habomFeedbackRescueFinish{
+  display:none!important;
+}
