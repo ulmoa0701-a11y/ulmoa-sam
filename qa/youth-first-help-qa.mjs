@@ -112,6 +112,9 @@ for(const width of [390,1280]){
   await check(await page.locator('button[data-option="text"]').getAttribute('aria-pressed')==='true',width+'px back retains support choice');
   // A previously consented topic must NOT remain auto-shared after any revision.
   await page.locator('button[data-option="example"]').click();
+  await check((await page.locator('#print-safe-body').textContent())==='',width+'px old printable draft cleared immediately after revision');
+  await check(await page.locator('#print').isDisabled(),width+'px old print permission withdrawn before returning to summary');
+  await check(await page.locator('#copy').isDisabled(),width+'px old copy permission withdrawn before returning to summary');
   await page.locator('#next').click();
   await page.locator('#next').click();
   await check(!(await page.locator('input[data-share="support"]').isChecked()),width+'px support choice change revokes previous consent');
