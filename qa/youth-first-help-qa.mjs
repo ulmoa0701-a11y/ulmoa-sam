@@ -22,8 +22,10 @@ for(const width of [390,1280]){
  const ctx=await browser.newContext({viewport:{width,height:870},deviceScaleFactor:1,locale:'ko-KR',permissions:['clipboard-read','clipboard-write']});
  const page=await ctx.newPage();
  const pageErrors=[],outbound=[];
+ let inspectConversationRequests=false;
  page.on('pageerror',e=>pageErrors.push(e.message));
  page.on('request',r=>{
+  if(!inspectConversationRequests)return;
   const host=new URL(r.url()).hostname;
   if(!['127.0.0.1','localhost','ulmoa0701-a11y.github.io'].includes(host))outbound.push(r.url());
  });
@@ -31,6 +33,8 @@ for(const width of [390,1280]){
  await page.goto(new URL('support-first/',BASE).href,{waitUntil:'domcontentloaded'});
  await check(await page.locator('[data-key]').count()===6,width+'px original first-help entry preserved');
  await check(await page.locator('a[href="me/"]').count()===1,width+'px original link into first conversation preserved');
+ // The unrelated entry page may load its own remote UI assets; audit only the newly rebuilt page.
+ inspectConversationRequests=true;
  await page.goto(url,{waitUntil:'domcontentloaded'});
  await check(await page.locator('#welcome-title').isVisible(),width+'px new story opening visible');
  await check(await page.locator('.world-moa').count()===1,width+'px original Moa visual retained');
@@ -129,7 +133,7 @@ for(const width of [390,1280]){
  await page.locator('#next').click();
  await check(await page.locator('#result').isVisible(),width+'px uncertain answers are valid, non-diagnostic');
  await check((await page.locator('#recap-items').textContent()).includes('잘 모르겠어'),width+'px uncertainty distinct from skipping');
- await check(outbound.length===0,width+'px no third party data or font requests');
+ await check(outbound.length===0,width+'px no third party data or font requests '+outbound.join('|'));
  await check(pageErrors.length===0,width+'px no JavaScript runtime exceptions '+pageErrors.join('|'));
  await fit(page,width,'result');
  await ctx.close();
