@@ -90,10 +90,36 @@ function buttonFor([key,title,icon,tone],chapter){
  });
  return button;
 }
+const momentReactions={
+ school:{
+  before:"등교 준비할 때가 신경 쓰이는구나. 어떤 점이 어려운지는 네가 말하고 싶을 때 함께 알아보자.",
+  enter:"교실에 들어갈 때가 떠오르는구나. 더 편하게 시작할 수 있는 방법이 있는지 같이 생각해볼 수 있어.",
+  class:"수업이나 과제할 때라고 골랐네. 무엇이 부담인지 상담에서 천천히 알아봐도 돼.",
+  peer:"학교에서 사람을 마주칠 때라고 골랐네. 누구인지 말하지 않아도 괜찮아."
+ },
+ people:{
+  start:"먼저 말을 시작할 때가 떠오르는구나. 말하지 않고 시작하는 방법도 있어.",
+  reply:"질문에 답할 때라고 골랐네. 생각할 시간이나 다른 표현 방법이 필요할 수도 있겠어.",
+  misunderstand:"오해나 갈등이 생기는 순간이라고 골랐네. 자세한 일은 꼭 지금 말하지 않아도 돼.",
+  alone:"사람들과 있어도 혼자라고 느껴지는 순간을 골랐네. 그 마음을 이해하기 위해 더 천천히 이야기해도 돼."
+ },
+ feeling:{
+  morning:"하루를 시작할 때가 특히 신경 쓰이는구나. 어떤 도움이 편한지 같이 살펴볼 수 있어.",
+  activity:"무언가를 해야 할 때가 떠오르는구나. 시작하는 방식부터 조정할 수도 있어.",
+  night:"저녁이나 잠들기 전이라고 골랐네. 잠과 기분에 관해 더 이야기할지는 네가 정해.",
+  unknown:"이유를 말로 설명하기 어렵다고 골랐네. 지금 바로 알아야 하는 건 아니야."
+ },
+ daily:{
+  home:"집에서 누군가와 이야기할 때라고 골랐네. 특정 사람이나 일을 말하지 않아도 괜찮아.",
+  schedule:"해야 할 일을 시작할 때가 떠오르는구나. 한 번에 하나씩 시작하는 방법도 생각해볼 수 있어.",
+  change:"예상과 달라졌을 때라고 골랐네. 그 순간 필요한 도움을 천천히 알아볼 수 있어.",
+  alone:"혼자 해결해야 하는 순간을 골랐네. 도움을 청할 방법도 함께 찾아볼 수 있어."
+ }
+};
 function replyText(){
  const choice=answers[step].choice;
  if(!choice)return"";
- return reactions[chapters[step].id]?.[choice]||"네가 고른 내용을 그대로 기억해둘게. 왜 그랬는지는 단정하지 않을게.";
+ return (step===2&&activeConcern()?momentReactions[activeConcern()]?.[choice]:null)||reactions[chapters[step].id]?.[choice]||"네가 고른 내용을 그대로 기억해둘게. 왜 그랬는지는 단정하지 않을게.";
 }
 function showReply(){
  const conf=config(step),answer=answers[step],item=conf.choices.find(x=>x[0]===answer.choice);
