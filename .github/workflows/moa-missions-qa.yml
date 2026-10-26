@@ -5,6 +5,7 @@ on:
     paths:
       - 'thinking-garden/games/moa-missions/**'
       - 'qa/moa-missions-qa.mjs'
+      - 'qa/garden-schoolbag-full-play-qa.mjs'
       - 'gardens/index.html'
       - 'gardens/catalog.js'
       - '.github/workflows/moa-missions-qa.yml'
@@ -12,6 +13,7 @@ on:
     paths:
       - 'thinking-garden/games/moa-missions/**'
       - 'qa/moa-missions-qa.mjs'
+      - 'qa/garden-schoolbag-full-play-qa.mjs'
       - 'gardens/index.html'
       - 'gardens/catalog.js'
       - '.github/workflows/moa-missions-qa.yml'
@@ -31,6 +33,7 @@ jobs:
         run: |
           node --check thinking-garden/games/moa-missions/app.js
           node --check qa/moa-missions-qa.mjs
+          node --check qa/garden-schoolbag-full-play-qa.mjs
       - name: Install browser automation
         run: npm install --no-save playwright-core@1.56.1
       - name: Find Chrome
@@ -46,6 +49,8 @@ jobs:
           exit 1
       - name: Play every mission
         run: node qa/moa-missions-qa.mjs
+      - name: Complete 120 real-choice schoolbag rounds on mobile and desktop
+        run: node qa/garden-schoolbag-full-play-qa.mjs
       - name: Play published mission pages
         env:
           TEST_BASE_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam
