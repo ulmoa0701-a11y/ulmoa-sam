@@ -1,0 +1,49 @@
+name: Instant Game Feedback QA
+on:
+  pull_request:
+    paths:
+      - 'assets/habom-game-feedback.*'
+      - 'qa/game-feedback-*.mjs'
+      - '.github/workflows/game-feedback-qa.yml'
+      - 'thinking-garden/**/index.html'
+      - 'thinking-garden/index.html'
+      - 'breath-garden/index.html'
+  push:
+    branches: [main]
+    paths:
+      - 'assets/habom-game-feedback.*'
+      - 'qa/game-feedback-*.mjs'
+      - '.github/workflows/game-feedback-qa.yml'
+permissions:
+  contents: read
+jobs:
+  verify-game-feedback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser tests
+        run: npm install --no-save --no-package-lock playwright-core@1.56.1
+      - name: Find Chromium
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Check scripts
+        run: |
+          node --check assets/habom-game-feedback.js
+          node --check qa/game-feedback-ui-qa.mjs
+          node --check qa/game-feedback-form-prefill-check.mjs
+      - name: Serve all games
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/game-feedback-server.log 2>&1 &
+          for i in {1..40}; do curl -fsS http://127.0.0.1:8765/thinking-garden/ >/dev/null && exit 0; sleep .25; done
+          cat /tmp/game-feedback-server.log
+          exit 1
+      - name: Launch feedback from each standalone game and main hub on mobile and desktop
+        run: node qa/game-feedback-ui-qa.mjs
+      - name: Inspect public Jotform prefill aliases without submitting user data
+        run: node qa/game-feedback-form-prefill-check.mjs
