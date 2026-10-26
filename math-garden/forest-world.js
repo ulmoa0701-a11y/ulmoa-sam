@@ -396,6 +396,7 @@ function showTab(tab){
  state.tab=tab;save();
  ['quest','gather','pet','build'].forEach(t=>{ $('panel'+t[0].toUpperCase()+t.slice(1)).hidden = t!==tab; });
  Array.from($('tabbar').children).forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.tab===tab)));
+ stage.classList.toggle('compact',tab!=='quest');
  renderVillageAll();
 }
 function buildTabbar(){

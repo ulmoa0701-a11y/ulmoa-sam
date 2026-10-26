@@ -4,14 +4,14 @@
 @media(max-width:650px){
 .mast{padding:10px 12px;min-height:64px}.back{font-size:13px}.identity{font-size:14px}.identity span{display:none}.controls{gap:5px}.controls button{font-size:11px;min-height:44px;padding:7px}
 .main{padding:10px 7px}.topline{padding:6px 7px 10px}.topline h1{font-size:27px}.overline{font-size:11px}.chapter-dot{width:31px;height:31px;font-size:12px}.chapters{gap:5px}
-.stage{border-width:5px;border-radius:25px;min-height:600px;background-position:50% center}.scenecontent{padding:9px 5px 15px}.storybar{gap:4px}.story-character{flex-basis:49px;height:63px}.story-character svg,.story-character img{width:56px;height:63px;object-fit:contain}.story-cloud{padding:8px 10px;min-height:65px;border-width:3px;border-radius:20px}.story-cloud p{font-size:16px}.story-cloud small{font-size:11px}.look{width:39px;height:39px;flex:none;border-width:3px;font-size:22px}.play{margin-top:8px;min-height:460px}
+.stage{border-width:5px;border-radius:25px;min-height:600px;background-position:50% center}.stage.compact{min-height:380px}.scenecontent{padding:9px 5px 15px}.storybar{gap:4px}.story-character{flex-basis:49px;height:63px}.story-character svg,.story-character img{width:56px;height:63px;object-fit:contain}.story-cloud{padding:8px 10px;min-height:65px;border-width:3px;border-radius:20px}.story-cloud p{font-size:16px}.story-cloud small{font-size:11px}.look{width:39px;height:39px;flex:none;border-width:3px;font-size:22px}.play{margin-top:8px;min-height:460px}
 .intro,.lesson,.quest,.success,.chapter-result{width:100%;border-width:4px;padding:13px 9px;min-height:380px;border-radius:27px;box-shadow:0 7px 0 #998b6a}.intro-title{font-size:24px}.intro p{font-size:14px}.btn{min-height:58px;font-size:18px;padding:10px 19px}.lesson-foot{gap:8px}.visual-equation{font-size:14px}.observation{font-size:12px}.demo-pair,.hungry-friend{min-width:78px;min-height:108px;padding:4px;border-width:2px;border-radius:16px}.demo-pair .forest-friend,.hungry-friend .forest-friend{width:73px;height:78px;object-fit:contain}.match-slot{min-width:37px;min-height:37px}.food{width:32px;height:36px;flex-basis:32px}.food:before{width:25px;height:13px;top:-4px}.food:after{top:-10px;left:15px}.food.mini{width:23px;height:26px;flex-basis:23px}.food.mini:before{width:17px;height:8px}.quest{gap:8px;min-height:418px}.quest-chip{font-size:12px}.quest-board{min-height:275px;gap:5px}.friends-line,.demo-friends{gap:5px}
 .delivery-line{gap:7px;flex-wrap:nowrap}.supply,.delivery{min-width:0;width:49%;min-height:112px}.supply-items{max-width:150px;aspect-ratio:149/210}.supply-items .tree-pile{max-height:42%}.supply-items .interaction{min-width:34px;min-height:36px;padding:1px}.packed-food{max-width:160px;width:94%}.packed-food .basket-pile{height:52%}.packed-food .interaction{min-width:24px;min-height:28px}.supply-caption{font-size:10px;padding:3px 5px;margin:1px}.quest-actions .btn{font-size:17px;min-height:51px}
 .compare-path{gap:8px}.compare-path .interaction{width:47%;padding:10px 5px;min-height:160px}.fruit-pile{gap:4px;max-width:160px}.make-board{padding:7px;gap:3px;border-width:4px;max-width:100%}.make-board .match-slot{width:43px;height:43px}.scaffold{padding:6px}.scaffold p{font-size:11px}.feedback-error{font-size:13px}
 .success-line{gap:6px}.served .forest-friend{width:62px;height:70px;object-fit:contain}.served{padding:4px}.success h2,.chapter-result h2{font-size:23px}.result-actions button{font-size:15px;min-height:51px;padding:9px}
 .lower{padding:16px 7px;align-items:flex-start}.lower p{font-size:13px}.lower-actions button{font-size:12px}.small-info{font-size:11px}
 }
-@media(max-width:355px){.identity{display:none}.stage{min-height:640px}.friends-line{gap:2px}.hungry-friend{min-width:65px}.hungry-friend .forest-friend{width:62px}.packed-food .food.mini{transform:scale(.85)}}
+@media(max-width:355px){.identity{display:none}.stage{min-height:640px}.stage.compact{min-height:420px}.friends-line{gap:2px}.hungry-friend{min-width:65px}.hungry-friend .forest-friend{width:62px}.packed-food .food.mini{transform:scale(.85)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 
 /* QA-discovered readability and instructional differentiation */
@@ -81,7 +81,7 @@ button.feed-friend.friend-fed .forest-friend{transform:translateY(-3px)}
 .res img{width:28px;height:28px;object-fit:contain}
 
 /* panel system (quest / gather / pet / build share this) */
-.panel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:10px 12px 24px}
+.panel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:10px 12px 24px}.stage.compact{min-height:420px}
 .panel[hidden]{display:none}
 .panel-quest{padding:0;gap:0;display:block}
 .panel-quest .topline{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:4px 10px 14px}
