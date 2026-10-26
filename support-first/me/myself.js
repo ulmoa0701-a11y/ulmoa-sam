@@ -173,13 +173,23 @@ function buildShare(){
   const c=document.createElement("input");c.type="checkbox";c.checked=disclose[chapter.id];c.dataset.share=chapter.id;
   const text=document.createElement("span");text.textContent=d.label+" · "+(d.selection||"건너뛰었어");
   main.append(c,text);outer.append(main);
+  let noteCheckbox=null;
   if(d.own){
     const note=document.createElement("label");note.className="handoff-note";
-    const check=document.createElement("input");check.type="checkbox";check.checked=discloseNotes[chapter.id];check.dataset.note=chapter.id;
+    const check=document.createElement("input");check.type="checkbox";check.checked=disclose[chapter.id]&&discloseNotes[chapter.id];check.disabled=!disclose[chapter.id];check.dataset.note=chapter.id;
+    noteCheckbox=check;
     const l=document.createElement("span");l.textContent="내가 직접 쓴 문장도 포함";note.append(check,l);outer.append(note);
     check.addEventListener("change",()=>{discloseNotes[chapter.id]=check.checked;renderPreview();});
   }
-  c.addEventListener("change",()=>{disclose[chapter.id]=c.checked;renderPreview();});
+  c.addEventListener("change",()=>{
+   disclose[chapter.id]=c.checked;
+   if(!c.checked){
+     // Removing permission to share this topic also revokes permission for its free text.
+     discloseNotes[chapter.id]=false;
+   }
+   if(noteCheckbox){noteCheckbox.checked=disclose[chapter.id]&&discloseNotes[chapter.id];noteCheckbox.disabled=!c.checked;}
+   renderPreview();
+  });
   area.append(outer);
  });
  renderPreview();
