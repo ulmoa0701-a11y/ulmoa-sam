@@ -185,7 +185,7 @@ function paint(focus=false){
 }
 function capture(){
  const answer=answers[step];
- if(!answer.choice){answer.own="";answer.sent=false;return;}
+ if(!answer.choice||answer.choice==="unsure"){answer.own="";answer.sent=false;return;}
  answer.own=$("own-input").value.slice(0,120);
 }
 function next(){capture();if(step===4)finish();else{step++;paint(true);}}
