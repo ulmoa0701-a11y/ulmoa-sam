@@ -24,6 +24,7 @@ const checks=[
  {ids:['rhythm-touch'],script:'thinking-garden/games/rhythm-touch/qa.mjs',level:'5 viewports and scored simulated timeline; includes physical key taps but not live music performance'},
  {ids:['recorder'],script:'qa/recorder-full-play-qa.cjs',level:'4 full virtual fingering sessions / 32 physical button rounds; no actual instrument/camera accuracy'},
  {ids:['strength','long','beat'],script:'qa/breath-recorder-integrated-qa.mjs',level:'entry and settings only; no full microphone play or real wind accuracy'},
+ {ids:['strength','long','beat'],script:'qa/breath-synthetic-full-goal-qa.cjs',level:'full goals on desktop/mobile with mocked microphone and synthetic analyser; not actual breath or physical microphone'},
 ];
 const index=new Map(all.map(id=>[id,[]]));
 for(const test of checks){
@@ -39,15 +40,17 @@ const fullUnknown=['strength','long','beat'];
 const report={scope:'34-game code and synthetic-browser regression mapping, NOT real child or hardware validation',
  at:new Date().toISOString(),count:all.length,native:24,independent:10,
  actualFullBreathModeCoverage:false,
+ syntheticBreathFullGoalCoverage:true,
  humanTesting:false,
  gameSummaries:[...index].map(([id,tests])=>({
   id,tests,needsPhysicalDevice:hardwareGaps.includes(id),
-  noFullGameplayProven:fullUnknown.includes(id)
+  noRealMicrophoneFullGameplayProven:fullUnknown.includes(id),
+  syntheticAudioFullGoalProven:fullUnknown.includes(id)
  })),
  openGaps:['Real microphone/wind-controlled full sessions for strength, long and beat',
    'Real camera tracking / real recorder fingering and sound',
    'Real human comprehension, enjoyment, motion accessibility and educational/clinical outcomes'],
- limitations:'CI reports virtual browsers; simulated gestures, demo mode, source-only checks and page opens are not equivalent to real-device or human validation.'
+ limitations:'Synthetic audio completes three breath goals via the production analyser path but does NOT measure physical breathing or real microphones. CI virtual browsers, simulated gestures, demo mode, source-only checks and page opens are not equivalent to real-device or human validation.'
 };
 fs.mkdirSync('qa/34-audit-artifacts',{recursive:true});
 fs.writeFileSync('qa/34-audit-artifacts/report.json',JSON.stringify(report,null,2)+'\n');
