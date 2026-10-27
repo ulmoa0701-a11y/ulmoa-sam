@@ -91,10 +91,11 @@ for(const width of [390,1280]){
  await check(await page.locator('#share-text').count()===0,width+'px no big empty summary textarea');
  await check(await page.locator('#copy').isEnabled(),width+'px one action to copy complete finished report');
  await check(await page.locator('#print').isEnabled(),width+'px one action to print whole finished letter');
- await check((await page.locator('.paper-message').textContent()).includes('너는'),width+'px honest brief introduction personalizes letter');
+ await check((await page.locator('.paper-message').textContent()).includes('편한 순간으로 고른 건'),width+'px honest brief introduction personalizes letter');
  await check((await page.locator('#letter-next').textContent()).includes('함께 해보기'),width+'px personal next visit aspiration included');
  await screenshot(page,width,'personal-letter');
  await page.locator('#copy').click();
+ await page.waitForFunction(()=>document.querySelector('#share-status')?.textContent?.length>0,null,{timeout:4000});
  await check((await page.locator('#share-status').textContent()).length>0,width+'px full copy action provides status');
  const copied=await page.evaluate(async()=>await navigator.clipboard.readText());
  await check(copied.includes('요즘 시작이 쉽지 않아')&&copied.includes('게임·영상')&&copied.includes('설명이 잘 이해되지 않아')&&copied.includes('고르거나 글로 이야기하기'),width+'px clipboard includes all original choices detail and own words');
