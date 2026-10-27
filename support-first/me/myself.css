@@ -440,3 +440,5 @@ dialog form{display:flex;justify-content:flex-end}
  #letter-page .reflection-part h3{font-size:9pt}
  #letter-page .letter-forward,#letter-page .letter-signature{break-inside:avoid}
 }
+
+@media print{#letter-page .paper-divider{display:none}#letter-page .letter-memories{break-before:page;padding-top:8mm}#letter-page .letter-memories h2{break-after:avoid}}
