@@ -47,10 +47,10 @@ for(const [label,width,height] of [
   check(state.metaRobots?.includes('noindex'),label+': index enabled before privacy gate');
   check(!!state.ogTitle&&!!state.ogDescription&&state.ogImage?.startsWith('https://'),
     label+': social preview metadata missing');
-  check(state.shortcuts.length===8,label+': 8 shortcut destinations are not preserved');
+  check(state.shortcuts.length===9 && new Set(state.shortcuts).size===9,label+': 9 distinct shortcut destinations are not preserved');
   check(state.primary.join('|')==='gardens/#cognitive|materials/|notes/',
     label+': game/material/learn first-visit order differs '+state.primary.join('|'));
-  check(['music-garden/','gardens/#heart','brain-map/','parents/','request/'].every(h=>state.shortcuts.includes(h)),
+  check(['music-garden/','gardens/#heart','brain-map/','parents/','support-first/','request/'].every(h=>state.shortcuts.includes(h)),
     label+': a secondary shortcut disappeared');
   check(state.featured.join('|')==='gardens/#cognitive|music-garden/'&&state.approvedMusic,
     label+': approved featured garden art or routes changed');

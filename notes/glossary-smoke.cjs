@@ -267,7 +267,7 @@ const path=require("node:path");
       assert.equal(await cards.count(),6,"original album still uses six images per page");
       assert.equal(await paged.isVisible(),true,"album pagination still works");
       await page.locator('.gcat-tab[data-tab="cognitive"]').click();
-      await page.evaluate(()=>scrollTo(0,280));
+      await page.locator(".gcat-search-rail").evaluate(el=>scrollTo(0,el.getBoundingClientRect().top+scrollY+180));
       await page.waitForTimeout(120);
       const sticky=await page.locator(".gcat-search-rail").evaluate(x=>({top:x.getBoundingClientRect().top,position:getComputedStyle(x).position,scroll:scrollY}));
       assert.equal(sticky.position,"sticky");

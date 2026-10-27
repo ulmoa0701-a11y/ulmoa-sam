@@ -2,21 +2,21 @@ import {chromium} from 'playwright-core';
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 const base=process.env.MOA_BASE||'http://127.0.0.1:8765/';
-const out='qa/moa-speaking-artifacts';
+const out=process.env.MOA_OUT||'qa/moa-speaking-artifacts';
 const pages=[
  ['home','',true],['brain-map','brain-map/',true],['materials','materials/',true],
  ['notes','notes/',true],['parents','parents/',true],['info','info/',true],
- ['request','request/',true],['gardens','gardens/',false],
- ['music-garden','music-garden/',false],['thinking-garden','thinking-garden/',false]
+ ['request','request/',true],['gardens','gardens/',true],
+ ['music-garden','music-garden/',true],['thinking-garden','thinking-garden/',true]
 ];
 const viewports=[['desktop',1440,900],['tablet',820,920],['mobile',390,844],['small-phone',320,720]];
 await mkdir(out,{recursive:true});
-const browser=await chromium.launch({executablePath:process.env.CHROME_BIN||'/usr/bin/chromium',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+const browser=await chromium.launch({executablePath:process.env.CHROME_BIN||'/usr/bin/chromium',headless:true,...(process.env.MOA_PROXY?{proxy:{server:process.env.MOA_PROXY,bypass:'127.0.0.1,localhost'}}:{}),args:['--no-sandbox','--disable-dev-shm-usage']});
 const summary=[];
 try{
  for(const [size,width,height] of viewports){
   for(const [name,path,hasPortrait] of pages){
-   const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:1});
+   const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:1,ignoreHTTPSErrors:process.env.MOA_PROXY_INSECURE==='1'});
    await page.addInitScript(()=>{
      const mock={
        getVoices:()=>[],
@@ -28,6 +28,7 @@ try{
    try{
     const res=await page.goto(base+path,{waitUntil:'domcontentloaded',timeout:30000});
     assert.equal(res?.status(),200,name+' HTTP 200');
+    await page.evaluate(()=>document.fonts.ready);
     const guide=page.locator('.moa-page-guide');
     assert.equal(await guide.count(),1,name+' has exactly one Moa introduction');
     await guide.waitFor({state:'visible'});
@@ -42,14 +43,14 @@ try{
         background:style.backgroundColor,
         messageSize:parseFloat(ms.fontSize),font:ms.fontFamily,text:m.textContent.trim(),
         imageSrc:image?.getAttribute('src')||'',imageLoaded:!!image?.naturalWidth,
-        cssPresent:[...document.styleSheets].some(x=>(x.href||'').includes('moa-page-guide.css?v=20261022-short1'))};
+        cssPresent:[...document.styleSheets].some(x=>(x.href||'').includes('moa-page-guide.css?v=20261027-conversation1'))};
     });
     assert.ok(state.cssPresent,'updated guide stylesheet used: '+name);
     assert.ok(state.x>=-1&&state.right<=width+1,'horizontal guide fits: '+name+' '+size+' '+JSON.stringify(state));
-    assert.ok(state.height>=45&&state.height<=125&&state.borderWidth>=1,'compact visible bubble: '+name+' '+size+' '+JSON.stringify(state));
+    assert.ok(state.height>=45&&state.height<=160&&state.borderWidth>=1,'compact visible bubble: '+name+' '+size+' '+JSON.stringify(state));
     assert.ok(state.text.length>=10&&state.text.length<=38,'short nonfatiguing utterance: '+name+' length '+state.text.length);
-    assert.ok(state.font.includes('Pretendard'),'clear readable type for one-line utterance: '+name+' '+state.font);
-    assert.ok(state.messageSize>=13,'compact speech remains legible: '+name);
+    assert.ok(state.font.includes('Nanum Pen Script'),'handwriting accent for short speech: '+name+' '+state.font);
+    assert.ok(state.messageSize>=20,'compact speech remains legible: '+name);
     const button=guide.locator('.moa-page-guide__listen');
     assert.equal(await button.count(),1,name+' has one optional speech button');
     assert.equal(await button.getAttribute('aria-pressed'),'false','no speech autoplay');
@@ -86,9 +87,13 @@ try{
        assert.equal((await nav.first().innerText()).includes('3D 뇌지도'),false,'outdated 3D-only menu gone');
      }
     }
-    if(size==='desktop'||size==='mobile'){
+    if(true){
+     if(name==='brain-map')await page.locator('#lobesTab').click();
+     await page.mouse.move(0,0);
      await page.screenshot({path:`${out}/${name}-${size}.png`,fullPage:false,animations:'disabled'});
     }
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'page fits viewport: '+name+' '+size);
+    if(name==='request'){await page.locator('#privatePostTab').click();assert.equal(await page.locator('#privatePostPanel').isVisible(),true);await page.locator('#publicPostTab').click();assert.equal(await page.locator('#publicPostPanel').isVisible(),true);}
     summary.push({name,size,width,height,guideTop:Math.round(state.y),textSize:state.messageSize,image:hasPortrait});
    }finally{await page.close();}
   }

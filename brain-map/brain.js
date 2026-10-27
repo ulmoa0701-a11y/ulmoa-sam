@@ -269,7 +269,7 @@
   }
   viewTabs.forEach(button=>button.setAttribute('aria-selected',String(button.dataset.brainView===key)));
   const intro=document.getElementById('mapIntroText');
-  if(intro)intro.textContent=key==='hemispheres'?'좌뇌와 우뇌가 맡는 일을 비교하고, 함께하는 활동도 살펴봐요.':'생활 장면에서 보고, 듣고, 움직이고, 생각하는 여러 과정을 먼저 알아봐요.';
+  if(intro)intro.textContent=key==='hemispheres'?'좌뇌와 우뇌는 어떻게 함께 일할까?':'대화할 때 뇌는 어떻게 일할까? 장면을 골라보자!';
   if(updateHash)window.history.replaceState(null,'',key==='hemispheres'?'#hemispheres':'#lobes');
  }
  for(const button of viewTabs){

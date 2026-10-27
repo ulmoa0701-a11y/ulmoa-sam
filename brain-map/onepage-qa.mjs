@@ -29,7 +29,7 @@ try{
     };
     const faces=[...document.fonts].filter(x=>/MaruBuriSemiBold|Nanum Pen Script|Pretendard/i.test(x.family))
       .map(x=>({family:x.family,status:x.status}));
-    return {body:read('.brain-main .map-intro p'),title:read('.map-intro h1'),
+    return {body:read('#lobeSceneFocusText'),title:read('.map-intro h1'),
       subheading:read('.map-panel-heading h2'),card:read('.lobe-card small'),
       cardTitle:read('.lobe-card strong'),faces,hasGamjaOverride:!!document.querySelector('link[href*="habom-gamja-font"]')};
   });
@@ -541,7 +541,7 @@ try{
     const preview=await page.screenshot({type:'jpeg',quality:50,animations:'disabled'});
     console.log('BRAIN_HEMI_PREVIEW_'+name+'='+preview.toString('base64'));
   }
-  assert.equal(await page.locator('#mapIntroText').innerText(),'좌뇌와 우뇌가 맡는 일을 비교하고, 함께하는 활동도 살펴봐요.');
+  assert.equal(await page.locator('#mapIntroText').innerText(),'좌뇌와 우뇌는 어떻게 함께 일할까?');
   await page.locator('[data-brain-view="lobes"]').click();
   assert.equal(await page.locator('#lobesView').isVisible(),true,'Returning to original map should work');
   assert.equal(await page.locator('.lobe-card').count(),6,'Original cards preserved');

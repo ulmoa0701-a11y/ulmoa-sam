@@ -1,20 +1,30 @@
-/* 모아의 한마디 · 한 줄만 읽고 바로 시작할 수 있는 최소 안내 */
+/* A small conversation at the point of choice, never a full-width information card. */
 .moa-page-guide,.moa-page-guide *{box-sizing:border-box}
-.moa-page-guide{display:flex;align-items:center;gap:8px;position:relative;width:min(100%,850px);max-width:850px;min-width:0;margin:5px 0 14px;padding:0}
-.moa-page-guide__portrait{display:block;width:clamp(59px,7vw,78px);height:clamp(69px,8vw,90px);flex:none;object-fit:contain;filter:drop-shadow(0 3px 4px #45604d18)}
-.moa-page-guide__bubble{position:relative;display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;min-width:0;flex:1;padding:10px 13px 10px 18px;border:1px solid #d7e5d8;border-radius:17px;background:#fffefa;box-shadow:0 4px 10px #5369580b}
-.moa-page-guide__bubble::before{content:"";position:absolute;left:-6px;top:38%;width:10px;height:10px;background:#fffefa;border-left:1px solid #d7e5d8;border-bottom:1px solid #d7e5d8;transform:rotate(45deg)}
+.moa-page-guide{display:flex;align-items:center;gap:6px;position:relative;width:fit-content;max-width:100%;min-width:0;margin:8px 0 18px;padding:0;isolation:isolate}
+.moa-page-guide img.moa-page-guide__portrait{display:block;width:92px;height:104px;max-width:none;flex:0 0 auto;object-fit:contain;filter:none;transform:none;animation:none;margin:0;position:static}
+.moa-page-guide__bubble{position:relative;display:flex;align-items:center;gap:8px;min-width:0;max-width:400px;padding:14px 16px;border:1px solid #d9dfd0;border-radius:25px 29px 23px 9px;background:#fffef8;box-shadow:none}
+.moa-page-guide__bubble::before{content:"";position:absolute;left:-10px;top:calc(50% - 7px);width:16px;height:13px;background:#fffef8;border-left:1px solid #d9dfd0;border-bottom:1px solid #d9dfd0;transform:skewX(-30deg) rotate(14deg);border-radius:0 0 0 4px;z-index:-1}
 .moa-page-guide__title{display:none!important}
-.moa-page-guide .moa-page-guide__message,body .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message,#glossaryCatalog .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message{display:block;flex:1 1 235px;min-width:0;margin:0!important;font-family:"Pretendard Variable",Pretendard,SUIT,"Apple SD Gothic Neo",sans-serif!important;font-size:clamp(15px,1.55vw,19px)!important;font-weight:740!important;line-height:1.45!important;letter-spacing:-.04em!important;color:#2e4e39!important;word-break:keep-all!important}
-.moa-page-guide__listen{display:inline-flex;justify-content:center;align-items:center;flex:none;gap:5px;min-height:36px;padding:6px 12px;border:1px solid #cbdccc;border-radius:999px;color:#45654f;background:#f5faf4;font:750 12px/1.1 "Pretendard Variable",Pretendard,SUIT,sans-serif;cursor:pointer;white-space:nowrap}
-.moa-page-guide__listen:hover{background:#e8f4e9;border-color:#a8c9ad}
+.moa-page-guide .moa-page-guide__message,body .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message,#glossaryCatalog .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message{display:block;min-width:0;margin:0!important;font-family:var(--habom-accent-font,"Nanum Pen Script"),"Pretendard Variable",sans-serif!important;font-size:24px!important;font-weight:400!important;line-height:1.35!important;letter-spacing:0!important;color:#354d3c!important;word-break:keep-all!important;overflow-wrap:anywhere;text-wrap:pretty}
+.moa-page-guide__listen{display:inline-flex;justify-content:center;align-items:center;flex:0 0 auto;min-width:44px;min-height:44px;padding:5px;border:0;border-radius:50%;color:#526750;background:transparent;font:600 11px/1.1 sans-serif;cursor:pointer;white-space:nowrap}
+.moa-page-guide__listen:hover,.moa-page-guide__listen[aria-pressed="true"]{background:#e9efdf}
 .moa-page-guide__listen:focus-visible{outline:3px solid #3f7a56;outline-offset:2px}
-.moa-page-guide__listen[aria-pressed="true"]{background:#dceede;border-color:#78ae84}
 .moa-page-guide__listen:disabled{opacity:.58;cursor:not-allowed}
-.moa-page-guide__status{position:absolute;width:1px;height:1px;overflow:hidden;white-space:nowrap;clip-path:inset(50%)}
-.moa-page-guide--existing{width:min(100%,820px);margin:5px 0 15px}
-.moa-page-guide--existing .moa-page-guide__bubble{background:#fffefa}
-.moa-page-guide--existing .moa-page-guide__bubble::before{display:none}
-@media(max-width:650px){.moa-page-guide{gap:5px;margin:4px 0 11px}.moa-page-guide__portrait{width:55px;height:68px}.moa-page-guide__bubble{gap:4px 8px;padding:9px 10px 9px 13px;border-radius:13px}.moa-page-guide .moa-page-guide__message,body .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message,#glossaryCatalog .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message{font-size:14px!important;line-height:1.4!important;flex-basis:160px}.moa-page-guide__listen{min-height:32px;padding:5px 9px;font-size:11.5px}}
-@media(max-width:350px){.moa-page-guide__portrait{width:47px;height:63px}.moa-page-guide .moa-page-guide__message,body .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message,#glossaryCatalog .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message{font-size:13.5px!important}}
+.moa-page-guide__status,.moa-visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;white-space:nowrap;clip-path:inset(50%)}
+/* The hero's single approved Moa and its speech stay together at every breakpoint. */
+.garden-hero .moa-page-guide--hero,.music-hero .moa-page-guide--hero,.library-hero .moa-page-guide--hero{flex:0 1 440px;align-self:center;margin:12px 0;width:fit-content;max-width:100%;min-width:0;z-index:1}
+.brain-page .map-intro{margin-bottom:4px}
+.brain-page .lobe-scene-head:has(.moa-visually-hidden){margin:0;padding:0}
+@media(max-width:650px){
+ .moa-page-guide{gap:3px;margin:6px 0 14px}
+ .moa-page-guide img.moa-page-guide__portrait{width:68px;height:80px}
+ .moa-page-guide__bubble{gap:2px;padding:10px 9px 10px 13px;max-width:calc(100vw - 105px);border-radius:21px 24px 20px 7px}
+ .moa-page-guide .moa-page-guide__message,body .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message,#glossaryCatalog .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message{font-size:21px!important;line-height:1.25!important}
+ .garden-hero .moa-page-guide--hero,.music-hero .moa-page-guide--hero,.library-hero .moa-page-guide--hero{flex:none;width:fit-content;margin:6px 0 0}
+}
+@media(max-width:350px){.moa-page-guide img.moa-page-guide__portrait{width:54px;height:68px}.moa-page-guide__bubble{padding:9px 6px 9px 11px}.moa-page-guide .moa-page-guide__message,body .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message,#glossaryCatalog .moa-page-guide .moa-page-guide__bubble p.moa-page-guide__message{font-size:20px!important}}
 @media print{.moa-page-guide{display:none!important}}
+/* Reserve a real conversation column instead of the former narrow image slot. */
+.gardens-page .garden-hero{grid-template-columns:minmax(0,1fr) minmax(280px,440px)}
+@media(max-width:900px){.gardens-page .garden-hero{grid-template-columns:minmax(0,1fr)}.music-hero{flex-direction:column;align-items:flex-start;min-height:0}.music-hero .moa-page-guide--hero{align-self:flex-start}.library-hero .moa-page-guide--hero{justify-self:start}}
+@media(max-width:900px){.music-hero .moa-page-guide--hero{flex:none}}
