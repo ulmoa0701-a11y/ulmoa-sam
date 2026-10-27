@@ -307,7 +307,7 @@ function guideOpacity(phase,contact,kind){
  // No hard opacity step at the contact moment; the marker settles gradually.
  const pulse=reduced?0:beatCue(phase,contact);
  const settle=reduced?1:smoothUnit((phase-contact+.07)/.20);
- return kind==="footsteps"?.21+.37*settle+.25*pulse:.23+.33*settle+.24*pulse;
+ return kind==="footsteps" ? (.21+.37*settle+.25*pulse) : (.23+.33*settle+.24*pulse);
 }
 function paintGuide(g,phase){
  const mode=effectiveGuide();
