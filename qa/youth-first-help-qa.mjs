@@ -54,6 +54,8 @@ for(const width of [390,1280]){
  await check(await page.locator('#next').isDisabled(),width+'px cannot advance silently without selecting skip');
  await page.locator('[data-choice="game"]').click();
  await check(await page.locator('#next').isEnabled(),width+'px selected response enables continuation');
+ await check((await page.locator('#more-label').textContent()).includes('게임이나 영상'),width+'px interest follow-up is a clear question');
+ await check((await page.locator('#more-help').textContent()).includes('그냥 이어가도'),width+'px optional follow-up is explained');
  await page.locator('.detail-chip').first().click();
  await page.locator('#next').click();
  await check((await page.locator('#question-title').textContent()).includes('신경'),width+'px interest leads naturally to chosen concern');
@@ -67,6 +69,8 @@ for(const width of [390,1280]){
  await check((await page.locator('#question-title').textContent()).includes('학교'),width+'px adaptive school situation is asked');
  await check(await page.locator('[data-choice="lesson"]').count()===1,width+'px relevant school choices are available');
  await page.locator('[data-choice="lesson"]').click();
+ await check((await page.locator('#more-label').textContent()).includes('수업이나 과제를 시작할 때'),width+'px school follow-up names selected situation');
+ await check((await page.locator('#detail-choices').textContent()).includes('설명이 잘 이해되지 않아'),width+'px school follow-up answers match');
  await page.locator('.detail-chip').first().click();
  await page.locator('#next').click();
  await check((await page.locator('#question-title').textContent()).includes('편할까'),width+'px choice of communication next');
@@ -137,6 +141,53 @@ for(const width of [390,1280]){
  await check(pageErrors.length===0,width+'px no JavaScript runtime exceptions '+pageErrors.join('|'));
  await fit(page,width,'result');
  await ctx.close();
+
+ // Every selected situation gets its own concrete question and corresponding response choices.
+ const followCases={
+  school:[['arrival','학교에 가거나 들어갈 때','집에서 나서기가 부담돼'],['lesson','수업이나 과제를 시작할 때','설명이 잘 이해되지 않아'],['people','학교에서 사람을 만날 때','먼저 말을 걸기 어려워'],['expect','성적이나 기대가 신경 쓰일 때','잘해야 한다는 부담이 있어']],
+  people:[['begin','먼저 말을 꺼내야 할 때','어떻게 시작할지 모르겠어'],['reply','질문을 받으면 어떤 순간이 어려워','바로 대답해야 할 것 같아'],['alone','사람들과 함께 있어도 혼자 같을 때','대화에 끼기 어려워'],['trouble','오해나 갈등이 생길 때','내 뜻을 설명하기 어려워']],
+  mood:[['wake','아침에 일어날 때','아직 잠이 덜 깬 것 같아'],['start','무언가 하려고 할 때','시작할 기운이 잘 안 나'],['night','저녁이나 잠들기 전에는','낮에 있었던 일이 생각나'],['unexpected','갑자기 기분이 달라질 때','어떤 기분인지 잘 모르겠어']],
+  day:[['talk','집에서 누군가와 이야기할 때','내 말을 끝까지 하기 어려워'],['plan','해야 할 일을 시작할 때, 어떤 점이 가장 어려워','어디서부터 해야 할지 모르겠어'],['change','예상과 다르게 일이 흘러가면','그다음에 뭘 해야 할지 모르겠어'],['alone','혼자 해결해야 할 때','물어보거나 확인할 사람이 필요해']]
+ };
+ for(const [topic,cases] of Object.entries(followCases)){
+  const tab=await browser.newPage({viewport:{width,height:820}});
+  for(const [moment,prompt,expected] of cases){
+   await tab.goto(url,{waitUntil:'domcontentloaded'});
+   await tab.locator('#start').click();
+   await tab.locator('#pass').click();
+   await tab.locator('[data-choice="'+topic+'"]').click();
+   await tab.locator('#next').click();
+   await tab.locator('[data-choice="'+moment+'"]').click();
+   await check((await tab.locator('#more-label').textContent()).includes(prompt),width+'px '+topic+'/'+moment+' follow-up matches selected scene');
+   await check((await tab.locator('#detail-choices').textContent()).includes(expected),width+'px '+topic+'/'+moment+' responses fit question');
+   await check((await tab.locator('#more-help').textContent()).includes('하나만'),width+'px '+topic+'/'+moment+' single response explained');
+   await check(await tab.locator('.detail-chip').count()===3,width+'px '+topic+'/'+moment+' exactly three optional choices');
+   await check(await tab.locator('#next').isEnabled(),width+'px '+topic+'/'+moment+' follow-up can be skipped');
+   if(topic==='day'&&moment==='plan'){
+    await screenshot(tab,width,'clear-day-plan-followup');
+    await check(!(await tab.locator('#more-label').textContent()).includes('조금 더 이야기하고 싶다면'),width+'px screenshot ambiguous heading removed');
+   }
+   await tab.locator('.detail-chip').first().click();
+   await tab.locator('.detail-chip').nth(1).click();
+   await check(await tab.locator('.detail-chip[aria-pressed="true"]').count()===1,width+'px '+topic+'/'+moment+' only one detail selected');
+   await tab.locator('#next').click();
+   await check((await tab.locator('#question-title').textContent()).includes('처음 보는 사람'),width+'px '+topic+'/'+moment+' continues normally');
+  }
+  await tab.close();
+ }
+ for(const stage of ['spark','pace']){
+  const tab=await browser.newPage({viewport:{width,height:820}});
+  const options=stage==='spark'?[['game','게임이나 영상'],['create','무언가 만들어볼 때'],['rest','혼자 쉴 때'],['friend','좋아하는 사람과 있을 때']]:[['wait','생각할 시간을 줄 때'],['write','선택지나 글로 답할 때'],['play','함께 활동하며 시작한다면'],['talk','말로 이야기할 때']];
+  for(const [choice,fragment] of options){
+   await tab.goto(url,{waitUntil:'domcontentloaded'});
+   await tab.locator('#start').click();
+   if(stage==='pace'){await tab.locator('#pass').click();await tab.locator('#pass').click();}
+   await tab.locator('[data-choice="'+choice+'"]').click();
+   await check((await tab.locator('#more-label').textContent()).includes(fragment),width+'px '+stage+'/'+choice+' concrete follow-up');
+   await check((await tab.locator('#more-help').textContent()).includes('그냥 이어가도'),width+'px '+stage+'/'+choice+' optional');
+  }
+  await tab.close();
+ }
  // Verify all four topic branches at both sizes.
  for(const [key,expected] of [['school','lesson'],['people','reply'],['mood','night'],['day','change']]){
   const tab=await browser.newPage({viewport:{width,height:820}});
