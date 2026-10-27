@@ -118,7 +118,7 @@ function init(changeCallback){
    changedInput(type);
   });
  }
- $("discovery-correction").addEventListener("input",()=>{state.correction=trimmed("discovery-correction");onChange();});
+ $("discovery-correction").addEventListener("input",()=>{state.correction=trimmed("discovery-correction");refresh();});
  document.querySelectorAll("[data-discovery-confirm]").forEach(b=>b.addEventListener("click",()=>setVerdict(b.dataset.discoveryConfirm)));
 }
 root.MoaSelfDiscovery={init,show,clear,summary,lines,candidate};
