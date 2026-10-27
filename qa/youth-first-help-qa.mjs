@@ -221,6 +221,9 @@ for(const width of [320,390,820,1440]){
  await check(!(await page.locator('#reflection-parts').innerText()).includes('골랐어'),width+'px reflection does not recite selections');
  await check(await page.locator('#recap-items').isHidden(),width+'px source answers remain optional');
  await fit(page,width,'replanning insight');
+ await page.evaluate(()=>document.fonts.ready);
+ await check(await page.evaluate(()=>[...document.images].every(i=>i.complete&&i.naturalWidth>0)),width+'px Moa and page images load');
+ await check(await page.evaluate(()=>document.fonts.status==='loaded'),width+'px fonts finish loading');
  await screenshot(page,width,'replanning-insight');
  // Every optional scene answer must meaningfully change both the insight and action.
  const variants=await page.evaluate(()=>{

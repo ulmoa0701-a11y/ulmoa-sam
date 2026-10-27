@@ -306,9 +306,9 @@ function fullReport(){
  for(const part of view.parts)lines.push("",part.label,part.text);
  lines.push("","한 번은 이렇게 해봐도 좋아",view.step,view.optional,"","말이 막히면, 이 문장부터",view.request,"","이 방법이 나에게 맞는지 알아보려면",view.check,"",view.warm);
  if(feedbackText())lines.push("","내가 읽고 덧붙인 말: "+feedbackText());
- lines.push("","내가 남긴 답 전체 — 원래 응답");
  const discoveryLines=window.MoaSelfDiscovery.lines();
  if(discoveryLines.length)lines.push("",...discoveryLines);
+ lines.push("","내가 남긴 답 전체 — 원래 응답");
  for(const id of stages){
   const a=records[id];lines.push("",storyLabels[id],chosen(id));
   if(a.detail)lines.push("추가 답변: "+a.detail);

@@ -641,3 +641,6 @@ dialog form{display:flex;justify-content:flex-end}
 
 .discovery-disclosure{margin-top:20px;border-top:1px solid #dce3d6}.discovery-disclosure>summary{cursor:pointer;padding:15px 0;font-size:.87rem;min-height:48px}.discovery-disclosure .self-discovery{margin-top:0}
 @media print{.discovery-disclosure>summary{display:none}.discovery-disclosure{border:0;break-before:page}.discovery-disclosure:has([data-active="false"]){display:none!important}}
+.insight-cover-row #cover-choose{border:1px solid #d9e0d2;border-radius:20px;background:transparent;color:#4f6e5a;padding:7px 12px;font:inherit;font-size:.75rem;cursor:pointer}
+.insight-cover-row #cover-choose:hover{background:#edf1e5}.insight-cover-row #cover-choose:focus-visible{outline:2px solid #42634f;outline-offset:3px}
+@media print{.discovery-disclosure:has([data-active="true"]):before{content:'내가 더 살펴본 장면';display:block;font-size:16pt;font-weight:700;margin-bottom:14px}.insight-letter:has(.self-discovery[data-active="true"]) .letter-memories{break-before:auto!important;padding-top:6mm!important}}
