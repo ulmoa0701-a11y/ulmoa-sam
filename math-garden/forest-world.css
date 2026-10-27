@@ -378,3 +378,176 @@ button.feed-friend.friend-fed .forest-friend{transform:translateY(-3px)}
  .gather-actions button{font-size:11px;padding:6px 7px}
  .gather-actions .gather-confirm{min-width:105px}
 }
+
+
+/* Forest gathering V2 — one quiet, illustrated play surface, not a dashboard.
+   Only this tab is redesigned; other village and quest panels remain untouched. */
+.stage.gather-mode #resourceBar{display:none}
+.stage.gather-mode{min-height:0}
+.stage.gather-mode .scenecontent{min-height:0}
+.stage.gather-mode .panel-gather{
+ width:100%;max-width:950px;margin:auto;min-height:610px;
+ display:grid;grid-template-columns:minmax(0,1fr);
+ grid-template-areas:"guide" "spots" "basket" "actions" "status";
+ grid-template-rows:auto 1fr auto auto auto;align-content:center;justify-items:center;
+ gap:6px;padding:23px 22px 19px;background:transparent;
+ position:relative;isolation:isolate
+}
+.stage.gather-mode .panel-gather::before{
+ content:"";position:absolute;inset:6px 4% 5%;
+ border-radius:50%;
+ background:radial-gradient(ellipse at 50% 85%,#eaf4d750 0%,#eaf4d730 34%,transparent 73%);
+ z-index:-1;pointer-events:none
+}
+.stage.gather-mode .gather-guide{
+ grid-area:guide;display:flex;align-items:center;gap:13px;width:min(100%,660px);
+ margin:0 auto 10px;z-index:1
+}
+.stage.gather-mode .gather-bear{
+ width:91px;height:107px;object-fit:contain;flex:none;
+ filter:drop-shadow(0 8px 7px #536d3b32)
+}
+.stage.gather-mode .gather-cloud{
+ width:100%;min-width:0;min-height:0;padding:14px 21px;
+ border:1.5px solid #e6d5aa;border-radius:27px;
+ background:#fffaf0f2;box-shadow:0 8px 19px #53653f18;
+ gap:3px
+}
+.stage.gather-mode .gather-cloud small{font-size:12px;color:#967551}
+.stage.gather-mode .gather-cloud strong{font-size:clamp(18px,2.2vw,23px);line-height:1.35;letter-spacing:-.02em}
+.stage.gather-mode .gather-cloud span{font-size:13px;color:#66816b}
+.stage.gather-mode .gather-spots{
+ grid-area:spots;width:min(100%,470px);min-height:190px;
+ display:flex;align-items:center;justify-content:space-evenly;
+ gap:14px;flex-wrap:nowrap;position:relative
+}
+.stage.gather-mode .gather-pick{
+ appearance:none;position:relative;border:0;background:transparent;
+ display:flex;align-items:center;justify-content:center;flex-direction:column;
+ padding:10px 8px;gap:1px;flex:1;min-width:0;min-height:166px;
+ cursor:pointer;border-radius:25px;transition:transform .15s ease
+}
+.stage.gather-mode .gather-pick::before{
+ content:"";position:absolute;z-index:-1;left:16%;right:16%;bottom:23px;height:49px;
+ background:radial-gradient(ellipse,#e6eac08f 0%,#c9d8ab45 66%,transparent 75%);
+ border-radius:50%
+}
+.stage.gather-mode .gather-pick img{
+ width:121px;height:119px;max-width:100%;object-fit:contain;
+ animation:none;filter:drop-shadow(0 8px 5px #536d3b39)
+}
+.stage.gather-mode .gather-pick.gather-berry img{width:93px;height:112px}
+.stage.gather-mode .gather-pick span{
+ font-size:15px;font-weight:800;color:#456c50;line-height:1.3;
+ padding:6px 12px;border-radius:30px;background:#f8f5e4d9
+}
+.stage.gather-mode .gather-pick:hover{transform:translateY(-3px)}
+.stage.gather-mode .gather-pick:active{transform:scale(.95)}
+.stage.gather-mode .gather-pick:focus-visible,
+.stage.gather-mode .gather-slot:focus-visible,
+.stage.gather-mode .gather-confirm:focus-visible{outline:4px solid #d99b57;outline-offset:3px}
+.stage.gather-mode .gather-pick:disabled{opacity:.40;cursor:default}
+.stage.gather-mode .gather-targets{
+ grid-area:basket;width:min(100%,590px);display:block;margin-top:0
+}
+.stage.gather-mode .gather-basket{
+ width:100%;padding:15px 22px 16px;border:1.5px solid #d9d4b3;
+ background:#fffaf0df;border-radius:27px;
+ box-shadow:0 10px 22px #4a673a12
+}
+.stage.gather-mode .gather-basket-title{
+ display:flex;gap:10px;align-items:center;justify-content:center;
+ font-size:17px;font-weight:850;color:#41664f;margin:0 0 9px
+}
+.stage.gather-mode .gather-basket-title small{
+ color:#869183;font-weight:550;font-size:12px
+}
+.stage.gather-mode .gather-basket-row{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:start
+}
+.stage.gather-mode .gather-target{
+ padding:4px 6px 2px;min-width:0;max-width:none;flex:auto;background:transparent;
+ border:0;border-radius:0;box-shadow:none;text-align:center
+}
+.stage.gather-mode .gather-target + .gather-target{border-left:1px solid #dfddc7}
+.stage.gather-mode .gather-target strong{
+ display:flex;justify-content:center;align-items:center;gap:8px;
+ font-size:14px;color:#496951
+}
+.stage.gather-mode .gather-target strong span{font-variant-numeric:tabular-nums;color:#547b60}
+.stage.gather-mode .gather-slots{
+ justify-content:center;align-content:start;display:flex;flex-wrap:wrap;gap:5px;
+ min-height:48px;margin-top:6px
+}
+.stage.gather-mode .gather-slot{
+ flex:0 0 43px;width:43px;height:43px;min-height:43px;display:grid;place-items:center;
+ border:2px dashed #bfbfa8;border-radius:50%;background:#f6f0dd;
+ padding:0;margin:0;cursor:default
+}
+.stage.gather-mode button.gather-slot{
+ cursor:pointer;border-style:solid;border-color:#a2c393;background:#e6f3dd;
+ transition:transform .12s,background .12s
+}
+.stage.gather-mode button.gather-slot:hover{transform:translateY(-2px);background:#d9eccd}
+.stage.gather-mode .gather-slot.extra{border-color:#d09f78;background:#f6e2d1}
+.stage.gather-mode .gather-slot .food.mini{transform:scale(.95);margin:0}
+.stage.gather-mode .gather-actions{grid-area:actions;margin:15px auto 0}
+.stage.gather-mode .gather-actions .gather-confirm{
+ min-width:235px;min-height:56px;font-size:18px;
+ border:0;border-radius:20px;color:#fff;background:linear-gradient(#d99474,#ba765e);
+ box-shadow:0 5px 0 #a16a55,0 9px 20px #845a4530;
+ transition:transform .13s,box-shadow .13s
+}
+.stage.gather-mode .gather-actions .gather-confirm:active{transform:translateY(4px);box-shadow:0 1px 0 #a16a55}
+.stage.gather-mode .gather-status{
+ grid-area:status;min-height:23px;margin-top:9px;
+ color:#8a5a3c;font-weight:800;font-size:14px;text-align:center
+}
+.stage.gather-mode .gather-journey{
+ height:160px;display:grid;place-items:center;position:relative
+}
+.stage.gather-mode .gather-journey img{width:125px;height:125px;object-fit:contain;filter:drop-shadow(0 7px 5px #66754e40)}
+.stage.gather-mode .gather-journey span{
+ position:absolute;top:14px;right:-5px;background:#fff8e7;color:#78975f;
+ width:33px;height:33px;border-radius:50%;display:grid;place-items:center;
+ font-size:21px;font-weight:900
+}
+.stage.gather-mode .gather-complete{
+ font-size:22px;font-weight:850;color:#527f5a;text-align:center;
+ padding:14px 10px;margin:4px 0;line-height:1.35
+}
+@media(max-width:650px){
+ .stage.gather-mode .panel-gather{
+  min-height:0;padding:15px 11px 17px;gap:3px;grid-template-rows:auto auto auto auto auto
+ }
+ .stage.gather-mode .gather-guide{gap:5px;margin-bottom:3px}
+ .stage.gather-mode .gather-bear{width:56px;height:72px}
+ .stage.gather-mode .gather-cloud{padding:10px 12px;border-radius:18px}
+ .stage.gather-mode .gather-cloud strong{font-size:16px}
+ .stage.gather-mode .gather-cloud span{font-size:11px}
+ .stage.gather-mode .gather-spots{min-height:140px;gap:5px}
+ .stage.gather-mode .gather-pick{min-height:133px;padding:5px 2px}
+ .stage.gather-mode .gather-pick img{width:102px;height:93px}
+ .stage.gather-mode .gather-pick.gather-berry img{width:73px;height:89px}
+ .stage.gather-mode .gather-pick span{font-size:12px;padding:5px 8px}
+ .stage.gather-mode .gather-basket{padding:11px 8px 12px;border-radius:20px}
+ .stage.gather-mode .gather-basket-title{font-size:15px;margin-bottom:5px;gap:5px}
+ .stage.gather-mode .gather-basket-title small{font-size:10px}
+ .stage.gather-mode .gather-target{padding:3px 2px}
+ .stage.gather-mode .gather-target strong{font-size:12px;gap:4px}
+ .stage.gather-mode .gather-slots{min-height:40px;gap:4px}
+ .stage.gather-mode .gather-slot{flex-basis:38px;width:38px;height:38px;min-height:38px}
+ .stage.gather-mode .gather-actions{margin-top:11px}
+ .stage.gather-mode .gather-actions .gather-confirm{min-width:185px;min-height:50px;font-size:16px}
+ .stage.gather-mode .gather-status{font-size:12px;margin-top:6px}
+}
+@media(max-width:355px){
+ .stage.gather-mode .gather-slot{flex-basis:35px;width:35px;height:35px;min-height:35px}
+ .stage.gather-mode .gather-cloud strong{font-size:15px}
+ .stage.gather-mode .gather-cloud small{font-size:10px}
+ .stage.gather-mode .gather-basket-title{flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){
+ .stage.gather-mode .gather-pick,.stage.gather-mode .gather-slot,
+ .stage.gather-mode .gather-confirm{transition:none}
+}
