@@ -133,6 +133,7 @@ for(const width of [320,390,820,1440]){
  await check(copied.includes('별빛 탐험길')&&copied.includes('학교에서의 하루를')&&copied.includes('오늘의 이야기 조각'),width+'px copy includes personalized title, motif and grounded clues');
  await check(!copied.includes('상담자의 판단')&&!copied.includes('우울증 진단'),width+'px full result adds no clinical diagnosis');
  await page.emulateMedia({media:'print'});
+ await page.evaluate(()=>window.dispatchEvent(new Event('beforeprint')));
  await check(await page.locator('#letter-page').isVisible(),width+'px personal keepsake printed');
  await check(await page.locator('.memory-card').count()===5,width+'px printed letter retains all five conversation themes');
  await check(await page.locator('#recap-items').isVisible(),width+'px printing always reveals full collapsed answers');
@@ -144,6 +145,7 @@ for(const width of [320,390,820,1440]){
  await check(await page.locator('#reflection-response').isVisible(),width+'px print includes reader correction');
  if(width===1440)await page.pdf({path:path.join(out,'personal-letter-print.pdf'),format:'A4',printBackground:true});
  await page.emulateMedia({media:'screen'});
+ await page.evaluate(()=>window.dispatchEvent(new Event('afterprint')));
  await check(await page.locator('#recap-items').isHidden(),width+'px screen restores concise collapsed record');
  await page.locator('.memory-disclosure summary').click();
  await check(await page.locator('#recap-items').isVisible(),width+'px original five answers unfold on request');
