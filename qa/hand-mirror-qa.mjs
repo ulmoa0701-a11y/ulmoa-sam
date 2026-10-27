@@ -245,9 +245,10 @@ async function fakeVideoGarden(){
  await p.goto(base+'/thinking-garden/games/hand-mirror/',{waitUntil:'domcontentloaded'});
  await p.locator('[data-mode="fingers"]').click();
  await p.locator('#cameraStart').click();
- await p.waitForFunction(()=>document.querySelector('#cameraCheck').hidden&&document.querySelector('#modelCard svg'),null,{timeout:18000});
- assert.equal(await p.locator('#modelCard').isVisible(),true,'Finger exploration uses big illustrated hand sample');
- assert.equal(await p.locator('#modelSymbol svg').isVisible(),true,'Illustrated gesture is visible in camera');
+ await p.waitForFunction(()=>document.querySelector('#cameraCheck').hidden&&document.querySelectorAll('#modelFingerGuide .finger-count-cue').length===1,null,{timeout:18000});
+ assert.equal(await p.locator('#modelCard').isVisible(),true,'Camera shows finger count instructions');
+ assert.equal(await p.locator('#modelSymbol svg').count(),0,'No low-quality cartoon hand overlay in the camera');
+ assert.match(await p.locator('#modelFingerGuide').innerText(),/어느 손가락이든/,'Finger-count mode must not falsely mandate a specific finger');
  assert.equal(await p.locator('#ghostGuides').isVisible(),false,'No duplicate ghost hand in finger mission');
  assert.equal(await p.locator('#liveCompare').isVisible(),false,'No confusing 1/4 scoring box');
  assert.equal(await p.locator('#liveLegend').isVisible(),false,'No secondary verbose color text');
