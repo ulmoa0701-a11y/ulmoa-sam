@@ -66,14 +66,22 @@
  </section>
  <section class="result" id="result" hidden aria-labelledby="result-title">
   <div class="letter-frame">
-   <div class="letter-notice"><span class="letter-notice-icon" aria-hidden="true">✳</span><div><b>모아가 보낸 첫 번째 편지</b><p>네가 선택한 이야기를 한 장에 모았어. 다시 읽어보고, 간직해도 좋아.</p></div><span class="letter-notice-no">01 / FIRST STORY</span></div>
+   <div class="letter-notice"><span class="letter-notice-icon" aria-hidden="true">✳</span><div><b>모아가 너에게 보낸 편지</b><p>같은 질문을 받았더라도, 네가 고른 장면과 말은 달라.</p></div><span class="letter-notice-no">01 / YOUR STORY</span></div>
    <article class="letter-paper" id="letter-page" aria-label="나만의 첫 이야기 편지">
     <div class="paper-top"><span>FROM MOA · TO YOU</span><span id="letter-date"></span></div>
+    <section class="identity-cover" id="identity-cover" aria-label="오늘의 이야기 상징">
+     <div class="identity-cover-copy"><span class="identity-eyebrow">TODAY'S STORY · 오늘의 상징</span><h2 id="cover-name"></h2><p id="cover-reason"></p><span class="identity-not-type">성격유형이 아닌 오늘 고른 이야기의 그림이야</span></div>
+     <div class="identity-art" aria-hidden="true"><span class="identity-halo"></span><span id="cover-symbol" class="cover-symbol"></span><span class="identity-spark spark-a">✧</span><span class="identity-spark spark-b">✦</span></div>
+    </section>
+    <div class="cover-customization"><button type="button" id="cover-choose" aria-expanded="false" aria-controls="cover-options">표지 그림 바꾸기 <span aria-hidden="true">✎</span></button><div id="cover-options" hidden role="group" aria-label="오늘 편지의 표지 그림"></div></div>
     <div class="paper-heading">
-     <div class="paper-heading-copy"><span class="letter-small">오늘의 나에게 도착한 이야기</span><h1 id="result-title" tabindex="-1">나에 대해 알게 된<br><em>작은 이야기들.</em></h1><p>네가 고른 말에서, 지금의 너를 함께 알아가 보자.</p></div>
+     <div class="paper-heading-copy"><span class="letter-small">오늘 너의 답으로 완성한 편지</span><h1 id="result-title" tabindex="-1">나에 대해 알게 된<br><em>작은 이야기들.</em></h1><p id="letter-subtitle">네가 고른 말에서, 지금의 너를 함께 알아가 보자.</p></div>
      <div class="paper-character"><span class="paper-orbit" aria-hidden="true"></span><img src="../../assets/moa-hello-wave-20261012.webp" width="130" height="138" alt="손을 흔드는 모아"></div>
     </div>
     <div class="paper-message"><span class="paper-salutation">안녕, 너에게.</span><p id="letter-message"></p></div>
+    <section class="highlight-section" aria-labelledby="highlight-title"><div class="highlight-heading"><span aria-hidden="true">✳</span><div><span class="letter-small">MOA REMEMBERED</span><h2 id="highlight-title">모아가 기억한 오늘의 한 문장</h2></div></div><blockquote id="highlight-quote"></blockquote><p id="highlight-source"></p></section>
+    <section class="clue-section" aria-labelledby="clue-title"><div class="clue-title-row"><h2 id="clue-title">오늘의 세 가지 이야기 조각</h2><span>네가 고른 답만 모았어</span></div><div id="clue-list" class="clue-list"></div></section>
+    <section id="own-voice-section" class="own-voice-section" hidden aria-labelledby="own-voice-title"><div class="own-voice-heading"><span aria-hidden="true">✎</span><h2 id="own-voice-title">네가 직접 남긴 말</h2></div><div id="own-voice-list"></div></section>
     <section class="letter-reflection" aria-labelledby="reflection-title">
      <span class="letter-small">오늘의 답에서 발견한 이야기</span><h2 id="reflection-title"></h2>
      <div id="reflection-parts"></div><blockquote id="reflection-warm"></blockquote>
@@ -88,7 +96,7 @@
     <section class="letter-memories" aria-labelledby="memories-title"><h2 id="memories-title">오늘 네가 들려준 다섯 가지 이야기</h2><p class="letter-memories-sub">답한 것과 건너뛴 것까지, 오늘 대화의 기록이야.</p><div id="recap-items" class="memory-list"></div></section>
     <section class="letter-forward" aria-labelledby="forward-title"><div class="forward-mark" aria-hidden="true">↗</div><div><span class="letter-small">THE NEXT PAGE</span><h2 id="forward-title">다음에 해볼 작은 일</h2><p id="reflection-step"></p><p class="reflection-limit">숙제는 아니야. 마음이 달라지면 바꿔도 돼.</p><details><summary>다음 만남에 전할 말</summary><p id="letter-next"></p></details></div></section>
     <div class="letter-signature"><div><span>너의 첫 이야기를 함께한</span><strong>모아가.</strong></div><span class="signature-asterisk" aria-hidden="true">✳</span></div>
-    <p class="paper-disclaimer">이 편지는 오늘 네가 직접 선택한 답을 정리한 기록이야. 성격·능력·감정 상태를 검사하거나 진단한 결과는 아니야.</p>
+    <p class="paper-disclaimer">색과 상징은 오늘의 선택에서 가져온 표지 장식이야. 성격유형이나 진단을 뜻하지 않아. 편지의 문장은 네가 실제로 고르거나 쓴 말을 중심으로 만들었어.</p>
    </article>
    <div class="letter-toolbox">
     <div class="letter-toolbox-copy"><span>KEEP THIS LETTER</span><h2>이 편지를 어떻게 간직할까?</h2><p>오늘 나온 <b>모든 답변과 직접 쓴 말</b>이 한 장에 담겼어. 상담자에게 보여주거나 따로 보관할 수 있어. <b>자동으로 전송되지는 않아.</b></p></div>
