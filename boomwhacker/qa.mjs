@@ -1123,8 +1123,31 @@ async function heartV4Smoke(){
     "V4 "+cfg.name+": two brief steps must HOLD between contacts, with small lifts");
    check(data.eventsSolid.length===1&&data.eventsSplit.length>=2,
     "V4 "+cfg.name+": original whole-heart and split-heart musical grammar changed");
-   check(["forest","night","classroom","heart-frame","moa"].every(n=>data.assets[n]),
-    "V4 "+cfg.name+": original visual assets missing");
+   check(["forest","night","classroom","heart-frame","moa","forest-enchanted","forest-enchanted-mobile"].every(n=>data.assets[n]),
+    "V4 "+cfg.name+": the scene, original assets or mobile adaptation did not load");
+   const stageArt=await page.evaluate(()=>window.__HEART_V4_QA__.sceneInfo());
+   check(stageArt.loaded&&stageArt.scene===(cfg.name==="mobile"?"forest-enchanted-mobile":"forest-enchanted"),
+    "V4 "+cfg.name+": sample-quality night stage was not selected "+JSON.stringify(stageArt));
+   const footLegibility=await page.evaluate(()=>{
+     const q=window.__HEART_V4_QA__,canvas=document.querySelector("#score"),context=canvas.getContext("2d");
+     const first=q.geometry(0,q.pageAt(.25)),cx=first.x+first.w*.28,cy=first.y-first.w*.08;
+     const xa=Math.max(0,Math.round(cx-42)),ya=Math.max(0,Math.round(cy-53));
+     const ww=84,hh=90;
+     document.querySelector('[data-guide="footsteps"]').click();q.render(.25);
+     const foot=context.getImageData(xa,ya,ww,hh).data;
+     document.querySelector('[data-guide="heart"]').click();q.render(.25);
+     const mark=context.getImageData(xa,ya,ww,hh).data;
+     let changed=0,bright=0;
+     for(let j=0;j<foot.length;j+=4){
+       const diff=Math.abs(foot[j]-mark[j])+Math.abs(foot[j+1]-mark[j+1])+Math.abs(foot[j+2]-mark[j+2]);
+       if(diff>80)changed++;
+       if(foot[j]>220&&foot[j+1]>185&&foot[j+2]>105)bright++;
+     }
+     document.querySelector('[data-guide="footsteps"]').click();q.render(-2);
+     return {changed,bright,footprintCenter:{x:cx,y:cy}};
+   });
+   check(footLegibility.changed>65&&footLegibility.bright>35,
+     "V4 "+cfg.name+": actual footprint outside the note heart is not visually clear "+JSON.stringify(footLegibility));
   }
   // Meter-specific proof: same two crest contacts across 2/4, 3/4 and 4/4.
   // Selecting songs changes only the authored score, never the visual beat landmarks.
