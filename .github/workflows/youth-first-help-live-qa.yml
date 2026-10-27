@@ -18,10 +18,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install Korean glyph fonts for visual QA
+      - name: Install Korean glyph fonts for visual QA (bounded)
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          if ! timeout 65s sudo apt-get update -qq; then
+            echo "::warning::Font package metadata temporarily unavailable; functional QA will continue"
+          fi
+          if ! timeout 75s sudo apt-get install -y --no-install-recommends fonts-noto-cjk; then
+            echo "::warning::Korean screenshot font unavailable; functional QA will continue"
+          fi
           fc-match 'Noto Sans CJK KR' | head -1
       - name: Install browser driver
         run: |
