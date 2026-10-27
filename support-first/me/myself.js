@@ -296,7 +296,7 @@ function renderCover(){
  $("letter-page").dataset.storyTheme=id;
  $("cover-name").textContent=theme.name;
  $("cover-symbol").textContent=theme.symbol;
- $("cover-reason").textContent=theme.caption;
+ $("cover-reason").textContent=coverChoice?"이 표지는 네가 직접 고른 그림이야. 오늘의 답과 성격을 분류하지는 않아.":theme.caption;
  const [first,last]=storyHeadline();
  $("result-title").replaceChildren(document.createTextNode(first),document.createElement("br"));
  const em=document.createElement("em");em.textContent=last;$("result-title").append(em);
@@ -344,7 +344,10 @@ function recap(){
  renderCover();
  const h=highlight();$("highlight-quote").textContent="“"+h.quote+"”";$("highlight-source").textContent=h.source;
  const clues=$("clue-list");clues.replaceChildren();
- clueItems().forEach((item,i)=>{
+ const chosenClues=clueItems();
+ $("clue-title").textContent="오늘의 "+(chosenClues.length===1?"한 가지":chosenClues.length===2?"두 가지":"세 가지")+" 이야기 조각";
+ clues.dataset.count=String(chosenClues.length);
+ chosenClues.forEach((item,i)=>{
   const card=append("div","clue-item",undefined,clues);
   append("span","clue-index",String(i+1).padStart(2,"0"),card);
   const body=append("div","clue-copy",undefined,card);
@@ -359,7 +362,7 @@ function fullReport(){
   "오늘의 이야기 표지: "+theme.name+" ("+theme.symbol+")","※ 표지는 오늘 고른 이야기의 장식이고, 성격유형은 아니야.","",
   "안녕, 너에게.",letterIntro(),"",
   "모아가 기억한 오늘의 한 문장",h.quote,h.source,"",
-  "오늘의 세 가지 이야기 조각"];
+  "오늘의 이야기 조각"];
  for(const c of clueItems())lines.push("• "+c.label+": "+c.value);
  lines.push("");
  const written=stages.filter(id=>records[id].note.trim());
