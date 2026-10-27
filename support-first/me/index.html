@@ -11,6 +11,7 @@
 <link rel="icon" href="../../assets/habom-favicon-v3-32.png">
 <link rel="stylesheet" href="./myself.css?v=20261027-reflection2">
 <script defer src="./letter-reflection.js?v=20261027-reflection2"></script>
+<script defer src="./self-discovery.js?v=20261027-discovery1"></script>
 <script defer src="./myself.js?v=20261027-reflection2"></script>
 </head>
 <body>
@@ -74,8 +75,43 @@
      <div class="identity-art" aria-hidden="true"><span class="identity-halo"></span><span id="cover-symbol" class="cover-symbol"></span><span class="identity-spark spark-a">✧</span><span class="identity-spark spark-b">✦</span></div>
     </section>
     <div class="cover-customization"><button type="button" id="cover-choose" aria-expanded="false" aria-controls="cover-options">표지 그림 바꾸기 <span aria-hidden="true">✎</span></button><div id="cover-options" hidden role="group" aria-label="오늘 편지의 표지 그림"></div></div>
+    <section class="self-discovery" id="self-discovery" aria-labelledby="discovery-title">
+     <div class="discovery-heading">
+      <span class="discovery-sigil" aria-hidden="true">◉</span>
+      <div><span class="letter-small">LOOK CLOSER · 내가 나를 알아보는 시간</span>
+       <h2 id="discovery-title">답을 모았으니, 이제 한 장면을 더 들여다볼까?</h2>
+       <p>모아가 너를 분석하는 게 아니라, <strong>네가 직접 느낀 것과 바랐던 걸 찾아보는 질문</strong>이야. 전부 건너뛰어도 돼.</p>
+      </div>
+     </div>
+     <div class="discovery-scene"><span>내가 고른 장면</span><strong id="discovery-scene"></strong></div>
+     <div class="discovery-questions">
+      <fieldset class="discovery-question"><legend>01. 그때 내 안에서는 무슨 일이 있었을까?</legend>
+       <p>비슷한 답이 없으면 직접 적거나 넘어가도 돼.</p>
+       <div id="discovery-feelings" class="discovery-options" role="group" aria-label="그 순간의 느낌"></div>
+       <label class="discovery-own" for="discovery-feeling-own">다른 느낌이라면, 내 말로</label>
+       <textarea id="discovery-feeling-own" maxlength="160" rows="2" placeholder="짧은 단어 하나도 괜찮아"></textarea>
+      </fieldset>
+      <fieldset class="discovery-question"><legend>02. 그때 정말 바랐던 건 무엇일까?</legend>
+       <p>도움이 필요한 방법일 수도 있고, 그저 쉬고 싶은 마음일 수도 있어.</p>
+       <div id="discovery-needs" class="discovery-options" role="group" aria-label="그 순간 바란 것"></div>
+       <label class="discovery-own" for="discovery-need-own">선택지에 없다면, 내 말로</label>
+       <textarea id="discovery-need-own" maxlength="160" rows="2" placeholder="다른 바람이 있었다면 적어도 좋아"></textarea>
+      </fieldset>
+     </div>
+     <div class="discovery-mirror" id="discovery-mirror" aria-live="polite">
+      <span class="discovery-mirror-kicker">내가 나에 대해 알아챈 점</span>
+      <p id="discovery-mirror-text">아직 고르지 않았다면, 지금은 빈칸으로 남겨두자.</p>
+      <div class="discovery-confirm" id="discovery-confirm" hidden>
+       <p>이렇게 이해한 게 내 이야기와 맞을까?</p>
+       <div class="discovery-confirm-choices" id="discovery-confirm-choices" role="group" aria-label="내 이야기와 맞는지 직접 판단"><button type="button" data-discovery-confirm="yes" aria-pressed="false">맞아</button><button type="button" data-discovery-confirm="different" aria-pressed="false">조금 달라</button><button type="button" data-discovery-confirm="unsure" aria-pressed="false">아직 모르겠어</button></div>
+       <label for="discovery-correction">다르거나 덧붙일 말이 있다면 직접 적기 (선택)</label>
+       <textarea id="discovery-correction" maxlength="240" rows="2" placeholder="내 마음에 더 가까운 말은…"></textarea>
+      </div>
+     </div>
+     <p class="discovery-ethics">모아의 문장은 정답이 아니야. 네가 확인한 것만 ‘내가 알아챈 점’으로 남겨. 답은 자동 저장·전송되지 않아.</p>
+    </section>
     <div class="paper-heading">
-     <div class="paper-heading-copy"><span class="letter-small">오늘 너의 답으로 완성한 편지</span><h1 id="result-title" tabindex="-1">나에 대해 알게 된<br><em>작은 이야기들.</em></h1><p id="letter-subtitle">네가 고른 말에서, 지금의 너를 함께 알아가 보자.</p></div>
+     <div class="paper-heading-copy"><span class="letter-small">오늘 너의 답으로 완성한 편지</span><h1 id="result-title" tabindex="-1">나에 대해 알게 된<br><em>작은 이야기들.</em></h1><p id="letter-subtitle">네가 고른 장면에 어떤 마음이 있었는지, 직접 살펴볼 수 있어.</p></div>
      <div class="paper-character"><span class="paper-orbit" aria-hidden="true"></span><img src="../../assets/moa-hello-wave-20261012.webp" width="130" height="138" alt="손을 흔드는 모아"></div>
     </div>
     <div class="paper-message"><span class="paper-salutation">안녕, 너에게.</span><p id="letter-message"></p></div>
