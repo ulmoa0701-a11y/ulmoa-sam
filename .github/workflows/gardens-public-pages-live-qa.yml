@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/gardens-public-pages-live-qa.yml'
+      - 'qa/gardens-public-diagnostic.cjs'
   workflow_run:
     workflows: ['pages build and deployment']
     types: [completed]
@@ -41,6 +42,8 @@ jobs:
           done
           echo 'Published gallery not updated or unreachable'
           exit 1
+      - name: Diagnose public game iframe state
+        run: node qa/gardens-public-diagnostic.cjs
       - name: Test public 34 cards and actual live previews at 360/390/768/1280
         env:
           TEST_BASE_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam
