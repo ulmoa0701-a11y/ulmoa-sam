@@ -79,8 +79,10 @@ try{
   assert.equal(await page.locator('.gather-target').nth(1).locator('.gather-slot .food.acorn').count(),0,
     'strawberry slots must never show acorns');
   for(let k=0;k<3;k++)await page.locator('[data-spot="acorns"]').click();
-  assert.equal(await page.locator('.gather-target').nth(0).locator('.gather-slot.filled .food.acorn').count(),3,
-    'acorn gathering slots must show acorns');
+  assert.equal(await page.locator('.gather-target').nth(0).locator('.gather-slot .food.acorn').count(),3,
+    'all three acorn slots, including one excess item, must show acorns');
+  assert.equal(await page.locator('.gather-target').nth(0).locator('.gather-slot.extra .food.acorn').count(),1,
+    'overfilled acorn must be marked as an extra acorn, not a strawberry');
   assert.equal(await page.locator('.gather-target').nth(0).locator('.gather-slot .food.berry').count(),0,
     'acorn gathering slots must never show strawberries');
   await page.screenshot({path:path.join(out,'gather-correct-fruit-icons-390.png')});
