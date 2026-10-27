@@ -1,0 +1,57 @@
+name: Gardens Public Pages Choice and Live Preview QA
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/gardens-public-pages-live-qa.yml'
+      - 'qa/gardens-public-diagnostic.cjs'
+  workflow_run:
+    workflows: ['pages build and deployment']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-choice-and-preview:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || 'main' }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser automation
+        run: npm install --no-save --no-package-lock playwright-core@1.56.1
+      - name: Detect Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Wait for published choice gallery
+        run: |
+          for i in $(seq 1 12); do
+            if curl -fsSL --max-time 20 'https://ulmoa0701-a11y.github.io/ulmoa-sam/gardens/' -o /tmp/gardens-public.html && grep -q 'choice-gallery-v2.css' /tmp/gardens-public.html; then
+              echo 'Public gallery contains the new compact choice stylesheet'
+              exit 0
+            fi
+            sleep 10
+          done
+          echo 'Published gallery not updated or unreachable'
+          exit 1
+      - name: Diagnose public game iframe state
+        run: node qa/gardens-public-diagnostic.cjs
+      - name: Test public 34 cards and actual live previews at 360/390/768/1280
+        env:
+          TEST_BASE_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam
+        run: node qa/garden-choice-gallery-qa.cjs
+      - name: Upload public screenshots and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gardens-public-choice-live-screenshots
+          path: qa/garden-choice-gallery-artifacts/
+          if-no-files-found: warn

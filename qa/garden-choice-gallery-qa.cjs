@@ -58,8 +58,10 @@ fs.mkdirSync(out,{recursive:true});
     assert.equal(new URL(await frame.getAttribute('src')).pathname+new URL(await frame.getAttribute('src')).search,
       new URL(expected,base+'/gardens/').pathname+new URL(expected,base+'/gardens/').search,
       'live preview must use the exact actual game route');
-    await page.frameLocator('#previewLive').locator('#introStart').waitFor({state:'visible',timeout:25000});
-    assert.equal(await page.frameLocator('#previewLive').locator('#introScreen.active').isVisible(),true,'actual intro must be visible');
+    // A public iframe may briefly expose unstyled DOM before scripts/CSS finish.
+    // Wait for the real active intro, not merely a button visible during loading.
+    await page.frameLocator('#previewLive').locator('#introScreen.active').waitFor({state:'visible',timeout:30000});
+    assert.equal(await page.frameLocator('#previewLive').locator('#introStart').isVisible(),true,'actual intro start button must be visible');
     assert.ok(await dialog.locator('.preview-play').isVisible(),'full screen start button missing');
     const modalOverflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
     assert.ok(modalOverflow<=5,'preview dialog caused body overflow');
