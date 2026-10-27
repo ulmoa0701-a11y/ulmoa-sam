@@ -502,7 +502,7 @@ $("print").addEventListener("click",()=>{
 // Print the complete original answers even when the student kept the transcript collapsed.
 let transcriptWasOpen=null;
 window.addEventListener("beforeprint",()=>{
- if($("result").hidden||$("print").disabled)return;
+ if($("result").hidden||$("print").disabled||transcriptWasOpen!==null)return;
  const details=document.querySelector(".memory-disclosure");
  if(!details)return;
  transcriptWasOpen=details.open;
