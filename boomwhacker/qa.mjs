@@ -1124,13 +1124,13 @@ async function heartV4Smoke(){
   await page.locator('[data-guide="footsteps"]').click();
   check((await page.locator('[data-guide="footsteps"]').getAttribute("aria-pressed"))==="true",
     "V4 "+cfg.name+": footstep guide mode control not accessible");
-  check((await page.locator("#status").textContent()).includes("한 박"),
-    "V4 "+cfg.name+": status must describe ONE heart as ONE beat");
   await page.locator("#tempo").selectOption("0.75");
   await page.locator("#notes").selectOption("3");
   await page.locator(".key").first().click();
   await page.locator("#play").click();await page.waitForTimeout(160);
   check((await page.locator("#play span").textContent())==="일시정지","V4 "+cfg.name+": play should start");
+  check((await page.locator("#status").textContent()).includes("한 박"),
+    "V4 "+cfg.name+": playback status must describe ONE heart as ONE beat");
   const beforeTempo=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
   await page.locator("#tempo").selectOption("1.15");
   const afterTempo=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
