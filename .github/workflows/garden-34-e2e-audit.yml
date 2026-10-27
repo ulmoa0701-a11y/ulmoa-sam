@@ -81,7 +81,8 @@ jobs:
           node qa/moa-missions-qa.mjs
           node qa/garden-schoolbag-full-play-qa.mjs
   independent-rescue:
-    runs-on: ubuntu-latest
+    # Playwright 1.56.1 browser dependencies are supported on Ubuntu 24.04.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
