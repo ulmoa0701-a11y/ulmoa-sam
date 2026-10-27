@@ -1069,6 +1069,20 @@ async function heartV4Smoke(){
    check(data.left.x+10<data.right.x &&
       data.left.lift<.01&&data.right.lift<.01,
     "V4 "+cfg.name+": left and right contact points incorrect");
+   const midCross=await page.evaluate(()=>{
+     const q=window.__HEART_V4_QA__,g=q.geometry(0,q.pageAt(0)),p=q.stepPose(.55,g);
+     return {x:p.x,left:p.left,right:p.right};
+   });
+   check(midCross.x>midCross.left+(midCross.right-midCross.left)*.2 &&
+     midCross.x<midCross.right-(midCross.right-midCross.left)*.2,
+     "V4 "+cfg.name+": Moa crosses too abruptly instead of travelling gently");
+   const easedPulse=await page.evaluate(()=>{
+     const q=window.__HEART_V4_QA__;
+     return [q.beatCue(.25,.25),q.beatCue(.09,.25),q.beatCue(.17,.25)];
+   });
+   check(Math.abs(easedPulse[0]-1)<1e-6&&easedPulse[1]<.00001&&
+     easedPulse[2]>0&&easedPulse[2]<1,
+     "V4 "+cfg.name+": footstep pulse should fade smoothly");
    check(data.stepRange.filter(x=>x>1).length>=2 &&
      data.stepRange.every(x=>x<data.heartWidth*.031) &&
      Math.abs(data.holdFirst.x-data.left.x)<.1 &&
@@ -1200,6 +1214,24 @@ async function heartV4Smoke(){
  }
 }
 await heartV4Smoke();
+
+// Quiet accessibility mode must not pulse within the beat.
+async function heartV4ReducedMotion(){
+ const ctx=await browser.newContext({viewport:{width:390,height:844},reducedMotion:"reduce"});
+ const page=await ctx.newPage();
+ const response=await page.goto(ROOT+"/boomwhacker/heart-playalong-v4/",{waitUntil:"networkidle"});
+ check(!!response?.ok(),"V4 reduced motion route failed");
+ const qa=await page.evaluate(()=>{
+   const q=window.__HEART_V4_QA__,canvas=document.querySelector("#score");
+   q.render(.25);const a=canvas.toDataURL();
+   q.render(.75);const b=canvas.toDataURL();
+   return {effective:q.effectiveGuide(),unchanged:a===b};
+ });
+ check(qa.effective==="heart"&&qa.unchanged,
+   "V4 reduced-motion markers must stay visually static within each beat "+JSON.stringify(qa));
+ await ctx.close();
+}
+await heartV4ReducedMotion();
 
 await browser.close();
 fs.writeFileSync(`${out}/report.json`,JSON.stringify({failures,report},null,2));
