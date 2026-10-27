@@ -223,7 +223,7 @@ function chosen(id){
 }
 function letterIntro(){
  const intro=["오늘 모아와 처음 이야기를 나눴어."];
- if(hasAnswer(records.spark))intro.push("너는 ‘"+chosen("spark")+"’을(를) 편한 순간으로 골랐지.");
+ if(hasAnswer(records.spark))intro.push("네가 편한 순간으로 고른 건 ‘"+chosen("spark")+"’이었어.");
  if(hasAnswer(records.topic)&&records.topic.choice!=="none")intro.push("그리고 ‘"+chosen("topic")+"’에 관한 이야기도 꺼내봤어.");
  else if(records.topic.choice==="none")intro.push("특별히 떠오르는 고민이 없다는 대답도 그대로 남겨뒀어.");
  if(records.spark.choice===null&&records.topic.choice===null)intro.push("오늘은 잠깐 만나본 것만으로도 괜찮아.");
