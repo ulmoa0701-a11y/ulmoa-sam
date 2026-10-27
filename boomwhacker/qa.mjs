@@ -1226,7 +1226,7 @@ async function heartV4Smoke(){
   await page.locator('[data-guide="moa"]').click();
   await page.evaluate(()=>window.__HEART_V4_QA__.render(.75));
   await page.locator("#stage").screenshot({path:out+"/heartV4-"+cfg.name+"-moa-quiet.png"});
-  await page.locator('[data-guide="footsteps"]').click();
+  await page.locator('[data-guide="sparkle"]').click();
   await page.evaluate(()=>window.__HEART_V4_QA__.render(-2));
   await page.locator("#drawer summary").click();
   await page.locator('[data-theme="night"]').click();
