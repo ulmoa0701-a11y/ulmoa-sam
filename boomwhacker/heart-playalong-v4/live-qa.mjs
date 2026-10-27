@@ -103,6 +103,16 @@ try {
     check((await page.evaluate(()=>window.__HEART_V4_QA__.getState())).ambientFrames>motion.frames,
       config.name+": publicly deployed still image rather than a living scene");
     check(geometry.mode==="firefly",config.name+": single-firefly default");
+    const grass=await page.evaluate(()=>{
+      const q=window.__HEART_V4_QA__,state=q.getState();
+      const tuft=q.grassPose(17,0),moved=q.grassPose(17,2650);
+      return {count:state.grassTufts,
+        rooted:tuft.x===moved.x&&tuft.y===moved.y,
+        different:Math.abs(tuft.swing-moved.swing),
+        withinLimit:Math.abs(tuft.swing)<=5&&Math.abs(moved.swing)<=5};
+    });
+    check(grass.count===(config.width===390?202:342)&&grass.rooted&&grass.different>.3&&grass.withinLimit,
+      config.name+": original grass positions are not gently swaying in public build");
     await page.locator("#drawer summary").click();
     for(const theme of ["forest","night","classroom"]){
       await page.locator('[data-theme="'+theme+'"]').click();
