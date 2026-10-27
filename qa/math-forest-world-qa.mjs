@@ -74,7 +74,16 @@ try{
   await page.screenshot({path:path.join(out,'gather-purpose-320.png')});
   await page.setViewportSize({width:390,height:844});
   await page.locator('[data-spot="berries"]').click();
+  assert.equal(await page.locator('.gather-target').nth(1).locator('.gather-slot.filled .food.berry').count(),1,
+    'strawberry gathering slots must show strawberry artwork');
+  assert.equal(await page.locator('.gather-target').nth(1).locator('.gather-slot .food.acorn').count(),0,
+    'strawberry slots must never show acorns');
   for(let k=0;k<3;k++)await page.locator('[data-spot="acorns"]').click();
+  assert.equal(await page.locator('.gather-target').nth(0).locator('.gather-slot.filled .food.acorn').count(),3,
+    'acorn gathering slots must show acorns');
+  assert.equal(await page.locator('.gather-target').nth(0).locator('.gather-slot .food.berry').count(),0,
+    'acorn gathering slots must never show strawberries');
+  await page.screenshot({path:path.join(out,'gather-correct-fruit-icons-390.png')});
   assert.equal((await status(page)).acorns,0,'uncounted draft items must not become spendable');
   assert.equal((await status(page)).gatherOrder.acorns,3);
   await page.locator('[data-gather="check"]').click();
@@ -101,6 +110,10 @@ try{
   await page.locator('#panelGather [data-gather="next"]').click();
   assert.equal((await status(page)).gatherOrder.round,1,'next request must exist');
   assert.match(await page.locator('#gatherGuide').textContent(),/도토리 3개, 딸기 2개/);
+  await page.locator('[data-spot="berries"]').click();
+  assert.equal(await page.locator('.gather-target').nth(1).locator('.gather-slot .food.berry').count(),1,
+    'second request strawberry icon must stay correct');
+  assert.equal(await page.locator('.gather-target').nth(1).locator('.gather-slot .food.acorn').count(),0);
   // Original quest QA starts with a truly empty save.
   await page.evaluate(()=>localStorage.removeItem('moa-forest-world-v1'));
   await page.reload({waitUntil:'domcontentloaded'});
