@@ -140,12 +140,29 @@ try{
   }
   await page.setViewportSize({width:390,height:844});
   await page.locator('[data-spot="berries"]').click();
+  assert.deepEqual(await page.locator('.gather-target[data-kind="berries"] .gather-count-badge').allTextContents(),['1'],
+    'strawberry number badge should begin at 1');
+  assert.equal(await page.locator('.gather-target[data-kind="berries"] .gather-slot.just-added').count(),1,
+    'only the newly collected strawberry should pop');
+  assert.equal(await page.locator('.gather-target[data-kind="acorns"] .gather-count-badge').count(),0,
+    'empty acorn slots must not display numbers');
+  assert.match(await page.locator('#gatherStatus').textContent(),/딸기 1개/);
   const fruit=await page.locator('.gather-target').nth(1).locator('.gather-slot .food.berry').boundingBox();
   assert.ok(fruit&&fruit.width>=58&&fruit.height>=59,'strawberry must be larger and easy to count');
   assert.equal(await page.locator('.gather-target').nth(1).locator('.gather-slot .food.berry').count(),1);
   assert.equal(await page.locator('.gather-target').nth(1).locator('.gather-slot .food.acorn').count(),0);
-  for(let k=0;k<3;k++)await page.locator('[data-spot="acorns"]').click();
+  for(let k=0;k<3;k++){
+    await page.locator('[data-spot="acorns"]').click();
+    assert.deepEqual(
+      await page.locator('.gather-target[data-kind="acorns"] .gather-count-badge').allTextContents(),
+      Array.from({length:k+1},(_,i)=>String(i+1)),
+      'acorns should show counting badges 1 through '+(k+1));
+    assert.equal(await page.locator('.gather-target[data-kind="acorns"] .gather-slot.just-added').count(),1);
+    assert.equal(await page.locator('.gather-target[data-kind="acorns"] .gather-slot.just-added .gather-count-badge').textContent(),String(k+1));
+  }
   assert.equal(await page.locator('.gather-target').nth(0).locator('.gather-slot .food.acorn').count(),3);
+  assert.equal(await page.locator('.gather-slot.extra .gather-count-badge').textContent(),'3',
+    'extra fruit must retain correct next number');
   assert.equal(await page.locator('.gather-target').nth(0).locator('.gather-slot.extra .food.acorn').count(),1);
   assert.equal((await status(page)).acorns,0,'uncounted draft must not be added to inventory');
   await page.locator('[data-gather="check"]').click();
@@ -156,22 +173,33 @@ try{
   assert.ok(target&&target.width>=35&&target.height>=35);
   await undo.click();
   assert.equal((await status(page)).gatherOrder.acorns,2);
+  assert.deepEqual(await page.locator('.gather-target[data-kind="acorns"] .gather-count-badge').allTextContents(),['1','2'],
+    'undo must remove the last number, not leave an orphaned 3');
+  assert.equal(await page.locator('.gather-slot.just-added').count(),0,
+    'undo must not animate an old fruit as newly added');
   await page.locator('[data-gather="check"]').click();
   assert.equal((await status(page)).gatherOrder.phase,'ready');
   assert.equal((await status(page)).acorns,2);
   assert.equal((await status(page)).berries,1);
+  assert.deepEqual(await page.locator('.gather-target[data-kind="acorns"] .gather-count-badge').allTextContents(),['1','2']);
+  assert.deepEqual(await page.locator('.gather-target[data-kind="berries"] .gather-count-badge').allTextContents(),['1']);
   assert.equal(await page.locator('#panelGather .gather-confirm').count(),1);
   await page.screenshot({path:path.join(out,'gather-immersive-ready-390.png')});
   for(const width of [320,390]){
     await page.setViewportSize({width,height:width===320?640:844});
     const basketFruit=await page.locator('.gather-target').nth(1).locator('.gather-slot .food.berry').boundingBox();
     assert.ok(basketFruit&&basketFruit.width>=54,'filled fruit too small at '+width+'px');
+    const badge=await page.locator('.gather-target[data-kind="berries"] .gather-count-badge').boundingBox();
+    assert.ok(badge&&badge.width>=25&&badge.height>=25,'badge must remain legible and visible at '+width);
     assert.ok((await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth))<=3,'filled basket overflows screen at '+width);
     await page.screenshot({path:path.join(out,'gather-woven-basket-filled-'+width+'.png')});
   }
   await page.setViewportSize({width:390,height:844});
   await page.reload({waitUntil:'domcontentloaded'});
   assert.equal((await status(page)).gatherOrder.phase,'ready');
+  assert.deepEqual(await page.locator('.gather-target[data-kind="acorns"] .gather-count-badge').allTextContents(),['1','2'],
+    'badges must restore without replaying animation after reload');
+  assert.equal(await page.locator('.gather-slot.just-added').count(),0);
   assert.equal((await status(page)).acorns,2,'reload must not duplicate reward');
   await page.locator('#panelGather [data-gather="deliver"]').click();
   assert.equal((await status(page)).tab,'gather','bear delivery stays in same scene');
