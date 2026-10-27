@@ -91,12 +91,12 @@ try {
     const scene=await page.evaluate(()=>window.__HEART_V4_QA__.sceneInfo());
     check(scene.loaded&&scene.scene===(config.width===390?"forest-enchanted-mobile":"forest-enchanted"),
       config.name+": public scene does not use the approved separate composition");
-    check(geometry.mode==="footsteps",config.name+": low-distraction default");
+    check(geometry.mode==="sparkle",config.name+": single-sparkle default");
     await page.locator("#drawer summary").click();
     for(const theme of ["forest","night","classroom"]){
       await page.locator('[data-theme="'+theme+'"]').click();
       const signatures=[];
-      for(const guide of ["footsteps","heart","moa"]){
+      for(const guide of ["sparkle","firefly","heart","moa"]){
         await page.locator('[data-guide="'+guide+'"]').click();
         const metrics=await page.evaluate(()=>{
           const q=window.__HEART_V4_QA__;q.render(.75);
@@ -110,8 +110,16 @@ try {
       }
       check(new Set(signatures).size===3,config.name+": "+theme+" guide modes must change actual canvas pixels");
     }
+    const cueTiming=await page.evaluate(()=>{
+      const q=window.__HEART_V4_QA__;
+      return [.25,.5,.75].map(t=>q.guideState(t));
+    });
+    check(cueTiming[0].left===1&&cueTiming[0].right===0&&
+      cueTiming[1].glow===0&&
+      cueTiming[2].left===0&&cueTiming[2].right===1,
+      config.name+": public guide lit both crests together or wrong half-beat timing");
     await page.locator("#song").selectOption("0");
-    await page.locator('[data-guide="footsteps"]').click();
+    await page.locator('[data-guide="sparkle"]').click();
     await page.locator("#tempo").selectOption("0.75");
     await page.locator("#play").click();
     await page.waitForTimeout(2250);
