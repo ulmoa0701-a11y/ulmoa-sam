@@ -378,7 +378,7 @@ async function togglePlay(){
  playing=true;setPlayLabel();
  status.innerHTML="<strong>하트 한 개 = 한 박</strong> · 두 봉우리의 박자 흐름을 따라가요";rafId=requestAnimationFrame(loop)
 }
-function reset(){stop();beat=-song.meter;played.clear();status.innerHTML="<strong>연주 준비</strong> · 안내 방식을 골라 연주해요";render(beat)}
+function reset(){beat=-song.meter;played.clear();stop();status.innerHTML="<strong>연주 준비</strong> · 안내 방식을 골라 연주해요";render(beat)}
 playButton.addEventListener("click",()=>togglePlay().catch(e=>{status.textContent="오디오를 시작할 수 없어요: "+e.message;stop()}));
 $("#restart").addEventListener("click",reset);
 $("#full").addEventListener("click",async()=>{try{if(!document.fullscreenElement)await $("#stage").requestFullscreen();else await document.exitFullscreen()}catch(e){status.textContent="전체 화면을 지원하지 않는 브라우저입니다"}});
