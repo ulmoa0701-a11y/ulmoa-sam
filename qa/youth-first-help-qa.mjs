@@ -82,6 +82,24 @@ for(const width of [320,390,820,1440]){
  await page.locator('#next').click();
  await check(await page.locator('#result').isVisible(),width+'px finished personal letter visible');
  await check(await page.locator('#letter-page').isVisible(),width+'px whole result rendered as keepsake letter');
+ await check(await page.locator('#self-discovery').isVisible(),width+'px student self-discovery offered beyond static summary');
+ await check(await page.locator('#discovery-feelings button').count()===4,width+'px moment-specific inner experience choices');
+ await check(await page.locator('#discovery-needs button').count()===5,width+'px needed support choices');
+ await check((await page.locator('#discovery-scene').textContent()).includes('수업·과제를 시작할 때'),width+'px actual scene is repeated for reflection');
+ await check(await page.locator('#discovery-confirm').isHidden(),width+'px no validation without student responses');
+ await page.locator('#discovery-feelings button').first().click();
+ await check((await page.locator('#discovery-mirror-text').textContent()).includes('막막했어'),width+'px one thought reflected tentatively');
+ await page.locator('#discovery-needs button').nth(1).click();
+ await check((await page.locator('#discovery-mirror-text').textContent()).includes('함께 정하기'),width+'px linked situation and support');
+ await check((await page.locator('.discovery-mirror-kicker').textContent()).includes('생각 중'),width+'px provisional until student confirms');
+ await page.locator('[data-discovery-confirm="yes"]').click();
+ await check((await page.locator('.discovery-mirror-kicker').textContent()).includes('내가 맞다고'),width+'px verified only with student approval');
+ await page.locator('[data-discovery-confirm="different"]').click();
+ await check((await page.locator('.discovery-mirror-kicker').textContent()).includes('조금 다르게'),width+'px disagreement recognized');
+ await page.locator('#discovery-correction').fill('막막하기보다 설명을 다시 듣고 싶었어 <b>나의 말</b>');
+ await check((await page.locator('#discovery-correction-visible').textContent()).includes('설명을 다시 듣고 싶었어'),width+'px student corrected wording visible');
+ await check(await page.locator('#discovery-correction-visible b').count()===0,width+'px correction cannot inject markup');
+ await screenshot(page,width,'self-discovery');
  await check(await page.locator('.memory-disclosure summary').isVisible(),width+'px complete transcript can be expanded');
  await check(await page.locator('#recap-items').isHidden(),width+'px repeated records are collapsed on first view');
  await check((await page.locator('#result-title').textContent()).includes('학교에서의 하루'),width+'px selected topic personalizes letter title');
@@ -99,7 +117,7 @@ for(const width of [320,390,820,1440]){
  await check(await page.locator('#share-text').count()===0,width+'px no big empty summary textarea');
  await check(await page.locator('#copy').isEnabled(),width+'px one action to copy complete finished report');
  await check(await page.locator('#print').isEnabled(),width+'px one action to print whole finished letter');
- await check((await page.locator('.paper-message').textContent()).includes('편한 순간으로 고른 건'),width+'px honest brief introduction personalizes letter');
+ await check((await page.locator('.paper-message').textContent()).includes('오늘 네가 골랐던 장면은'),width+'px letter emphasizes selected experience rather than listing traits');
  await check((await page.locator('#letter-next').textContent()).includes('함께 해보기'),width+'px personal next visit aspiration included');
  await check((await page.locator('#reflection-title').innerText()).includes('내 생각을 내 방식'),width+'px reflection follows chosen communication style');
  await check((await page.locator('#reflection-warm').innerText()).includes('네 표현이야'),width+'px warm message matches writing preference');
@@ -130,6 +148,7 @@ for(const width of [320,390,820,1440]){
  const copied=await page.evaluate(async()=>await navigator.clipboard.readText());
  await check(copied.includes('요즘 시작이 쉽지 않아')&&copied.includes('게임·영상')&&copied.includes('설명이 잘 이해되지 않아')&&copied.includes('고르거나 글로 이야기하기'),width+'px clipboard includes all original choices detail and own words');
  await check(copied.includes('조금 달라요')&&copied.includes('익숙해지면 말하고 싶어')&&copied.includes('네 표현이야'),width+'px complete export includes reflection and reader correction');
+ await check(copied.includes('한 장면 깊이 들여다보기')&&copied.includes('설명을 다시 듣고 싶었어')&&copied.includes('조금 다르게 느낀 말'),width+'px entire report preserves verified or corrected student words');
  await check(copied.includes('별빛 탐험길')&&copied.includes('학교에서의 하루를')&&copied.includes('오늘의 이야기 조각'),width+'px copy includes personalized title, motif and grounded clues');
  await check(!copied.includes('상담자의 판단')&&!copied.includes('우울증 진단'),width+'px full result adds no clinical diagnosis');
  await page.emulateMedia({media:'print'});
@@ -143,6 +162,8 @@ for(const width of [320,390,820,1440]){
  await check(await page.locator('#cover-choose').isHidden(),width+'px print hides cover editor');
  await check(await page.locator('#highlight-quote').isVisible(),width+'px print shows original student quote');
  await check(await page.locator('#reflection-response').isVisible(),width+'px print includes reader correction');
+ await check(await page.locator('#discovery-correction-visible').isVisible(),width+'px printed letter contains corrected discovery');
+ await check(await page.locator('.discovery-questions').isHidden(),width+'px print hides unchosen questionnaire options');
  if(width===1440)await page.pdf({path:path.join(out,'personal-letter-print.pdf'),format:'A4',printBackground:true});
  await page.emulateMedia({media:'screen'});
  await page.evaluate(()=>window.dispatchEvent(new Event('afterprint')));
@@ -174,6 +195,7 @@ for(const width of [320,390,820,1440]){
  await check((await page.locator('#reflection-step').innerText()).includes('정하지 않아도'),width+'px no-answer result does not impose a task');
  await check(await page.locator('#copy').isEnabled(),width+'px early ending allows saving an honest empty conversation letter');
  await check((await page.locator('#recap-items').textContent()).includes('이번에는 이야기하지 않았어'),width+'px early ending is reflected without making up responses');
+ await check(await page.locator('#self-discovery').getAttribute('data-active')==='false',width+'px early ending does not invent insights');
  await check((await page.locator('#cover-name').textContent())==='첫 장의 새싹',width+'px no-answer keeps neutral story cover');
  await check(await page.locator('.clue-item').count()===1,width+'px no invented three clues');
  await check((await page.locator('#clue-title').textContent()).includes('한 가지'),width+'px accurate clue count');

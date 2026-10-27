@@ -258,15 +258,16 @@ function highlight(){
 }
 
 function letterIntro(){
- const parts=[];
- if(hasAnswer(records.spark))parts.push("네가 편한 순간으로 고른 건 ‘"+chosen("spark")+"’이었어.");
- else parts.push("오늘은 어떤 순간이 편한지 꼭 고르지 않아도 됐어.");
- if(hasAnswer(records.topic)&&records.topic.choice!=="none")parts.push("요즘은 ‘"+chosen("topic")+"’에 관해 이야기해 보고 싶다고 했지.");
- else if(records.topic.choice==="none")parts.push("특별히 떠오르는 고민이 없다고 말해준 것도 그대로 기억할게.");
- if(hasAnswer(records.moment))parts.push("그중 ‘"+chosen("moment")+"’이라는 장면이 떠올랐어.");
- if(hasAnswer(records.pace))parts.push("이야기할 때는 ‘"+chosen("pace")+"’가 편하다고 알려줬어.");
- parts.push("여기 있는 말들은 오늘 네가 골랐던 것들이야. 네가 어떤 사람인지 결정하는 말은 아니야.");
- return parts.join(" ");
+ const discovered=window.MoaSelfDiscovery?.summary();
+ const bits=[];
+ if(hasAnswer(records.moment))bits.push("오늘 네가 골랐던 장면은 ‘"+chosen("moment")+"’이었어.");
+ else if(hasAnswer(records.topic))bits.push("오늘은 ‘"+chosen("topic")+"’에 대해 조금 이야기해봤어.");
+ else bits.push("오늘은 어떤 이야기를 꺼낼지 아직 정하지 않아도 괜찮았어.");
+ if(discovered?.verified)bits.push("그 장면을 조금 더 살펴보고, 어떤 마음과 바람이 가까운지 네가 직접 ‘맞아’라고 확인해줬지. 그게 오늘의 가장 중요한 발견일 수 있어.");
+ else if(discovered?.has)bits.push("느낀 것과 바랐던 것을 나란히 놓아봤지만, 그 말이 맞는지는 네가 가장 잘 알아. 다르다면 다르다고 적어도 돼.");
+ else bits.push("이 선택만으로 네 마음을 다 알 수는 없어. 그래서 그때 무엇을 느꼈고 무엇을 바랐는지 스스로 살펴볼 질문을 남겨뒀어.");
+ bits.push("너에 관한 결론을 서둘러 내리지는 않을게. 편지의 뜻도 네가 바꾸고 결정할 수 있어.");
+ return bits.join(" ");
 }
 function letterNext(){
  const sentences=[];
@@ -396,6 +397,8 @@ function fullReport(){
  lines.push("");
  const notes=stages.filter(id=>records[id].note.trim());
  if(notes.length){lines.push("네가 직접 남긴 말");for(const id of notes)lines.push("• "+storyLabels[id]+": "+records[id].note.trim());lines.push("");}
+ const discoveryLines=window.MoaSelfDiscovery?.lines()||[];
+ if(discoveryLines.length)lines.push(...discoveryLines,"");
  lines.push("■ 오늘의 답에서 발견한 이야기",view.title);
  for(const part of view.parts)lines.push(part.label+": "+part.text);
  lines.push("모아의 한마디: "+view.warm,"작은 다음 한 걸음: "+view.step,"숙제는 아니야. 마음이 달라지면 바꿔도 돼.");
@@ -435,6 +438,8 @@ function guide(){
 function finish(){
  complete=true;
  $("intro").hidden=true;$("conversation").hidden=true;$("result").hidden=false;
+ const scene=records.moment.choice&& !["unknown","pass","none"].includes(records.moment.choice)?chosen("moment"):"";
+ window.MoaSelfDiscovery.show({topic:records.topic.choice,scene});
  recap();renderReflection();guide();
  $("cover-options").hidden=true;
  $("copy").disabled=false;$("print").disabled=false;
@@ -448,6 +453,7 @@ function begin(){
  $("question-title").focus({preventScroll:true});
 }
 function reset(){
+ window.MoaSelfDiscovery.clear();
  clearReflectionFeedback();
  for(const id of stages){records[id]={choice:null,detail:null,note:""};}
  revoke();position=0;complete=false;started=false;coverChoice=null;
@@ -463,6 +469,9 @@ document.querySelectorAll("[data-response]").forEach(button=>button.addEventList
 $("reflection-note").addEventListener("input",()=>{
  reflectionFeedback.note=$("reflection-note").value.slice(0,240).trim();updateReflectionFeedback();
 });
+window.MoaSelfDiscovery.init(()=>{
+ if(complete&&!$("result").hidden)$("letter-message").textContent=letterIntro();
+});
 $("start").addEventListener("click",begin);
 $("early-end").addEventListener("click",()=>{started=true;finish();});
 $("end-now").addEventListener("click",finish);
@@ -477,7 +486,7 @@ $("own-toggle").addEventListener("click",()=>{
 });
 $("own-save").addEventListener("click",saveOwn);
 $("own-input").addEventListener("input",()=>{revoke();$("panel-tip").textContent="아직 저장하지 않은 말이야. '이 말로 남길래'를 누르면 이 대화 안에만 남아.";});
-$("revise").addEventListener("click",()=>{clearReflectionFeedback();revoke();complete=false;position=0;render();window.scrollTo({top:0,behavior:"instant"});});
+$("revise").addEventListener("click",()=>{window.MoaSelfDiscovery.clear();clearReflectionFeedback();revoke();complete=false;position=0;render();window.scrollTo({top:0,behavior:"instant"});});
 $("cover-choose").addEventListener("click",()=>{const o=$("cover-options");o.hidden=!o.hidden;$("cover-choose").setAttribute("aria-expanded",String(!o.hidden));});
 $("copy").addEventListener("click",async()=>{
  if($("copy").disabled||$("result").hidden)return;
