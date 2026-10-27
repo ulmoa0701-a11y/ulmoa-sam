@@ -1083,6 +1083,14 @@ async function heartV4Smoke(){
    check(Math.abs(easedPulse[0]-1)<1e-6&&easedPulse[1]<.00001&&
      easedPulse[2]>0&&easedPulse[2]<1,
      "V4 "+cfg.name+": footstep pulse should fade smoothly");
+   const markerFade=await page.evaluate(()=>{
+     const q=window.__HEART_V4_QA__;
+     return ["footsteps","heart"].map(kind=>({
+       kind,before:q.guideOpacity(.249,.25,kind),after:q.guideOpacity(.251,.25,kind)
+     }));
+   });
+   check(markerFade.every(m=>Math.abs(m.before-m.after)<.04),
+     "V4 "+cfg.name+": contact-marker brightness must not jump "+JSON.stringify(markerFade));
    check(data.stepRange.filter(x=>x>1).length>=2 &&
      data.stepRange.every(x=>x<data.heartWidth*.031) &&
      Math.abs(data.holdFirst.x-data.left.x)<.1 &&
