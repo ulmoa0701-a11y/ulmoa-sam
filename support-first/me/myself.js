@@ -105,9 +105,7 @@ const prompts={start:"안녕. 나는 모아야. 잘 대답하려고 애쓰지 �
  pace:"마지막으로 다음 만남을 어떻게 시작하면 좋을지 물어볼게.",
  wish:"이제 오늘 고른 이야기를 같이 볼까?"};
 const records=Object.fromEntries(stages.map(id=>[id,{choice:null,detail:null,note:""}]));
-const share=Object.fromEntries(stages.map(id=>[id,false]));
-const shareNotes=Object.fromEntries(stages.map(id=>[id,false]));
-let position=0,started=false,complete=false;
+ let position=0,started=false,complete=false;
 const isBranch=()=>Boolean(context[records.topic.choice]);
 const stageAt=i=>stages[i];
 const config=id=>id==="moment"?(context[records.topic.choice]||{prompt:"조금 더 말해보고 싶은 순간이 있을까?",hint:"구체적인 게 떠오르지 않아도 괜찮아.",choices:[["none","아직 떠오르지 않아","○"]],reflect:{none:"지금 정확히 떠올릴 필요는 없어."},follow:null}):data[id];
@@ -121,10 +119,8 @@ function append(tag,cls,text,parent){
  const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;parent.append(el);return el;
 }
 function revoke(){
- for(const id of stages){share[id]=false;shareNotes[id]=false;}
- $("print-sheet").hidden=true;$("print-text").textContent="";
- $("share-text").value="";$("share-text").readOnly=true;
  $("copy").disabled=true;$("print").disabled=true;
+ $("copy-fallback").hidden=true;$("full-text-fallback").value="";
 }
 function clearFrom(start){
  for(let i=start;i<stages.length;i++){const a=records[stages[i]];a.choice=null;a.detail=null;a.note="";}
@@ -218,17 +214,63 @@ function saveOwn(){
  if(!a.choice||a.choice==="pass"||a.choice==="unknown"){a.choice="own";a.detail=null;}a.note=value;
  render();$("panel-tip").textContent="네 말 그대로 남겼어. 상담자에게 자동 전달되진 않아.";
 }
-function activeIds(){return stages.filter(id=>records[id].choice!==null);}
+
+const storyLabels={spark:"내가 편해지는 순간",topic:"요즘 내 마음에 걸리는 것",moment:"특히 떠오른 순간",pace:"내가 편한 대화 방법",wish:"다음에 해보고 싶은 것"};
+const dateText=()=>new Intl.DateTimeFormat("ko-KR",{year:"numeric",month:"long",day:"numeric"}).format(new Date());
+const hasAnswer=a=>Boolean(a?.choice&&a.choice!=="pass"&&a.choice!=="unknown");
+function chosen(id){
+ const a=records[id];return a.choice==="pass"?"이 이야기는 넘어가기로 했어":a.choice===null?"이번에는 이야기하지 않았어":choiceLabel(id,a.choice);
+}
+function letterIntro(){
+ const intro=["오늘 모아와 처음 이야기를 나눴어."];
+ if(hasAnswer(records.spark))intro.push("너는 ‘"+chosen("spark")+"’을(를) 편한 순간으로 골랐지.");
+ if(hasAnswer(records.topic)&&records.topic.choice!=="none")intro.push("그리고 ‘"+chosen("topic")+"’에 관한 이야기도 꺼내봤어.");
+ else if(records.topic.choice==="none")intro.push("특별히 떠오르는 고민이 없다는 대답도 그대로 남겨뒀어.");
+ if(records.spark.choice===null&&records.topic.choice===null)intro.push("오늘은 잠깐 만나본 것만으로도 괜찮아.");
+ intro.push("오늘 네가 직접 고른 말들을 아래에 모았어. 이 답이 너의 전부를 설명하는 건 아니야.");
+ return intro.join(" ");
+}
+function letterNext(){
+ const wish=records.wish,pace=records.pace;
+ const sentences=[];
+ if(hasAnswer(wish)&&wish.choice!=="unsure")sentences.push("다음에는 ‘"+chosen("wish")+"’부터 해봐도 좋겠어.");
+ else sentences.push("다음에 꼭 무엇을 할지 지금 정하지 않아도 돼.");
+ if(hasAnswer(pace))sentences.push("‘"+chosen("pace")+"’ 방식으로 시작하는 것도 기억해둘게.");
+ sentences.push("오늘과 생각이 달라지면 그때 다시 이야기해도 괜찮아.");
+ return sentences.join(" ");
+}
 function recap(){
  const box=$("recap-items");box.replaceChildren();
- for(const id of activeIds()){
-  const a=records[id],info=config(id);const row=append("div","recap-row",undefined,box);
-  append("div","recap-label",id==="spark"?"편한 순간":id==="topic"?"요즘 이야기":id==="moment"?"떠오르는 장면":id==="pace"?"편한 대화 방식":"다음에 해보고 싶은 것",row);
-  append("div","recap-choice",choiceLabel(id,a.choice),row);
-  if(a.detail)append("p","recap-detail",a.detail,row);
-  if(a.note)append("p","recap-note","내가 직접 쓴 말: "+a.note,row);
+ stages.forEach((id,index)=>{
+  const a=records[id],item=append("article","memory-card"+(a.choice===null||a.choice==="pass"?" memory-muted":""),undefined,box);
+  item.dataset.chapter=id;
+  const no=append("span","memory-no",String(index+1).padStart(2,"0"),item);
+  no.setAttribute("aria-hidden","true");
+  const body=append("div","memory-copy",undefined,item);
+  append("span","memory-label",storyLabels[id],body);
+  append("h3","memory-answer",chosen(id),body);
+  if(a.detail)append("p","memory-detail","조금 더 이야기한 말 · "+a.detail,body);
+  if(a.note)append("p","memory-note","내가 직접 적은 말 · "+a.note,body);
+ });
+ $("letter-message").textContent=letterIntro();
+ $("letter-next").textContent=letterNext();
+ $("letter-date").textContent=dateText();
+}
+function fullReport(){
+ const lines=["모아의 첫 번째 편지","나에 대해 알게 된 작은 이야기들",dateText(),"","안녕, 너에게.",letterIntro(),""];
+ for(const id of stages){
+  const a=records[id];
+  lines.push("■ "+storyLabels[id]);
+  lines.push("  "+chosen(id));
+  if(a.detail)lines.push("  조금 더 이야기한 말: "+a.detail);
+  if(a.note)lines.push("  내가 직접 적은 말: "+a.note);
+  lines.push("");
  }
- if(!activeIds().length)append("p","recap-none","오늘은 그냥 만나본 것만으로도 괜찮아.",box);
+ lines.push("다음 이야기는 네 속도로");
+ lines.push(letterNext());
+ lines.push("","너의 첫 이야기를 함께한, 모아가.");
+ lines.push("※ 오늘 직접 고른 말을 정리한 기록이며 검사·진단 결과가 아니야.");
+ return lines.join("\n");
 }
 function guide(){
  const root=$("guide-items");root.replaceChildren();
@@ -247,49 +289,12 @@ function guide(){
  }
  if(!root.childElementCount)append("p","guide-point","오늘은 학생에게 편안함과 비밀보장 안내를 우선하고, 다음에 이야기할 의사를 확인합니다.",root);
 }
-function makeShare(){
- const rows=$("share-items");rows.replaceChildren();
- const headings={spark:"편한 순간",topic:"요즘 이야기",moment:"떠오르는 장면",pace:"편한 소통 방식",wish:"다음에 해보고 싶은 것"};
- const usable=activeIds().filter(id=>records[id].choice!=="pass");
- for(const id of usable){
-  const a=records[id],row=append("div","share-row",undefined,rows);
-  const lab=append("label","share-main",undefined,row),input=document.createElement("input");
-  input.type="checkbox";input.dataset.share=id;input.checked=share[id];
-  lab.append(input);append("span","",headings[id]+" · "+choiceLabel(id,a.choice),lab);
-  input.addEventListener("change",()=>{share[id]=input.checked;if(!input.checked)shareNotes[id]=false;makeShare();});
-  if(a.note){
-   const nl=append("label","share-note",undefined,row),nb=document.createElement("input");
-   nb.type="checkbox";nb.dataset.note=id;nb.checked=Boolean(share[id]&&shareNotes[id]);nb.disabled=!share[id];
-   nl.append(nb);append("span","","내가 직접 쓴 말도 포함",nl);
-   nb.addEventListener("change",()=>{shareNotes[id]=nb.checked;refreshShareText();});
-  }
- }
- if(!usable.length)append("p","share-none","공유할 항목이 없어. 아무것도 전달하지 않아도 돼.",rows);
- refreshShareText();
-}
-function composeShareText(){
- const lines=["내가 상담에서 먼저 이야기하고 싶은 것"];
- const names={spark:"내가 편한 순간",topic:"요즘 이야기",moment:"떠오르는 순간",pace:"편한 대화 방식",wish:"다음에 원하는 것"};
- for(const id of activeIds()){
-  if(!share[id]||records[id].choice==="pass")continue;
-  const a=records[id];
-  lines.push("• "+names[id]+": "+choiceLabel(id,a.choice));
-  if(a.detail)lines.push("  - "+a.detail);
-  if(a.note&&shareNotes[id])lines.push("  - 내 말: "+a.note);
- }
- return lines.length>1?lines.join("\n"):"";
-}
-function refreshShareText(){
- const value=composeShareText(),enabled=Boolean(value);
- $("share-text").value=value;$("share-text").readOnly=!enabled;
- $("copy").disabled=!enabled;$("print").disabled=!enabled;
- $("print-sheet").hidden=!enabled;$("print-text").textContent=value;
- $("share-status").textContent="";
-}
 function finish(){
  complete=true;
  $("intro").hidden=true;$("conversation").hidden=true;$("result").hidden=false;
- recap();guide();makeShare();
+ recap();guide();
+ $("copy").disabled=false;$("print").disabled=false;
+ $("copy-fallback").hidden=true;$("share-status").textContent="";
  window.scrollTo({top:0,behavior:"instant"});
  $("result-title").focus({preventScroll:true});
 }
@@ -320,27 +325,25 @@ $("own-toggle").addEventListener("click",()=>{
 $("own-save").addEventListener("click",saveOwn);
 $("own-input").addEventListener("input",()=>{revoke();$("panel-tip").textContent="아직 저장하지 않은 말이야. '이 말로 남길래'를 누르면 이 대화 안에만 남아.";});
 $("revise").addEventListener("click",()=>{revoke();complete=false;position=0;render();window.scrollTo({top:0,behavior:"instant"});});
-$("share-text").addEventListener("input",()=>{$("print-text").textContent=$("share-text").value;$("share-status").textContent="";});
 $("copy").addEventListener("click",async()=>{
- if($("copy").disabled)return;
- const val=$("share-text").value;
+ if($("copy").disabled||$("result").hidden)return;
+ const val=fullReport();
  try{
   if(!navigator.clipboard||!window.isSecureContext)throw new Error("clipboard unavailable");
   await navigator.clipboard.writeText(val);
-  $("share-status").textContent="복사됐어. 붙여넣기 전에 내용이 맞는지 확인해줘.";
+  $("copy-fallback").hidden=true;
+  $("share-status").textContent="편지 전체를 복사했어. 어디에 붙여넣을지는 네가 정할 수 있어.";
  }catch{
-  $("share-status").textContent="자동 복사를 사용할 수 없어. 위 문장을 직접 선택해 복사할 수 있어.";
+  $("full-text-fallback").value=val;
+  $("copy-fallback").hidden=false;
+  $("full-text-fallback").focus();
+  $("full-text-fallback").select();
+  $("share-status").textContent="자동 복사가 어려워서 전체 편지를 아래에 보여줬어. 직접 선택해 복사할 수 있어.";
  }
 });
 $("print").addEventListener("click",()=>{
- if($("print").disabled)return;
- $("print-text").textContent=$("share-text").value;
- $("print-sheet").hidden=false;
+ if($("print").disabled||$("result").hidden)return;
  window.print();
-});
-window.addEventListener("beforeprint",()=>{
- if(!$("result").hidden&&!$("print").disabled)$("print-text").textContent=$("share-text").value;
- else{$("print-sheet").hidden=true;$("print-text").textContent="";}
 });
 $("privacy-open").addEventListener("click",()=>{if(typeof $("privacy-dialog").showModal==="function")$("privacy-dialog").showModal();else $("about").open=true;});
 window.addEventListener("pageshow",ev=>{if(ev.persisted)location.reload();});
