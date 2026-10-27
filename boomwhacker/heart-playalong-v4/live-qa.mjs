@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { createHash } from "node:crypto";
 import { chromium } from "playwright-core";
 
 // Test the deployed GitHub Pages address, not a local checkout.
@@ -50,6 +51,7 @@ try {
     await page.locator("#drawer summary").click();
     for(const theme of ["forest","night","classroom"]){
       await page.locator('[data-theme="'+theme+'"]').click();
+      const signatures=[];
       for(const guide of ["footsteps","heart","moa"]){
         await page.locator('[data-guide="'+guide+'"]').click();
         const metrics=await page.evaluate(()=>{
@@ -57,10 +59,12 @@ try {
           return {state:q.getState(),data:document.querySelector("#score").toDataURL()};
         });
         check(metrics.state.theme===theme&&metrics.state.motion===guide,config.name+": "+theme+" + "+guide+" mode");
+        signatures.push(createHash("sha256").update(metrics.data).digest("hex"));
         const name=config.name+"-"+theme+"-"+guide+".png";
         await page.locator("#stage").screenshot({path:OUT+"/"+name});
         report.screenshots.push(name);
       }
+      check(new Set(signatures).size===3,config.name+": "+theme+" guide modes must change actual canvas pixels");
     }
     await page.locator("#song").selectOption("0");
     await page.locator('[data-guide="footsteps"]').click();
