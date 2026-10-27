@@ -84,7 +84,7 @@ for(const width of [390,1280]){
  await check(await page.locator('#letter-page').isVisible(),width+'px whole result rendered as keepsake letter');
  await check((await page.locator('#result-title').textContent()).includes('작은 이야기'),width+'px personal letter heading visible');
  await check(await page.locator('.memory-card').count()===5,width+'px all five conversations gathered into one result');
- await check((await page.locator('#recap-items').textContent()).includes('요즘 시작이 쉽지 않아'),width+'px student's exact written note included without separate checkbox');
+ await check((await page.locator('#recap-items').textContent()).includes('요즘 시작이 쉽지 않아'),width+'px student written note included without separate checkbox');
  await check((await page.locator('#recap-items').textContent()).includes('설명이 잘 이해되지 않아'),width+'px contextual optional answer preserved');
  await check((await page.locator('#recap-items').textContent()).includes('게임·영상'),width+'px interest also retained, not excluded by selection');
  await check(await page.locator('#share-items').count()===0,width+'px no individual counselor disclosure checklist');
@@ -106,7 +106,7 @@ for(const width of [390,1280]){
  await check(await page.locator('#guide-items').isHidden(),width+'px private counselor guide not on student print');
  await page.emulateMedia({media:'screen'});
  await page.locator('#revise').click();
- await check(await page.locator('#print-sheet').isHidden(),width+'px old print data revoked immediately on revision');
+ await check(await page.locator('#result').isHidden(),width+'px previous letter hidden immediately on revision');
  await check(await page.locator('#copy').isDisabled(),width+'px old copy permission revoked on revision');
  await page.locator('#next').click();
  await page.locator('[data-choice="people"]').click();
