@@ -108,7 +108,7 @@ try {
         await page.locator("#stage").screenshot({path:OUT+"/"+name});
         report.screenshots.push(name);
       }
-      check(new Set(signatures).size===3,config.name+": "+theme+" guide modes must change actual canvas pixels");
+      check(new Set(signatures).size===4,config.name+": "+theme+" all four guide modes must produce distinct canvas pixels");
     }
     const cueTiming=await page.evaluate(()=>{
       const q=window.__HEART_V4_QA__;
