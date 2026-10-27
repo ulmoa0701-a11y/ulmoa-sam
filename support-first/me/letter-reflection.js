@@ -28,7 +28,7 @@ function compose(records){
  if(selectedSpark)parts.push({label:'내가 편해지는 순간',text:selectedSpark+(a('spark').detail?' 특히 “'+a('spark').detail+'”를 골랐어.':'')});
  if(p)parts.push({label:'나에게 맞는 대화 조건',text:p.meaning+(a('pace').detail?' “'+a('pace').detail+'”를 원한다는 것도 함께 전할 수 있어.':'')});
  if(scene)parts.push({label:'함께 살펴볼 장면',text:scene});
- if(!parts.length)parts.push({label:'아직 남겨둔 이야기',text:'지금 고른 답만으로 너를 설명하지 않을게. 직접 적은 말은 아래에 그대로 담았어. 말하지 않은 부분은 나중에 이야기해도 돼.'});
+ if(!parts.length)parts.push({label:'아직 남겨둔 이야기',text:'지금 고른 답만으로 너를 설명하지 않을게. 직접 적은 말이 있다면 아래에서 다시 볼 수 있어. 말하지 않은 부분은 나중에 이야기해도 돼.'});
  let step=p?.step||'다음에 이야기하고 싶은 것이 떠오르면, 단어 하나만 남겨보기.';
  if(a('wish').choice==='interest')step='좋아하는 것 하나를 떠올리고, 다음 만남에서 말하거나 보여주기.';
  if(a('wish').choice==='scene')step='다음에 함께 살펴볼 장면 하나를 고르기. 자세한 설명은 만나서 해도 돼.';

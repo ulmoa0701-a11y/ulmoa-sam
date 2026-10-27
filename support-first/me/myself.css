@@ -429,3 +429,14 @@ dialog form{display:flex;justify-content:flex-end}
 .letter-forward details{margin-top:14px;font-size:.82rem}.letter-forward summary{cursor:pointer;min-height:44px;padding:10px 0}
 @media(max-width:480px){.reflection-part p{font-size:.93rem}#reflection-warm{font-size:1rem}.letter-reflection{margin:22px 0}.reflection-part{margin:15px 0}}
 @media print{.reflection-edit{display:none!important}.letter-reflection{break-inside:avoid;margin:15px 0}.reflection-part p{font-size:10pt;line-height:1.5}#reflection-warm{font-size:11pt;margin:12px 0}.reflection-response{font-size:10pt}.letter-forward details{display:none}#letter-page{position:static!important}}
+@media print{
+ .topbar,.footer,.about,.letter-notice,.letter-toolbox,#result .guide,.letter-bottom,#privacy-dialog{display:none!important}
+ .site,.main,#result,#result .letter-frame{display:block!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:white!important;box-shadow:none!important;overflow:visible!important}
+ #letter-page{padding:8mm!important;border:0!important}
+ #letter-page:before,#letter-page:after{display:none!important}
+ #letter-page .letter-reflection{break-inside:auto;margin:12px 0;padding-bottom:10px}
+ #letter-page .reflection-part{margin:8px 0;break-inside:avoid}
+ #letter-page .letter-reflection h2{font-size:15pt;margin:5px 0 10px}
+ #letter-page .reflection-part h3{font-size:9pt}
+ #letter-page .letter-forward,#letter-page .letter-signature{break-inside:avoid}
+}
