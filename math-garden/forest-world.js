@@ -384,8 +384,11 @@ function floatPop(hostEl,imgSrc){
 /* Gathered pieces stay in a temporary basket until the child checks the number.
    Neither guessing nor tapping repeatedly earns spendable goods. */
 function gatherSlots(type,count,goal){
+ // Resource names are plural (acorns/berries); unit() expects acorn/berry.
+ // Normalize here so the strawberry count slots never fall back to acorn art.
+ const fruit=type==='berries'?'berry':'acorn';
  return '<div class="gather-slots" aria-hidden="true">'+Array.from({length:Math.max(goal,count)},(_,i)=>
-  '<span class="gather-slot '+(i<count?(i<goal?'filled':'extra'):'')+'">'+(i<count?unit(type,true):'')+'</span>'
+  '<span class="gather-slot '+(i<count?(i<goal?'filled':'extra'):'')+'">'+(i<count?unit(fruit,true):'')+'</span>'
  ).join('')+'</div>';
 }
 function renderGather(){
