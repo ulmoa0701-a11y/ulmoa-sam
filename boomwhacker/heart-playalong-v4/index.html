@@ -162,8 +162,9 @@ a{color:inherit}
 </section>
 <div class="below"><div class="status" id="status" role="status"><strong>하트 하나 = 한 박</strong> · 두 봉우리는 연주를 돕는 시각 안내예요</div><div class="guide-select" role="group" aria-label="박자 안내 방식">
 <span class="guide-label">박자 안내</span>
+<button type="button" data-guide="sparkle" aria-pressed="true">반짝 안내</button>
+<button type="button" data-guide="firefly" aria-pressed="false">반딧불 안내</button>
 <button type="button" data-guide="moa" aria-pressed="false">모아와 함께</button>
-<button type="button" data-guide="footsteps" aria-pressed="true">발자국만</button>
 <button type="button" data-guide="heart" aria-pressed="false">하트 강조만</button>
 </div></div>
 <section class="instrument" aria-label="붐웨커 음"><div class="instrument-label"><strong>내 색깔 악기</strong><span>도 · 레 · 미 · 파 · 솔 · 라 · 시</span></div><div class="keys" id="keys"></div></section>
@@ -192,7 +193,7 @@ const frequencyOf=note=>FREQUENCIES[NOTES.indexOf(note)]||0;
 const heartPath=new Path2D("M50 84 C44 77 9 55 6 29 C3 9 20 0 35 5 C43 7 48 13 50 19 C52 13 57 7 65 5 C80 0 97 9 94 29 C91 55 56 77 50 84Z");
 const imageNames=["forest","night","classroom","heart-frame","moa","forest-enchanted","forest-enchanted-mobile"];
 const images={};
-let song=SCORES[0],beat=-song.meter,playing=false,speed=1,theme="forest",motion="footsteps",audio=null,startedAt=0,rafId=0,played=new Set(),reduced=matchMedia("(prefers-reduced-motion: reduce)").matches,display={width:1440,height:820,mobile:false};
+let song=SCORES[0],beat=-song.meter,playing=false,speed=1,theme="forest",motion="sparkle",audio=null,startedAt=0,rafId=0,played=new Set(),reduced=matchMedia("(prefers-reduced-motion: reduce)").matches,display={width:1440,height:820,mobile:false};
 const meter=()=>song.meter,endBeat=()=>song.bars.length*song.meter,beatSeconds=()=>60/(song.bpm*speed);
 const TEXT_FONTS={
  ui:"'Pretendard','SUIT','Noto Sans CJK KR',sans-serif",
@@ -338,46 +339,95 @@ function paintMoa(g,phase){
  else{ctx.fillStyle="#ffefd5";ctx.beginPath();ctx.arc(p.x,p.y-size*.35,size*.22,0,Math.PI*2);ctx.fill()}
  ctx.restore();
 }
-function paintFootprint(x,y,r,alpha,side=0){
- // Clear human-style footprint: sole plus five rounded toes and two soft sparkles.
- // Draw OUTSIDE the note token, not on top of its Korean solfège label.
- ctx.save();ctx.globalAlpha=Math.min(1,Math.max(0,alpha));ctx.translate(x,y);
- ctx.rotate(side===0?-.13:.10);
- const s=r/23;ctx.scale(s,s);
- ctx.shadowColor="#ffdd75";ctx.shadowBlur=12;ctx.fillStyle="#fff4bc";
- ctx.strokeStyle="#835b2c";ctx.lineWidth=.7;
- ctx.beginPath();ctx.moveTo(-8,13);ctx.bezierCurveTo(-14,6,-12,-7,-4,-13);
- ctx.bezierCurveTo(5,-17,12,-8,11,2);ctx.bezierCurveTo(11,11,4,17,-3,18);
- ctx.bezierCurveTo(-6,18,-8,16,-8,13);ctx.closePath();ctx.fill();ctx.stroke();
- for(const [tx,ty,sz] of [[-9,-20,3.3],[-3,-24,3.9],[4,-25,4],[11,-22,3.4],[16,-17,2.8]]){
-  ctx.beginPath();ctx.arc(tx,ty,sz,0,Math.PI*2);ctx.fill();
- }
- ctx.shadowBlur=0;ctx.strokeStyle="#fff4c9";ctx.lineWidth=1.8;
- const twinkle=(xx,yy)=>{ctx.beginPath();ctx.moveTo(xx-5,yy);ctx.lineTo(xx+5,yy);ctx.moveTo(xx,yy-5);ctx.lineTo(xx,yy+5);ctx.stroke()};
- if(alpha>.66){twinkle(-19,5);twinkle(23,-7)}
- ctx.restore();
+// Two crests are visual subdivisions of ONE heart/beat. Never schedule sound here.
+// The indicator remains singular; no old marker or second glow remains visible.
+function guideState(phase){
+ const p=Math.max(0,Math.min(.999999,phase));
+ const side=p<.5?0:1,contact=side===0?.25:.75;
+ const distance=Math.abs(p-contact);
+ return {side,contact,glow:smoothUnit(1-distance/.23),
+         left:side===0?smoothUnit(1-distance/.23):0,
+         right:side===1?smoothUnit(1-distance/.23):0};
 }
 function guideOpacity(phase,contact,kind){
- // Graceful contact without strobing; after the beat the marker settles.
- const pulse=reduced?0:beatCue(phase,contact);
- const settle=reduced?1:smoothUnit((phase-contact+.07)/.20);
- return kind==="footsteps" ? (.27+.30*settle+.30*pulse) : (.23+.33*settle+.24*pulse);
+ const current=guideState(phase);
+ return current.side===(contact<.5?0:1)?current.glow:0;
+}
+// One tiny firefly moves between the two crests, with no teleport or second sprite.
+function fireflyPose(phase,g){
+ const p=Math.max(0,Math.min(.999999,phase));
+ const travel=smoothUnit((p-.38)/.24);
+ const x=g.x+g.w*(.28+.44*travel);
+ const y=g.y-g.w*(.105+.06*Math.sin(Math.PI*travel));
+ const cue=guideState(p);
+ return {x,y,travel,glow:cue.glow,side:cue.side};
+}
+function paintCrestGlow(g,side,strength){
+ if(strength<=.002)return;
+ ctx.save();ctx.translate(g.x,g.y);ctx.scale(g.w/100,g.w/100);
+ if(side===1){ctx.translate(100,0);ctx.scale(-1,1)}
+ ctx.globalAlpha=Math.min(1,strength);
+ const aura=ctx.createRadialGradient(28,9,1,28,9,22);
+ aura.addColorStop(0,"#ffefbc9c");aura.addColorStop(.48,"#ffe19e55");aura.addColorStop(1,"#ffe19e00");
+ ctx.fillStyle=aura;ctx.beginPath();ctx.ellipse(27,10,22,17,0,0,Math.PI*2);ctx.fill();
+ ctx.shadowBlur=11;ctx.shadowColor="#ffedab";ctx.lineCap="round";ctx.lineWidth=3.4;
+ ctx.strokeStyle="#fff4ce";
+ ctx.beginPath();ctx.moveTo(10,25);ctx.bezierCurveTo(7,11,16,5,30,5);
+ ctx.bezierCurveTo(38,6,45,11,49,18);ctx.stroke();
+ ctx.restore();
+}
+function paintTwinkle(x,y,r,alpha){
+ if(alpha<=.002)return;
+ ctx.save();ctx.globalAlpha=alpha;ctx.translate(x,y);
+ ctx.shadowColor="#ffdf81";ctx.shadowBlur=r*1.1;
+ ctx.fillStyle="#fff4bf";
+ ctx.beginPath();ctx.moveTo(0,-r);ctx.quadraticCurveTo(r*.22,-r*.16,r,0);
+ ctx.quadraticCurveTo(r*.22,r*.16,0,r);
+ ctx.quadraticCurveTo(-r*.22,r*.16,-r,0);
+ ctx.quadraticCurveTo(-r*.22,-r*.16,0,-r);
+ ctx.fill();ctx.restore();
+}
+function paintFirefly(phase,g){
+ const p=fireflyPose(phase,g);
+ const r=Math.max(4,Math.min(8,g.w*.041));
+ ctx.save();ctx.globalAlpha=.63+.37*p.glow;
+ const glow=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,r*3.8);
+ glow.addColorStop(0,"#fff5bded");glow.addColorStop(.23,"#ffdf81b0");
+ glow.addColorStop(.65,"#ffc66b38");glow.addColorStop(1,"#ffc66b00");
+ ctx.fillStyle=glow;ctx.beginPath();ctx.arc(p.x,p.y,r*3.8,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#fff9c7";ctx.shadowColor="#ffdc76";ctx.shadowBlur=r*1.8;
+ ctx.beginPath();ctx.arc(p.x,p.y,r*.63,0,Math.PI*2);ctx.fill();
+ ctx.shadowBlur=0;ctx.globalAlpha=.30+.20*p.glow;
+ ctx.fillStyle="#f6f7d9";
+ for(const direction of [-1,1]){
+  ctx.beginPath();ctx.ellipse(p.x+direction*r*.78,p.y-r*.48,r*.48,r*.23,
+    direction*.32,0,Math.PI*2);ctx.fill()
+ }
+ ctx.restore();
+}
+function paintQuietHeartGuide(g){
+ // Accessibility: reduced motion displays one static outline, no phase-based flash.
+ ctx.save();ctx.translate(g.x,g.y);ctx.scale(g.w/100,g.w/100);
+ ctx.lineWidth=2.1;ctx.strokeStyle=theme==="classroom"?"#285b45b0":"#fff0c4a3";
+ ctx.stroke(heartPath);ctx.restore();
 }
 function paintGuide(g,phase){
+ if(reduced){paintQuietHeartGuide(g);return}
  const mode=effectiveGuide();
- const left=g.x+g.w*.28,right=g.x+g.w*.72;
- const y=g.y-g.w*.08;
  if(mode==="moa"){paintMoa(g,phase);return}
- // Two calm landmarks: continuously fade from upcoming to reached.
- for(const [contact,x] of [[.25,left],[.75,right]]){
-  if(mode==="footsteps"){
-   paintFootprint(x,y,g.w*.145,Math.min(1,guideOpacity(phase,contact,"footsteps")+.18),contact===.25?0:1);
-  }else{
-   ctx.save();ctx.strokeStyle=theme==="classroom"?"#205a44":"#f7edce";
-   ctx.globalAlpha=guideOpacity(phase,contact,"heart");
-   ctx.lineWidth=2.7;ctx.beginPath();ctx.arc(x,y,g.w*.11,0,Math.PI*2);ctx.stroke();
-   ctx.restore();
-  }
+ const cue=guideState(phase);
+ const side=cue.side;
+ const x=g.x+g.w*(side===0?.28:.72),y=g.y-g.w*.09;
+ if(mode==="firefly"){
+  paintCrestGlow(g,side,cue.glow*.52);
+  paintFirefly(phase,g);
+ }else if(mode==="sparkle"){
+  paintCrestGlow(g,side,cue.glow*.95);
+  paintTwinkle(x,y,g.w*.049,cue.glow*.95);
+  // One smaller companion star sits alongside the SAME active crest.
+  paintTwinkle(x+g.w*.12,y+g.w*.015,g.w*.020,cue.glow*.43);
+ }else if(mode==="heart"){
+  paintCrestGlow(g,side,cue.glow*.74);
  }
 }
 function render(b){
@@ -460,7 +510,7 @@ songPicker.addEventListener("change",()=>{song=SCORES[+songPicker.value];$("#hud
 document.querySelectorAll("[data-guide]").forEach(btn=>btn.addEventListener("click",()=>{
  motion=btn.dataset.guide;
  document.querySelectorAll("[data-guide]").forEach(x=>x.setAttribute("aria-pressed",String(x===btn)));
- status.innerHTML="<strong>박자 안내</strong> · "+({"moa":"모아가 두 봉우리를 짧게 밟아요","footsteps":"발자국이 차례로 나타나요","heart":"하트의 두 봉우리를 차례로 강조해요"}[motion]);
+ status.innerHTML="<strong>박자 안내</strong> · "+({"sparkle":"왼쪽에서 오른쪽으로 금빛이 한 번씩 반짝여요","firefly":"반딧불 한 마리가 봉우리를 차례로 비춰요","moa":"모아가 두 봉우리를 짧게 밟아요","heart":"한 번에 한 봉우리만 은은하게 강조해요"}[motion]);
  render(beat)
 }));
 $("#notes").addEventListener("change",()=>{document.querySelectorAll(".key").forEach(k=>k.setAttribute("aria-disabled",String(!allowedNotes().includes(k.dataset.note))))});
@@ -480,7 +530,7 @@ const fontState=()=>({
  loaded:{story:[...document.fonts].some(f=>f.family==="Gamja Flower"&&f.status==="loaded"),
          score:[...document.fonts].some(f=>f.family==="Jua"&&f.status==="loaded")}
 });
-window.__HEART_V4_QA__={beatParts,geometry,crestTravel,stepPose,beatCue,guideOpacity,effectiveGuide,pageAt,fontState,sceneInfo:()=>({theme,mobile:display.mobile,scene:theme==="forest"?(display.mobile?"forest-enchanted-mobile":"forest-enchanted"):theme,loaded:ready(display.mobile?"forest-enchanted-mobile":"forest-enchanted")}),getState:()=>({beat,playing,speed,theme,motion,meter:song.meter,title:song.title,audioState:audio?.state||"none",playedCount:played.size}),render:(b)=>render(b),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
+window.__HEART_V4_QA__={beatParts,geometry,crestTravel,stepPose,beatCue,guideOpacity,guideState,fireflyPose,effectiveGuide,pageAt,fontState,sceneInfo:()=>({theme,mobile:display.mobile,scene:theme==="forest"?(display.mobile?"forest-enchanted-mobile":"forest-enchanted"):theme,loaded:ready(display.mobile?"forest-enchanted-mobile":"forest-enchanted")}),getState:()=>({beat,playing,speed,theme,motion,meter:song.meter,title:song.title,audioState:audio?.state||"none",playedCount:played.size}),render:(b)=>render(b),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
 window.addEventListener("resize",()=>render(beat));
 getAssets();$("#hudTitle").textContent=song.title;reset();
 // Canvas retains pixels rendered before web-font readiness. Repaint the SAME beat
