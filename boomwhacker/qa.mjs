@@ -1078,7 +1078,7 @@ async function heartV4Smoke(){
    const stepRange=[0,.1,.18,.25,.35,.5,.63,.75,.88,.99].map(x=>q.stepPose(x,g).lift);
    return {canvas:{w:document.querySelector("#score").width,h:document.querySelector("#score").height},
     stage:document.querySelector("#stage").getBoundingClientRect().toJSON(),
-    page,heartWidth:g.w,footstepMode:q.getState().motion,
+    page,heartWidth:g.w,guideMode:q.getState().motion,
     left,right,holdFirst,holdLast,noLift,stepRange,
     eventsSolid:q.beatParts(1),eventsSplit:q.beatParts(0),assets:q.assets()};
   });
@@ -1090,7 +1090,7 @@ async function heartV4Smoke(){
     "V4 "+cfg.name+": viewport score rows incorrect");
    check(data.heartWidth*data.stage.width/data.canvas.w>=60,
     "V4 "+cfg.name+": notation too small");
-   check(data.footstepMode==="footsteps","V4 "+cfg.name+": quiet footstep mode not default");
+   check(data.guideMode==="sparkle","V4 "+cfg.name+": calm sparkle guide not default");
    check(data.left.x+10<data.right.x &&
       data.left.lift<.01&&data.right.lift<.01,
     "V4 "+cfg.name+": left and right contact points incorrect");
@@ -1108,14 +1108,25 @@ async function heartV4Smoke(){
    check(Math.abs(easedPulse[0]-1)<1e-6&&easedPulse[1]<.00001&&
      easedPulse[2]>0&&easedPulse[2]<1,
      "V4 "+cfg.name+": footstep pulse should fade smoothly");
-   const markerFade=await page.evaluate(()=>{
+   const singleCue=await page.evaluate(()=>{
      const q=window.__HEART_V4_QA__;
-     return ["footsteps","heart"].map(kind=>({
-       kind,before:q.guideOpacity(.249,.25,kind),after:q.guideOpacity(.251,.25,kind)
-     }));
+     const xs=[0,.12,.249,.25,.40,.499,.5,.60,.749,.75,.93,.999];
+     const states=xs.map(phase=>({phase,...q.guideState(phase)}));
+     const pose=[.25,.38,.45,.50,.55,.62,.75].map(phase=>({phase,...q.fireflyPose(phase,q.geometry(0,q.pageAt(0)))}));
+     return {states,pose};
    });
-   check(markerFade.every(m=>Math.abs(m.before-m.after)<.04),
-     "V4 "+cfg.name+": contact-marker brightness must not jump "+JSON.stringify(markerFade));
+   check(singleCue.states.every(s=>(s.left===0||s.right===0)&&
+       (s.side===0?s.right===0:s.left===0))&&
+     singleCue.states.find(s=>s.phase===.25).left===1&&
+     singleCue.states.find(s=>s.phase===.25).right===0&&
+     singleCue.states.find(s=>s.phase===.75).right===1&&
+     singleCue.states.find(s=>s.phase===.75).left===0&&
+     singleCue.states.find(s=>s.phase===.5).glow===0,
+     "V4 "+cfg.name+": two crests lit together or guide contact out of time "+JSON.stringify(singleCue.states));
+   check(singleCue.pose.every((p,i,a)=>i===0||p.x>=a[i-1].x)&&
+     singleCue.pose[0].x<singleCue.pose.at(-1).x&&
+     singleCue.pose.every(p=>Number.isFinite(p.y)),
+     "V4 "+cfg.name+": single firefly jumped backwards between crests");
    check(data.stepRange.filter(x=>x>1).length>=2 &&
      data.stepRange.every(x=>x<data.heartWidth*.031) &&
      Math.abs(data.holdFirst.x-data.left.x)<.1 &&
@@ -1128,26 +1139,31 @@ async function heartV4Smoke(){
    const stageArt=await page.evaluate(()=>window.__HEART_V4_QA__.sceneInfo());
    check(stageArt.loaded&&stageArt.scene===(cfg.name==="mobile"?"forest-enchanted-mobile":"forest-enchanted"),
     "V4 "+cfg.name+": sample-quality night stage was not selected "+JSON.stringify(stageArt));
-   const footLegibility=await page.evaluate(()=>{
-     const q=window.__HEART_V4_QA__,canvas=document.querySelector("#score"),context=canvas.getContext("2d");
-     const first=q.geometry(0,q.pageAt(.25)),cx=first.x+first.w*.28,cy=first.y-first.w*.08;
-     const xa=Math.max(0,Math.round(cx-42)),ya=Math.max(0,Math.round(cy-53));
-     const ww=84,hh=90;
-     document.querySelector('[data-guide="footsteps"]').click();q.render(.25);
-     const foot=context.getImageData(xa,ya,ww,hh).data;
-     document.querySelector('[data-guide="heart"]').click();q.render(.25);
-     const mark=context.getImageData(xa,ya,ww,hh).data;
-     let changed=0,bright=0;
-     for(let j=0;j<foot.length;j+=4){
-       const diff=Math.abs(foot[j]-mark[j])+Math.abs(foot[j+1]-mark[j+1])+Math.abs(foot[j+2]-mark[j+2]);
-       if(diff>80)changed++;
-       if(foot[j]>220&&foot[j+1]>185&&foot[j+2]>105)bright++;
-     }
-     document.querySelector('[data-guide="footsteps"]').click();q.render(-2);
-     return {changed,bright,footprintCenter:{x:cx,y:cy}};
+   const cuePixels=await page.evaluate(()=>{
+     const q=window.__HEART_V4_QA__,canvas=document.querySelector("#score"),ctx=canvas.getContext("2d");
+     document.querySelector('[data-guide="sparkle"]').click();
+     const g=q.geometry(0,q.pageAt(0));
+     const sample=(phase,side)=>{
+       q.render(phase);
+       const cx=g.x+g.w*(side===0?.28:.72),cy=g.y+g.w*.015;
+       return ctx.getImageData(Math.round(cx-36),Math.round(cy-34),72,72).data;
+     };
+     const baseline=[sample(.5,0),sample(.5,1)];
+     const left=[sample(.25,0),sample(.25,1)];
+     const right=[sample(.75,0),sample(.75,1)];
+     const changed=(a,b)=>{
+       let n=0;for(let i=0;i<a.length;i+=4){
+         if(Math.abs(a[i]-b[i])+Math.abs(a[i+1]-b[i+1])+Math.abs(a[i+2]-b[i+2])>50)n++;
+       }return n;
+     };
+     document.querySelector('[data-guide="sparkle"]').click();q.render(-2);
+     return {leftBright:changed(left[0],baseline[0]),leftWrong:changed(left[1],baseline[1]),
+             rightBright:changed(right[1],baseline[1]),rightWrong:changed(right[0],baseline[0])};
    });
-   check(footLegibility.changed>65&&footLegibility.bright>35,
-     "V4 "+cfg.name+": actual footprint outside the note heart is not visually clear "+JSON.stringify(footLegibility));
+   check(cuePixels.leftBright>50&&cuePixels.rightBright>50&&
+     cuePixels.leftBright>cuePixels.leftWrong*1.5&&
+     cuePixels.rightBright>cuePixels.rightWrong*1.5,
+     "V4 "+cfg.name+": sparkle must be visible on only the current crest "+JSON.stringify(cuePixels));
   }
   // Meter-specific proof: same two crest contacts across 2/4, 3/4 and 4/4.
   // Selecting songs changes only the authored score, never the visual beat landmarks.
@@ -1182,25 +1198,28 @@ async function heartV4Smoke(){
       Math.abs(p[1]-(i+1)*.25)<1e-6),
     "V4 "+cfg.name+": sixteenth-note subdivision damaged "+JSON.stringify(quarterProof));
   await page.locator("#song").evaluate(el=>{el.value="0";el.dispatchEvent(new Event("change",{bubbles:true}))});
-  check(await page.locator('[data-guide]').count()===3,
-    "V4 "+cfg.name+": user must have three distinct guide options");
+  check(await page.locator('[data-guide]').count()===4,
+    "V4 "+cfg.name+": sparkle, firefly, Moa and quiet-heart options all present");
   // Rendering must truly differ, not just change a selected label.
   const fingerprints=await page.evaluate(()=>{
     const q=window.__HEART_V4_QA__,out={};
-    for(const m of ["footsteps","heart","moa"]){
+    for(const m of ["sparkle","firefly","heart","moa"]){
       document.querySelector('[data-guide="'+m+'"]').click();
       q.render(.6);
       out[m]=document.querySelector("#score").toDataURL();
     }
-    document.querySelector('[data-guide="footsteps"]').click();
+    document.querySelector('[data-guide="sparkle"]').click();
     q.render(-2);
     return Object.fromEntries(Object.entries(out).map(([k,v])=>[k,v]));
   });
-  check(new Set(Object.values(fingerprints)).size===3,
-    "V4 "+cfg.name+": all three options must render different actual frames");
+  check(new Set(Object.values(fingerprints)).size===4,
+    "V4 "+cfg.name+": all four options must render different actual frames");
   await page.screenshot({path:out+"/heartV4-"+cfg.name+"-forest.png",fullPage:true});
   await page.evaluate(()=>window.__HEART_V4_QA__.render(.75));
-  await page.locator("#stage").screenshot({path:out+"/heartV4-"+cfg.name+"-footsteps.png"});
+  await page.locator("#stage").screenshot({path:out+"/heartV4-"+cfg.name+"-sparkle.png"});
+  await page.locator('[data-guide="firefly"]').click();
+  await page.evaluate(()=>window.__HEART_V4_QA__.render(.75));
+  await page.locator("#stage").screenshot({path:out+"/heartV4-"+cfg.name+"-firefly.png"});
   await page.locator('[data-guide="heart"]').click();
   await page.evaluate(()=>window.__HEART_V4_QA__.render(.75));
   await page.locator("#stage").screenshot({path:out+"/heartV4-"+cfg.name+"-heart-guide.png"});
@@ -1224,9 +1243,13 @@ async function heartV4Smoke(){
   await page.locator('[data-guide="heart"]').click();
   check((await page.evaluate(()=>window.__HEART_V4_QA__.getState().motion))==="heart",
     "V4 "+cfg.name+": heart-only guide mode not selected");
-  await page.locator('[data-guide="footsteps"]').click();
-  check((await page.locator('[data-guide="footsteps"]').getAttribute("aria-pressed"))==="true",
-    "V4 "+cfg.name+": footstep guide mode control not accessible");
+  await page.locator('[data-guide="sparkle"]').click();
+  check((await page.locator('[data-guide="sparkle"]').getAttribute("aria-pressed"))==="true",
+    "V4 "+cfg.name+": sparkle guide mode control not accessible");
+  await page.locator('[data-guide="firefly"]').click();
+  check((await page.locator('[data-guide="firefly"]').getAttribute("aria-pressed"))==="true",
+    "V4 "+cfg.name+": firefly option not accessible");
+  await page.locator('[data-guide="sparkle"]').click();
   // Use the short canonical 2/4 starting tune, whose two-beat count-in
   // finishes within this audio-onset browser test's real-time window.
   await page.locator("#song").selectOption("0");
