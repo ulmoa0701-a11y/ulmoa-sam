@@ -18,7 +18,7 @@ async function fit(page,width,label){
 async function screenshot(page,width,name){
  await page.screenshot({path:path.join(out,'myself-'+name+'-'+width+'.png'),fullPage:true});
 }
-for(const width of [390,1280]){
+for(const width of [320,390,820,1440]){
  const ctx=await browser.newContext({viewport:{width,height:870},deviceScaleFactor:1,locale:'ko-KR',permissions:['clipboard-read','clipboard-write']});
  const page=await ctx.newPage();
  const pageErrors=[],outbound=[];
@@ -93,18 +93,32 @@ for(const width of [390,1280]){
  await check(await page.locator('#print').isEnabled(),width+'px one action to print whole finished letter');
  await check((await page.locator('.paper-message').textContent()).includes('편한 순간으로 고른 건'),width+'px honest brief introduction personalizes letter');
  await check((await page.locator('#letter-next').textContent()).includes('함께 해보기'),width+'px personal next visit aspiration included');
+ await check((await page.locator('#reflection-title').innerText()).includes('내 생각을 내 방식'),width+'px reflection follows chosen communication style');
+ await check((await page.locator('#reflection-warm').innerText()).includes('네 표현이야'),width+'px warm message matches writing preference');
+ await check((await page.locator('#reflection-parts').innerText()).includes('설명을 다시'),width+'px selected scene gets specific support suggestion');
+ await check((await page.locator('#reflection-step').innerText()).includes('게임이나 활동'),width+'px next step respects explicit wish');
+ await page.locator('.reflection-edit summary').click();
+ await page.locator('[data-response="조금 달라요"]').click();
+ await page.locator('#reflection-note').fill('글도 좋지만 익숙해지면 말하고 싶어 <b>내 말</b>');
+ await check((await page.locator('#reflection-response').innerText()).includes('<b>내 말</b>'),width+'px reader correction rendered as text');
+ await check(await page.locator('#reflection-response b').count()===0,width+'px correction cannot inject markup');
+ await fit(page,width,'personalized letter');
  await screenshot(page,width,'personal-letter');
  await page.locator('#copy').click();
  await page.waitForFunction(()=>document.querySelector('#share-status')?.textContent?.length>0,null,{timeout:4000});
  await check((await page.locator('#share-status').textContent()).length>0,width+'px full copy action provides status');
  const copied=await page.evaluate(async()=>await navigator.clipboard.readText());
  await check(copied.includes('요즘 시작이 쉽지 않아')&&copied.includes('게임·영상')&&copied.includes('설명이 잘 이해되지 않아')&&copied.includes('고르거나 글로 이야기하기'),width+'px clipboard includes all original choices detail and own words');
+ await check(copied.includes('조금 달라요')&&copied.includes('익숙해지면 말하고 싶어')&&copied.includes('네 표현이야'),width+'px complete export includes reflection and reader correction');
  await check(!copied.includes('상담자의 판단')&&!copied.includes('우울증 진단'),width+'px full result adds no clinical diagnosis');
  await page.emulateMedia({media:'print'});
  await check(await page.locator('#letter-page').isVisible(),width+'px personal keepsake printed');
  await check(await page.locator('.memory-card').count()===5,width+'px printed letter retains all five conversation themes');
  await check(await page.locator('#copy').isHidden(),width+'px copy control not shown on printed letter');
  await check(await page.locator('#guide-items').isHidden(),width+'px private counselor guide not on student print');
+ await check(await page.locator('.reflection-edit').isHidden(),width+'px print hides input controls');
+ await check(await page.locator('#reflection-response').isVisible(),width+'px print includes reader correction');
+ if(width===1440)await page.pdf({path:path.join(out,'personal-letter-print.pdf'),format:'A4',printBackground:true});
  await page.emulateMedia({media:'screen'});
  await page.locator('#revise').click();
  await check(await page.locator('#result').isHidden(),width+'px previous letter hidden immediately on revision');
@@ -118,6 +132,7 @@ for(const width of [390,1280]){
  await page.locator('#pass').click();
  await page.locator('#pass').click();
  await check(await page.locator('#result').isVisible(),width+'px all optional skipped sections finish');
+ await check(await page.locator('#reflection-response').isHidden(),width+'px changing answers clears obsolete interpretation feedback');
  await check(await page.locator('#copy').isEnabled(),width+'px revised full letter available only after student finishes');
  await check((await page.locator('#recap-items').textContent()).includes('친구·사람 관계'),width+'px revised complete letter uses changed topic');
  await check(!(await page.locator('#recap-items').textContent()).includes('요즘 시작이 쉽지 않아'),width+'px stale free text from old answer removed');
@@ -126,6 +141,8 @@ for(const width of [390,1280]){
  await check(await page.locator('#result').isHidden(),width+'px reload clears shared content');
  await page.locator('#early-end').click();
  await check(await page.locator('#result').isVisible(),width+'px immediate voluntary early ending works');
+ await check((await page.locator('#reflection-title').innerText()).includes('아직 알아가는'),width+'px no-answer result does not invent a type');
+ await check((await page.locator('#reflection-step').innerText()).includes('정하지 않아도'),width+'px no-answer result does not impose a task');
  await check(await page.locator('#copy').isEnabled(),width+'px early ending allows saving an honest empty conversation letter');
  await check((await page.locator('#recap-items').textContent()).includes('이번에는 이야기하지 않았어'),width+'px early ending is reflected without making up responses');
  await page.reload({waitUntil:'domcontentloaded'});
