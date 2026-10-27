@@ -1,0 +1,153 @@
+name: Garden 34 Evidence and Regression Audit
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/garden-34-e2e-audit.yml'
+      - 'qa/garden-34-evidence-audit.cjs'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/garden-34-e2e-audit.yml'
+      - 'qa/garden-34-evidence-audit.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence-map:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check inventory and gaps without inventing complete coverage
+        run: node qa/garden-34-evidence-audit.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: garden-34-evidence-map
+          path: qa/34-audit-artifacts/report.json
+  native-basic-and-literacy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --no-save --no-package-lock playwright-core@1.56.1
+      - name: Find Chromium
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Serve website
+        run: python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/g34-native.log 2>&1 &
+      - name: Test 10 native games and 2 literacy games through actual UI to results
+        run: |
+          node qa/garden-actual-play-qa.cjs
+          node qa/garden-literacy-full-play-qa.cjs
+  native-slow-and-novel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --no-save --no-package-lock playwright-core@1.56.1
+      - name: Find Chromium
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Serve website
+        run: python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/g34-novel.log 2>&1 &
+      - name: Verify 6 slow-look and 6 story strategy games
+        run: |
+          node qa/slow-look-qa.cjs
+          node qa/novel-garden-qa.cjs
+  independent-missions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --no-save --no-package-lock playwright-core@1.56.1
+      - name: Find Chromium
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - run: python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/g34-missions.log 2>&1 &
+      - name: Verify money, change and emotional expression actual missions
+        run: |
+          node qa/moa-missions-qa.mjs
+          node qa/garden-schoolbag-full-play-qa.mjs
+  independent-rescue:
+    # Playwright 1.56.1 browser dependencies are supported on Ubuntu 24.04.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - run: python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/g34-rescue.log 2>&1 &
+      - name: Three difficulties and full five mission rounds by canvas pointer
+        run: |
+          node thinking-garden/games/rescue/rescue-core-qa.cjs
+          node thinking-garden/games/rescue/rescue-smoke.cjs
+          RESCUE_TEST_MODE=starter node thinking-garden/games/rescue/rescue-smoke.cjs
+          RESCUE_TEST_MODE=challenge node thinking-garden/games/rescue/rescue-smoke.cjs
+  independent-hand:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --no-save --no-package-lock playwright-core@1.56.1
+      - name: Find Chromium
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - run: python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/g34-hand.log 2>&1 &
+      - name: Verify gesture selection, UI play and camera recovery simulations
+        run: |
+          node qa/hand-mirror-qa.mjs
+          node qa/hand-mirror-edge-qa.mjs
+  independent-rhythm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --no-save --no-package-lock playwright-core@1.56.1
+      - name: Find Chromium
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - run: python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/g34-rhythm.log 2>&1 &
+      - name: Verify rhythm game controls, score and simulation boundaries
+        run: node thinking-garden/games/rhythm-touch/qa.mjs
+  independent-breath-recorder:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --no-save --no-package-lock playwright-core@1.56.1
+      - name: Find Chromium
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - run: python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/g34-breath.log 2>&1 &
+      - name: Verify breathing pages and complete virtual recorder tasks
+        run: |
+          node qa/breath-recorder-integrated-qa.mjs
+          node qa/recorder-full-play-qa.cjs

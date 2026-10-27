@@ -1,0 +1,45 @@
+name: Garden Recorder Real Full-Play QA
+on:
+  pull_request:
+    paths:
+      - 'qa/recorder-full-play-qa.cjs'
+      - '.github/workflows/garden-recorder-full-play-qa.yml'
+      - 'thinking-garden/recorder/index.html'
+  push:
+    branches: [main]
+    paths:
+      - 'qa/recorder-full-play-qa.cjs'
+      - '.github/workflows/garden-recorder-full-play-qa.yml'
+      - 'thinking-garden/recorder/index.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  recorder-full-play:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Browser tooling
+        run: |
+          npm install --no-save --no-package-lock playwright-core@1.56.1
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Syntax
+        run: node --check qa/recorder-full-play-qa.cjs
+      - name: Local site
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/recorder-full-play.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8765/thinking-garden/recorder/ >/dev/null && exit 0; sleep 0.5; done
+          cat /tmp/recorder-full-play.log; exit 1
+      - name: Complete easy and normal virtual-fingering lessons on phone and desktop
+        run: node qa/recorder-full-play-qa.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recorder-full-play-evidence
+          path: qa/recorder-full-play-artifacts/
+          if-no-files-found: warn
