@@ -53,13 +53,13 @@ function openPreview(key,href,trigger){
  const item=CATALOG[key];if(!item)return;
  lastPreviewTrigger=trigger;
  $('#previewType').textContent=item.focusLabel;
- $('#previewTitle').textContent=item.title;
+ $('#previewTitle').textContent=item.displayTitle||item.title;
  $('#previewAction').textContent=item.action;
  $('#previewSteps').innerHTML=item.steps.map(t=>'<li>'+esc(t)+'</li>').join('');
  $('#previewLife').textContent=item.life;
  $('#previewPlay').href=href;
  const frame=$('#previewLive');
- frame.title=item.title+' — 실제 게임 시작 화면';
+ frame.title=(item.displayTitle||item.title)+' — 실제 게임 시작 화면';
  // The old static JPG snapshots drifted out of date and pixelated on phones.
  // This preview opens the *current actual game route*, without fake art or
  // a separate imitation. Never start camera/microphone automatically.
@@ -78,16 +78,19 @@ for(const section of sections){
   if(!item){console.warn('Missing game metadata:',href);continue}
   const prevImg=$('img',a),originalImage=prevImg?.getAttribute('src')||'../thinking-garden/assets/moa-discovery.png';
   const originalTitle=$('.play-card-body strong',a)?.textContent?.trim()||item.title;
+  // Use the game's established story name on its choice card, not a second catalog name.
+  const displayTitle=originalTitle.replace(/\s*[🌰🌼🌷]+$/u,'').trim()||item.title;
+  item.displayTitle=displayTitle;
   const card=document.createElement('article');
   card.className='play-card play-card-enhanced';
   card.dataset.game=key;card.dataset.focus=item.focus;card.dataset.character=originalImage;
-  card.dataset.title=item.title;card.dataset.oldName=originalTitle;
+  card.dataset.title=displayTitle;card.dataset.oldName=originalTitle;
   card.dataset.search=[item.title,originalTitle,item.action,item.focusLabel,item.life,...item.steps].join(' ').toLocaleLowerCase('ko-KR');
   card.innerHTML='<div class="play-card-media"><img loading="lazy" decoding="async" class="real-shot" src="previews/'+esc(key)+'.jpg'+PREVIEW_VERSION+'" alt="" /><span class="shot-caption" aria-hidden="true">게임 시작 화면</span></div>'+
-    '<div class="play-card-details"><p class="play-activity">'+esc(item.focusLabel)+'</p><h3>'+esc(item.title)+'</h3>'+
+    '<div class="play-card-details"><p class="play-activity">'+esc(item.focusLabel)+'</p><h3>'+esc(displayTitle)+'</h3>'+
     (originalTitle!==item.title?'<p class="play-story-name">'+esc(originalTitle)+'</p>':'')+
     '<p class="play-simple-desc">'+esc(item.action)+'</p><p class="play-life-one-line" title="'+esc(item.life)+'">생활 연결 · '+esc(item.life)+'</p>'+
-    '<div class="play-buttons"><button type="button" class="play-preview-btn" aria-label="'+esc(item.title)+' 실제 화면 미리보기">미리보기</button><a class="play-start-btn" href="'+esc(href)+'" aria-label="'+esc(item.title)+' 게임 시작">게임 시작 <span aria-hidden="true">→</span></a></div></div>';
+    '<div class="play-buttons"><button type="button" class="play-preview-btn" aria-label="'+esc(displayTitle)+' 실제 화면 미리보기">미리보기</button><a class="play-start-btn" href="'+esc(href)+'" aria-label="'+esc(displayTitle)+' 게임 시작">게임 시작 <span aria-hidden="true">→</span></a></div></div>';
   const img=$('img.real-shot',card);
   imageFallback(img,key,originalImage);
   $('.play-preview-btn',card).addEventListener('click',e=>openPreview(key,href,e.currentTarget));
