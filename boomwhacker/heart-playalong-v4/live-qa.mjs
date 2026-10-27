@@ -56,6 +56,27 @@ try {
     const liveHash=createHash("sha256").update(await response.text()).digest("hex");
     check(liveHash===expectedHash,config.name+": served the same HTML as current main checkout");
     check(await page.locator(".transport #play").isVisible(),config.name+": playback control available");
+    const typography=await page.evaluate(async()=>{
+      await Promise.all([
+        document.fonts.load('28px "Gamja Flower"',"첫 번째 길"),
+        document.fonts.load('32px "Jua"',"도미솔")
+      ]);
+      const q=window.__HEART_V4_QA__,state=q.fontState(),canvas=document.querySelector("#score");
+      const ctx=canvas.getContext("2d"),original=ctx.fillText,calls=[];
+      try {
+        ctx.fillText=function(label,x,y,...args){
+          if(["첫 번째 길","도","미","솔"].includes(label))calls.push({label,font:this.font});
+          return original.call(this,label,x,y,...args);
+        };
+        q.render(.75);
+      }finally{ctx.fillText=original}
+      return {...state,calls,titleFontSize:getComputedStyle(document.querySelector(".heading h1")).fontSize};
+    });
+    check(typography.loaded.story&&typography.loaded.score&&typography.title.includes("Gamja Flower"),
+      config.name+": actually loaded Gamja Flower and Jua fonts");
+    check(typography.calls.some(x=>x.label==="첫 번째 길"&&x.font.includes("Gamja Flower"))&&
+      typography.calls.some(x=>x.label==="도"&&x.font.includes("Jua")),
+      config.name+": public canvas renders heart notes with Jua and story labels with Gamja Flower");
     const geometry=await page.evaluate(()=>{
       const q=window.__HEART_V4_QA__,stage=document.querySelector("#stage").getBoundingClientRect();
       return {nativeW:document.querySelector("#score").width,stageW:stage.width,

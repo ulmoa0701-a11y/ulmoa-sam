@@ -1039,6 +1039,31 @@ async function heartV4Smoke(){
   const resp=await page.goto(ROOT+"/boomwhacker/heart-playalong-v4/",{waitUntil:"networkidle"});
   check(resp?.ok(),"V4 "+cfg.name+": isolated immersive route HTTP error");
   check((await page.title()).includes("모아의 하트 산책"),"V4 "+cfg.name+": title missing");
+  // Fonts must be loaded before judging canvas snapshots, not just named in CSS.
+  const typography=await page.evaluate(async()=>{
+    await Promise.all([
+      document.fonts.load('28px "Gamja Flower"',"첫 번째 길"),
+      document.fonts.load('32px "Jua"',"도미솔")
+    ]);
+    const q=window.__HEART_V4_QA__,data=q.fontState();
+    const canvas=document.querySelector("#score"),ctx=canvas.getContext("2d");
+    const nativeFill=ctx.fillText,labels=[];
+    try {
+      ctx.fillText=function(label,x,y,...args){
+        if(["도","미","솔","첫 번째 길","두 번째 길"].includes(label))
+          labels.push({label,font:this.font});
+        return nativeFill.call(this,label,x,y,...args);
+      };
+      q.render(.75);
+    }finally{ctx.fillText=nativeFill}
+    return {...data,labels};
+  });
+  check(typography.loaded.story&&typography.loaded.score &&
+    typography.title.includes("Gamja Flower"),
+    "V4 "+cfg.name+": Gamja Flower or Jua did not load "+JSON.stringify(typography));
+  check(typography.labels.some(x=>x.label==="첫 번째 길"&&x.font.includes("Gamja Flower"))&&
+    typography.labels.some(x=>x.label==="도"&&x.font.includes("Jua")),
+    "V4 "+cfg.name+": actual score canvas did not paint with the chosen fonts "+JSON.stringify(typography.labels));
   check(await page.locator("#score").count()===1,"V4 "+cfg.name+": canvas missing");
   check(await page.locator(".transport #play").count()===1,"V4 "+cfg.name+": stage controls missing");
   check(await page.locator("#keys .key").count()===8,"V4 "+cfg.name+": canonical 8 note buttons missing");

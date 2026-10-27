@@ -7,8 +7,12 @@
 <link rel="icon" type="image/svg+xml" href="./assets/note.svg">
 <meta name="description" content="원본 하트색깔악보 규칙을 지키면서 모아와 함께 연주하는 새로운 무대형 플레이어">
 <title>모아의 하트 산책 · 일단 해봄 음악정원</title>
+<!-- The decorative web fonts are scoped to V4; original heart-score and legacy players remain unchanged. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gamja+Flower&amp;family=Jua&amp;display=swap">
 <style>
-:root{font-family:"Pretendard Variable","Pretendard","SUIT Variable","SUIT","Noto Sans KR",system-ui,sans-serif;color:#edf3ed;background:#102420;font-synthesis:none}
+:root{--font-story:"Gamja Flower","MaruBuri SemiBold","Noto Sans KR",sans-serif;--font-score:"Jua","Pretendard","SUIT","Noto Sans KR",sans-serif;font-family:"Pretendard Variable","Pretendard","SUIT Variable","SUIT","Noto Sans KR",system-ui,sans-serif;color:#edf3ed;background:#102420;font-synthesis:none}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#35574a 0%,#142c27 50%,#0c1e1c 100%)}
@@ -28,7 +32,7 @@ a{color:inherit}
 .toplink{color:#d5e4db;font-size:12px;text-decoration:none;border-bottom:1px solid #a5bdae75;padding-bottom:4px;white-space:nowrap}
 .heading{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin:0 0 18px}
 .heading .kicker{color:#d8c598;letter-spacing:.18em;font-size:10px;font-weight:850;margin:0 0 5px}
-.heading h1{font-family:"MaruBuri SemiBold","MaruBuri","Noto Serif KR",serif;font-size:clamp(24px,3vw,43px);font-weight:650;line-height:1.2;letter-spacing:-.07em;margin:0}
+.heading h1{font-family:var(--font-story);font-size:clamp(33px,3.5vw,50px);font-weight:400;line-height:1.12;letter-spacing:-.02em;margin:0}
 .heading p{margin:0 0 3px;color:#9fbbaa;font-size:12px}
 .stage{position:relative;width:100%;isolation:isolate;border-radius:28px;overflow:hidden;border:1px solid #a4d7b339;box-shadow:0 35px 100px #020e0e78;background:#1d4740}
 #score{display:block;width:100%;height:auto;aspect-ratio:1440/820;object-fit:contain}
@@ -91,7 +95,7 @@ a{color:inherit}
 .toplink{font-size:10px}
 .heading{padding:0 16px;display:block;margin-bottom:15px}
 .heading .kicker{font-size:9px}
-.heading h1{font-size:26px}
+.heading h1{font-size:34px}
 .heading p{font-size:11px;margin:7px 0 0}
 .stage{border-radius:0;border-left:0;border-right:0}
 #score{aspect-ratio:820/1040}
@@ -190,8 +194,13 @@ const imageNames=["forest","night","classroom","heart-frame","moa"];
 const images={};
 let song=SCORES[0],beat=-song.meter,playing=false,speed=1,theme="forest",motion="footsteps",audio=null,startedAt=0,rafId=0,played=new Set(),reduced=matchMedia("(prefers-reduced-motion: reduce)").matches,display={width:1440,height:820,mobile:false};
 const meter=()=>song.meter,endBeat=()=>song.bars.length*song.meter,beatSeconds=()=>60/(song.bpm*speed);
-const text=(label,x,y,size=20,color="#f7f5ef",align="left",weight=700)=>{
- ctx.save();ctx.font=weight+" "+size+"px 'Pretendard','SUIT','Noto Sans CJK KR',sans-serif";
+const TEXT_FONTS={
+ ui:"'Pretendard','SUIT','Noto Sans CJK KR',sans-serif",
+ story:"'Gamja Flower','MaruBuri','Noto Sans CJK KR',sans-serif",
+ score:"'Jua','Pretendard','SUIT','Noto Sans CJK KR',sans-serif"
+};
+const text=(label,x,y,size=20,color="#f7f5ef",align="left",weight=700,role="ui")=>{
+ ctx.save();ctx.font=(role==="ui"?weight+" ":"")+size+"px "+(TEXT_FONTS[role]||TEXT_FONTS.ui);
  ctx.textAlign=align;ctx.textBaseline="middle";ctx.fillStyle=color;ctx.fillText(label,x,y);ctx.restore()
 };
 function line(x1,y1,x2,y2,color,width=2){ctx.save();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore()}
@@ -278,10 +287,10 @@ function paintHeart(k,g,active,partOfCurrent){
  if(ready("heart-frame"))ctx.drawImage(images["heart-frame"],0,0,100,90);
  else{ctx.strokeStyle="#174b403f";ctx.lineWidth=1.2;ctx.stroke(heartPath)}
  const onsets=parts.filter(p=>Math.abs((p.source.start-k)-p.from)<.0001&&p.source.start>=k-1e-6);
- if(!onsets.length&&parts.length){text("길게",50,39,20,"#152f31","center",680)}
+ if(!onsets.length&&parts.length){text("길게",50,39,22,"#152f31","center",400,"score")}
  else for(const p of onsets){const dur=p.to-p.from,center=(p.from+p.to)*50;
  const label=p.note==="높은도"?"도":p.note;
- text(label,center,37,dur<=.25?14:dur<=.5?22:29,p.note==="높은도"?"#fff":"#142b3a","center",740)}
+ text(label,center,37,dur<=.25?15:dur<=.5?24:32,p.note==="높은도"?"#fff":"#142b3a","center",400,"score")}
  ctx.restore();
 }
 function paintMoa(g,phase){
@@ -339,7 +348,7 @@ function render(b){
   const yText=m?(row===0?206:558):(row===0?185:448);
   if(barFirst>=song.bars.length)continue;
   const label=String(barFirst+1).padStart(2,"0")+" — "+String(Math.min(song.bars.length,barFirst+page.barsPerLine)).padStart(2,"0")+" 마디";
-  text(row===0?"첫 번째 길":"두 번째 길",m?50:89,yText,m?19:17,theme==="classroom"?"#345c4b":"#f2e8d1","left",770);
+  text(row===0?"첫 번째 길":"두 번째 길",m?50:89,yText,m?27:25,theme==="classroom"?"#345c4b":"#f2e8d1","left",400,"story");
   text(label,W-(m?50:93),yText,m?16:16,theme==="classroom"?"#476953":"#e6e6cc","right",600);
   for(let col=0;col<perRow;col++){const k=start+row*perRow+col;if(k>=endBeat())continue;
    const g=geometry(k,page);paintHeart(k,g,k===active,k===active)}
@@ -421,9 +430,23 @@ document.querySelectorAll(".key").forEach(k=>k.addEventListener("click",async()=
  makeTone(k.dataset.note,audio.currentTime+.015,.35);k.classList.add("is-hit");setTimeout(()=>k.classList.remove("is-hit"),180)}
  catch(e){status.textContent="악기 소리를 낼 수 없어요"}
 }));
-window.__HEART_V4_QA__={beatParts,geometry,crestTravel,stepPose,beatCue,guideOpacity,effectiveGuide,pageAt,getState:()=>({beat,playing,speed,theme,motion,meter:song.meter,title:song.title,audioState:audio?.state||"none",playedCount:played.size}),render:(b)=>render(b),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
+const fontState=()=>({
+ title:getComputedStyle($(".heading h1")).fontFamily,
+ fonts:{story:TEXT_FONTS.story,score:TEXT_FONTS.score},
+ loaded:{story:[...document.fonts].some(f=>f.family==="Gamja Flower"&&f.status==="loaded"),
+         score:[...document.fonts].some(f=>f.family==="Jua"&&f.status==="loaded")}
+});
+window.__HEART_V4_QA__={beatParts,geometry,crestTravel,stepPose,beatCue,guideOpacity,effectiveGuide,pageAt,fontState,getState:()=>({beat,playing,speed,theme,motion,meter:song.meter,title:song.title,audioState:audio?.state||"none",playedCount:played.size}),render:(b)=>render(b),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
 window.addEventListener("resize",()=>render(beat));
 getAssets();$("#hudTitle").textContent=song.title;reset();
+// Canvas retains pixels rendered before web-font readiness. Repaint the SAME beat
+// after both fonts settle without restarting playback, touching notes or changing tempo.
+if(document.fonts?.load){
+ Promise.allSettled([
+  document.fonts.load('28px "Gamja Flower"',"첫 번째 길"),
+  document.fonts.load('32px "Jua"',"도레미파솔라시")
+ ]).then(()=>render(beat));
+}
 });
 </script>
 </body></html>
