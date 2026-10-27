@@ -627,6 +627,65 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 }
 @media(prefers-reduced-motion:reduce){#intro .mode{transition:none}}
 
+
+/* Camera guide V8: stop drawing imaginary cartoon hands inside real camera footage.
+   The actual tracked hand and joint overlay ARE the visual model.
+   This guide shows the requested finger states, never a fake anatomical picture. */
+.play.is-camera .viewer .model-card{
+ top:108px;right:11px;left:auto;
+ width:min(44%,186px);min-width:138px;
+ padding:12px 11px 13px;
+ background:#fffdf3f2;
+ border:2px solid #d7e9d7;border-radius:18px;
+ box-shadow:0 9px 24px #173d353f;
+ gap:6px;align-items:stretch;text-align:left;
+}
+.play.is-camera .viewer .model-card[data-side="left"]{left:11px;right:auto}
+.play.is-camera .viewer .model-card .model-symbol{display:none!important}
+.play.is-camera .viewer .model-card small{font-size:11px;color:#607866;font-weight:800}
+.play.is-camera .viewer .model-card strong{
+ font-family:Pretendard,SUIT,system-ui,sans-serif;
+ font-size:clamp(13px,3.4vw,17px);
+ font-weight:950;white-space:normal;
+ color:#234c39;line-height:1.32;word-break:keep-all;
+}
+.model-finger-guide{display:grid;gap:5px;width:100%;min-width:0}
+.model-finger-guide .finger-guide-row{display:grid;gap:4px}
+.model-finger-guide .finger-guide-label{font-size:10px;font-weight:900;color:#5d7465}
+.model-finger-guide .finger-guide-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.model-finger-guide .finger-guide-state{
+ display:grid;place-items:center;gap:2px;
+ border:1px solid #dce8d8;background:#edf1ed;
+ border-radius:9px;min-width:0;padding:5px 0 4px;
+ font-size:11px;font-weight:900;color:#62746a;
+}
+.model-finger-guide .finger-guide-state b{font-size:12px;font-weight:950}
+.model-finger-guide .finger-guide-state small{font-size:9px;font-weight:850;color:inherit}
+.model-finger-guide .finger-guide-state.is-open{background:#e0f4de;border-color:#95cca4;color:#255f43}
+.model-finger-guide .finger-guide-state.is-folded{background:#fff1d7;border-color:#ecd3a3;color:#775a2d}
+.model-finger-guide .finger-count-cue{
+ display:flex;align-items:center;gap:6px;padding:5px 7px;
+ border-radius:10px;background:#e5f4e9;
+ font-size:11px;font-weight:850;color:#37624b;line-height:1.4;
+}
+.model-finger-guide .finger-count-cue b{
+ font-size:17px;color:#275b41;font-variant-numeric:tabular-nums;
+}
+@media(max-width:760px){
+ .play.is-camera .viewer .model-card{
+  width:min(46%,170px);min-width:126px;top:100px;
+  padding:9px 8px 10px;border-radius:14px;gap:4px;
+ }
+ .play.is-camera .viewer .model-card strong{font-size:clamp(12px,3.7vw,16px)}
+ .model-finger-guide .finger-guide-steps{gap:3px}
+ .model-finger-guide .finger-guide-state{padding:4px 0;font-size:10px}
+ .model-finger-guide .finger-guide-state small{font-size:8px}
+ .model-finger-guide .finger-count-cue{padding:5px;font-size:10px}
+}
+@media(max-width:370px){
+ .play.is-camera .viewer .model-card{top:91px;min-width:122px;width:45%}
+}
+
 </style>
 <link rel="stylesheet" href="../../../assets/moa-quick-guide.css?v=20261017-v1">
 <link rel="stylesheet" href="../../../assets/moa-clay-game.css?v=20261018-a1">
@@ -656,7 +715,7 @@ body:has(#game:not([hidden])) .play.is-camera .task-head{display:none}
 </section>
 <section id="game" class="play" hidden>
 <div class="panel camera-panel"><div class="camera-title"><strong id="viewName">손 모양 살펴보기</strong><span id="kindBadge">📷 카메라</span></div>
-<div class="viewer" id="viewer"><div class="garden-hud" id="gardenHud" hidden aria-label="현재 놀이 진행"><span id="gardenHudRound">1 / 6</span><span id="gardenHudFlower">🌷 0 / 3</span></div><div class="garden-touch-preview" id="gardenTouchPreview" hidden aria-label="따라 할 손 모양"></div><video id="video" playsinline autoplay muted aria-hidden="true"></video><canvas id="overlay" aria-label="손가락 인식 표시"></canvas><div class="live-task" id="liveTask" hidden><small>모아의 손을 따라 해봐!</small><strong id="liveTitle">손 모양 따라하기</strong><span class="live-legend" id="liveLegend">🟡 노란 손가락 쭉! · 연한 손가락 접기</span></div><div class="ghost-guides" id="ghostGuides" aria-hidden="true"></div><div id="acornActor" class="acorn-actor" aria-hidden="true" hidden><span class="acorn-icon"><img src="assets/acorn.svg" alt="" draggable="false"></span><span class="acorn-glow"></span></div><div id="modelCard" class="model-card" aria-label="따라 할 손 모양" hidden><small>🌱 모아의 손</small><span class="model-symbol" id="modelSymbol" aria-hidden="true">✊</span><strong id="modelTitle">주먹 쥐기</strong></div><div id="liveCompare" class="live-compare" role="status" aria-live="polite" hidden><strong id="liveCompareTitle">내 손 0 / 4</strong><span id="liveCompareCue">표시된 손가락을 움직여 봐!</span></div><div class="camera-check" id="cameraCheck" role="status" aria-live="polite" hidden><strong>📷 먼저 내 손을 보여줘!</strong><span id="cameraCheckText">카메라를 연결하고 있어요…</span><span class="camera-check-progress"><span id="cameraCheckFill"></span></span></div><div class="camera-hold" id="cameraHold" hidden><span id="cameraHoldFill"></span></div><div id="cameraProblem" class="camera-problem" role="status" hidden><strong id="cameraProblemTitle">카메라를 확인해 볼까?</strong><p id="cameraProblemText">영상이 보이지 않으면 카메라를 다시 연결해 봐.</p><div class="camera-problem-actions"><button id="retryCamera" type="button">↻ 카메라 다시 연결</button><button id="cameraToTouch" type="button">👆 화면 놀이로 바꾸기</button></div></div><div id="placeholder" class="placeholder"><span class="hand">✋</span>준비되면 손을 카메라에 보여줘!</div><div class="garden-mini-dock" id="gardenTouchDock" hidden></div><div class="adventure-actor" id="adventureActor" aria-hidden="true" hidden><span id="adventureActorEmoji">🫧</span></div><div id="fingerStars" class="finger-stars" aria-hidden="true" hidden><span class="finger-star" data-finger="0" hidden>★</span><span class="finger-star" data-finger="1" hidden>★</span><span class="finger-star" data-finger="2" hidden>★</span><span class="finger-star" data-finger="3" hidden>★</span></div><div class="adventure-scene" id="adventureScene" hidden aria-label="놀이가 진행되는 모습"><strong id="adventureSceneTitle">마법 시작!</strong><div id="adventureSceneObjects" class="adventure-scene-objects" aria-hidden="true"></div><div id="adventureSceneSteps" class="adventure-scene-steps" aria-hidden="true"></div></div><div class="garden-scene" id="gardenScene" hidden><p class="garden-scene-title" id="gardenStory">🌰 도토리 잡아볼까?</p><div id="gardenAcorn" class="garden-acorn" aria-hidden="true"><img src="assets/acorn.svg" alt="" draggable="false"></div><div class="garden-beds" aria-label="꽃밭 진행 모습"><div class="garden-bed" data-bed="0" data-growth="empty"><span class="garden-plant">🌱</span><span class="garden-soil"></span></div><div class="garden-bed" data-bed="1" data-growth="empty"><span class="garden-plant">🌷</span><span class="garden-soil"></span></div><div class="garden-bed" data-bed="2" data-growth="empty"><span class="garden-plant">🌻</span><span class="garden-soil"></span></div></div><p class="garden-caption" id="gardenCaption">손을 움직일 때마다 꽃밭이 자라요</p></div><div class="viewer-badge" id="viewerBadge" role="status">차근차근 준비해요</div></div>
+<div class="viewer" id="viewer"><div class="garden-hud" id="gardenHud" hidden aria-label="현재 놀이 진행"><span id="gardenHudRound">1 / 6</span><span id="gardenHudFlower">🌷 0 / 3</span></div><div class="garden-touch-preview" id="gardenTouchPreview" hidden aria-label="따라 할 손 모양"></div><video id="video" playsinline autoplay muted aria-hidden="true"></video><canvas id="overlay" aria-label="손가락 인식 표시"></canvas><div class="live-task" id="liveTask" hidden><small>모아의 손을 따라 해봐!</small><strong id="liveTitle">손 모양 따라하기</strong><span class="live-legend" id="liveLegend">🟡 노란 손가락 쭉! · 연한 손가락 접기</span></div><div class="ghost-guides" id="ghostGuides" aria-hidden="true"></div><div id="acornActor" class="acorn-actor" aria-hidden="true" hidden><span class="acorn-icon"><img src="assets/acorn.svg" alt="" draggable="false"></span><span class="acorn-glow"></span></div><div id="modelCard" class="model-card" aria-label="따라 할 손 모양" hidden><small>🌱 모아의 손</small><span class="model-symbol" id="modelSymbol" aria-hidden="true"></span><strong id="modelTitle">손가락 모두 접기</strong><div id="modelFingerGuide" class="model-finger-guide" aria-label="펴고 접을 손가락 안내"></div></div><div id="liveCompare" class="live-compare" role="status" aria-live="polite" hidden><strong id="liveCompareTitle">내 손 0 / 4</strong><span id="liveCompareCue">표시된 손가락을 움직여 봐!</span></div><div class="camera-check" id="cameraCheck" role="status" aria-live="polite" hidden><strong>📷 먼저 내 손을 보여줘!</strong><span id="cameraCheckText">카메라를 연결하고 있어요…</span><span class="camera-check-progress"><span id="cameraCheckFill"></span></span></div><div class="camera-hold" id="cameraHold" hidden><span id="cameraHoldFill"></span></div><div id="cameraProblem" class="camera-problem" role="status" hidden><strong id="cameraProblemTitle">카메라를 확인해 볼까?</strong><p id="cameraProblemText">영상이 보이지 않으면 카메라를 다시 연결해 봐.</p><div class="camera-problem-actions"><button id="retryCamera" type="button">↻ 카메라 다시 연결</button><button id="cameraToTouch" type="button">👆 화면 놀이로 바꾸기</button></div></div><div id="placeholder" class="placeholder"><span class="hand">✋</span>준비되면 손을 카메라에 보여줘!</div><div class="garden-mini-dock" id="gardenTouchDock" hidden></div><div class="adventure-actor" id="adventureActor" aria-hidden="true" hidden><span id="adventureActorEmoji">🫧</span></div><div id="fingerStars" class="finger-stars" aria-hidden="true" hidden><span class="finger-star" data-finger="0" hidden>★</span><span class="finger-star" data-finger="1" hidden>★</span><span class="finger-star" data-finger="2" hidden>★</span><span class="finger-star" data-finger="3" hidden>★</span></div><div class="adventure-scene" id="adventureScene" hidden aria-label="놀이가 진행되는 모습"><strong id="adventureSceneTitle">마법 시작!</strong><div id="adventureSceneObjects" class="adventure-scene-objects" aria-hidden="true"></div><div id="adventureSceneSteps" class="adventure-scene-steps" aria-hidden="true"></div></div><div class="garden-scene" id="gardenScene" hidden><p class="garden-scene-title" id="gardenStory">🌰 도토리 잡아볼까?</p><div id="gardenAcorn" class="garden-acorn" aria-hidden="true"><img src="assets/acorn.svg" alt="" draggable="false"></div><div class="garden-beds" aria-label="꽃밭 진행 모습"><div class="garden-bed" data-bed="0" data-growth="empty"><span class="garden-plant">🌱</span><span class="garden-soil"></span></div><div class="garden-bed" data-bed="1" data-growth="empty"><span class="garden-plant">🌷</span><span class="garden-soil"></span></div><div class="garden-bed" data-bed="2" data-growth="empty"><span class="garden-plant">🌻</span><span class="garden-soil"></span></div></div><p class="garden-caption" id="gardenCaption">손을 움직일 때마다 꽃밭이 자라요</p></div><div class="viewer-badge" id="viewerBadge" role="status">차근차근 준비해요</div></div>
 <div class="camera-tools"><button class="tiny" type="button" id="flip" hidden>↻ 앞·뒤 카메라</button><button class="tiny" type="button" id="guideToggle" hidden aria-pressed="true">👋 손 그림 보이기</button><button class="tiny" type="button" id="pause">⏹ 그만하기</button><span>🔒 영상 저장·업로드 없음</span></div>
 </div>
 <div class="game-right"><div class="panel"><div class="progress-head"><span id="roundLabel">1 / 6</span><span id="flowerLabel">🌼 0</span></div><div class="bar"><span id="meter"></span></div>
