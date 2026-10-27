@@ -1,0 +1,45 @@
+name: Gardens Compact Choice and Real Live Preview QA
+on:
+  pull_request:
+    paths:
+      - 'gardens/**'
+      - 'qa/garden-choice-gallery-qa.cjs'
+      - '.github/workflows/garden-choice-gallery-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'gardens/**'
+      - 'qa/garden-choice-gallery-qa.cjs'
+      - '.github/workflows/garden-choice-gallery-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  choice-cards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --no-save --no-package-lock playwright-core@1.56.1
+      - name: Detect Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Validate script
+        run: node --check qa/garden-choice-gallery-qa.cjs && node --check gardens/catalog.js
+      - name: Local preview
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/garden-choice.log 2>&1 &
+          for i in $(seq 1 40); do curl -fsS http://127.0.0.1:8765/gardens/ >/dev/null && exit 0; sleep .4; done
+          cat /tmp/garden-choice.log; exit 1
+      - name: Verify 34 choices, compact mobile layout, same-route live preview and camera privacy
+        run: node qa/garden-choice-gallery-qa.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: garden-choice-mobile-and-desktop-screens
+          path: qa/garden-choice-gallery-artifacts/
+          if-no-files-found: warn
