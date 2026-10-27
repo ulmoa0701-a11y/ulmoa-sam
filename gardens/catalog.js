@@ -38,7 +38,7 @@ function imageFallback(img,key,old){
    img.alt=(CATALOG[key]?.title||'게임')+' 실제 시작 안내 화면';
    const cap=img.closest('.play-card-media')?.querySelector('.shot-caption');
    if(cap)cap.textContent='게임 시작 화면';
-   img.src='previews/'+key+'.jpg'+PREVIEW_VERSION;return
+   img.src='previews/'+key+'-play.jpg'+PREVIEW_VERSION;return
   }
   if(img.dataset.fallbackStep==='intro'){
    img.dataset.fallbackStep='character';img.closest('.preview-visual, .play-card-media')?.classList.add('no-real-shot');
@@ -83,7 +83,7 @@ for(const section of sections){
   card.dataset.game=key;card.dataset.focus=item.focus;card.dataset.character=originalImage;
   card.dataset.title=item.title;card.dataset.oldName=originalTitle;
   card.dataset.search=[item.title,originalTitle,item.action,item.focusLabel,item.life,...item.steps].join(' ').toLocaleLowerCase('ko-KR');
-  card.innerHTML='<div class="play-card-media"><img loading="lazy" decoding="async" class="real-shot" src="previews/'+esc(key)+'-play.jpg'+PREVIEW_VERSION+'" alt="" /><span class="shot-caption" aria-hidden="true">게임 장면</span></div>'+
+  card.innerHTML='<div class="play-card-media"><img loading="lazy" decoding="async" class="real-shot" src="previews/'+esc(key)+'.jpg'+PREVIEW_VERSION+'" alt="" /><span class="shot-caption" aria-hidden="true">게임 시작 화면</span></div>'+
     '<div class="play-card-details"><p class="play-activity">'+esc(item.focusLabel)+'</p><h3>'+esc(item.title)+'</h3>'+
     (originalTitle!==item.title?'<p class="play-story-name">'+esc(originalTitle)+'</p>':'')+
     '<p class="play-simple-desc">'+esc(item.action)+'</p><p class="play-life-one-line" title="'+esc(item.life)+'">생활 연결 · '+esc(item.life)+'</p>'+
