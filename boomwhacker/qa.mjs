@@ -1101,7 +1101,7 @@ async function heartV4Smoke(){
     x.landingDistance>0&&x.noteCount===x.expectedNotes),
     "V4 "+cfg.name+": 2/4, 3/4 or 4/4 score/guide geometry invalid "+JSON.stringify(meterProof));
   // Exact sixteenth division remains four independent note events inside ONE heart.
-  await page.locator("#song").selectOption("6");
+  await page.locator("#song").evaluate(el=>{el.value="6";el.dispatchEvent(new Event("change",{bubbles:true}))});
   const quarterProof=await page.evaluate(()=>{
     const q=window.__HEART_V4_QA__,p=q.beatParts(16);
     return {meter:q.getState().meter,count:p.length,
@@ -1111,7 +1111,7 @@ async function heartV4Smoke(){
     quarterProof.divisions.every((p,i)=>Math.abs(p[0]-i*.25)<1e-6&&
       Math.abs(p[1]-(i+1)*.25)<1e-6),
     "V4 "+cfg.name+": sixteenth-note subdivision damaged "+JSON.stringify(quarterProof));
-  await page.locator("#song").selectOption("0");
+  await page.locator("#song").evaluate(el=>{el.value="0";el.dispatchEvent(new Event("change",{bubbles:true}))});
   check(await page.locator('[data-guide]').count()===3,
     "V4 "+cfg.name+": user must have three distinct guide options");
   // Rendering must truly differ, not just change a selected label.
