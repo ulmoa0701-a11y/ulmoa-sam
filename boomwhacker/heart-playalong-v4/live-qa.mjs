@@ -31,8 +31,13 @@ try {
     const context=await browser.newContext({viewport:{width:config.width,height:config.height},deviceScaleFactor:1});
     const page=await context.newPage();
     const errors=[];
-    page.on("pageerror",e=>errors.push(e.message));
-    page.on("console",m=>{if(m.type()==="error")errors.push(m.text())});
+    page.on("pageerror",e=>errors.push("JS "+e.message));
+    page.on("console",m=>{
+      if(m.type()==="error")errors.push("CONSOLE "+m.text()+" @ "+(m.location()?.url||"unknown"));
+    });
+    page.on("response",r=>{
+      if(r.status()>=400)errors.push("HTTP "+r.status()+" "+r.url());
+    });
     const response=await page.goto(BASE+"?view="+config.name+"&cache="+Date.now(),{waitUntil:"networkidle",timeout:25000});
     check(!!response?.ok(),config.name+": public HTTP success");
     check(await page.locator(".transport #play").isVisible(),config.name+": playback control available");
