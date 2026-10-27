@@ -4,13 +4,18 @@ on:
     paths:
       - '.github/workflows/gardens-public-pages-live-qa.yml'
       - 'qa/gardens-public-diagnostic.cjs'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/gardens-public-pages-live-qa.yml'
   workflow_run:
-    workflows: ['pages build and deployment']
+    workflows: ['Gardens Compact Choice and Real Live Preview QA']
     types: [completed]
     branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 jobs:
   public-choice-and-preview:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
@@ -31,6 +36,22 @@ jobs:
           test -n "$CHROME_BIN"
           echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
           "$CHROME_BIN" --version
+      - name: Wait for successful Pages deployment of the exact source commit
+        if: github.event_name != 'pull_request'
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 45); do
+            curl -fsSL --max-time 20 -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${{ github.repository }}/actions/runs?branch=main&per_page=50" -o /tmp/garden-pages-runs.json
+            if node -e 'const a=require("/tmp/garden-pages-runs.json");process.exit(a.workflow_runs.some(r=>r.name==="pages build and deployment"&&r.head_sha===process.env.EXPECTED_SHA&&r.conclusion==="success")?0:1)'; then
+              echo "Pages deployment succeeded for $EXPECTED_SHA"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "No successful Pages deployment for $EXPECTED_SHA"
+          exit 1
       - name: Wait for published choice gallery
         run: |
           for i in $(seq 1 12); do
