@@ -234,6 +234,9 @@ for(const width of [320,390,820,1440]){
   });
  });
  await check(variants,width+'px different difficulties produce different guidance');
+ const sparse=await page.evaluate(()=>({pace:window.MoaLetterReflection.compose({pace:{choice:'wait'}}),wish:window.MoaLetterReflection.compose({wish:{choice:'together'}})}));
+ await check(sparse.pace.title.includes('생각할 시간')&&!sparse.pace.parts[0].text.includes('좋아하는 활동'),width+'px pace-only answer receives relevant guidance');
+ await check(sparse.wish.title.includes('아직 말하지 않은'),width+'px wish-only answer does not invent personal insight');
  await check(outbound.length===0,width+'px no third party data or font requests '+outbound.join('|'));
  await check(pageErrors.length===0,width+'px no JavaScript runtime exceptions '+pageErrors.join('|'));
  await fit(page,width,'result');
