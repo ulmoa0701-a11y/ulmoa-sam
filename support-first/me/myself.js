@@ -106,6 +106,7 @@ const prompts={start:"안녕. 나는 모아야. 잘 대답하려고 애쓰지 �
  wish:"이제 오늘 고른 이야기를 같이 볼까?"};
 const records=Object.fromEntries(stages.map(id=>[id,{choice:null,detail:null,note:""}]));
  let position=0,started=false,complete=false;
+let coverChoice=null; // Decorative and user-changeable; never a personality classification.
 const isBranch=()=>Boolean(context[records.topic.choice]);
 const stageAt=i=>stages[i];
 const config=id=>id==="moment"?(context[records.topic.choice]||{prompt:"조금 더 말해보고 싶은 순간이 있을까?",hint:"구체적인 게 떠오르지 않아도 괜찮아.",choices:[["none","아직 떠오르지 않아","○"]],reflect:{none:"지금 정확히 떠올릴 필요는 없어."},follow:null}):data[id];
@@ -215,29 +216,114 @@ function saveOwn(){
  render();$("panel-tip").textContent="네 말 그대로 남겼어. 상담자에게 자동 전달되진 않아.";
 }
 
+
 const storyLabels={spark:"내가 편해지는 순간",topic:"요즘 내 마음에 걸리는 것",moment:"특히 떠오른 순간",pace:"내가 편한 대화 방법",wish:"다음에 해보고 싶은 것"};
 const dateText=()=>new Intl.DateTimeFormat("ko-KR",{year:"numeric",month:"long",day:"numeric"}).format(new Date());
-const hasAnswer=a=>Boolean(a?.choice&&a.choice!=="pass"&&a.choice!=="unknown");
+const hasAnswer=a=>Boolean(a?.choice&&a.choice!=="pass"&&a.choice!=="unknown"&&a.choice!=="own");
+const themes={
+ rest:{name:"달빛 쉼터",symbol:"🐰",caption:"조용히 쉬는 시간이 편하다는 네 선택에서 달빛 쉼터를 떠올렸어.",title:"조용한 시간을 담은"},
+ game:{name:"별빛 탐험길",symbol:"🦊",caption:"게임이나 영상을 좋아하는 순간을 골라서 별빛 탐험길로 꾸몄어.",title:"좋아하는 장면에서 시작한"},
+ create:{name:"반짝이는 작업실",symbol:"🐿️",caption:"무언가 만들고 해보는 시간이 좋다고 골라서 작은 작업실로 꾸몄어.",title:"만드는 순간이 담긴"},
+ friend:{name:"함께하는 모닥불",symbol:"🦦",caption:"좋아하는 사람과 함께하는 시간을 골라서 따뜻한 모닥불을 떠올렸어.",title:"함께하는 시간이 담긴"},
+ neutral:{name:"첫 장의 새싹",symbol:"🌱",caption:"오늘 아직 정하지 않은 이야기는 빈 페이지처럼 열어뒀어.",title:"나만의 첫"}
+};
+const coverTheme=()=>themes[coverChoice||records.spark.choice]||themes.neutral;
+const coverId=()=>coverChoice|| (themes[records.spark.choice]?records.spark.choice:"neutral");
 function chosen(id){
- const a=records[id];return a.choice==="pass"?"이 이야기는 넘어가기로 했어":a.choice===null?"이번에는 이야기하지 않았어":choiceLabel(id,a.choice);
+ const a=records[id];
+ return a.choice==="pass"?"이 이야기는 넘어가기로 했어":a.choice===null?"이번에는 이야기하지 않았어":choiceLabel(id,a.choice);
+}
+function storyHeadline(){
+ const topic=records.topic.choice;
+ const byTopic={
+  school:["학교에서의 하루를","살펴본 오늘."],
+  people:["사람 사이의 순간들을","꺼내본 오늘."],
+  mood:["기분과 에너지를","이야기한 오늘."],
+  day:["집과 일상의 장면들을","이야기한 오늘."]
+ };
+ if(byTopic[topic])return byTopic[topic];
+ if(records.topic.choice==="own"&&records.topic.note)return["내 말로 직접 남긴","오늘의 첫 이야기."];
+ const t=themes[records.spark.choice];
+ return t?[t.title,"오늘의 이야기."]:["오늘을 있는 그대로","남긴 첫 이야기."];
+}
+function highlight(){
+ for(const id of ["moment","topic","spark","pace","wish"]){
+  if(records[id].note.trim())return{quote:records[id].note.trim(),source:"이 문장은 네가 직접 적은 말이야."};
+ }
+ if(records.moment.detail)return{quote:records.moment.detail,source:"어려웠던 순간을 조금 더 이야기하며 골랐어."};
+ if(hasAnswer(records.moment))return{quote:chosen("moment"),source:"네가 떠오른 장면으로 고른 답이야."};
+ if(hasAnswer(records.spark))return{quote:chosen("spark"),source:"오늘 편하다고 말해준 순간이야."};
+ if(hasAnswer(records.pace))return{quote:chosen("pace"),source:"네가 편한 대화 방식으로 골랐어."};
+ if(hasAnswer(records.topic))return{quote:chosen("topic"),source:"오늘 이야기하고 싶은 주제로 골랐어."};
+ if(hasAnswer(records.wish))return{quote:chosen("wish"),source:"다음에 해보고 싶은 일로 골랐어."};
+ return{quote:"오늘은 아직 고르지 않아도 괜찮아.",source:"답하지 않은 것도 오늘 대화의 한 부분이야."};
 }
 function letterIntro(){
- const intro=["오늘 모아와 처음 이야기를 나눴어."];
- if(hasAnswer(records.spark))intro.push("네가 편한 순간으로 고른 건 ‘"+chosen("spark")+"’이었어.");
- if(hasAnswer(records.topic)&&records.topic.choice!=="none")intro.push("그리고 ‘"+chosen("topic")+"’에 관한 이야기도 꺼내봤어.");
- else if(records.topic.choice==="none")intro.push("특별히 떠오르는 고민이 없다는 대답도 그대로 남겨뒀어.");
- if(records.spark.choice===null&&records.topic.choice===null)intro.push("오늘은 잠깐 만나본 것만으로도 괜찮아.");
- intro.push("오늘 네가 직접 고른 말들을 아래에 모았어. 이 답이 너의 전부를 설명하는 건 아니야.");
- return intro.join(" ");
+ const parts=[];
+ if(hasAnswer(records.spark))parts.push("네가 편한 순간으로 고른 건 ‘"+chosen("spark")+"’이었어.");
+ else parts.push("오늘은 어떤 순간이 편한지 꼭 고르지 않아도 됐어.");
+ if(hasAnswer(records.topic)&&records.topic.choice!=="none")parts.push("요즘은 ‘"+chosen("topic")+"’에 관해 이야기해 보고 싶다고 했지.");
+ else if(records.topic.choice==="none")parts.push("특별히 떠오르는 고민이 없다고 말해준 것도 그대로 기억할게.");
+ if(hasAnswer(records.moment))parts.push("그중 ‘"+chosen("moment")+"’이라는 장면이 떠올랐어.");
+ if(hasAnswer(records.pace))parts.push("이야기할 때는 ‘"+chosen("pace")+"’가 편하다고 알려줬어.");
+ parts.push("여기 있는 말들은 오늘 네가 골랐던 것들이야. 네가 어떤 사람인지 결정하는 말은 아니야.");
+ return parts.join(" ");
 }
 function letterNext(){
- const wish=records.wish,pace=records.pace;
  const sentences=[];
- if(hasAnswer(wish)&&wish.choice!=="unsure")sentences.push("다음에는 ‘"+chosen("wish")+"’부터 해봐도 좋겠어.");
- else sentences.push("다음에 꼭 무엇을 할지 지금 정하지 않아도 돼.");
- if(hasAnswer(pace))sentences.push("‘"+chosen("pace")+"’ 방식으로 시작하는 것도 기억해둘게.");
- sentences.push("오늘과 생각이 달라지면 그때 다시 이야기해도 괜찮아.");
+ if(hasAnswer(records.wish)&&records.wish.choice!=="unsure")sentences.push("다음에는 ‘"+chosen("wish")+"’부터 시작해 볼 수 있겠어.");
+ else sentences.push("다음에 꼭 무엇을 할지 지금 정하지 않아도 괜찮아.");
+ if(hasAnswer(records.pace))sentences.push("‘"+chosen("pace")+"’라는 네가 고른 방식도 함께 생각해 볼게.");
+ if(hasAnswer(records.moment))sentences.push("원한다면 ‘"+chosen("moment")+"’에 관한 장면부터 천천히 이야기해도 돼.");
+ sentences.push("마음이 바뀌면 얼마든지 다시 고를 수 있어.");
  return sentences.join(" ");
+}
+function clueItems(){
+ const candidates=[
+  {id:"spark",label:"내가 편한 순간"},
+  {id:"moment",label:"오늘 떠오른 장면"},
+  {id:"pace",label:"편한 대화 방식"},
+  {id:"wish",label:"다음에 해보고 싶은 것"},
+  {id:"topic",label:"요즘 이야기하고 싶은 주제"}
+ ];
+ const result=candidates.filter(it=>hasAnswer(records[it.id])&&!(it.id==="wish"&&records.wish.choice==="unsure")).slice(0,3)
+  .map(it=>({...it,value:chosen(it.id)}));
+ if(!result.length)result.push({id:"none",label:"오늘의 한 가지",value:"원할 때 다시 이야기하기"});
+ return result;
+}
+function renderCover(){
+ const theme=coverTheme(),id=coverId();
+ $("letter-page").dataset.storyTheme=id;
+ $("cover-name").textContent=theme.name;
+ $("cover-symbol").textContent=theme.symbol;
+ $("cover-reason").textContent=theme.caption;
+ const [first,last]=storyHeadline();
+ $("result-title").replaceChildren(document.createTextNode(first),document.createElement("br"));
+ const em=document.createElement("em");em.textContent=last;$("result-title").append(em);
+ $("letter-subtitle").textContent="오늘 네가 골랐던 답으로 이 편지를 완성했어.";
+ $("cover-choose").setAttribute("aria-expanded",String(!$("cover-options").hidden));
+ const choices=$("cover-options");choices.replaceChildren();
+ for(const [key,item] of Object.entries(themes)){
+  const btn=append("button","cover-swatch",item.symbol+" "+item.name,choices);
+  btn.type="button";btn.setAttribute("aria-pressed",String(id===key));btn.dataset.theme=key;
+  btn.addEventListener("click",()=>{
+   coverChoice=key;
+   choices.hidden=true;
+   $("cover-choose").setAttribute("aria-expanded","false");
+   renderCover();
+   $("share-status").textContent="";
+  });
+ }
+}
+function renderOwnVoice(){
+ const root=$("own-voice-list");root.replaceChildren();
+ const notes=stages.filter(id=>records[id].note.trim());
+ $("own-voice-section").hidden=!notes.length;
+ for(const id of notes){
+  const box=append("div","own-voice-note",undefined,root);
+  append("div","own-voice-label",storyLabels[id]+"에서 남긴 말",box);
+  append("blockquote","own-voice-quote",records[id].note.trim(),box);
+ }
 }
 function recap(){
  const box=$("recap-items");box.replaceChildren();
@@ -255,21 +341,43 @@ function recap(){
  $("letter-message").textContent=letterIntro();
  $("letter-next").textContent=letterNext();
  $("letter-date").textContent=dateText();
+ renderCover();
+ const h=highlight();$("highlight-quote").textContent="“"+h.quote+"”";$("highlight-source").textContent=h.source;
+ const clues=$("clue-list");clues.replaceChildren();
+ clueItems().forEach((item,i)=>{
+  const card=append("div","clue-item",undefined,clues);
+  append("span","clue-index",String(i+1).padStart(2,"0"),card);
+  const body=append("div","clue-copy",undefined,card);
+  append("span","clue-label",item.label,body);
+  append("strong","clue-value",item.value,body);
+ });
+ renderOwnVoice();
 }
 function fullReport(){
- const lines=["모아의 첫 번째 편지","나에 대해 알게 된 작은 이야기들",dateText(),"","안녕, 너에게.",letterIntro(),""];
+ const [head1,head2]=storyHeadline(),theme=coverTheme(),h=highlight();
+ const lines=["모아가 너에게 보낸 첫 번째 편지",head1+" "+head2,dateText(),"",
+  "오늘의 이야기 표지: "+theme.name+" ("+theme.symbol+")","※ 표지는 오늘 고른 이야기의 장식이고, 성격유형은 아니야.","",
+  "안녕, 너에게.",letterIntro(),"",
+  "모아가 기억한 오늘의 한 문장",h.quote,h.source,"",
+  "오늘의 세 가지 이야기 조각"];
+ for(const c of clueItems())lines.push("• "+c.label+": "+c.value);
+ lines.push("");
+ const written=stages.filter(id=>records[id].note.trim());
+ if(written.length){
+  lines.push("네가 직접 남긴 말");
+  for(const id of written)lines.push("• "+storyLabels[id]+": "+records[id].note.trim());
+  lines.push("");
+ }
+ lines.push("우리가 나눈 이야기 전체");
  for(const id of stages){
   const a=records[id];
-  lines.push("■ "+storyLabels[id]);
-  lines.push("  "+chosen(id));
+  lines.push("■ "+storyLabels[id]);lines.push("  "+chosen(id));
   if(a.detail)lines.push("  조금 더 이야기한 말: "+a.detail);
   if(a.note)lines.push("  내가 직접 적은 말: "+a.note);
   lines.push("");
  }
- lines.push("다음 이야기는 네 속도로");
- lines.push(letterNext());
- lines.push("","너의 첫 이야기를 함께한, 모아가.");
- lines.push("※ 오늘 직접 고른 말을 정리한 기록이며 검사·진단 결과가 아니야.");
+ lines.push("다음 이야기는 네 속도로",letterNext(),"","너의 첫 이야기를 함께한, 모아가.",
+  "※ 오늘 직접 고른 말을 정리한 기록이며 검사·진단 결과가 아니야.");
  return lines.join("\n");
 }
 function guide(){
@@ -293,6 +401,7 @@ function finish(){
  complete=true;
  $("intro").hidden=true;$("conversation").hidden=true;$("result").hidden=false;
  recap();guide();
+ $("cover-options").hidden=true;
  $("copy").disabled=false;$("print").disabled=false;
  $("copy-fallback").hidden=true;$("share-status").textContent="";
  window.scrollTo({top:0,behavior:"instant"});
@@ -305,7 +414,7 @@ function begin(){
 }
 function reset(){
  for(const id of stages){records[id]={choice:null,detail:null,note:""};}
- revoke();position=0;complete=false;started=false;
+ revoke();position=0;complete=false;started=false;coverChoice=null;
  $("conversation").hidden=true;$("result").hidden=true;$("intro").hidden=false;
  window.scrollTo({top:0,behavior:"instant"});
  $("welcome-title").focus?.({preventScroll:true});
@@ -325,6 +434,10 @@ $("own-toggle").addEventListener("click",()=>{
 $("own-save").addEventListener("click",saveOwn);
 $("own-input").addEventListener("input",()=>{revoke();$("panel-tip").textContent="아직 저장하지 않은 말이야. '이 말로 남길래'를 누르면 이 대화 안에만 남아.";});
 $("revise").addEventListener("click",()=>{revoke();complete=false;position=0;render();window.scrollTo({top:0,behavior:"instant"});});
+$("cover-choose").addEventListener("click",()=>{
+ const options=$("cover-options");options.hidden=!options.hidden;
+ $("cover-choose").setAttribute("aria-expanded",String(!options.hidden));
+});
 $("copy").addEventListener("click",async()=>{
  if($("copy").disabled||$("result").hidden)return;
  const val=fullReport();
