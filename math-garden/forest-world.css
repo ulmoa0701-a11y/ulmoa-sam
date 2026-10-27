@@ -551,3 +551,190 @@ button.feed-friend.friend-fed .forest-friend{transform:translateY(-3px)}
  .stage.gather-mode .gather-pick,.stage.gather-mode .gather-slot,
  .stage.gather-mode .gather-confirm{transition:none}
 }
+
+
+/* Basket V3: a woven, handle-bearing basket with full-size, countable fruit.
+   Scope every rule to gather mode to preserve the other three games. */
+.stage.gather-mode .panel-gather{
+ min-height:585px;
+ grid-template-rows:auto minmax(132px,1fr) auto auto auto;
+ padding:14px 15px 13px;
+ gap:3px;
+}
+.stage.gather-mode .gather-guide{margin-bottom:3px}
+.stage.gather-mode .gather-spots{min-height:145px;align-self:center}
+.stage.gather-mode .gather-pick{min-height:139px}
+.stage.gather-mode .gather-pick img{height:100px;width:112px}
+.stage.gather-mode .gather-pick.gather-berry img{height:99px;width:86px}
+.stage.gather-mode .gather-targets{width:min(100%,570px);overflow:visible}
+.stage.gather-mode .gather-basket{
+ width:100%;
+ position:relative;
+ isolation:isolate;
+ background:transparent;
+ border:0;
+ box-shadow:none;
+ min-height:214px;
+ padding:7px 20px 16px;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ justify-content:space-between;
+ overflow:visible;
+}
+.stage.gather-mode .gather-basket-handle{
+ position:absolute;
+ left:15%;
+ right:15%;
+ top:5px;
+ height:129px;
+ border:13px solid #b9804a;
+ border-bottom:0;
+ border-radius:49% 49% 0 0 / 88% 88% 0 0;
+ background:transparent;
+ box-shadow:inset 0 7px 0 #f4dba84a,0 -3px 0 #eac38c;
+ z-index:0;
+ pointer-events:none;
+}
+.stage.gather-mode .gather-basket-body{
+ position:absolute;
+ z-index:1;
+ bottom:0;
+ left:2%;
+ width:96%;
+ height:73%;
+ border:5px solid #936039;
+ border-top:13px solid #b77c48;
+ border-radius:18px 18px 75px 75px / 15px 15px 45px 45px;
+ background:
+  repeating-linear-gradient(38deg,transparent 0 12px,#87572730 12px 15px,transparent 15px 26px),
+  repeating-linear-gradient(-38deg,transparent 0 13px,#fff1c340 13px 16px,transparent 16px 26px),
+  linear-gradient(180deg,#e8be7b 0%,#ce995d 40%,#b57841 100%);
+ box-shadow:inset 0 9px 6px #fff4cf72,inset 0 -10px 13px #75471e35,0 11px 12px #54734732;
+ pointer-events:none;
+}
+.stage.gather-mode .gather-basket-title{
+ position:relative;
+ z-index:3;
+ display:flex;
+ flex-wrap:wrap;
+ justify-content:center;
+ align-items:center;
+ gap:4px 9px;
+ max-width:95%;
+ margin:0 auto 4px;
+ padding:5px 14px;
+ background:#fff9e8f5;
+ border:1px solid #dfc795;
+ border-radius:25px;
+ box-shadow:0 3px 5px #7c53311f;
+ color:#5d5e3b;
+ font-size:17px;
+ line-height:1.35;
+}
+.stage.gather-mode .gather-basket-title small{
+ font-size:12px;
+ color:#7a775d;
+ font-weight:600;
+}
+.stage.gather-mode .gather-basket-row{
+ position:relative;
+ z-index:3;
+ width:100%;
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ align-items:center;
+ gap:7px;
+ min-height:138px;
+ margin:0 auto;
+ padding:7px 6px 13px;
+}
+.stage.gather-mode .gather-target{
+ padding:0 2px;
+ min-width:0;
+ background:none;
+ border:0;
+ text-align:center;
+}
+.stage.gather-mode .gather-target + .gather-target{border-left:1px solid #fff2c59c}
+.stage.gather-mode .gather-target strong{
+ width:fit-content;
+ max-width:100%;
+ margin:0 auto;
+ padding:4px 11px;
+ border-radius:19px;
+ background:#fff8e8eb;
+ box-shadow:0 3px 5px #75451b26;
+ color:#5e5035;
+ font-size:16px;
+}
+.stage.gather-mode .gather-target strong span{color:#675032;font-size:17px}
+.stage.gather-mode .gather-slots{
+ margin:5px auto 0;
+ min-height:78px;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ align-content:center;
+ flex-wrap:wrap;
+ gap:7px;
+}
+.stage.gather-mode .gather-slot{
+ flex:0 0 61px;
+ width:61px;
+ height:65px;
+ min-height:65px;
+ display:grid;
+ place-items:center;
+ border:2px dashed #f8e9c8c9;
+ background:#fff6d12c;
+ box-shadow:none;
+ border-radius:50%;
+ padding:0;
+ margin:0;
+}
+.stage.gather-mode button.gather-slot{
+ background:#fff9e6b0;
+ border:2px solid #f2dcba;
+ box-shadow:0 3px 5px #895a2c3b;
+}
+.stage.gather-mode .gather-slot.extra{border-color:#9a5d31;background:#fff0d8}
+.stage.gather-mode .gather-slot .food.mini{
+ width:53px;
+ height:57px;
+ flex:0 0 53px;
+ transform:none;
+ margin:0;
+ border-radius:0;
+ box-shadow:none;
+ filter:drop-shadow(0 4px 3px #66462446);
+}
+.stage.gather-mode .gather-actions{margin:9px auto 0}
+@media(max-width:650px){
+ .stage.gather-mode .panel-gather{padding:12px 8px 15px;gap:3px;min-height:0;grid-template-rows:auto auto auto auto auto}
+ .stage.gather-mode .gather-spots{min-height:125px}
+ .stage.gather-mode .gather-pick{min-height:122px}
+ .stage.gather-mode .gather-pick img{height:87px}
+ .stage.gather-mode .gather-pick.gather-berry img{height:83px}
+ .stage.gather-mode .gather-basket{min-height:202px;padding:4px 6px 13px}
+ .stage.gather-mode .gather-basket-handle{left:13%;right:13%;height:115px;border-width:11px}
+ .stage.gather-mode .gather-basket-body{height:75%;border-width:4px;border-top-width:12px}
+ .stage.gather-mode .gather-basket-title{font-size:15px;padding:4px 9px}
+ .stage.gather-mode .gather-basket-title small{font-size:11px}
+ .stage.gather-mode .gather-basket-row{min-height:128px;gap:4px;padding:5px 3px 12px}
+ .stage.gather-mode .gather-target strong{font-size:13px;padding:3px 7px}
+ .stage.gather-mode .gather-target strong span{font-size:14px}
+ .stage.gather-mode .gather-slots{min-height:70px;gap:4px;margin-top:6px}
+ .stage.gather-mode .gather-slot{flex-basis:50px;width:50px;height:56px;min-height:56px}
+ .stage.gather-mode .gather-slot .food.mini{width:44px;height:48px;flex-basis:44px}
+ .stage.gather-mode .gather-actions{margin-top:8px}
+}
+@media(max-width:355px){
+ .stage.gather-mode .gather-basket{min-height:215px}
+ .stage.gather-mode .gather-basket-title{flex-direction:column;gap:0;padding:4px 8px;font-size:14px}
+ .stage.gather-mode .gather-basket-title small{font-size:10px}
+ .stage.gather-mode .gather-basket-row{min-height:130px}
+ .stage.gather-mode .gather-slots{gap:3px}
+ .stage.gather-mode .gather-slot{flex-basis:47px;width:47px;height:53px;min-height:53px}
+ .stage.gather-mode .gather-slot .food.mini{width:41px;height:45px;flex-basis:41px}
+}
