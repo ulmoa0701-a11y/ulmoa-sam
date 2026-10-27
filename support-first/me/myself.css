@@ -415,3 +415,17 @@ dialog form{display:flex;justify-content:flex-end}
  #letter-page .paper-disclaimer{font-size:8pt}
  #letter-page .letter-signature{margin-bottom:12px}
 }
+
+/* An answer-based letter, with room for the reader's own interpretation. */
+.letter-reflection{margin:28px 0;padding:8px 0 22px;border-bottom:1px solid #dfdfd0}
+.letter-reflection h2{font-size:clamp(1.2rem,3.5vw,1.7rem);line-height:1.5;margin:9px 0 21px;color:#284d47;word-break:keep-all;overflow-wrap:anywhere}
+.reflection-part{margin:17px 0}.reflection-part h3{font-size:.85rem;color:#536c60;margin:0 0 5px}.reflection-part p{font-size:1rem;line-height:1.85;margin:0;word-break:keep-all;overflow-wrap:anywhere}
+#reflection-warm{margin:23px 0 12px;padding:4px 0 4px 17px;border-left:3px solid #91a98c;font-size:1.12rem;line-height:1.8;color:#34564a;font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
+.reflection-limit,.reflection-edit p{font-size:.78rem!important;line-height:1.7!important;color:#68736a}
+.reflection-edit{margin-top:19px}.reflection-edit summary{cursor:pointer;min-height:44px;padding:10px 0;font-size:.9rem}.reflection-edit label{display:block;margin:14px 0 8px;font-size:.85rem}
+#reflection-options{display:flex;flex-wrap:wrap;gap:8px}#reflection-options button{min-height:44px;background:#fffef9;border:1px solid #b9c5b7;border-radius:22px;padding:9px 14px;font:inherit;font-size:.85rem;color:#355548;cursor:pointer}#reflection-options button[aria-pressed=true]{background:#355548;color:white}
+#reflection-note{width:100%;box-sizing:border-box;resize:vertical;min-height:80px;background:#fffef9;color:#293e37;border:1px solid #b9c5b7;border-radius:8px;padding:12px;font:inherit;font-size:16px;line-height:1.6}
+.reflection-response{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem;line-height:1.75;margin-top:14px;padding:12px 0;border-top:1px dashed #becaba}
+.letter-forward details{margin-top:14px;font-size:.82rem}.letter-forward summary{cursor:pointer;min-height:44px;padding:10px 0}
+@media(max-width:480px){.reflection-part p{font-size:.93rem}#reflection-warm{font-size:1rem}.letter-reflection{margin:22px 0}.reflection-part{margin:15px 0}}
+@media print{.reflection-edit{display:none!important}.letter-reflection{break-inside:avoid;margin:15px 0}.reflection-part p{font-size:10pt;line-height:1.5}#reflection-warm{font-size:11pt;margin:12px 0}.reflection-response{font-size:10pt}.letter-forward details{display:none}#letter-page{position:static!important}}

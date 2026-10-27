@@ -10,6 +10,7 @@
 <meta name="description" content="정답 없는 첫 대화. 말하지 않아도, 모른다고 해도 괜찮은 청소년 상담 준비 이야기">
 <link rel="icon" href="../../assets/habom-favicon-v3-32.png">
 <link rel="stylesheet" href="./myself.css">
+<script defer src="./letter-reflection.js"></script>
 <script defer src="./myself.js"></script>
 </head>
 <body>
@@ -69,13 +70,23 @@
    <article class="letter-paper" id="letter-page" aria-label="나만의 첫 이야기 편지">
     <div class="paper-top"><span>FROM MOA · TO YOU</span><span id="letter-date"></span></div>
     <div class="paper-heading">
-     <div class="paper-heading-copy"><span class="letter-small">오늘의 나에게 도착한 이야기</span><h1 id="result-title" tabindex="-1">나에 대해 알게 된<br><em>작은 이야기들.</em></h1><p>모아가 네 말을 그대로 모아 편지로 남겼어.</p></div>
+     <div class="paper-heading-copy"><span class="letter-small">오늘의 나에게 도착한 이야기</span><h1 id="result-title" tabindex="-1">나에 대해 알게 된<br><em>작은 이야기들.</em></h1><p>네가 고른 말에서, 지금의 너를 함께 알아가 보자.</p></div>
      <div class="paper-character"><span class="paper-orbit" aria-hidden="true"></span><img src="../../assets/moa-hello-wave-20261012.webp" width="130" height="138" alt="손을 흔드는 모아"></div>
     </div>
     <div class="paper-message"><span class="paper-salutation">안녕, 너에게.</span><p id="letter-message"></p></div>
+    <section class="letter-reflection" aria-labelledby="reflection-title">
+     <span class="letter-small">오늘의 답에서 발견한 이야기</span><h2 id="reflection-title"></h2>
+     <div id="reflection-parts"></div><blockquote id="reflection-warm"></blockquote>
+     <p class="reflection-limit">네가 고른 답을 바탕으로 썼어. 너의 성격을 정한 말은 아니야.</p>
+     <details class="reflection-edit"><summary>읽어보니 내 이야기와 어때?</summary>
+      <div id="reflection-options" role="group" aria-label="편지에 대한 내 생각"><button type="button" data-response="잘 맞아요" aria-pressed="false">잘 맞아요</button><button type="button" data-response="조금 달라요" aria-pressed="false">조금 달라요</button><button type="button" data-response="아직 모르겠어요" aria-pressed="false">아직 모르겠어요</button></div>
+      <label for="reflection-note">다르게 느낀 점이나 덧붙이고 싶은 말 (선택)</label><textarea id="reflection-note" rows="2" maxlength="240" placeholder="나는 이렇게 느꼈어…"></textarea>
+      <p>적는 대로 이 편지에 담겨. 복사·인쇄할 때 함께 남고, 자동 전송되지는 않아.</p>
+     </details><p id="reflection-response" class="reflection-response" aria-live="polite" hidden></p>
+    </section>
     <div class="paper-divider"><span aria-hidden="true">✳</span><span>THE THINGS YOU TOLD ME</span><span aria-hidden="true">✳</span></div>
     <section class="letter-memories" aria-labelledby="memories-title"><h2 id="memories-title">오늘 네가 들려준 다섯 가지 이야기</h2><p class="letter-memories-sub">답한 것과 건너뛴 것까지, 오늘 대화의 기록이야.</p><div id="recap-items" class="memory-list"></div></section>
-    <section class="letter-forward" aria-labelledby="forward-title"><div class="forward-mark" aria-hidden="true">↗</div><div><span class="letter-small">THE NEXT PAGE</span><h2 id="forward-title">다음 이야기는 네 속도로</h2><p id="letter-next"></p></div></section>
+    <section class="letter-forward" aria-labelledby="forward-title"><div class="forward-mark" aria-hidden="true">↗</div><div><span class="letter-small">THE NEXT PAGE</span><h2 id="forward-title">내가 골라볼 작은 다음 한 걸음</h2><p id="reflection-step"></p><p class="reflection-limit">숙제는 아니야. 마음이 달라지면 바꿔도 돼.</p><details><summary>다음 만남에 전할 말</summary><p id="letter-next"></p></details></div></section>
     <div class="letter-signature"><div><span>너의 첫 이야기를 함께한</span><strong>모아가.</strong></div><span class="signature-asterisk" aria-hidden="true">✳</span></div>
     <p class="paper-disclaimer">이 편지는 오늘 네가 직접 선택한 답을 정리한 기록이야. 성격·능력·감정 상태를 검사하거나 진단한 결과는 아니야.</p>
    </article>

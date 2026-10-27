@@ -239,6 +239,35 @@ function letterNext(){
  sentences.push("오늘과 생각이 달라지면 그때 다시 이야기해도 괜찮아.");
  return sentences.join(" ");
 }
+const reflectionFeedback={response:"",note:""};
+function feedbackText(){
+ return [reflectionFeedback.response,reflectionFeedback.note].filter(Boolean).join(" · ");
+}
+function updateReflectionFeedback(){
+ const text=feedbackText();
+ $("reflection-response").hidden=!text;
+ $("reflection-response").textContent=text?"내가 읽고 덧붙인 말 · "+text:"";
+ $("copy-fallback").hidden=true;$("full-text-fallback").value="";
+ $("share-status").textContent="";
+}
+function clearReflectionFeedback(){
+ reflectionFeedback.response="";reflectionFeedback.note="";
+ $("reflection-note").value="";
+ document.querySelectorAll("[data-response]").forEach(b=>b.setAttribute("aria-pressed","false"));
+ updateReflectionFeedback();
+}
+function renderReflection(){
+ const view=window.MoaLetterReflection.compose(records);
+ $("reflection-title").textContent=view.title;
+ const area=$("reflection-parts");area.replaceChildren();
+ for(const part of view.parts){
+  const row=append("div","reflection-part",undefined,area);
+  append("h3","",part.label,row);append("p","",part.text,row);
+ }
+ $("reflection-warm").textContent=view.warm;
+ $("reflection-step").textContent=view.step;
+ updateReflectionFeedback();
+}
 function recap(){
  const box=$("recap-items");box.replaceChildren();
  stages.forEach((id,index)=>{
@@ -257,7 +286,13 @@ function recap(){
  $("letter-date").textContent=dateText();
 }
 function fullReport(){
+ const view=window.MoaLetterReflection.compose(records);
  const lines=["모아의 첫 번째 편지","나에 대해 알게 된 작은 이야기들",dateText(),"","안녕, 너에게.",letterIntro(),""];
+ lines.push("■ 오늘의 답에서 발견한 이야기",view.title);
+ for(const part of view.parts)lines.push(part.label+": "+part.text);
+ lines.push("모아의 한마디: "+view.warm,"작은 다음 한 걸음: "+view.step,"숙제는 아니야. 마음이 달라지면 바꿔도 돼.");
+ if(feedbackText())lines.push("내가 읽고 덧붙인 말: "+feedbackText());
+ lines.push("");
  for(const id of stages){
   const a=records[id];
   lines.push("■ "+storyLabels[id]);
@@ -292,7 +327,7 @@ function guide(){
 function finish(){
  complete=true;
  $("intro").hidden=true;$("conversation").hidden=true;$("result").hidden=false;
- recap();guide();
+ recap();renderReflection();guide();
  $("copy").disabled=false;$("print").disabled=false;
  $("copy-fallback").hidden=true;$("share-status").textContent="";
  window.scrollTo({top:0,behavior:"instant"});
@@ -304,12 +339,21 @@ function begin(){
  $("question-title").focus({preventScroll:true});
 }
 function reset(){
+ clearReflectionFeedback();
  for(const id of stages){records[id]={choice:null,detail:null,note:""};}
  revoke();position=0;complete=false;started=false;
  $("conversation").hidden=true;$("result").hidden=true;$("intro").hidden=false;
  window.scrollTo({top:0,behavior:"instant"});
  $("welcome-title").focus?.({preventScroll:true});
 }
+document.querySelectorAll("[data-response]").forEach(button=>button.addEventListener("click",()=>{
+ reflectionFeedback.response=button.dataset.response;
+ document.querySelectorAll("[data-response]").forEach(b=>b.setAttribute("aria-pressed",String(b===button)));
+ updateReflectionFeedback();
+}));
+$("reflection-note").addEventListener("input",()=>{
+ reflectionFeedback.note=$("reflection-note").value.slice(0,240).trim();updateReflectionFeedback();
+});
 $("start").addEventListener("click",begin);
 $("early-end").addEventListener("click",()=>{started=true;finish();});
 $("end-now").addEventListener("click",finish);
@@ -324,7 +368,7 @@ $("own-toggle").addEventListener("click",()=>{
 });
 $("own-save").addEventListener("click",saveOwn);
 $("own-input").addEventListener("input",()=>{revoke();$("panel-tip").textContent="아직 저장하지 않은 말이야. '이 말로 남길래'를 누르면 이 대화 안에만 남아.";});
-$("revise").addEventListener("click",()=>{revoke();complete=false;position=0;render();window.scrollTo({top:0,behavior:"instant"});});
+$("revise").addEventListener("click",()=>{clearReflectionFeedback();revoke();complete=false;position=0;render();window.scrollTo({top:0,behavior:"instant"});});
 $("copy").addEventListener("click",async()=>{
  if($("copy").disabled||$("result").hidden)return;
  const val=fullReport();
