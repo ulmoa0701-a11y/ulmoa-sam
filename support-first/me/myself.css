@@ -563,3 +563,56 @@ dialog form{display:flex;justify-content:flex-end}
  #letter-page .memory-disclosure:not([open])>#recap-items *{visibility:visible!important}
  #letter-page .memory-disclosure .memory-list{padding-top:0}
 }
+
+
+/* Self-discovery belongs to the student: experience -> need -> student approval, not a test type. */
+.self-discovery{margin:29px 0 28px;padding:27px 27px 23px;border:1px solid #d1dfd2;border-radius:19px;background:linear-gradient(138deg,#ecf2e9 0%,#f5f5e9 68%,#f5f0e2 100%);color:#294a3d}
+.discovery-heading{display:flex;gap:15px;align-items:flex-start}
+.discovery-sigil{display:grid;place-items:center;flex:none;width:42px;height:42px;border-radius:13px;border:1px solid #b5cfb6;background:#fafff1;color:#60856b;font-size:1.4rem}
+.discovery-heading h2{font-family:MaruBuri,"Noto Serif KR",serif;font-size:1.32rem;letter-spacing:-.045em;line-height:1.55;color:#2c5243;margin:5px 0 7px;word-break:keep-all}
+.discovery-heading p{margin:0;font-size:.88rem;line-height:1.8;color:#607969;word-break:keep-all}
+.discovery-heading strong{color:#3b664e}
+.discovery-scene{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;margin:21px 0 19px;border-radius:13px;background:#fefdf5;border:1px solid #dce6d9}
+.discovery-scene span{font-size:.75rem;color:#77907f;flex:none;margin-top:3px}
+.discovery-scene strong{font-size:.87rem;color:#3b6454;line-height:1.6}
+.discovery-questions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.discovery-question{margin:0;padding:15px 15px 13px;min-width:0;border:1px solid #dde6d8;border-radius:15px;background:#fffef9}
+.discovery-question legend{font-size:.9rem;font-weight:780;color:#365a48;line-height:1.5;float:left;max-width:100%;padding:0 1px;margin:0;word-break:keep-all}
+.discovery-question>p{clear:both;margin:5px 0 13px;color:#859487;font-size:.75rem;line-height:1.5}
+.discovery-options{display:grid;grid-template-columns:1fr;gap:7px}
+.discovery-chip{width:100%;text-align:left;padding:10px 12px;min-height:43px;background:#f7f8f2;border:1px solid #dce7d9;color:#546a5c;border-radius:11px;line-height:1.45;font-size:.81rem;font-weight:660;cursor:pointer;word-break:keep-all}
+.discovery-chip:hover{background:#eaf2e6}
+.discovery-chip[aria-pressed="true"]{background:#dcebdc;border-color:#6b9574;color:#2a5a40;box-shadow:inset 0 0 0 1px #729978}
+.discovery-own{display:block;font-size:.77rem;color:#617e69;font-weight:700;margin:15px 0 6px}
+.discovery-question textarea,#discovery-correction{resize:vertical;display:block;width:100%;border-radius:11px;border:1px solid #cddccd;background:#fffdf8;color:#294c3c;line-height:1.6;font-size:.85rem;padding:10px 11px;min-height:57px;max-height:140px}
+.discovery-mirror{background:#fffdf4;border:1px solid #d6e1d0;border-left:4px solid #75977b;border-radius:12px;margin-top:17px;padding:17px 19px 15px}
+.discovery-mirror-kicker{font-size:.76rem;color:#6c916e;letter-spacing:.02em;font-weight:800}
+#discovery-mirror-text{font-family:MaruBuri,"Noto Serif KR",serif;font-size:1.03rem;line-height:1.8;color:#3b5f4a;word-break:keep-all;overflow-wrap:anywhere;margin:9px 0 0}
+.discovery-confirm{border-top:1px solid #e1e9dc;margin-top:13px;padding-top:13px}
+.discovery-confirm>p{font-size:.84rem;font-weight:740;color:#516e5b;margin:0 0 10px}
+.discovery-confirm-choices{display:flex;flex-wrap:wrap;gap:7px}
+.discovery-confirm-choices button{border:1px solid #c2d5c4;background:#fffef7;border-radius:999px;padding:9px 13px;min-height:42px;font-size:.8rem;font-weight:690;color:#5c775d}
+.discovery-confirm-choices button[aria-pressed="true"]{background:#2d6548;border-color:#2d6548;color:white}
+.discovery-confirm label{display:block;margin:12px 0 6px;font-size:.78rem;font-weight:700;color:#718471}
+.discovery-ethics{margin:13px 0 0;color:#7c8b7d;font-size:.74rem;line-height:1.7}
+@media(max-width:760px){
+ .self-discovery{padding:18px 14px;margin:21px 0;border-radius:15px}
+ .discovery-heading{gap:9px}.discovery-sigil{width:34px;height:34px;font-size:1.2rem;border-radius:9px}
+ .discovery-heading h2{font-size:1.08rem;line-height:1.5}
+ .discovery-heading p{font-size:.79rem}
+ .discovery-scene{display:block;padding:10px 13px;margin:15px 0}
+ .discovery-scene span{display:block;margin-bottom:4px}
+ .discovery-questions{grid-template-columns:1fr;gap:12px}
+ .discovery-question{padding:13px}
+ .discovery-chip{font-size:.82rem;min-height:45px}
+ .discovery-mirror{padding:14px}
+ #discovery-mirror-text{font-size:.92rem}
+}
+@media print{
+ #letter-page .self-discovery:not([data-active="true"]){display:none!important}
+ #letter-page .self-discovery{break-inside:avoid;background:#f4f7ef!important;padding:12px 16px;margin:12px 0;border:1px solid #dae3d3}
+ #letter-page .discovery-questions,#letter-page .discovery-confirm,#letter-page .discovery-ethics,#letter-page .discovery-scene{display:none!important}
+ #letter-page .discovery-heading{display:none!important}
+ #letter-page .discovery-mirror{margin:0;padding:8px 10px;break-inside:avoid}
+ #letter-page #discovery-mirror-text{font-size:11pt;margin:4px 0;line-height:1.6}
+}
