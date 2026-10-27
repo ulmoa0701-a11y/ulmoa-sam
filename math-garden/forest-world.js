@@ -381,62 +381,67 @@ function floatPop(hostEl,imgSrc){
  hostEl.appendChild(p);
  setTimeout(()=>p.remove(),700);
 }
-/* Gathered pieces stay in a temporary basket until the child checks the number.
-   Neither guessing nor tapping repeatedly earns spendable goods. */
-function gatherSlots(type,count,goal){
- // Resource names are plural (acorns/berries); unit() expects acorn/berry.
- // Normalize here so the strawberry count slots never fall back to acorn art.
- const fruit=type==='berries'?'berry':'acorn';
- return '<div class="gather-slots" aria-hidden="true">'+Array.from({length:Math.max(goal,count)},(_,i)=>
-  '<span class="gather-slot '+(i<count?(i<goal?'filled':'extra'):'')+'">'+(i<count?unit(fruit,true):'')+'</span>'
- ).join('')+'</div>';
+/* One story scene: a request, pickable fruit, a single basket, and delivery. */
+function gatherSlots(type,count,goal,editable=true){
+ const fruit=type==='berries'?'berry':'acorn',label=type==='berries'?'딸기':'도토리';
+ return '<div class="gather-slots">'+Array.from({length:Math.max(goal,count)},(_,i)=>{
+  const filled=i<count,cl='gather-slot '+(filled?'filled':'empty')+(i>=goal?' extra':'');
+  return filled&&editable?
+   '<button type="button" class="'+cl+'" data-gather="undo-'+type+'" aria-label="'+label+' 하나 꺼내기">'+unit(fruit,true)+'</button>':
+   '<span class="'+cl+'" aria-hidden="true">'+(filled?unit(fruit,true):'')+'</span>';
+ }).join('')+'</div>';
 }
 function renderGather(){
- const x=gatherGoal(),collect=gather.phase==='collect';
- const ready=gather.phase==='ready'||gather.phase==='feed',done=gather.phase==='done';
- const story=collect?'도토리 '+x.acorns+'개, 딸기 '+x.berries+'개를 부탁해!'
-  :done?'곰돌이가 간식을 받았어!':'꾸러미 완성! 곰돌이에게 줄까?';
- const desc=collect?'그림의 수만큼 담고, 다 담았어를 눌러 봐.'
-  :done?'곰돌이가 든든해졌어.':'모은 간식을 하나씩 나누어 주면 부탁이 끝나.';
- $('gatherGuide').innerHTML=
-  '<img class="gather-bear" src="'+A+'characters/bear_'+(done?'happy':'waiting')+'.png" alt="">'+
-  '<div class="gather-cloud"><small>곰돌이의 '+(gather.round+1)+'번째 부탁</small><strong>'+story+'</strong><span>'+desc+'</span></div>';
- $('gatherTargets').innerHTML=collect?['acorns','berries'].map(kind=>{
-  const label=kind==='acorns'?'도토리':'딸기',icon=kind==='acorns'?'acorn_single.png':'berry_single.png';
-  return '<div class="gather-target '+(gather[kind]===x[kind]?'exact':'')+'">'+
-   '<div class="gather-count"><img src="'+A+'objects/'+icon+'" alt=""><b>'+label+' '+gather[kind]+' / '+x[kind]+'</b></div>'+
-   gatherSlots(kind,gather[kind],x[kind])+'</div>';
- }).join(''):ready
-  ?'<p class="gather-packed">'+unit('acorn')+' '+x.acorns+'개 '+unit('berry')+' '+x.berries+'개 <span>준비 끝!</span></p>'
-  :'<p class="gather-packed">간식을 모두 전해 줬어!</p>';
- $('gatherSpots').innerHTML=collect
-  ?'<button type="button" class="spot" data-spot="acorns" aria-label="도토리 한 개 담기" '+(gather.acorns>=x.acorns+2?'disabled':'')+'><img src="'+A+'objects/acorn_tree.png" alt=""><span class="spot-label">도토리 담기 <b>+1</b></span></button>'+
-   '<button type="button" class="spot" data-spot="berries" aria-label="딸기 한 개 담기" '+(gather.berries>=x.berries+2?'disabled':'')+'><img src="'+A+'objects/berry_single.png" alt="" class="berry-spot-img"><span class="spot-label">딸기 담기 <b>+1</b></span></button>'
-  :'';
- $('gatherActions').innerHTML=collect
-  ?'<button type="button" class="gather-undo" data-gather="undo-acorns" '+(gather.acorns?'':'disabled')+' aria-label="도토리 하나 빼기">도토리 −1</button>'+
-   '<button type="button" class="gather-undo" data-gather="undo-berries" '+(gather.berries?'':'disabled')+' aria-label="딸기 하나 빼기">딸기 −1</button>'+
-   '<button type="button" class="gather-confirm" data-gather="check">다 담았어 '+ICONS.check+'</button>'
-  :'<button type="button" class="gather-confirm" data-gather="pet">'+(done?'곰돌이 다시 보기':'곰돌이에게 주기')+' '+ICONS.arrowRight+'</button>'+
-   '<button type="button" class="gather-next" data-gather="next">새 부탁 받기</button>';
- $('gatherStatus').textContent=gatherMessage||(collect?'스스로 개수를 보고 확인해 봐.':'');
+ const x=gatherGoal(),collect=gather.phase==='collect',done=gather.phase==='done';
+ const title=collect?'도토리 '+x.acorns+'개랑 딸기 '+x.berries+'개만 가져다줄래?':
+  done?'고마워! 덕분에 배부르다!':'와, 부탁한 만큼 모았구나!';
+ const sub=collect?'나무와 딸기를 눌러 바구니에 담아 줘.':done?'다음에도 함께 놀자.':'이제 곰돌이에게 전해 줘.';
+ $('gatherGuide').innerHTML='<img class="gather-bear" src="'+A+'characters/bear_'+(done?'happy':'waiting')+'.png" alt="곰돌이">'+
+  '<div class="gather-cloud"><small>곰돌이의 '+(gather.round+1)+'번째 부탁</small><strong>'+title+'</strong><span>'+sub+'</span></div>';
+ $('gatherSpots').innerHTML=collect?
+  '<button type="button" class="gather-pick gather-tree" data-spot="acorns" '+(gather.acorns>=x.acorns+2?'disabled':'')+' aria-label="도토리 하나 담기"><img src="'+A+'objects/acorn_tree.png" alt=""><span>도토리 담기</span></button>'+
+  '<button type="button" class="gather-pick gather-berry" data-spot="berries" '+(gather.berries>=x.berries+2?'disabled':'')+' aria-label="딸기 하나 담기"><img src="'+A+'objects/berry_single.png" alt=""><span>딸기 담기</span></button>':
+  '<div class="gather-journey" aria-hidden="true"><img src="'+A+'objects/basket_empty.png" alt=""><span>'+(done?'♥':'✓')+'</span></div>';
+ $('gatherTargets').innerHTML=done?'<p class="gather-complete">곰돌이에게 간식 배달 성공!</p>':
+  '<div class="gather-basket"><p class="gather-basket-title">내 바구니 <small>'+(collect?'담은 그림을 누르면 뺄 수 있어':'간식 준비 끝!')+'</small></p>'+
+  '<div class="gather-basket-row">'+['acorns','berries'].map(kind=>{
+   const label=kind==='acorns'?'도토리':'딸기';
+   return '<div class="gather-target" data-kind="'+kind+'"><strong>'+label+' <span>'+gather[kind]+' / '+x[kind]+'</span></strong>'+
+    gatherSlots(kind,gather[kind],x[kind],collect)+'</div>';
+  }).join('')+'</div></div>';
+ $('gatherActions').innerHTML='<button type="button" class="gather-confirm" data-gather="'+
+  (collect?'check':done?'next':'deliver')+'">'+
+  (collect?'다 모았어!':done?'다음 부탁 받기':'곰돌이에게 주기')+' '+ICONS.arrowRight+'</button>';
+ $('gatherStatus').textContent=gatherMessage;
 }
 function gatherCheck(){
  if(gather.phase!=='collect')return;
  const x=gatherGoal();
  if(gather.acorns===x.acorns&&gather.berries===x.berries){
   state.acorns+=gather.acorns;state.berries+=gather.berries;
-  gather.phase='ready';gather.fedAcorns=0;gather.fedBerries=0;
-  gatherMessage='꾸러미가 완성됐어! 곰돌이에게 전해 보자.';
-  sfx(true);save();renderVillageAll();return;
+  gather.phase='ready';gather.fedAcorns=0;gather.fedBerries=0;gatherMessage='';
+  save();sfx(true);renderVillageAll();return;
  }
  const lines=[];
  for(const [k,label] of [['acorns','도토리'],['berries','딸기']]){
-  const missing=x[k]-gather[k];
-  if(missing>0)lines.push(label+' '+missing+'개 더 필요해.');
-  if(missing<0)lines.push(label+' '+(-missing)+'개 많아. 빼 볼까?');
+  const diff=x[k]-gather[k];
+  if(diff>0)lines.push(label+' '+diff+'개 더 담아볼까?');
+  if(diff<0)lines.push(label+' '+(-diff)+'개를 빼 볼까?');
  }
  gatherMessage=lines.join(' ');sfx(false);renderGather();
+}
+function gatherDeliver(){
+ if(gather.phase!=='ready'&&gather.phase!=='feed')return;
+ const x=gatherGoal(),a=Math.max(0,x.acorns-gather.fedAcorns),
+  b=Math.max(0,x.berries-gather.fedBerries);
+ if(state.acorns<a||state.berries<b){
+  gatherMessage='간식이 부족해. 반려동물 탭에서 남은 간식을 확인해 줘.';
+  sfx(false);renderGather();return;
+ }
+ state.acorns-=a;state.berries-=b;
+ state.feedCount+=a+b;state.hunger=Math.min(100,state.hunger+20*(a+b));state.lastFed=Date.now();
+ gather.fedAcorns=x.acorns;gather.fedBerries=x.berries;
+ gather.phase='done';gatherMessage='';save();sfx(true);renderVillageAll();
 }
 
 function petStage(){return state.feedCount>=20?3:state.feedCount>=12?2:state.feedCount>=5?1:0}
@@ -480,6 +485,7 @@ function showTab(tab){
  ['quest','gather','pet','build'].forEach(t=>{ $('panel'+t[0].toUpperCase()+t.slice(1)).hidden = t!==tab; });
  Array.from($('tabbar').children).forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.tab===tab)));
  stage.classList.toggle('compact',tab!=='quest');
+ stage.classList.toggle('gather-mode',tab==='gather');
  renderVillageAll();
 }
 function buildTabbar(){
@@ -506,6 +512,7 @@ $('world').addEventListener('click',e=>{
  if(gatherBtn && !gatherBtn.disabled){
   const action=gatherBtn.dataset.gather;
   if(action==='check'){gatherCheck();return}
+  if(action==='deliver'){gatherDeliver();return}
   if(action==='undo-acorns'||action==='undo-berries'){
    const kind=action==='undo-acorns'?'acorns':'berries';
    if(gather.phase==='collect'&&gather[kind]>0){gather[kind]--;gatherMessage='';save();renderGather()}
