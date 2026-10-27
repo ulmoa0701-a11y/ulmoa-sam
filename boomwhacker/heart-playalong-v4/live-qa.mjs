@@ -17,7 +17,7 @@ try {
     try {
       const response=await probe.goto(BASE+"?v4_live="+Date.now(),{waitUntil:"domcontentloaded",timeout:20000});
       deployed=!!response?.ok()&&await probe.evaluate(()=>(
-        document.querySelector(".heading p")?.textContent.includes("하트 악보를 보며")&&
+        document.querySelector(".heading > p")?.textContent.includes("하트 악보를 보며")&&
         typeof window.__HEART_V4_QA__?.getState==="function"&&
         typeof window.__HEART_V4_QA__.getState().speed==="number"
       ));
