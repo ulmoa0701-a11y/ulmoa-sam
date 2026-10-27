@@ -420,7 +420,7 @@ document.querySelectorAll(".key").forEach(k=>k.addEventListener("click",async()=
  makeTone(k.dataset.note,audio.currentTime+.015,.35);k.classList.add("is-hit");setTimeout(()=>k.classList.remove("is-hit"),180)}
  catch(e){status.textContent="악기 소리를 낼 수 없어요"}
 }));
-window.__HEART_V4_QA__={beatParts,geometry,crestTravel,stepPose,beatCue,guideOpacity,effectiveGuide,pageAt,getState:()=>({beat,playing,speed,theme,motion,meter:song.meter,title:song.title}),render:(b)=>render(b),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
+window.__HEART_V4_QA__={beatParts,geometry,crestTravel,stepPose,beatCue,guideOpacity,effectiveGuide,pageAt,getState:()=>({beat,playing,speed,theme,motion,meter:song.meter,title:song.title,audioState:audio?.state||"none",playedCount:played.size}),render:(b)=>render(b),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
 window.addEventListener("resize",()=>render(beat));
 getAssets();$("#hudTitle").textContent=song.title;reset();
 });
