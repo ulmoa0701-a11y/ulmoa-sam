@@ -81,10 +81,15 @@ for(const width of [360,390,1366]){
   await previewCard.locator('.play-preview-btn').click();
   check(await page.locator('#gardenPreviewDialog').isVisible(),width+' actual preview dialog did not open');
   check((await page.locator('#previewSteps li').count())===3,width+' preview steps not clear');
-  await page.locator('.preview-frame-switch [data-frame="intro"]').click();
-  check((await page.locator('#previewShot').getAttribute('src')).includes(previewKey+'.jpg'),'intro frame not displayed');
-  await page.locator('.preview-frame-switch [data-frame="play"]').click();
-  check((await page.locator('#previewShot').getAttribute('src')).includes(previewKey+'-play.jpg'),'play frame not displayed');
+  const liveFrame=page.locator('#previewLive');
+  const liveSrc=await liveFrame.getAttribute('src');
+  check(new URL(liveSrc).href===new URL(previewTarget,base+'/gardens/').href,
+    width+' preview opens the real game URL, not an outdated screenshot');
+  if(previewKey==='hand-mirror'){
+   await page.frameLocator('#previewLive').locator('#cameraStart').waitFor({state:'visible',timeout:15000});
+   check(await page.frameLocator('#previewLive').locator('#intro').isVisible(),
+     width+' camera preview shows actual intro and never starts camera automatically');
+  }
   check((await page.locator('#previewPlay').getAttribute('href'))===previewTarget,width+' preview game link changed');
   await page.locator('.preview-close').click();
  }
