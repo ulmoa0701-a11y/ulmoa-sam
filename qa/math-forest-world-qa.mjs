@@ -108,6 +108,8 @@ try{
   assert.equal(await page.locator('#panelGather .gather-confirm').count(),1);
   assert.equal(await page.locator('#panelGather .gather-undo').count(),0);
   assert.equal(await page.locator('#panelGather .gather-bear').count(),1);
+  assert.equal(await page.locator('.gather-basket-handle').count(),1,'basket must have a visible handle');
+  assert.equal(await page.locator('.gather-basket-body').count(),1,'basket must have a woven body');
   await page.screenshot({path:path.join(out,'gather-immersive-initial-390.png')});
   for(const width of [320,390,768,1280]){
     await page.setViewportSize({width,height:width===320?640:900});
@@ -115,10 +117,19 @@ try{
     assert.ok(overflow<=3,'gather horizontal overflow at '+width+': '+overflow);
     const bounds=await page.locator('#panelGather .gather-confirm').boundingBox();
     assert.ok(bounds&&bounds.width>=120&&bounds.height>=44,'large confirmation target');
+    const basket=await page.locator('.gather-basket').boundingBox();
+    const handle=await page.locator('.gather-basket-handle').boundingBox();
+    const body=await page.locator('.gather-basket-body').boundingBox();
+    assert.ok(basket&&handle&&body,'basket parts must have visible dimensions');
+    assert.ok(handle.width>=160&&handle.height>=100,'basket needs a prominent handle at '+width);
+    assert.ok(body.width>=230&&body.height>=120,'basket needs a large illustrated body at '+width);
+    assert.ok(basket.y+basket.height<=bounds.y+2,'basket and action button should not overlap at '+width);
     await page.screenshot({path:path.join(out,'gather-immersive-'+width+'.png')});
   }
   await page.setViewportSize({width:390,height:844});
   await page.locator('[data-spot="berries"]').click();
+  const fruit=await page.locator('.gather-target').nth(1).locator('.gather-slot .food.berry').boundingBox();
+  assert.ok(fruit&&fruit.width>=40&&fruit.height>=44,'strawberry must be much larger than the former 24px icon');
   assert.equal(await page.locator('.gather-target').nth(1).locator('.gather-slot .food.berry').count(),1);
   assert.equal(await page.locator('.gather-target').nth(1).locator('.gather-slot .food.acorn').count(),0);
   for(let k=0;k<3;k++)await page.locator('[data-spot="acorns"]').click();
@@ -139,6 +150,14 @@ try{
   assert.equal((await status(page)).berries,1);
   assert.equal(await page.locator('#panelGather .gather-confirm').count(),1);
   await page.screenshot({path:path.join(out,'gather-immersive-ready-390.png')});
+  for(const width of [320,390]){
+    await page.setViewportSize({width,height:width===320?640:844});
+    const basketFruit=await page.locator('.gather-target').nth(1).locator('.gather-slot .food.berry').boundingBox();
+    assert.ok(basketFruit&&basketFruit.width>=40,'filled fruit too small at '+width+'px');
+    assert.ok((await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth))<=3,'filled basket overflows screen at '+width);
+    await page.screenshot({path:path.join(out,'gather-woven-basket-filled-'+width+'.png')});
+  }
+  await page.setViewportSize({width:390,height:844});
   await page.reload({waitUntil:'domcontentloaded'});
   assert.equal((await status(page)).gatherOrder.phase,'ready');
   assert.equal((await status(page)).acorns,2,'reload must not duplicate reward');
