@@ -143,10 +143,10 @@ a{color:inherit}
 <body>
 <div class="shell">
 <header class="masthead"><div class="brand"><div class="brand-mark"><img src="./assets/note.svg" alt=""></div><div class="brand-name"><strong>일단 해봄 · 음악정원</strong><span>ULMOA HEART PLAYALONG</span></div></div><a class="toplink" href="../heart-performance/">원래 버전 보기</a></header>
-<div class="heading"><div><p class="kicker">A NEW LITTLE MUSICAL JOURNEY · V4</p><h1>모아의 하트 산책</h1></div><p>하트는 그대로, 모아는 왼쪽에서 오른쪽으로 깡충깡충</p></div>
+<div class="heading"><div><p class="kicker">A NEW LITTLE MUSICAL JOURNEY · V4</p><h1>모아의 하트 산책</h1></div><p>하트 악보를 보며 내 속도로 한 박씩 연주해요</p></div>
 <main>
 <section class="stage" id="stage" aria-label="장면 속에 직접 놓인 원본 하트색깔악보 연주 무대">
-<canvas id="score" width="1440" height="820" role="img" aria-label="두 줄 하트 악보와 두 봉우리를 차례로 이동하며 뛰는 모아"></canvas>
+<canvas id="score" width="1440" height="820" role="img" aria-label="두 줄 하트색깔악보. 하트 하나는 한 박이며 두 봉우리의 시각 안내는 별도의 음이 아닙니다"></canvas>
 <div class="hud" aria-hidden="true"><div class="song"><i></i><strong id="hudTitle">모아의 출발 신호</strong></div><span class="progress" id="hudProgress">01 / 08 마디</span></div>
 <div class="transport">
 <button type="button" class="primary" id="play"><img src="./assets/play.svg" alt=""><span>연주 시작</span></button>
@@ -155,7 +155,7 @@ a{color:inherit}
 <button type="button" id="full" aria-label="악보 크게 보기"><img src="./assets/expand.svg" alt=""><span>크게</span></button>
 </div>
 </section>
-<div class="below"><div class="status" id="status" role="status"><strong>한 박에 두 번</strong> · 왼쪽 봉우리에서 오른쪽 봉우리까지</div><div class="guide-select" role="group" aria-label="박자 안내 방식">
+<div class="below"><div class="status" id="status" role="status"><strong>하트 하나 = 한 박</strong> · 두 봉우리는 연주를 돕는 시각 안내예요</div><div class="guide-select" role="group" aria-label="박자 안내 방식">
 <span class="guide-label">박자 안내</span>
 <button type="button" data-guide="moa" aria-pressed="false">모아와 함께</button>
 <button type="button" data-guide="footsteps" aria-pressed="true">발자국만</button>
@@ -341,7 +341,7 @@ function render(b){
  if(active>=start&&active<start+page.pageBars*song.meter){
   const g=geometry(active,page);paintGuide(g,Math.max(0,Math.min(.9999,b-active)))
  }
- text("한 하트 · 두 박자 안내 지점     ·     실제 음의 길이는 그대로",W/2,H-(m?144:134),m?17:15,theme==="classroom"?"#214b3d":"#ecf2df","center",680);
+ if(!playing)text("하트 하나 = 한 박 · 봉우리 안내는 음을 두 번 연주하라는 뜻이 아니에요",W/2,H-(m?144:134),m?17:15,theme==="classroom"?"#214b3d":"#ecf2df","center",680);
  $("#hudProgress").textContent=String(Math.min(song.bars.length,Math.floor(Math.max(0,b)/song.meter)+1)).padStart(2,"0")+" / "+String(song.bars.length).padStart(2,"0")+" 마디";
  return page
 }
@@ -360,7 +360,7 @@ function scheduleNotes(nowBeat){
   played.add(e.id);makeTone(e.note,audio.currentTime+.018,e.dur*beatSeconds()*.84)
  }
 }
-function setPlayLabel(){playButton.querySelector("span").textContent=playing?"일시정지":"연주 시작";playButton.querySelector("img").src="./assets/"+(playing?"pause":"play")+".svg"}
+function setPlayLabel(){playButton.querySelector("span").textContent=playing?"일시정지":beat>-song.meter&&beat<endBeat()?"이어서 연주":"연주 시작";playButton.querySelector("img").src="./assets/"+(playing?"pause":"play")+".svg"}
 function stop(){playing=false;cancelAnimationFrame(rafId);setPlayLabel()}
 function loop(now){
  if(!playing)return;
@@ -385,7 +385,19 @@ $("#full").addEventListener("click",async()=>{try{if(!document.fullscreenElement
 const songPicker=$("#song");
 songPicker.innerHTML=SCORES.map((s,i)=>'<option value="'+i+'">'+s.title.replaceAll("<","&lt;")+'</option>').join("");
 songPicker.addEventListener("change",()=>{song=SCORES[+songPicker.value];$("#hudTitle").textContent=song.title;reset()});
-$("#tempo").addEventListener("change",e=>{speed=+e.target.value;reset()});
+// Changing practice tempo must preserve the *current* musical position, even mid-count-in.
+ // Re-anchor the visual/audio event clock without adding note onsets.
+ $("#tempo").addEventListener("change",e=>{
+  const next=Number(e.target.value);
+  if(!Number.isFinite(next)||next<=0)return;
+  if(playing){
+   const now=performance.now();
+   beat=-song.meter+(now-startedAt)/(beatSeconds()*1000);
+   speed=next;
+   startedAt=now-(beat+song.meter)*beatSeconds()*1000;
+  }else speed=next;
+  render(beat);
+ });
 document.querySelectorAll("[data-guide]").forEach(btn=>btn.addEventListener("click",()=>{
  motion=btn.dataset.guide;
  document.querySelectorAll("[data-guide]").forEach(x=>x.setAttribute("aria-pressed",String(x===btn)));
@@ -403,7 +415,7 @@ document.querySelectorAll(".key").forEach(k=>k.addEventListener("click",async()=
  makeTone(k.dataset.note,audio.currentTime+.015,.35);k.classList.add("is-hit");setTimeout(()=>k.classList.remove("is-hit"),180)}
  catch(e){status.textContent="악기 소리를 낼 수 없어요"}
 }));
-window.__HEART_V4_QA__={beatParts,geometry,crestTravel,stepPose,beatCue,effectiveGuide,pageAt,getState:()=>({beat,playing,theme,motion,meter:song.meter,title:song.title}),render:(b)=>render(b),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
+window.__HEART_V4_QA__={beatParts,geometry,crestTravel,stepPose,beatCue,effectiveGuide,pageAt,getState:()=>({beat,playing,speed,theme,motion,meter:song.meter,title:song.title}),render:(b)=>render(b),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
 window.addEventListener("resize",()=>render(beat));
 getAssets();$("#hudTitle").textContent=song.title;reset();
 });
