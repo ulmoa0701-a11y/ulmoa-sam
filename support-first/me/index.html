@@ -56,7 +56,7 @@
     </div>
     <div class="own-talk">
      <button type="button" class="own-toggle" id="own-toggle" aria-expanded="false" aria-controls="own-panel">선택지에 없는 내 말도 있어 <span aria-hidden="true">＋</span></button>
-     <div id="own-panel" hidden><label for="own-input">원하면 한두 문장만 남겨도 돼</label><textarea id="own-input" maxlength="160" rows="2" placeholder="이름, 연락처, 학교 이름처럼 나를 알아볼 정보는 적지 않아도 돼"></textarea><p class="own-help">이 글은 자동으로 해석하거나 상담자에게 보내지 않아. 보여줄지는 마지막에 네가 정해.</p><button type="button" class="own-save" id="own-save">이 말로 남길래</button></div>
+     <div id="own-panel" hidden><label for="own-input">원하면 한두 문장만 남겨도 돼</label><textarea id="own-input" maxlength="160" rows="2" placeholder="이름, 연락처, 학교 이름처럼 나를 알아볼 정보는 적지 않아도 돼"></textarea><p class="own-help">글을 자동으로 해석하거나 상담자에게 보내지는 않아. 마지막 편지에는 네가 직접 쓴 말도 그대로 들어가.</p><button type="button" class="own-save" id="own-save">이 말로 남길래</button></div>
     </div>
     <div class="panel-actions"><button type="button" class="back" id="back">이전 이야기</button><button type="button" class="next" id="next" disabled>이어가기 <span aria-hidden="true">→</span></button></div>
     <p class="panel-tip" id="panel-tip" role="status">고르거나 건너뛰어도 돼</p>
@@ -64,18 +64,29 @@
   </div>
  </section>
  <section class="result" id="result" hidden aria-labelledby="result-title">
-  <div class="result-hero"><span class="result-eyebrow">우리의 첫 대화가 남긴 것</span><h1 id="result-title" tabindex="-1">오늘 알게 된,<br><em>너의 작은 조각들.</em></h1><p>이건 너를 평가한 결과가 아니야. 오늘 고른 이야기를 모아둔 것뿐이야.</p><img src="../../assets/moa-hello-wave-20261012.webp" alt="모아가 손을 흔드는 모습" width="91"></div>
-  <div class="result-content">
-   <div class="recap"><h2>내가 고른 이야기</h2><div id="recap-items"></div></div>
-   <div class="share-box"><div class="share-intro"><span class="small-accent">MY CHOICE</span><h2>상담자에게 무엇을 보여줄까?</h2><p>아무것도 고르지 않으면 아무것도 복사하거나 인쇄할 수 없어.</p></div>
-    <div id="share-items" class="share-items"></div>
-    <label for="share-text" class="share-label">보여줄 문장 미리보기 · 직접 고칠 수 있어</label>
-    <textarea id="share-text" rows="5" maxlength="1500" readonly aria-describedby="share-tip"></textarea>
-    <p id="share-tip" class="share-tip">공유는 네가 ‘복사’하거나 ‘인쇄’할 때만 이루어져.</p>
-    <div class="result-buttons"><button id="copy" type="button" disabled class="primary">선택한 내용 복사</button><button id="print" type="button" disabled class="light-button">선택한 내용 인쇄</button></div><p id="share-status" role="status"></p>
+  <div class="letter-frame">
+   <div class="letter-notice"><span class="letter-notice-icon" aria-hidden="true">✳</span><div><b>모아가 보낸 첫 번째 편지</b><p>네가 선택한 이야기를 한 장에 모았어. 다시 읽어보고, 간직해도 좋아.</p></div><span class="letter-notice-no">01 / FIRST STORY</span></div>
+   <article class="letter-paper" id="letter-page" aria-label="나만의 첫 이야기 편지">
+    <div class="paper-top"><span>FROM MOA · TO YOU</span><span id="letter-date"></span></div>
+    <div class="paper-heading">
+     <div class="paper-heading-copy"><span class="letter-small">오늘의 나에게 도착한 이야기</span><h1 id="result-title" tabindex="-1">나에 대해 알게 된<br><em>작은 이야기들.</em></h1><p>모아가 네 말을 그대로 모아 편지로 남겼어.</p></div>
+     <div class="paper-character"><span class="paper-orbit" aria-hidden="true"></span><img src="../../assets/moa-hello-wave-20261012.webp" width="130" height="138" alt="손을 흔드는 모아"></div>
+    </div>
+    <div class="paper-message"><span class="paper-salutation">안녕, 너에게.</span><p id="letter-message"></p></div>
+    <div class="paper-divider"><span aria-hidden="true">✳</span><span>THE THINGS YOU TOLD ME</span><span aria-hidden="true">✳</span></div>
+    <section class="letter-memories" aria-labelledby="memories-title"><h2 id="memories-title">오늘 네가 들려준 다섯 가지 이야기</h2><p class="letter-memories-sub">답한 것과 건너뛴 것까지, 오늘 대화의 기록이야.</p><div id="recap-items" class="memory-list"></div></section>
+    <section class="letter-forward" aria-labelledby="forward-title"><div class="forward-mark" aria-hidden="true">↗</div><div><span class="letter-small">THE NEXT PAGE</span><h2 id="forward-title">다음 이야기는 네 속도로</h2><p id="letter-next"></p></div></section>
+    <div class="letter-signature"><div><span>너의 첫 이야기를 함께한</span><strong>모아가.</strong></div><span class="signature-asterisk" aria-hidden="true">✳</span></div>
+    <p class="paper-disclaimer">이 편지는 오늘 네가 직접 선택한 답을 정리한 기록이야. 성격·능력·감정 상태를 검사하거나 진단한 결과는 아니야.</p>
+   </article>
+   <div class="letter-toolbox">
+    <div class="letter-toolbox-copy"><span>KEEP THIS LETTER</span><h2>이 편지를 어떻게 간직할까?</h2><p>오늘 나온 <b>모든 답변과 직접 쓴 말</b>이 한 장에 담겼어. 상담자에게 보여주거나 따로 보관할 수 있어. <b>자동으로 전송되지는 않아.</b></p></div>
+    <div class="letter-toolbox-actions"><button type="button" id="copy" class="primary">이야기 전체 복사</button><button type="button" id="print" class="light-button">편지 인쇄 · PDF 저장</button><button type="button" id="revise" class="text-button">다시 이야기하기</button></div>
+    <p id="share-status" role="status"></p>
+    <div id="copy-fallback" class="copy-fallback" hidden><label for="full-text-fallback">복사가 어려우면 아래 전체 내용을 직접 선택해 복사해줘.</label><textarea id="full-text-fallback" readonly rows="7"></textarea></div>
    </div>
-   <details class="guide"><summary>상담자에게 · 이어서 이야기할 질문</summary><div id="guide-items"></div><p>학생의 선택을 증상·진단·위험도 점수로 해석하지 않습니다. 안전·괴롭힘·학대·자해 등 민감한 주제는 실제 상담에서 비밀보장 한계와 안전 절차를 안내하고 별도 평가해야 합니다.</p></details>
-   <div class="last-actions"><button type="button" id="revise" class="light-button">이야기 다시 보기</button><a href="../make/" class="secondary-link">내 관심사로 함께 만들어보기</a></div>
+   <details class="guide"><summary>상담자를 위한 이어가기 질문 <span class="guide-tag">학생용 편지와 별개</span></summary><div id="guide-items"></div><p>학생의 선택을 증상·진단·위험도 점수로 해석하지 않습니다. 안전·괴롭힘·학대·자해 등 민감한 주제는 실제 상담에서 비밀보장 한계와 안전 절차를 안내하고 별도 평가해야 합니다.</p></details>
+   <div class="letter-bottom"><a href="../make/" class="secondary-link">내 관심사로 함께 만들어보기 →</a></div>
   </div>
  </section>
  <details class="about" id="about"><summary>이 대화는 어떻게 만들어졌을까? · 근거와 한계</summary>
@@ -90,6 +101,5 @@
 </main>
 <footer class="footer"><div>일단 해봄 · 모아와 첫 이야기</div><div>급한 위험이 있다면 <a href="tel:112">112</a> · <a href="tel:119">119</a> · <a href="https://www.1388.go.kr/" target="_blank" rel="noopener noreferrer">청소년1388</a></div></footer>
 </div>
-<dialog id="privacy-dialog" aria-labelledby="privacy-title"><h2 id="privacy-title">내 이야기는 어디에 남을까?</h2><p>이 페이지는 이름이나 답변을 서버로 자동 전송·저장하지 않아. 새로고침하면 대화가 사라져. 같은 화면을 보고 있는 사람은 답을 볼 수 있고, 복사·인쇄한 내용은 다른 곳에 남을 수 있어.</p><p>그래서 보여줄 내용은 마지막에 직접 고르게 했어. 실제 상담에서의 비밀보장 범위와 예외는 상담자에게 따로 확인할 수 있어.</p><form method="dialog"><button class="primary">알겠어</button></form></dialog>
-<div class="print-sheet" id="print-sheet" hidden><h1>내가 상담에서 보여주기로 한 이야기</h1><pre id="print-text"></pre></div>
+<dialog id="privacy-dialog" aria-labelledby="privacy-title"><h2 id="privacy-title">내 이야기는 어디에 남을까?</h2><p>이 페이지는 이름이나 답변을 서버로 자동 전송·저장하지 않아. 새로고침하면 대화가 사라져. 같은 화면을 보고 있는 사람은 답을 볼 수 있고, 복사·인쇄한 내용은 다른 곳에 남을 수 있어.</p><p>대화가 끝나면 답 전체를 편지로 보여줘. 복사하거나 인쇄해서 다른 사람에게 전달할지는 네가 정할 수 있어. 실제 상담에서의 비밀보장 범위와 예외는 상담자에게 따로 확인할 수 있어.</p><form method="dialog"><button class="primary">알겠어</button></form></dialog>
 </body></html>
