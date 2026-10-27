@@ -23,8 +23,8 @@ on:
       - ".github/workflows/rhythm-touch-qa.yml"
 jobs:
   rhythm-browser-qa:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -32,9 +32,10 @@ jobs:
           node-version: '22'
       - name: Install Korean fonts
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq fonts-noto-cjk
+          sudo timeout 180s apt-get update -qq -o Acquire::http::Timeout=20 -o Acquire::Retries=2
+          sudo timeout 180s apt-get install -y -qq fonts-noto-cjk
           fc-cache -f
+          fc-list :lang=ko family | grep -qi 'Noto Sans CJK'
       - name: Install browser automation
         run: npm install --no-save playwright-core@1.56.1
       - name: Detect Chrome

@@ -70,9 +70,24 @@ function renderGuide(){
  $('modelCard').hidden=!showLiveModel;
  if(showLiveModel){
   const target=currentGoal()[0];
-  $('modelSymbol').innerHTML=currentGoal().map(p=>handArt(p)).join('');
+  // Camera uses the visitor's real hand/joint overlay, not an invented cartoon.
+  // The compact indicator describes the four measured fingers without implying
+  // that the game can measure thumb force, real grasp strength or object handling.
+  $('modelSymbol').replaceChildren();
   $('modelSymbol').classList.toggle('is-double',currentGoal().length===2);
-  $('modelCard').querySelector('small').textContent=S.mode==='fingers'?'예시 · 어떤 손가락이든 괜찮아':'모아의 손';
+  $('modelFingerGuide').innerHTML=currentGoal().map((pose,i)=>{
+    if(S.mode==='fingers'){
+      const n={one:1,two:2,three:3}[pose]||1;
+      return '<div class="finger-count-cue" role="note"><b>'+n+' / 4</b><span>어느 손가락이든 '+n+'개 펴 보세요</span></div>';
+    }
+    const names=['검','중','약','새'];
+    const pattern=core.PATTERNS[pose]||[];
+    const cells=names.map((name,j)=>'<span class="finger-guide-state '+(pattern[j]?'is-open':'is-folded')+'" aria-label="'+name+'손가락 '+(pattern[j]?'펴기':'접기')+'"><b>'+name+'</b><small>'+(pattern[j]?'펴기':'접기')+'</small></span>').join('');
+    return '<div class="finger-guide-row" role="group" aria-label="'+(currentGoal().length===2?(i+1)+'번째 손 · ':'')+core.TITLES[pose]+'">'+
+      (currentGoal().length===2?'<span class="finger-guide-label">'+(i+1)+'번째 손</span>':'')+
+      '<div class="finger-guide-steps">'+cells+'</div></div>';
+  }).join('');
+  $('modelCard').querySelector('small').textContent=S.mode==='fingers'?'손가락 개수를 살펴봐요':'지금 따라 할 움직임';
   $('modelTitle').textContent=S.mode==='fingers'?'손가락 '+({one:1,two:2,three:3}[target]||1)+'개 펴기':currentGoal().map(p=>core.TITLES[p]).join(' + ');
   $('modelCard').dataset.pose=target;
  }
