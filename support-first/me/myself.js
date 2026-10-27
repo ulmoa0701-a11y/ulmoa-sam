@@ -499,6 +499,19 @@ $("print").addEventListener("click",()=>{
  if($("print").disabled||$("result").hidden)return;
  window.print();
 });
+// Print the complete original answers even when the student kept the transcript collapsed.
+let transcriptWasOpen=null;
+window.addEventListener("beforeprint",()=>{
+ if($("result").hidden||$("print").disabled||transcriptWasOpen!==null)return;
+ const details=document.querySelector(".memory-disclosure");
+ if(!details)return;
+ transcriptWasOpen=details.open;
+ details.open=true;
+});
+window.addEventListener("afterprint",()=>{
+ const details=document.querySelector(".memory-disclosure");
+ if(details&&transcriptWasOpen!==null){details.open=transcriptWasOpen;transcriptWasOpen=null;}
+});
 $("privacy-open").addEventListener("click",()=>{if(typeof $("privacy-dialog").showModal==="function")$("privacy-dialog").showModal();else $("about").open=true;});
 window.addEventListener("pageshow",ev=>{if(ev.persisted)location.reload();});
 })();

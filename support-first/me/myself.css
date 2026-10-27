@@ -546,3 +546,20 @@ dialog form{display:flex;justify-content:flex-end}
  #letter-page .letter-memories{break-before:auto}
  #letter-page .memory-card{break-inside:avoid}
 }
+
+
+/* Keep student's first impression short; complete original answers remain accessible. */
+#letter-page .letter-memories{margin:27px 0 18px}
+.memory-disclosure{margin:13px 0 0}
+.memory-disclosure summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 17px;border-radius:12px;background:#f2f3e9;color:#3a6351;border:1px solid #dae5d7;cursor:pointer;font-weight:780;font-size:.87rem;min-height:48px}
+.memory-disclosure summary::-webkit-details-marker{display:none}
+.memory-disclosure summary:after{content:"＋";color:#638871;font-weight:800;font-size:1.12rem;line-height:1}
+.memory-disclosure[open] summary:after{content:"−"}
+.memory-disclosure[open] summary{border-radius:12px 12px 0 0;background:#e7eee2}
+.memory-disclosure .memory-list{padding-top:12px}
+@media print{
+ #letter-page .memory-disclosure summary{display:none!important}
+ #letter-page .memory-disclosure:not([open])>#recap-items{display:grid!important;visibility:visible!important}
+ #letter-page .memory-disclosure:not([open])>#recap-items *{visibility:visible!important}
+ #letter-page .memory-disclosure .memory-list{padding-top:0}
+}
