@@ -1179,6 +1179,9 @@ async function heartV4Smoke(){
   await page.locator('[data-guide="footsteps"]').click();
   check((await page.locator('[data-guide="footsteps"]').getAttribute("aria-pressed"))==="true",
     "V4 "+cfg.name+": footstep guide mode control not accessible");
+  // Use the short canonical 2/4 starting tune, whose two-beat count-in
+  // finishes within this audio-onset browser test's real-time window.
+  await page.locator("#song").selectOption("0");
   await page.locator("#tempo").selectOption("0.75");
   await page.locator("#notes").selectOption("3");
   await page.locator(".key").first().click();
