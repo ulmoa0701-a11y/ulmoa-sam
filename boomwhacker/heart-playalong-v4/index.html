@@ -231,19 +231,20 @@ function effectiveGuide(){return reduced?"heart":motion}
 function stepPose(phase,g){
  const p=Math.max(0,Math.min(.99999,phase));
  const left=g.x+g.w*.28,right=g.x+g.w*.72;
- const shift=smoothUnit((p-.46)/.12);
+ // A gradual crossing between the two crest contacts, never a sudden sideways dash.
+  const shift=smoothUnit((p-.37)/.35);
  const jumpAt=land=>{const progress=(p-(land-.14))/.14;
    return progress>0&&progress<1?Math.sin(Math.PI*progress)*g.w*.026:0};
  const lift=jumpAt(.25)+jumpAt(.75);
- const fade=Math.min(1,smoothUnit(p/.085),smoothUnit((1-p)/.085));
+ const fade=Math.min(1,smoothUnit(p/.14),smoothUnit((1-p)/.14));
  return {x:left+(right-left)*shift,y:g.y+g.w*.12-lift,lift,opacity:fade,left,right};
 }
 // Stable 1/4 and 3/4 landings; no continuous inter-heart racing.
 function crestTravel(phase,g){return stepPose(phase,g)}
 function beatCue(phase,contact){
  const distance=Math.abs(phase-contact);
- // One restrained pulse lasting about 0.12 of a beat; no flashing.
- return Math.max(0,1-distance/.13);
+ // Ease gently into and out of each guide point, without a sharp flash.
+ return smoothUnit(1-distance/.16);
 }
 function paintBackdrop(){
  const {width:W,height:H,mobile:m}=display;
@@ -309,8 +310,9 @@ function paintGuide(g,phase){
  if(mode==="moa"){paintMoa(g,phase);return}
  // Previously reached contact stays faintly visible; upcoming is quieter still.
  for(const [contact,x] of [[.25,left],[.75,right]]){
-  const pulse=beatCue(phase,contact);
-  const seen=phase>=contact;
+  // Reduced-motion mode shows two fixed markers: no beat-phase flash or hopping.
+   const pulse=reduced?0:beatCue(phase,contact);
+   const seen=reduced||phase>=contact;
   if(mode==="footsteps"){
    paintFootprint(x,y,g.w*.085,(seen?.58:.21)+pulse*.25);
   }else{
