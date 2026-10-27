@@ -1092,6 +1092,31 @@ async function heartV4Smoke(){
    check(data.heartWidth*data.stage.width/(cfg.name==="mobile"?820:1440)>=60,
     "V4 "+cfg.name+": notation too small");
    check(data.guideMode==="firefly","V4 "+cfg.name+": single firefly must be default");
+   const grassCheck=await page.evaluate(()=>{
+     const q=window.__HEART_V4_QA__,state=q.getState(),count=state.grassTufts;
+     const roots=[0,7,17,32,48,67,82,99,125,160,183].filter(i=>i<count);
+     const samples=roots.map(i=>{
+       const a=q.grassPose(i,0),b=q.grassPose(i,2650);
+       return {i,rootFixed:a.rootX===b.rootX&&a.rootY===b.rootY,
+         moved:Math.abs(a.swing-b.swing),withinLimit:Math.abs(a.swing)<=5&&Math.abs(b.swing)<=5};
+     });
+     const v=q.grassPose(0,0),ratio=state.pixelRatio,context=document.querySelector("#score").getContext("2d");
+     const region=()=>{
+       const x=Math.max(0,Math.round((v.x-30)*ratio)),y=Math.max(0,Math.round((v.y-38)*ratio));
+       return context.getImageData(x,y,Math.round(65*ratio),Math.round(55*ratio)).data;
+     };
+     q.render(-2,0);const first=region();
+     q.render(-2,2650);const second=region();
+     let changed=0;
+     for(let j=0;j<first.length;j+=4){
+       if(Math.abs(first[j]-second[j])+Math.abs(first[j+1]-second[j+1])+Math.abs(first[j+2]-second[j+2])>22)changed++;
+     }
+     return {count,samples,changed,positionsAtSameRoot:samples.every(s=>s.rootFixed)};
+   });
+   check(grassCheck.count===(cfg.name==="mobile"?202:342)&&
+     grassCheck.positionsAtSameRoot&&grassCheck.samples.every(s=>s.withinLimit)&&
+     grassCheck.samples.filter(s=>s.moved>.6).length>=5&&grassCheck.changed>30,
+     "V4 "+cfg.name+": grass roots must stay planted while stems visibly sway "+JSON.stringify(grassCheck));
    const motionCheck=await page.evaluate(()=>{
      const q=window.__HEART_V4_QA__,one=q.sceneMotionState(0),two=q.sceneMotionState(2500);
      const startFrame=q.getState().ambientFrames;
@@ -1327,9 +1352,12 @@ async function heartV4ReducedMotion(){
    const q=window.__HEART_V4_QA__,canvas=document.querySelector("#score");
    q.render(.25,0);const a=canvas.toDataURL();
    q.render(.75,2500);const b=canvas.toDataURL();
-   return {effective:q.effectiveGuide(),unchanged:a===b,movement:q.sceneMotionState(2500),ambientActive:q.getState().ambientActive};
+   const v=q.grassPose(0,0),later=q.grassPose(0,5000);
+   return {effective:q.effectiveGuide(),unchanged:a===b,movement:q.sceneMotionState(2500),
+     anchoredAndStill:v.rootX===later.rootX&&v.rootY===later.rootY&&v.swing===later.swing,
+     ambientActive:q.getState().ambientActive};
  });
- check(qa.effective==="heart"&&qa.unchanged&&!qa.movement.active&&!qa.ambientActive,
+ check(qa.effective==="heart"&&qa.unchanged&&qa.anchoredAndStill&&!qa.movement.active&&!qa.ambientActive,
    "V4 reduced-motion markers must stay visually static within each beat "+JSON.stringify(qa));
  await ctx.close();
 }
