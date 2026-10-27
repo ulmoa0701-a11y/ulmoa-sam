@@ -241,3 +241,10 @@ dialog form{display:flex;justify-content:flex-end}
  .result-hero img{right:5%}
  .result-hero h1{font-size:2.15rem}
 }
+
+/* Explain the optional context-specific follow-up without adding another long panel. */
+.more-label{font-size:.98rem;font-weight:800;color:#274d40;line-height:1.55;word-break:keep-all;margin:0 0 4px}
+.more-help{font-size:.79rem;color:#6d8072;line-height:1.55;margin:0 0 12px;word-break:keep-all}
+.detail-choices{gap:9px}
+.detail-chip{font-size:.83rem;line-height:1.4;padding:10px 14px;min-height:43px;text-align:left;white-space:normal}
+@media(max-width:760px){.more-label{font-size:.92rem}.more-help{font-size:.76rem}.detail-chip{font-size:.81rem;min-height:42px}}
