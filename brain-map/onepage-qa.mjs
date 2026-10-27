@@ -29,7 +29,7 @@ try{
     };
     const faces=[...document.fonts].filter(x=>/MaruBuriSemiBold|Nanum Pen Script|Pretendard/i.test(x.family))
       .map(x=>({family:x.family,status:x.status}));
-    return {body:read('.brain-main .map-intro p'),title:read('.map-intro h1'),
+    return {body:read('#lobeSceneFocusText'),title:read('.map-intro h1'),
       subheading:read('.map-panel-heading h2'),card:read('.lobe-card small'),
       cardTitle:read('.lobe-card strong'),faces,hasGamjaOverride:!!document.querySelector('link[href*="habom-gamja-font"]')};
   });

@@ -64,6 +64,61 @@ try{
   assert.equal(response.status(),200);
   assert.equal(await page.locator('#tabbar .tab-btn').count(),4);
   assert.equal(await page.locator('.panel:not([hidden])').count(),1);
+  // New child-facing collection must be a small count-and-check task, not unlimited tapping.
+  assert.match(await page.locator('#gatherGuide').textContent(),/도토리 2개, 딸기 1개/);
+  assert.match(await page.locator('#gatherTargets').textContent(),/도토리 0 \/ 2/);
+  await page.screenshot({path:path.join(out,'gather-purpose-390.png')});
+  await page.setViewportSize({width:320,height:640});
+  const gatherOverflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+  assert.ok(gatherOverflow<=3,'gather should not overflow narrow phones: '+gatherOverflow);
+  await page.screenshot({path:path.join(out,'gather-purpose-320.png')});
+  await page.setViewportSize({width:390,height:844});
+  await page.locator('[data-spot="berries"]').click();
+  assert.equal(await page.locator('.gather-target').nth(1).locator('.gather-slot.filled .food.berry').count(),1,
+    'strawberry gathering slots must show strawberry artwork');
+  assert.equal(await page.locator('.gather-target').nth(1).locator('.gather-slot .food.acorn').count(),0,
+    'strawberry slots must never show acorns');
+  for(let k=0;k<3;k++)await page.locator('[data-spot="acorns"]').click();
+  assert.equal(await page.locator('.gather-target').nth(0).locator('.gather-slot .food.acorn').count(),3,
+    'all three acorn slots, including one excess item, must show acorns');
+  assert.equal(await page.locator('.gather-target').nth(0).locator('.gather-slot.extra .food.acorn').count(),1,
+    'overfilled acorn must be marked as an extra acorn, not a strawberry');
+  assert.equal(await page.locator('.gather-target').nth(0).locator('.gather-slot .food.berry').count(),0,
+    'acorn gathering slots must never show strawberries');
+  await page.screenshot({path:path.join(out,'gather-correct-fruit-icons-390.png')});
+  assert.equal((await status(page)).acorns,0,'uncounted draft items must not become spendable');
+  assert.equal((await status(page)).gatherOrder.acorns,3);
+  await page.locator('[data-gather="check"]').click();
+  assert.match(await page.locator('#gatherStatus').textContent(),/도토리 1개 많아/);
+  assert.equal((await status(page)).gatherOrder.phase,'collect','wrong quantities must not auto finish');
+  await page.locator('[data-gather="undo-acorns"]').click();
+  assert.equal((await status(page)).gatherOrder.acorns,2);
+  await page.locator('[data-gather="check"]').click();
+  assert.equal((await status(page)).gatherOrder.phase,'ready','only exact counts finish the basket');
+  assert.equal((await status(page)).acorns,2);
+  assert.equal((await status(page)).berries,1);
+  await page.reload({waitUntil:'domcontentloaded'});
+  assert.equal((await status(page)).gatherOrder.phase,'ready','basket completion survives reload');
+  assert.equal((await status(page)).acorns,2,'reload must not award same order twice');
+  await page.locator('[data-gather="pet"]').click();
+  assert.equal((await status(page)).tab,'pet');
+  await page.locator('[data-feed="acorns"]').click();
+  await page.locator('[data-feed="acorns"]').click();
+  await page.locator('[data-feed="berries"]').click();
+  assert.equal((await status(page)).gatherOrder.phase,'done','delivering exact basket ends bear request');
+  assert.equal((await status(page)).acorns,0);
+  assert.equal((await status(page)).berries,0);
+  await page.locator('[data-tab="gather"]').click();
+  await page.locator('#panelGather [data-gather="next"]').click();
+  assert.equal((await status(page)).gatherOrder.round,1,'next request must exist');
+  assert.match(await page.locator('#gatherGuide').textContent(),/도토리 3개, 딸기 2개/);
+  await page.locator('[data-spot="berries"]').click();
+  assert.equal(await page.locator('.gather-target').nth(1).locator('.gather-slot .food.berry').count(),1,
+    'second request strawberry icon must stay correct');
+  assert.equal(await page.locator('.gather-target').nth(1).locator('.gather-slot .food.acorn').count(),0);
+  // Original quest QA starts with a truly empty save.
+  await page.evaluate(()=>localStorage.removeItem('moa-forest-world-v1'));
+  await page.reload({waitUntil:'domcontentloaded'});
   await page.locator('[data-tab="quest"]').click();
   assert.equal(await page.locator('.map-node').count(),7);
   assert.equal((await status(page)).unlocked,0);

@@ -1,0 +1,79 @@
+/* One low-clutter feedback entry; all styles are isolated from games. */
+#habomFeedbackLauncher{position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:98;min-height:44px;padding:9px 15px;border:1px solid #9bc7ae;border-radius:28px;background:#fffdf5;color:#285943;box-shadow:0 3px 13px #1d3d3233;font:700 14px/1.25 sans-serif;cursor:pointer;touch-action:manipulation}
+#habomFeedbackBackdrop[hidden]{display:none}
+#habomFeedbackBackdrop{position:fixed;z-index:99998;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;box-sizing:border-box;background:rgba(14,31,23,.72)}
+#habomFeedbackSheet{display:flex;flex-direction:column;width:min(100%,610px);max-height:min(92dvh,880px);background:#fffef8;color:#233a2d;border-radius:19px;overflow:hidden;box-shadow:0 12px 42px #0004;font:400 15px/1.55 sans-serif}
+#habomFeedbackTop{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 18px 8px}
+#habomFeedbackTop h2{margin:0;font:800 19px/1.4 sans-serif;color:#254a34}
+#habomFeedbackClose{min-height:44px;min-width:44px;border:0;border-radius:14px;background:#ecf4e9;color:#23543e;font-size:22px;cursor:pointer}
+#habomFeedbackInfo{padding:0 18px 7px;font-size:14px;color:#506457}
+#habomFeedbackInfo p{margin:3px 0 4px;line-height:1.5}
+#habomFeedbackGame{color:#2c6044}
+#habomFeedbackFrame{width:100%;height:clamp(340px,64dvh,620px);border:0;display:block;background:#fff}
+#habomFeedbackFoot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 17px 15px;font-size:12px;color:#65766a}
+#habomFeedbackFoot a{color:#27664f;text-underline-offset:3px}
+
+/* A clear single action in each finished-game scene, without extra required fields. */
+#habomFeedbackAtFinish,#habomFeedbackRescueFinish{
+ display:inline-flex;justify-content:center;align-items:center;
+ min-width:152px;min-height:46px;padding:11px 18px;
+ border:2px solid #84b497;border-radius:16px;
+ background:#f5fff3;color:#285c40;font:800 15px/1.3 sans-serif;
+ cursor:pointer;touch-action:manipulation;margin:8px;
+}
+#habomFeedbackRescueFinish{position:absolute;z-index:120;top:18px;right:14px;left:auto;bottom:auto;margin:0;display:inline-flex;box-shadow:0 6px 22px #0a2b2270}
+#habomFeedbackRescueFinish[hidden]{display:none!important}
+#habomFeedbackAtFinish:focus-visible,#habomFeedbackRescueFinish:focus-visible{outline:3px solid #d8ab4c;outline-offset:3px}
+#successScreen #habomFeedbackAtFinish{display:block;width:min(100%,310px);margin:12px auto 0}
+@media(max-width:440px){#habomFeedbackAtFinish{min-height:48px;font-size:15px}}
+
+#habomFeedbackLauncher:focus-visible,#habomFeedbackBackdrop button:focus-visible,#habomFeedbackBackdrop a:focus-visible,#habomFeedbackAtFinish:focus-visible{outline:3px solid #d8ab4c;outline-offset:3px}
+@media(max-width:440px){#habomFeedbackLauncher{font-size:12px;right:8px;bottom:calc(9px + env(safe-area-inset-bottom,0px));padding:8px 11px}#habomFeedbackBackdrop{padding:6px}#habomFeedbackSheet{max-height:98dvh;border-radius:13px}#habomFeedbackFrame{height:71dvh}#habomFeedbackTop{padding:10px 12px 5px}#habomFeedbackFoot{padding:7px 12px 9px}}
+
+
+/* Private screenshot feedback UI; isolated from every garden game. */
+#habomFeedbackV2[hidden]{display:none!important}
+#habomFeedbackV2{position:fixed;z-index:99999;inset:0;display:flex;align-items:center;justify-content:center;box-sizing:border-box;background:rgba(8,31,25,.78);padding:10px;font-family:Pretendard,"Noto Sans KR",sans-serif}
+#habomFeedbackV2Dialog{width:min(100%,565px);max-height:97dvh;overflow:auto;overscroll-behavior:contain;box-sizing:border-box;background:#fffdf6;color:#233f32;border:2px solid #d6e7d9;border-radius:20px;padding:16px;box-shadow:0 14px 40px #001b1755;font:400 14px/1.48 Pretendard,"Noto Sans KR",sans-serif}
+#habomFeedbackV2 .habom-fb-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+#habomFeedbackV2 h2{margin:0;font-size:21px;line-height:1.35;font-weight:900;color:#265540}
+#habomFbClose{width:44px;height:44px;flex:none;border:0;border-radius:14px;background:#e7f3e7;color:#285540;font-size:25px;cursor:pointer}
+#habomFbContext{color:#587566;font-size:13px;margin:3px 0 10px;overflow-wrap:anywhere}
+#habomFbKinds{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:0 0 10px;padding:0;border:0}
+#habomFbKinds legend{font-weight:850;color:#264a36;margin-bottom:7px}
+#habomFbKinds label{display:flex;align-items:center;gap:7px;min-height:48px;border:1.5px solid #d9e5da;border-radius:12px;padding:8px 10px;background:#f9fcf6;cursor:pointer;font-weight:680;line-height:1.35}
+#habomFbKinds label:has(input:checked){border-color:#35805f;background:#edf8ed}
+#habomFbKinds input{accent-color:#398460;min-width:19px;min-height:19px;flex:none}
+#habomFeedbackV2 .habom-fb-note{display:block;font-weight:700;color:#345747;font-size:13px}
+#habomFeedbackV2 textarea{box-sizing:border-box;display:block;width:100%;min-height:60px;margin:5px 0 10px;padding:10px 11px;border:1.5px solid #c7d9c9;border-radius:11px;background:#fff;color:#253a32;font:400 14px/1.5 inherit;resize:vertical}
+#habomFbCapture{padding:9px;border:1px solid #dfebe0;border-radius:13px;background:#f7fbf6}
+#habomFeedbackV2 .habom-fb-capture-head{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px}
+#habomFbCaptureStatus{color:#577365;font-size:12px}
+#habomFbPreview{width:100%;height:auto;max-height:30dvh;object-fit:contain;display:none;touch-action:none;cursor:crosshair;border-radius:8px;margin:6px 0;border:1px solid #cbdcd0;background:#f2f5ec}
+#habomFeedbackV2 .habom-fb-capture-actions{display:flex;gap:8px;margin:6px 0}
+#habomFeedbackV2 button{font-family:inherit}
+#habomFbReset,#habomFbNoImage{border:1px solid #bad1bd;border-radius:9px;background:#fff;color:#315c44;padding:7px 10px;min-height:37px;font-size:12px;font-weight:760;cursor:pointer}
+#habomFbReset:disabled{opacity:.45;cursor:default}
+#habomFeedbackV2 .habom-fb-small{margin:4px 0 7px;font-size:12px;color:#5a7163;line-height:1.4}
+#habomFeedbackV2 .habom-fb-confirm{display:flex;align-items:flex-start;gap:8px;font-weight:740;font-size:12px;line-height:1.5;color:#345443}
+#habomFbReviewed{width:19px;height:19px;accent-color:#297253;flex:none;margin:0}
+#habomFbWarning{min-height:17px;margin:8px 0;color:#925220;font-size:13px;font-weight:750}
+#habomFeedbackV2 .habom-fb-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+#habomFbSubmit{min-height:49px;flex:1;border:0;border-radius:13px;background:#2e7253;color:white;font-size:15px;font-weight:850;cursor:pointer}
+#habomFbSubmit:disabled{opacity:.7}
+#habomFbFallback{color:#3a7058;font-size:12px;white-space:nowrap;text-decoration:underline}
+#habomFeedbackV2 .habom-fb-footnote{font-size:11px;color:#718175;margin:8px 0 0;line-height:1.4}
+#habomFeedbackV2 button:focus-visible,#habomFeedbackV2 input:focus-visible,#habomFeedbackV2 textarea:focus-visible,#habomFeedbackLauncher:focus-visible{outline:3px solid #d2a24d;outline-offset:3px}
+@media(max-width:480px){
+ #habomFeedbackV2{padding:4px;align-items:center}
+ #habomFeedbackV2Dialog{padding:11px;border-radius:14px;max-height:98dvh}
+ #habomFeedbackV2 h2{font-size:18px}
+ #habomFbKinds{gap:5px}
+ #habomFbKinds label{font-size:12px;padding:6px;min-height:44px}
+ #habomFbPreview{max-height:23dvh}
+ #habomFbSubmit{flex-basis:100%}
+ #habomFbFallback{width:100%;text-align:center}
+}
+
+/* Rescue has a floating instructions panel on the bottom-right. Keep report control opposite. */
+body:has(.game-frame) #habomFeedbackLauncher{right:auto;left:10px;bottom:calc(12px + env(safe-area-inset-bottom,0px))}
