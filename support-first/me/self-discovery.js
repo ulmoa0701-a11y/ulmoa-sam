@@ -43,6 +43,9 @@ function setVerdict(v){
 function refresh(){
  const val=candidate(),confirmation=$("discovery-confirm");
  $("discovery-mirror-text").textContent=val||"아직 고르지 않았다면, 지금은 빈칸으로 남겨두자.";
+ $("self-discovery").dataset.active=String(Boolean(val));
+ const label=$("self-discovery").querySelector(".discovery-mirror-kicker");
+ if(label)label.textContent=state.verdict==="yes"?"내가 맞다고 확인한 문장":state.verdict==="different"?"조금 다르게 느껴지는 문장":state.verdict==="unsure"?"아직 판단하지 않은 문장":"이렇게 이해해도 될지 생각 중인 문장";
  confirmation.hidden=!val;
  if(!val){
   state.verdict="";
