@@ -1084,13 +1084,29 @@ async function heartV4Smoke(){
   });
   check(!!data,"V4 "+cfg.name+": QA hook missing");
   if(data){
-   check((cfg.name==="mobile"?data.canvas.w===820:data.canvas.w===1440),
-    "V4 "+cfg.name+": wrong native canvas resolution");
+   check(data.canvas.w >= (cfg.name==="mobile"?820:1440)*1.5 &&
+     data.canvas.h >= (cfg.name==="mobile"?1040:820)*1.5,
+    "V4 "+cfg.name+": native canvas pixel density too low");
    check((cfg.name==="mobile"?data.page.barsPerLine===1:data.page.barsPerLine===2),
     "V4 "+cfg.name+": viewport score rows incorrect");
-   check(data.heartWidth*data.stage.width/data.canvas.w>=60,
+   check(data.heartWidth*data.stage.width/(cfg.name==="mobile"?820:1440)>=60,
     "V4 "+cfg.name+": notation too small");
-   check(data.guideMode==="sparkle","V4 "+cfg.name+": calm sparkle guide not default");
+   check(data.guideMode==="firefly","V4 "+cfg.name+": single firefly must be default");
+   const motionCheck=await page.evaluate(()=>{
+     const q=window.__HEART_V4_QA__,one=q.sceneMotionState(0),two=q.sceneMotionState(2500);
+     const startFrame=q.getState().ambientFrames;
+     q.render(-2,0);const still=document.querySelector("#score").toDataURL();
+     q.render(-2,2500);const moved=document.querySelector("#score").toDataURL();
+     return {one,two,changed:still!==moved,initialFrames:startFrame};
+   });
+   check(motionCheck.one.active&&motionCheck.changed&&
+     Math.abs(motionCheck.one.leftX-motionCheck.two.leftX)>1 &&
+     Math.abs(motionCheck.one.rightX-motionCheck.two.rightX)>1,
+     "V4 "+cfg.name+": animated foliage/lamplight must change pixels "+JSON.stringify(motionCheck));
+   await page.waitForTimeout(450);
+   const ambientCheck=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
+   check(ambientCheck.ambientActive&&ambientCheck.ambientFrames>motionCheck.initialFrames,
+     "V4 "+cfg.name+": idle scene does not animate independently of playhead");
    check(data.left.x+10<data.right.x &&
       data.left.lift<.01&&data.right.lift<.01,
     "V4 "+cfg.name+": left and right contact points incorrect");
@@ -1134,7 +1150,7 @@ async function heartV4Smoke(){
     "V4 "+cfg.name+": two brief steps must HOLD between contacts, with small lifts");
    check(data.eventsSolid.length===1&&data.eventsSplit.length>=2,
     "V4 "+cfg.name+": original whole-heart and split-heart musical grammar changed");
-   check(["forest","night","classroom","heart-frame","moa","forest-enchanted","forest-enchanted-mobile"].every(n=>data.assets[n]),
+   check(["forest","night","classroom","heart-frame","moa","forest-enchanted","forest-enchanted-mobile","forest-canopy-left","forest-canopy-right","forest-canopy-left-mobile","forest-canopy-right-mobile"].every(n=>data.assets[n]),
     "V4 "+cfg.name+": the scene, original assets or mobile adaptation did not load");
    const stageArt=await page.evaluate(()=>window.__HEART_V4_QA__.sceneInfo());
    check(stageArt.loaded&&stageArt.scene===(cfg.name==="mobile"?"forest-enchanted-mobile":"forest-enchanted"),
@@ -1146,7 +1162,8 @@ async function heartV4Smoke(){
      const sample=(phase,side)=>{
        q.render(phase);
        const cx=g.x+g.w*(side===0?.28:.72),cy=g.y+g.w*.015;
-       return ctx.getImageData(Math.round(cx-36),Math.round(cy-34),72,72).data;
+       const ratio=q.getState().pixelRatio;
+       return ctx.getImageData(Math.round((cx-36)*ratio),Math.round((cy-34)*ratio),Math.round(72*ratio),Math.round(72*ratio)).data;
      };
      const baseline=[sample(.5,0),sample(.5,1)];
      const left=[sample(.25,0),sample(.25,1)];
@@ -1308,11 +1325,11 @@ async function heartV4ReducedMotion(){
  check(!!response?.ok(),"V4 reduced motion route failed");
  const qa=await page.evaluate(()=>{
    const q=window.__HEART_V4_QA__,canvas=document.querySelector("#score");
-   q.render(.25);const a=canvas.toDataURL();
-   q.render(.75);const b=canvas.toDataURL();
-   return {effective:q.effectiveGuide(),unchanged:a===b};
+   q.render(.25,0);const a=canvas.toDataURL();
+   q.render(.75,2500);const b=canvas.toDataURL();
+   return {effective:q.effectiveGuide(),unchanged:a===b,movement:q.sceneMotionState(2500),ambientActive:q.getState().ambientActive};
  });
- check(qa.effective==="heart"&&qa.unchanged,
+ check(qa.effective==="heart"&&qa.unchanged&&!qa.movement.active&&!qa.ambientActive,
    "V4 reduced-motion markers must stay visually static within each beat "+JSON.stringify(qa));
  await ctx.close();
 }

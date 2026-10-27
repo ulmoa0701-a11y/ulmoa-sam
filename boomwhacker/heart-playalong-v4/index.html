@@ -162,8 +162,8 @@ a{color:inherit}
 </section>
 <div class="below"><div class="status" id="status" role="status"><strong>하트 하나 = 한 박</strong> · 두 봉우리는 연주를 돕는 시각 안내예요</div><div class="guide-select" role="group" aria-label="박자 안내 방식">
 <span class="guide-label">박자 안내</span>
-<button type="button" data-guide="sparkle" aria-pressed="true">반짝 안내</button>
-<button type="button" data-guide="firefly" aria-pressed="false">반딧불 안내</button>
+<button type="button" data-guide="firefly" aria-pressed="true">반딧불 안내</button>
+<button type="button" data-guide="sparkle" aria-pressed="false">반짝 안내</button>
 <button type="button" data-guide="moa" aria-pressed="false">모아와 함께</button>
 <button type="button" data-guide="heart" aria-pressed="false">하트 강조만</button>
 </div></div>
@@ -191,9 +191,9 @@ const FREQUENCIES=[261.6256,293.6648,329.6276,349.2282,391.9954,440,493.8833,523
 const colorOf=note=>COLORS[NOTES.indexOf(note)]||"#a9c8bb";
 const frequencyOf=note=>FREQUENCIES[NOTES.indexOf(note)]||0;
 const heartPath=new Path2D("M50 84 C44 77 9 55 6 29 C3 9 20 0 35 5 C43 7 48 13 50 19 C52 13 57 7 65 5 C80 0 97 9 94 29 C91 55 56 77 50 84Z");
-const imageNames=["forest","night","classroom","heart-frame","moa","forest-enchanted","forest-enchanted-mobile"];
+const imageNames=["forest","night","classroom","heart-frame","moa","forest-enchanted","forest-enchanted-mobile","forest-canopy-left","forest-canopy-right","forest-canopy-left-mobile","forest-canopy-right-mobile"];
 const images={};
-let song=SCORES[0],beat=-song.meter,playing=false,speed=1,theme="forest",motion="sparkle",audio=null,startedAt=0,rafId=0,played=new Set(),reduced=matchMedia("(prefers-reduced-motion: reduce)").matches,display={width:1440,height:820,mobile:false};
+let song=SCORES[0],beat=-song.meter,playing=false,speed=1,theme="forest",motion="firefly",audio=null,startedAt=0,rafId=0,played=new Set(),reduced=matchMedia("(prefers-reduced-motion: reduce)").matches,display={width:1440,height:820,mobile:false,pixelRatio:1},ambientId=0,ambientLast=0,ambientFrames=0;
 const meter=()=>song.meter,endBeat=()=>song.bars.length*song.meter,beatSeconds=()=>60/(song.bpm*speed);
 const TEXT_FONTS={
  ui:"'Pretendard','SUIT','Noto Sans CJK KR',sans-serif",
@@ -210,8 +210,13 @@ function ready(name){return images[name]&&images[name].complete&&images[name].na
 function layout(){
  const mobile=window.matchMedia("(max-width:740px)").matches;
  const width=mobile?820:1440,height=mobile?1040:820;
- if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height}
- display={width,height,mobile};return display
+ // Subpixel scene and Jua syllables stay crisp, including on high-density screens.
+ // Cap the cost for children using older tablets and phones.
+ const pixelRatio=Math.min(mobile?1.6:2,Math.max(1.5,window.devicePixelRatio||1));
+ const physicalW=Math.round(width*pixelRatio),physicalH=Math.round(height*pixelRatio);
+ if(canvas.width!==physicalW||canvas.height!==physicalH){canvas.width=physicalW;canvas.height=physicalH}
+ ctx.setTransform(pixelRatio,0,0,pixelRatio,0,0);
+ display={width,height,mobile,pixelRatio};return display
 }
 function beatParts(k){
  return song.events.filter(e=>e.start<k+1-1e-7&&e.start+e.dur>k+1e-7)
@@ -257,19 +262,47 @@ function beatCue(phase,contact){
  // Ease gently into and out of each guide point, without a sharp flash.
  return smoothUnit(1-distance/.16);
 }
-function paintBackdrop(){
+// Decorations deliberately stay away from the notation, and never indicate beat time.
+function sceneMotionState(time=performance.now()){
+ const active=!reduced&&!document.hidden&&theme==="forest";
+ const t=active?time/1000:0;
+ return {active,leftX:active?3.7*Math.sin(2*Math.PI*t/9.2):0,
+  leftY:active?.85*Math.sin(2*Math.PI*t/11.8):0,
+  rightX:active?3.1*Math.sin(2*Math.PI*t/10.7+1.1):0,
+  rightY:active?.65*Math.sin(2*Math.PI*t/8.9+.7):0,
+  lantern:active?.16+.025*Math.sin(2*Math.PI*t/3.6):.16};
+}
+function paintSceneMotion(time){
+ const {width:W,height:H,mobile:m}=display;
+ const state=sceneMotionState(time);
+ for(const [side,dx,dy] of [["left",state.leftX,state.leftY],["right",state.rightX,state.rightY]]){
+  const key="forest-canopy-"+side+(m?"-mobile":"");
+  if(ready(key))ctx.drawImage(images[key],dx,dy,W,H);
+ }
+ // Slow, low-opacity lamplight breathing, never strobing.
+ ctx.save();
+ for(const x of [m?85:155,W-(m?85:152)]){
+  const y=m?77:65,r=m?74:94;
+  const halo=ctx.createRadialGradient(x,y,1,x,y,r);
+  halo.addColorStop(0,"rgba(255,232,155,"+state.lantern.toFixed(3)+")");
+  halo.addColorStop(.36,"rgba(255,207,107,"+(state.lantern*.36).toFixed(3)+")");
+  halo.addColorStop(1,"rgba(255,208,121,0)");
+  ctx.fillStyle=halo;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+ }
+ ctx.restore();
+}
+function paintBackdrop(time=performance.now()){
  const {width:W,height:H,mobile:m}=display;
  const art=theme==="forest"?(m?"forest-enchanted-mobile":"forest-enchanted"):theme;
  if(ready(art)){
    ctx.drawImage(images[art],0,0,W,H);
-   if(theme==="forest")return; // The approved scene has its own lanterns, stone paths and edge lighting.
+   if(theme==="forest"){paintSceneMotion(time);return}
  }else if(ready(theme))ctx.drawImage(images[theme],0,0,W,H);
  else{ctx.fillStyle=theme==="night"?"#172c49":theme==="classroom"?"#e0cfb6":"#102b35";ctx.fillRect(0,0,W,H)}
  const gradient=ctx.createLinearGradient(0,0,0,H);
  gradient.addColorStop(0,theme==="classroom"?"#1c332920":"#081a1b46");
  gradient.addColorStop(.25,"#102b2805");gradient.addColorStop(.85,"#082a274a");gradient.addColorStop(1,theme==="classroom"?"#223d35a8":"#071b1ed7");
  ctx.fillStyle=gradient;ctx.fillRect(0,0,W,H);
- // Legacy scenes keep their original guidance lines.
  const yRows=m?[347,699]:[327,589];
  for(const yy of yRows){ctx.save();ctx.strokeStyle=theme==="night"?"#d9d4ff80":"#e9eccc8a";ctx.lineWidth=m?3:2.5;
  ctx.shadowBlur=14;ctx.shadowColor="#fff3bf8e";
@@ -430,9 +463,9 @@ function paintGuide(g,phase){
   paintCrestGlow(g,side,cue.glow*.74);
  }
 }
-function render(b){
+function render(b,time=performance.now()){
  layout();const W=display.width,H=display.height,m=display.mobile;
- ctx.clearRect(0,0,W,H);paintBackdrop();
+ ctx.clearRect(0,0,W,H);paintBackdrop(time);
  const page=pageAt(b),start=page.firstBar*song.meter,perRow=song.meter*page.barsPerLine;
  const current=Math.floor(Math.max(0,b)),active=(b>=0&&b<endBeat())?current:-1;
  text("HEART  /  WALK",m?48:89,m?132:134,m?20:19,theme==="classroom"?"#234a3c":"#f8edd1","left",760);
@@ -470,12 +503,22 @@ function scheduleNotes(nowBeat){
  }
 }
 function setPlayLabel(){playButton.querySelector("span").textContent=playing?"일시정지":beat>-song.meter&&beat<endBeat()?"이어서 연주":"연주 시작";playButton.querySelector("img").src="./assets/"+(playing?"pause":"play")+".svg"}
-function stop(){playing=false;cancelAnimationFrame(rafId);setPlayLabel()}
+function stop(){playing=false;cancelAnimationFrame(rafId);setPlayLabel();startAmbient()}
+function stopAmbient(){if(ambientId)cancelAnimationFrame(ambientId);ambientId=0}
+function ambientFrame(now){
+ if(playing||reduced||document.hidden||theme!=="forest"){ambientId=0;return}
+ if(now-ambientLast>=100){ambientLast=now;ambientFrames++;render(beat,now)}
+ ambientId=requestAnimationFrame(ambientFrame);
+}
+function startAmbient(){
+ if(ambientId||playing||reduced||document.hidden||theme!=="forest")return;
+ ambientLast=0;ambientId=requestAnimationFrame(ambientFrame)
+}
 function loop(now){
  if(!playing)return;
  beat=-song.meter+(now-startedAt)/(beatSeconds()*1000);
  if(beat>=endBeat()){beat=endBeat();stop();render(beat);status.innerHTML="<strong>연주를 마쳤어요</strong> · 다시 시작할 수 있어요";return}
- scheduleNotes(beat);render(beat);rafId=requestAnimationFrame(loop)
+ scheduleNotes(beat);render(beat,now);rafId=requestAnimationFrame(loop)
 }
 async function togglePlay(){
  if(playing){stop();return}
@@ -484,7 +527,7 @@ async function togglePlay(){
  if(beat>=endBeat())beat=-song.meter;
  played=new Set(song.events.filter(e=>e.start<beat-.02).map(e=>e.id));
  startedAt=performance.now()-(beat+song.meter)*beatSeconds()*1000;
- playing=true;setPlayLabel();
+ playing=true;stopAmbient();setPlayLabel();
  status.innerHTML="<strong>하트 한 개 = 한 박</strong> · 두 봉우리의 박자 흐름을 따라가요";rafId=requestAnimationFrame(loop)
 }
 function reset(){beat=-song.meter;played.clear();stop();status.innerHTML="<strong>연주 준비</strong> · 안내 방식을 골라 연주해요";render(beat)}
@@ -516,7 +559,8 @@ document.querySelectorAll("[data-guide]").forEach(btn=>btn.addEventListener("cli
 $("#notes").addEventListener("change",()=>{document.querySelectorAll(".key").forEach(k=>k.setAttribute("aria-disabled",String(!allowedNotes().includes(k.dataset.note))))});
 const allowedNotes=()=>{const v=+$("#notes").value;return v===3?["도","미","솔"]:v===5?["도","레","미","솔","라"]:NOTES};
 document.querySelectorAll("[data-theme]").forEach(btn=>btn.addEventListener("click",()=>{
- theme=btn.dataset.theme;document.querySelectorAll("[data-theme]").forEach(x=>x.setAttribute("aria-pressed",String(x===btn)));render(beat)
+ theme=btn.dataset.theme;document.querySelectorAll("[data-theme]").forEach(x=>x.setAttribute("aria-pressed",String(x===btn)));render(beat);
+ if(theme==="forest")startAmbient();else stopAmbient()
 }));
 $("#keys").innerHTML=NOTES.map((n,i)=>'<button class="key" data-note="'+n+'" style="--note:'+COLORS[i]+'" aria-label="'+(n==="높은도"?"높은 도":n)+' 듣기"><b>'+(n==="높은도"?"도↑":n)+'</b></button>').join("");
 document.querySelectorAll(".key").forEach(k=>k.addEventListener("click",async()=>{
@@ -530,8 +574,9 @@ const fontState=()=>({
  loaded:{story:[...document.fonts].some(f=>f.family==="Gamja Flower"&&f.status==="loaded"),
          score:[...document.fonts].some(f=>f.family==="Jua"&&f.status==="loaded")}
 });
-window.__HEART_V4_QA__={beatParts,geometry,crestTravel,stepPose,beatCue,guideOpacity,guideState,fireflyPose,effectiveGuide,pageAt,fontState,sceneInfo:()=>({theme,mobile:display.mobile,scene:theme==="forest"?(display.mobile?"forest-enchanted-mobile":"forest-enchanted"):theme,loaded:ready(display.mobile?"forest-enchanted-mobile":"forest-enchanted")}),getState:()=>({beat,playing,speed,theme,motion,meter:song.meter,title:song.title,audioState:audio?.state||"none",playedCount:played.size}),render:(b)=>render(b),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
+window.__HEART_V4_QA__={beatParts,geometry,crestTravel,stepPose,beatCue,guideOpacity,guideState,fireflyPose,sceneMotionState,effectiveGuide,pageAt,fontState,sceneInfo:()=>({theme,mobile:display.mobile,scene:theme==="forest"?(display.mobile?"forest-enchanted-mobile":"forest-enchanted"):theme,loaded:ready(display.mobile?"forest-enchanted-mobile":"forest-enchanted")}),getState:()=>({beat,playing,speed,theme,motion,meter:song.meter,title:song.title,audioState:audio?.state||"none",playedCount:played.size,pixelRatio:display.pixelRatio,ambientFrames,ambientActive:ambientId!==0}),render:(b)=>render(b),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
 window.addEventListener("resize",()=>render(beat));
+document.addEventListener("visibilitychange",()=>{if(document.hidden)stopAmbient();else if(!playing)startAmbient()});
 getAssets();$("#hudTitle").textContent=song.title;reset();
 // Canvas retains pixels rendered before web-font readiness. Repaint the SAME beat
 // after both fonts settle without restarting playback, touching notes or changing tempo.

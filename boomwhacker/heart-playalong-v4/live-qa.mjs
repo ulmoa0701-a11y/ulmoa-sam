@@ -84,14 +84,25 @@ try {
         musicMeter:window.__PERFORMANCE_SCORES__.map(s=>s.meter),
         assets:q.assets(),mode:q.getState().motion};
     });
-    check(geometry.nativeW===(config.width===390?820:1440),config.name+": native responsive score canvas");
+    check(geometry.nativeW>=(config.width===390?820:1440)*1.5,config.name+": high-density score canvas missing");
     check(geometry.scrollW<=geometry.viewport+1,config.name+": no horizontal overflow");
     check([2,3,4].every(m=>geometry.musicMeter.includes(m)),config.name+": original 2/4 3/4 4/4 arrangements");
     check(Object.values(geometry.assets).every(Boolean),config.name+": public backdrop/heart/Moa/night-forest/mobile assets");
     const scene=await page.evaluate(()=>window.__HEART_V4_QA__.sceneInfo());
     check(scene.loaded&&scene.scene===(config.width===390?"forest-enchanted-mobile":"forest-enchanted"),
       config.name+": public scene does not use the approved separate composition");
-    check(geometry.mode==="sparkle",config.name+": single-sparkle default");
+    const motion=await page.evaluate(()=>{
+      const q=window.__HEART_V4_QA__,a=q.sceneMotionState(0),b=q.sceneMotionState(2500);
+      q.render(-2,0);const first=document.querySelector("#score").toDataURL();
+      q.render(-2,2500);const second=document.querySelector("#score").toDataURL();
+      return {a,b,visiblyMoves:first!==second,frames:q.getState().ambientFrames};
+    });
+    check(motion.a.active&&motion.visiblyMoves&&Math.abs(motion.a.leftX-motion.b.leftX)>1,
+      config.name+": public scenery movement missing");
+    await page.waitForTimeout(340);
+    check((await page.evaluate(()=>window.__HEART_V4_QA__.getState())).ambientFrames>motion.frames,
+      config.name+": publicly deployed still image rather than a living scene");
+    check(geometry.mode==="firefly",config.name+": single-firefly default");
     await page.locator("#drawer summary").click();
     for(const theme of ["forest","night","classroom"]){
       await page.locator('[data-theme="'+theme+'"]').click();
