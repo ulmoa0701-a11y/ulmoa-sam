@@ -40,7 +40,7 @@ jobs:
           BASE="https://ulmoa0701-a11y.github.io/ulmoa-sam/"
           # A marker in HTML can already exist in an OLD release. Compare
           # actual bytes of all relevant files to the checked-out commit.
-          FILES=(support-first/me/index.html support-first/me/myself.css support-first/me/myself.js)
+          FILES=(support-first/me/index.html support-first/me/myself.css support-first/me/myself.js support-first/me/letter-reflection.js support-first/me/self-discovery.js)
           for attempt in $(seq 1 45); do
             all_ready=1
             for path in "${FILES[@]}"; do
@@ -55,7 +55,7 @@ jobs:
               rm -f "$downloaded"
             done
             if [ "$all_ready" = 1 ]; then
-              echo "All three public assets match current checkout: ${GITHUB_SHA}"
+              echo "All five public assets match current checkout: ${GITHUB_SHA}"
               exit 0
             fi
             echo "Public assets still updating (attempt ${attempt}/45)"

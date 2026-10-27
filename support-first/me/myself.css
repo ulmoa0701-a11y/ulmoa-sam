@@ -564,6 +564,28 @@ dialog form{display:flex;justify-content:flex-end}
  #letter-page .memory-disclosure .memory-list{padding-top:0}
 }
 
+/* Insight first: one possibility, one experiment, one usable sentence. */
+.insight-cover-row{display:flex;align-items:center;gap:8px;margin:19px 0 9px;font-size:.83rem;color:#5d7869;flex-wrap:wrap}
+.insight-cover-row #cover-symbol{font-size:1.4rem;position:static;line-height:1.4}
+.insight-cover-row #cover-name{font-weight:650}.insight-cover-row #cover-choose{margin-left:auto;font-size:.75rem;min-height:44px}
+.insight-letter .paper-heading{padding:16px 0 6px;grid-template-columns:minmax(0,1fr) 100px}
+.insight-letter .paper-heading h1{font-size:clamp(1.6rem,3.3vw,2.35rem);line-height:1.45;word-break:keep-all;overflow-wrap:anywhere;margin:8px 0 12px;letter-spacing:-.045em}
+.insight-letter .paper-character{width:100px;height:106px}.insight-letter .paper-character img{width:100px}
+.insight-letter .paper-heading-copy>p{font-size:.85rem;line-height:1.7}
+.insight-letter .letter-reflection{margin:16px 0 22px;padding:0;border:0}
+.insight-letter .reflection-part{margin:18px 0}.insight-letter .reflection-part h3{font-size:.8rem;color:#607565;margin-bottom:7px}
+.insight-letter .reflection-part p,.insight-action>p:not(.reflection-limit){font-size:1rem;line-height:1.85;word-break:keep-all;overflow-wrap:anywhere}
+.insight-action{margin:24px 0;padding:21px 23px;background:#eaf0e3;border-radius:6px;border-left:3px solid #91aa7e;break-inside:avoid}
+.insight-action h2,.insight-words h2{font-size:1.08rem;line-height:1.6;margin:5px 0 9px;word-break:keep-all}.insight-action>p{margin:7px 0}
+.insight-words{margin:25px 0}.insight-words h2{color:#4b6756}.insight-words blockquote{margin:10px 0;padding:0 0 0 17px;border-left:2px solid #8da58d;font-size:1.06rem;font-weight:650;line-height:1.9;word-break:keep-all;overflow-wrap:anywhere}.insight-words>p{font-size:.78rem;color:#6b756c}
+.insight-check{border-top:1px solid #e0e4d8;border-bottom:1px solid #e0e4d8}.insight-check summary{cursor:pointer;min-height:48px;padding:13px 0;font-size:.85rem;line-height:1.7}.insight-check p{font-size:.92rem;line-height:1.8;margin:0 0 15px;word-break:keep-all}
+.insight-reader{margin:12px 0 22px}.insight-reader .reflection-edit{margin:0}
+.insight-letter #reflection-warm{border:0;padding:0;margin:26px 0 8px;font-size:.94rem;line-height:1.8;font-weight:500;color:#42604c}
+.insight-letter .letter-signature{margin:4px 0 17px}.insight-letter .letter-signature strong{font-size:1.18rem}
+.insight-letter .letter-memories{padding:0;margin:20px 0 0!important}.insight-letter .memory-disclosure{margin:0}
+@media(max-width:480px){.insight-letter .paper-heading{grid-template-columns:minmax(0,1fr) 64px;gap:9px}.insight-letter .paper-character{width:64px;height:70px}.insight-letter .paper-character img{width:64px}.insight-action{padding:16px 14px}.insight-letter .reflection-part p,.insight-action>p:not(.reflection-limit){font-size:.95rem}.insight-words blockquote{font-size:.98rem}.insight-cover-row{margin-top:12px}}
+@media print{.insight-cover-row{margin:0 0 8px}.insight-cover-row #cover-choose{display:none!important}.insight-letter .paper-heading h1{font-size:21pt!important}.insight-letter .paper-heading{padding:8px 0!important}.insight-letter .reflection-part p,.insight-action>p:not(.reflection-limit){font-size:10pt;line-height:1.65}.insight-action{margin:12px 0;padding:12px 16px}.insight-words{margin:15px 0;break-inside:avoid}.insight-words blockquote{font-size:11pt}.insight-check summary{display:none}.insight-check{border:0}.insight-check p{font-size:9pt}.insight-letter .letter-memories{break-before:page!important;padding-top:8mm!important}.insight-letter .letter-memories:before{content:'내가 남긴 답 전체';display:block;font-size:16pt;font-weight:700;margin-bottom:14px}.insight-letter .insight-reader{margin:0}.insight-letter .letter-signature{margin:5px 0!important}.insight-letter #reflection-warm{margin:12px 0 5px;font-size:10pt}}
+
 
 /* Self-discovery belongs to the student: experience -> need -> student approval, not a test type. */
 .self-discovery{margin:29px 0 28px;padding:27px 27px 23px;border:1px solid #d1dfd2;border-radius:19px;background:linear-gradient(138deg,#ecf2e9 0%,#f5f5e9 68%,#f5f0e2 100%);color:#294a3d}
@@ -616,3 +638,9 @@ dialog form{display:flex;justify-content:flex-end}
  #letter-page .discovery-mirror{margin:0;padding:8px 10px;break-inside:avoid}
  #letter-page #discovery-mirror-text{font-size:11pt;margin:4px 0;line-height:1.6}
 }
+
+.discovery-disclosure{margin-top:20px;border-top:1px solid #dce3d6}.discovery-disclosure>summary{cursor:pointer;padding:15px 0;font-size:.87rem;min-height:48px}.discovery-disclosure .self-discovery{margin-top:0}
+@media print{.discovery-disclosure>summary{display:none}.discovery-disclosure{border:0;break-before:page}.discovery-disclosure:has([data-active="false"]){display:none!important}}
+.insight-cover-row #cover-choose{border:1px solid #d9e0d2;border-radius:20px;background:transparent;color:#4f6e5a;padding:7px 12px;font:inherit;font-size:.75rem;cursor:pointer}
+.insight-cover-row #cover-choose:hover{background:#edf1e5}.insight-cover-row #cover-choose:focus-visible{outline:2px solid #42634f;outline-offset:3px}
+@media print{.discovery-disclosure:has([data-active="true"]):before{content:'내가 더 살펴본 장면';display:block;font-size:16pt;font-weight:700;margin-bottom:14px}.insight-letter:has(.self-discovery[data-active="true"]) .letter-memories{break-before:auto!important;padding-top:6mm!important}}

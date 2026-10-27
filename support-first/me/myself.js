@@ -231,76 +231,13 @@ const themes={
 };
 const coverTheme=()=>themes[coverChoice||records.spark.choice]||themes.neutral;
 const coverId=()=>coverChoice|| (themes[records.spark.choice]?records.spark.choice:"neutral");
-function storyHeadline(){
- const topic=records.topic.choice;
- const byTopic={
-  school:["학교에서의 하루를","살펴본 오늘."],
-  people:["사람 사이의 순간들을","꺼내본 오늘."],
-  mood:["기분과 에너지를","이야기한 오늘."],
-  day:["집과 일상의 장면들을","이야기한 오늘."]
- };
- if(byTopic[topic])return byTopic[topic];
- if(records.topic.choice==="own"&&records.topic.note)return["내 말로 직접 남긴","오늘의 첫 이야기."];
- const t=themes[records.spark.choice];
- return t?[t.title,"오늘의 이야기."]:["오늘을 있는 그대로","남긴 첫 이야기."];
-}
-function highlight(){
- for(const id of ["moment","topic","spark","pace","wish"]){
-  if(records[id].note.trim())return{quote:records[id].note.trim(),source:"이 문장은 네가 직접 적은 말이야."};
- }
- if(records.moment.detail)return{quote:records.moment.detail,source:"어려웠던 순간을 조금 더 이야기하며 골랐어."};
- if(hasAnswer(records.moment))return{quote:chosen("moment"),source:"네가 떠오른 장면으로 고른 답이야."};
- if(hasAnswer(records.spark))return{quote:chosen("spark"),source:"오늘 편하다고 말해준 순간이야."};
- if(hasAnswer(records.pace))return{quote:chosen("pace"),source:"네가 편한 대화 방식으로 골랐어."};
- if(hasAnswer(records.topic))return{quote:chosen("topic"),source:"오늘 이야기하고 싶은 주제로 골랐어."};
- if(hasAnswer(records.wish))return{quote:chosen("wish"),source:"다음에 해보고 싶은 일로 골랐어."};
- return{quote:"오늘은 아직 고르지 않아도 괜찮아.",source:"답하지 않은 것도 오늘 대화의 한 부분이야."};
-}
-
-function letterIntro(){
- const discovered=window.MoaSelfDiscovery?.summary();
- const bits=[];
- if(hasAnswer(records.moment))bits.push("오늘 네가 골랐던 장면은 ‘"+chosen("moment")+"’이었어.");
- else if(hasAnswer(records.topic))bits.push("오늘은 ‘"+chosen("topic")+"’에 대해 조금 이야기해봤어.");
- else bits.push("오늘은 어떤 이야기를 꺼낼지 아직 정하지 않아도 괜찮았어.");
- if(discovered?.verified)bits.push("그 장면을 조금 더 살펴보고, 어떤 마음과 바람이 가까운지 네가 직접 ‘맞아’라고 확인해줬지. 그게 오늘의 가장 중요한 발견일 수 있어.");
- else if(discovered?.has)bits.push("느낀 것과 바랐던 것을 나란히 놓아봤지만, 그 말이 맞는지는 네가 가장 잘 알아. 다르다면 다르다고 적어도 돼.");
- else bits.push("이 선택만으로 네 마음을 다 알 수는 없어. 그래서 그때 무엇을 느꼈고 무엇을 바랐는지 스스로 살펴볼 질문을 남겨뒀어.");
- bits.push("너에 관한 결론을 서둘러 내리지는 않을게. 편지의 뜻도 네가 바꾸고 결정할 수 있어.");
- return bits.join(" ");
-}
-function letterNext(){
- const sentences=[];
- if(hasAnswer(records.wish)&&records.wish.choice!=="unsure")sentences.push("다음에는 ‘"+chosen("wish")+"’부터 시작해 볼 수 있겠어.");
- else sentences.push("다음에 꼭 무엇을 할지 지금 정하지 않아도 괜찮아.");
- if(hasAnswer(records.pace))sentences.push("‘"+chosen("pace")+"’라는 네가 고른 방식도 함께 생각해 볼게.");
- if(hasAnswer(records.moment))sentences.push("원한다면 ‘"+chosen("moment")+"’에 관한 장면부터 천천히 이야기해도 돼.");
- sentences.push("마음이 바뀌면 얼마든지 다시 고를 수 있어.");
- return sentences.join(" ");
-}
-function clueItems(){
- const candidates=[
-  {id:"spark",label:"내가 편한 순간"},
-  {id:"moment",label:"오늘 떠오른 장면"},
-  {id:"pace",label:"편한 대화 방식"},
-  {id:"wish",label:"다음에 해보고 싶은 것"},
-  {id:"topic",label:"요즘 이야기하고 싶은 주제"}
- ];
- const result=candidates.filter(it=>hasAnswer(records[it.id])&&!(it.id==="wish"&&records.wish.choice==="unsure")).slice(0,3)
-  .map(it=>({...it,value:chosen(it.id)}));
- if(!result.length)result.push({id:"none",label:"오늘의 한 가지",value:"원할 때 다시 이야기하기"});
- return result;
-}
 function renderCover(){
  const theme=coverTheme(),id=coverId();
  $("letter-page").dataset.storyTheme=id;
  $("cover-name").textContent=theme.name;
  $("cover-symbol").textContent=theme.symbol;
  $("cover-reason").textContent=coverChoice?"이 표지는 네가 직접 고른 그림이야. 오늘의 답과 성격을 분류하지는 않아.":theme.caption;
- const [first,last]=storyHeadline();
- $("result-title").replaceChildren(document.createTextNode(first),document.createElement("br"));
- const em=document.createElement("em");em.textContent=last;$("result-title").append(em);
- $("letter-subtitle").textContent="오늘 네가 골랐던 답으로 이 편지를 완성했어.";
+ $("result-title").textContent=window.MoaLetterReflection.compose(records).title;
  $("cover-choose").setAttribute("aria-expanded",String(!$("cover-options").hidden));
  const choices=$("cover-options");choices.replaceChildren();
  for(const [key,item] of Object.entries(themes)){
@@ -313,16 +250,6 @@ function renderCover(){
    renderCover();
    $("share-status").textContent="";
   });
- }
-}
-function renderOwnVoice(){
- const root=$("own-voice-list");root.replaceChildren();
- const notes=stages.filter(id=>records[id].note.trim());
- $("own-voice-section").hidden=!notes.length;
- for(const id of notes){
-  const box=append("div","own-voice-note",undefined,root);
-  append("div","own-voice-label",storyLabels[id]+"에서 남긴 말",box);
-  append("blockquote","own-voice-quote",records[id].note.trim(),box);
  }
 }
 const reflectionFeedback={response:"",note:""};
@@ -344,7 +271,7 @@ function clearReflectionFeedback(){
 }
 function renderReflection(){
  const view=window.MoaLetterReflection.compose(records);
- $("reflection-title").textContent=view.title;
+ $("result-title").textContent=view.title;
  const area=$("reflection-parts");area.replaceChildren();
  for(const part of view.parts){
   const row=append("div","reflection-part",undefined,area);
@@ -352,6 +279,9 @@ function renderReflection(){
  }
  $("reflection-warm").textContent=view.warm;
  $("reflection-step").textContent=view.step;
+ $("reflection-request").textContent=view.request;
+ $("reflection-check").textContent=view.check;
+ $("reflection-optional").textContent=view.optional;
  updateReflectionFeedback();
 }
 function recap(){
@@ -367,57 +297,26 @@ function recap(){
   if(a.detail)append("p","memory-detail","조금 더 이야기한 말 · "+a.detail,body);
   if(a.note)append("p","memory-note","내가 직접 적은 말 · "+a.note,body);
  });
- $("letter-message").textContent=letterIntro();
- $("letter-next").textContent=letterNext();
  $("letter-date").textContent=dateText();
  renderCover();
- const h=highlight();$("highlight-quote").textContent="“"+h.quote+"”";$("highlight-source").textContent=h.source;
- const clues=$("clue-list");clues.replaceChildren();
- const chosenClues=clueItems();
- $("clue-title").textContent="오늘의 "+(chosenClues.length===1?"한 가지":chosenClues.length===2?"두 가지":"세 가지")+" 이야기 조각";
- clues.dataset.count=String(chosenClues.length);
- chosenClues.forEach((item,i)=>{
-  const card=append("div","clue-item",undefined,clues);
-  append("span","clue-index",String(i+1).padStart(2,"0"),card);
-  const body=append("div","clue-copy",undefined,card);
-  append("span","clue-label",item.label,body);append("strong","clue-value",item.value,body);
- });
- renderOwnVoice();
 }
 function fullReport(){
  const view=window.MoaLetterReflection.compose(records);
- const [h1,h2]=storyHeadline(),theme=coverTheme(),h=highlight();
- const lines=["모아가 너에게 보낸 첫 번째 편지",h1+" "+h2,dateText(),
-  "오늘의 표지: "+theme.name+" ("+theme.symbol+")",
-  "※ 표지는 오늘 고른 장면의 장식이고 성격유형은 아니야.","",
-  "안녕, 너에게.",letterIntro(),"",
-  "모아가 기억한 오늘의 한 문장",h.quote,h.source,"",
-  "오늘의 이야기 조각"]; 
- for(const item of clueItems())lines.push("• "+item.label+": "+item.value);
- lines.push("");
- const notes=stages.filter(id=>records[id].note.trim());
- if(notes.length){lines.push("네가 직접 남긴 말");for(const id of notes)lines.push("• "+storyLabels[id]+": "+records[id].note.trim());lines.push("");}
- const discoveryLines=window.MoaSelfDiscovery?.lines()||[];
- if(discoveryLines.length)lines.push(...discoveryLines,"");
- lines.push("■ 오늘의 답에서 발견한 이야기",view.title);
- for(const part of view.parts)lines.push(part.label+": "+part.text);
- lines.push("모아의 한마디: "+view.warm,"작은 다음 한 걸음: "+view.step,"숙제는 아니야. 마음이 달라지면 바꿔도 돼.");
- if(feedbackText())lines.push("내가 읽고 덧붙인 말: "+feedbackText());
- lines.push("");
+ const lines=["모아와 함께 찾은 작은 실마리",view.title,dateText(),"오늘의 표지: "+coverTheme().name,"", "가능성과 제안이며 성격검사·진단 결과가 아니야."];
+ for(const part of view.parts)lines.push("",part.label,part.text);
+ lines.push("","한 번은 이렇게 해봐도 좋아",view.step,view.optional,"","말이 막히면, 이 문장부터",view.request,"","이 방법이 나에게 맞는지 알아보려면",view.check,"",view.warm);
+ if(feedbackText())lines.push("","내가 읽고 덧붙인 말: "+feedbackText());
+ const discoveryLines=window.MoaSelfDiscovery.lines();
+ if(discoveryLines.length)lines.push("",...discoveryLines);
+ lines.push("","내가 남긴 답 전체 — 원래 응답");
  for(const id of stages){
-  const a=records[id];
-  lines.push("■ "+storyLabels[id]);
-  lines.push("  "+chosen(id));
-  if(a.detail)lines.push("  조금 더 이야기한 말: "+a.detail);
-  if(a.note)lines.push("  내가 직접 적은 말: "+a.note);
-  lines.push("");
+  const a=records[id];lines.push("",storyLabels[id],chosen(id));
+  if(a.detail)lines.push("추가 답변: "+a.detail);
+  if(a.note)lines.push("내가 직접 적은 말: "+a.note);
  }
- lines.push("다음 이야기는 네 속도로");
- lines.push(letterNext());
- lines.push("","너의 첫 이야기를 함께한, 모아가.");
- lines.push("※ 오늘 직접 고른 말을 정리한 기록이며 검사·진단 결과가 아니야.");
  return lines.join("\n");
 }
+
 function guide(){
  const root=$("guide-items");root.replaceChildren();
  const points=[
@@ -436,10 +335,10 @@ function guide(){
  if(!root.childElementCount)append("p","guide-point","오늘은 학생에게 편안함과 비밀보장 안내를 우선하고, 다음에 이야기할 의사를 확인합니다.",root);
 }
 function finish(){
+ const scene=records.moment.choice&&!["unknown","pass","none"].includes(records.moment.choice)?chosen("moment"):"";
+ window.MoaSelfDiscovery.show({topic:records.topic.choice,scene});
  complete=true;
  $("intro").hidden=true;$("conversation").hidden=true;$("result").hidden=false;
- const scene=records.moment.choice&& !["unknown","pass","none"].includes(records.moment.choice)?chosen("moment"):"";
- window.MoaSelfDiscovery.show({topic:records.topic.choice,scene});
  recap();renderReflection();guide();
  $("cover-options").hidden=true;
  $("copy").disabled=false;$("print").disabled=false;
@@ -469,9 +368,7 @@ document.querySelectorAll("[data-response]").forEach(button=>button.addEventList
 $("reflection-note").addEventListener("input",()=>{
  reflectionFeedback.note=$("reflection-note").value.slice(0,240).trim();updateReflectionFeedback();
 });
-window.MoaSelfDiscovery.init(()=>{
- if(complete&&!$("result").hidden)$("letter-message").textContent=letterIntro();
-});
+window.MoaSelfDiscovery.init(()=>{});
 $("start").addEventListener("click",begin);
 $("early-end").addEventListener("click",()=>{started=true;finish();});
 $("end-now").addEventListener("click",finish);
@@ -510,16 +407,21 @@ $("print").addEventListener("click",()=>{
 });
 // Print the complete original answers even when the student kept the transcript collapsed.
 let transcriptWasOpen=null;
+let extraPrintState=[];
 window.addEventListener("beforeprint",()=>{
  if($("result").hidden||$("print").disabled||transcriptWasOpen!==null)return;
  const details=document.querySelector(".memory-disclosure");
  if(!details)return;
+ extraPrintState=[...document.querySelectorAll(".insight-check,.discovery-disclosure")].map(el=>[el,el.open]);
+ for(const [el] of extraPrintState)el.open=true;
  transcriptWasOpen=details.open;
  details.open=true;
 });
 window.addEventListener("afterprint",()=>{
  const details=document.querySelector(".memory-disclosure");
  if(details&&transcriptWasOpen!==null){details.open=transcriptWasOpen;transcriptWasOpen=null;}
+ for(const [el,open] of extraPrintState)el.open=open;
+ extraPrintState=[];
 });
 $("privacy-open").addEventListener("click",()=>{if(typeof $("privacy-dialog").showModal==="function")$("privacy-dialog").showModal();else $("about").open=true;});
 window.addEventListener("pageshow",ev=>{if(ev.persisted)location.reload();});

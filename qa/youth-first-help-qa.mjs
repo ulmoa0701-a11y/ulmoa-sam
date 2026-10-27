@@ -82,6 +82,8 @@ for(const width of [320,390,820,1440]){
  await page.locator('#next').click();
  await check(await page.locator('#result').isVisible(),width+'px finished personal letter visible');
  await check(await page.locator('#letter-page').isVisible(),width+'px whole result rendered as keepsake letter');
+ await check(await page.locator('#self-discovery').isHidden(),width+'px optional discovery does not block result');
+ await page.locator('.discovery-disclosure>summary').click();
  await check(await page.locator('#self-discovery').isVisible(),width+'px student self-discovery offered beyond static summary');
  await check(await page.locator('#discovery-feelings button').count()===4,width+'px moment-specific inner experience choices');
  await check(await page.locator('#discovery-needs button').count()===5,width+'px needed support choices');
@@ -100,15 +102,14 @@ for(const width of [320,390,820,1440]){
  await check((await page.locator('#discovery-correction-visible').textContent()).includes('설명을 다시 듣고 싶었어'),width+'px student corrected wording visible');
  await check(await page.locator('#discovery-correction-visible b').count()===0,width+'px correction cannot inject markup');
  await screenshot(page,width,'self-discovery');
+ await page.locator('.discovery-disclosure>summary').click();
  await check(await page.locator('.memory-disclosure summary').isVisible(),width+'px complete transcript can be expanded');
  await check(await page.locator('#recap-items').isHidden(),width+'px repeated records are collapsed on first view');
- await check((await page.locator('#result-title').textContent()).includes('학교에서의 하루'),width+'px selected topic personalizes letter title');
+ await check((await page.locator('#result-title').textContent()).includes('시작이 막힐 때'),width+'px selected topic personalizes letter title');
  await check((await page.locator('#cover-name').textContent())==='별빛 탐험길',width+'px game choice yields story name');
  await check(await page.locator('#letter-page').getAttribute('data-story-theme')==='game',width+'px game choice yields blue cover');
  await check((await page.locator('#cover-reason').textContent()).includes('게임이나 영상'),width+'px personalized symbol grounded in selected interest');
- await check((await page.locator('#highlight-quote').textContent()).includes('요즘 시작이 쉽지 않아'),width+'px student own quote prominently emphasized');
- await check((await page.locator('#own-voice-list').textContent()).includes('요즘 시작이 쉽지 않아'),width+'px student own words separately highlighted');
- await check(await page.locator('.clue-item').count()===3,width+'px only actual three answer clues displayed');
+ await check(await page.locator('.highlight-section,.clue-section,.paper-message,.own-voice-section').count()===0,width+'px repeated answer summaries removed');
  await check(await page.locator('.memory-card').count()===5,width+'px all five conversations gathered into one result');
  await check((await page.locator('#recap-items').textContent()).includes('요즘 시작이 쉽지 않아'),width+'px student written note included without separate checkbox');
  await check((await page.locator('#recap-items').textContent()).includes('설명이 잘 이해되지 않아'),width+'px contextual optional answer preserved');
@@ -117,12 +118,10 @@ for(const width of [320,390,820,1440]){
  await check(await page.locator('#share-text').count()===0,width+'px no big empty summary textarea');
  await check(await page.locator('#copy').isEnabled(),width+'px one action to copy complete finished report');
  await check(await page.locator('#print').isEnabled(),width+'px one action to print whole finished letter');
- await check((await page.locator('.paper-message').textContent()).includes('오늘 네가 골랐던 장면은'),width+'px letter emphasizes selected experience rather than listing traits');
- await check((await page.locator('#letter-next').textContent()).includes('함께 해보기'),width+'px personal next visit aspiration included');
- await check((await page.locator('#reflection-title').innerText()).includes('내 생각을 내 방식'),width+'px reflection follows chosen communication style');
- await check((await page.locator('#reflection-warm').innerText()).includes('네 표현이야'),width+'px warm message matches writing preference');
- await check((await page.locator('#reflection-parts').innerText()).includes('설명을 다시'),width+'px selected scene gets specific support suggestion');
- await check((await page.locator('#reflection-step').innerText()).includes('게임이나 활동'),width+'px next step respects explicit wish');
+ await check((await page.locator('#result-title').innerText()).includes('먼저 필요한 것'),width+'px reflection follows chosen communication style');
+ await check((await page.locator('#reflection-warm').innerText()).includes('막힌 곳을 찾는 것도'),width+'px warm message matches writing preference');
+ await check((await page.locator('#reflection-parts').innerText()).includes('보이는 예시'),width+'px selected scene gets specific support suggestion');
+ await check((await page.locator('#reflection-step').innerText()).includes('완성된 예시'),width+'px next step respects explicit wish');
  await page.locator('.reflection-edit summary').click();
  await page.locator('[data-response="조금 달라요"]').click();
  await page.locator('#reflection-note').fill('글도 좋지만 익숙해지면 말하고 싶어 <b>내 말</b>');
@@ -147,9 +146,9 @@ for(const width of [320,390,820,1440]){
  await check((await page.locator('#share-status').textContent()).length>0,width+'px full copy action provides status');
  const copied=await page.evaluate(async()=>await navigator.clipboard.readText());
  await check(copied.includes('요즘 시작이 쉽지 않아')&&copied.includes('게임·영상')&&copied.includes('설명이 잘 이해되지 않아')&&copied.includes('고르거나 글로 이야기하기'),width+'px clipboard includes all original choices detail and own words');
- await check(copied.includes('조금 달라요')&&copied.includes('익숙해지면 말하고 싶어')&&copied.includes('네 표현이야'),width+'px complete export includes reflection and reader correction');
+ await check(copied.includes('조금 달라요')&&copied.includes('익숙해지면 말하고 싶어')&&copied.includes('막힌 곳을 찾는 것도'),width+'px complete export includes reflection and reader correction');
+ await check(copied.includes('별빛 탐험길')&&copied.includes('시작이 막힐 때')&&copied.includes('말이 막히면'),width+'px copy includes personalized title, motif and grounded clues');
  await check(copied.includes('한 장면 깊이 들여다보기')&&copied.includes('설명을 다시 듣고 싶었어')&&copied.includes('조금 다르게 느낀 말'),width+'px entire report preserves verified or corrected student words');
- await check(copied.includes('별빛 탐험길')&&copied.includes('학교에서의 하루를')&&copied.includes('오늘의 이야기 조각'),width+'px copy includes personalized title, motif and grounded clues');
  await check(!copied.includes('상담자의 판단')&&!copied.includes('우울증 진단'),width+'px full result adds no clinical diagnosis');
  await page.emulateMedia({media:'print'});
  await page.evaluate(()=>window.dispatchEvent(new Event('beforeprint')));
@@ -160,7 +159,6 @@ for(const width of [320,390,820,1440]){
  await check(await page.locator('#guide-items').isHidden(),width+'px private counselor guide not on student print');
  await check(await page.locator('.reflection-edit').isHidden(),width+'px print hides input controls');
  await check(await page.locator('#cover-choose').isHidden(),width+'px print hides cover editor');
- await check(await page.locator('#highlight-quote').isVisible(),width+'px print shows original student quote');
  await check(await page.locator('#reflection-response').isVisible(),width+'px print includes reader correction');
  await check(await page.locator('#discovery-correction-visible').isVisible(),width+'px printed letter contains corrected discovery');
  await check(await page.locator('.discovery-questions').isHidden(),width+'px print hides unchosen questionnaire options');
@@ -191,14 +189,12 @@ for(const width of [320,390,820,1440]){
  await check(await page.locator('#result').isHidden(),width+'px reload clears shared content');
  await page.locator('#early-end').click();
  await check(await page.locator('#result').isVisible(),width+'px immediate voluntary early ending works');
- await check((await page.locator('#reflection-title').innerText()).includes('아직 알아가는'),width+'px no-answer result does not invent a type');
- await check((await page.locator('#reflection-step').innerText()).includes('정하지 않아도'),width+'px no-answer result does not impose a task');
+ await check((await page.locator('#result-title').innerText()).includes('아직 말하지 않은'),width+'px no-answer result does not invent a type');
+ await check((await page.locator('#reflection-optional').innerText()).includes('정하지 않아도'),width+'px no-answer result does not impose a task');
  await check(await page.locator('#copy').isEnabled(),width+'px early ending allows saving an honest empty conversation letter');
  await check((await page.locator('#recap-items').textContent()).includes('이번에는 이야기하지 않았어'),width+'px early ending is reflected without making up responses');
  await check(await page.locator('#self-discovery').getAttribute('data-active')==='false',width+'px early ending does not invent insights');
  await check((await page.locator('#cover-name').textContent())==='첫 장의 새싹',width+'px no-answer keeps neutral story cover');
- await check(await page.locator('.clue-item').count()===1,width+'px no invented three clues');
- await check((await page.locator('#clue-title').textContent()).includes('한 가지'),width+'px accurate clue count');
  await page.reload({waitUntil:'domcontentloaded'});
  await page.locator('#start').click();
  await page.locator('#unknown').click();
@@ -211,6 +207,36 @@ for(const width of [320,390,820,1440]){
  await page.locator('#next').click();
  await check(await page.locator('#result').isVisible(),width+'px uncertain answers are valid, non-diagnostic');
  await check((await page.locator('#recap-items').textContent()).includes('잘 모르겠어'),width+'px uncertainty distinct from skipping');
+ // Reproduce the user's replanning example, including the optional detail.
+ await page.reload({waitUntil:'domcontentloaded'});
+ await page.locator('#start').click();
+ for(const [choice,detail] of [['rest','아무것도 하지 않아도 돼서'],['day',null],['change','계획을 다시 세우기 어려워'],['talk','내 말을 끝까지 들어주기'],['unsure',null]]){
+  await page.locator('[data-choice="'+choice+'"]').click();
+  if(detail)await page.getByRole('button',{name:detail,exact:true}).click();
+  await page.locator('#next').click();
+ }
+ await check((await page.locator('#result-title').innerText()).includes('다음 한 칸'),width+'px replanning has meaningful situation title');
+ await check((await page.locator('#reflection-step').innerText()).includes('그대로인 것 / 달라진 것'),width+'px replanning offers concrete experiment');
+ await check((await page.locator('#reflection-request').innerText()).includes('끝까지 듣고'),width+'px ready-to-use request respects conversation conditions');
+ await check(!(await page.locator('#reflection-parts').innerText()).includes('골랐어'),width+'px reflection does not recite selections');
+ await check(await page.locator('#recap-items').isHidden(),width+'px source answers remain optional');
+ await fit(page,width,'replanning insight');
+ await page.evaluate(()=>document.fonts.ready);
+ await check(await page.evaluate(()=>[...document.images].every(i=>i.complete&&i.naturalWidth>0)),width+'px Moa and page images load');
+ await check(await page.evaluate(()=>document.fonts.status==='loaded'),width+'px fonts finish loading');
+ await screenshot(page,width,'replanning-insight');
+ // Every optional scene answer must meaningfully change both the insight and action.
+ const variants=await page.evaluate(()=>{
+  const groups=[['school','lesson',['설명이 잘 이해되지 않아','해야 할 일이 너무 많게 느껴져','틀리거나 실수할까 걱정돼']],['day','change',['그다음에 뭘 해야 할지 모르겠어','계획을 다시 세우기 어려워','마음이 편해지는 데 시간이 걸려']]];
+  return groups.every(([topic,moment,details])=>{
+   const results=details.map(detail=>window.MoaLetterReflection.compose({topic:{choice:topic},moment:{choice:moment,detail}}));
+   return new Set(results.map(v=>v.step)).size===3&&new Set(results.map(v=>v.parts[0].text)).size===3;
+  });
+ });
+ await check(variants,width+'px different difficulties produce different guidance');
+ const sparse=await page.evaluate(()=>({pace:window.MoaLetterReflection.compose({pace:{choice:'wait'}}),wish:window.MoaLetterReflection.compose({wish:{choice:'together'}})}));
+ await check(sparse.pace.title.includes('생각할 시간')&&!sparse.pace.parts[0].text.includes('좋아하는 활동'),width+'px pace-only answer receives relevant guidance');
+ await check(sparse.wish.title.includes('아직 말하지 않은'),width+'px wish-only answer does not invent personal insight');
  await check(outbound.length===0,width+'px no third party data or font requests '+outbound.join('|'));
  await check(pageErrors.length===0,width+'px no JavaScript runtime exceptions '+pageErrors.join('|'));
  await fit(page,width,'result');
@@ -246,6 +272,11 @@ for(const width of [320,390,820,1440]){
    await check(await tab.locator('.detail-chip[aria-pressed="true"]').count()===1,width+'px '+topic+'/'+moment+' only one detail selected');
    await tab.locator('#next').click();
    await check((await tab.locator('#question-title').textContent()).includes('처음 보는 사람'),width+'px '+topic+'/'+moment+' continues normally');
+   await tab.locator('#pass').click();
+   await tab.locator('#pass').click();
+   await check((await tab.locator('#reflection-step').innerText()).length>15,width+'px '+topic+'/'+moment+' useful result action rendered');
+   await check((await tab.locator('#reflection-request').innerText()).length>10,width+'px '+topic+'/'+moment+' usable request rendered');
+   await fit(tab,width,topic+'/'+moment+' result');
   }
   await tab.close();
  }

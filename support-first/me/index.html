@@ -9,10 +9,10 @@
 <title>모아와 첫 이야기 | 일단 해봄</title>
 <meta name="description" content="정답 없는 첫 대화. 말하지 않아도, 모른다고 해도 괜찮은 청소년 상담 준비 이야기">
 <link rel="icon" href="../../assets/habom-favicon-v3-32.png">
-<link rel="stylesheet" href="./myself.css?v=20261027-reflection2">
-<script defer src="./letter-reflection.js?v=20261027-reflection2"></script>
-<script defer src="./self-discovery.js?v=20261027-discovery1"></script>
-<script defer src="./myself.js?v=20261027-reflection2"></script>
+<link rel="stylesheet" href="./myself.css?v=20261027-insight1">
+<script defer src="./letter-reflection.js?v=20261027-insight1"></script>
+<script defer src="./self-discovery.js?v=20261027-insight1"></script>
+<script defer src="./myself.js?v=20261027-insight1"></script>
 </head>
 <body>
 <div class="site">
@@ -68,18 +68,24 @@
  <section class="result" id="result" hidden aria-labelledby="result-title">
   <div class="letter-frame">
    <div class="letter-notice"><span class="letter-notice-icon" aria-hidden="true">✳</span><div><b>모아가 너에게 보낸 편지</b><p>같은 질문을 받았더라도, 네가 고른 장면과 말은 달라.</p></div><span class="letter-notice-no">01 / YOUR STORY</span></div>
-   <article class="letter-paper" id="letter-page" aria-label="나만의 첫 이야기 편지">
-    <div class="paper-top"><span>FROM MOA · TO YOU</span><span id="letter-date"></span></div>
-    <section class="identity-cover" id="identity-cover" aria-label="오늘의 이야기 상징">
-     <div class="identity-cover-copy"><span class="identity-eyebrow">TODAY'S STORY · 오늘의 상징</span><h2 id="cover-name"></h2><p id="cover-reason"></p><span class="identity-not-type">성격유형이 아닌 오늘 고른 이야기의 그림이야</span></div>
-     <div class="identity-art" aria-hidden="true"><span class="identity-halo"></span><span id="cover-symbol" class="cover-symbol"></span><span class="identity-spark spark-a">✧</span><span class="identity-spark spark-b">✦</span></div>
-    </section>
-    <div class="cover-customization"><button type="button" id="cover-choose" aria-expanded="false" aria-controls="cover-options">표지 그림 바꾸기 <span aria-hidden="true">✎</span></button><div id="cover-options" hidden role="group" aria-label="오늘 편지의 표지 그림"></div></div>
+   <article class="letter-paper insight-letter" id="letter-page" aria-label="나에게 맞는 방법을 찾는 편지">
+    <div class="paper-top"><span>모아와 함께 찾은 작은 실마리</span><span id="letter-date"></span></div>
+    <div class="insight-cover-row"><span id="cover-symbol" aria-hidden="true"></span><span id="cover-name"></span><button type="button" id="cover-choose" aria-expanded="false" aria-controls="cover-options">표지 바꾸기</button><span id="cover-reason" hidden></span></div>
+    <div id="cover-options" hidden role="group" aria-label="오늘 편지의 표지 그림"></div>
+    <div class="paper-heading"><div class="paper-heading-copy"><span class="letter-small">오늘의 장면을 조금 다르게 보면</span><h1 id="result-title" tabindex="-1"></h1><p id="letter-subtitle">맞는 부분은 가져가고, 다른 부분은 네 말로 바꿔줘.</p></div><div class="paper-character"><img src="../../assets/moa-hello-wave-20261012.webp" width="100" height="106" alt="이야기를 건네는 모아"></div></div>
+    <section class="letter-reflection" aria-label="생각해볼 실마리"><div id="reflection-parts"></div></section>
+    <section class="insight-action" aria-labelledby="forward-title"><span class="letter-small">필요한 순간에 꺼내 쓸 방법</span><h2 id="forward-title">한 번은 이렇게 해봐도 좋아</h2><p id="reflection-step"></p><p id="reflection-optional" class="reflection-limit"></p></section>
+    <section class="insight-words" aria-labelledby="words-title"><h2 id="words-title">말이 막히면, 이 문장부터</h2><blockquote id="reflection-request"></blockquote><p>그대로 쓰지 않아도 돼. 네 말투로 바꿔도 좋아.</p></section>
+    <details class="insight-check"><summary>이 방법이 나에게 맞는지 알아보려면</summary><p id="reflection-check"></p></details>
+    <div class="insight-reader"><details class="reflection-edit"><summary>내 경우와 다른 점이 있나요?</summary><div id="reflection-options" role="group" aria-label="편지에 대한 내 생각"><button type="button" data-response="잘 맞아요" aria-pressed="false">잘 맞아요</button><button type="button" data-response="조금 달라요" aria-pressed="false">조금 달라요</button><button type="button" data-response="아직 모르겠어요" aria-pressed="false">아직 모르겠어요</button></div><label for="reflection-note">다른 점이나 새로 알게 된 점 (선택)</label><textarea id="reflection-note" rows="2" maxlength="240" placeholder="나는 이 부분보다… / 이렇게 하면 더 편할 것 같아…"></textarea><p>이 말도 복사·인쇄에 함께 담겨. 자동 전송되지는 않아.</p></details><p id="reflection-response" class="reflection-response" aria-live="polite" hidden></p></div>
+    <p id="reflection-warm" class="insight-closing"></p><div class="letter-signature"><div><strong>모아가.</strong></div></div>
+    <p class="paper-disclaimer">선택한 답에서 생각해본 가능성과 제안이야. 성격검사나 진단 결과가 아니며, 직접 쓴 글의 뜻을 자동으로 분석하지 않아.</p>
+    <details class="discovery-disclosure"><summary>내 느낌과 바람을 직접 적어보기 (선택)</summary>
     <section class="self-discovery" id="self-discovery" aria-labelledby="discovery-title">
      <div class="discovery-heading">
       <span class="discovery-sigil" aria-hidden="true">◉</span>
-      <div><span class="letter-small">LOOK CLOSER · 내가 나를 알아보는 시간</span>
-       <h2 id="discovery-title">답을 모았으니, 이제 한 장면을 더 들여다볼까?</h2>
+      <div><span class="letter-small">조금 더 살펴보고 싶다면</span>
+       <h2 id="discovery-title">그때 내가 바랐던 도움은?</h2>
        <p>모아가 너를 분석하는 게 아니라, <strong>네가 직접 느낀 것과 바랐던 걸 찾아보는 질문</strong>이야. 전부 건너뛰어도 돼.</p>
       </div>
      </div>
@@ -111,32 +117,11 @@
      </div>
      <p class="discovery-ethics">모아의 문장은 정답이 아니야. 네가 확인한 것만 ‘내가 알아챈 점’으로 남겨. 답은 자동 저장·전송되지 않아.</p>
     </section>
-    <div class="paper-heading">
-     <div class="paper-heading-copy"><span class="letter-small">오늘 너의 답으로 완성한 편지</span><h1 id="result-title" tabindex="-1">나에 대해 알게 된<br><em>작은 이야기들.</em></h1><p id="letter-subtitle">네가 고른 장면에 어떤 마음이 있었는지, 직접 살펴볼 수 있어.</p></div>
-     <div class="paper-character"><span class="paper-orbit" aria-hidden="true"></span><img src="../../assets/moa-hello-wave-20261012.webp" width="130" height="138" alt="손을 흔드는 모아"></div>
-    </div>
-    <div class="paper-message"><span class="paper-salutation">안녕, 너에게.</span><p id="letter-message"></p></div>
-    <section class="highlight-section" aria-labelledby="highlight-title"><div class="highlight-heading"><span aria-hidden="true">✳</span><div><span class="letter-small">MOA REMEMBERED</span><h2 id="highlight-title">모아가 기억한 오늘의 한 문장</h2></div></div><blockquote id="highlight-quote"></blockquote><p id="highlight-source"></p></section>
-    <section class="clue-section" aria-labelledby="clue-title"><div class="clue-title-row"><h2 id="clue-title">오늘의 세 가지 이야기 조각</h2><span>네가 고른 답만 모았어</span></div><div id="clue-list" class="clue-list"></div></section>
-    <section id="own-voice-section" class="own-voice-section" hidden aria-labelledby="own-voice-title"><div class="own-voice-heading"><span aria-hidden="true">✎</span><h2 id="own-voice-title">네가 직접 남긴 말</h2></div><div id="own-voice-list"></div></section>
-    <section class="letter-reflection" aria-labelledby="reflection-title">
-     <span class="letter-small">오늘의 답에서 발견한 이야기</span><h2 id="reflection-title"></h2>
-     <div id="reflection-parts"></div><blockquote id="reflection-warm"></blockquote>
-     <p class="reflection-limit">네가 고른 답을 바탕으로 썼어. 너의 성격을 정한 말은 아니야.</p>
-     <details class="reflection-edit"><summary>읽어보니 내 이야기와 어때?</summary>
-      <div id="reflection-options" role="group" aria-label="편지에 대한 내 생각"><button type="button" data-response="잘 맞아요" aria-pressed="false">잘 맞아요</button><button type="button" data-response="조금 달라요" aria-pressed="false">조금 달라요</button><button type="button" data-response="아직 모르겠어요" aria-pressed="false">아직 모르겠어요</button></div>
-      <label for="reflection-note">다르게 느낀 점이나 덧붙이고 싶은 말 (선택)</label><textarea id="reflection-note" rows="2" maxlength="240" placeholder="나는 이렇게 느꼈어…"></textarea>
-      <p>적는 대로 이 편지에 담겨. 복사·인쇄할 때 함께 남고, 자동 전송되지는 않아.</p>
-     </details><p id="reflection-response" class="reflection-response" aria-live="polite" hidden></p>
-    </section>
-    <div class="paper-divider"><span aria-hidden="true">✳</span><span>THE THINGS YOU TOLD ME</span><span aria-hidden="true">✳</span></div>
-    <section class="letter-memories" aria-labelledby="memories-title"><h2 id="memories-title">우리가 나눈 이야기 전체</h2><p class="letter-memories-sub">오늘의 모든 답을 빠짐없이 남겼어. 궁금할 때 펼쳐봐.</p><details class="memory-disclosure"><summary>내가 고른 다섯 가지 답 자세히 보기</summary><div id="recap-items" class="memory-list"></div></details></section>
-    <section class="letter-forward" aria-labelledby="forward-title"><div class="forward-mark" aria-hidden="true">↗</div><div><span class="letter-small">THE NEXT PAGE</span><h2 id="forward-title">다음에 해볼 작은 일</h2><p id="reflection-step"></p><p class="reflection-limit">숙제는 아니야. 마음이 달라지면 바꿔도 돼.</p><details><summary>다음 만남에 전할 말</summary><p id="letter-next"></p></details></div></section>
-    <div class="letter-signature"><div><span>너의 첫 이야기를 함께한</span><strong>모아가.</strong></div><span class="signature-asterisk" aria-hidden="true">✳</span></div>
-    <p class="paper-disclaimer">색과 상징은 오늘의 선택에서 가져온 표지 장식이야. 성격유형이나 진단을 뜻하지 않아. 편지의 문장은 네가 실제로 고르거나 쓴 말을 중심으로 만들었어.</p>
+    </details>
+    <section class="letter-memories" aria-label="원래 답변 전체"><details class="memory-disclosure"><summary>내가 남긴 답 전체 보기</summary><div id="recap-items" class="memory-list"></div></details></section>
    </article>
    <div class="letter-toolbox">
-    <div class="letter-toolbox-copy"><span>KEEP THIS LETTER</span><h2>이 편지를 어떻게 간직할까?</h2><p>오늘 나온 <b>모든 답변과 직접 쓴 말</b>이 한 장에 담겼어. 상담자에게 보여주거나 따로 보관할 수 있어. <b>자동으로 전송되지는 않아.</b></p></div>
+    <div class="letter-toolbox-copy"><span>KEEP THIS LETTER</span><h2>이 편지를 어떻게 간직할까?</h2><p>제안과 <b>모든 답변·직접 쓴 말</b>을 함께 담았어. 상담자에게 보여주거나 따로 보관할 수 있어. <b>자동으로 전송되지는 않아.</b></p></div>
     <div class="letter-toolbox-actions"><button type="button" id="copy" class="primary">이야기 전체 복사</button><button type="button" id="print" class="light-button">편지 인쇄 · PDF 저장</button><button type="button" id="revise" class="text-button">다시 이야기하기</button></div>
     <p id="share-status" role="status"></p>
     <div id="copy-fallback" class="copy-fallback" hidden><label for="full-text-fallback">복사가 어려우면 아래 전체 내용을 직접 선택해 복사해줘.</label><textarea id="full-text-fallback" readonly rows="7"></textarea></div>
