@@ -614,3 +614,49 @@ button.feed-friend.friend-fed .forest-friend{transform:translateY(-3px)}
 @media(prefers-reduced-motion:reduce){
  .stage.gather-mode .gather-pick,.stage.gather-mode button.gather-slot,.stage.gather-mode .gather-confirm{transition:none}
 }
+
+
+/* Counting with objects: one unobtrusive numeral per piece of fruit.
+   Fruit identity/size remains dominant; animation fires only on a fresh tap. */
+.stage.gather-mode .gather-slot{position:relative;overflow:visible}
+.stage.gather-mode .gather-count-badge{
+ position:absolute;z-index:4;top:-8px;right:-7px;
+ display:grid;place-items:center;
+ width:30px;height:30px;min-width:30px;
+ border:2px solid #ead5a7;border-radius:50%;
+ background:#fffbea;color:#44624e;
+ font:900 18px/1 'Pretendard','SUIT',system-ui,sans-serif;
+ font-variant-numeric:tabular-nums;
+ box-shadow:0 3px 6px #4d4b2f38;
+ pointer-events:none;user-select:none;
+}
+.stage.gather-mode .gather-slot.extra .gather-count-badge{
+ background:#fbe4c8;color:#825334;border-color:#cd9970
+}
+.stage.gather-mode .gather-slot.just-added .gather-count-badge{
+ animation:gather-number-pop .48s cubic-bezier(.21,.82,.23,1.05) both;
+}
+.stage.gather-mode .gather-slot.just-added .food.mini{
+ animation:gather-fruit-arrive .32s ease-out both
+}
+@keyframes gather-number-pop{
+ 0%{transform:translateY(12px) scale(.3);opacity:0}
+ 55%{transform:translateY(-6px) scale(1.2);opacity:1}
+ 100%{transform:translateY(0) scale(1);opacity:1}
+}
+@keyframes gather-fruit-arrive{
+ 0%{transform:translateY(-13px) scale(.86);opacity:.45}
+ 100%{transform:translateY(0) scale(1);opacity:1}
+}
+@media(max-width:420px){
+ .stage.gather-mode .gather-count-badge{
+  width:26px;height:26px;min-width:26px;
+  right:-4px;top:-6px;font-size:16px;border-width:1.5px;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .stage.gather-mode .gather-slot.just-added .food.mini,
+ .stage.gather-mode .gather-slot.just-added .gather-count-badge{
+  animation:none
+ }
+}
