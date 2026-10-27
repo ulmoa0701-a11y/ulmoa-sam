@@ -26,7 +26,7 @@ function keyFor(href){
 const modal=document.createElement('dialog');modal.className='garden-preview-dialog';modal.id='gardenPreviewDialog';
 modal.innerHTML='<div class="preview-dialog-header"><span class="preview-overline">게임 미리보기</span><button type="button" class="preview-close" aria-label="미리보기 닫기">✕</button></div><div class="preview-dialog-content"><div class="preview-visual"><div class="preview-live-heading"><span aria-hidden="true">●</span> 지금 게임의 실제 시작 화면 <small>선택하면 여기에서 바로 체험할 수 있어요</small></div><iframe id="previewLive" class="preview-live-frame" title="게임 실제 시작 화면" loading="lazy" sandbox="allow-scripts allow-same-origin allow-forms" allow="camera; microphone"></iframe><div class="preview-live-fallback" hidden>미리보기를 불러오지 못했어요. 아래의 게임 시작 버튼으로 바로 이용할 수 있어요.</div></div><div class="preview-info"><p class="preview-type" id="previewType"></p><h2 id="previewTitle"></h2><p class="preview-action" id="previewAction"></p><h3>어떻게 놀아요?</h3><ol id="previewSteps"></ol><div class="preview-life"><small>활동에서 연습하는 것</small><p id="previewLife"></p></div><p class="preview-note">게임 속 친구의 색은 활동 분류나 난이도를 나타내지 않아요. 실제 게임에서 만나는 친구예요.</p><a id="previewPlay" class="preview-play" href="#">바로 게임 시작 →</a></div></div>';
 document.body.append(modal);
-$('.preview-close',modal).addEventListener('click',()=>modal.close());
+$('.preview-close',modal).addEventListener('click',()=>{ $('#previewLive').removeAttribute('src');modal.close() });
 modal.addEventListener('click',e=>{if(e.target===modal)modal.close()});
 let lastPreviewTrigger=null;
 modal.addEventListener('close',()=>{const frame=$('#previewLive');frame.removeAttribute('src');lastPreviewTrigger?.focus();});
