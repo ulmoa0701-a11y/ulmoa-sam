@@ -41,7 +41,7 @@ for(const width of [320,390,820,1440]){
  await check(await page.locator('#choice-grid button').count()===0,width+'px no form before voluntary start');
  await check(await page.locator('form[method="post"]').count()===0,width+'px no data submit form');
  await check(await page.locator('a[href="../make/"]').count()===1,width+'px original next activity route retained');
- await check(await page.locator('.about a').count()===4,width+'px four clinical evidence citations in app');
+ await check(await page.locator('.about a').count()===7,width+'px four clinical and three visual design source links');
  await fit(page,width,'intro');
  await screenshot(page,width,'opening');
  await page.locator('#privacy-open').click();
