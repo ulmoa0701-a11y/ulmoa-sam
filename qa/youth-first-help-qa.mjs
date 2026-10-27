@@ -82,6 +82,8 @@ for(const width of [320,390,820,1440]){
  await page.locator('#next').click();
  await check(await page.locator('#result').isVisible(),width+'px finished personal letter visible');
  await check(await page.locator('#letter-page').isVisible(),width+'px whole result rendered as keepsake letter');
+ await check(await page.locator('.memory-disclosure summary').isVisible(),width+'px complete transcript can be expanded');
+ await check(await page.locator('#recap-items').isHidden(),width+'px repeated records are collapsed on first view');
  await check((await page.locator('#result-title').textContent()).includes('학교에서의 하루'),width+'px selected topic personalizes letter title');
  await check((await page.locator('#cover-name').textContent())==='별빛 탐험길',width+'px game choice yields story name');
  await check(await page.locator('#letter-page').getAttribute('data-story-theme')==='game',width+'px game choice yields blue cover');
@@ -133,6 +135,7 @@ for(const width of [320,390,820,1440]){
  await page.emulateMedia({media:'print'});
  await check(await page.locator('#letter-page').isVisible(),width+'px personal keepsake printed');
  await check(await page.locator('.memory-card').count()===5,width+'px printed letter retains all five conversation themes');
+ await check(await page.locator('#recap-items').isVisible(),width+'px printing always reveals full collapsed answers');
  await check(await page.locator('#copy').isHidden(),width+'px copy control not shown on printed letter');
  await check(await page.locator('#guide-items').isHidden(),width+'px private counselor guide not on student print');
  await check(await page.locator('.reflection-edit').isHidden(),width+'px print hides input controls');
@@ -141,6 +144,9 @@ for(const width of [320,390,820,1440]){
  await check(await page.locator('#reflection-response').isVisible(),width+'px print includes reader correction');
  if(width===1440)await page.pdf({path:path.join(out,'personal-letter-print.pdf'),format:'A4',printBackground:true});
  await page.emulateMedia({media:'screen'});
+ await check(await page.locator('#recap-items').isHidden(),width+'px screen restores concise collapsed record');
+ await page.locator('.memory-disclosure summary').click();
+ await check(await page.locator('#recap-items').isVisible(),width+'px original five answers unfold on request');
  await page.locator('#revise').click();
  await check(await page.locator('#result').isHidden(),width+'px previous letter hidden immediately on revision');
  await check(await page.locator('#copy').isDisabled(),width+'px old copy permission revoked on revision');
