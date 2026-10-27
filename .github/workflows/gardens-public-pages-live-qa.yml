@@ -34,7 +34,7 @@ jobs:
       - name: Wait for published choice gallery
         run: |
           for i in $(seq 1 12); do
-            if curl -fsSL --max-time 20 'https://ulmoa0701-a11y.github.io/ulmoa-sam/gardens/' | grep -q 'choice-gallery-v2.css'; then
+            if curl -fsSL --max-time 20 'https://ulmoa0701-a11y.github.io/ulmoa-sam/gardens/' -o /tmp/gardens-public.html && grep -q 'choice-gallery-v2.css' /tmp/gardens-public.html; then
               echo 'Public gallery contains the new compact choice stylesheet'
               exit 0
             fi
