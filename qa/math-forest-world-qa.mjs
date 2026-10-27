@@ -62,6 +62,42 @@ try{
   page.on('pageerror',err=>errors.push(err.message));
   const response=await page.goto(base+'/math-garden/forest-world.html',{waitUntil:'domcontentloaded'});
   assert.equal(response.status(),200);
+  // Regression: the old UI left 2 acorns + 1 strawberry in an unconfirmed
+  // localStorage draft. They must not appear selected when opening the new UI.
+  await page.evaluate(()=>localStorage.setItem('moa-forest-world-v1',JSON.stringify({
+    acorns:8,berries:5,feedCount:4,unlocked:2,buildings:[{type:'flower'}],
+    reviewLog:{share:{criteriaMet:true}},tab:'gather',
+    gatherOrder:{round:0,acorns:2,berries:1,fedAcorns:0,fedBerries:0,phase:'collect'}
+  })));
+  await page.reload({waitUntil:'domcontentloaded'});
+  let migrated=await status(page);
+  assert.equal(migrated.gatherOrder.acorns,0,'old draft acorns must start unselected in the redesigned scene');
+  assert.equal(migrated.gatherOrder.berries,0,'old draft strawberries must start unselected in the redesigned scene');
+  assert.match(await page.locator('#gatherTargets').textContent(),/도토리 0 \/ 2/);
+  assert.match(await page.locator('#gatherTargets').textContent(),/딸기 0 \/ 1/);
+  assert.equal(migrated.acorns,8,'do not erase real previously earned acorns');
+  assert.equal(migrated.berries,5,'do not erase real previously earned strawberries');
+  assert.equal(migrated.unlocked,2,'do not erase unlocked forest chapters');
+  assert.equal(migrated.feedCount,4,'do not erase past pet care');
+  assert.equal((await page.evaluate(()=>JSON.parse(localStorage.getItem('moa-forest-world-v1')))).gatherSceneVersion,4);
+  // Migration happens once: new-version picks should still survive a reload.
+  await page.locator('[data-spot="berries"]').click();
+  await page.reload({waitUntil:'domcontentloaded'});
+  migrated=await status(page);
+  assert.equal(migrated.gatherOrder.berries,1,'drafts made in the current version must persist normally');
+  assert.equal(migrated.gatherOrder.acorns,0);
+  // A fully checked old order must retain its credited supplies.
+  await page.evaluate(()=>localStorage.setItem('moa-forest-world-v1',JSON.stringify({
+    acorns:6,berries:3,unlocked:3,tab:'gather',
+    gatherOrder:{round:0,acorns:2,berries:1,fedAcorns:0,fedBerries:0,phase:'ready'}
+  })));
+  await page.reload({waitUntil:'domcontentloaded'});
+  migrated=await status(page);
+  assert.equal(migrated.gatherOrder.phase,'ready','old completed baskets must not be erased');
+  assert.equal(migrated.acorns,6,'old completed order must not be credited twice');
+  assert.equal(migrated.berries,3);
+  await page.evaluate(()=>localStorage.removeItem('moa-forest-world-v1'));
+  await page.reload({waitUntil:'domcontentloaded'});
   assert.equal(await page.locator('#tabbar .tab-btn').count(),4);
   assert.equal(await page.locator('.panel:not([hidden])').count(),1);
   // Child-facing scene: one short request, two pickable objects, one basket,

@@ -15,6 +15,7 @@ const GATHER_ORDERS=[
  {acorns:2,berries:2},{acorns:4,berries:1}
 ];
 const storeKey='moa-forest-world-v1';
+const GATHER_SCENE_VERSION=4; // First single-scene release that handles saved baskets explicitly.
 const A='./assets/mission-v4/',V='./assets/village-v1/';
 
 /* ---------- shared icon set (deduped from mission.js + village.js) ---------- */
@@ -105,6 +106,15 @@ for(const k of ['acorns','berries','fedAcorns','fedBerries']){
  if(!Number.isInteger(gather[k])||gather[k]<0)gather[k]=0;
 }
 if(!['collect','ready','feed','done'].includes(gather.phase))gather.phase='collect';
+/* Older gathering screens saved the unconfirmed basket to the same storage key.
+   After a redesign, those old taps looked like fruit was already selected by itself.
+   On the first visit to V4, clear ONLY the old unconfirmed draft. Preserve earned
+   currency, progress, built items, and already-confirmed/partly delivered orders.
+   Once migrated, normal V4 draft progress survives tab switches and reloads. */
+if(state.gatherSceneVersion!==GATHER_SCENE_VERSION){
+ if(gather.phase==='collect'){gather.acorns=0;gather.berries=0;}
+ state.gatherSceneVersion=GATHER_SCENE_VERSION;
+}
 let gatherMessage='';
 const gatherGoal=()=>GATHER_ORDERS[gather.round%GATHER_ORDERS.length];
 if(!state.reviewLog||typeof state.reviewLog!=='object')state.reviewLog={};
@@ -113,7 +123,7 @@ if(!Array.isArray(state.planksPlaced))state.planksPlaced=[];
 if(!Array.isArray(state.results))state.results=[];
 if(!Number.isInteger(state.concept)||state.concept<0||state.concept>=CONCEPTS.length)state.concept=0;
 function save(){try{
- const persist={acorns:state.acorns,berries:state.berries,feedCount:state.feedCount,hunger:state.hunger,buildings:state.buildings,sound:state.sound,lastFed:state.lastFed,tab:state.tab,unlocked:state.unlocked,reviewLog:state.reviewLog,gatherOrder:state.gatherOrder};
+ const persist={acorns:state.acorns,berries:state.berries,feedCount:state.feedCount,hunger:state.hunger,buildings:state.buildings,sound:state.sound,lastFed:state.lastFed,tab:state.tab,unlocked:state.unlocked,reviewLog:state.reviewLog,gatherOrder:state.gatherOrder,gatherSceneVersion:state.gatherSceneVersion};
  QUEST_PERSIST_FIELDS.forEach(k=>{persist[k]=state[k]});
  localStorage.setItem(storeKey,JSON.stringify(persist));
 }catch(e){}}
