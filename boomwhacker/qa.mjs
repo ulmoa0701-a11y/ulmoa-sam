@@ -1069,6 +1069,28 @@ async function heartV4Smoke(){
    check(data.left.x+10<data.right.x &&
       data.left.lift<.01&&data.right.lift<.01,
     "V4 "+cfg.name+": left and right contact points incorrect");
+   const midCross=await page.evaluate(()=>{
+     const q=window.__HEART_V4_QA__,g=q.geometry(0,q.pageAt(0)),p=q.stepPose(.55,g);
+     return {x:p.x,left:p.left,right:p.right};
+   });
+   check(midCross.x>midCross.left+(midCross.right-midCross.left)*.2 &&
+     midCross.x<midCross.right-(midCross.right-midCross.left)*.2,
+     "V4 "+cfg.name+": Moa crosses too abruptly instead of travelling gently");
+   const easedPulse=await page.evaluate(()=>{
+     const q=window.__HEART_V4_QA__;
+     return [q.beatCue(.25,.25),q.beatCue(.09,.25),q.beatCue(.17,.25)];
+   });
+   check(Math.abs(easedPulse[0]-1)<1e-6&&easedPulse[1]<.00001&&
+     easedPulse[2]>0&&easedPulse[2]<1,
+     "V4 "+cfg.name+": footstep pulse should fade smoothly");
+   const markerFade=await page.evaluate(()=>{
+     const q=window.__HEART_V4_QA__;
+     return ["footsteps","heart"].map(kind=>({
+       kind,before:q.guideOpacity(.249,.25,kind),after:q.guideOpacity(.251,.25,kind)
+     }));
+   });
+   check(markerFade.every(m=>Math.abs(m.before-m.after)<.04),
+     "V4 "+cfg.name+": contact-marker brightness must not jump "+JSON.stringify(markerFade));
    check(data.stepRange.filter(x=>x>1).length>=2 &&
      data.stepRange.every(x=>x<data.heartWidth*.031) &&
      Math.abs(data.holdFirst.x-data.left.x)<.1 &&
@@ -1079,6 +1101,39 @@ async function heartV4Smoke(){
    check(["forest","night","classroom","heart-frame","moa"].every(n=>data.assets[n]),
     "V4 "+cfg.name+": original visual assets missing");
   }
+  // Meter-specific proof: same two crest contacts across 2/4, 3/4 and 4/4.
+  // Selecting songs changes only the authored score, never the visual beat landmarks.
+  const meterProof=await page.evaluate(()=>{
+    const picker=document.querySelector("#song"),q=window.__HEART_V4_QA__;
+    return [2,3,4].map(meter=>{
+      const idx=window.__PERFORMANCE_SCORES__.findIndex(s=>s.meter===meter);
+      if(idx<0)return {meter,found:false};
+      picker.value=String(idx);picker.dispatchEvent(new Event("change",{bubbles:true}));
+      const source=window.__PERFORMANCE_SCORES__[idx];
+      const page=q.pageAt(.5),first=q.geometry(0,page),last=q.geometry(meter-1,page);
+      const left=q.stepPose(.25,first),right=q.stepPose(.75,first);
+      return {meter,found:true,reported:q.getState().meter,
+        beats:source.beats,bars:source.bars.length,barWidth:last.x-first.x,
+        crestOrder:left.x<right.x,landingDistance:right.x-left.x,
+        noteCount:source.events.length,expectedNotes:source.bars.reduce((sum,b)=>sum+b.events.length,0)};
+    });
+  });
+  check(meterProof.every(x=>x.found&&x.reported===x.meter&&
+    x.beats===x.bars*x.meter&&x.barWidth>0&&x.crestOrder&&
+    x.landingDistance>0&&x.noteCount===x.expectedNotes),
+    "V4 "+cfg.name+": 2/4, 3/4 or 4/4 score/guide geometry invalid "+JSON.stringify(meterProof));
+  // Exact sixteenth division remains four independent note events inside ONE heart.
+  await page.locator("#song").evaluate(el=>{el.value="6";el.dispatchEvent(new Event("change",{bubbles:true}))});
+  const quarterProof=await page.evaluate(()=>{
+    const q=window.__HEART_V4_QA__,p=q.beatParts(16);
+    return {meter:q.getState().meter,count:p.length,
+      divisions:p.map(x=>[x.from,x.to])};
+  });
+  check(quarterProof.meter===4&&quarterProof.count===4&&
+    quarterProof.divisions.every((p,i)=>Math.abs(p[0]-i*.25)<1e-6&&
+      Math.abs(p[1]-(i+1)*.25)<1e-6),
+    "V4 "+cfg.name+": sixteenth-note subdivision damaged "+JSON.stringify(quarterProof));
+  await page.locator("#song").evaluate(el=>{el.value="0";el.dispatchEvent(new Event("change",{bubbles:true}))});
   check(await page.locator('[data-guide]').count()===3,
     "V4 "+cfg.name+": user must have three distinct guide options");
   // Rendering must truly differ, not just change a selected label.
@@ -1124,20 +1179,73 @@ async function heartV4Smoke(){
   await page.locator('[data-guide="footsteps"]').click();
   check((await page.locator('[data-guide="footsteps"]').getAttribute("aria-pressed"))==="true",
     "V4 "+cfg.name+": footstep guide mode control not accessible");
+  // Use the short canonical 2/4 starting tune, whose two-beat count-in
+  // finishes within this audio-onset browser test's real-time window.
+  await page.locator("#song").selectOption("0");
   await page.locator("#tempo").selectOption("0.75");
   await page.locator("#notes").selectOption("3");
   await page.locator(".key").first().click();
-  await page.locator("#play").click();await page.waitForTimeout(160);
+  await page.locator("#play").click();await page.waitForTimeout(2250);
   check((await page.locator("#play span").textContent())==="일시정지","V4 "+cfg.name+": play should start");
+  const audible=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
+  check(audible.audioState==="running"&&audible.beat>=.5&&audible.playedCount>=2,
+    "V4 "+cfg.name+": actual original melody onsets must begin after count-in "+JSON.stringify(audible));
+  check((await page.locator("#status").textContent()).includes("한 박"),
+    "V4 "+cfg.name+": playback status must describe ONE heart as ONE beat");
+  const beforeTempo=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
+  await page.locator("#tempo").selectOption("1.15");
+  const afterTempo=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
+  check(afterTempo.playing&&afterTempo.speed===1.15&&
+    Math.abs(afterTempo.beat-beforeTempo.beat)<.3,
+    "V4 "+cfg.name+": live tempo switch restarted the piece or jumped in time "+
+      JSON.stringify({beforeTempo,afterTempo}));
+  await page.waitForTimeout(110);
+  const advanced=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
+  check(advanced.beat>afterTempo.beat,
+    "V4 "+cfg.name+": visual beat clock stalled after live tempo change");
   await page.locator("#play").click();
-  check((await page.locator("#play span").textContent())==="연주 시작","V4 "+cfg.name+": pause failed");
+  check((await page.locator("#play span").textContent())==="이어서 연주",
+    "V4 "+cfg.name+": pause should offer resume, not restart");
+  const paused=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
+  await page.locator("#tempo").selectOption("1");
+  const pausedChange=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
+  check(!pausedChange.playing&&pausedChange.speed===1&&
+    Math.abs(pausedChange.beat-paused.beat)<.001,
+    "V4 "+cfg.name+": changing tempo while paused reset the playhead");
+  await page.locator("#play").click();await page.waitForTimeout(100);
+  const resumed=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
+  check(resumed.playing&&resumed.beat>pausedChange.beat,
+    "V4 "+cfg.name+": playback failed to continue after pausing and changing tempo");
+  await page.locator("#play").click();
   await page.locator("#restart").click();
+  check((await page.locator("#play span").textContent())==="연주 시작"&&
+    Math.abs((await page.evaluate(()=>window.__HEART_V4_QA__.getState().beat))+
+      (await page.evaluate(()=>window.__HEART_V4_QA__.getState().meter)))<.001,
+    "V4 "+cfg.name+": explicit restart should return to count-in");
   check(!errors.length,"V4 "+cfg.name+": JavaScript/browser error: "+errors.join(" / "));
   report.push({name:"heartV4-"+cfg.name,checks:"complete",data,errors});
   await ctx.close();
  }
 }
 await heartV4Smoke();
+
+// Quiet accessibility mode must not pulse within the beat.
+async function heartV4ReducedMotion(){
+ const ctx=await browser.newContext({viewport:{width:390,height:844},reducedMotion:"reduce"});
+ const page=await ctx.newPage();
+ const response=await page.goto(ROOT+"/boomwhacker/heart-playalong-v4/",{waitUntil:"networkidle"});
+ check(!!response?.ok(),"V4 reduced motion route failed");
+ const qa=await page.evaluate(()=>{
+   const q=window.__HEART_V4_QA__,canvas=document.querySelector("#score");
+   q.render(.25);const a=canvas.toDataURL();
+   q.render(.75);const b=canvas.toDataURL();
+   return {effective:q.effectiveGuide(),unchanged:a===b};
+ });
+ check(qa.effective==="heart"&&qa.unchanged,
+   "V4 reduced-motion markers must stay visually static within each beat "+JSON.stringify(qa));
+ await ctx.close();
+}
+await heartV4ReducedMotion();
 
 await browser.close();
 fs.writeFileSync(`${out}/report.json`,JSON.stringify({failures,report},null,2));

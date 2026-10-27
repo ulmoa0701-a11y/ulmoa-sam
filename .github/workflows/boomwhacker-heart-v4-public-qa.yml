@@ -1,0 +1,32 @@
+name: Heart Walk V4 LIVE Pages QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'boomwhacker/heart-playalong-v4/**'
+      - '.github/workflows/boomwhacker-heart-v4-public-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chrome test driver
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund playwright-core@1.56.1
+      - name: Run full deployed V4 desktop/mobile smoke after Pages catches up
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+        run: node boomwhacker/heart-playalong-v4/live-qa.mjs
+      - name: Preserve screenshots and report for visual review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: heart-v4-live-pages-visual-evidence
+          path: boomwhacker/heart-playalong-v4/live-qa-artifacts
+          if-no-files-found: warn
