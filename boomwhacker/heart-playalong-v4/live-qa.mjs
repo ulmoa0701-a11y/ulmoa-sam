@@ -70,8 +70,10 @@ try {
     await page.locator('[data-guide="footsteps"]').click();
     await page.locator("#tempo").selectOption("0.75");
     await page.locator("#play").click();
-    await page.waitForTimeout(190);
+    await page.waitForTimeout(2250);
     const before=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
+    check(before.audioState==="running"&&before.beat>=.5&&before.playedCount>=2,
+      config.name+": public melody really schedules original notes after count-in");
     await page.locator("#tempo").selectOption("1.15");
     const changed=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
     check(changed.playing&&changed.speed===1.15&&Math.abs(changed.beat-before.beat)<.35,
