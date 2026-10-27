@@ -413,7 +413,9 @@ function renderGather(){
   '<button type="button" class="gather-pick gather-berry" data-spot="berries" '+(gather.berries>=x.berries+2?'disabled':'')+' aria-label="딸기 하나 담기"><img src="'+A+'objects/berry_single.png" alt=""><span>딸기 담기</span></button>':
   '<div class="gather-journey" aria-hidden="true"><img src="'+A+'objects/basket_empty.png" alt=""><span>'+(done?'♥':'✓')+'</span></div>';
  $('gatherTargets').innerHTML=done?'<p class="gather-complete">곰돌이에게 간식 배달 성공!</p>':
-  '<div class="gather-basket"><p class="gather-basket-title">내 바구니 <small>'+(collect?'담은 그림을 누르면 뺄 수 있어':'간식 준비 끝!')+'</small></p>'+
+  '<div class="gather-basket" role="group" aria-label="곰돌이에게 전할 간식 바구니">'+
+  '<div class="gather-basket-handle" aria-hidden="true"></div><div class="gather-basket-body" aria-hidden="true"></div>'+
+  '<p class="gather-basket-title">내 바구니 <small>'+(collect?'담은 간식을 누르면 뺄 수 있어':'간식 준비 끝!')+'</small></p>'+
   '<div class="gather-basket-row">'+['acorns','berries'].map(kind=>{
    const label=kind==='acorns'?'도토리':'딸기';
    return '<div class="gather-target" data-kind="'+kind+'"><strong>'+label+' <span>'+gather[kind]+' / '+x[kind]+'</span></strong>'+
