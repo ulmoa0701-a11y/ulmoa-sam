@@ -415,3 +415,108 @@ dialog form{display:flex;justify-content:flex-end}
  #letter-page .paper-disclaimer{font-size:8pt}
  #letter-page .letter-signature{margin-bottom:12px}
 }
+
+
+/* Personal story edition: the motif marks today's selected scene, not personality. */
+.letter-paper{--story-ink:#54775e;--story-tint:#edf2e3;--story-soft:#f4f3e9;--story-edge:#d7e2cf}
+.letter-paper[data-story-theme="rest"]{--story-ink:#62749a;--story-tint:#e9eef9;--story-soft:#f1f0f8;--story-edge:#cbd7e8}
+.letter-paper[data-story-theme="game"]{--story-ink:#5875aa;--story-tint:#e4edfd;--story-soft:#f0f3fa;--story-edge:#cbdaf1}
+.letter-paper[data-story-theme="create"]{--story-ink:#ae7852;--story-tint:#f9eadb;--story-soft:#fbf2e8;--story-edge:#eedac8}
+.letter-paper[data-story-theme="friend"]{--story-ink:#a86b6b;--story-tint:#f9e7e2;--story-soft:#fcf1e9;--story-edge:#efdbd4}
+.letter-paper[data-story-theme="neutral"]{--story-ink:#648a70;--story-tint:#e8f0e0;--story-soft:#f2f5e9;--story-edge:#d5e5d1}
+.identity-cover{display:grid;grid-template-columns:minmax(0,1fr) 152px;gap:20px;align-items:center;margin:27px 0 7px;padding:20px 26px 19px;border:1px solid var(--story-edge);background:radial-gradient(circle at 85% 25%,#ffffffb0,transparent 46%),var(--story-tint);border-radius:18px;position:relative;overflow:hidden;isolation:isolate}
+.identity-cover:after{position:absolute;content:"";height:160px;width:350px;right:-85px;bottom:-128px;border-radius:50%;background:#fff8eb55;pointer-events:none}
+.identity-cover-copy{min-width:0;position:relative;z-index:1}
+.identity-eyebrow{font:760 .65rem/1.6 ui-monospace,Consolas,monospace;letter-spacing:.14em;color:var(--story-ink)}
+.identity-cover h2{font-family:MaruBuri,"Noto Serif KR",serif;font-weight:700;color:var(--story-ink);font-size:1.45rem;line-height:1.35;letter-spacing:-.06em;margin:6px 0 9px}
+.identity-cover p{font-size:.85rem;line-height:1.65;color:#576e61;margin:0 0 8px;word-break:keep-all}
+.identity-not-type{color:#849188;font-size:.73rem;line-height:1.5}
+.identity-art{position:relative;display:grid;place-items:center;width:132px;height:132px;justify-self:end;border-radius:50%;background:radial-gradient(circle at 40% 29%,#fffcf1,#fffdf9 44%,var(--story-edge) 93%);box-shadow:0 0 0 7px #ffffff75,inset 0 0 0 1px #ffffff;z-index:1}
+.identity-halo{position:absolute;inset:12px;border:1px dashed var(--story-ink);opacity:.45;border-radius:50%}
+.cover-symbol{font-size:4rem;line-height:1;filter:drop-shadow(0 6px 8px #48535b20);font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.identity-spark{position:absolute;color:var(--story-ink);font-size:1.5rem}
+.spark-a{top:-8px;right:6px}.spark-b{bottom:0;left:5px;font-size:1.1rem}
+.cover-customization{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:3px 0 11px}
+.cover-customization>button{border:none;background:transparent;color:var(--story-ink);font-size:.78rem;padding:9px 3px;font-weight:730;text-decoration:underline;text-underline-offset:3px}
+#cover-options{display:flex;flex-wrap:wrap;gap:6px;width:100%;padding:9px;border-radius:11px;background:#f6f5ec;border:1px solid #e2e4d9}
+.cover-swatch{font-size:.8rem;padding:7px 10px;color:#4c6657;background:#fffefa;border:1px solid #d4e0d3;border-radius:999px;min-height:36px}
+.cover-swatch[aria-pressed="true"]{border-color:var(--story-ink);color:var(--story-ink);background:var(--story-tint);font-weight:790}
+.paper-heading{padding:16px 0 13px;grid-template-columns:minmax(0,1fr) 130px}
+.paper-heading h1{font-size:clamp(1.9rem,3.1vw,2.65rem);line-height:1.45;margin:12px 0}
+.paper-heading h1 em{color:var(--story-ink)}
+.paper-character{width:120px;height:120px}
+.paper-character img{width:99px}
+.paper-message{border-left-color:var(--story-ink);background:var(--story-soft);margin:17px 0 26px}
+.highlight-section{border:1px solid var(--story-edge);background:var(--story-soft);padding:22px 24px 18px;margin:22px 0 18px;border-radius:15px}
+.highlight-heading{display:flex;gap:11px;align-items:center}
+.highlight-heading>span{font-size:1.9rem;color:var(--story-ink)}
+.highlight-heading h2{font:760 1rem/1.4 Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;margin:1px 0 0;color:#516959}
+#highlight-quote{margin:15px 0 6px;font-family:MaruBuri,"Noto Serif KR",serif;color:var(--story-ink);font-weight:700;font-size:clamp(1.09rem,2vw,1.4rem);line-height:1.75;letter-spacing:-.04em;white-space:pre-wrap;overflow-wrap:anywhere}
+#highlight-source{font-size:.77rem;color:#778479;margin:0}
+.clue-section{margin:25px 0 23px}
+.clue-title-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px;margin-bottom:11px}
+.clue-title-row h2{margin:0;color:#365748;font-size:1.03rem;letter-spacing:-.02em;font-weight:770}
+.clue-title-row>span{font-size:.76rem;color:#849083}
+.clue-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.clue-item{min-width:0;border:1px solid #e5e7da;padding:14px 12px;background:#faf9f2;border-radius:12px;display:flex;gap:9px;align-items:flex-start}
+.clue-index{font:.8rem/1.3 ui-monospace,monospace;color:var(--story-ink);flex:none}
+.clue-copy{min-width:0}
+.clue-label{display:block;color:#86948b;font-size:.71rem;margin-bottom:5px}
+.clue-value{color:#3c5b4c;font-size:.83rem;line-height:1.5;display:block;word-break:keep-all;font-weight:710}
+.own-voice-section{background:#fffcf2;border:1px dashed #ceb997;padding:19px 23px;border-radius:14px;margin:21px 0 26px}
+.own-voice-heading{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.own-voice-heading span{font-size:1.2rem;color:#ae8565}
+.own-voice-heading h2{font-size:.98rem;font-weight:790;margin:0;color:#6f604c}
+.own-voice-note+.own-voice-note{border-top:1px solid #e5dac8;padding-top:11px;margin-top:13px}
+.own-voice-label{color:#a1947d;font-size:.74rem}
+.own-voice-quote{font-family:MaruBuri,"Noto Serif KR",serif;font-size:1.09rem;font-weight:680;color:#695940;letter-spacing:-.025em;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;margin:9px 0 0}
+.memory-card{background:#f7f6ee}
+.memory-card:nth-child(2),.memory-card:nth-child(3),.memory-card:nth-child(4),.memory-card:nth-child(5){background:#f7f7f0}
+.memory-card:nth-child(5){background:var(--story-tint);border-color:var(--story-edge)}
+.memory-no{background:var(--story-tint);color:var(--story-ink)}
+.letter-forward{background:var(--story-tint);border-color:var(--story-edge)}
+.forward-mark{color:var(--story-ink)}
+.letter-forward h2{color:var(--story-ink)}
+@media(max-width:760px){
+ .identity-cover{grid-template-columns:minmax(0,1fr) 86px;gap:10px;margin:17px 0 6px;padding:16px 12px}
+ .identity-eyebrow{font-size:.52rem}
+ .identity-cover h2{font-size:1.14rem;margin:6px 0}
+ .identity-cover p{font-size:.77rem}
+ .identity-not-type{font-size:.65rem}
+ .identity-art{width:81px;height:81px}
+ .identity-halo{inset:8px}
+ .cover-symbol{font-size:2.65rem}
+ .identity-spark{font-size:1rem}
+ .paper-heading{grid-template-columns:minmax(0,1fr) 80px;padding:14px 0 7px}
+ .paper-heading h1{font-size:clamp(1.58rem,6vw,2rem)}
+ .paper-character{width:79px;height:79px}
+ .paper-character img{width:73px}
+ .highlight-section{padding:16px 14px;margin:18px 0}
+ .highlight-heading h2{font-size:.89rem}
+ #highlight-quote{font-size:1.04rem}
+ .clue-title-row{display:block}
+ .clue-title-row h2{font-size:.94rem}
+ .clue-title-row>span{font-size:.7rem}
+ .clue-list{grid-template-columns:1fr;gap:7px;margin-top:9px}
+ .clue-item{padding:11px 13px}
+ .own-voice-section{padding:15px 13px}
+ .own-voice-quote{font-size:.99rem}
+}
+@media print{
+ #letter-page .identity-cover{margin:12px 0;padding:9px 14px;grid-template-columns:minmax(0,1fr) 75px;break-inside:avoid}
+ #letter-page .identity-art{width:70px;height:70px}
+ #letter-page .cover-symbol{font-size:2.1rem}
+ #letter-page .cover-customization{display:none!important}
+ #letter-page .identity-cover h2{font-size:14pt}
+ #letter-page .identity-cover p{font-size:9pt}
+ #letter-page .identity-not-type{font-size:8pt}
+ #letter-page .paper-heading{padding:10px 0}
+ #letter-page .highlight-section{padding:10px 13px;margin:10px 0;break-inside:avoid}
+ #letter-page #highlight-quote{font-size:12pt;line-height:1.6}
+ #letter-page .clue-section{margin:12px 0}
+ #letter-page .clue-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+ #letter-page .clue-item{padding:8px;break-inside:avoid}
+ #letter-page .own-voice-section{padding:10px 12px;margin:12px 0;break-inside:avoid}
+ #letter-page .letter-memories{break-before:auto}
+ #letter-page .memory-card{break-inside:avoid}
+}
