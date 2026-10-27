@@ -47,6 +47,7 @@ fs.mkdirSync(out,{recursive:true});
       assert.ok(metrics.media.width<=160,vp.device+' image is not a compact game illustration '+metrics.media.width);
       assert.ok(metrics.details.width>140,vp.device+' insufficient room for game name and start');
     }
+    await flower.scrollIntoViewIfNeeded();
     await page.screenshot({path:out+'/'+vp.device+'-choice.png',fullPage:false});
     // The very same route is used in the preview and in the "game start" CTA.
     const expected=await flower.locator('.play-start-btn').getAttribute('href');
