@@ -1124,14 +1124,43 @@ async function heartV4Smoke(){
   await page.locator('[data-guide="footsteps"]').click();
   check((await page.locator('[data-guide="footsteps"]').getAttribute("aria-pressed"))==="true",
     "V4 "+cfg.name+": footstep guide mode control not accessible");
+  check((await page.locator("#status").textContent()).includes("한 박"),
+    "V4 "+cfg.name+": status must describe ONE heart as ONE beat");
   await page.locator("#tempo").selectOption("0.75");
   await page.locator("#notes").selectOption("3");
   await page.locator(".key").first().click();
   await page.locator("#play").click();await page.waitForTimeout(160);
   check((await page.locator("#play span").textContent())==="일시정지","V4 "+cfg.name+": play should start");
+  const beforeTempo=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
+  await page.locator("#tempo").selectOption("1.15");
+  const afterTempo=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
+  check(afterTempo.playing&&afterTempo.speed===1.15&&
+    Math.abs(afterTempo.beat-beforeTempo.beat)<.3,
+    "V4 "+cfg.name+": live tempo switch restarted the piece or jumped in time "+
+      JSON.stringify({beforeTempo,afterTempo}));
+  await page.waitForTimeout(110);
+  const advanced=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
+  check(advanced.beat>afterTempo.beat,
+    "V4 "+cfg.name+": visual beat clock stalled after live tempo change");
   await page.locator("#play").click();
-  check((await page.locator("#play span").textContent())==="연주 시작","V4 "+cfg.name+": pause failed");
+  check((await page.locator("#play span").textContent())==="이어서 연주",
+    "V4 "+cfg.name+": pause should offer resume, not restart");
+  const paused=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
+  await page.locator("#tempo").selectOption("1");
+  const pausedChange=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
+  check(!pausedChange.playing&&pausedChange.speed===1&&
+    Math.abs(pausedChange.beat-paused.beat)<.001,
+    "V4 "+cfg.name+": changing tempo while paused reset the playhead");
+  await page.locator("#play").click();await page.waitForTimeout(100);
+  const resumed=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
+  check(resumed.playing&&resumed.beat>pausedChange.beat,
+    "V4 "+cfg.name+": playback failed to continue after pausing and changing tempo");
+  await page.locator("#play").click();
   await page.locator("#restart").click();
+  check((await page.locator("#play span").textContent())==="연주 시작"&&
+    Math.abs((await page.evaluate(()=>window.__HEART_V4_QA__.getState().beat))+
+      (await page.evaluate(()=>window.__HEART_V4_QA__.getState().meter)))<.001,
+    "V4 "+cfg.name+": explicit restart should return to count-in");
   check(!errors.length,"V4 "+cfg.name+": JavaScript/browser error: "+errors.join(" / "));
   report.push({name:"heartV4-"+cfg.name,checks:"complete",data,errors});
   await ctx.close();
