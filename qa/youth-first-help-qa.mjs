@@ -117,7 +117,7 @@ for(const width of [320,390,820,1440]){
  await check(await page.locator('#share-text').count()===0,width+'px no big empty summary textarea');
  await check(await page.locator('#copy').isEnabled(),width+'px one action to copy complete finished report');
  await check(await page.locator('#print').isEnabled(),width+'px one action to print whole finished letter');
- await check((await page.locator('.paper-message').textContent()).includes('편한 순간으로 고른 건'),width+'px honest brief introduction personalizes letter');
+ await check((await page.locator('.paper-message').textContent()).includes('오늘 네가 골랐던 장면은'),width+'px letter emphasizes selected experience rather than listing traits');
  await check((await page.locator('#letter-next').textContent()).includes('함께 해보기'),width+'px personal next visit aspiration included');
  await check((await page.locator('#reflection-title').innerText()).includes('내 생각을 내 방식'),width+'px reflection follows chosen communication style');
  await check((await page.locator('#reflection-warm').innerText()).includes('네 표현이야'),width+'px warm message matches writing preference');
