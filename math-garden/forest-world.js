@@ -116,6 +116,7 @@ if(state.gatherSceneVersion!==GATHER_SCENE_VERSION){
  state.gatherSceneVersion=GATHER_SCENE_VERSION;
 }
 let gatherMessage='';
+let gatherRecentlyAdded=null; // Ephemeral, never persisted: animate only the fruit just tapped.
 const gatherGoal=()=>GATHER_ORDERS[gather.round%GATHER_ORDERS.length];
 if(!state.reviewLog||typeof state.reviewLog!=='object')state.reviewLog={};
 if(!Array.isArray(state.served))state.served=[];
@@ -394,12 +395,15 @@ function floatPop(hostEl,imgSrc){
 /* One story scene: a request, pickable fruit, a single basket, and delivery. */
 function gatherSlots(type,count,goal,editable=true){
  const fruit=type==='berries'?'berry':'acorn',label=type==='berries'?'딸기':'도토리';
- return '<div class="gather-slots">'+Array.from({length:Math.max(goal,count)},(_,i)=>{
-  const filled=i<count,cl='gather-slot '+(filled?'filled':'empty')+(i>=goal?' extra':'');
-  return filled&&editable?
-   '<button type="button" class="'+cl+'" data-gather="undo-'+type+'" aria-label="'+label+' 하나 꺼내기">'+unit(fruit,true)+'</button>':
-   '<span class="'+cl+'" aria-hidden="true">'+(filled?unit(fruit,true):'')+'</span>';
- }).join('')+'</div>';
+ return '<div class="gather-slots" role="group" aria-label="'+label+' '+count+'개 담김">'+
+  Array.from({length:Math.max(goal,count)},(_,i)=>{
+   const filled=i<count,justAdded=filled&&gatherRecentlyAdded?.type===type&&gatherRecentlyAdded.index===i;
+   const cl='gather-slot '+(filled?'filled':'empty')+(i>=goal?' extra':'')+(justAdded?' just-added':'');
+   const number=filled?'<span class="gather-count-badge" aria-hidden="true">'+(i+1)+'</span>':'';
+   return filled&&editable?
+    '<button type="button" class="'+cl+'" data-gather="undo-'+type+'" aria-label="'+label+' '+count+'개 중 하나 빼기">'+unit(fruit,true)+number+'</button>':
+    '<span class="'+cl+'" aria-hidden="true">'+(filled?unit(fruit,true)+number:'')+'</span>';
+  }).join('')+'</div>';
 }
 function renderGather(){
  const x=gatherGoal(),collect=gather.phase==='collect',done=gather.phase==='done';
@@ -427,6 +431,7 @@ function renderGather(){
   (collect?'check':done?'next':'deliver')+'">'+
   (collect?'다 모았어!':done?'다음 부탁 받기':'곰돌이에게 주기')+' '+ICONS.arrowRight+'</button>';
  $('gatherStatus').textContent=gatherMessage;
+ gatherRecentlyAdded=null;
 }
 function gatherCheck(){
  if(gather.phase!=='collect')return;
@@ -520,7 +525,9 @@ $('world').addEventListener('click',e=>{
  if(spot && !spot.disabled && gather.phase==='collect'){
   const kind=spot.dataset.spot,x=gatherGoal();
   if(!['acorns','berries'].includes(kind)||gather[kind]>=x[kind]+2)return;
-  gather[kind]++;gatherMessage='';save();sfx(true);renderGather();return;
+  gather[kind]++;gatherRecentlyAdded={type:kind,index:gather[kind]-1};
+  gatherMessage=(kind==='acorns'?'도토리 ':'딸기 ')+gather[kind]+'개!';
+  save();sfx(true);renderGather();return;
  }
  const gatherBtn=e.target.closest('[data-gather]');
  if(gatherBtn && !gatherBtn.disabled){
@@ -529,7 +536,11 @@ $('world').addEventListener('click',e=>{
   if(action==='deliver'){gatherDeliver();return}
   if(action==='undo-acorns'||action==='undo-berries'){
    const kind=action==='undo-acorns'?'acorns':'berries';
-   if(gather.phase==='collect'&&gather[kind]>0){gather[kind]--;gatherMessage='';save();renderGather()}
+   if(gather.phase==='collect'&&gather[kind]>0){
+    gather[kind]--;gatherRecentlyAdded=null;
+    gatherMessage=(kind==='acorns'?'도토리 ':'딸기 ')+gather[kind]+'개 남았어.';
+    save();renderGather()
+   }
    return;
   }
   if(action==='pet'){if(gather.phase==='ready')gather.phase='feed';save();showTab('pet');return}
