@@ -303,21 +303,24 @@ function paintFootprint(x,y,r,alpha){
  }
  ctx.restore();
 }
+function guideOpacity(phase,contact,kind){
+ // No hard opacity step at the contact moment; the marker settles gradually.
+ const pulse=reduced?0:beatCue(phase,contact);
+ const settle=reduced?1:smoothUnit((phase-contact+.07)/.20);
+ return kind==="footsteps"?.21+.37*settle+.25*pulse:.23+.33*settle+.24*pulse;
+}
 function paintGuide(g,phase){
  const mode=effectiveGuide();
  const left=g.x+g.w*.28,right=g.x+g.w*.72;
  const y=g.y+g.w*.18;
  if(mode==="moa"){paintMoa(g,phase);return}
- // Previously reached contact stays faintly visible; upcoming is quieter still.
+ // Two calm landmarks: continuously fade from upcoming to reached.
  for(const [contact,x] of [[.25,left],[.75,right]]){
-  // Reduced-motion mode shows two fixed markers: no beat-phase flash or hopping.
-   const pulse=reduced?0:beatCue(phase,contact);
-   const seen=reduced||phase>=contact;
   if(mode==="footsteps"){
-   paintFootprint(x,y,g.w*.085,(seen?.58:.21)+pulse*.25);
+   paintFootprint(x,y,g.w*.085,guideOpacity(phase,contact,"footsteps"));
   }else{
    ctx.save();ctx.strokeStyle=theme==="classroom"?"#205a44":"#f7edce";
-   ctx.globalAlpha=(seen?.56:.23)+pulse*.24;
+   ctx.globalAlpha=guideOpacity(phase,contact,"heart");
    ctx.lineWidth=2.7;ctx.beginPath();ctx.arc(x,y,g.w*.11,0,Math.PI*2);ctx.stroke();
    ctx.restore();
   }
@@ -417,7 +420,7 @@ document.querySelectorAll(".key").forEach(k=>k.addEventListener("click",async()=
  makeTone(k.dataset.note,audio.currentTime+.015,.35);k.classList.add("is-hit");setTimeout(()=>k.classList.remove("is-hit"),180)}
  catch(e){status.textContent="악기 소리를 낼 수 없어요"}
 }));
-window.__HEART_V4_QA__={beatParts,geometry,crestTravel,stepPose,beatCue,effectiveGuide,pageAt,getState:()=>({beat,playing,speed,theme,motion,meter:song.meter,title:song.title}),render:(b)=>render(b),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
+window.__HEART_V4_QA__={beatParts,geometry,crestTravel,stepPose,beatCue,guideOpacity,effectiveGuide,pageAt,getState:()=>({beat,playing,speed,theme,motion,meter:song.meter,title:song.title}),render:(b)=>render(b),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
 window.addEventListener("resize",()=>render(beat));
 getAssets();$("#hudTitle").textContent=song.title;reset();
 });
