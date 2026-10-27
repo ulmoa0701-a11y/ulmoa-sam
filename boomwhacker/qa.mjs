@@ -1079,6 +1079,39 @@ async function heartV4Smoke(){
    check(["forest","night","classroom","heart-frame","moa"].every(n=>data.assets[n]),
     "V4 "+cfg.name+": original visual assets missing");
   }
+  // Meter-specific proof: same two crest contacts across 2/4, 3/4 and 4/4.
+  // Selecting songs changes only the authored score, never the visual beat landmarks.
+  const meterProof=await page.evaluate(()=>{
+    const picker=document.querySelector("#song"),q=window.__HEART_V4_QA__;
+    return [2,3,4].map(meter=>{
+      const idx=window.__PERFORMANCE_SCORES__.findIndex(s=>s.meter===meter);
+      if(idx<0)return {meter,found:false};
+      picker.value=String(idx);picker.dispatchEvent(new Event("change",{bubbles:true}));
+      const source=window.__PERFORMANCE_SCORES__[idx];
+      const page=q.pageAt(.5),first=q.geometry(0,page),last=q.geometry(meter-1,page);
+      const left=q.stepPose(.25,first),right=q.stepPose(.75,first);
+      return {meter,found:true,reported:q.getState().meter,
+        beats:source.beats,bars:source.bars.length,barWidth:last.x-first.x,
+        crestOrder:left.x<right.x,landingDistance:right.x-left.x,
+        noteCount:source.events.length,expectedNotes:source.bars.reduce((sum,b)=>sum+b.events.length,0)};
+    });
+  });
+  check(meterProof.every(x=>x.found&&x.reported===x.meter&&
+    x.beats===x.bars*x.meter&&x.barWidth>0&&x.crestOrder&&
+    x.landingDistance>0&&x.noteCount===x.expectedNotes),
+    "V4 "+cfg.name+": 2/4, 3/4 or 4/4 score/guide geometry invalid "+JSON.stringify(meterProof));
+  // Exact sixteenth division remains four independent note events inside ONE heart.
+  await page.locator("#song").selectOption("6");
+  const quarterProof=await page.evaluate(()=>{
+    const q=window.__HEART_V4_QA__,p=q.beatParts(16);
+    return {meter:q.getState().meter,count:p.length,
+      divisions:p.map(x=>[x.from,x.to])};
+  });
+  check(quarterProof.meter===4&&quarterProof.count===4&&
+    quarterProof.divisions.every((p,i)=>Math.abs(p[0]-i*.25)<1e-6&&
+      Math.abs(p[1]-(i+1)*.25)<1e-6),
+    "V4 "+cfg.name+": sixteenth-note subdivision damaged "+JSON.stringify(quarterProof));
+  await page.locator("#song").selectOption("0");
   check(await page.locator('[data-guide]').count()===3,
     "V4 "+cfg.name+": user must have three distinct guide options");
   // Rendering must truly differ, not just change a selected label.
