@@ -178,3 +178,8 @@
 @media(prefers-reduced-motion:reduce){
   .gardens-page .play-card.play-card-enhanced{transition:none}
 }
+
+/* Preserve the earlier picture-only option; show terse copy only in normal mode. */
+.gardens-page.garden-picture-mode .play-simple-desc,
+.gardens-page.garden-picture-mode .play-activity,
+.gardens-page.garden-picture-mode .play-life-one-line{display:none!important}
