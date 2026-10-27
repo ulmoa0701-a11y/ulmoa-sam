@@ -1182,8 +1182,11 @@ async function heartV4Smoke(){
   await page.locator("#tempo").selectOption("0.75");
   await page.locator("#notes").selectOption("3");
   await page.locator(".key").first().click();
-  await page.locator("#play").click();await page.waitForTimeout(160);
+  await page.locator("#play").click();await page.waitForTimeout(2250);
   check((await page.locator("#play span").textContent())==="일시정지","V4 "+cfg.name+": play should start");
+  const audible=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
+  check(audible.audioState==="running"&&audible.beat>=.5&&audible.playedCount>=2,
+    "V4 "+cfg.name+": actual original melody onsets must begin after count-in "+JSON.stringify(audible));
   check((await page.locator("#status").textContent()).includes("한 박"),
     "V4 "+cfg.name+": playback status must describe ONE heart as ONE beat");
   const beforeTempo=await page.evaluate(()=>window.__HEART_V4_QA__.getState());
