@@ -17,6 +17,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Ensure readable Korean text in captured browser views
+        run: |
+          if fc-list :lang=ko family | grep -q .; then
+            echo 'Korean font already available'
+          else
+            timeout 60s sudo apt-get update -qq && timeout 90s sudo apt-get install -y -qq fonts-noto-cjk || echo 'Package mirror unavailable; retain fallback'
+            fc-cache -f || true
+          fi
       - name: Install Chrome test driver
         run: npm install --no-save --ignore-scripts --no-audit --no-fund playwright-core@1.56.1
       - name: Run full deployed V4 desktop/mobile smoke after Pages catches up
