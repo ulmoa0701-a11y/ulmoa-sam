@@ -15,6 +15,8 @@ const {chromium}=require('playwright-core');
   await page.locator('.play-card-enhanced[data-game="flower"] .play-preview-btn').click();
   const frame=await (await page.locator('#previewLive').elementHandle()).contentFrame();
   frame.on('pageerror',e=>errors.push({where:'game',message:e.message}));
+  await frame.waitForLoadState('load');
+  await frame.locator('#introScreen.active').waitFor({state:'visible',timeout:30000});
   await frame.locator('#introStart').waitFor({state:'visible',timeout:30000});
   const snapshot=await frame.evaluate(()=>{
    const intro=document.querySelector('#introScreen');
