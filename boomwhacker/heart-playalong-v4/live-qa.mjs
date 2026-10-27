@@ -6,26 +6,30 @@ import { chromium } from "playwright-core";
 // Test the deployed GitHub Pages address, not a local checkout.
 const BASE="https://ulmoa0701-a11y.github.io/ulmoa-sam/boomwhacker/heart-playalong-v4/";
 const OUT="boomwhacker/heart-playalong-v4/live-qa-artifacts";
+const expectedHtml=fs.readFileSync("boomwhacker/heart-playalong-v4/index.html","utf8");
+const expectedHash=createHash("sha256").update(expectedHtml).digest("hex");
 fs.mkdirSync(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_BIN||"/usr/bin/google-chrome",args:["--no-sandbox","--autoplay-policy=no-user-gesture-required"]});
-const report={url:BASE,checks:[],screenshots:[],errors:[]};
+const report={url:BASE,expectedHash,checks:[],screenshots:[],errors:[],warnings:[]};
 const check=(ok,msg)=>{if(!ok)throw Error(msg);report.checks.push(msg)};
 try {
   const probe=await browser.newPage();
-  let deployed=false,lastError="";
+  let deployed=false,lastError="",lastHash="";
   for(let attempt=0;attempt<60;attempt++){
     try {
       const response=await probe.goto(BASE+"?v4_live="+Date.now(),{waitUntil:"domcontentloaded",timeout:20000});
-      deployed=!!response?.ok()&&await probe.evaluate(()=>(
-        document.querySelector(".heading > p")?.textContent.includes("하트 악보를 보며")&&
-        typeof window.__HEART_V4_QA__?.getState==="function"&&
-        typeof window.__HEART_V4_QA__.getState().speed==="number"
-      ));
+      // Compare exact checked-out HTML bytes against real Pages response.
+      // This avoids accepting yesterday's deployed page while today's build is pending.
+      if(response?.ok()){
+        lastHash=createHash("sha256").update(await response.text()).digest("hex");
+        deployed=lastHash===expectedHash&&
+          await probe.evaluate(()=>typeof window.__HEART_V4_QA__?.getState==="function");
+      }
       if(deployed)break;
     }catch(e){lastError=String(e)}
     await new Promise(resolve=>setTimeout(resolve,5000));
   }
-  check(deployed,"public V4 has deployed the newest PR build; "+lastError);
+  check(deployed,"public V4 source matches current main commit (expected "+expectedHash+", seen "+lastHash+"); "+lastError);
   await probe.close();
   for(const config of [{name:"pc-1440",width:1440,height:900},{name:"mobile-390",width:390,height:844}]){
     const context=await browser.newContext({viewport:{width:config.width,height:config.height},deviceScaleFactor:1});
@@ -33,13 +37,24 @@ try {
     const errors=[];
     page.on("pageerror",e=>errors.push("JS "+e.message));
     page.on("console",m=>{
-      if(m.type()==="error")errors.push("CONSOLE "+m.text()+" @ "+(m.location()?.url||"unknown"));
+      if(m.type()!=="error")return;
+      const source=m.location()?.url||"unknown";
+      if(/\/favicon\.ico(?:$|\?)/.test(source)&&/404/.test(m.text())){
+        report.warnings.push("optional site-wide favicon: "+source);return;
+      }
+      errors.push("CONSOLE "+m.text()+" @ "+source);
     });
     page.on("response",r=>{
-      if(r.status()>=400)errors.push("HTTP "+r.status()+" "+r.url());
+      if(r.status()<400)return;
+      if(/\/favicon\.ico(?:$|\?)/.test(r.url())){
+        report.warnings.push("optional site-wide favicon HTTP "+r.status()+": "+r.url());return;
+      }
+      errors.push("HTTP "+r.status()+" "+r.url());
     });
     const response=await page.goto(BASE+"?view="+config.name+"&cache="+Date.now(),{waitUntil:"networkidle",timeout:25000});
     check(!!response?.ok(),config.name+": public HTTP success");
+    const liveHash=createHash("sha256").update(await response.text()).digest("hex");
+    check(liveHash===expectedHash,config.name+": served the same HTML as current main checkout");
     check(await page.locator(".transport #play").isVisible(),config.name+": playback control available");
     const geometry=await page.evaluate(()=>{
       const q=window.__HEART_V4_QA__,stage=document.querySelector("#stage").getBoundingClientRect();
