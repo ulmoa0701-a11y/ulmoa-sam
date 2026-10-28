@@ -9,10 +9,10 @@
 <title>모아와 첫 이야기 | 일단 해봄</title>
 <meta name="description" content="정답 없는 첫 대화. 말하지 않아도, 모른다고 해도 괜찮은 청소년 상담 준비 이야기">
 <link rel="icon" href="../../assets/habom-favicon-v3-32.png">
-<link rel="stylesheet" href="./myself.css?v=20261027-insight1">
+<link rel="stylesheet" href="./myself.css?v=20261028-story-v2">
 <script defer src="./letter-reflection.js?v=20261027-insight1"></script>
 <script defer src="./self-discovery.js?v=20261027-insight1"></script>
-<script defer src="./myself.js?v=20261027-insight1"></script>
+<script defer src="./myself.js?v=20261028-story-v2"></script>
 </head>
 <body>
 <div class="site">
@@ -22,46 +22,60 @@
  <a class="exit-link" href="../">나가기</a>
 </header>
 <main class="main" id="main">
- <section class="intro" id="intro" aria-labelledby="welcome-title">
-  <div class="world" aria-hidden="true">
-   <div class="world-sky"><i class="sky-star one"></i><i class="sky-star two"></i><i class="sky-star three"></i><i class="sky-star four"></i><i class="sky-star five"></i><div class="moon"></div></div>
-   <div class="mountain far"></div><div class="mountain near"></div><div class="river"></div>
-   <div class="house"><div class="roof"></div><div class="house-front"><div class="window"></div><div class="door"></div></div></div>
-   <div class="world-glow"></div><img class="world-moa" src="../../assets/moa-hello-wave-20261012.webp" alt="">
+ <section class="intro intro-v2" id="intro" aria-labelledby="welcome-title">
+  <div class="world" aria-label="모아와 함께 만드는 내 이야기 한 장">
+   <div class="world-halo" aria-hidden="true"></div>
+   <div class="world-sticker" aria-hidden="true"><span>MOA'S LETTER</span><span>✳</span></div>
+   <img class="world-moa" src="../../assets/moa-hello-wave-20261012.webp" alt="">
+   <div class="world-note" aria-hidden="true"><span>내가 좋아하는 것</span><strong>내가 편한 순간</strong><span>→ 내 말로 남기기</span></div>
+   <div class="world-spark world-spark-a" aria-hidden="true">✧</div>
+   <div class="world-spark world-spark-b" aria-hidden="true">✺</div>
   </div>
   <div class="intro-copy">
-   <p class="eyebrow">처음 만난 우리에게</p>
-   <h1 id="welcome-title">대답을 잘하는 시간 말고,<br><em>너를 알아가는 시간.</em></h1>
-   <p class="intro-sub">좋아하는 이야기부터 시작해도 되고, 지금은 그냥 조용해도 괜찮아.</p>
-   <div class="welcome-speech"><span class="speech-avatar"><img src="../../assets/moa-hello-wave-20261012.webp" alt="모아" width="46" height="48"></span><div><b>모아</b><p>안녕, 난 모아야. 질문이 어려우면 바꾸거나 건너뛰어도 돼. 오늘 무슨 이야기를 할지는 네가 정해.</p></div></div>
-   <div class="start-row"><button type="button" class="primary" id="start">대화 시작하기 <span aria-hidden="true">↗</span></button><button type="button" class="text-button" id="early-end">오늘은 여기까지</button></div>
-   <p class="privacy-line"><span aria-hidden="true">◇</span> 답은 자동 저장·전송되지 않아 <button type="button" class="underlink" id="privacy-open">자세히</button></p>
+   <p class="eyebrow">MOA · MY FIRST STORY</p>
+   <h1 id="welcome-title">오늘의 나를<br><em>내 말로 발견해 보기.</em></h1>
+   <p class="intro-sub">무엇이 편한지, 언제 어려운지, 어떤 도움이 좋을지. 네가 고른 말로 <strong>너만의 이야기 한 장</strong>을 만들어 볼 거야.</p>
+   <div class="intro-steps" aria-label="대화 진행 방식">
+     <span><b>01</b> 편한 것 고르기</span>
+     <span aria-hidden="true">→</span>
+     <span><b>02</b> 내 이야기하기</span>
+     <span aria-hidden="true">→</span>
+     <span><b>03</b> 한 장에 담기</span>
+   </div>
+   <div class="welcome-speech"><span class="speech-avatar"><img src="../../assets/moa-hello-wave-20261012.webp" alt="모아" width="46" height="48"></span><div><b>모아가 알려줄게</b><p>잘 대답할 필요 없어. 네가 고르거나 쓴 말이 결과에 그대로 남아. 싫은 질문은 건너뛰어도 돼.</p></div></div>
+   <div class="start-row"><button type="button" class="primary" id="start">내 이야기 시작하기 <span aria-hidden="true">→</span></button><button type="button" class="text-button" id="early-end">오늘은 여기까지</button></div>
+   <p class="privacy-line"><span aria-hidden="true">◈</span> 자동 저장·전송 없음 · <button type="button" class="underlink" id="privacy-open">어떻게 사용하는지 보기</button></p>
   </div>
  </section>
- <section class="conversation" id="conversation" hidden aria-label="모아와 나의 대화">
+ <section class="conversation conversation-v2" id="conversation" hidden aria-label="모아와 나의 대화">
   <div class="conversation-side">
-   <div class="side-art" aria-hidden="true"><span class="distant-star">✦</span><span class="side-moon"></span><span class="hill hill-back"></span><span class="hill hill-front"></span><img src="../../assets/moa-hello-wave-20261012.webp" alt=""></div>
-   <div class="side-text"><span>MOA · FIRST STORY</span><p>어떤 대답도<br>서두를 필요 없어</p><small>생각해 보는 것만으로도 충분해</small></div>
+   <div class="side-art" aria-hidden="true"><img src="../../assets/moa-hello-wave-20261012.webp" alt=""></div>
+   <div class="side-text"><span>MOA · FIRST STORY</span><p>이야기는<br>네 속도로.</p><small>오늘 고른 답이 마지막 한 장으로 이어져</small></div>
+   <div class="side-remember"><span>지금 고른 이야기</span><strong id="side-remember-text">아직 비워둔 첫 장이야</strong></div>
    <div class="side-actions"><button type="button" class="side-action" id="restart">처음부터 다시</button><button type="button" class="side-action" id="end-now">여기서 마치기</button></div>
   </div>
   <div class="conversation-body">
-   <div class="conversation-top"><span class="live-mark"><span aria-hidden="true"></span> 우리 둘의 이야기</span><span class="conversation-info">말 · 선택 · 건너뛰기, 모두 가능</span></div>
-   <div id="thread" class="thread" aria-live="off"></div>
+   <div class="conversation-top">
+    <div class="conversation-top-line"><span class="live-mark">모아와 나의 대화</span><strong id="progress-count" class="progress-count">01 / 05</strong></div>
+    <div class="progress-track" role="progressbar" aria-label="대화 진행" aria-valuemin="0" aria-valuemax="5" aria-valuenow="1" id="progress-track"><span id="progress-bar"></span></div>
+    <p class="progress-hint">몇 가지만 고르면, 마지막에 너의 말로 편지가 완성돼.</p>
+   </div>
+   <div id="thread" class="thread" aria-label="지금까지 고른 이야기" aria-live="off"></div>
    <div class="question-panel" id="question-panel" aria-labelledby="question-title">
     <div class="question-head"><span id="question-kicker" class="question-kicker">모아가 궁금한 건</span><h2 id="question-title" tabindex="-1"></h2><p id="question-hint"></p></div>
     <div class="choice-grid" id="choice-grid" role="group" aria-label="대화에서 고를 답"></div>
     <div class="choose-other"><button type="button" class="soft-choice" id="unknown">지금은 잘 모르겠어</button><button type="button" class="soft-choice" id="pass">이 질문은 넘어갈래</button></div>
     <div class="more-talk" id="more-talk" hidden>
      <p class="more-label" id="more-label"></p>
-     <p class="more-help" id="more-help">추가 질문이야. 하나만 골라도 되고, 그냥 이어가도 돼.</p>
+     <p class="more-help" id="more-help">조금 더 가까운 말을 골라봐. 없어도 괜찮아.</p>
      <div class="detail-choices" id="detail-choices" role="group" aria-label="조금 더 해볼 이야기"></div>
     </div>
     <div class="own-talk">
-     <button type="button" class="own-toggle" id="own-toggle" aria-expanded="false" aria-controls="own-panel">선택지에 없는 내 말도 있어 <span aria-hidden="true">＋</span></button>
-     <div id="own-panel" hidden><label for="own-input">원하면 한두 문장만 남겨도 돼</label><textarea id="own-input" maxlength="160" rows="2" placeholder="이름, 연락처, 학교 이름처럼 나를 알아볼 정보는 적지 않아도 돼"></textarea><p class="own-help">글을 자동으로 해석하거나 상담자에게 보내지는 않아. 마지막 편지에는 네가 직접 쓴 말도 그대로 들어가.</p><button type="button" class="own-save" id="own-save">이 말로 남길래</button></div>
+     <button type="button" class="own-toggle" id="own-toggle" aria-expanded="false" aria-controls="own-panel">보기에는 없는 내 말도 남기기 <span aria-hidden="true">＋</span></button>
+     <div id="own-panel" hidden><label for="own-input">내 말로 한두 문장 (선택)</label><textarea id="own-input" maxlength="160" rows="2" placeholder="내가 생각한 건… (이름·연락처·학교명은 적지 않아도 돼)"></textarea><p class="own-help">네가 직접 쓴 말은 마지막 편지에 그대로 남아. 자동 분석·전송하지 않아.</p><button type="button" class="own-save" id="own-save">이 말 남기기</button></div>
     </div>
-    <div class="panel-actions"><button type="button" class="back" id="back">이전 이야기</button><button type="button" class="next" id="next" disabled>이어가기 <span aria-hidden="true">→</span></button></div>
-    <p class="panel-tip" id="panel-tip" role="status">고르거나 건너뛰어도 돼</p>
+    <div class="panel-actions"><button type="button" class="back" id="back">이전 이야기</button><button type="button" class="next" id="next" disabled>다음 이야기 <span aria-hidden="true">→</span></button></div>
+    <p class="panel-tip" id="panel-tip" role="status">편한 쪽을 고르거나 넘어가도 돼</p>
    </div>
   </div>
  </section>
@@ -82,6 +96,10 @@
      </div>
      <div class="paper-character"><img src="../../assets/moa-hello-wave-20261012.webp" width="100" height="106" alt="이야기를 건네는 모아"></div>
     </div>
+    <section class="result-facts" aria-labelledby="result-facts-title">
+     <div class="facts-heading"><span class="facts-spark" aria-hidden="true">✳</span><h2 id="result-facts-title">모아가 기억한, 네 이야기</h2><span>네가 고른 답 그대로</span></div>
+     <div id="result-facts" class="result-fact-list"></div>
+    </section>
     <section class="insight-action" aria-labelledby="forward-title">
       <span class="insight-number">01 · 딱 하나만</span>
       <h2 id="forward-title">이렇게 해볼래?</h2>
