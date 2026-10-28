@@ -9,7 +9,7 @@ on:
     paths:
       - '.github/workflows/gardens-public-pages-live-qa.yml'
   workflow_run:
-    workflows: ['Gardens Compact Choice and Real Live Preview QA']
+    workflows: ['Gardens Compact Choice and Real Live Preview QA', 'pages build and deployment']
     types: [completed]
     branches: [main]
   workflow_dispatch:
