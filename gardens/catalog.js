@@ -86,7 +86,14 @@ for(const section of sections){
   card.dataset.game=key;card.dataset.focus=item.focus;card.dataset.character=originalImage;
   card.dataset.title=displayTitle;card.dataset.oldName=originalTitle;
   card.dataset.search=[item.title,originalTitle,item.action,item.focusLabel,item.life,...item.steps].join(' ').toLocaleLowerCase('ko-KR');
-  card.innerHTML='<div class="play-card-media"><img loading="lazy" decoding="async" class="real-shot" src="previews/'+esc(key)+'.jpg'+PREVIEW_VERSION+'" alt="" /><span class="shot-caption" aria-hidden="true">게임 시작 화면</span></div>'+
+  // A tiny screenshot of a whole menu did not explain the hand or rescue play.
+  // Only these two use true game-art-based activity illustrations in the list.
+  // The live iframe preview still opens the original, unmodified game URL.
+  const activityArt=key==='hand-mirror'||key==='rescue';
+  const thumbSrc=activityArt?'previews/'+key+'-card.svg?v=20261028-series1':'previews/'+key+'.jpg'+PREVIEW_VERSION;
+  const thumbLabel=activityArt?'활동 대표 그림':'게임 시작 화면';
+  card.dataset.previewKind=activityArt?'activity-art':'real-capture';
+  card.innerHTML='<div class="play-card-media"><img loading="lazy" decoding="async" class="real-shot" src="'+esc(thumbSrc)+'" alt="" /><span class="shot-caption" aria-hidden="true">'+thumbLabel+'</span></div>'+
     '<div class="play-card-details"><p class="play-activity">'+esc(item.focusLabel)+'</p><h3>'+esc(displayTitle)+'</h3>'+
     (originalTitle!==item.title?'<p class="play-story-name">'+esc(originalTitle)+'</p>':'')+
     '<p class="play-simple-desc">'+esc(item.action)+'</p><p class="play-life-one-line" title="'+esc(item.life)+'">생활 연결 · '+esc(item.life)+'</p>'+
