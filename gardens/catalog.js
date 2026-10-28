@@ -86,13 +86,12 @@ for(const section of sections){
   card.dataset.game=key;card.dataset.focus=item.focus;card.dataset.character=originalImage;
   card.dataset.title=displayTitle;card.dataset.oldName=originalTitle;
   card.dataset.search=[item.title,originalTitle,item.action,item.focusLabel,item.life,...item.steps].join(' ').toLocaleLowerCase('ko-KR');
-  // A tiny screenshot of a whole menu did not explain the hand or rescue play.
-  // Only these two use true game-art-based activity illustrations in the list.
-  // The live iframe preview still opens the original, unmodified game URL.
-  const activityArt=key==='hand-mirror'||key==='rescue';
-  const thumbSrc=activityArt?'previews/'+key+'-card.svg?v=20261028-series1':'previews/'+key+'.jpg'+PREVIEW_VERSION;
-  const thumbLabel=activityArt?'활동 대표 그림':'게임 시작 화면';
-  card.dataset.previewKind=activityArt?'activity-art':'real-capture';
+  // All 34 cards have legible 600x390 SVG activity illustrations.
+  // The original JPEGs remain as fallbacks. The live iframe always opens
+  // the unchanged current game URL: a thumbnail is not a screenshot.
+  const thumbSrc='previews/'+key+'-card.svg?v=20261028-art34-v1';
+  const thumbLabel='활동 대표 그림';
+  card.dataset.previewKind='activity-art';
   card.innerHTML='<div class="play-card-media"><img loading="lazy" decoding="async" class="real-shot" src="'+esc(thumbSrc)+'" alt="" /><span class="shot-caption" aria-hidden="true">'+thumbLabel+'</span></div>'+
     '<div class="play-card-details"><p class="play-activity">'+esc(item.focusLabel)+'</p><h3>'+esc(displayTitle)+'</h3>'+
     (originalTitle!==item.title?'<p class="play-story-name">'+esc(originalTitle)+'</p>':'')+
