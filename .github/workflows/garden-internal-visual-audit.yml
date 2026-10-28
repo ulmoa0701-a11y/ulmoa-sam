@@ -1,0 +1,55 @@
+name: Gardens 34 Internal Play UI Visual Audit
+on:
+  pull_request:
+    paths:
+      - 'qa/garden-internal-visual-audit.mjs'
+      - '.github/workflows/garden-internal-visual-audit.yml'
+      - 'thinking-garden/**'
+      - 'breath-garden/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  screenshots:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: ['mobile-390', 'desktop-1280', 'small-mobile-360']
+    env:
+      QA_DEVICE: ${{ matrix.profile }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate internal visual audit
+        run: node --check qa/garden-internal-visual-audit.mjs
+      - name: Install local browser tools (no paid API)
+        run: npm install --no-save --no-package-lock playwright-core@1.56.1
+      - name: Locate Chromium
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Install Korean glyph font for reliable UI visual review
+        run: |
+          timeout 240 sudo apt-get update -qq
+          timeout 240 sudo apt-get install -y -qq fonts-noto-cjk
+          fc-list :lang=ko | grep -q . || (echo "Missing Korean fonts" && exit 1)
+      - name: Serve unchanged original games
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/garden-internal-ui.log 2>&1 &
+          for i in $(seq 1 40); do curl -fsS http://127.0.0.1:8765/thinking-garden/ >/dev/null && exit 0; sleep .5; done
+          cat /tmp/garden-internal-ui.log
+          exit 1
+      - name: Browse and screenshot 34 actual game internals
+        run: node qa/garden-internal-visual-audit.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gardens-34-internal-ui-${{ matrix.profile }}
+          path: qa/garden-internal-design-artifacts/
+          retention-days: 14
+          if-no-files-found: warn
