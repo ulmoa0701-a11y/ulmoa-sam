@@ -192,7 +192,7 @@ const FREQUENCIES=[261.6256,293.6648,329.6276,349.2282,391.9954,440,493.8833,523
 const colorOf=note=>COLORS[NOTES.indexOf(note)]||"#a9c8bb";
 const frequencyOf=note=>FREQUENCIES[NOTES.indexOf(note)]||0;
 const heartPath=new Path2D("M50 84 C44 77 9 55 6 29 C3 9 20 0 35 5 C43 7 48 13 50 19 C52 13 57 7 65 5 C80 0 97 9 94 29 C91 55 56 77 50 84Z");
-const imageNames=["forest","night","classroom","heart-frame","moa","forest-enchanted","forest-enchanted-mobile","forest-canopy-left","forest-canopy-right","forest-canopy-left-mobile","forest-canopy-right-mobile","forest-cinematic","forest-cinematic-mobile","forest-cinematic-canopy-left","forest-cinematic-canopy-right","forest-cinematic-canopy-left-mobile","forest-cinematic-canopy-right-mobile"];
+const imageNames=["forest","night","classroom","heart-frame","moa","forest-enchanted","forest-enchanted-mobile","forest-canopy-left","forest-canopy-right","forest-canopy-left-mobile","forest-canopy-right-mobile","forest-cinematic","forest-cinematic-mobile","forest-cinematic-canopy-left","forest-cinematic-canopy-right","forest-cinematic-canopy-left-mobile","forest-cinematic-canopy-right-mobile","forest-painted","forest-painted-mobile"];
 const GRASS=window.__HEART_V4_GRASS__||{desktop:[],mobile:[]};
 const GRASS_PALETTE=["#355c49","#4e8057","#577d54","#3b6e50"];
 const images={};
@@ -208,7 +208,7 @@ const text=(label,x,y,size=20,color="#f7f5ef",align="left",weight=700,role="ui")
  ctx.textAlign=align;ctx.textBaseline="middle";ctx.fillStyle=color;ctx.fillText(label,x,y);ctx.restore()
 };
 function line(x1,y1,x2,y2,color,width=2){ctx.save();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore()}
-function getAssets(){for(const name of imageNames){const img=new Image();img.src=name==="moa"?"../../thinking-garden/assets/moa-default.png":"./assets/"+name+".svg";img.onload=()=>{if(!playing)render(beat)};images[name]=img}}
+function getAssets(){for(const name of imageNames){const img=new Image();img.src=name==="moa"?"../../thinking-garden/assets/moa-default.png":"./assets/"+name+(name.startsWith("forest-painted")?".webp":".svg");img.onload=()=>{if(!playing)render(beat)};images[name]=img}}
 function ready(name){return images[name]&&images[name].complete&&images[name].naturalWidth>0}
 function layout(){
  const mobile=window.matchMedia("(max-width:740px)").matches;
@@ -280,7 +280,7 @@ function paintSceneMotion(time){
  const state=sceneMotionState(time);
  for(const [side,dx,dy] of [["left",state.leftX,state.leftY],["right",state.rightX,state.rightY]]){
   const key="forest-cinematic-canopy-"+side+(m?"-mobile":"");
-  if(ready(key))ctx.drawImage(images[key],dx,dy,W,H);
+  if(ready(key)){ctx.save();ctx.globalAlpha=.24;ctx.drawImage(images[key],dx,dy,W,H);ctx.restore()}
  }
  // Slow, low-opacity lamplight breathing, never strobing.
  ctx.save();
@@ -318,7 +318,7 @@ function paintGrass(time){
   const p=grassPose(i,time,m);if(!p)continue;
   const {x,y,height:h,color,width:w,swing:d}=p;
   const far=y<(m?570:520);
-  ctx.globalAlpha=far?.46:.67;
+  ctx.globalAlpha=far?.26:.39;
   ctx.strokeStyle=GRASS_PALETTE[color]||"#4e8057";
   ctx.lineWidth=Math.max(1.35,w*.91);
   // The middle stem is tallest; left/right leaves bend with the same wind.
@@ -332,7 +332,7 @@ function paintGrass(time){
   ctx.stroke();
   // A narrow tapered leaf on the tallest blade catches soft light.
   if(i%3===0){
-   ctx.globalAlpha=far?.12:.18;
+   ctx.globalAlpha=far?.075:.11;
    ctx.fillStyle="#9bb57b";
    const tipX=x+h*.20+d,tipY=y-h*1.40;
    ctx.beginPath();
@@ -346,7 +346,7 @@ function paintGrass(time){
 }
 function paintBackdrop(time=performance.now()){
  const {width:W,height:H,mobile:m}=display;
- const art=theme==="forest"?(m?"forest-cinematic-mobile":"forest-cinematic"):theme;
+ const art=theme==="forest"?(m?"forest-painted-mobile":"forest-painted"):theme;
  if(ready(art)){
    ctx.drawImage(images[art],0,0,W,H);
    if(theme==="forest"){paintSceneMotion(time);paintGrass(time);return}
@@ -627,7 +627,7 @@ const fontState=()=>({
  loaded:{story:[...document.fonts].some(f=>f.family==="Gamja Flower"&&f.status==="loaded"),
          score:[...document.fonts].some(f=>f.family==="Jua"&&f.status==="loaded")}
 });
-window.__HEART_V4_QA__={beatParts,geometry,crestTravel,stepPose,beatCue,guideOpacity,guideState,fireflyPose,sceneMotionState,grassPose,effectiveGuide,pageAt,fontState,sceneInfo:()=>({theme,mobile:display.mobile,scene:theme==="forest"?(display.mobile?"forest-cinematic-mobile":"forest-cinematic"):theme,loaded:ready(display.mobile?"forest-cinematic-mobile":"forest-cinematic")}),getState:()=>({beat,playing,speed,theme,motion,meter:song.meter,title:song.title,audioState:audio?.state||"none",playedCount:played.size,pixelRatio:display.pixelRatio,grassTufts:(GRASS[display.mobile?"mobile":"desktop"]||[]).length,ambientFrames,ambientActive:ambientId!==0}),render:(b,time)=>render(b,time??performance.now()),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
+window.__HEART_V4_QA__={beatParts,geometry,crestTravel,stepPose,beatCue,guideOpacity,guideState,fireflyPose,sceneMotionState,grassPose,effectiveGuide,pageAt,fontState,sceneInfo:()=>({theme,mobile:display.mobile,scene:theme==="forest"?(display.mobile?"forest-painted-mobile":"forest-painted"):theme,loaded:ready(display.mobile?"forest-painted-mobile":"forest-painted")}),getState:()=>({beat,playing,speed,theme,motion,meter:song.meter,title:song.title,audioState:audio?.state||"none",playedCount:played.size,pixelRatio:display.pixelRatio,grassTufts:(GRASS[display.mobile?"mobile":"desktop"]||[]).length,ambientFrames,ambientActive:ambientId!==0}),render:(b,time)=>render(b,time??performance.now()),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
 window.addEventListener("resize",()=>render(beat));
 document.addEventListener("visibilitychange",()=>{if(document.hidden)stopAmbient();else if(!playing)startAmbient()});
 getAssets();$("#hudTitle").textContent=song.title;reset();
