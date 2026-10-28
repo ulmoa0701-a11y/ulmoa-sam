@@ -644,3 +644,61 @@ dialog form{display:flex;justify-content:flex-end}
 .insight-cover-row #cover-choose{border:1px solid #d9e0d2;border-radius:20px;background:transparent;color:#4f6e5a;padding:7px 12px;font:inherit;font-size:.75rem;cursor:pointer}
 .insight-cover-row #cover-choose:hover{background:#edf1e5}.insight-cover-row #cover-choose:focus-visible{outline:2px solid #42634f;outline-offset:3px}
 @media print{.discovery-disclosure:has([data-active="true"]):before{content:'내가 더 살펴본 장면';display:block;font-size:16pt;font-weight:700;margin-bottom:14px}.insight-letter:has(.self-discovery[data-active="true"]) .letter-memories{break-before:auto!important;padding-top:6mm!important}}
+
+
+/* ONE-GLANCE EDITION | The student's own choice is the headline.
+   Limit the first screen to one situation, one action, one useful request.
+   Preserve long authored explanation only behind "why" disclosure. */
+.insight-letter{--insight-accent:var(--story-ink,#45765b)}
+.insight-main{grid-template-columns:minmax(0,1fr) 88px!important;align-items:start!important;padding:16px 0 9px!important;gap:13px!important}
+.insight-main .letter-small{color:#73907a;font-weight:800;letter-spacing:.05em}
+.insight-scene{display:inline-flex;max-width:100%;width:fit-content;border:1px solid #d7e2d7;background:#f0f4ed;color:#466a58;border-radius:999px;padding:8px 14px;font-size:.88rem!important;font-weight:750!important;margin:11px 0 20px!important;line-height:1.5!important;overflow-wrap:anywhere}
+.insight-main h1{font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif!important;font-weight:850!important;font-size:clamp(2rem,4.2vw,3.15rem)!important;letter-spacing:-.065em!important;line-height:1.34!important;margin:0 0 12px!important;max-width:560px;color:#254e3c!important}
+.insight-main #letter-subtitle{font-size:.81rem!important;line-height:1.6;color:#8b9689;margin:0!important}
+.insight-original{margin:13px 0 0!important;padding:9px 12px;border-left:2px solid #baab8d;color:#766954!important;background:#faf6e9;border-radius:6px;font-size:.84rem!important;line-height:1.5!important;white-space:pre-wrap;overflow-wrap:anywhere}
+.insight-main .paper-character{width:85px!important;height:94px!important}
+.insight-main .paper-character img{width:81px!important;height:auto!important}
+.insight-number{display:block;font-size:.76rem;font-weight:850;letter-spacing:.04em;color:#5f8769}
+.insight-letter .insight-action{border:1px solid #d5e4d0!important;border-left:0!important;border-radius:16px!important;background:linear-gradient(115deg,#e6f0dd,#eff4e8)!important;padding:22px 26px!important;margin:25px 0 14px!important}
+.insight-letter .insight-action h2{font-size:.86rem!important;margin:9px 0 8px!important;font-weight:800;color:#466955}
+.insight-letter #reflection-step{font-size:clamp(1.15rem,2.2vw,1.46rem)!important;line-height:1.52!important;letter-spacing:-.04em;color:#264e3a;font-weight:820;max-width:620px;margin:0!important}
+.insight-letter .insight-words{margin:0 0 15px!important;padding:18px 22px!important;border:1px solid #e2e5da;background:#fcfcf5;border-radius:15px}
+.insight-letter .insight-words .insight-number{color:#768c7a}
+.insight-letter .insight-words h2{font-size:.84rem!important;color:#536e5c!important;margin:8px 0 5px!important}
+.insight-letter #reflection-request{border:0!important;padding:0!important;margin:5px 0 0!important;font-size:1.02rem!important;line-height:1.65!important;color:#2a4d40;font-weight:720}
+.insight-reader{padding:0 0 11px;border-bottom:1px solid #e5e9e0!important;margin:10px 0 9px!important}
+.insight-reader .reflection-edit summary{font-size:.89rem!important;color:#426950!important;font-weight:750;line-height:1.6;padding:11px 4px!important;min-height:46px;cursor:pointer}
+.insight-reader #reflection-options button{font-size:.81rem;min-height:43px}
+.insight-more{border:0;border-bottom:1px solid #e3e6df;margin:0 0 18px}
+.insight-more>summary{list-style:none;cursor:pointer;padding:12px 4px;min-height:46px;display:flex;align-items:center;justify-content:space-between;gap:14px;font-size:.79rem;color:#849185;font-weight:650}
+.insight-more>summary::-webkit-details-marker{display:none}
+.insight-more>summary:after{content:"＋";font-size:1.12rem;color:#7b927d}
+.insight-more[open]>summary:after{content:"−"}
+.insight-more .letter-reflection{background:#f7f8f1;border-radius:12px;margin:9px 0 0!important;padding:15px 18px!important}
+.insight-more .reflection-part{margin:10px 0!important}
+.insight-more .reflection-part h3{font-size:.77rem}
+.insight-more .reflection-part p{font-size:.85rem!important;line-height:1.65!important;color:#5b7061}
+.insight-more #reflection-warm{font-size:.85rem!important;margin:8px 0!important;line-height:1.7!important}
+.insight-more #reflection-check{font-size:.84rem;line-height:1.65;color:#566f5b;margin:8px 0}
+.insight-more #reflection-optional{font-size:.75rem!important;line-height:1.5!important;margin-bottom:13px}
+.insight-letter .paper-disclaimer{margin-top:12px;font-size:.72rem;color:#899487}
+@media(max-width:760px){
+ .insight-main{grid-template-columns:minmax(0,1fr) 60px!important;gap:10px!important}
+ .insight-main .paper-character{width:60px!important;height:67px!important}
+ .insight-main .paper-character img{width:57px!important}
+ .insight-scene{font-size:.78rem!important;padding:7px 10px;margin:9px 0 17px!important}
+ .insight-main h1{font-size:clamp(1.65rem,7vw,2.15rem)!important}
+ .insight-letter .insight-action{padding:17px 16px!important;margin:21px 0 11px!important}
+ .insight-letter #reflection-step{font-size:1.12rem!important;line-height:1.55!important}
+ .insight-letter .insight-words{padding:15px 16px!important}
+ .insight-letter #reflection-request{font-size:.92rem!important}
+}
+@media print{
+ #letter-page .insight-more{display:none!important}
+ #letter-page .insight-main h1{font-size:25pt!important}
+ #letter-page .insight-scene{border:1px solid #d7e2d7}
+ #letter-page .insight-action{padding:12px 15px!important;margin:12px 0!important}
+ #letter-page #reflection-step{font-size:14pt!important}
+ #letter-page .insight-words{padding:10px 13px!important;margin:8px 0!important}
+ #letter-page #reflection-request{font-size:11pt!important}
+}
