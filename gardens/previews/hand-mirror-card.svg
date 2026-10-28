@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="390" viewBox="0 0 600 390" role="img" aria-labelledby="title desc">
+<title id="title">모아의 마법 꽃밭 활동 대표 그림</title><desc id="desc">게임에 등장하는 도토리에서 반짝이는 꽃이 피어나는 모습을 보여주는 간단한 활동 장면입니다.</desc>
+<defs><linearGradient id="bg" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#f1f9fc"/><stop offset=".65" stop-color="#e9f5ec"/><stop offset="1" stop-color="#e5f3d2"/></linearGradient><linearGradient id="bloom" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffe9f2"/><stop offset="1" stop-color="#f2a8be"/></linearGradient><linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#aee2a2"/><stop offset="1" stop-color="#61b78a"/></linearGradient><filter id="soft" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#5d9774" flood-opacity=".14"/></filter></defs>
+<rect width="600" height="390" fill="url(#bg)"/>
+<path d="M0 340Q160 314 300 334T600 324V390H0Z" fill="#dfeec7" opacity=".75"/>
+<g filter="url(#soft)"><rect x="154" y="76" width="294" height="229" rx="47" fill="#fffdf7" stroke="#dce8da" stroke-width="3"/></g>
+<svg x="178" y="167" width="92" height="112" viewBox="0 0 100 118" aria-hidden="true">
+ <defs>
+  <linearGradient id="nut-nut" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#f7bb64"/><stop offset=".45" stop-color="#c9793e"/><stop offset="1" stop-color="#9b502d"/></linearGradient>
+  <linearGradient id="nut-cap" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#e0a663"/><stop offset="1" stop-color="#a86539"/></linearGradient>
+ </defs>
+ <path d="M51 22Q49 11 58 4" fill="none" stroke="#684629" stroke-width="7" stroke-linecap="round"/>
+ <path d="M26 43C13 56 17 80 31 97Q41 111 51 114Q65 108 76 91C91 64 82 45 73 41Z" fill="url(#nut-nut)" stroke="#754323" stroke-width="4" stroke-linejoin="round"/>
+ <path d="M31 60Q26 77 40 95" fill="none" stroke="#ffd39d" stroke-width="5" stroke-linecap="round" opacity=".65"/>
+ <path d="M17 49C8 45 10 32 21 26Q49 12 77 27C91 32 93 44 82 49Q51 63 17 49Z" fill="url(#nut-cap)" stroke="#744526" stroke-width="4" stroke-linejoin="round"/>
+ <path d="M22 31L31 51M36 24L44 53M54 22L58 53M71 27L70 50" stroke="#83502d" stroke-width="3.2" opacity=".65" stroke-linecap="round"/>
+ <path d="M22 41Q52 54 80 41" fill="none" stroke="#f3cc9a" stroke-width="3" opacity=".8" stroke-linecap="round"/>
+</svg>
+<path d="M276 199q22-14 37 0" fill="none" stroke="#9acbb0" stroke-width="7" stroke-linecap="round"/>
+<path d="M302 188l12 11-12 10" fill="none" stroke="#9acbb0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<g stroke="#7cbd93" stroke-width="7" stroke-linecap="round"><path d="M365 244v37" fill="none"/><path d="M365 264q-24-23-37-8 13 21 37 8" fill="url(#leaf)" stroke-width="2"/><path d="M366 260q26-20 37-5-13 18-37 5" fill="url(#leaf)" stroke-width="2"/></g>
+<g transform="translate(364 188)" filter="url(#soft)">
+<ellipse cx="0" cy="-34" rx="22" ry="37" fill="url(#bloom)"/>
+<ellipse cx="27" cy="-18" rx="22" ry="37" fill="url(#bloom)" transform="rotate(55 27 -18)"/>
+<ellipse cx="24" cy="23" rx="22" ry="37" fill="url(#bloom)" transform="rotate(120 24 23)"/>
+<ellipse cx="-25" cy="23" rx="22" ry="37" fill="url(#bloom)" transform="rotate(-120 -25 23)"/>
+<ellipse cx="-27" cy="-18" rx="22" ry="37" fill="url(#bloom)" transform="rotate(-55 -27 -18)"/>
+<circle r="29" fill="#ffdb72" stroke="#e4b558" stroke-width="2"/><circle cx="-8" cy="-7" r="4" fill="#fff2c0"/><circle cx="10" cy="3" r="4" fill="#f2c05e"/>
+</g>
+<g fill="#f9e29b"><path d="M297 109l5 12 12 5-12 5-5 12-5-12-12-5 12-5Z"/><circle cx="412" cy="150" r="5"/><circle cx="201" cy="124" r="4"/></g>
+<g stroke="#b9dfb7" stroke-width="5" stroke-linecap="round" fill="none"><path d="M117 323q10-11 20 0M475 325q10-12 20 0"/></g>
+</svg>

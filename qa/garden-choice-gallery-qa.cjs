@@ -78,6 +78,31 @@ fs.mkdirSync(out,{recursive:true});
       fs.writeFileSync(out+'/'+vp.device+'-all34-cards.json',JSON.stringify(audit,null,2)+'\n');
     }
 
+    // Two original in-game-art illustrations replace tiny screenshots of menus.
+    // This does not change what opens in the live preview, nor any game flow.
+    for(const game of ['rescue','hand-mirror']){
+      const card=page.locator('.play-card-enhanced[data-game="'+game+'"]');
+      const title=await card.getAttribute('data-title');
+      await page.locator('#gardenSearch').fill(title);
+      await card.waitFor({state:'visible'});
+      await card.scrollIntoViewIfNeeded();
+      assert.equal(await card.getAttribute('data-preview-kind'),'activity-art',
+        vp.device+' '+game+' wrong media class');
+      const asset=await card.locator('img.real-shot').evaluate(async img=>{
+        await img.decode();
+        return {url:new URL(img.currentSrc).pathname,width:img.naturalWidth,height:img.naturalHeight,
+          fallback:img.dataset.fallbackStep||null};
+      });
+      assert.equal(asset.url.endsWith('/gardens/previews/'+game+'-card.svg'),true,
+        vp.device+' '+game+' no dedicated illustration');
+      assert.equal(asset.width,600,vp.device+' '+game+' wrong illustration width');
+      assert.equal(asset.height,390,vp.device+' '+game+' wrong illustration height');
+      assert.equal(asset.fallback,null,vp.device+' '+game+' illustration failed to load');
+      await card.screenshot({path:out+'/'+vp.device+'-'+game+'-series-art.png'});
+    }
+    assert.equal(await page.locator('.play-card-enhanced[data-preview-kind="activity-art"]').count(),
+      2,'Only the two requested cards should use dedicated activity illustrations');
+
     if(vp.width<=390){
       // Money, changed supplies and feelings use authentic 890x190 intro banners.
       // A center crop of these panoramic assets was nearly blank on narrow cards.
