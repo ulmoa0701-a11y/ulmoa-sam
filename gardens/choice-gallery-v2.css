@@ -125,6 +125,11 @@
     display:block;width:100%;height:100%;padding:0;
     object-fit:cover;object-position:center;
   }
+  /* These three actual start images are very wide (890×190). Center-cropping
+     a portrait phone card shows only empty background; frame the character. */
+  .gardens-page .play-card-enhanced:is([data-game="money"],[data-game="change"],[data-game="feel"]) .play-card-media img{
+    object-position:right center;
+  }
   .gardens-page .play-card-details,
   .gardens-page.garden-picture-mode .play-card-details{
     display:flex;flex-direction:column;align-items:stretch;
