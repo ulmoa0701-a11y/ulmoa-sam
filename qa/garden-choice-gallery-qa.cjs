@@ -78,9 +78,11 @@ fs.mkdirSync(out,{recursive:true});
       fs.writeFileSync(out+'/'+vp.device+'-all34-cards.json',JSON.stringify(audit,null,2)+'\n');
     }
 
-    // Two original in-game-art illustrations replace tiny screenshots of menus.
-    // This does not change what opens in the live preview, nor any game flow.
-    for(const game of ['rescue','hand-mirror']){
+    // Every game now has a scene-specific SVG; the real game route stays unchanged.
+    // Assert 600x390 vector covers, not only that a low-res JPEG decoded.
+    const visualIds=await page.locator('.play-card-enhanced').evaluateAll(cards=>cards.map(c=>c.dataset.game));
+    assert.equal(visualIds.length,34);
+    for(const game of visualIds){
       const card=page.locator('.play-card-enhanced[data-game="'+game+'"]');
       const title=await card.getAttribute('data-title');
       await page.locator('#gardenSearch').fill(title);
@@ -98,28 +100,11 @@ fs.mkdirSync(out,{recursive:true});
       assert.equal(asset.width,600,vp.device+' '+game+' wrong illustration width');
       assert.equal(asset.height,390,vp.device+' '+game+' wrong illustration height');
       assert.equal(asset.fallback,null,vp.device+' '+game+' illustration failed to load');
-      await card.screenshot({path:out+'/'+vp.device+'-'+game+'-series-art.png'});
+      if(vp.width>390 || (vp.width<=390 && ['rescue','hand-mirror','flower','memory','money','recorder','feel'].includes(game)))\n        await card.screenshot({path:out+'/'+vp.device+'-'+game+'-series-art.png'});
     }
     assert.equal(await page.locator('.play-card-enhanced[data-preview-kind="activity-art"]').count(),
-      2,'Only the two requested cards should use dedicated activity illustrations');
+      34,'Every game should have a dedicated vector activity illustration');
 
-    if(vp.width<=390){
-      // Money, changed supplies and feelings use authentic 890x190 intro banners.
-      // A center crop of these panoramic assets was nearly blank on narrow cards.
-      for(const [id,query] of [['money','돈 세고'],['change','바뀐 준비물'],['feel','상황 속 마음']]){
-        await page.locator('#gardenSearch').fill(query);
-        const card=page.locator('.play-card-enhanced[data-game="'+id+'"]');
-        await card.waitFor({state:'visible'});
-        await card.scrollIntoViewIfNeeded();
-        const image=await card.locator('.play-card-media img').evaluate(async el=>{
-          await el.decode();
-          return {width:el.naturalWidth,height:el.naturalHeight,position:getComputedStyle(el).objectPosition};
-        });
-        assert.ok(image.width>100&&image.height>100,vp.device+' '+id+' authentic intro image missing');
-        assert.match(image.position,/right|100%/,vp.device+' '+id+' image crop hides its character');
-        await card.screenshot({path:out+'/'+vp.device+'-'+id+'-focused-card.png'});
-      }
-    }
     await page.locator('#gardenSearch').fill('꽃만');
     const flower=page.locator('.play-card-enhanced[data-game="flower"]');
     assert.ok(await flower.isVisible(),'flower game found by search');
