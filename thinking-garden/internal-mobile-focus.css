@@ -1,0 +1,114 @@
+/* Mobile gameplay clarity, 2026-10-28.
+   Findings: repeated mission panels push the real play below the phone fold.
+   Keep the spoken mission and the '방법 보기' disclosure; do not touch game
+   goals, target color/size, scoring, recording or input handling. */
+@media (max-width:600px){
+  #gameScreen .game-page{padding:10px 6px 24px}
+  #gameScreen .game-top{
+    grid-template-columns:42px minmax(0,1fr) auto;
+    gap:7px;margin-bottom:8px;
+  }
+  #gameScreen .back-btn{width:42px;height:42px;border-radius:13px}
+  #gameScreen .game-name small{display:none}
+  #gameScreen .game-name h2{font-size:clamp(16px,4.6vw,20px);line-height:1.22}
+  #gameScreen .game-status{gap:5px}
+  #gameScreen .game-status span,
+  #gameScreen .game-status b{padding:6px 7px;font-size:13px;border-radius:10px}
+  #gameScreen #gameWorld{min-height:0;border-width:3px;border-radius:22px}
+  #gameScreen #gameWorld .guide-panel{
+    width:calc(100% - 16px);min-height:63px;
+    margin:5px auto 5px;padding:6px 47px 6px 51px;
+    border-radius:18px;
+  }
+  #gameScreen #gameWorld .guide-panel img{
+    width:40px;height:44px;left:6px;top:50%;bottom:auto;
+    transform:translateY(-50%);animation:none!important;
+  }
+  #gameScreen #gameWorld .guide-copy{min-width:0}
+  #gameScreen #gameWorld .guide-copy small{display:none}
+  #gameScreen #gameWorld .guide-copy h3{
+    font-size:clamp(15px,4.1vw,18px);
+    line-height:1.2;margin:0;
+    overflow-wrap:anywhere;
+  }
+  /* The next card already states the concrete action, so don't repeat it
+     visibly in the mission bubble. Keep text in the DOM for assistive tools. */
+  #gameScreen #gameWorld:has(.moa-play-compass) #missionSub{
+    position:absolute;clip-path:inset(50%);width:1px;height:1px;
+    overflow:hidden;white-space:nowrap;margin:0;padding:0;
+  }
+  #gameScreen #speakMission{
+    position:absolute;top:50%;right:7px;
+    width:42px;height:42px;min-height:42px;
+    margin:0;padding:0;
+    border:1px solid #d7e9d8;background:#f1f9ef;
+    border-radius:12px;
+    transform:translateY(-50%);
+    font-size:0;line-height:1;cursor:pointer;
+  }
+  #gameScreen #speakMission:before{content:"🔊";font-size:19px}
+  #gameScreen #speakMission:focus-visible{
+    outline:3px solid #327e5f;outline-offset:3px;
+  }
+  #gameScreen .moa-play-compass{
+    margin:5px auto 7px;border-radius:15px;
+  }
+  #gameScreen .moa-compass-main{
+    grid-template-columns:34px minmax(0,1fr) 86px;
+    padding:7px 9px;gap:7px;
+  }
+  #gameScreen .moa-compass-icon{
+    width:38px;height:38px;font-size:20px;border-radius:10px;
+  }
+  #gameScreen .moa-compass-copy{gap:2px;line-height:1.3}
+  #gameScreen .moa-compass-tag{display:none}
+  #gameScreen .moa-compass-goal{font-size:15px;line-height:1.25}
+  #gameScreen .moa-compass-desc{
+    position:absolute;clip-path:inset(50%);width:1px;height:1px;
+    overflow:hidden;white-space:nowrap;margin:0;padding:0;
+  }
+  #gameScreen .moa-compass-help{
+    grid-column:3;grid-row:1;justify-self:end;align-self:center;
+    min-height:42px;min-width:80px;padding:8px 7px;
+    font-size:12px;line-height:1.2;
+  }
+  #gameScreen .game-area{
+    min-height:0;width:calc(100% - 16px);
+    margin:7px auto 44px;padding:3px;
+  }
+  /* Complex slow-play games retain their real targets and instructions while
+     reducing repeated framing; grid controls are intentionally untouched. */
+  #gameScreen #gameWorld .slow-task.moa-redesigned-world{
+    padding:10px!important;gap:9px;
+  }
+  #gameScreen #gameWorld .moa-world-scene-head{
+    min-height:72px;padding:9px 10px;gap:8px;border-radius:17px;
+  }
+  #gameScreen #gameWorld .moa-world-art{width:51px;height:51px}
+  #gameScreen #gameWorld .moa-world-scene-copy small{
+    font-size:11px;line-height:1.3;
+  }
+  #gameScreen #gameWorld .moa-world-scene-copy strong{
+    font-size:clamp(15px,4.2vw,18px);line-height:1.25;
+  }
+  /* Screen-report launcher stays available but no longer covers a whole
+     lower-right answer tile. Its accessible text remains unchanged. */
+  body:has(#gameScreen.active) #habomFeedbackLauncher{
+    width:44px;height:44px;min-height:44px;
+    padding:0;right:8px;
+    bottom:calc(8px + env(safe-area-inset-bottom,0px));
+    font-size:0;line-height:1;
+  }
+  body:has(#gameScreen.active) #habomFeedbackLauncher::before{
+    content:"💬";font-size:21px;
+  }
+}
+
+@media (max-width:380px){
+  /* The 360px hidden-friend leaf emoji is wider than its small choice tile.
+     Keep each target distinct without clipping its visible leaf or paw clue. */
+  #gameScreen #gameWorld .leaf-clue-game .leaf-cover{font-size:34px}
+  #gameScreen #gameWorld .leaf-clue-game .leaf-trail{
+    font-size:19px;letter-spacing:2px;
+  }
+}
