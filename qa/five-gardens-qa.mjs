@@ -40,14 +40,9 @@ for(const width of [360,390,1366]){
    id:card.dataset.game,kind:card.dataset.previewKind,
    src:card.querySelector('img.real-shot')?.getAttribute('src')||''
  })));
- const activityArt=cardMedia.filter(x=>x.id==='rescue'||x.id==='hand-mirror');
- const genuineCaptures=cardMedia.filter(x=>x.id!=='rescue'&&x.id!=='hand-mirror');
- check(cardMedia.length===34&&genuineCaptures.length===32&&
-   genuineCaptures.every(x=>x.kind==='real-capture'&&x.src.endsWith(previewVersion)),
-   width+' native game preview version missing from 32 unchanged cards');
- check(activityArt.length===2&&activityArt.every(x=>x.kind==='activity-art'&&
-   x.src.startsWith('previews/'+x.id+'-card.svg?v=')),
-   width+' two approved in-game-art card images missing');
+ check(cardMedia.length===34&&new Set(cardMedia.map(x=>x.id)).size===34&&
+   cardMedia.every(x=>x.kind==='activity-art'&&x.src.startsWith('previews/'+x.id+'-card.svg?v=20261028-art34-v1')),
+   width+' 34 distinct SVG game activity covers missing');
  check(await page.locator('#gardenSearch').count()===1,width+' overall search missing');
  const firstVisible=await page.locator('#cognitive .play-card-enhanced:not([hidden])').count();
  check(firstVisible===6,width+' cognitive preview should begin with six cards, got '+firstVisible);
