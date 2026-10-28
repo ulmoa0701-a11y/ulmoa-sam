@@ -1,6 +1,7 @@
-/* Choice gallery V2 — selecting a game, not scrolling through magnified screenshots.
-   The media remains a crop from that game's genuine play capture.
-   The preview dialog embeds the actual live game screen; no mock illustrations. */
+/* Choice gallery V2 — concise activity selection, not a wall of full screens.
+   32 cards crop actual game captures. The hand/rescue cards use illustrated
+   scenes built from their own game assets; each is labeled as representative art.
+   The iframe preview always embeds the unchanged actual game URL. */
 .gardens-page{
   --choice-ink:#264537;
   --choice-mint:#e2efe5;
