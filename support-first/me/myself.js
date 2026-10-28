@@ -349,9 +349,9 @@ function recap(){
 }
 function fullReport(){
  const view=window.MoaLetterReflection.compose(records);
- const lines=["모아와 함께 찾은 작은 실마리",view.title,dateText(),"오늘의 표지: "+coverTheme().name,"", "가능성과 제안이며 성격검사·진단 결과가 아니야."];
  const mini=glance(records,view);
- lines.push("내가 고른 장면: "+mini.scene,"가장 걸리는 점: "+mini.heading,"","딱 한 가지 해볼 일",mini.action,"","필요할 때 이렇게 말해도 돼",mini.request);
+ const lines=["모아가 너에게 보낸 편지",mini.heading,dateText(),"오늘의 표지: "+coverTheme().name,"", "선택한 답에서 생각해 본 제안이야. 성격검사·진단 결과는 아니야."];
+ lines.push("내가 고른 장면: "+mini.scene,"","딱 한 가지 해볼 일",mini.action,"","필요할 때 이렇게 말해도 돼",mini.request);
  if(mini.note)lines.push("내가 직접 쓴 말: "+mini.note);
  lines.push("","추가 설명 (선택)");
  for(const part of view.parts)lines.push(part.label,part.text);
