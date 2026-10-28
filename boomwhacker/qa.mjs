@@ -1175,10 +1175,10 @@ async function heartV4Smoke(){
     "V4 "+cfg.name+": two brief steps must HOLD between contacts, with small lifts");
    check(data.eventsSolid.length===1&&data.eventsSplit.length>=2,
     "V4 "+cfg.name+": original whole-heart and split-heart musical grammar changed");
-   check(["forest","night","classroom","heart-frame","moa","forest-enchanted","forest-enchanted-mobile","forest-canopy-left","forest-canopy-right","forest-canopy-left-mobile","forest-canopy-right-mobile","forest-cinematic","forest-cinematic-mobile","forest-cinematic-canopy-left","forest-cinematic-canopy-right","forest-cinematic-canopy-left-mobile","forest-cinematic-canopy-right-mobile"].every(n=>data.assets[n]),
+   check(["forest","night","classroom","heart-frame","moa","forest-enchanted","forest-enchanted-mobile","forest-canopy-left","forest-canopy-right","forest-canopy-left-mobile","forest-canopy-right-mobile","forest-cinematic","forest-cinematic-mobile","forest-cinematic-canopy-left","forest-cinematic-canopy-right","forest-cinematic-canopy-left-mobile","forest-cinematic-canopy-right-mobile","forest-painted","forest-painted-mobile"].every(n=>data.assets[n]),
     "V4 "+cfg.name+": the scene, original assets or mobile adaptation did not load");
    const stageArt=await page.evaluate(()=>window.__HEART_V4_QA__.sceneInfo());
-   check(stageArt.loaded&&stageArt.scene===(cfg.name==="mobile"?"forest-cinematic-mobile":"forest-cinematic"),
+   check(stageArt.loaded&&stageArt.scene===(cfg.name==="mobile"?"forest-painted-mobile":"forest-painted"),
     "V4 "+cfg.name+": sample-quality night stage was not selected "+JSON.stringify(stageArt));
    const cuePixels=await page.evaluate(()=>{
      const q=window.__HEART_V4_QA__,canvas=document.querySelector("#score"),ctx=canvas.getContext("2d");
