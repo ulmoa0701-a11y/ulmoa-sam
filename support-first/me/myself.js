@@ -127,29 +127,32 @@ function clearFrom(start){
  for(let i=start;i<stages.length;i++){const a=records[stages[i]];a.choice=null;a.detail=null;a.note="";}
  revoke();
 }
+let lastRenderedPosition=-1;
 function refreshThread(){
  const area=$("thread");area.replaceChildren();
- append("div","thread-date","모아와 나 · 처음 나누는 이야기",area);
- const hello=append("div","chat-row moa",undefined,area);
- append("img","chat-avatar",undefined,hello).src="../../assets/moa-hello-wave-20261012.webp";
- append("p","chat-bubble",prompts.start,hello);
- for(let i=0;i<position;i++){
-  const id=stageAt(i),a=records[id],cfg=config(id);
-  if(!a.choice)continue;
-  if(a.choice!=="pass"){
-   const mine=append("div","chat-row self",undefined,area);
-   const label=choiceLabel(id,a.choice);
-   append("p","chat-bubble",label+(a.detail?" · "+a.detail:""),mine);
-  }
-  const reply=append("div","chat-row moa",undefined,area);
-  append("img","chat-avatar",undefined,reply).src="../../assets/moa-hello-wave-20261012.webp";
-  let reflection=a.choice==="pass"?"알겠어. 이 질문은 건너뛸게.":a.choice==="unknown"?"지금 모르겠어도 괜찮아. 바로 정하지 않아도 돼.":a.choice==="own"?"네 말로 전해줬구나. 내용은 내가 분석하지 않고 그대로 남겨둘게.":cfg.reflect[a.choice]||"말해줘서 고마워. 정답은 없어.";
-  append("p","chat-bubble",reflection,reply);
+ const previous=stages.slice(0,position).filter(id=>records[id].choice);
+ if(!previous.length){
+  area.hidden=true;
+  $("side-remember-text").textContent="네가 고를 첫 이야기를 기다리고 있어";
+  return;
  }
+ area.hidden=false;
+ append("span","thread-caption","여기까지 네가 고른 말",area);
+ const trail=append("div","story-trail",undefined,area);
+ for(const id of previous){
+  const answer=records[id],segment=append("div","trail-card",undefined,trail);
+  append("span","trail-label",storyLabels[id]||"오늘의 이야기",segment);
+  let caption=answer.choice==="pass"?"넘어간 질문":answer.choice==="unknown"?"아직 모르겠어":(choiceLabel(id,answer.choice)+(answer.detail?" · "+answer.detail:""));
+  append("strong","trail-answer",caption||"내 말로 이야기했어",segment);
+ }
+ const last=previous.map(id=>records[id]).filter(a=>a.choice!=="pass"&&a.choice!=="unknown").at(-1);
+ $("side-remember-text").textContent=last?(last.detail||choiceLabel(previous.filter(id=>records[id].choice!=="pass"&&records[id].choice!=="unknown").at(-1),last.choice)):"건너뛰어도 네 이야기야";
 }
-function card(c,selected){
+function card(c,selected,index){
  const b=document.createElement("button");b.type="button";b.className="choice"+(selected?" active":"");b.dataset.choice=c[0];b.setAttribute("aria-pressed",String(selected));
- append("span","choice-symbol",c[2],b);append("span","choice-label",c[1],b);
+ append("span","choice-symbol",String(index+1).padStart(2,"0"),b);
+ append("span","choice-label",c[1],b);
+ append("span","choice-indicator",selected?"✓":"↗",b).setAttribute("aria-hidden","true");
  b.addEventListener("click",()=>choose(c[0]));
  return b;
 }
@@ -158,11 +161,15 @@ function render(){
  const id=stageAt(position),cfg=config(id),a=records[id];
  $("intro").hidden=true;$("result").hidden=true;$("conversation").hidden=false;
  refreshThread();
+ const actualStep=position+1;
+ $("progress-count").textContent=String(actualStep).padStart(2,"0")+" / "+String(stages.length).padStart(2,"0");
+ $("progress-bar").style.width=(actualStep/stages.length*100)+"%";
+ $("progress-track").setAttribute("aria-valuenow",String(actualStep));
  $("question-kicker").textContent=(data[id]?.kicker||"조금 더 알아가기")+" · 모아";
  $("question-title").textContent=cfg.question||cfg.prompt;
  $("question-hint").textContent=cfg.hint;
  const grid=$("choice-grid");grid.replaceChildren();
- cfg.choices.forEach(c=>grid.append(card(c,a.choice===c[0])));
+ cfg.choices.forEach((c,i)=>grid.append(card(c,a.choice===c[0],i)));
  $("unknown").classList.toggle("active",a.choice==="unknown");
  $("pass").classList.toggle("active",a.choice==="pass");
  const follow=$("more-talk"),list=$("detail-choices");list.replaceChildren();
@@ -183,10 +190,11 @@ function render(){
  $("own-toggle").hidden=a.choice==="pass"||a.choice==="unknown";
  $("back").disabled=position===0;
  $("next").disabled=!a.choice;
- $("next").innerHTML=position===stages.length-1?'우리 이야기 돌아보기 <span aria-hidden="true">→</span>':'이어가기 <span aria-hidden="true">→</span>';
+ $("next").innerHTML=position===stages.length-1?'내 이야기 한 장 받기 <span aria-hidden="true">→</span>':'다음 이야기 <span aria-hidden="true">→</span>';
  $("panel-tip").textContent=a.choice==="pass"?"좋아, 넘어가자.":a.choice==="unknown"?"모르겠다는 대답도 괜찮아.":a.choice?"선택한 답은 언제든 바꿀 수 있어.":"고르거나 건너뛰어도 돼";
  // Keep the conversation readable without auto-focusing a button or stealing keyboard focus.
- if(document.activeElement!==$("question-title"))$("question-panel").scrollIntoView({behavior:"instant",block:"start"});
+ if(lastRenderedPosition!==position&&document.activeElement!==$("question-title"))$("question-panel").scrollIntoView({behavior:"instant",block:"start"});
+ lastRenderedPosition=position;
 }
 function choose(key){
  const id=stageAt(position),a=records[id];
@@ -311,10 +319,33 @@ function glance(records,view){
  const note=["moment","topic"].map(id=>a(id).note?.trim()).find(Boolean)||"";
  return {scene,heading,action,request,note,expanded:view};
 }
+function renderResultFacts(){
+ const area=$("result-facts");area.replaceChildren();
+ const content=[];
+ const spark=records.spark,moment=records.moment,pace=records.pace,topic=records.topic,wish=records.wish;
+ if(hasAnswer(spark)&&spark.choice!=="own")content.push(["내가 편한 순간",chosen("spark")+(spark.detail?" · "+spark.detail:""),"01"]);
+ if(hasAnswer(moment)&&moment.choice!=="none"&&moment.choice!=="own")content.push(["내가 이야기한 장면",chosen("moment")+(moment.detail?" · "+moment.detail:""),"02"]);
+ else if(hasAnswer(topic)&&topic.choice!=="none"&&topic.choice!=="own")content.push(["요즘 이야기하고 싶은 것",chosen("topic"),"02"]);
+ if(hasAnswer(pace)&&pace.choice!=="own")content.push(["나에게 편한 대화",chosen("pace"),"03"]);
+ if(content.length<3&&hasAnswer(wish)&&wish.choice!=="unsure"&&wish.choice!=="own")content.push(["다음에 해보고 싶은 것",chosen("wish"),"04"]);
+ if(!content.length){
+  const box=append("div","result-fact result-fact-empty",undefined,area);
+  append("span","fact-value","오늘은 고르지 않은 이야기가 더 많아. 모아가 대신 결정하지 않을게.",box);
+  return;
+ }
+ for(const [label,value,num] of content.slice(0,3)){
+  const node=append("div","result-fact",undefined,area);
+  append("span","fact-index",num,node);
+  const body=append("div","fact-copy",undefined,node);
+  append("span","fact-label",label,body);
+  append("strong","fact-value",value,body);
+ }
+}
 function renderReflection(){
  const view=window.MoaLetterReflection.compose(records);
  const mini=glance(records,view);
  $("result-title").textContent=mini.heading;
+ renderResultFacts();
  $("insight-scene").textContent=mini.scene;
  $("reflection-step").textContent=mini.action;
  $("reflection-request").textContent=mini.request;
@@ -398,7 +429,7 @@ function finish(){
  $("result-title").focus({preventScroll:true});
 }
 function begin(){
- started=true;complete=false;position=0;
+ started=true;complete=false;position=0;lastRenderedPosition=-1;
  $("intro").hidden=true;render();window.scrollTo({top:0,behavior:"instant"});
  $("question-title").focus({preventScroll:true});
 }
@@ -406,7 +437,7 @@ function reset(){
  window.MoaSelfDiscovery.clear();
  clearReflectionFeedback();
  for(const id of stages){records[id]={choice:null,detail:null,note:""};}
- revoke();position=0;complete=false;started=false;coverChoice=null;
+ revoke();position=0;complete=false;started=false;coverChoice=null;lastRenderedPosition=-1;
  $("conversation").hidden=true;$("result").hidden=true;$("intro").hidden=false;
  window.scrollTo({top:0,behavior:"instant"});
  $("welcome-title").focus?.({preventScroll:true});
