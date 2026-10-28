@@ -817,7 +817,7 @@ body{background:#f3f3ee;color:#27453a}
 .insight-letter .insight-action{margin-top:14px!important}
 .insight-letter #result-title{font-size:clamp(2rem,3.55vw,2.75rem)!important;line-height:1.32!important}
 .insight-letter .paper-character{border-radius:50%;background:radial-gradient(circle at 50% 50%,#f1f6e8,#e7f0db);box-shadow:0 0 0 6px #edf3e67c}
-.insight-letter #letter-page,.letter-paper{overflow:visible}
+.insight-letter#letter-page{overflow:hidden}
 .insight-letter .paper-disclaimer{font-size:.71rem;line-height:1.75}
 
 /* Lean mobile composition, keep controls and exits available */
