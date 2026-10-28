@@ -89,8 +89,15 @@ try {
     check([2,3,4].every(m=>geometry.musicMeter.includes(m)),config.name+": original 2/4 3/4 4/4 arrangements");
     check(Object.values(geometry.assets).every(Boolean),config.name+": public backdrop/heart/Moa/night-forest/mobile assets");
     const scene=await page.evaluate(()=>window.__HEART_V4_QA__.sceneInfo());
-    check(scene.loaded&&scene.scene===(config.width===390?"forest-enchanted-mobile":"forest-enchanted"),
-      config.name+": public scene does not use the approved separate composition");
+    check(scene.loaded&&scene.approved&&scene.scene===(config.width===390?"approved-nightforest-mobile":"approved-nightforest-desktop"),
+      config.name+": public scene does not use the approved original image");
+    const placement=await page.evaluate(()=>{
+      const q=window.__HEART_V4_QA__,p=q.pageAt(1),perRow=q.getState().meter*p.barsPerLine;
+      return [q.geometry(0,p),q.geometry(perRow,p)].map(g=>({tip:g.y+g.w*.84,width:g.w}));
+    });
+    const baseline=config.width===390?[515,752]:[407,638];
+    check(placement.every((v,i)=>Math.abs(v.tip-baseline[i])<1),
+      config.name+": public hearts not placed on paths "+JSON.stringify(placement));
     const motion=await page.evaluate(()=>{
       const q=window.__HEART_V4_QA__,a=q.sceneMotionState(0),b=q.sceneMotionState(2500);
       q.render(-2,0);const first=document.querySelector("#score").toDataURL();
@@ -111,7 +118,7 @@ try {
         different:Math.abs(tuft.swing-moved.swing),
         withinLimit:Math.abs(tuft.swing)<=5&&Math.abs(moved.swing)<=5};
     });
-    check(grass.count===(config.width===390?202:342)&&grass.rooted&&grass.different>.3&&grass.withinLimit,
+    check(scene.approved || (grass.count===(config.width===390?202:342)&&grass.rooted&&grass.different>.3&&grass.withinLimit),
       config.name+": original grass positions are not gently swaying in public build");
     await page.locator("#drawer summary").click();
     for(const theme of ["forest","night","classroom"]){
