@@ -40,7 +40,7 @@ async function snap(page,selector,name,record){
  return false;
 }
 async function capture(id,url,{native=false}={}){
- const context=await browser.newContext({viewport:{width:screenWidth,height:screenHeight},deviceScaleFactor:1,reducedMotion:'reduce',permissions:[]});
+ const context=await browser.newContext({viewport:{width:screenWidth,height:screenHeight},isMobile:screenWidth<=500,hasTouch:screenWidth<=500,deviceScaleFactor:1,reducedMotion:'reduce',permissions:[]});
  const page=await context.newPage();
  const entry={id,url,device:currentDevice,viewport:[screenWidth,screenHeight],preview:false,play:false,playState:null,errors:[]};
  page.on('pageerror',e=>entry.errors.push(e.message.slice(0,100)));
@@ -124,7 +124,7 @@ async function capture(id,url,{native=false}={}){
      entry.play=await snap(page,'.garden-stage,#viewer,.play-panel,#play,.shell main',id+'-play',entry);
    }catch{}
   }else if(id==='rhythm-touch'){
-   entry.preview=await snap(page,'.heading',id);
+   entry.preview=await snap(page,'main',id);
    await page.locator('#startBtn').click({timeout:3500});
    await page.waitForTimeout(350);
    entry.play=await snap(page,'.game',id+'-play',entry);
@@ -142,14 +142,19 @@ async function capture(id,url,{native=false}={}){
    const wide=await page.evaluate(()=>window.moaRescueGame.scene.isActive('landtitle'));
    const rect=await canvas.boundingBox();
    if(!rect||rect.width<300||rect.height<250)throw Error('Rescue canvas is too small');
-   if(!wide)throw Error('Desktop rescue capture unexpectedly opened portrait scene');
-   await canvas.click({position:{x:Math.round(rect.width*.5),y:Math.round(rect.height*(619/760))}});
-   await page.waitForFunction(()=>window.moaRescueGame?.scene?.isActive('landmission'),null,{timeout:10000});
-   await canvas.click({position:{x:Math.round(rect.width*(754/1200)),y:Math.round(rect.height*(498/760))}});
-   await page.waitForFunction(()=>{
-    const scene=window.moaRescueGame?.scene?.getScene('landmission');
-    return scene?.sys?.isActive()&&scene.targets?.length>=2&&!scene.lock;
-   },null,{timeout:10000});
+   // Phaser has two real layouts. Click their actual title/briefing controls,
+   // never mark the portrait title screen as completed gameplay.
+   const worldWidth=wide?1200:720,worldHeight=wide?760:1280;
+   const titleStart={x:wide?600:360,y:wide?619:1030};
+   const dispatch={x:wide?754:360,y:wide?498:827};
+   const sceneName=wide?'landmission':'mission';
+   await canvas.click({position:{x:Math.round(rect.width*titleStart.x/worldWidth),y:Math.round(rect.height*titleStart.y/worldHeight)}});
+   await page.waitForFunction(name=>window.moaRescueGame?.scene?.isActive(name),sceneName,{timeout:10000});
+   await canvas.click({position:{x:Math.round(rect.width*dispatch.x/worldWidth),y:Math.round(rect.height*dispatch.y/worldHeight)}});
+   await page.waitForFunction(name=>{
+    const scene=window.moaRescueGame?.scene?.getScene(name);
+    return scene?.sys?.isActive()&&!scene.lock&&(name==='landmission'?scene.targets?.length>=2:scene.actors?.length>=2);
+   },sceneName,{timeout:10000});
    entry.play=await snap(page,'#game canvas',id+'-play',entry);
    if(!entry.play)throw Error('Rescue mission animals were not photographed');
    entry.playState='mission';
