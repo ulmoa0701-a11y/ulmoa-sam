@@ -36,8 +36,18 @@ for(const width of [360,390,1366]){
  check(data.overflow<=3,width+' horizontal overflow '+data.overflow);
  check(data.navPresent,width+' shared navigation missing');
  check(await page.locator('.play-card-enhanced').count()===34,width+' enhanced game card count mismatch');
- const photoURLs=await page.locator('.play-card-enhanced img.real-shot').evaluateAll(nodes=>nodes.map(x=>x.getAttribute('src')||''));
- check(photoURLs.length===34&&photoURLs.every(u=>u.endsWith(previewVersion)),width+' cropped game preview version not used across all 34 cards');
+ const cardMedia=await page.locator('.play-card-enhanced').evaluateAll(cards=>cards.map(card=>({
+   id:card.dataset.game,kind:card.dataset.previewKind,
+   src:card.querySelector('img.real-shot')?.getAttribute('src')||''
+ })));
+ const activityArt=cardMedia.filter(x=>x.id==='rescue'||x.id==='hand-mirror');
+ const genuineCaptures=cardMedia.filter(x=>x.id!=='rescue'&&x.id!=='hand-mirror');
+ check(cardMedia.length===34&&genuineCaptures.length===32&&
+   genuineCaptures.every(x=>x.kind==='real-capture'&&x.src.endsWith(previewVersion)),
+   width+' native game preview version missing from 32 unchanged cards');
+ check(activityArt.length===2&&activityArt.every(x=>x.kind==='activity-art'&&
+   x.src.startsWith('previews/'+x.id+'-card.svg?v=')),
+   width+' two approved in-game-art card images missing');
  check(await page.locator('#gardenSearch').count()===1,width+' overall search missing');
  const firstVisible=await page.locator('#cognitive .play-card-enhanced:not([hidden])').count();
  check(firstVisible===6,width+' cognitive preview should begin with six cards, got '+firstVisible);
