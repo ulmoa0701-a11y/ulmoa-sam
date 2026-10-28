@@ -142,7 +142,7 @@ function refreshThread(){
  for(const id of previous){
   const answer=records[id],segment=append("div","trail-card",undefined,trail);
   append("span","trail-label",storyLabels[id]||"오늘의 이야기",segment);
-  let caption=answer.choice==="pass"?"넘어간 질문":answer.choice==="unknown"?"아직 모르겠어":answer.detail||choiceLabel(id,answer.choice);
+  let caption=answer.choice==="pass"?"넘어간 질문":answer.choice==="unknown"?"아직 모르겠어":(choiceLabel(id,answer.choice)+(answer.detail?" · "+answer.detail:""));
   append("strong","trail-answer",caption||"내 말로 이야기했어",segment);
  }
  const last=previous.map(id=>records[id]).filter(a=>a.choice!=="pass"&&a.choice!=="unknown").at(-1);
@@ -323,8 +323,8 @@ function renderResultFacts(){
  const area=$("result-facts");area.replaceChildren();
  const content=[];
  const spark=records.spark,moment=records.moment,pace=records.pace,topic=records.topic,wish=records.wish;
- if(hasAnswer(spark)&&spark.choice!=="own")content.push(["내가 편한 순간",spark.detail||chosen("spark"),"01"]);
- if(hasAnswer(moment)&&moment.choice!=="none"&&moment.choice!=="own")content.push(["내가 이야기한 장면",moment.detail||chosen("moment"),"02"]);
+ if(hasAnswer(spark)&&spark.choice!=="own")content.push(["내가 편한 순간",chosen("spark")+(spark.detail?" · "+spark.detail:""),"01"]);
+ if(hasAnswer(moment)&&moment.choice!=="none"&&moment.choice!=="own")content.push(["내가 이야기한 장면",chosen("moment")+(moment.detail?" · "+moment.detail:""),"02"]);
  else if(hasAnswer(topic)&&topic.choice!=="none"&&topic.choice!=="own")content.push(["요즘 이야기하고 싶은 것",chosen("topic"),"02"]);
  if(hasAnswer(pace)&&pace.choice!=="own")content.push(["나에게 편한 대화",chosen("pace"),"03"]);
  if(content.length<3&&hasAnswer(wish)&&wish.choice!=="unsure"&&wish.choice!=="own")content.push(["다음에 해보고 싶은 것",chosen("wish"),"04"]);
