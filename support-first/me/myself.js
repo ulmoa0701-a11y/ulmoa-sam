@@ -269,17 +269,64 @@ function clearReflectionFeedback(){
  document.querySelectorAll("[data-response]").forEach(b=>b.setAttribute("aria-pressed","false"));
  updateReflectionFeedback();
 }
+// A short, literal first screen. All expanded explanations remain separately available.
+function glance(records,view){
+ const a=id=>records[id]||{};
+ const key=(a("topic").choice||"")+"."+(a("moment").choice||"");
+ const suggestions={
+  "school.arrival":["학교에 가기 전, 가장 힘든 순간 하나 고르기","학교에 가는 길에 이 부분이 어려워. 같이 봐줄래?"],
+  "school.lesson":["완성된 예시 하나 보고, 첫 번째 할 일 정하기","어떻게 시작하는지 예시 하나만 보여줄래?"],
+  "school.people":["조금 편했던 자리 한 곳 떠올리기","어떤 자리에서 더 편한지 같이 찾아줄래?"],
+  "school.expect":["이번에 어디까지 하면 되는지 한 가지 정하기","어디까지 하면 되는지 기준을 알려줄래?"],
+  "people.begin":["지금 함께 보고 있는 것으로 한마디 시작해 보기","첫마디를 같이 골라줄래?"],
+  "people.reply":["대답하기 전에 생각할 시간 요청하기","잠깐 생각할 시간을 줄래?"],
+  "people.alone":["함께하고 싶은지 잠깐 쉬고 싶은지 고르기","어떤 게 편한지 내 얘기부터 들어줄래?"],
+  "people.trouble":["실제로 들은 말과 내 생각을 나눠 적기","그 말이 어떤 뜻이었는지 확인해도 될까?"],
+  "mood.wake":["아침에 가장 힘든 순간 하나 적기","아침에 이 부분이 힘들어. 같이 살펴봐줄래?"],
+  "mood.start":["지금 할 수 있는 첫 동작 하나 정하기","시작할 때 이 부분이 어려워. 같이 봐줄래?"],
+  "mood.night":["떠오르는 생각 하나만 적어두기","이 생각이 자꾸 떠올라. 나중에 같이 이야기할래?"],
+  "mood.unexpected":["기분이 바뀌기 전 상황 하나 떠올리기","무슨 기분인지 아직 몰라. 같이 살펴봐줄래?"],
+  "day.talk":["말하기 전에 끝까지 들어달라고 부탁하기","내 말부터 끝까지 들어줄래?"],
+  "day.plan":["첫 번째로 할 일 하나만 고르기","뭐부터 해야 할지 같이 정해줄래?"],
+  "day.change":["바뀐 점 하나 확인하고, 다음 할 일 하나 고르기","계획이 바뀌어서 헷갈려. 다음 한 가지만 같이 정해줄래?"],
+  "day.alone":["혼자 해볼 부분과 물어볼 부분 나누기","이 부분은 내가 해볼게. 여기는 확인해줄래?"]
+ };
+ const overrides={
+  "계획을 다시 세우기 어려워":["그대로인 것·바뀐 것 하나씩 적고, 다음 일 하나 정하기","계획이 바뀌면 다시 정하기 어려워. 같이 정해줄래?"],
+  "그다음에 뭘 해야 할지 모르겠어":["바뀐 뒤 첫 번째로 할 일 하나만 정하기","계획이 바뀌어서 헷갈려. 다음에 뭐부터 할까?"],
+  "마음이 편해지는 데 시간이 걸려":["새 계획을 확인한 뒤 잠깐 쉬는 시간 갖기","바뀐 건 알겠어. 잠깐 마음 정리할 시간 줄래?"],
+  "설명이 잘 이해되지 않아":["완성된 예시 하나 보고, 첫 번째 할 일 확인하기","설명이 잘 안 잡혀. 예시 하나 보여줄래?"],
+  "해야 할 일이 너무 많게 느껴져":["지금 할 일 하나만 골라 눈앞에 두기","한 번에 많아서 어려워. 첫 번째 일부터 같이 정해줄래?"],
+  "틀리거나 실수할까 걱정돼":["평가 없이 한 번 연습해 보기","틀릴까 걱정돼. 먼저 연습해 봐도 될까?"],
+  "하루를 시작할 힘이 부족해":["아침에 하기 어려운 일 한 가지 도움 요청하기","아침에 기운이 부족해. 이 부분을 도와줄래?"],
+  "시작할 기운이 잘 안 나":["기운이 없는 순간을 말하고 함께 살펴보기","시작할 기운이 안 나. 내 상태를 같이 봐줄래?"]
+ };
+ const chosenDetail=a("moment").detail;
+ const scene= a("moment").choice&&!["unknown","pass","none"].includes(a("moment").choice)?choiceLabel("moment",a("moment").choice):
+  a("topic").choice&&!["unknown","pass","none"].includes(a("topic").choice)?choiceLabel("topic",a("topic").choice):"오늘은 아직 고르지 않았어";
+ const heading=chosenDetail|| (scene==="오늘은 아직 고르지 않았어"?"아직 정하지 않아도 괜찮아":scene);
+ const pair=overrides[chosenDetail]||suggestions[key];
+ const action=pair?.[0]||(scene==="오늘은 아직 고르지 않았어"?"필요할 때 다시 시작하기":"어떤 도움이 필요한지 한 가지 직접 고르기");
+ const request=pair?.[1]||(scene==="오늘은 아직 고르지 않았어"?"오늘은 여기까지만 할래.":"내가 원하는 방식으로 다시 이야기해볼래?");
+ const note=["moment","topic"].map(id=>a(id).note?.trim()).find(Boolean)||"";
+ return {scene,heading,action,request,note,expanded:view};
+}
 function renderReflection(){
  const view=window.MoaLetterReflection.compose(records);
- $("result-title").textContent=view.title;
+ const mini=glance(records,view);
+ $("result-title").textContent=mini.heading;
+ $("insight-scene").textContent=mini.scene;
+ $("reflection-step").textContent=mini.action;
+ $("reflection-request").textContent=mini.request;
+ $("letter-subtitle").textContent="네가 직접 고른 말이야. 맞지 않으면 바꿔도 돼.";
+ $("insight-original").hidden=!mini.note;
+ $("insight-original").textContent=mini.note?"네가 직접 남긴 말 · “"+mini.note+"”":"";
  const area=$("reflection-parts");area.replaceChildren();
  for(const part of view.parts){
   const row=append("div","reflection-part",undefined,area);
   append("h3","",part.label,row);append("p","",part.text,row);
  }
  $("reflection-warm").textContent=view.warm;
- $("reflection-step").textContent=view.step;
- $("reflection-request").textContent=view.request;
  $("reflection-check").textContent=view.check;
  $("reflection-optional").textContent=view.optional;
  updateReflectionFeedback();
@@ -302,9 +349,13 @@ function recap(){
 }
 function fullReport(){
  const view=window.MoaLetterReflection.compose(records);
- const lines=["모아와 함께 찾은 작은 실마리",view.title,dateText(),"오늘의 표지: "+coverTheme().name,"", "가능성과 제안이며 성격검사·진단 결과가 아니야."];
- for(const part of view.parts)lines.push("",part.label,part.text);
- lines.push("","한 번은 이렇게 해봐도 좋아",view.step,view.optional,"","말이 막히면, 이 문장부터",view.request,"","이 방법이 나에게 맞는지 알아보려면",view.check,"",view.warm);
+ const mini=glance(records,view);
+ const lines=["모아가 너에게 보낸 편지",mini.heading,dateText(),"오늘의 표지: "+coverTheme().name,"", "선택한 답에서 생각해 본 제안이야. 성격검사·진단 결과는 아니야."];
+ lines.push("내가 고른 장면: "+mini.scene,"","딱 한 가지 해볼 일",mini.action,"","필요할 때 이렇게 말해도 돼",mini.request);
+ if(mini.note)lines.push("내가 직접 쓴 말: "+mini.note);
+ lines.push("","추가 설명 (선택)");
+ for(const part of view.parts)lines.push(part.label,part.text);
+ lines.push("어떤 점이 달라지는지 확인하기",view.check,"",view.warm,view.optional);
  if(feedbackText())lines.push("","내가 읽고 덧붙인 말: "+feedbackText());
  const discoveryLines=window.MoaSelfDiscovery.lines();
  if(discoveryLines.length)lines.push("",...discoveryLines);
