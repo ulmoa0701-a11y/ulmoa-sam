@@ -103,3 +103,12 @@
     content:"💬";font-size:21px;
   }
 }
+
+@media (max-width:380px){
+  /* The 360px hidden-friend leaf emoji is wider than its small choice tile.
+     Keep each target distinct without clipping its visible leaf or paw clue. */
+  #gameScreen #gameWorld .leaf-clue-game .leaf-cover{font-size:34px}
+  #gameScreen #gameWorld .leaf-clue-game .leaf-trail{
+    font-size:19px;letter-spacing:2px;
+  }
+}
