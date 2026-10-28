@@ -100,7 +100,8 @@ fs.mkdirSync(out,{recursive:true});
       assert.equal(asset.width,600,vp.device+' '+game+' wrong illustration width');
       assert.equal(asset.height,390,vp.device+' '+game+' wrong illustration height');
       assert.equal(asset.fallback,null,vp.device+' '+game+' illustration failed to load');
-      if(vp.width>390 || (vp.width<=390 && ['rescue','hand-mirror','flower','memory','money','recorder','feel'].includes(game)))\n        await card.screenshot({path:out+'/'+vp.device+'-'+game+'-series-art.png'});
+      if(vp.width>390 || (vp.width<=390 && ['rescue','hand-mirror','flower','memory','money','recorder','feel'].includes(game)))
+        await card.screenshot({path:out+'/'+vp.device+'-'+game+'-series-art.png'});
     }
     assert.equal(await page.locator('.play-card-enhanced[data-preview-kind="activity-art"]').count(),
       34,'Every game should have a dedicated vector activity illustration');
