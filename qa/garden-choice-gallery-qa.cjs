@@ -30,6 +30,54 @@ fs.mkdirSync(out,{recursive:true});
     assert.equal(count,34,'all 34 game choices preserved');
     assert.equal(await page.locator('#gardenSearch').count(),1,'search retained');
     assert.ok(await page.locator('.garden-filter-buttons').count()>=4,'topic filters retained');
+
+    // Audit every card, not just one search result or three panoramic samples.
+    // These are rendered-image/link checks, NOT proof of completing any game.
+    if(vp.width<=390){
+      const identities=await page.locator('.play-card-enhanced').evaluateAll(cards=>
+        cards.map(card=>({
+          key:card.dataset.game,
+          title:card.dataset.title,
+          href:card.querySelector('.play-start-btn')?.getAttribute('href')
+        })));
+      assert.equal(new Set(identities.map(item=>item.key)).size,34,'duplicate game identities');
+      const audit=[];
+      for(const item of identities){
+        assert.ok(item.key&&item.title&&item.href,'game identity/title/link missing');
+        await page.locator('#gardenSearch').fill(item.title);
+        const card=page.locator('.play-card-enhanced[data-game="'+item.key+'"]');
+        await card.waitFor({state:'visible'});
+        await card.scrollIntoViewIfNeeded();
+        await page.waitForFunction(key=>{
+          const img=document.querySelector('.play-card-enhanced[data-game="'+key+'"] img.real-shot');
+          return !!img&&img.complete&&img.naturalWidth>0;
+        },item.key,{timeout:12000});
+        const visual=await card.evaluate(el=>{
+          const img=el.querySelector('img.real-shot');
+          const title=el.querySelector('h3');
+          const buttons=Array.from(el.querySelectorAll('.play-buttons > *'));
+          const rect=el.getBoundingClientRect();
+          return {
+            imageWidth:img.naturalWidth,imageHeight:img.naturalHeight,
+            fallback:img.dataset.fallbackStep||null,
+            titleClipped:title.scrollHeight>title.clientHeight+2,
+            cardWidth:rect.width,
+            buttonHeights:buttons.map(button=>Math.round(button.getBoundingClientRect().height))
+          };
+        });
+        assert.equal(visual.fallback,null,vp.device+' '+item.key+' uses fallback instead of its game preview');
+        assert.equal(visual.titleClipped,false,vp.device+' '+item.key+' game title clipped');
+        assert.ok(visual.buttonHeights.every(h=>h>=40),vp.device+' '+item.key+' tiny touch target');
+        const target=new URL(item.href,base+'/gardens/');
+        const response=await page.request.get(target.href);
+        assert.equal(response.status(),200,vp.device+' '+item.key+' game route unavailable');
+        await response.dispose();
+        await card.screenshot({path:out+'/'+vp.device+'-all34-'+item.key+'.png'});
+        audit.push({...item,...visual,status:200});
+      }
+      fs.writeFileSync(out+'/'+vp.device+'-all34-cards.json',JSON.stringify(audit,null,2)+'\n');
+    }
+
     if(vp.width<=390){
       // Money, changed supplies and feelings use authentic 890x190 intro banners.
       // A center crop of these panoramic assets was nearly blank on narrow cards.
