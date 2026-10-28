@@ -191,13 +191,13 @@ for(const vp of [
  {name:'mobile-390',width:390,height:844},
  {name:'desktop-1280',width:1280,height:900},
  {name:'small-mobile-360',width:360,height:740}
-]){
+].filter(v=>!process.env.QA_DEVICE||v.name===process.env.QA_DEVICE)){
  currentDevice=vp.name;screenWidth=vp.width;screenHeight=vp.height;
  for(const id of nativeIds)await capture(id,'/thinking-garden/?game='+id,{native:true});
  for(const [id,url] of specials)await capture(id,url);
 }
 await browser.close();
-const expected=34*3, missing=report.filter(x=>!x.play);
+const expected=34*(process.env.QA_DEVICE?1:3), missing=report.filter(x=>!x.play);
 const hard=report.filter(x=>x.metrics?.horizontalOverflow>6||x.metrics?.broken?.length>0||x.errors.some(e=>/HTTP 404|SyntaxError/.test(e)));
 const summary={scope:'34 game INTERNAL UI desktop/mobile screenshot and automated layout inspection; first interaction where supported; camera and breathing remain synthetic/unverified',head:process.env.GITHUB_SHA||null,total:report.length,expected,visualPlayConfirmed:report.filter(x=>x.play).length,introOnly:missing.map(x=>({id:x.id,device:x.device,reason:x.errors})),hardFailures:hard.map(x=>({id:x.id,device:x.device,metrics:x.metrics,errors:x.errors})),metrics:report};
 fs.writeFileSync(path.join(outDir,'report.json'),JSON.stringify(summary,null,2)+'\n');
