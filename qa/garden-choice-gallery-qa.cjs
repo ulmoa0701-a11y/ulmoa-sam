@@ -30,6 +30,23 @@ fs.mkdirSync(out,{recursive:true});
     assert.equal(count,34,'all 34 game choices preserved');
     assert.equal(await page.locator('#gardenSearch').count(),1,'search retained');
     assert.ok(await page.locator('.garden-filter-buttons').count()>=4,'topic filters retained');
+    if(vp.width<=390){
+      // Money, changed supplies and feelings use authentic 890x190 intro banners.
+      // A center crop of these panoramic assets was nearly blank on narrow cards.
+      for(const [id,query] of [['money','돈 세고'],['change','바뀐 준비물'],['feel','상황 속 마음']]){
+        await page.locator('#gardenSearch').fill(query);
+        const card=page.locator('.play-card-enhanced[data-game="'+id+'"]');
+        await card.waitFor({state:'visible'});
+        await card.scrollIntoViewIfNeeded();
+        const image=await card.locator('.play-card-media img').evaluate(async el=>{
+          await el.decode();
+          return {width:el.naturalWidth,height:el.naturalHeight,position:getComputedStyle(el).objectPosition};
+        });
+        assert.ok(image.width>100&&image.height>100,vp.device+' '+id+' authentic intro image missing');
+        assert.match(image.position,/right|100%/,vp.device+' '+id+' image crop hides its character');
+        await card.screenshot({path:out+'/'+vp.device+'-'+id+'-focused-card.png'});
+      }
+    }
     await page.locator('#gardenSearch').fill('꽃만');
     const flower=page.locator('.play-card-enhanced[data-game="flower"]');
     assert.ok(await flower.isVisible(),'flower game found by search');
