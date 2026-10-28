@@ -242,7 +242,10 @@ function geometry(k,page){
  const usable=m?680:1220;
  const size=Math.min(m?190:177,(usable-(perRow-1)*gap)/perRow);
  const start=(w-(perRow*size+(perRow-1)*gap))/2;
- const y=m?(row===0?246:599):(row===0?224:484);
+ const lineBaselines=m?[515,752]:[407,638];
+ // Match the approved image's actual two stone pathways across all note counts.
+ const useApproved=theme==="forest"&&approvedArtReady(m);
+ const y=useApproved?lineBaselines[row]-size*.84:(m?(row===0?246:599):(row===0?224:484));
  return {x:start+column*(size+gap),y,w:size,h:size*.90,row,column};
 }
 function smoothUnit(v){const t=Math.max(0,Math.min(1,v));return t*t*(3-2*t)}
@@ -553,7 +556,9 @@ function render(b,time=performance.now()){
  const totalPageBars=Math.min(page.firstBar+page.pageBars,song.bars.length);
  for(let row=0;row<2;row++){
   const barFirst=page.firstBar+row*page.barsPerLine;
-  const yText=m?(row===0?206:558):(row===0?185:448);
+  const useApproved=theme==="forest"&&approvedArtReady(m);
+  const firstHeart=geometry(start+row*perRow,page);
+  const yText=useApproved?firstHeart.y-(m?45:42):(m?(row===0?206:558):(row===0?185:448));
   if(barFirst>=song.bars.length)continue;
   const label=String(barFirst+1).padStart(2,"0")+" — "+String(Math.min(song.bars.length,barFirst+page.barsPerLine)).padStart(2,"0")+" 마디";
   text(row===0?"첫 번째 길":"두 번째 길",m?50:89,yText,m?27:25,theme==="classroom"?"#345c4b":"#f2e8d1","left",400,"story");
