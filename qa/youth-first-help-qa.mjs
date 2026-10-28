@@ -37,6 +37,9 @@ for(const width of [320,390,820,1440]){
  inspectConversationRequests=true;
  await page.goto(url,{waitUntil:'domcontentloaded'});
  await check(await page.locator('#welcome-title').isVisible(),width+'px new story opening visible');
+ await check((await page.locator('#welcome-title').textContent()).includes('내 말로 발견'),width+'px clear personalized purpose');
+ await check(await page.locator('.intro-steps').isVisible(),width+'px start screen shows the three-step experience');
+ await check(await page.locator('.world-note').isVisible(),width+'px hero design carries the story idea');
  await check(await page.locator('.world-moa').count()===1,width+'px original Moa visual retained');
  await check(await page.locator('#choice-grid button').count()===0,width+'px no form before voluntary start');
  await check(await page.locator('form[method="post"]').count()===0,width+'px no data submit form');
@@ -50,6 +53,9 @@ for(const width of [320,390,820,1440]){
  await page.locator('#privacy-dialog button').click();
  await page.locator('#start').click();
  await check(await page.locator('#conversation').isVisible(),width+'px starts optional dialogue');
+ await check((await page.locator('#progress-count').textContent()).includes('01 / 05'),width+'px visible first step');
+ await check(await page.locator('#progress-track').getAttribute('aria-valuenow')==='1',width+'px accessible first step');
+ await check(await page.locator('.conversation-v2 .choice').count()===4,width+'px numbered response cards available');
  await check(await page.locator('.choice').count()===4,width+'px opening conversation has four choices');
  await check(await page.locator('#next').isDisabled(),width+'px cannot advance silently without selecting skip');
  await page.locator('[data-choice="game"]').click();
@@ -59,7 +65,9 @@ for(const width of [320,390,820,1440]){
  await page.locator('.detail-chip').first().click();
  await page.locator('#next').click();
  await check((await page.locator('#question-title').textContent()).includes('신경'),width+'px interest leads naturally to chosen concern');
- await check((await page.locator('#thread').textContent()).includes('게임·영상'),width+'px conversation remembers chosen interest');
+ await check((await page.locator('#thread').textContent()).includes('게임·영상'),width+'px choice trail remembers personal interest');
+ await check(await page.locator('.trail-card').count()>=1,width+'px prior answer visible without long chat bubbles');
+ await check(await page.locator('#progress-track').getAttribute('aria-valuenow')==='2',width+'px progress matches second step');
  await page.locator('[data-choice="school"]').click();
  await page.locator('#own-toggle').click();
  await page.locator('#own-input').fill('요즘 시작이 쉽지 않아');
@@ -82,6 +90,11 @@ for(const width of [320,390,820,1440]){
  await page.locator('#next').click();
  await check(await page.locator('#result').isVisible(),width+'px finished personal letter visible');
  await check(await page.locator('#letter-page').isVisible(),width+'px whole result rendered as keepsake letter');
+ await check(await page.locator('#result-facts').isVisible(),width+'px personal three-fact section visible');
+ await check(await page.locator('.result-fact').count()===3,width+'px exactly three grounded story facts');
+ await check((await page.locator('#result-facts').textContent()).includes('게임·영상'),width+'px favorite activity recalled exactly');
+ await check((await page.locator('#result-facts').textContent()).includes('설명이 잘 이해되지 않아'),width+'px challenging moment recalled exactly');
+ await check((await page.locator('#result-facts').textContent()).includes('고르거나 글로 이야기하기'),width+'px chosen conversation style recalled exactly');
  await check(await page.locator('#self-discovery').isHidden(),width+'px optional discovery does not block result');
  await page.locator('.discovery-disclosure>summary').click();
  await check(await page.locator('#self-discovery').isVisible(),width+'px student self-discovery offered beyond static summary');
@@ -162,6 +175,7 @@ for(const width of [320,390,820,1440]){
  await check(await page.locator('.memory-card').count()===5,width+'px printed letter retains all five conversation themes');
  await check(await page.locator('#recap-items').isVisible(),width+'px printing always reveals full collapsed answers');
  await check(await page.locator('#copy').isHidden(),width+'px copy control not shown on printed letter');
+ await check(await page.locator('.result-fact').count()===3,width+'px printed letter retains personal story facts');
  await check(await page.locator('#guide-items').isHidden(),width+'px private counselor guide not on student print');
  await check(await page.locator('.reflection-edit').isHidden(),width+'px print hides input controls');
  await check(await page.locator('#cover-choose').isHidden(),width+'px print hides cover editor');
