@@ -112,10 +112,10 @@ export async function practiceExtras(opts:{
   if(!['student','parent'].includes(member.role))return send({error:'작성자 전용입니다.'},403);
   const b=await body(request),day=b.day;
   if(!dayOK(day))return send({error:'오늘 또는 지나간 날짜를 선택해 주세요.'},400);
-  const waking=wakingFrequency(b.waking),movement=frequency(b.movement),worry=frequency(b.worry);
+  const waking=wakingFrequency(b.waking),requestedMovement=frequency(b.movement),requestedWorry=frequency(b.worry);
   const sleepOnset=frequency(b.sleepOnset),repeating=frequency(b.repeating),
    worryImpact=frequency(b.worryImpact),ticBother=frequency(b.ticBother);
-  const responses=[waking,movement,worry,sleepOnset,repeating,worryImpact,ticBother];
+  const responses=[waking,requestedMovement,requestedWorry,sleepOnset,repeating,worryImpact,ticBother];
   if(responses.some(x=>typeof x==='number'&&Number.isNaN(x))||
    responses.every(x=>x===null))
    return send({error:'기억나는 항목 하나만 선택해도 됩니다.'},400);
@@ -123,9 +123,12 @@ export async function practiceExtras(opts:{
   if(!studentId||!member.therapist_id||!(await checkStudent(admin,studentId,member.therapist_id)))
    return send({error:'담당 학생 연결을 확인할 수 없습니다.'},403);
   const {data:previous,error:pe}=await admin.from('ildan_daily_checkins')
-   .select('shared_at').eq('author_id',uid).eq('day',day).maybeSingle();
+   .select('shared_at,movement_count,worry_count').eq('author_id',uid).eq('day',day).maybeSingle();
   if(pe)throw Error('CHECKIN_PREVIOUS_FAILED');
   const share=b.share===true;
+  // New short check-in must not silently erase legacy frequency entries.
+  const movement=b.movement===undefined?previous?.movement_count??null:requestedMovement;
+  const worry=b.worry===undefined?previous?.worry_count??null:requestedWorry;
   const {error}=await admin.from('ildan_daily_checkins').upsert({
    author_id:uid,student_id:studentId,therapist_id:member.therapist_id,
    kind:member.role,day,waking_count:waking,movement_count:movement,worry_count:worry,
