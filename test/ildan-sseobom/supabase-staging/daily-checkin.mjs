@@ -5,7 +5,7 @@ const pad=n=>String(n).padStart(2,'0');
 const dayKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const today=()=>dayKey(new Date());
 const parse=raw=>{const x=new Date((raw||today())+'T12:00:00');return Number.isFinite(x.getTime())?x:new Date()};
-const state={student:{day:today(),student:'all'},parent:{day:today(),student:'all'},therapist:{day:today(),student:'all'}};
+const state={student:{day:today(),student:'all',showCalendar:false},parent:{day:today(),student:'all',showCalendar:false},therapist:{day:today(),student:'all',showCalendar:true}};
 const questions=[
  {key:'sleepOnset',icon:'🌙',title:'잠들 때 어땠어?',sub:'선택한 날짜의 아침이 오기 전 잠자리에서',answers:['평소처럼 잤어','조금 뒤척였어','오래 뒤척여 힘들었어']},
  {key:'waking',icon:'💤',title:'자는 중에 몇 번 깼어?',sub:'잘 때 몇 번 깼는지 기억나는 만큼만',answers:['안 깼어','1번','2번','3번 이상'],unknown:4},
@@ -57,10 +57,12 @@ export function mountDailyCheckins(root,{role,checkins=[],students=[],onSave,onD
  <span class="tag">DAILY CHECK-IN</span><h2>${teacher?'공유된 하루 체크':'하루 체크 · 눌러서 끝!'}</h2>
  <p class="calendar-explain">${teacher?'공유하기를 선택한 기록만 보여요. 빈 날짜는 증상이 없었다는 뜻이 아닙니다.':'기억나는 것만 골라도 돼. 숫자를 계산하거나 계속 확인할 필요 없어.'}</p>
  ${teacher?`<label class="calendar-student-picker">학생별 보기<select id="dailyStudent"><option value="all">전체 학생</option>${students.map(v=>`<option value="${esc(v.id)}"${v.id===s.student?' selected':''}>${esc(v.nickname)}</option>`).join('')}</select></label>`:''}
+ ${teacher?'':`<button type="button" class="daily-calendar-toggle" id="dailyCalendarToggle" aria-expanded="${s.showCalendar}">${s.showCalendar?'− 날짜 달력 접기':'▦ 지난 날짜 체크하기'}</button>`}
+ <div id="dailyCalendarPanel" ${teacher||s.showCalendar?'':'hidden'}>
  <div class="writing-month-control"><button type="button" data-daily-prev aria-label="이전 달">‹</button><strong>${y}년 ${m+1}월</strong><button type="button" data-daily-next aria-label="다음 달">›</button><button type="button" data-daily-today>이번 달</button></div>
  <p class="daily-subtitle">선택한 날짜에만 체크해. 빈 날짜는 괜찮아.</p>
  <div class="calendar-weekdays">${['월','화','수','목','금','토','일'].map(x=>`<span>${x}</span>`).join('')}</div>
- <div class="daily-month-grid">${grid}</div>
+ <div class="daily-month-grid">${grid}</div></div>
  <section class="daily-selected" aria-label="선택한 날짜 체크">
  <h3>${esc(s.day)} ${teacher?'· 공유된 체크':'· 기억나는 만큼'}</h3>
  ${!teacher?`<p class="daily-sleep-night">🌙 수면 질문은 <b>${esc(sleepNight)} 밤 → ${esc(s.day)} 아침</b>에 관한 거야.</p>`:''}
@@ -76,7 +78,9 @@ export function mountDailyCheckins(root,{role,checkins=[],students=[],onSave,onD
   </form>`}
  </section><p class="daily-ethics">이건 생활을 돌아보는 메모야. 진단이나 정확한 증상 횟수 측정이 아니야. 체크가 부담스러우면 쉬어도 괜찮아.</p></div>`;
  const draw=()=>mountDailyCheckins(root,{role,checkins,students,onSave,onDelete});
- root.querySelectorAll('[data-daily-date]').forEach(btn=>btn.onclick=()=>{s.day=btn.dataset.dailyDate;draw()});
+ root.querySelectorAll('[data-daily-date]').forEach(btn=>btn.onclick=()=>{s.day=btn.dataset.dailyDate;s.showCalendar=false;draw()});
+ const toggleCalendar=root.querySelector('#dailyCalendarToggle');
+ if(toggleCalendar)toggleCalendar.onclick=()=>{s.showCalendar=!s.showCalendar;draw()};
  for(const [selector,step] of [['[data-daily-prev]',-1],['[data-daily-next]',1]])root.querySelector(selector).onclick=()=>{
   const d=parse(s.day),n=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+step);
   d.setDate(Math.min(n,new Date(d.getFullYear(),d.getMonth()+1,0).getDate()));
