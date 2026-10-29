@@ -93,6 +93,7 @@ export function mountDailyCheckins(root,{role,checkins=[],students=[],onSave,onD
   const setChoice=(key,value)=>{
    const input=form.querySelector(`input[name="${key}"]`);if(!input)return;
    input.value=String(value);
+   form.dataset.dirty='true';
    form.querySelectorAll(`[data-choice="${key}"]`).forEach(b=>{
     const selected=b.dataset.choiceValue===String(value);
     b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));
@@ -119,6 +120,7 @@ export function mountDailyCheckins(root,{role,checkins=[],students=[],onSave,onD
    form.querySelector('#dailyOptionalPanel').hidden=!dailyState[role];
    toggle.textContent=dailyState[role]?'− 선택 항목 접기':'＋ 몸의 움직임·소리도 체크할래? (선택)';
   };
+  form.elements.share.addEventListener('change',()=>{form.dataset.dirty='true'});
   form.onsubmit=async ev=>{
    ev.preventDefault();
    const button=form.querySelector('button[type=submit]');
