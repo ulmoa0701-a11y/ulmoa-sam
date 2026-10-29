@@ -7,11 +7,11 @@ const today=()=>dayKey(new Date());
 const parse=raw=>{const x=new Date((raw||today())+'T12:00:00');return Number.isFinite(x.getTime())?x:new Date()};
 const state={student:{day:today(),student:'all'},parent:{day:today(),student:'all'},therapist:{day:today(),student:'all'}};
 const questions=[
- {key:'sleepOnset',icon:'🌙',title:'잠들기 어려웠어?',sub:'선택한 날짜의 전날 밤',answers:['괜찮았어','조금','많이']},
- {key:'waking',icon:'💤',title:'자다가 몇 번 깼어?',sub:'선택한 날짜의 전날 밤',answers:['안 깼어','1번','2번','3번 이상'],unknown:4},
- {key:'repeating',icon:'🔁',title:'찜찜해서 같은 행동을 다시 했어?',sub:'예: 글씨를 다시 쓰거나 물건을 다시 만지기',answers:['없었어','한두 번','여러 번']},
- {key:'worryImpact',icon:'💭',title:'걱정 때문에 하던 일이 어려웠어?',sub:'예: 공부를 시작하거나 끝내는 일이 어려움',answers:['없었어','조금','많이']},
- {key:'ticBother',icon:'〰️',title:'몸의 움직임이나 소리 때문에 불편했어?',sub:'틱인지 정확히 판단할 필요 없어. 불편했는지만 체크해.',answers:['괜찮았어','조금','많이'],optional:true}
+ {key:'sleepOnset',icon:'🌙',title:'잠들 때 어땠어?',sub:'선택한 날짜의 아침이 오기 전 잠자리에서',answers:['평소처럼 잤어','조금 뒤척였어','오래 뒤척여 힘들었어']},
+ {key:'waking',icon:'💤',title:'자는 중에 몇 번 깼어?',sub:'잘 때 몇 번 깼는지 기억나는 만큼만',answers:['안 깼어','1번','2번','3번 이상'],unknown:4},
+ {key:'repeating',icon:'🔁',title:'다시 하느라 하던 일이 늦어졌어?',sub:'예: 글씨를 다시 쓰거나 지나온 길로 돌아가기',answers:['늦어지지 않았어','잠깐 늦어졌어','오래 걸려 힘들었어']},
+ {key:'worryImpact',icon:'💭',title:'걱정 때문에 하던 일을 멈췄어?',sub:'예: 공부를 시작하지 못하거나 하던 일을 멈추기',answers:['평소처럼 했어','잠깐 멈췄어','오래 멈춰 힘들었어']},
+ {key:'ticBother',icon:'〰️',title:'저절로 나오는 움직임·소리가 불편했어?',sub:'정확한 틱 횟수는 셀 필요 없어. 오늘 생활이 불편했는지만 골라.',answers:['괜찮았어','조금 불편했어','많이 불편했어'],optional:true}
 ];
 const validChoice=(q,x)=>Number.isInteger(x)&&x>=0&&x<q.answers.length||x===(q.unknown??3);
 const readable=(q,value)=>{
@@ -28,6 +28,7 @@ export function mountDailyCheckins(root,{role,checkins=[],students=[],onSave,onD
  const date=parse(s.day),y=date.getFullYear(),m=date.getMonth();
  const offset=(new Date(y,m,1,12).getDay()+6)%7;
  const last=new Date(y,m+1,0,12).getDate(),size=Math.ceil((offset+last)/7)*7;
+ const sleepNight=dayKey(new Date(y,m,date.getDate()-1,12));
  const grid=Array.from({length:size},(_,i)=>{
   const d=new Date(y,m,1+i-offset,12),key=dayKey(d);
   const matches=rows.filter(x=>x.day===key),out=d.getMonth()!==m;
@@ -48,7 +49,7 @@ export function mountDailyCheckins(root,{role,checkins=[],students=[],onSave,onD
  const teacherRows=selected.map(x=>`<div class="daily-teacher-row">
   <b>${esc(students.find(v=>v.id===x.studentId)?.nickname||'담당 학생')}${x.kind==='parent'?' · 보호자 체크':''}</b>
   <div class="daily-tally-grid">${questions.map(q=>`<div><span>${q.icon} ${q.title}</span><strong>${readable(q,x[q.key])}</strong></div>`).join('')}</div>
-  ${x.sleepOnset===undefined||x.sleepOnset===null&&x.repeating===null&&x.worryImpact===null&&x.ticBother===null&&x.movement!==null?
+  ${(x.sleepOnset==null&&x.repeating==null&&x.worryImpact==null&&x.ticBother==null&&(x.movement!=null||x.worry!=null))?
    '<small class="muted">이전 버전에서 작성한 기록입니다. 오래된 숫자와 새로운 불편함 정도를 직접 비교하지 않습니다.</small>':''}
  </div>`).join('');
  const optionalShown=!!(teacher||dailyState[role]||own?.ticBother!==null&&own?.ticBother!==undefined);
@@ -61,10 +62,11 @@ export function mountDailyCheckins(root,{role,checkins=[],students=[],onSave,onD
  <div class="calendar-weekdays">${['월','화','수','목','금','토','일'].map(x=>`<span>${x}</span>`).join('')}</div>
  <div class="daily-month-grid">${grid}</div>
  <section class="daily-selected" aria-label="선택한 날짜 체크">
- <h3>${esc(s.day)} ${teacher?'· 공유된 체크':'· 오늘 기억나는 만큼'}</h3>
+ <h3>${esc(s.day)} ${teacher?'· 공유된 체크':'· 기억나는 만큼'}</h3>
+ ${!teacher?`<p class="daily-sleep-night">🌙 수면 질문은 <b>${esc(sleepNight)} 밤 → ${esc(s.day)} 아침</b>에 관한 거야.</p>`:''}
  ${teacher?(teacherRows||'<p class="calendar-empty">이 날짜에 공유된 체크가 없습니다.</p>'):
  `<form id="dailyForm">
-   <p class="daily-howto">⬅️ ➡️ 세 칸 중 하나를 <b>누르거나 좌우로 움직여도</b> 돼. 생각이 안 나면 ‘잘 모르겠어’!</p>
+   <p class="daily-howto">⬅️ ➡️ 맞는 칸을 <b>한 번 눌러봐</b>. 움직여서 선택해도 돼. 고민되면 ‘잘 모르겠어’!</p>
    ${questions.filter(q=>!q.optional).map(card).join('')}
    <button type="button" class="daily-optional-toggle" id="dailyOptionalToggle" aria-expanded="${optionalShown}">${optionalShown?'− 선택 항목 접기':'＋ 몸의 움직임·소리도 체크할래? (선택)'}</button>
    <div id="dailyOptionalPanel" ${optionalShown?'':'hidden'}>${card(questions.find(q=>q.optional))}</div>
@@ -93,7 +95,7 @@ export function mountDailyCheckins(root,{role,checkins=[],students=[],onSave,onD
    });
   };
   form.querySelectorAll('[data-choice]').forEach(button=>button.addEventListener('click',()=>setChoice(button.dataset.choice,Number(button.dataset.choiceValue))));
-  // 3-step swipe controls do not require precise pointer dragging; buttons always work.
+  // Swipe controls have clickable button alternatives; no continuous clinical score.
   form.querySelectorAll('.daily-choice-track').forEach(track=>{
    let dragging=false;
    const choose=x=>{
