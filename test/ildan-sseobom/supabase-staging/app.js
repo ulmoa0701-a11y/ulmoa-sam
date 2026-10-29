@@ -272,6 +272,29 @@ async function refreshAuth(){
 function renderWritingCalendar(){
  const root=$('writingCalendar');if(root&&['student','therapist'].includes(me?.role))mountWritingCalendar(root,{role:me.role,records:shownRecords(records),students:me.role==='therapist'?students:[],onNewRecord:()=>activateWorkspace('write')});
 }
+
+async function refreshDailyCheckins(){
+ const root=$('dailyCheckin');
+ if(!root||!me||!['student','parent','therapist'].includes(me.role))return;
+ try{
+  const result=await api('practice-checkins');
+  if(!root.isConnected)return;
+  mountDailyCheckins(root,{
+   role:me.role,checkins:result.checkins||[],students,
+   onSave:async value=>{
+    try{await api('practice-checkins',{method:'POST',body:value});
+     toast(value.share?'하루 체크를 저장하고 선생님에게 공유했어요.':'하루 체크를 나만 보기로 저장했어요.');
+     await refreshDailyCheckins();
+    }catch(e){toast('저장되지 않았어요: '+e.message)}
+   },
+   onDelete:async day=>{
+    try{await api('practice-checkin-delete',{method:'POST',body:{day}});toast('이 날짜 체크를 삭제했어요.');await refreshDailyCheckins()}
+    catch(e){toast('삭제하지 못했어요: '+e.message)}
+   }
+  });
+ }catch(e){root.textContent='상태 체크 달력을 불러오지 못했어요. 연결을 확인하고 다시 열어 주세요.'}
+}
+
 function workspaceNav(items, selected){
  return `<nav class="workspace-nav" aria-label="내 공간 메뉴">${items.map(([id,ico,name,sub])=>`<button type="button" data-workspace-target="${id}" class="workspace-link${selected===id?' selected':''}" aria-current="${selected===id?'page':'false'}"><span class="w-icon" aria-hidden="true">${ico}</span><span class="w-copy"><strong>${name}</strong><small>${sub}</small></span></button>`).join('')}</nav>`;
 }
@@ -289,6 +312,7 @@ function activateWorkspace(next){
 function bindWorkspace(){
  document.querySelectorAll('[data-workspace-target]').forEach(b=>b.addEventListener('click',()=>{
   activateWorkspace(b.dataset.workspaceTarget);paintSketches();if(me?.role==='parent'&&activeView==='calendar')renderParentCalendar();if(activeView==='writingCalendar')renderWritingCalendar();
+  if(activeView==='daily')void refreshDailyCheckins();
   if(window.innerWidth<741)document.querySelector('.workspace-content')?.scrollIntoView({behavior:'smooth',block:'start'});
  }));
  activateWorkspace(activeView);
@@ -847,13 +871,14 @@ function populatePracticeEditor(isParent){
 function studentHome(){
  const isParent=me.role==='parent';
  const items=isParent?[
-  ['write','✎','1분 생활 메모','필요할 때만'],['calendar','▦','기록 달력','월·주·일'],['history','▤','내 기록','내가 쓴 내용']
+  ['write','✎','1분 생활 메모','필요할 때만'],['daily','☾','하루 상태 체크','횟수만'],['calendar','▦','기록 달력','월·주·일'],['history','▤','내 기록','내가 쓴 내용']
  ]:[
-  ['write','✎','기록하기','한 장이면 충분해'],['writingCalendar','▦','나의 기록 달력','날짜·횟수·분량'],['history','▤','내 기록','지난 기록 확인'],['coding','⌘','코딩 실험실','원하면 탐색하기']
+  ['write','✎','기록하기','한 장이면 충분해'],['daily','☾','하루 상태 체크','횟수만'],['writingCalendar','▦','나의 기록 달력','날짜·횟수·분량'],['history','▤','내 기록','지난 기록 확인'],['coding','⌘','코딩 실험실','원하면 탐색하기']
  ];
  app.innerHTML=hero(isParent?'필요할 때만 짧게 남겨요.':'내가 남기고 싶은 한 페이지.',isParent?'모든 변화를 적을 필요는 없어요. 기억에 남은 한 가지면 충분해요.':'매일 써야 하는 숙제는 아니야. 기록한 내용은 기본적으로 나만 볼 수 있어.')+
  `<div class="workspace-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">01</span></div>${workspaceNav(items,activeView)}<div class="sidebar-note"><span class="privacy-dot" aria-hidden="true"></span>공유는 내가 선택해요.<br><small>혼자만 볼 수도 있어요.</small></div></aside><div class="workspace-content">
  <section data-workspace-view="write" class="workspace-section"><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>${isParent?'observation.note':'my-note.md'}</span><span class="editor-status">NEW NOTE</span></div><div class="editor-paper"><span class="tag">01 / WRITE</span><h2>${isParent?'간단한 생활 메모':'새 페이지'}</h2><p>${isParent?'한 가지를 짧게 적어도 충분해요. 치료사에게 전달하지 않아도 돼요.':'글이나 그림으로 남겨도 되고, 그냥 둘러봐도 돼.'}</p>${dataForm(me.role)}</div></section>
+ <section data-workspace-view="daily" id="dailyCheckin" class="workspace-section" hidden></section>
  ${isParent?`<section data-workspace-view="calendar" id="parentCalendar" class="workspace-section" hidden>${parentCalendarHTML()}</section>`:`<section data-workspace-view="writingCalendar" id="writingCalendar" class="workspace-section" hidden></section>`}
  <section data-workspace-view="history" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>my-notes.json</span></div><div class="editor-paper"><span class="tag">02 / ARCHIVE</span><h2>${isParent?'내 생활 메모':'내 서랍'}</h2><p>${isParent?'내가 남긴 메모만 보여요.':'내가 남긴 페이지들을 모아두는 곳이야.'}</p><div id="recordsHere">${recordCards()}</div>${records.some(r=>r.local&&!r.syncedTo)?`<div class="device-transfer-all"><button id="transferAllDevice" class="button">기기 임시 기록 모두 서버로 복사</button><p>원본을 지우지 않고 비공개 복사합니다. 담당 치료사에게는 따로 공유해야 보여요.</p></div>`:''}${deviceOriginals().length?`<details class="device-originals"><summary>기기에 남긴 이전 원본 ${deviceOriginals().length}건</summary><p>서버로 복사한 뒤에도 원본은 자동 삭제하지 않습니다.</p></details>`:''} </div></section>
  ${isParent?'':`<section data-workspace-view="coding" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>studio / playground</span></div><div class="editor-paper"><span class="tag">OPTIONAL / PLAY</span><h2>코딩 실험실</h2><p>조건을 바꿔 결과를 확인하는 작은 실험 공간이야. 기록하지 않고 그냥 놀아도 돼.</p>${codingMarkup()}<details class="optional-fields"><summary>간단한 선택 예시 살펴보기 <small>선택</small></summary><div class="optional-wrap">${situationMarkup()}</div></details></div></section>`}
@@ -862,6 +887,7 @@ function studentHome(){
  if(editingPracticeRecord)populatePracticeEditor(isParent);
  paintSketches();if(isParent)renderParentCalendar();else renderWritingCalendar();
  if(!isParent){attachSituation();attachCoding();}
+ void refreshDailyCheckins();
 
 }
 // Browser polling is a supplement: the database notification entry is the source of truth.
@@ -931,7 +957,7 @@ async function initSessionNotes(){
  form.onsubmit=e=>{e.preventDefault();const entry={};["studentReport","parentReport","observation","question","plan","functionalImpact","familyResponse","workingHypothesis","alternatives","uncertainty","burdenReview","erpReview","erpTarget","erpSafety","cbitReview","cbitTarget","cbitContext"].forEach(k=>{const v=formValue(form,k);if(v)entry[k]=v});if(!Object.keys(entry).length){toast('한 가지 이상 남겨주세요.');return;}loading(form.querySelector('button'),async()=>{await api('session-notes',{method:'POST',body:{studentId:formValue(form,'studentId'),entry}});form.reset();toast('회기 메모를 보관했어요.');await display()})};
  await display();
 }
-async function therapistHome(){const r=await Promise.all([api('students'),api('drive/status'),api('accounts')]);students=r[0].students;drive=r[1];const accounts=r[2].accounts;app.innerHTML=hero('오늘의 사례 공간','학생이 공유한 내용과 보호자 관찰을 구분해 보고, 다음 회기를 준비해요.')+`<div class="workspace-shell therapist-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">02</span></div>${workspaceNav([['inbox','▣','공유 자료','학생·보호자'],['alerts','♧','새 공유 알림','미확인 기록'],['writingCalendar','▦','공유 기록 달력','학생별 월간'],['session','▤','회기 준비','치료사 메모'],['accounts','♙','계정 연결','초대·재등록'],['drive','↗','Google Drive','담당자 전용']],activeView)}<div class="sidebar-note">배정된 학생의 공유 기록만<br><small>담당 치료사가 확인할 수 있어요.</small></div></aside><div class="workspace-content"><div class="grid"><section class="panel highlight full" data-workspace-view="inbox"><span class="tag">01 / INBOX</span><h2>학생·보호자가 공유한 기록 <small id="inboxSharedCount">(${records.length}건)</small></h2><p>원문을 유지하며 작성자의 관점에 따라 구분해요. 자동으로 진단하거나 평가하지 않아요.</p><div class="buttons"><button id="refresh" class="button-ghost">↻ 새 기록 확인</button><button id="csv" class="button-ghost">CSV 다운로드</button></div><p class="parent-inbox-policy">공유받은 글·사진·그림은 펼치지 않아도 확인할 수 있습니다. 이 화면은 가상 기록 전용입니다.</p><div class="filter-strip"><label>학생별 보기<select id="filterStudent"><option value="all">전체 학생</option>${students.map(s=>`<option value="${sanitize(s.nickname)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><label>작성자 구분<select id="filterKind"><option value="all">전체</option><option value="student">학생 기록</option><option value="parent">학부모 전달</option></select></label></div><div id="inboxResults">${recordCards()}</div></section><section data-workspace-view="alerts" class="panel full notification-panel" hidden><span class="tag">SHARED RECORD ALERTS</span><h2>새 공유 알림 <small id="notificationCount">(0)</small></h2><p>학생이나 보호자가 치료사에게 공유한 기록만 알려드립니다. 기록하지 않았거나 비공개로 저장한 내용은 알리지 않습니다.</p><div class="buttons"><button id="notificationRefresh" type="button" class="button-ghost">새 알림 확인</button></div><div id="notificationList" aria-live="polite" aria-label="공유 알림 목록"><p class="muted">알림을 확인하고 있습니다.</p></div><div id="pushSettings" aria-label="기기 푸시 알림 설정"></div></section><section data-workspace-view="writingCalendar" id="writingCalendar" class="panel full" hidden></section><section class="panel full case-panel" data-workspace-view="session" hidden><span class="tag">SESSION / THERAPIST ONLY</span><h2>회기 준비·메모</h2><p>학생이 선택해 공유한 내용과 실제 회기에서 확인한 내용을 분리해 기록합니다. 치료사의 가설은 관찰 사실이 아니며, 앱이 진단이나 치료 효과를 판단하지 않습니다. <b>로그인한 역할과 기록 접근은 서버에서 확인합니다.</b></p>
+async function therapistHome(){const r=await Promise.all([api('students'),api('drive/status'),api('accounts')]);students=r[0].students;drive=r[1];const accounts=r[2].accounts;app.innerHTML=hero('오늘의 사례 공간','학생이 공유한 내용과 보호자 관찰을 구분해 보고, 다음 회기를 준비해요.')+`<div class="workspace-shell therapist-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">02</span></div>${workspaceNav([['inbox','▣','공유 자료','학생·보호자'],['daily','☾','상태 체크 달력','공유된 체크'],['alerts','♧','새 공유 알림','미확인 기록'],['writingCalendar','▦','공유 기록 달력','학생별 월간'],['session','▤','회기 준비','치료사 메모'],['accounts','♙','계정 연결','초대·재등록'],['drive','↗','Google Drive','담당자 전용']],activeView)}<div class="sidebar-note">배정된 학생의 공유 기록만<br><small>담당 치료사가 확인할 수 있어요.</small></div></aside><div class="workspace-content"><div class="grid"><section class="panel highlight full" data-workspace-view="inbox"><span class="tag">01 / INBOX</span><h2>학생·보호자가 공유한 기록 <small id="inboxSharedCount">(${records.length}건)</small></h2><p>원문을 유지하며 작성자의 관점에 따라 구분해요. 자동으로 진단하거나 평가하지 않아요.</p><div class="buttons"><button id="refresh" class="button-ghost">↻ 새 기록 확인</button><button id="csv" class="button-ghost">CSV 다운로드</button></div><p class="parent-inbox-policy">공유받은 글·사진·그림은 펼치지 않아도 확인할 수 있습니다. 이 화면은 가상 기록 전용입니다.</p><div class="filter-strip"><label>학생별 보기<select id="filterStudent"><option value="all">전체 학생</option>${students.map(s=>`<option value="${sanitize(s.nickname)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><label>작성자 구분<select id="filterKind"><option value="all">전체</option><option value="student">학생 기록</option><option value="parent">학부모 전달</option></select></label></div><div id="inboxResults">${recordCards()}</div></section><section data-workspace-view="daily" class="panel full" id="dailyCheckin" hidden></section><section data-workspace-view="alerts" class="panel full notification-panel" hidden><span class="tag">SHARED RECORD ALERTS</span><h2>새 공유 알림 <small id="notificationCount">(0)</small></h2><p>학생이나 보호자가 치료사에게 공유한 기록만 알려드립니다. 기록하지 않았거나 비공개로 저장한 내용은 알리지 않습니다.</p><div class="buttons"><button id="notificationRefresh" type="button" class="button-ghost">새 알림 확인</button></div><div id="notificationList" aria-live="polite" aria-label="공유 알림 목록"><p class="muted">알림을 확인하고 있습니다.</p></div><div id="pushSettings" aria-label="기기 푸시 알림 설정"></div></section><section data-workspace-view="writingCalendar" id="writingCalendar" class="panel full" hidden></section><section class="panel full case-panel" data-workspace-view="session" hidden><span class="tag">SESSION / THERAPIST ONLY</span><h2>회기 준비·메모</h2><p>학생이 선택해 공유한 내용과 실제 회기에서 확인한 내용을 분리해 기록합니다. 치료사의 가설은 관찰 사실이 아니며, 앱이 진단이나 치료 효과를 판단하지 않습니다. <b>로그인한 역할과 기록 접근은 서버에서 확인합니다.</b></p>
 <form id="sessionForm" class="form clinician-form">
 <label>담당 학생<select name="studentId" required>${students.map(s=>`<option value="${sanitize(s.id)}">${sanitize(s.nickname)}</option>`).join('')}</select></label>
 <div class="clinician-quick-fields">
@@ -986,7 +1012,7 @@ async function therapistHome(){const r=await Promise.all([api('students'),api('d
  <p class="muted">이름은 학생 목록과 연결 메뉴에 표시됩니다. 현재 체험 단계에서는 실제 아동의 개인정보 대신 가상 이름을 사용해 주세요.</p><div class="student-list-summary" aria-label="등록된 학생"><strong>등록된 학생 (${students.length}명)</strong>${students.length?`<div class="student-list-chips">${students.map(s=>`<span class="student-list-chip">${sanitize(s.nickname)}</span>`).join("")}</div>`:`<p class="muted">등록된 학생이 없어요. 위에서 먼저 추가해 주세요.</p>`}</div><h3>2. 학생·보호자에게 보낼 링크 만들기</h3><p class="muted" id="inviteExplainer">등록된 학생을 선택해 주세요.</p><form id="inviteForm" class="form"><label>초대할 사람<select name="role" id="inviteRole"><option value="student">학생</option><option value="parent">보호자</option></select></label><label id="studentPicker">대상 학생<select name="studentId" ${students.length?"":"disabled"}>${students.map(s=>`<option value="${sanitize(s.id)}">${sanitize(s.nickname)}</option>`).join('')}</select></label><button id="inviteSubmit" class="button" ${students.length?"":"disabled"}>학생 접속 링크 만들기</button></form><div id="inviteOutput"></div><section aria-label="발급한 초대 링크"><h3>초대 링크 관리</h3>
  <p>누구에게 보낸 링크인지 학생 이름과 구분해 표시합니다. 링크 자체는 발급 직후에만 복사할 수 있고, 잘못 전달한 링크는 취소할 수 있어요.</p>
  <div id="inviteList" role="status" aria-live="polite">목록을 불러오는 중입니다.</div></section></section><section class="panel" data-workspace-view="accounts"><span class="tag">02 / ACCOUNT HELP</span><h2>계정 접근 도움말</h2><p>기기를 바꾸거나 로그아웃해서 다시 접속해야 할 때 신원 확인 후 기존 계정용 링크를 새로 발급할 수 있어요.</p><label>대상 계정<select id="resetUser">${accounts.map(a=>`<option value="${sanitize(a.id)}">${sanitize(a.nickname)} · ${a.role==='student'?'학생':'학부모'}</option>`).join('')}</select></label><div class="buttons"><button id="resetIssue" class="button-ghost" ${accounts.length?'':'disabled'}>기존 계정 새 접속 링크 만들기</button></div><div id="resetOutput"></div></section><section class="panel full" data-workspace-view="drive"><span class="tag">03 / GOOGLE DRIVE</span><h2>Google Drive</h2><p>${drive.connected?'내 구글 계정이 연결돼 있습니다.':'구글 계정 연결 전입니다. 학생 기록은 아직 자동 업로드되지 않습니다.'}</p><div class="buttons"><button id="googleConnect" class="button-ghost" ${drive.configured&&drive.backupEnabled?'':'disabled'}>${drive.connected?'구글 계정 다시 연결':'내 구글 계정 연결'}</button><button id="driveSync" class="button" ${drive.connected&&drive.backupEnabled?'':'disabled'}>공유 기록 백업</button>${drive.folderUrl?`<a class="button-ghost" href="${sanitize(drive.folderUrl)}" target="_blank" rel="noopener noreferrer">내 드라이브 폴더 열기 ↗</a>`:''}</div>${!drive.backupEnabled?hint('보존·삭제·동의 및 사본 처리 정책 검증 전까지 Google Drive 백업이 비활성화되어 있습니다. 서버 공유를 취소해도 기존 다운로드 파일은 자동으로 회수되지 않습니다.'):!drive.configured?hint('구글 OAuth 관리자 설정이 아직 끝나지 않았습니다.'):''}<p>삭제 확인이 필요한 사본은 치료사의 기록 관리자에게 문의하세요.</p></section></div></div></div>`;
-attachShares();bindWorkspace();paintSketches();initSessionNotes();renderWritingCalendar();startNotificationChecks();void setupPushPanel({api,toast});
+attachShares();bindWorkspace();paintSketches();initSessionNotes();renderWritingCalendar();startNotificationChecks();void setupPushPanel({api,toast});void refreshDailyCheckins();
 const rerenderInbox=()=>{
  const name=$('filterStudent').value,kind=$('filterKind').value;
  const list=records.filter(r=>(name==='all'||r.student===name)&&(kind==='all'||r.kind===kind));
