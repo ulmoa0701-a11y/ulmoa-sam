@@ -307,6 +307,11 @@ with sync_playwright() as p:
   teacher.locator('[data-workspace-target="daily"]').click()
   teacher.locator('.daily-teacher-row').first.wait_for(timeout=12000)
   assert '1' in teacher.locator('.daily-teacher-row').first.inner_text()
+  dates=teacher.evaluate("""async()=>{const mod=await import('./record-calendar.mjs');
+   return [mod.writtenDay({createdAt:'2026-10-29T07:20:00Z',entry:{date:'2026-10-21'}}),
+     mod.writtenDay({createdAt:'2026-10-29T07:20:00Z',entry:{date:'2026-10-25'}})]}""")
+  assert dates==['2026-10-21','2026-10-25'],('calendar must index chosen dates',dates)
+
   teacher.locator('[data-workspace-target="inbox"]').click()
   teacher.locator('#filterKind').select_option('parent')
   assert teacher.locator('#inboxResults .shared-clinician-record').count()==0, 'author filter must work'
@@ -319,7 +324,7 @@ with sync_playwright() as p:
   assert teacher.locator('.shared-clinician-content .saved-photo-grid img').first.evaluate('img=>img.complete&&img.naturalWidth>0'), 'photo should recover after renewal'
   teacher.close()
   checks.append(f'{width}px practice save with drawing/photo, cross-device reload, therapist share, no clinical write')
-  stored.clear()
+  stored.clear();feedback.clear();daily.clear()
  assert not remote_clinical,('unexpected non-practice clinical POST',remote_clinical)
  browser.close()
 srv.shutdown()
