@@ -314,7 +314,8 @@ function activateWorkspace(next){
 function bindWorkspace(){
  document.querySelectorAll('[data-workspace-target]').forEach(b=>b.addEventListener('click',()=>{
   activateWorkspace(b.dataset.workspaceTarget);paintSketches();if(me?.role==='parent'&&activeView==='calendar')renderParentCalendar();if(activeView==='writingCalendar')renderWritingCalendar();
-  if(activeView==='daily')void refreshDailyCheckins();
+  // The daily check-in is loaded once on screen mount; do not race a second
+  // asynchronous refresh against the child's first tap when opening its tab.
   if(window.innerWidth<741)document.querySelector('.workspace-content')?.scrollIntoView({behavior:'smooth',block:'start'});
  }));
  activateWorkspace(activeView);
