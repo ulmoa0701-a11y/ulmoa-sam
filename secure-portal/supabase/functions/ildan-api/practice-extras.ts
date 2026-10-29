@@ -9,6 +9,7 @@ function dayOK(raw:unknown):raw is string{
  return check.getUTCFullYear()===y&&check.getUTCMonth()===m-1&&check.getUTCDate()===d;
 }
 const frequency=(x:unknown)=>x===undefined||x===null?null:Number.isInteger(x)&&Number(x)>=0&&Number(x)<=3?x:NaN;
+const wakingFrequency=(x:unknown)=>x===undefined||x===null?null:Number.isInteger(x)&&Number(x)>=0&&Number(x)<=4?x:NaN;
 export async function practiceExtras(opts:{
  apiName:string;request:Request;admin:any;member:any;uid:string;
  send:(value:any,status?:number)=>Response;body:(request:Request)=>Promise<any>;
@@ -84,33 +85,39 @@ export async function practiceExtras(opts:{
    const ids=(assigned||[]).map((x:any)=>x.user_id);
    if(!ids.length)return send({checkins:[]});
    const {data,error}=await admin.from('ildan_daily_checkins')
-    .select('id,student_id,kind,day,waking_count,movement_count,worry_count,updated_at')
+    .select('id,student_id,kind,day,waking_count,movement_count,worry_count,sleep_onset_level,repeat_level,worry_impact_level,tic_bother_level,updated_at')
     .eq('therapist_id',uid).in('student_id',ids).not('shared_at','is',null)
     .order('day',{ascending:false}).limit(300);
    if(error)throw Error('CHECKIN_LIST_FAILED');
    return send({checkins:(data||[]).map((x:any)=>({
     id:x.id,studentId:x.student_id,kind:x.kind,day:x.day,
     waking:x.waking_count,movement:x.movement_count,worry:x.worry_count,
+    sleepOnset:x.sleep_onset_level,repeating:x.repeat_level,worryImpact:x.worry_impact_level,ticBother:x.tic_bother_level,
     shared:true,updatedAt:x.updated_at
    }))});
   }
   if(!['student','parent'].includes(member.role))return send({error:'접근할 수 없습니다.'},403);
   const {data,error}=await admin.from('ildan_daily_checkins')
-   .select('id,day,waking_count,movement_count,worry_count,shared_at,updated_at')
+   .select('id,day,waking_count,movement_count,worry_count,sleep_onset_level,repeat_level,worry_impact_level,tic_bother_level,shared_at,updated_at')
    .eq('author_id',uid).order('day',{ascending:false}).limit(300);
   if(error)throw Error('CHECKIN_LIST_FAILED');
   return send({checkins:(data||[]).map((x:any)=>({
    id:x.id,day:x.day,waking:x.waking_count,movement:x.movement_count,
-   worry:x.worry_count,shared:!!x.shared_at,updatedAt:x.updated_at
+   worry:x.worry_count,sleepOnset:x.sleep_onset_level,repeating:x.repeat_level,
+   worryImpact:x.worry_impact_level,ticBother:x.tic_bother_level,
+   shared:!!x.shared_at,updatedAt:x.updated_at
   }))});
  }
  if(apiName==='practice-checkins'&&request.method==='POST'){
   if(!['student','parent'].includes(member.role))return send({error:'작성자 전용입니다.'},403);
   const b=await body(request),day=b.day;
   if(!dayOK(day))return send({error:'오늘 또는 지나간 날짜를 선택해 주세요.'},400);
-  const waking=frequency(b.waking),movement=frequency(b.movement),worry=frequency(b.worry);
-  if([waking,movement,worry].some(x=>typeof x==='number'&&Number.isNaN(x))||
-   [waking,movement,worry].every(x=>x===null))
+  const waking=wakingFrequency(b.waking),movement=frequency(b.movement),worry=frequency(b.worry);
+  const sleepOnset=frequency(b.sleepOnset),repeating=frequency(b.repeating),
+   worryImpact=frequency(b.worryImpact),ticBother=frequency(b.ticBother);
+  const responses=[waking,movement,worry,sleepOnset,repeating,worryImpact,ticBother];
+  if(responses.some(x=>typeof x==='number'&&Number.isNaN(x))||
+   responses.every(x=>x===null))
    return send({error:'기억나는 항목 하나만 선택해도 됩니다.'},400);
   const studentId=member.role==='student'?uid:member.student_id;
   if(!studentId||!member.therapist_id||!(await checkStudent(admin,studentId,member.therapist_id)))
@@ -122,6 +129,7 @@ export async function practiceExtras(opts:{
   const {error}=await admin.from('ildan_daily_checkins').upsert({
    author_id:uid,student_id:studentId,therapist_id:member.therapist_id,
    kind:member.role,day,waking_count:waking,movement_count:movement,worry_count:worry,
+   sleep_onset_level:sleepOnset,repeat_level:repeating,worry_impact_level:worryImpact,tic_bother_level:ticBother,
    shared_at:share?(previous?.shared_at||new Date().toISOString()):null,
    updated_at:new Date().toISOString()
   },{onConflict:'author_id,day'});
