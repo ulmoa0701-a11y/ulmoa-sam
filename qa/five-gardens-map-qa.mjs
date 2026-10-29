@@ -16,6 +16,27 @@ for(const width of [320,360,390,768,1366]){
  const res=await page.goto(base+'/gardens/',{waitUntil:'domcontentloaded',timeout:30000});
  await page.waitForTimeout(650);
  const map=page.locator('.garden-story-map');
+ // The unapproved SVG map has been rolled back. Verify the safe legacy
+ // navigation until a reviewed, approved replacement is available.
+ if(await map.count()===0){
+  const restored=await page.evaluate(()=>{
+   const anchors=[...document.querySelectorAll('nav.garden-jumps a.garden-jump')].map(a=>a.getAttribute('href'));
+   const css=[...document.querySelectorAll('link[rel="stylesheet"]')].map(a=>a.getAttribute('href'));
+   return {anchors,gameCount:document.querySelectorAll('.play-card-enhanced').length,
+    overflow:document.documentElement.scrollWidth-innerWidth,
+    mapCssLoaded:css.some(a=>a.includes('story-map.css')),
+    obsoleteInstruction:!!document.querySelector('.garden-map-instruction')};
+  });
+  assert(res?.ok(),width+' restored gardens page HTTP error');
+  assert(restored.anchors.join('|')===paths.map(x=>'#'+x).join('|'),width+' restored garden navigation broken');
+  assert(restored.gameCount===34,width+' restored garden game count incorrect');
+  assert(restored.overflow<=3,width+' restored view horizontal overflow');
+  assert(!restored.mapCssLoaded&&!restored.obsoleteInstruction,width+' rejected storybook map remains active');
+  assert(errors.length===0,width+' restored page JS errors: '+errors.join(' / '));
+  await page.screenshot({path:out+'/restored-first-screen-'+width+'.png'});
+  await context.close();
+  continue;
+ }
  assert(res?.ok(),width+' gardens page HTTP error');
  assert(await map.count()===1,width+' exploration map missing');
  const snapshot=await page.evaluate(()=>{
