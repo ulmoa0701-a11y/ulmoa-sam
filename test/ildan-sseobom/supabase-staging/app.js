@@ -273,22 +273,24 @@ function renderWritingCalendar(){
  const root=$('writingCalendar');if(root&&['student','therapist'].includes(me?.role))mountWritingCalendar(root,{role:me.role,records:shownRecords(records),students:me.role==='therapist'?students:[],onNewRecord:()=>activateWorkspace('write')});
 }
 
-async function refreshDailyCheckins(){
+async function refreshDailyCheckins(force=false){
  const root=$('dailyCheckin');
  if(!root||!me||!['student','parent','therapist'].includes(me.role))return;
  try{
   const result=await api('practice-checkins');
   if(!root.isConnected)return;
+  // Do not overwrite already selected answers while an overlapping GET finishes.
+  if(!force&&root.querySelector('#dailyForm')?.dataset.dirty==='true')return;
   mountDailyCheckins(root,{
    role:me.role,checkins:result.checkins||[],students,
    onSave:async value=>{
     try{await api('practice-checkins',{method:'POST',body:value});
      toast(value.share?'하루 체크를 저장하고 선생님에게 공유했어요.':'하루 체크를 나만 보기로 저장했어요.');
-     await refreshDailyCheckins();
+     await refreshDailyCheckins(true);
     }catch(e){toast('저장되지 않았어요: '+e.message)}
    },
    onDelete:async day=>{
-    try{await api('practice-checkin-delete',{method:'POST',body:{day}});toast('이 날짜 체크를 삭제했어요.');await refreshDailyCheckins()}
+    try{await api('practice-checkin-delete',{method:'POST',body:{day}});toast('이 날짜 체크를 삭제했어요.');await refreshDailyCheckins(true)}
     catch(e){toast('삭제하지 못했어요: '+e.message)}
    }
   });
@@ -312,7 +314,8 @@ function activateWorkspace(next){
 function bindWorkspace(){
  document.querySelectorAll('[data-workspace-target]').forEach(b=>b.addEventListener('click',()=>{
   activateWorkspace(b.dataset.workspaceTarget);paintSketches();if(me?.role==='parent'&&activeView==='calendar')renderParentCalendar();if(activeView==='writingCalendar')renderWritingCalendar();
-  if(activeView==='daily')void refreshDailyCheckins();
+  // The daily check-in is loaded once on screen mount; do not race a second
+  // asynchronous refresh against the child's first tap when opening its tab.
   if(window.innerWidth<741)document.querySelector('.workspace-content')?.scrollIntoView({behavior:'smooth',block:'start'});
  }));
  activateWorkspace(activeView);

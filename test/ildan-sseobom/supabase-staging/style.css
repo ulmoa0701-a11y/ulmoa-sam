@@ -1042,3 +1042,33 @@ form[hidden], .form[hidden] {display:none !important;}
 .daily-teacher-row{padding:12px;border:1px solid #dae7ed;border-radius:12px;margin:8px 0}
 .daily-ethics{font-size:12px;line-height:1.65;color:#6a7a85;margin-top:22px}
 @media(max-width:640px){.feedback-inputs{grid-template-columns:1fr}.daily-day{min-height:47px}.daily-field{align-items:stretch;flex-direction:column}.daily-field select{max-width:100%;width:100%;flex:auto}.record-feedback-editor{padding:12px}}
+
+/* Tailored quick tap response controls: 3 anchored choices + optional swipe.
+   Avoid clinical-severity colors, streaks, numeric anxiety scores. */
+.daily-tap-card{margin:12px 0;padding:13px 14px 12px;border-radius:16px;border:1px solid #dce7ec;background:#f9fcfd}
+.daily-tap-heading{display:flex;gap:10px;align-items:center;margin-bottom:11px;color:#274455}
+.daily-tap-icon{display:grid;place-items:center;min-width:37px;height:37px;background:#e7f3f6;border-radius:11px;font-size:20px}
+.daily-tap-heading strong{display:block;font-size:15px;line-height:1.4;font-weight:700}
+.daily-tap-heading small{display:block;margin-top:3px;font-size:12px;line-height:1.35;color:#637987}
+.daily-choice-track{display:flex;width:100%;gap:6px;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.daily-choice{appearance:none;flex:1 1 0;min-width:0;min-height:46px;padding:6px 4px;border:1px solid #cddfe7;border-radius:11px;background:#fff;color:#35586a;font:600 13px/1.35 inherit;font-family:inherit;font-size:13px;font-weight:650;line-height:1.35;cursor:pointer;transition:background .15s,border-color .15s}
+.daily-choice.selected{background:#d7eaf0;border:2px solid #5b8c9d;color:#1f5268}
+.daily-choice:focus-visible,.daily-unknown:focus-visible,.daily-optional-toggle:focus-visible{outline:3px solid #76b6d2;outline-offset:2px}
+.daily-unknown{margin-top:9px;border:0;background:transparent;color:#607885;text-decoration:underline;text-underline-offset:3px;padding:7px 3px;font-size:13px;cursor:pointer}
+.daily-unknown.selected{font-weight:750;color:#245e78}
+.daily-howto{border-radius:12px;padding:10px 12px;background:#eef6f8;font-size:13px;line-height:1.55;color:#385a6a;margin-bottom:12px}
+.daily-optional-toggle{margin:12px 0;width:100%;min-height:45px;border-radius:12px;border:1px dashed #aecad6;background:#fff;color:#2d667f;font-size:14px;font-weight:650;cursor:pointer}
+#dailyOptionalPanel[hidden]{display:none}
+.daily-sharing{align-items:center;padding:12px;border-radius:12px;background:#eef5f7}
+.daily-submit{margin-top:12px}
+.daily-submit .button{min-height:46px;min-width:150px}
+.daily-tally-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.daily-tally-grid>div{display:flex;flex-direction:column;gap:4px;background:#f2f7f9;border-radius:9px;padding:9px}
+.daily-tally-grid span{font-size:12px;color:#5b7280}
+.daily-tally-grid strong{font-size:14px;color:#294b60}
+@media(max-width:550px){.daily-tap-card{padding:12px}.daily-choice{min-height:45px;font-size:12px;padding:5px 3px}.daily-tally-grid{grid-template-columns:1fr}.daily-submit .button{flex:1}}
+
+.daily-calendar-toggle{width:100%;border:1px solid #cddfe7;background:#f5fafb;color:#335d71;min-height:42px;border-radius:11px;margin:13px 0;font:650 14px/1.4 inherit;font-family:inherit;font-size:14px;cursor:pointer}
+#dailyCalendarPanel[hidden]{display:none}
+.daily-sleep-night{font-size:12px;line-height:1.55;color:#536f7c;background:#f4f8fa;padding:10px 11px;border-radius:10px;margin:4px 0 12px}
+.daily-choice{display:flex;align-items:center;justify-content:center;min-height:61px}
