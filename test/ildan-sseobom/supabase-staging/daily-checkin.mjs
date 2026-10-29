@@ -109,7 +109,11 @@ export function mountDailyCheckins(root,{role,checkins=[],students=[],onSave,onD
     const box=track.getBoundingClientRect(),fraction=Math.max(0,Math.min(.999,(x-box.left)/box.width));
     setChoice(key,Math.min(2,Math.floor(fraction*3)));
    };
-   track.addEventListener('pointerdown',ev=>{if(!ev.isPrimary||ev.button!==0)return;dragging=true;track.setPointerCapture(ev.pointerId);choose(ev.clientX)});
+   track.addEventListener('pointerdown',ev=>{if(!ev.isPrimary||ev.button!==0)return;
+    const key=track.closest('[data-check-card]')?.dataset.checkCard;
+    // Four-button awakening counts must deliver normal clicks to each button.
+    if(questions.find(q=>q.key===key)?.answers.length!==3)return;
+    dragging=true;track.setPointerCapture(ev.pointerId);choose(ev.clientX)});
    track.addEventListener('pointermove',ev=>{if(dragging)choose(ev.clientX)});
    const stop=()=>{dragging=false};track.addEventListener('pointerup',stop);track.addEventListener('pointercancel',stop);
   });
