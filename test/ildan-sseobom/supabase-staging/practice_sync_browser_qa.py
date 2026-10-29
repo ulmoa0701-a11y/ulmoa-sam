@@ -15,7 +15,7 @@ url='http://127.0.0.1:8829/test/ildan-sseobom/supabase-staging/'
 student='10000000-0000-4000-8000-000000000015'
 therapist='10000000-0000-4000-8000-000000000016'
 bucket='ildan-practice-media'
-stored=[];uploaded=[];remote_clinical=[];api_calls=[];browser_requests=[];read_notifications=[];push_calls=[];push_devices=set()
+stored=[];uploaded=[];remote_clinical=[];api_calls=[];browser_requests=[];read_notifications=[];push_calls=[];push_devices=set();feedback={};daily=[]
 def png():
  raw=b''.join(b'\0'+b'\xe1\x93\x65'*24 for _ in range(24))
  def chunk(tag,data):return struct.pack('>I',len(data))+tag+data+struct.pack('>I',zlib.crc32(tag+data)&0xffffffff)
@@ -60,7 +60,7 @@ def init(page,role):
   elif name=='practice-unshare':
    stored[0]['shared']=False;data={'ok':True,'shared':False}
   elif name=='practice-delete':
-   stored.clear();data={'ok':True,'deleted':True}
+   stored.clear();feedback.clear();daily.clear();data={'ok':True,'deleted':True}
   elif name=='practice-notifications' and method=='GET':
    if role!='therapist':code=403;data={'error':'치료사 전용입니다.'}
    else:
@@ -71,6 +71,28 @@ def init(page,role):
    if role!='therapist':code=403;data={'error':'치료사 전용입니다.'}
    elif payload.get('notificationId')!='10000000-0000-4000-8000-000000000091':code=404;data={'error':'알림 없음'}
    else:read_notifications.append(datetime.now(timezone.utc).isoformat());data={'ok':True}
+
+  elif name=='practice-feedback' and method=='GET':
+   data={'feedback':[{'recordId':rid,**item} for rid,item in feedback.items()
+    if any(row['id']==rid and row['shared'] for row in stored)]}
+  elif name=='practice-feedback' and method=='POST':
+   if role!='therapist':code=403;data={'error':'치료사 전용'}
+   else:
+    feedback[payload['recordId']]={'reaction':payload.get('reaction'),'text':payload.get('text') or ''}
+    data={'ok':True}
+  elif name=='practice-feedback-delete':
+   if role!='therapist':code=403;data={'error':'치료사 전용'}
+   else:feedback.pop(payload.get('recordId'),None);data={'ok':True,'deleted':True}
+  elif name=='practice-checkins' and method=='GET':
+   data={'checkins':[row for row in daily if role!='therapist' or row.get('shared')]}
+  elif name=='practice-checkins' and method=='POST':
+   data={'ok':True,'day':payload['day'],'shared':bool(payload.get('share'))}
+   daily[:]=[x for x in daily if x['day']!=payload['day']]
+   daily.append({'id':'00000000-0000-4000-8000-000000000096','studentId':student,'kind':'student',
+    'day':payload['day'],'waking':payload.get('waking'),'movement':payload.get('movement'),
+    'worry':payload.get('worry'),'shared':bool(payload.get('share'))})
+  elif name=='practice-checkin-delete':
+   daily[:]=[x for x in daily if x['day']!=payload['day']];data={'ok':True,'deleted':True}
   elif name=='push-config':
    data={'enabled':True,'publicKey':'B'*86}
   elif name=='push-status':
@@ -203,6 +225,18 @@ with sync_playwright() as p:
   assert any('sketch' in x['entry'] for x in stored[1:]), 'drawing-only note survives cloud transfer'
   originals=page.evaluate("""async(uid)=>{const m=await import('./trial-media.mjs');return (await m.listPracticeRecords(uid)).filter(x=>x.syncedTo&&x.transferState==='done').length}""",student)
   assert originals==3, 'all three original device records must be preserved'
+
+  # One-click daily check: zero is not the same as unanswered; shared only with consent.
+  page.locator('[data-workspace-target="daily"]').click()
+  page.locator('#dailyForm select[name=waking]').wait_for(timeout=15000)
+  page.locator('#dailyForm select[name=waking]').select_option('1')
+  page.locator('#dailyForm select[name=movement]').select_option('0')
+  page.locator('#dailyForm input[name=share]').check()
+  page.locator('#dailyForm button[type=submit]').click()
+  page.wait_for_function("() => document.querySelector('#dailyForm button[type=submit]')?.innerText.includes('수정')", timeout=15000)
+  assert daily and daily[-1]['shared'] and daily[-1]['waking']==1 and daily[-1]['movement']==0, ('daily payload',daily,'api events',[x for x in api_calls[-20:] if 'checkin' in x[0]])
+  assert daily[-1]['worry'] is None, 'unanswered must stay unknown, not zero'
+  page.locator('[data-workspace-target="history"]').click()
   assert not errors,('page errors',width,errors)
   page.close()
   # A totally new context/device sees server-synced record without previous IndexedDB.
@@ -262,6 +296,23 @@ with sync_playwright() as p:
   assert teacher.locator('.shared-clinician-content .saved-photo-grid img').count()==1, 'shared photo must be immediately visible'
   assert teacher.locator('.shared-clinician-content .sketch-record').count()==1, 'shared drawing must be immediately visible'
   expect(teacher.locator('.shared-clinician-content .saved-photo-grid img').first).to_have_js_property('naturalWidth',24,timeout=12000)
+
+  # Therapist feedback is per shared record; students will see it on next visit.
+  teacher.locator('[data-record-feedback]').first.wait_for(timeout=12000)
+  teacher.locator('[data-record-feedback] select[name=reaction]').select_option('star')
+  teacher.locator('[data-record-feedback] textarea[name=text]').fill('잘 읽었어. 다음에 이야기해 보자.')
+  teacher.locator('[data-record-feedback] button[type=submit]').click()
+  teacher.locator('[data-record-feedback] button[type=submit]').get_by_text('반응 수정하기').wait_for(timeout=15000)
+  assert stored[0]['id'] in feedback and feedback[stored[0]['id']]['reaction']=='star'
+  teacher.locator('[data-workspace-target="daily"]').click()
+  teacher.locator('.daily-teacher-row').first.wait_for(timeout=12000)
+  assert '1' in teacher.locator('.daily-teacher-row').first.inner_text()
+  dates=teacher.evaluate("""async()=>{const mod=await import('./record-calendar.mjs');
+   return [mod.writtenDay({createdAt:'2026-10-29T07:20:00Z',entry:{date:'2026-10-21'}}),
+     mod.writtenDay({createdAt:'2026-10-29T07:20:00Z',entry:{date:'2026-10-25'}})]}""")
+  assert dates==['2026-10-21','2026-10-25'],('calendar must index chosen dates',dates)
+
+  teacher.locator('[data-workspace-target="inbox"]').click()
   teacher.locator('#filterKind').select_option('parent')
   assert teacher.locator('#inboxResults .shared-clinician-record').count()==0, 'author filter must work'
   teacher.locator('#filterKind').select_option('all')
@@ -273,7 +324,7 @@ with sync_playwright() as p:
   assert teacher.locator('.shared-clinician-content .saved-photo-grid img').first.evaluate('img=>img.complete&&img.naturalWidth>0'), 'photo should recover after renewal'
   teacher.close()
   checks.append(f'{width}px practice save with drawing/photo, cross-device reload, therapist share, no clinical write')
-  stored.clear()
+  stored.clear();feedback.clear();daily.clear()
  assert not remote_clinical,('unexpected non-practice clinical POST',remote_clinical)
  browser.close()
 srv.shutdown()
