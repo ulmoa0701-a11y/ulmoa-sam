@@ -90,7 +90,9 @@ def init(page,role):
    daily[:]=[x for x in daily if x['day']!=payload['day']]
    daily.append({'id':'00000000-0000-4000-8000-000000000096','studentId':student,'kind':'student',
     'day':payload['day'],'waking':payload.get('waking'),'movement':payload.get('movement'),
-    'worry':payload.get('worry'),'shared':bool(payload.get('share'))})
+    'worry':payload.get('worry'),'sleepOnset':payload.get('sleepOnset'),
+    'repeating':payload.get('repeating'),'worryImpact':payload.get('worryImpact'),
+    'ticBother':payload.get('ticBother'),'shared':bool(payload.get('share'))})
   elif name=='practice-checkin-delete':
    daily[:]=[x for x in daily if x['day']!=payload['day']];data={'ok':True,'deleted':True}
   elif name=='push-config':
@@ -228,14 +230,23 @@ with sync_playwright() as p:
 
   # One-click daily check: zero is not the same as unanswered; shared only with consent.
   page.locator('[data-workspace-target="daily"]').click()
-  page.locator('#dailyForm select[name=waking]').wait_for(timeout=15000)
-  page.locator('#dailyForm select[name=waking]').select_option('1')
-  page.locator('#dailyForm select[name=movement]').select_option('0')
+  page.locator('#dailyForm [data-choice=waking][data-choice-value="1"]').wait_for(timeout=15000)
+  page.locator('#dailyForm [data-choice=waking][data-choice-value="1"]').click()
+  page.locator('#dailyForm [data-choice=repeating][data-choice-value="1"]').click()
+  page.locator('#dailyForm [data-choice=worryImpact][data-choice-value="0"]').click()
+  # Swipe snaps to one of three choices; tapping stays available.
+  track=page.locator('#dailyForm [data-check-card=sleepOnset] .daily-choice-track')
+  box=track.bounding_box()
+  page.mouse.move(box['x']+box['width']*.12,box['y']+box['height']*.5)
+  page.mouse.down()
+  page.mouse.move(box['x']+box['width']*.86,box['y']+box['height']*.5,steps=5)
+  page.mouse.up()
+  assert page.locator('#dailyForm input[name=sleepOnset]').input_value()=='2'
   page.locator('#dailyForm input[name=share]').check()
   page.locator('#dailyForm button[type=submit]').click()
   page.wait_for_function("() => document.querySelector('#dailyForm button[type=submit]')?.innerText.includes('수정')", timeout=15000)
-  assert daily and daily[-1]['shared'] and daily[-1]['waking']==1 and daily[-1]['movement']==0, ('daily payload',daily,'api events',[x for x in api_calls[-20:] if 'checkin' in x[0]])
-  assert daily[-1]['worry'] is None, 'unanswered must stay unknown, not zero'
+  assert daily and daily[-1]['shared'] and daily[-1]['waking']==1 and daily[-1]['sleepOnset']==2 and daily[-1]['repeating']==1 and daily[-1]['worryImpact']==0, ('daily payload',daily)
+  assert daily[-1]['ticBother'] is None, 'unanswered optional tic item must stay unknown, not zero'
   page.locator('[data-workspace-target="history"]').click()
   assert not errors,('page errors',width,errors)
   page.close()
