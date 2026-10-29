@@ -233,7 +233,7 @@ with sync_playwright() as p:
   page.locator('#dailyForm select[name=movement]').select_option('0')
   page.locator('#dailyForm input[name=share]').check()
   page.locator('#dailyForm button[type=submit]').click()
-  page.wait_for_function("() => document.querySelector('#dailyForm button[type=submit]')?.innerText.includes('수정')",{ }, timeout=15000)
+  page.wait_for_function("() => document.querySelector('#dailyForm button[type=submit]')?.innerText.includes('수정')", timeout=15000)
   assert daily and daily[-1]['shared'] and daily[-1]['waking']==1 and daily[-1]['movement']==0
   assert daily[-1]['worry'] is None, 'unanswered must stay unknown, not zero'
   page.locator('[data-workspace-target="history"]').click()
