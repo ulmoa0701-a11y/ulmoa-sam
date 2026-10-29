@@ -242,7 +242,7 @@ with sync_playwright() as p:
   page.mouse.down()
   page.mouse.move(box['x']+box['width']*.86,box['y']+box['height']*.5,steps=5)
   page.mouse.up()
-  assert page.locator('#dailyForm input[name=sleepOnset]').input_value()=='2'
+  assert page.locator('#dailyForm input[name=sleepOnset]').input_value()=='2', ('swipe value',page.locator('#dailyForm input[name=sleepOnset]').input_value(), 'pressed',[x.get_attribute('data-choice-value') for x in page.locator('#dailyForm [data-choice=sleepOnset][aria-pressed=true]').all()], 'track',track.bounding_box())
   assert page.locator('#dailyForm input[name=waking]').input_value()=='1', 'other choice must not reset after dragging'
   page.locator('#dailyForm input[name=share]').check()
   page.locator('#dailyForm button[type=submit]').click()
