@@ -237,7 +237,9 @@ with sync_playwright() as p:
   assert page.locator('#dailyForm input[name=waking]').input_value()=='1', 'waking choice must remain selected'
   # Swipe snaps to one of three choices; tapping stays available.
   track=page.locator('#dailyForm [data-check-card=sleepOnset] .daily-choice-track')
+  track.scroll_into_view_if_needed()
   box=track.bounding_box()
+  assert 0<=box['y']<900, 'drag target must be inside visible Chrome viewport'
   page.mouse.move(box['x']+box['width']*.12,box['y']+box['height']*.5)
   page.mouse.down()
   page.mouse.move(box['x']+box['width']*.86,box['y']+box['height']*.5,steps=5)
