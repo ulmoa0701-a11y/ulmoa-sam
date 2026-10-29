@@ -34,7 +34,7 @@ export function mountDailyCheckins(root,{role,checkins=[],students=[],onSave,onD
   const matches=rows.filter(x=>x.day===key),out=d.getMonth()!==m;
   return `<button type="button" class="daily-day${key===s.day?' selected':''}${out?' outside':''}" data-daily-date="${key}" aria-pressed="${key===s.day}" aria-label="${key}, ${matches.length?'체크 있음':'체크 없음'}"><span>${d.getDate()}</span>${matches.length?'<i aria-hidden="true"></i>':''}</button>`;
  }).join('');
- const countDays=new Set(rows.filter(r=>r.day.startsWith(y+'-'+pad(m+1)+'-')).map(r=>r.day)).size;
+
  const card=q=>{
   const value=own?.[q.key];
   const choices=q.answers.map((label,index)=>`<button type="button" class="daily-choice${value===index?' selected':''}" aria-pressed="${value===index}" data-choice="${q.key}" data-choice-value="${index}">${label}</button>`).join('');
@@ -58,7 +58,7 @@ export function mountDailyCheckins(root,{role,checkins=[],students=[],onSave,onD
  <p class="calendar-explain">${teacher?'공유하기를 선택한 기록만 보여요. 빈 날짜는 증상이 없었다는 뜻이 아닙니다.':'기억나는 것만 골라도 돼. 숫자를 계산하거나 계속 확인할 필요 없어.'}</p>
  ${teacher?`<label class="calendar-student-picker">학생별 보기<select id="dailyStudent"><option value="all">전체 학생</option>${students.map(v=>`<option value="${esc(v.id)}"${v.id===s.student?' selected':''}>${esc(v.nickname)}</option>`).join('')}</select></label>`:''}
  <div class="writing-month-control"><button type="button" data-daily-prev aria-label="이전 달">‹</button><strong>${y}년 ${m+1}월</strong><button type="button" data-daily-next aria-label="다음 달">›</button><button type="button" data-daily-today>이번 달</button></div>
- <p class="daily-subtitle">이번 달 ${countDays}일 체크됨 · 체크하지 않은 날도 괜찮아요.</p>
+ <p class="daily-subtitle">선택한 날짜에만 체크해. 빈 날짜는 괜찮아.</p>
  <div class="calendar-weekdays">${['월','화','수','목','금','토','일'].map(x=>`<span>${x}</span>`).join('')}</div>
  <div class="daily-month-grid">${grid}</div>
  <section class="daily-selected" aria-label="선택한 날짜 체크">
