@@ -244,7 +244,7 @@ with sync_playwright() as p:
   assert page.locator('#dailyForm input[name=sleepOnset]').input_value()=='2'
   page.locator('#dailyForm input[name=share]').check()
   page.locator('#dailyForm button[type=submit]').click()
-  page.wait_for_function("() => document.querySelector('#dailyForm button[type=submit]')?.innerText.includes('수정')", timeout=15000)
+  page.locator('#dailyDelete').wait_for(timeout=15000)
   assert daily and daily[-1]['shared'] and daily[-1]['waking']==1 and daily[-1]['sleepOnset']==2 and daily[-1]['repeating']==1 and daily[-1]['worryImpact']==0, ('daily payload',daily)
   assert daily[-1]['ticBother'] is None, 'unanswered optional tic item must stay unknown, not zero'
   page.locator('[data-workspace-target="history"]').click()
