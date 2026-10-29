@@ -42,19 +42,24 @@ jobs:
           exit 1
       - name: Visual map and navigation QA
         run: node qa/five-gardens-map-qa.mjs
-      - name: Verify published design
+      - name: Verify published garden navigation matches checked-out version
         if: github.event_name == 'push'
         env:
           TEST_BASE_URL: https://ulmoa0701-a11y.github.io/ulmoa-sam
         run: |
+          if grep -Fq 'story-map.css' gardens/index.html; then
+            EXPECTED_MARKER='story-map.css?v=20261029-v1'
+          else
+            EXPECTED_MARKER='<nav class="garden-jumps" aria-label="정원 선택">'
+          fi
           for i in $(seq 1 60); do
-            if curl -fsSL --max-time 12 "$TEST_BASE_URL/gardens/?map=$GITHUB_SHA" | grep -Fq 'story-map.css?v=20261029-v1'; then
+            if curl -fsSL --max-time 12 "$TEST_BASE_URL/gardens/?rollback=$GITHUB_SHA" | grep -Fq "$EXPECTED_MARKER"; then
               node qa/five-gardens-map-qa.mjs
               exit $?
             fi
             sleep 4
           done
-          echo "Current map has not reached Pages"
+          echo "Current garden navigation has not reached Pages"
           exit 1
       - uses: actions/upload-artifact@v4
         if: always()
