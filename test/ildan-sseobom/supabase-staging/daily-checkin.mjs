@@ -102,20 +102,34 @@ export function mountDailyCheckins(root,{role,checkins=[],students=[],onSave,onD
   form.querySelectorAll('[data-choice]').forEach(button=>button.addEventListener('click',()=>setChoice(button.dataset.choice,Number(button.dataset.choiceValue))));
   // Swipe controls have clickable button alternatives; no continuous clinical score.
   form.querySelectorAll('.daily-choice-track').forEach(track=>{
-   let dragging=false;
+   let dragging=false,originX=0,swiped=false;
+   const key=track.closest('[data-check-card]')?.dataset.checkCard;
+   const q=questions.find(q=>q.key===key);
+   if(!q||q.answers.length!==3)return; // Four-count buttons use native click.
    const choose=x=>{
-    const key=track.closest('[data-check-card]')?.dataset.checkCard;
-    const q=questions.find(q=>q.key===key);if(!q||q.answers.length!==3)return;
-    const box=track.getBoundingClientRect(),fraction=Math.max(0,Math.min(.999,(x-box.left)/box.width));
+    const box=track.getBoundingClientRect();
+    if(!box.width)return;
+    const fraction=Math.max(0,Math.min(.999,(x-box.left)/box.width));
     setChoice(key,Math.min(2,Math.floor(fraction*3)));
    };
-   track.addEventListener('pointerdown',ev=>{if(!ev.isPrimary||ev.button!==0)return;
-    const key=track.closest('[data-check-card]')?.dataset.checkCard;
-    // Four-button awakening counts must deliver normal clicks to each button.
-    if(questions.find(q=>q.key===key)?.answers.length!==3)return;
-    dragging=true;track.setPointerCapture(ev.pointerId);choose(ev.clientX)});
-   track.addEventListener('pointermove',ev=>{if(dragging)choose(ev.clientX)});
-   const stop=()=>{dragging=false};track.addEventListener('pointerup',stop);track.addEventListener('pointercancel',stop);
+   track.addEventListener('pointerdown',ev=>{
+    if(!ev.isPrimary||ev.button!==0)return;
+    dragging=true;originX=ev.clientX;swiped=false;
+    track.setPointerCapture(ev.pointerId);choose(ev.clientX);
+   });
+   track.addEventListener('pointermove',ev=>{
+    if(!dragging)return;
+    if(Math.abs(ev.clientX-originX)>8)swiped=true;
+    choose(ev.clientX);
+   });
+   track.addEventListener('pointerup',()=>{dragging=false});
+   track.addEventListener('pointercancel',()=>{dragging=false;swiped=false});
+   // Browser click synthesis after drag must not revert to starting button.
+   track.addEventListener('click',ev=>{
+    if(!swiped)return;
+    ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation();
+    swiped=false;
+   },true);
   });
   const toggle=form.querySelector('#dailyOptionalToggle');
   toggle.onclick=()=>{
