@@ -182,3 +182,55 @@
 @media(prefers-reduced-motion:reduce){
  .gardens-page .garden-story-map .garden-jump{transition:none!important}
 }
+
+/* Search belongs to the map's tool dock, not another big rectangular menu. */
+.gardens-page .garden-search-panel{
+ display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,1.2fr) auto;
+ gap:12px;align-items:center;
+ padding:13px 16px;margin:12px 0 13px;
+ border:1px solid #cedfcc;border-radius:24px;
+ background:linear-gradient(117deg,#e9f3e4,#fbfaf0);
+ box-shadow:0 3px 9px #507d5420;
+}
+.gardens-page .garden-search-title>span{
+ width:36px;height:36px;border-radius:50%;background:#fffdf5;
+ border:1px solid #d8e5ce;
+}
+.gardens-page .garden-search-title strong{font-size:15px}
+.gardens-page .garden-search-title small{font-size:11px}
+.gardens-page .garden-search-controls input{border-radius:999px;background:#fffefa}
+.gardens-page .garden-search-panel .garden-picture-toggle{
+ justify-self:end;align-self:center;margin:0;min-height:43px;
+ padding:7px 12px;border-radius:999px;
+ border-width:1px 1px 2px;white-space:nowrap;background:#fffdf6;
+}
+.gardens-page .garden-search-panel .garden-search-status,
+.gardens-page .garden-search-panel .garden-picture-description{
+ grid-column:1/-1;margin:0;padding:0 3px;
+}
+@media(max-width:850px){
+ .gardens-page .garden-search-panel{grid-template-columns:minmax(0,1fr) auto}
+ .gardens-page .garden-search-title{grid-column:1/-1}
+ .gardens-page .garden-search-controls{grid-column:1}
+ .gardens-page .garden-search-panel .garden-picture-toggle{grid-column:2}
+}
+@media(max-width:540px){
+ .gardens-page .garden-search-panel{grid-template-columns:1fr;padding:11px 13px;gap:8px}
+ .gardens-page .garden-search-title,.gardens-page .garden-search-controls,
+ .gardens-page .garden-search-panel .garden-picture-toggle{
+  grid-column:1;min-width:0;
+ }
+ .gardens-page .garden-search-panel .garden-picture-toggle{
+  justify-self:start;min-height:42px;padding:8px 13px;
+ }
+ .gardens-page .garden-search-title strong{font-size:14px}
+ .gardens-page .garden-search-title small{font-size:11px}
+ .gardens-page .garden-search-title>span{width:30px;height:30px;font-size:17px}
+ .gardens-page .garden-search-controls input{height:43px;font-size:15px}
+ .gardens-page .garden-story-map .garden-jump small{
+  white-space:normal;overflow-wrap:keep-all;font-size:11px;line-height:1.18;
+ }
+}
+@media(max-width:350px){
+ .gardens-page .garden-story-map .garden-jump small{font-size:10.5px}
+}
