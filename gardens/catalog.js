@@ -138,11 +138,12 @@ introNote.before(searchPanel);
 const searchInput=$('#gardenSearch'),searchClear=$('#gardenSearchClear'),searchStatus=$('#gardenSearchStatus');
 function refreshResults(){
  const query=searchInput.value.trim().toLocaleLowerCase('ko-KR');
+ const queryWords=query.split(/\s+/).filter(Boolean);
  let grandTotal=0;
  for(const section of sections){
   const filter=section.dataset.activeFocus||'all';
   const cards=Array.from(section.querySelectorAll('.play-card-enhanced'));
-  const matches=cards.filter(card=>(filter==='all'||card.dataset.focus===filter)&&(!query||card.dataset.search.includes(query)));
+  const matches=cards.filter(card=>(filter==='all'||card.dataset.focus===filter)&&(!query||queryWords.every(word=>card.dataset.search.includes(word))));
   const limit=!query&&section.id==='cognitive'&&filter==='all'&&section.dataset.expanded!=='true'?6:Infinity;
   cards.forEach(card=>{card.hidden=!matches.includes(card)||matches.indexOf(card)>=limit});
   const visible=Math.min(limit,matches.length);
