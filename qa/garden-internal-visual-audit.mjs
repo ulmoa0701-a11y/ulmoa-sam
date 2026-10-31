@@ -183,7 +183,10 @@ async function capture(id,url,{native=false}={}){
     const candidates=['#gameArea','#gameScreen','#playScreen','#practiceScreen','#play','#viewer','#featherStage','#longProgress','#beatScene','#game canvas','.game'];
     const stage=candidates.map(selector=>({selector,el:document.querySelector(selector)})).find(x=>x.el&&visible(x.el));
     const b=stage?.el?.getBoundingClientRect();
-    return {documentWidth:document.documentElement.scrollWidth,viewportWidth:vw,viewportHeight:vh,scrollHeight:document.documentElement.scrollHeight,horizontalOverflow:Math.max(0,document.documentElement.scrollWidth-vw),stage:stage?{selector:stage.selector,rect:{x:Math.round(b.x),y:Math.round(b.y),width:Math.round(b.width),height:Math.round(b.height),bottom:Math.round(b.bottom)}}:null,visibleControls:nodes.length,touchTooSmall,clipped,broken,fontsReady:document.fonts?.status};
+    const sharedHeaderTargets=[...document.querySelectorAll('.topbar .brand,.topbar .sound-btn')]
+      .filter(visible).map(el=>({name:el.getAttribute('aria-label')||el.className,
+        width:Math.round(el.getBoundingClientRect().width),height:Math.round(el.getBoundingClientRect().height)}));
+    return {documentWidth:document.documentElement.scrollWidth,viewportWidth:vw,viewportHeight:vh,scrollHeight:document.documentElement.scrollHeight,horizontalOverflow:Math.max(0,document.documentElement.scrollWidth-vw),stage:stage?{selector:stage.selector,rect:{x:Math.round(b.x),y:Math.round(b.y),width:Math.round(b.width),height:Math.round(b.height),bottom:Math.round(b.bottom)}}:null,visibleControls:nodes.length,touchTooSmall,clipped,broken,sharedHeaderTargets,fontsReady:document.fonts?.status};
    });
    await page.screenshot({path:path.join(outDir,currentDevice+'-'+id+'-whole-page.png'),fullPage:true,animations:'disabled',timeout:18000});
   }catch(e){entry.errors.push('Visual diagnostics: '+String(e).slice(0,160));}
@@ -203,7 +206,9 @@ for(const vp of [
 }
 await browser.close();
 const expected=34*(process.env.QA_DEVICE?1:3), missing=report.filter(x=>!x.play);
-const hard=report.filter(x=>x.metrics?.horizontalOverflow>6||x.metrics?.broken?.length>0||x.errors.some(e=>/HTTP 404|SyntaxError/.test(e)));
+const hard=report.filter(x=>x.metrics?.horizontalOverflow>6||x.metrics?.broken?.length>0||x.errors.some(e=>/HTTP 404|SyntaxError/.test(e))||
+  (nativeIds.includes(x.id)&&(!x.metrics?.sharedHeaderTargets||x.metrics.sharedHeaderTargets.length!==2||
+    x.metrics.sharedHeaderTargets.some(t=>t.width<40||t.height<40))));
 const summary={scope:'34 game INTERNAL UI desktop/mobile screenshot and automated layout inspection; first interaction where supported; camera and breathing remain synthetic/unverified',head:process.env.GITHUB_SHA||null,total:report.length,expected,visualPlayConfirmed:report.filter(x=>x.play).length,introOnly:missing.map(x=>({id:x.id,device:x.device,reason:x.errors})),hardFailures:hard.map(x=>({id:x.id,device:x.device,metrics:x.metrics,errors:x.errors})),metrics:report};
 fs.writeFileSync(path.join(outDir,'report.json'),JSON.stringify(summary,null,2)+'\n');
 console.log('GARDEN-INTERNAL-VISUAL '+JSON.stringify({total:summary.total,expected,visualPlayConfirmed:summary.visualPlayConfirmed,introOnly:summary.introOnly,hardFailures:summary.hardFailures.map(x=>({id:x.id,device:x.device}))}));
