@@ -1,0 +1,367 @@
+/* Interactive flower trails — NOT the rejected 2026-10-29 static SVG map.
+   This version is native HTML/CSS scenery, linked by responsive SVG paths,
+   with the approved 34 game-specific illustrations as functional hotspots.
+   The existing list stays accessible with one reversible toggle. */
+.gardens-page{
+ --trail-ink:#294b3b;
+ --trail-sand:#f3e0ad;
+ --trail-edge:#d8c592;
+ --trail-cream:#fffdf4;
+}
+.gardens-page .garden-trail-instruction{
+ display:flex;align-items:center;gap:9px;margin:12px 4px 11px;
+ font-size:clamp(13px,1.45vw,16px);font-weight:750;color:#496f57;
+}
+.gardens-page .garden-trail-instruction span{
+ color:#c39d49;font-size:22px;filter:drop-shadow(0 2px 1px #fff);
+}
+.gardens-page .garden-atlas{
+ position:relative;display:block;isolation:isolate;overflow:hidden;
+ height:clamp(405px,39vw,485px);margin:0 0 15px;
+ border-radius:37px 43px 39px 46px/36px 31px 38px 38px;
+ border:2px solid #cfdfc4;
+ background:
+  radial-gradient(ellipse 27% 26% at 7% 12%,#bbdfbc99 0 74%,transparent 76%),
+  radial-gradient(ellipse 24% 30% at 93% 20%,#b1dbb688 0 74%,transparent 76%),
+  radial-gradient(ellipse 40% 22% at 47% 101%,#b4d49fa1 0 72%,transparent 75%),
+  radial-gradient(ellipse 18% 21% at 21% 71%,#bce7e8af 0 70%,transparent 73%),
+  linear-gradient(165deg,#edf8ec,#e2f2d8 51%,#f4f0d9);
+ box-shadow:0 13px 34px #54755420,inset 0 0 0 6px #ffffff70;
+}
+.gardens-page .garden-atlas:before{
+ content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+ background:
+ radial-gradient(ellipse 7% 6% at 12% 44%,#fff7d2bd 0 70%,transparent 73%),
+ radial-gradient(ellipse 9% 7% at 87% 78%,#fff6d4b3 0 70%,transparent 73%),
+ radial-gradient(ellipse 13% 8% at 49% 55%,#c8e9bb9c 0 75%,transparent 77%),
+ radial-gradient(ellipse 13% 7% at 62% 10%,#f5e8b29c 0 70%,transparent 74%);
+}
+.gardens-page .garden-atlas:after{
+ content:"";position:absolute;z-index:0;pointer-events:none;
+ left:11%;top:68%;width:17%;height:13%;
+ background:radial-gradient(ellipse at 32% 32%,#e4fbfa,#bce4dd 59%,#90c6c6 78%,transparent 82%);
+ border-radius:54% 46% 59% 41% / 56% 61% 39% 44%;
+ transform:rotate(-10deg);
+ opacity:.88;
+}
+.gardens-page .garden-route-lines{
+ position:absolute;inset:0;display:block;overflow:visible;
+ width:100%;height:100%;pointer-events:none;z-index:1;
+}
+.gardens-page .garden-route-lines path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.gardens-page .garden-path-edge{stroke:var(--trail-edge);stroke-width:28;opacity:.52}
+.gardens-page .garden-path-sand{stroke:var(--trail-sand);stroke-width:20;opacity:.96}
+.gardens-page .garden-path-dots{stroke:#fffbef;stroke-width:2.7;stroke-dasharray:2 13;opacity:.82}
+.gardens-page .garden-atlas .garden-jump{
+ position:absolute;z-index:3;display:flex;flex-direction:column;gap:0;
+ justify-content:center;align-items:center;
+ width:23%;height:46%;min-height:0;min-width:0;
+ padding:0;border:0;box-shadow:none;background:transparent;
+ text-decoration:none;transition:transform .16s ease;
+ color:var(--trail-ink);
+}
+.gardens-page .garden-atlas .garden-jump:hover{background:transparent;transform:translateY(-5px)}
+.gardens-page .garden-atlas .garden-jump:focus-visible{
+ outline:4px solid #267452;outline-offset:-3px;border-radius:48%;background:#fffdf447;
+}
+.gardens-page .garden-atlas .garden-jump-cognitive{left:4%;top:6%}
+.gardens-page .garden-atlas .garden-jump-thinking{left:39%;top:4%}
+.gardens-page .garden-atlas .garden-jump-learning{right:4%;top:6%}
+.gardens-page .garden-atlas .garden-jump-music{right:16%;bottom:3%}
+.gardens-page .garden-atlas .garden-jump-heart{left:16%;bottom:3%}
+.gardens-page .garden-atlas .garden-atlas-art{
+ display:block;width:clamp(80px,10.5vw,128px);height:clamp(80px,10.5vw,128px);
+ border-radius:50%;object-fit:cover;
+ border:6px solid #fffdf4;
+ outline:2px solid #b4d2a7;
+ box-shadow:0 8px 0 #8fad8860,0 11px 21px #4e795540;
+ background:#f5f9eb;transform:rotate(-2deg);
+ flex:none;transition:transform .15s ease;
+}
+.gardens-page .garden-atlas .garden-jump:nth-child(even) .garden-atlas-art{transform:rotate(2deg)}
+.gardens-page .garden-atlas .garden-jump:hover .garden-atlas-art{transform:scale(1.055)}
+.gardens-page .garden-atlas .garden-jump>span:nth-child(2){
+ display:grid;justify-items:center;gap:2px;
+ width:max-content;max-width:100%;min-width:125px;
+ padding:9px 14px 10px;margin-top:-2px;
+ border-radius:48% 51% 47% 53% / 37% 39% 48% 41%;
+ background:linear-gradient(155deg,#fffdf5f5,#f8f0d4f3);
+ border:2px solid #e6d7ae;border-bottom:4px solid #d2bc84;
+ box-shadow:0 6px 14px #41644825;
+ text-align:center;
+}
+.gardens-page .garden-atlas .jump-symbol,
+.gardens-page .garden-atlas .jump-arrow{display:none}
+.gardens-page .garden-atlas .garden-jump strong{
+ color:#315947;font-family:"MaruBuri",Pretendard,SUIT,serif;
+ font-size:clamp(16px,1.7vw,22px);letter-spacing:-.045em;line-height:1.3;
+ font-weight:800;white-space:nowrap;
+}
+.gardens-page .garden-atlas .garden-jump small{
+ color:#617264;font-size:clamp(10px,1vw,12px);line-height:1.35;
+ white-space:normal;text-align:center;
+}
+.gardens-page .garden-view-switch{
+ justify-self:end;align-self:center;display:inline-flex;align-items:center;gap:7px;
+ min-height:44px;padding:9px 16px;cursor:pointer;white-space:nowrap;
+ border-radius:999px;background:#f6f2e1;color:#386a51;
+ border:1.5px solid #c9d8bc;border-bottom-width:3px;
+ font-size:13px;font-weight:800;
+}
+.gardens-page .garden-view-switch[aria-pressed="true"]{
+ background:#dfeee0;border-color:#8ec4aa;color:#245a44;
+}
+.gardens-page .garden-view-switch:focus-visible{outline:3px solid #267452;outline-offset:2px}
+/* The five sections become continuous forest walks, not a catalog of
+   rectangular boxes. All original cards remain in their original order. */
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-trail-section{
+ padding:9px 0 26px;margin-bottom:21px;
+ border:0;box-shadow:none;border-radius:0;background:transparent;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-section-heading{
+ padding:10px 12px 4px;position:relative;z-index:2;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-discovery-controls{
+ background:#f8fbf3cc;border:1px solid #e3ead9;
+ border-radius:23px;padding:13px 13px 11px;margin:9px 3px 12px;
+ box-shadow:none;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-filter-buttons button{
+ border-radius:999px;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk{
+ --walk-rose:#d8eab9;--walk-grass:#e7f4d3;
+ position:relative;isolation:isolate;
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+ grid-auto-rows:249px;gap:10px 4px;
+ padding:28px 19px 23px;margin:0 3px;
+ border:2px solid #d2e2c9;
+ border-radius:38px 45px 35px 44px/42px 34px 46px 37px;
+ background:
+ radial-gradient(ellipse 20% 12% at 11% 19%,#fff5dc 0 69%,transparent 74%),
+ radial-gradient(ellipse 19% 12% at 87% 58%,#caecdfbb 0 73%,transparent 75%),
+ radial-gradient(ellipse 33% 11% at 54% 96%,var(--walk-rose) 0 73%,transparent 76%),
+ radial-gradient(ellipse 22% 17% at 24% 55%,#cfe3c2b5 0 74%,transparent 77%),
+ linear-gradient(155deg,#eff8e9,var(--walk-grass) 51%,#f3f2dd 100%);
+ box-shadow:0 9px 25px #54755322,inset 0 0 0 5px #ffffff80;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) #thinking .garden-walk{
+ --walk-rose:#d9d4ed;--walk-grass:#e8f0e1;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) #learning .garden-walk{
+ --walk-rose:#f3dfaa;--walk-grass:#e9f1d3;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) #music .garden-walk{
+ --walk-rose:#bce3d8;--walk-grass:#e5f3e3;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) #heart .garden-walk{
+ --walk-rose:#f3d8dc;--walk-grass:#f0f2df;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .garden-route-lines{
+ z-index:1;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .garden-path-edge{stroke-width:26}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .garden-path-sand{stroke-width:18}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .garden-path-dots{stroke-width:2.3}
+.gardens-page .garden-walk-decor{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden;border-radius:inherit}
+.gardens-page .garden-scenery{position:absolute;display:block;transform:translate(-50%,-50%);pointer-events:none}
+.gardens-page .garden-scenery-tree{
+ width:66px;height:71px;border-radius:49% 51% 51% 49% / 48% 52% 45% 55%;
+ background:radial-gradient(circle at 36% 31%,#d7ebad 3%,#a9d29d 45%,#76b594 84%);
+ box-shadow:inset -10px -9px 0 #568f7e23,0 5px 7px #477c6330;opacity:.8;
+}
+.gardens-page .garden-scenery-tree:after{
+ content:"";position:absolute;left:46%;top:68%;height:28px;width:7px;
+ background:#a48764;z-index:-1;border-radius:6px;
+}
+.gardens-page .garden-scenery-bloom{
+ width:40px;height:40px;border-radius:48%;
+ background:
+ radial-gradient(circle at 50% 50%,#f5d978 0 20%,transparent 22%),
+ radial-gradient(ellipse 14px 13px at 50% 13%,#f4bad0 15%,transparent 95%),
+ radial-gradient(ellipse 14px 13px at 88% 53%,#f4bad0 15%,transparent 95%),
+ radial-gradient(ellipse 14px 13px at 50% 85%,#f4bad0 15%,transparent 95%),
+ radial-gradient(ellipse 14px 13px at 12% 53%,#f4bad0 15%,transparent 95%);
+ opacity:.78;
+}
+.gardens-page .garden-scenery-shrub{
+ width:50px;height:33px;
+ border-radius:48% 52% 36% 54%;
+ background:radial-gradient(ellipse at 32% 35%,#d3edb7,#87bd98 75%);
+ box-shadow:14px -3px 0 -6px #bad9a5,-12px 4px 0 -8px #80b696;
+ opacity:.73;
+}
+.gardens-page .garden-scenery-pond{
+ width:80px;height:43px;border-radius:55% 45% 48% 52% / 60% 52% 48% 40%;
+ background:radial-gradient(ellipse at 30% 20%,#f2ffff,#a6ded8 71%,#9fc6c5);
+ box-shadow:0 0 0 5px #c5e7c2a0;
+ transform:translate(-50%,-50%) rotate(-10deg);opacity:.65;
+}
+/* Game spots are round, tactile landmarks. The familiar game cover image
+   is never blown up beyond what its vector design supports. */
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card.play-card-enhanced{
+ z-index:2;position:relative;display:flex;flex-direction:column;
+ justify-content:flex-start;align-items:center;
+ min-height:0;height:244px;width:100%;max-width:235px;
+ margin:0 auto;padding:4px 0 0;gap:4px;
+ background:transparent;border:0;border-radius:0;
+ box-shadow:none;overflow:visible;isolation:auto;
+ transform:none;transition:none;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card.play-card-enhanced[hidden]{display:none!important}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card-media{
+ position:relative;flex:none;align-self:center;
+ display:block;width:118px;height:118px;min-height:0;
+ border-radius:50%;aspect-ratio:1;overflow:hidden;
+ border:5px solid #fffdfa;outline:2px solid #c8debd;
+ background:#f1f7e9;cursor:pointer;
+ box-shadow:0 6px 0 #a3c59f8c,0 13px 19px #4c715538;
+ transform:rotate(-1.5deg);
+ transition:transform .15s,box-shadow .15s;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card:nth-of-type(even) .play-card-media{transform:rotate(2deg)}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card-media:hover{
+ transform:scale(1.05);box-shadow:0 6px 0 #a3c59f8c,0 16px 24px #4c71553c;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card-media:focus-visible{
+ outline:4px solid #246b50;outline-offset:4px;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card-media img{
+ width:100%;height:100%;object-fit:cover;object-position:center;
+ border-radius:0;filter:none;padding:0;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card-details{
+ display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+ gap:2px;flex:1;width:100%;min-height:0;padding:0 2px 2px;
+ background:transparent;border:0;box-shadow:none;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-activity{
+ font-size:10px;color:#4e8260;margin:0;line-height:1.2;
+ text-align:center;white-space:nowrap;font-weight:850;
+ text-shadow:0 1px #fff;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-activity:before{
+ width:7px;height:7px;margin-right:4px;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card h3{
+ display:flex;align-items:center;justify-content:center;
+ width:100%;max-width:208px;min-height:42px;
+ padding:5px 7px;margin:0;
+ background:linear-gradient(180deg,#fffef7ed,#f9f4deee);
+ border:1px solid #e7d9ad;border-bottom:2px solid #d6c294;
+ box-shadow:0 3px 7px #59775a25;
+ border-radius:47% 52% 50% 46% / 38% 41% 39% 42%;
+ color:#2a4737;font-family:"MaruBuri",Pretendard,SUIT,serif;
+ font-weight:800;font-size:clamp(12px,1.4vw,16px);line-height:1.27;
+ text-align:center;letter-spacing:-.04em;
+ overflow:visible;word-break:keep-all;overflow-wrap:anywhere;
+ -webkit-line-clamp:unset;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-simple-desc,
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-story-name,
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-life-one-line{
+ display:none!important;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-buttons{
+ display:grid;grid-template-columns:1fr 1fr;gap:5px;
+ width:100%;max-width:200px;margin:auto 0 0;padding:0 3px;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-buttons .play-preview-btn,
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-buttons .play-start-btn{
+ display:flex;align-items:center;justify-content:center;gap:3px;
+ min-height:42px;height:auto;padding:7px 4px;
+ border-radius:999px;font-size:clamp(10px,1.05vw,12px);
+ font-weight:850;line-height:1.18;white-space:nowrap;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-buttons .play-preview-btn{
+ background:#fffdf2;color:#37634c;border:1.5px solid #c0d6ba;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-buttons .play-start-btn{
+ background:#3b795c;color:#fff;border:1.5px solid #296749;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-buttons :is(button,a):focus-visible{
+ outline:3px solid #286c51;outline-offset:2px;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-more-button{
+ border-radius:999px;background:linear-gradient(175deg,#fff6db,#e9e0bf);
+ border:2px solid #d5bb82;color:#466044;
+ box-shadow:0 5px 0 #c9b48d66;font-weight:850;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-more-wrap{margin-top:13px}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-bottom-links{padding:11px 8px}
+/* Smaller screens still show two clear, large targets along the path. */
+@media(max-width:999px){
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-auto-rows:245px;column-gap:10px;
+ }
+ .gardens-page .garden-atlas{height:405px}
+ .gardens-page .garden-atlas .garden-jump{width:24%}
+ .gardens-page .garden-atlas .garden-atlas-art{width:99px;height:99px}
+}
+@media(max-width:680px){
+ .gardens-page .garden-atlas{
+  height:690px;min-height:0;border-radius:29px;
+  background:
+   radial-gradient(ellipse 24% 17% at 8% 10%,#bbdfbca1 0 73%,transparent 76%),
+   radial-gradient(ellipse 25% 18% at 87% 62%,#bce7e0a1 0 72%,transparent 74%),
+   radial-gradient(ellipse 36% 13% at 47% 100%,#b4d49f99 0 72%,transparent 75%),
+   linear-gradient(165deg,#edf8ec,#e2f2d8 51%,#f5eed4);
+ }
+ .gardens-page .garden-atlas .garden-jump{
+  width:47%;height:29%;
+ }
+ .gardens-page .garden-atlas .garden-jump-cognitive{left:2%;top:3%}
+ .gardens-page .garden-atlas .garden-jump-thinking{left:51%;top:3%}
+ .gardens-page .garden-atlas .garden-jump-learning{right:2%;top:35%}
+ .gardens-page .garden-atlas .garden-jump-music{left:2%;right:auto;top:35%;bottom:auto}
+ .gardens-page .garden-atlas .garden-jump-heart{left:26.5%;top:68%;bottom:auto}
+ .gardens-page .garden-atlas .garden-atlas-art{width:92px;height:92px;border-width:5px}
+ .gardens-page .garden-atlas .garden-jump>span:nth-child(2){min-width:116px;padding:7px 9px 8px}
+ .gardens-page .garden-atlas .garden-jump strong{font-size:16px}
+ .gardens-page .garden-atlas .garden-jump small{font-size:10px}
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-trail-section{padding-inline:0;margin-bottom:12px}
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk{
+  padding:17px 10px 14px;margin:0;gap:8px 5px;
+  grid-auto-rows:240px;border-radius:29px;
+ }
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card.play-card-enhanced{
+  max-width:190px;height:233px;padding:3px 0 0;
+ }
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card-media{
+  width:102px;height:102px;border-width:4px;
+ }
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card-details{padding:0 1px 1px}
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card h3{
+  font-size:clamp(12px,3.5vw,15px);min-height:39px;padding:4px 5px;
+ }
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-buttons{
+  gap:4px;padding:0 1px;
+ }
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-buttons .play-preview-btn,
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-buttons .play-start-btn{
+  font-size:11px;min-height:42px;padding:7px 2px;
+ }
+ .gardens-page .garden-view-switch{min-height:42px;padding:8px 12px}
+}
+@media(max-width:360px){
+ .gardens-page .garden-atlas{height:650px}
+ .gardens-page .garden-atlas .garden-atlas-art{width:84px;height:84px}
+ .gardens-page .garden-atlas .garden-jump>span:nth-child(2){min-width:107px;padding:7px 6px 8px}
+ .gardens-page .garden-atlas .garden-jump small{font-size:9px}
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk{
+  padding-left:7px;padding-right:7px;column-gap:4px;
+ }
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card-media{width:94px;height:94px}
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card h3{font-size:12px}
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-buttons .play-preview-btn,
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-buttons .play-start-btn{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .gardens-page .garden-atlas .garden-jump,
+ .gardens-page .garden-atlas .garden-atlas-art,
+ .gardens-page.garden-trails-active .garden-walk .play-card-media{transition:none!important}
+}
+/* Keep list-view exactly as before, including picture-first mode. */
+.gardens-page.garden-list-view .garden-walk-decor,
+.gardens-page.garden-list-view .garden-route-lines.garden-walk-route{display:none!important}
