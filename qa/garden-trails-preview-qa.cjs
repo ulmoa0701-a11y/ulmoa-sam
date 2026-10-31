@@ -66,6 +66,14 @@ fs.mkdirSync(out,{recursive:true});
     assert.ok(nodes.every(n=>!n.titleClipped),vp.name+' clipped garden sign');
     if(vp.width<=390)assert.ok(nodes.every(n=>n.card[1]<=260),vp.name+' node too tall');
     await page.locator('.garden-atlas').screenshot({path:path.join(out,vp.name+'-five-garden-map.png')});
+    // A visible on-map destination must open its unchanged section without
+    // putting the heading underneath the fixed global site navigation.
+    await page.locator('.garden-atlas a[href="#thinking"]').click();
+    await page.waitForFunction(()=>location.hash==='#thinking'&&
+       document.querySelector('#thinking').getBoundingClientRect().top>=62);
+    const headingTop=await page.locator('#thinking').evaluate(el=>Math.round(el.getBoundingClientRect().top));
+    assert.ok(headingTop>=62&&headingTop<=140,vp.name+' garden anchor obscured by header '+headingTop);
+
     await cognitive.screenshot({path:path.join(out,vp.name+'-cognitive-path.png')});
     // Path is playable, not decorative-only. Tap the game illustration itself.
     await page.locator('#gardenSearch').fill('꽃만');
