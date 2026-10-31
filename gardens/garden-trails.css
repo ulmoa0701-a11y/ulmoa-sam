@@ -9,7 +9,6 @@
  --trail-cream:#fffdf4;
 }
 /* Garden anchor jumps stay clear of the site's sticky navigation. */
-html:has(body.gardens-page.garden-trails-active){scroll-padding-top:95px}
 .gardens-page.garden-trails-active .garden-trail-section{scroll-margin-top:95px}
 .gardens-page.garden-trails-active .garden-walk-node{scroll-margin-top:90px}
 .gardens-page .garden-trail-instruction{
