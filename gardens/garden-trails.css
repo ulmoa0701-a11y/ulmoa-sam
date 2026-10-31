@@ -80,7 +80,7 @@
 }
 .gardens-page .garden-atlas .garden-jump:nth-child(even) .garden-atlas-art{transform:rotate(2deg)}
 .gardens-page .garden-atlas .garden-jump:hover .garden-atlas-art{transform:scale(1.055)}
-.gardens-page .garden-atlas .garden-jump>span:nth-child(2){
+.gardens-page .garden-atlas .garden-jump>span:not(.jump-symbol):not(.jump-arrow){
  display:grid;justify-items:center;gap:2px;
  width:max-content;max-width:100%;min-width:125px;
  padding:9px 14px 10px;margin-top:-2px;
@@ -317,7 +317,7 @@
  .gardens-page .garden-atlas .garden-jump-music{left:2%;right:auto;top:35%;bottom:auto}
  .gardens-page .garden-atlas .garden-jump-heart{left:26.5%;top:68%;bottom:auto}
  .gardens-page .garden-atlas .garden-atlas-art{width:92px;height:92px;border-width:5px}
- .gardens-page .garden-atlas .garden-jump>span:nth-child(2){min-width:116px;padding:7px 9px 8px}
+ .gardens-page .garden-atlas .garden-jump>span:not(.jump-symbol):not(.jump-arrow){min-width:116px;padding:7px 9px 8px}
  .gardens-page .garden-atlas .garden-jump strong{font-size:16px}
  .gardens-page .garden-atlas .garden-jump small{font-size:10px}
  .gardens-page.garden-trails-active:not(.garden-list-view) .garden-trail-section{padding-inline:0;margin-bottom:12px}
@@ -347,7 +347,7 @@
 @media(max-width:360px){
  .gardens-page .garden-atlas{height:650px}
  .gardens-page .garden-atlas .garden-atlas-art{width:84px;height:84px}
- .gardens-page .garden-atlas .garden-jump>span:nth-child(2){min-width:107px;padding:7px 6px 8px}
+ .gardens-page .garden-atlas .garden-jump>span:not(.jump-symbol):not(.jump-arrow){min-width:107px;padding:7px 6px 8px}
  .gardens-page .garden-atlas .garden-jump small{font-size:9px}
  .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk{
   padding-left:7px;padding-right:7px;column-gap:4px;
