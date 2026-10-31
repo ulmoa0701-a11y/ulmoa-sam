@@ -152,6 +152,12 @@ function schedule(){
  if(task)return;
  task=requestAnimationFrame(()=>{task=0;render()});
 }
+// The older picture-only mode belongs to the original accessible list.
+// Switching to it must not hide the descriptions when it is switched back.
+const pictureSwitch=document.querySelector('#gardenPictureMode');
+if(pictureSwitch)pictureSwitch.addEventListener('click',()=>{
+ if(!document.body.classList.contains('garden-list-view'))listToggle.click();
+});
 listToggle.addEventListener('click',()=>{
  const isList=document.body.classList.toggle('garden-list-view');
  listToggle.setAttribute('aria-pressed',String(isList));
