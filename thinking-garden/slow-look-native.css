@@ -121,3 +121,26 @@ button:disabled.slow-primary,button:disabled.slow-secondary{opacity:.65;cursor:d
 .slow-block-built strong{font-size:19px}
 .slow-block-built p{margin:0;font-size:13px}
 @media(max-width:600px){.slow-block-story{gap:7px;padding:8px}.slow-block-story img{width:39px;height:39px}.slow-block-story strong{font-size:14px}.slow-block-story span{font-size:12px}.slow-block-tools button{padding:8px;font-size:12px;flex:1 1 auto}.slow-build-pair .slow-block-board .slow-tile{min-height:37px}}
+
+/* Small phones: place the example above the answer grid so every 3×3 or
+   4×4 answer cell is large enough to tap without changing task difficulty.
+   The original side-by-side comparison remains on wider screens. */
+@media(max-width:420px){
+ .slow-map-pair{
+   grid-template-columns:minmax(0,1fr);
+   justify-items:center;
+   gap:12px;
+   max-width:320px;
+   margin-inline:auto;
+ }
+ .slow-map-pair>div{width:100%;min-width:0}
+ .slow-map-pair .slow-board{
+   width:min(100%,260px);
+   max-width:260px;
+   margin-inline:auto;
+   gap:5px;
+   padding:7px;
+ }
+ .slow-map-pair button.slow-tile{min-width:40px;min-height:40px}
+ .slow-build-pair .slow-block-board .slow-tile{min-height:40px}
+}
