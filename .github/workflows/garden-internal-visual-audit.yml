@@ -1,4 +1,5 @@
 name: Gardens 34 Internal Play UI Visual Audit
+run-name: 34 internal game screens — ${{ github.sha }}
 on:
   pull_request:
     paths:

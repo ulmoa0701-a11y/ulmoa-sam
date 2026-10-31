@@ -112,3 +112,16 @@
     font-size:19px;letter-spacing:2px;
   }
 }
+
+/* 2026-10-31 internal UI audit: 24 shared games had 30px home and 34px sound targets.
+   Enlarge interactive hit areas without changing game stages, content or scoring. */
+body:has(#gameScreen.active) .topbar .brand{
+  min-height:44px;
+  padding-block:5px;
+}
+body:has(#gameScreen.active) .topbar .sound-btn{
+  width:44px;
+  height:44px;
+  min-width:44px;
+  min-height:44px;
+}
