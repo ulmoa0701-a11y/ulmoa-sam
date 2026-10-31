@@ -206,10 +206,12 @@ for(const vp of [
 }
 await browser.close();
 const expected=34*(process.env.QA_DEVICE?1:3), missing=report.filter(x=>!x.play);
+const mobileSpatialTooSmall=report.filter(x=>x.device!=='desktop-1280'&&['slowPlace','slowBlock'].includes(x.id)&&
+  x.metrics?.touchTooSmall?.some(t=>/행.*열/.test(t.name)));
 const hard=report.filter(x=>x.metrics?.horizontalOverflow>6||x.metrics?.broken?.length>0||x.errors.some(e=>/HTTP 404|SyntaxError/.test(e))||
   (nativeIds.includes(x.id)&&(!x.metrics?.sharedHeaderTargets||x.metrics.sharedHeaderTargets.length!==2||
     x.metrics.sharedHeaderTargets.some(t=>t.width<40||t.height<40))));
-const summary={scope:'34 game INTERNAL UI desktop/mobile screenshot and automated layout inspection; first interaction where supported; camera and breathing remain synthetic/unverified',head:process.env.GITHUB_SHA||null,total:report.length,expected,visualPlayConfirmed:report.filter(x=>x.play).length,introOnly:missing.map(x=>({id:x.id,device:x.device,reason:x.errors})),hardFailures:hard.map(x=>({id:x.id,device:x.device,metrics:x.metrics,errors:x.errors})),metrics:report};
+const summary={scope:'34 game INTERNAL UI desktop/mobile screenshot and automated layout inspection; first interaction where supported; camera and breathing remain synthetic/unverified',head:process.env.GITHUB_SHA||null,total:report.length,expected,visualPlayConfirmed:report.filter(x=>x.play).length,introOnly:missing.map(x=>({id:x.id,device:x.device,reason:x.errors})),hardFailures:hard.map(x=>({id:x.id,device:x.device,metrics:x.metrics,errors:x.errors})),mobileSpatialTooSmall:mobileSpatialTooSmall.map(x=>({id:x.id,device:x.device,tiles:x.metrics.touchTooSmall})),metrics:report};
 fs.writeFileSync(path.join(outDir,'report.json'),JSON.stringify(summary,null,2)+'\n');
 console.log('GARDEN-INTERNAL-VISUAL '+JSON.stringify({total:summary.total,expected,visualPlayConfirmed:summary.visualPlayConfirmed,introOnly:summary.introOnly,hardFailures:summary.hardFailures.map(x=>({id:x.id,device:x.device}))}));
-if(report.length!==expected||hard.length)process.exitCode=1;
+if(report.length!==expected||hard.length||mobileSpatialTooSmall.length)process.exitCode=1;
