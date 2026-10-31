@@ -8,6 +8,10 @@
  --trail-edge:#d8c592;
  --trail-cream:#fffdf4;
 }
+/* Garden anchor jumps stay clear of the site's sticky navigation. */
+html:has(body.gardens-page.garden-trails-active){scroll-padding-top:95px}
+.gardens-page.garden-trails-active .garden-trail-section{scroll-margin-top:95px}
+.gardens-page.garden-trails-active .garden-walk-node{scroll-margin-top:90px}
 .gardens-page .garden-trail-instruction{
  display:flex;align-items:center;gap:9px;margin:12px 4px 11px;
  font-size:clamp(13px,1.45vw,16px);font-weight:750;color:#496f57;
