@@ -289,7 +289,7 @@ Nm=function(){const giveSickle=Kp===3&&jm(Bp)<5.5&&qp&&!Jp;__hg4OrigNm();if(give
 zm=function(action){
  if(__hg4ShopOpen)return;
  const nearFlower=__hgClosestFlower()?.d<=6;
- if(action==="talk"&&__hg4NearShop()&&!__hg4BossStages.has(Kp)){__hg4Open();return}
+ if(action==="talk"&&__hg4NearShop()&&!__hg4BossStages.has(Kp)){if(Kp===0&&jm(zp)<5.5)return __hg4OrigZm(action);__hg4Open();return}
  if(action==="talk"&&__hg4BossStages.has(Kp)&&!nearFlower)return;
  if(action==="trap"&&Kp!==2&&!(Kp===6&&dm==="water"&&__uHasBucket))return;
  if(action==="slash"&&Kp===4&&__hg4HasSickle)__hg4SwingUntil=performance.now()+380;
