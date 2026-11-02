@@ -368,3 +368,157 @@
 /* Keep list-view exactly as before, including picture-first mode. */
 .gardens-page.garden-list-view .garden-walk-decor,
 .gardens-page.garden-list-view .garden-route-lines.garden-walk-route{display:none!important}
+
+
+/* Storybook landscape refinement · original artwork already used inside
+   Moa Rescue, not the previously rejected static garden-map illustrations.
+   Click targets, text, and paths remain live DOM rather than baked into art. */
+.gardens-page .garden-atlas{
+ border:4px solid #dfedc3;
+ background:
+  linear-gradient(170deg,rgba(248,255,245,.11),rgba(243,251,230,.20) 52%,rgba(245,253,232,.25)),
+  url("../thinking-garden/games/rescue/art/world-wide-0.svg") center 55% / cover no-repeat,
+  #d8edcf;
+ box-shadow:0 12px 0 #9bbd8180,0 18px 34px #44663d30,
+  inset 0 0 0 6px #faffee80;
+}
+.gardens-page .garden-atlas:before{
+ content:"";inset:0;z-index:0;pointer-events:none;position:absolute;
+ background:linear-gradient(90deg,rgba(245,252,228,.14) 0%,transparent 28%,transparent 73%,rgba(245,252,228,.11) 100%);
+}
+.gardens-page .garden-atlas:after{display:none}
+.gardens-page .garden-atlas .garden-jump{
+ filter:drop-shadow(0 12px 10px #214d3633);
+}
+.gardens-page .garden-atlas .garden-jump:before{
+ content:"";position:absolute;bottom:32px;width:86%;height:33%;
+ border-radius:50% 50% 46% 49% / 52% 52% 40% 40%;
+ background:
+  radial-gradient(ellipse at 50% 30%,#e5f7bb,#aedb8e 54%,#71ac75 79%,#457f69);
+ border:2px solid #7eab714a;
+ box-shadow:inset 0 4px 6px #fffde58b,0 9px 14px #436a4a55;
+ opacity:.94;z-index:-1;
+}
+.gardens-page .garden-atlas .garden-atlas-art{
+ width:clamp(94px,11.7vw,139px);height:clamp(94px,11.7vw,139px);
+ border-radius:35% 53% 43% 56% / 46% 40% 60% 48%;
+ border:7px solid #fffdf1;outline:3px solid #d0e1a0;
+ box-shadow:0 0 0 5px #a3c77b87,0 13px 22px #35674554;
+ transform:rotate(-3deg);background:#fffef2;
+}
+.gardens-page .garden-atlas .garden-jump:nth-child(even) .garden-atlas-art{
+ border-radius:52% 42% 56% 38% / 47% 55% 42% 57%;transform:rotate(3deg);
+}
+.gardens-page .garden-atlas .garden-jump>span:not(.jump-symbol):not(.jump-arrow){
+ position:relative;min-width:134px;
+ background:linear-gradient(#fff7dbed,#f5e4bced);
+ border-color:#dcb780;border-bottom-width:5px;
+ border-radius:25px 24px 26px 25px / 18px 19px 22px 20px;
+ box-shadow:0 6px 0 #c99e6273,0 9px 20px #315f4944;
+}
+.gardens-page .garden-atlas .garden-jump>span:not(.jump-symbol):not(.jump-arrow):before,
+.gardens-page .garden-atlas .garden-jump>span:not(.jump-symbol):not(.jump-arrow):after{
+ content:"";position:absolute;top:8px;width:5px;height:5px;
+ border-radius:50%;background:#c0985c;box-shadow:inset 0 1px 1px #795735;
+}
+.gardens-page .garden-atlas .garden-jump>span:not(.jump-symbol):not(.jump-arrow):before{left:9px}
+.gardens-page .garden-atlas .garden-jump>span:not(.jump-symbol):not(.jump-arrow):after{right:9px}
+.gardens-page .garden-atlas .garden-path-edge{stroke:#a479489e;stroke-width:37}
+.gardens-page .garden-atlas .garden-path-sand{stroke:#f8de9a;stroke-width:27;opacity:1}
+.gardens-page .garden-atlas .garden-path-dots{stroke:#fffeeb;stroke-width:3;stroke-dasharray:3 16}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk{
+ border:4px solid #d6e9c1;
+ background:
+  linear-gradient(145deg,rgba(248,255,233,.36),rgba(243,254,238,.26)),
+  url("../thinking-garden/games/rescue/art/world-wide-0.svg") center / cover no-repeat,
+  #e6f4db;
+ box-shadow:0 8px 0 #9bbd8170,0 15px 30px #3e694137,inset 0 0 0 6px #fffde78a;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) #thinking .garden-walk{
+ background:
+  linear-gradient(135deg,#eff7ff6b,#e9ebfb68),
+  url("../thinking-garden/games/rescue/art/world-wide-2.svg") center / cover no-repeat;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) #learning .garden-walk{
+ background:
+  linear-gradient(135deg,#fffce069,#f4f3d66f),
+  url("../thinking-garden/games/rescue/art/world-wide-4.svg") center / cover no-repeat;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) #music .garden-walk{
+ background:
+  linear-gradient(135deg,#edfcf786,#e4f7fd67),
+  url("../thinking-garden/games/rescue/art/world-wide-3.svg") center / cover no-repeat;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) #heart .garden-walk{
+ background:
+  linear-gradient(135deg,#fff3f6a3,#fcebf46d),
+  url("../thinking-garden/games/rescue/art/world-wide-1.svg") center / cover no-repeat;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .garden-path-edge{
+ stroke:#b28f5a;stroke-width:35;opacity:.8;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .garden-path-sand{
+ stroke:#f8dea7;stroke-width:25;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .garden-path-dots{
+ stroke:#fffef2;stroke-width:3.2;stroke-dasharray:3 14;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card-media{
+ width:133px;height:133px;
+ border-radius:38% 57% 44% 52% / 52% 42% 55% 47%;
+ border:7px solid #fffdf4;outline:3px solid #b2cf93;
+ box-shadow:0 0 0 5px #86ba7791,0 10px 0 #4c8a628a,0 17px 25px #28533e63;
+ background:#fffced;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card h3{
+ border-radius:23px 25px 23px 24px / 17px 16px 19px 17px;
+ background:linear-gradient(#fff9e5f7,#f4e3bef7);
+ border:2px solid #d9b77c;border-bottom:5px solid #be965f;
+ box-shadow:0 5px 11px #345b424b;
+ color:#264632;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-activity{
+ font-size:11px;background:#fffef2d9;padding:3px 7px;border-radius:999px;
+ box-shadow:0 2px 5px #467b6438;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-buttons :is(.play-preview-btn,.play-start-btn){
+ border-bottom-width:3px;
+ box-shadow:0 3px 8px #345c443b;
+}
+.gardens-page.garden-trails-active:not(.garden-list-view) .garden-scenery{opacity:.36}
+@media(max-width:680px){
+ .gardens-page .garden-atlas{
+  background:
+   linear-gradient(165deg,#e4f7e92b,#eaf5e034 60%,#f7fbeb42),
+   url("../thinking-garden/games/rescue/art/world-tall-0.svg") center center / cover no-repeat,#e1f1d3;
+ }
+ .gardens-page .garden-atlas .garden-jump:before{bottom:23px;height:35%}
+ .gardens-page .garden-atlas .garden-atlas-art{width:110px;height:110px;border-width:6px}
+ .gardens-page .garden-atlas .garden-jump>span:not(.jump-symbol):not(.jump-arrow){min-width:124px}
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk{
+  background:
+   linear-gradient(165deg,rgba(243,251,237,.48),rgba(238,249,238,.40)),
+   url("../thinking-garden/games/rescue/art/world-tall-0.svg") center / cover no-repeat;
+ }
+ .gardens-page.garden-trails-active:not(.garden-list-view) #thinking .garden-walk{
+  background:linear-gradient(#f0f5ff80,#f0f7f285),url("../thinking-garden/games/rescue/art/world-tall-2.svg") center / cover no-repeat;
+ }
+ .gardens-page.garden-trails-active:not(.garden-list-view) #learning .garden-walk{
+  background:linear-gradient(#fffbe78a,#f4f7dc80),url("../thinking-garden/games/rescue/art/world-tall-4.svg") center / cover no-repeat;
+ }
+ .gardens-page.garden-trails-active:not(.garden-list-view) #music .garden-walk{
+  background:linear-gradient(#eafaef8a,#edfbff87),url("../thinking-garden/games/rescue/art/world-tall-3.svg") center / cover no-repeat;
+ }
+ .gardens-page.garden-trails-active:not(.garden-list-view) #heart .garden-walk{
+  background:linear-gradient(#fff0f28a,#f7f7e486),url("../thinking-garden/games/rescue/art/world-tall-1.svg") center / cover no-repeat;
+ }
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card-media{
+  width:113px;height:113px;border-width:5px;
+ }
+}
+@media(max-width:360px){
+ .gardens-page .garden-atlas .garden-atlas-art{width:101px;height:101px}
+ .gardens-page.garden-trails-active:not(.garden-list-view) .garden-walk .play-card-media{
+  width:103px;height:103px;
+ }
+}
