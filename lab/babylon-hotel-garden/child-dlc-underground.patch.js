@@ -193,7 +193,7 @@ function __hg5PressAction(){
  if(__hg5Phase==="meet")return __hg5TalkGardener();
  if(__hg5Phase==="dig")return __hg5Dig();
  if(__hg5Phase==="ladder"&&__hg5Range(__hg5HomePos.x,__hg5HomePos.z)<4.5)return __hg5StartDescent(true);
- if(__hg5Phase==="underground"&&__hg5Range(__hg5LadderBottom.x,__hg5LadderBottom.z)<4.7)return __hg5StartDescent(false);
+ if((__hg5Phase==="underground"||__hg5Phase==="mansion")&&__hg5Range(__hg5LadderBottom.x,__hg5LadderBottom.z)<4.7)return __hg5StartDescent(false);
  if(__hg5Phase==="underground"&&__hg5Range(__hg5DoorPos.x,__hg5DoorPos.z)<5)return __hg5EnterManor();
  return false;
 }

@@ -1,0 +1,38 @@
+name: Hotel Garden Underground DLC QA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/hotel-garden-dlc-qa.yml'
+      - 'qa/hotel-garden-dlc-qa.mjs'
+      - 'lab/babylon-hotel-garden/child-dlc-underground.patch.js'
+      - 'lab/babylon-hotel-garden/assets/index-DxiltY-5.js'
+concurrency:
+  group: hotel-garden-dlc-qa
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  full-dlc-play:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install existing Chrome browser runner
+        run: npm install --no-save --no-audit --no-fund puppeteer-core@latest
+      - name: Find Chrome
+        run: echo "CHROME_PATH=$(which google-chrome || which google-chrome-stable || which chromium)" >> "$GITHUB_ENV"
+      - name: Play full underground DLC with keyboard
+        run: node qa/hotel-garden-dlc-qa.mjs
+      - name: Upload DLC QA report and independent screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hotel-garden-dlc-real-play-evidence
+          path: qa/results/hotel-garden-dlc-*
+          if-no-files-found: warn
+          retention-days: 7
