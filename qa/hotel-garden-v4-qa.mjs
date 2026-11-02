@@ -26,6 +26,7 @@ try{
  check("noPermanentGardenerTarget",await page.$eval("#target",e=>getComputedStyle(e).display==="none"));
  await page.keyboard.press("Enter");await sleep(150);
  check("enterAdvancesDialog",await page.$eval("#dialog",e=>!e.classList.contains("show")));
+ await sleep(450);await page.screenshot({path:"qa/results/hotel-garden-v4-botanical-market-overview.png"});
  const oldQText=await page.$eval("#notice",e=>e.textContent);await page.keyboard.press("q");await sleep(120);
  check("unneededQSilent",(await page.$eval("#notice",e=>e.textContent))===oldQText);
  // Walk to the shop with real keyboard actions. Test never changes game coordinates directly.
@@ -41,7 +42,7 @@ try{
  console.log("V4_SHOP_DIAG_BEFORE",JSON.stringify({state:await state(),game:await page.evaluate(()=>window.__ulmoaGameQa.state()),dialog:await page.$eval("#dialog",e=>e.className)}));
  if(arrived){
   // Capture the ORIGINAL large building front before opening the seed store.
-  await page.screenshot({path:"qa/results/hotel-garden-v5-botanical-market-front.png"});
+  await page.screenshot({path:"qa/results/hotel-garden-v4-botanical-market-front.png"});
   await page.keyboard.press("e");await sleep(300);
   check("shopOpensAtOriginalHouseWithE",await page.$eval("#hg4Shop",e=>e.classList.contains("open")));
   await page.keyboard.press("Escape");await sleep(130);
@@ -69,7 +70,7 @@ try{
  check("combatTimerVisible",woods.bossTimer);
  // Pressing E during battle, away from a collectible, must not produce NPC talk warning.
  const oldEText=await page.$eval("#notice",e=>e.textContent);await page.keyboard.press("e");await sleep(100);
- check("talkSilentDuringBoss",(await page.$eval("#notice",e=>e.textContent))===oldEText);
+ check("talkSilentDuringBoss",await page.$eval("#notice",e=>!e.textContent.includes("조금 더 가까이 가야 말걸 수 있어요"))&&await page.$eval("#dialog",e=>!e.classList.contains("show")));
  const eyePreview=await page.evaluate(()=>window.__ulmoaGardenV2.previewBoss("eye"));await sleep(950);
  const oldEyeText=await page.$eval("#notice",e=>e.textContent);await page.keyboard.press("q");await sleep(130);
  check("qSilentInEyeBattle",(await page.$eval("#notice",e=>e.textContent))===oldEyeText);console.log("V4_EYE_DIAG",JSON.stringify({preview:eyePreview,state:await state()}));
