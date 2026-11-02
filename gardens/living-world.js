@@ -131,7 +131,68 @@ window.addEventListener('popstate',()=>{
  const id=decodeURIComponent(location.hash.slice(1));
  if(ids.includes(id))goToGarden(id,false);else backToMap(false);
 });
+// A path winds through actual interactive game landmarks. The path is
+// decorative SVG only; the original keyboard-focusable buttons remain HTML.
+const trails=[];
+for(const zone of sections){
+ const field=zone.querySelector('.world-trail');
+ if(!field)continue;
+ const line=document.createElementNS('http://www.w3.org/2000/svg','svg');
+ line.setAttribute('class','world-winding-trail');
+ line.setAttribute('aria-hidden','true');line.setAttribute('focusable','false');
+ line.setAttribute('preserveAspectRatio','none');
+ field.prepend(line);
+ trails.push({zone,field,line,cards:[...field.querySelectorAll('.world-game-stop')]});
+}
+function redrawTrails(){
+ if(!document.body.classList.contains('world-in-garden'))return;
+ for(const {zone,field,line,cards:stops} of trails){
+  if(!zone.classList.contains('world-zone-active'))continue;
+  const root=field.getBoundingClientRect();
+  const shown=stops.filter(card=>!card.hidden&&getComputedStyle(card).display!=='none');
+  const points=shown.map(card=>{
+   const el=card.querySelector('.play-card-media')||card;
+   const b=el.getBoundingClientRect();
+   return{x:b.left-root.left+b.width*.5,y:b.top-root.top+b.height*.56};
+  });
+  const width=Math.max(1,field.clientWidth),height=Math.max(1,field.clientHeight);
+  line.setAttribute('viewBox','0 0 '+width+' '+height);
+  line.setAttribute('width',width);line.setAttribute('height',height);
+  let d='';
+  for(let i=0;i<points.length;i++){
+   const p=points[i];
+   if(i===0){d='M '+p.x+' '+p.y;continue}
+   const a=points[i-1],dy=p.y-a.y,dx=p.x-a.x;
+   if(Math.abs(dy)<15){
+    d+=' Q '+(a.x+p.x)/2+' '+(a.y-31)+' '+p.x+' '+p.y;
+   }else{
+    d+=' C '+(a.x+dx*.25)+' '+(a.y+dy*.50)+' '+(p.x-dx*.25)+' '+(p.y-dy*.50)+' '+p.x+' '+p.y;
+   }
+  }
+  line.innerHTML='<path class="world-trail-ridge" d="'+d+'"/>'+
+  '<path class="world-trail-soil" d="'+d+'"/>'+
+  '<path class="world-trail-light" d="'+d+'"/>';
+ }
+}
+let pendingFrame=0;
+function scheduleTrail(){
+ if(pendingFrame)return;
+ pendingFrame=requestAnimationFrame(()=>{pendingFrame=0;redrawTrails()});
+}
+const zonesObserver=new MutationObserver(scheduleTrail);
+for(const {field,cards:stops} of trails){
+ for(const card of stops)zonesObserver.observe(card,{attributes:true,attributeFilter:['hidden']});
+ const btn=field.parentElement.querySelector('.garden-more-button');
+ btn?.addEventListener('click',scheduleTrail);
+}
+window.addEventListener('resize',scheduleTrail,{passive:true});
+const resizeWatcher=new ResizeObserver(scheduleTrail);
+for(const {field} of trails)resizeWatcher.observe(field);
+for(const a of gardenLinks)a.addEventListener('click',scheduleTrail);
+for(const b of backs)b.addEventListener('click',scheduleTrail);
+switcher.addEventListener('click',scheduleTrail);
 const initial=decodeURIComponent(location.hash.slice(1));
 if(ids.includes(initial))goToGarden(initial,false);
+scheduleTrail();
 console.info('Five living gardens ready: 5 real world portals, '+cards.length+' original game entries; reversible accessible list.');
 })();
