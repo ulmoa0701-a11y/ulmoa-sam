@@ -566,3 +566,33 @@
   width:48px;height:55px;
  }
 }
+
+
+/* Foreground tree canopy gives a true depth cue over the sunny garden world.
+   These are existing OpenAI-project music-garden art assets; they are not
+   generated mock UI or images of the old rejected five-gardens map. */
+.gardens-page .garden-atlas:before,
+.gardens-page .garden-atlas:after{
+ display:block;content:"";position:absolute;top:-2px;pointer-events:none;
+ z-index:2;width:34%;height:35%;
+ background-position:top left;background-size:contain;background-repeat:no-repeat;
+ opacity:.54;filter:drop-shadow(0 8px 8px #244c384c);
+}
+.gardens-page .garden-atlas:before{
+ left:-2px;right:auto;
+ background-image:url("../boomwhacker/heart-playalong-v4/assets/forest-canopy-left.svg");
+}
+.gardens-page .garden-atlas:after{
+ right:-2px;left:auto;background-position:top right;
+ background-image:url("../boomwhacker/heart-playalong-v4/assets/forest-canopy-right.svg");
+}
+@media(max-width:680px){
+ .gardens-page .garden-atlas:before,
+ .gardens-page .garden-atlas:after{width:28%;height:23%;opacity:.37}
+ .gardens-page .garden-atlas:before{
+  background-image:url("../boomwhacker/heart-playalong-v4/assets/forest-canopy-left-mobile.svg");
+ }
+ .gardens-page .garden-atlas:after{
+  background-image:url("../boomwhacker/heart-playalong-v4/assets/forest-canopy-right-mobile.svg");
+ }
+}
