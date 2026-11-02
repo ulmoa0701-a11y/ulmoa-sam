@@ -3,7 +3,7 @@
   "steps": [
     {
       "step": "started",
-      "time": "2026-11-02T12:27:45.334Z",
+      "time": "2026-11-02T12:38:31.659Z",
       "state": {
         "stage": 0,
         "patch": "2026-10-12-child-feedback-v1",
@@ -38,13 +38,13 @@
     },
     {
       "step": "gardener talk",
-      "time": "2026-11-02T12:27:51.304Z",
+      "time": "2026-11-02T12:38:36.518Z",
       "state": {
         "stage": 1,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          -15.01,
-          -2.56
+          -14.67,
+          -2.64
         ],
         "woods": {
           "enabled": true,
@@ -73,13 +73,13 @@
     },
     {
       "step": "WOODS encounter",
-      "time": "2026-11-02T12:28:42.616Z",
+      "time": "2026-11-02T12:39:16.530Z",
       "state": {
         "stage": 2,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          15.16,
-          17.09
+          15.43,
+          17.44
         ],
         "woods": {
           "enabled": true,
@@ -108,13 +108,13 @@
     },
     {
       "step": "WOODS real Q traps",
-      "time": "2026-11-02T12:28:58.921Z",
+      "time": "2026-11-02T12:39:21.933Z",
       "state": {
         "stage": 2,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          16.13,
-          14.67
+          14.23,
+          19.34
         ],
         "woods": {
           "enabled": false,
@@ -143,13 +143,13 @@
     },
     {
       "step": "WOODS actual hold E",
-      "time": "2026-11-02T12:29:00.913Z",
+      "time": "2026-11-02T12:39:23.934Z",
       "state": {
         "stage": 3,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          16.13,
-          14.67
+          14.23,
+          19.34
         ],
         "woods": {
           "enabled": false,
@@ -178,13 +178,13 @@
     },
     {
       "step": "pond keeper dialogue opened",
-      "time": "2026-11-02T12:29:35.429Z",
+      "time": "2026-11-02T12:39:53.120Z",
       "state": {
         "stage": 3,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          3.56,
-          -5.34
+          3.25,
+          -5.59
         ],
         "woods": {
           "enabled": false,
@@ -213,13 +213,13 @@
     },
     {
       "step": "pond keeper handoff, EYE stage",
-      "time": "2026-11-02T12:29:35.820Z",
+      "time": "2026-11-02T12:39:53.502Z",
       "state": {
         "stage": 4,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          3.56,
-          -5.34
+          3.25,
+          -5.59
         ],
         "woods": {
           "enabled": false,
@@ -251,13 +251,13 @@
   "http": [],
   "gardener": {
     "near": true,
-    "iterations": 11,
+    "iterations": 9,
     "last": {
       "stage": 0,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        -15.01,
-        -2.56
+        -14.67,
+        -2.64
       ],
       "woods": {
         "enabled": false,
@@ -285,13 +285,13 @@
   },
   "woods": {
     "near": false,
-    "iterations": 95,
+    "iterations": 74,
     "last": {
       "stage": 1,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        15.16,
-        17.09
+        15.43,
+        17.44
       ],
       "woods": {
         "enabled": true,
@@ -320,13 +320,13 @@
   "hits": 2,
   "keeper": {
     "near": true,
-    "iterations": 65,
+    "iterations": 55,
     "last": {
       "stage": 3,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        3.56,
-        -5.34
+        3.25,
+        -5.59
       ],
       "woods": {
         "enabled": false,
@@ -354,5 +354,5 @@
   },
   "sickleAfterRealTalk": true,
   "pass": true,
-  "generatedAt": "2026-11-02T12:29:37.749Z"
+  "generatedAt": "2026-11-02T12:39:55.194Z"
 }
