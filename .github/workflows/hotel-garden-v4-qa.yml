@@ -1,0 +1,36 @@
+name: Hotel Garden V4 feature QA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/hotel-garden-v4-qa.yml'
+      - 'qa/hotel-garden-v4-qa.mjs'
+      - 'lab/babylon-hotel-garden/child-feedback-v4.patch.js'
+      - 'lab/babylon-hotel-garden/index.html'
+      - 'lab/babylon-hotel-garden/assets/index-garden-feedback-v4-*.js'
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser runner
+        run: npm install --no-save --no-audit --no-fund puppeteer-core@latest
+      - name: Find Chrome
+        run: echo "CHROME_PATH=$(which google-chrome || which google-chrome-stable || which chromium)" >> "$GITHUB_ENV"
+      - name: Inspect real V4 controls, seed store and sickle
+        run: node qa/hotel-garden-v4-qa.mjs
+      - name: Upload evidence and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hotel-garden-v4-evidence
+          path: qa/results/hotel-garden-v4-*
+          if-no-files-found: warn
+          retention-days: 7
