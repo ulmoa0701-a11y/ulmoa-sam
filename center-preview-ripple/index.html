@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="site.css">
+  <noscript><style>.reveal{opacity:1!important;transform:none!important}.menu-toggle{display:none!important}</style></noscript>
 </head>
 <body>
 <header class="topbar">
@@ -18,10 +19,10 @@
     <strong>울모아</strong>
     <small>특수교육발달심리연구소</small>
   </a>
-  <button class="menu-toggle ripple-target" type="button" aria-label="메뉴 열기" aria-expanded="false"><span></span><span></span></button>
+  <button class="menu-toggle ripple-target" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="primary-navigation"><span></span><span></span></button>
 </header>
 
-<nav class="menu-panel" aria-hidden="true">
+<nav class="menu-panel" id="primary-navigation" aria-label="전체 메뉴" aria-hidden="true" inert>
   <div class="menu-rings" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="menu-links">
     <a href="#start">지금의 어려움</a>
@@ -67,15 +68,15 @@
   <section class="start" id="start">
     <div class="section-heading reveal">
       <p class="section-index">02 · START HERE</p>
-      <h2>지금 가장<br>마음에 걸리는 건?</h2>
+      <h2>어떤 도움이<br>필요하세요?</h2>
     </div>
     <div class="concern-list">
-      <a class="concern reveal" href="#practice"><span>말·의사소통</span><small>말이 늦어요 · 발음 · 대화 이어가기</small><b>언어</b></a>
-      <a class="concern reveal" href="#practice"><span>집중·학습·인지</span><small>주의집중 · 기억 · 문제해결 · 학습준비</small><b>인지</b></a>
-      <a class="concern reveal" href="#practice"><span>감정·행동</span><small>불안 · 위축 · 충동 · 감정조절</small><b>놀이</b></a>
-      <a class="concern reveal" href="#practice"><span>사회성·관계</span><small>또래관계 · 상황이해 · 차례 · 협력</small><b>인지·사회성</b></a>
-      <a class="concern reveal" href="#practice"><span>음악·표현</span><small>음악치료 · 악기 · 창작 · 앙상블</small><b>음악</b></a>
-      <a class="concern reveal" href="#practice"><span>정서·가족상담</span><small>스트레스 · 관계 · 부모상담 · 심리상담</small><b>상담</b></a>
+      <a class="concern reveal" href="#service-language"><span>말·의사소통</span><small>말이 늦어요 · 발음 · 대화 이어가기</small><b>언어</b></a>
+      <a class="concern reveal" href="#service-cognitive"><span>집중·학습·인지</span><small>주의집중 · 기억 · 문제해결 · 학습준비</small><b>인지</b></a>
+      <a class="concern reveal" href="#service-play"><span>감정·행동</span><small>불안 · 위축 · 충동 · 감정조절</small><b>놀이</b></a>
+      <a class="concern reveal" href="#service-cognitive"><span>사회성·관계</span><small>또래관계 · 상황이해 · 차례 · 협력</small><b>인지·사회성</b></a>
+      <a class="concern reveal" href="#service-music"><span>음악·표현</span><small>음악치료 · 악기 · 창작 · 앙상블</small><b>음악</b></a>
+      <a class="concern reveal" href="#service-counseling"><span>정서·가족상담</span><small>스트레스 · 관계 · 부모상담 · 심리상담</small><b>상담</b></a>
     </div>
   </section>
 
@@ -86,13 +87,14 @@
       <h2>각 분야의 전문성,<br>필요할 때는 함께.</h2>
     </div>
     <ol class="practice-flow">
-      <li class="reveal"><span>01</span><h3>음악치료</h3><p>정서·표현·상호작용을 음악 경험으로 확장합니다.</p></li>
-      <li class="reveal"><span>02</span><h3>인지치료</h3><p>주의, 기억, 사고와 일상에서 필요한 문제해결을 다룹니다.</p></li>
-      <li class="reveal"><span>03</span><h3>언어치료</h3><p>언어이해, 표현, 조음과 사회적 의사소통을 지원합니다.</p></li>
-      <li class="reveal"><span>04</span><h3>놀이치료</h3><p>놀이를 통해 감정·행동·관계를 안전하게 표현하도록 돕습니다.</p></li>
-      <li class="reveal"><span>05</span><h3>심리상담</h3><p>아동·청소년·성인의 정서와 관계, 회복 과정을 함께 살핍니다.</p></li>
-      <li class="reveal"><span>06</span><h3>악기 이음</h3><p>짧고 반복적인 30분 악기 활동을 개인의 속도에 맞춥니다. <a class="inline-link" href="https://m.blog.naver.com/ulmoa/224397146399" target="_blank" rel="noopener noreferrer">프로그램 안내 ↗</a></p></li>
+      <li class="reveal" id="service-music" tabindex="-1"><span>01</span><h3>음악치료</h3><p>정서·표현·상호작용을 음악 경험으로 확장합니다.</p></li>
+      <li class="reveal" id="service-cognitive" tabindex="-1"><span>02</span><h3>인지치료</h3><p>주의, 기억, 사고와 일상에서 필요한 문제해결을 다룹니다.</p></li>
+      <li class="reveal" id="service-language" tabindex="-1"><span>03</span><h3>언어치료</h3><p>언어이해, 표현, 조음과 사회적 의사소통을 지원합니다.</p></li>
+      <li class="reveal" id="service-play" tabindex="-1"><span>04</span><h3>놀이치료</h3><p>놀이를 통해 감정·행동·관계를 안전하게 표현하도록 돕습니다.</p></li>
+      <li class="reveal" id="service-counseling" tabindex="-1"><span>05</span><h3>심리상담</h3><p>아동·청소년·성인의 정서와 관계, 회복 과정을 함께 살핍니다.</p></li>
+      <li class="reveal" id="service-instrument" tabindex="-1"><span>06</span><h3>악기 이음</h3><p>짧고 반복적인 30분 악기 활동을 개인의 속도에 맞춥니다. <a class="inline-link" href="https://m.blog.naver.com/ulmoa/224397146399" target="_blank" rel="noopener noreferrer">프로그램 안내 ↗</a></p></li>
     </ol>
+    <a class="practice-consult" href="https://pf.kakao.com/_wEGJn" target="_blank" rel="noopener noreferrer">어떤 도움부터 시작할지 고민된다면 <strong>상담 문의 ↗</strong></a>
   </section>
 
   <section class="team" id="team">
@@ -152,7 +154,7 @@
   <section class="contact" id="contact">
     <div class="contact-rings" aria-hidden="true"><i></i><i></i><i></i><span></span></div>
     <p class="section-index reveal">08 · CONTACT</p>
-    <h2 class="reveal">무엇부터 물어봐야 할지<br>정하지 않아도 괜찮습니다.</h2>
+    <h2 class="reveal">무엇부터든,<br>편하게 물어보세요.</h2>
     <a class="contact-phone ripple-target reveal" href="tel:01025550701">010 2555 0701</a>
     <div class="contact-links reveal">
       <a class="ripple-target" href="https://pf.kakao.com/_wEGJn" target="_blank" rel="noopener">카카오채널 ↗</a>
