@@ -70,6 +70,16 @@ fs.mkdirSync(out,{recursive:true});
         assert.ok((await r.body()).length>20000,'storybook scenery unexpectedly empty '+asset);
         await r.dispose();
       }
+      for(const asset of [
+        'forest-canopy-left.svg','forest-canopy-right.svg',
+        'forest-canopy-left-mobile.svg','forest-canopy-right-mobile.svg'
+      ]){
+        const url=base+'/boomwhacker/heart-playalong-v4/assets/'+asset;
+        const r=await page.request.get(url);
+        assert.equal(r.status(),200,'original forest canopy asset missing '+asset);
+        assert.ok((await r.body()).length>30000,'empty forest canopy art '+asset);
+        await r.dispose();
+      }
     }
 
     assert.equal(await page.locator('#cognitive .garden-walk-node:visible').count(),6,'Cognitive first six must be visible');
