@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'gardens/living-world.css'
+      - 'gardens/world-depth-v2.css'
       - 'gardens/living-world.js'
       - 'gardens/world-map-wide.svg'
       - 'gardens/world-map-mobile.svg'
