@@ -89,3 +89,8 @@ main section[id]{scroll-margin-top:76px}
 
 /* Prevent single-syllable line breaks in program and support descriptions */
 .practice-flow p,.person span,.support-detail p,.team-disclaimer{word-break:keep-all;overflow-wrap:break-word}
+
+/* Seven-item navigation must fit tablet and desktop viewport heights */
+.menu-links a{font-size:clamp(34px,4.5vw,60px);padding:6px 0}
+.menu-panel{overflow-y:auto}
+@media(max-width:900px){.menu-links a{font-size:clamp(34px,9.5vw,60px);padding:6px 0}}
