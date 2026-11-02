@@ -46,3 +46,10 @@
 .wordmark strong{font-size:20px}
 }
 @media(prefers-reduced-motion:reduce){.ripple-ink{animation:none!important}}
+
+/* RIPPLE usability refinements after true-viewport Chrome QA */
+.text-cta{background:var(--ink);color:#fff;border:1px solid var(--ink);border-radius:999px;padding:13px 21px;gap:20px;box-shadow:0 9px 24px rgba(18,59,47,.12);transition:background .2s,transform .2s}
+.text-cta:hover{background:var(--ink2);transform:translateY(-2px)}
+.text-cta:focus-visible,.menu-toggle:focus-visible,.menu-links a:focus-visible{outline:3px solid #69b642;outline-offset:4px}
+main section[id]{scroll-margin-top:76px}
+@media(max-width:900px){.text-cta{margin-top:22px;padding:13px 19px}.menu-panel{overflow-y:auto}}
