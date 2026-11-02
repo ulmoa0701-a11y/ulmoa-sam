@@ -30,12 +30,14 @@ try{
   const p=await page.evaluate(()=>window.__ulmoaGameQa.state().player);
   const dx=shopPos[0]-p[0],dz=shopPos[1]-p[1];
   if(Math.hypot(dx,dz)<3.25&&p[1]<-5.35){arrived=true;break}
-  const sx=-.8*dx+.6*dz,sy=-.6*dx-.8*dz,axis=Math.abs(sx)>=Math.abs(sy)?(sx>0?"ArrowRight":"ArrowLeft"):(sy>0?"ArrowDown":"ArrowUp");
+  const sx=-.8*dx+.6*dz,sy=-.6*dx-.8*dz,axis=Math.abs(sx)>=Math.abs(sy)?(sx>0?"ArrowRight":"ArrowLeft"):(sy>0?"ArrowUp":"ArrowDown");
   await page.keyboard.down(axis);await sleep(310);await page.keyboard.up(axis);await sleep(60);
  }
  check("walkedToShopWithKeyboard",arrived);
  console.log("V4_SHOP_DIAG_BEFORE",JSON.stringify({state:await state(),game:await page.evaluate(()=>window.__ulmoaGameQa.state()),dialog:await page.$eval("#dialog",e=>e.className)}));
  if(arrived){
+  // Capture the ORIGINAL large building front before opening the seed store.
+  await page.screenshot({path:"qa/results/hotel-garden-v4-original-big-house-shopfront.png"});
   await page.keyboard.press("e");await sleep(300);
   check("shopOpensAtOriginalHouseWithE",await page.$eval("#hg4Shop",e=>e.classList.contains("open")));
   await page.keyboard.press("Escape");await sleep(130);
