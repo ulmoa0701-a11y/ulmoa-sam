@@ -522,3 +522,47 @@
   width:103px;height:103px;
  }
 }
+
+
+/* Characters are existing licensed-in-project game sprites, not generated
+   fake menu lettering; scenery is intentionally decorative/aria-hidden. */
+.gardens-page .garden-atlas .garden-jump:after{
+ content:"";position:absolute;pointer-events:none;z-index:4;
+ width:61px;height:71px;left:8%;top:34%;
+ background:center/contain no-repeat;
+ filter:drop-shadow(0 7px 5px #31583c55);
+ transform:rotate(-8deg);
+}
+.gardens-page .garden-atlas .garden-jump-cognitive:after{
+ background-image:url("../thinking-garden/games/rescue/art/illustrated/rabbit-blue.webp");
+}
+.gardens-page .garden-atlas .garden-jump-thinking:after{
+ background-image:url("../thinking-garden/games/rescue/art/illustrated/cow-green.webp");
+ left:auto;right:7%;transform:rotate(8deg);
+}
+.gardens-page .garden-atlas .garden-jump-learning:after{
+ background-image:url("../thinking-garden/games/rescue/art/illustrated/pig-yellow.webp");
+}
+.gardens-page .garden-atlas .garden-jump-music:after{
+ background-image:url("../thinking-garden/games/rescue/art/illustrated/duck-blue.webp");
+ left:auto;right:8%;transform:rotate(5deg);
+}
+.gardens-page .garden-atlas .garden-jump-heart:after{
+ background-image:url("../thinking-garden/games/rescue/art/illustrated/rabbit-red.webp");
+ left:auto;right:8%;transform:rotate(8deg);
+}
+@media(max-width:680px){
+ .gardens-page .garden-atlas .garden-jump:after{
+  width:56px;height:62px;top:27%;left:5%;
+ }
+ .gardens-page .garden-atlas .garden-jump-thinking:after,
+ .gardens-page .garden-atlas .garden-jump-music:after,
+ .gardens-page .garden-atlas .garden-jump-heart:after{
+  left:auto;right:4%;
+ }
+}
+@media(max-width:360px){
+ .gardens-page .garden-atlas .garden-jump:after{
+  width:48px;height:55px;
+ }
+}
