@@ -120,3 +120,7 @@ main section[id]:focus-visible{outline:3px solid var(--green);outline-offset:-5p
 .visit-line small{font-size:13px}
 .practice-consult{font-size:14px;line-height:1.5;border-radius:20px;display:flex;justify-content:space-between}
 }
+
+/* WCAG-oriented small-text contrast review: all at least 4.5:1 on their section backgrounds */
+.wordmark small,.hero-photo figcaption,.space-strip figcaption,.person small,.visit-line small,.visit-line b,.menu-panel>p,.scroll-cue,.support>p:last-child{color:#53675d}
+.visit .section-heading>p:last-child,.team .section-heading>p:last-child,.start .section-heading>p:last-child{color:#53675d}
