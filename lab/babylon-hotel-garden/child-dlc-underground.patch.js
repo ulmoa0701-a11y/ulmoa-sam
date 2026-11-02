@@ -68,8 +68,14 @@ function __hg5MBox(n,x,y,z,w,h,d,c){return __hg5Block(n,__hg5Manor,new R(x,y,z),
 function __hg5MBall(n,x,y,z,w,h,d,c){return __hg5Ball(n,__hg5Manor,new R(x,y,z),new R(w,h,d),c)}
 // Intact, opulent two-storey mansion: broad facade, paired wings, slate roofs and gilded detailing.
 __hg5MBox("hg5MansionRaisedFoundation",0,.5,0,24,1.0,16,new H(.62,.61,.56));
-__hg5MBox("hg5MansionGroundFloor",0,4.4,1.0,22,7.8,14,__hg5MansionWall);
-__hg5MBox("hg5MansionUpperFloor",0,10.7,1.0,22,5.2,14,__hg5MansionWall);
+__hg5MBox("hg5MansionGroundFloor",0,1.03,1.0,22,.25,14,__hg5Color.ivory);
+__hg5MBox("hg5MansionSideWallL",-10.7,4.35,1,.5,7.8,14,__hg5MansionWall);
+__hg5MBox("hg5MansionSideWallR",10.7,4.35,1,.5,7.8,14,__hg5MansionWall);
+__hg5MBox("hg5MansionBackWall",0,4.35,7.85,22,7.8,.5,__hg5MansionWall);
+__hg5MBox("hg5MansionUpperFloor",0,8.18,1.0,22,.3,14,__hg5Color.ivory);
+__hg5MBox("hg5UpperSideL",-10.7,10.65,1,.5,5,14,__hg5MansionWall);
+__hg5MBox("hg5UpperSideR",10.7,10.65,1,.5,5,14,__hg5MansionWall);
+__hg5MBox("hg5UpperBack",0,10.65,7.85,22,5,.5,__hg5MansionWall);
 __hg5MBox("hg5MansionFrontLeft",-6.7,3.7,-6.15,8.6,6.8,.65,__hg5MansionWall);
 __hg5MBox("hg5MansionFrontRight",6.7,3.7,-6.15,8.6,6.8,.65,__hg5MansionWall);
 __hg5MBox("hg5DoorLintel",0,6.35,-6.15,5.1,1.4,.65,__hg5MansionWall);
@@ -115,7 +121,7 @@ for(let i=0;i<8;i++){
 }
 const __hg5BottomLadder=new fc("hg5BottomLadder",Yf);__hg5BottomLadder.parent=__hg5Under;__hg5BottomLadder.position.copyFrom(__hg5LadderBottom);
 for(const x of [-.6,.6])__hg5Cylinder("hg5UndergroundLadderRail"+x,__hg5BottomLadder,new R(x,2.3,0),new R(.13,5,.13),__hg5Color.gold);
-for(let i=0;i<8;i++)__hg5MBox("hg5BottomStepDecor"+i,0,0,0,.01,.01,.01,__hg5Color.gold).setEnabled(false);
+
 for(let i=0;i<9;i++)__hg5Block("hg5BottomLadderRung"+i,__hg5BottomLadder,new R(0,.4+i*.52,0),new R(1.4,.12,.22),__hg5Color.wood);
 // A welcoming undamaged lobby, not a ruined house.
 const __hg5Lobby=new fc("hg5ManorInterior",Yf);__hg5Lobby.parent=__hg5Manor;
@@ -225,6 +231,15 @@ Km=function(dt){
  __hg5OriginalKm(dt);
  if(__hg5Phase==="underground"||__hg5Phase==="mansion")Rp.position.y=__hg5EarthY+Math.max(0,Rp.position.y);
 };
+const __hg5OriginalQm=qm;
+qm=function(){
+ if(__hg5Phase==="mansion"&&!__hg5Transition){
+  const p=Rp.position.clone(),wanted=p.add(new R(4,4,4));
+  Xf.position=R.Lerp(Xf.position,wanted,.23);Xf.setTarget(p.add(new R(0,1.5,0)));
+  return;
+ }
+ __hg5OriginalQm();
+};
 const __hg5OriginalDm=Dm;
 Dm=function(stage){__hg5OriginalDm(stage);if(stage<7&&__hg5Phase!=="locked"){__hg5Phase="locked";__hg5Quest.style.display="none";__hg5Action.style.display="none";__hg5Under.setEnabled(false)}};
 Yf.onBeforeRenderObservable.add(()=>{
@@ -250,7 +265,7 @@ Yf.onBeforeRenderObservable.add(()=>{
  else if(__hg5Phase==="underground"&&__hg5Range(__hg5DoorPos.x,__hg5DoorPos.z)<5)__hg5ActionButton("E · 저택 문 열기");
  else __hg5Action.style.display="none";
  if(__hg5Phase==="underground"||__hg5Phase==="mansion"){
-  __hg4ShopButton.style.display="none";__hg4Sickle.setEnabled(false);__hg5SickleNote.style.display="none";
+  __hg4ShopButton.style.display="none";__hg4Sickle.setEnabled(false);__hg4SickleNote.style.display="none";
   __hg5Shovel.setEnabled(false);
   document.getElementById("hg4Combat").style.display="none";
  }
@@ -258,7 +273,7 @@ Yf.onBeforeRenderObservable.add(()=>{
  if(__hg5Phase==="mansion")__hg5Location.textContent="DLC · 대저택 발견";
 });
 window.__ulmoaGardenDlc={
- state:()=>({phase:__hg5Phase,unlocked:__hg5Phase!=="locked",shovel:__hg5Stats.shovel,digs:__hg5DigCount,ladder:__hg5Stats.ladder,transition:!!__hg5Transition,underground:__hg5Underground(),mansion3D:!!Yf.getMeshByName("hg5GrandPortico"),mansionVisible:__hg5Under.isEnabled(),mansionEntered:__hg5Stats.entered,player:[+Rp.position.x.toFixed(2),+Rp.position.y.toFixed(2),+Rp.position.z.toFixed(2)],quest:ep.textContent,mainStage:Kp,lotus:__uLotusCount}),
+ state:()=>({phase:__hg5Phase,unlocked:__hg5Phase!=="locked",shovel:__hg5Stats.shovel,digs:__hg5DigCount,ladder:__hg5Stats.ladder,transition:!!__hg5Transition,underground:__hg5Underground(),mansion3D:!!Yf.getMeshByName("hg5GrandPortico"),mansionVisible:__hg5Under.isEnabled(),mansionEntered:__hg5Stats.entered,player:[+Rp.position.x.toFixed(2),+Rp.position.y.toFixed(2),+Rp.position.z.toFixed(2)],gardener:[+zp.position.x.toFixed(2),+zp.position.z.toFixed(2)],quest:ep.textContent,mainStage:Kp,lotus:__uLotusCount}),
  // Read-only marker, no skip or teleport helper; QA must actually press keys.
  version:"garden-beneath-v1"
 };
