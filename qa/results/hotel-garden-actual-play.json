@@ -3,7 +3,7 @@
   "steps": [
     {
       "step": "started",
-      "time": "2026-11-02T11:13:51.784Z",
+      "time": "2026-11-02T11:17:56.432Z",
       "state": {
         "stage": 0,
         "patch": "2026-10-12-child-feedback-v1",
@@ -41,13 +41,13 @@
   "http": [],
   "gardener": {
     "near": true,
-    "iterations": 8,
+    "iterations": 13,
     "last": {
       "stage": 0,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        -14.8,
-        -2.95
+        -14.81,
+        -2.82
       ],
       "woods": {
         "enabled": false,
@@ -75,5 +75,5 @@
   },
   "error": "TimeoutError: Waiting failed: 9000ms exceeded",
   "pass": false,
-  "generatedAt": "2026-11-02T11:14:05.585Z"
+  "generatedAt": "2026-11-02T11:18:14.219Z"
 }
