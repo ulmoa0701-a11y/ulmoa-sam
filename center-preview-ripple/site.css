@@ -58,3 +58,39 @@ main section[id]{scroll-margin-top:76px}
 .menu-panel{overflow-x:hidden}
 .menu-rings{right:0;bottom:0;pointer-events:none}
 @media(max-width:900px){.menu-rings{width:min(55vw,260px);height:min(55vw,260px)}}
+
+/* Operations-information content review */
+.inline-link{color:#d4efbe;text-decoration:underline;text-underline-offset:4px;font-weight:600}
+.inline-link:hover{color:#fff}
+.team{grid-template-areas:"intro people" "note note"}
+.team>.section-heading{grid-area:intro}
+.team>.people-list{grid-area:people}
+.team-disclaimer{grid-area:note;font-size:13px;color:#5c7167;margin:3px 0 0;max-width:960px;line-height:1.8}
+.support-detail{display:grid;gap:16px;align-self:start}
+.support-detail p{font-size:14px;color:#526b5e;line-height:1.9;margin:0}
+.support-detail .support-note{font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+.support-detail .support-note strong{display:block;color:var(--ink);font-size:14px;margin-bottom:5px}
+@media(max-width:900px){.team{display:block}.team-disclaimer{margin-top:20px}.support-detail{margin-top:18px}.support-detail p{font-size:14px}.support-detail .support-note{font-size:13px}}
+
+/* Readability adjustment after mobile visual QA */
+.team{row-gap:24px}
+.support-detail{gap:18px}
+.support-group strong{display:block;font-size:15px;font-weight:600;margin-bottom:7px;color:var(--ink)}
+.support-group p{font-size:14px;color:#526b5e;line-height:1.8;margin:0}
+.support-group.support-note{border-top:1px solid var(--line);padding-top:16px}
+.support-group.support-note p{font-size:14px;color:#526b5e}
+@media(max-width:900px){
+ .team .section-heading h2,.practice .section-heading h2{font-size:clamp(30px,8.4vw,44px);line-height:1.18;word-break:keep-all;overflow-wrap:break-word}
+ .support h2{font-size:clamp(30px,8.6vw,44px);line-height:1.18;word-break:keep-all}
+ .support-group strong{font-size:16px}
+ .support-group p,.support-group.support-note p{font-size:15px;line-height:1.8}
+}
+@media(max-width:360px){.team .section-heading h2,.practice .section-heading h2{font-size:29px}}
+
+/* Prevent single-syllable line breaks in program and support descriptions */
+.practice-flow p,.person span,.support-detail p,.team-disclaimer{word-break:keep-all;overflow-wrap:break-word}
+
+/* Seven-item navigation must fit tablet and desktop viewport heights */
+.menu-links a{font-size:clamp(34px,4.5vw,60px);padding:6px 0}
+.menu-panel{overflow-y:auto}
+@media(max-width:900px){.menu-links a{font-size:clamp(34px,9.5vw,60px);padding:6px 0}}
