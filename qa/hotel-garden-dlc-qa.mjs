@@ -46,8 +46,10 @@ try {
  const gardener=unlocked.gardener;
  let result=await walkTo(gardener[0],gardener[1],3.2,130000);
  console.log("DLC_WALK_GARDENER",JSON.stringify(result));
+ console.log("DLC_GARDENER_BEFORE_E",JSON.stringify({state:await state(),dialog:await modal()}));
  check("reachGardenerWithKeyboard",result.arrived);
  await page.keyboard.press("e");await wait(350);
+ console.log("DLC_GARDENER_AFTER_E",JSON.stringify({state:await state(),dialog:await modal(),shopOpen:await page.$eval("#hg4Shop",e=>e.classList.contains("open"))}));
  const gardenerText=await page.$eval("#dialogText",el=>el.textContent);
  check("gardenerMentionsDifferentSoil",gardenerText.includes("보랏빛 흙")&&gardenerText.includes("삽"));
  await clickDialog();

@@ -274,8 +274,15 @@ Yf.onBeforeRenderObservable.add(()=>{
  if(__hg5Phase==="dig"||__hg5Phase==="ladder")__hg5Shovel.setEnabled(true);
  if(__hg5Phase==="mansion")__hg5Location.textContent="DLC · 대저택 발견";
 });
+// Capture the final-story gardener conversation before the nearby shop's E handler.
+// The gardener appears next to the building; player intent on the post-clear story wins.
+document.addEventListener("keydown",e=>{
+ if(e.code!=="KeyE"||e.repeat||__hg5Phase!=="meet")return;
+ if(ap.classList.contains("show")||__hg5Range(zp.position.x,zp.position.z)>5.8)return;
+ if(__hg5TalkGardener()){e.preventDefault();e.stopImmediatePropagation()}
+},true);
 window.__ulmoaGardenDlc={
- state:()=>({phase:__hg5Phase,unlocked:__hg5Phase!=="locked",shovel:__hg5Stats.shovel,digs:__hg5DigCount,ladder:__hg5Stats.ladder,transition:!!__hg5Transition,underground:__hg5Underground(),mansion3D:!!Yf.getMeshByName("hg5GrandPortico"),mansionVisible:__hg5Under.isEnabled(),mansionEntered:__hg5Stats.entered,player:[+Rp.position.x.toFixed(2),+Rp.position.y.toFixed(2),+Rp.position.z.toFixed(2)],gardener:[+zp.position.x.toFixed(2),+zp.position.z.toFixed(2)],quest:ep.textContent,mainStage:Kp,lotus:__uLotusCount}),
+ state:()=>({phase:__hg5Phase,unlocked:__hg5Phase!=="locked",shovel:__hg5Stats.shovel,digs:__hg5DigCount,ladder:__hg5Stats.ladder,transition:!!__hg5Transition,underground:__hg5Underground(),mansion3D:!!Yf.getMeshByName("hg5GrandPortico"),mansionVisible:__hg5Under.isEnabled(),mansionEntered:__hg5Stats.entered,player:[+Rp.position.x.toFixed(2),+Rp.position.y.toFixed(2),+Rp.position.z.toFixed(2)],gardener:[+zp.position.x.toFixed(2),+zp.position.z.toFixed(2)],quest:ep.textContent,mainStage:Kp,lotus:__uLotusCount,dialogOpen:ap.classList.contains("show"),gardenerDistance:+__hg5Range(zp.position.x,zp.position.z).toFixed(2),shopNear:__hg4NearShop()}),
  // Read-only marker, no skip or teleport helper; QA must actually press keys.
  version:"garden-beneath-v1"
 };
