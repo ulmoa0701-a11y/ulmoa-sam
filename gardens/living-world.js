@@ -28,6 +28,17 @@ guide.src='../assets/moa-hello-wave-20261012.webp';
 guide.alt='';guide.className='world-guide';
 guide.loading='lazy';guide.decoding='async';
 nav.append(guide);
+const worldFriends={
+ cognitive:'rabbit-blue',thinking:'duck-green',learning:'pig-yellow',
+ music:'cow-blue',heart:'rabbit-red'
+};
+for(const [place,friend] of Object.entries(worldFriends)){
+ const actor=document.createElement('img');
+ actor.src='../thinking-garden/games/rescue/art/illustrated/'+friend+'.webp';
+ actor.alt='';actor.className='world-actor world-actor-'+place;
+ actor.setAttribute('aria-hidden','true');actor.decoding='async';actor.loading='lazy';
+ nav.append(actor);
+}
 const gardenLinks=[...nav.querySelectorAll('a.garden-jump')];
 for(const a of gardenLinks){
  const id=(a.getAttribute('href')||'').slice(1);
