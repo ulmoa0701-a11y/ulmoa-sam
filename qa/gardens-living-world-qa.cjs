@@ -63,6 +63,8 @@ const expected={cognitive:21,thinking:3,learning:4,music:3,heart:3};
       background:getComputedStyle(el).backgroundImage,destinations};
     });
     console.log('DEBUG MAP GEOMETRY '+config.name+' '+JSON.stringify(map));
+    await page.evaluate(()=>window.scrollTo(0,0));
+    await page.screenshot({path:path.join(OUT,config.name+'-full-page.png'),fullPage:true});
     await page.locator('nav.world-map').screenshot({path:path.join(OUT,config.name+'-world-map.png')});
     assert.ok(map.width>=300&&map.height>=(config.width<=680?500:350),'world map is not large enough');
     assert.ok(map.background.includes(asset),'wrong responsive world art '+map.background);
@@ -87,6 +89,11 @@ const expected={cognitive:21,thinking:3,learning:4,music:3,heart:3};
       assert.equal(await page.locator('#'+id+'.world-zone-active').count(),1);
       const visible=await page.locator('section.world-zone').evaluateAll(zones=>zones.filter(z=>getComputedStyle(z).display!=='none').map(z=>z.id));
       assert.deepEqual(visible,[id]);
+      await page.waitForFunction(id=>{
+        const svg=document.querySelector('#'+id+' .world-winding-trail .world-trail-soil');
+        return svg&&svg.getAttribute('d')?.length>20;
+      },id);
+      assert.equal(await page.locator('#'+id+' .world-winding-trail path').count(),3,'world path layering missing');
       await page.locator('#'+id+' .world-zone-landscape').screenshot({path:path.join(OUT,config.name+'-'+id+'-environment.png')});
       await page.locator('#'+id+' .world-trail').screenshot({path:path.join(OUT,config.name+'-'+id+'-game-stops.png')});
       // Test that real game routes and actual game previews still work.
