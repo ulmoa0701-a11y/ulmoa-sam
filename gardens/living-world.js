@@ -135,6 +135,10 @@ switcher.addEventListener('click',()=>list?backToMap(true):listMode());
 search?.addEventListener('input',()=>{
  if(search.value.trim())listMode();
 });
+// Picture-first mode is an intentional accessible alternative to the map.
+// When activated from the world scene, reveal its real 34 game entries.
+const pictureToggle=document.querySelector('#gardenPictureMode');
+pictureToggle?.addEventListener('click',()=>{if(!list)listMode()});
 window.addEventListener('popstate',()=>{
  const id=decodeURIComponent(location.hash.slice(1));
  if(ids.includes(id))goToGarden(id,false);else backToMap(false);
