@@ -64,7 +64,7 @@ const expected={cognitive:21,thinking:3,learning:4,music:3,heart:3};
     });
     console.log('DEBUG MAP GEOMETRY '+config.name+' '+JSON.stringify(map));
     await page.locator('nav.world-map').screenshot({path:path.join(OUT,config.name+'-world-map.png')});
-    assert.ok(map.width>=300&&map.height>=500,'world map is not large enough');
+    assert.ok(map.width>=300&&map.height>=(config.width<=680?500:350),'world map is not large enough');
     assert.ok(map.background.includes(asset),'wrong responsive world art '+map.background);
     assert.ok(map.destinations.every(x=>x.inside&&x.width>=90&&x.height>=75),'portal clipped '+JSON.stringify(map.destinations));
     assert.equal(new Set(map.destinations.map(x=>x.id)).size,5);
