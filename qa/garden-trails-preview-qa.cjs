@@ -92,6 +92,22 @@ fs.mkdirSync(out,{recursive:true});
     assert.ok(nodes.every(n=>!n.titleClipped),vp.name+' clipped garden sign');
     if(vp.width<=390)assert.ok(nodes.every(n=>n.card[1]<=260),vp.name+' node too tall');
     await page.locator('.garden-atlas').screenshot({path:path.join(out,vp.name+'-five-garden-map.png')});
+    // Art-direction comparison only: preview the existing enchanted forest
+    // illustration without altering published or PR CSS. This is a separate
+    // scene screenshot for review, not an automatically approved redesign.
+    const forestArt=vp.width<=680?'forest-enchanted-mobile.svg':'forest-enchanted.svg';
+    const forestURL=base+'/boomwhacker/heart-playalong-v4/assets/'+forestArt;
+    const forestResult=await page.request.get(forestURL);
+    assert.equal(forestResult.status(),200,'existing enchanted forest background missing');
+    assert.ok((await forestResult.body()).length>30000,'enchanted forest asset unexpectedly short');
+    await forestResult.dispose();
+    await page.locator('.garden-atlas').evaluate((node,art)=>{
+      node.style.backgroundImage='linear-gradient(170deg,rgba(246,253,241,.17),rgba(242,250,230,.26)),url("'+art+'")';
+      node.style.backgroundSize='cover';
+      node.style.backgroundPosition='center';
+    },forestURL);
+    await page.locator('.garden-atlas').screenshot({path:path.join(out,vp.name+'-alternate-enchanted-forest.png')});
+
     // A visible on-map destination must open its unchanged section without
     // putting the heading underneath the fixed global site navigation.
     await page.locator('.garden-atlas a[href="#thinking"]').click();
