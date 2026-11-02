@@ -46,6 +46,32 @@ fs.mkdirSync(out,{recursive:true});
     assert.ok(nav.every(n=>n.inside&&n.width>=85&&n.height>=110),vp.name+' map navigation overflow '+JSON.stringify(nav));
     const mapHeight=await page.locator('.garden-atlas').evaluate(n=>n.getBoundingClientRect().height);
     assert.ok(mapHeight>=380,vp.name+' map too shallow');
+
+    // World artwork exists as a real loaded resource, not a fake embedded map screenshot.
+    const worldSources=await page.evaluate(()=>{
+      const atlas=getComputedStyle(document.querySelector('.garden-atlas')).backgroundImage;
+      const gardens=[...document.querySelectorAll('.garden-trail-section')].map(el=>({
+        id:el.id,background:getComputedStyle(el.querySelector('.garden-walk')).backgroundImage
+      }));
+      return {atlas,gardens};
+    });
+    const variant=vp.width<=680?'world-tall-':'world-wide-';
+    assert.ok(worldSources.atlas.includes(variant+'0.svg'),vp.name+' five-zone artwork not present');
+    assert.ok(worldSources.gardens.every((s,i)=>s.background.includes(variant+([0,2,4,3,1][i])+'.svg')),
+      vp.name+' theme-specific scenery missing '+JSON.stringify(worldSources.gardens));
+    if(vp.name==='small-phone'){
+      const sources=[0,1,2,3,4].flatMap(n=>[
+        'thinking-garden/games/rescue/art/world-wide-'+n+'.svg',
+        'thinking-garden/games/rescue/art/world-tall-'+n+'.svg'
+      ]);
+      for(const asset of sources){
+        const r=await page.request.get(base+'/'+asset);
+        assert.equal(r.status(),200,'storybook scenery missing '+asset);
+        assert.ok((await r.body()).length>20000,'storybook scenery unexpectedly empty '+asset);
+        await r.dispose();
+      }
+    }
+
     assert.equal(await page.locator('#cognitive .garden-walk-node:visible').count(),6,'Cognitive first six must be visible');
     const cognitive=page.locator('#cognitive .garden-walk');
     await page.locator('#cognitive').scrollIntoViewIfNeeded();
