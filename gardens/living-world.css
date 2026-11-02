@@ -355,3 +355,28 @@ body.world-ready.world-in-garden .world-trail-light{
 }
 body.world-ready.world-in-garden .world-trail .world-game-stop{z-index:2}
 body.world-ready.world-list-mode .world-winding-trail{display:none!important}
+
+
+/* Original three-dimensional animal illustrations add a sense of inhabited
+   places, without rendering any fake interactive controls into the image. */
+body.world-ready .world-map .world-actor{
+ display:block;position:absolute;z-index:2;pointer-events:none;
+ width:clamp(67px,8.6vw,118px);height:auto;aspect-ratio:1;object-fit:contain;
+ filter:drop-shadow(0 9px 7px #456d4880);
+ transform:translate(-50%,-50%);
+}
+body.world-ready .world-map .world-actor-cognitive{left:32%;top:39%}
+body.world-ready .world-map .world-actor-thinking{left:37%;top:76%}
+body.world-ready .world-map .world-actor-learning{left:68%;top:40%}
+body.world-ready .world-map .world-actor-music{left:67%;top:86%}
+body.world-ready .world-map .world-actor-heart{left:68%;top:66%}
+@media(max-width:680px){
+ body.world-ready .world-map .world-actor{
+  width:clamp(50px,15vw,75px);filter:drop-shadow(0 5px 4px #456d4870);
+ }
+ body.world-ready .world-map .world-actor-cognitive{left:73%;top:19%}
+ body.world-ready .world-map .world-actor-thinking{left:21%;top:35%}
+ body.world-ready .world-map .world-actor-learning{left:74%;top:56%}
+ body.world-ready .world-map .world-actor-music{left:22%;top:72%}
+ body.world-ready .world-map .world-actor-heart{left:78%;top:90%}
+}
