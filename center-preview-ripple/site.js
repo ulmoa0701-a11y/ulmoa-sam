@@ -5,6 +5,7 @@ function setMenu(open){
   menuButton.classList.toggle('open',open);
   menu.classList.toggle('open',open);
   menuButton.setAttribute('aria-expanded',String(open));
+  menuButton.setAttribute('aria-label',open?'메뉴 닫기':'메뉴 열기');
   menu.setAttribute('aria-hidden',String(!open));
   document.body.style.overflow=open?'hidden':'';
 }
@@ -46,3 +47,10 @@ window.addEventListener('scroll',()=>{
     ticking=false;
   });
 },{passive:true});
+
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape' && menu?.classList.contains('open')){
+    setMenu(false);
+    menuButton?.focus();
+  }
+});
