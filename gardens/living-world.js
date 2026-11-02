@@ -22,10 +22,7 @@ const intro=document.createElement('div');
 intro.className='world-intro';
 intro.innerHTML='<span class="world-intro-icon" aria-hidden="true">✦</span><span>모아와 함께 가보고 싶은 정원을 골라봐!</span><span class="world-intro-caption">각 장소에 들어가면 실제 게임을 만나볼 수 있어요.</span>';
 nav.before(intro);
-const mapTitle=document.createElement('p');
-mapTitle.className='world-map-title';
-mapTitle.textContent='다섯 개의 정원으로 떠나는 모험';
-nav.prepend(mapTitle);
+// The live page heading is already directly above the map; no baked or duplicate title.
 const guide=document.createElement('img');
 guide.src='../assets/moa-hello-wave-20261012.webp';
 guide.alt='';guide.className='world-guide';
