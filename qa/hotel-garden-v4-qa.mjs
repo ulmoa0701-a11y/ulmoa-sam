@@ -36,7 +36,7 @@ try{
  for(let i=0;i<65;i++){
   const p=await page.evaluate(()=>window.__ulmoaGameQa.state().player);
   const dx=shopPos[0]-p[0],dz=shopPos[1]-p[1];
-  if(Math.hypot(dx,dz)<3.25&&p[1]<-5.35){arrived=true;break}
+  if((await state()).nearShop){arrived=true;break}
   const sx=-.8*dx+.6*dz,sy=-.6*dx-.8*dz,axis=Math.abs(sx)>=Math.abs(sy)?(sx>0?"ArrowRight":"ArrowLeft"):(sy>0?"ArrowUp":"ArrowDown");
   await page.keyboard.down(axis);await sleep(310);await page.keyboard.up(axis);await sleep(60);
  }

@@ -207,20 +207,17 @@ for(const [side,x,z,color] of [
 }
 const __hg4ShopCameraDefault=qm;
 qm=function(){
- // Orient toward the near wall, not downward onto a giant blank roof.
+ // Maintain the original isometric compass so WASD / arrow directions remain predictable.
+ // Lower the viewing height near the store to reveal displays along the walls.
  if(__hg4NearShop()&&!__hg4ShopOpen&&qp&&!Jp&&!__hg4BossStages.has(Kp)){
-  const store=new R(-5,0,-4),out=Rp.position.subtract(store);out.y=0;
-  if(out.length()<.25)out.set(-1,0,-1);
-  out.normalize();
-  const focus=R.Lerp(store,Rp.position,.20);focus.y=1.05;
-  const desired=store.add(out.scale(10.8)).add(new R(0,6.7,0));
-  Xf.position=R.Lerp(Xf.position,desired,.13);
+  const focus=R.Lerp(Rp.position,new R(-5,0,-4),.29);focus.y=1.20;
+  const desired=focus.add(new R(9.0,6.65,12.0));
+  Xf.position=R.Lerp(Xf.position,desired,.16);
   Xf.setTarget(focus);
   return;
  }
  __hg4ShopCameraDefault();
 };
-
 // Make the actual purchase window feel like browsing physical picture-backed packets.
 const __hg4MarketStyles=document.createElement("style");
 __hg4MarketStyles.textContent='#hg4ShopCard{background:linear-gradient(155deg,#f4f7e6 0%,#fff7e5 65%,#f3e8ce 100%);border:5px solid #537c51;box-shadow:0 13px 50px #0005}#hg4ShopCard h2{color:#24583b;font-size:clamp(20px,3vw,29px)}#hg4Offers button{background:linear-gradient(#fffef6,#eaf1d5);min-height:155px;border:2px solid #7aa16a;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:7px;box-shadow:0 4px 0 #4f724032}#hg4Offers button .icon{font-size:42px;filter:drop-shadow(0px 3px 2px #0002)}#hg4Offers button:hover:not(:disabled){border-color:#b58a2d;transform:translateY(-2px)}#hg4Wallet,#hg4Bag{font-size:16px;font-weight:800}#hg4ShopButton{background:#d9ecb8;border-color:#3a7747;box-shadow:0 4px 13px #0003}@media(max-width:700px){#hg4Offers{grid-template-columns:repeat(3,minmax(0,1fr))}#hg4Offers button{min-height:108px;font-size:11px;padding:5px;gap:3px}#hg4Offers button .icon{font-size:28px}}';
