@@ -1,0 +1,196 @@
+{
+  "version": "2026-11-02",
+  "gardens": {
+    "cognitive": {
+      "name": "인지정원",
+      "subtitle": "살펴보고 · 기억하고 · 반응하기",
+      "x": 24,
+      "y": 28,
+      "hint": "나무 위 작은 탐험 집",
+      "games": [
+        {
+          "title": "모아의 마법 꽃밭 🌰",
+          "href": "thinking-garden/games/hand-mirror/"
+        },
+        {
+          "title": "모아 구조대!",
+          "href": "thinking-garden/games/rescue/"
+        },
+        {
+          "title": "기억꽃길 이어가기",
+          "href": "thinking-garden/?game=memory"
+        },
+        {
+          "title": "쌍둥이 모양 찾기",
+          "href": "thinking-garden/?game=sameShape"
+        },
+        {
+          "title": "꽃만 쏙쏙 찾기",
+          "href": "thinking-garden/?game=flower"
+        },
+        {
+          "title": "잎사귀 숨은친구",
+          "href": "thinking-garden/?game=hide"
+        },
+        {
+          "title": "반짝이 길 따라가기",
+          "href": "thinking-garden/?game=path"
+        },
+        {
+          "title": "초록불에 톡!",
+          "href": "thinking-garden/?game=calm"
+        },
+        {
+          "title": "정원 안에 별 심기",
+          "href": "thinking-garden/?game=inside"
+        },
+        {
+          "title": "하나씩 깨우기",
+          "href": "thinking-garden/?game=targets"
+        },
+        {
+          "title": "숲속 장면 탐정",
+          "href": "thinking-garden/?game=sceneDetect"
+        },
+        {
+          "title": "꽃과 단서 찾기",
+          "href": "thinking-garden/?game=slowScan"
+        },
+        {
+          "title": "정원 지도 따라 놓기",
+          "href": "thinking-garden/?game=slowPlace"
+        },
+        {
+          "title": "블록 건축가",
+          "href": "thinking-garden/?game=slowBlock"
+        },
+        {
+          "title": "친구 이름 탐정",
+          "href": "thinking-garden/?game=slowName"
+        },
+        {
+          "title": "꽃자리 기억하기",
+          "href": "thinking-garden/?game=slowMemory"
+        },
+        {
+          "title": "정원길 쓱싹 칠하기",
+          "href": "thinking-garden/?game=paint"
+        },
+        {
+          "title": "시든 꽃 깨우기",
+          "href": "thinking-garden/?game=water"
+        },
+        {
+          "title": "꼬인 신호 구조대",
+          "href": "thinking-garden/?game=resetRescue"
+        },
+        {
+          "title": "우리 교실 이사작전",
+          "href": "thinking-garden/?game=classroomMove"
+        },
+        {
+          "title": "바뀐 준비물 찾기",
+          "href": "thinking-garden/games/moa-missions/?game=change"
+        }
+      ],
+      "focusX": 29,
+      "focusY": 28
+    },
+    "thinking": {
+      "name": "생각정원",
+      "subtitle": "규칙을 찾고 · 계획하기",
+      "x": 62,
+      "y": 29,
+      "hint": "물길이 만나는 연못",
+      "games": [
+        {
+          "title": "바뀌는 바람우체국",
+          "href": "thinking-garden/?game=rulePost"
+        },
+        {
+          "title": "거울연못의 비밀",
+          "href": "thinking-garden/?game=mirrorPond"
+        },
+        {
+          "title": "축제 준비 대작전",
+          "href": "thinking-garden/?game=festivalPlan"
+        }
+      ],
+      "focusX": 62,
+      "focusY": 26
+    },
+    "learning": {
+      "name": "학습정원",
+      "subtitle": "읽고 · 쓰고 · 생활에 써보기",
+      "x": 22,
+      "y": 61,
+      "hint": "이야기가 가득한 책방",
+      "games": [
+        {
+          "title": "띄어쓰기 다리 놓기",
+          "href": "thinking-garden/?game=spacing"
+        },
+        {
+          "title": "고장 난 간판 고치기",
+          "href": "thinking-garden/?game=spelling"
+        },
+        {
+          "title": "가방 준비 탐험",
+          "href": "thinking-garden/?game=slowEveryday"
+        },
+        {
+          "title": "모아의 화폐 가게",
+          "href": "thinking-garden/games/moa-missions/?game=money"
+        }
+      ],
+      "focusX": 20,
+      "focusY": 57
+    },
+    "music": {
+      "name": "음악정원",
+      "subtitle": "듣고 · 움직이고 · 연주하기",
+      "x": 83,
+      "y": 43,
+      "hint": "숲속 작은 공연장",
+      "games": [
+        {
+          "title": "박자꽃 톡톡!",
+          "href": "thinking-garden/games/rhythm-touch/"
+        },
+        {
+          "title": "리코더 마법정원",
+          "href": "thinking-garden/recorder/"
+        },
+        {
+          "title": "박자 바람",
+          "href": "breath-garden/?mode=beat"
+        }
+      ],
+      "focusX": 80,
+      "focusY": 39
+    },
+    "heart": {
+      "name": "마음정원",
+      "subtitle": "마음 알아보고 · 쉬어가기",
+      "x": 78,
+      "y": 75,
+      "hint": "장미꽃 아래 쉼터",
+      "games": [
+        {
+          "title": "바람의 힘",
+          "href": "breath-garden/?mode=strength"
+        },
+        {
+          "title": "오래 후~",
+          "href": "breath-garden/?mode=long"
+        },
+        {
+          "title": "마음 이야기 탐험",
+          "href": "thinking-garden/games/moa-missions/?game=feel"
+        }
+      ],
+      "focusX": 77,
+      "focusY": 76
+    }
+  }
+}
