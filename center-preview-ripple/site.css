@@ -86,3 +86,6 @@ main section[id]{scroll-margin-top:76px}
  .support-group p,.support-group.support-note p{font-size:15px;line-height:1.8}
 }
 @media(max-width:360px){.team .section-heading h2,.practice .section-heading h2{font-size:29px}}
+
+/* Prevent single-syllable line breaks in program and support descriptions */
+.practice-flow p,.person span,.support-detail p,.team-disclaimer{word-break:keep-all;overflow-wrap:break-word}
