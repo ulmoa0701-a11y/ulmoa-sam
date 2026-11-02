@@ -182,10 +182,10 @@ for(const a of __hg4RoofPlants){
  // Petals in a horizontal flower head face upwards toward an angled game camera.
  for(let j=0;j<7;j++){
   const t=j*2*Math.PI/7;
-  const petal=__hg4Ball("hg4RoofFlowerPetal"+a.id+j,a.x+Math.cos(t)*.52,4.69,a.z+Math.sin(t)*.52,.56,.30,.52,a.color);
+  const petal=__hg4Ball("hg4RoofFlowerPetal"+a.id+j,a.x+Math.cos(t)*.49,4.64,a.z+Math.sin(t)*.49,.47,.16,.26,a.color);
   petal.rotation.y=t;
  }
- __hg4Ball("hg4RoofFlowerHeart"+a.id,a.x,4.78,a.z,.54,.35,.54,__hg4Sun);
+ __hg4Ball("hg4RoofFlowerHeart"+a.id,a.x,4.76,a.z,.36,.24,.36,__hg4Sun);
  // Three sprouting leaves in each bed make these flowers read as growing plants.
  for(let j=0;j<3;j++){
   const t=j*Math.PI*2/3;
@@ -210,8 +210,8 @@ qm=function(){
  // Maintain the original isometric compass so WASD / arrow directions remain predictable.
  // Lower the viewing height near the store to reveal displays along the walls.
  if(__hg4NearShop()&&!__hg4ShopOpen&&qp&&!Jp&&!__hg4BossStages.has(Kp)){
-  const focus=R.Lerp(Rp.position,new R(-5,0,-4),.29);focus.y=1.20;
-  const desired=focus.add(new R(9.0,6.65,12.0));
+  const focus=R.Lerp(Rp.position,new R(-5,0,-4),.36);focus.y=1.20;
+  const desired=focus.add(new R(15.0,7.4,20.0));
   Xf.position=R.Lerp(Xf.position,desired,.16);
   Xf.setTarget(focus);
   return;
