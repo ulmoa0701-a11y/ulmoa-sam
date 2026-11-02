@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-02T11:00:31.513Z",
+  "generatedAt": "2026-11-02T11:10:44.323Z",
   "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/",
   "kind": "real public browser loading and controls; internal event-path smoke (NOT full human playthrough)",
   "results": [
@@ -57,18 +57,18 @@
         "gameModules": [
           "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/assets/index-DxiltY-5.js"
         ],
-        "fps": 9.1,
-        "frames": 6,
+        "fps": 8.7,
+        "frames": 5,
         "canvas": 1,
         "overflow": false,
         "lotusText": "🌸 연꽃 0/3",
         "timer": "07:00",
         "hudCollision": false,
         "target": {
-          "x": 643.3828125,
-          "y": 98,
-          "width": 153.234375,
-          "height": 53
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
         },
         "lotus": {
           "x": 12,
@@ -90,10 +90,10 @@
           -6
         ],
         "after": [
-          -18.78,
-          -7.04
+          -18.59,
+          -6.78
         ],
-        "distance": 1.3
+        "distance": 0.98
       },
       "smoke": {
         "geometry": true,
@@ -172,18 +172,18 @@
         "gameModules": [
           "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/assets/index-DxiltY-5.js"
         ],
-        "fps": 25.9,
-        "frames": 24,
+        "fps": 10.7,
+        "frames": 10,
         "canvas": 1,
         "overflow": false,
         "lotusText": "🌸 연꽃 0/3",
         "timer": "07:00",
         "hudCollision": false,
         "target": {
-          "x": 132.03125,
-          "y": 78,
-          "width": 125.9375,
-          "height": 45
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
         },
         "lotus": {
           "x": 10,
@@ -205,10 +205,10 @@
           -6
         ],
         "after": [
-          -21.12,
-          -10.16
+          -20.85,
+          -9.8
         ],
-        "distance": 5.2
+        "distance": 4.75
       },
       "smoke": {
         "geometry": true,
