@@ -15,7 +15,8 @@ try{
  await page.waitForFunction(()=>window.__ulmoaGardenV4?.state()&&window.__hgShadersReady,{timeout:45000});
  const start=await state();
  check("v4Loaded",!!start);
- check("shopBuilding3D",start.shopExists);
+ check("shopOnExistingHouse",start.shopExists&&start.shopIsOriginalBuilding);
+ check("noSecondFreestandingShop",!start.detachedShopExists);
  check("npcAllPresentAtStart",start.allNpcs.every(Boolean));
  check("correctAreaLabel",await page.$eval("#area",e=>e.textContent.includes("호텔 밖 정원")&&!e.textContent.includes("호텔 앞 정원")));
  check("noPermanentGardenerTarget",await page.$eval("#target",e=>getComputedStyle(e).display==="none"));
@@ -24,17 +25,20 @@ try{
  const oldQText=await page.$eval("#notice",e=>e.textContent);await page.keyboard.press("q");await sleep(120);
  check("unneededQSilent",(await page.$eval("#notice",e=>e.textContent))===oldQText);
  // Walk to the shop with real keyboard actions. Test never changes game coordinates directly.
- const shopPos=[-10,-9];let arrived=false;
+ const shopPos=[-5,-7.4];let arrived=false;
  for(let i=0;i<65;i++){
   const p=await page.evaluate(()=>window.__ulmoaGameQa.state().player);
   const dx=shopPos[0]-p[0],dz=shopPos[1]-p[1];
-  if(Math.hypot(dx,dz)<5.0){arrived=true;break}
+  if(Math.hypot(dx,dz)<3.25&&p[1]<-5.35){arrived=true;break}
   const sx=-.8*dx+.6*dz,sy=-.6*dx-.8*dz,axis=Math.abs(sx)>=Math.abs(sy)?(sx>0?"ArrowRight":"ArrowLeft"):(sy>0?"ArrowDown":"ArrowUp");
   await page.keyboard.down(axis);await sleep(310);await page.keyboard.up(axis);await sleep(60);
  }
  check("walkedToShopWithKeyboard",arrived);
  console.log("V4_SHOP_DIAG_BEFORE",JSON.stringify({state:await state(),game:await page.evaluate(()=>window.__ulmoaGameQa.state()),dialog:await page.$eval("#dialog",e=>e.className)}));
  if(arrived){
+  await page.keyboard.press("e");await sleep(300);
+  check("shopOpensAtOriginalHouseWithE",await page.$eval("#hg4Shop",e=>e.classList.contains("open")));
+  await page.keyboard.press("Escape");await sleep(130);
   await page.keyboard.press("b");await sleep(400);
   console.log("V4_SHOP_DIAG_AFTER",JSON.stringify({state:await state(),overlay:await page.$eval("#hg4Shop",e=>e.className),shopButton:await page.$eval("#hg4ShopButton",e=>getComputedStyle(e).display)}));
   check("shopOpensByB",await page.$eval("#hg4Shop",e=>e.classList.contains("open")));

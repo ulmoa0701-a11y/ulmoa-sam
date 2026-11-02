@@ -201,6 +201,7 @@ __hg5Action.addEventListener("click",__hg5PressAction);
 zm=function(action){
  if(__hg5Phase==="locked")return __hg5OriginalZm(action);
  if(__hg5Transition)return;
+ if(action==="talk"&&__hg4NearShop())return __hg5OriginalZm(action);
  if(action==="talk"){
   if(__hg5PressAction())return;
   if(["dig","ladder","underground","mansion","meet"].includes(__hg5Phase))return;

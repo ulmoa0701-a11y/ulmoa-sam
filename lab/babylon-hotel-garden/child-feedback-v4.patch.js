@@ -20,10 +20,10 @@ __hg4Css.textContent='#hg4Combat{position:fixed;z-index:25;right:12px;top:159px;
 document.head.appendChild(__hg4Css);
 const __hg4Combat=document.createElement("div");__hg4Combat.id="hg4Combat";__hg4Combat.style.display="none";document.body.appendChild(__hg4Combat);
 const __hg4Seeds=document.createElement("div");__hg4Seeds.id="hg4Seeds";document.body.appendChild(__hg4Seeds);
-const __hg4ShopButton=document.createElement("button");__hg4ShopButton.type="button";__hg4ShopButton.id="hg4ShopButton";__hg4ShopButton.style.display="none";__hg4ShopButton.textContent="🌱 씨앗 가게 (B)";document.body.appendChild(__hg4ShopButton);
+const __hg4ShopButton=document.createElement("button");__hg4ShopButton.type="button";__hg4ShopButton.id="hg4ShopButton";__hg4ShopButton.style.display="none";__hg4ShopButton.textContent="🌱 큰집 씨앗 상점 · 문 열기 (E/B)";document.body.appendChild(__hg4ShopButton);
 const __hg4SickleNote=document.createElement("div");__hg4SickleNote.id="hg4SickleNote";__hg4SickleNote.style.display="none";__hg4SickleNote.textContent="낫 획득 · EYE에서 F 베기";document.body.appendChild(__hg4SickleNote);
 const __hg4Shop=document.createElement("div");__hg4Shop.id="hg4Shop";__hg4Shop.setAttribute("role","dialog");__hg4Shop.setAttribute("aria-label","정원 씨앗 가게");
-__hg4Shop.innerHTML='<div id="hg4ShopCard"><h2>🌱 정원 씨앗 가게</h2><p id="hg4Wallet"></p><div id="hg4Offers"></div><p id="hg4Bag"></p><small>3가지 씨앗이 방문마다 무작위로 나와요. 게임 속 씨앗 토큰을 사용하며 실제 결제는 없어요.</small><div class="shop-actions"><button id="hg4PlantButton" type="button">씨앗 심기 (P)</button><button id="hg4CloseShop" type="button">가게 닫기</button></div></div>';
+__hg4Shop.innerHTML='<div id="hg4ShopCard"><h2>🌱 정원의 큰집 · 씨앗 상점</h2><p id="hg4Wallet"></p><div id="hg4Offers"></div><p id="hg4Bag"></p><small>3가지 씨앗이 방문마다 무작위로 나와요. 게임 속 씨앗 토큰을 사용하며 실제 결제는 없어요.</small><div class="shop-actions"><button id="hg4PlantButton" type="button">씨앗 심기 (P)</button><button id="hg4CloseShop" type="button">가게 닫기</button></div></div>';
 document.body.appendChild(__hg4Shop);
 function __hg4Balance(){__hg4Seeds.textContent="🌰 씨앗 토큰 "+__hg4Coins+" · 🌱 "+Object.values(__hg4Bag).reduce((sum,n)=>sum+(Number(n)||0),0)+"개"}
 function __hg4ShopDraw(){
@@ -36,26 +36,54 @@ function __hg4ShopDraw(){
  document.getElementById("hg4Bag").textContent="내 씨앗: "+(__hg4SeedCatalog.filter(x=>__hg4Bag[x.id]>0).map(x=>x.name+" ×"+__hg4Bag[x.id]).join(" · ")||"아직 없어요");
  document.getElementById("hg4PlantButton").disabled=!Object.values(__hg4Bag).some(n=>Number(n)>0);
 }
-function __hg4NearShop(){return Math.hypot(Rp.position.x+10,Rp.position.z+9)<6.2}
+function __hg4NearShop(){return Rp.position.y>-5&&Rp.position.z<-5.35&&Math.hypot(Rp.position.x+5,Rp.position.z+7.4)<4.8}
 function __hg4Open(){if(!qp||Jp||__hg4BossStages.has(Kp)||!__hg4NearShop())return;__hg4ShopOpen=true;__hg4Offers=__hg4Shuffle();Gp.up=Gp.down=Gp.left=Gp.right=false;__hg4ShopDraw();__hg4Shop.classList.add("open")}
 function __hg4Close(){__hg4ShopOpen=false;__hg4Shop.classList.remove("open")}
 __hg4ShopButton.onclick=__hg4Open;
 __hg4Shop.addEventListener("click",e=>{if(e.target===__hg4Shop)__hg4Close()});
 document.getElementById("hg4CloseShop").onclick=__hg4Close;
-const __hg4ShopBuilding=new fc("hg4ShopBuilding",Yf);__hg4ShopBuilding.position.set(-10,0,-9);
-const __hg4Timber=new H(.51,.33,.16),__hg4Cream=new H(.92,.83,.61),__hg4Green=new H(.30,.49,.31);
-__uBox("hg4ShopFloor",__hg4ShopBuilding,new R(0,.1,0),new R(3.9,.2,2.9),__hg4Timber);
-__uBox("hg4ShopRearWall",__hg4ShopBuilding,new R(0,1.38,1.25),new R(3.75,2.65,.15),__hg4Cream);
+// The LARGE EXISTING white, tiled-roof hotel building is the seed shop.
+// We decorate its original facade and retain the original roof, footprint, and doorway.
+// There is NO second freestanding shop building.
+Np.metadata={...(Np.metadata||{}),purpose:"seed-shop",sourceBuilding:"existing-hotel"};
+const __hg4ShopFront=new fc("hg4ShopFrontOnExistingHouse",Yf);
+__hg4ShopFront.position.set(-5,0,-4);
+const __hg4Timber=new H(.46,.28,.15),__hg4Cream=new H(.96,.89,.71),__hg4Green=new H(.14,.38,.25),__hg4Gold=new H(.81,.66,.28);
+__uBox("hg4SeedShopFacadeBoard",__hg4ShopFront,new R(0,3.23,-2.96),new R(5.42,.76,.22),__hg4Green);
+__uBox("hg4SeedShopSignTopTrim",__hg4ShopFront,new R(0,3.65,-3.01),new R(5.7,.12,.28),__hg4Gold);
+__uBox("hg4SeedShopSignBottomTrim",__hg4ShopFront,new R(0,2.8,-3.01),new R(5.7,.1,.28),__hg4Gold);
+__uBox("hg4SeedShopAwning",__hg4ShopFront,new R(0,2.52,-3.26),new R(5.5,.17,1.60),__hg4Green);
+__uBox("hg4SeedShopAwningFrontTrim",__hg4ShopFront,new R(0,2.38,-4.06),new R(5.55,.25,.13),__hg4Cream);
+for(let i=0;i<7;i++)__uBox("hg4SeedShopCanopyStripe"+i,__hg4ShopFront,new R(-2.30+i*.77,2.54,-3.28),new R(.34,.018,1.60),i%2?__hg4Cream:__hg4Gold);
+// Shop entrance is the ACTUAL existing front door, now green with a brass knob.
+__uBox("hg4SeedShopDoorOnOriginalHouse",__hg4ShopFront,new R(0,1.15,-2.58),new R(1.28,2.24,.15),__hg4Green);
+__uSphere("hg4SeedShopBrassDoorknob",__hg4ShopFront,new R(.39,1.16,-2.72),new R(.13,.13,.13),__hg4Gold);
+__uBox("hg4SeedShopDoorStep",__hg4ShopFront,new R(0,.12,-3.02),new R(2.25,.23,.8),__hg4Cream);
 for(const side of [-1,1]){
- __uBox("hg4ShopPost"+side,__hg4ShopBuilding,new R(side*1.8,1.42,-1.12),new R(.19,2.85,.18),__hg4Timber);
- const roof=__uBox("hg4Roof"+side,__hg4ShopBuilding,new R(side*.93,3.12,0),new R(2.28,.22,3.5),__hg4Green);roof.rotation.z=side*.30;
- __uBox("hg4Shelf"+side,__hg4ShopBuilding,new R(side*.80,.72,.63),new R(1.42,.14,.67),__hg4Timber);
+ // Original large-house windows remain visible; new flower displays make this a recognisable store.
+ const x=side*2.4;
+ __uBox("hg4SeedShopWindowBox"+side,__hg4ShopFront,new R(x,1.55,-2.76),new R(1.52,.39,.5),__hg4Timber);
+ __uBox("hg4SeedShopFlowerGrass"+side,__hg4ShopFront,new R(x,1.83,-2.75),new R(1.32,.18,.38),__hg4Green);
+ for(let i=0;i<4;i++)__uSphere("hg4SeedShopWindowFlower"+side+"_"+i,__hg4ShopFront,new R(x-.52+i*.35,1.99,-2.81),new R(.19,.20,.19),new H(...__hg4SeedCatalog[(i+(side>0?2:0))%__hg4SeedCatalog.length].color));
+ const crateX=side*3.08;
+ __uBox("hg4SeedShopCrate"+side,__hg4ShopFront,new R(crateX,.47,-3.24),new R(1.08,.76,.86),__hg4Timber);
+ __uBox("hg4SeedShopCrateLip"+side,__hg4ShopFront,new R(crateX,.85,-3.24),new R(1.21,.15,.98),__hg4Gold);
+ for(let i=0;i<3;i++)__uSphere("hg4SeedShopDisplaySeed"+side+"_"+i,__hg4ShopFront,new R(crateX-.31+i*.31,1.02,-3.24),new R(.26,.28,.23),new H(...__hg4SeedCatalog[(i+(side>0?3:0))%6].color));
 }
-__uBox("hg4Counter",__hg4ShopBuilding,new R(0,.87,-.8),new R(3.23,.61,.58),__hg4Cream);
-for(let i=0;i<6;i++){
- const seed=__uSphere("hg4MarketSeeds"+i,__hg4ShopBuilding,new R(-1.25+(i%3)*1.25,1.34,-.78+Math.floor(i/3)*.22),new R(.24,.27,.24),new H(...__hg4SeedCatalog[i].color));
- seed.isPickable=false;
-}
+const __hg4ShopWorldLabel=document.createElement("div");
+__hg4ShopWorldLabel.id="hg4ShopWorldLabel";__hg4ShopWorldLabel.textContent="🌱 씨앗 상점";
+__hg4ShopWorldLabel.style.cssText="position:fixed;z-index:17;pointer-events:none;display:none;white-space:nowrap;text-align:center;padding:4px 12px;border-radius:10px;background:#e6f1dff0;color:#214735;border:2px solid #4c774d;box-shadow:0 2px 9px #0006;font:900 16px system-ui;transform:translate(-50%,-50%)";
+document.body.appendChild(__hg4ShopWorldLabel);
+const __hg4ShopSignAnchor=new fc("hg4SeedShopSignAnchor",Yf);
+__hg4ShopSignAnchor.position.set(-5,3.23,-7.15);
+Yf.onAfterRenderObservable.add(()=>{
+ if(!__hg4ShopFront.isEnabled()||__hg4ShopOpen||Rp.position.y<-5){__hg4ShopWorldLabel.style.display="none";return}
+ const w=Jf.getRenderWidth(),h=Jf.getRenderHeight(),v=Xf.viewport.toGlobal(w,h);
+ const pt=R.Project(new R(0,0,0),__hg4ShopSignAnchor.getWorldMatrix(),Yf.getTransformMatrix(),v);
+ const x=pt.x/w*innerWidth,y=pt.y/h*innerHeight;
+ if(pt.z<0||pt.z>1||x<30||x>innerWidth-30||y<100||y>innerHeight-20){__hg4ShopWorldLabel.style.display="none";return}
+ __hg4ShopWorldLabel.style.display="block";__hg4ShopWorldLabel.style.left=x+"px";__hg4ShopWorldLabel.style.top=y+"px";
+});
 function __hg4Plant(){
  const seed=__hg4SeedCatalog.find(x=>__hg4Bag[x.id]>0);if(!seed){km("먼저 씨앗을 구해요.",1700);return false}
  if(__hg4BossStages.has(Kp)||!qp||Jp){km("보스전이 끝나면 심을 수 있어요.",1800);return false}
@@ -105,6 +133,7 @@ Nm=function(){const giveSickle=Kp===3&&jm(Bp)<5.5&&qp&&!Jp;__hg4OrigNm();if(give
 zm=function(action){
  if(__hg4ShopOpen)return;
  const nearFlower=__hgClosestFlower()?.d<=6;
+ if(action==="talk"&&__hg4NearShop()&&!__hg4BossStages.has(Kp)){__hg4Open();return}
  if(action==="talk"&&__hg4BossStages.has(Kp)&&!nearFlower)return;
  if(action==="trap"&&Kp!==2&&!(Kp===6&&dm==="water"&&__uHasBucket))return;
  if(action==="slash"&&Kp===4&&__hg4HasSickle)__hg4SwingUntil=performance.now()+380;
@@ -139,4 +168,4 @@ Yf.onBeforeRenderObservable.add(()=>{
  __hg4ShopButton.style.display=__hg4NearShop()&&!__hg4BossStages.has(Kp)&&qp&&!Jp?"block":"none";
 });
 __hg4Balance();rp.style.display="none";
-window.__ulmoaGardenV4={state:()=>({hasSickle:__hg4HasSickle,shopExists:!!Yf.getMeshByName("hg4ShopRearWall"),coins:__hg4Coins,bag:{...__hg4Bag},allNpcs:[zp.isEnabled(),Bp.isEnabled(),Vp.isEnabled()],bossTimer:__hg4Combat.style.display!=="none",nearShop:__hg4NearShop()})};
+window.__ulmoaGardenV4={state:()=>({hasSickle:__hg4HasSickle,shopExists:!!Yf.getMeshByName("hg4SeedShopFacadeBoard"),shopIsOriginalBuilding:Np.metadata?.purpose==="seed-shop"&&Math.abs(__hg4ShopFront.position.x-Np.position.x)<.1&&Math.abs(__hg4ShopFront.position.z-Np.position.z)<.1,detachedShopExists:!!Yf.getTransformNodeByName("hg4ShopBuilding"),coins:__hg4Coins,bag:{...__hg4Bag},allNpcs:[zp.isEnabled(),Bp.isEnabled(),Vp.isEnabled()],bossTimer:__hg4Combat.style.display!=="none",nearShop:__hg4NearShop()})};
