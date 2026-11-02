@@ -103,6 +103,9 @@ try{
  }
  const site=await browser.newPage({viewport:{width:390,height:844}});
  await site.goto(base+'/gardens/',{waitUntil:'domcontentloaded'});
+ // The living-world navigation opens one garden at a time; visit Learning first.
+ if(await site.locator('nav.world-map a[href="#learning"]').count())
+   await site.locator('nav.world-map a[href="#learning"]').click();
  assert.ok(await site.locator('#learning .math-feature[href="../math-garden/"]').isVisible(),'garden entry missing');
  await site.goto(base+'/',{waitUntil:'domcontentloaded'});
  assert.ok(await site.locator('.math-home-feature[href="math-garden/"]').isVisible(),'home entry missing');

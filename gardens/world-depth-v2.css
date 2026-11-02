@@ -1,0 +1,199 @@
+/* Living-world depth pass v2 — aesthetic-only enhancement.
+   No baked text, no fake controls, and no modifications to game images.
+   The original portal geometry and navigation remain authoritative. */
+body.world-ready.gardens-page{
+ --world-light:#fffae0; --world-ink:#3b5740;
+}
+body.world-ready .garden-jumps.world-map{
+ box-shadow:inset 0 0 0 3px #ffffefb8,
+  inset 0 -28px 42px #376b4830,0 9px 0 #7ca7848f,
+  0 19px 48px #345b494a;
+ border-color:#f5f0d0;
+}
+body.world-ready .garden-jumps.world-map::before{
+ content:"";position:absolute;inset:-3%;z-index:1;pointer-events:none;
+ background:
+  radial-gradient(ellipse 37% 20% at 46% 5%,#fffef1bb,transparent 96%),
+  radial-gradient(ellipse 18% 31% at 8% 31%,#fff8d535,transparent 97%),
+  radial-gradient(ellipse 20% 25% at 93% 70%,#ffe6a929,transparent 97%),
+  linear-gradient(115deg,#ffffff27,transparent 43% 72%,#244d4327);
+ animation:worldLightDrift 16s ease-in-out infinite alternate;
+}
+body.world-ready .garden-jumps.world-map::after{
+ content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+ border-radius:inherit;
+ box-shadow:inset 0 0 36px 2px #f9ffe68f,inset 0 -32px 38px #2e684128;
+ background:radial-gradient(ellipse at 48% 47%,transparent 45%,#224c3c18 100%);
+}
+@keyframes worldLightDrift{
+ from{transform:translate3d(-1.4%,0,0);opacity:.8}
+ to{transform:translate3d(1.4%,.8%,0);opacity:1}
+}
+body.world-ready .world-map-title{
+ z-index:5;
+ background:linear-gradient(180deg,#ffffeaf6,#fff3cde8 64%,#ecd49ce0);
+ border-color:#c9ad75;box-shadow:0 3px 0 #ae8c58a6,0 12px 24px #4a68494d;
+ letter-spacing:-.03em;
+}
+body.world-ready .world-map .world-portal>span:not(.jump-symbol):not(.jump-arrow){
+ z-index:2;backdrop-filter:blur(2px);
+ box-shadow:inset 0 2px 0 #fffbecc7,0 5px 0 #8d684a70,0 12px 21px #37684d58;
+ transition:box-shadow .2s ease,translate .2s ease;
+}
+body.world-ready .world-map .world-portal:hover>span:not(.jump-symbol):not(.jump-arrow),
+body.world-ready .world-map .world-portal:focus-visible>span:not(.jump-symbol):not(.jump-arrow){
+ translate:0 -4px;
+ box-shadow:inset 0 2px 0 #fffbecc7,0 8px 0 #8d684a72,0 17px 25px #37684d60;
+}
+body.world-ready .world-map .world-portal::before{
+ content:"";pointer-events:none;position:absolute;left:calc(50% - 10px);
+ bottom:5%;height:43%;width:20px;
+ border-radius:7px 7px 4px 4px;
+ background:linear-gradient(90deg,#986e42 0 19%,#e3bc79 27% 42%,#a87a48 69%,#7e573a);
+ box-shadow:4px 5px 8px #2d604870;
+ transform:rotate(2deg);z-index:1;
+}
+body.world-ready .world-guide{
+ z-index:4;filter:drop-shadow(2px 11px 9px #3b6b507e);
+ animation:worldGuideFloat 6.7s ease-in-out infinite;
+}
+@keyframes worldGuideFloat{
+ 0%,100%{transform:translate(-50%,-15%) rotate(-1deg)}
+ 50%{transform:translate(-50%,-18%) rotate(1deg)}
+}
+body.world-ready .world-map .world-actor{
+ z-index:2;
+ filter:drop-shadow(2px 9px 7px #3d67567c);
+ animation:worldFriendSway 7s ease-in-out infinite;
+ transform-origin:50% 100%;
+}
+body.world-ready .world-map .world-actor:nth-of-type(2n){
+ animation-duration:8.4s;animation-delay:-3s;
+}
+@keyframes worldFriendSway{
+ 0%,100%{transform:translate(-50%,-50%) rotate(-2deg)}
+ 50%{transform:translate(-50%,-53%) rotate(2deg)}
+}
+/* Make entry points a cohesive part of the place, not floating bubble cards. */
+body.world-ready.world-in-garden .world-zone-landscape{
+ min-height:clamp(250px,30vw,360px);
+ border:6px solid #dfebc8;border-bottom:0;
+ border-radius:36px 36px 0 0;
+ box-shadow:inset 0 5px 13px #fff9d8ba,0 -9px 24px #59795324;
+ isolation:isolate;
+}
+body.world-ready.world-in-garden .world-zone-landscape::before{
+ content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+ background:linear-gradient(180deg,#fafff83d,transparent 42%,#426c3f25 100%),
+ radial-gradient(ellipse at 15% 9%,#fffbc099,transparent 52%);
+}
+body.world-ready.world-in-garden .world-zone-landscape::after{
+ content:"";position:absolute;z-index:0;inset:auto -4% -13px;
+ height:45px;pointer-events:none;
+ background:radial-gradient(ellipse 54% 92% at 17% 100%,#6a9a66ba,transparent),
+  radial-gradient(ellipse 50% 90% at 81% 100%,#5c9464aa,transparent);
+ filter:blur(2px);
+}
+body.world-ready .world-zone-scene-label{
+ z-index:2;box-shadow:0 4px 0 #ad966d67,0 10px 14px #355f4d4d;
+ background:linear-gradient(#fffdf0f5,#fff1d3ec);
+}
+/* Road is a tactile meadow path; the existing line remains SVG/decoration. */
+body.world-ready.world-in-garden .world-trail{
+ background:
+ radial-gradient(ellipse at 15% 20%,#fbffe4 0,transparent 23%),
+ radial-gradient(ellipse at 83% 66%,#c8e5a6 0,transparent 34%),
+ radial-gradient(ellipse at 39% 95%,#f3f9d0 0,transparent 24%),
+ linear-gradient(160deg,#d8ecc3,#b9d6a1 53%,#d4e9b7);
+ border-color:#dfebc8;
+ box-shadow:inset 0 7px 18px #6c9c5727,0 12px 30px #51774b36;
+ row-gap:25px;padding-top:45px;padding-bottom:55px;
+}
+body.world-ready.world-in-garden #thinking .world-trail{
+ background:radial-gradient(ellipse at 20% 20%,#faf3f6,transparent 42%),
+  linear-gradient(153deg,#e5e4f3,#bcded5 55%,#d0e8bf);
+}
+body.world-ready.world-in-garden #learning .world-trail{
+ background:radial-gradient(ellipse at 40% 12%,#fffdec,transparent 40%),
+  linear-gradient(149deg,#f4e9c4,#d5e4b5 56%,#d2ebc8);
+}
+body.world-ready.world-in-garden #music .world-trail{
+ background:radial-gradient(ellipse at 85% 10%,#e7fbff,transparent 40%),
+  linear-gradient(155deg,#dbf1ea,#aed7cb 60%,#d8ebbb);
+}
+body.world-ready.world-in-garden #heart .world-trail{
+ background:radial-gradient(ellipse at 20% 10%,#fff4f7,transparent 42%),
+  linear-gradient(149deg,#f9e0e8,#eddbd1 57%,#d8eabf);
+}
+body.world-ready.world-in-garden .world-trail-ridge{
+ stroke:#5b996e8c;stroke-width:42;
+}
+body.world-ready.world-in-garden .world-trail-soil{
+ stroke:#f5e2b6;stroke-width:32;
+}
+body.world-ready.world-in-garden .world-trail-light{
+ stroke:#fffaf0d9;stroke-width:2;stroke-dasharray:2 15;
+}
+body.world-ready.world-in-garden .world-game-stop{
+ isolation:isolate;transition:translate .18s ease;
+}
+body.world-ready.world-in-garden .world-game-stop::before{
+ content:"";position:absolute;z-index:-1;pointer-events:none;
+ width:min(96%,240px);height:89px;left:50%;top:64px;
+ transform:translateX(-50%);border-radius:50%;
+ background:radial-gradient(ellipse at 48% 46%,#f4f9d3 0 33%,#9fc889 57%,#6a9f70 74%,transparent 76%);
+ filter:drop-shadow(0 8px 7px #2d5d494d);
+}
+body.world-ready.world-in-garden .world-game-stop:nth-of-type(3n+1){translate:-2.5% 0}
+body.world-ready.world-in-garden .world-game-stop:nth-of-type(3n+2){translate:0 6px}
+body.world-ready.world-in-garden .world-game-stop:nth-of-type(3n){translate:2.5% -6px}
+body.world-ready.world-in-garden .world-game-stop .play-card-media{
+ width:clamp(129px,12.8vw,165px);height:clamp(111px,11.3vw,145px);
+ border:6px solid #fff9e8;outline:3px solid #a9c99c;
+ border-radius:24% 27% 24% 30% / 26% 24% 28% 25%;
+ box-shadow:inset 0 4px 5px #ffffffaa,0 5px 0 #7bac83,0 14px 16px #365e5069;
+ transform:rotate(-1deg);
+}
+body.world-ready.world-in-garden .world-game-stop:nth-of-type(even) .play-card-media{
+ border-radius:29% 24% 26% 23% / 24% 29% 25% 26%;
+ transform:rotate(1deg);
+}
+body.world-ready.world-in-garden .world-game-stop .play-card-media:hover,
+body.world-ready.world-in-garden .world-game-stop .play-card-media:focus-visible{
+ transform:translateY(-5px) rotate(0) scale(1.025);
+}
+body.world-ready.world-in-garden .world-game-stop h3{
+ background:linear-gradient(180deg,#fffbed,#f5e4bc 62%,#dfc18e);
+ border-color:#ba9a67;border-bottom:5px solid #98794e;
+ border-radius:11px 14px 13px 11px;
+ box-shadow:inset 0 2px 0 #fffef2,0 5px 10px #476c5261;
+}
+@media(max-width:680px){
+ body.world-ready .world-guide{animation-name:worldGuideFloatMobile}
+ @keyframes worldGuideFloatMobile{
+  0%,100%{transform:translate(-50%,-35%) rotate(-1deg)}
+  50%{transform:translate(-50%,-38%) rotate(1deg)}
+ }
+ body.world-ready .world-map-title{padding:7px 12px}
+ body.world-ready .world-map .world-portal::before{
+  width:14px;left:calc(50% - 7px);height:28%;bottom:9%;
+ }
+ body.world-ready.world-in-garden .world-zone-landscape{min-height:195px;border-width:4px}
+ body.world-ready.world-in-garden .world-trail{
+  row-gap:20px;padding:26px 8px 40px;
+ }
+ body.world-ready.world-in-garden .world-game-stop{translate:0 0!important}
+ body.world-ready.world-in-garden .world-game-stop::before{
+  width:98%;height:70px;top:55px;
+ }
+ body.world-ready.world-in-garden .world-game-stop .play-card-media{
+  width:clamp(104px,30vw,125px);height:clamp(95px,27vw,112px);
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ body.world-ready .garden-jumps.world-map::before,
+ body.world-ready .world-guide,
+ body.world-ready .world-map .world-actor{animation:none!important}
+ body.world-ready .world-map .world-portal>span:not(.jump-symbol):not(.jump-arrow),
+ body.world-ready.world-in-garden .world-game-stop{transition:none!important}
+}

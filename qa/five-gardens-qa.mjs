@@ -17,6 +17,8 @@ for(const width of [360,390,1366]){
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  let response=await page.goto(base+'/gardens/',{waitUntil:'domcontentloaded',timeout:25000});
  await page.waitForTimeout(400);
+ // A world scene can be opened first; verify original catalog via its actual list-view control.
+ if(await page.locator('#worldListToggle').count())await page.locator('#worldListToggle').click();
  const data=await page.evaluate(()=>{
   const ids=['cognitive','thinking','learning','music','heart'];
   const counts=ids.map(id=>document.querySelectorAll('#'+id+' .play-card').length);
