@@ -19,6 +19,8 @@ try{
  check("noSecondFreestandingShop",!start.detachedShopExists);
  check("allFourFacesStocked",start.visualShopFacades);
  check("largeRooftopSprout",start.roofSprout);
+ check("roofFlowerBedsVisible",start.roofFlowerBeds);
+ check("tallOutdoorFlowerDisplays",start.tallDisplays>=4);
  check("visible3DSeedPacketInventory",start.seedPackets>=18);
  check("real3DFlowerPots",start.flowerPots>=8);
  check("npcAllPresentAtStart",start.allNpcs.every(Boolean));

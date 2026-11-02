@@ -168,6 +168,59 @@ __hg4Cylinder("hg4RoofSproutStem",0,5.21,0,.23,1.22,.23,__hg4Green);
 const leafL=__hg4Ball("hg4RoofGiantSproutLeafLeft",-.7,5.77,0,1.36,.55,.56,__hg4Mint);leafL.rotation.z=-.28;
 const leafR=__hg4Ball("hg4RoofGiantSproutLeafRight",.7,5.87,0,1.36,.55,.56,__hg4Green);leafR.rotation.z=.28;
 __hg4Ball("hg4RoofSproutTip",0,6.0,0,.36,.43,.35,__hg4Green);
+// Four elevated rooftop nursery beds give the market a living, colourful roof
+// that remains recognisable from the gameplay camera's high angle.
+const __hg4RoofPlants=[
+ {x:-2.42,z:-1.24,color:__hg4Sun,id:"sun"},
+ {x:2.42,z:-1.24,color:__hg4PetalPink,id:"pink"},
+ {x:-2.42,z:1.36,color:__hg4Purple,id:"violet"},
+ {x:2.42,z:1.36,color:__hg4Sky,id:"blue"}
+];
+for(const a of __hg4RoofPlants){
+ __hg4Box("hg4RoofNurseryBed"+a.id,a.x,4.23,a.z,1.78,.32,1.78,__hg4Timber);
+ __hg4Box("hg4RoofNurseryBedSoil"+a.id,a.x,4.41,a.z,1.50,.11,1.50,__hg4SoilBrown);
+ // Petals in a horizontal flower head face upwards toward an angled game camera.
+ for(let j=0;j<7;j++){
+  const t=j*2*Math.PI/7;
+  const petal=__hg4Ball("hg4RoofFlowerPetal"+a.id+j,a.x+Math.cos(t)*.52,4.69,a.z+Math.sin(t)*.52,.56,.30,.52,a.color);
+  petal.rotation.y=t;
+ }
+ __hg4Ball("hg4RoofFlowerHeart"+a.id,a.x,4.78,a.z,.54,.35,.54,__hg4Sun);
+ // Three sprouting leaves in each bed make these flowers read as growing plants.
+ for(let j=0;j<3;j++){
+  const t=j*Math.PI*2/3;
+  __hg4Ball("hg4RoofSeedlingLeaves"+a.id+j,a.x+Math.cos(t)*.55,4.55,a.z+Math.sin(t)*.53,.39,.16,.30,__hg4Mint);
+ }
+}
+// Extra-tall floral displays stand OUTSIDE the canopy and remain visible from above.
+for(const [side,x,z,color] of [
+ ["west",-4.60,-1.6,__hg4Sun],["east",4.60,-1.6,__hg4PetalPink],
+ ["northLeft",-2.7,4.28,__hg4Purple],["northRight",2.7,4.28,__hg4Sky]
+]){
+ __hg4Cylinder("hg4TallMarketPlanter"+side,x,.48,z,1.05,.96,1.02,new H(.75,.37,.21));
+ __hg4Cylinder("hg4TallMarketStem"+side,x,1.65,z,.16,2.05,.16,__hg4Green);
+ for(let j=0;j<6;j++){
+  const a=j*Math.PI/3;
+  __hg4Ball("hg4TallMarketBlossom"+side+j,x+Math.cos(a)*.45,2.83,z+Math.sin(a)*.45,.48,.32,.47,color);
+ }
+ __hg4Ball("hg4TallMarketCenter"+side,x,2.94,z,.46,.33,.44,__hg4Gold);
+}
+const __hg4ShopCameraDefault=qm;
+qm=function(){
+ // Orient toward the near wall, not downward onto a giant blank roof.
+ if(__hg4NearShop()&&!__hg4ShopOpen&&qp&&!Jp&&!__hg4BossStages.has(Kp)){
+  const store=new R(-5,0,-4),out=Rp.position.subtract(store);out.y=0;
+  if(out.length()<.25)out.set(-1,0,-1);
+  out.normalize();
+  const focus=R.Lerp(store,Rp.position,.20);focus.y=1.05;
+  const desired=store.add(out.scale(10.8)).add(new R(0,6.7,0));
+  Xf.position=R.Lerp(Xf.position,desired,.13);
+  Xf.setTarget(focus);
+  return;
+ }
+ __hg4ShopCameraDefault();
+};
+
 // Make the actual purchase window feel like browsing physical picture-backed packets.
 const __hg4MarketStyles=document.createElement("style");
 __hg4MarketStyles.textContent='#hg4ShopCard{background:linear-gradient(155deg,#f4f7e6 0%,#fff7e5 65%,#f3e8ce 100%);border:5px solid #537c51;box-shadow:0 13px 50px #0005}#hg4ShopCard h2{color:#24583b;font-size:clamp(20px,3vw,29px)}#hg4Offers button{background:linear-gradient(#fffef6,#eaf1d5);min-height:155px;border:2px solid #7aa16a;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:7px;box-shadow:0 4px 0 #4f724032}#hg4Offers button .icon{font-size:42px;filter:drop-shadow(0px 3px 2px #0002)}#hg4Offers button:hover:not(:disabled){border-color:#b58a2d;transform:translateY(-2px)}#hg4Wallet,#hg4Bag{font-size:16px;font-weight:800}#hg4ShopButton{background:#d9ecb8;border-color:#3a7747;box-shadow:0 4px 13px #0003}@media(max-width:700px){#hg4Offers{grid-template-columns:repeat(3,minmax(0,1fr))}#hg4Offers button{min-height:108px;font-size:11px;padding:5px;gap:3px}#hg4Offers button .icon{font-size:28px}}';
@@ -274,4 +327,4 @@ Yf.onBeforeRenderObservable.add(()=>{
  __hg4ShopButton.style.display=__hg4NearShop()&&!__hg4BossStages.has(Kp)&&qp&&!Jp?"block":"none";
 });
 __hg4Balance();rp.style.display="none";
-window.__ulmoaGardenV4={state:()=>({hasSickle:__hg4HasSickle,shopExists:!!Yf.getMeshByName("hg4SeedShopFacadeBoard"),shopIsOriginalBuilding:Np.metadata?.purpose==="seed-shop"&&Math.abs(__hg4ShopFront.position.x-Np.position.x)<.1&&Math.abs(__hg4ShopFront.position.z-Np.position.z)<.1,detachedShopExists:!!Yf.getTransformNodeByName("hg4ShopBuilding"),visualShopFacades:["hg4MarketRackeast","hg4MarketRackwest","hg4MarketRackrear","hg4MarketRackfront"].every(n=>!!Yf.getTransformNodeByName(n)),roofSprout:!!Yf.getMeshByName("hg4RoofGiantSproutLeafLeft"),seedPackets:Yf.meshes.filter(m=>m.name.startsWith("hg4SeedPacket")&&!m.name.includes("Flower")).length,flowerPots:Yf.meshes.filter(m=>m.name.startsWith("hg4VisibleFlowerPot")).length,coins:__hg4Coins,bag:{...__hg4Bag},allNpcs:[zp.isEnabled(),Bp.isEnabled(),Vp.isEnabled()],bossTimer:__hg4Combat.style.display!=="none",nearShop:__hg4NearShop()})};
+window.__ulmoaGardenV4={state:()=>({hasSickle:__hg4HasSickle,shopExists:!!Yf.getMeshByName("hg4SeedShopFacadeBoard"),shopIsOriginalBuilding:Np.metadata?.purpose==="seed-shop"&&Math.abs(__hg4ShopFront.position.x-Np.position.x)<.1&&Math.abs(__hg4ShopFront.position.z-Np.position.z)<.1,detachedShopExists:!!Yf.getTransformNodeByName("hg4ShopBuilding"),visualShopFacades:["hg4MarketRackeast","hg4MarketRackwest","hg4MarketRackrear","hg4MarketRackfront"].every(n=>!!Yf.getTransformNodeByName(n)),roofSprout:!!Yf.getMeshByName("hg4RoofGiantSproutLeafLeft"),roofFlowerBeds:["sun","pink","violet","blue"].every(t=>!!Yf.getMeshByName("hg4RoofNurseryBed"+t)),tallDisplays:Yf.meshes.filter(m=>m.name.startsWith("hg4TallMarketPlanter")).length,seedPackets:Yf.meshes.filter(m=>m.name.startsWith("hg4SeedPacket")&&!m.name.includes("Flower")).length,flowerPots:Yf.meshes.filter(m=>m.name.startsWith("hg4VisibleFlowerPot")).length,coins:__hg4Coins,bag:{...__hg4Bag},allNpcs:[zp.isEnabled(),Bp.isEnabled(),Vp.isEnabled()],bossTimer:__hg4Combat.style.display!=="none",nearShop:__hg4NearShop()})};
