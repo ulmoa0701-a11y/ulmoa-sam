@@ -70,10 +70,22 @@ try{
  // E held down for one full second collects the reward through normal keyboard listeners.
  await page.keyboard.down("e");await sleep(1450);await page.keyboard.up("e");await sleep(200);
  await record("WOODS actual hold E");
- const s=await state();
+ const woodsCollected=await state();
+ if(woodsCollected.stage===3&&woodsCollected.lotus===1){
+  // Continue using real keyboard input. Pond keeper moves slightly but remains near (4,-8).
+  report.keeper=await walkTo(4,-8,2.75,105000);
+  await page.keyboard.press("e");await sleep(250);
+  await record("pond keeper dialogue opened");
+  report.sickleAfterRealTalk=await page.evaluate(()=>window.__ulmoaGardenV4?.state()?.hasSickle===true);
+  if(await page.$eval("#dialog",e=>e.classList.contains("show")))await clickDialog();
+  await record("pond keeper handoff, EYE stage");
+ }
+ const final=await state();
  report.pass=report.steps.some(x=>x.step==="gardener talk"&&x.state.stage===1)
    &&report.steps.some(x=>x.step==="WOODS encounter"&&x.state.stage===2)
-   &&s.stage===3&&s.lotus===1&&errors.length===0&&http.length===0;
+   &&woodsCollected.stage===3&&woodsCollected.lotus===1
+   &&report.sickleAfterRealTalk===true&&final.stage===4
+   &&errors.length===0&&http.length===0;
 }catch(e){report.error=String(e);report.pass=false}
 await page.screenshot({path:"hotel-garden-actual-play.jpg",type:"jpeg",quality:62,fullPage:true}).catch(()=>{});
 await browser.close();
