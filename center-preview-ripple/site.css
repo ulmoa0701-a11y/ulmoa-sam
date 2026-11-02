@@ -101,3 +101,22 @@ main section[id]{scroll-margin-top:76px}
 .practice-flow li[id]:focus-visible{outline:3px solid var(--green2);outline-offset:5px}
 main section[id]:focus{outline:none}
 main section[id]:focus-visible{outline:3px solid var(--green);outline-offset:-5px}
+
+/* Full-page visual QA: intentional Korean wrapping and clear next actions */
+.start .section-heading h2{font-size:clamp(48px,5.1vw,74px);word-break:keep-all;overflow-wrap:break-word}
+.contact h2{font-size:clamp(48px,5.4vw,76px);word-break:keep-all;overflow-wrap:break-word}
+.concern small{font-size:14px;line-height:1.6;color:#526a5f;word-break:keep-all;overflow-wrap:break-word}
+.concern b{font-size:13px}
+.concern b::after{content:" ↗";font-size:13px}
+.visit-line small{font-size:13px;line-height:1.55;word-break:keep-all;overflow-wrap:break-word}
+.practice-consult{display:inline-flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:30px;padding:14px 20px;border:1px solid rgba(255,255,255,.4);border-radius:999px;font-size:14px;color:#e6f4e8;transition:background .2s}
+.practice-consult strong{font-weight:600;color:#fff}
+.practice-consult:hover{background:rgba(255,255,255,.12)}
+.practice-consult:focus-visible{outline:3px solid #a9db8f;outline-offset:4px}
+@media(max-width:900px){
+.start .section-heading h2{font-size:clamp(38px,9.5vw,55px)}
+.contact h2{font-size:clamp(32px,8.8vw,58px);line-height:1.19}
+.concern small{font-size:14px}
+.visit-line small{font-size:13px}
+.practice-consult{font-size:14px;line-height:1.5;border-radius:20px;display:flex;justify-content:space-between}
+}
