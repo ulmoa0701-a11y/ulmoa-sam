@@ -36,7 +36,7 @@ for(const [place,friend] of Object.entries(worldFriends)){
  const actor=document.createElement('img');
  actor.src='../thinking-garden/games/rescue/art/illustrated/'+friend+'.webp';
  actor.alt='';actor.className='world-actor world-actor-'+place;
- actor.setAttribute('aria-hidden','true');actor.decoding='async';actor.loading='lazy';
+ actor.setAttribute('aria-hidden','true');actor.decoding='async';actor.loading='eager';
  nav.append(actor);
 }
 const gardenLinks=[...nav.querySelectorAll('a.garden-jump')];
