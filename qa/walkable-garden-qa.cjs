@@ -38,8 +38,9 @@ const ids=['cognitive','thinking','learning','music','heart'],expected=[21,3,4,3
     assert.equal(await page.locator('#panel[open] .activities .activity').count(),5);
     await page.locator('#panelClose').click();
     assert.equal(await page.locator('#panel[open]').count(),0);
-    // A direct landmark click should walk to the destination before opening it.
-    await page.locator('[data-portal="cognitive"]').click();
+    // A landmark outside the mobile camera must remain accessible through quick travel.
+    await page.locator('#quick').click();
+    await page.locator('#panel .activity button').first().click();
     await page.locator('#panel[open]').waitFor({timeout:16000});
     assert.equal(await page.locator('#panelTitle').innerText(),'인지정원');
     assert.equal(await page.locator('#activities .activity').count(),3);
