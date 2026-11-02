@@ -504,46 +504,152 @@ function __hg4ShopDraw(){
  document.getElementById("hg4Bag").textContent="내 씨앗: "+(__hg4SeedCatalog.filter(x=>__hg4Bag[x.id]>0).map(x=>x.name+" ×"+__hg4Bag[x.id]).join(" · ")||"아직 없어요");
  document.getElementById("hg4PlantButton").disabled=!Object.values(__hg4Bag).some(n=>Number(n)>0);
 }
-function __hg4NearShop(){return Rp.position.y>-5&&Rp.position.z<-5.35&&Math.hypot(Rp.position.x+5,Rp.position.z+7.4)<4.8}
+function __hg4NearShop(){const dx=Math.max(Math.abs(Rp.position.x+5)-3.5,0),dz=Math.max(Math.abs(Rp.position.z+4)-2.4,0);return Rp.position.y>-5&&Math.abs(Rp.position.x+5)<6.3&&Math.abs(Rp.position.z+4)<5.0&&dx*dx+dz*dz<5.5}
 function __hg4Open(){if(!qp||Jp||__hg4BossStages.has(Kp)||!__hg4NearShop())return;__hg4ShopOpen=true;__hg4Offers=__hg4Shuffle();Gp.up=Gp.down=Gp.left=Gp.right=false;__hg4ShopDraw();__hg4Shop.classList.add("open")}
 function __hg4Close(){__hg4ShopOpen=false;__hg4Shop.classList.remove("open")}
 __hg4ShopButton.onclick=__hg4Open;
 __hg4Shop.addEventListener("click",e=>{if(e.target===__hg4Shop)__hg4Close()});
 document.getElementById("hg4CloseShop").onclick=__hg4Close;
-// The LARGE EXISTING white, tiled-roof hotel building is the seed shop.
-// We decorate its original facade and retain the original roof, footprint, and doorway.
-// There is NO second freestanding shop building.
+// THE EXISTING 7m × 4.8m HOUSE IS A REAL 360° GARDEN SEED MARKET.
+// All four house walls must read "plant and seed shop" without reading text.
+// Keep the original house, its footprint and original main door, never add another building.
 Np.metadata={...(Np.metadata||{}),purpose:"seed-shop",sourceBuilding:"existing-hotel"};
-const __hg4ShopFront=new fc("hg4ShopFrontOnExistingHouse",Yf);
-__hg4ShopFront.position.set(-5,0,-4);
-const __hg4Timber=new H(.46,.28,.15),__hg4Cream=new H(.96,.89,.71),__hg4Green=new H(.14,.38,.25),__hg4Gold=new H(.81,.66,.28);
-__uBox("hg4SeedShopFacadeBoard",__hg4ShopFront,new R(0,3.23,-2.96),new R(5.42,.76,.22),__hg4Green);
-__uBox("hg4SeedShopSignTopTrim",__hg4ShopFront,new R(0,3.65,-3.01),new R(5.7,.12,.28),__hg4Gold);
-__uBox("hg4SeedShopSignBottomTrim",__hg4ShopFront,new R(0,2.8,-3.01),new R(5.7,.1,.28),__hg4Gold);
-__uBox("hg4SeedShopAwning",__hg4ShopFront,new R(0,2.52,-3.26),new R(5.5,.17,1.60),__hg4Green);
-__uBox("hg4SeedShopAwningFrontTrim",__hg4ShopFront,new R(0,2.38,-4.06),new R(5.55,.25,.13),__hg4Cream);
-for(let i=0;i<7;i++)__uBox("hg4SeedShopCanopyStripe"+i,__hg4ShopFront,new R(-2.30+i*.77,2.54,-3.28),new R(.34,.018,1.60),i%2?__hg4Cream:__hg4Gold);
-// Shop entrance is the ACTUAL existing front door, now green with a brass knob.
-__uBox("hg4SeedShopDoorOnOriginalHouse",__hg4ShopFront,new R(0,1.15,-2.58),new R(1.28,2.24,.15),__hg4Green);
-__uSphere("hg4SeedShopBrassDoorknob",__hg4ShopFront,new R(.39,1.16,-2.72),new R(.13,.13,.13),__hg4Gold);
-__uBox("hg4SeedShopDoorStep",__hg4ShopFront,new R(0,.12,-3.02),new R(2.25,.23,.8),__hg4Cream);
-for(const side of [-1,1]){
- // Original large-house windows remain visible; new flower displays make this a recognisable store.
- const x=side*2.4;
- __uBox("hg4SeedShopWindowBox"+side,__hg4ShopFront,new R(x,1.55,-2.76),new R(1.52,.39,.5),__hg4Timber);
- __uBox("hg4SeedShopFlowerGrass"+side,__hg4ShopFront,new R(x,1.83,-2.75),new R(1.32,.18,.38),__hg4Green);
- for(let i=0;i<4;i++)__uSphere("hg4SeedShopWindowFlower"+side+"_"+i,__hg4ShopFront,new R(x-.52+i*.35,1.99,-2.81),new R(.19,.20,.19),new H(...__hg4SeedCatalog[(i+(side>0?2:0))%__hg4SeedCatalog.length].color));
- const crateX=side*3.08;
- __uBox("hg4SeedShopCrate"+side,__hg4ShopFront,new R(crateX,.47,-3.24),new R(1.08,.76,.86),__hg4Timber);
- __uBox("hg4SeedShopCrateLip"+side,__hg4ShopFront,new R(crateX,.85,-3.24),new R(1.21,.15,.98),__hg4Gold);
- for(let i=0;i<3;i++)__uSphere("hg4SeedShopDisplaySeed"+side+"_"+i,__hg4ShopFront,new R(crateX-.31+i*.31,1.02,-3.24),new R(.26,.28,.23),new H(...__hg4SeedCatalog[(i+(side>0?3:0))%6].color));
+const __hg4ShopFront=new fc("hg4ShopFrontOnExistingHouse",Yf);__hg4ShopFront.position.set(-5,0,-4);
+const __hg4Timber=new H(.40,.24,.13),__hg4Cream=new H(.97,.89,.69),__hg4Green=new H(.14,.43,.29),__hg4Gold=new H(.92,.68,.27);
+const __hg4Mint=new H(.65,.83,.63),__hg4PetalPink=new H(.95,.34,.53),__hg4PinkLight=new H(.99,.66,.78);
+const __hg4Sun=new H(1,.72,.14),__hg4Sky=new H(.32,.69,.85),__hg4Purple=new H(.65,.43,.86),__hg4SoilBrown=new H(.32,.20,.10);
+const __hg4Box=(id,x,y,z,sx,sy,sz,c,parent=__hg4ShopFront)=>__uBox(id,parent,new R(x,y,z),new R(sx,sy,sz),c);
+const __hg4Ball=(id,x,y,z,sx,sy,sz,c,parent=__hg4ShopFront)=>__uSphere(id,parent,new R(x,y,z),new R(sx,sy,sz),c);
+const __hg4Cylinder=(id,x,y,z,sx,sy,sz,c,parent=__hg4ShopFront)=>__uCyl(id,parent,new R(x,y,z),new R(sx,sy,sz),c);
+// Warm buttercream walls, deep greenhouse-green roof: replaces the plain gray block.
+Np.material=__uMat("hg4SeedShopSagePlaster",new H(.83,.89,.73));
+Pp.material=__uMat("hg4SeedShopForestRoof",new H(.20,.39,.30));
+Fp.material=__uMat("hg4SeedShopOldDoorRepainted",__hg4Green);
+const __hg4RoofRibbon=__hg4Box("hg4RoofOverhangTrim",0,3.63,0,8.0,.19,5.57,__hg4Timber);
+for(const x of [-3.45,3.45]){
+ for(const z of [-2.39,2.39])__hg4Box("hg4HouseCornerPost"+x+"_"+z,x,1.78,z,.21,3.5,.21,__hg4Timber);
 }
+for(const z of [-2.38,2.38])__hg4Box("hg4LongWallBottomTrim"+z,0,.37,z,6.82,.24,.12,__hg4Timber);
+for(const x of [-3.52,3.52])__hg4Box("hg4SideWallBottomTrim"+x,x,.37,0,.12,.24,4.54,__hg4Timber);
+// Four protruding striped awnings, not a single inaccessible facade.
+for(const [face,z,rotation] of [["front",-2.43,0],["back",2.43,Math.PI]]){
+ const stall=new fc("hg4MarketAwning"+face,Yf);stall.parent=__hg4ShopFront;stall.position.z=z;stall.rotation.y=rotation;
+ __uBox("hg4"+face+"AwningTop",stall,new R(0,2.79,-.56),new R(6.7,.22,1.20),__hg4Green);
+ for(let i=0;i<9;i++)__uBox("hg4"+face+"CanopyCreamStripe"+i,stall,new R(-2.91+i*.73,2.91,-.57),new R(.33,.09,1.18),i%2?__hg4Cream:__hg4Sun);
+ __uBox("hg4"+face+"AwningEdge",stall,new R(0,2.66,-1.16),new R(6.85,.27,.16),__hg4Gold);
+}
+for(const x of [-3.53,3.53]){
+ const side=new fc("hg4MarketSideAwning"+x,Yf);side.parent=__hg4ShopFront;side.position.x=x;side.rotation.y=x<0?-Math.PI/2:Math.PI/2;
+ __uBox("hg4SideAwningRoof"+x,side,new R(0,2.78,-.52),new R(4.57,.18,1.12),__hg4Green);
+ for(let i=0;i<7;i++)__uBox("hg4SideAwningStripe"+x+"_"+i,side,new R(-1.9+i*.64,2.9,-.50),new R(.30,.09,1.06),i%2?__hg4Cream:__hg4Sun);
+ __uBox("hg4SideAwningEdge"+x,side,new R(0,2.65,-1.04),new R(4.6,.23,.13),__hg4Gold);
+}
+// Big real entrance with an arched floral motif.
+__hg4Box("hg4SeedShopFacadeBoard",0,3.30,-2.66,5.70,.48,.18,__hg4Green);
+__hg4Box("hg4ShopDoor",0,1.13,-2.56,1.34,2.18,.12,__hg4Timber);
+__hg4Box("hg4ShopDoorGlass",0,1.58,-2.65,.88,1.14,.08,new H(.47,.76,.78));
+__hg4Box("hg4ShopDoorGlassCross",0,1.58,-2.71,.1,1.15,.08,__hg4Cream);
+__hg4Ball("hg4GoldHandle",.46,1.08,-2.73,.13,.13,.14,__hg4Gold);
+__hg4Box("hg4ShopEntranceStep",0,.13,-3.19,2.45,.21,1.12,__hg4Cream);
+for(const x of [-2.1,2.1]){
+ __hg4Box("hg4ShopWindowFrame"+x,x,1.62,-2.66,1.63,1.65,.16,__hg4Timber);
+ __hg4Box("hg4ShopWindowGlass"+x,x,1.64,-2.79,1.35,1.34,.1,new H(.55,.78,.71));
+ __hg4Box("hg4ShopWindowShelf"+x,x,.95,-2.96,1.90,.20,.48,__hg4Gold);
+}
+// Oversized botanical emblems: not text-only signs or emoji-only decorations.
+function __hg4Flower(id,x,y,z,color,size=1,parent=__hg4ShopFront,face=0){
+ const root=new fc(id,Yf);root.parent=parent;root.position.set(x,y,z);root.rotation.y=face;
+ __uCyl(id+"Stem",root,new R(0,-.37,0),new R(.10,.68,.10),__hg4Green);
+ for(let p=0;p<5;p++){
+  const a=p*2*Math.PI/5;
+  const leaf=__uSphere(id+"Petal"+p,root,new R(Math.sin(a)*.43*size,Math.cos(a)*.43*size,.08),new R(.42*size,.49*size,.20*size),color);
+  leaf.rotation.z=-a;
+ }
+ __uSphere(id+"SeedCenter",root,new R(0,0,-.07),new R(.39*size,.39*size,.26*size),__hg4SoilBrown);
+ return root;
+}
+function __hg4Pot(id,x,z,palette,size=1,parent=__hg4ShopFront){
+ const group=new fc(id,Yf);group.parent=parent;group.position.set(x,0,z);
+ __uCyl(id+"TerracottaPot",group,new R(0,.46*size,0),new R(.77*size,.80*size,.72*size),new H(.72,.36,.21));
+ __uCyl(id+"PotRim",group,new R(0,.83*size,0),new R(.89*size,.18*size,.86*size),new H(.90,.54,.28));
+ __uCyl(id+"PotSoil",group,new R(0,.93*size,0),new R(.73*size,.08*size,.70*size),__hg4SoilBrown);
+ __uCyl(id+"GrowingStem",group,new R(0,1.35*size,0),new R(.10*size,.9*size,.10*size),__hg4Green);
+ __uSphere(id+"LeafL",group,new R(-.30*size,1.26*size,0),new R(.57*size,.19*size,.30*size),__hg4Mint);
+ __uSphere(id+"LeafR",group,new R(.30*size,1.48*size,0),new R(.57*size,.19*size,.30*size),__hg4Green);
+ __hg4Flower(id+"BigBlossom",0,1.95*size,-.02,palette,.66*size,group);
+ return group;
+}
+// Market stalls on both long visible sides and the rear, facing the camera from EVERY direction.
+// Each rack has unmistakable 3D seed packet displays, leaves, and large potted flowers.
+const __hg4MarketFaces=[
+ {n:"east",x:3.55,z:0,a:Math.PI/2,w:4.6},
+ {n:"west",x:-3.55,z:0,a:-Math.PI/2,w:4.6},
+ {n:"rear",x:0,z:2.48,a:Math.PI,w:6.5},
+ {n:"front",x:0,z:-2.48,a:0,w:6.5}
+];
+const __hg4PacketColors=[__hg4Sun,__hg4PetalPink,__hg4Sky,__hg4Purple,__hg4Mint,__hg4Gold];
+for(const f of __hg4MarketFaces){
+ const rack=new fc("hg4MarketRack"+f.n,Yf);rack.parent=__hg4ShopFront;
+ rack.position.set(f.x,0,f.z);rack.rotation.y=f.a;
+ const cols=f.n==="front"?2:3;
+ const spacing=f.n==="front"?4.5:1.27;
+ const left=f.n==="front"?-2.35:-(cols-1)*spacing/2;
+ for(let i=0;i<cols;i++){
+  const x=left+i*spacing,c=__hg4PacketColors[(i+(f.n==="rear"?3:f.n==="east"?1:0))%6];
+  // Raised produce table projects outside the existing wall and clearly shows merchandise.
+  __uBox("hg4MerchCounter"+f.n+i,rack,new R(x,.83,-.82),new R(f.n==="front"?1.30:1.05,.16,1.18),__hg4Timber);
+  for(const xx of [-.40,.40])__uBox("hg4CounterLeg"+f.n+i+"_"+xx,rack,new R(x+xx,.43,-.81),new R(.10,.82,.10),__hg4Timber);
+  // Two bright vertical illustrated seed packets on every table.
+  for(let j=0;j<2;j++){
+   const bx=x+(-.22+j*.43),color=__hg4PacketColors[(i+j+2)%6];
+   __uBox("hg4SeedPacket"+f.n+i+"_"+j,rack,new R(bx,1.40,-.86),new R(.35,.65,.10),color);
+   __uSphere("hg4SeedPacketFlower"+f.n+i+"_"+j,rack,new R(bx,1.45,-.93),new R(.21,.24,.09),j?__hg4PinkLight:__hg4Cream);
+   __uBox("hg4PacketSoilMark"+f.n+i+"_"+j,rack,new R(bx,1.14,-.94),new R(.23,.08,.03),__hg4SoilBrown);
+  }
+  // Large, unmistakable physical pot with blooming sunflower or tulip.
+  const pot=new fc("hg4StallPot"+f.n+i,Yf);pot.parent=rack;pot.position.set(x,.84,-1.02);
+  __uCyl("hg4VisibleFlowerPot"+f.n+i,pot,new R(0,.22,0),new R(.55,.40,.55),new H(.78,.42,.25));
+  __uCyl("hg4PotSoil"+f.n+i,pot,new R(0,.44,0),new R(.49,.07,.48),__hg4SoilBrown);
+  __uCyl("hg4PotStem"+f.n+i,pot,new R(0,.74,0),new R(.08,.65,.08),__hg4Green);
+  __uSphere("hg4PotLeaf"+f.n+i,pot,new R(.24,.69,0),new R(.42,.15,.25),__hg4Green);
+  __hg4Flower("hg4DisplayFlower"+f.n+i,0,1.10,0,c,.58,pot);
+ }
+ // Oversized freestanding wooden flower crates in front of long side walls.
+ for(const side of [-1,1]){
+  if(f.n==="front")continue;
+  const x=side*(f.n==="rear"?2.55:1.65);
+  __uBox("hg4FlowerCrate"+f.n+side,rack,new R(x,.33,-1.90),new R(.98,.66,.86),__hg4Timber);
+  __uBox("hg4FlowerCrateSoil"+f.n+side,rack,new R(x,.7,-1.9),new R(.90,.11,.76),__hg4SoilBrown);
+  const basketFlower=__hg4Flower("hg4FlowersFromCrate"+f.n+side,x,1.20,-1.93,side>0?__hg4PetalPink:__hg4Sun,.56,rack);
+ }
+}
+// Five huge terracotta flowerpots around the building corners: visible even when zoomed out.
+for(const [id,x,z,color,sz] of [
+ ["entryL",-2.4,-3.30,__hg4PetalPink,1.02],["entryR",2.4,-3.30,__hg4Sun,1.02],
+ ["sideEast",4.05,.65,__hg4Purple,1.08],["sideWest",-4.05,.6,__hg4Sky,1.08],
+ ["backCorner",1.8,3.45,__hg4Sun,.98]
+])__hg4Pot("hg4LargeOutdoorPot"+id,x,z,color,sz);
+// Landmark sprout growing from a terracotta roof planter; unmistakable from aerial camera.
+__hg4Box("hg4RoofPlanterBase",0,4.32,0,2.7,.5,1.7,__hg4Timber);
+__hg4Box("hg4RoofPlanterSoil",0,4.62,0,2.45,.15,1.52,__hg4SoilBrown);
+__hg4Cylinder("hg4RoofSproutStem",0,5.21,0,.23,1.22,.23,__hg4Green);
+const leafL=__hg4Ball("hg4RoofGiantSproutLeafLeft",-.7,5.77,0,1.36,.55,.56,__hg4Mint);leafL.rotation.z=-.28;
+const leafR=__hg4Ball("hg4RoofGiantSproutLeafRight",.7,5.87,0,1.36,.55,.56,__hg4Green);leafR.rotation.z=.28;
+__hg4Ball("hg4RoofSproutTip",0,6.0,0,.36,.43,.35,__hg4Green);
+// Make the actual purchase window feel like browsing physical picture-backed packets.
+const __hg4MarketStyles=document.createElement("style");
+__hg4MarketStyles.textContent='#hg4ShopCard{background:linear-gradient(155deg,#f4f7e6 0%,#fff7e5 65%,#f3e8ce 100%);border:5px solid #537c51;box-shadow:0 13px 50px #0005}#hg4ShopCard h2{color:#24583b;font-size:clamp(20px,3vw,29px)}#hg4Offers button{background:linear-gradient(#fffef6,#eaf1d5);min-height:155px;border:2px solid #7aa16a;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:7px;box-shadow:0 4px 0 #4f724032}#hg4Offers button .icon{font-size:42px;filter:drop-shadow(0px 3px 2px #0002)}#hg4Offers button:hover:not(:disabled){border-color:#b58a2d;transform:translateY(-2px)}#hg4Wallet,#hg4Bag{font-size:16px;font-weight:800}#hg4ShopButton{background:#d9ecb8;border-color:#3a7747;box-shadow:0 4px 13px #0003}@media(max-width:700px){#hg4Offers{grid-template-columns:repeat(3,minmax(0,1fr))}#hg4Offers button{min-height:108px;font-size:11px;padding:5px;gap:3px}#hg4Offers button .icon{font-size:28px}}';
+document.head.appendChild(__hg4MarketStyles);
+const __hg4SeedVisuals={clover:"🍀",sun:"🌻",bell:"🪻",pink:"🌷",moon:"🌸",sky:"🌼"};
+function __hg4UpdatePacketIcons(){const bs=document.querySelectorAll("#hg4Offers button");for(let i=0;i<bs.length;i++){const flower=__hg4SeedVisuals[__hg4Offers[i]?.id]||"🌱";bs[i].querySelector(".icon").textContent=flower;}}
+const __hg4ShopDrawBeforeMarket=__hg4ShopDraw;
+__hg4ShopDraw=function(){__hg4ShopDrawBeforeMarket();__hg4UpdatePacketIcons()};
 const __hg4ShopWorldLabel=document.createElement("div");
 __hg4ShopWorldLabel.id="hg4ShopWorldLabel";__hg4ShopWorldLabel.textContent="🌱 씨앗 상점";
 __hg4ShopWorldLabel.style.cssText="position:fixed;z-index:17;pointer-events:none;display:none;white-space:nowrap;text-align:center;padding:4px 12px;border-radius:10px;background:#e6f1dff0;color:#214735;border:2px solid #4c774d;box-shadow:0 2px 9px #0006;font:900 16px system-ui;transform:translate(-50%,-50%)";
 document.body.appendChild(__hg4ShopWorldLabel);
 const __hg4ShopSignAnchor=new fc("hg4SeedShopSignAnchor",Yf);
-__hg4ShopSignAnchor.position.set(-5,3.23,-7.15);
+__hg4ShopSignAnchor.position.set(-5,5.15,-4);
 Yf.onAfterRenderObservable.add(()=>{
  if(!__hg4ShopFront.isEnabled()||__hg4ShopOpen||Rp.position.y<-5){__hg4ShopWorldLabel.style.display="none";return}
  const w=Jf.getRenderWidth(),h=Jf.getRenderHeight(),v=Xf.viewport.toGlobal(w,h);
@@ -636,7 +742,7 @@ Yf.onBeforeRenderObservable.add(()=>{
  __hg4ShopButton.style.display=__hg4NearShop()&&!__hg4BossStages.has(Kp)&&qp&&!Jp?"block":"none";
 });
 __hg4Balance();rp.style.display="none";
-window.__ulmoaGardenV4={state:()=>({hasSickle:__hg4HasSickle,shopExists:!!Yf.getMeshByName("hg4SeedShopFacadeBoard"),shopIsOriginalBuilding:Np.metadata?.purpose==="seed-shop"&&Math.abs(__hg4ShopFront.position.x-Np.position.x)<.1&&Math.abs(__hg4ShopFront.position.z-Np.position.z)<.1,detachedShopExists:!!Yf.getTransformNodeByName("hg4ShopBuilding"),coins:__hg4Coins,bag:{...__hg4Bag},allNpcs:[zp.isEnabled(),Bp.isEnabled(),Vp.isEnabled()],bossTimer:__hg4Combat.style.display!=="none",nearShop:__hg4NearShop()})};
+window.__ulmoaGardenV4={state:()=>({hasSickle:__hg4HasSickle,shopExists:!!Yf.getMeshByName("hg4SeedShopFacadeBoard"),shopIsOriginalBuilding:Np.metadata?.purpose==="seed-shop"&&Math.abs(__hg4ShopFront.position.x-Np.position.x)<.1&&Math.abs(__hg4ShopFront.position.z-Np.position.z)<.1,detachedShopExists:!!Yf.getTransformNodeByName("hg4ShopBuilding"),visualShopFacades:["hg4MarketRackeast","hg4MarketRackwest","hg4MarketRackrear","hg4MarketRackfront"].every(n=>!!Yf.getTransformNodeByName(n)),roofSprout:!!Yf.getMeshByName("hg4RoofGiantSproutLeafLeft"),seedPackets:Yf.meshes.filter(m=>m.name.startsWith("hg4SeedPacket")&&!m.name.includes("Flower")).length,flowerPots:Yf.meshes.filter(m=>m.name.startsWith("hg4VisibleFlowerPot")).length,coins:__hg4Coins,bag:{...__hg4Bag},allNpcs:[zp.isEnabled(),Bp.isEnabled(),Vp.isEnabled()],bossTimer:__hg4Combat.style.display!=="none",nearShop:__hg4NearShop()})};
 
 
 /* HOTEL GARDEN DLC V1 — garden beneath the garden.

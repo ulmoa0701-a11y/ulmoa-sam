@@ -17,6 +17,10 @@ try{
  check("v4Loaded",!!start);
  check("shopOnExistingHouse",start.shopExists&&start.shopIsOriginalBuilding);
  check("noSecondFreestandingShop",!start.detachedShopExists);
+ check("allFourFacesStocked",start.visualShopFacades);
+ check("largeRooftopSprout",start.roofSprout);
+ check("visible3DSeedPacketInventory",start.seedPackets>=18);
+ check("real3DFlowerPots",start.flowerPots>=8);
  check("npcAllPresentAtStart",start.allNpcs.every(Boolean));
  check("correctAreaLabel",await page.$eval("#area",e=>e.textContent.includes("호텔 밖 정원")&&!e.textContent.includes("호텔 앞 정원")));
  check("noPermanentGardenerTarget",await page.$eval("#target",e=>getComputedStyle(e).display==="none"));
@@ -37,7 +41,7 @@ try{
  console.log("V4_SHOP_DIAG_BEFORE",JSON.stringify({state:await state(),game:await page.evaluate(()=>window.__ulmoaGameQa.state()),dialog:await page.$eval("#dialog",e=>e.className)}));
  if(arrived){
   // Capture the ORIGINAL large building front before opening the seed store.
-  await page.screenshot({path:"qa/results/hotel-garden-v4-original-big-house-shopfront.png"});
+  await page.screenshot({path:"qa/results/hotel-garden-v5-botanical-market-front.png"});
   await page.keyboard.press("e");await sleep(300);
   check("shopOpensAtOriginalHouseWithE",await page.$eval("#hg4Shop",e=>e.classList.contains("open")));
   await page.keyboard.press("Escape");await sleep(130);
