@@ -291,7 +291,7 @@ body.world-ready.world-list-mode .world-zone-top{display:none!important}
  body.world-ready .world-map .world-portal>span:not(.jump-symbol):not(.jump-arrow){
   min-width:90%;max-width:100%;padding:7px 11px 5px;border-width:2px;border-bottom-width:4px;
  }
- body.world-ready .world-map .world-portal[data-garden="cognitive"]{left:10.5%;top:9.6%}
+ body.world-ready .world-map .world-portal[data-garden="cognitive"]{left:10.5%;top:12.2%}
  body.world-ready .world-map .world-portal[data-garden="thinking"]{left:46%;top:27.1%}
  body.world-ready .world-map .world-portal[data-garden="learning"]{left:10.5%;top:46.1%}
  body.world-ready .world-map .world-portal[data-garden="music"]{left:45%;top:65.6%}
