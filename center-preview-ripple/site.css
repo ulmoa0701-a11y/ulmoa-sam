@@ -71,3 +71,18 @@ main section[id]{scroll-margin-top:76px}
 .support-detail .support-note{font-size:13px;border-top:1px solid var(--line);padding-top:14px}
 .support-detail .support-note strong{display:block;color:var(--ink);font-size:14px;margin-bottom:5px}
 @media(max-width:900px){.team{display:block}.team-disclaimer{margin-top:20px}.support-detail{margin-top:18px}.support-detail p{font-size:14px}.support-detail .support-note{font-size:13px}}
+
+/* Readability adjustment after mobile visual QA */
+.team{row-gap:24px}
+.support-detail{gap:18px}
+.support-group strong{display:block;font-size:15px;font-weight:600;margin-bottom:7px;color:var(--ink)}
+.support-group p{font-size:14px;color:#526b5e;line-height:1.8;margin:0}
+.support-group.support-note{border-top:1px solid var(--line);padding-top:16px}
+.support-group.support-note p{font-size:14px;color:#526b5e}
+@media(max-width:900px){
+ .team .section-heading h2,.practice .section-heading h2{font-size:clamp(30px,8.4vw,44px);line-height:1.18;word-break:keep-all;overflow-wrap:break-word}
+ .support h2{font-size:clamp(30px,8.6vw,44px);line-height:1.18;word-break:keep-all}
+ .support-group strong{font-size:16px}
+ .support-group p,.support-group.support-note p{font-size:15px;line-height:1.8}
+}
+@media(max-width:360px){.team .section-heading h2,.practice .section-heading h2{font-size:29px}}
