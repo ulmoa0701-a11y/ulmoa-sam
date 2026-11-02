@@ -79,6 +79,8 @@ const expected={cognitive:21,thinking:3,learning:4,music:3,heart:3};
       const h=Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.y,b.y));
       assert.ok(w*h<2500,'overlapping garden portals '+i+' '+j+' '+w*h);
     }
+    assert.equal(await page.locator('nav.world-map img.world-actor').count(),5,'missing game world animals');
+    await page.locator('nav.world-map img').evaluateAll(async imgs=>{await Promise.all(imgs.map(img=>img.decode().catch(()=>null)))});
     const bad=await page.locator('nav.world-map img').evaluateAll(imgs=>imgs.filter(x=>!x.complete||!x.naturalWidth).map(x=>x.src));
     assert.deepEqual(bad,[],'broken approved Moa character');
     await page.locator('nav.world-map').screenshot({path:path.join(OUT,config.name+'-world-map.png')});
