@@ -16,3 +16,40 @@
 @media(max-width:900px){.topbar{height:68px}.wordmark small{display:none}.hero{min-height:auto;padding:112px 16px 58px;display:block}.hero-copy{max-width:100%}.hero h1{font-size:28vw;line-height:.88;margin-top:22px}.signature{font-size:25px}.hero-line{font-size:21px;margin-top:30px}.hero-services{font-size:12px}.hero-photo{margin-top:46px;padding-left:12vw}.hero-photo img{height:52vh;min-height:370px;border-radius:48% 48% 8px 8px}.hero-ripple{left:73%;top:26%;width:125vw}.scroll-cue{display:none}.manifesto,.start,.team,.visit,.space,.support{padding:84px 16px}.manifesto{display:block}.manifesto>.section-index{margin-bottom:28px}.manifesto-main h2{font-size:13vw}.manifesto-side{margin-top:28px}.start,.team,.visit{display:block}.section-heading{margin-bottom:44px}.section-heading h2{font-size:12vw}.concern{grid-template-columns:1fr auto;padding:20px 0;gap:8px}.concern small{grid-column:1/-1}.concern span{font-size:20px}.practice{padding:88px 16px}.practice-flow{margin-top:44px}.practice-flow li{grid-template-columns:45px 1fr;padding:24px 0}.practice-flow p{grid-column:2;margin-top:-8px}.practice-flow h3{font-size:28px}.practice-ripple{width:140vw;height:140vw;right:-80vw;bottom:-25vw}.person{grid-template-columns:1fr auto;gap:7px 15px}.person strong{font-size:23px}.person small{grid-column:1}.person span{grid-column:1/-1}.visit-line li{grid-template-columns:45px 95px 1fr;gap:10px}.space-head{display:block}.space-head .section-index{margin-bottom:12px}.space-head h2{font-size:12vw}.space-strip{grid-template-columns:1fr 1fr}.space-strip figure:nth-child(2){grid-column:1/-1;grid-row:1}.space-strip figure:nth-child(2) img{height:390px;border-radius:100px 0 0 0}.space-strip figure:nth-child(1) img,.space-strip figure:nth-child(3) img{height:210px;border-radius:0}.support{display:block}.support h2{font-size:10.5vw;margin:20px 0}.contact{min-height:80svh;padding:90px 16px}.contact h2{font-size:12vw}.contact-phone{font-size:14vw}.contact-links{display:grid}.contact-links a{text-align:center}.contact-rings{width:150vw;height:150vw;right:-100vw}footer{display:block}footer span{display:block;margin-top:5px}.menu-panel{padding:100px 20px 36px}.menu-links a{font-size:11vw}}
 @media(max-width:480px){.hero-photo{padding-left:8vw}.hero-photo img{min-height:340px}.manifesto-main h2{font-size:12.5vw}.section-heading h2{font-size:11.5vw}.concern:hover{padding-left:0}.space-strip figure:nth-child(2) img{height:340px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}.ring,.scroll-cue span{animation:none}.reveal{opacity:1;transform:none;transition:none}}
+
+/* RIPPLE responsive QA refinement — preserves original visual language */
+@media(min-width:901px){
+.hero{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(28px,4vw,70px)}
+.hero h1{font-size:clamp(84px,10vw,158px)}
+.hero-photo img{height:min(61vh,590px)}
+.hero-line{margin-top:28px}
+.text-cta{margin-top:25px}
+}
+@media(max-width:900px){
+.topbar{padding-inline:20px}
+.menu-toggle{display:grid;flex-shrink:0;position:relative;z-index:2;background:rgba(234,243,229,.85);border:1px solid var(--line);border-radius:50%}
+.hero{padding:105px 20px 48px}
+.hero h1{font-size:clamp(68px,23vw,106px);letter-spacing:-.09em;line-height:1.02;margin:12px 0 10px}
+.signature{font-size:clamp(22px,6vw,29px)}
+.hero-line{font-size:clamp(17px,4.8vw,21px);margin-top:22px}
+.hero-services{font-size:12px;line-height:1.8}
+.text-cta{margin-top:19px;padding:12px 0}
+.hero-photo{margin-top:26px;padding-left:0;max-width:580px}
+.hero-photo img{height:clamp(260px,42vh,430px);min-height:0;border-radius:46% 46% 10px 10px}
+.hero-photo figcaption{flex-wrap:wrap}
+.hero-ripple{left:70%;top:28%;width:115vw}
+}
+@media(max-width:480px){
+.hero h1{font-size:clamp(68px,23vw,95px)}
+.hero-photo{padding-left:0}
+.hero-photo img{min-height:0;height:clamp(250px,38vh,340px)}
+.wordmark strong{font-size:20px}
+}
+@media(prefers-reduced-motion:reduce){.ripple-ink{animation:none!important}}
+
+/* RIPPLE usability refinements after true-viewport Chrome QA */
+.text-cta{background:var(--ink);color:#fff;border:1px solid var(--ink);border-radius:999px;padding:13px 21px;gap:20px;box-shadow:0 9px 24px rgba(18,59,47,.12);transition:background .2s,transform .2s}
+.text-cta:hover{background:var(--ink2);transform:translateY(-2px)}
+.text-cta:focus-visible,.menu-toggle:focus-visible,.menu-links a:focus-visible{outline:3px solid #69b642;outline-offset:4px}
+main section[id]{scroll-margin-top:76px}
+@media(max-width:900px){.text-cta{margin-top:22px;padding:13px 19px}.menu-panel{overflow-y:auto}}
