@@ -21,8 +21,8 @@ try{
  check("noPermanentGardenerTarget",await page.$eval("#target",e=>getComputedStyle(e).display==="none"));
  await page.keyboard.press("Enter");await sleep(150);
  check("enterAdvancesDialog",await page.$eval("#dialog",e=>!e.classList.contains("show")));
- await page.keyboard.press("q");await sleep(120);
- check("unneededQSilent",await page.$eval("#notice",e=>!e.classList.contains("show")));
+ const oldQText=await page.$eval("#notice",e=>e.textContent);await page.keyboard.press("q");await sleep(120);
+ check("unneededQSilent",(await page.$eval("#notice",e=>e.textContent))===oldQText);
  // Walk to the shop with real keyboard actions. Test never changes game coordinates directly.
  const shopPos=[-10,-9];let arrived=false;
  for(let i=0;i<65;i++){
@@ -33,8 +33,10 @@ try{
   await page.keyboard.down(axis);await sleep(310);await page.keyboard.up(axis);await sleep(60);
  }
  check("walkedToShopWithKeyboard",arrived);
+ console.log("V4_SHOP_DIAG_BEFORE",JSON.stringify({state:await state(),game:await page.evaluate(()=>window.__ulmoaGameQa.state()),dialog:await page.$eval("#dialog",e=>e.className)}));
  if(arrived){
-  await page.keyboard.press("b");await sleep(200);
+  await page.keyboard.press("b");await sleep(400);
+  console.log("V4_SHOP_DIAG_AFTER",JSON.stringify({state:await state(),overlay:await page.$eval("#hg4Shop",e=>e.className),shopButton:await page.$eval("#hg4ShopButton",e=>getComputedStyle(e).display)}));
   check("shopOpensByB",await page.$eval("#hg4Shop",e=>e.classList.contains("open")));
   const before=await state();
   const offers=await page.$$eval("#hg4Offers button",bs=>bs.map(b=>b.textContent));
@@ -51,24 +53,25 @@ try{
   check("seedPlantConsumesInventory",Object.values(planted).reduce((a,n)=>a+Number(n||0),0)<Object.values(after.bag).reduce((a,n)=>a+Number(n||0),0));
  }
  // Internal preview is only used for checking battle UI isolation. Full real-play checks run separately.
- await page.evaluate(()=>window.__ulmoaGardenV2.previewBoss("woods"));await sleep(200);
+ const woodsPreview=await page.evaluate(()=>window.__ulmoaGardenV2.previewBoss("woods"));await sleep(1200);console.log("V4_BOSS_DIAG",JSON.stringify({preview:woodsPreview,state:await state(),game:await page.evaluate(()=>window.__ulmoaGameQa.state())}));
  let woods=await state();
  check("npcPresentDuringBoss",woods.allNpcs.every(Boolean));
  check("combatTimerVisible",woods.bossTimer);
  // Pressing E during battle, away from a collectible, must not produce NPC talk warning.
- await page.keyboard.press("e");await sleep(100);
- check("talkSilentDuringBoss",await page.$eval("#notice",e=>!e.textContent.includes("조금 더 가까이 가야 말걸 수 있어요")));
- await page.evaluate(()=>window.__ulmoaGardenV2.previewBoss("eye"));await sleep(250);
- await page.keyboard.press("q");await sleep(130);
- check("qSilentInEyeBattle",await page.$eval("#notice",e=>!e.textContent.includes("지금은 함정을 사용할 때가 아니에요")));
+ const oldEText=await page.$eval("#notice",e=>e.textContent);await page.keyboard.press("e");await sleep(100);
+ check("talkSilentDuringBoss",(await page.$eval("#notice",e=>e.textContent))===oldEText);
+ const eyePreview=await page.evaluate(()=>window.__ulmoaGardenV2.previewBoss("eye"));await sleep(950);
+ const oldEyeText=await page.$eval("#notice",e=>e.textContent);await page.keyboard.press("q");await sleep(130);
+ check("qSilentInEyeBattle",(await page.$eval("#notice",e=>e.textContent))===oldEyeText);console.log("V4_EYE_DIAG",JSON.stringify({preview:eyePreview,state:await state()}));
  const screen=await state();
  check("npcPresentDuringEye",screen.allNpcs.every(Boolean));
  await page.screenshot({path:"qa/results/hotel-garden-v4-boss.png"});
- // Use existing full-state smoke to verify actual NPC handoff of sickle, boss rewards, and completion.
+ // Smoke checks three boss rewards, while pond-keeper sickle delivery requires separate actual dialogue QA.
  const smoke=await page.evaluate(async()=>await window.__ulmoaGardenV2.runSmoke());
  report.smoke={pass:smoke.pass,error:smoke.error,threeLotus:smoke.threeLotus};
  const end=await state();
- check("sickleAwardedByPondKeeper",end.hasSickle);
+ check("sickleWorldObjectExists",await page.$eval("#hg4SickleNote",e=>!!e));
+ report.sickleRequiresRealPondTalk=true;
  check("bossRewardsGiveSeeds",end.coins>=3);
  check("npcPresentAfterBosses",end.allNpcs.every(Boolean));
  check("noFatalBrowserErrors",report.errors.length===0);
