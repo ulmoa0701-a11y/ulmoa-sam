@@ -101,7 +101,7 @@ const __hg4Flame=Df.CreateCylinder("hg4SmogFlameTip",{height:1.25,diameterTop:0,
 __hg4Flame.parent=Wp;__hg4Flame.position.set(0,5.6,-.12);__hg4Flame.material=__uMat("hg4FlameGlow",new H(1,.53,.13));
 // Keep all human NPCs present; retain all boss spawning and quest state.
 Dm=function(stage){__hg4OrigDm(stage);__hg4KeepPeople();rp.style.display="none";__hg4Sickle.setEnabled(__hg4HasSickle)};
-Nm=function(){const giveSickle=Kp===3&&jm(Bp)<4.5&&qp&&!Jp;__hg4OrigNm();if(giveSickle&&!__hg4HasSickle)__hg4Equip()};
+Nm=function(){const giveSickle=Kp===3&&jm(Bp)<5.5&&qp&&!Jp;__hg4OrigNm();if(giveSickle&&!__hg4HasSickle)__hg4Equip()};
 zm=function(action){
  if(__hg4ShopOpen)return;
  const nearFlower=__hgClosestFlower()?.d<=6;
