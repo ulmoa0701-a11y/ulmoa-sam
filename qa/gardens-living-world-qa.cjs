@@ -38,6 +38,20 @@ const expected={cognitive:21,thinking:3,learning:4,music:3,heart:3};
     await page.locator('body.world-ready').waitFor({state:'attached'});
     await page.evaluate(()=>document.fonts.ready);
     assert.equal(await page.locator('nav.world-map a.world-portal').count(),5);
+    // v2 scenery should be a real stylesheet, with motion disabled when requested.
+    const depth=await page.evaluate(()=>{
+     const map=document.querySelector('nav.world-map');
+     return {
+      sheet:[...document.styleSheets].some(s=>s.href&&s.href.includes('world-depth-v2.css')),
+      overlay:getComputedStyle(map,'::before').content,
+      guideMotion:getComputedStyle(document.querySelector('.world-guide')).animationName,
+      actorMotion:getComputedStyle(document.querySelector('.world-actor')).animationName
+     };
+    });
+    assert.equal(depth.sheet,true,'storybook depth stylesheet not loaded');
+    assert.notEqual(depth.overlay,'none','atmospheric layer missing');
+    assert.equal(depth.guideMotion,'none','reduced-motion guide is still animated');
+    assert.equal(depth.actorMotion,'none','reduced-motion actor is still animated');
     assert.equal(await page.locator('.world-game-stop').count(),34);
     assert.equal(await page.locator('.world-zone').count(),5);
     for(const id of gardenIds){
