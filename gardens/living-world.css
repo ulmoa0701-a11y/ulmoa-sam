@@ -333,3 +333,25 @@ body.world-ready.world-list-mode .world-zone-top{display:none!important}
  body.world-ready .garden-jumps.world-map a.world-portal,
  body.world-ready.world-in-garden .world-game-stop .play-card-media{transition:none}
 }
+
+
+/* S-shaped footpath passes behind the real 34 garden game landmarks. */
+body.world-ready .world-winding-trail{display:none}
+body.world-ready.world-in-garden .world-winding-trail{
+ position:absolute;z-index:1;display:block;inset:0;width:100%;height:100%;
+ pointer-events:none;overflow:visible;
+}
+body.world-ready.world-in-garden .world-winding-trail path{
+ fill:none;stroke-linecap:round;stroke-linejoin:round;
+}
+body.world-ready.world-in-garden .world-trail-ridge{
+ stroke:#7fa77e9c;stroke-width:35;
+}
+body.world-ready.world-in-garden .world-trail-soil{
+ stroke:#f4dbab;stroke-width:26;
+}
+body.world-ready.world-in-garden .world-trail-light{
+ stroke:#fff8db;stroke-width:2.5;stroke-dasharray:3 13;
+}
+body.world-ready.world-in-garden .world-trail .world-game-stop{z-index:2}
+body.world-ready.world-list-mode .world-winding-trail{display:none!important}
