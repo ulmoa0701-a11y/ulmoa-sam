@@ -36,8 +36,8 @@ if(root&&original){
   const scene=new THREE.Scene();scene.background=new THREE.Color(0xb8d9c1);
   scene.fog=new THREE.Fog(0xb8d9c1,37,72);
   const camera=new THREE.OrthographicCamera(-16,16,10,-10,.1,100);
-  camera.position.set(0,34,17);camera.lookAt(0,0,0);
-  const scaleZ=.8944271909999159;
+  camera.position.set(0,34,29);camera.lookAt(0,0,0);
+  const scaleZ=.760;
   const X=x=>(x-800)/50,Z=y=>(y-500)/(50*scaleZ);
   const place=(x,y)=>new THREE.Vector3(X(x),0,Z(y));
   const ground=new THREE.Group();scene.add(ground);
@@ -290,8 +290,8 @@ if(root&&original){
    const light=new THREE.PointLight(0xffe6a2,.35,2.7,2);light.position.set(p.x,1.24,p.z);scene.add(light);
   }
   // gentle atmosphere: baked only by actual lights, not fake UI labels.
-  scene.add(new THREE.HemisphereLight(0xf5ffe8,0x739a83,2.2));
-  const sunlight=new THREE.DirectionalLight(0xffe6be,2.6);
+  scene.add(new THREE.HemisphereLight(0xf5ffe8,0x739a83,1.5));
+  const sunlight=new THREE.DirectionalLight(0xffe6be,2.1);
   sunlight.position.set(-17,28,-9);sunlight.castShadow=true;
   sunlight.shadow.mapSize.set(2048,2048);
   sunlight.shadow.camera.left=-24;sunlight.shadow.camera.right=24;
@@ -309,7 +309,7 @@ if(root&&original){
   webgl.setSize(1280,800,false);
   webgl.outputColorSpace=THREE.SRGBColorSpace;
   webgl.toneMapping=THREE.ACESFilmicToneMapping;
-  webgl.toneMappingExposure=1.36;
+  webgl.toneMappingExposure=1.06;
   webgl.shadowMap.enabled=true;webgl.shadowMap.type=THREE.PCFSoftShadowMap;
   webgl.render(scene,camera);
   root.insertBefore(canvas,original);
