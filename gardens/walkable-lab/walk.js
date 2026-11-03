@@ -186,6 +186,7 @@ function bind(){
  }
  for(const b of portal){b.addEventListener('click',e=>{e.stopPropagation();walkTo(points[b.dataset.portal],b.dataset.portal)})}
  viewport.addEventListener('pointerup',e=>{
+  if(document.body.classList.contains('third-person'))return;
   if(e.target.closest('button,.pad,.hud'))return;
   if(dialogsOpen())return;
   const b=viewport.getBoundingClientRect();
@@ -202,6 +203,10 @@ function bind(){
  el('prevSet').addEventListener('click',()=>{page--;showActivities()});
  el('nextSet').addEventListener('click',()=>{page++;showActivities()});
  el('query').addEventListener('input',renderFinder);
+ window.addEventListener('moa-world-move',event=>{
+   const {x,y}=event.detail||{};
+   if(Number.isFinite(x)&&Number.isFinite(y))walkTo({x,y});
+ });
  window.addEventListener('resize',camera);
 }
 async function init(){
