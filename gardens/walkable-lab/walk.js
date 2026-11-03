@@ -22,7 +22,7 @@ function thumb(g){
 }
 const portal=[...document.querySelectorAll('[data-portal]')], places=[...document.querySelectorAll('.place')];
 let data=null, all=[], selected='all', current=null, page=0, nearby=null, walkTarget=null, waypoints=[], autoOpen=null, scale=1,camX=0,camY=0,last=0,raf=0;
-const pos={x:800,y:610},keys=new Set(), held=new Set();
+const pos={x:800,y:535},keys=new Set(), held=new Set();
 const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const num=(x,a,b)=>Math.max(a,Math.min(b,x));
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
@@ -194,7 +194,7 @@ function bind(){
   walkTo({x,y},null);
  });
  el('interact').addEventListener('click',()=>nearby&&openGarden(nearby));
- el('returnCenter').addEventListener('click',()=>walkTo({x:800,y:610}));
+ el('returnCenter').addEventListener('click',()=>walkTo({x:800,y:535}));
  el('quick').addEventListener('click',openQuick);
  el('list').addEventListener('click',openFinder);
  el('accessibleList').addEventListener('click',openFinder);
