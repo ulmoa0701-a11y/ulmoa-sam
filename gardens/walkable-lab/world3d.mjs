@@ -351,7 +351,8 @@ if(root&&original&&new URLSearchParams(location.search).get('mode')!=='2d'){
     window.dispatchEvent(new CustomEvent('moa-world-move',{detail:{x,y}}));
    }
   });
-  let last=0,visible=true;
+  let last=0,visible=true,heading=0;
+  let previousLocation=null;
   document.addEventListener('visibilitychange',()=>visible=!document.hidden);
   function animate(t){
    requestAnimationFrame(animate);
@@ -364,9 +365,19 @@ if(root&&original&&new URLSearchParams(location.search).get('mode')!=='2d'){
    const playerX=Number.parseFloat(originalActor.style.left)||800;
    const playerY=Number.parseFloat(originalActor.style.top)||610;
    const avatar=place(playerX,playerY);
-   const desired=new THREE.Vector3(avatar.x,10.3,avatar.z-13.2);
-   camera.position.lerp(desired,.11);
-   camera.lookAt(avatar.x,1.05,avatar.z+2.6);
+   if(previousLocation&&!reduce){
+    const dx=avatar.x-previousLocation.x,dz=avatar.z-previousLocation.z;
+    if(Math.hypot(dx,dz)>.008){
+     const targetHeading=Math.atan2(dx,dz);
+     const delta=Math.atan2(Math.sin(targetHeading-heading),Math.cos(targetHeading-heading));
+     heading+=Math.max(-.032,Math.min(.032,delta));
+    }
+   }
+   previousLocation=avatar.clone();
+   const ux=Math.sin(heading),uz=Math.cos(heading);
+   const desired=new THREE.Vector3(avatar.x-ux*13.2,10.3,avatar.z-uz*13.2);
+   camera.position.lerp(desired,.105);
+   camera.lookAt(avatar.x+ux*2.6,1.05,avatar.z+uz*2.6);
    const screen=projected(new THREE.Vector3(avatar.x,1.05,avatar.z));
    actor.style.left=screen.x+'px';actor.style.top=screen.y+'px';
    const moving=originalActor.classList.contains('moving');
