@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="모아와 직접 걸어 다니며 다섯 정원을 발견하는 실험용 탐험 지도.">
+<title>모아의 다섯 정원 · 걸어서 탐험하기 (실험실)</title>
+<link rel="stylesheet" href="walk.css">
+<link rel="stylesheet" href="walk-v2.css">
+<script src="walk.js" defer></script>
+<script type="module" src="world3d.mjs"></script>
+</head>
+<body>
+<div class="app">
+ <header class="bar">
+  <a class="brand" href="../../"><img src="../../assets/habom-approved-wordmark.webp" alt="일단 해봄"></a>
+  <div class="title"><strong>모아의 다섯 정원</strong><span>직접 걸어서 탐험하기 · 실험실</span></div>
+  <nav class="top-nav" aria-label="빠른 이동"><button id="quick" type="button">정원 바로 찾기</button><button id="list" type="button">전체 게임 34개</button><a href="../v4-preview/">원래 지도</a></nav>
+ </header>
+ <section class="viewport" id="viewport" aria-label="다섯 정원 걸어서 탐험하는 지도">
+  <div class="scene" id="scene">
+   <svg class="terrain" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="skyLand" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#e9f9dc"/><stop offset=".5" stop-color="#9bd49d"/><stop offset="1" stop-color="#66a985"/></linearGradient>
+      <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e8f6c8"/><stop offset=".55" stop-color="#b5d58a"/><stop offset="1" stop-color="#73ad79"/></linearGradient>
+      <linearGradient id="roof" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f7cf83"/><stop offset=".5" stop-color="#bf8057"/><stop offset="1" stop-color="#864f42"/></linearGradient>
+      <linearGradient id="wood" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f9d9a1"/><stop offset=".65" stop-color="#c6936a"/><stop offset="1" stop-color="#83573d"/></linearGradient>
+      <linearGradient id="water" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#d6fffb"/><stop offset=".45" stop-color="#69d1d5"/><stop offset="1" stop-color="#2f969f"/></linearGradient>
+      <linearGradient id="pink" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#ffedf2"/><stop offset=".7" stop-color="#f7b5d0"/><stop offset="1" stop-color="#d681ad"/></linearGradient>
+      <radialGradient id="treeleaf"><stop stop-color="#d9f6a8"/><stop offset=".65" stop-color="#78bd81"/><stop offset="1" stop-color="#427f65"/></radialGradient>
+      <filter id="shadow" x="-35%" y="-45%" width="170%" height="190%"><feDropShadow dx="0" dy="13" stdDeviation="10" flood-color="#2e5746" flood-opacity=".32"/></filter>
+      <g id="tree"><ellipse cx="3" cy="10" rx="55" ry="20" fill="#245c4a" opacity=".19"/><path d="M-14 6L-10-100Q0-124 13-100L16 6Z" fill="url(#wood)"/><circle cx="-31" cy="-103" r="45" fill="url(#treeleaf)"/><circle cx="24" cy="-123" r="55" fill="url(#treeleaf)"/><circle cx="65" cy="-95" r="39" fill="url(#treeleaf)"/><ellipse cx="-19" cy="-146" rx="26" ry="11" transform="rotate(-20 -19 -146)" fill="#f3ffdb" opacity=".31"/></g>
+      <g id="bush"><ellipse cx="0" cy="0" rx="48" ry="21" fill="#3c825d" opacity=".24"/><ellipse cx="-18" cy="-16" rx="35" ry="23" fill="#71ba78"/><ellipse cx="16" cy="-21" rx="36" ry="27" fill="url(#treeleaf)"/></g>
+      <g id="flower"><path d="M0 0V20" stroke="#548f69" stroke-width="3"/><circle cx="-9" cy="-10" r="10" fill="#ffd9e3"/><circle cx="9" cy="-10" r="10" fill="#ffe5ec"/><circle cy="-19" r="10" fill="#ffc6d5"/><circle cy="-7" r="7" fill="#ffdc74"/></g>
+      <g id="tile"><ellipse cx="0" cy="0" rx="43" ry="24" fill="#e5c999"/><path d="M-25 -16Q0 -32 28 -12Q45 7 15 15Q-15 25-35 7Z" fill="#fff2d7" stroke="#d7b88e" stroke-width="3"/></g>
+    </defs>
+    <rect width="1600" height="1000" fill="url(#skyLand)"/>
+    <path d="M-80 180Q350 30 770 125T1675 165L1710 1040H-100Z" fill="url(#ground)"/>
+    <path d="M0 430Q510 315 900 462T1600 411V1040H0Z" fill="#92c47e" opacity=".33"/>
+    <path d="M-50 930Q330 790 710 916T1650 857" fill="none" stroke="#f1f8c9" stroke-width="120" opacity=".28"/>
+    <!-- all roads are vector scenery, never image-baked controls -->
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M800 520Q570 455 370 350T300 275 M800 520Q1005 445 1090 302 M800 520Q520 545 355 743 M800 520Q1020 610 1160 733 M800 520Q790 665 805 814" stroke="#6c9973" stroke-width="107" opacity=".42"/>
+      <path d="M800 520Q570 455 370 350T300 275 M800 520Q1005 445 1090 302 M800 520Q520 545 355 743 M800 520Q1020 610 1160 733 M800 520Q790 665 805 814" stroke="#ecd29e" stroke-width="68"/>
+      <path d="M800 520Q570 455 370 350T300 275 M800 520Q1005 445 1090 302 M800 520Q520 545 355 743 M800 520Q1020 610 1160 733 M800 520Q790 665 805 814" stroke="#f9e9bf" stroke-width="49" stroke-dasharray="13 16"/>
+    </g>
+    <g opacity=".87"><use href="#tree" transform="translate(92 232) scale(1.2)"/><use href="#tree" transform="translate(178 111) scale(.68)"/><use href="#tree" transform="translate(485 172) scale(.71)"/><use href="#tree" transform="translate(675 128) scale(.82)"/><use href="#tree" transform="translate(894 167) scale(.71)"/><use href="#tree" transform="translate(1450 239) scale(1.1)"/><use href="#tree" transform="translate(1510 484) scale(.9)"/><use href="#tree" transform="translate(105 585) scale(.8)"/><use href="#tree" transform="translate(137 905) scale(.9)"/><use href="#tree" transform="translate(567 934) scale(.62)"/><use href="#tree" transform="translate(1455 936) scale(.92)"/></g>
+    <!-- cognitive / treehouse -->
+    <g transform="translate(300 250)" filter="url(#shadow)">
+      <ellipse cx="0" cy="39" rx="200" ry="84" fill="#456f4c" opacity=".35"/>
+      <ellipse cx="0" cy="12" rx="183" ry="69" fill="#a2ce7e" stroke="#e0eab1" stroke-width="12"/>
+      <g transform="translate(0 36) scale(.7)"><use href="#tree"/></g>
+      <path d="M-116 -32L0 -150L118 -32Z" fill="url(#roof)" stroke="#8b6355" stroke-width="9"/>
+      <rect x="-98" y="-37" width="193" height="100" rx="16" fill="url(#wood)" stroke="#9c7048" stroke-width="7"/>
+      <path d="M-111 -34L0 -112L109 -34" fill="none" stroke="#ffe3a0" stroke-width="8"/>
+      <path d="M-26 64V-18Q0 -48 26 -18V64Z" fill="#765a47"/><rect x="-78" y="-13" width="35" height="31" rx="9" fill="#e6f8d3" stroke="#d0a166" stroke-width="6"/>
+      <path d="M-118 62h235" stroke="#a87e53" stroke-width="10"/>
+      <use href="#bush" transform="translate(-157 35) scale(.64)"/>
+    </g>
+    <!-- pond / thinking -->
+    <g transform="translate(1090 292)" filter="url(#shadow)">
+      <ellipse cy="45" rx="207" ry="122" fill="#488f91" opacity=".28"/>
+      <ellipse cy="8" rx="204" ry="116" fill="url(#water)" stroke="#a8e1d8" stroke-width="16"/>
+      <path d="M-156 17Q-110 -23-61 9T49 10T160 -3" fill="none" stroke="#ddffff" stroke-width="6" opacity=".7"/>
+      <ellipse cx="-65" cy="-13" rx="35" ry="19" fill="#78bf73"/><ellipse cx="102" cy="26" rx="34" ry="17" fill="#84c68c"/>
+      <use href="#flower" transform="translate(-70 -13) scale(.9)"/><use href="#flower" transform="translate(100 27) scale(.7)"/>
+      <path d="M-60 -109Q-22 -172 26 -143Q91 -126 106 -79L67 -50L-33 -58Z" fill="#c5b6e8" opacity=".78"/>
+      <path d="M-185 81Q0 54 188 81" fill="none" stroke="#f3dfab" stroke-width="17" stroke-linecap="round"/>
+    </g>
+    <!-- learning book cottage -->
+    <g transform="translate(358 738)" filter="url(#shadow)">
+      <ellipse cy="61" rx="210" ry="84" fill="#466f4b" opacity=".25"/>
+      <ellipse cy="36" rx="193" ry="79" fill="#a7d38e" stroke="#e2edb1" stroke-width="12"/>
+      <rect x="-120" y="-56" width="241" height="138" rx="20" fill="#f3e1b7" stroke="#ad875a" stroke-width="8"/>
+      <path d="M-139 -60L0 -166L138 -60Z" fill="url(#roof)" stroke="#8c6445" stroke-width="11"/>
+      <path d="M-113 -60L0 -133L113 -60" fill="none" stroke="#ffe29c" stroke-width="8"/>
+      <path d="M-40 79V-37Q0 -75 40 -37V79Z" fill="#9a714f"/>
+      <rect x="-98" y="-36" width="34" height="45" rx="7" fill="#d4f5db" stroke="#b58958" stroke-width="7"/>
+      <rect x="64" y="-36" width="34" height="45" rx="7" fill="#d4f5db" stroke="#b58958" stroke-width="7"/>
+      <use href="#bush" transform="translate(-157 31) scale(.65)"/><use href="#bush" transform="translate(156 35) scale(.6)"/>
+    </g>
+    <!-- music garden / bandstand -->
+    <g transform="translate(1160 722)" filter="url(#shadow)">
+      <ellipse cy="65" rx="205" ry="97" fill="#407959" opacity=".32"/>
+      <ellipse cy="39" rx="189" ry="87" fill="#f3d79e" stroke="#b5d5a2" stroke-width="13"/>
+      <path d="M-155 -38Q-145 -124 0 -140Q145 -126 156 -38Z" fill="#d99bc4" stroke="#c07dad" stroke-width="9"/>
+      <path d="M-150 -38Q-125 4 -100 -38Q-65 8 -32 -38Q0 13 33 -38Q68 10 102 -38Q126 5 150 -38" fill="#f9d9e9" stroke="#b46d9a" stroke-width="5"/>
+      <path d="M-141 -37V55M142 -37V55" stroke="#9e7656" stroke-width="14"/>
+      <ellipse cy="58" rx="115" ry="30" fill="#c79367"/>
+      <path d="M0 -75V17M0 -75V-14L44 -25V6" fill="none" stroke="#fff2b7" stroke-width="12" stroke-linecap="round"/>
+      <circle cx="-3" cy="27" r="15" fill="#fff2b7"/><circle cx="42" cy="18" r="15" fill="#fff2b7"/>
+    </g>
+    <!-- heart garden -->
+    <g transform="translate(802 827)" filter="url(#shadow)">
+      <ellipse cy="49" rx="183" ry="92" fill="#5e9a68" opacity=".34"/>
+      <ellipse cy="17" rx="171" ry="81" fill="#dbedaf" stroke="#a4cf97" stroke-width="12"/>
+      <path d="M-121 -9Q0 -145 126 -8" fill="none" stroke="#916e5b" stroke-width="19"/>
+      <path d="M-119 -18Q0 -164 124 -18" fill="none" stroke="url(#pink)" stroke-width="26"/>
+      <rect x="-95" y="-14" width="190" height="82" rx="18" fill="#f4c2d5" stroke="#c5879f" stroke-width="6"/>
+      <path d="M-86 -13Q-59 -53 -31 -13T25 -13T86 -13" fill="none" stroke="#fff0f6" stroke-width="11"/>
+      <use href="#flower" transform="translate(-136 -15)"/><use href="#flower" transform="translate(137 -13)"/><use href="#flower" transform="translate(-104 58) scale(.7)"/>
+    </g>
+    <g opacity=".87">
+      <use href="#bush" transform="translate(596 328)"/><use href="#bush" transform="translate(841 295) scale(.8)"/>
+      <use href="#bush" transform="translate(939 542) scale(.75)"/><use href="#bush" transform="translate(562 701) scale(.8)"/>
+      <use href="#bush" transform="translate(1384 729)"/>
+    </g>
+    <g opacity=".95">
+      <use href="#flower" transform="translate(560 238)"/><use href="#flower" transform="translate(681 710) scale(.8)"/><use href="#flower" transform="translate(1287 561) scale(.9)"/>
+      <use href="#flower" transform="translate(226 544)"/><use href="#flower" transform="translate(1301 896) scale(.8)"/><use href="#flower" transform="translate(672 899)"/>
+    </g>
+    <!-- spawn plaza -->
+    <g transform="translate(800 518)" filter="url(#shadow)"><ellipse rx="102" ry="68" fill="#b6dc9b" stroke="#ecf4d1" stroke-width="9"/><ellipse rx="71" ry="44" fill="#f5e6b7" stroke="#dfc18d" stroke-width="5"/><use href="#flower" transform="translate(-66 -43) scale(.6)"/><use href="#flower" transform="translate(75 -46) scale(.6)"/></g>
+   </svg>
+   <div class="place cognitive" data-place="cognitive" style="--x:300px;--y:277px"><button class="portal" type="button" data-portal="cognitive" aria-label="인지정원으로 이동"><strong>인지정원</strong><span>21개 활동</span></button></div>
+   <div class="place thinking" data-place="thinking" style="--x:1090px;--y:340px"><button class="portal" type="button" data-portal="thinking" aria-label="생각정원으로 이동"><strong>생각정원</strong><span>3개 활동</span></button></div>
+   <div class="place learning" data-place="learning" style="--x:358px;--y:786px"><button class="portal" type="button" data-portal="learning" aria-label="학습정원으로 이동"><strong>학습정원</strong><span>4개 활동</span></button></div>
+   <div class="place music" data-place="music" style="--x:1160px;--y:767px"><button class="portal" type="button" data-portal="music" aria-label="음악정원으로 이동"><strong>음악정원</strong><span>3개 활동</span></button></div>
+   <div class="place heart" data-place="heart" style="--x:802px;--y:882px"><button class="portal" type="button" data-portal="heart" aria-label="마음정원으로 이동"><strong>마음정원</strong><span>3개 활동</span></button></div>
+   <div class="player" id="player" aria-label="모아 캐릭터"><span class="player-shadow"></span><img src="../../assets/moa-hello-wave-20261012.webp" alt="모아"><span class="player-name">모아</span></div>
+  </div>
+  <div class="hud"><div class="hud-guide"><img src="../../assets/moa-hello-wave-20261012.webp" alt=""><p id="say" role="status" aria-live="polite">길을 따라 움직여 봐! 정원에 다가가면 들어갈 수 있어.</p></div><div class="hud-actions"><button id="interact" type="button" disabled>정원 들어가기</button><button id="returnCenter" type="button">광장으로</button></div></div>
+  <div class="pad" aria-label="이동 버튼"><button data-dir="up" aria-label="위로">▲</button><button data-dir="left" aria-label="왼쪽">◀</button><button data-dir="down" aria-label="아래로">▼</button><button data-dir="right" aria-label="오른쪽">▶</button></div>
+ </section>
+ <footer class="foot"><span>PC: 화살표·WASD 이동 · 클릭/터치로 이동 · 가까운 장소에서 Enter</span><span>탐험이 불편하면 <button id="accessibleList" type="button">전체 목록</button>으로 바로 찾기 · <a class="switch2d" href="?mode=2d">가벼운 2D 지도</a><a class="switch3d" href="./">3D 산책 다시 열기</a></span></footer>
+</div>
+<dialog id="panel" aria-labelledby="panelTitle">
+ <div class="panel-head"><button id="panelClose" type="button" aria-label="닫기">← 지도로 돌아가기</button><span id="panelHint"></span></div>
+ <h2 id="panelTitle">정원</h2><p id="panelDesc"></p><div id="panelTabs"></div>
+ <div class="activities" id="activities"></div><div class="panel-bottom"><button type="button" id="prevSet">← 이전 길</button><span id="pageNo" role="status"></span><button type="button" id="nextSet">다음 길 →</button></div>
+</dialog>
+<dialog id="finder" aria-labelledby="finderTitle"><div class="panel-head"><button id="finderClose" type="button">← 지도로 돌아가기</button></div><h2 id="finderTitle">34개 게임 바로 찾기</h2><p>탐험하지 않고도 언제든 선택할 수 있어요.</p><label for="query">게임 검색</label><input id="query" placeholder="게임 제목 검색" autocomplete="off"><div id="filters"></div><div id="results"></div></dialog>
+</body></html>

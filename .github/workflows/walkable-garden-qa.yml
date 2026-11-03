@@ -1,0 +1,42 @@
+name: Walkable Five Gardens Experimental QA
+on:
+  pull_request:
+    paths:
+      - 'gardens/walkable-lab/**'
+      - 'qa/walkable-garden-qa.cjs'
+      - '.github/workflows/walkable-garden-qa.yml'
+  workflow_dispatch:
+permissions: { contents: read }
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 21
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Browser adapter
+        run: npm install --no-save --no-package-lock playwright-core@1.56.1
+      - name: Chromium and Korean fonts
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          timeout 240 sudo apt-get update -qq
+          timeout 240 sudo apt-get install -y -qq fonts-noto-cjk
+      - name: Serve repository
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/walkable.log 2>&1 &
+          for i in $(seq 1 50); do curl -fsS http://127.0.0.1:8765/gardens/walkable-lab/ >/dev/null && exit 0; sleep .4; done
+          cat /tmp/walkable.log
+          exit 1
+      - name: Browser QA for movement, touch layout, interaction, game links
+        run: node qa/walkable-garden-qa.cjs
+      - name: Save real browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: walkable-garden-experiment-screenshots
+          path: qa/artifacts/walkable-garden/
+          retention-days: 14
+          if-no-files-found: warn
