@@ -17,7 +17,7 @@ const ids=['cognitive','thinking','learning','music','heart'],expected=[21,3,4,3
    const page=await context.newPage();page.setDefaultTimeout(12000);
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
    try{
-    const response=await page.goto(BASE,{waitUntil:'networkidle'});
+    const response=await page.goto(BASE+'?mode=2d',{waitUntil:'networkidle'});
     assert.equal(response.status(),200);
     await page.waitForFunction(()=>!!document.querySelector('.portal')&&document.querySelector('#say').textContent.includes('길을 따라'));
     assert.equal(await page.locator('button.portal').count(),5);
