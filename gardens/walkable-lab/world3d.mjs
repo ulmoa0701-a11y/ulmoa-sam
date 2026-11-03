@@ -34,7 +34,17 @@ if(root&&original&&new URLSearchParams(location.search).get('mode')!=='2d'){
  canvas.style.cssText='position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:auto;touch-action:none;z-index:2';
  const webgl=(()=>{try{return new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'low-power'});}catch(e){console.warn('3D garden unavailable; keeping original map',e);return null}})();
  if(webgl){
-  const scene=new THREE.Scene();scene.background=new THREE.Color(0xb8d9c1);
+  const scene=new THREE.Scene();
+  const sky=document.createElement('canvas');sky.width=512;sky.height=256;
+  const skyctx=sky.getContext('2d');
+  const skygradient=skyctx.createLinearGradient(0,0,0,256);
+  skygradient.addColorStop(0,'#dcecf1');skygradient.addColorStop(.62,'#d4e9d5');skygradient.addColorStop(1,'#b7d7b4');
+  skyctx.fillStyle=skygradient;skyctx.fillRect(0,0,512,256);
+  skyctx.fillStyle='#c6dcc5';
+  skyctx.beginPath();skyctx.moveTo(0,256);skyctx.lineTo(0,218);skyctx.quadraticCurveTo(74,182,158,217);
+  skyctx.quadraticCurveTo(248,180,304,214);skyctx.quadraticCurveTo(404,180,512,218);skyctx.lineTo(512,256);skyctx.fill();
+  const skyTexture=new THREE.CanvasTexture(sky);skyTexture.colorSpace=THREE.SRGBColorSpace;
+  scene.background=skyTexture;
   scene.fog=new THREE.Fog(0xb8d9c1,37,72);
   const camera=new THREE.PerspectiveCamera(57,1,.1,130);
   camera.position.set(0,6,11);camera.lookAt(0,0,0);
@@ -288,6 +298,16 @@ if(root&&original&&new URLSearchParams(location.search).get('mode')!=='2d'){
    box(p.x,1.13,p.z,.28,.31,.28,materials.glass);
    cone(p.x,1.39,p.z,.29,.25,materials.roof,4).rotation.y=Math.PI/4;
    const light=new THREE.PointLight(0xffe6a2,.35,2.7,2);light.position.set(p.x,1.24,p.z);scene.add(light);
+  }
+  // Hotel-garden-style flower borders by the quiet rose pavilion.
+  for(const [px,pz] of [[676,839],[921,842],[704,923],[895,939],[943,786]]){
+   const p=place(px,pz);
+   const hedge=ball(p.x,.27,p.z,.46,materials.hedge);hedge.scale.set(1.75,.65,1.16);
+   for(let j=0;j<7;j++){
+    const angle=j*Math.PI*2/7,rr=.25+rand(0,.27);
+    const rose=ball(p.x+Math.cos(angle)*rr,.48+rand(0,.13),p.z+Math.sin(angle)*rr,.12+rand(0,.035),blossom[j%3]);
+    rose.castShadow=false;
+   }
   }
   // gentle atmosphere: baked only by actual lights, not fake UI labels.
   scene.add(new THREE.HemisphereLight(0xf5ffe8,0x739a83,1.5));
