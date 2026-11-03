@@ -24,7 +24,7 @@ if(root&&original&&new URLSearchParams(location.search).get('mode')!=='2d'){
    gold:new THREE.MeshStandardMaterial({color:0xf7d986,roughness:.58,metalness:.08}),
    stage:new THREE.MeshStandardMaterial({color:0xa78ec6,roughness:.85}),
    pink:new THREE.MeshStandardMaterial({color:0xe5a7c5,roughness:.9}),
-   water:new THREE.MeshPhysicalMaterial({color:0x68c8c6,roughness:.24,metalness:.08,transparent:true,opacity:.94,clearcoat:.7,clearcoatRoughness:.08}),
+   water:new THREE.MeshStandardMaterial({color:0x68c8c6,roughness:.34,metalness:.02,transparent:true,opacity:.94}),
    wall:new THREE.MeshStandardMaterial({color:0xffedc8,roughness:1}),
    glass:new THREE.MeshStandardMaterial({color:0xf7d8a2,emissive:0xf0ac55,emissiveIntensity:.55,roughness:.22})
  };
@@ -32,7 +32,7 @@ if(root&&original&&new URLSearchParams(location.search).get('mode')!=='2d'){
  const canvas=document.createElement('canvas');
  canvas.className='three-landscape';canvas.setAttribute('aria-hidden','true');
  canvas.style.cssText='position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:auto;touch-action:none;z-index:2';
- const webgl=(()=>{try{return new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'low-power'});}catch(e){console.warn('3D garden unavailable; keeping original map',e);return null}})();
+ const webgl=(()=>{try{return new THREE.WebGLRenderer({canvas,antialias:false,alpha:false,powerPreference:'default'});}catch(e){console.warn('3D garden unavailable; keeping original map',e);return null}})();
  if(webgl){
   const scene=new THREE.Scene();
   const sky=document.createElement('canvas');sky.width=512;sky.height=256;
@@ -63,7 +63,11 @@ if(root&&original&&new URLSearchParams(location.search).get('mode')!=='2d'){
   const ball=(x,y,z,r,mat,group=scenery)=>put(new THREE.SphereGeometry(r,12,9),mat,x,y,z,group);
   const cyl=(x,y,z,top,bottom,height,mat,sides=10,group=scenery)=>put(new THREE.CylinderGeometry(top,bottom,height,sides),mat,x,y,z,group);
   const cone=(x,y,z,r,h,mat,sides=4,group=scenery)=>put(new THREE.ConeGeometry(r,h,sides,1),mat,x,y,z,group);
-  function mat(hex){return new THREE.MeshStandardMaterial({color:hex,roughness:.94})}
+  const materialCache=new Map();
+  function mat(hex){
+   if(!materialCache.has(hex))materialCache.set(hex,new THREE.MeshStandardMaterial({color:hex,roughness:.94}));
+   return materialCache.get(hex);
+  }
   const foliage=[0x74b488,0x6eae7e,0x97c68b,0x5f9975,0x8dbd87,0x6aa482,0x9aca91].map(mat);
   const blossom=[0xf1c5d2,0xf8dfe2,0xeac7e1].map(mat);
   const slate=[0xb37682,0xb27b79,0x886980].map(mat);
@@ -297,7 +301,7 @@ if(root&&original&&new URLSearchParams(location.search).get('mode')!=='2d'){
    cyl(p.x,.52,p.z,.07,.08,1.05,materials.darkWood,6);
    box(p.x,1.13,p.z,.28,.31,.28,materials.glass);
    cone(p.x,1.39,p.z,.29,.25,materials.roof,4).rotation.y=Math.PI/4;
-   const light=new THREE.PointLight(0xffe6a2,.35,2.7,2);light.position.set(p.x,1.24,p.z);scene.add(light);
+   // The emissive lantern material gives warmth without seven per-pixel dynamic lights.
   }
   // Hotel-garden-style flower borders by the quiet rose pavilion.
   for(const [px,pz] of [[676,839],[921,842],[704,923],[895,939],[943,786]]){
@@ -312,8 +316,8 @@ if(root&&original&&new URLSearchParams(location.search).get('mode')!=='2d'){
   // gentle atmosphere: baked only by actual lights, not fake UI labels.
   scene.add(new THREE.HemisphereLight(0xf5ffe8,0x739a83,1.5));
   const sunlight=new THREE.DirectionalLight(0xffe6be,2.1);
-  sunlight.position.set(-17,28,-9);sunlight.castShadow=true;
-  sunlight.shadow.mapSize.set(2048,2048);
+  sunlight.position.set(-17,28,-9);sunlight.castShadow=false;
+  sunlight.shadow.mapSize.set(512,512);
   sunlight.shadow.camera.left=-24;sunlight.shadow.camera.right=24;
   sunlight.shadow.camera.top=21;sunlight.shadow.camera.bottom=-21;
   sunlight.shadow.camera.near=.5;sunlight.shadow.camera.far=65;
@@ -325,11 +329,69 @@ if(root&&original&&new URLSearchParams(location.search).get('mode')!=='2d'){
    const p=place(...xy),m=new THREE.Mesh(new THREE.TorusGeometry(2.1,.075,5,64),new THREE.MeshBasicMaterial({color:0xfff4bf,transparent:true,opacity:0.0,depthWrite:false}));
    m.position.set(p.x,.2,p.z);m.rotation.x=Math.PI/2;scene.add(m);nearRings[key]=m;
   }
-  webgl.setPixelRatio(Math.min(1.5,window.devicePixelRatio||1));
+  // Batch nonmoving opaque architecture and landscaping by material.
+  // This replaces hundreds of individual GPU draw calls with a few combined geometries.
+  const originalMeshCount=meshes.length;
+  const buckets=new Map();
+  for(const mesh of meshes){
+   const material=mesh.material;
+   if(!mesh.isMesh||Array.isArray(material)||material.transparent||!material.isMeshStandardMaterial)continue;
+   mesh.updateWorldMatrix(true,false);
+   const geometry=mesh.geometry.clone();
+   geometry.applyMatrix4(mesh.matrixWorld);
+   if(!geometry.getAttribute('normal'))geometry.computeVertexNormals();
+   const id=material.uuid;
+   if(!buckets.has(id))buckets.set(id,{material,entries:[]});
+   buckets.get(id).entries.push({mesh,geometry});
+  }
+  let batchedCount=0;
+  for(const {material,entries} of buckets.values()){
+   if(entries.length<2)continue;
+   const vertexCount=entries.reduce((sum,e)=>sum+e.geometry.getAttribute('position').count,0);
+   const indexCount=entries.reduce((sum,e)=>sum+(e.geometry.index?e.geometry.index.count:e.geometry.getAttribute('position').count),0);
+   const positions=new Float32Array(vertexCount*3);
+   const normals=new Float32Array(vertexCount*3);
+   const uvs=new Float32Array(vertexCount*2);
+   const indices=new Uint32Array(indexCount);
+   let offset=0,indexOffset=0;
+   for(const {mesh,geometry} of entries){
+    const p=geometry.getAttribute('position'),n=geometry.getAttribute('normal'),uv=geometry.getAttribute('uv');
+    positions.set(p.array,offset*3);
+    if(n)normals.set(n.array,offset*3);
+    if(uv)uvs.set(uv.array,offset*2);
+    if(geometry.index){
+     const arr=geometry.index.array;
+     for(let k=0;k<arr.length;k++)indices[indexOffset+k]=arr[k]+offset;
+     indexOffset+=arr.length;
+    }else{
+     for(let k=0;k<p.count;k++)indices[indexOffset+k]=k+offset;
+     indexOffset+=p.count;
+    }
+    offset+=p.count;
+   }
+   const geometry=new THREE.BufferGeometry();
+   geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
+   geometry.setAttribute('normal',new THREE.BufferAttribute(normals,3));
+   geometry.setAttribute('uv',new THREE.BufferAttribute(uvs,2));
+   geometry.setIndex(new THREE.BufferAttribute(indices,1));
+   geometry.computeBoundingSphere();
+   const combined=new THREE.Mesh(geometry,material);
+   combined.castShadow=false;combined.receiveShadow=false;
+   scene.add(combined);
+   for(const item of entries){item.mesh.parent?.remove(item.mesh);item.mesh.geometry.dispose();item.geometry.dispose()}
+   batchedCount+=entries.length;
+  }
+  meshes.length=0;
+  console.info('MoA 3D scenery batched',batchedCount,'of',originalMeshCount,'static meshes into',buckets.size,'material groups');
+
+  // Limit hardware resolution; CSS size stays 100%, avoiding 2x/3x mobile GPU load.
+  const basePixelRatio=Math.min(1,window.devicePixelRatio||1);
+  webgl.setPixelRatio(basePixelRatio);
   webgl.outputColorSpace=THREE.SRGBColorSpace;
   webgl.toneMapping=THREE.ACESFilmicToneMapping;
   webgl.toneMappingExposure=1.04;
-  webgl.shadowMap.enabled=true;webgl.shadowMap.type=THREE.PCFSoftShadowMap;
+  // Static ambient shading and painted ground details are enough for this lightweight scene.
+  webgl.shadowMap.enabled=false;
   const layer=document.createElement('div');layer.className='three-hotspots';
   layer.setAttribute('aria-label','다섯 정원 진입');
   layer.style.cssText='position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden';
@@ -371,38 +433,42 @@ if(root&&original&&new URLSearchParams(location.search).get('mode')!=='2d'){
     window.dispatchEvent(new CustomEvent('moa-world-move',{detail:{x,y}}));
    }
   });
-  let last=0,visible=true,heading=0;
-  let previousLocation=null;
+  let last=0,visible=true,slowFrames=0,lowerQuality=false;
+  // Stable fixed-angle camera: the avatar actually travels across the screen;
+  // the camera only pans when the avatar leaves a comfortable center zone.
+  const follow=place(800,535);
   document.addEventListener('visibilitychange',()=>visible=!document.hidden);
   function animate(t){
    requestAnimationFrame(animate);
    if(!visible)return;
-   if(t-last<(innerWidth<760?33:24))return;last=t;
+   if(last&&t-last<48)return;
+   const elapsed=last?t-last:48;last=t;
+   if(elapsed>110&&elapsed<750)slowFrames++;else slowFrames=Math.max(0,slowFrames-2);
+   if(slowFrames>=8&&!lowerQuality){
+    lowerQuality=true;
+    webgl.setPixelRatio(Math.min(.7,basePixelRatio));
+    resize();
+    document.body.classList.add('three-low-quality');
+    console.info('MoA garden reduced 3D resolution to preserve movement performance');
+   }
    if(!reduce)for(let i=0;i<ripples.length;i++){
     ripples[i].scale.set(1+Math.sin(t/1600+i)*.08,1,1+Math.cos(t/1500+i)*.08);
    }
    const originalActor=document.getElementById('player');
    const playerX=Number.parseFloat(originalActor.style.left)||800;
-   const playerY=Number.parseFloat(originalActor.style.top)||610;
+   const playerY=Number.parseFloat(originalActor.style.top)||535;
    const avatar=place(playerX,playerY);
-   if(previousLocation&&!reduce){
-    const dx=avatar.x-previousLocation.x,dz=avatar.z-previousLocation.z;
-    if(Math.hypot(dx,dz)>.008){
-     const targetHeading=Math.atan2(dx,dz);
-     const delta=Math.atan2(Math.sin(targetHeading-heading),Math.cos(targetHeading-heading));
-     heading+=Math.max(-.032,Math.min(.032,delta));
-    }
-   }
-   previousLocation=avatar.clone();
-   const ux=Math.sin(heading),uz=Math.cos(heading);
-   const desired=new THREE.Vector3(avatar.x-ux*13.2,10.3,avatar.z-uz*13.2);
-   camera.position.lerp(desired,.105);
-   camera.lookAt(avatar.x+ux*2.6,1.05,avatar.z+uz*2.6);
+   const delta=avatar.clone().sub(follow);
+   // Dead zone means pressing the arrow keys visibly moves Moa before the camera pans.
+   if(delta.length()>1.3)follow.addScaledVector(delta,.12);
+   camera.position.set(follow.x,10.6,follow.z+13.4);
+   camera.lookAt(follow.x,1.0,follow.z-2.6);
    const screen=projected(new THREE.Vector3(avatar.x,1.05,avatar.z));
    actor.style.left=screen.x+'px';actor.style.top=screen.y+'px';
    const moving=originalActor.classList.contains('moving');
-   actor.style.transform='translate(-50%,-90%) '+(moving&&!reduce?'rotate('+Math.sin(t/100)*2.4+'deg)':'');
-   actorName.style.left=screen.x+'px';actorName.style.top=(screen.y+9)+'px';
+   const bounce=moving&&!reduce?Math.sin(t/105)*5:0;
+   actor.style.transform='translate(-50%,-90%) translateY('+bounce.toFixed(1)+'px)';
+   actorName.style.left=screen.x+'px';actorName.style.top=(screen.y+9+bounce)+'px';
    actorName.style.transform='translate(-50%,0)';
    for(const spot of spots){
     const point=spot.dataset.place;

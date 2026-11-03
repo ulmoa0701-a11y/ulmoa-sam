@@ -45,7 +45,7 @@ function draw(){
  interact.disabled=!nearby;interact.textContent=nearby&&data?'🚪 '+data[nearby].name+' 들어가기':'가까운 정원에서 입장';
  if(nearby&&data){sayText(data[nearby].name+'에 도착했어! 들어가서 게임을 찾아볼까?')}
  else if(!walkTarget&&!waypoints.length){sayText('길을 따라 움직여 봐! 정원에 다가가면 들어갈 수 있어.')}
- camera();
+ if(!document.body.classList.contains('third-person'))camera();
 }
 function walkTo(dest,id){
  if(dialogsOpen())return;
@@ -147,7 +147,7 @@ function move(dt){
  if(keys.has('arrowright')||keys.has('d')||held.has('right'))mx++;
  if(keys.has('arrowup')||keys.has('w')||held.has('up'))my--;
  if(keys.has('arrowdown')||keys.has('s')||held.has('down'))my++;
- const manual=mx||my,step=Math.min(dt,.05)*210;
+ const manual=mx||my,step=Math.min(Math.max(dt,0),.12)*210;
  if(manual){walkTarget=null;waypoints=[];autoOpen=null;
   const len=Math.hypot(mx,my);mx/=len;my/=len;
  } else if(walkTarget){
@@ -169,7 +169,9 @@ function onKey(e){
  const key=e.key.toLowerCase();
  if(dialogsOpen())return;
  if(['arrowleft','arrowright','arrowup','arrowdown','w','a','s','d',' '].includes(key)){
-  if(e.target.closest('button,input,a'))return;
+  // Movement must work even after a menu/button retained keyboard focus.
+  // Preserve typing, editable text and open dialogs.
+  if(e.target.closest('input,textarea,select,[contenteditable="true"]'))return;
   e.preventDefault();keys.add(key)
  }
  if((key==='enter'||key==='e')&&nearby&&!e.target.closest('button,input,a')){e.preventDefault();openGarden(nearby)}

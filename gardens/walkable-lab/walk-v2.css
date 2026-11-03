@@ -76,3 +76,18 @@ dialog h2{font-size:clamp(24px,3vw,34px)}
 .switch2d{display:none}.three-world-ready .switch2d{display:inline}.three-world-ready .switch3d{display:none}.foot a{font-weight:800;color:#366b4c;text-decoration:underline}
 
 #results .result-card,#results .result-card:visited{color:#345c46;text-decoration:none}#results .result-card-copy strong{color:#31513d!important}
+
+/* Avoid expensive full-screen postprocess and multiple blurred overlays. */
+.three-world-ready .three-landscape{filter:none!important}
+.three-world-ready .hud-guide,.three-world-ready .hud-actions button,
+.third-person .three-hotspots .portal{backdrop-filter:none!important}
+.third-person .three-hotspots .portal{box-shadow:0 4px 10px #2b513f77!important}
+.top-nav .switch2d{display:none}
+.top-nav .switch3d{display:inline-flex}
+.three-world-ready .top-nav .switch2d{display:inline-flex}
+.three-world-ready .top-nav .switch3d{display:none}
+.three-low-quality .top-nav .switch2d{background:#e0ecda;border-color:#6a986f}
+@media(max-width:480px){
+ .top-nav{flex-wrap:wrap;justify-content:center;gap:5px}
+ .top-nav button,.top-nav a{padding:7px 8px;min-height:38px;font-size:11px}
+}

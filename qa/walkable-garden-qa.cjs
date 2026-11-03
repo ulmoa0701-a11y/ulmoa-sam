@@ -34,6 +34,12 @@ const ids=['cognitive','thinking','learning','music','heart'],expected=[21,3,4,3
     await page.keyboard.down('ArrowRight');await page.waitForTimeout(200);await page.keyboard.up('ArrowRight');
     const later=await player.evaluate(el=>parseFloat(el.style.left));
     assert.ok(later>start.left+7,'player failed to walk '+JSON.stringify({start,later}));
+    // Regression: pressing movement keys must work even if a top-menu button retains focus.
+    await page.locator('#quick').focus();
+    const beforeFocused=await player.evaluate(el=>parseFloat(el.style.left));
+    await page.keyboard.down('ArrowRight');await page.waitForTimeout(240);await page.keyboard.up('ArrowRight');
+    const afterFocused=await player.evaluate(el=>parseFloat(el.style.left));
+    assert.ok(afterFocused>beforeFocused+8,'focused button swallowed walking input');
     const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
     assert.ok(overflow<=3,'horizontal overflow '+overflow);
     await page.screenshot({path:path.join(OUT,name+'-map.png')});
