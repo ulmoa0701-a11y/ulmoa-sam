@@ -74,3 +74,5 @@ dialog h2{font-size:clamp(24px,3vw,34px)}
 }
 
 .switch2d{display:none}.three-world-ready .switch2d{display:inline}.three-world-ready .switch3d{display:none}.foot a{font-weight:800;color:#366b4c;text-decoration:underline}
+
+#results .result-card,#results .result-card:visited{color:#345c46;text-decoration:none}#results .result-card-copy strong{color:#31513d!important}
