@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f6f4e7">
+  <meta name="description" content="모아와 함께 다섯 정원을 직접 산책하며 34개 게임을 찾아보세요.">
+  <title>모아와 산책하는 다섯 정원 | 일단 해봄</title>
+  <link rel="preload" as="image" href="garden-landscape.webp" fetchpriority="high">
+  <link rel="stylesheet" href="world.css?v=1">
+  <script src="world.js?v=1" defer></script>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="header">
+    <a href="../../" class="brand"><img src="../../assets/habom-approved-wordmark.webp" alt="일단 해봄"><span><strong>모아의 다섯 정원</strong><small>함께 걸으며 만나는 작은 배움</small></span></a>
+    <nav class="header-nav" aria-label="다른 탐험 방식">
+      <button type="button" id="openFinder"><span aria-hidden="true">⌕</span> 게임 34개</button>
+      <a href="../walkable-lab/" title="기존 실시간 3D 탐험판">3D 체험</a>
+      <a href="../v4-preview/">원래 지도</a>
+    </nav>
+  </header>
+  <main class="viewport" id="viewport" aria-label="직접 걸어서 정원을 탐험하는 화면">
+    <div class="world" id="world">
+      <img class="landscape" src="garden-landscape.webp" alt="" draggable="false" fetchpriority="high">
+      <div class="portal cognitive" style="--px:25.8%;--py:32.5%;--accent:#65935c" data-garden="cognitive">
+        <button type="button" aria-label="인지정원, 게임 21개. 이곳으로 이동"><span class="portal-emoji" aria-hidden="true">🌳</span><span class="portal-copy"><strong>인지정원</strong><small>21개 게임</small></span><span class="portal-arrow" aria-hidden="true">↗</span></button>
+      </div>
+      <div class="portal thinking" style="--px:75.0%;--py:31.5%;--accent:#4b9aa1" data-garden="thinking">
+        <button type="button" aria-label="생각정원, 게임 3개. 이곳으로 이동"><span class="portal-emoji" aria-hidden="true">💭</span><span class="portal-copy"><strong>생각정원</strong><small>3개 게임</small></span><span class="portal-arrow" aria-hidden="true">↗</span></button>
+      </div>
+      <div class="portal learning" style="--px:25.0%;--py:62.5%;--accent:#bb8b4b" data-garden="learning">
+        <button type="button" aria-label="학습정원, 게임 4개. 이곳으로 이동"><span class="portal-emoji" aria-hidden="true">📚</span><span class="portal-copy"><strong>학습정원</strong><small>4개 게임</small></span><span class="portal-arrow" aria-hidden="true">↗</span></button>
+      </div>
+      <div class="portal music" style="--px:77.6%;--py:62.5%;--accent:#aa76bb" data-garden="music">
+        <button type="button" aria-label="음악정원, 게임 3개. 이곳으로 이동"><span class="portal-emoji" aria-hidden="true">🎵</span><span class="portal-copy"><strong>음악정원</strong><small>3개 게임</small></span><span class="portal-arrow" aria-hidden="true">↗</span></button>
+      </div>
+      <div class="portal heart" style="--px:49.6%;--py:85.2%;--accent:#da91a1" data-garden="heart">
+        <button type="button" aria-label="마음정원, 게임 3개. 이곳으로 이동"><span class="portal-emoji" aria-hidden="true">💗</span><span class="portal-copy"><strong>마음정원</strong><small>3개 게임</small></span><span class="portal-arrow" aria-hidden="true">↗</span></button>
+      </div>
+      <div class="player" id="player" aria-label="모아 캐릭터">
+        <span class="player-shadow"></span>
+        <img src="../../assets/moa-hello-wave-20261012.webp" alt="모아" draggable="false">
+        <span class="player-label">모아</span>
+      </div>
+    </div>
+    <div class="guide" aria-live="polite">
+      <img src="../../assets/moa-hello-wave-20261012.webp" alt="">
+      <p id="message">정원을 누르거나 길을 따라 움직여 봐!</p>
+    </div>
+    <div class="viewport-actions">
+      <button id="enter" type="button" disabled>정원에 들어가기</button>
+      <button id="goPlaza" type="button" title="중앙 분수대로 돌아가기">⌂ 광장으로</button>
+    </div>
+    <div class="move-pad" aria-label="모아 이동하기">
+      <button type="button" data-move="up" aria-label="위로 이동">▲</button>
+      <button type="button" data-move="left" aria-label="왼쪽 이동">◀</button>
+      <button type="button" data-move="down" aria-label="아래로 이동">▼</button>
+      <button type="button" data-move="right" aria-label="오른쪽 이동">▶</button>
+    </div>
+    <div class="mobile-gardens" id="mobileGardens" aria-label="가까운 정원 바로 찾기">
+      <button type="button" data-jump="cognitive">🌳 인지</button>
+      <button type="button" data-jump="thinking">💭 생각</button>
+      <button type="button" data-jump="learning">📚 학습</button>
+      <button type="button" data-jump="music">🎵 음악</button>
+      <button type="button" data-jump="heart">💗 마음</button>
+    </div>
+    <span class="tip" id="tip">방향키·WASD 또는 화면 터치로 이동 · 정원에 가까워지면 Enter</span>
+  </main>
+</div>
+<dialog id="gardenDialog" class="dialog" aria-labelledby="gardenTitle">
+  <div class="dialog-top"><button id="closeGarden" type="button" class="back">← 정원으로 돌아가기</button><span id="gardenCount"></span></div>
+  <h2 id="gardenTitle"></h2><p id="gardenSubtitle" class="dialog-lead"></p>
+  <div class="game-grid" id="gardenGames"></div>
+  <div class="pages"><button id="prevGames" type="button">← 이전</button><span id="pageInfo" aria-live="polite"></span><button id="nextGames" type="button">다음 →</button></div>
+</dialog>
+<dialog id="findDialog" class="dialog finder" aria-labelledby="findTitle">
+  <div class="dialog-top"><button id="closeFinder" type="button" class="back">← 정원으로 돌아가기</button><span>원하는 게임 바로 찾기</span></div>
+  <h2 id="findTitle">34개 게임 모두 만나기</h2><p class="dialog-lead">탐험하지 않아도 바로 찾을 수 있어요.</p>
+  <label class="search-label" for="query">게임 이름 검색</label><input id="query" type="search" placeholder="예: 꽃, 모양, 박자">
+  <div class="filters" id="filters"></div><div class="find-results" id="findResults"></div>
+</dialog>
+</body>
+</html>
