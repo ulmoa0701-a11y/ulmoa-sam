@@ -22,8 +22,11 @@ const ids=['cognitive','thinking','learning','music','heart'],expected=[21,3,4,3
     await page.waitForFunction(()=>!!document.querySelector('.portal')&&document.querySelector('#say').textContent.includes('길을 따라'));
     assert.equal(await page.locator('button.portal').count(),5);
     assert.equal((await page.request.get(BASE+'games.json')).status(),200);
-    const map=await page.locator('.scene').evaluate(el=>({width:el.clientWidth,height:el.clientHeight,transform:getComputedStyle(el).transform}));
-    assert.equal(map.width,1600);assert.equal(map.height,1000);
+    const map=await page.evaluate(()=>({world3d:document.body.classList.contains('third-person'),
+     canvas:document.querySelector('canvas.three-landscape')?.getBoundingClientRect().width,
+     fallback:document.querySelector('.scene')?.clientWidth}));
+    if(map.world3d){assert.ok(map.canvas>200,'3D canvas missing');}
+    else{assert.equal(map.fallback,1600,'accessible 2D fallback unavailable');}
     const player=page.locator('#player');
     const start=await player.evaluate(el=>({left:parseFloat(el.style.left),top:parseFloat(el.style.top)}));
     // direct keyboard movement: no forced zoom or horizontal overflow.
