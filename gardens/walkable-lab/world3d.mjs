@@ -5,7 +5,7 @@ import * as THREE from './vendor/three.min.mjs';
 
 const root=document.getElementById('scene');
 const original=root?.querySelector('svg.terrain');
-if(root&&original){
+if(root&&original&&new URLSearchParams(location.search).get('mode')!=='2d'){
  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const random=(()=>{let x=29337;return()=>((x^=x<<13,x^=x>>>17,x^=x<<5)>>>0)/4294967295})();
  const rand=(a,b)=>a+(b-a)*random();
