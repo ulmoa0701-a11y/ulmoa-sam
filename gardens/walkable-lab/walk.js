@@ -6,6 +6,20 @@ const ids=['cognitive','thinking','learning','music','heart'];
 const points={cognitive:{x:300,y:392},thinking:{x:1090,y:451},learning:{x:358,y:883},music:{x:1160,y:873},heart:{x:802,y:942}};
 const centers={cognitive:{x:300,y:277},thinking:{x:1090,y:340},learning:{x:358,y:786},music:{x:1160,y:767},heart:{x:802,y:882}};
 const pictures={cognitive:'friend-hong.png',thinking:'friend-ru.png',learning:'friend-saem.png',music:'friend-ti.png',heart:'moa-discovery.png'};
+function previewAsset(g){
+ const href=g.href||'';
+ const known=(href.match(/\/games\/(hand-mirror|rescue|rhythm-touch)\//)||[])[1];
+ const mode=(href.match(/[?&]mode=([^&]+)/)||[])[1];
+ const key=(href.match(/[?&]game=([^&]+)/)||[])[1]||
+  known||(href.includes('/recorder/')?'recorder':mode||'');
+ return /^[a-zA-Z][a-zA-Z-]*$/.test(key)?'../previews/'+key+'-card.svg':null;
+}
+function thumb(g){
+ const img=document.createElement('img');img.loading='lazy';img.decoding='async';img.alt='';
+ img.src=previewAsset(g)||'../../thinking-garden/assets/'+pictures[g.garden];
+ img.addEventListener('error',()=>{img.src='../../thinking-garden/assets/'+pictures[g.garden]}, {once:true});
+ return img;
+}
 const portal=[...document.querySelectorAll('[data-portal]')], places=[...document.querySelectorAll('.place')];
 let data=null, all=[], selected='all', current=null, page=0, nearby=null, walkTarget=null, waypoints=[], autoOpen=null, scale=1,camX=0,camY=0,last=0,raf=0;
 const pos={x:800,y:610},keys=new Set(), held=new Set();
@@ -66,7 +80,7 @@ function showActivities(){
  for(const g of list){
   const box=document.createElement('article');box.className='activity';
   const art=document.createElement('div');art.className='art';
-  const img=document.createElement('img');img.src='../../thinking-garden/assets/'+pictures[current];img.alt='';img.loading='lazy';art.append(img);
+  art.append(thumb({...g,garden:current}));
   const copy=document.createElement('div');copy.className='copy';
   const h=document.createElement('h3');h.textContent=g.title;
   const link=document.createElement('a');link.href='../../'+g.href;link.textContent='게임 시작 →';
@@ -108,10 +122,13 @@ function renderFinder(){
  const filtered=all.filter(g=>(selected==='all'||g.garden===selected)&&g.title.toLowerCase().includes(q));
  const result=el('results');result.replaceChildren();
  for(const g of filtered){
-  const a=document.createElement('a');a.href='../../'+g.href;
+  const a=document.createElement('a');a.className='result-card';a.href='../../'+g.href;
+  const preview=document.createElement('span');preview.className='result-card-image';preview.append(thumb(g));
+  const body=document.createElement('span');body.className='result-card-copy';
   const title=document.createElement('strong');title.textContent=g.title;
   const small=document.createElement('small');small.textContent=data[g.garden].name;
-  a.append(title,small);result.append(a);
+  const arrow=document.createElement('span');arrow.className='result-card-arrow';arrow.textContent='↗';arrow.setAttribute('aria-hidden','true');
+  body.append(small,title);a.append(preview,body,arrow);result.append(a);
  }
  if(!filtered.length){const p=document.createElement('p');p.textContent='찾은 게임이 없어요. 다른 이름을 입력해보세요.';result.append(p)}
 }
