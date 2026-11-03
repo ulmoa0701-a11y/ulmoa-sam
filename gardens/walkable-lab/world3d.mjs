@@ -67,7 +67,7 @@ if(root&&original){
   const grassTexture=new THREE.CanvasTexture(grassCanvas);
   grassTexture.wrapS=grassTexture.wrapT=THREE.RepeatWrapping;grassTexture.repeat.set(7,5);
   grassTexture.colorSpace=THREE.SRGBColorSpace;
-  const turf=put(new THREE.PlaneGeometry(45,32),new THREE.MeshStandardMaterial({map:grassTexture,roughness:1}),0,-.22,0,ground,false);
+  const turf=put(new THREE.PlaneGeometry(70,70),new THREE.MeshStandardMaterial({map:grassTexture,roughness:1}),0,-.22,0,ground,false);
   turf.rotation.x=-Math.PI/2;turf.receiveShadow=true;
   function outline(x,z,r,color){
    const m=cyl(x,-.10,z,r,r,.12,mat(color),40,ground);m.castShadow=false;
@@ -364,9 +364,9 @@ if(root&&original){
    const playerX=Number.parseFloat(originalActor.style.left)||800;
    const playerY=Number.parseFloat(originalActor.style.top)||610;
    const avatar=place(playerX,playerY);
-   const desired=new THREE.Vector3(avatar.x,5.8,avatar.z+9.8);
+   const desired=new THREE.Vector3(avatar.x,10.3,avatar.z-13.2);
    camera.position.lerp(desired,.11);
-   camera.lookAt(avatar.x,1.15,avatar.z-3.2);
+   camera.lookAt(avatar.x,1.05,avatar.z+2.6);
    const screen=projected(new THREE.Vector3(avatar.x,1.05,avatar.z));
    actor.style.left=screen.x+'px';actor.style.top=screen.y+'px';
    const moving=originalActor.classList.contains('moving');
