@@ -63,7 +63,11 @@ if(root&&original&&new URLSearchParams(location.search).get('mode')!=='2d'){
   const ball=(x,y,z,r,mat,group=scenery)=>put(new THREE.SphereGeometry(r,12,9),mat,x,y,z,group);
   const cyl=(x,y,z,top,bottom,height,mat,sides=10,group=scenery)=>put(new THREE.CylinderGeometry(top,bottom,height,sides),mat,x,y,z,group);
   const cone=(x,y,z,r,h,mat,sides=4,group=scenery)=>put(new THREE.ConeGeometry(r,h,sides,1),mat,x,y,z,group);
-  function mat(hex){return new THREE.MeshStandardMaterial({color:hex,roughness:.94})}
+  const materialCache=new Map();
+  function mat(hex){
+   if(!materialCache.has(hex))materialCache.set(hex,new THREE.MeshStandardMaterial({color:hex,roughness:.94}));
+   return materialCache.get(hex);
+  }
   const foliage=[0x74b488,0x6eae7e,0x97c68b,0x5f9975,0x8dbd87,0x6aa482,0x9aca91].map(mat);
   const blossom=[0xf1c5d2,0xf8dfe2,0xeac7e1].map(mat);
   const slate=[0xb37682,0xb27b79,0x886980].map(mat);
@@ -325,6 +329,61 @@ if(root&&original&&new URLSearchParams(location.search).get('mode')!=='2d'){
    const p=place(...xy),m=new THREE.Mesh(new THREE.TorusGeometry(2.1,.075,5,64),new THREE.MeshBasicMaterial({color:0xfff4bf,transparent:true,opacity:0.0,depthWrite:false}));
    m.position.set(p.x,.2,p.z);m.rotation.x=Math.PI/2;scene.add(m);nearRings[key]=m;
   }
+  // Batch nonmoving opaque architecture and landscaping by material.
+  // This replaces hundreds of individual GPU draw calls with a few combined geometries.
+  const originalMeshCount=meshes.length;
+  const buckets=new Map();
+  for(const mesh of meshes){
+   const material=mesh.material;
+   if(!mesh.isMesh||Array.isArray(material)||material.transparent||!material.isMeshStandardMaterial)continue;
+   mesh.updateWorldMatrix(true,false);
+   const geometry=mesh.geometry.clone();
+   geometry.applyMatrix4(mesh.matrixWorld);
+   if(!geometry.getAttribute('normal'))geometry.computeVertexNormals();
+   const id=material.uuid;
+   if(!buckets.has(id))buckets.set(id,{material,entries:[]});
+   buckets.get(id).entries.push({mesh,geometry});
+  }
+  let batchedCount=0;
+  for(const {material,entries} of buckets.values()){
+   if(entries.length<2)continue;
+   const vertexCount=entries.reduce((sum,e)=>sum+e.geometry.getAttribute('position').count,0);
+   const indexCount=entries.reduce((sum,e)=>sum+(e.geometry.index?e.geometry.index.count:e.geometry.getAttribute('position').count),0);
+   const positions=new Float32Array(vertexCount*3);
+   const normals=new Float32Array(vertexCount*3);
+   const uvs=new Float32Array(vertexCount*2);
+   const indices=new Uint32Array(indexCount);
+   let offset=0,indexOffset=0;
+   for(const {mesh,geometry} of entries){
+    const p=geometry.getAttribute('position'),n=geometry.getAttribute('normal'),uv=geometry.getAttribute('uv');
+    positions.set(p.array,offset*3);
+    if(n)normals.set(n.array,offset*3);
+    if(uv)uvs.set(uv.array,offset*2);
+    if(geometry.index){
+     const arr=geometry.index.array;
+     for(let k=0;k<arr.length;k++)indices[indexOffset+k]=arr[k]+offset;
+     indexOffset+=arr.length;
+    }else{
+     for(let k=0;k<p.count;k++)indices[indexOffset+k]=k+offset;
+     indexOffset+=p.count;
+    }
+    offset+=p.count;
+   }
+   const geometry=new THREE.BufferGeometry();
+   geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
+   geometry.setAttribute('normal',new THREE.BufferAttribute(normals,3));
+   geometry.setAttribute('uv',new THREE.BufferAttribute(uvs,2));
+   geometry.setIndex(new THREE.BufferAttribute(indices,1));
+   geometry.computeBoundingSphere();
+   const combined=new THREE.Mesh(geometry,material);
+   combined.castShadow=false;combined.receiveShadow=false;
+   scene.add(combined);
+   for(const item of entries){item.mesh.parent?.remove(item.mesh);item.mesh.geometry.dispose();item.geometry.dispose()}
+   batchedCount+=entries.length;
+  }
+  meshes.length=0;
+  console.info('MoA 3D scenery batched',batchedCount,'of',originalMeshCount,'static meshes into',buckets.size,'material groups');
+
   // Limit hardware resolution; CSS size stays 100%, avoiding 2x/3x mobile GPU load.
   const basePixelRatio=Math.min(1,window.devicePixelRatio||1);
   webgl.setPixelRatio(basePixelRatio);
