@@ -1,0 +1,43 @@
+name: Illustrated Five Gardens 2.5D QA
+on:
+  pull_request:
+    paths:
+      - 'gardens/illustrated-lab/**'
+      - 'qa/illustrated-gardens-qa.cjs'
+      - '.github/workflows/illustrated-gardens-qa.yml'
+  workflow_dispatch:
+permissions: { contents: read }
+jobs:
+  illustrated-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser adapter
+        run: npm install --no-save --no-package-lock playwright-core@1.56.1
+      - name: Locate browser and Korean fonts
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          timeout 240 sudo apt-get update -qq
+          timeout 240 sudo apt-get install -y -qq fonts-noto-cjk
+      - name: Serve site for real browser testing
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/illustrated-25d.log 2>&1 &
+          for i in $(seq 1 50); do curl -fsS http://127.0.0.1:8765/gardens/illustrated-lab/ >/dev/null && exit 0; sleep .4; done
+          cat /tmp/illustrated-25d.log
+          exit 1
+      - name: Verify artwork, movement, five gardens, all 34 games, preview images
+        run: node qa/illustrated-gardens-qa.cjs
+      - name: Save PC and mobile screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: five-gardens-illustrated-25d-screenshots
+          path: qa/artifacts/illustrated-25d/
+          retention-days: 14
+          if-no-files-found: warn
