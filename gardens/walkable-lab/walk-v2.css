@@ -57,3 +57,18 @@ dialog h2{font-size:clamp(24px,3vw,34px)}
  #results .result-card-copy strong{font-size:13px}
 }
 @media(prefers-reduced-motion:reduce){.activity,#results .result-card{transition:none}}
+
+/* Third-person walk-through: real geometry with only actionable HTML labels. */
+.third-person .three-hotspots .place{pointer-events:auto;position:absolute;z-index:5}
+.third-person .three-hotspots .portal{pointer-events:auto;min-width:150px;padding:8px 12px;background:#fffdf0e9;backdrop-filter:blur(7px)}
+.third-person .three-hotspots .portal strong{font-size:17px}
+.third-person .three-hotspots .portal span{font-size:11px}
+.third-person .three-actor{user-select:none;-webkit-user-select:none}
+.third-person .three-actor-name{font-family:"Pretendard Variable",Pretendard,SUIT,sans-serif;color:#345741}
+.third-person .viewport{background:linear-gradient(#c1e4e8,#cce2b2)}
+@media(max-width:760px){
+ .third-person .three-hotspots .portal{min-width:123px;padding:6px 8px;border-width:2px;border-bottom-width:5px}
+ .third-person .three-hotspots .portal strong{font-size:15px}
+ .third-person .three-hotspots .portal span{font-size:10px}
+ .third-person .three-actor{width:83px!important;height:99px!important}
+}
