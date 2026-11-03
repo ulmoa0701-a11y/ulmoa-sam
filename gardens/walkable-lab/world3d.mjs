@@ -28,17 +28,17 @@ if(root&&original){
    wall:new THREE.MeshStandardMaterial({color:0xffedc8,roughness:1}),
    glass:new THREE.MeshStandardMaterial({color:0xf7d8a2,emissive:0xf0ac55,emissiveIntensity:.55,roughness:.22})
  };
+ const viewport=document.getElementById('viewport');
  const canvas=document.createElement('canvas');
  canvas.className='three-landscape';canvas.setAttribute('aria-hidden','true');
- canvas.style.cssText='position:absolute;inset:0;display:block;width:1600px;height:1000px;pointer-events:none;z-index:1';
+ canvas.style.cssText='position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:auto;touch-action:none;z-index:2';
  const webgl=(()=>{try{return new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'low-power'});}catch(e){console.warn('3D garden unavailable; keeping original map',e);return null}})();
  if(webgl){
   const scene=new THREE.Scene();scene.background=new THREE.Color(0xb8d9c1);
   scene.fog=new THREE.Fog(0xb8d9c1,37,72);
-  const camera=new THREE.OrthographicCamera(-16,16,10,-10,.1,100);
-  camera.position.set(0,34,29);camera.lookAt(0,0,0);
-  const scaleZ=.760;
-  const X=x=>(x-800)/50,Z=y=>(y-500)/(50*scaleZ);
+  const camera=new THREE.PerspectiveCamera(57,1,.1,130);
+  camera.position.set(0,6,11);camera.lookAt(0,0,0);
+  const X=x=>(x-800)/50,Z=y=>(y-500)/50;
   const place=(x,y)=>new THREE.Vector3(X(x),0,Z(y));
   const ground=new THREE.Group();scene.add(ground);
   const scenery=new THREE.Group();scene.add(scenery);
@@ -305,38 +305,95 @@ if(root&&original){
    const p=place(...xy),m=new THREE.Mesh(new THREE.TorusGeometry(2.1,.075,5,64),new THREE.MeshBasicMaterial({color:0xfff4bf,transparent:true,opacity:0.0,depthWrite:false}));
    m.position.set(p.x,.2,p.z);m.rotation.x=Math.PI/2;scene.add(m);nearRings[key]=m;
   }
-  webgl.setPixelRatio(1);
-  webgl.setSize(1280,800,false);
+  webgl.setPixelRatio(Math.min(1.5,window.devicePixelRatio||1));
   webgl.outputColorSpace=THREE.SRGBColorSpace;
   webgl.toneMapping=THREE.ACESFilmicToneMapping;
-  webgl.toneMappingExposure=1.06;
+  webgl.toneMappingExposure=1.04;
   webgl.shadowMap.enabled=true;webgl.shadowMap.type=THREE.PCFSoftShadowMap;
-  webgl.render(scene,camera);
-  root.insertBefore(canvas,original);
-  original.style.display='none';
-  root.classList.add('three-ready');
-  document.body.classList.add('three-world-ready');
-  let frames=0,last=0,visible=true;
-  document.addEventListener('visibilitychange',()=>{visible=!document.hidden});
+  const layer=document.createElement('div');layer.className='three-hotspots';
+  layer.setAttribute('aria-label','다섯 정원 진입');
+  layer.style.cssText='position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden';
+  const spots=[...root.querySelectorAll('.place')];
+  for(const spot of spots){spot.classList.add('three-portal');layer.append(spot)}
+  viewport.insertBefore(canvas,viewport.firstChild);
+  viewport.append(layer);
+  const actor=document.createElement('img');
+  actor.className='three-actor';actor.src='../../assets/moa-hello-wave-20261012.webp';actor.alt='모아';
+  actor.draggable=false;actor.style.cssText='position:absolute;width:92px;height:106px;object-fit:contain;pointer-events:none;z-index:4;filter:drop-shadow(1px 9px 7px #2b5b4b80)';
+  viewport.append(actor);
+  const actorName=document.createElement('span');
+  actorName.textContent='모아';actorName.className='three-actor-name';
+  actorName.style.cssText='position:absolute;z-index:4;pointer-events:none;min-width:34px;text-align:center;font-size:12px;font-weight:850;border:1px solid #c9dabb;border-radius:99px;background:#fffdf3e9;padding:2px 7px;box-shadow:0 3px 9px #33584470';
+  viewport.append(actorName);
+  root.style.display='none';
+  document.body.classList.add('three-world-ready','third-person');
+  const raycaster=new THREE.Raycaster();
+  const plane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
+  const tmp=new THREE.Vector3();
+  function resize(){
+   const w=Math.max(1,viewport.clientWidth),h=Math.max(1,viewport.clientHeight);
+   camera.aspect=w/h;camera.updateProjectionMatrix();
+   webgl.setSize(w,h,false);
+  }
+  resize();window.addEventListener('resize',resize,{passive:true});
+  function projected(vec){
+   const v=vec.clone().project(camera);
+   const w=viewport.clientWidth,h=viewport.clientHeight;
+   return{x:(v.x*.5+.5)*w,y:(-.5*v.y+.5)*h,on:v.z<1.0&&v.z>-1&&v.x>-1.45&&v.x<1.45&&v.y>-1.6&&v.y<1.6}
+  }
+  canvas.addEventListener('pointerup',event=>{
+   if(event.button!==0||document.querySelector('dialog[open]'))return;
+   const box=canvas.getBoundingClientRect();
+   const n=new THREE.Vector2(((event.clientX-box.left)/box.width)*2-1,-((event.clientY-box.top)/box.height)*2+1);
+   raycaster.setFromCamera(n,camera);
+   if(raycaster.ray.intersectPlane(plane,tmp)){
+    const x=tmp.x*50+800,y=tmp.z*50+500;
+    window.dispatchEvent(new CustomEvent('moa-world-move',{detail:{x,y}}));
+   }
+  });
+  let last=0,visible=true;
+  document.addEventListener('visibilitychange',()=>visible=!document.hidden);
   function animate(t){
    requestAnimationFrame(animate);
    if(!visible)return;
-   if(t-last<(innerWidth<760?33:25))return;last=t;
-   if(!reduce){
-    for(let i=0;i<ripples.length;i++){ripples[i].scale.set(1+Math.sin(t/1400+i)*.12,1,1+Math.cos(t/1500+i)*.12)}
+   if(t-last<(innerWidth<760?33:24))return;last=t;
+   if(!reduce)for(let i=0;i<ripples.length;i++){
+    ripples[i].scale.set(1+Math.sin(t/1600+i)*.08,1,1+Math.cos(t/1500+i)*.08);
+   }
+   const originalActor=document.getElementById('player');
+   const playerX=Number.parseFloat(originalActor.style.left)||800;
+   const playerY=Number.parseFloat(originalActor.style.top)||610;
+   const avatar=place(playerX,playerY);
+   const desired=new THREE.Vector3(avatar.x,5.8,avatar.z+9.8);
+   camera.position.lerp(desired,.11);
+   camera.lookAt(avatar.x,1.15,avatar.z-3.2);
+   const screen=projected(new THREE.Vector3(avatar.x,1.05,avatar.z));
+   actor.style.left=screen.x+'px';actor.style.top=screen.y+'px';
+   const moving=originalActor.classList.contains('moving');
+   actor.style.transform='translate(-50%,-90%) '+(moving&&!reduce?'rotate('+Math.sin(t/100)*2.4+'deg)':'');
+   actorName.style.left=screen.x+'px';actorName.style.top=(screen.y+9)+'px';
+   actorName.style.transform='translate(-50%,0)';
+   for(const spot of spots){
+    const point=spot.dataset.place;
+    const coords={cognitive:[300,270],thinking:[1090,290],learning:[355,744],music:[1160,731],heart:[801,839]}[point];
+    const p=place(...coords);
+    const projectedSpot=projected(new THREE.Vector3(p.x,2.4,p.z));
+    spot.style.left=projectedSpot.x+'px';spot.style.top=projectedSpot.y+'px';
+    spot.style.display=projectedSpot.on?'':'none';
    }
    const near=document.querySelector('.place.near')?.dataset.place;
    for(const [key,m] of Object.entries(nearRings)){
-    const target=key===near?.6:0;
-    m.material.opacity+= (target-m.material.opacity)*.18;
+    const target=key===near?.64:0;
+    m.material.opacity+=(target-m.material.opacity)*.18;
    }
    webgl.render(scene,camera);
   }
   requestAnimationFrame(animate);
   canvas.addEventListener('webglcontextlost',e=>{
-   e.preventDefault();original.style.display='';canvas.style.display='none';
-   document.body.classList.remove('three-world-ready');
+   e.preventDefault();document.body.classList.remove('three-world-ready','third-person');
+   root.style.display='';layer.remove();canvas.remove();actor.remove();actorName.remove();
+   for(const spot of spots)root.append(spot);
   });
-  console.info('MoA 3D garden ready: five handmade 3D spaces, zero external tracking');
+  console.info('MoA 3D walking village ready: five places, active 3D camera, approved avatar');
  }
 }
