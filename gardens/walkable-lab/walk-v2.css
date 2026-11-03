@@ -72,3 +72,5 @@ dialog h2{font-size:clamp(24px,3vw,34px)}
  .third-person .three-hotspots .portal span{font-size:10px}
  .third-person .three-actor{width:83px!important;height:99px!important}
 }
+
+.switch2d{display:none}.three-world-ready .switch2d{display:inline}.three-world-ready .switch3d{display:none}.foot a{font-weight:800;color:#366b4c;text-decoration:underline}
