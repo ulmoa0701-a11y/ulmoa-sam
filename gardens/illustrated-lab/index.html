@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f9f7e9">
+  <meta name="description" content="모아와 아름다운 다섯 정원을 걸으며 실제 게임 34개를 발견해 보세요.">
+  <title>모아의 다섯 정원 · 그림 속을 걸어봐요</title>
+  <link rel="preload" href="garden-world.webp" as="image" type="image/webp" fetchpriority="high">
+  <link rel="stylesheet" href="scene.css?v=20261103-a">
+  <script src="scene.js?v=20261103-a" defer></script>
+</head>
+<body>
+ <div class="app">
+  <header class="header">
+   <a class="logo-link" href="../../" aria-label="일단 해봄 홈"><img src="../../assets/habom-approved-wordmark.webp" alt="일단 해봄"></a>
+   <div class="heading"><strong>모아의 다섯 정원</strong><span>그림 속을 걸으며 게임을 만나요</span></div>
+   <nav class="header-nav" aria-label="탐험 메뉴">
+    <button id="pickGarden" type="button"><span aria-hidden="true">🌿</span> 정원 찾기</button>
+    <button id="allGames" type="button">전체 게임 <b>34</b></button>
+    <a href="../walkable-lab/" title="이전 3D 실험판">3D 체험판</a>
+   </nav>
+  </header>
+
+  <main class="map-shell">
+   <section id="viewport" class="viewport" aria-label="다섯 정원 탐험 지도" tabindex="0">
+    <div class="scene" id="scene">
+     <picture class="scene-picture">
+      <source media="(max-width:760px)" srcset="garden-world.webp" type="image/webp">
+      <img class="landscape" src="garden-world.webp" srcset="garden-world.webp 1x, garden-world@2x.webp 2x" alt="" width="1672" height="941" decoding="async" fetchpriority="high">
+     </picture>
+     <button type="button" class="landmark cognitive" data-garden="cognitive" style="--x:304px;--y:220px" aria-label="인지정원으로 가기"><span class="landmark-name">인지정원</span><small>21개 게임</small></button>
+     <button type="button" class="landmark thinking" data-garden="thinking" style="--x:770px;--y:172px" aria-label="생각정원으로 가기"><span class="landmark-name">생각정원</span><small>3개 게임</small></button>
+     <button type="button" class="landmark learning" data-garden="learning" style="--x:239px;--y:545px" aria-label="학습정원으로 가기"><span class="landmark-name">학습정원</span><small>4개 게임</small></button>
+     <button type="button" class="landmark music" data-garden="music" style="--x:1394px;--y:203px" aria-label="음악정원으로 가기"><span class="landmark-name">음악정원</span><small>3개 게임</small></button>
+     <button type="button" class="landmark heart" data-garden="heart" style="--x:1380px;--y:545px" aria-label="마음정원으로 가기"><span class="landmark-name">마음정원</span><small>3개 게임</small></button>
+     <div id="player" class="player" aria-label="모아 캐릭터"><img src="../../assets/moa-hello-wave-20261012.webp" alt=""><span class="player-name">모아</span></div>
+    </div>
+    <div class="guide" id="guide"><img src="../../assets/moa-hello-wave-20261012.webp" alt=""><p id="guideText" role="status" aria-live="polite">정원을 눌러 보거나, 방향키로 걸어가 봐!</p></div>
+    <div class="quick-controls"><button type="button" id="nearby" disabled>가까이 가면 입장할 수 있어</button><button type="button" id="goPlaza">광장으로</button></div>
+    <div class="touch-pad" aria-label="모아 이동 버튼"><button type="button" data-direction="up" aria-label="위로 이동">▲</button><button type="button" data-direction="left" aria-label="왼쪽으로 이동">◀</button><button type="button" data-direction="down" aria-label="아래로 이동">▼</button><button type="button" data-direction="right" aria-label="오른쪽으로 이동">▶</button></div>
+    <div class="map-tip">PC: 방향키·WASD / 모바일: 방향 버튼 / 정원 간판을 누르면 길 안내</div>
+   </section>
+  </main>
+ </div>
+
+ <dialog id="gardenDialog" class="sheet" aria-labelledby="gardenTitle">
+  <div class="sheet-top"><button type="button" id="closeGarden">← 정원으로 돌아가기</button><small id="gardenBadge"></small></div>
+  <h2 id="gardenTitle">정원</h2><p id="gardenIntro"></p>
+  <div id="gardenCards" class="game-grid"></div>
+  <div class="pager"><button id="previousPage" type="button">← 이전 길</button><strong id="pageIndicator"></strong><button id="nextPage" type="button">다음 길 →</button></div>
+ </dialog>
+
+ <dialog id="chooserDialog" class="sheet" aria-labelledby="chooserTitle">
+  <div class="sheet-top"><button type="button" id="closeChooser">← 지도로 돌아가기</button><span>원하는 곳으로 바로 이동</span></div>
+  <h2 id="chooserTitle">어느 정원에 가볼까?</h2><p>모아가 길을 따라 찾아가 줄게. 걸어가지 않고 게임만 골라도 돼.</p>
+  <div id="chooserCards" class="chooser-grid"></div>
+ </dialog>
+
+ <dialog id="libraryDialog" class="sheet" aria-labelledby="libraryTitle">
+  <div class="sheet-top"><button type="button" id="closeLibrary">← 지도로 돌아가기</button><span>34개 게임 바로 찾기</span></div>
+  <h2 id="libraryTitle">전체 게임 34개</h2><p>탐험하지 않고도 원하는 게임을 바로 선택할 수 있어.</p>
+  <label for="librarySearch" class="search-label">게임 이름 검색</label><input id="librarySearch" type="search" autocomplete="off" placeholder="어떤 게임을 찾고 있나요?">
+  <div id="gardenFilters" class="filters" aria-label="정원별 게임 분류"></div><div id="libraryResults" class="library-results"></div>
+ </dialog>
+</body>
+</html>
