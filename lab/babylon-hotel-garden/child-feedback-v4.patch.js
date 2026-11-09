@@ -274,7 +274,7 @@ __uCyl("hg4SickleHandle",__hg4Sickle,new R(0,.19,0),new R(.11,.91,.11),new H(.52
 const __hg4BladePoints=[];for(let k=0;k<=12;k++){const a=-.5+k/12*Math.PI*1.2;__hg4BladePoints.push(new R(.38+Math.cos(a)*.54,.50+Math.sin(a)*.48,0))}
 const __hg4Blade=Df.CreateTube("hg4SickleCurvedSteel",{path:__hg4BladePoints,radius:.066,tessellation:9},Yf);
 __hg4Blade.parent=__hg4Sickle;__hg4Blade.material=__uMat("hg4SilverBladeMaterial",new H(.80,.88,.89));__hg4Sickle.setEnabled(false);
-function __hg4Equip(){__hg4HasSickle=true;__hg4Sickle.setEnabled(true);__hg4SickleNote.style.display="block";km("연못 관리인에게 낫을 받았어요! EYE의 빈틈에 F를 눌러요.",3000)}
+function __hg4Equip(){__hg4HasSickle=true;__hg4Sickle.setEnabled(Kp===4&&qp&&!Jp);__hg4SickleNote.style.display="none";km("연못 관리인에게 낫을 받았어요! EYE의 빈틈에 F를 눌러요.",3000)}
 // Make individual boss silhouettes noticeably different from ordinary trees.
 const __hg4Ivory=new H(.97,.92,.79),__hg4Vine=new H(.08,.42,.14),__hg4Night=new H(.14,.18,.18);
 for(let k=0;k<4;k++){const y=3.1+k*.58;const m=__uCyl("hg4WoodsKnot"+k,Hp,new R(k%2?-.62:.72,y,-.43),new R(.42,.47,.20),k%2?__hg4Ivory:__hg4Vine);m.rotation.z=(k%2?-.35:.25)}
@@ -284,7 +284,7 @@ for(let k=0;k<3;k++){const plume=__uSphere("hg4SmogSmoke"+k,Wp,new R((k-1)*.4,5.
 const __hg4Flame=Df.CreateCylinder("hg4SmogFlameTip",{height:1.25,diameterTop:0,diameterBottom:.74,tessellation:16},Yf);
 __hg4Flame.parent=Wp;__hg4Flame.position.set(0,5.6,-.12);__hg4Flame.material=__uMat("hg4FlameGlow",new H(1,.53,.13));
 // Keep all human NPCs present; retain all boss spawning and quest state.
-Dm=function(stage){__hg4OrigDm(stage);__hg4KeepPeople();rp.style.display="none";__hg4Sickle.setEnabled(__hg4HasSickle)};
+Dm=function(stage){__hg4OrigDm(stage);__hg4KeepPeople();rp.style.display="none";__hg4Sickle.setEnabled(__hg4HasSickle&&stage===4&&qp&&!Jp)};
 Nm=function(){const giveSickle=Kp===3&&jm(Bp)<5.5&&qp&&!Jp;__hg4OrigNm();if(giveSickle&&!__hg4HasSickle)__hg4Equip()};
 zm=function(action){
  if(__hg4ShopOpen)return;
@@ -292,7 +292,7 @@ zm=function(action){
  if(action==="talk"&&__hg4NearShop()&&!__hg4BossStages.has(Kp)){if(Kp===0&&jm(zp)<5.5)return __hg4OrigZm(action);__hg4Open();return}
  if(action==="talk"&&__hg4BossStages.has(Kp)&&!nearFlower)return;
  if(action==="trap"&&Kp!==2&&!(Kp===6&&dm==="water"&&__uHasBucket))return;
- if(action==="slash"&&Kp===4&&__hg4HasSickle)__hg4SwingUntil=performance.now()+380;
+ if(action==="slash"){if(Kp!==4||!__hg4HasSickle)return;__hg4SwingUntil=performance.now()+380;}
  return __hg4OrigZm(action);
 };
 xp=function(event,payload={}){__hg4OrigXp(event,payload);if(event==="BOSS_DEFEATED"&&payload.boss&&!__hg4Rewards.has(payload.boss)){__hg4Rewards.add(payload.boss);__hg4Coins=Math.min(999,__hg4Coins+3);__hg4Save();__hg4Balance();km("🌰 씨앗 토큰 3개를 받았어요!",2000)}};
@@ -310,8 +310,8 @@ Yf.onBeforeRenderObservable.add(()=>{
   n.position.x=base.x+Math.sin(a)*.80;n.position.z=base.z+Math.cos(a)*.72;
   const legL=Yf.getMeshByName(n.name+"Leg-1"),legR=Yf.getMeshByName(n.name+"Leg1");if(legL)legL.rotation.x=.22*Math.sin(t*2.4+i);if(legR)legR.rotation.x=-.22*Math.sin(t*2.4+i);
  }
- __hg4SickleNote.style.display=__hg4HasSickle&&[4,5,6,7].includes(Kp)?"block":"none";
- if(__hg4HasSickle){const swing=Math.max(0,(__hg4SwingUntil-performance.now())/380);__hg4Sickle.rotation.z=swing>0?Math.sin((1-swing)*Math.PI)*-.95:0;__hg4Sickle.setEnabled(Kp>=4)}
+ __hg4SickleNote.style.display=__hg4HasSickle&&Kp===4&&qp&&!Jp?"block":"none";
+ if(__hg4HasSickle){const swing=Math.max(0,(__hg4SwingUntil-performance.now())/380);__hg4Sickle.rotation.z=swing>0?Math.sin((1-swing)*Math.PI)*-.95:0;__hg4Sickle.setEnabled(Kp===4&&qp&&!Jp)}
  const combat=__hg4BossStages.has(Kp)&&qp&&!Jp;
  __hg4Combat.style.display=combat?"block":"none";
  if(combat){const mode=Kp===2?_m:Kp===4?im:dm;
@@ -321,6 +321,7 @@ Yf.onBeforeRenderObservable.add(()=>{
   const progress=Kp===2?Zp+"/2":Kp===4?Qp+"/3":pm+"/3";
   __hg4Combat.innerHTML="<span>"+caption+"</span><strong>"+secs+"초</strong><small>공략 "+progress+"</small>";
  }
+ const slashButton=document.querySelector('#touchAction [data-action="slash"]');if(slashButton)slashButton.classList.toggle("hidden",Kp!==4||!__hg4HasSickle||!qp||Jp);
  __hg4ShopButton.style.display=__hg4NearShop()&&!__hg4BossStages.has(Kp)&&qp&&!Jp?"block":"none";
 });
 __hg4Balance();rp.style.display="none";

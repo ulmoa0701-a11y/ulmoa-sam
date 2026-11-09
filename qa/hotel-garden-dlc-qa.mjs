@@ -5,7 +5,7 @@ import fs from "node:fs";
 fs.mkdirSync("qa/results",{recursive:true});
 const browser=await puppeteer.launch({headless:true,executablePath:process.env.CHROME_PATH||"/usr/bin/google-chrome",args:["--no-sandbox","--disable-dev-shm-usage","--use-angle=swiftshader","--enable-unsafe-swiftshader"]});
 const page=await browser.newPage();await page.setViewport({width:1440,height:900});
-const report={url:"https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/",at:new Date().toISOString(),checks:{},steps:[],errors:[],httpErrors:[],pass:false};
+const report={url:process.env.HOTEL_GARDEN_URL||"https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/",at:new Date().toISOString(),checks:{},steps:[],errors:[],httpErrors:[],pass:false};
 page.on("pageerror",e=>report.errors.push(String(e)));
 page.on("response",r=>{if(r.status()>=400)report.httpErrors.push({status:r.status(),url:r.url()})});
 const wait=ms=>new Promise(r=>setTimeout(r,ms));

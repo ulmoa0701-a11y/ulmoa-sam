@@ -1,0 +1,53 @@
+name: Hotel Garden candidate regression QA
+on:
+  pull_request:
+    paths:
+      - 'lab/babylon-hotel-garden/**'
+      - 'qa/hotel-garden-*.mjs'
+      - '.github/workflows/hotel-garden-candidate-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  candidate-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      HOTEL_GARDEN_URL: http://127.0.0.1:8765/lab/babylon-hotel-garden/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser runner and Korean fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk
+          npm install --no-save --no-audit --no-fund puppeteer-core@latest
+      - name: Start isolated candidate website
+        run: |
+          echo "CHROME_PATH=$(which google-chrome || which google-chrome-stable || which chromium)" >> "$GITHUB_ENV"
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/hotel-garden-http.log 2>&1 &
+          sleep 3
+          curl --fail --silent --show-error "$HOTEL_GARDEN_URL" >/dev/null
+      - name: V4 shop and combat interface
+        run: node qa/hotel-garden-v4-qa.mjs
+      - name: Public-style PC and mobile load test, against candidate
+        run: node qa/hotel-garden-public-qa.mjs
+      - name: Real-keyboard gardener through EYE unlock
+        run: node qa/hotel-garden-actual-play.mjs
+      - name: Full real-keyboard route through three bosses
+        run: node qa/hotel-garden-full-route-e2e.mjs
+      - name: Underground DLC flow
+        run: node qa/hotel-garden-dlc-qa.mjs
+      - name: Preserve results on pass or fail
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hotel-garden-candidate-qa
+          path: |
+            qa/results/hotel-garden-*
+            hotel-garden-*.json
+            hotel-garden-*.jpg
+          if-no-files-found: warn
+          retention-days: 7
