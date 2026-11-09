@@ -30,6 +30,8 @@ jobs:
           nohup python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/hotel-garden-http.log 2>&1 &
           sleep 3
           curl --fail --silent --show-error "$HOTEL_GARDEN_URL" >/dev/null
+      - name: Parse-check Babylon browser module
+        run: node --input-type=module --check < lab/babylon-hotel-garden/assets/index-DxiltY-5.js
       - name: V5 player, collision and mansion regression
         run: node qa/hotel-garden-v5-qa.mjs
       - name: V4 shop and combat interface
