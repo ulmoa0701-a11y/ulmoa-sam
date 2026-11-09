@@ -79,12 +79,15 @@ try{
   report.sickleAfterRealTalk=await page.evaluate(()=>window.__ulmoaGardenV4?.state()?.hasSickle===true);
   if(await page.$eval("#dialog",e=>e.classList.contains("show")))await clickDialog();
   await record("pond keeper handoff, EYE stage");
+  await sleep(250);
+  report.eyeSlashControl=await page.evaluate(()=>({stage:window.__ulmoaGameQa.state().stage,hasSickle:window.__ulmoaGardenV4.state().hasSickle,buttonVisible:!document.querySelector('#touchAction [data-action="slash"]').classList.contains('hidden'),noteVisible:getComputedStyle(document.getElementById('hg4SickleNote')).display!=='none'}));
  }
  const final=await state();
  report.pass=report.steps.some(x=>x.step==="gardener talk"&&x.state.stage===1)
    &&report.steps.some(x=>x.step==="WOODS encounter"&&x.state.stage===2)
    &&woodsCollected.stage===3&&woodsCollected.lotus===1
    &&report.sickleAfterRealTalk===true&&final.stage===4
+   &&report.eyeSlashControl?.buttonVisible===true&&report.eyeSlashControl?.hasSickle===true
    &&errors.length===0&&http.length===0;
 }catch(e){report.error=String(e);report.pass=false}
 await page.screenshot({path:"hotel-garden-actual-play.jpg",type:"jpeg",quality:62,fullPage:true}).catch(()=>{});
