@@ -46,7 +46,12 @@ try {
  check("dlcUnlockAfterClear",unlocked.phase==="meet"&&unlocked.lotus===3&&unlocked.mainStage===7);
  check("purpleSoilAppearsAfterClear",await page.evaluate(()=>window.__ulmoaGardenFeedbackV5.state().soilVisible));
  const gardener=unlocked.gardener;
- let result=await walkTo(gardener[0],gardener[1],3.2,130000);
+ // Pond now physically blocks shortcuts; return from SMOG along the SOUTH bank.
+ let result=await walkTo(17,-11,3.1,100000);
+ check("detourAroundPondToEastBank",result.arrived);
+ result=await walkTo(-14,-11,2.5,130000);
+ check("detourAroundPondToWestBank",result.arrived);
+ result=await walkTo(gardener[0],gardener[1],3.2,130000);
  console.log("DLC_WALK_GARDENER",JSON.stringify(result));
  console.log("DLC_GARDENER_BEFORE_E",JSON.stringify({state:await state(),dialog:await modal()}));
  check("reachGardenerWithKeyboard",result.arrived);
