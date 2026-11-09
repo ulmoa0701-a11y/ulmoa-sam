@@ -118,6 +118,7 @@ try{
  report.woodsArrival=await walkTo(20,18,4.9,65000);await nextDialog();await record('woods encounter');
  report.woodsWon=await playWoods();await record('woods defeated');
  report.woodsFlower=await pickFlower();await record('woods flower');
+ report.pondDetour=await walkTo(17,-11,3.0,65000); // around the now-solid pond
  report.pondArrival=await walkTo(4,-8,4.0,65000);await page.keyboard.press('e');await nextDialog();await record('pond keeper');
  report.eyeArrival=await walkTo(24,-15,4.8,65000);
  await record('EYE approached by keyboard');
