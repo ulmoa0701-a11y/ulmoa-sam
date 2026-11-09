@@ -73,6 +73,8 @@ try{
  const woodsCollected=await state();
  if(woodsCollected.stage===3&&woodsCollected.lotus===1){
   // Continue using real keyboard input. Pond keeper moves slightly but remains near (4,-8).
+  // Pond is now solid: use the eastern bank instead of walking across the water.
+  report.keeperDetour=await walkTo(17,-11,3.0,105000);
   report.keeper=await walkTo(4,-8,2.75,105000);
   await page.keyboard.press("e");await sleep(250);
   await record("pond keeper dialogue opened");
