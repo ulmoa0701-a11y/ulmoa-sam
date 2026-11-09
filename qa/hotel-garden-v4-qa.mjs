@@ -32,14 +32,19 @@ try{
  await sleep(450);await page.screenshot({path:"qa/results/hotel-garden-v4-botanical-market-overview.png"});
  const oldQText=await page.$eval("#notice",e=>e.textContent);await page.keyboard.press("q");await sleep(120);
  check("unneededQSilent",(await page.$eval("#notice",e=>e.textContent))===oldQText);
- // Walk to the shop with real keyboard actions. Test never changes game coordinates directly.
- const shopPos=[-5,-7.4];let arrived=false;
- for(let i=0;i<65;i++){
-  const p=await page.evaluate(()=>window.__ulmoaGameQa.state().player);
-  const dx=shopPos[0]-p[0],dz=shopPos[1]-p[1];
-  if((await state()).nearShop){arrived=true;break}
-  const sx=-.8*dx+.6*dz,sy=-.6*dx-.8*dz,axis=Math.abs(sx)>=Math.abs(sy)?(sx>0?"ArrowRight":"ArrowLeft"):(sy>0?"ArrowUp":"ArrowDown");
-  await page.keyboard.down(axis);await sleep(310);await page.keyboard.up(axis);await sleep(60);
+ // Walk around the tree near the seed shop; intentionally NEVER pass through its trunk.
+ // The old direct-line bot was stuck because a newly solid tree correctly blocked the shortcut.
+ const shopWaypoints=[[-13,-3.5],[-9.6,-1.7]];let arrived=false;
+ for(const shopPos of shopWaypoints){
+  for(let i=0;i<54;i++){
+   const p=await page.evaluate(()=>window.__ulmoaGameQa.state().player);
+   const dx=shopPos[0]-p[0],dz=shopPos[1]-p[1];
+   if((await state()).nearShop){arrived=true;break}
+   if(Math.hypot(dx,dz)<1.0)break;
+   const sx=-.8*dx+.6*dz,sy=-.6*dx-.8*dz,axis=Math.abs(sx)>=Math.abs(sy)?(sx>0?"ArrowRight":"ArrowLeft"):(sy>0?"ArrowUp":"ArrowDown");
+   await page.keyboard.down(axis);await sleep(310);await page.keyboard.up(axis);await sleep(60);
+  }
+  if(arrived)break;
  }
  check("walkedToShopWithKeyboard",arrived);
  console.log("V4_SHOP_DIAG_BEFORE",JSON.stringify({state:await state(),game:await page.evaluate(()=>window.__ulmoaGameQa.state()),dialog:await page.$eval("#dialog",e=>e.className)}));
@@ -47,6 +52,11 @@ try{
   // Capture the ORIGINAL large building front before opening the seed store.
   await page.screenshot({path:"qa/results/hotel-garden-v4-botanical-market-front.png"});
   await page.keyboard.press("e");await sleep(300);
+  // The gardener has story priority in stage 0; enter the story before checking shop E.
+  if(await page.$eval("#dialog",e=>e.classList.contains("show"))){
+   await page.keyboard.press("Enter");await sleep(250);
+   await page.keyboard.press("e");await sleep(300);
+  }
   check("shopOpensAtOriginalHouseWithE",await page.$eval("#hg4Shop",e=>e.classList.contains("open")));
   await page.keyboard.press("Escape");await sleep(130);
   await page.keyboard.press("b");await sleep(400);
