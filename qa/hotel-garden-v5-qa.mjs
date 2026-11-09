@@ -27,7 +27,7 @@ try{
    free:!p(-18,-6,"garden"),
    manorClosed:p(17,.1,"underground"),
    undergroundRoadClear:!p(-27,-12,"underground"),
-   insideStairwellClear:!p(17,7+2,"underground")
+   stairwellSealedUntilEntry:p(17,7+2,"underground")
   };
  });
  for(const [k,v]of Object.entries(collision))check("collision_"+k,v);
