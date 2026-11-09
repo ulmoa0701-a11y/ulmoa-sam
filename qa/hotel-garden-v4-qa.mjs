@@ -4,7 +4,7 @@ import fs from "node:fs";
 fs.mkdirSync("qa/results",{recursive:true});
 const browser=await puppeteer.launch({headless:true,executablePath:process.env.CHROME_PATH||"/usr/bin/google-chrome",args:["--no-sandbox","--disable-dev-shm-usage","--use-angle=swiftshader","--enable-unsafe-swiftshader"]});
 const page=await browser.newPage();await page.setViewport({width:1440,height:900});
-const report={url:"https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/",at:new Date().toISOString(),checks:{},errors:[],httpErrors:[]};
+const report={url:process.env.HOTEL_GARDEN_URL||"https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/",at:new Date().toISOString(),checks:{},errors:[],httpErrors:[]};
 page.on("pageerror",e=>report.errors.push(String(e)));
 page.on("response",r=>{if(r.status()>=400)report.httpErrors.push({status:r.status(),url:r.url()})});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -15,6 +15,7 @@ try{
  await page.waitForFunction(()=>window.__ulmoaGardenV4?.state()&&window.__hgShadersReady,{timeout:45000});
  const start=await state();
  check("v4Loaded",!!start);
+ check("slashHiddenBeforeBattle",await page.$eval('#touchAction [data-action="slash"]',e=>e.classList.contains("hidden")));
  check("shopOnExistingHouse",start.shopExists&&start.shopIsOriginalBuilding);
  check("noSecondFreestandingShop",!start.detachedShopExists);
  check("allFourFacesStocked",start.visualShopFacades);
@@ -69,6 +70,7 @@ try{
  const woodsPreview=await page.evaluate(()=>window.__ulmoaGardenV2.previewBoss("woods"));await sleep(1200);console.log("V4_BOSS_DIAG",JSON.stringify({preview:woodsPreview,state:await state(),game:await page.evaluate(()=>window.__ulmoaGameQa.state())}));
  let woods=await state();
  check("npcPresentDuringBoss",woods.allNpcs.every(Boolean));
+ check("slashHiddenDuringWoods",await page.$eval('#touchAction [data-action="slash"]',e=>e.classList.contains("hidden")));
  check("combatTimerVisible",woods.bossTimer);
  // Pressing E during battle, away from a collectible, must not produce NPC talk warning.
  const oldEText=await page.$eval("#notice",e=>e.textContent);await page.keyboard.press("e");await sleep(100);
@@ -78,6 +80,7 @@ try{
  check("qSilentInEyeBattle",(await page.$eval("#notice",e=>e.textContent))===oldEyeText);console.log("V4_EYE_DIAG",JSON.stringify({preview:eyePreview,state:await state()}));
  const screen=await state();
  check("npcPresentDuringEye",screen.allNpcs.every(Boolean));
+ check("slashNeedsSickleEvenInPreview",!screen.hasSickle&&await page.$eval('#touchAction [data-action="slash"]',e=>e.classList.contains("hidden")));
  await page.screenshot({path:"qa/results/hotel-garden-v4-boss.png"});
  // Smoke checks three boss rewards, while pond-keeper sickle delivery requires separate actual dialogue QA.
  const smoke=await page.evaluate(async()=>await window.__ulmoaGardenV2.runSmoke());
@@ -87,6 +90,8 @@ try{
  report.sickleRequiresRealPondTalk=true;
  check("bossRewardsGiveSeeds",end.coins>=3);
  check("npcPresentAfterBosses",end.allNpcs.every(Boolean));
+ check("slashHiddenAfterQuest",await page.$eval('#touchAction [data-action="slash"]',e=>e.classList.contains("hidden")));
+ check("sicklePromptHiddenAfterQuest",await page.$eval("#hg4SickleNote",e=>getComputedStyle(e).display==="none"));
  check("noFatalBrowserErrors",report.errors.length===0);
  check("noHttpErrors",report.httpErrors.length===0);
 }catch(e){report.error=String(e);report.errors.push(String(e))}
