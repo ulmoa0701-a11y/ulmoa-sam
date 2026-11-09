@@ -52,6 +52,11 @@ try{
   // Capture the ORIGINAL large building front before opening the seed store.
   await page.screenshot({path:"qa/results/hotel-garden-v4-botanical-market-front.png"});
   await page.keyboard.press("e");await sleep(300);
+  // The gardener has story priority in stage 0; enter the story before checking shop E.
+  if(await page.$eval("#dialog",e=>e.classList.contains("show"))){
+   await page.keyboard.press("Enter");await sleep(250);
+   await page.keyboard.press("e");await sleep(300);
+  }
   check("shopOpensAtOriginalHouseWithE",await page.$eval("#hg4Shop",e=>e.classList.contains("open")));
   await page.keyboard.press("Escape");await sleep(130);
   await page.keyboard.press("b");await sleep(400);
