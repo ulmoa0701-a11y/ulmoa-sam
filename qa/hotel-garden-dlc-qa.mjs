@@ -35,6 +35,7 @@ try {
  let initial=await log("start locked");
  check("lockedUntilMainClear",initial.phase==="locked"&&!initial.shovel&&!initial.mansionVisible);
  check("mansionMeshExistsButHidden",initial.mansion3D&&!initial.mansionVisible);
+ check("purpleSoilHiddenBeforeClear",await page.evaluate(()=>!window.__ulmoaGardenFeedbackV5.state().soilVisible));
  await clickDialog();
  const smoke=await page.evaluate(async()=>window.__ulmoaGardenV2.runSmoke());
  report.mainQuestSmoke={pass:smoke.pass,threeLotus:smoke.threeLotus,stage7:smoke.stage7,error:smoke.error};
@@ -43,6 +44,7 @@ try {
  await clickDialog();
  let unlocked=await log("three lotus unlock");
  check("dlcUnlockAfterClear",unlocked.phase==="meet"&&unlocked.lotus===3&&unlocked.mainStage===7);
+ check("purpleSoilAppearsAfterClear",await page.evaluate(()=>window.__ulmoaGardenFeedbackV5.state().soilVisible));
  const gardener=unlocked.gardener;
  let result=await walkTo(gardener[0],gardener[1],3.2,130000);
  console.log("DLC_WALK_GARDENER",JSON.stringify(result));
@@ -69,7 +71,11 @@ try {
  check("separate3DUndergroundWorld",down.underground&&down.mansionVisible&&down.player[1]<-55);
  await clickDialog();
  await page.screenshot({path:"qa/results/hotel-garden-dlc-first-arrival.png"});
- result=await walkTo(17,-11,4.1,135000);
+ // Central avenue first, then the mansion's NEW right-hand driveway.
+result=await walkTo(17,-11,3.1,135000);
+ console.log("DLC_WALK_TO_RIGHT_TURN",JSON.stringify(result));
+ check("reachRightTurnWithoutCrossingBuilding",result.arrived);
+ result=await walkTo(17,-2.7,3.0,110000);
  console.log("DLC_WALK_MANSION",JSON.stringify(result));
  check("walkToGrandMansion",result.arrived);
  await page.screenshot({path:"qa/results/hotel-garden-dlc-mansion-front.png"});
@@ -80,6 +86,11 @@ try {
  check("mansionDoorOpenAndEntered",mansion.mansionEntered&&mansion.phase==="mansion");
  await clickDialog();
  await page.screenshot({path:"qa/results/hotel-garden-dlc-mansion-lobby.png"});
+ const beforeStairs=(await state()).player[1];
+ result=await walkTo(17,13.5,1.0,125000);
+ console.log("DLC_STAIR_ASCENT",JSON.stringify(result));
+ check("grandStairsCanBeWalkedUp",result.arrived&&(await state()).player[1]>-53&&beforeStairs<-58);
+ await page.screenshot({path:"qa/results/hotel-garden-dlc-walkable-stairs.png"});
  check("originalStageAndLotusPreserved",mansion.mainStage===7&&mansion.lotus===3);
  check("noScriptErrors",report.errors.length===0);
  check("noHttpErrors",report.httpErrors.length===0);
