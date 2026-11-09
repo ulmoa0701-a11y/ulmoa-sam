@@ -1084,7 +1084,7 @@ window.__ulmoaGardenDlc={
  version:"garden-beneath-v1"
 };
 
-var Ym=0,Xm=performance.now(),Zm=Xm;Yf.onBeforeRenderObservable.add(()=>{let e=Math.min(.05,Jf.getDeltaTime()/1e3);Ym++,qp&&!Jp&&(Jm(),Km(e),Hm(e),Gm(e),Wm(e),Vm(),Mm(),qm());let t=performance.now();t-Zm>1e3&&(window.__bench={engine:`Babylon.js`,readyMs:Xm,avgFps:+Jf.getFps().toFixed(1),frames:Ym,meshes:Yf.meshes.length,stage:Kp},Zm=t)}),
+var Ym=0,Xm=performance.now(),Zm=Xm;Yf.onBeforeRenderObservable.add(()=>{let e=Math.min(.05,Jf.getDeltaTime()/1e3);Ym++,qp&&!Jp&&(Jm(),Km(e),Hm(e),Gm(e),Wm(e),Vm(),Mm(),qm());let t=performance.now();t-Zm>1e3&&(window.__bench={engine:`Babylon.js`,readyMs:Xm,avgFps:+Jf.getFps().toFixed(1),frames:Ym,meshes:Yf.meshes.length,stage:Kp},Zm=t)});
 /* HOTEL GARDEN V5 — real collisions, close-range WOODS, footwear,
    animated sickle, post-clear soil, right-side walkable manor and silhouette.
    Add after V4 + underground DLC, before the initial Dm(0) invocation. */
