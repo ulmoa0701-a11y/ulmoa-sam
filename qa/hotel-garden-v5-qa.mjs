@@ -32,6 +32,12 @@ try{
  });
  for(const [k,v]of Object.entries(collision))check("collision_"+k,v);
  check("woodsShortRangeDefined",start.woodsDangerRadius===8.2);
+ // Exercise an ACTUAL running WOODS battle while the player stays outside range.
+ // Preview sets the character six meters aside on each axis: distance about 8.49m.
+ const preview=await page.evaluate(()=>window.__ulmoaGardenV2.previewBoss("woods"));
+ await new Promise(resolve=>setTimeout(resolve,5400));
+ const farFight=await page.evaluate(()=>({game:window.__ulmoaGameQa.state(),v5:window.__ulmoaGardenFeedbackV5.state()}));
+ check("woodsCannotHitIdleDistantPlayer",preview&&farFight.game.stage===2&&farFight.v5.woodsDistance>8.2&&farFight.game.woods.damage===0);
  await page.screenshot({path:"qa/results/hotel-garden-v5-garden.png"});
  const ui=await page.evaluate(()=>({hasSickle:!!document.getElementById("hg4SickleNote"),hasShop:!!document.getElementById("hg4Shop"),hasDlc:!!document.getElementById("hg5Quest"),hasSilhouette:!!document.getElementById("hg6PlayerSilhouette")}));
  check("previousFeaturesPreserved",Object.values(ui).every(Boolean));
