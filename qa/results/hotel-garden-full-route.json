@@ -4,7 +4,7 @@
   "steps": [
     {
       "label": "start",
-      "time": "2026-11-02T13:07:30.272Z",
+      "time": "2026-11-09T10:51:02.704Z",
       "stage": 0,
       "player": [
         -18,
@@ -32,11 +32,11 @@
     },
     {
       "label": "gardener",
-      "time": "2026-11-02T13:07:34.911Z",
+      "time": "2026-11-09T10:51:05.627Z",
       "stage": 1,
       "player": [
-        -14.86,
-        -2.75
+        -14.66,
+        -2.76
       ],
       "woods": {
         "enabled": true,
@@ -60,11 +60,11 @@
     },
     {
       "label": "woods encounter",
-      "time": "2026-11-02T13:08:10.302Z",
+      "time": "2026-11-09T10:51:24.868Z",
       "stage": 2,
       "player": [
-        15.37,
-        17.27
+        15.24,
+        17.51
       ],
       "woods": {
         "enabled": true,
@@ -88,11 +88,11 @@
     },
     {
       "label": "woods defeated",
-      "time": "2026-11-02T13:08:26.421Z",
+      "time": "2026-11-09T10:51:30.647Z",
       "stage": 3,
       "player": [
-        15.92,
-        14.31
+        16.8,
+        19.59
       ],
       "woods": {
         "enabled": false,
@@ -116,11 +116,11 @@
     },
     {
       "label": "woods flower",
-      "time": "2026-11-02T13:08:28.032Z",
+      "time": "2026-11-09T10:51:32.253Z",
       "stage": 3,
       "player": [
-        15.92,
-        14.31
+        16.8,
+        19.59
       ],
       "woods": {
         "enabled": false,
@@ -144,11 +144,11 @@
     },
     {
       "label": "pond keeper",
-      "time": "2026-11-02T13:08:45.802Z",
+      "time": "2026-11-09T10:51:44.649Z",
       "stage": 4,
       "player": [
-        3.38,
-        -4.28
+        3.97,
+        -4.38
       ],
       "woods": {
         "enabled": false,
@@ -172,11 +172,11 @@
     },
     {
       "label": "EYE approached by keyboard",
-      "time": "2026-11-02T13:08:59.035Z",
+      "time": "2026-11-09T10:51:51.667Z",
       "stage": 4,
       "player": [
-        19.36,
-        -15.57
+        19.55,
+        -16.07
       ],
       "woods": {
         "enabled": false,
@@ -200,11 +200,11 @@
     },
     {
       "label": "eye defeated",
-      "time": "2026-11-02T13:09:04.621Z",
-      "stage": 4,
+      "time": "2026-11-09T10:51:56.899Z",
+      "stage": 5,
       "player": [
-        19.36,
-        -15.57
+        19.55,
+        -16.07
       ],
       "woods": {
         "enabled": false,
@@ -212,8 +212,8 @@
         "damage": 0
       },
       "eye": {
-        "enabled": true,
-        "hits": 2,
+        "enabled": false,
+        "hits": 3,
         "damage": 0
       },
       "smog": {
@@ -224,15 +224,15 @@
       },
       "lotus": 1,
       "bucket": false,
-      "mission": "⑤ 지금 빈틈! F 베기"
+      "mission": "⑥ 여행객에게 가서 E 말걸기"
     },
     {
       "label": "eye flower",
-      "time": "2026-11-02T13:09:07.938Z",
-      "stage": 4,
+      "time": "2026-11-09T10:51:58.534Z",
+      "stage": 5,
       "player": [
-        19,
-        -16.92
+        19.55,
+        -16.07
       ],
       "woods": {
         "enabled": false,
@@ -240,9 +240,9 @@
         "damage": 0
       },
       "eye": {
-        "enabled": true,
-        "hits": 2,
-        "damage": 1
+        "enabled": false,
+        "hits": 3,
+        "damage": 0
       },
       "smog": {
         "enabled": false,
@@ -250,24 +250,192 @@
         "cycle": 0,
         "damage": 0
       },
-      "lotus": 1,
+      "lotus": 2,
       "bucket": false,
-      "mission": "⑤ EYE 추격을 피하고 빈틈에 F 베기 3번"
+      "mission": "⑥ 여행객에게 가서 E 말걸기"
+    },
+    {
+      "label": "traveler bucket",
+      "time": "2026-11-09T10:52:19.373Z",
+      "stage": 6,
+      "player": [
+        -1.53,
+        14.35
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 2,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 3,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": true,
+        "mode": "approach",
+        "cycle": 0,
+        "damage": 0
+      },
+      "lotus": 2,
+      "bucket": true,
+      "mission": "⑦ 1/3 · SMOG 가까이 가서 변화 관찰"
+    },
+    {
+      "label": "SMOG dodge 1",
+      "time": "2026-11-09T10:52:36.639Z",
+      "stage": 6,
+      "player": [
+        32.11,
+        -13.57
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 2,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 3,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": true,
+        "mode": "cooldown",
+        "cycle": 1,
+        "damage": 0
+      },
+      "lotus": 2,
+      "bucket": true,
+      "mission": "⑦ 2/3 · 다시 가까이 가서 변화 관찰"
+    },
+    {
+      "label": "SMOG dodge 2",
+      "time": "2026-11-09T10:52:41.128Z",
+      "stage": 6,
+      "player": [
+        23.37,
+        -14.95
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 2,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 3,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": true,
+        "mode": "cooldown",
+        "cycle": 2,
+        "damage": 0
+      },
+      "lotus": 2,
+      "bucket": true,
+      "mission": "⑦ 3/3 · 다시 가까이 가서 변화 관찰"
+    },
+    {
+      "label": "SMOG dodge 3",
+      "time": "2026-11-09T10:52:45.615Z",
+      "stage": 6,
+      "player": [
+        23.19,
+        -14.82
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 2,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 3,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": true,
+        "mode": "water",
+        "cycle": 3,
+        "damage": 0
+      },
+      "lotus": 2,
+      "bucket": true,
+      "mission": "⑦ 마지막! SMOG 가까이에서 Q 물양동이"
+    },
+    {
+      "label": "smog water",
+      "time": "2026-11-09T10:52:48.656Z",
+      "stage": 7,
+      "player": [
+        27.9,
+        -18.35
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 2,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 3,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": false,
+        "mode": "water",
+        "cycle": 3,
+        "damage": 0
+      },
+      "lotus": 2,
+      "bucket": false,
+      "mission": "✓ 미션 완료 · 남은 시간 자유 탐험"
+    },
+    {
+      "label": "stage 7 and third lotus",
+      "time": "2026-11-09T10:52:50.532Z",
+      "stage": 7,
+      "player": [
+        28.35,
+        -18.68
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 2,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 3,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": false,
+        "mode": "water",
+        "cycle": 3,
+        "damage": 0
+      },
+      "lotus": 3,
+      "bucket": false,
+      "mission": "🔎 숨겨진 이야기 · 정원사에게 돌아가 E로 말 걸기"
     }
   ],
   "errors": [],
   "httpErrors": [],
   "networkFailures": [],
-  "pass": false,
+  "pass": true,
   "gardener": {
     "near": true,
-    "pulses": 14,
+    "pulses": 9,
     "last": {
       "stage": 0,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        -14.86,
-        -2.75
+        -14.66,
+        -2.76
       ],
       "woods": {
         "enabled": false,
@@ -295,13 +463,13 @@
   },
   "woodsArrival": {
     "near": false,
-    "pulses": 71,
+    "pulses": 38,
     "last": {
       "stage": 1,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        15.37,
-        17.27
+        15.24,
+        17.51
       ],
       "woods": {
         "enabled": true,
@@ -331,13 +499,13 @@
   "woodsFlower": true,
   "pondArrival": {
     "near": true,
-    "pulses": 41,
+    "pulses": 28,
     "last": {
       "stage": 3,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        3.38,
-        -4.28
+        3.97,
+        -4.38
       ],
       "woods": {
         "enabled": false,
@@ -365,13 +533,13 @@
   },
   "eyeArrival": {
     "near": true,
-    "pulses": 28,
+    "pulses": 15,
     "last": {
       "stage": 4,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        19.36,
-        -15.57
+        19.55,
+        -16.07
       ],
       "woods": {
         "enabled": false,
@@ -397,17 +565,68 @@
       ]
     }
   },
-  "eyeWon": false,
-  "eyeFlower": false,
+  "eyeAttempts": [
+    {
+      "attempt": 1,
+      "previous": 0,
+      "hits": 1,
+      "mission": "⑤ 지금 빈틈! F 베기",
+      "notice": "✅ 베기 성공! 1/3"
+    },
+    {
+      "attempt": 2,
+      "previous": 1,
+      "hits": 1,
+      "mission": "⑤ 지금 빈틈! F 베기",
+      "notice": "✅ 베기 성공! 1/3"
+    },
+    {
+      "attempt": 3,
+      "previous": 1,
+      "hits": 1,
+      "mission": "⑤ EYE 가지 공격 준비! 점프하거나 옆으로 피하기",
+      "notice": "⚠️ EYE 공격! Space 점프 또는 옆으로 이동!"
+    },
+    {
+      "attempt": 4,
+      "previous": 1,
+      "hits": 2,
+      "mission": "⑤ 지금 빈틈! F 베기",
+      "notice": "✅ 베기 성공! 2/3"
+    },
+    {
+      "attempt": 5,
+      "previous": 2,
+      "hits": 2,
+      "mission": "⑤ 지금 빈틈! F 베기",
+      "notice": "✅ 베기 성공! 2/3"
+    },
+    {
+      "attempt": 6,
+      "previous": 2,
+      "hits": 2,
+      "mission": "⑤ EYE 가지 공격 준비! 점프하거나 옆으로 피하기",
+      "notice": "⚠️ EYE 공격! Space 점프 또는 옆으로 이동!"
+    },
+    {
+      "attempt": 7,
+      "previous": 2,
+      "hits": 3,
+      "mission": "⑤ 지금 빈틈! F 베기",
+      "notice": "🌰 씨앗 토큰 3개를 받았어요!"
+    }
+  ],
+  "eyeWon": true,
+  "eyeFlower": true,
   "travelerArrival": {
     "near": true,
-    "pulses": 71,
+    "pulses": 43,
     "last": {
-      "stage": 4,
+      "stage": 5,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        -1.09,
-        14.42
+        -1.53,
+        14.35
       ],
       "woods": {
         "enabled": false,
@@ -415,9 +634,9 @@
         "damage": 0
       },
       "eye": {
-        "enabled": true,
-        "hits": 2,
-        "damage": 1
+        "enabled": false,
+        "hits": 3,
+        "damage": 0
       },
       "smog": {
         "enabled": false,
@@ -425,7 +644,7 @@
         "cycle": 0,
         "damage": 0
       },
-      "lotus": 1,
+      "lotus": 2,
       "bucket": false,
       "map": [
         90,
@@ -433,6 +652,7 @@
       ]
     }
   },
-  "error": "TimeoutError: Waiting failed: 15000ms exceeded",
-  "generatedAt": "2026-11-02T13:09:59.071Z"
+  "smogWon": true,
+  "smogFlower": true,
+  "generatedAt": "2026-11-09T10:52:51.151Z"
 }
