@@ -7,7 +7,7 @@ const errors=[],http=[];
 page.on("pageerror",e=>errors.push(String(e)));
 page.on("response",r=>{if(r.status()>=400)http.push({status:r.status(),url:r.url()})});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const report={url:"https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/",steps:[],errors,http};
+const report={url:process.env.HOTEL_GARDEN_URL||"https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/",steps:[],errors,http};
 async function state(){return page.evaluate(()=>window.__ulmoaGameQa?.state())}
 async function record(step){report.steps.push({step,time:new Date().toISOString(),state:await state(),mission:await page.$eval("#mission",e=>e.textContent)})}
 async function move(key,ms=380){await page.keyboard.down(key);await sleep(ms);await page.keyboard.up(key);await sleep(70)}
