@@ -2,7 +2,7 @@
 // window.__ulmoaGameQa is read-only here; no previewBoss, runSmoke, teleport, or event injection.
 import puppeteer from 'puppeteer-core';
 import fs from 'node:fs';
-const url='https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/';
+const url=process.env.HOTEL_GARDEN_URL||'https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/';
 const browser=await puppeteer.launch({headless:true,executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',args:['--no-sandbox','--disable-dev-shm-usage','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 const page=await browser.newPage();
 await page.setViewport({width:1440,height:900});
@@ -73,8 +73,8 @@ async function playWoods(){
  return defeated;
 }
 async function playEye(){
- let hits=0;
- for(let attempts=0;attempts<10 && hits<3;attempts++){
+ let hits=0;report.eyeAttempts=[];
+ for(let attempts=0;attempts<16 && hits<3;attempts++){
   await page.waitForFunction(()=>{
    const m=document.querySelector('#mission')?.textContent||'';
    return m.includes('가지 공격 준비!')||m.includes('지금 빈틈')||document.querySelector('#dialog')?.classList.contains('show');
@@ -83,8 +83,10 @@ async function playEye(){
   if((await page.$eval('#mission',e=>e.textContent)).includes('가지 공격 준비!'))await page.keyboard.press('Space');
   await page.waitForFunction(()=>document.querySelector('#mission')?.textContent.includes('지금 빈틈')||document.querySelector('#dialog')?.classList.contains('show'),{timeout:10000});
   if(await modal()){await nextDialog();continue}
-  await page.keyboard.press('f');await wait(400);
-  hits=(await state()).eye.hits;
+  await page.keyboard.press('f');await wait(430);
+  const previous=hits;hits=(await state()).eye.hits;
+  report.eyeAttempts.push({attempt:attempts+1,previous,hits,mission:await page.$eval('#mission',e=>e.textContent),notice:await page.$eval('#notice',e=>e.textContent)});
+  console.log('EYE_ATTEMPT '+JSON.stringify(report.eyeAttempts.at(-1)));
   if(await modal()){await nextDialog();if((await state()).stage===5)break;continue}
  }
  const defeated=(await state()).eye.hits===3;
@@ -120,6 +122,7 @@ try{
  report.eyeArrival=await walkTo(24,-15,4.8,65000);
  await record('EYE approached by keyboard');
  report.eyeWon=await playEye();await record('eye defeated');
+ if(!report.eyeWon)throw Error('EYE did not reach three successful slashes: '+JSON.stringify(report.eyeAttempts?.slice(-5)));
  report.eyeFlower=await pickFlower();await record('eye flower');
  report.travelerArrival=await walkTo(-2,18,4.0,65000);await page.keyboard.press('e');await nextDialog();await record('traveler bucket');
  report.smogWon=await playSmog();await record('smog water');
