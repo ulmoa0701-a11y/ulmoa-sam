@@ -1166,7 +1166,7 @@ function __hg6Rect(x,z,cx,cz,hx,hz){return Math.abs(x-cx)<hx+.36&&Math.abs(z-cz)
 function __hg6GardenBlocked(x,z){
  if(__hg6Rect(x,z,-5,-4,3.70,2.63))return true; // original house / 360-degree racks
  if(Math.hypot(x-4,z+3)<3.45)return true; // pond water and stones
- for(const t of __hg6Trees)if(Math.hypot(x-t[0],z-t[1])<.44+t[2]*.52)return true;
+ for(const t of __hg6Trees)if(Math.hypot(x-t[0],z-t[1])<.33+t[2]*.38)return true;
  for(const p of __hg6Lamps)if(Math.hypot(x-p[0],z-p[1])<.52)return true;
  return false;
 }
