@@ -36,14 +36,14 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    else if(scene.kind==='share')m.append(h('p','hands-explain',Array.from({length:scene.boxes},()=>scene.answer+'개').join(' · ')+' / 남은 것 '+scene.remainder+'개'));
    else if(scene.kind==='groups')m.append(h('p','hands-explain',scene.groups+'묶음 × '+scene.per+'개 = '+scene.answer+'개'));
    else if(scene.kind==='graph')m.append(h('p','hands-explain','표의 숫자만큼 막대 높이: '+scene.data.join(' · ')));
-   else if(scene.kind==='place')m.append(h('p','hands-explain','십 '+scene.tens+'묶음, 낱개 '+scene.ones+'개 → '+scene.answer));
+   else if(scene.kind==='place')m.append(h('p','hands-explain',scene.places.map(x=>x.label+' '+x.value+'개').join(' · ')+' → '+scene.answer));
    else if(scene.kind==='count')m.append(h('p','hands-explain','도토리를 하나씩 짚으면서 '+scene.count+'개 세어 봐.'));
    else if(scene.kind==='move')m.append(h('p','hands-explain','오른쪽 '+scene.dx+'칸, 위 '+scene.dy+'칸 움직이면 목적지야.'));
    else if(scene.kind==='line')m.append(h('p','hands-explain','시작점부터 한 칸씩 같은 간격으로 이동해.'));
    else if(scene.kind==='measure')m.append(h('p','hands-explain','자에서 0을 찾고 '+scene.target+'cm만큼 이동해.'));
    else if(scene.kind==='pattern')m.append(h('p','hands-explain','매번 '+scene.step+'씩 커져. 규칙은 '+scene.answer+'에서 계속돼.'));
    else if(scene.kind==='symmetry')m.append(h('p','hands-explain','왼쪽 꽃과 대칭선을 기준으로 같은 거리의 오른쪽 칸에 꽃을 심어.'));
-   else if(scene.kind==='shape')m.append(h('p','hands-explain','변을 하나씩 세면 '+scene.sides+'개. '+scene.name+'이야.'));
+   else if(scene.kind==='shape')m.append(h('p','hands-explain',scene.solid?'평평한 면과 둥근 부분을 살펴보면 '+scene.name+'이야.':'변을 하나씩 세면 '+scene.sides+'개. '+scene.name+'이야.'));
    else m.append(h('p','hands-explain',problem.question+' → '+problem.answer));
    m.append(h('p','hands-small',scene.hint||problem.hint||'한 번 더 천천히 확인해 보자.'));
    work.append(m);
@@ -99,7 +99,7 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
  }else if(scene.kind==='clock'){
    let hour=12,minute=0;
    say('시침과 분침을 바꿔서 같은 시각을 만들어 봐.');
-   const target=addScene('<p class="hands-small">모아가 보여주는 시각</p>'+visual('clock',{hour:scene.hour,minute:scene.minute}));
+   const target=addScene('<p class="hands-small">'+(scene.elapsed?'현재 시각에서 30분 뒤를 만들어 봐':'모아가 보여주는 시각')+'</p>'+visual('clock',{hour:scene.elapsed?scene.startHour:scene.hour,minute:scene.elapsed?scene.startMinute:scene.minute}));
    const mine=addScene('<p class="hands-small">내가 만든 시각</p>');
    const row=h('div','hands-steppers');work.append(row);
    const update=()=>{mine.innerHTML='<p class="hands-small">내가 만든 시각</p>'+visual('clock',{hour,minute});stepH.val.textContent=hour+'시';stepM.val.textContent=minute+'분'};
@@ -146,12 +146,22 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    for(let i=0;i<9;i++){const v=scene.start+scene.step*i;const mark=btn(String(v),()=>{marks.querySelectorAll('button').forEach(b=>b.classList.remove('selected'));mark.classList.add('selected');marks.dataset.value=String(v)},'hands-number-mark');marks.append(mark)}
    guide();check(()=>+marks.dataset.value===target);preset(()=>{const m=[...marks.children].find(b=>b.textContent===String(target));m?.click()});
  }else if(scene.kind==='place'){
-   let tens=0,ones=0;const row=h('div','hands-steppers');work.append(row);const summary=h('p','hands-left');work.append(summary);
-   say('십 한 묶음은 10개, 낱개는 한 개야. 맞게 묶어 보자.');
-   const update=()=>{stepT.val.textContent='십 '+tens+'묶음';stepO.val.textContent='낱개 '+ones+'개';summary.textContent='◼'.repeat(tens)+'  ●'.repeat(ones)+' = '+(tens*10+ones)};
-   const stepT=addStepper(row,'십',()=>{tens=Math.max(0,tens-1);update()},()=>{tens=Math.min(9,tens+1);update()});
-   const stepO=addStepper(row,'낱개',()=>{ones=Math.max(0,ones-1);update()},()=>{ones=Math.min(9,ones+1);update()});update();guide();
-   check(()=>tens===scene.tens&&ones===scene.ones);preset(()=>{tens=scene.tens;ones=scene.ones;update()});
+   const values=scene.places.map(()=>0),row=h('div','hands-steppers');work.append(row);const summary=h('div','hands-place-blocks');work.append(summary);
+   say('자릿값 블록을 하나씩 늘리거나 줄여서 같은 수를 만들어 보자.');
+   const steps=[];
+   const update=()=>{
+     summary.replaceChildren();
+     scene.places.forEach((place,i)=>{
+       steps[i].val.textContent=place.label+' '+values[i]+'개';
+       const tile=h('div','hands-place-column');tile.append(h('strong','',place.label));
+       tile.append(h('span','hands-place-icons',('▮').repeat(values[i])||'·'));
+       summary.append(tile);
+     });
+   };
+   scene.places.forEach((place,i)=>{steps.push(addStepper(row,place.label,()=>{values[i]=Math.max(0,values[i]-1);update()},()=>{values[i]=Math.min(9,values[i]+1);update()}))});
+   update();guide();
+   check(()=>values.every((v,i)=>v===scene.places[i].value));
+   preset(()=>{scene.places.forEach((p,i)=>values[i]=p.value);update()});
  }else if(scene.kind==='measure'){
    say('0cm부터 시작해 목표 눈금을 표시하자.');
    const ruler=h('div','hands-ruler');let value=-1;work.append(ruler);
