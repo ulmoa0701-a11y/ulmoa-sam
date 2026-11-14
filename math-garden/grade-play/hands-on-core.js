@@ -7,17 +7,18 @@ const rand=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const pick=x=>x[rand(0,x.length-1)];
 const inSet=(m,list)=>list.split(' ').includes(m);
 const family=(mode,answer='')=>{
- if(inSet(mode,'count shapeCount classify'))return 'count';
+ if(mode==='count')return 'count';
  if(inSet(mode,'divide groupDiv remainder'))return 'share';
  if(inSet(mode,'groupMult times'))return 'groups';
  if(inSet(mode,'fractionParts fracDecimal fracCompare fracEquivalent fracAdd fracSub fracUnlike fracUnlikeSub fractionKinds fractionMix'))return 'fraction';
  if(inSet(mode,'angles anglesMeasure angleSum rightAngle'))return 'angle';
  if(inSet(mode,'clock elapsed'))return 'clock';
  if(inSet(mode,'chart pictograph barGraph lineChart lineChange pieChart tableRead graphChoice'))return 'graph';
- if(inSet(mode,'tens50 tens100 tens hundreds thousands placeValue placeValue4 placeValueBig'))return 'place';
+ if(inSet(mode,'tens50 tens100 tens hundreds thousands placeValue placeValue4'))return 'place';
  if(inSet(mode,'numberLine numberLine50 numberLine100 numberOrder numberOrder50 numberOrder100 numberOrder999 numberOrder4 numberOrderBig compare'))return 'line';
  if(inSet(mode,'pattern patternShapes'))return 'pattern';
- if(inSet(mode,'transformation2d transformation reflection rotation'))return 'move';
+ if(inSet(mode,'reflection'))return 'symmetry';
+ if(inSet(mode,'transformation2d transformation rotation'))return 'move';
  if(inSet(mode,'symmetry pointSym'))return 'symmetry';
  if(inSet(mode,'shape2d shape3d shapeMatch shape3dObject shape3dClass polygonSides triangles triangleClass shapeQuadrilaterals quadrilateral regularPolygon diagonals congruence prism netCube solids faces shapeViews solidProperties boxEdges cubes'))return 'shape';
  if(inSet(mode,'ruler length lengthCompare'))return 'measure';
@@ -34,8 +35,8 @@ function buildMode(kind,mode,p){
  return {kind:'share',question:total+'개의 도토리를 '+boxes+'명에게 똑같이 나눠 주자.',hint:'한 명씩 돌아가면서 하나씩 담으면 공평해져.',total,boxes,remainder:mode==='remainder'?total%boxes:0,answer:Math.floor(total/boxes)};}
  if(kind==='groups'){const groups=rand(2,4),per=rand(2,6);return {kind:'groups',question:groups+'개 바구니에 '+per+'개씩 담아 보자.',hint:'바구니마다 개수가 같은지 살펴봐.',groups,per,answer:groups*per};}
  if(kind==='graph'){const data=Array.from({length:3},()=>rand(1,8));return {kind:'graph',question:'조사표와 똑같은 막대그래프를 직접 만들어 보자.',hint:'왼쪽 표의 숫자만큼 막대를 높여 봐.',data,answer:data.join(',')};}
- if(kind==='clock'){const hour=rand(1,12),minute=pick([0,30]);return {kind:'clock',question:'오른쪽 시계와 똑같은 시각을 만들어 보자.',hint:'짧은 바늘은 시, 긴 바늘은 분을 나타내.',hour,minute,answer:hour+'|'+minute};}
- if(kind==='angle'){const angle=mode==='rightAngle'?90:mode==='angles'?pick([30,60,90,120,150]):rand(2,12)*15;return {kind:'angle',question:angle+'° 각을 직접 만들어 보자.',hint:'90°는 직각, 더 작으면 예각, 더 크면 둔각이야.',angle,answer:angle};}
+ if(kind==='clock'){const hour=rand(1,11),minute=pick([0,30]),elapsed=mode==='elapsed',plus=30;const targetHour=elapsed?(minute===30?hour+1:hour):hour,targetMinute=elapsed?(minute===30?0:30):minute;return {kind:'clock',question:elapsed?'시계에서 30분 뒤의 시각을 직접 만들어 보자.':'모아의 시계와 똑같은 시각을 만들어 보자.',hint:elapsed?'긴 바늘을 반 바퀴 움직이면 30분이야.':'짧은 바늘은 시, 긴 바늘은 분을 나타내.',hour:targetHour,minute:targetMinute,startHour:hour,startMinute:minute,elapsed,answer:targetHour+'|'+targetMinute};}
+ if(kind==='angle'){let angle=mode==='rightAngle'?90:mode==='angles'?pick([30,60,90,120,150]):rand(2,12)*15;let a=null,b=null;if(mode==='angleSum'){a=rand(3,8)*10;b=rand(2,6)*10;angle=a+b;}return {kind:'angle',question:a? a+'°와 '+b+'°를 합친 각을 만들어 보자.':angle+'° 각을 직접 만들어 보자.',hint:'90°는 직각, 더 작으면 예각, 더 크면 둔각이야.',angle,first:a,second:b,answer:angle};}
  if(kind==='fraction'){
   const den=pick([3,4,5,6]);let numer=rand(1,den-1),task='parts',other=0,first=0;
   if(inSet(mode,'fracAdd fracUnlike')){task='add';first=rand(1,2);other=rand(1,den-first-1);numer=first+other}
@@ -50,7 +51,7 @@ function buildMode(kind,mode,p){
  if(kind==='pattern'){const step=rand(2,7),start=rand(1,11);return {kind:'pattern',question:'수의 규칙을 찾아 빈칸을 완성하자.',hint:'앞의 수에서 매번 얼마씩 커지는지 살펴봐.',start,step,answer:start+step*4};}
  if(kind==='line'){const start=rand(0,10),step=rand(1,5),target=start+step*rand(1,7);return {kind:'line',question:'수직선에서 '+target+'을 찾아 표시해 보자.',hint:'시작점부터 같은 간격으로 한 칸씩 세어 봐.',start,step,target,answer:target};}
  if(kind==='count'){const count=rand(2,9);return {kind:'count',question:'도토리를 세고 같은 개수를 열 칸 틀에 채워 보자.',hint:'왼쪽부터 하나씩 누르면서 개수를 맞춰 봐.',count,answer:count};}
- if(kind==='place'){const tens=rand(1,8),ones=rand(0,9);return {kind:'place',question:'십 모형 '+tens+'개와 낱개 '+ones+'개를 직접 만들어 보자.',hint:'십 한 묶음은 10개, 낱개는 1개야.',tens,ones,answer:tens*10+ones};}
+ if(kind==='place'){const labels=inSet(mode,'thousands placeValue4')?['천','백','십','일']:inSet(mode,'hundreds placeValue')?['백','십','일']:['십','일'];const places=labels.map((label,i)=>({label,value:i===0?rand(1,label==='십'&&mode==='tens50'?5:8):rand(0,9)}));if(mode==='tens50'&&places[0].value===5)places[1].value=0;if(mode==='tens100'&&places[0].value===8)places[1].value=rand(0,9);const multipliers={천:1000,백:100,십:10,일:1};const answer=places.reduce((n,x)=>n+x.value*multipliers[x.label],0);return {kind:'place',question:places.map(x=>x.label+' '+x.value+'개').join(', ')+'를 직접 만들어 보자.',hint:'한 자리씩 세면서 각 자릿값을 맞춰 보자.',places,answer};}
  if(kind==='measure'){const target=rand(2,15);return {kind:'measure',question:'자 위에서 '+target+'cm 위치에 표시를 놓자.',hint:'0부터 눈금을 한 칸씩 따라가 봐.',target,answer:target};}
  if(kind==='symmetry'){return {kind:'symmetry',question:'세로 대칭선 반대편에 같은 위치의 꽃을 심어 보자.',hint:'대칭선을 기준으로 같은 거리만큼 반대쪽에 있어야 해.',x:rand(0,1),y:rand(0,3),answer:'mirror'}}
  if(kind==='shape'){const solids=inSet(mode,'shape3d shape3dObject shape3dClass prism netCube solids faces shapeViews solidProperties boxEdges cubes');if(solids){const types=[['상자 모양','📦'],['둥근기둥 모양','🥫'],['공 모양','⚽']];const [name,emoji]=pick(types);return {kind:'shape',solid:true,question:'어떤 입체 모양인지 살펴보고 그림 카드를 모양 바구니에 넣자.',hint:'평평한 면과 둥근 면, 꼭짓점을 비교해 보자.',name,emoji,answer:name}}
