@@ -43,6 +43,8 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    else if(scene.kind==='measure')m.append(h('p','hands-explain','자에서 0을 찾고 '+scene.target+'cm만큼 이동해.'));
    else if(scene.kind==='pattern')m.append(h('p','hands-explain','매번 '+scene.step+'씩 커져. 규칙은 '+scene.answer+'에서 계속돼.'));
    else if(scene.kind==='symmetry')m.append(h('p','hands-explain','왼쪽 꽃과 대칭선을 기준으로 같은 거리의 오른쪽 칸에 꽃을 심어.'));
+   else if(scene.kind==='circle')m.append(h('p','hands-explain',scene.part==='중심'||scene.part==='반지름'||scene.part==='지름'&&scene.answer===scene.part?'원의 '+scene.part+' 부분을 찾아보자.':'원의 '+scene.part+' 길이는 '+scene.answer+'cm야.'));
+   else if(scene.kind==='units')m.append(h('p','hands-explain',scene.big+scene.unit+' + '+scene.small+scene.minor+' = '+scene.answer+scene.minor));
    else if(scene.kind==='shape')m.append(h('p','hands-explain',scene.solid?'평평한 면과 둥근 부분을 살펴보면 '+scene.name+'이야.':'변을 하나씩 세면 '+scene.sides+'개. '+scene.name+'이야.'));
    else m.append(h('p','hands-explain',problem.question+' → '+problem.answer));
    m.append(h('p','hands-small',scene.hint||problem.hint||'한 번 더 천천히 확인해 보자.'));
@@ -124,6 +126,41 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    const area=h('div','hands-graph');work.append(area);
    const update=()=>{area.replaceChildren();data.forEach((v,i)=>{const col=h('div','hands-graph-col');col.append(h('strong','',names[i]));const track=h('div','hands-graph-track');for(let y=9;y>=1;y--){const seg=h('div','hands-graph-segment'+(y<=v?' active':''));track.append(seg)}col.append(track);col.append(h('b','',v+'개'));col.append(btn('＋',()=>{data[i]=Math.min(9,data[i]+1);update()},'hands-step'));col.append(btn('−',()=>{data[i]=Math.max(0,data[i]-1);update()},'hands-step'));area.append(col)})};
    update();guide();check(()=>data.every((v,i)=>v===scene.data[i]));preset(()=>{scene.data.forEach((v,i)=>data[i]=v);update()});
+ }else if(scene.kind==='circle'){
+   if(scene.part==='중심'||scene.part==='반지름'||scene.part==='지름'){
+     say('원의 그림에서 알맞은 부분을 직접 눌러 표시해 보자.');
+     let chosen=null;
+     const diagram=h('div','hands-circle-select');
+     const svg='<svg viewBox="0 0 260 260" width="265" style="max-width:100%" role="img" aria-label="원, 중심점, 반지름과 지름을 선택하는 그림">'+
+     '<circle cx="130" cy="130" r="100" fill="#f4fbef" stroke="#467a5d" stroke-width="5"/>'+
+     '<line data-part="지름" role="button" tabindex="0" aria-label="지름: 원의 양끝을 잇는 선" x1="30" y1="130" x2="230" y2="130" stroke="#e8b36e" stroke-width="15" stroke-linecap="round"/>'+
+     '<line data-part="반지름" role="button" tabindex="0" aria-label="반지름: 중심과 원의 테두리를 잇는 선" x1="130" y1="130" x2="130" y2="30" stroke="#80ae8a" stroke-width="18" stroke-linecap="round"/>'+
+     '<circle data-part="중심" role="button" tabindex="0" aria-label="원의 중심점" cx="130" cy="130" r="17" fill="#467c61"/>'+
+     '</svg>';
+     diagram.innerHTML=svg;work.append(diagram);
+     diagram.querySelectorAll('[data-part]').forEach(el=>{
+       const activate=()=>{chosen=el.dataset.part;diagram.querySelectorAll('[data-part]').forEach(x=>x.classList.toggle('selected',x===el))};
+       el.addEventListener('click',activate);el.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();activate()}});
+     });
+     guide();check(()=>chosen===scene.answer);preset(()=>{diagram.querySelector('[data-part="'+scene.answer+'"]').dispatchEvent(new Event('click',{bubbles:true}))});
+   }else{
+     say('반지름은 중심에서 테두리까지, 지름은 원을 가로지르는 길이야.');
+     let length=1;const img=addScene('');
+     const row=h('div','hands-steppers');work.append(row);
+     const step=addStepper(row,'길이',()=>{length=Math.max(1,length-1);update()},()=>{length=Math.min(20,length+1);update()});
+     const update=()=>{step.val.textContent=length+'cm';img.innerHTML='<svg viewBox="0 0 270 210" width="260" style="max-width:90%" role="img" aria-label="반지름과 지름"><circle cx="135" cy="110" r="80" fill="#e8f4e5" stroke="#427c60" stroke-width="5"/><line x1="'+(scene.part==='지름'?55:135)+'" y1="110" x2="215" y2="110" stroke="#c97a58" stroke-width="7"/><circle cx="135" cy="110" r="6" fill="#4d7e5f"/><text x="135" y="195" text-anchor="middle" font-size="20" fill="#356245">'+scene.part+' '+length+'cm</text></svg>'};
+     update();guide();check(()=>length===scene.answer);preset(()=>{length=scene.answer;update()});
+   }
+ }else if(scene.kind==='units'){
+   say('큰 단위 한 개는 작은 단위 1000개야. 두 단위를 나눠서 맞춰 봐.');
+   let big=0,small=0;const row=h('div','hands-steppers');work.append(row);
+   const meter=h('div','hands-capacity');work.append(meter);
+   const update=()=>{stepBig.val.textContent=big+scene.unit;stepSmall.val.textContent=small+scene.minor;
+     meter.replaceChildren();const bigTokens=h('div','hands-big-units');for(let i=0;i<big;i++)bigTokens.append(h('span','',scene.unit==='L'?'🧃':'⚖️'));
+     meter.append(bigTokens,h('strong','',big+scene.unit+' + '+small+scene.minor+' = '+(big*1000+small)+scene.minor))};
+   const stepBig=addStepper(row,scene.unit,()=>{big=Math.max(0,big-1);update()},()=>{big=Math.min(8,big+1);update()});
+   const stepSmall=addStepper(row,scene.minor,()=>{small=Math.max(0,small-100);update()},()=>{small=Math.min(900,small+100);update()});
+   update();guide();check(()=>big===scene.big&&small===scene.small);preset(()=>{big=scene.big;small=scene.small;update()});
  }else if(scene.kind==='move'){
    let x=scene.x,y=scene.y;const grid=h('div','hands-move-grid');work.append(grid);
    say('꽃을 화살표로 움직여 목적지에 보내 줘.');
