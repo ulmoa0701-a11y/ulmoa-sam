@@ -43,7 +43,7 @@ async function enter(page,answer){
   assert((await page.locator('#stepTitle').textContent()).includes('12 × 3'),'place value stage missing');
   assert.equal(await page.locator('#stage .tenframe').count(),3,'12x3 should visually show three ten frames');
   if(width===390)await page.screenshot({path:folder+'/tens-guided-mobile.png',fullPage:true});
-  for(const answer of ['10 + 2','30','6','36','30 + 1','90','3','93']){
+  for(const answer of ['10 + 2','30','6','36','30 + 1','90','3','93','10 + 4','30','12','42']){
     await choose(page,answer);await advance(page);
   }
   assert((await page.locator('#stepTitle').textContent()).includes('혼자'),'independent stage missing');
