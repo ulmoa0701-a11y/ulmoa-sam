@@ -69,12 +69,13 @@ async function enter(page,answer){
  await page.locator('#keypad button[data-key="1"]').click();await page.locator('#keypad button[data-key="✔"]').click();
  assert(await page.locator('#advance').isHidden(),'wrong answer should not unlock next');
  await page.locator('#helper').click();
+ await page.locator('#keypad button[data-key="⌫"]').click();
  for(const digit of '46')await page.locator('#keypad button[data-key="'+digit+'"]').click();
  await page.locator('#keypad button[data-key="✔"]').click();
- // wrong 1 still in input; clear it first
- // Separate regression checks below use fresh reset
+ assert.equal(await page.locator('#advance').isVisible(),true,'corrected answer should allow progress');
  const state=await page.evaluate(()=>window.MathLearningQA.getState());
  assert(state.testScore===0,'assisted answer incorrectly counted as first-try independent');
+ assert(state.testHelp>0&&state.testTotalErrors>0,'help and error records missing');
  await c.close();
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exit(1)});
