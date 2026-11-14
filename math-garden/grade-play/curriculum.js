@@ -30,12 +30,12 @@ const RAW={
 ['표와 그래프','그림그래프 읽기|chart','표에서 가장 큰 수|tableRead','그림표로 비교하기|pictograph'],
 ['규칙 찾기','커지는 수 규칙|pattern','빈칸에 들어갈 수|numberLine','모양 순서 규칙|patternShapes']],
 '3-1':[
-['덧셈과 뺄셈','세 자리 수 더하기|bigAdd','세 자리 수 빼기|bigAdd','생활 속 세 자리 계산|wordProblems'],
+['덧셈과 뺄셈','세 자리 수 더하기|bigAdd','세 자리 수 빼기|bigAdd','생활 속 세 자리 계산|wordProblemsBig'],
 ['평면도형','직각 알아보기|rightAngle','직사각형·정사각형|quadrilateral','도형의 변과 꼭짓점|polygonSides'],
 ['나눗셈','똑같이 나누기|divide','몇 묶음 되는지|groupDiv','곱셈으로 몫 확인|divide'],
-['곱셈','두 자리 수 × 한 자리 수|multDigit','세 자리 수 × 한 자리 수|wordMultiply','곱셈 이야기 해결|groupMult'],
+['곱셈','두 자리 수 × 한 자리 수|multDigit','세 자리 수 × 한 자리 수|multTriple','곱셈 이야기 해결|groupMult'],
 ['길이와 시간','길이 단위 바꾸기|meter','몇 분인지 알아보기|minutes','몇 분 뒤 시각|elapsed'],
-['분수와 소수','전체의 몇 분의 몇|fractionParts','0.1이 몇 개인가|tenths','분수와 소수 연결|decimalPlace']],
+['분수와 소수','전체의 몇 분의 몇|fractionParts','0.1이 몇 개인가|tenths','분수와 소수 연결|fracDecimal']],
 '3-2':[
 ['곱셈','두 자리 수 × 한 자리 수|multDigit','두 자리 수 × 두 자리 수|times2','곱셈으로 문제 해결|wordMultiply'],
 ['나눗셈','두 자리 수 나눗셈|divide','나머지가 있는 나눗셈|remainder','나눗셈 상황 이해|groupDiv'],
@@ -47,7 +47,7 @@ const RAW={
 ['큰 수','만·억 단위 읽기|millions','큰 수의 자리값|placeValue','큰 수 크기 비교|numberOrder'],
 ['각도','예각·직각·둔각|angles','각도 크기 읽기|anglesMeasure','각의 합 구하기|angleSum'],
 ['곱셈과 나눗셈','큰 수 곱하기|times2','큰 수 나누기|longDiv','나머지 확인|remainder'],
-['평면도형의 이동','평행 이동한 위치|transformation','뒤집은 모양|reflection','돌린 모양|rotation'],
+['평면도형의 이동','평행 이동한 위치|transformation2d','뒤집은 모양|reflection','돌린 모양|rotation'],
 ['막대그래프','막대그래프 읽기|chart','자료 차이 구하기|barGraph','표를 그래프로|tableRead'],
 ['규칙 찾기','수 규칙 이어가기|pattern','대응하는 수 찾기|correspondence','규칙식 살펴보기|ruleEquation']],
 '4-2':[
@@ -67,20 +67,20 @@ const RAW={
 '5-2':[
 ['수의 범위와 어림하기','이상·이하·초과·미만|inequalities','올림·버림·반올림|round','어림한 수 활용|roundUse'],
 ['분수의 곱셈','분수 × 자연수|fracMultN','진분수 × 진분수|fracMult','곱셈의 크기 생각|fractionParts'],
-['합동과 대칭','겹치는 합동 도형|congruence','선대칭도형의 대칭축|symmetry','점대칭도형|rotation'],
+['합동과 대칭','겹치는 합동 도형|congruence','선대칭도형의 대칭축|symmetry','점대칭도형|pointSym'],
 ['소수의 곱셈','소수 × 자연수|decimalMult','소수 × 소수|decimalMulti','실생활 소수 곱셈|wordMultiply'],
 ['직육면체','직육면체의 면과 모서리|boxEdges','직육면체 전개도|netCube','정육면체 특징|prism'],
 ['평균과 가능성','평균 구하기|mean','가능성 판단하기|possibility','자료로 예상하기|tableRead']],
 '6-1':[
 ['분수의 곱셈과 나눗셈','분수 곱셈 복습|fracMult','분수 ÷ 자연수|fracDivN','자연수 ÷ 자연수의 몫|fractionDivInt'],
 ['각기둥과 각뿔','각기둥·각뿔 구별|prism','면과 꼭짓점 수|faces','전개도 알아보기|netCube'],
-['소수의 곱셈과 나눗셈','소수 곱셈|decimalMult','소수 ÷ 자연수|decimalDiv','몫의 소수점 찾기|decimalMulti'],
+['소수의 곱셈과 나눗셈','소수 곱셈|decimalMult','소수 ÷ 자연수|decimalDiv','몫의 소수점 찾기|decimalPoint'],
 ['비와 비율','두 양의 비|ratio','비율을 백분율로|percent','생활 속 비율 문제|proportion'],
 ['여러 가지 그래프','띠그래프 읽기|pieChart','원그래프 해석|pieChart','그래프 선택하기|graphChoice'],
 ['직육면체의 겉넓이와 부피','겉넓이 구하기|surfaceArea','부피 구하기|volume','cm³와 m³ 바꾸기|unitVolume']],
 '6-2':[
 ['분수의 나눗셈','분모 같은 분수 나누기|fracDivF','분모 다른 분수 나누기|fracDivF','분수와 자연수의 나눗셈|divisionFraction'],
-['공간과 입체','쌓기나무 개수|cubes','앞·위·옆에서 본 모양|shapeViews','보이지 않는 쌓기나무|cubes'],
+['공간과 입체','쌓기나무 개수|cubes','앞·위·옆에서 본 모양|shapeViews','보이지 않는 쌓기나무|hiddenCubes'],
 ['소수의 나눗셈','소수 ÷ 소수|decimalDivDecimal','자연수 ÷ 소수|decimalDivDecimal','몫을 반올림하기|roundQuotient'],
 ['비례식과 비례배분','비례식에서 빈칸|proportion','비의 성질|ratio','비례배분하기|split'],
 ['원의 둘레와 넓이','원의 둘레|circumference','원의 넓이|circleArea','지름과 반지름 연결|circleDiameter'],
