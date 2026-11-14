@@ -1,0 +1,93 @@
+/* Approved Moa green-garden visual language: large touch controls and clean target focus. */
+#answers{display:block!important;width:100%;margin:10px 0 4px;gap:0}
+.hands-shell{width:100%;display:block;margin:0 auto;padding:15px;border:2px solid #d6e6d0;border-radius:22px;background:linear-gradient(180deg,#fbfff9,#f5faf1);color:#315c46}
+.hands-head{display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:13px}
+.hands-category{color:#41795b;background:#e5f3e3;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:900}
+.hands-phase{color:#7b633c;background:#ffefcf;border-radius:99px;padding:6px 12px;font-size:12px;font-weight:800}
+.hands-directions{font-size:15px;line-height:1.6;margin:3px 0 13px;text-align:center;color:#527263}
+.hands-work{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:100%;overflow-x:auto;padding:5px 2px 16px}
+.hands-small{font-size:14px;line-height:1.65;color:#5b7560;text-align:center;max-width:600px;margin:1px 0 6px}
+.hands-left{font-size:17px;font-weight:900;color:#355b41;text-align:center;word-break:keep-all;margin:3px 0}
+.hands-button,.hands-check,.hands-help,.hands-step,.hands-key,.hands-word,.hands-ruler-mark,.hands-number-mark,.hands-basket-add,.hands-undo,.hands-shape-card,.hands-frac-cell,.hands-cell,.hands-mirror-cell{font:inherit;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+.hands-button:focus-visible,.hands-check:focus-visible,.hands-help:focus-visible,.hands-step:focus-visible,.hands-key:focus-visible,.hands-word:focus-visible,.hands-ruler-mark:focus-visible,.hands-number-mark:focus-visible,.hands-basket-add:focus-visible,.hands-undo:focus-visible,.hands-shape-card:focus-visible,.hands-frac-cell:focus-visible,.hands-cell:focus-visible,.hands-mirror-cell:focus-visible{outline:4px solid #cc9254;outline-offset:2px}
+.hands-actions{display:flex;justify-content:center;gap:11px;flex-wrap:wrap;margin-top:12px}
+.hands-check{background:#3b8763;color:white;border:0;border-radius:16px;padding:14px 25px;min-height:55px;font-size:16px;font-weight:900}
+.hands-help{background:#fff2d6;border:2px solid #e6cf8f;color:#75502d;border-radius:15px;padding:12px 16px;min-height:48px;font-weight:850}
+.hands-check:hover{background:#28694d}
+.hands-model{max-width:620px;width:100%;border:2px solid #c6ddc3;background:#fffdf3;border-radius:19px;padding:22px 16px;text-align:center;display:grid;gap:10px;justify-items:center}
+.hands-model>p:first-child{font-size:14px;font-weight:900;color:#446c57;margin:0}
+.hands-explain{color:#2f6448;font-size:clamp(18px,3.4vw,26px);font-weight:900;line-height:1.6;word-break:keep-all;margin:5px auto}
+.hands-step{background:white;color:#3d795b;border:2px solid #99bea6;border-radius:14px;min-width:48px;min-height:49px;font-weight:900;font-size:18px;padding:7px 10px}
+.hands-steppers{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;width:100%}
+.hands-stepper{background:#ebf5e8;border:1px solid #c3dec4;border-radius:17px;padding:9px;display:flex;align-items:center;gap:9px;justify-content:space-around}
+.hands-step-value{color:#2f694d;min-width:56px;text-align:center;font-size:17px}
+.hands-prompt-seeds{font-size:29px;line-height:1.6;letter-spacing:5px;max-width:430px;white-space:normal;word-break:break-all;text-align:center;background:#fff;border:1px solid #cee0c9;border-radius:17px;padding:12px}
+.hands-tenframe{display:grid;grid-template-columns:repeat(5,minmax(43px,65px));gap:6px;justify-content:center;width:min(100%,400px)}
+.hands-cell{min-height:58px;border-radius:13px;border:2px solid #8ab99a;background:white;color:#c3d1c1;font-size:25px}
+.hands-cell[aria-pressed=true]{background:#e5f4d3;color:#2b7855;box-shadow:inset 0 0 0 1px #2f9068}
+.hands-baskets{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));width:min(100%,660px);gap:9px}
+.hands-basket{display:flex;flex-direction:column;align-items:stretch;gap:8px;border:2px solid #c2ddc5;border-radius:17px;padding:12px;background:#fff}
+.hands-basket-title{text-align:center;font-size:13px;font-weight:900;color:#57755c}
+.hands-basket-add{min-height:75px;border:1px solid #9fbca3;border-radius:14px;background:#e3f5d9;color:#355a3e;font-weight:800;font-size:16px;line-height:1.4;word-break:break-all;padding:9px}
+.hands-undo{border:0;border-radius:9px;background:#f5e9d2;color:#765539;padding:7px 10px;font-size:13px}
+.hands-fraction-bar{display:flex;width:min(100%,570px);gap:3px;padding:5px;border:2px solid #7fae92;border-radius:15px;background:#f4fbf3;min-height:94px;margin:7px auto}
+.hands-frac-cell{flex:1;min-width:23px;border-radius:9px;border:2px solid #b8d0b3;background:white;color:white;font-size:16px;font-weight:900}
+.hands-frac-cell.filled{background:#69b68d;border-color:#3c9866;color:#fefefe}
+.hands-given-fractions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;width:100%}
+.hands-given-fractions>div{background:#fff;padding:9px 12px;flex:1;min-width:110px;max-width:250px;border-radius:14px;border:1px solid #d4dfc9;display:grid;justify-items:center;gap:9px}
+.hands-given-fractions strong{font-size:13px;color:#4b6955}
+.hands-given-fractions .hands-fraction-bar{min-height:40px;width:100%;margin:0}
+.hands-given-fractions .hands-fraction-bar span{min-width:7px;flex:1;border-right:1px solid #9bbe9f}
+.hands-given-fractions .hands-fraction-bar .filled{background:#70b889}
+.hands-clock-svg{display:block;width:min(190px,65vw);height:auto;margin:auto}
+.hands-visual{text-align:center;border-radius:20px;background:#fff;padding:9px 15px;max-width:100%;min-width:190px}
+.hands-angle-svg{display:block;width:min(330px,76vw);margin:0 auto}
+.hands-range{accent-color:#3d976c;width:min(260px,60vw);min-height:48px;cursor:pointer}
+.hands-data-table{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;background:#fffefa;border:2px solid #dae8cf;padding:12px;border-radius:14px}
+.hands-data-table p{font-size:15px;font-weight:900;margin:0 5px;color:#365c45}
+.hands-graph{display:flex;justify-content:center;align-items:end;gap:12px;width:min(100%,500px);min-height:235px}
+.hands-graph-col{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;min-width:55px}
+.hands-graph-col strong{font-size:13px;color:#48694c}
+.hands-graph-track{height:180px;width:min(100%,65px);display:flex;flex-direction:column;gap:2px;border-bottom:3px solid #77967b}
+.hands-graph-segment{height:20px;width:100%;background:#f0f5ec;border:1px solid #e0e7dc;border-radius:5px}
+.hands-graph-segment.active{background:#78b68a;border-color:#48996d}
+.hands-move-grid{display:grid;grid-template-columns:repeat(5,minmax(40px,56px));gap:5px}
+.hands-grid-tile{aspect-ratio:1;border-radius:9px;border:1px solid #c1d7b7;background:#fff;font-size:25px;display:grid;place-items:center}
+.hands-grid-tile.target{background:#ffefc3;box-shadow:inset 0 0 0 2px #d7a456}
+.hands-arrows{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+.hands-pattern{display:flex;gap:9px;justify-content:center;align-items:center;flex-wrap:wrap;width:100%}
+.hands-pattern span,.hands-pattern-slot{font-weight:900;background:white;color:#3a7155;border:2px solid #cadfc9;min-width:50px;min-height:52px;padding:9px;border-radius:14px;text-align:center;font-size:18px}
+.hands-pattern-slot{background:#fff3d3;border-color:#e5c077}
+.hands-jump{display:flex;gap:8px}
+.hands-number-marks{display:flex;gap:4px;overflow-x:auto;max-width:100%;padding:12px 3px 20px}
+.hands-number-mark{border:2px solid #a1c5a7;min-height:58px;min-width:58px;border-radius:10px;background:#fff;color:#315f45;font-size:16px;font-weight:900;position:relative}
+.hands-number-mark:after{content:"";position:absolute;bottom:-13px;left:50%;height:11px;border-left:2px solid #749579}
+.hands-number-mark.selected{background:#daf2cb;border-color:#347a54}
+.hands-ruler{display:flex;width:100%;overflow-x:auto;padding:8px 2px 20px;gap:2px}
+.hands-ruler-mark{min-width:40px;height:62px;border:1px solid #d6b776;border-bottom:5px solid #c6a25f;background:#fff4d9;color:#715a3a;font-size:13px;font-weight:900;border-radius:5px}
+.hands-ruler-mark.selected{background:#d9efce;border-color:#4c9162;box-shadow:inset 0 0 0 2px #42946c}
+.hands-shapes{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.hands-shape-card{min-height:130px;min-width:110px;border:2px solid #d2e4d0;border-radius:18px;background:white;color:#326047;padding:12px;display:grid;justify-items:center;align-items:center;gap:8px;font-size:14px;font-weight:900}
+.hands-shape-card.selected{background:#e7f5dd;border-color:#3e9062}
+.hands-big-emoji{font-size:57px;line-height:1.3}
+.hands-mirror-grid{display:grid;grid-template-columns:repeat(6,minmax(37px,53px));gap:4px;justify-content:center}
+.hands-mirror-cell{min-width:36px;aspect-ratio:1;border:1px solid #b8d4ba;background:white;border-radius:9px;font-size:22px}
+.hands-mirror-cell.split{border-right:4px solid #cb9b5b}
+.hands-mirror-cell.selected{background:#d9f3cf}
+.hands-entry{display:block;border:3px solid #9ecbab;background:white;color:#2a5940;border-radius:17px;width:min(100%,430px);min-height:62px;padding:12px 16px;font-size:23px;text-align:center;outline-offset:3px}
+.hands-entry:focus{outline:3px solid #d4ab5f}
+.hands-numberpad{display:grid;grid-template-columns:repeat(3,minmax(60px,1fr));gap:7px;width:min(100%,320px)}
+.hands-key{background:white;color:#2b6446;border:2px solid #c7e3c9;border-radius:12px;font-weight:900;font-size:20px;min-height:51px}
+.hands-wordbank{display:flex;flex-wrap:wrap;justify-content:center;gap:7px}
+.hands-word{min-height:45px;padding:10px 14px;background:#f2f4df;color:#4d6848;border:2px solid #d3d9bc;border-radius:13px;font-weight:800}
+@media(max-width:600px){.hands-shell{padding:11px 8px;border-radius:17px}.hands-head{gap:6px}.hands-category,.hands-phase{font-size:11px}.hands-directions{font-size:13px}.hands-baskets{grid-template-columns:repeat(2,minmax(0,1fr))}.hands-basket{padding:9px}.hands-frac-cell{min-width:15px}.hands-shape-card{min-width:85px;min-height:115px;padding:7px}.hands-tenframe{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}.hands-cell{min-height:54px;font-size:22px}.hands-number-mark{min-width:46px}.hands-ruler-mark{min-width:33px}.hands-mirror-grid{grid-template-columns:repeat(6,minmax(36px,1fr));width:100%}.hands-check{width:100%}.hands-actions{flex-direction:column}}
+
+.hands-fraction-bar>span{flex:1;min-width:8px;background:#fff;border-right:1px solid #80b18d}
+.hands-fraction-bar>span.filled{background:#6eba94}
+.hands-given-fractions .hands-fraction-bar>span[style*="filled"]{background:#6eba94}
+
+.hands-place-blocks{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;max-width:100%}.hands-place-column{border:2px solid #c4dbbf;border-radius:15px;background:#fffef7;display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 12px;min-width:64px}.hands-place-column strong{color:#527558}.hands-place-icons{color:#4e9d6e;font-size:23px;word-break:break-all;letter-spacing:3px;max-width:110px;min-height:42px}
+
+.hands-circle-select{width:min(100%,310px);display:grid;place-items:center;border:2px solid #c9dfc8;border-radius:18px;background:#fff;touch-action:manipulation;padding:10px}.hands-circle-select [data-part]{cursor:pointer;transition:filter .15s}.hands-circle-select [data-part].selected{filter:drop-shadow(0 0 5px #ca854e);stroke:#dc8053;stroke-width:20}.hands-capacity{display:grid;justify-items:center;gap:8px;padding:14px;border-radius:17px;background:#fff9e9;border:1px solid #d9d6b8;min-width:min(100%,290px)}.hands-big-units{display:flex;gap:8px;justify-content:center;min-height:50px;font-size:38px}.hands-capacity strong{font-size:17px;color:#376c55}
+
+.hands-spin-arrow{display:grid;place-items:center;width:150px;height:150px;background:#edf7df;border:3px solid #9ec9a9;border-radius:100%;font-size:94px;color:#3e815d;font-weight:900;transition:transform .15s;user-select:none;margin:17px auto}

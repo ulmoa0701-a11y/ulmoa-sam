@@ -3,15 +3,18 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#527b61">
-<meta name="description" content="일단해봄 모아의 초등 수학정원. 1~6학년 학기별 대단원·소단원을 선택해 5문제씩 놀이로 연습해요.">
+<meta name="description" content="일단해봄 모아의 초등 수학정원. 1~6학년 학기별 대단원·소단원을 선택해 시범 보기, 조작하기, 혼자 해결하기로 개념을 연습해요.">
 <title>초등 수학 단원별 모험 | 일단해봄 학습정원</title>
 <link rel="icon" href="../../assets/habom-favicon-v3-32.png">
 <link rel="stylesheet" href="../../assets/habom-gamja-font.css">
 <link rel="stylesheet" href="./style.css">
 <link rel="stylesheet" href="./unit-style.css">
+<link rel="stylesheet" href="./hands-on.css">
 <script src="./app.js" defer></script>
 <script src="./curriculum.js" defer></script>
 <script src="./unit-engine.js" defer></script>
+<script src="./hands-on-core.js" defer></script>
+<script src="./hands-on.js" defer></script>
 <script src="./unit-app.js" defer></script>
 </head>
 <body>
@@ -24,7 +27,7 @@
 <main>
 <section class="hero" aria-labelledby="title">
 <div class="hero-copy"><p class="eyebrow">🌳 모아의 학습정원 · 2022 개정 학습 주제 참고</p><h1 id="title">단원별 <em>수학 모험</em></h1>
-<p>학년과 학기를 고르고, 배우고 싶은 단원과 소단원을 찾아보자! 틀려도 괜찮아. 천천히 여러 번 해볼 수 있어.</p>
+<p>학년과 학기를 고른 다음, 도토리 나누기·분수 조각·시계·각도·그래프를 직접 조작해 보자. 틀려도 다시 도전할 수 있어.</p>
 <div class="stats" id="catalogStats" aria-live="polite"></div>
 </div>
 <img class="mascot" src="../../thinking-garden/assets/moa-discovery.png" alt="모아가 안내하는 모습" loading="eager">
@@ -50,15 +53,15 @@
 <p id="roundCount" class="unit-subnote">1 / 5</p>
 <p id="question" class="quest-text"></p>
 <div id="picture" class="picture" aria-label="문제와 그림"></div>
-<div id="answers" class="answers" role="group" aria-label="답 고르기"></div>
-<p id="feedback" class="feedback" role="status" aria-live="polite">천천히 생각해 보자.</p>
+<div id="answers" class="answers" role="group" aria-label="직접 조작하는 수학 활동"></div>
+<p id="feedback" class="feedback" role="status" aria-live="polite">손으로 움직이고 직접 확인해 보자.</p>
 <div class="game-actions"><button type="button" class="hint-btn" id="hint">🌱 힌트 보기</button><button type="button" class="next-btn" id="next" hidden>다음 문제 →</button></div>
 </div>
 <div id="done" class="finish" hidden><span class="big-flower" aria-hidden="true">🌼</span><h3>숲속 모험 완성!</h3><p id="resultText"></p>
 <div class="finish-actions"><button type="button" id="again">다시 해보기</button><button type="button" id="another">다른 소단원 찾기</button></div></div>
 </div>
 </section>
-<p class="note"><strong>안내:</strong> 2022 개정 수학 성취 내용에 맞춘 일단해봄의 자체 단원·소단원 구성입니다. 출판사별 교과서 차례, 단원 순서, 학습 진도와 일치한다고 보장하지 않습니다. 문제는 직접 만든 선택형 연습이며, 학습 수준 진단이나 치료 효과의 근거로 사용할 수 없습니다. 완료 기록은 이 기기에만 저장됩니다.</p>
+<p class="note"><strong>안내:</strong> 2022 개정 수학 성취 내용에 맞춘 일단해봄의 자체 단원·소단원 구성입니다. 출판사별 교과서 차례, 단원 순서, 학습 진도와 일치한다고 보장하지 않습니다. 조작형 활동과 직접 입력형 연습을 혼합하였습니다. 소단원에 따라 조작 방식은 다르며, 일부 심화 문제는 아직 숫자·문장 입력 방식입니다. 시범·도움받은 해결과 독립 해결을 구분하고, 학습 수준 진단이나 치료 효과의 근거로 사용하지 않습니다. 완료 기록은 이 기기에만 저장됩니다.</p>
 </main>
 <footer><a href="../../gardens/#learning">학습정원으로</a><span>작게 시작해서 스스로 해보는 일단해봄</span></footer>
 </div>
