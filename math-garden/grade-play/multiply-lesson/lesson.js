@@ -85,7 +85,7 @@ function renderSymbol(){
  else showChoice('4 × 3과 같은 덧셈은?', ['4 + 4 + 4','4 + 3','3 + 3 + 3'],'4 + 4 + 4','4개씩 3묶음이니까 4를 세 번 더해.');
 }
 function guidedItems(){
- const data=[{a:12,b:3},{a:31,b:3}][S.round],tenVal=Math.floor(data.a/10)*10,ones=data.a%10;
+ const data=[{a:12,b:3},{a:31,b:3},{a:14,b:3}][S.round],tenVal=Math.floor(data.a/10)*10,ones=data.a%10;
  const result=[
  {label:data.a+' = ? + ?',choices:[tenVal+' + '+ones,tenVal+' + '+data.b,data.a+' + '+ones],answer:tenVal+' + '+ones,hint:'사과 '+data.a+'개를 10개 묶음과 낱개로 나누어 봐.'},
  {label:tenVal+' × '+data.b+' = ?',choices:[String(tenVal*data.b),String(tenVal*(data.b+1)),String(tenVal+data.b)],answer:String(tenVal*data.b),hint:'10개 묶음이 몇 개인지 세고 10을 곱해.'},
@@ -95,9 +95,10 @@ function guidedItems(){
 }
 function renderGuided(){
  const {data,item}=guidedItems();
- $('stepTitle').textContent=S.round===0?'12 × 3 : 10개씩 묶어봐':'31 × 3 : 자리를 나눠봐';
+ $('stepTitle').textContent=['12 × 3 : 10개씩 묶어봐','31 × 3 : 자리를 나눠봐','14 × 3 : 10개로 다시 묶어봐'][S.round];
  const focus=S.sub===1?'tens':S.sub===2?'ones':'all';
- html('stage',tensScene(data.a,data.b,focus)+'<div class="number-sentence">'+item.label+'</div>');
+ const regroup=S.round===2&&S.sub===3?'<div class="regroup-note"><b>일의 자리에서 나온 12개</b><span>'+ten(true)+' ＋ '+apple('sm')+apple('sm')+'</span><strong>12개 = 10개 묶음 1개 + 낱개 2개</strong></div>':'';
+  html('stage',tensScene(data.a,data.b,focus)+regroup+'<div class="number-sentence">'+item.label+'</div>');
  $('helper').hidden=false;
  showChoice('🔟 그림을 보고 계산해 봐',item.choices,item.answer,item.hint);
 }
@@ -172,7 +173,7 @@ $('advance').addEventListener('click',()=>{
  if(S.step===2){if(S.sub===0){S.sub=1;S.done=false;S.incorrect=0;S.assisted=false;renderSymbol()}else gotoStep(3);return}
  if(S.step===3){
   if(S.sub<3){S.sub++;S.done=false;S.incorrect=0;S.assisted=false;renderGuided()}
-  else if(S.round===0){S.round=1;S.sub=0;S.done=false;S.incorrect=0;S.assisted=false;renderGuided()}
+  else if(S.round<2){S.round++;S.sub=0;S.done=false;S.incorrect=0;S.assisted=false;renderGuided()}
   else gotoStep(4);return;
  }
  if(S.step===4){
