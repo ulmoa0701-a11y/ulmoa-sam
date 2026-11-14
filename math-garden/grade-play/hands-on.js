@@ -42,7 +42,8 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    else if(scene.kind==='line')m.append(h('p','hands-explain','시작점부터 한 칸씩 같은 간격으로 이동해.'));
    else if(scene.kind==='measure')m.append(h('p','hands-explain','자에서 0을 찾고 '+scene.target+'cm만큼 이동해.'));
    else if(scene.kind==='pattern')m.append(h('p','hands-explain','매번 '+scene.step+'씩 커져. 규칙은 '+scene.answer+'에서 계속돼.'));
-   else if(scene.kind==='symmetry')m.append(h('p','hands-explain','왼쪽 꽃과 대칭선을 기준으로 같은 거리의 오른쪽 칸에 꽃을 심어.'));
+   else if(scene.kind==='symmetry')m.append(h('p','hands-explain',scene.point?'중심점을 기준으로 반 바퀴 돌린 반대쪽 자리에 꽃을 놓아.':'대칭선 기준으로 같은 거리의 오른쪽 칸에 꽃을 심어.'));
+   else if(scene.kind==='spin')m.append(h('p','hands-explain','위쪽 화살표를 시계 방향으로 '+scene.turns+'° 돌리면 돼.'));
    else if(scene.kind==='circle')m.append(h('p','hands-explain',typeof scene.answer==='string'?'원의 '+scene.part+' 부분을 찾아보자.':'원의 '+scene.part+' 길이는 '+scene.answer+'cm야.'));
    else if(scene.kind==='units')m.append(h('p','hands-explain',scene.big+scene.unit+' + '+scene.small+scene.minor+' = '+scene.answer+scene.minor));
    else if(scene.kind==='shape')m.append(h('p','hands-explain',scene.solid?'평평한 면과 둥근 부분을 살펴보면 '+scene.name+'이야.':'변을 하나씩 세면 '+scene.sides+'개. '+scene.name+'이야.'));
@@ -204,10 +205,17 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    const ruler=h('div','hands-ruler');let value=-1;work.append(ruler);
    for(let i=0;i<=16;i++){const m=btn(String(i),()=>{value=i;ruler.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));m.classList.add('selected')},'hands-ruler-mark');m.setAttribute('aria-label',i+'센티미터 표시하기');ruler.append(m)}
    guide();check(()=>value===scene.target);preset(()=>{ruler.children[scene.target].click()});
+ }else if(scene.kind==='spin'){
+   let turns=0;const face=h('div','hands-spin-arrow');work.append(face);
+   say('화살표를 90°씩 실제로 돌려 봐. 반대 방향도 눌러 볼 수 있어.');
+   const update=()=>{face.textContent='↑';face.style.transform='rotate('+turns+'deg)';face.setAttribute('aria-label','현재 '+turns+'도 회전한 화살표')};
+   const arrows=h('div','hands-arrows');work.append(arrows);
+   arrows.append(btn('↶ 90°',()=>{turns=(turns+270)%360;update()},'hands-step'),btn('↷ 90°',()=>{turns=(turns+90)%360;update()},'hands-step'));
+   update();guide();check(()=>turns===scene.turns);preset(()=>{turns=scene.turns;update()});
  }else if(scene.kind==='symmetry'){
-   say('가운데 선을 기준으로 같은 높이·같은 거리에 꽃을 심어 보자.');
+   say(scene.point?'가운데 점에서 반 바퀴 돌렸을 때의 반대편 자리를 찾아 봐.':'가운데 선을 기준으로 같은 높이·같은 거리에 꽃을 심어 보자.');
    const grid=h('div','hands-mirror-grid');work.append(grid);
-   let chosen=-1;const target=scene.y*6+(5-scene.x);
+   let chosen=-1;const target=(scene.point?3-scene.y:scene.y)*6+(5-scene.x);
    const draw=()=>{grid.replaceChildren();for(let y=0;y<4;y++)for(let x=0;x<6;x++){
      const idx=y*6+x,b=btn(y===scene.y&&x===scene.x?'🌼':idx===chosen?'🌼':'',()=>{if(x<3)return;chosen=idx;draw()},'hands-mirror-cell'+(x===2?' split':'')+(idx===chosen?' selected':''));
      if(y===scene.y&&x===scene.x)b.disabled=true;
