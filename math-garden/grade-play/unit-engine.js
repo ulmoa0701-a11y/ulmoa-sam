@@ -36,6 +36,18 @@ function mk(q,art,answer,wrong,hint,kind='choice'){
 function problem(mode){
  let a,b,c,d,n,s,t,z,arr;
  switch(mode){
+ case 'tens50':a=rand(1,5);b=a===5?0:rand(0,9);return mk('10개 묶음과 낱개를 합치면?',bold('10개 묶음 '+a+'개 · 낱개 '+b+'개'),a*10+b,[a*10+b+1,a*10+b-1,a*10+b+10],'10개 묶음 하나는 10이야.');
+ case 'numberOrder50':a=rand(5,41);b=a+rand(2,8);return mk('50까지 수 중 더 큰 수는?',bold(a+'　　'+b),b,[a,a+1,b+1],'10의 자리부터 비교해.');
+ case 'numberLine50':a=rand(1,22);b=rand(1,4);c=rand(1,4);return mk('50까지 수직선 물음표에 들어갈 수는?',line(a,b,c),a+b*c,[a+b*(c-1),a+b*(c+1),a+b*c+1],'한 칸씩 몇씩 늘어나는지 살펴봐.');
+ case 'tens100':a=rand(1,10);b=a===10?0:rand(0,9);return mk('100까지 10개씩 묶으면 모두 몇 개?',bold('10개 묶음 '+a+'개 · 낱개 '+b+'개'),a*10+b,[a*10+b+1,a*10+b-1,a*10+b+10],'10개 묶음이 10개면 100이야.');
+ case 'numberOrder100':a=rand(20,80);b=a+rand(2,17);return mk('100까지 수 중 더 큰 수는?',bold(a+'　　'+b),b,[a,a+1,b+1],'십의 자리가 더 큰 수를 골라.');
+ case 'numberLine100':a=rand(20,49);b=rand(2,7);c=rand(1,4);return mk('100까지 수의 규칙은?',line(a,b,c),a+b*c,[a+b*(c-1),a+b*(c+1),a+b*c+1],'빈칸 양옆의 차이를 찾아.');
+ case 'numberOrder999':a=rand(110,830);b=a+rand(2,90);return mk('세 자리 수 중 더 큰 수는?',bold(a+'　　'+b),b,[a,a+1,b+1],'백의 자리가 같으면 십의 자리로 비교해.');
+ case 'numberOrder4':a=rand(1020,8700);b=a+rand(2,180);return mk('네 자리 수 중 더 큰 수는?',bold(a.toLocaleString('en-US')+'　'+b.toLocaleString('en-US')),b,[a,a+1,b+1],'천·백·십·일의 자리 순서대로 비교해.');
+ case 'placeValue4':a=rand(1,8);b=rand(1,9);c=rand(0,9);d=rand(0,9);return mk('네 자리 수에서 백의 자리 숫자가 나타내는 값은?',bold((a*1000+b*100+c*10+d).toLocaleString('en-US')),b*100,[a*1000,c*10,d],'백의 자리는 100개씩 몇 묶음인지 나타내.');
+ case 'largeNumbers':a=rand(1,8);b=rand(1,9);n=a*100000000+b*10000;return mk(a+'억 '+b+'만을 숫자로 나타내면?',bold(a+'억 '+b+'만'),n.toLocaleString('en-US'),[(n+100000).toLocaleString('en-US'),(n+10000).toLocaleString('en-US'),(n+1000000).toLocaleString('en-US')],'1억은 100,000,000이고 1만은 10,000이야.');
+ case 'placeValueBig':a=rand(1,8);b=rand(1,9);c=rand(1,7);n=a*100000000+b*10000+c;return mk('이 큰 수에서 만의 자리값은?',bold(n.toLocaleString('en-US')),b*10000,[a*100000000,b*1000,b*100000],'만의 자리는 10,000씩 몇 묶음이야.');
+ case 'numberOrderBig':a=rand(100000000,700000000);b=a+rand(1000,99999);return mk('큰 수 중 더 큰 수를 골라 봐.',bold(a.toLocaleString('en-US')+'<br>'+b.toLocaleString('en-US')),b.toLocaleString('en-US'),[a.toLocaleString('en-US'),(b+1000).toLocaleString('en-US'),(a-1000).toLocaleString('en-US')],'억·만 단위부터 차례대로 비교해.');
  case 'shape3d':s=pick([['상자 모양','📦'],['둥근기둥 모양','🥫'],['공 모양','⚽']]);return mk('이 물건은 어떤 입체 모양일까?',bold(s[1]),s[0],['상자 모양','둥근기둥 모양','공 모양','세모 모양'].filter(x=>x!==s[0]),'평평한 면, 둥근 면, 굴러가는 모습을 살펴봐.');
  case 'shape3dObject':s=pick([['공 모양','🏀'],['상자 모양','🎁'],['둥근기둥 모양','🥫']]);return mk('이 생활 물건의 모양을 골라 줘.',bold(s[1]),s[0],['상자 모양','둥근기둥 모양','공 모양','세모 모양'].filter(x=>x!==s[0]),'서 있는 모습과 굴러가는 모습을 떠올려 봐.');
  case 'shape3dClass':s=pick([['공 모양','⚽ 🏀'],['상자 모양','📦 🎁'],['둥근기둥 모양','🥫 🥁']]);return mk('두 물건의 공통 모양은?',bold(s[1]),s[0],['상자 모양','둥근기둥 모양','공 모양','세모 모양'].filter(x=>x!==s[0]),'겉의 색은 무시하고 기본 모양을 봐.');
