@@ -88,6 +88,20 @@ const RAW={
 };
 const C={};for(const [term,units] of Object.entries(RAW)){C[term]=units.map(([name,...subtopics],unitIndex)=>({id:term+'-'+(unitIndex+1),name,subtopics:subtopics.map((line,i)=>{const [title,mode]=line.split('|');return {id:term+'-'+(unitIndex+1)+'-'+(i+1),title,mode}})}))}
 const get=(g,t)=>C[g+'-'+t]||[];
+// Grade-crossing prerequisite links: these are instructional suggestions,
+// not claims that a child has mastered a grade based on a game result.
+const PREREQUISITES=Object.freeze({
+ '2-2-2':{g:2,t:1,u:5,s:0,label:'같은 수 묶기부터'},
+ '3-1-4':{g:2,t:2,u:1,s:0,label:'곱셈구구부터'},
+ '3-2-1':{g:3,t:1,u:3,s:1,label:'두 자리 수 × 한 자리 수부터'},
+ '4-1-3':{g:3,t:2,u:0,s:1,label:'두 자리 수 × 두 자리 수부터'},
+ '5-1-5':{g:4,t:2,u:0,s:0,label:'분모가 같은 분수 덧셈부터'},
+ '5-2-4':{g:4,t:2,u:2,s:0,label:'소수 덧셈부터'},
+ '6-1-1':{g:5,t:2,u:1,s:0,label:'분수의 곱셈부터'},
+ '6-2-1':{g:6,t:1,u:0,s:1,label:'분수 ÷ 자연수부터'},
+ '6-2-3':{g:6,t:1,u:2,s:1,label:'소수 ÷ 자연수부터'}
+});
+const prerequisiteFor=id=>PREREQUISITES[id]||null;
 const counts={terms:Object.keys(C).length,units:Object.values(C).reduce((n,a)=>n+a.length,0),topics:Object.values(C).reduce((n,a)=>n+a.reduce((m,u)=>m+u.subtopics.length,0),0)};
-root.MoaMathCurriculum=Object.freeze({C,get,counts});
+root.MoaMathCurriculum=Object.freeze({C,get,counts,prerequisiteFor});
 })(window);
