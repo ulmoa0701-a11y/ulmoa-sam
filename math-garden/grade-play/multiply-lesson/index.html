@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f1f8ef">
+<meta name="description" content="숲속 수학연구소: 실제 담기부터 그림·반복 덧셈·곱셈식·두 자리 수 곱셈·혼자 푸는 새 문제까지">
+<title>곱셈 개념 연구소 | 일단해봄 학습정원</title>
+<link rel="stylesheet" href="../../../assets/habom-gamja-font.css">
+<link rel="stylesheet" href="./lesson.css">
+<script src="./lesson.js" defer></script>
+</head>
+<body>
+<div class="app-shell">
+<header class="topbar"><a class="back" href="../../../gardens/#learning" aria-label="학습정원으로 돌아가기"><span aria-hidden="true">←</span><span>학습정원</span></a><strong>🍎 곱셈 연구소</strong><button id="voice" class="voice" aria-pressed="false" aria-label="한국어 음성 안내 켜기" type="button">🔊</button></header>
+<main>
+  <section class="masthead">
+    <div class="mascot"><img src="../../../thinking-garden/assets/moa-discovery.png" alt="숲속 수학정원의 모아"></div>
+    <div><p class="eyebrow">초등 3학년 곱셈 · 차근차근 배우기</p><h1>사과를 담으면<br><em>곱셈이 보여!</em></h1><p class="intro">👆 담기 → 👀 그림 → ✖️ 식 → 🔟 묶음 → ✏️ 혼자</p></div>
+  </section>
+  <nav class="progress" aria-label="학습 단계" id="progress"></nav>
+  <div class="playbox" id="playbox">
+    <div class="phase-top"><div class="step-chip" id="stepChip">🌱 1단계</div><button class="replay" id="retryStep" type="button" aria-label="현재 활동 처음부터 다시 하기">↻ 다시</button></div>
+    <h2 id="stepTitle">같은 수씩 담아요</h2>
+    <p class="short-prompt" id="prompt" aria-live="polite">사과를 눌러 바구니를 채워요.</p>
+    <div id="stage" class="stage" aria-label="수학 놀이 영역"></div>
+    <div id="options" class="options" role="group" aria-label="답 고르기"></div>
+    <div id="keypad" class="keypad" hidden></div>
+    <div class="feedback" id="feedback" role="status" aria-live="polite">🍎 👆 → 🧺</div>
+    <div class="bottom-actions">
+      <button id="helper" class="helper" type="button" aria-label="그림 힌트 보기">💡 힌트</button>
+      <button id="advance" class="advance" type="button" hidden>다음 <span aria-hidden="true">➜</span></button>
+    </div>
+  </div>
+  <section class="teacher-guide">
+    <details><summary>선생님·보호자용 학습 안내</summary>
+      <p>목표: 같은 수씩 묶기의 의미를 경험하고, 반복 덧셈·곱셈식·십의 자리 분해를 연결한 뒤 새로운 계산식 및 상황 문제로 일반화하기. 처음 단계는 읽기 없이 그림 누르기로 시작할 수 있으며, 이후 학교 수학과 연결되도록 기호 및 간단한 문장제를 단계적으로 도입합니다.</p>
+      <p>학습 진행: ① 2개씩 3묶음 직접 담기 → ② 3개씩 4묶음을 반복 덧셈으로 표현 → ③ 같은 수 묶음을 곱셈식으로 표현 → ④ 12×3과 31×3을 십의 자리와 일의 자리로 나누어 계산 → ⑤ 새로운 식과 간단한 문장제 4개를 도움 없이 풀어보기.</p>
+      <p>독립 확인 기준은 교육적 효과가 입증된 표준 점수가 아니라 임의로 정한 <b>게임 내부 학습 체크 기준</b>입니다. 오답 또는 힌트 사용을 구분하여 표시하며 ‘학교 학습 가능’이라는 판정에 사용할 수 없습니다. 실제 이해 여부는 교사 관찰, 말·그림 설명, 다른 상황 적용을 별도로 확인해야 합니다.</p>
+      <p>음성 안내는 브라우저/운영체제의 한국어 음성 합성 지원에 따라 달라질 수 있습니다. 기록은 서버에 전송하지 않고 현재 게임 세션에만 사용됩니다.</p>
+      <a href="../?g=3&t=2">3학년 2학기 단원 목록</a> · <a href="../concept-multiply/">기존 사과 배달 미니게임</a>
+    </details>
+  </section>
+</main>
+</div>
+</body></html>
