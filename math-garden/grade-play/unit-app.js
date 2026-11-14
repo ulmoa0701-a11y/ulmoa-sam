@@ -46,7 +46,7 @@ function select(grade,term,scroll=true){
  $units.innerHTML=units.map((u,i)=>'<details class="unit-card" '+(i===0?'open':'')+' data-index="'+i+'"><summary><span class="unit-n">'+(i+1)+'</span><span><span class="unit-name">'+u.name+'</span><span class="unit-count">'+u.subtopics.length+'개 소단원</span></span><span class="unit-chevron" aria-hidden="true">›</span></summary><div class="subunit-list">'+u.subtopics.map((x,j)=>{
   const done=read(grade,term,i,j),medal=done?'🌼':'🌱';
   return '<button type="button" class="subunit" data-unit="'+i+'" data-sub="'+j+'"><span class="medal" aria-hidden="true">'+medal+'</span><span><b>'+(j+1)+'. '+x.title+'</b><small>'+(done?'한 번 해본 놀이':'5문제 · 다시 도전 가능')+'</small></span><span class="arrow" aria-hidden="true">→</span></button>';
- }).join('')+'</div></details>').join('');
+ }).join('')+(grade===3&&term===2&&i===0?'<a class="subunit subunit-feature" href="./concept-multiply/" aria-label="숲속 열매 배송단, 곱셈 개념 체험 게임으로 이동"><span class="medal" aria-hidden="true">🎮</span><span><b>🌰 숲속 열매 배송단</b><small>십 묶음 만들기 · 친구에게 배달하기 · 스스로 계산하기</small></span><span class="arrow" aria-hidden="true">→</span></a>':'')+'</div></details>').join('');
  safeUrl(url());if(scroll)el('unit-title').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function play(unit,sub,scroll=true){
