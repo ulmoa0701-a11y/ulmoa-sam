@@ -46,7 +46,10 @@ function select(grade,term,scroll=true){
  $units.innerHTML=units.map((u,i)=>'<details class="unit-card" '+(i===0?'open':'')+' data-index="'+i+'"><summary><span class="unit-n">'+(i+1)+'</span><span><span class="unit-name">'+u.name+'</span><span class="unit-count">'+u.subtopics.length+'개 소단원</span></span><span class="unit-chevron" aria-hidden="true">›</span></summary><div class="subunit-list">'+u.subtopics.map((x,j)=>{
   const done=read(grade,term,i,j),medal=done?'🌼':'🌱';
   return '<button type="button" class="subunit" data-unit="'+i+'" data-sub="'+j+'"><span class="medal" aria-hidden="true">'+medal+'</span><span><b>'+(j+1)+'. '+x.title+'</b><small>'+(done?'한 번 해본 놀이':'5문제 · 다시 도전 가능')+'</small></span><span class="arrow" aria-hidden="true">→</span></button>';
- }).join('')+(grade===3&&term===2&&i===0?'<a class="concept-link" href="./multiply-lesson/" aria-label="곱셈 개념 연구소, 직접 담기부터 학교 수학 문제 연습까지"><span class="medal" aria-hidden="true">🎮</span><span><b>🍎 곱셈 개념 연구소</b><small>직접 담기 · 반복 덧셈 · 곱셈식 · 두 자리 수 계산 · 혼자 풀기</small></span><span class="arrow" aria-hidden="true">→</span></a>':'')+'</div></details>').join('');
+ }).join('')+(C.prerequisiteFor(u.id)?(()=>{
+  const p=C.prerequisiteFor(u.id);
+  return '<a class="concept-link" href="./?g='+p.g+'&t='+p.t+'&u='+p.u+'&s='+p.s+'" aria-label="선수 개념 복습: '+p.label+'"><span class="medal" aria-hidden="true">🧩</span><span><b>먼저 해보면 좋아요</b><small>'+p.label+'</small></span><span class="arrow" aria-hidden="true">→</span></a>';
+ })():'')+(grade===3&&term===1&&i===3?'<a class="concept-link" href="./multiply-lesson/" aria-label="두 자리 수 곱셈 기초 개념 연구소"><span class="medal" aria-hidden="true">🎮</span><span><b>🍎 곱셈 개념 연구소 · 기초</b><small>같은 수 묶기 · 반복 덧셈 · 두 자리 수 × 한 자리 수 · 독립 연습</small></span><span class="arrow" aria-hidden="true">→</span></a>':'')+'</div></details>').join('');
  safeUrl(url());if(scroll)el('unit-title').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function play(unit,sub,scroll=true){
