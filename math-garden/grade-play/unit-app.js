@@ -3,7 +3,7 @@
 const C=window.MoaMathCurriculum,E=window.MoaUnitEngine;
 if(!C||!E)return;
 const el=id=>document.getElementById(id);
-const state={grade:3,term:2,unit:0,sub:0,round:0,firstTry:0,assisted:false,solved:false,current:null,active:false};
+const state={grade:3,term:2,unit:0,sub:0,round:0,firstTry:0,assisted:false,activity:null,solved:false,current:null,active:false};
 const safeUrl=u=>{try{history.replaceState(null,'',u)}catch{}};
 const url=(u=null,s=null)=>{let q='?g='+state.grade+'&t='+state.term;if(u!==null)q+='&u='+u;if(s!==null)q+='&s='+s;return location.pathname+q};
 const key=(g,t,u,s)=>'moa-unit-math-v2-'+g+'-'+t+'-'+u+'-'+s;
@@ -25,16 +25,11 @@ function init(){
  el('backToUnits').addEventListener('click',back);
  el('again').addEventListener('click',()=>play(state.unit,state.sub));
  el('another').addEventListener('click',back);
- el('hint').addEventListener('click',()=>{if(!state.active||state.solved)return;state.assisted=true;const f=el('feedback');f.textContent=state.current.hint;f.dataset.status='hint'});
- el('next').addEventListener('click',next);
- el('answers').addEventListener('click',e=>{const b=e.target.closest('button[data-answer]');if(!b||state.solved||!state.active)return;
-   const ans=b.dataset.answer;if(ans===state.current.answer){state.solved=true;if(!state.assisted)state.firstTry++;
-     b.classList.add('correct');el('answers').querySelectorAll('button').forEach(x=>x.disabled=true);
-     el('hint').hidden=true;el('next').hidden=false;el('next').textContent=state.round===4?'모험 마무리 →':'다음 문제 →';
-     const f=el('feedback');f.dataset.status='correct';f.textContent=state.assisted?'다시 생각하고 해결했어! 🌷':'스스로 찾았어! 🌼';
-     progress(state.round+1);
-   }else{state.assisted=true;b.classList.add('incorrect');b.disabled=true;
-     const f=el('feedback');f.dataset.status='incorrect';f.textContent='조금 달라. 그림을 다시 보거나 힌트를 눌러 봐.'}
+ el('hint').addEventListener('click',()=>{
+   if(!state.active||state.solved)return;
+   state.assisted=true;const f=el('feedback');
+   f.textContent=state.activity?.scene?.hint||state.current?.hint||'그림에서 수와 규칙을 먼저 찾아보자.';
+   f.dataset.status='hint';
  });
  select(state.grade,state.term,false);
  const u=Number(q.get('u')),s=Number(q.get('s'));
@@ -68,22 +63,40 @@ function progress(n){
  el('flowers').setAttribute('aria-label','5문제 중 '+n+'문제 해결');
 }
 function render(){
- state.solved=false;state.assisted=false;state.current=E.problem(get()[state.unit].subtopics[state.sub].mode);
- el('roundCount').textContent=(state.round+1)+' / 5 · 천천히 골라 봐';
- el('question').textContent=state.current.question;
- el('picture').innerHTML=state.current.art;
- const answers=el('answers');answers.replaceChildren();
- for(const choice of state.current.options){const b=document.createElement('button');b.type='button';b.className='answer';b.textContent=choice;b.dataset.answer=choice;answers.append(b)}
- const f=el('feedback');f.textContent='준비되면 답을 눌러 봐.';f.dataset.status='';
- el('hint').hidden=false;el('next').hidden=true;progress(state.round);
+ state.solved=false;state.assisted=false;
+ const topic=get()[state.unit].subtopics[state.sub],phase=['model','guided','independent','transfer','review'][state.round];
+ state.current=E.problem(topic.mode);
+ el('roundCount').textContent=(state.round+1)+' / 5 · '+({model:'먼저 보기',guided:'함께하기',independent:'혼자 하기',transfer:'새 문제 풀기',review:'다시 확인하기'})[phase];
+ const f=el('feedback');f.textContent='서두르지 말고 한 단계씩 해보자.';f.dataset.status='';
+ el('hint').hidden=state.round===0;
+ el('next').hidden=true;progress(state.round);
+ state.activity=window.MoaHandsOn.render({
+   mode:topic.mode,problem:state.current,round:state.round,container:el('answers'),
+   setScene:(q,art)=>{el('question').textContent=q;el('picture').innerHTML=art||'';el('picture').hidden=!art},
+   onSupport:()=>{state.assisted=true},
+   onWrong:(message)=>{state.assisted=true;f.textContent=message;f.dataset.status='incorrect'},
+   onSolved:({assisted,phase:solvedPhase})=>{
+     if(state.solved)return;
+     state.solved=true;
+     if(['independent','transfer','review'].includes(solvedPhase)&&!assisted&&!state.assisted)state.firstTry++;
+     el('hint').hidden=true;el('next').hidden=false;
+     el('next').textContent=state.round===4?'모험 마무리 →':'다음 단계 →';
+     f.dataset.status='correct';
+     f.textContent=phase==='model'?'모아의 시범을 봤어. 이제 직접 해보자 🌱':
+       (phase==='guided'?'함께 연습했어. 다음에는 혼자 해보자 🌷':
+       assisted||state.assisted?'도움받아 해결했어. 다시 시도해도 좋아 🌼':'내가 직접 해결했어! 🌼');
+     progress(state.round+1);
+   }
+ });
 }
 function next(){
  if(!state.solved)return;
  state.round++;
  if(state.round<5){render();el('question').tabIndex=-1;el('question').focus({preventScroll:true});return}
  el('questionPanel').hidden=true;el('done').hidden=false;progress(5);
+ state.active=false;
  save(state.grade,state.term,state.unit,state.sub,state.firstTry);
- el('resultText').textContent='5문제를 모두 풀었어! 도움 없이 첫 시도에 찾은 문제는 '+state.firstTry+'개야. 힌트를 보고 푼 문제도 소중한 연습이야.';
+ el('resultText').textContent='시범 1번, 안내연습 1번, 혼자 풀기 3번을 경험했어. 혼자 풀기에서 도움 없이 성공한 문제는 '+state.firstTry+'개야. 같은 개념을 다른 날 다시 해봐도 좋아.';
  el('done').querySelector('h3').tabIndex=-1;el('done').querySelector('h3').focus({preventScroll:true});
 }
 function back(){select(state.grade,state.term,false);const d=$units.querySelectorAll('details')[state.unit];if(d){d.open=true;Array.from($units.querySelectorAll('details')).forEach(x=>{if(x!==d)x.open=false})}el('browse').scrollIntoView({behavior:'smooth',block:'start'})}
