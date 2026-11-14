@@ -18,7 +18,8 @@ const family=(mode,answer='')=>{
  if(inSet(mode,'numberLine numberLine50 numberLine100 numberOrder numberOrder50 numberOrder100 numberOrder999 numberOrder4 numberOrderBig compare'))return 'line';
  if(inSet(mode,'pattern patternShapes'))return 'pattern';
  if(inSet(mode,'reflection'))return 'symmetry';
- if(inSet(mode,'transformation2d transformation rotation'))return 'move';
+ if(mode==='rotation')return 'spin';
+ if(inSet(mode,'transformation2d transformation'))return 'move';
  if(inSet(mode,'symmetry pointSym'))return 'symmetry';
  if(inSet(mode,'shape2d shape3d shapeMatch shape3dObject shape3dClass polygonSides triangles triangleClass shapeQuadrilaterals quadrilateral regularPolygon diagonals congruence prism netCube solids faces shapeViews solidProperties boxEdges cubes'))return 'shape';
  if(inSet(mode,'circleParts circleRadius circleDiameter'))return 'circle';
@@ -61,7 +62,9 @@ function buildMode(kind,mode,p){
  if(kind==='count'){const count=rand(2,9);return {kind:'count',question:'도토리를 세고 같은 개수를 열 칸 틀에 채워 보자.',hint:'왼쪽부터 하나씩 누르면서 개수를 맞춰 봐.',count,answer:count};}
  if(kind==='place'){const labels=inSet(mode,'thousands placeValue4')?['천','백','십','일']:inSet(mode,'hundreds placeValue')?['백','십','일']:['십','일'];const places=labels.map((label,i)=>({label,value:i===0?rand(1,label==='십'&&mode==='tens50'?5:8):rand(0,9)}));if(mode==='tens50'&&places[0].value===5)places[1].value=0;if(mode==='tens100'&&places[0].value===8)places[1].value=rand(0,9);const multipliers={천:1000,백:100,십:10,일:1};const answer=places.reduce((n,x)=>n+x.value*multipliers[x.label],0);return {kind:'place',question:places.map(x=>x.label+' '+x.value+'개').join(', ')+'를 직접 만들어 보자.',hint:'한 자리씩 세면서 각 자릿값을 맞춰 보자.',places,answer};}
  if(kind==='measure'){const target=rand(2,15);return {kind:'measure',question:'자 위에서 '+target+'cm 위치에 표시를 놓자.',hint:'0부터 눈금을 한 칸씩 따라가 봐.',target,answer:target};}
- if(kind==='symmetry'){return {kind:'symmetry',question:'세로 대칭선 반대편에 같은 위치의 꽃을 심어 보자.',hint:'대칭선을 기준으로 같은 거리만큼 반대쪽에 있어야 해.',x:rand(0,1),y:rand(0,3),answer:'mirror'}}
+ if(kind==='symmetry'){const point=mode==='pointSym';return {kind:'symmetry',point,question:point?'그림을 가운데 점 기준으로 반 바퀴 돌리면 꽃은 어디로 갈까?':'세로 대칭선 반대편에 같은 위치의 꽃을 심어 보자.',hint:point?'가로와 세로 위치 모두 중심의 반대편으로 옮겨.':'대칭선을 기준으로 같은 거리만큼 반대쪽에 있어야 해.',x:rand(0,1),y:rand(0,3),answer:'mirror'}}
+ if(kind==='spin'){const turns=pick([90,180,270]);return {kind:'spin',question:'위쪽 화살표를 시계 방향으로 '+turns+'° 돌려 보자.',hint:'90°는 네 방향 중 한 칸, 180°는 반 바퀴야.',turns,answer:turns}}
+
  if(kind==='shape'){const solids=inSet(mode,'shape3d shape3dObject shape3dClass prism netCube solids faces shapeViews solidProperties boxEdges cubes');if(solids){const types=[['상자 모양','📦'],['둥근기둥 모양','🥫'],['공 모양','⚽']];const [name,emoji]=pick(types);return {kind:'shape',solid:true,question:'어떤 입체 모양인지 살펴보고 그림 카드를 모양 바구니에 넣자.',hint:'평평한 면과 둥근 면, 꼭짓점을 비교해 보자.',name,emoji,answer:name}}
  const types=[['세모',3],['네모',4],['오각형',5],['육각형',6]];const [name,sides]=pick(types);return {kind:'shape',question:'변이 '+sides+'개인 도형을 찾아 모양 바구니로 보내자.',hint:'그림 테두리의 변을 하나씩 세어 봐.',sides,name,answer:name};}
  return {kind:kind==='write'?'write':'build',question:p.question,hint:p.hint,answer:p.answer,art:p.art};
@@ -71,6 +74,6 @@ count:'수 세기·일대일 대응',share:'하나씩 공평하게 나누기',gr
 graph:'표에서 그래프 만들기',clock:'시계 바늘 움직이기',angle:'각도 직접 만들기',
 fraction:'분수 조각 색칠하기',move:'격자에서 이동하기',pattern:'수 규칙 찾기',
 line:'수직선 눈금 찾기',place:'십과 낱개 묶기',measure:'자로 길이 표시하기',
-shape:'모양 구성·분류하기',symmetry:'대칭선에 맞춰 꽃 심기',circle:'원 구성·반지름·지름',units:'들이와 무게 직접 계량',build:'그림 보고 답 만들기',write:'생각한 답을 직접 쓰기'};
+shape:'모양 구성·분류하기',symmetry:'대칭·점대칭 꽃 심기',spin:'화살표를 실제로 회전시키기',circle:'원 구성·반지름·지름',units:'들이와 무게 직접 계량',build:'그림 보고 답 만들기',write:'생각한 답을 직접 쓰기'};
 root.MoaHandsOnCore=Object.freeze({family,buildMode,visual,typeDescriptions,h,btn});
 })(window);
