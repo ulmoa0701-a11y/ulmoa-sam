@@ -11,7 +11,8 @@ const ten=(small=false)=>'<span class="tenframe'+(small?' small':'')+'" role="im
 const group=n=>Array.from({length:n},()=>apple('sm')).join('');
 const html=(id,content)=>{$(id).innerHTML=content};
 const cur=()=>STEPS[S.step];
-function say(message){if(!S.voice || !('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window))return;try{window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(message);utterance.lang='ko-KR';utterance.rate=.86;window.speechSynthesis.speak(utterance)}catch{}}
+function speakNow(message){if(!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window))return;try{window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(message);utterance.lang='ko-KR';utterance.rate=.86;window.speechSynthesis.speak(utterance)}catch{}}
+function say(message){if(S.voice)speakNow(message)}
 function stageHint(message){S.assisted=true;S.stageHint=true;message=message||'그림을 다시 보고 묶음 수와 한 묶음의 개수를 비교해 봐.';feedback('💡 '+message,'helped');say(message)}
 function feedback(message,type=''){$('feedback').textContent=message;$('feedback').className='feedback '+type}
 function progress(){html('progress',STEPS.map(([icon,label],i)=>'<div class="progress-item '+(i===S.step?'active':i<S.step?'done':'')+'" aria-current="'+(S.step===i?'step':'false')+'"><span class="p-icon">'+icon+'</span><span>'+label+'</span></div>').join(''))}
@@ -125,7 +126,7 @@ function submitTest(){
   S.incorrect++;S.testTotalErrors++;
   feedback('↶　다시 계산해 봐.','retry');
   say('아직 달라요. 십의 자리와 일의 자리를 나눠 계산해 보세요.');
-  if(S.incorrect>=2)stageHint('예: 23 × 2는 20 × 2와 3 × 2로 나눌 수 있어. 같은 방법을 적용해 봐.');
+  if(S.incorrect>=2){S.testHelp++;stageHint('예: 23 × 2는 20 × 2와 3 × 2로 나눌 수 있어. 같은 방법을 적용해 봐.')}
  }
 }
 $('keypad').addEventListener('click',e=>{
@@ -151,7 +152,7 @@ $('stage').addEventListener('click',e=>{
   }
   if(e.target.closest('#undoOne')&&S.groups[S.active]>0){S.groups[S.active]--;renderFill()}
  }
- if(e.target.closest('#readProblem')&&S.step===4){say(currentTest().word)}
+ if(e.target.closest('#readProblem')&&S.step===4){speakNow(currentTest().word)}
 });
 $('helper').addEventListener('click',()=>{
  if(S.step===4){
