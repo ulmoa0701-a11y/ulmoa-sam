@@ -46,7 +46,7 @@ function reset(level){
  S.friend=0;S.baskets=Array.from({length:n().friends},()=>({packs:0,singles:0}));
  S.phase='fill';S.locked=false;S.retries=0;S.hintUsed=0;
  $('levelList').innerHTML=LEVELS.map((x,i)=>'<button type="button" data-level="'+i+'" aria-pressed="'+String(S.level===i)+'">'+(i+1)+'단계　🍎 '+x.each+' × '+x.friends+'</button>').join('');
- $('levelList').querySelectorAll('[data-level]').forEach(b=>b.addEventListener('click',()=>{$('.level-switch')?.removeAttribute('open');reset(+b.dataset.level)}));
+ $('levelList').querySelectorAll('[data-level]').forEach(b=>b.addEventListener('click',()=>{document.querySelector('.level-switch')?.removeAttribute('open');reset(+b.dataset.level)}));
  $('stageNumber').textContent='🌱 '+(S.level+1)+' / '+LEVELS.length;
  $('flowers').innerHTML=Array.from({length:LEVELS.length},(_,i)=>'<span class="'+(i<S.level?'grown':'')+'">'+(i<S.level?'🌼':'○')+'</span>').join('');
  $('playScreen').hidden=false;$('countScreen').hidden=true;$('winScreen').hidden=true;
