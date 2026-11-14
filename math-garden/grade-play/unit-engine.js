@@ -36,6 +36,16 @@ function mk(q,art,answer,wrong,hint,kind='choice'){
 function problem(mode){
  let a,b,c,d,n,s,t,z,arr;
  switch(mode){
+ case 'shape3d':s=pick([['상자 모양','📦'],['둥근기둥 모양','🥫'],['공 모양','⚽']]);return mk('이 물건은 어떤 입체 모양일까?',bold(s[1]),s[0],['상자 모양','둥근기둥 모양','공 모양','세모 모양'].filter(x=>x!==s[0]),'평평한 면, 둥근 면, 굴러가는 모습을 살펴봐.');
+ case 'shape3dObject':s=pick([['공 모양','🏀'],['상자 모양','🎁'],['둥근기둥 모양','🥫']]);return mk('이 생활 물건의 모양을 골라 줘.',bold(s[1]),s[0],['상자 모양','둥근기둥 모양','공 모양','세모 모양'].filter(x=>x!==s[0]),'서 있는 모습과 굴러가는 모습을 떠올려 봐.');
+ case 'shape3dClass':s=pick([['공 모양','⚽ 🏀'],['상자 모양','📦 🎁'],['둥근기둥 모양','🥫 🥁']]);return mk('두 물건의 공통 모양은?',bold(s[1]),s[0],['상자 모양','둥근기둥 모양','공 모양','세모 모양'].filter(x=>x!==s[0]),'겉의 색은 무시하고 기본 모양을 봐.');
+ case 'noCarry':a=rand(1,6)*10+rand(0,5);b=rand(1,2)*10+rand(0,9-a%10);return mk('받아올림 없이 더하면?',bold(a+' + '+b+' = ?'),a+b,[a+b+1,a+b+10,a+b-10],'일의 자리끼리 더해도 10보다 작아.');
+ case 'noBorrow':a=rand(4,8)*10+rand(3,9);b=rand(1,2)*10+rand(0,a%10);return mk('받아내림 없이 빼면?',bold(a+' − '+b+' = ?'),a-b,[a-b+1,a-b+10,a-b-10],'일의 자리끼리 먼저 빼도 돼.');
+ case 'sumThreeSmall':a=rand(1,5);b=rand(1,5);c=rand(1,5);return mk('세 수를 더하면?',bold(a+' + '+b+' + '+c),a+b+c,[a+b,a+b+c+1,a+b+c-1],'차례대로 더해도 되고 10을 먼저 만들어도 돼.');
+ case 'subThreeSmall':a=rand(12,18);b=rand(1,4);c=rand(1,4);return mk('세 수를 차례로 빼면?',bold(a+' − '+b+' − '+c),a-b-c,[a-b+c,a-b,a-b-c+1],'왼쪽부터 하나씩 빼.');
+ case 'addCarrySmall':a=rand(6,9);b=rand(10-a,9);return mk('10을 만들어 더하면?',bold(a+' + '+b+' = ?'),a+b,[a+b+1,a+b-1,a+b+2],'10이 되려면 '+a+'에 '+(10-a)+'을 더해야 해.');
+ case 'subBorrowSmall':a=rand(11,18);b=rand(a-9,9);return mk('10에서 나누어 빼면?',bold(a+' − '+b+' = ?'),a-b,[a-b+1,a-b-1,a-b+2],'먼저 10에서 빼고 남은 것을 더해.');
+ case 'tenBridge':a=rand(7,9);b=rand(10-a,9);return mk('10개 묶음을 먼저 만들어 보자.',bold(a+' + '+b+' = ?'),a+b,[a+b+1,a+b-1,a+b+3],'10까지 채울 숫자와 남은 숫자를 나누어 생각해.');
  case 'wordProblemsBig':a=rand(120,460);b=rand(110,350);return mk('창고에 열매가 '+a+'개 있었어. '+b+'개를 더 가져오면?',bold('🍎 '+a+'개 + '+b+'개'),a+b,[a+b+10,a+b-10,a+b+1],'백·십·일의 자리끼리 더해.');
  case 'multTriple':a=rand(112,235);b=rand(2,7);return mk('세 자리 수와 한 자리 수를 곱하면?',bold(a+' × '+b+' = ?'),a*b,[a*b+a,a*b+b,a*b-10],'백·십·일 자리를 나누어 곱해.');
  case 'fracDecimal':a=rand(1,9);return mk('분수를 소수로 바꾸면?',fraction(a,10),fmt(a/10),[fmt((a+1)/10),fmt((a-1)/10),fmt(a/100)],'10분의 1은 0.1이야.');
