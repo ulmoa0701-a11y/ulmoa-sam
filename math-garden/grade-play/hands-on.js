@@ -42,6 +42,7 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    else if(scene.kind==='line')m.append(h('p','hands-explain','시작점부터 한 칸씩 같은 간격으로 이동해.'));
    else if(scene.kind==='measure')m.append(h('p','hands-explain','자에서 0을 찾고 '+scene.target+'cm만큼 이동해.'));
    else if(scene.kind==='pattern')m.append(h('p','hands-explain','매번 '+scene.step+'씩 커져. 규칙은 '+scene.answer+'에서 계속돼.'));
+   else if(scene.kind==='symmetry')m.append(h('p','hands-explain','왼쪽 꽃과 대칭선을 기준으로 같은 거리의 오른쪽 칸에 꽃을 심어.'));
    else if(scene.kind==='shape')m.append(h('p','hands-explain','변을 하나씩 세면 '+scene.sides+'개. '+scene.name+'이야.'));
    else m.append(h('p','hands-explain',problem.question+' → '+problem.answer));
    m.append(h('p','hands-small',scene.hint||problem.hint||'한 번 더 천천히 확인해 보자.'));
@@ -81,7 +82,17 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    update();guide();check(()=>boxes.every(x=>x===scene.per));preset(()=>{boxes.fill(scene.per);update()});
  }else if(scene.kind==='fraction'){
    const chosen=new Set(),bar=h('div','hands-fraction-bar');work.append(bar);
-   say('아래 조각을 하나씩 눌러 색칠해 봐. 다시 누르면 색칠이 사라져.');
+   if(scene.task==='add'||scene.task==='sub')say('먼저 '+scene.first+'/'+scene.den+'과 '+scene.other+'/'+scene.den+'을 보고, 결과만큼 색칠해 보자.');
+   else if(scene.task==='compare')say('두 분수를 비교해 더 큰 쪽을 그림으로 만들어 보자.');
+   else if(scene.task==='equivalent')say('원래 분수와 같은 양이 되도록 두 배로 나눈 칸을 색칠해 보자.');
+   else if(scene.task==='improper')say('한 판을 가득 채우고, 나머지까지 색칠해 보자.');
+   else say('아래 조각을 하나씩 눌러 색칠해 봐. 다시 누르면 색칠이 사라져.');
+   if(['add','sub','compare','equivalent'].includes(scene.task)){
+     const given=h('div','hands-given-fractions');
+     if(scene.task==='equivalent'){given.innerHTML='<div><strong>원래 분수 '+scene.first+'/'+scene.originalDen+'</strong>'+visual('fraction',{n:scene.first,d:scene.originalDen})+'</div>'}
+     else given.innerHTML='<div><strong>첫 번째 '+scene.first+'/'+scene.den+'</strong>'+visual('fraction',{n:scene.first,d:scene.den})+'</div><div><strong>'+({add:'더할 분수',sub:'뺄 분수',compare:'비교할 분수'})[scene.task]+' '+scene.other+'/'+scene.den+'</strong>'+visual('fraction',{n:scene.other,d:scene.den})+'</div>';
+     work.append(given);
+   }
    const count=h('p','hands-left');work.append(count);
    const update=()=>{bar.replaceChildren();for(let i=0;i<scene.den;i++){const cell=btn(chosen.has(i)?'●':'',()=>{chosen.has(i)?chosen.delete(i):chosen.add(i);update()},'hands-frac-cell'+(chosen.has(i)?' filled':''));cell.setAttribute('aria-label',(i+1)+'번째 분수 칸');cell.setAttribute('aria-pressed',String(chosen.has(i)));bar.append(cell)}count.textContent='전체 '+scene.den+'칸 중 '+chosen.size+'칸 색칠했어.'};
    update();guide();check(()=>chosen.size===scene.numer);preset(()=>{chosen.clear();for(let i=0;i<scene.numer;i++)chosen.add(i);update()});
@@ -146,11 +157,23 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    const ruler=h('div','hands-ruler');let value=-1;work.append(ruler);
    for(let i=0;i<=16;i++){const m=btn(String(i),()=>{value=i;ruler.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));m.classList.add('selected')},'hands-ruler-mark');m.setAttribute('aria-label',i+'센티미터 표시하기');ruler.append(m)}
    guide();check(()=>value===scene.target);preset(()=>{ruler.children[scene.target].click()});
+ }else if(scene.kind==='symmetry'){
+   say('가운데 선을 기준으로 같은 높이·같은 거리에 꽃을 심어 보자.');
+   const grid=h('div','hands-mirror-grid');work.append(grid);
+   let chosen=-1;const target=scene.y*6+(5-scene.x);
+   const draw=()=>{grid.replaceChildren();for(let y=0;y<4;y++)for(let x=0;x<6;x++){
+     const idx=y*6+x,b=btn(y===scene.y&&x===scene.x?'🌼':idx===chosen?'🌼':'',()=>{if(x<3)return;chosen=idx;draw()},'hands-mirror-cell'+(x===2?' split':'')+(idx===chosen?' selected':''));
+     if(y===scene.y&&x===scene.x)b.disabled=true;
+     b.setAttribute('aria-label',(x+1)+'열 '+(y+1)+'행 '+(idx===chosen?'내가 심은 꽃':(y===scene.y&&x===scene.x?'처음 꽃':'빈칸')));
+     grid.append(b);
+   }};
+   draw();guide();check(()=>chosen===target);preset(()=>{chosen=target;draw()});
  }else if(scene.kind==='shape'){
    say('모양을 손으로 눌러 바구니에 넣어 보자. 변의 수가 맞으면 성공!');
-   const candidates=[['세모',3],['네모',4],['오각형',5],['육각형',6]];
+   const candidates=scene.solid?[['상자 모양','📦'],['둥근기둥 모양','🥫'],['공 모양','⚽']]:[['세모',3],['네모',4],['오각형',5],['육각형',6]];
    const board=h('div','hands-shapes');let chosen='';work.append(board);const svg=n=>'<svg viewBox="0 0 100 100" width="75" height="75" role="img" aria-label="'+n+'각형"><polygon points="'+Array.from({length:n},(_,i)=>{const r=2*Math.PI*i/n-Math.PI/2;return (50+38*Math.cos(r)).toFixed(0)+','+(50+38*Math.sin(r)).toFixed(0)}).join(' ')+'" fill="#b4d8b6" stroke="#477e60" stroke-width="5"/></svg>';
-   candidates.forEach(([name,n])=>{const b=btn('',()=>{chosen=name;board.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected')},'hands-shape-card');b.innerHTML=svg(n)+'<span>'+name+'</span>';board.append(b)});
+   if(scene.solid)work.prepend(h('p','hands-prompt-seeds',scene.emoji));
+   candidates.forEach(([name,n])=>{const b=btn('',()=>{chosen=name;board.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected')},'hands-shape-card');b.innerHTML=(scene.solid?'<span class="hands-big-emoji">'+n+'</span>':svg(n))+'<span>'+name+'</span>';board.append(b)});
    guide();check(()=>chosen===scene.name);preset(()=>{board.children[candidates.findIndex(a=>a[0]===scene.name)].click()});
  }else{
    say('그림과 문장을 살펴보고 답을 직접 완성해 보자.');
