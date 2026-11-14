@@ -4,6 +4,7 @@ on:
     paths:
       - 'math-garden/grade-play/concept-multiply/**'
       - 'qa/multiply-picture-first-qa.cjs'
+      - 'qa/one-action-math-qa.cjs'
       - '.github/workflows/multiply-picture-first-qa.yml'
   push:
     branches: [main]
@@ -36,10 +37,10 @@ jobs:
           for i in $(seq 1 40); do curl -fsS http://127.0.0.1:8765/math-garden/grade-play/concept-multiply/ >/dev/null && exit 0; sleep 0.25; done
           exit 1
       - name: Full game walkthrough on phones and desktop
-        run: node qa/multiply-picture-first-qa.cjs
+        run: node qa/one-action-math-qa.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: picture-first-game-screenshots
-          path: qa/picture-multiply-artifacts/
+          name: picture-first-game-screenshots-compat
+          path: qa/one-action-math-screens/
           if-no-files-found: ignore
