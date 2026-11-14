@@ -65,3 +65,7 @@
 #play .game-nav{margin-top:14px}
 .unit-fraction-bar{min-height:48px}
 }
+/* 별도 개념 체험 게임 링크는 기존 소단원 버튼과 구별 */
+.subunit-feature{background:linear-gradient(110deg,#e9f8ea,#fff8e5);border-color:#8fbea1;text-decoration:none;color:#29563c;min-height:89px}
+.subunit-feature:hover,.subunit-feature:focus-visible{border-color:#347b54;background:#e4f5df}
+.subunit-feature b{font-weight:900}
