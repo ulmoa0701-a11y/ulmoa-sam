@@ -31,6 +31,7 @@ function init(){
    f.textContent=state.activity?.scene?.hint||state.current?.hint||'그림에서 수와 규칙을 먼저 찾아보자.';
    f.dataset.status='hint';
  });
+ el('next').addEventListener('click',next);
  select(state.grade,state.term,false);
  const u=Number(q.get('u')),s=Number(q.get('s'));
  if(q.has('u')&&q.has('s')&&Number.isInteger(u)&&Number.isInteger(s)&&u>=0&&u<get().length&&s>=0&&s<get()[u].subtopics.length)play(u,s,false);
