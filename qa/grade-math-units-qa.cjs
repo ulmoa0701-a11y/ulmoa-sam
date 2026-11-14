@@ -56,7 +56,7 @@ try{
            go.click();
          }else{
            const help=shell.querySelector('.hands-actions .hands-help');
-           if(!help)throw Error('guided support missing '+shell.dataset.kind);
+           if(!help)throw Error('guided support missing '+shell.dataset.kind+' phase='+shell.dataset.phase+' round='+window.MoaUnitApp.state.round+' solved='+window.MoaUnitApp.state.solved+' html='+shell.outerHTML.slice(0,1000));
            help.click();
            const check=shell.querySelector('.hands-actions .hands-check');
            if(!check)throw Error('check missing');
