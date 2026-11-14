@@ -21,7 +21,7 @@ function setupStep(){
  $('helper').hidden=S.step===5;
  render();window.scrollTo({top:0,behavior:'smooth'});
 }
-function gotoStep(step){S.step=Math.max(0,Math.min(4,step));setupStep()}
+function gotoStep(step){S.step=Math.max(0,Math.min(4,step));if(S.step===4){S.testIndex=0;S.testScore=0;S.testTotalErrors=0;S.testHelp=0;S.scoreList=[];S.typed=''}setupStep()}
 function scene(values,kind='apple',mode='plain'){
  return '<div class="scene-grid">'+Array.from({length:values.length},(_,i)=>{
  const n=values[i],item=kind==='apple'?group(n):Array.from({length:n},()=>'<span class="apple sm" aria-hidden="true">'+kind+'</span>').join('');
@@ -71,7 +71,7 @@ function renderFill(){
 }
 function renderRepresent(){
  $('stepTitle').textContent='그림이 덧셈이 돼';
- html('stage',scene([3,3,3,3])+(S.sub===0?'<div class="math-display">3 · 3 · 3 · 3</div>':'<div class="math-display">3 + 3 + 3 + 3 = ?</div>'));
+ html('stage',scene([3,3,3,3])+(S.sub===0?'<div class="math-display">🧺3　🧺3　🧺3　🧺3</div>':'<div class="math-display">3 + 3 + 3 + 3 = ?</div>'));
  $('helper').hidden=false;
  if(S.sub===0)showChoice('👀 그림을 나타내는 덧셈은?', ['3 + 3 + 3 + 3','3 + 4','4 + 4 + 4'],'3 + 3 + 3 + 3','친구 네 명이 각각 3개씩 가지고 있어.');
  else showChoice('3 + 3 + 3 + 3 = ?', ['9','12','15'],'12','3을 네 번 더해 봐.');
@@ -151,7 +151,7 @@ $('stage').addEventListener('click',e=>{
   }
   if(e.target.closest('#undoOne')&&S.groups[S.active]>0){S.groups[S.active]--;renderFill()}
  }
- if(e.target.closest('#readProblem')&&S.step===4){S.assisted=true;S.stageHint=true;S.testHelp++;say(currentTest().word)}
+ if(e.target.closest('#readProblem')&&S.step===4){say(currentTest().word)}
 });
 $('helper').addEventListener('click',()=>{
  if(S.step===4){
