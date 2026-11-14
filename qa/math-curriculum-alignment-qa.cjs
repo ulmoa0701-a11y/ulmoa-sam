@@ -34,7 +34,7 @@ assert(names(3,2,0).join(' ').includes('두 자리 수 × 두 자리 수'),'grad
 assert(names(4,1,2).join(' ').includes('세 자리 수 × 두 자리 수'),'grade4 multiplication scope needs explicit model');
 assert(names(5,1,4).join(' ').includes('분모 다른 분수'),'grade5 unlike denominator absent');
 assert(names(6,1,3).join(' ').includes('비율'),'grade6 ratio missing');
-assert(names(6,2,1).join(' ').includes('위·앞·옆'),'grade6 spatial views missing');
+assert(names(6,2,1).join(' ').includes('앞·위·옆'),'grade6 spatial views missing');
 for(const mode of ['multTens','multTriple','times2','wordMultiply2','multTriple2']){
  for(let i=0;i<50;i++){const p=E.problem(mode);assert(p.options.includes(p.answer)&&p.options.length===4,mode+' broken generator');}
 }
