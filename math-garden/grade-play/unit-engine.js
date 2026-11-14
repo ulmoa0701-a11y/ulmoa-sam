@@ -39,7 +39,7 @@ function problem(mode){
  case 'wordProblemsBig':a=rand(120,460);b=rand(110,350);return mk('창고에 열매가 '+a+'개 있었어. '+b+'개를 더 가져오면?',bold('🍎 '+a+'개 + '+b+'개'),a+b,[a+b+10,a+b-10,a+b+1],'백·십·일의 자리끼리 더해.');
  case 'multTriple':a=rand(112,235);b=rand(2,7);return mk('세 자리 수와 한 자리 수를 곱하면?',bold(a+' × '+b+' = ?'),a*b,[a*b+a,a*b+b,a*b-10],'백·십·일 자리를 나누어 곱해.');
  case 'fracDecimal':a=rand(1,9);return mk('분수를 소수로 바꾸면?',fraction(a,10),fmt(a/10),[fmt((a+1)/10),fmt((a-1)/10),fmt(a/100)],'10분의 1은 0.1이야.');
- case 'transformation2d':a=rand(1,4);b=rand(1,3);return mk('꽃을 오른쪽으로 '+b+'칸 옮기면 어느 칸일까?',bold('가로 1 · 2 · 3 · 4 · 5 · 6 · 7 · 8<br>꽃은 '+a+'번 칸'),a+b+'번 칸',[a+'번 칸',(a+b+1)+'번 칸',(a+b-1)+'번 칸'],'방향은 그대로 두고 위치만 옮겨.');
+ case 'transformation2d':a=rand(1,4);b=rand(1,3);return mk('꽃을 오른쪽으로 '+b+'칸 옮기면 어느 칸일까?',bold('가로 1 · 2 · 3 · 4 · 5 · 6 · 7 · 8<br>꽃은 '+a+'번 칸'),a+b+'번 칸',[a+'번 칸',(a+b+1)+'번 칸',(a+b+2)+'번 칸'],'방향은 그대로 두고 위치만 옮겨.');
  case 'pointSym':s=pick(['평행사변형','직사각형','정삼각형']);return mk('도형을 중심 기준으로 180° 돌려도 겹칠까?',bold(s),s==='정삼각형'?'아니요':'네',s==='정삼각형'?['네','항상','모르겠어요']:['아니요','항상 안 돼요','모르겠어요'],'점대칭은 반 바퀴 돌렸을 때 같은 모양이 돼.', 'choice');
  case 'decimalPoint':a=rand(12,50);b=rand(2,5);return mk('소수를 자연수로 나누는 몫은?',bold(fmt(a*b/10)+' ÷ '+b),fmt(a/10),[fmt(a/10+1),fmt(a/100),fmt(a/10+.1)],'소수점 위치를 맞추어 자연수 나눗셈처럼 계산해.');
  case 'hiddenCubes':a=rand(2,4);b=rand(2,4);return mk('쌓기나무 탑의 위에 '+a+'개, 아래에 '+b+'개가 있어. 전체 개수는?',bold('🧱 위 '+a+'개 · 아래 '+b+'개'),a+b,[a,b,a+b+1],'보이지 않는 아래층까지 모두 포함해.');
