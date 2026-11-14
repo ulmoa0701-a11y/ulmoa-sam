@@ -4,17 +4,17 @@
 const RAW={
 '1-1':[
 ['9까지의 수','도토리 1~9 세기|count','큰 수와 작은 수 비교|compare','몇 번째 친구일까?|ordinal'],
-['여러 가지 모양','평면 모양 구별|shape2d','모양이 같은 물건 찾기|shapeMatch','모양별로 개수 세기|shapeCount'],
+['여러 가지 모양','상자·둥근기둥·공 모양|shape3d','사물에서 입체 모양 찾기|shape3dObject','입체 모양 분류하기|shape3dClass'],
 ['덧셈과 뺄셈','열매 합치기|add10','열매 덜어 내기|sub10','10 만들기|make10'],
 ['비교하기','길이가 더 긴 것|lengthCompare','더 많고 더 적은 것|compare','더 무거운 쪽|weightCompare'],
 ['50까지의 수','10개 묶음과 낱개|tens','수의 순서 찾기|numberOrder','수직선의 수 읽기|numberLine']],
 '1-2':[
 ['100까지의 수','10개씩 묶어 세기|tens','수의 크기 비교|numberOrder','빈 숫자 자리 채우기|numberLine'],
-['덧셈과 뺄셈 ①','덧셈 이야기|add10','뺄셈 이야기|sub10','10이 되는 짝 찾기|make10'],
+['덧셈과 뺄셈 ①','받아올림 없는 두 자리 덧셈|noCarry','받아내림 없는 두 자리 뺄셈|noBorrow','자릿수 맞춰 계산하기|noCarry'],
 ['여러 가지 모양','동그라미·세모·네모|shape2d','같은 모양 연결|shapeMatch','모양 분류하기|shapeCount'],
-['덧셈과 뺄셈 ②','받아올림 덧셈|carry','받아내림 뺄셈|borrow','두 자리 수 계산|add100'],
+['덧셈과 뺄셈 ②','세 수의 덧셈|sumThreeSmall','세 수의 뺄셈|subThreeSmall','10을 만드는 짝|make10'],
 ['시계 보기와 규칙 찾기','몇 시와 몇 시 30분|clock','수의 규칙 찾기|pattern','모양 규칙 이어가기|patternShapes'],
-['덧셈과 뺄셈 ③','두 자리 수 더하기|add100','두 자리 수 빼기|borrow','생활 속 계산|wordProblems']],
+['덧셈과 뺄셈 ③','10을 만들며 더하기|addCarrySmall','10에서 빼기|subBorrowSmall','받아올림·받아내림 연결|tenBridge']],
 '2-1':[
 ['세 자리 수','백·십·일의 자리|hundreds','세 자리 수 비교|numberOrder','자리값 바꾸기|placeValue'],
 ['여러 가지 도형','도형 이름 고르기|shape2d','같은 도형 찾기|shapeMatch','변과 꼭짓점 찾기|polygonSides'],
