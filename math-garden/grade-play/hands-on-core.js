@@ -21,6 +21,8 @@ const family=(mode,answer='')=>{
  if(inSet(mode,'transformation2d transformation rotation'))return 'move';
  if(inSet(mode,'symmetry pointSym'))return 'symmetry';
  if(inSet(mode,'shape2d shape3d shapeMatch shape3dObject shape3dClass polygonSides triangles triangleClass shapeQuadrilaterals quadrilateral regularPolygon diagonals congruence prism netCube solids faces shapeViews solidProperties boxEdges cubes'))return 'shape';
+ if(inSet(mode,'circleParts circleRadius circleDiameter'))return 'circle';
+ if(inSet(mode,'capacity weight unitConvert'))return 'units';
  if(inSet(mode,'ruler length lengthCompare'))return 'measure';
  return /^[-\d,.]+(?:cm|m|g|kg|mL|L|분|개|상자|cm²|cm³|m³|%)?$/.test(String(answer)) ? 'build' : 'write';
 };
@@ -47,6 +49,12 @@ function buildMode(kind,mode,p){
   const question=task==='add'?first+'/'+den+' + '+other+'/'+den+'을 그림으로 합쳐 보자.':task==='sub'?first+'/'+den+' − '+other+'/'+den+'의 남은 양을 만들자.':task==='compare'?first+'/'+den+'와 '+other+'/'+den+'를 비교해 더 큰 분수를 색칠해 보자.':'전체 '+den+'칸 중 '+numer+'칸을 색칠해서 '+numer+'/'+den+'을 만들어 보자.';
   return {kind:'fraction',task,question,hint:'같은 크기의 조각을 보고 분자만큼 색칠해 보자.',den,numer,first,other,answer:numer};
  }
+ if(kind==='circle'){const radius=rand(2,9);
+  if(mode==='circleParts'){const part=pick(['중심','반지름','지름']);return {kind:'circle',part,question:'원의 '+part+'에 해당하는 곳을 그림에서 눌러 봐.',hint:'가운데 점은 중심, 가운데부터 테두리는 반지름, 양쪽 끝을 잇는 선은 지름이야.',answer:part}}
+  if(mode==='circleRadius')return {kind:'circle',part:'반지름',question:'지름이 '+(radius*2)+'cm인 원의 반지름을 만들어 보자.',hint:'반지름 두 개 길이가 지름과 같아.',radius,answer:radius};
+  return {kind:'circle',part:'지름',question:'반지름이 '+radius+'cm인 원의 지름을 만들어 보자.',hint:'반지름을 두 배 하면 지름이야.',radius,answer:radius*2};
+ }
+ if(kind==='units'){const liter=mode==='capacity',big=rand(1,4),small=rand(1,8)*100,unit=liter?'L':'kg',minor=liter?'mL':'g';return {kind:'units',question:big+unit+' '+small+minor+'을 직접 계량해서 만들어 보자.',hint:'1'+unit+'은 1000'+minor+'이야.',big,small,unit,minor,answer:big*1000+small}}
  if(kind==='move'){const x=rand(1,3),y=rand(1,3),dx=rand(1,2),dy=mode==='transformation2d'?0:rand(0,2);return {kind:'move',question:'꽃을 오른쪽으로 '+dx+'칸'+(dy?' 위로 '+dy+'칸':'')+' 이동시켜 보자.',hint:'오른쪽은 한 칸씩 오른쪽, 위는 한 줄 위로 움직여.',x,y,dx,dy,answer:(x+dx)+'|'+(y+dy)};}
  if(kind==='pattern'){const step=rand(2,7),start=rand(1,11);return {kind:'pattern',question:'수의 규칙을 찾아 빈칸을 완성하자.',hint:'앞의 수에서 매번 얼마씩 커지는지 살펴봐.',start,step,answer:start+step*4};}
  if(kind==='line'){const start=rand(0,10),step=rand(1,5),target=start+step*rand(1,7);return {kind:'line',question:'수직선에서 '+target+'을 찾아 표시해 보자.',hint:'시작점부터 같은 간격으로 한 칸씩 세어 봐.',start,step,target,answer:target};}
@@ -63,6 +71,6 @@ count:'수 세기·일대일 대응',share:'하나씩 공평하게 나누기',gr
 graph:'표에서 그래프 만들기',clock:'시계 바늘 움직이기',angle:'각도 직접 만들기',
 fraction:'분수 조각 색칠하기',move:'격자에서 이동하기',pattern:'수 규칙 찾기',
 line:'수직선 눈금 찾기',place:'십과 낱개 묶기',measure:'자로 길이 표시하기',
-shape:'모양 구성·분류하기',symmetry:'대칭선에 맞춰 꽃 심기',build:'그림 보고 답 만들기',write:'생각한 답을 직접 쓰기'};
+shape:'모양 구성·분류하기',symmetry:'대칭선에 맞춰 꽃 심기',circle:'원 구성·반지름·지름',units:'들이와 무게 직접 계량',build:'그림 보고 답 만들기',write:'생각한 답을 직접 쓰기'};
 root.MoaHandsOnCore=Object.freeze({family,buildMode,visual,typeDescriptions,h,btn});
 })(window);
