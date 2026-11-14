@@ -22,13 +22,21 @@ function mk(q,art,answer,wrong,hint,kind='choice'){
   const n=Number(a);if(Number.isFinite(n)){for(let v=1;options.length<4&&v<100;v++){for(const w of [n+v,n-v])if(w>=0&&!options.includes(fmt(w)))options.push(fmt(w))}}
   else{const m=a.match(/^(-?\d+(?:\.\d+)?)(cm|m|g|kg|mL|L|분|개|cm²|cm³|m³|%|°)$/);if(m){for(let i=1;options.length<4&&i<20;i++){for(const v of [Number(m[1])+i,Number(m[1])-i])if(v>=0&&!options.includes(fmt(v)+m[2]))options.push(fmt(v)+m[2])}}}
  }
+ if(options.length<4){
+  const m=a.match(/^(\d+)(번째|번|상자)$/);
+  if(m){for(let v=1;options.length<4&&v<=30;v++){const k=v+m[2];if(k!==a&&!options.includes(k))options.push(k)}}
+  const frac=a.match(/^(\d+)\/(\d+)$/);
+  if(frac){const n=+frac[1],d=+frac[2];for(let i=1;options.length<4&&i<40;i++){for(const t of [fract(n+i,d),fract(n,d+i),fract(Math.max(1,n-i),d)])if(t!==a&&!options.includes(t))options.push(t)}}
+  const ratio=a.match(/^(\d+):(\d+)$/);
+  if(ratio){for(let i=1;options.length<4&&i<15;i++){for(const t of [ratio[1]+':'+(+ratio[2]+i),(+ratio[1]+i)+':'+ratio[2]])if(t!==a&&!options.includes(t))options.push(t)}}
+ }
  if(options.length<4)throw Error('답 선택지가 부족함: '+q+' / '+options.join(','));
  return {question:q,art,answer:a,options:sh(options.slice(0,4)),hint,kind};
 }
 function problem(mode){
  let a,b,c,d,n,s,t,z,arr;
  switch(mode){
- case 'ordinal':a=rand(1,5);return mk('앞에서 몇 번째 친구에게 꽃을 줄까?',bold('🐻　🐰　🐱　🐸　🐶'+'<br>↓ 표시: '+a+'번 자리'),a+'번째',[a+1+'번째',Math.max(1,a-1)+'번째',a+2+'번째'],'왼쪽부터 하나씩 순서를 세어 봐.');
+ case 'ordinal':a=rand(1,5);return mk('앞에서 몇 번째 친구에게 꽃을 줄까?',bold(['🐻','🐰','🐱','🐸','🐶'].map((x,i)=>'<span style="background:'+(i===a-1?'#f8dd89':'none')+';padding:6px;border-radius:9px">'+x+'</span>').join(' ')),a+'번째',[a+1+'번째',Math.max(1,a-1)+'번째',a+2+'번째'],'왼쪽부터 하나씩 순서를 세어 봐.');
  case 'shape2d':s=pick([['세모','triangle'],['네모','square'],['동그라미','circle'],['직사각형','rectangle']]);return mk('그림의 모양 이름은?',shapeSvg(s[1]),s[0],['세모','네모','동그라미','직사각형'].filter(x=>x!==s[0]),'선과 꼭짓점이 몇 개인지 살펴보자.');
  case 'shapeMatch':s=pick([['세모','triangle'],['네모','square'],['동그라미','circle']]);return mk('가장 닮은 모양 이름은?',shapeSvg(s[1]),s[0],['세모','네모','동그라미','오각형'].filter(x=>x!==s[0]),'모양의 테두리를 따라가며 비교해 보자.');
  case 'shapeCount':a=rand(2,5);b=rand(1,4);return mk('동그라미는 몇 개일까?',bold('🟢'.repeat(a)+'<br>'+'🔺'.repeat(b)),a,[a+1,a-1,a+2],'동그라미만 찾아 하나씩 세어 봐.');
@@ -50,8 +58,9 @@ function problem(mode){
  case 'multDigit':a=rand(11,49);b=rand(2,9);return mk('몇 개의 열매가 모일까?',bold(a+' × '+b+' = ?'),a*b,[a*b+b,a*b-b,a*b+10],'십의 자리와 일의 자리를 나눠 곱해.');
  case 'wordMultiply':a=rand(12,23);b=rand(2,5);return mk('한 상자에 '+a+'개씩, '+b+'상자가 있어. 모두 몇 개?',bold(a+'개 × '+b+'상자'),a*b,[a+b,a*b+a,a*b-b],'같은 개수의 상자가 여러 개 있으니 곱셈해.');
  case 'decimalPlace':a=rand(1,9);b=rand(0,9);return mk('수 '+a+'.'+b+'에서 소수 첫째 자리 숫자는?',bold(a+'.'+b),b,[a,b+1,(b+2)%10],'소수점 바로 오른쪽 숫자를 봐.');
+ case 'polygonSides':a=pick([3,4,5,6]);return mk('이 도형의 변은 몇 개일까?',shapeSvg(({3:'triangle',4:'square',5:'pentagon',6:'hexagon'})[a]),a,[a+1,a-1,a+2],'테두리를 따라 변을 하나씩 세어.');
  case 'fractionParts':d=rand(3,9);a=rand(1,d-1);return mk('색칠한 부분은 전체의 몇 분의 몇?',bar(a,d),a+'/'+d,[(a+1)+'/'+d,(a)+'/'+(d+1),(Math.max(1,a-1))+'/'+d],'전체 칸이 분모, 색칠한 칸이 분자야.');
- case 'circleParts':s=pick(['반지름','지름','중심']);return mk('원의 '+s+'은 무엇일까?','<svg width="220" viewBox="0 0 220 180" role="img" aria-label="원의 구성"><circle cx="110" cy="90" r="72" stroke="#52836a" stroke-width="5" fill="#e3f3dd"/><path d="M38 90H182" stroke="#b55f55" stroke-width="3"/><circle cx="110" cy="90" r="6" fill="#3b705a"/><text x="124" y="81" font-size="17">'+s+'</text></svg>',s,['반지름','지름','중심','원주'].filter(x=>x!==s),'중심은 가운데 점, 반지름은 중심부터 테두리, 지름은 중심을 지나는 양 끝 선이야.');
+ case 'circleParts':s=pick(['반지름','지름','중심']);return mk('붉은 표시의 이름은?','<svg width="220" viewBox="0 0 220 180" role="img" aria-label="원의 구성"><circle cx="110" cy="90" r="72" stroke="#52836a" stroke-width="5" fill="#e3f3dd"/>'+(s==='지름'?'<path d="M38 90H182" stroke="#b55f55" stroke-width="6"/>':s==='반지름'?'<path d="M110 90H182" stroke="#b55f55" stroke-width="6"/>':'<circle cx="110" cy="90" r="9" fill="#b55f55"/>')+'<circle cx="110" cy="90" r="4" fill="#3b705a"/></svg>',s,['반지름','지름','중심','원주'].filter(x=>x!==s),'중심은 가운데 점, 반지름은 중심부터 테두리, 지름은 중심을 지나는 양 끝 선이야.');
  case 'circleRadius':a=rand(2,9);return mk('반지름이 '+a+'cm인 원의 지름은?',bold('◯ 반지름 '+a+'cm'),a*2+'cm',[(a+1)+'cm',a+'cm',(a*2+2)+'cm'],'지름은 반지름 두 개 길이야.');
  case 'circleDiameter':a=rand(2,9);return mk('지름이 '+(a*2)+'cm인 원의 반지름은?',bold('◯ 지름 '+(a*2)+'cm'),a+'cm',[(a*2)+'cm',(a+1)+'cm',(a-1)+'cm'],'반지름은 지름의 절반이야.');
  case 'fractionKinds':d=rand(3,7);a=rand(1,d-1);s=pick(['진분수','가분수','대분수']);t=s==='진분수'?fraction(a,d):s==='가분수'?fraction(d+a,d):bold('1 '+a+'/'+d);return mk('이 분수의 종류는?',t,s,['진분수','가분수','대분수','자연수'].filter(x=>x!==s),'분자가 작은지, 분모보다 큰지, 자연수 부분이 있는지 봐.');
@@ -67,10 +76,10 @@ function problem(mode){
  case 'correspondence':a=rand(2,6);b=rand(2,5);return mk('한 상자에 '+a+'개씩이면 '+b+'상자에 몇 개?',bold('1 → '+a+'<br>2 → '+(a*2)+'<br>'+b+' → ?'),a*b,[a+b,a*b+a,a*b-1],'한 상자당 개수와 상자 수를 곱해.');
  case 'ruleEquation':a=rand(2,5);b=rand(3,7);return mk('규칙을 보고 ?에 들어갈 수는?',bold('x × '+a+' = y<br>'+b+' × '+a+' = ?'),a*b,[a+b,a*b+1,a*(b+1)],'앞의 수에 같은 수를 곱하는 규칙이야.');
  case 'fracSub':d=rand(4,9);a=rand(2,d-1);b=rand(1,a-1);return mk('분모가 같은 분수를 빼면?',fraction(a,d)+'<span class="symbol">−</span>'+fraction(b,d),(a-b)+'/'+d,[(a+b)+'/'+d,(a-b+1)+'/'+d,(a-b)+'/'+(d*2)],'분모는 그대로 두고 분자끼리 빼.');
- case 'triangles':s=pick(['정삼각형','이등변삼각형','부등변삼각형']);return mk('설명에 맞는 삼각형은?',bold(s==='정삼각형'?'세 변의 길이가 모두 같아요.':s==='이등변삼각형'?'두 변의 길이가 같아요.':'세 변 길이가 모두 달라요.'),s,['정삼각형','이등변삼각형','부등변삼각형','직사각형'].filter(x=>x!==s),'같은 길이의 변이 몇 개인지 살펴봐.');
+ case 'triangles':s=pick(['정삼각형','이등변삼각형','부등변삼각형']);return mk('설명에 맞는 삼각형은?',bold(s==='정삼각형'?'세 변의 길이가 모두 같아요.':s==='이등변삼각형'?'두 변만 길이가 같고 나머지 한 변은 달라요.':'세 변 길이가 모두 달라요.'),s,['정삼각형','이등변삼각형','부등변삼각형','직사각형'].filter(x=>x!==s),'같은 길이의 변이 몇 개인지 살펴봐.');
  case 'triangleClass':s=pick(['예각삼각형','직각삼각형','둔각삼각형']);return mk('각의 설명에 맞는 삼각형은?',bold(s==='예각삼각형'?'세 각이 모두 예각이에요.':s==='직각삼각형'?'직각이 하나 있어요.':'둔각이 하나 있어요.'),s,['예각삼각형','직각삼각형','둔각삼각형','정사각형'].filter(x=>x!==s),'직각보다 큰 각이 있는지 확인해.');
  case 'decimalSub':a=rand(20,65);b=rand(1,19);return mk('소수 뺄셈을 계산하면?',bold(fmt(a/10)+' − '+fmt(b/10)),fmt((a-b)/10),[fmt((a-b+1)/10),fmt((a-b-1)/10),fmt((a+b)/10)],'소수점 자리를 맞추어 빼.');
- case 'shapeQuadrilaterals':s=pick(['사다리꼴','마름모','평행사변형']);return mk('설명에 맞는 사각형은?',bold(s==='사다리꼴'?'마주 보는 한 쌍의 변이 평행한 사각형':s==='마름모'?'네 변의 길이가 모두 같은 사각형':'마주 보는 두 쌍의 변이 평행한 사각형'),s,['사다리꼴','마름모','평행사변형','삼각형'].filter(x=>x!==s),'변의 길이와 평행한 변을 확인해.');
+ case 'shapeQuadrilaterals':s=pick(['사다리꼴','마름모','평행사변형']);return mk('설명에 맞는 사각형은?',bold(s==='사다리꼴'?'마주 보는 변 중 꼭 한 쌍만 평행한 사각형':s==='마름모'?'네 변의 길이가 모두 같은 사각형':'마주 보는 두 쌍의 변이 평행한 사각형'),s,['사다리꼴','마름모','평행사변형','삼각형'].filter(x=>x!==s),'변의 길이와 평행한 변을 확인해.');
  case 'lineChange':a=rand(3,8);b=a+rand(2,5);c=b-rand(1,3);return mk('화요일에서 수요일로 몇 개 줄었을까?',barGraph([a,b,c]),b-c,[b-a,c,c+1],'화요일 수에서 수요일 수를 빼.');
  case 'regularPolygon':a=pick([3,4,5,6]);return mk('모든 변의 길이와 각이 같은 '+a+'각형의 이름은?',shapeSvg(({3:'triangle',4:'square',5:'pentagon',6:'hexagon'})[a]),({3:'정삼각형',4:'정사각형',5:'정오각형',6:'정육각형'})[a],['정삼각형','정사각형','정오각형','정육각형'].filter(x=>x!==({3:'정삼각형',4:'정사각형',5:'정오각형',6:'정육각형'})[a]),'변과 각이 모두 같은지 생각해.');
  case 'diagonals':a=rand(4,7);n=a*(a-3)/2;return mk('꼭짓점이 '+a+'개인 다각형의 대각선 수는?',bold('대각선은 이웃하지 않은 두 꼭짓점을 이어.'),n,[n+1,n-1,n+2],'한 꼭짓점에서 대각선은 (꼭짓점 수−3)개야.');
@@ -84,7 +93,7 @@ function problem(mode){
  case 'perimeter':a=rand(2,9);b=rand(2,8);return mk('가로 '+a+'cm, 세로 '+b+'cm 직사각형 둘레는?',bold('▭ 가로 '+a+'cm · 세로 '+b+'cm'),(a+b)*2+'cm',[(a*b)+'cm',(a+b)+'cm',((a+b)*2+2)+'cm'],'가로 두 번, 세로 두 번 더해.');
  case 'rectangleArea':a=rand(2,9);b=rand(2,9);return mk('직사각형 넓이는 몇 cm²?',bold('▭ 가로 '+a+'cm · 세로 '+b+'cm'),a*b+'cm²',[(a+b)*2+'cm²',(a*b+1)+'cm²',(a+b)+'cm²'],'가로×세로를 계산해.');
  case 'triangleArea':a=rand(2,8)*2;b=rand(2,9);return mk('밑변 '+a+'cm, 높이 '+b+'cm인 삼각형 넓이는?',shapeSvg('triangle')+bold(a+'cm × '+b+'cm ÷ 2'),a*b/2+'cm²',[(a*b)+'cm²',(a*b/2+2)+'cm²',(a+b)+'cm²'],'밑변×높이를 2로 나눠.');
- case 'inequalities':a=rand(5,20);s=pick(['이상','이하','초과','미만']);b=s==='이상'?a:s==='이하'?a:s==='초과'?a+1:a-1;return mk(a+' '+s+'에 해당하는 수는?',bold('기준: '+a),b,[s==='초과'?a:a+1,s==='미만'?a:a-1,b+2].filter(v=>v!==b),'이상·이하에는 기준 수를 포함해.');
+ case 'inequalities':a=rand(5,20);s=pick(['이상','이하','초과','미만']);b=s==='이상'?a:s==='이하'?a:s==='초과'?a+1:a-1;return mk('기준 '+a+' '+s+' 조건을 만족하는 '+(s==='이상'||s==='초과'?'가장 작은':'가장 큰')+' 자연수는?',bold('조건: '+a+' '+s),b,[b-1,b+1,b+2].filter(v=>v>=0),'이상·이하에는 기준 수를 포함해.');
  case 'roundUse':a=rand(25,90);return mk('한 상자에 10개씩 담아야 해. '+a+'개면 최소 몇 상자?',bold(a+' ÷ 10 → 올림'),Math.ceil(a/10)+'상자',[(Math.floor(a/10))+'상자',(Math.ceil(a/10)+1)+'상자',(Math.ceil(a/10)+2)+'상자'],'남는 게 있으면 상자를 하나 더 써.');
  case 'fracMultN':a=rand(1,3);b=rand(4,8);c=rand(2,5);return mk('분수 × 자연수는?',fraction(a,b)+'<span class="symbol">× '+c+'</span>',fract(a*c,b),[fract(a+c,b),fract(a,b*c),fract(a*c,b+1)],'분자에 자연수를 곱해 약분해.');
  case 'congruence':s=pick(['정사각형','직사각형','정삼각형']);return mk('두 도형이 완전히 겹치려면 무엇이 같아야 할까?',bold('🔷　↔　🔷'), '모양과 크기',['색깔만','방향만','위치만'],'합동은 돌리거나 뒤집어도 모양과 크기가 같아.');
@@ -92,7 +101,7 @@ function problem(mode){
  case 'boxEdges':s=pick(['면','모서리','꼭짓점']);a=({면:6,모서리:12,꼭짓점:8})[s];return mk('직육면체의 '+s+'은 몇 개일까?',bold('▣ 직육면체'),a,[4,6,8,12,10].filter(x=>x!==a),'면 6개·모서리 12개·꼭짓점 8개야.');
  case 'netCube':s=pick(['6개','5개','8개']);return mk('정육면체의 전개도는 정사각형 몇 개일까?',bold('🧊 펼치면 정사각형 조각이 보여.'),'6개',[s,'4개','7개','8개'].filter(x=>x!=='6개'),'정육면체에는 면이 여섯 개야.');
  case 'mean':a=rand(3,9);b=rand(4,10);c=rand(3,8);return mk('세 친구가 '+a+', '+b+', '+c+'개를 모았어. 평균은?',bold(a+'　'+b+'　'+c),fmt((a+b+c)/3),[fmt((a+b+c)/3+1),fmt(a+b+c),fmt((a+b+c)/3-1)],'모두 합한 뒤 사람 수 3으로 나눠.');
- case 'possibility':s=pick(['반드시','불가능','반반','가능성이 높음']);return mk('주머니에 빨간 공 8개, 파란 공 2개가 있어. 빨간 공을 뽑을 가능성은?',bold('🔴'.repeat(8)+'🔵🔵'),'가능성이 높음',['반드시','불가능','반반'],'빨간 공이 더 많지만 파란 공도 있어.');
+ case 'possibility':a=rand(0,10);b=10-a;s=a===10?'반드시':a===0?'불가능':a===5?'반반':a>5?'가능성이 높음':'가능성이 낮음';return mk('빨간 공을 뽑을 가능성은?',bold('🔴'.repeat(a)+'🔵'.repeat(b)),s,['반드시','불가능','반반','가능성이 높음','가능성이 낮음'].filter(x=>x!==s),'빨간 공과 파란 공이 각각 몇 개인지 비교해.');
  case 'fractionDivInt':a=rand(1,8);b=rand(2,8);return mk(a+'개를 '+b+'명에게 똑같이 나눈 양은?',bold(a+' ÷ '+b),fract(a,b),[fract(b,a),fract(a+1,b),fract(a,b+1)],'자연수÷자연수는 분수로 나타낼 수 있어.');
  case 'prism':s=pick(['각기둥','각뿔']);return mk('이 입체도형의 특징은?',bold(s==='각기둥'?'위아래 밑면이 합동이고 평행해.':'밑면 하나와 한 꼭짓점에서 모이는 옆면이 있어.'),s,['각기둥','각뿔','원기둥','구'].filter(x=>x!==s),'밑면이 몇 개 있고, 옆면이 어떻게 모이는지 봐.');
  case 'faces':s=pick([['삼각기둥',5],['사각기둥',6],['사각뿔',5]]);return mk(s[0]+'의 면은 모두 몇 개일까?',bold('면을 한 장씩 세어 보자'),s[1],[4,5,6,7,8].filter(x=>x!==s[1]),'밑면과 옆면을 따로 세어.');
