@@ -59,6 +59,7 @@ function problem(mode){
  case 'subBorrowSmall':a=rand(11,18);b=rand(a-9,9);return mk('10에서 나누어 빼면?',bold(a+' − '+b+' = ?'),a-b,[a-b+1,a-b-1,a-b+2],'먼저 10에서 빼고 남은 것을 더해.');
  case 'tenBridge':a=rand(7,9);b=rand(10-a,9);return mk('10개 묶음을 먼저 만들어 보자.',bold(a+' + '+b+' = ?'),a+b,[a+b+1,a+b-1,a+b+3],'10까지 채울 숫자와 남은 숫자를 나누어 생각해.');
  case 'wordProblemsBig':a=rand(120,460);b=rand(110,350);return mk('창고에 열매가 '+a+'개 있었어. '+b+'개를 더 가져오면?',bold('🍎 '+a+'개 + '+b+'개'),a+b,[a+b+10,a+b-10,a+b+1],'백·십·일의 자리끼리 더해.');
+ case 'multTriple2':a=rand(112,399);b=rand(11,39);return mk('세 자리 수와 두 자리 수를 곱하면?',bold(a+' × '+b+' = ?'),a*b,[a*b+a*10,a*b-a,a*b+b],'두 자리 곱하는 수를 10의 자리와 1의 자리로 분해해 각각 곱한 다음 더해.');
  case 'multTriple':a=rand(112,235);b=rand(2,7);return mk('세 자리 수와 한 자리 수를 곱하면?',bold(a+' × '+b+' = ?'),a*b,[a*b+a,a*b+b,a*b-10],'백·십·일 자리를 나누어 곱해.');
  case 'fracDecimal':a=rand(1,9);return mk('분수를 소수로 바꾸면?',fraction(a,10),fmt(a/10),[fmt((a+1)/10),fmt((a-1)/10),fmt(a/100)],'10분의 1은 0.1이야.');
  case 'transformation2d':a=rand(1,4);b=rand(1,3);return mk('꽃을 오른쪽으로 '+b+'칸 옮기면 어느 칸일까?',bold('가로 1 · 2 · 3 · 4 · 5 · 6 · 7 · 8<br>꽃은 '+a+'번 칸'),a+b+'번 칸',[a+'번 칸',(a+b+1)+'번 칸',(a+b+2)+'번 칸'],'방향은 그대로 두고 위치만 옮겨.');
@@ -84,7 +85,9 @@ function problem(mode){
  case 'compareUnit':a=rand(1,5);b=rand(10,90);return mk(a+'m '+b+'cm는 몇 cm일까?',bold('1m = 100cm'),a*100+b+'cm',[(a*100+b+10)+'cm',(a*100+b-10)+'cm',(a*10+b)+'cm'],'m는 100을 곱하고 cm와 합쳐.');
  case 'elapsed':a=rand(1,9);b=rand(1,5)*10;return mk(a+'시부터 '+b+'분이 지나면 몇 시 몇 분?',clock(a,0),a+'시 '+b+'분',[a+'시 '+(b+10)+'분',(a+1)+'시 '+b+'분',a+'시 '+(b-10)+'분'],'시계의 긴 바늘이 몇 칸 움직이는지 살펴봐.');
  case 'groupDiv':a=rand(2,8);b=rand(2,6);return mk((a*b)+'개를 '+a+'개씩 묶으면 몇 묶음?',dots(a*b,'🍎'),b,[a,b+1,b-1],'같은 개수씩 묶어 몇 묶음인지 세어.');
+ case 'multTens':a=rand(1,9)*10;b=rand(2,9);return mk('몇십을 몇 번 더하면 될까?',bold(a+' × '+b+' = ?'),a*b,[a*b+10,a*b-10,a+b],'10개 묶음 '+a/10+'개가 '+b+'번 있어.');
  case 'multDigit':a=rand(11,49);b=rand(2,9);return mk('몇 개의 열매가 모일까?',bold(a+' × '+b+' = ?'),a*b,[a*b+b,a*b-b,a*b+10],'십의 자리와 일의 자리를 나눠 곱해.');
+ case 'wordMultiply2':a=rand(12,39);b=rand(11,29);return mk('한 상자에 '+a+'개씩, '+b+'상자가 있어. 모두 몇 개일까?',bold(a+' × '+b+' = ?'),a*b,[a*b+a,a*b-b,a+b],'상자 수를 10상자와 남은 상자로 나누어 곱한 뒤 더해.');
  case 'wordMultiply':a=rand(12,23);b=rand(2,5);return mk('한 상자에 '+a+'개씩, '+b+'상자가 있어. 모두 몇 개?',bold(a+'개 × '+b+'상자'),a*b,[a+b,a*b+a,a*b-b],'같은 개수의 상자가 여러 개 있으니 곱셈해.');
  case 'decimalPlace':a=rand(1,9);b=rand(0,9);return mk('수 '+a+'.'+b+'에서 소수 첫째 자리 숫자는?',bold(a+'.'+b),b,[a,b+1,(b+2)%10],'소수점 바로 오른쪽 숫자를 봐.');
  case 'polygonSides':a=pick([3,4,5,6]);return mk('이 도형의 변은 몇 개일까?',shapeSvg(({3:'triangle',4:'square',5:'pentagon',6:'hexagon'})[a]),a,[a+1,a-1,a+2],'테두리를 따라 변을 하나씩 세어.');
