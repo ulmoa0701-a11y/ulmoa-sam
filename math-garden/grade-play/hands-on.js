@@ -165,7 +165,7 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    update();guide();check(()=>boxes.every(x=>x===scene.per));preset(()=>{boxes.fill(scene.per);update()});
  }else if(scene.kind==='fraction'){
    const chosen=new Set(),bar=h('div','hands-fraction-bar');work.append(bar);
-   if(scene.task==='add'||scene.task==='sub')say('먼저 '+scene.first+'/'+scene.den+'과 '+scene.other+'/'+scene.den+'을 보고, 결과만큼 색칠해 보자.');
+   if(scene.task==='add'||scene.task==='sub')say('먼저 '+(scene.firstText||scene.first+'/'+scene.den)+'과 '+(scene.otherText||scene.other+'/'+scene.den)+'을 같은 크기의 칸으로 바꾸고, 결과만큼 색칠해 보자.');
    else if(scene.task==='compare')say('두 분수를 비교해 더 큰 쪽을 그림으로 만들어 보자.');
    else if(scene.task==='equivalent')say('원래 분수와 같은 양이 되도록 두 배로 나눈 칸을 색칠해 보자.');
    else if(scene.task==='improper')say('한 판을 가득 채우고, 나머지까지 색칠해 보자.');
