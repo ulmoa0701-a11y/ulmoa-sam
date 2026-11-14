@@ -43,7 +43,7 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    else if(scene.kind==='measure')m.append(h('p','hands-explain','자에서 0을 찾고 '+scene.target+'cm만큼 이동해.'));
    else if(scene.kind==='pattern')m.append(h('p','hands-explain','매번 '+scene.step+'씩 커져. 규칙은 '+scene.answer+'에서 계속돼.'));
    else if(scene.kind==='symmetry')m.append(h('p','hands-explain','왼쪽 꽃과 대칭선을 기준으로 같은 거리의 오른쪽 칸에 꽃을 심어.'));
-   else if(scene.kind==='circle')m.append(h('p','hands-explain',scene.part==='중심'||scene.part==='반지름'||scene.part==='지름'&&scene.answer===scene.part?'원의 '+scene.part+' 부분을 찾아보자.':'원의 '+scene.part+' 길이는 '+scene.answer+'cm야.'));
+   else if(scene.kind==='circle')m.append(h('p','hands-explain',typeof scene.answer==='string'?'원의 '+scene.part+' 부분을 찾아보자.':'원의 '+scene.part+' 길이는 '+scene.answer+'cm야.'));
    else if(scene.kind==='units')m.append(h('p','hands-explain',scene.big+scene.unit+' + '+scene.small+scene.minor+' = '+scene.answer+scene.minor));
    else if(scene.kind==='shape')m.append(h('p','hands-explain',scene.solid?'평평한 면과 둥근 부분을 살펴보면 '+scene.name+'이야.':'변을 하나씩 세면 '+scene.sides+'개. '+scene.name+'이야.'));
    else m.append(h('p','hands-explain',problem.question+' → '+problem.answer));
@@ -127,7 +127,7 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    const update=()=>{area.replaceChildren();data.forEach((v,i)=>{const col=h('div','hands-graph-col');col.append(h('strong','',names[i]));const track=h('div','hands-graph-track');for(let y=9;y>=1;y--){const seg=h('div','hands-graph-segment'+(y<=v?' active':''));track.append(seg)}col.append(track);col.append(h('b','',v+'개'));col.append(btn('＋',()=>{data[i]=Math.min(9,data[i]+1);update()},'hands-step'));col.append(btn('−',()=>{data[i]=Math.max(0,data[i]-1);update()},'hands-step'));area.append(col)})};
    update();guide();check(()=>data.every((v,i)=>v===scene.data[i]));preset(()=>{scene.data.forEach((v,i)=>data[i]=v);update()});
  }else if(scene.kind==='circle'){
-   if(scene.part==='중심'||scene.part==='반지름'||scene.part==='지름'){
+   if(typeof scene.answer==='string'){
      say('원의 그림에서 알맞은 부분을 직접 눌러 표시해 보자.');
      let chosen=null;
      const diagram=h('div','hands-circle-select');
