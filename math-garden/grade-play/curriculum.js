@@ -33,11 +33,11 @@ const RAW={
 ['덧셈과 뺄셈','세 자리 수 더하기|bigAdd','세 자리 수 빼기|bigAdd','생활 속 세 자리 계산|wordProblemsBig'],
 ['평면도형','직각 알아보기|rightAngle','직사각형·정사각형|quadrilateral','도형의 변과 꼭짓점|polygonSides'],
 ['나눗셈','똑같이 나누기|divide','몇 묶음 되는지|groupDiv','곱셈으로 몫 확인|divide'],
-['곱셈','두 자리 수 × 한 자리 수|multDigit','세 자리 수 × 한 자리 수|multTriple','곱셈 이야기 해결|groupMult'],
+['곱셈','몇십 × 한 자리 수|multTens','두 자리 수 × 한 자리 수|multDigit','곱셈 이야기 해결|wordMultiply'],
 ['길이와 시간','길이 단위 바꾸기|meter','몇 분인지 알아보기|minutes','몇 분 뒤 시각|elapsed'],
 ['분수와 소수','전체의 몇 분의 몇|fractionParts','0.1이 몇 개인가|tenths','분수와 소수 연결|fracDecimal']],
 '3-2':[
-['곱셈','두 자리 수 × 한 자리 수|multDigit','두 자리 수 × 두 자리 수|times2','곱셈으로 문제 해결|wordMultiply'],
+['곱셈','세 자리 수 × 한 자리 수|multTriple','두 자리 수 × 두 자리 수|times2','곱셈으로 문제 해결|wordMultiply2'],
 ['나눗셈','두 자리 수 나눗셈|divide','나머지가 있는 나눗셈|remainder','나눗셈 상황 이해|groupDiv'],
 ['원','원의 중심과 반지름|circleParts','반지름과 지름의 관계|circleDiameter','원에서 길이 비교|circleRadius'],
 ['분수','진분수와 가분수|fractionKinds','대분수와 가분수|fractionMix','분수 크기 비교|fracCompare'],
@@ -46,7 +46,7 @@ const RAW={
 '4-1':[
 ['큰 수','만·억 단위 읽기|largeNumbers','큰 수의 자리값|placeValueBig','큰 수 크기 비교|numberOrderBig'],
 ['각도','예각·직각·둔각|angles','각도 크기 읽기|anglesMeasure','각의 합 구하기|angleSum'],
-['곱셈과 나눗셈','큰 수 곱하기|times2','큰 수 나누기|longDiv','나머지 확인|remainder'],
+['곱셈과 나눗셈','세 자리 수 × 두 자리 수|multTriple2','두 자리 수로 나누기|longDiv','나머지 확인|remainder'],
 ['평면도형의 이동','평행 이동한 위치|transformation2d','뒤집은 모양|reflection','돌린 모양|rotation'],
 ['막대그래프','막대그래프 읽기|chart','자료 차이 구하기|barGraph','표를 그래프로|tableRead'],
 ['규칙 찾기','수 규칙 이어가기|pattern','대응하는 수 찾기|correspondence','규칙식 살펴보기|ruleEquation']],
@@ -88,6 +88,20 @@ const RAW={
 };
 const C={};for(const [term,units] of Object.entries(RAW)){C[term]=units.map(([name,...subtopics],unitIndex)=>({id:term+'-'+(unitIndex+1),name,subtopics:subtopics.map((line,i)=>{const [title,mode]=line.split('|');return {id:term+'-'+(unitIndex+1)+'-'+(i+1),title,mode}})}))}
 const get=(g,t)=>C[g+'-'+t]||[];
+// Grade-crossing prerequisite links: these are instructional suggestions,
+// not claims that a child has mastered a grade based on a game result.
+const PREREQUISITES=Object.freeze({
+ '2-2-2':{g:2,t:1,u:5,s:0,label:'같은 수 묶기부터'},
+ '3-1-4':{g:2,t:2,u:1,s:0,label:'곱셈구구부터'},
+ '3-2-1':{g:3,t:1,u:3,s:1,label:'두 자리 수 × 한 자리 수부터'},
+ '4-1-3':{g:3,t:2,u:0,s:1,label:'두 자리 수 × 두 자리 수부터'},
+ '5-1-5':{g:4,t:2,u:0,s:0,label:'분모가 같은 분수 덧셈부터'},
+ '5-2-4':{g:4,t:2,u:2,s:0,label:'소수 덧셈부터'},
+ '6-1-1':{g:5,t:2,u:1,s:0,label:'분수의 곱셈부터'},
+ '6-2-1':{g:6,t:1,u:0,s:1,label:'분수 ÷ 자연수부터'},
+ '6-2-3':{g:6,t:1,u:2,s:1,label:'소수 ÷ 자연수부터'}
+});
+const prerequisiteFor=id=>PREREQUISITES[id]||null;
 const counts={terms:Object.keys(C).length,units:Object.values(C).reduce((n,a)=>n+a.length,0),topics:Object.values(C).reduce((n,a)=>n+a.reduce((m,u)=>m+u.subtopics.length,0),0)};
-root.MoaMathCurriculum=Object.freeze({C,get,counts});
+root.MoaMathCurriculum=Object.freeze({C,get,counts,prerequisiteFor});
 })(window);
