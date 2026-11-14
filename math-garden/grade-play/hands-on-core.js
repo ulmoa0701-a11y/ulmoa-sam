@@ -41,6 +41,23 @@ function buildMode(kind,mode,p){
  if(kind==='clock'){const hour=rand(1,11),minute=pick([0,30]),elapsed=mode==='elapsed',plus=30;const targetHour=elapsed?(minute===30?hour+1:hour):hour,targetMinute=elapsed?(minute===30?0:30):minute;return {kind:'clock',question:elapsed?'시계에서 30분 뒤의 시각을 직접 만들어 보자.':'모아의 시계와 똑같은 시각을 만들어 보자.',hint:elapsed?'긴 바늘을 반 바퀴 움직이면 30분이야.':'짧은 바늘은 시, 긴 바늘은 분을 나타내.',hour:targetHour,minute:targetMinute,startHour:hour,startMinute:minute,elapsed,answer:targetHour+'|'+targetMinute};}
  if(kind==='angle'){let angle=mode==='rightAngle'?90:mode==='angles'?pick([30,60,90,120,150]):rand(2,12)*15;let a=null,b=null;if(mode==='angleSum'){a=rand(3,8)*10;b=rand(2,6)*10;angle=a+b;}return {kind:'angle',question:a? a+'°와 '+b+'°를 합친 각을 만들어 보자.':angle+'° 각을 직접 만들어 보자.',hint:'90°는 직각, 더 작으면 예각, 더 크면 둔각이야.',angle,first:a,second:b,answer:angle};}
  if(kind==='fraction'){
+  // Unlike denominators must remain unlike in the presented problem; convert to
+  // equal-sized parts only for the manipulative answer grid.
+  if(inSet(mode,'fracUnlike fracUnlikeSub')){
+   const cases=mode==='fracUnlike'
+    ? [[1,2,1,4],[1,3,1,6],[1,2,1,3],[1,4,3,8],[2,5,1,10]]
+    : [[3,4,1,2],[5,6,1,3],[3,5,1,10],[2,3,1,6]];
+   const [n1,d1,n2,d2]=pick(cases);
+   const gcd=(a,b)=>b?gcd(b,a%b):a,den=d1*d2/gcd(d1,d2);
+   const first=n1*(den/d1),other=n2*(den/d2);
+   const numer=mode==='fracUnlike'?first+other:first-other;
+   const sign=mode==='fracUnlike'?'+':'−';
+   return {kind:'fraction',task:mode==='fracUnlike'?'add':'sub',den,
+    numer,first,other,firstText:n1+'/'+d1,otherText:n2+'/'+d2,
+    question:n1+'/'+d1+' '+sign+' '+n2+'/'+d2+'를 같은 크기의 칸으로 바꾸어 계산해 보자.',
+    hint:'분모를 '+den+'으로 맞추면 '+first+'/'+den+' '+sign+' '+other+'/'+den+'이 돼. 같은 크기 칸으로 바꾸기 전에는 분자끼리 더하거나 빼면 안 돼.',
+    answer:numer};
+  }
   const den=pick([3,4,5,6]);let numer=rand(1,den-1),task='parts',other=0,first=0;
   if(inSet(mode,'fracAdd fracUnlike')){task='add';first=rand(1,2);other=rand(1,den-first-1);numer=first+other}
   else if(inSet(mode,'fracSub fracUnlikeSub')){task='sub';first=rand(2,den-1);other=rand(1,first-1);numer=first-other}
