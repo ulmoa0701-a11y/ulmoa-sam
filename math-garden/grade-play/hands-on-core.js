@@ -17,7 +17,7 @@ const family=(mode,answer='')=>{
  if(inSet(mode,'tens50 tens100 tens hundreds thousands placeValue placeValue4 placeValueBig'))return 'place';
  if(inSet(mode,'numberLine numberLine50 numberLine100 numberOrder numberOrder50 numberOrder100 numberOrder999 numberOrder4 numberOrderBig compare'))return 'line';
  if(inSet(mode,'pattern patternShapes'))return 'pattern';
- if(inSet(mode,'transformation2d transformation reflection rotation pointSym'))return 'move';
+ if(inSet(mode,'transformation2d transformation reflection rotation'))return 'move';
  if(inSet(mode,'symmetry pointSym'))return 'symmetry';
  if(inSet(mode,'shape2d shape3d shapeMatch shape3dObject shape3dClass polygonSides triangles triangleClass shapeQuadrilaterals quadrilateral regularPolygon diagonals congruence prism netCube solids faces shapeViews solidProperties boxEdges cubes'))return 'shape';
  if(inSet(mode,'ruler length lengthCompare'))return 'measure';
