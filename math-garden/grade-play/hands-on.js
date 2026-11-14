@@ -177,14 +177,14 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    guide();check(()=>chosen===scene.name);preset(()=>{board.children[candidates.findIndex(a=>a[0]===scene.name)].click()});
  }else{
    say('그림과 문장을 살펴보고 답을 직접 완성해 보자.');
-   const input=h('input','hands-entry');input.type='text';input.autocomplete='off';input.spellcheck=false;input.setAttribute('aria-label','직접 생각한 답 입력');input.placeholder=/^[\d.,-]/.test(String(scene.answer))?'여기에 답 쓰기':'이름 또는 답 쓰기';input.inputMode=/^[\d.,-]/.test(String(scene.answer))?'decimal':'text';work.append(input);
+   const input=h('input','hands-entry');input.type='text';input.autocomplete='off';input.spellcheck=false;input.setAttribute('aria-label','직접 생각한 답 입력');input.placeholder=/^[\d.,-]/.test(String(scene.answer))?'숫자만 써도 돼':'이름 또는 답 쓰기';input.inputMode=/^[\d.,-]/.test(String(scene.answer))?'decimal':'text';work.append(input);
    const numeric=/^[\d.,-]+/.test(String(scene.answer));
    if(numeric){const keys=h('div','hands-numberpad');work.append(keys);
-    for(const digit of ['1','2','3','4','5','6','7','8','9','지우기','0','.'])keys.append(btn(digit,()=>{if(digit==='지우기')input.value=input.value.slice(0,-1);else input.value+=digit;input.focus()},'hands-key'));
+    for(const digit of ['1','2','3','4','5','6','7','8','9','/','0','.','지우기'])keys.append(btn(digit,()=>{if(digit==='지우기')input.value=input.value.slice(0,-1);else input.value+=digit;input.focus()},'hands-key'));
    }else{const reveal=btn('글자 도움 보기',()=>{support();const suggest=h('div','hands-wordbank');const options=[scene.answer,...(problem.options||[]).filter(x=>x!==scene.answer)].slice(0,6);
       options.forEach(v=>suggest.append(btn(v,()=>{input.value=v;input.focus()},'hands-word')));reveal.replaceWith(suggest)},'hands-help');work.append(reveal)}
    input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const submit=actions.querySelector('.hands-check');submit?.click()}});
-   guide();check(()=>norm(input.value)===norm(scene.answer));preset(()=>{input.value=scene.answer;input.focus()});
+   guide();check(()=>{const actual=norm(input.value),goal=norm(scene.answer);if(actual===goal)return true;const m=goal.match(/^(-?\d+(?:\.\d+)?)(cm³|cm²|cm|m|g|kg|ml|l|분|개|상자|m³|%)$/);return !!m&&actual===m[1]});preset(()=>{input.value=scene.answer;input.focus()});
  }
  current={kind:scene.kind,mode,phase,scene};
  return current;
