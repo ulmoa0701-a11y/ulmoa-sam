@@ -81,3 +81,7 @@
 .hands-wordbank{display:flex;flex-wrap:wrap;justify-content:center;gap:7px}
 .hands-word{min-height:45px;padding:10px 14px;background:#f2f4df;color:#4d6848;border:2px solid #d3d9bc;border-radius:13px;font-weight:800}
 @media(max-width:600px){.hands-shell{padding:11px 8px;border-radius:17px}.hands-head{gap:6px}.hands-category,.hands-phase{font-size:11px}.hands-directions{font-size:13px}.hands-baskets{grid-template-columns:repeat(2,minmax(0,1fr))}.hands-basket{padding:9px}.hands-frac-cell{min-width:15px}.hands-shape-card{min-width:85px;min-height:115px;padding:7px}.hands-tenframe{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}.hands-cell{min-height:54px;font-size:22px}.hands-number-mark{min-width:46px}.hands-ruler-mark{min-width:33px}.hands-mirror-grid{grid-template-columns:repeat(6,minmax(36px,1fr));width:100%}.hands-check{width:100%}.hands-actions{flex-direction:column}}
+
+.hands-fraction-bar>span{flex:1;min-width:8px;background:#fff;border-right:1px solid #80b18d}
+.hands-fraction-bar>span.filled{background:#6eba94}
+.hands-given-fractions .hands-fraction-bar>span[style*="filled"]{background:#6eba94}
