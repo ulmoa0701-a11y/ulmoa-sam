@@ -140,42 +140,185 @@ header{background:#ffffffd9;border-bottom:1px solid #dbe7d8}.top{max-width:1060p
 </main>
 <script>
 (()=>{'use strict';
-const LEVELS=[{each:12,friends:3,title:'연습 마을',story:'다람쥐 친구',animal:'🐿️'},{each:31,friends:9,title:'도전 마을',story:'숲속 친구',animal:'🐰'},{each:42,friends:3,title:'새로운 마을',story:'새 친구',animal:'🦊'}];
+const LEVELS=[{each:12,friends:3,title:'연습 마을',animal:'🐿️'},{each:31,friends:9,title:'도전 마을',animal:'🐰'},{each:42,friends:3,title:'새로운 마을',animal:'🦊'}];
 const $=id=>document.getElementById(id);
-const state={level:0,step:0,tens:0,ones:0,delivered:[],mathIndex:0,assists:0,errors:0,firstCorrect:0,seenHelp:false,wrongForCurrent:0};
-const current=()=>LEVELS[state.level],neededTens=()=>Math.floor(current().each/10),neededOnes=()=>current().each%10;
-const say=(message,style='')=>{$('feedback').textContent=message;$('feedback').className='feedback '+style};
-function boot(level){state.level=level;state.step=0;state.tens=0;state.ones=0;state.delivered=[];state.mathIndex=0;state.assists=0;state.errors=0;state.firstCorrect=0;state.seenHelp=false;state.wrongForCurrent=0;show();}
-function show(){const c=current();document.querySelectorAll('[data-stage]').forEach(btn=>btn.setAttribute('aria-current',String(+btn.dataset.stage===state.level)));document.querySelectorAll('.milestone').forEach((n,i)=>{n.className='milestone '+(i===state.step?'active':i<state.step?'past':'')});
-$('statusTag').textContent=c.title+' · '+c.each+' × '+c.friends; $('scene').innerHTML=c.story+' <strong>'+c.friends+'명</strong>이 기다리고 있어. 각 친구에게 <strong>'+c.each+'개씩</strong> 배달해야 해.';
-['buildStage','deliverStage','mathStage','winStage'].forEach((id,i)=>$(id).hidden=state.step!==i);
-$('boardTitle').textContent=['열매 포장하기','숲속 배달하기','같은 묶음 계산하기','모험 마무리'][state.step];
-if(state.step===0){$('insideBox').hidden=true;$('openBox').setAttribute('aria-expanded','false');updateBuild();say('10개 묶음과 낱개를 움직여 '+c.each+'개를 만들어 보자.');}
-if(state.step===1){renderDelivery();say('친구들을 하나씩 눌러 같은 양의 열매를 배달해 줘.');}
-if(state.step===2){mathProblem();say('아직 전체 정답은 보여주지 않을게. 직접 생각해 보자.');}
-if(state.step===3){win();say('수량을 만들고 여러 그룹을 연결해 해결했어!','good');}}
-function updateBuild(){const count=state.tens*10+state.ones;$('tenCount').textContent=state.tens;$('oneCount').textContent=state.ones;$('basketTotal').textContent=count+'개';$('basketPreview').innerHTML=(state.tens?Array.from({length:state.tens},()=>'<span class="bundle">📦 10</span>').join(''):'')+(state.ones?'<span class="loose">'+'🍎'.repeat(state.ones)+'</span>':'');if(!count)$('basketPreview').textContent='아직 비어 있어';$('tenMinus').disabled=state.tens===0;$('oneMinus').disabled=state.ones===0;$('tenPlus').disabled=state.tens>=9;$('onePlus').disabled=state.ones>=9;}
-for(const [id,field,offset]of [['tenPlus','tens',1],['tenMinus','tens',-1],['onePlus','ones',1],['oneMinus','ones',-1]])$(id).addEventListener('click',()=>{state[field]=Math.min(9,Math.max(0,state[field]+offset));updateBuild();say('바구니가 바뀌었어. 열매 수를 확인해 보자.');});
-$('openBox').addEventListener('click',()=>{const box=$('insideBox');box.hidden=!box.hidden;$('openBox').setAttribute('aria-expanded',String(!box.hidden));state.assists++;state.seenHelp=true;say('상자 하나에는 실제로 열매 10개가 들어 있어.','hint')});
-$('buildHelp').addEventListener('click',()=>{state.assists++;state.seenHelp=true;const count=state.assists;const help=count===1?'🍀 '+current().each+'개에서 열 개 묶음을 만들고, 남은 낱개를 생각해 봐.':'🍀 '+current().each+' = '+(neededTens()*10)+' + '+neededOnes()+'. 10개 묶음 '+neededTens()+'개와 낱개 '+neededOnes()+'개로 만들어 봐.';say(help,'hint')});
-$('buildConfirm').addEventListener('click',()=>{const n=state.tens*10+state.ones;if(n!==current().each){state.errors++;state.wrongForCurrent++;say('지금 '+n+'개야. 친구에게 필요한 '+current().each+'개와 같지 않아. 십 묶음과 낱개를 다시 살펴봐.','wrong');return;}
-if(state.wrongForCurrent===0&&!state.seenHelp)state.firstCorrect++;state.wrongForCurrent=0;state.seenHelp=false;state.step=1;state.delivered=Array(current().friends).fill(false);show();});
-function renderDelivery(){const c=current();$('perFriend').textContent=c.each+'개';$('deliveryStatus').textContent=state.delivered.filter(Boolean).length+' / '+c.friends+'명 배달 완료';$('deliveryNext').disabled=!state.delivered.every(Boolean);const faces=['🐰','🐻','🐿️','🦊','🐸','🦔','🐼','🐯','🐹'];$('friendGrid').replaceChildren();state.delivered.forEach((done,i)=>{const b=document.createElement('button');b.type='button';b.className='friend'+(done?' delivered':'');b.setAttribute('aria-label',(i+1)+'번째 친구 '+(done?'배달 완료':'배달하기'));b.innerHTML='<span class="face" aria-hidden="true">'+faces[i]+'</span><span>친구 '+(i+1)+'</span>'+(done?'<span class="filled">📦×'+state.tens+' · 🍎×'+state.ones+'</span>':'<span>빈 바구니 🧺</span>');b.disabled=done;b.addEventListener('click',()=>{state.delivered[i]=true;renderDelivery();say((i+1)+'번째 친구에게 '+c.each+'개를 배달했어!','good')});$('friendGrid').appendChild(b)});}
-$('deliveryHelp').addEventListener('click',()=>{state.assists++;say('친구에게 전달하는 바구니마다 10개 묶음 '+state.tens+'개와 낱개 '+state.ones+'개가 있어. 몇 번 반복되는지 살펴봐.','hint')});
-$('deliveryNext').addEventListener('click',()=>{if(!state.delivered.every(Boolean))return;state.step=2;state.mathIndex=0;state.seenHelp=false;state.wrongForCurrent=0;show();});
+const S={level:0,step:0,tens:0,ones:0,delivered:[],mathIndex:0,assists:0,errors:0,firstCorrect:0,seenHelp:false,wrongForCurrent:0};
+const current=()=>LEVELS[S.level];
+const neededTens=()=>Math.floor(current().each/10),neededOnes=()=>current().each%10;
+const pack=(size='')=>'<span class="ten-tray '+size+'" role="img" aria-label="사과 열 개">'+Array.from({length:10},()=>'<span class="apple" aria-hidden="true">🍎</span>').join('')+'</span>';
+const apples=(n)=>Array.from({length:n},()=>'<span aria-hidden="true">🍎</span>').join('');
+let voiceOn=false;
+function speak(message){
+ if(!voiceOn||!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window))return;
+ try{window.speechSynthesis.cancel();const v=new SpeechSynthesisUtterance(message);v.lang='ko-KR';v.rate=.83;v.pitch=1.06;window.speechSynthesis.speak(v)}catch{}
+}
+function guide(){
+ const c=current();
+ if(S.step===0)return '친구 한 명에게 사과 '+c.each+'개를 담아 주세요. 상자 안에는 사과 열 개가 보여요. 상자 그림과 사과 그림을 눌러서 바구니를 채워 보세요.';
+ if(S.step===1)return '친구가 '+c.friends+'명 있어요. 친구들의 바구니를 하나씩 눌러 주세요. 모두 같은 양이 들어가요.';
+ if(S.step===2)return ['열 개가 들어 있는 상자의 전체 사과 수를 구해 보세요. 숫자 버튼을 누른 후 초록색 체크를 눌러요.','낱개 사과가 모두 몇 개인지 세어 보세요.','상자 안의 사과와 낱개 사과를 모두 더해 보세요.'][S.mathIndex];
+ return '모든 친구에게 배달했어요! 참 잘했어요.';
+}
+$('voiceBtn').addEventListener('click',()=>{
+ if(!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window)){say('🔊 기기에서 음성 안내가 지원되지 않아요. 그림을 보고 눌러 주세요.','hint');return}
+ voiceOn=!voiceOn;$('voiceBtn').setAttribute('aria-pressed',String(voiceOn));$('voiceBtn').textContent=voiceOn?'🔊':'🔇';
+ $('voiceBtn').setAttribute('aria-label',voiceOn?'음성 안내 끄기':'소리 안내 듣기');
+ if(voiceOn)speak(guide());else window.speechSynthesis.cancel();
+});
+function say(message,kind=''){const f=$('feedback');f.textContent=(kind==='wrong'?'🔁 ':kind==='good'?'🌼 ':kind==='hint'?'👀 ':'')+message;f.className='feedback '+kind}
+function boot(level){
+ Object.assign(S,{level,step:0,tens:0,ones:0,delivered:[],mathIndex:0,assists:0,errors:0,firstCorrect:0,seenHelp:false,wrongForCurrent:0});
+ show();
+}
+function show(){
+ const c=current();
+ document.querySelectorAll('[data-stage]').forEach((b,i)=>{b.setAttribute('aria-current',String(i===S.level));b.textContent=c&&['🐿️ 12 × 3','🐰 31 × 9','🦊 42 × 3'][i]});
+ document.querySelectorAll('.milestone').forEach((n,i)=>{n.className='milestone '+(i===S.step?'active':i<S.step?'past':'')});
+ $('statusTag').textContent=c.animal+' '+c.each+' × '+c.friends;
+ $('scene').innerHTML='<span class="stage-pictos" aria-label="'+c.friends+'명의 친구에게 '+c.each+'개씩 배달">'+Array.from({length:c.friends},(_,i)=>'<span aria-hidden="true">'+['🐰','🐻','🐿️','🦊','🐸','🦔','🐼','🐯','🐹'][i]+'</span>').join('')+' <span>🧺 × '+c.each+'</span></span>';
+ ['buildStage','deliverStage','mathStage','winStage'].forEach((id,i)=>$(id).hidden=S.step!==i);
+ $('boardTitle').textContent=['👆 📦 ➜ 🧺','👆 🐰 ➜ 🧺','🔢 🧮','🎉 🌼'][S.step];
+ if(S.step===0){
+  $('targetNumber').textContent=c.each;
+  $('targetApples').innerHTML=apples(c.each);
+  $('targetApples').setAttribute('aria-label','사과 '+c.each+'개의 그림');
+  $('packSource').innerHTML=pack();
+  updateBuild();say('👆 📦　👆 🍎　➜　🧺');
+ }else if(S.step===1){renderDelivery();say('👆 🐰　➜　🧺')}
+ else if(S.step===2){mathProblem();say('🔢　➜　✅')}
+ else{win();say('🎉 🌼','good')}
+ if(voiceOn)speak(guide());
+}
+function updateBuild(){
+ const count=S.tens*10+S.ones,target=current().each;
+ $('tenCount')?.replaceChildren?.();
+ $('basketPreview').innerHTML=Array.from({length:S.tens},()=>pack('small')).join('')+(S.ones?'<span class="loose" role="img" aria-label="낱개 사과 '+S.ones+'개">'+apples(S.ones)+'</span>':'')||'<span class="basket-empty" aria-hidden="true">🧺</span>';
+ $('basketTotal').textContent=count+' / '+target+' 🍎';
+ $('basketTotal').style.color=count===target?'#197344':count>target?'#b56643':'#396049';
+ $('tenMinus').disabled=S.tens===0;$('oneMinus').disabled=S.ones===0;
+ $('tenPlus').disabled=S.tens>=8 || (count>=target+10);
+ $('onePlus').disabled=S.ones>=9 || (count>=target+3);
+ $('tenPlus').classList.toggle('awaiting',count<target&&S.tens<neededTens());
+ $('onePlus').classList.toggle('awaiting',count<target&&S.tens>=neededTens()&&S.ones<neededOnes());
+ $('buildConfirm').classList.toggle('target-bounce',count===target);
+}
+for(const [id,field,diff] of [['tenPlus','tens',1],['tenMinus','tens',-1],['onePlus','ones',1],['oneMinus','ones',-1]]){
+ $(id).addEventListener('click',()=>{
+   S[field]=Math.max(0,Math.min(9,S[field]+diff));
+   updateBuild();
+   const count=S.tens*10+S.ones;
+   say(count===current().each?'🧺 🍎 ✅':count>current().each?'↶ 🧺':'🧺 '+count+' 🍎',count===current().each?'good':'');
+   if(voiceOn&&count===current().each)speak('사과 '+count+'개! 이제 체크를 눌러요.');
+ });
+}
+$('openBox').addEventListener('click',()=>{speak('상자 안에는 다섯 개씩 두 줄, 사과 열 개가 있어요.')});
+$('buildHelp').addEventListener('click',()=>{
+ S.assists++;S.seenHelp=true;
+ $('tenPlus').classList.add('awaiting');
+ const t=neededTens(),o=neededOnes();
+ const phrase=S.assists===1?'상자 안에 열 개씩 있어요. 열 개 상자를 먼저 눌러 보세요.':'상자 '+t+'개와 낱개 사과 '+o+'개를 넣어 보세요.';
+ if(voiceOn)speak(phrase);
+ say(S.assists===1?'👆 📦 × 10':'📦 × '+t+'　＋　🍎 × '+o,'hint');
+});
+$('buildConfirm').addEventListener('click',()=>{
+ const n=S.tens*10+S.ones;
+ if(n!==current().each){
+  S.errors++;S.wrongForCurrent++;
+  $('basketTotal').classList.add('target-bounce');setTimeout(()=>$('basketTotal').classList.remove('target-bounce'),800);
+  say('🧺 '+n+'　≠　'+current().each+' 🍎','wrong');
+  if(voiceOn)speak(n>current().each?'너무 많아요. 되돌리기 화살표를 눌러 보세요.':'사과가 더 필요해요. 상자나 사과를 눌러 보세요.');
+  return;
+ }
+ if(S.wrongForCurrent===0&&!S.seenHelp)S.firstCorrect++;
+ S.wrongForCurrent=0;S.seenHelp=false;S.step=1;S.delivered=Array(current().friends).fill(false);show();
+});
+function renderDelivery(){
+ const c=current(),done=S.delivered.filter(Boolean).length;
+ $('deliveryStatus').textContent='🧺　'+done+' / '+c.friends+'　✅';
+ $('deliveryNext').disabled=done!==c.friends;
+ const faces=['🐰','🐻','🐿️','🦊','🐸','🦔','🐼','🐯','🐹'];
+ $('friendGrid').replaceChildren();
+ S.delivered.forEach((filled,i)=>{
+  const b=document.createElement('button');b.type='button';b.className='friend'+(filled?' delivered':i===done?' awaiting':'');
+  b.setAttribute('aria-label',(i+1)+'번 친구 '+(filled?'사과 '+c.each+'개 배달 완료':'빈 바구니에 사과 배달하기'));
+  const display=Array.from({length:S.tens},()=>pack('tiny')).join('')+Array.from({length:S.ones},()=>'<span aria-hidden="true">🍎</span>').join('');
+  b.innerHTML='<span class="face" aria-hidden="true">'+faces[i]+'</span>'+(filled?'<span class="mini-packs" aria-label="사과 '+c.each+'개">'+display+'</span><span class="friend-icons" aria-hidden="true">✅</span>':'<span class="friend-icons" aria-hidden="true">🧺 👆</span>');
+  b.disabled=filled;
+  b.addEventListener('click',()=>{
+    S.delivered[i]=true;renderDelivery();
+    const count=S.delivered.filter(Boolean).length;
+    say('🐰 '+count+' / '+c.friends+'　✅','good');
+    if(count===c.friends&&voiceOn)speak('모든 친구에게 배달했어요. 큰 체크 버튼을 눌러 계산해 볼까요?');
+  });
+  $('friendGrid').appendChild(b);
+ });
+ if(done===c.friends)$('deliveryNext').classList.add('target-bounce');
+ else $('deliveryNext').classList.remove('target-bounce');
+}
+$('deliveryHelp').addEventListener('click',()=>{
+ S.assists++;
+ const next=$('friendGrid').querySelector('.friend:not(.delivered)');
+ if(next){next.classList.add('awaiting');next.focus({preventScroll:true})}
+ if(voiceOn)speak('빈 바구니가 있는 친구를 하나씩 눌러 주세요.');
+ say('👆 🐰　➜　🧺','hint');
+});
+$('deliveryNext').addEventListener('click',()=>{
+ if(!S.delivered.length||!S.delivered.every(Boolean))return;
+ S.step=2;S.mathIndex=0;S.seenHelp=false;S.wrongForCurrent=0;show();
+});
 const answers=()=>[neededTens()*current().friends*10,neededOnes()*current().friends,current().each*current().friends];
-function mathProblem(){const c=current(),t=neededTens(),o=neededOnes(),n=c.friends;const queries=[['10개 묶음으로 만든 열매는 모두 몇 개?',`(${t}묶음 × ${n}명) × 10개 = ?`],['낱개 열매는 모두 몇 개?',`${o}개 × ${n}명 = ?`],['두 수를 합치면 열매가 총 몇 개?',`${answers()[0]}개 + ${answers()[1]}개 = ?`]];
-$('mathLead').textContent=queries[state.mathIndex][0];$('mathEquation').textContent=queries[state.mathIndex][1];$('mathInput').value='';$('mathInput').focus({preventScroll:true});
-$('stripCards').innerHTML=Array.from({length:n},()=>'<span class="strip-group">📦×'+t+' · 🍎×'+o+'</span>').join('');let log=[];if(state.mathIndex>0)log.push('<li>📦 10개 묶음에서 얻은 열매: '+answers()[0]+'개</li>');if(state.mathIndex>1)log.push('<li>🍎 낱개 열매: '+answers()[1]+'개</li>');$('worklog').innerHTML=log.join('');}
-function submitMath(){const val=$('mathInput').value.trim(),correct=answers()[state.mathIndex];if(!/^\d+$/.test(val)){say('숫자를 입력한 뒤 확인을 눌러 줘.','wrong');return;}if(+val!==correct){state.errors++;state.wrongForCurrent++;say('아직 달라. 바구니 수와 한 바구니의 열매 묶음을 다시 살펴봐.','wrong');return;}
-if(state.wrongForCurrent===0&&!state.seenHelp)state.firstCorrect++;state.mathIndex++;state.seenHelp=false;state.wrongForCurrent=0;
-if(state.mathIndex<3){mathProblem();say('맞았어! 이제 다음 수를 찾아보자.','good')}else{state.step=3;show()}}
-$('mathConfirm').addEventListener('click',submitMath);$('mathInput').addEventListener('keydown',e=>{if(e.key==='Enter')submitMath()});
-$('mathHelp').addEventListener('click',()=>{state.assists++;state.seenHelp=true;const c=current(),t=neededTens(),o=neededOnes();const m=[`${t}묶음씩 ${c.friends}명. 총 ${t} × ${c.friends}묶음이야. 한 묶음엔 10개가 있어.`,`${o}개씩 ${c.friends}명에게 주었어. 곱셈이나 반복 덧셈으로 생각해.`,`십 묶음에서 계산한 수와 낱개에서 계산한 수를 더해.`];say('🌱 '+m[state.mathIndex],'hint')});
-function win(){const c=current(),t=neededTens(),o=neededOnes(),num=c.each*c.friends;$('finalEquation').textContent=c.each+' × '+c.friends+' = ('+(t*10)+' × '+c.friends+') + ('+o+' × '+c.friends+') = '+num;$('finalReport').textContent='처음 시도에서 도움 없이 해결한 계산·구성 단계: '+state.firstCorrect+'/4 · 힌트 사용: '+state.assists+'번 · 다시 시도: '+state.errors+'번';$('nextTown').hidden=state.level===LEVELS.length-1;$('nextTown').textContent='다음 마을로 →';}
-$('replay').addEventListener('click',()=>boot(state.level));$('nextTown').addEventListener('click',()=>boot(Math.min(LEVELS.length-1,state.level+1)));
+function mathProblem(){
+ const c=current(),t=S.tens,o=S.ones,n=c.friends;
+ const equations=['('+t+' × '+n+') × 10 = ?','🍎 '+o+' × '+n+' = ?','🍎 '+answers()[0]+' + '+answers()[1]+' = ?'];
+ const headers=['📦　×　'+n+'　🐰','🍎　×　'+n+'　🐰','📦 ＋ 🍎　= ❓'];
+ $('mathLead').textContent=headers[S.mathIndex];
+ $('mathEquation').textContent=equations[S.mathIndex];
+ $('mathInput').value='';
+ $('stripCards').innerHTML=Array.from({length:n},(_,i)=>'<span class="strip-group" aria-label="'+(i+1)+'번째 친구의 열 개 상자와 낱개 사과">'+Array.from({length:t},()=>pack('tiny')).join('')+apples(o)+'</span>').join('');
+ $('worklog').innerHTML=(S.mathIndex>0?'<li>📦 ➜ '+answers()[0]+' 🍎 ✅</li>':'')+(S.mathIndex>1?'<li>🍎 ➜ '+answers()[1]+' 🍎 ✅</li>':'');
+}
+function submitMath(){
+ const val=$('mathInput').value.replace(/\D/g,''),correct=answers()[S.mathIndex];
+ if(!val || +val!==correct){
+  S.errors++;S.wrongForCurrent++;
+  say(val?'🔢 '+val+'　↶　❓':'🔢　❓','wrong');
+  if(voiceOn)speak(val?'아직 달라요. 그림을 다시 보고 숫자를 고쳐 보세요.':'숫자 버튼을 눌러 정답을 입력해 보세요.');
+  return;
+ }
+ if(S.wrongForCurrent===0&&!S.seenHelp)S.firstCorrect++;
+ S.mathIndex++;S.seenHelp=false;S.wrongForCurrent=0;
+ if(S.mathIndex<3){mathProblem();say('✅ 🌼','good');if(voiceOn)speak(guide())}
+ else{S.step=3;show()}
+}
+$('mathConfirm').addEventListener('click',submitMath);
+$('mathInput').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,5)});
+$('mathInput').addEventListener('keydown',e=>{if(e.key==='Enter')submitMath()});
+$('mathKeypad').addEventListener('click',e=>{
+ const b=e.target.closest('button[data-key]');if(!b)return;const key=b.dataset.key;
+ if(key==='ok')return;
+ if(key==='back')$('mathInput').value=$('mathInput').value.slice(0,-1);
+ else if($('mathInput').value.length<5)$('mathInput').value+=key;
+});
+$('mathHelp').addEventListener('click',()=>{
+ S.assists++;S.seenHelp=true;
+ const c=current(),t=S.tens,o=S.ones;
+ const hints=['📦 '+t+' × '+c.friends+'　→　🔟','🍎 '+o+' × '+c.friends,'🍎 '+answers()[0]+' ＋ 🍎 '+answers()[1]];
+ say(hints[S.mathIndex],'hint');
+ if(voiceOn)speak(['친구 한 명에게 상자 '+t+'개. 친구 '+c.friends+'명. 상자 개수를 곱한 뒤 열 개를 곱해요.','낱개 사과가 친구마다 '+o+'개, 친구는 '+c.friends+'명이에요.','앞에서 구한 상자 사과와 낱개 사과를 더해요.'][S.mathIndex]);
+});
+function win(){
+ const c=current(),t=S.tens,o=S.ones,num=c.each*c.friends;
+ $('finalEquation').textContent=c.each+' × '+c.friends+' = ('+t*10+' × '+c.friends+') + ('+o+' × '+c.friends+') = '+num;
+ $('finalReport').textContent='독립 해결 '+S.firstCorrect+' / 4 · 💡 '+S.assists+' · ↶ '+S.errors;
+ $('nextTown').hidden=S.level===LEVELS.length-1;
+ $('nextTown').textContent=S.level===LEVELS.length-1?'🌼 ✅':'🐰 ➜';
+ $('replay').textContent='🔄';
+}
+$('replay').addEventListener('click',()=>boot(S.level));
+$('nextTown').addEventListener('click',()=>boot(Math.min(LEVELS.length-1,S.level+1)));
 document.querySelectorAll('[data-stage]').forEach(btn=>btn.addEventListener('click',()=>boot(+btn.dataset.stage)));
-const params=new URLSearchParams(location.search),requested=Number(params.get('stage'));boot(Number.isInteger(requested)&&requested>=0&&requested<LEVELS.length?requested:0);
+const params=new URLSearchParams(location.search),requested=Number(params.get('stage'));
+boot(Number.isInteger(requested)&&requested>=0&&requested<LEVELS.length?requested:0);
 })();
 </script>
 </body>
