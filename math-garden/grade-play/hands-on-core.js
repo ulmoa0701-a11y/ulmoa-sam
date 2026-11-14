@@ -21,6 +21,10 @@ const family=(mode,answer='')=>{
  if(mode==='rotation')return 'spin';
  if(inSet(mode,'transformation2d transformation'))return 'move';
  if(inSet(mode,'symmetry pointSym'))return 'symmetry';
+ // These upper-grade spatial topics need faithful 3D models.
+ // Until those are implemented, retain their own original problems instead
+ // of substituting a misleading box/can/ball sorting activity.
+ if(inSet(mode,'netCube faces shapeViews hiddenCubes cubes boxEdges solidProperties'))return 'build';
  if(inSet(mode,'shape2d shape3d shapeMatch shape3dObject shape3dClass polygonSides triangles triangleClass shapeQuadrilaterals quadrilateral regularPolygon diagonals congruence prism netCube solids faces shapeViews solidProperties boxEdges cubes'))return 'shape';
  if(inSet(mode,'circleParts circleRadius circleDiameter'))return 'circle';
  if(inSet(mode,'capacity weight unitConvert'))return 'units';
