@@ -85,3 +85,5 @@
 .hands-fraction-bar>span{flex:1;min-width:8px;background:#fff;border-right:1px solid #80b18d}
 .hands-fraction-bar>span.filled{background:#6eba94}
 .hands-given-fractions .hands-fraction-bar>span[style*="filled"]{background:#6eba94}
+
+.hands-place-blocks{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;max-width:100%}.hands-place-column{border:2px solid #c4dbbf;border-radius:15px;background:#fffef7;display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 12px;min-width:64px}.hands-place-column strong{color:#527558}.hands-place-icons{color:#4e9d6e;font-size:23px;word-break:break-all;letter-spacing:3px;max-width:110px;min-height:42px}
