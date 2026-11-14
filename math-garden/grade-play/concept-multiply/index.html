@@ -1,325 +1,73 @@
 <!doctype html>
-<html lang="ko">
-<head>
+<html lang="ko"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f2f8eb">
-<title>모아의 열매 배송단 | 곱셈 개념 체험 게임</title>
-<style>
-:root{--pine:#244b3e;--green:#3a7b5b;--light:#edf7e7;--cream:#fffaf0;--ink:#263f32;--muted:#5e766a;--gold:#ffdd91;--pink:#eea59b;--line:#cce2ca;--shadow:0 12px 32px #254f3e18}*{box-sizing:border-box}
-html{scroll-behavior:smooth}body{margin:0;font-family:'Pretendard','SUIT','Noto Sans KR','Malgun Gothic',system-ui,sans-serif;color:var(--ink);background:radial-gradient(ellipse at 7% 4%,#deedda,transparent 40%),#f6f9f1;line-height:1.5}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:4px solid #be8141;outline-offset:3px}button:disabled{cursor:default;opacity:.56}button:not(:disabled):active{transform:scale(.98)}[hidden]{display:none!important}
-header{background:#ffffffd9;border-bottom:1px solid #dbe7d8}.top{max-width:1060px;margin:auto;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px}.brand{font-weight:950;color:var(--pine);letter-spacing:-.05em;font-size:20px}.tag{border:1px solid #d3e7d5;padding:6px 11px;border-radius:999px;background:#eaf6e8;color:#376b53;font-size:12px;font-weight:800}main{max-width:1060px;margin:auto;padding:22px 20px 35px}.hero{display:flex;gap:20px;align-items:center;justify-content:space-between;border:2px solid #c9dfc5;border-radius:28px;background:linear-gradient(123deg,#e7f6e1,#fffae6);padding:24px 30px;box-shadow:var(--shadow)}.hero h1{font-size:clamp(25px,3.2vw,38px);line-height:1.24;letter-spacing:-.05em;margin:2px 0 6px;color:var(--pine)}.hero p{margin:0;max-width:700px;color:#52715d;font-size:15px}.mascot{flex:0 0 auto;font-size:67px;filter:drop-shadow(0 7px 1px #8faf853b)}.eyebrow{font-weight:850;color:#568c60;font-size:12px;margin-bottom:3px!important}.levels{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}.level{min-height:46px;background:#fff;border:2px solid #d7e5d4;border-radius:14px;color:#426d54;font-weight:900;padding:10px 15px}.level[aria-current=true]{background:var(--pine);border-color:var(--pine);color:white}.nav-progress{display:flex;gap:8px;margin:17px 0 18px}.milestone{flex:1;text-align:center;min-width:0;border-radius:11px;background:#e6eee4;color:#718276;padding:9px 5px;font-size:12px;font-weight:850}.milestone.active{background:#31795c;color:white}.milestone.past{background:#d8efdb;color:#2e704c}
-.board{border:2px solid #d4e6cd;border-radius:28px;background:#fffdfa;min-height:450px;box-shadow:0 6px 0 #e3edd9;padding:26px;position:relative}.mission-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}.mission-title{font-size:clamp(20px,2.4vw,29px);color:#2d5841;font-weight:950;letter-spacing:-.045em;margin:0}.scene{text-align:center;font-size:15px;color:#566d5d;margin:7px 0 22px}.scene strong{color:#285c42;font-size:17px}.score{font-size:12px;font-weight:800;color:#6c8675;background:#f1f7ed;border:1px solid #d7e5d2;border-radius:12px;padding:9px 11px}.explain{color:#5e7568;font-size:14px;margin:7px 0 15px}.subhead{font-size:19px;font-weight:950;margin:0 0 8px;color:var(--pine)}.build-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}.inside-box{margin:10px auto 0;padding:9px;border:2px dashed #d4c793;border-radius:12px;background:#fffced;line-height:1.6;max-width:195px;font-size:23px}.open-box{font-size:12px;min-height:37px;padding:7px 8px;border-radius:10px}.build-col{background:#f5faf1;border:2px solid #dcead4;border-radius:20px;padding:16px;text-align:center}.big-label{font-size:16px;font-weight:900;color:#386e52}.helper{font-size:12px;color:#6a8676;margin:4px 0 15px}.product{font-size:42px;margin:8px 0 13px}.adjust{display:flex;align-items:center;justify-content:center;gap:17px}.adjust button{width:48px;height:48px;border-radius:14px;background:#397b5d;color:white;border:0;font-size:27px;font-weight:900}.count{font-size:28px;font-weight:950;min-width:40px;color:#355b47}.basket{margin:20px auto 10px;background:#fff6da;border:3px dashed #d5b87e;border-radius:19px;padding:17px;text-align:center}.basket-label{font-size:14px;font-weight:850;color:#7a6742}.basket-preview{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:9px;min-height:56px;margin:12px 0}.bundle{background:#d5ecce;border:2px solid #92be96;border-radius:9px;font-size:19px;font-weight:850;color:#336246;padding:5px 8px}.loose{font-size:24px}.basket-total{font-size:22px;font-weight:900;color:#396049}.actionrow{display:flex;align-items:center;justify-content:center;gap:10px;margin:18px 0 0;flex-wrap:wrap}.primary{border:0;background:#377d5b;color:#fff;border-radius:15px;padding:13px 22px;font-weight:900;min-height:51px;box-shadow:0 4px 0 #23573e}.secondary{border:2px solid #d1dfc9;background:#fff;color:#457353;border-radius:15px;padding:11px 17px;font-weight:850;min-height:49px}.feedback{min-height:53px;display:flex;align-items:center;justify-content:center;text-align:center;max-width:800px;margin:15px auto 0;padding:9px 14px;background:#f2f6eb;border-radius:14px;color:#50705b;font-weight:770;font-size:14px}.feedback.wrong{background:#fff0e8;color:#a05b3e}.feedback.good{background:#e6f4e8;color:#34704e}.feedback.hint{background:#e9f1fb;color:#456787}.friend-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:730px;margin:22px auto}.friend{border:2px solid #d7e5d0;min-height:108px;border-radius:18px;background:#fafff7;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:7px;font-weight:850;color:#52775b;font-size:13px;position:relative}.friend .face{font-size:32px}.friend .filled{font-size:12px;color:#376b53;background:#d7ebd3;padding:3px 6px;border-radius:8px}.friend.delivered{border-color:#77b988;background:#e4f4dc;box-shadow:0 3px 0 #b1d8ad}.friend:not(.delivered):hover{border-color:#3d8663;transform:translateY(-2px)}.delivery-status{text-align:center;color:#336e52;font-weight:950;font-size:22px}.calculations{max-width:760px;margin:auto}.strip-cards{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:12px auto 22px}.strip-group{background:#edfae9;border:2px solid #c8e5c5;border-radius:10px;padding:7px 9px;font-size:13px;font-weight:850;color:#49775a}.mathbox{border:2px solid #dbe6d2;background:#fbfff8;border-radius:20px;max-width:620px;margin:15px auto;padding:20px;text-align:center}.mathbox .equation{font-size:clamp(19px,3vw,27px);font-weight:950;color:#2d5841;margin:10px 0}.mathbox p{font-size:13px;color:#678270;margin:5px 0 12px}.entry{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px}.entry input{width:160px;min-height:60px;border:3px solid #b9d9b5;border-radius:15px;text-align:center;background:#fff;color:#315a42;font-size:30px;font-weight:900}.entry input:focus{border-color:#4b9a6f}.entry .unit{font-size:16px;font-weight:850;color:#45644f}.worklog{max-width:660px;margin:8px auto;padding:0;list-style:none;display:grid;gap:9px}.worklog li{border:1px solid #d4e3d0;border-radius:13px;background:#f7fcf5;padding:10px 14px;color:#436a52;font-weight:800}.victory{text-align:center;padding:8px}.victory .star{font-size:73px}.victory h2{font-size:29px;letter-spacing:-.05em;margin:3px 0;color:#2f7250}.victory p{color:#607666}.final-eq{margin:20px auto;padding:17px;border-radius:17px;background:#e6f5df;color:#245e45;font-size:22px;font-weight:900;max-width:610px;overflow-wrap:anywhere}.summary-note{background:#fff4da;color:#806d44;padding:13px;border-radius:12px;font-size:13px;max-width:630px;margin:16px auto}.foot{font-size:12px;line-height:1.7;color:#718175;max-width:840px;margin:20px auto 0}.visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-@media(max-width:680px){.top{padding:11px 15px}.brand{font-size:16px}.tag{font-size:10px;padding:5px 7px}main{padding:12px 12px 30px}.hero{padding:16px 17px;gap:6px;border-radius:20px}.hero h1{font-size:25px}.hero p{font-size:12px}.mascot{font-size:46px}.levels{gap:6px}.level{padding:8px 10px;min-height:42px;font-size:12px}.nav-progress{margin:12px 0}.milestone{font-size:10px;padding:9px 3px}.board{padding:15px 12px;min-height:380px;border-radius:20px}.mission-head{gap:7px}.scene{font-size:13px;margin:8px 0 16px}.scene strong{font-size:15px}.build-layout{gap:8px}.build-col{padding:12px 7px;border-radius:16px}.big-label{font-size:13px}.product{font-size:30px}.helper{font-size:11px;min-height:35px}.adjust{gap:7px}.adjust button{width:42px;height:44px}.count{font-size:24px;min-width:26px}.basket{margin:13px 0 6px;padding:12px 6px}.friend-grid{gap:6px;margin:13px auto}.friend{min-height:88px;font-size:11px;border-radius:13px}.friend .face{font-size:27px}.friend .filled{font-size:10px}.basket-total{font-size:20px}.score{font-size:10px;padding:5px}.entry input{width:140px}.mathbox{padding:14px 10px}.victory h2{font-size:25px}}
-@media(prefers-reduced-motion:reduce){*{animation-duration:0!important;transition-duration:0!important;scroll-behavior:auto!important}}
-
-/* Picture-first, prereader-friendly play. Ten apples are visible in EVERY pack. */
-.voice-control{border:2px solid #b2d3b3;background:#fff;border-radius:50%;font-size:27px;width:58px;height:58px;flex:0 0 58px;box-shadow:0 3px 0 #cbdcc7}
-.voice-control[aria-pressed="true"]{background:#e2f4dc;border-color:#5c9b6c}
-.hero .hero-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.hero .hero-title-row h1{margin:0}
-.hero .hero-child-desc{display:flex;gap:9px;align-items:center;flex-wrap:wrap;font-size:23px;margin-top:8px}
-.hero .hero-child-desc span{border:1px solid #d4e6ca;border-radius:13px;background:#fff8de;padding:3px 9px}
-.prereader-guide{display:flex;align-items:center;justify-content:center;gap:11px;flex-wrap:wrap;text-align:center;margin:12px auto}
-.prereader-guide .guide-step{font-size:28px;background:#eff7ea;border:2px solid #cfe3c8;border-radius:15px;padding:6px 13px}
-.prereader-guide .guide-arrow{font-size:21px;color:#76a07b}
-.build-target{background:#fff8e4;border:2px solid #e4d39e;border-radius:18px;padding:12px;text-align:center;margin:12px auto 16px;max-width:760px}
-.target-top{display:flex;justify-content:center;align-items:center;gap:16px;font-size:24px;flex-wrap:wrap}
-.target-number{font-size:30px;font-weight:950;color:#365e46}
-.target-apples{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px;margin:9px auto 3px;max-width:390px}
-.target-apples span{font-size:22px;line-height:1.25;display:flex;justify-content:center;align-items:center}
-.touch-source{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:175px;width:100%;background:#fff;border:3px solid #bbdabc;border-radius:20px;color:#355b46;position:relative;touch-action:manipulation}
-.touch-source:focus-visible{outline:4px solid #a56631}
-.touch-source:active{transform:scale(.97)}
-.touch-source .tap-hint{font-size:22px;position:absolute;top:-14px;right:8px;filter:drop-shadow(0 3px 2px #ffffff)}
-@keyframes nudge{0%,100%{box-shadow:0 0 0 0 #7fb38944}50%{box-shadow:0 0 0 10px #7fb38919}}
-.touch-source.awaiting,.friend:not(.delivered).awaiting{animation:nudge 2s ease-in-out infinite}
-.touch-source .source-caption{font-size:21px;font-weight:950;letter-spacing:.015em}
-.ten-tray{display:inline-grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(2,1fr);gap:2px;background:linear-gradient(145deg,#fff7d9,#f6e4b4);border:3px solid #b4a16b;border-radius:14px;padding:8px;position:relative;box-shadow:inset 0 -5px #eddaa9;vertical-align:middle}
-.ten-tray::before{content:"";position:absolute;inset:-6px 13px auto 13px;height:5px;background:#d2b377;border-radius:9px}
-.ten-tray .apple{display:block;text-align:center;font-size:22px;line-height:1;min-width:22px}
-.ten-tray.small{gap:1px;border-width:2px;border-radius:9px;padding:4px;box-shadow:none}
-.ten-tray.small::before{display:none}
-.ten-tray.small .apple{font-size:14px;min-width:14px}
-.ten-tray.tiny{gap:0;border-width:1px;border-radius:6px;padding:2px;box-shadow:none}
-.ten-tray.tiny::before{display:none}
-.ten-tray.tiny .apple{font-size:9px;min-width:9px}
-.own-basket{border:3px dashed #d7b978;border-radius:19px;background:#fff9e8;text-align:center;padding:13px;margin-top:12px}
-.own-basket .basket-preview{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:7px;min-height:64px;margin:10px 0}
-.own-basket .basket-total{font-size:25px}
-.basket-empty{color:#9e9b88;font-size:30px}
-.undo-row{display:flex;justify-content:center;gap:15px;margin:10px 0 0}
-.undo-row button{border:2px solid #d6e3cd;border-radius:15px;background:#fff;padding:10px 16px;font-size:24px;min-width:95px;min-height:51px}
-.own-basket .basket-label{font-size:24px;line-height:1.1}
-.actionrow .picture-next{font-size:28px;min-width:136px;min-height:62px;border-radius:17px}
-.target-bounce{animation:nudge 1.4s ease-in-out infinite}
-.friend .mini-packs{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;align-items:center;max-width:100%}
-.friend .mini-packs .ten-tray.tiny .apple{font-size:7px;min-width:7px}
-.friend .face{font-size:39px}
-.friend{min-height:125px}
-.friend .friend-icons{font-size:25px}
-.delivery-status{font-size:25px}
-.strip-group{display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:center;min-width:140px;max-width:100%;min-height:66px}
-.strip-group .ten-tray.tiny .apple{font-size:8px;min-width:8px}
-.keypad{display:grid;grid-template-columns:repeat(3,78px);gap:8px;justify-content:center;margin:18px auto 3px}
-.keypad button{background:#f4faef;border:2px solid #cadfc6;min-height:65px;border-radius:14px;color:#365c44;font-size:28px;font-weight:900}
-.keypad button.key-ok{background:#377d5b;color:#fff}
-.keypad button.key-del{background:#fff1e2}
-.math-visual-title{font-size:34px!important;font-weight:950!important;color:#285f48!important}
-.mathbox .equation{font-size:clamp(22px,4vw,34px)}
-.mathbox .entry input{width:180px;min-height:66px;font-size:36px}
-.stage-pictos{display:flex;align-items:center;gap:12px;justify-content:center;font-size:26px;color:#335d48;flex-wrap:wrap}
-.sr-assist{font-size:12px!important;color:#6d816d!important;line-height:1.5}
-@media(max-width:680px){
-.hero{padding:12px 14px}.hero .hero-child-desc{font-size:20px}.voice-control{width:51px;height:51px;flex-basis:51px}
-.hero p:not(.eyebrow):not(.hero-child-desc){font-size:11px}
-.build-col{padding:9px 6px}.touch-source{min-height:152px;padding:6px}.touch-source .source-caption{font-size:17px}
-.ten-tray{gap:0;padding:6px}.ten-tray .apple{font-size:18px;min-width:17px}
-.ten-tray.small .apple{font-size:13px;min-width:13px}
-.target-apples span{font-size:19px}.target-apples{gap:1px}
-.friend{min-height:114px;padding:6px 2px}.friend .face{font-size:29px}
-.friend .mini-packs .ten-tray.tiny .apple{font-size:6px;min-width:6px}
-.keypad{grid-template-columns:repeat(3,min(25vw,90px))}.keypad button{min-height:60px}
-.prereader-guide .guide-step{font-size:22px;padding:5px 9px}
-.board{padding:13px 10px}
-}
-@media(prefers-reduced-motion:reduce){.target-bounce,.touch-source.awaiting,.friend:not(.delivered).awaiting{animation:none!important}}
-
-</style>
-</head>
-<body>
-<header><div class="top"><a class="brand" href="../../../gardens/#learning" style="text-decoration:none" aria-label="일단해봄 학습정원으로 돌아가기">🌿 모아의 학습정원</a><a class="tag" href="../?g=3&t=2" style="text-decoration:none" aria-label="3학년 2학기 수학 단원으로 돌아가기">← 3학년 2학기 곱셈 단원</a></div></header>
-<main>
-<section class="hero"><div style="flex:1"><div class="hero-title-row"><h1>🌰 숲속 열매 배송단</h1><button type="button" id="voiceBtn" class="voice-control" aria-label="소리 안내 듣기" aria-pressed="false" title="🔊 그림 안내를 목소리로 듣기">🔊</button></div><p class="hero-child-desc" aria-label="그림을 누르고 친구에게 배달한 다음 계산하기"><span>👆📦</span><span>→</span><span>🐰🧺</span><span>→</span><span>🔢✅</span></p><p>그림을 터치해 열매를 담고 친구에게 배달해요. 🔊를 누르면 음성으로 안내해요.</p></div><div class="mascot" aria-hidden="true">🐿️</div></section>
-<nav class="levels" aria-label="도전 선택"><button type="button" class="level" data-stage="0">① 연습 마을 · 12 × 3</button><button type="button" class="level" data-stage="1">② 도전 마을 · 31 × 9</button><button type="button" class="level" data-stage="2">③ 새로운 마을 · 42 × 3</button></nav>
-<div class="nav-progress" role="group" aria-label="미션 단계"><div class="milestone" data-step="0">📦 👆</div><div class="milestone" data-step="1">🐰 🧺</div><div class="milestone" data-step="2">🔢 🧮</div><div class="milestone" data-step="3">🌼 🎉</div></div>
-<section class="board" aria-live="off"><div class="mission-head"><h2 class="mission-title" id="boardTitle">열매를 포장해 볼까?</h2><span class="score" id="statusTag">연습 마을</span></div><p class="scene" id="scene">친구 3명에게 열매를 12개씩 배달해 줘!</p>
-<div id="buildStage" hidden>
-  <div class="prereader-guide" aria-label="그림을 터치해 바구니에 열매 넣기"><span class="guide-step">👆</span><span class="guide-arrow">→</span><span class="guide-step">🧺</span><span class="guide-arrow">→</span><span class="guide-step">✅</span></div>
-  <h3 class="visually-hidden">한 친구가 받을 사과 개수만큼 사과 열 개 묶음과 낱개를 바구니에 넣어 주세요.</h3>
-  <div class="build-target"><div class="target-top"><span>🐰 🧺</span><span class="target-number" id="targetNumber">12</span><span>🍎</span></div><div class="target-apples" id="targetApples" aria-label="한 친구에게 필요한 사과 그림"></div></div>
-  <div class="build-layout">
-    <div class="build-col"><div class="big-label">🔟 × 10</div>
-      <button type="button" class="touch-source awaiting" id="tenPlus" aria-label="사과 열 개가 보이는 상자 한 개를 바구니에 넣기">
-        <span class="tap-hint" aria-hidden="true">👆</span><span id="packSource"></span><span class="source-caption">＋ 📦</span>
-      </button>
-    </div>
-    <div class="build-col"><div class="big-label">🍎 × 1</div>
-      <button type="button" class="touch-source" id="onePlus" aria-label="사과 낱개 한 개를 바구니에 넣기">
-        <span class="tap-hint" aria-hidden="true">👆</span><span style="font-size:69px" aria-hidden="true">🍎</span><span class="source-caption">＋ 🍎</span>
-      </button>
-    </div>
+<meta name="theme-color" content="#eaf4e7"><meta name="description" content="글을 읽지 않아도 시작하는 사과 배달 곱셈 게임. 같은 개수씩 나누어 담고 모아 세어 봐요.">
+<title>사과 배달 놀이 | 모아의 수학정원</title>
+<link rel="icon" href="../../../thinking-garden/favicon.ico">
+<link rel="stylesheet" href="../../../assets/habom-gamja-font.css">
+<link rel="stylesheet" href="./game.css">
+<script src="./game.js" defer></script>
+</head><body>
+<header class="topbar">
+ <a class="home" href="../../../gardens/#learning" aria-label="일단해봄 학습정원으로 돌아가기"><span aria-hidden="true">←</span><span>🌿 학습정원</span></a>
+ <strong class="brand">🍎 사과 배달 놀이</strong>
+ <button type="button" class="sound" id="sound" aria-label="음성 안내 켜기" aria-pressed="false">🔊</button>
+</header>
+<main id="main">
+  <div class="statusbar">
+    <span class="level-indicator" id="stageNumber">🌱 1 / 7</span>
+    <div class="flowers" id="flowers" aria-label="완료한 마을 수">○ ○ ○ ○ ○ ○ ○</div>
+    <details class="level-switch"><summary aria-label="연습 단계 선택">⚙️</summary>
+      <div class="level-list" id="levelList" role="group" aria-label="원하는 곱셈 단계 바로 선택"></div>
+    </details>
   </div>
-  <div class="own-basket"><div class="basket-label">🧺</div><div class="basket-preview" id="basketPreview"></div><output class="basket-total" id="basketTotal" aria-label="현재 담긴 사과 수">0 / 12 🍎</output><div class="undo-row"><button type="button" id="tenMinus" aria-label="열 개 상자 하나 되돌리기">↶ 📦</button><button type="button" id="oneMinus" aria-label="사과 낱개 하나 되돌리기">↶ 🍎</button></div></div>
-  <div id="insideBox" hidden aria-hidden="true"></div><button id="openBox" type="button" hidden>상자 속 열 개 보기</button>
-  <div class="actionrow"><button type="button" class="secondary" id="buildHelp" aria-label="그림 힌트 다시 보기">👀 💡</button><button type="button" class="primary picture-next" id="buildConfirm" aria-label="바구니 확인하고 배달 시작하기">✅ ➜</button></div>
-</div>
-<div id="deliverStage" hidden>
-  <h3 class="visually-hidden">모든 친구의 바구니를 차례로 눌러 같은 개수의 사과를 나눠 주세요.</h3>
-  <div class="prereader-guide" aria-label="바구니를 터치해 같은 양씩 나누기"><span class="guide-step">🧺</span><span class="guide-arrow">→</span><span class="guide-step">👆🐰</span><span class="guide-arrow">→</span><span class="guide-step">✅</span></div>
-  <p class="delivery-status" id="deliveryStatus">0 / 3 🐰</p>
-  <div class="friend-grid" id="friendGrid"></div>
-  <div class="actionrow"><button type="button" class="secondary" id="deliveryHelp" aria-label="그림으로 배달하는 방법 보기">👀 💡</button><button type="button" class="primary picture-next" id="deliveryNext" aria-label="계산 단계로 가기" disabled>✅ ➜</button></div>
-</div>
-<div id="mathStage" hidden>
-  <div class="prereader-guide" aria-label="열 개 묶음과 낱개를 세어 답을 누르기"><span class="guide-step">📦 🍎</span><span class="guide-arrow">→</span><span class="guide-step">🔢</span><span class="guide-arrow">→</span><span class="guide-step">✅</span></div>
-  <div class="strip-cards" id="stripCards" aria-label="친구마다 나누어 준 사과 상자와 낱개"></div><ol class="worklog" id="worklog"></ol>
-  <div class="mathbox"><p class="math-visual-title" id="mathLead">📦 ❓</p><div class="equation" id="mathEquation"></div>
-  <div class="entry"><label for="mathInput" class="visually-hidden">계산한 숫자</label><input id="mathInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="5" placeholder="?" autocomplete="off"><span class="unit">🍎</span></div>
-  <div class="keypad" id="mathKeypad" role="group" aria-label="숫자 누르기">
-  <button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button>
-  <button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button>
-  <button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button>
-  <button type="button" class="key-del" data-key="back" aria-label="마지막 숫자 지우기">⌫</button><button type="button" data-key="0">0</button><button type="button" class="key-ok" data-key="ok" id="mathConfirm" aria-label="답 확인하기">✅</button>
-  </div></div>
-  <div class="actionrow"><button type="button" class="secondary" id="mathHelp" aria-label="계산 그림 힌트 보기">👀 💡</button></div>
-</div>
-<div id="winStage" hidden><div class="victory"><div class="star" aria-hidden="true">🎉</div><h2>열매 배송 성공!</h2><p>같은 개수를 묶어 나누면 큰 곱셈도 계산할 수 있어.</p><div class="final-eq" id="finalEquation"></div><p id="finalReport"></p><div class="summary-note">이 게임에서 답을 얻은 과정만 확인했어. 개념을 완전히 습득했는지는 다른 날, 다른 수와 실제 물건으로도 확인해야 해.</div><div class="actionrow"><button type="button" id="replay" class="secondary">이 마을 다시 하기</button><button type="button" id="nextTown" class="primary">다음 마을로 →</button></div></div></div>
-<p class="feedback" id="feedback" role="status" aria-live="polite">정답을 보지 않고 직접 만들어 보자.</p>
-</section>
-<p class="foot">교수 설계 시범용: 십 묶음·낱개를 조작하고 반복 배달한 뒤 계산식을 연결하도록 제작했어. 학교별 진도와 아동의 발달수준에 따라 연습 수준을 조절해야 하며, 교육·치료 효과를 검증한 프로그램은 아니야. 입력 내용은 서버에 전송하지 않아.</p>
+  <section class="play-card" id="playScreen" aria-label="사과 배달 게임">
+   <div class="picture-rule" id="pictureRule" aria-label="사과를 누르면 친구의 바구니에 들어가요"><span>👆</span><span class="arrow">→</span><span class="rule-apple" id="ruleApple"></span><span class="arrow">→</span><span>🧺</span></div>
+   <div class="town-goal">
+      <div class="goal-line"><span class="mini-head" aria-hidden="true">🐰</span><span class="goal-math" id="goalMath">2 × 2</span><span class="mini-head" aria-hidden="true">🧺</span></div>
+      <div class="friend-track" id="friendTrack" role="group" aria-label="친구들 배달 진행 상황"></div>
+   </div>
+   <div class="working-area" id="workingArea">
+      <div class="friend-large"><img id="friendPortrait" src="../../../thinking-garden/assets/friend-hong.png" alt="기다리는 숲속 친구"></div>
+      <div class="target-wrap">
+        <div class="basket-heading"><span aria-hidden="true">🧺</span> <strong id="targetCount">0 / 2</strong></div>
+        <div class="basket-frame" id="basketFrame" aria-label="사과를 담을 바구니">
+          <div class="basket-handle" aria-hidden="true"></div><div class="basket-items" id="basketItems"></div>
+        </div>
+        <button type="button" id="undo" class="undo" aria-label="방금 담은 사과 되돌리기" hidden>↶</button>
+      </div>
+   </div>
+   <div class="pick-area" id="pickArea">
+     <div class="source-tip" aria-hidden="true"><span class="hand">👆</span><span class="arrow-down">↓</span></div>
+     <div class="source-buttons">
+       <button type="button" id="appleSource" class="source source-apple" aria-label="사과 하나를 바구니에 넣기"><span id="sourceApple"></span><b class="source-count">+1</b></button>
+       <button type="button" id="packSource" class="source source-pack" aria-label="사과 열 개 묶음을 바구니에 넣기" hidden><span id="sourcePack"></span><b class="source-count">+10</b></button>
+     </div>
+   </div>
+   <p class="kid-feedback" id="kidFeedback" role="status" aria-live="polite" aria-atomic="true">🍎 👆 → 🧺</p>
+  </section>
+  <section class="count-card" id="countScreen" hidden aria-label="친구들에게 배달한 사과 모두 세기">
+    <div class="count-heading"><span aria-hidden="true">🧺</span><strong id="countEquation">2 × 2 = ?</strong><span aria-hidden="true">🍎</span></div>
+    <div class="collected-friends" id="collectedFriends"></div>
+    <div class="count-question"><span class="count-big-apple" id="countApple"></span><span>?</span></div>
+    <div class="choice-grid" id="choiceGrid" role="group" aria-label="전체 사과 개수 고르기"></div>
+    <button class="recount-btn" id="recount" type="button" aria-label="사과 그림 다시 보기">👀 🔄</button>
+    <p class="kid-feedback" id="countFeedback" role="status" aria-live="polite" aria-atomic="true">👀 🍎 → 🔢</p>
+  </section>
+  <section class="win-card" id="winScreen" hidden aria-label="배달 미션 완료">
+    <div class="big-star" aria-hidden="true">🌼</div>
+    <div class="win-friends" id="winFriends" aria-hidden="true"></div>
+    <h1 class="win-equation" id="winEquation">2 × 2 = 4</h1>
+    <div class="win-path"><span>🍎</span><span>→</span><span>🧺</span><span>→</span><span>🌼</span></div>
+    <div class="win-buttons">
+      <button class="repeat" type="button" id="again" aria-label="이번 마을 다시 시작">🔄</button>
+      <button class="go-next" type="button" id="nextLevel" aria-label="다음 마을 시작">다음 마을 <span>▶</span></button>
+    </div>
+  </section>
+  <details class="adult-note"><summary>보호자·선생님 안내</summary>
+    <p>이 게임은 사과를 실제로 담아 보는 구체적 경험과 같은 개수의 묶음을 세는 경험을 연결하도록 구성했습니다. 첫 단계는 2개씩 2명이며, 3개씩 2명, 4개씩 3명, 12개씩 3명, 31개씩 3명, 31개씩 9명, 42개씩 3명 순으로 진행합니다. 처음엔 큰 사과 버튼만 누르면 자동으로 다음 친구의 바구니로 이동합니다. 10개 묶음을 사용하는 단계부터는 사과 열 개가 그려진 묶음 버튼이 추가됩니다.</p>
+    <p>오답이 나와도 정답을 미리 알려주지 않으며 다시 생각하게 합니다. 숫자 읽기·일대일 대응·묶음 세기에 어려움이 있는 아동은 보호자와 함께 선택한 더 쉬운 단계에서 반복할 수 있습니다. 어린 아동이 독립적으로 곱셈을 습득하는 효과는 확인되지 않았습니다. 브라우저의 한국어 음성 합성 지원 여부에 따라 🔊 안내가 작동하지 않을 수 있습니다.</p>
+    <a href="../?g=3&t=2">3학년 2학기 곱셈 단원으로 돌아가기</a>
+  </details>
 </main>
-<script>
-(()=>{'use strict';
-const LEVELS=[{each:12,friends:3,title:'연습 마을',animal:'🐿️'},{each:31,friends:9,title:'도전 마을',animal:'🐰'},{each:42,friends:3,title:'새로운 마을',animal:'🦊'}];
-const $=id=>document.getElementById(id);
-const S={level:0,step:0,tens:0,ones:0,delivered:[],mathIndex:0,assists:0,errors:0,firstCorrect:0,seenHelp:false,wrongForCurrent:0};
-const current=()=>LEVELS[S.level];
-const neededTens=()=>Math.floor(current().each/10),neededOnes=()=>current().each%10;
-const pack=(size='')=>'<span class="ten-tray '+size+'" role="img" aria-label="사과 열 개">'+Array.from({length:10},()=>'<span class="apple" aria-hidden="true">🍎</span>').join('')+'</span>';
-const apples=(n)=>Array.from({length:n},()=>'<span aria-hidden="true">🍎</span>').join('');
-let voiceOn=false;
-function speak(message){
- if(!voiceOn||!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window))return;
- try{window.speechSynthesis.cancel();const v=new SpeechSynthesisUtterance(message);v.lang='ko-KR';v.rate=.83;v.pitch=1.06;window.speechSynthesis.speak(v)}catch{}
-}
-function guide(){
- const c=current();
- if(S.step===0)return '친구 한 명에게 사과 '+c.each+'개를 담아 주세요. 상자 안에는 사과 열 개가 보여요. 상자 그림과 사과 그림을 눌러서 바구니를 채워 보세요.';
- if(S.step===1)return '친구가 '+c.friends+'명 있어요. 친구들의 바구니를 하나씩 눌러 주세요. 모두 같은 양이 들어가요.';
- if(S.step===2)return ['열 개가 들어 있는 상자의 전체 사과 수를 구해 보세요. 숫자 버튼을 누른 후 초록색 체크를 눌러요.','낱개 사과가 모두 몇 개인지 세어 보세요.','상자 안의 사과와 낱개 사과를 모두 더해 보세요.'][S.mathIndex];
- return '모든 친구에게 배달했어요! 참 잘했어요.';
-}
-$('voiceBtn').addEventListener('click',()=>{
- if(!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window)){say('🔊 기기에서 음성 안내가 지원되지 않아요. 그림을 보고 눌러 주세요.','hint');return}
- voiceOn=!voiceOn;$('voiceBtn').setAttribute('aria-pressed',String(voiceOn));$('voiceBtn').textContent=voiceOn?'🔊':'🔇';
- $('voiceBtn').setAttribute('aria-label',voiceOn?'음성 안내 끄기':'소리 안내 듣기');
- if(voiceOn)speak(guide());else window.speechSynthesis.cancel();
-});
-function say(message,kind=''){const f=$('feedback');f.textContent=(kind==='wrong'?'🔁 ':kind==='good'?'🌼 ':kind==='hint'?'👀 ':'')+message;f.className='feedback '+kind}
-function boot(level){
- Object.assign(S,{level,step:0,tens:0,ones:0,delivered:[],mathIndex:0,assists:0,errors:0,firstCorrect:0,seenHelp:false,wrongForCurrent:0});
- show();
-}
-function show(){
- const c=current();
- document.querySelectorAll('[data-stage]').forEach((b,i)=>{b.setAttribute('aria-current',String(i===S.level));b.textContent=c&&['🐿️ 12 × 3','🐰 31 × 9','🦊 42 × 3'][i]});
- document.querySelectorAll('.milestone').forEach((n,i)=>{n.className='milestone '+(i===S.step?'active':i<S.step?'past':'')});
- $('statusTag').textContent=c.animal+' '+c.each+' × '+c.friends;
- $('scene').innerHTML='<span class="stage-pictos" aria-label="'+c.friends+'명의 친구에게 '+c.each+'개씩 배달">'+Array.from({length:c.friends},(_,i)=>'<span aria-hidden="true">'+['🐰','🐻','🐿️','🦊','🐸','🦔','🐼','🐯','🐹'][i]+'</span>').join('')+' <span>🧺 × '+c.each+'</span></span>';
- ['buildStage','deliverStage','mathStage','winStage'].forEach((id,i)=>$(id).hidden=S.step!==i);
- $('boardTitle').textContent=['👆 📦 ➜ 🧺','👆 🐰 ➜ 🧺','🔢 🧮','🎉 🌼'][S.step];
- if(S.step===0){
-  $('targetNumber').textContent=c.each;
-  $('targetApples').innerHTML=apples(c.each);
-  $('targetApples').setAttribute('aria-label','사과 '+c.each+'개의 그림');
-  $('packSource').innerHTML=pack();
-  updateBuild();say('👆 📦　👆 🍎　➜　🧺');
- }else if(S.step===1){renderDelivery();say('👆 🐰　➜　🧺')}
- else if(S.step===2){mathProblem();say('🔢　➜　✅')}
- else{win();say('🎉 🌼','good')}
- if(voiceOn)speak(guide());
-}
-function updateBuild(){
- const count=S.tens*10+S.ones,target=current().each;
- $('tenCount')?.replaceChildren?.();
- $('basketPreview').innerHTML=Array.from({length:S.tens},()=>pack('small')).join('')+(S.ones?'<span class="loose" role="img" aria-label="낱개 사과 '+S.ones+'개">'+apples(S.ones)+'</span>':'')||'<span class="basket-empty" aria-hidden="true">🧺</span>';
- $('basketTotal').textContent=count+' / '+target+' 🍎';
- $('basketTotal').style.color=count===target?'#197344':count>target?'#b56643':'#396049';
- $('tenMinus').disabled=S.tens===0;$('oneMinus').disabled=S.ones===0;
- $('tenPlus').disabled=S.tens>=8 || (count>=target+10);
- $('onePlus').disabled=S.ones>=9 || (count>=target+3);
- $('tenPlus').classList.toggle('awaiting',count<target&&S.tens<neededTens());
- $('onePlus').classList.toggle('awaiting',count<target&&S.tens>=neededTens()&&S.ones<neededOnes());
- $('buildConfirm').classList.toggle('target-bounce',count===target);
-}
-for(const [id,field,diff] of [['tenPlus','tens',1],['tenMinus','tens',-1],['onePlus','ones',1],['oneMinus','ones',-1]]){
- $(id).addEventListener('click',()=>{
-   S[field]=Math.max(0,Math.min(9,S[field]+diff));
-   updateBuild();
-   const count=S.tens*10+S.ones;
-   say(count===current().each?'🧺 🍎 ✅':count>current().each?'↶ 🧺':'🧺 '+count+' 🍎',count===current().each?'good':'');
-   if(voiceOn&&count===current().each)speak('사과 '+count+'개! 이제 체크를 눌러요.');
- });
-}
-$('openBox').addEventListener('click',()=>{speak('상자 안에는 다섯 개씩 두 줄, 사과 열 개가 있어요.')});
-$('buildHelp').addEventListener('click',()=>{
- S.assists++;S.seenHelp=true;
- $('tenPlus').classList.add('awaiting');
- const t=neededTens(),o=neededOnes();
- const phrase=S.assists===1?'상자 안에 열 개씩 있어요. 열 개 상자를 먼저 눌러 보세요.':'상자 '+t+'개와 낱개 사과 '+o+'개를 넣어 보세요.';
- if(voiceOn)speak(phrase);
- say(S.assists===1?'👆 📦 × 10':'📦 × '+t+'　＋　🍎 × '+o,'hint');
-});
-$('buildConfirm').addEventListener('click',()=>{
- const n=S.tens*10+S.ones;
- if(n!==current().each){
-  S.errors++;S.wrongForCurrent++;
-  $('basketTotal').classList.add('target-bounce');setTimeout(()=>$('basketTotal').classList.remove('target-bounce'),800);
-  say('🧺 '+n+'　≠　'+current().each+' 🍎','wrong');
-  if(voiceOn)speak(n>current().each?'너무 많아요. 되돌리기 화살표를 눌러 보세요.':'사과가 더 필요해요. 상자나 사과를 눌러 보세요.');
-  return;
- }
- if(S.wrongForCurrent===0&&!S.seenHelp)S.firstCorrect++;
- S.wrongForCurrent=0;S.seenHelp=false;S.step=1;S.delivered=Array(current().friends).fill(false);show();
-});
-function renderDelivery(){
- const c=current(),done=S.delivered.filter(Boolean).length;
- $('deliveryStatus').textContent='🧺　'+done+' / '+c.friends+'　✅';
- $('deliveryNext').disabled=done!==c.friends;
- const faces=['🐰','🐻','🐿️','🦊','🐸','🦔','🐼','🐯','🐹'];
- $('friendGrid').replaceChildren();
- S.delivered.forEach((filled,i)=>{
-  const b=document.createElement('button');b.type='button';b.className='friend'+(filled?' delivered':i===done?' awaiting':'');
-  b.setAttribute('aria-label',(i+1)+'번 친구 '+(filled?'사과 '+c.each+'개 배달 완료':'빈 바구니에 사과 배달하기'));
-  const display=Array.from({length:S.tens},()=>pack('tiny')).join('')+Array.from({length:S.ones},()=>'<span aria-hidden="true">🍎</span>').join('');
-  b.innerHTML='<span class="face" aria-hidden="true">'+faces[i]+'</span>'+(filled?'<span class="mini-packs" aria-label="사과 '+c.each+'개">'+display+'</span><span class="friend-icons" aria-hidden="true">✅</span>':'<span class="friend-icons" aria-hidden="true">🧺 👆</span>');
-  b.disabled=filled;
-  b.addEventListener('click',()=>{
-    S.delivered[i]=true;renderDelivery();
-    const count=S.delivered.filter(Boolean).length;
-    say('🐰 '+count+' / '+c.friends+'　✅','good');
-    if(count===c.friends&&voiceOn)speak('모든 친구에게 배달했어요. 큰 체크 버튼을 눌러 계산해 볼까요?');
-  });
-  $('friendGrid').appendChild(b);
- });
- if(done===c.friends)$('deliveryNext').classList.add('target-bounce');
- else $('deliveryNext').classList.remove('target-bounce');
-}
-$('deliveryHelp').addEventListener('click',()=>{
- S.assists++;
- const next=$('friendGrid').querySelector('.friend:not(.delivered)');
- if(next){next.classList.add('awaiting');next.focus({preventScroll:true})}
- if(voiceOn)speak('빈 바구니가 있는 친구를 하나씩 눌러 주세요.');
- say('👆 🐰　➜　🧺','hint');
-});
-$('deliveryNext').addEventListener('click',()=>{
- if(!S.delivered.length||!S.delivered.every(Boolean))return;
- S.step=2;S.mathIndex=0;S.seenHelp=false;S.wrongForCurrent=0;show();
-});
-const answers=()=>[neededTens()*current().friends*10,neededOnes()*current().friends,current().each*current().friends];
-function mathProblem(){
- const c=current(),t=S.tens,o=S.ones,n=c.friends;
- const equations=['('+t+' × '+n+') × 10 = ?','🍎 '+o+' × '+n+' = ?','🍎 '+answers()[0]+' + '+answers()[1]+' = ?'];
- const headers=['📦　×　'+n+'　🐰','🍎　×　'+n+'　🐰','📦 ＋ 🍎　= ❓'];
- $('mathLead').textContent=headers[S.mathIndex];
- $('mathEquation').textContent=equations[S.mathIndex];
- $('mathInput').value='';
- $('stripCards').innerHTML=Array.from({length:n},(_,i)=>'<span class="strip-group" aria-label="'+(i+1)+'번째 친구의 열 개 상자와 낱개 사과">'+Array.from({length:t},()=>pack('tiny')).join('')+apples(o)+'</span>').join('');
- $('worklog').innerHTML=(S.mathIndex>0?'<li>📦 ➜ '+answers()[0]+' 🍎 ✅</li>':'')+(S.mathIndex>1?'<li>🍎 ➜ '+answers()[1]+' 🍎 ✅</li>':'');
-}
-function submitMath(){
- const val=$('mathInput').value.replace(/\D/g,''),correct=answers()[S.mathIndex];
- if(!val || +val!==correct){
-  S.errors++;S.wrongForCurrent++;
-  say(val?'🔢 '+val+'　↶　❓':'🔢　❓','wrong');
-  if(voiceOn)speak(val?'아직 달라요. 그림을 다시 보고 숫자를 고쳐 보세요.':'숫자 버튼을 눌러 정답을 입력해 보세요.');
-  return;
- }
- if(S.wrongForCurrent===0&&!S.seenHelp)S.firstCorrect++;
- S.mathIndex++;S.seenHelp=false;S.wrongForCurrent=0;
- if(S.mathIndex<3){mathProblem();say('✅ 🌼','good');if(voiceOn)speak(guide())}
- else{S.step=3;show()}
-}
-$('mathConfirm').addEventListener('click',submitMath);
-$('mathInput').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,5)});
-$('mathInput').addEventListener('keydown',e=>{if(e.key==='Enter')submitMath()});
-$('mathKeypad').addEventListener('click',e=>{
- const b=e.target.closest('button[data-key]');if(!b)return;const key=b.dataset.key;
- if(key==='ok')return;
- if(key==='back')$('mathInput').value=$('mathInput').value.slice(0,-1);
- else if($('mathInput').value.length<5)$('mathInput').value+=key;
-});
-$('mathHelp').addEventListener('click',()=>{
- S.assists++;S.seenHelp=true;
- const c=current(),t=S.tens,o=S.ones;
- const hints=['📦 '+t+' × '+c.friends+'　→　🔟','🍎 '+o+' × '+c.friends,'🍎 '+answers()[0]+' ＋ 🍎 '+answers()[1]];
- say(hints[S.mathIndex],'hint');
- if(voiceOn)speak(['친구 한 명에게 상자 '+t+'개. 친구 '+c.friends+'명. 상자 개수를 곱한 뒤 열 개를 곱해요.','낱개 사과가 친구마다 '+o+'개, 친구는 '+c.friends+'명이에요.','앞에서 구한 상자 사과와 낱개 사과를 더해요.'][S.mathIndex]);
-});
-function win(){
- const c=current(),t=S.tens,o=S.ones,num=c.each*c.friends;
- $('finalEquation').textContent=c.each+' × '+c.friends+' = ('+t*10+' × '+c.friends+') + ('+o+' × '+c.friends+') = '+num;
- $('finalReport').textContent='독립 해결 '+S.firstCorrect+' / 4 · 💡 '+S.assists+' · ↶ '+S.errors;
- $('nextTown').hidden=S.level===LEVELS.length-1;
- $('nextTown').textContent=S.level===LEVELS.length-1?'🌼 ✅':'🐰 ➜';
- $('replay').textContent='🔄';
-}
-$('replay').addEventListener('click',()=>boot(S.level));
-$('nextTown').addEventListener('click',()=>boot(Math.min(LEVELS.length-1,S.level+1)));
-document.querySelectorAll('[data-stage]').forEach(btn=>btn.addEventListener('click',()=>boot(+btn.dataset.stage)));
-const params=new URLSearchParams(location.search),requested=Number(params.get('stage'));
-boot(Number.isInteger(requested)&&requested>=0&&requested<LEVELS.length?requested:0);
-})();
-</script>
-</body>
-</html>
+</body></html>
