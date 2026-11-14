@@ -88,6 +88,57 @@ try{
   return {success:window.MoaUnitApp.state.solved,independent:window.MoaUnitApp.state.firstTry,count,filled:[...document.querySelectorAll('.hands-cell[aria-pressed=true]')].length};
  });
  assert(independent.success&&independent.independent===1&&independent.filled===independent.count,'independent manipulative answer not recognized');
+
+ const families=await page.evaluate(()=>{
+  const seen=new Map();
+  const core=window.MoaHandsOnCore, C=window.MoaMathCurriculum;
+  for(let g=1;g<=6;g++)for(let t=1;t<=2;t++)C.get(g,t).forEach((unit,u)=>unit.subtopics.forEach((sub,v)=>{
+    const kind=core.family(sub.mode,'');
+    if(!seen.has(kind))seen.set(kind,{g,t,u,v,kind,mode:sub.mode});
+  }));
+  // Test named conceptual variations beyond first example.
+  for(const mode of ['circleRadius','circleDiameter','circleParts','capacity','fracAdd','fractionKinds','elapsed']){
+    for(let g=1;g<=6;g++)for(let t=1;t<=2;t++)C.get(g,t).forEach((unit,u)=>unit.subtopics.forEach((sub,v)=>{
+      if(sub.mode===mode)seen.set('mode:'+mode,{g,t,u,v,kind:core.family(mode,''),mode});
+    }));
+  }
+  const results=[];
+  for(const {g,t,u,v,kind,mode} of seen.values()){
+    window.MoaUnitApp.select(g,t,false);window.MoaUnitApp.play(u,v,false);
+    document.querySelector('.hands-actions .hands-check').click();document.querySelector('#next').click();
+    document.querySelector('.hands-actions .hands-help').click();document.querySelector('.hands-actions .hands-check').click();document.querySelector('#next').click();
+    const scene=window.MoaUnitApp.state.activity.scene,root=document.querySelector('.hands-shell');
+    const click=(selector,index=0)=>{const a=[...root.querySelectorAll(selector)];if(!a[index])throw Error('missing '+selector+' for '+mode);a[index].click()};
+    if(kind==='count'){for(let i=0;i<scene.count;i++)click('.hands-cell',i)}
+    else if(kind==='share'){for(let i=0;i<scene.boxes;i++)for(let n=0;n<scene.answer;n++)click('.hands-basket-add',i)}
+    else if(kind==='groups'){for(let i=0;i<scene.groups;i++)for(let n=0;n<scene.per;n++)click('.hands-basket-add',i)}
+    else if(kind==='fraction'){for(let i=0;i<scene.numer;i++)click('.hands-frac-cell',i)}
+    else if(kind==='clock'){}
+    else if(kind==='angle'){const input=root.querySelector('input[type=range]');input.value=scene.angle;input.dispatchEvent(new Event('input',{bubbles:true}))}
+    else if(kind==='graph'){for(let i=0;i<3;i++)for(let n=0;n<scene.data[i];n++)click('.hands-graph-col .hands-step',i*2)}
+    else if(kind==='move'){for(let n=0;n<scene.dx;n++)click('.hands-arrows .hands-step',1);for(let n=0;n<scene.dy;n++)click('.hands-arrows .hands-step',2)}
+    else if(kind==='pattern'){for(let n=0;n<scene.answer;n++)click('.hands-stepper .hands-step',1)}
+    else if(kind==='line'){const item=[...root.querySelectorAll('.hands-number-mark')].find(x=>x.textContent===String(scene.target));item.click()}
+    else if(kind==='place'){scene.places.forEach((p,i)=>{for(let n=0;n<p.value;n++)click('.hands-stepper .hands-step',i*2+1)})}
+    else if(kind==='measure')click('.hands-ruler-mark',scene.target)
+    else if(kind==='shape'){const item=[...root.querySelectorAll('.hands-shape-card')].find(x=>x.textContent.includes(scene.name));item.click()}
+    else if(kind==='symmetry')click('.hands-mirror-cell',scene.y*6+(5-scene.x))
+    else if(kind==='circle'){if(typeof scene.answer==='string')root.querySelector('[data-part="'+scene.answer+'"]').dispatchEvent(new Event('click',{bubbles:true}));else for(let n=1;n<scene.answer;n++)click('.hands-stepper .hands-step',1)}
+    else if(kind==='units'){for(let n=0;n<scene.big;n++)click('.hands-stepper .hands-step',1);for(let n=0;n<scene.small/100;n++)click('.hands-stepper .hands-step',3)}
+    else{root.querySelector('.hands-entry').value=scene.answer}
+    if(kind==='clock'){
+      for(let n=0;n<scene.hour;n++)click('.hands-stepper .hands-step',1);
+      if(scene.minute===30)click('.hands-stepper .hands-step',3);
+    }
+    root.querySelector('.hands-actions .hands-check').click();
+    if(!window.MoaUnitApp.state.solved||window.MoaUnitApp.state.firstTry!==1)throw Error('independent hands-on failed '+kind+' '+mode);
+    results.push(kind+':'+mode);
+  }
+  return results;
+ });
+ assert(families.length>=16,'fewer than 16 independent modality checks');
+ console.log('INDEPENDENT_MANIPULATIVES:',families.length,'family and submode touch exercises passed');
+
  }
  const quick=await page.goto(base+'/'+ROOT+'/quick.html',{waitUntil:'load'});
  assert(quick?.ok(),'original 49 mini-games missing');
