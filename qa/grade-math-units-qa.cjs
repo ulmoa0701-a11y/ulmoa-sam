@@ -122,7 +122,8 @@ try{
     else if(kind==='place'){scene.places.forEach((p,i)=>{for(let n=0;n<p.value;n++)click('.hands-stepper .hands-step',i*2+1)})}
     else if(kind==='measure')click('.hands-ruler-mark',scene.target)
     else if(kind==='shape'){const item=[...root.querySelectorAll('.hands-shape-card')].find(x=>x.textContent.includes(scene.name));item.click()}
-    else if(kind==='symmetry')click('.hands-mirror-cell',scene.y*6+(5-scene.x))
+    else if(kind==='symmetry')click('.hands-mirror-cell',(scene.point?3-scene.y:scene.y)*6+(5-scene.x))
+    else if(kind==='spin')for(let n=0;n<scene.turns/90;n++)click('.hands-arrows .hands-step',1)
     else if(kind==='circle'){if(typeof scene.answer==='string')root.querySelector('[data-part="'+scene.answer+'"]').dispatchEvent(new Event('click',{bubbles:true}));else for(let n=1;n<scene.answer;n++)click('.hands-stepper .hands-step',1)}
     else if(kind==='units'){for(let n=0;n<scene.big;n++)click('.hands-stepper .hands-step',1);for(let n=0;n<scene.small/100;n++)click('.hands-stepper .hands-step',3)}
     else{root.querySelector('.hands-entry').value=scene.answer}
