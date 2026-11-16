@@ -34,6 +34,8 @@ async function walkTo(x,z,radius=4,timeout=50000){
 }
 async function pickFlower(){
  const before=(await state()).lotus;
+ // SMOG's water-bucket victory now grants its adjacent final lotus automatically.
+ if(before>=3)return true;
  for(let turn=0;turn<8;turn++){
   const hint=await page.$eval('#hgRewardNav',e=>e.textContent).catch(()=>''),pickupLabel=await page.$eval('[data-action="talk"]',e=>e.textContent).catch(()=>'');
   if(pickupLabel.includes('연꽃 줍기'))break;
