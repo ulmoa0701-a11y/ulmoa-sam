@@ -22,7 +22,7 @@ for(let i=0;i<8;i++){
  const angle=i*Math.PI/4;
  for(const kind of ["Trunk","Canopy"]){
   const mesh=Yf.getMeshByName("hg5ManorGardenTree"+kind+i);
-  if(mesh){mesh.position.x=17+Math.cos(angle)*16;mesh.position.z=7+Math.sin(angle)*19}
+  if(mesh){mesh.position.x=i===6?31:17+Math.cos(angle)*16;mesh.position.z=7+Math.sin(angle)*19}
  }
 }
 __hg5Block("hg6MansionRightTurnDriveway",__hg5Under,new R(17,-59.92,-7.6),new R(6,.10,13),new H(.72,.69,.61));
@@ -215,7 +215,7 @@ const __hg6PreviousQm=qm;
 qm=function(){
  if(__hg5Transition||(__hg5Phase!=="underground"&&__hg5Phase!=="mansion"))return __hg6PreviousQm();
  const p=Rp.position;
- const offset=__hg5Phase==="underground"?new R(0,6.0,-11.5):p.y>-55.5?new R(0,7.0,-8.7):new R(0,4.0,-7.2);
+ const offset=__hg5Phase==="underground"?new R(0,8.0,-16.0):p.y>-55.5?new R(0,7.0,-8.7):new R(0,4.0,-7.2);
  Xf.position=R.Lerp(Xf.position,p.add(offset),.23);
  Xf.setTarget(p.add(new R(0,1.45,0)));
 };
