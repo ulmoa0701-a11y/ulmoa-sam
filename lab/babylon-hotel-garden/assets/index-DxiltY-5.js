@@ -1357,6 +1357,7 @@ for(const role of ["gardener","keeper","traveler"]){
 }
 // Physical character radii, not merely visible textures. NPCs wander during the mission.
 const __hg7People=[zp,Bp,Vp];
+const __hg7NpcSafe=new Map(__hg7People.map(n=>[n,n.position.clone()]));
 function __hg7HumanBlocked(x,z){
  if(__hg5Underground()||__hg5Transition)return false;
  for(const npc of __hg7People){
@@ -1478,6 +1479,22 @@ __hg7Beam.setEnabled(false);
 let __hg7NightOn=false;
 function __hg7NightWanted(){return qp&&!Jp&&Xp/Tm>=.68&&!(__hg5Phase==="descending"||__hg5Phase==="ascending")}
 Yf.onBeforeRenderObservable.add(()=>{
+ // NPCs must not wander THROUGH an idle player either.
+ if(qp&&!__hg5Underground()){
+  for(const npc of __hg7People){
+   if(!npc.isEnabled())continue;
+   const dx=npc.position.x-Rp.position.x,dz=npc.position.z-Rp.position.z;
+   const dist=Math.hypot(dx,dz);
+   if(dist>=.86){__hg7NpcSafe.set(npc,npc.position.clone());continue}
+   const safe=__hg7NpcSafe.get(npc);
+   if(safe&&Math.hypot(safe.x-Rp.position.x,safe.z-Rp.position.z)>=.86)npc.position.copyFrom(safe);
+   else {
+    const k=.86/Math.max(.001,dist);
+    npc.position.x=Rp.position.x+(dist<.001?1:dx*k);
+    npc.position.z=Rp.position.z+(dist<.001?0:dz*k);
+   }
+  }
+ }
  const show=__hg7NightWanted();
  if(show!==__hg7NightOn){
   __hg7NightOn=show;
