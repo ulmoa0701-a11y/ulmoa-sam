@@ -15,7 +15,7 @@ const check=(label,condition)=>{report.checks[label]=!!condition;console.log("DL
 const modal=()=>page.$eval("#dialog",e=>e.classList.contains("show"));
 async function clickDialog(){if(await modal()){await page.keyboard.press("Enter");await wait(220)}}
 async function hold(key,ms){await page.keyboard.down(key);await wait(ms);await page.keyboard.up(key);await wait(90)}
-function direction(dx,dz){const sx=-.8*dx+.6*dz,sy=-.6*dx-.8*dz;return Math.abs(sx)>Math.abs(sy)?(sx>0?"ArrowRight":"ArrowLeft"):(sy>0?"ArrowUp":"ArrowDown")}
+function direction(dx,dz,phase){const cave=phase==="underground"||phase==="mansion";const sx=cave?-dx:-.8*dx+.6*dz,sy=cave?dz:-.6*dx-.8*dz;return Math.abs(sx)>Math.abs(sy)?(sx>0?"ArrowRight":"ArrowLeft"):(sy>0?"ArrowUp":"ArrowDown")}
 async function walkTo(x,z,radius=4,timeout=110000){
  let pulses=0,arrived=false;const start=Date.now();
  await page.keyboard.down("Shift");
@@ -24,7 +24,7 @@ async function walkTo(x,z,radius=4,timeout=110000){
    if(await modal())break;
    const s=await state(),dx=x-s.player[0],dz=z-s.player[2];
    if(Math.hypot(dx,dz)<radius){arrived=true;break}
-   await hold(direction(dx,dz),Math.min(500,Math.max(150,Math.round(Math.hypot(dx,dz)*35))));
+   await hold(direction(dx,dz,s.phase),Math.min(500,Math.max(150,Math.round(Math.hypot(dx,dz)*35))));
   }
  }finally{await page.keyboard.up("Shift")}
  return {arrived,pulses,state:await state()};
@@ -79,6 +79,16 @@ try {
  await page.waitForFunction(()=>window.__ulmoaGardenDlc.state().phase==="underground",{timeout:18000});
  let down=await log("underground arrived");
  check("separate3DUndergroundWorld",down.underground&&down.mansionVisible&&down.player[1]<-55);
+ check("digProgressHiddenAfterLadder",await page.$eval("#hg5DigProgress",e=>getComputedStyle(e).display==="none"));
+ // Key auto-repeat in the DLC must not restart an in-progress jump.
+ await page.keyboard.down("Space");await wait(120);
+ const jumpOne=await page.evaluate(()=>window.__ulmoaGardenFeedbackV6.state());
+ await page.evaluate(()=>document.dispatchEvent(new KeyboardEvent("keydown",{bubbles:true,code:"Space",repeat:true})));
+ await wait(180);
+ const jumpTwo=await page.evaluate(()=>window.__ulmoaGardenFeedbackV6.state());
+ await page.keyboard.up("Space");
+ check("dlcSpaceRepeatDoesNotResetJump",jumpOne.jumpActive&&jumpTwo.jumpTime>jumpOne.jumpTime+.09);
+
  await clickDialog();
  await page.screenshot({path:"qa/results/hotel-garden-dlc-first-arrival.png"});
  // Central avenue first, then the mansion's NEW right-hand driveway.
@@ -94,6 +104,8 @@ result=await walkTo(17,-11,3.1,135000);
  let mansion=await log("enter grand mansion");
  check("mansionEntranceDialog",entranceText.includes("저택")&&entranceText.includes("대리석"));
  check("mansionDoorOpenAndEntered",mansion.mansionEntered&&mansion.phase==="mansion");
+ check("mansionScreenAlignedControls",await page.evaluate(()=>window.__ulmoaGardenFeedbackV6.state().phase==="mansion"));
+
  await clickDialog();
  await page.screenshot({path:"qa/results/hotel-garden-dlc-mansion-lobby.png"});
  const beforeStairs=(await state()).player[1];
