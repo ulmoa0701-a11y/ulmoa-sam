@@ -16,7 +16,7 @@ __hg5Soil.root.setEnabled(false);
 __hg5Soil.hole.setEnabled(false);
 // Move the whole intact manor to the RIGHT of the eastbound avenue.
 __hg5Manor.position.z=7;
-__hg5DoorPos.z=.1;
+__hg5DoorPos.z=-3.1; // Reachable exterior entrance at the foot of the portico steps
 __hg5Fountain.position.set(7,-60,-22);
 for(let i=0;i<8;i++){
  const angle=i*Math.PI/4;
