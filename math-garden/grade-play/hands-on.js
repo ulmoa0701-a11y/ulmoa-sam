@@ -37,6 +37,17 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    else if(scene.kind==='groups')m.append(h('p','hands-explain',scene.groups+'묶음 × '+scene.per+'개 = '+scene.answer+'개'));
    else if(scene.kind==='spatial'){m.insertAdjacentHTML('beforeend',isoStacks(scene.heights));m.append(h('p','hands-explain','위에서 본 높이: '+scene.heights.join(' · ')+' / 전체 '+scene.count+'개'));}
    else if(scene.kind==='decimal-scale')m.append(h('p','hands-explain',scene.dividend+' ÷ '+scene.divisor+' = '+scene.scaledDividend+' ÷ '+scene.scaledDivisor+' = '+scene.quotient+' (두 수 모두 ×'+scene.factor+')'));
+   else if(scene.kind==='fraction-divide'){
+    if(scene.operation==='share'){
+     m.insertAdjacentHTML('beforeend',visual('fraction',{n:scene.numer,d:scene.den}));
+     m.append(h('p','hands-explain',scene.numer+'/'+scene.den+' ÷ '+scene.people+' = '+scene.each+'/'+scene.den));
+    }else{
+     const strip=h('div','hands-divide-pieces');strip.style.gridTemplateColumns='repeat('+Math.min(12,scene.den)+',minmax(0,1fr))';
+     for(let i=0;i<scene.units;i++)strip.append(h('span','hands-divide-piece','■'));
+     m.append(strip);
+     m.append(h('p','hands-explain',scene.left+' ÷ '+scene.right+' = '+scene.quotient+'묶음'));
+    }
+   }
    else if(scene.kind==='graph')m.append(h('p','hands-explain','표의 숫자만큼 막대 높이: '+scene.data.join(' · ')));
    else if(scene.kind==='place')m.append(h('p','hands-explain',scene.places.map(x=>x.label+' '+x.value+'개').join(' · ')+' → '+scene.answer));
    else if(scene.kind==='count')m.append(h('p','hands-explain','도토리를 하나씩 짚으면서 '+scene.count+'개 세어 봐.'));
@@ -106,6 +117,49 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    update();guide();
    check(()=>currentHeights.every((v,i)=>v===scene.heights[i]));
    preset(()=>{scene.heights.forEach((v,i)=>{currentHeights[i]=v});update()});
+ }else if(scene.kind==='fraction-divide'){
+   if(scene.operation==='share'){
+    say('한 조각씩 공평하게 나누어 줘. 모두 나눴는지 눈으로 확인해 봐.');
+    const pieces=h('div','hands-divide-pieces');
+    pieces.style.gridTemplateColumns='repeat('+scene.den+',minmax(0,1fr))';
+    for(let i=0;i<scene.den;i++)pieces.append(h('span','hands-divide-piece'+(i<scene.numer?' filled':''),i<scene.numer?'■':'□'));
+    const bins=Array(scene.people).fill(0),status=h('p','hands-left'),board=h('div','hands-divide-board');
+    work.append(pieces,status,board);
+    const update=()=>{
+     status.textContent='남은 '+(scene.numer-bins.reduce((a,b)=>a+b,0))+'조각 · 전체 '+scene.numer+'조각';
+     board.replaceChildren();
+     bins.forEach((n,i)=>{
+      const slot=h('div','hands-divide-bin');
+      slot.append(h('strong','',i+1+'번 친구'));
+      slot.append(btn('🟩 '+n+'개 +',()=>{if(bins.reduce((a,b)=>a+b,0)<scene.numer){bins[i]++;update()}},'hands-divide-add'));
+      slot.append(btn('↶',()=>{if(bins[i]>0){bins[i]--;update()}},'hands-divide-minus'));
+      board.append(slot);
+     });
+    };
+    update();guide();
+    check(()=>bins.every(n=>n===scene.each)&&bins.reduce((a,b)=>a+b,0)===scene.numer);
+    preset(()=>{bins.fill(scene.each);update()});
+   }else{
+    say('같은 크기 조각 '+scene.groupSize+'개가 한 묶음이야. 한 묶음씩 표시하면서 몇 묶음인지 세어 보자.');
+    const explain=h('p','hands-small',scene.left+' ÷ '+scene.right+' · 전체를 '+scene.den+'등분한 조각으로 비교');
+    const pieces=h('div','hands-divide-pieces'),status=h('p','hands-left');let formed=0;
+    pieces.style.gridTemplateColumns='repeat('+Math.min(12,scene.den)+',minmax(0,1fr))';
+    const controls=h('div','hands-decimal-buttons');
+    controls.append(btn('한 묶음 +',()=>{if((formed+1)*scene.groupSize<=scene.units){formed++;update()}},'hands-divide-group'));
+    controls.append(btn('↶ 되돌리기',()=>{formed=Math.max(0,formed-1);update()},'hands-divide-undo'));
+    work.append(explain,pieces,status,controls);
+    const update=()=>{
+     pieces.replaceChildren();
+     for(let i=0;i<scene.units;i++){
+      const cell=h('span','hands-divide-piece'+(i<formed*scene.groupSize?' grouped':''),i<formed*scene.groupSize?'✓':'■');
+      if((i+1)%scene.groupSize===0)cell.classList.add('group-end');
+      pieces.append(cell);
+     }
+     status.textContent=formed+'묶음 · 아직 묶지 않은 조각 '+(scene.units-formed*scene.groupSize)+'개';
+    };
+    update();guide();check(()=>formed===scene.quotient);
+    preset(()=>{formed=scene.quotient;update()});
+   }
  }else if(scene.kind==='decimal-scale'){
    say('나누는 수가 자연수가 되도록 두 수를 똑같이 바꾼 다음 몫을 입력해 봐.');
    const expression=h('div','hands-decimal-expression');
