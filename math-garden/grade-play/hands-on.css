@@ -119,3 +119,17 @@
 .hands-decimal-transformed{background:#f5faee;font-size:clamp(19px,4vw,27px)}
 .hands-given-fractions>p{flex-basis:100%;padding:2px 5px}
 @media(max-width:600px){.hands-spatial-board{width:100%}.hands-spatial-cell{grid-template-columns:40px 1fr 40px;padding:6px}.hands-spatial-plus,.hands-spatial-minus{min-width:40px;min-height:43px}.hands-spatial-iso{max-width:285px}.hands-decimal-factor{font-size:16px;min-height:55px}}
+
+/* Grade 6: equal-fraction pieces and hands-on sharing/grouping. */
+.hands-divide-pieces{display:grid;gap:4px;width:min(100%,540px);padding:10px;border:2px solid #a7c7aa;border-radius:15px;background:#fffdf5}
+.hands-divide-piece{min-width:20px;min-height:43px;border:2px solid #abc8ad;border-radius:6px;background:#fff;color:#adc5b4;display:grid;place-items:center;font-size:23px;font-weight:900}
+.hands-divide-piece.filled{background:#9dd6ad;color:#377454;border-color:#4b9066}
+.hands-divide-piece.grouped{background:#b4e1c1;color:#2d7a4b;border-color:#398f59}
+.hands-divide-piece.group-end{border-right:4px solid #a87942}
+.hands-divide-board{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:100%}
+.hands-divide-bin{display:grid;grid-template-columns:1fr 52px;grid-template-rows:auto auto;gap:8px;min-width:136px;padding:12px;background:#fafff7;border:2px solid #c6dec7;border-radius:14px;text-align:center}
+.hands-divide-bin strong{grid-column:1/-1;color:#517457}
+.hands-divide-add,.hands-divide-minus,.hands-divide-group,.hands-divide-undo{border:2px solid #acd0ac;background:#ebf7e6;border-radius:13px;color:#356b4a;font:inherit;font-weight:900;min-height:51px;padding:9px;touch-action:manipulation}
+.hands-divide-minus,.hands-divide-undo{background:#fff1e2}
+.hands-divide-group{min-width:165px}
+@media(max-width:600px){.hands-divide-piece{min-width:0;min-height:37px;font-size:18px}.hands-divide-pieces{gap:3px;padding:6px}.hands-divide-bin{min-width:120px}}
