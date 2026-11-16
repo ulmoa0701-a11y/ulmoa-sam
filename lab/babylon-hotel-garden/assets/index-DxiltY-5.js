@@ -312,7 +312,7 @@ window.__ulmoaGardenV2={
  },
  state:()=>({sprinting:__hgSprinting,stage:Kp,flowers:[...__hgFlowers.keys()],flowerPositions:Object.fromEntries([...__hgFlowers].map(([k,node])=>[k,[node.position.x,node.position.z]])),collected:__uLotusCount,bucket:__uHasBucket,pouring:__hgPouring,bosses:[...__hgDefeated],eyeSlashVisible:!document.querySelector('[data-action="slash"]')?.classList.contains("hidden")}),
  holdPickup:async(boss)=>{
- const node=__hgFlowers.get(boss);if(!node)return false;
+ const node=__hgFlowers.get(boss);if(!node)return boss==="smog"&&__uLotusCount===3;
  Rp.position.copyFrom(node.position.add(new R(-1.3,0,0)));
  const touch=boss==="eye",button=document.querySelector('[data-action="talk"]');
  if(touch&&button){button.dispatchEvent(new PointerEvent("pointerdown",{bubbles:true,pointerType:"touch"}))}
@@ -1304,6 +1304,20 @@ qm=function(){
  const offset=__hg5Phase==="underground"?new R(0,8.0,-16.0):p.y>-55.5?new R(0,7.0,-8.7):new R(0,4.0,-7.2);
  Xf.position=R.Lerp(Xf.position,p.add(offset),.23);
  Xf.setTarget(p.add(new R(0,1.45,0)));
+};
+// On SMOG's successful water-bucket finish, immediately claim the nearby final lotus.
+// The flower is spawned within 2.8 m of the player; requiring another E hold
+// sometimes left the main quest at 2/3 and kept the purple-soil DLC locked.
+const __hg6OriginalRewardXp=xp;
+xp=function(event,payload={}){
+ __hg6OriginalRewardXp(event,payload);
+ if(event==="BOSS_DEFEATED"&&payload.boss==="smog"){
+  const lotus=__hgFlowers.get("smog");
+  if(lotus&&!lotus.isDisposed()&&R.Distance(Rp.position,lotus.position)<=6){
+   __hgCollectFlower("smog");
+   xp("FINAL_LOTUS_AUTO_COLLECTED",{boss:"smog",lotusCount:__uLotusCount});
+  }
+ }
 };
 window.__ulmoaGardenFeedbackV5={
  state:()=>({shoes:[-1,1].every(i=>!!Yf.getMeshByName("hg6PlayerShoe"+i)),woodsDistance:+Math.hypot(Rp.position.x-Hp.position.x,Rp.position.z-Hp.position.z).toFixed(2),woodsDangerRadius:8.2,soilVisible:__hg5Soil.root.isEnabled(),manorLocation:[__hg5Manor.position.x,__hg5Manor.position.z],door:[__hg5DoorPos.x,__hg5DoorPos.z],stairCount:23,silhouetteVisible:__hg6Silhouette.style.display!=="none",stage:Kp,phase:__hg5Phase,player:[+Rp.position.x.toFixed(2),+Rp.position.y.toFixed(2),+Rp.position.z.toFixed(2)]}),
