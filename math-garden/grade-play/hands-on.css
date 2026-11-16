@@ -91,3 +91,45 @@
 .hands-circle-select{width:min(100%,310px);display:grid;place-items:center;border:2px solid #c9dfc8;border-radius:18px;background:#fff;touch-action:manipulation;padding:10px}.hands-circle-select [data-part]{cursor:pointer;transition:filter .15s}.hands-circle-select [data-part].selected{filter:drop-shadow(0 0 5px #ca854e);stroke:#dc8053;stroke-width:20}.hands-capacity{display:grid;justify-items:center;gap:8px;padding:14px;border-radius:17px;background:#fff9e9;border:1px solid #d9d6b8;min-width:min(100%,290px)}.hands-big-units{display:flex;gap:8px;justify-content:center;min-height:50px;font-size:38px}.hands-capacity strong{font-size:17px;color:#376c55}
 
 .hands-spin-arrow{display:grid;place-items:center;width:150px;height:150px;background:#edf7df;border:3px solid #9ec9a9;border-radius:100%;font-size:94px;color:#3e815d;font-weight:900;transition:transform .15s;user-select:none;margin:17px auto}
+
+/* Grade 6: top-view height map and live isometric cube stacks. */
+.hands-spatial-iso{display:block;width:min(100%,320px);height:auto;max-height:260px}
+.hands-spatial-target{display:grid;justify-items:center;gap:9px;width:min(100%,290px);padding:12px;background:#fffdf4;border:2px solid #d8dabb;border-radius:17px;color:#315b46}
+.hands-spatial-target>strong{font-size:15px;line-height:1.5;text-align:center}
+.hands-spatial-map{display:grid;grid-template-columns:repeat(2,66px);gap:7px;justify-content:center}
+.hands-spatial-target-cell{min-height:59px;display:grid;place-items:center;border:2px solid #a8c99e;background:#e5f4df;border-radius:12px;font-size:27px;font-weight:950}
+.hands-spatial-views{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;width:100%}
+.hands-spatial-view{padding:9px 14px;min-width:135px;border:1px solid #c5dbc2;border-radius:14px;background:white;display:grid;gap:6px;justify-items:center}
+.hands-spatial-view>strong{font-size:13px;color:#54735c}
+.hands-spatial-bars{height:85px;display:flex;align-items:end;gap:5px;border-bottom:3px solid #7f987c}
+.hands-spatial-bar{display:block;width:35px;max-height:81px;background:repeating-linear-gradient(to top,#85b99a 0,#85b99a 24px,#477c60 25px,#477c60 27px);border:1px solid #477c60}
+.hands-spatial-preview{display:grid;place-items:center;width:min(100%,360px);background:#f8fcf6;border-radius:17px}
+.hands-spatial-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:min(100%,375px)}
+.hands-spatial-cell{display:grid;grid-template-columns:44px 1fr 44px;grid-template-rows:auto 48px;align-items:center;justify-items:center;gap:4px;border:2px solid #c5ddc5;border-radius:14px;padding:8px;background:white}
+.hands-spatial-position{grid-column:1/-1;font-size:12px;color:#607e65;font-weight:800}
+.hands-spatial-height{font-size:23px;color:#315e48}
+.hands-spatial-plus,.hands-spatial-minus{min-height:44px;min-width:44px;border:2px solid #a8c8ae;border-radius:12px;color:#35664d;background:#e9f5e7;font-size:25px;font-weight:900;touch-action:manipulation}
+.hands-spatial-minus{background:#fff3e4}
+.hands-spatial-plus:focus-visible,.hands-spatial-minus:focus-visible,.hands-decimal-factor:focus-visible{outline:3px solid #ca935d;outline-offset:2px}
+/* Grade 6: scaled dividend/divisor stay visible together. */
+.hands-decimal-expression,.hands-decimal-transformed{text-align:center;font-weight:950;font-size:clamp(23px,5vw,35px);color:#2f674d;background:white;padding:13px 18px;border:2px solid #d4e6d0;border-radius:16px;margin:0}
+.hands-decimal-buttons{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+.hands-decimal-factor{min-height:62px;padding:12px 18px;border:2px solid #b1cfb3;border-radius:16px;background:#fff;color:#35654b;font-size:18px;font-weight:900;touch-action:manipulation}
+.hands-decimal-factor[aria-pressed=true]{background:#dff2d7;border-color:#34895b}
+.hands-decimal-transformed{background:#f5faee;font-size:clamp(19px,4vw,27px)}
+.hands-given-fractions>p{flex-basis:100%;padding:2px 5px}
+@media(max-width:600px){.hands-spatial-board{width:100%}.hands-spatial-cell{grid-template-columns:40px 1fr 40px;padding:6px}.hands-spatial-plus,.hands-spatial-minus{min-width:40px;min-height:43px}.hands-spatial-iso{max-width:285px}.hands-decimal-factor{font-size:16px;min-height:55px}}
+
+/* Grade 6: equal-fraction pieces and hands-on sharing/grouping. */
+.hands-divide-pieces{display:grid;gap:4px;width:min(100%,540px);padding:10px;border:2px solid #a7c7aa;border-radius:15px;background:#fffdf5}
+.hands-divide-piece{min-width:20px;min-height:43px;border:2px solid #abc8ad;border-radius:6px;background:#fff;color:#adc5b4;display:grid;place-items:center;font-size:23px;font-weight:900}
+.hands-divide-piece.filled{background:#9dd6ad;color:#377454;border-color:#4b9066}
+.hands-divide-piece.grouped{background:#b4e1c1;color:#2d7a4b;border-color:#398f59}
+.hands-divide-piece.group-end{border-right:4px solid #a87942}
+.hands-divide-board{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:100%}
+.hands-divide-bin{display:grid;grid-template-columns:1fr 52px;grid-template-rows:auto auto;gap:8px;min-width:136px;padding:12px;background:#fafff7;border:2px solid #c6dec7;border-radius:14px;text-align:center}
+.hands-divide-bin strong{grid-column:1/-1;color:#517457}
+.hands-divide-add,.hands-divide-minus,.hands-divide-group,.hands-divide-undo{border:2px solid #acd0ac;background:#ebf7e6;border-radius:13px;color:#356b4a;font:inherit;font-weight:900;min-height:51px;padding:9px;touch-action:manipulation}
+.hands-divide-minus,.hands-divide-undo{background:#fff1e2}
+.hands-divide-group{min-width:165px}
+@media(max-width:600px){.hands-divide-piece{min-width:0;min-height:37px;font-size:18px}.hands-divide-pieces{gap:3px;padding:6px}.hands-divide-bin{min-width:120px}}

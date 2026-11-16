@@ -74,6 +74,8 @@ try{
  console.log('PLAY_QA: all 213 subunits finished five phases, kinds=',result.kinds.join(','));
  await page.goto(base+'/'+ROOT+'/?g=3&t=2&u=2&s=1',{waitUntil:'load'});
  assert(await page.locator('#play').isVisible(),'deep-link not play');
+ assert(await page.locator('body').evaluate(node=>node.classList.contains('unit-playing')),'active lesson focus mode missing');
+ assert.equal(await page.locator('.hero').isVisible(),false,'landing hero wastes active lesson viewport');
  assert.equal(await page.locator('.hands-shell').count(),1,'hands-on component not loaded');
  await page.screenshot({path:dir+'/hands-on-lesson-mobile.png'});
  const independent=await page.evaluate(()=>{
@@ -109,7 +111,13 @@ try{
     document.querySelector('.hands-actions .hands-help').click();document.querySelector('.hands-actions .hands-check').click();document.querySelector('#next').click();
     const scene=window.MoaUnitApp.state.activity.scene,root=document.querySelector('.hands-shell');
     const click=(selector,index=0)=>{const a=[...root.querySelectorAll(selector)];if(!a[index])throw Error('missing '+selector+' for '+mode);a[index].click()};
-    if(kind==='count'){for(let i=0;i<scene.count;i++)click('.hands-cell',i)}
+    if(kind==='fraction-divide'){
+      if(scene.operation==='share'){for(let i=0;i<scene.people;i++)for(let j=0;j<scene.each;j++)click('.hands-divide-add',i)}
+      else for(let j=0;j<scene.quotient;j++)click('.hands-divide-group');
+    }
+    else if(kind==='spatial'){scene.heights.forEach((v,i)=>{for(let j=0;j<v;j++)click('.hands-spatial-plus',i)})}
+    else if(kind==='decimal-scale'){root.querySelector('[data-factor="'+scene.factor+'"]').click();root.querySelector('.hands-entry').value=String(scene.quotient)}
+    else if(kind==='count'){for(let i=0;i<scene.count;i++)click('.hands-cell',i)}
     else if(kind==='share'){for(let i=0;i<scene.boxes;i++)for(let n=0;n<scene.answer;n++)click('.hands-basket-add',i)}
     else if(kind==='groups'){for(let i=0;i<scene.groups;i++)for(let n=0;n<scene.per;n++)click('.hands-basket-add',i)}
     else if(kind==='fraction'){for(let i=0;i<scene.numer;i++)click('.hands-frac-cell',i)}

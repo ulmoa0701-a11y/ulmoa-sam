@@ -143,6 +143,7 @@ function problem(mode){
  case 'graphChoice':s=pick([['시간 흐름에 따른 기온 변화','꺾은선그래프'],['음식별 판매량 비교','막대그래프'],['전체 중 항목별 비율','원그래프']]);return mk('다음 자료를 나타내기 알맞은 그래프는?',bold(s[0]),s[1],['꺾은선그래프','막대그래프','원그래프','표'].filter(x=>x!==s[1]),'변화인지, 항목별 비교인지, 비율인지 생각해.');
  case 'surfaceArea':a=rand(2,7);b=rand(2,6);c=rand(2,5);return mk('가로 '+a+', 세로 '+b+', 높이 '+c+'cm인 직육면체 겉넓이는?',bold('2×('+a+'×'+b+' + '+b+'×'+c+' + '+a+'×'+c+')'),2*(a*b+b*c+a*c)+'cm²',[(a*b*c)+'cm²',(a*b+b*c+a*c)+'cm²',(2*(a*b+b*c+a*c)+2)+'cm²'],'세 쌍의 같은 면 넓이를 두 배로 해.');
  case 'unitVolume':a=rand(1,4);return mk(a+'m³는 몇 cm³일까?',bold('1m³ = 1,000,000cm³'),(a*1000000).toLocaleString('en-US')+'cm³',[(a*1000).toLocaleString('en-US')+'cm³',(a*10000).toLocaleString('en-US')+'cm³',(a*100000).toLocaleString('en-US')+'cm³'],'1m는 100cm. 부피는 가로·세로·높이 모두 바꿔.');
+ case 'fracDivSame':s=pick([[3,4,1],[4,5,2],[2,3,1],[4,6,2],[3,6,1]]);a=s[0];b=s[1];c=s[2];return mk('분모가 같은 분수끼리 나누면?',bold(a+'/'+b+' ÷ '+c+'/'+b),a/c,[a/c+1,a/c+2,a/c+3],'같은 크기의 '+b+'등분 조각에서 '+c+'조각씩 몇 묶음인지 세어.');
  case 'divisionFraction':a=rand(2,6);b=rand(1,3);c=rand(b+1,6);return mk('자연수를 분수로 나누면?',bold(a+' ÷ '+b+'/'+c),fract(a*c,b),[fract(a*b,c),fract(a,b*c),fract(a*c,b+1)],'뒤의 분수를 거꾸로 하여 곱해.');
  case 'cubes':a=rand(1,3);b=rand(2,4);c=rand(1,3);return mk('왼쪽 탑 '+a+'개, 가운데 '+b+'개, 오른쪽 '+c+'개. 모두 몇 개?',bold('🟩 × '+a+'　🟩 × '+b+'　🟩 × '+c),a+b+c,[a+b,b+c,a+b+c+1],'보이지 않는 아래층도 포함해.');
  case 'shapeViews':a=rand(2,4);b=rand(1,3);return mk('두 탑을 위에서 보면 칸이 몇 개 보일까?',bold('앞 탑 높이 '+a+'칸 / 뒤 탑 높이 '+b+'칸'),2,[a,b,a+b],'위에서는 탑의 높이가 아니라 자리를 세어.');
