@@ -109,7 +109,9 @@ try{
     document.querySelector('.hands-actions .hands-help').click();document.querySelector('.hands-actions .hands-check').click();document.querySelector('#next').click();
     const scene=window.MoaUnitApp.state.activity.scene,root=document.querySelector('.hands-shell');
     const click=(selector,index=0)=>{const a=[...root.querySelectorAll(selector)];if(!a[index])throw Error('missing '+selector+' for '+mode);a[index].click()};
-    if(kind==='count'){for(let i=0;i<scene.count;i++)click('.hands-cell',i)}
+    if(kind==='spatial'){scene.heights.forEach((v,i)=>{for(let j=0;j<v;j++)click('.hands-spatial-plus',i)})}
+    else if(kind==='decimal-scale'){root.querySelector('[data-factor="'+scene.factor+'"]').click();root.querySelector('.hands-entry').value=String(scene.quotient)}
+    else if(kind==='count'){for(let i=0;i<scene.count;i++)click('.hands-cell',i)}
     else if(kind==='share'){for(let i=0;i<scene.boxes;i++)for(let n=0;n<scene.answer;n++)click('.hands-basket-add',i)}
     else if(kind==='groups'){for(let i=0;i<scene.groups;i++)for(let n=0;n<scene.per;n++)click('.hands-basket-add',i)}
     else if(kind==='fraction'){for(let i=0;i<scene.numer;i++)click('.hands-frac-cell',i)}
