@@ -121,7 +121,7 @@ Yf.onAfterRenderObservable.add(()=>{
  if(!qp||__hg5Transition){__hg6PersonOutline.style.display="none";return}
  try{
   const playerHead=Rp.getAbsolutePosition().add(new R(0,1.65,0));
-  const projected=R.Project(playerHead,R.Identity(),Yf.getTransformMatrix(),{x:0,y:0,width:innerWidth,height:innerHeight});
+  const projected=R.Project(new R(0,1.65,0),Rp.getWorldMatrix(),Yf.getTransformMatrix(),{x:0,y:0,width:innerWidth,height:innerHeight});
   if(projected.z<=0||projected.z>=1||projected.x<0||projected.y<0||projected.x>innerWidth||projected.y>innerHeight){__hg6PersonOutline.style.display="none";return}
   const result=Yf.pick(projected.x,projected.y,m=>{
    if(!m.isEnabled()||!m.isVisible||m.visibility===0)return false;
