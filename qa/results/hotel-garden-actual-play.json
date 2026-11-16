@@ -3,7 +3,7 @@
   "steps": [
     {
       "step": "started",
-      "time": "2026-11-09T10:49:53.853Z",
+      "time": "2026-11-16T10:24:52.230Z",
       "state": {
         "stage": 0,
         "patch": "2026-10-12-child-feedback-v1",
@@ -38,13 +38,13 @@
     },
     {
       "step": "gardener talk",
-      "time": "2026-11-09T10:49:57.624Z",
+      "time": "2026-11-16T10:24:57.621Z",
       "state": {
         "stage": 1,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          -15.07,
-          -2.1
+          -14.8,
+          -2.81
         ],
         "woods": {
           "enabled": true,
@@ -73,13 +73,13 @@
     },
     {
       "step": "WOODS encounter",
-      "time": "2026-11-09T10:50:28.571Z",
+      "time": "2026-11-16T10:25:40.224Z",
       "state": {
         "stage": 2,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          15.52,
-          17.2
+          15.23,
+          17.47
         ],
         "woods": {
           "enabled": true,
@@ -108,13 +108,13 @@
     },
     {
       "step": "WOODS real Q traps",
-      "time": "2026-11-09T10:50:34.250Z",
+      "time": "2026-11-16T10:25:56.041Z",
       "state": {
         "stage": 2,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          17.08,
-          19.28
+          16.27,
+          14.88
         ],
         "woods": {
           "enabled": false,
@@ -143,13 +143,13 @@
     },
     {
       "step": "WOODS actual hold E",
-      "time": "2026-11-09T10:50:36.289Z",
+      "time": "2026-11-16T10:25:58.141Z",
       "state": {
         "stage": 3,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          17.08,
-          19.28
+          16.27,
+          14.88
         ],
         "woods": {
           "enabled": false,
@@ -178,13 +178,13 @@
     },
     {
       "step": "pond keeper dialogue opened",
-      "time": "2026-11-09T10:50:57.940Z",
+      "time": "2026-11-16T10:27:57.616Z",
       "state": {
         "stage": 3,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          3.43,
-          -5.42
+          8.33,
+          -7.4
         ],
         "woods": {
           "enabled": false,
@@ -213,13 +213,13 @@
     },
     {
       "step": "pond keeper handoff, EYE stage",
-      "time": "2026-11-09T10:50:58.395Z",
+      "time": "2026-11-16T10:27:58.079Z",
       "state": {
         "stage": 4,
         "patch": "2026-10-12-child-feedback-v1",
         "player": [
-          3.43,
-          -5.42
+          8.33,
+          -7.4
         ],
         "woods": {
           "enabled": false,
@@ -251,13 +251,13 @@
   "http": [],
   "gardener": {
     "near": true,
-    "iterations": 7,
+    "iterations": 10,
     "last": {
       "stage": 0,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        -15.07,
-        -2.1
+        -14.8,
+        -2.81
       ],
       "woods": {
         "enabled": false,
@@ -285,13 +285,13 @@
   },
   "woods": {
     "near": false,
-    "iterations": 57,
+    "iterations": 79,
     "last": {
       "stage": 1,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        15.52,
-        17.2
+        15.23,
+        17.47
       ],
       "woods": {
         "enabled": true,
@@ -318,15 +318,49 @@
     }
   },
   "hits": 2,
-  "keeper": {
+  "keeperDetour": {
     "near": true,
-    "iterations": 41,
+    "iterations": 54,
     "last": {
       "stage": 3,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        3.43,
-        -5.42
+        17.3,
+        -8.45
+      ],
+      "woods": {
+        "enabled": false,
+        "hits": 2,
+        "damage": 0
+      },
+      "eye": {
+        "enabled": false,
+        "hits": 0,
+        "damage": 0
+      },
+      "smog": {
+        "enabled": false,
+        "mode": "approach",
+        "cycle": 0,
+        "damage": 0
+      },
+      "lotus": 1,
+      "bucket": false,
+      "map": [
+        90,
+        72
+      ]
+    }
+  },
+  "keeper": {
+    "near": false,
+    "iterations": 171,
+    "last": {
+      "stage": 3,
+      "patch": "2026-10-12-child-feedback-v1",
+      "player": [
+        8.33,
+        -7.4
       ],
       "woods": {
         "enabled": false,
@@ -360,5 +394,5 @@
     "noteVisible": true
   },
   "pass": true,
-  "generatedAt": "2026-11-09T10:51:00.013Z"
+  "generatedAt": "2026-11-16T10:28:00.300Z"
 }
