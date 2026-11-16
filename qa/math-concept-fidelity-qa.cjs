@@ -12,6 +12,7 @@ for(const mode of ['cubes','shapeViews','hiddenCubes']){
  for(let i=0;i<100;i++){
   const p=E.problem(mode),s=H.buildMode(H.family(mode,p.answer),mode,p);
   assert.equal(s.heights.length,4);assert(s.heights.every(x=>Number.isInteger(x)&&x>=0&&x<=3));
+  assert(new Set(s.heights).size>=2,'each spatial task needs contrasting heights');
   assert.equal(s.count,s.heights.reduce((a,b)=>a+b,0));
   assert.equal(s.front[0],Math.max(s.heights[0],s.heights[2]));
   assert.equal(s.front[1],Math.max(s.heights[1],s.heights[3]));
