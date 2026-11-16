@@ -1358,7 +1358,7 @@ for(const role of ["gardener","keeper","traveler"]){
 // Physical character radii, not merely visible textures. NPCs wander during the mission.
 const __hg7People=[zp,Bp,Vp];
 function __hg7HumanBlocked(x,z){
- if(__hg5Underground()||__hg5Transition||!qp)return false;
+ if(__hg5Underground()||__hg5Transition)return false;
  for(const npc of __hg7People){
   if(!npc.isEnabled())continue;
   if(Math.hypot(x-npc.position.x,z-npc.position.z)<.83)return true;
@@ -1501,6 +1501,7 @@ window.__ulmoaGardenFeedbackV6={
   shoesAttached:__hg7LegLinks.filter(x=>x.startsWith("hg6")).length===12,
   linkedFootwear:__hg7LegLinks.length,
   peopleSolid:__hg7HumanBlocked(zp.position.x,zp.position.z),
+  gardener:[+zp.position.x.toFixed(3),+zp.position.z.toFixed(3)],
   modalPaused:__hg7UiPaused(),
   stage:Kp,phase:__hg5Phase,
   flashlightOn:__hg7NightOn,nightEligible:__hg7NightWanted(),
