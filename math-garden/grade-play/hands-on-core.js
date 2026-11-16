@@ -10,6 +10,9 @@ const family=(mode,answer='')=>{
  if(mode==='count')return 'count';
  if(inSet(mode,'divide groupDiv remainder'))return 'share';
  if(inSet(mode,'cubes hiddenCubes shapeViews'))return 'spatial';
+ if(inSet(mode,'fracMultN fracMult'))return 'fraction-product';
+ if(inSet(mode,'decimalMult decimalMulti'))return 'decimal-product';
+ if(mode==='volume')return 'volume-layers';
  if(mode==='decimalDivDecimal')return 'decimal-scale';
  if(inSet(mode,'fracDivN fracDivSame fracDivF divisionFraction'))return 'fraction-divide';
  if(inSet(mode,'groupMult times'))return 'groups';
@@ -57,6 +60,37 @@ function isoStacks(heights){
  return '<svg class="hands-spatial-iso" viewBox="0 0 320 270" role="img" aria-label="쌓기나무 높이 '+heights.join(', ')+'"><title>네 위치에 쌓은 쌓기나무</title>'+pieces.join('')+'</svg>';
 }
 function buildMode(kind,mode,p){
+ if(kind==='fraction-product'){
+  if(mode==='fracMultN'){
+   const [numer,den,times]=pick([[2,5,3],[1,4,3],[3,5,2],[2,3,3],[3,4,2]]);
+   return {kind,mode,numer,den,times,answer:numer*times,
+    question:numer+'/'+den+' × '+times+' : '+numer+'/'+den+'을 '+times+'번 똑같이 만들어 봐.',
+    hint:'한 번에 '+numer+'조각, 모두 '+times+'번이야. 조각을 합쳐 '+(numer*times)+'/'+den+'이 돼.'};
+  }
+  const [a,cols,b,rows]=pick([[2,3,1,2],[1,2,2,3],[3,4,2,3],[2,5,3,4],[1,3,3,5]]);
+  return {kind,mode,a,cols,b,rows,answer:a*b,
+   question:a+'/'+cols+' × '+b+'/'+rows+' : 가로와 세로를 칠해 겹친 칸을 찾아봐.',
+   hint:'전체 '+(cols*rows)+'칸 중 가로 '+a+'칸과 세로 '+b+'칸이 겹치는 곳은 '+(a*b)+'칸이야.'};
+ }
+ if(kind==='decimal-product'){
+  if(mode==='decimalMult'){
+   const [tenths,times]=pick([[12,2],[13,3],[21,2],[14,3],[22,2]]);
+   return {kind,mode,tenths,times,answer:tenths*times,
+    question:(tenths/10).toFixed(1)+' × '+times+' : 0.1짜리 조각을 여러 번 모아 봐.',
+    hint:(tenths/10).toFixed(1)+'은 0.1이 '+tenths+'개야. 이를 '+times+'번 모으면 '+(tenths*times)+'개가 돼.'};
+  }
+  const [a,b]=pick([[3,4],[4,6],[2,7],[6,5],[7,3]]);
+  return {kind,mode,a,b,answer:a*b,
+   question:'0.'+a+' × 0.'+b+' : 10×10칸의 가로·세로를 색칠해 겹친 칸을 찾아봐.',
+   hint:'전체 100칸 중 '+a*b+'칸이 겹치므로 결과는 0.'+String(a*b).padStart(2,'0')+'이야.'};
+ }
+ if(kind==='volume-layers'){
+  const length=rand(2,4),width=rand(2,3),height=rand(2,4);
+  return {kind,mode,length,width,height,answer:length*width*height,
+   question:'가로 '+length+'cm, 세로 '+width+'cm, 높이 '+height+'cm인 직육면체를 1cm³ 쌓기나무로 채워 봐.',
+   hint:'한 층에 '+length+'×'+width+' = '+(length*width)+'개. 같은 층이 '+height+'개이므로 모두 '+length*width*height+'개야.'};
+ }
+
  if(kind==='spatial'){
   const heights=[rand(1,3),rand(0,2),rand(1,3),rand(1,3)];
   // The child must see at least two different tower heights, even in random tests.
@@ -151,6 +185,7 @@ function buildMode(kind,mode,p){
  return {kind:kind==='write'?'write':'build',question:p.question,hint:p.hint,answer:p.answer,art:p.art};
 }
 const typeDescriptions={
+'fraction-product':'분수 곱셈 · 반복과 겹침', 'decimal-product':'소수 곱셈 · 0.1과 0.01', 'volume-layers':'직육면체 · 1cm³ 층 쌓기',
 count:'수 세기·일대일 대응',share:'하나씩 공평하게 나누기',groups:'같은 수씩 묶기',
 graph:'표에서 그래프 만들기',clock:'시계 바늘 움직이기',angle:'각도 직접 만들기',
 spatial:'쌓기나무 높이·앞·옆모습', 'decimal-scale':'소수의 나눗셈 자릿값 바꾸기',

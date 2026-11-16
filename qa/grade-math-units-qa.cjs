@@ -99,7 +99,7 @@ try{
     if(!seen.has(kind))seen.set(kind,{g,t,u,v,kind,mode:sub.mode});
   }));
   // Test named conceptual variations beyond first example.
-  for(const mode of ['circleRadius','circleDiameter','circleParts','capacity','fracAdd','fractionKinds','elapsed']){
+  for(const mode of ['circleRadius','circleDiameter','circleParts','capacity','fracAdd','fractionKinds','elapsed','fracMult','fracMultN','decimalMult','decimalMulti','volume']){
     for(let g=1;g<=6;g++)for(let t=1;t<=2;t++)C.get(g,t).forEach((unit,u)=>unit.subtopics.forEach((sub,v)=>{
       if(sub.mode===mode)seen.set('mode:'+mode,{g,t,u,v,kind:core.family(mode,''),mode});
     }));
@@ -115,7 +115,17 @@ try{
       if(scene.operation==='share'){for(let i=0;i<scene.people;i++)for(let j=0;j<scene.each;j++)click('.hands-divide-add',i)}
       else for(let j=0;j<scene.quotient;j++)click('.hands-divide-group');
     }
-    else if(kind==='spatial'){scene.heights.forEach((v,i)=>{for(let j=0;j<v;j++)click('.hands-spatial-plus',i)})}
+    else if(kind==='fraction-product'||kind==='decimal-product'){
+      if(mode==='fracMultN'||mode==='decimalMult'){
+       const goal=kind==='decimal-product'?scene.tenths:scene.numer;
+       for(let i=0;i<scene.times;i++)for(let j=0;j<goal;j++)click('.hands-product-add',i);
+      }else{
+       for(let j=0;j<scene.a;j++)click('.hands-product-axis-x');
+       for(let j=0;j<scene.b;j++)click('.hands-product-axis-y');
+      }
+     }
+     else if(kind==='volume-layers'){for(let j=0;j<scene.height;j++)click('.hands-volume-up')}
+     else if(kind==='spatial'){scene.heights.forEach((v,i)=>{for(let j=0;j<v;j++)click('.hands-spatial-plus',i)})}
     else if(kind==='decimal-scale'){root.querySelector('[data-factor="'+scene.factor+'"]').click();root.querySelector('.hands-entry').value=String(scene.quotient)}
     else if(kind==='count'){for(let i=0;i<scene.count;i++)click('.hands-cell',i)}
     else if(kind==='share'){for(let i=0;i<scene.boxes;i++)for(let n=0;n<scene.answer;n++)click('.hands-basket-add',i)}
