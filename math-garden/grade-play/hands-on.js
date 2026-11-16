@@ -82,7 +82,7 @@ root.MoaHandsOnCore=Object.freeze({family,buildMode,visual,typeDescriptions,h,bt
 (function(root){'use strict';
 const Core=root.MoaHandsOnCore;
 if(!Core)return;
-const {family,buildMode,visual,typeDescriptions,h,btn}=Core;
+const {family,buildMode,visual,typeDescriptions,isoStacks,h,btn}=Core;
 const norm=v=>String(v).trim().replaceAll(',','').replace(/\s+/g,' ').toLowerCase();
 const escape=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
 let current=null;
@@ -115,6 +115,8 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    else if(scene.kind==='clock')m.insertAdjacentHTML('beforeend',visual('clock',{hour:scene.hour,minute:scene.minute}));
    else if(scene.kind==='share')m.append(h('p','hands-explain',Array.from({length:scene.boxes},()=>scene.answer+'개').join(' · ')+' / 남은 것 '+scene.remainder+'개'));
    else if(scene.kind==='groups')m.append(h('p','hands-explain',scene.groups+'묶음 × '+scene.per+'개 = '+scene.answer+'개'));
+   else if(scene.kind==='spatial'){m.insertAdjacentHTML('beforeend',isoStacks(scene.heights));m.append(h('p','hands-explain','위에서 본 높이: '+scene.heights.join(' · ')+' / 전체 '+scene.count+'개'));}
+   else if(scene.kind==='decimal-scale')m.append(h('p','hands-explain',scene.dividend+' ÷ '+scene.divisor+' = '+scene.scaledDividend+' ÷ '+scene.scaledDivisor+' = '+scene.quotient+' (두 수 모두 ×'+scene.factor+')'));
    else if(scene.kind==='graph')m.append(h('p','hands-explain','표의 숫자만큼 막대 높이: '+scene.data.join(' · ')));
    else if(scene.kind==='place')m.append(h('p','hands-explain',scene.places.map(x=>x.label+' '+x.value+'개').join(' · ')+' → '+scene.answer));
    else if(scene.kind==='count')m.append(h('p','hands-explain','도토리를 하나씩 짚으면서 '+scene.count+'개 세어 봐.'));
@@ -150,6 +152,58 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    const grid=h('div','hands-tenframe');work.append(grid);
    const update=()=>{grid.replaceChildren();for(let i=0;i<10;i++){const b=btn(selected.has(i)?'🌰':'·',()=>{selected.has(i)?selected.delete(i):selected.add(i);update()},'hands-cell');b.setAttribute('aria-label',(i+1)+'번째 칸 '+(selected.has(i)?'채워짐':'비어 있음'));b.setAttribute('aria-pressed',String(selected.has(i)));grid.append(b)}};
    update();guide();check(()=>selected.size===scene.count);preset(()=>{selected=new Set(Array.from({length:scene.count},(_,i)=>i));update()});
+ }else if(scene.kind==='spatial'){
+   const currentHeights=[0,0,0,0],board=h('div','hands-spatial-board'),map=h('div','hands-spatial-map');
+   const preview=h('div','hands-spatial-preview'),total=h('p','hands-left');
+   const legend=h('p','hands-small','지도 위쪽은 뒤, 아래쪽은 앞이야. 각 칸의 숫자만큼 쌓기나무를 올려 보자.');
+   work.append(legend);
+   const target=h('div','hands-spatial-target');target.append(h('strong','',scene.mode==='shapeViews'?'위에서 본 높이 지도 · 앞·옆모습':'위에서 본 높이 지도'));
+   scene.heights.forEach((v,i)=>{const cell=h('span','hands-spatial-target-cell',v);cell.setAttribute('aria-label',(i<2?'뒤':'앞')+' '+(i%2===0?'왼쪽':'오른쪽')+' '+v+'개');map.append(cell)});
+   target.append(map);work.append(target);
+   if(scene.mode==='shapeViews'){
+    const views=h('div','hands-spatial-views');
+    for(const [name,nums] of [['앞에서 본 모습',scene.front],['옆에서 본 모습',scene.side]]){
+     const view=h('div','hands-spatial-view');view.append(h('strong','',name));
+     const bars=h('div','hands-spatial-bars');
+     nums.forEach(v=>{const col=h('span','hands-spatial-bar');col.style.height=(v*27)+'px';col.setAttribute('aria-label',v+'칸 높이');bars.append(col)});
+     view.append(bars);views.append(view);
+    }work.append(views);
+   }
+   work.append(preview,board,total);
+   const update=()=>{
+    preview.innerHTML=isoStacks(currentHeights);
+    board.replaceChildren();
+    currentHeights.forEach((v,i)=>{
+     const cell=h('div','hands-spatial-cell');
+     cell.append(h('span','hands-spatial-position',(i<2?'뒤':'앞')+' '+(i%2===0?'왼쪽':'오른쪽')));
+     cell.append(btn('−',()=>{currentHeights[i]=Math.max(0,v-1);update()},'hands-spatial-minus'));
+     cell.append(h('strong','hands-spatial-height',v));
+     cell.append(btn('+',()=>{currentHeights[i]=Math.min(3,v+1);update()},'hands-spatial-plus'));
+     board.append(cell);
+    });
+    total.textContent='내가 쌓은 나무 '+currentHeights.reduce((a,b)=>a+b,0)+'개';
+   };
+   update();guide();
+   check(()=>currentHeights.every((v,i)=>v===scene.heights[i]));
+   preset(()=>{scene.heights.forEach((v,i)=>{currentHeights[i]=v});update()});
+ }else if(scene.kind==='decimal-scale'){
+   say('나누는 수가 자연수가 되도록 두 수를 똑같이 바꾼 다음 몫을 입력해 봐.');
+   const expression=h('div','hands-decimal-expression');
+   expression.append(h('strong','',scene.dividend+' ÷ '+scene.divisor));
+   const buttons=h('div','hands-decimal-buttons');let factor=0,typed='';
+   const transformed=h('p','hands-decimal-transformed','어느 수를 곱할까?');
+   for(const n of [10,100]){const b=btn('양쪽 모두 ×'+n,()=>{factor=n;update()},'hands-decimal-factor');b.dataset.factor=String(n);buttons.append(b)}
+   const input=h('input','hands-entry');input.type='text';input.inputMode='numeric';input.autocomplete='off';input.setAttribute('aria-label','바뀐 식의 몫');input.placeholder='몫 입력';
+   const keys=h('div','hands-numberpad');
+   for(const digit of ['1','2','3','4','5','6','7','8','9','⌫','0']){
+    keys.append(btn(digit,()=>{if(digit==='⌫')input.value=input.value.slice(0,-1);else if(input.value.length<4)input.value+=digit;input.focus()},'hands-key'));
+   }
+   const update=()=>{transformed.textContent=factor? (scene.dividendHundredths*factor/100)+' ÷ '+(scene.divisorHundredths*factor/100)+' = ?':'어느 수를 곱할까?';
+    buttons.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.factor===factor)));
+   };
+   work.append(expression,buttons,transformed,input,keys);update();guide();
+   check(()=>factor===scene.factor&&Number(input.value)===scene.quotient&&input.value.trim()!=='');
+   preset(()=>{factor=scene.factor;input.value=String(scene.quotient);update()});
  }else if(scene.kind==='share'){
    const boxes=Array(scene.boxes).fill(0);let rest=scene.total;
    say('한 친구에게 한 개씩 나눠 줘. 바구니를 누르면 담기고, −를 누르면 되돌릴 수 있어.');
@@ -173,7 +227,12 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    if(['add','sub','compare','equivalent'].includes(scene.task)){
      const given=h('div','hands-given-fractions');
      if(scene.task==='equivalent'){given.innerHTML='<div><strong>원래 분수 '+scene.first+'/'+scene.originalDen+'</strong>'+visual('fraction',{n:scene.first,d:scene.originalDen})+'</div>'}
-     else given.innerHTML='<div><strong>첫 번째 '+scene.first+'/'+scene.den+'</strong>'+visual('fraction',{n:scene.first,d:scene.den})+'</div><div><strong>'+({add:'더할 분수',sub:'뺄 분수',compare:'비교할 분수'})[scene.task]+' '+scene.other+'/'+scene.den+'</strong>'+visual('fraction',{n:scene.other,d:scene.den})+'</div>';
+     else {
+      const [n1,d1]=(scene.firstText||scene.first+'/'+scene.den).split('/').map(Number);
+      const [n2,d2]=(scene.otherText||scene.other+'/'+scene.den).split('/').map(Number);
+      given.innerHTML='<div><strong>첫 번째 '+n1+'/'+d1+'</strong>'+visual('fraction',{n:n1,d:d1})+'</div><div><strong>'+({add:'더할 분수',sub:'뺄 분수',compare:'비교할 분수'})[scene.task]+' '+n2+'/'+d2+'</strong>'+visual('fraction',{n:n2,d:d2})+'</div>';
+      if(scene.firstText)given.insertAdjacentHTML('beforeend','<p class="hands-small">같은 크기 조각으로 바꾸면: '+scene.first+'/'+scene.den+' 와 '+scene.other+'/'+scene.den+'</p>');
+     }
      work.append(given);
    }
    const count=h('p','hands-left');work.append(count);
