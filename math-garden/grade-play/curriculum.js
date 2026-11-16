@@ -79,7 +79,7 @@ const RAW={
 ['여러 가지 그래프','띠그래프 읽기|pieChart','원그래프 해석|pieChart','그래프 선택하기|graphChoice'],
 ['직육면체의 겉넓이와 부피','겉넓이 구하기|surfaceArea','부피 구하기|volume','cm³와 m³ 바꾸기|unitVolume']],
 '6-2':[
-['분수의 나눗셈','분모 같은 분수 나누기|fracDivF','분모 다른 분수 나누기|fracDivF','분수와 자연수의 나눗셈|divisionFraction'],
+['분수의 나눗셈','분모 같은 분수 나누기|fracDivSame','분모 다른 분수 나누기|fracDivF','분수와 자연수의 나눗셈|divisionFraction'],
 ['공간과 입체','쌓기나무 개수|cubes','앞·위·옆에서 본 모양|shapeViews','보이지 않는 쌓기나무|hiddenCubes'],
 ['소수의 나눗셈','소수 ÷ 소수|decimalDivDecimal','자연수 ÷ 소수|decimalDivDecimal','몫을 반올림하기|roundQuotient'],
 ['비례식과 비례배분','비례식에서 빈칸|proportion','비의 성질|ratio','비례배분하기|split'],
