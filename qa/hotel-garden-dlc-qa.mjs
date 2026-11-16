@@ -80,6 +80,8 @@ try {
  let down=await log("underground arrived");
  check("separate3DUndergroundWorld",down.underground&&down.mansionVisible&&down.player[1]<-55);
  check("digProgressHiddenAfterLadder",await page.$eval("#hg5DigProgress",e=>getComputedStyle(e).display==="none"));
+ // Dismiss arrival story before exercising game input: gameplay pauses under modals.
+ await clickDialog();
  // Key auto-repeat in the DLC must not restart an in-progress jump.
  await page.keyboard.down("Space");await wait(120);
  const jumpOne=await page.evaluate(()=>window.__ulmoaGardenFeedbackV6.state());
@@ -88,8 +90,6 @@ try {
  const jumpTwo=await page.evaluate(()=>window.__ulmoaGardenFeedbackV6.state());
  await page.keyboard.up("Space");
  check("dlcSpaceRepeatDoesNotResetJump",jumpOne.jumpActive&&jumpTwo.jumpTime>jumpOne.jumpTime+.09);
-
- await clickDialog();
  await page.screenshot({path:"qa/results/hotel-garden-dlc-first-arrival.png"});
  // Central avenue first, then the mansion's NEW right-hand driveway.
 result=await walkTo(17,-11,3.1,135000);
