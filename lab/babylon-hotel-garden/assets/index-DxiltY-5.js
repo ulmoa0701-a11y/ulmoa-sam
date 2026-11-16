@@ -833,6 +833,7 @@ function __hg5BuildSoil(){
  return {root,hole};
 }
 const __hg5Soil=__hg5BuildSoil();
+__hg5Soil.root.setEnabled(false); // purple soil appears strictly after story completion
 const __hg5Shovel=new fc("hg5Shovel",Yf);__hg5Shovel.parent=Rp;__hg5Shovel.position.set(-.66,1.22,-.08);
 __hg5Cylinder("hg5ShovelWoodHandle",__hg5Shovel,new R(0,.25,0),new R(.11,1.36,.12),new H(.57,.33,.17));
 const shovelBlade=__hg5Block("hg5ShovelMetalSpade",__hg5Shovel,new R(0,-.57,.02),new R(.53,.75,.19),new H(.57,.71,.75));
@@ -840,11 +841,11 @@ shovelBlade.rotation.z=.12;
 __hg5Block("hg5ShovelGrip",__hg5Shovel,new R(0,.99,0),new R(.39,.12,.18),new H(.24,.18,.12));__hg5Shovel.setEnabled(false);
 const __hg5Under=new fc("hg5UndergroundWorld",Yf);__hg5Under.setEnabled(false);
 const __hg5UnderFloor=__hg5Block("hg5UndergroundFloor",__hg5Under,new R(0,-60.12,0),new R(86,.25,70),__hg5Color.grass);
-__hg5Block("hg5MansionAvenue",__hg5Under,new R(-4,-59.95,-13),new R(52,.08,5.2),new H(.70,.67,.57));
-__hg5Block("hg5MansionAvenueBorderN",__hg5Under,new R(-4,-59.9,-16),new R(53,.16,.18),__hg5Color.gold);
-__hg5Block("hg5MansionAvenueBorderS",__hg5Under,new R(-4,-59.9,-10),new R(53,.16,.18),__hg5Color.gold);
+__hg5Block("hg5MansionAvenue",__hg5Under,new R(-4,-59.95,-22),new R(52,.08,6.0),new H(.70,.67,.57));
+__hg5Block("hg5MansionAvenueBorderN",__hg5Under,new R(-4,-59.9,-25.2),new R(53,.16,.18),__hg5Color.gold);
+__hg5Block("hg5MansionAvenueBorderS",__hg5Under,new R(-4,-59.9,-18.8),new R(53,.16,.18),__hg5Color.gold);
 for(let i=0;i<7;i++){
- const x=-22+i*7.4,zz=-18;
+ const x=-22+i*7.4,zz=-27;
  const stem=__hg5Cylinder("hg5CavernLampPost"+i,__hg5Under,new R(x,-58.8,zz),new R(.14,2.3,.14),__hg5Color.gold);
  const globe=__hg5Ball("hg5CavernLampGlow"+i,__hg5Under,new R(x,-57.55,zz),new R(.36,.36,.36),new H(1,.86,.51));
  globe.material.emissiveColor=new H(.35,.22,.08);
@@ -899,20 +900,20 @@ for(let x=-3;x<=3;x+=2){
 }
 __hg5MBox("hg5GrandPortico",0,6.8,-8.3,10,.85,4.6,__hg5Color.ivory);
 __hg5MBox("hg5PorticoCrown",0,7.4,-8.3,11.2,.25,5.0,__hg5Color.gold);
-for(let i=0;i<4;i++)__hg5MBox("hg5WideMarbleStair"+i,0,.2+i*.18,-10.5+i*.55,10-i*.75,.28,1.4,__hg5Color.ivory);
+for(let i=0;i<5;i++)__hg5MBox("hg5WideMarbleStair"+i,0,.16+i*.20,-11.7+i*.76,10-i*.65,.32,1.15,__hg5Color.ivory);
 const __hg5EntranceLeft=__hg5MBox("hg5ManorLeftDoor",-.95,3.0,-6.9,1.9,4.6,.25,__hg5Color.wood);
 const __hg5EntranceRight=__hg5MBox("hg5ManorRightDoor",.95,3.0,-6.9,1.9,4.6,.25,__hg5Color.wood);
 for(const d of [__hg5EntranceLeft,__hg5EntranceRight])__hg5MBall("hg5GoldDoorKnob"+d.name,d.position.x<0?-.1:.1,3,-7.1,.17,.17,.17,__hg5Color.gold);
 __hg5MBox("hg5MansionBalcony",0,8.85,-7.3,7.8,.28,2.1,__hg5Color.ivory);
 for(let x=-3.4;x<=3.4;x+=.8)__hg5Cylinder("hg5BalconyBaluster"+x,__hg5Manor,new R(x,9.4,-8.1),new R(.14,.93,.14),__hg5Color.ivory);
 __hg5MBox("hg5BalconyHandrail",0,10,-8.1,7.7,.22,.24,__hg5Color.gold);
-const __hg5Fountain=new fc("hg5Fountain",Yf);__hg5Fountain.parent=__hg5Under;__hg5Fountain.position.set(17,-60,-21);
+const __hg5Fountain=new fc("hg5Fountain",Yf);__hg5Fountain.parent=__hg5Under;__hg5Fountain.position.set(23,-60,6);
 __hg5Cylinder("hg5FountainBase",__hg5Fountain,new R(0,.4,0),new R(4.4,.7,4.4),__hg5Color.ivory);
 __hg5Cylinder("hg5FountainWater",__hg5Fountain,new R(0,.78,0),new R(3.7,.06,3.7),new H(.35,.71,.84));
 __hg5Cylinder("hg5FountainSpire",__hg5Fountain,new R(0,1.75,0),new R(.56,2.2,.56),__hg5Color.gold);
 __hg5Ball("hg5FountainPearl",__hg5Fountain,new R(0,3.05,0),new R(.58,.58,.58),new H(.72,.94,1));
 for(let i=0;i<8;i++){
- const a=i*Math.PI/4,x=17+Math.cos(a)*16,z=-5+Math.sin(a)*19;
+ const a=i*Math.PI/4,x=17+Math.cos(a)*16,z=5+Math.abs(Math.sin(a))*13;
  __hg5Cylinder("hg5ManorGardenTreeTrunk"+i,__hg5Under,new R(x,-58.8,z),new R(.50,2.4,.50),__hg5Color.wood);
  __hg5Ball("hg5ManorGardenTreeCanopy"+i,__hg5Under,new R(x,-56.8,z),new R(2.4,2.3,2.4),new H(.15,.38,.26));
 }
@@ -929,13 +930,34 @@ for(const x of [-4.8,4.8]){
 }
 __hg5Cylinder("hg5ChandelierRod",__hg5Manor,new R(0,11,1),new R(.13,3,.13),__hg5Color.gold);
 for(let i=0;i<7;i++){const a=i*Math.PI*2/7;const m=__hg5MBall("hg5ChandelierCrystal"+i,Math.cos(a)*1.5,9.6,1+Math.sin(a)*1.5,.37,.65,.37,new H(.95,.88,.57));m.material.emissiveColor=new H(.18,.16,.09)}
-const __hg5Bannister=__hg5MBox("hg5CurvedGrandStairs",0,1.8,6,8,1.7,3.2,__hg5Color.ivory);
+// Two real walkable marble flights, with a landing and visible balustrades.
+const __hg5StairStepCount=18;
+for(let i=0;i<__hg5StairStepCount;i++){
+ const z=.18+i*.37;
+ __hg5MBox("hg6StairFirst"+i,-2.2,1.12+(i+1)*.202,z,2.65,.24,.39,__hg5Color.ivory);
+ __hg5MBox("hg6StairSecond"+i,2.2,4.76+(i+1)*.202,6.50-i*.37,2.65,.24,.39,__hg5Color.ivory);
+}
+__hg5MBox("hg6StairLanding",0,4.76,6.91,7.1,.25,1.5,__hg5Color.ivory);
+for(const side of [-1,1]){
+ __hg5MBox("hg6StairHandrail"+side,side*3.78,5.18,3.3,.20,6.2,.20,__hg5Color.gold);
+ for(let j=0;j<8;j++){
+  const z=.4+j*.84;
+  __hg5Cylinder("hg6Baluster"+side+"_"+j,__hg5Manor,new R(side*3.78,1.5+j*.40,z),new R(.13,1.10,.13),__hg5Color.ivory);
+ }
+}
+__hg5MBox("hg6GrandCarvedArchTop",0,7.75,-5.88,5.9,.5,.55,__hg5Color.gold);
+__hg5MBox("hg6EntrancePediment",0,7.67,-8.2,11.5,.3,5,__hg5Color.roof);
+for(const s of [-1,1]){
+ __hg5MBox("hg6WingStoneCourse"+s,s*13.5,3.9,-5.4,5.55,.34,.5,__hg5Color.ivory);
+ __hg5MBox("hg6WingCrown"+s,s*13.5,13.6,-5.4,6.25,.5,.75,__hg5Color.gold);
+}
+
 __hg5Under.setEnabled(false);
 function __hg5Mission(text){ep.textContent=text;__hg5Quest.textContent=text;__hg5Quest.style.display="block"}
 function __hg5ActionButton(label){__hg5Action.textContent=label;__hg5Action.style.display="block"}
 function __hg5SetUnlocked(){
  if(__hg5Phase!=="locked"||!__hg5Unlocked())return;
- __hg5Phase="meet";__hg5Mission("🔎 숨겨진 이야기 · 정원사에게 돌아가 E로 말 걸기");
+ __hg5Phase="meet";__hg5Soil.root.setEnabled(true);__hg5Mission("🔎 숨겨진 이야기 · 정원사에게 돌아가 E로 말 걸기");
  __hg5Action.style.display="none";__hg5Location.style.display="block";
  km("🌿 정원에서 새로운 일이 생겼어요. 정원사에게 돌아가 보세요.",4400);
  xp("DLC_UNLOCKED",{id:"garden-beneath",lotus:__uLotusCount});
