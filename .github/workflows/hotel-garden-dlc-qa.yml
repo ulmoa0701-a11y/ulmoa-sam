@@ -1,6 +1,11 @@
 name: Hotel Garden Underground DLC QA
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/hotel-garden-dlc-qa.yml'
+      - 'qa/hotel-garden-dlc-qa.mjs'
+      - 'lab/babylon-hotel-garden/**'
   push:
     branches: [main]
     paths:
@@ -17,6 +22,8 @@ jobs:
   full-dlc-play:
     runs-on: ubuntu-latest
     timeout-minutes: 13
+    env:
+      HOTEL_GARDEN_URL: http://127.0.0.1:8765/lab/babylon-hotel-garden/
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,6 +33,11 @@ jobs:
         run: npm install --no-save --no-audit --no-fund puppeteer-core@latest
       - name: Find Chrome
         run: echo "CHROME_PATH=$(which google-chrome || which google-chrome-stable || which chromium)" >> "$GITHUB_ENV"
+      - name: Serve checked-out game for isolated test
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/hotel-garden-dlc-http.log 2>&1 &
+          sleep 3
+          curl --fail --silent --show-error "$HOTEL_GARDEN_URL" >/dev/null
       - name: Play full underground DLC with keyboard
         run: node qa/hotel-garden-dlc-qa.mjs
       - name: Upload DLC QA report and independent screenshots
