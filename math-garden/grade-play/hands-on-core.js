@@ -9,6 +9,8 @@ const inSet=(m,list)=>list.split(' ').includes(m);
 const family=(mode,answer='')=>{
  if(mode==='count')return 'count';
  if(inSet(mode,'divide groupDiv remainder'))return 'share';
+ if(inSet(mode,'cubes hiddenCubes shapeViews'))return 'spatial';
+ if(mode==='decimalDivDecimal')return 'decimal-scale';
  if(inSet(mode,'groupMult times'))return 'groups';
  if(inSet(mode,'fractionParts fracDecimal fracCompare fracEquivalent fracAdd fracSub fracUnlike fracUnlikeSub fractionKinds fractionMix'))return 'fraction';
  if(inSet(mode,'angles anglesMeasure angleSum rightAngle'))return 'angle';
@@ -37,7 +39,44 @@ const visual=(type,d)=>{if(type==='fraction'){const n=d.n||0,den=d.d||4;return '
  if(type==='angle'){const a=d.angle||0,r=a*Math.PI/180;return '<svg class="hands-angle-svg" viewBox="0 0 240 150" role="img" aria-label="만든 각의 모습"><path d="M108 125H214 M108 125L'+(108+105*Math.cos(r)).toFixed(1)+' '+(125-105*Math.sin(r)).toFixed(1)+'" stroke="#417b61" stroke-width="6" stroke-linecap="round" fill="none"/><circle cx="108" cy="125" r="5" fill="#d58a5b"/><text x="116" y="115" font-size="14" fill="#5c7d61">'+a+'°</text></svg>'}
  if(type==='clock'){const hour=d.hour||12,minute=d.minute||0,hr=(hour%12+minute/60)*Math.PI/6,mi=minute*Math.PI/30;return '<svg class="hands-clock-svg" viewBox="0 0 210 210" role="img" aria-label="조작한 시계"><circle cx="105" cy="105" r="91" fill="#fffaf0" stroke="#6b9d7c" stroke-width="6"/>'+Array.from({length:12},(_,i)=>{const a=i*Math.PI/6;return '<text x="'+(105+75*Math.sin(a)).toFixed(1)+'" y="'+(110-75*Math.cos(a)).toFixed(1)+'" text-anchor="middle" font-size="16" fill="#35684b">'+(i||12)+'</text>'}).join('')+'<path d="M105 105L'+(105+51*Math.sin(hr)).toFixed(1)+' '+(105-51*Math.cos(hr)).toFixed(1)+'" stroke="#365b45" stroke-width="8" stroke-linecap="round"/><path d="M105 105L'+(105+65*Math.sin(mi)).toFixed(1)+' '+(105-65*Math.cos(mi)).toFixed(1)+'" stroke="#c67c5b" stroke-width="5" stroke-linecap="round"/></svg>'}
  return ''};
+// Isometric square-base cubes: one fixed array order [back-left, back-right, front-left, front-right].
+// Every stacked cube is drawn; the diagram never replaces the target shape with generic box icons.
+function isoStacks(heights){
+ const pieces=[];
+ const cells=[0,1,2,3].sort((a,b)=>Math.floor(a/2)+a%2-Math.floor(b/2)-b%2);
+ for(const idx of cells){const row=Math.floor(idx/2),col=idx%2;
+  for(let z=0;z<heights[idx];z++){
+   const x=160+(col-row)*34,y=135+(col+row)*18-z*34;
+   const pt=a=>a.map(p=>p.join(',')).join(' ');
+   pieces.push('<polygon points="'+pt([[x,y],[x+34,y+18],[x,y+36],[x-34,y+18]])+'" fill="#bbebca" stroke="#527e67" stroke-width="1.8"/>');
+   pieces.push('<polygon points="'+pt([[x-34,y+18],[x,y+36],[x,y+70],[x-34,y+52]])+'" fill="#79b995" stroke="#527e67" stroke-width="1.8"/>');
+   pieces.push('<polygon points="'+pt([[x,y+36],[x+34,y+18],[x+34,y+52],[x,y+70]])+'" fill="#529976" stroke="#527e67" stroke-width="1.8"/>');
+  }
+ }
+ return '<svg class="hands-spatial-iso" viewBox="0 0 320 270" role="img" aria-label="쌓기나무 높이 '+heights.join(', ')+'"><title>네 위치에 쌓은 쌓기나무</title>'+pieces.join('')+'</svg>';
+}
 function buildMode(kind,mode,p){
+ if(kind==='spatial'){
+  const heights=[rand(1,3),rand(0,2),rand(1,3),rand(1,3)];
+  if(heights.every(x=>x===1))heights[2]=2;
+  const count=heights.reduce((a,b)=>a+b,0);
+  const top=heights.map(x=>Number(x>0));
+  const front=[Math.max(heights[2],heights[0]),Math.max(heights[3],heights[1])];
+  const side=[Math.max(heights[0],heights[1]),Math.max(heights[2],heights[3])];
+  const question=mode==='shapeViews'?'위에서 본 높이 지도를 보고 쌓기나무를 만든 뒤 앞·옆모습과 비교해 봐.':mode==='hiddenCubes'?'뒤쪽에 가려진 쌓기나무도 높이 지도대로 쌓아서 모두 몇 개인지 확인해 봐.':'높이 지도에 맞춰 쌓기나무를 직접 만들어 봐.';
+  return {kind:'spatial',mode,question,hint:'위에서 본 지도에 있는 숫자는 그 위치에 쌓인 나무의 높이야. 0은 빈 자리야.',heights,top,front,side,count,answer:heights.join(',')};
+ }
+ if(kind==='decimal-scale'){
+  const divisorHundredths=pick([20,25,40,50,60,80,12,15,24,75]);
+  const factor=divisorHundredths%10===0?10:100,quotient=rand(2,11);
+  const dividendHundredths=divisorHundredths*quotient;
+  const fmt=n=>(n/100).toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
+  const dividend=fmt(dividendHundredths),divisor=fmt(divisorHundredths);
+  return {kind:'decimal-scale',question:dividend+' ÷ '+divisor+'의 몫을 구해 봐. 두 수를 같은 배수로 바꿔 나누자.',
+   hint:'나누는 수가 자연수가 되도록 두 수에 똑같이 10 또는 100을 곱해 봐.',
+   dividend,divisor,dividendHundredths,divisorHundredths,factor,quotient,
+   scaledDividend:dividendHundredths*factor/100,scaledDivisor:divisorHundredths*factor/100,answer:quotient};
+ }
  if(kind==='share'){const n=rand(7,19),boxes=rand(2,4),remainder=mode==='remainder'?rand(1,boxes-1):0,total=mode==='remainder'?boxes*rand(2,4)+remainder:boxes*rand(2,4);
  return {kind:'share',question:total+'개의 도토리를 '+boxes+'명에게 똑같이 나눠 주자.',hint:'한 명씩 돌아가면서 하나씩 담으면 공평해져.',total,boxes,remainder:mode==='remainder'?total%boxes:0,answer:Math.floor(total/boxes)};}
  if(kind==='groups'){const groups=rand(2,4),per=rand(2,6);return {kind:'groups',question:groups+'개 바구니에 '+per+'개씩 담아 보자.',hint:'바구니마다 개수가 같은지 살펴봐.',groups,per,answer:groups*per};}
@@ -93,8 +132,9 @@ function buildMode(kind,mode,p){
 const typeDescriptions={
 count:'수 세기·일대일 대응',share:'하나씩 공평하게 나누기',groups:'같은 수씩 묶기',
 graph:'표에서 그래프 만들기',clock:'시계 바늘 움직이기',angle:'각도 직접 만들기',
+spatial:'쌓기나무 높이·앞·옆모습', 'decimal-scale':'소수의 나눗셈 자릿값 바꾸기',
 fraction:'분수 조각 색칠하기',move:'격자에서 이동하기',pattern:'수 규칙 찾기',
 line:'수직선 눈금 찾기',place:'십과 낱개 묶기',measure:'자로 길이 표시하기',
 shape:'모양 구성·분류하기',symmetry:'대칭·점대칭 꽃 심기',spin:'화살표를 실제로 회전시키기',circle:'원 구성·반지름·지름',units:'들이와 무게 직접 계량',build:'그림 보고 답 만들기',write:'생각한 답을 직접 쓰기'};
-root.MoaHandsOnCore=Object.freeze({family,buildMode,visual,typeDescriptions,h,btn});
+root.MoaHandsOnCore=Object.freeze({family,buildMode,visual,typeDescriptions,isoStacks,h,btn});
 })(window);
