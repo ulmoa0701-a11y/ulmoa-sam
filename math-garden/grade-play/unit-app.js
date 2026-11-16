@@ -37,7 +37,7 @@ function init(){
  if(q.has('u')&&q.has('s')&&Number.isInteger(u)&&Number.isInteger(s)&&u>=0&&u<get().length&&s>=0&&s<get()[u].subtopics.length)play(u,s,false);
 }
 function select(grade,term,scroll=true){
- state.grade=grade;state.term=term;state.active=false;
+ state.grade=grade;state.term=term;state.active=false;document.body.classList.remove('unit-playing');
  el('play').hidden=true;el('browse').hidden=false;
  Array.from($grades.children).forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.grade===grade)));
  Array.from($terms.children).forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.term===term)));
@@ -54,7 +54,7 @@ function select(grade,term,scroll=true){
 }
 function play(unit,sub,scroll=true){
  const units=get();if(!units[unit]||!units[unit].subtopics[sub])return;
- state.unit=unit;state.sub=sub;state.round=0;state.firstTry=0;state.assisted=false;state.solved=false;state.active=true;
+ state.unit=unit;state.sub=sub;state.round=0;state.firstTry=0;state.assisted=false;state.solved=false;state.active=true;document.body.classList.add('unit-playing');
  el('browse').hidden=true;el('play').hidden=false;el('done').hidden=true;el('questionPanel').hidden=false;
  el('playPath').textContent=state.grade+'학년 · '+state.term+'학기';
  el('playUnit').textContent=(unit+1)+'단원 · '+units[unit].name;
