@@ -89,6 +89,7 @@ try {
  await wait(180);
  const jumpTwo=await page.evaluate(()=>window.__ulmoaGardenFeedbackV6.state());
  await page.keyboard.up("Space");
+ console.log("DLC_JUMP_REPEAT_DIAG",JSON.stringify({jumpOne,jumpTwo,modal:await modal(),dom:await page.evaluate(()=>({activeElement:document.activeElement?.id,dialogClass:document.getElementById("dialog").className}))}));
  check("dlcSpaceRepeatDoesNotResetJump",jumpOne.jumpActive&&jumpTwo.jumpTime>jumpOne.jumpTime+.09);
  await page.screenshot({path:"qa/results/hotel-garden-dlc-first-arrival.png"});
  // Central avenue first, then the mansion's NEW right-hand driveway.
