@@ -1360,7 +1360,7 @@ const __hg7People=[zp,Bp,Vp];
 function __hg7HumanBlocked(x,z){
  if(__hg5Underground()||__hg5Transition||!qp)return false;
  for(const npc of __hg7People){
-  if(!npc.isEnabled()||!npc.isVisible)continue;
+  if(!npc.isEnabled())continue;
   if(Math.hypot(x-npc.position.x,z-npc.position.z)<.83)return true;
  }
  return false;
@@ -1498,7 +1498,7 @@ Yf.onBeforeRenderObservable.add(()=>{
 // Read-only QA diagnostics; no teleport or game-state mutation exposed.
 window.__ulmoaGardenFeedbackV6={
  state:()=>({
-  shoesAttached:__hg7LegLinks.filter(x=>x.startsWith("hg6")).length===14,
+  shoesAttached:__hg7LegLinks.filter(x=>x.startsWith("hg6")).length===12,
   linkedFootwear:__hg7LegLinks.length,
   peopleSolid:__hg7HumanBlocked(zp.position.x,zp.position.z),
   modalPaused:__hg7UiPaused(),
@@ -1506,9 +1506,11 @@ window.__ulmoaGardenFeedbackV6={
   flashlightOn:__hg7NightOn,nightEligible:__hg7NightWanted(),
   jumpActive:nm,jumpTime:+tm.toFixed(3),digDisplay:__hg5DigProgress.style.display,
   combatDisplay:__hg4Combat.style.display,
+  smogPlayerFocus:Kp===6&&typeof Xf.getTarget==="function"?+R.Distance(Xf.getTarget(),Rp.position.add(new R(0,1.55,0))).toFixed(3):null,
   player:[+Rp.position.x.toFixed(2),+Rp.position.y.toFixed(2),+Rp.position.z.toFixed(2)]
  }),
  probeHuman:(x,z)=>__hg7HumanBlocked(x,z),
+ previewNight:()=>{if(__hg5Underground())return false;qp=true;Jp=false;ap.classList.remove("show");Xp=Tm*.73;Yp=performance.now()-Xp*1000;Vm();return true;},
  version:"child-playtest-v6"
 };
 
