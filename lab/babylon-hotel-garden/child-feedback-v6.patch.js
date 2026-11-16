@@ -140,7 +140,7 @@ Yf.onAfterRenderObservable.add(()=>{
  const house=under&&__hg6SegmentHitsBox(camera.x,camera.z,player.x,player.z,__hg5Manor.position.x,__hg5Manor.position.z,18,8);
  if(!shop&&!house){__hg6Silhouette.style.display="none";return}
  const viewport=Xf.viewport.toGlobal(Jf.getRenderWidth(),Jf.getRenderHeight());
- const pt=R.Project(player.add(new R(0,1.55,0)),R.Identity(),Yf.getTransformMatrix(),viewport);
+ const pt=R.Project(new R(0,1.55,0),Rp.getWorldMatrix(),Yf.getTransformMatrix(),viewport);
  const px=pt.x*(innerWidth/Jf.getRenderWidth()),py=pt.y*(innerHeight/Jf.getRenderHeight());
  if(!Number.isFinite(px)||!Number.isFinite(py)||pt.z<0||pt.z>1){__hg6Silhouette.style.display="none";return}
  __hg6Silhouette.style.left=px+"px";__hg6Silhouette.style.top=py+"px";__hg6Silhouette.style.display="block";
