@@ -1,0 +1,28 @@
+name: Hotel Garden initialization diagnostic
+on:
+  pull_request:
+    paths:
+      - 'qa/hotel-garden-diagnostic.mjs'
+      - 'lab/babylon-hotel-garden/**'
+      - '.github/workflows/hotel-garden-init-debug.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      HOTEL_GARDEN_URL: http://127.0.0.1:8765/lab/babylon-hotel-garden/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-audit --no-fund puppeteer-core@latest
+      - name: Check actual browser initialization
+        run: |
+          echo "CHROME_PATH=$(command -v google-chrome || command -v chromium)" >> "$GITHUB_ENV"
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/hotel-garden-server.log 2>&1 &
+          sleep 2
+          node qa/hotel-garden-diagnostic.mjs
