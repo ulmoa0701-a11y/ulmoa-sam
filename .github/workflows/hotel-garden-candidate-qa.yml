@@ -30,15 +30,24 @@ jobs:
           nohup python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/hotel-garden-http.log 2>&1 &
           sleep 3
           curl --fail --silent --show-error "$HOTEL_GARDEN_URL" >/dev/null
+      - name: Parse-check Babylon browser module
+        run: node --input-type=module --check < lab/babylon-hotel-garden/assets/index-DxiltY-5.js
+      - name: V5 player, collision and mansion regression
+        run: node qa/hotel-garden-v5-qa.mjs
       - name: V4 shop and combat interface
+        if: success() || failure()
         run: node qa/hotel-garden-v4-qa.mjs
       - name: Public-style PC and mobile load test, against candidate
+        if: success() || failure()
         run: node qa/hotel-garden-public-qa.mjs
       - name: Real-keyboard gardener through EYE unlock
+        if: success() || failure()
         run: node qa/hotel-garden-actual-play.mjs
       - name: Full real-keyboard route through three bosses
+        if: success() || failure()
         run: node qa/hotel-garden-full-route-e2e.mjs
       - name: Underground DLC flow
+        if: success() || failure()
         run: node qa/hotel-garden-dlc-qa.mjs
       - name: Preserve results on pass or fail
         uses: actions/upload-artifact@v4

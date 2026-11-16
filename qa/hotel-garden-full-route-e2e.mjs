@@ -118,13 +118,22 @@ try{
  report.woodsArrival=await walkTo(20,18,4.9,65000);await nextDialog();await record('woods encounter');
  report.woodsWon=await playWoods();await record('woods defeated');
  report.woodsFlower=await pickFlower();await record('woods flower');
+ report.pondDetour=await walkTo(17,-11,3.0,65000); // around the now-solid pond
  report.pondArrival=await walkTo(4,-8,4.0,65000);await page.keyboard.press('e');await nextDialog();await record('pond keeper');
  report.eyeArrival=await walkTo(24,-15,4.8,65000);
  await record('EYE approached by keyboard');
  report.eyeWon=await playEye();await record('eye defeated');
  if(!report.eyeWon)throw Error('EYE did not reach three successful slashes: '+JSON.stringify(report.eyeAttempts?.slice(-5)));
  report.eyeFlower=await pickFlower();await record('eye flower');
- report.travelerArrival=await walkTo(-2,18,4.0,65000);await page.keyboard.press('e');await nextDialog();await record('traveler bucket');
+ // Walk around the eastern garden instead of steering straight through the solid pond and trees.
+ report.travelerWaypoints=[];
+ for(const [wx,wz,wr] of [[30,-12,5],[30,12,5],[18,20,5],[4,20,5]]){
+  const leg=await walkTo(wx,wz,wr,65000);report.travelerWaypoints.push({target:[wx,wz],near:leg.near,last:leg.last.player});
+  if(!leg.near)throw Error('Blocked on accessible garden detour: '+JSON.stringify(report.travelerWaypoints));
+ }
+ report.travelerArrival=await walkTo(-2,18,4.0,65000);
+ if(!report.travelerArrival.near)throw Error('Cannot reach the traveler with keyboard movement: '+JSON.stringify(report.travelerArrival.last));
+ await page.keyboard.press('e');await nextDialog();await record('traveler bucket');
  report.smogWon=await playSmog();await record('smog water');
  await walkTo(29,-23,4.5,18000);
  report.smogFlower=await pickFlower();const last=await record('stage 7 and third lotus');
