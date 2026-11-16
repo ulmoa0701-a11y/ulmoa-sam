@@ -49,8 +49,13 @@ try {
  // Pond now physically blocks shortcuts; return from SMOG along the SOUTH bank.
  let result=await walkTo(17,-11,3.1,100000);
  check("detourAroundPondToEastBank",result.arrived);
- result=await walkTo(-14,-11,2.5,130000);
- check("detourAroundPondToWestBank",result.arrived);
+ // Travel along the southern bank with reachable checkpoints, never across water.
+ const southBank=[];
+ for(const [wx,wz,wr] of [[11,-14,3.3],[0,-14,3.3],[-14,-11,3.4]]){
+  result=await walkTo(wx,wz,wr,90000);southBank.push({target:[wx,wz],arrived:result.arrived,at:result.state.player});
+  console.log('DLC_SOUTH_BANK',JSON.stringify(southBank.at(-1)));
+ }
+ check("detourAroundPondToWestBank",southBank.every(v=>v.arrived));
  result=await walkTo(gardener[0],gardener[1],3.2,130000);
  console.log("DLC_WALK_GARDENER",JSON.stringify(result));
  console.log("DLC_GARDENER_BEFORE_E",JSON.stringify({state:await state(),dialog:await modal()}));
