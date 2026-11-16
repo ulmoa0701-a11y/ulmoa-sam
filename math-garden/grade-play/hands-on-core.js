@@ -59,7 +59,8 @@ function isoStacks(heights){
 function buildMode(kind,mode,p){
  if(kind==='spatial'){
   const heights=[rand(1,3),rand(0,2),rand(1,3),rand(1,3)];
-  if(heights.every(x=>x===1))heights[2]=2;
+  // The child must see at least two different tower heights, even in random tests.
+  if(heights.every(x=>x===heights[0]))heights[2]=heights[0]===3?1:heights[0]+1;
   const count=heights.reduce((a,b)=>a+b,0);
   const top=heights.map(x=>Number(x>0));
   const front=[Math.max(heights[2],heights[0]),Math.max(heights[3],heights[1])];
