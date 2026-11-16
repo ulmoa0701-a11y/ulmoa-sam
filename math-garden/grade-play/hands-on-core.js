@@ -11,6 +11,7 @@ const family=(mode,answer='')=>{
  if(inSet(mode,'divide groupDiv remainder'))return 'share';
  if(inSet(mode,'cubes hiddenCubes shapeViews'))return 'spatial';
  if(mode==='decimalDivDecimal')return 'decimal-scale';
+ if(inSet(mode,'fracDivN fracDivF divisionFraction'))return 'fraction-divide';
  if(inSet(mode,'groupMult times'))return 'groups';
  if(inSet(mode,'fractionParts fracDecimal fracCompare fracEquivalent fracAdd fracSub fracUnlike fracUnlikeSub fractionKinds fractionMix'))return 'fraction';
  if(inSet(mode,'angles anglesMeasure angleSum rightAngle'))return 'angle';
@@ -65,6 +66,24 @@ function buildMode(kind,mode,p){
   const side=[Math.max(heights[0],heights[1]),Math.max(heights[2],heights[3])];
   const question=mode==='shapeViews'?'위에서 본 높이 지도를 보고 쌓기나무를 만든 뒤 앞·옆모습과 비교해 봐.':mode==='hiddenCubes'?'뒤쪽에 가려진 쌓기나무도 높이 지도대로 쌓아서 모두 몇 개인지 확인해 봐.':'높이 지도에 맞춰 쌓기나무를 직접 만들어 봐.';
   return {kind:'spatial',mode,question,hint:'위에서 본 지도에 있는 숫자는 그 위치에 쌓인 나무의 높이야. 0은 빈 자리야.',heights,top,front,side,count,answer:heights.join(',')};
+ }
+ if(kind==='fraction-divide'){
+  if(mode==='fracDivN'){
+   const [numer,den,people]=pick([[4,6,2],[6,8,3],[6,9,2],[4,8,2]]);
+   return {kind:'fraction-divide',operation:'share',mode,question:numer+'/'+den+'을 '+people+'명에게 똑같이 나누어 줘.',
+    hint:'색칠한 '+numer+'조각을 '+people+'명에게 하나씩 번갈아 나누어 주면 한 명에게 '+(numer/people)+'조각이야.',
+    numer,den,people,each:numer/people,answer:(numer/people)+'/'+den};
+  }
+  const data=mode==='fracDivF'
+   ? pick([[3,4,1,8],[2,3,1,6],[3,5,1,10],[3,4,3,8],[1,2,1,4]])
+   : pick([[2,1,1,2],[3,1,3,4],[2,1,2,3],[1,1,1,4]]);
+  const [a,b,c,d]=data,gcd=(x,y)=>y?gcd(y,x%y):x,den=b*d/gcd(b,d);
+  const units=a*(den/b),groupSize=c*(den/d);
+  const quotient=units/groupSize;
+  if(!Number.isInteger(quotient))throw Error('Fraction model quotient not integral');
+  return {kind:'fraction-divide',operation:'group',mode,question:a+'/'+b+' 안에 '+c+'/'+d+'이 몇 번 들어갈까?',
+   hint:'전체를 '+den+'등분한 같은 크기 조각으로 만들고, '+groupSize+'조각씩 한 묶음을 만들어 세어 봐.',
+   left:a+'/'+b,right:c+'/'+d,den,units,groupSize,quotient,answer:quotient};
  }
  if(kind==='decimal-scale'){
   const divisorHundredths=pick([20,25,40,50,60,80,12,15,24,75]);
@@ -133,6 +152,7 @@ const typeDescriptions={
 count:'수 세기·일대일 대응',share:'하나씩 공평하게 나누기',groups:'같은 수씩 묶기',
 graph:'표에서 그래프 만들기',clock:'시계 바늘 움직이기',angle:'각도 직접 만들기',
 spatial:'쌓기나무 높이·앞·옆모습', 'decimal-scale':'소수의 나눗셈 자릿값 바꾸기',
+'fraction-divide':'분수를 나누고 같은 크기 묶기',
 fraction:'분수 조각 색칠하기',move:'격자에서 이동하기',pattern:'수 규칙 찾기',
 line:'수직선 눈금 찾기',place:'십과 낱개 묶기',measure:'자로 길이 표시하기',
 shape:'모양 구성·분류하기',symmetry:'대칭·점대칭 꽃 심기',spin:'화살표를 실제로 회전시키기',circle:'원 구성·반지름·지름',units:'들이와 무게 직접 계량',build:'그림 보고 답 만들기',write:'생각한 답을 직접 쓰기'};
