@@ -74,6 +74,8 @@ try{
  console.log('PLAY_QA: all 213 subunits finished five phases, kinds=',result.kinds.join(','));
  await page.goto(base+'/'+ROOT+'/?g=3&t=2&u=2&s=1',{waitUntil:'load'});
  assert(await page.locator('#play').isVisible(),'deep-link not play');
+ assert(await page.locator('body').evaluate(node=>node.classList.contains('unit-playing')),'active lesson focus mode missing');
+ assert.equal(await page.locator('.hero').isVisible(),false,'landing hero wastes active lesson viewport');
  assert.equal(await page.locator('.hands-shell').count(),1,'hands-on component not loaded');
  await page.screenshot({path:dir+'/hands-on-lesson-mobile.png'});
  const independent=await page.evaluate(()=>{
