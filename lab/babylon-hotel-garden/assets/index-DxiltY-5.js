@@ -1295,6 +1295,16 @@ Yf.onAfterRenderObservable.add(()=>{
  __hg6Silhouette.style.display=occluded?"block":"none";
  if(occluded){__hg6Silhouette.style.left=pt.x/rw*innerWidth+"px";__hg6Silhouette.style.top=pt.y/rh*innerHeight+"px"}
 });
+// Camera: remain in front of the manor facade/behind the explorer, not inside solid walls.
+// The former +Z tracking offset placed the camera behind the closed rear wall on the stairs.
+const __hg6PreviousQm=qm;
+qm=function(){
+ if(__hg5Transition||(__hg5Phase!=="underground"&&__hg5Phase!=="mansion"))return __hg6PreviousQm();
+ const p=Rp.position;
+ const offset=__hg5Phase==="underground"?new R(0,6.0,-11.5):p.y>-55.5?new R(0,7.0,-8.7):new R(0,4.0,-7.2);
+ Xf.position=R.Lerp(Xf.position,p.add(offset),.23);
+ Xf.setTarget(p.add(new R(0,1.45,0)));
+};
 window.__ulmoaGardenFeedbackV5={
  state:()=>({shoes:[-1,1].every(i=>!!Yf.getMeshByName("hg6PlayerShoe"+i)),woodsDistance:+Math.hypot(Rp.position.x-Hp.position.x,Rp.position.z-Hp.position.z).toFixed(2),woodsDangerRadius:8.2,soilVisible:__hg5Soil.root.isEnabled(),manorLocation:[__hg5Manor.position.x,__hg5Manor.position.z],door:[__hg5DoorPos.x,__hg5DoorPos.z],stairCount:23,silhouetteVisible:__hg6Silhouette.style.display!=="none",stage:Kp,phase:__hg5Phase,player:[+Rp.position.x.toFixed(2),+Rp.position.y.toFixed(2),+Rp.position.z.toFixed(2)]}),
  probeCollision:(x,z,area)=>area==="underground"?__hg6UnderBlocked(x,z):__hg6GardenBlocked(x,z),
