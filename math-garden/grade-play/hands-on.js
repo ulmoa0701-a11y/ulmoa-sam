@@ -30,7 +30,8 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    const m=h('div','hands-model');
    const note=h('p','', '모아의 시범');
    m.append(note);
-   if(scene.kind==='fraction')m.insertAdjacentHTML('beforeend',visual('fraction',{n:scene.numer,d:scene.den}));
+   if(['fraction-product','decimal-product','volume-layers'].includes(scene.kind))m.append(h('p','hands-explain',scene.question+' · '+scene.hint));
+   else if(scene.kind==='fraction')m.insertAdjacentHTML('beforeend',visual('fraction',{n:scene.numer,d:scene.den}));
    else if(scene.kind==='angle')m.insertAdjacentHTML('beforeend',visual('angle',{angle:scene.angle}));
    else if(scene.kind==='clock')m.insertAdjacentHTML('beforeend',visual('clock',{hour:scene.hour,minute:scene.minute}));
    else if(scene.kind==='share')m.append(h('p','hands-explain',Array.from({length:scene.boxes},()=>scene.answer+'개').join(' · ')+' / 남은 것 '+scene.remainder+'개'));
@@ -83,6 +84,75 @@ function render({mode,problem,round,container,onSolved,onWrong,onSupport,setScen
    const grid=h('div','hands-tenframe');work.append(grid);
    const update=()=>{grid.replaceChildren();for(let i=0;i<10;i++){const b=btn(selected.has(i)?'🌰':'·',()=>{selected.has(i)?selected.delete(i):selected.add(i);update()},'hands-cell');b.setAttribute('aria-label',(i+1)+'번째 칸 '+(selected.has(i)?'채워짐':'비어 있음'));b.setAttribute('aria-pressed',String(selected.has(i)));grid.append(b)}};
    update();guide();check(()=>selected.size===scene.count);preset(()=>{selected=new Set(Array.from({length:scene.count},(_,i)=>i));update()});
+ }else if(scene.kind==='fraction-product'||scene.kind==='decimal-product'){
+   const isDecimal=scene.kind==='decimal-product',repeat=isDecimal?scene.mode==='decimalMult':scene.mode==='fracMultN';
+   if(repeat){
+    const goal=isDecimal?scene.tenths:scene.numer,counts=Array(scene.times).fill(0);
+    const board=h('div','hands-product-groups'),status=h('p','hands-left');
+    say('같은 양을 '+scene.times+'번 만들어 보자. 각 묶음의 조각 수를 맞춰 봐.');
+    work.append(board,status);
+    const update=()=>{
+     board.replaceChildren();
+     counts.forEach((v,i)=>{
+      const card=h('div','hands-product-group');
+      card.append(h('strong','',i+1+'번 묶음: '+v+'조각'));
+      const marks=h('div','hands-product-dots');
+      for(let j=0;j<v;j++)marks.append(h('span','', '▰'));
+      card.append(marks);
+      const controls=h('div','hands-product-controls');
+      controls.append(btn('+ '+(isDecimal?'0.1':'1/'+scene.den),()=>{counts[i]=Math.min(goal,counts[i]+1);update()},'hands-product-add'));
+      if(isDecimal)controls.append(btn('+ 1',()=>{counts[i]=Math.min(goal,counts[i]+10);update()},'hands-product-ten'));
+      controls.append(btn('↶',()=>{counts[i]=Math.max(0,counts[i]-1);update()},'hands-product-undo'));
+      card.append(controls);board.append(card);
+     });
+     const total=counts.reduce((a,b)=>a+b,0);
+     status.textContent=isDecimal?'0.1 조각 '+total+'개 = '+(total/10).toFixed(1):'전체 '+total+'조각 = '+total+'/'+scene.den;
+    };
+    update();guide();check(()=>counts.every(v=>v===goal));
+    preset(()=>{counts.fill(goal);update()});
+   }else{
+    const cols=isDecimal?10:scene.cols,rows=isDecimal?10:scene.rows;
+    const goalA=scene.a,goalB=scene.b;let a=0,b=0;
+    say('가로와 세로를 색칠하고 겹치는 곳을 세어 봐.');
+    const controls=h('div','hands-product-controls'),board=h('div','hands-product-area'),status=h('p','hands-left');
+    controls.append(btn('가로 +1',()=>{a=Math.min(cols,a+1);update()},'hands-product-axis-x'));
+    controls.append(btn('세로 +1',()=>{b=Math.min(rows,b+1);update()},'hands-product-axis-y'));
+    controls.append(btn('처음부터',()=>{a=0;b=0;update()},'hands-product-undo'));
+    work.append(controls,board,status);
+    const update=()=>{
+     board.replaceChildren();board.style.gridTemplateColumns='repeat('+cols+',minmax(0,1fr))';
+     for(let row=0;row<rows;row++)for(let col=0;col<cols;col++){
+      const horizontal=col<a,vertical=row<b;
+      const cell=h('span','hands-product-square'+(horizontal?' horizontal':'')+(vertical?' vertical':'')+(horizontal&&vertical?' overlap':''));
+      cell.setAttribute('aria-label',horizontal&&vertical?'겹친 칸':horizontal?'가로':vertical?'세로':'빈 칸');
+      board.append(cell);
+     }
+     status.textContent='가로 '+a+'/'+cols+' · 세로 '+b+'/'+rows+' · 겹침 '+a*b+'/'+cols*rows;
+    };
+    update();guide();check(()=>a===goalA&&b===goalB);preset(()=>{a=goalA;b=goalB;update()});
+   }
+ }else if(scene.kind==='volume-layers'){
+   let layers=0;
+   say('가로 '+scene.length+'개, 세로 '+scene.width+'개로 한 층을 만들고 높이만큼 쌓아 봐.');
+   const floor=h('div','hands-volume-floor'),stack=h('div','hands-volume-stack'),status=h('p','hands-left');
+   const controls=h('div','hands-product-controls');
+   controls.append(btn('한 층 더',()=>{layers=Math.min(scene.height,layers+1);update()},'hands-volume-up'));
+   controls.append(btn('한 층 빼기',()=>{layers=Math.max(0,layers-1);update()},'hands-volume-down'));
+   work.append(floor,controls,stack,status);
+   floor.style.gridTemplateColumns='repeat('+scene.length+',minmax(0,1fr))';
+   for(let i=0;i<scene.length*scene.width;i++)floor.append(h('span','hands-volume-cube','■'));
+   const update=()=>{
+    stack.replaceChildren();
+    for(let layer=0;layer<layers;layer++){
+     const item=h('div','hands-volume-layer');
+     item.append(h('strong','',layer+1+'층'));
+     const squares=h('div','hands-volume-layer-cubes');
+     for(let i=0;i<scene.length*scene.width;i++)squares.append(h('span','', '▣'));
+     item.append(squares);stack.append(item);
+    }
+    status.textContent='한 층 '+scene.length*scene.width+'개 × '+layers+'층 = '+scene.length*scene.width*layers+'cm³';
+   };
+   update();guide();check(()=>layers===scene.height);preset(()=>{layers=scene.height;update()});
  }else if(scene.kind==='spatial'){
    const currentHeights=[0,0,0,0],board=h('div','hands-spatial-board'),map=h('div','hands-spatial-map');
    const preview=h('div','hands-spatial-preview'),total=h('p','hands-left');
