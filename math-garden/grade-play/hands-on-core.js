@@ -11,7 +11,7 @@ const family=(mode,answer='')=>{
  if(inSet(mode,'divide groupDiv remainder'))return 'share';
  if(inSet(mode,'cubes hiddenCubes shapeViews'))return 'spatial';
  if(mode==='decimalDivDecimal')return 'decimal-scale';
- if(inSet(mode,'fracDivN fracDivF divisionFraction'))return 'fraction-divide';
+ if(inSet(mode,'fracDivN fracDivSame fracDivF divisionFraction'))return 'fraction-divide';
  if(inSet(mode,'groupMult times'))return 'groups';
  if(inSet(mode,'fractionParts fracDecimal fracCompare fracEquivalent fracAdd fracSub fracUnlike fracUnlikeSub fractionKinds fractionMix'))return 'fraction';
  if(inSet(mode,'angles anglesMeasure angleSum rightAngle'))return 'angle';
@@ -74,16 +74,17 @@ function buildMode(kind,mode,p){
     hint:'색칠한 '+numer+'조각을 '+people+'명에게 하나씩 번갈아 나누어 주면 한 명에게 '+(numer/people)+'조각이야.',
     numer,den,people,each:numer/people,answer:(numer/people)+'/'+den};
   }
-  const data=mode==='fracDivF'
-   ? pick([[3,4,1,8],[2,3,1,6],[3,5,1,10],[3,4,3,8],[1,2,1,4]])
+  const data=mode==='fracDivSame'
+   ? pick([[3,4,1,4],[4,5,2,5],[2,3,1,3],[4,6,2,6],[3,6,1,6]])
+   : mode==='fracDivF' ? pick([[3,4,1,8],[2,3,1,6],[3,5,1,10],[3,4,3,8],[1,2,1,4]])
    : pick([[2,1,1,2],[3,1,3,4],[2,1,2,3],[1,1,1,4]]);
-  const [a,b,c,d]=data,gcd=(x,y)=>y?gcd(y,x%y):x,den=b*d/gcd(b,d);
+  const [a,b,c,d]=data,gcd=(x,y)=>y?gcd(y,x%y):x,den=b*d/gcd(b,d),leftText=b===1?String(a):a+'/'+b;
   const units=a*(den/b),groupSize=c*(den/d);
   const quotient=units/groupSize;
   if(!Number.isInteger(quotient))throw Error('Fraction model quotient not integral');
-  return {kind:'fraction-divide',operation:'group',mode,question:a+'/'+b+' 안에 '+c+'/'+d+'이 몇 번 들어갈까?',
+  return {kind:'fraction-divide',operation:'group',mode,question:leftText+' 안에 '+c+'/'+d+'이 몇 번 들어갈까?',
    hint:'전체를 '+den+'등분한 같은 크기 조각으로 만들고, '+groupSize+'조각씩 한 묶음을 만들어 세어 봐.',
-   left:a+'/'+b,right:c+'/'+d,den,units,groupSize,quotient,answer:quotient};
+   left:leftText,right:c+'/'+d,den,units,groupSize,quotient,answer:quotient};
  }
  if(kind==='decimal-scale'){
   const divisorHundredths=pick([20,25,40,50,60,80,12,15,24,75]);
