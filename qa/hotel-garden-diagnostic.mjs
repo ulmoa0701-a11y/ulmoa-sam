@@ -1,0 +1,13 @@
+import puppeteer from 'puppeteer-core';
+const browser=await puppeteer.launch({headless:true,executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',args:['--no-sandbox','--disable-dev-shm-usage','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const page=await browser.newPage();await page.setViewport({width:1440,height:900});
+page.on('pageerror',e=>console.log('DIAG_PAGE_ERROR',e.stack||String(e)));
+page.on('console',m=>{if(m.type()==='error')console.log('DIAG_CONSOLE',m.text())});
+page.on('requestfailed',r=>console.log('DIAG_FAILED_REQUEST',r.url(),r.failure()?.errorText));
+page.on('response',r=>{if(r.status()>=400)console.log('DIAG_HTTP',r.status(),r.url())});
+const url=process.env.HOTEL_GARDEN_URL||'https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/';
+await page.goto(url+'?diag='+Date.now(),{waitUntil:'domcontentloaded',timeout:30000});
+await new Promise(r=>setTimeout(r,4000));
+const s=await page.evaluate(()=>({ready:window.__hgShadersReady,shaderError:window.__hgShaderError,v4:!!window.__ulmoaGardenV4,dlc:!!window.__ulmoaGardenDlc,v5:!!window.__ulmoaGardenFeedbackV5,v6:!!window.__ulmoaGardenV6,script:Array.from(document.scripts).map(x=>x.src)}));
+console.log('DIAG_STATE',JSON.stringify(s));
+await browser.close();if(!s.v5||!s.v6)process.exitCode=1;
