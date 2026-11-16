@@ -133,3 +133,24 @@
 .hands-divide-minus,.hands-divide-undo{background:#fff1e2}
 .hands-divide-group{min-width:165px}
 @media(max-width:600px){.hands-divide-piece{min-width:0;min-height:37px;font-size:18px}.hands-divide-pieces{gap:3px;padding:6px}.hands-divide-bin{min-width:120px}}
+
+/* Concrete multiplication: equal fractional groups, area overlap, and unit-cube layers. */
+.hands-product-controls{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;width:100%}
+.hands-product-controls button{min-width:88px;min-height:49px;padding:9px 12px;border:2px solid #a8cbaa;border-radius:13px;background:#e7f4e7;color:#305d49;font:inherit;font-weight:850;touch-action:manipulation}
+.hands-product-controls .hands-product-undo,.hands-volume-down{background:#fff4e6}
+.hands-product-groups{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;width:100%}
+.hands-product-group{min-width:155px;max-width:240px;flex:1 1 155px;background:#fffef7;border:2px solid #c6dbc4;border-radius:16px;padding:11px;display:grid;justify-items:center;gap:10px}
+.hands-product-group strong{font-size:16px;color:#3c6d51}
+.hands-product-dots{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;min-height:24px;color:#4d9d75;font-size:18px}
+.hands-product-area{display:grid;gap:2px;width:min(100%,350px);aspect-ratio:1;background:#f9fbf7;border:2px solid #afc7af;border-radius:13px;padding:5px}
+.hands-product-square{min-width:0;min-height:0;border:1px solid #cadecb;border-radius:2px;background:white}
+.hands-product-square.horizontal{background:#ffdf9d;border-color:#dcb76a}
+.hands-product-square.vertical{background:#afdaeb;border-color:#7aadc4}
+.hands-product-square.overlap{background:#74b991;border-color:#3c8361}
+.hands-volume-floor{display:grid;gap:3px;width:min(100%,220px);padding:9px;background:#f5f9e9;border:2px solid #b8d0ae;border-radius:13px}
+.hands-volume-cube{display:grid;place-items:center;background:#a2d2a6;min-height:40px;color:#316c4a;border:1px solid #5c9a73;border-radius:5px}
+.hands-volume-stack{display:grid;gap:7px;width:min(100%,480px)}
+.hands-volume-layer{display:flex;align-items:center;gap:10px;border:1px solid #c1d7ba;background:white;border-radius:12px;padding:7px 12px}
+.hands-volume-layer strong{flex:0 0 35px;font-size:13px;color:#4e7958}
+.hands-volume-layer-cubes{display:flex;flex-wrap:wrap;gap:3px;font-size:19px;color:#57a478}
+@media(max-width:600px){.hands-product-group{flex-basis:135px;min-width:130px}.hands-product-controls button{min-width:71px;font-size:14px;padding:7px}.hands-product-area{max-width:280px}.hands-volume-layer-cubes{font-size:16px}}
