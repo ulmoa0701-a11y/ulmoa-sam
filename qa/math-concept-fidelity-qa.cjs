@@ -35,7 +35,23 @@ for(const mode of ['fracUnlike','fracUnlikeSub']){
   assert(Math.abs(s.numer/s.den-(n1/d1+(mode==='fracUnlike'?1:-1)*n2/d2))<1e-8);
  }
 }
-console.log('PASS MODEL: 3D stack geometry, front/side projections, 10x/100x quotient invariance, unlike fractions');
+for(const mode of ['fracDivN','fracDivSame','fracDivF','divisionFraction']){
+ for(let i=0;i<100;i++){
+  const scene=H.buildMode(H.family(mode),mode,E.problem(mode));
+  assert.equal(scene.kind,'fraction-divide');
+  if(mode==='fracDivN'){
+    assert.equal(scene.operation,'share');
+    assert.equal(scene.each*scene.people,scene.numer);
+  }else{
+    assert.equal(scene.operation,'group');
+    assert.equal(scene.quotient*scene.groupSize,scene.units);
+    assert.equal(scene.answer,scene.quotient);
+    if(mode==='fracDivSame')assert.equal(scene.left.split('/')[1],scene.right.split('/')[1]);
+    if(mode==='fracDivF')assert.notEqual(scene.left.split('/')[1],scene.right.split('/')[1]);
+  }
+ }
+}
+console.log('PASS MODEL: 3D stacks, decimal equivalence, unlike fraction bars and 4 fraction-division modes');
 
 (async()=>{
  const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',args:['--no-sandbox','--disable-dev-shm-usage']});
@@ -104,6 +120,25 @@ console.log('PASS MODEL: 3D stack geometry, front/side projections, 10x/100x quo
     return {d1:+d1,d2:+d2};
    });
    assert.notEqual(frac.d1,frac.d2);
+   for(const item of [{g:6,t:1,u:0,s:1,mode:'fracDivN'},{g:6,t:2,u:0,s:0,mode:'fracDivSame'},{g:6,t:2,u:0,s:1,mode:'fracDivF'},{g:6,t:2,u:0,s:2,mode:'divisionFraction'}]){
+    await page.goto(base+'/math-garden/grade-play/?g='+item.g+'&t='+item.t+'&u='+item.u+'&s='+item.s);
+    const r=await page.evaluate(()=>{
+     const app=window.MoaUnitApp;
+     const click=s=>{const el=document.querySelector(s);if(!el)throw Error('missing '+s);el.click()};
+     click('.hands-check');click('#next');
+     click('.hands-help');click('.hands-check');click('#next');
+     const scene=app.state.activity.scene;
+     if(scene.operation==='share'){
+      for(let i=0;i<scene.people;i++)for(let k=0;k<scene.each;k++)document.querySelectorAll('.hands-divide-add')[i].click();
+     }else{
+      for(let i=0;i<scene.quotient;i++)click('.hands-divide-group');
+     }
+     click('.hands-check');
+     return {mode:scene.mode,solved:app.state.solved,firstTry:app.state.firstTry};
+    });
+    assert(r.solved&&r.firstTry===1,item.mode+' did not solve independently');
+    assert.equal(r.mode,item.mode);
+   }
    await page.close();
    console.log('PASS BROWSER '+width+'px: all three 3D spatial modes, true positional grading, decimal scaling, fraction source bars');
   }
