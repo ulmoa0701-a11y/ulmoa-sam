@@ -15,7 +15,7 @@ try{
  const start=await page.evaluate(()=>window.__ulmoaGardenFeedbackV5.state());
  check("playerShoeModelsExist",start.shoes);
  check("purpleSoilHiddenAtStart",!start.soilVisible&&start.phase==="locked");
- check("manorOnRightOfAvenue",start.manorLocation[0]===17&&start.manorLocation[1]===7&&start.door[1]===.1);
+ check("manorOnRightOfAvenue",start.manorLocation[0]===17&&start.manorLocation[1]===7&&start.door[1]===-3.1);
  check("23RealStairs",start.stairCount===23&&await page.evaluate(()=>!!window.__ulmoaGardenFeedbackV5&&!!document.querySelector("#hg6PlayerSilhouette")));
  const collision=await page.evaluate(()=>{
   const p=window.__ulmoaGardenFeedbackV5.probeCollision;
