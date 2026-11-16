@@ -22,7 +22,7 @@ try{
  check("npcHasSolidBody",initial.peopleSolid);
  check("npcFootprintIsActuallyBlocked",await page.evaluate(()=>{
   const v=window.__ulmoaGardenFeedbackV6;
-  return v.probeHuman(-3,1)&&!v.probeHuman(-40,-30);
+  const s=v.state();return v.probeHuman(s.gardener[0],s.gardener[1])&&!v.probeHuman(-40,-30);
  }));
  const visual=await page.evaluate(()=>({
   top:parseFloat(getComputedStyle(document.getElementById("hg4Combat")).top),
