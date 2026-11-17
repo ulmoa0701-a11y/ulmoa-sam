@@ -57,3 +57,18 @@
 @media(max-width:740px){.theme-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.theme-card{min-height:110px}.play-settings{grid-template-columns:1fr 1fr}.setting-field:last-child{grid-column:1/-1}}
 @media(max-width:480px){.song-app{width:calc(100% - 16px)}.song-hero{padding:19px 15px;min-height:180px}.song-hero h1{font-size:clamp(31px,8vw,40px)}.song-hero img{max-height:125px;width:25%}.song-hero p{font-size:12px}.step-jump{gap:4px}.step-jump a{font-size:12px;min-height:45px;padding:5px 2px}.song-sheet{padding:16px}.theme-grid{gap:6px}.theme-card{min-height:104px}.theme-card strong{font-size:13px}.theme-card small{font-size:10px}.theme-emoji{font-size:29px}.word-cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.word-card{min-height:59px;font-size:15px}.lyric-slot{min-height:52px;border-radius:9px;font-size:17px}.lyrics-preview,.note-grid,.grid-syllables{gap:3px}.note-grid,.grid-syllables{grid-template-columns:33px repeat(8,minmax(0,1fr))}.note-btn{min-height:47px;border-radius:8px;font-size:17px}.note-label{min-height:47px;font-size:13px}.grid-syllables span{min-height:39px;border-radius:8px;font-size:14px}.grid-syllables span:first-child{font-size:10px}.pitch-chip{min-width:33px;min-height:32px}.level-row button{min-height:43px;font-size:11px}.karaoke-line span{font-size:22px;min-width:23px}.storage-panel{padding:15px}.topnav{gap:4px}}
 @media print{@page{size:A4;margin:14mm}.song-app{width:100%;max-width:none}.topnav,.hero,.step-jump,.section-top,.song-app #songIdea,.song-app #songWords,.song-app #songNotes,.play-settings,.main-play,.storage-panel,.status,.song-app footer,.mini-note{display:none!important}.song-app #songFinish{display:block!important;box-shadow:none;border:none;margin:0;padding:0}.song-app #songFinish::before{content:'모아의 노래공방 · 나의 작사·작곡';display:block;font-size:13px;color:#52765b;margin-bottom:15px;font-weight:900}.play-lyrics{border:1px solid #aebfae;background:#fff;padding:25px;min-height:120px}.karaoke-line span{color:#222;font-size:30px}.karaoke-line span.now{background:transparent;color:#222;transform:none}}
+
+.note-label-part2,.syllable-label-part2{display:none!important}.print-song{display:none}
+@media(max-width:480px){
+ .note-grid,.grid-syllables{grid-template-columns:33px repeat(4,minmax(0,1fr))}
+ .note-label-part2,.syllable-label-part2{display:grid!important}
+ .note-btn{min-height:53px;font-size:19px}
+ .grid-syllables span{min-height:42px;font-size:17px}
+}
+@media print{
+ .print-song{display:block!important;text-align:center;margin:22px 0 28px}
+ .print-song h2{font-size:32px;color:#314d3e;margin:0 0 26px}
+ .print-song p{font-size:27px!important;line-height:1.85!important;color:#263f32!important;font-weight:850}
+ .print-song small{font-size:11px;color:#79917d}
+ .play-lyrics{display:none!important}
+}
