@@ -153,12 +153,50 @@ function wavBuffer(buffer){const pcm=buffer.getChannelData(0),len=pcm.length,byt
 }
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
 function filename(){return(song.title.replace(/[\\/:*?"<>|\u0000-\u001f]/g,'').trim()||'내노래').slice(0,32)}
-async function exportAudio(){stop();const b=$('downloadWav');b.disabled=true;status('🎧 내가 만든 연주 음원을 만들고 있어요.');
- try{const O=window.OfflineAudioContext||window.webkitOfflineAudioContext;if(!O)throw Error('이 브라우저에서는 WAV 만들기가 지원되지 않아요.');
-  const sec=16*(60/song.tempo/2)+1,offline=new O(1,Math.ceil(sec*44100),44100);
-  scheduleSong(offline,.1,0,16,null);const rendered=await offline.startRendering();
-  download(new Blob([wavBuffer(rendered)],{type:'audio/wav'}),filename()+'_연주.wav');status('🎶 연주 음원 WAV를 저장했어요. 가창 목소리는 포함되지 않아요.','win');
- }catch(e){status('WAV 저장 실패: '+e.message,'warn')}finally{b.disabled=false}
+/* WAV는 PCM을 직접 만들어 저장한다. OfflineAudioContext 비동기 렌더링/브라우저 제한에 의존하지 않는다. */
+function synthesizeWav(){
+ const rate=44100,step=60/song.tempo/2,seconds=16*step+.65,pcm=new Float32Array(Math.ceil(seconds*rate));
+ const TAU=Math.PI*2;
+ function add(freq,at,duration,volume,shape='sine'){
+  const begin=Math.max(0,Math.floor(at*rate)),end=Math.min(pcm.length,Math.ceil((at+duration)*rate));
+  for(let i=begin;i<end;i++){
+   const t=(i-begin)/rate,env=Math.min(1,t/.009,Math.max(0,(duration-t)/.045));
+   const phase=TAU*freq*t;
+   const sample=shape==='triangle'?(2/Math.PI)*Math.asin(Math.sin(phase)):Math.sin(phase);
+   pcm[i]+=sample*volume*Math.max(0,env);
+  }
+ }
+ function addDrum(at,strong){
+  const duration=strong?.16:.09,start=Math.floor(at*rate),end=Math.min(pcm.length,Math.ceil((at+duration)*rate));
+  const f0=strong?126:430,f1=strong?52:230,sweep=Math.log(f1/f0)/duration;
+  for(let i=start;i<end;i++){
+   const t=(i-start)/rate,phase=TAU*f0*Math.expm1(sweep*t)/sweep;
+   pcm[i]+=Math.sin(phase)*(strong?.12:.055)*Math.pow(Math.max(0,1-t/duration),2);
+  }
+ }
+ const chords=[[261.63,329.63,392],[196,246.94,293.66],[220,261.63,329.63],[174.61,220,261.63]];
+ const notes=song.notes[0].concat(song.notes[1]),withBeat=['beat','both'].includes(song.backing),withChord=['chord','both'].includes(song.backing);
+ for(let i=0;i<16;i++){
+  const at=.1+i*step,n=notes[i];
+  if(n!==null){
+   const f=PITCHES[n].freq,shape=song.voice==='piano'?'triangle':'sine';
+   add(f,at,step*.84,song.voice==='bell'?.13:.17,shape);
+   if(song.voice==='bell')add(f*2,at,step*.48,.032);
+   if(song.voice==='piano')add(f*2,at,step*.25,.018);
+  }
+  if(withBeat&&i%2===0)addDrum(at,i%4===0);
+  if(withChord&&i%4===0)chords[Math.floor(i/4)].forEach((f,j)=>add(f/2,at,step*3.75,.025,j===0?'sine':'triangle'));
+ }
+ return wavBuffer({sampleRate:rate,getChannelData:()=>pcm});
+}
+function exportAudio(){
+ stop();const button=$('downloadWav');button.disabled=true;status('🎧 연주 음원을 만들고 있어요.');
+ try{
+  const data=synthesizeWav();
+  download(new Blob([data],{type:'audio/wav'}),filename()+'_연주.wav');
+  status('🎶 WAV 연주 음원을 저장했어요. 가창 목소리는 포함되지 않아요.','win');
+ }catch(e){status('WAV 저장 실패: '+e.message,'warn')}
+ finally{button.disabled=false}
 }
 function lyricsText(){return '모아의 노래공방\n제목: '+song.title+'\n\n[첫 번째 줄]\n'+song.lyrics[0]+'\n\n[두 번째 줄]\n'+song.lyrics[1]+'\n\n(내가 만든 노래 · 연주 음원은 WAV 파일로 별도 저장)'}
 function library(){const v=getStorage(STORAGE_LIBRARY);saved=Array.isArray(v)?v.filter(x=>x&&typeof x.id==='string'&&x.project).slice(0,20):[]}
