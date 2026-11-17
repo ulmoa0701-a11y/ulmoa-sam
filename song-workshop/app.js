@@ -39,7 +39,7 @@ function scrub(input){
  s.backing=['none','beat','chord','both'].includes(input.backing)?input.backing:'both';
  return s;
 }
-let song=template(),selectedLine=0,patternIndex=0,playing=false,token=0,audio=null,nodes=new Set(),timers=[],saved=[];
+let song=template(),selectedLine=0,patternIndex=0,playing=false,token=0,audio=null,nodes=new Set(),timers=[],saved=[],exampleLines=[true,true];
 function status(t,kind=''){const el=$('songStatus');el.textContent=t;el.dataset.kind=kind}
 function getStorage(key){try{return JSON.parse(localStorage.getItem(key)||'null')}catch(e){return null}}
 function putStorage(key,v){try{localStorage.setItem(key,JSON.stringify(v));return true}catch(e){return false}}
@@ -87,9 +87,10 @@ function drawKaraoke(active=-1){for(let r=0;r<2;r++){const div=$('playLine'+r),c
   chars.forEach((ch,i)=>{const s=document.createElement('span');s.textContent=ch;if(r*8+i===active)s.className='now';div.append(s)})}}
 function render(){drawTheme();drawVerseTabs();drawWords();drawLyrics();drawLevels();drawGrid();$('tempo').value=String(song.tempo);$('voice').value=song.voice;$('backing').value=song.backing}
 function setLine(n){stop();selectedLine=n;drawVerseTabs();drawLyrics();drawGrid();status((n===0?'첫':'두 번째')+' 줄을 편집해요.')}
-function addWord(word){const old=song.lyrics[selectedLine],joined=old+(old.trim()?' ':'')+word;if(syllables(joined).length>8){status('이 줄은 8칸까지! 다른 낱말을 골라 보세요.','warn');return}
+function addWord(word){if(exampleLines[selectedLine]){song.lyrics[selectedLine]='';exampleLines[selectedLine]=false}
+ const old=song.lyrics[selectedLine],joined=old+(old.trim()?' ':'')+word;if(syllables(joined).length>8){status('이 줄은 8칸까지! 다른 낱말을 골라 보세요.','warn');return}
  song.lyrics[selectedLine]=joined;updateDraft();drawLyrics();status('💬 '+word+'를 가사에 넣었어요.')}
-function applyTheme(theme){stop();song=template(theme);selectedLine=0;patternIndex=0;updateDraft();render();status(THEMES[theme].icon+' '+THEMES[theme].title+' 예시가 나왔어요. 가사와 음표를 바꿔 보세요!')}
+function applyTheme(theme){stop();song=template(theme);selectedLine=0;patternIndex=0;exampleLines=[true,true];updateDraft();render();status(THEMES[theme].icon+' '+THEMES[theme].title+' 예시가 나왔어요. 가사와 음표를 바꿔 보세요!')}
 function chooseLevel(level){stop();song.level=level;if(level===1){song.notes=song.notes.map(line=>line.map(n=>n===1?0:n===4?3:n))}updateDraft();drawLevels();drawGrid();
  status(['도·미·솔 3음부터 시작해요.','도·레·미·솔·라 5음을 골라요.','쉼표까지 넣어 자유롭게 만들어요.'][level-1])}
 function idea(){stop();patternIndex=(patternIndex+1)%NOTE_PATTERNS.length;const base=NOTE_PATTERNS[patternIndex][selectedLine],pitches=allowed();
@@ -209,9 +210,9 @@ function saveSong(){const title=song.title.trim()||'내 노래',id=String(Date.n
  const entry={id,savedAt:new Date().toISOString(),project:copy({...song,title})};saved.unshift(entry);saved=saved.slice(0,20);
  if(putStorage(STORAGE_LIBRARY,saved)){drawLibrary(id);status('💾 '+title+' 곡을 저장했어요. 최대 20곡까지 이 기기에 보관해요.','win')}else status('이 브라우저에서 저장을 사용할 수 없어요. 수정용 곡 파일로 내려받아 주세요.','warn')}
 function loadSong(){const id=$('savedSongs').value,item=saved.find(e=>e.id===id);if(!item){status('먼저 저장한 곡을 목록에서 골라 주세요.','warn');return}
- try{stop();song=scrub(item.project);selectedLine=0;updateDraft();render();status('📂 '+song.title+' 저장곡을 불러왔어요.','win')}catch(e){status('저장한 곡을 읽을 수 없어요: '+e.message,'warn')}}
+ try{stop();song=scrub(item.project);selectedLine=0;exampleLines=[false,false];updateDraft();render();status('📂 '+song.title+' 저장곡을 불러왔어요.','win')}catch(e){status('저장한 곡을 읽을 수 없어요: '+e.message,'warn')}}
 async function importSong(file){if(!file)return;if(file.size>120000){status('곡 파일이 너무 커요. 120KB 이하 JSON 파일을 선택해 주세요.','warn');return}
- try{const raw=await file.text(),parsed=JSON.parse(raw),p=scrub(parsed);stop();song=p;selectedLine=0;updateDraft();render();status('🎉 곡 파일을 불러왔어요. 계속 수정할 수 있어요!','win')}catch(e){status('올바른 모아의 노래공방 곡 파일인지 확인해 주세요: '+e.message,'warn')}}
+ try{const raw=await file.text(),parsed=JSON.parse(raw),p=scrub(parsed);stop();song=p;selectedLine=0;exampleLines=[false,false];updateDraft();render();status('🎉 곡 파일을 불러왔어요. 계속 수정할 수 있어요!','win')}catch(e){status('올바른 모아의 노래공방 곡 파일인지 확인해 주세요: '+e.message,'warn')}}
 function speechLyrics(){if(!('speechSynthesis' in window)){status('이 브라우저는 한국어 가사 읽기를 지원하지 않아요.','warn');return}
  try{speechSynthesis.cancel();const utter=new SpeechSynthesisUtterance(song.lyrics.filter(Boolean).join('. '));utter.lang='ko-KR';utter.rate=.82;utter.pitch=1;speechSynthesis.speak(utter);status('🔈 가사를 말로 읽어 줘요. 노래를 부르는 목소리는 아니에요.')}
  catch(e){status('음성 읽기 기능을 사용할 수 없어요.','warn')}}
@@ -219,10 +220,10 @@ function bind(){
  document.querySelectorAll('[data-theme]').forEach(x=>x.addEventListener('click',()=>{const theme=x.dataset.theme;if(theme===song.theme)return;applyTheme(theme)}));
  $('songTitle').addEventListener('input',e=>{song.title=String(e.target.value).slice(0,40);$('printTitle').textContent=song.title||'내 노래';updateDraft()});
  document.querySelectorAll('[data-line]').forEach(x=>x.addEventListener('click',()=>setLine(Number(x.dataset.line))));
- $('lyricInput').addEventListener('input',e=>{const text=normalizeLyrics(e.target.value);const capped=trimEight(text),truncated=syllables(text).length>8;song.lyrics[selectedLine]=capped;updateDraft();drawLyrics();if(truncated)status('이 줄은 8글자까지만 넣을 수 있어요.','warn')});
- $('wordBack').addEventListener('click',()=>{const chars=Array.from(song.lyrics[selectedLine]);chars.pop();song.lyrics[selectedLine]=chars.join('').trimEnd();updateDraft();drawLyrics();status('마지막 글자를 지웠어요.')});
- $('wordClear').addEventListener('click',()=>{song.lyrics[selectedLine]='';updateDraft();drawLyrics();status('이 줄을 지웠어요.')});
- $('wordExample').addEventListener('click',()=>{song.lyrics[selectedLine]=THEMES[song.theme].lines[selectedLine];updateDraft();drawLyrics();status('🌟 예시 가사를 다시 넣었어요.')});
+ $('lyricInput').addEventListener('input',e=>{const text=normalizeLyrics(e.target.value);const capped=trimEight(text),truncated=syllables(text).length>8;song.lyrics[selectedLine]=capped;exampleLines[selectedLine]=false;updateDraft();drawLyrics();if(truncated)status('이 줄은 8글자까지만 넣을 수 있어요.','warn')});
+ $('wordBack').addEventListener('click',()=>{const chars=Array.from(song.lyrics[selectedLine]);chars.pop();song.lyrics[selectedLine]=chars.join('').trimEnd();exampleLines[selectedLine]=false;updateDraft();drawLyrics();status('마지막 글자를 지웠어요.')});
+ $('wordClear').addEventListener('click',()=>{song.lyrics[selectedLine]='';exampleLines[selectedLine]=false;updateDraft();drawLyrics();status('이 줄을 지웠어요.')});
+ $('wordExample').addEventListener('click',()=>{song.lyrics[selectedLine]=THEMES[song.theme].lines[selectedLine];exampleLines[selectedLine]=true;updateDraft();drawLyrics();status('🌟 예시 가사를 다시 넣었어요.')});
  document.querySelectorAll('[data-level]').forEach(x=>x.addEventListener('click',()=>chooseLevel(Number(x.dataset.level))));
  $('melodyIdea').addEventListener('click',idea);$('melodyClear').addEventListener('click',()=>{stop();song.notes[selectedLine]=Array(8).fill(null);updateDraft();drawGrid();status('이 줄의 음표를 모두 지웠어요.')});
  $('demoNote').addEventListener('click',()=>play(selectedLine*8,selectedLine*8+8));
@@ -237,6 +238,6 @@ function bind(){
  $('printSong').addEventListener('click',()=>window.print());
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&playing){stop();status('■ 재생을 멈췄어요.')}});
 }
-try{const v=getStorage(STORAGE_DRAFT);if(v)song=scrub(v)}catch(e){song=template()}
+try{const v=getStorage(STORAGE_DRAFT);if(v){song=scrub(v);exampleLines=[false,false]}}catch(e){song=template()}
 library();render();drawLibrary();bind();
 })();
