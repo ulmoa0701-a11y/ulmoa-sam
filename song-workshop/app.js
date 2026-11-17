@@ -44,7 +44,7 @@ function status(t,kind=''){const el=$('songStatus');el.textContent=t;el.dataset.
 function getStorage(key){try{return JSON.parse(localStorage.getItem(key)||'null')}catch(e){return null}}
 function putStorage(key,v){try{localStorage.setItem(key,JSON.stringify(v));return true}catch(e){return false}}
 function updateDraft(){putStorage(STORAGE_DRAFT,song)}
-function drawTheme(){document.querySelectorAll('[data-theme]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.theme===song.theme)));$('songTitle').value=song.title}
+function drawTheme(){document.querySelectorAll('[data-theme]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.theme===song.theme)));$('songTitle').value=song.title;$('printTitle').textContent=song.title||'내 노래'}
 function drawVerseTabs(){document.querySelectorAll('[data-line]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.line)===selectedLine)))}
 function drawWords(){const cards=$('wordCards');cards.replaceChildren();THEMES[song.theme].words.forEach(w=>{const b=document.createElement('button');b.type='button';b.className='word-card';b.textContent=w;b.setAttribute('aria-label',w+' 가사에 넣기');b.addEventListener('click',()=>addWord(w));cards.append(b)})}
 function drawLyrics(){
@@ -54,6 +54,7 @@ function drawLyrics(){
  $('lyricInput').value=song.lyrics[selectedLine];
  $('verse0').textContent='💛 '+(song.lyrics[0]||'(첫 줄 비어 있어요)');
  $('verse1').textContent='💙 '+(song.lyrics[1]||'(두 번째 줄 비어 있어요)');
+ $('printVerse0').textContent=song.lyrics[0]||'(첫 줄)';$('printVerse1').textContent=song.lyrics[1]||'(둘째 줄)';
  drawGridSyllables();drawKaraoke();
 }
 function allowed(){return song.level===1?[0,2,3]:[0,1,2,3,4]}
@@ -64,22 +65,22 @@ function drawGrid(){
  const rows=[4,3,2,1,0],allowedPitches=allowed();
  for(const row of rows){
   const label=document.createElement('div');label.className='note-label';label.textContent=PITCHES[row].name;grid.append(label);
-  for(let col=0;col<8;col++){
+  for(let col=0;col<8;col++){if(col===4){const sub=document.createElement('div');sub.className='note-label note-label-part2';sub.textContent=PITCHES[row].name;grid.append(sub)}
    const b=document.createElement('button');b.type='button';b.className='note-btn';b.dataset.col=col;b.dataset.pitch=row;b.style.setProperty('--tone',PITCHES[row].color);
    const on=song.notes[selectedLine][col]===row,enabled=allowedPitches.includes(row);
    b.setAttribute('aria-pressed',String(on));b.setAttribute('aria-disabled',String(!enabled));b.setAttribute('aria-label',(col+1)+'번째 박 '+PITCHES[row].name+(on?' 선택됨':' 선택하기')+(enabled?'':' 현재 단계에서 선택 불가'));
    b.textContent=on?'♪':'·';if(!enabled)b.disabled=true;
-   b.addEventListener('click',()=>{stop();song.notes[selectedLine][col]=on?null:row;updateDraft();drawGrid();previewPitch(row);status((col+1)+'번째 칸을 '+(on?'쉼으로 바꿨어요.':PITCHES[row].name+' 음으로 바꿨어요.'))});
+   b.addEventListener('click',()=>{stop();song.notes[selectedLine][col]=on?null:row;updateDraft();drawGrid();if(!on)previewPitch(row);status((col+1)+'번째 칸을 '+(on?'쉼으로 바꿨어요.':PITCHES[row].name+' 음으로 바꿨어요.'))});
    grid.append(b);
   }
  }
  if(song.level===3){const label=document.createElement('div');label.className='note-label';label.textContent='쉼';grid.append(label);
-  for(let col=0;col<8;col++){const b=document.createElement('button');b.type='button';b.className='note-btn';b.dataset.col=col;b.dataset.rest='1';const on=song.notes[selectedLine][col]===null;b.textContent=on?'쉼':'○';b.setAttribute('aria-label',(col+1)+'번째 박 쉬기');b.setAttribute('aria-pressed',String(on));b.addEventListener('click',()=>{stop();song.notes[selectedLine][col]=null;updateDraft();drawGrid();status((col+1)+'번째 칸을 쉬는 박으로 바꿨어요.')});grid.append(b)}
+  for(let col=0;col<8;col++){if(col===4){const sub=document.createElement('div');sub.className='note-label note-label-part2';sub.textContent='쉼';grid.append(sub)}const b=document.createElement('button');b.type='button';b.className='note-btn';b.dataset.col=col;b.dataset.rest='1';const on=song.notes[selectedLine][col]===null;b.textContent=on?'쉼':'○';b.setAttribute('aria-label',(col+1)+'번째 박 쉬기');b.setAttribute('aria-pressed',String(on));b.addEventListener('click',()=>{stop();song.notes[selectedLine][col]=null;updateDraft();drawGrid();status((col+1)+'번째 칸을 쉬는 박으로 바꿨어요.')});grid.append(b)}
  }
  drawGridSyllables();
 }
 function drawGridSyllables(active=-1){const el=$('gridSyllables');el.replaceChildren();const n=document.createElement('span');n.textContent='가사';el.append(n);
- const chars=syllables(song.lyrics[selectedLine]);for(let i=0;i<8;i++){const span=document.createElement('span');span.textContent=chars[i]||'·';span.dataset.col=i;if(i===active)span.classList.add('now');el.append(span)}
+ const chars=syllables(song.lyrics[selectedLine]);for(let i=0;i<8;i++){if(i===4){const sub=document.createElement('span');sub.className='syllable-label-part2';sub.textContent='가사';el.append(sub)}const span=document.createElement('span');span.textContent=chars[i]||'·';span.dataset.col=i;if(i===active)span.classList.add('now');el.append(span)}
 }
 function drawKaraoke(active=-1){for(let r=0;r<2;r++){const div=$('playLine'+r),chars=syllables(song.lyrics[r]);div.replaceChildren();div.classList.toggle('empty',chars.length===0);
   if(!chars.length){div.textContent=r===0?'💛 첫 번째 줄에 가사를 넣어 주세요':'💙 두 번째 줄에 가사를 넣어 주세요';continue}
@@ -178,7 +179,7 @@ function speechLyrics(){if(!('speechSynthesis' in window)){status('이 브라우
  catch(e){status('음성 읽기 기능을 사용할 수 없어요.','warn')}}
 function bind(){
  document.querySelectorAll('[data-theme]').forEach(x=>x.addEventListener('click',()=>{const theme=x.dataset.theme;if(theme===song.theme)return;applyTheme(theme)}));
- $('songTitle').addEventListener('input',e=>{song.title=String(e.target.value).slice(0,40);updateDraft()});
+ $('songTitle').addEventListener('input',e=>{song.title=String(e.target.value).slice(0,40);$('printTitle').textContent=song.title||'내 노래';updateDraft()});
  document.querySelectorAll('[data-line]').forEach(x=>x.addEventListener('click',()=>setLine(Number(x.dataset.line))));
  $('lyricInput').addEventListener('input',e=>{const text=normalizeLyrics(e.target.value);const capped=trimEight(text),truncated=syllables(text).length>8;song.lyrics[selectedLine]=capped;updateDraft();drawLyrics();if(truncated)status('이 줄은 8글자까지만 넣을 수 있어요.','warn')});
  $('wordBack').addEventListener('click',()=>{const chars=Array.from(song.lyrics[selectedLine]);chars.pop();song.lyrics[selectedLine]=chars.join('').trimEnd();updateDraft();drawLyrics();status('마지막 글자를 지웠어요.')});
