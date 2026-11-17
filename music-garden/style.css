@@ -28,3 +28,6 @@ footer{padding:20px 5px 28px;text-align:center;color:#899c94;font-size:12px}
 .beat-preview-art span:first-child{font-size:clamp(35px,5vw,55px)}
 .beat-preview-art span:nth-child(2){color:#5879b2;font-weight:900;letter-spacing:.1em}
 @media(max-width:520px){.beat-preview-art{min-height:142px;gap:3px}.beat-preview-art span:first-child{font-size:35px}.beat-preview-art span:nth-child(2){font-size:19px}}
+
+/* Independent new music activity cards; preserve legacy game class selectors. */
+.rhythm-suite-card{background:linear-gradient(140deg,#fff,#fff5e5)}.ensemble-card{background:linear-gradient(140deg,#fff,#edf9ed)}.explore-card{background:linear-gradient(140deg,#fff,#f3f0ff)}

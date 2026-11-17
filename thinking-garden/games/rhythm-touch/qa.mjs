@@ -108,8 +108,8 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  await musicDoor.click();
  await page.waitForURL('**/music-garden/');
  check((await page.title()).includes('모아의 음악정원'),name+': music garden title wrong');
- check(await page.locator('.game-card').count()===4,
-   name+': music garden needs four activity entrances');
+ check(await page.locator('.game-card').count()===7,
+   name+': music garden now has seven activity entrances');
  check(await page.locator('.game-card[href="../thinking-garden/recorder/"]').count()===1,
    name+': music garden recorder entry missing');
  check(await page.locator('.game-card[href="../thinking-garden/games/rhythm-touch/"]').count()===1,

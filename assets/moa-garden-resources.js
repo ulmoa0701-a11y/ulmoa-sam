@@ -28,6 +28,7 @@ const entries={
  },
  music:{
   materials:[
+   {areas:['rhythm','notation','recorder','basics'],kind:'교사용 · 인쇄 자료',title:'음악놀이 30·50분 수업안·익명 관찰지',desc:'참여 방식에 따른 진행 방법, 한 가지 목표 정하기, A4 인쇄용 기록지',path:'music-play/guide.html'},
    {areas:['rhythm','notation'],kind:'악보 자료 · PDF',title:'16분 리듬 예시',desc:'4/4박자 안에서 16분음표 길이를 살펴보는 울모아 제작 자료',path:'materials/heart-score/sixteenth-rhythm_landscape.pdf'},
    {areas:['rhythm','notation'],kind:'악보 자료 · PDF',title:'점8분·16분 리듬 예시',desc:'점8분음표와 16분음표 길이를 비교하는 울모아 제작 자료',path:'materials/heart-score/dotted-rhythm_landscape.pdf'},
    {areas:['notation','recorder'],kind:'색깔악보 · PDF',title:'작은별 색깔악보',desc:'계이름을 보며 연주 순서를 따라가는 인쇄용 악보',path:'materials/heart-score/twinkle_landscape.pdf'},
@@ -35,6 +36,7 @@ const entries={
    {areas:['rhythm','notation','recorder'],kind:'음악 자료 책장',title:'색깔악보 전체 보기',desc:'나비야·작은별·리듬 예시 등 기존 음악 자료를 모아보기',path:'materials/#musicShelf'}
   ],
   learn:[
+   {areas:['basics'],kind:'듣고 비교하기',title:'빠르기·음의 높낮이·셈여림 구별',desc:'한 번에 한 조건만 바꿔서 들으며 소리 차이를 선택해요.',path:'music-explore/'},
    {areas:['rhythm'],kind:'기초 개념',title:'박자와 리듬은 무엇이 다를까요?',desc:'박자는 일정하게 세는 흐름, 리듬은 소리와 쉼을 길고 짧게 배치한 모양이에요.',path:'materials/#musicShelf'},
    {areas:['rhythm','notation'],kind:'기초 개념',title:'2/4와 4/4박자 읽기',desc:'2/4는 한 마디에 4분음표 기준 두 박, 4/4는 네 박을 담아요. 악보 예시로 비교해요.',path:'materials/#musicShelf'},
    {areas:['notation'],kind:'기초 개념',title:'계이름을 눈으로 따라가기',desc:'도·레·미처럼 음의 이름을 확인하고 악보의 순서대로 소리를 연결해요.',path:'heart-score/'},
