@@ -129,7 +129,11 @@ jobs:
       - name: Export real guitar worksheet to PDF
         run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          curl -fsS http://127.0.0.1:8773/music-play/practice.html >/dev/null || { python3 -m http.server 8773 --bind 127.0.0.1 >/tmp/music-child-pdf-http.log 2>&1 & sleep 2; }
           "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --no-pdf-header-footer --virtual-time-budget=3500 --print-to-pdf=/tmp/ulmoa-guitar-A4.pdf "http://127.0.0.1:8773/music-play/practice.html?instrument=guitar&level=1" >/tmp/worksheet-pdf.log 2>&1
           test -s /tmp/ulmoa-guitar-A4.pdf
           file /tmp/ulmoa-guitar-A4.pdf
-          if command -v pdfinfo >/dev/null; then pdfinfo /tmp/ulmoa-guitar-A4.pdf | grep -E '^Pages:|^Page size:'; fi
+          if command -v pdfinfo >/dev/null; then
+            pdfinfo /tmp/ulmoa-guitar-A4.pdf | grep -E '^Pages:|^Page size:'
+            test "$(pdfinfo /tmp/ulmoa-guitar-A4.pdf | awk '/^Pages:/ {print $2}')" = "1"
+          fi
