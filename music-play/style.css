@@ -22,3 +22,5 @@ footer{text-align:center;font-size:12px;line-height:1.7;color:#8c9f92;padding:24
 @media(max-width:385px){.toplinks a{padding:8px 6px;font-size:10px}.sitename{font-size:11px}.pattern,.trackgrid{gap:3px}.pattern .cell{min-height:55px}.trackgrid button{min-height:48px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 @media print{body{background:white}.topnav,.switcher,.actions,.teacher,footer{display:none!important}.app{width:100%;padding:0}.sheet,.hero{box-shadow:none;border-color:#bbb;break-inside:avoid}.hero img{width:100px}}
+
+@media(max-width:700px){.pattern,.trackgrid{grid-template-columns:repeat(4,minmax(0,1fr))}.pattern .cell,.trackgrid button{min-height:58px}}
