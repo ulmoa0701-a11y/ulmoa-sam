@@ -28,6 +28,7 @@ const entries={
  },
  music:{
   materials:[
+   {areas:['rhythm','notation','recorder','basics'],kind:'실물 악기 · 인쇄/PDF',title:'기타·피아노·붐웨커·리코더 단계별 활동지 12개',desc:'각 악기 3단계에서 한 장씩 선택하고 바로 인쇄 또는 PDF 저장',path:'music-play/practice.html'},
    {areas:['rhythm','notation','recorder','basics'],kind:'교사용 · 인쇄 자료',title:'음악놀이 30·50분 수업안·익명 관찰지',desc:'참여 방식에 따른 진행 방법, 한 가지 목표 정하기, A4 인쇄용 기록지',path:'music-play/guide.html'},
    {areas:['rhythm','notation'],kind:'악보 자료 · PDF',title:'16분 리듬 예시',desc:'4/4박자 안에서 16분음표 길이를 살펴보는 울모아 제작 자료',path:'materials/heart-score/sixteenth-rhythm_landscape.pdf'},
    {areas:['rhythm','notation'],kind:'악보 자료 · PDF',title:'점8분·16분 리듬 예시',desc:'점8분음표와 16분음표 길이를 비교하는 울모아 제작 자료',path:'materials/heart-score/dotted-rhythm_landscape.pdf'},
