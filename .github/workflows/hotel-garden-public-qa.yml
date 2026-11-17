@@ -35,8 +35,6 @@ jobs:
           echo "CHROME_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
       - name: Browser-check the published Babylon game (PC + mobile)
         run: node qa/hotel-garden-public-qa.mjs
-      - name: V7 hand flashlight and mobile interaction regression
-        run: node qa/hotel-garden-v7-qa.mjs
       - name: Real-keyboard classroom opening route (gardener to WOODS)
         if: always() && !cancelled()
         run: node qa/hotel-garden-actual-play.mjs
@@ -44,6 +42,8 @@ jobs:
       - name: Full child-gameplay route using real keyboard actions (all 3 bosses)
         if: always() && !cancelled()
         run: node qa/hotel-garden-full-route-e2e.mjs
+      - name: V7 hand flashlight and mobile interaction regression
+        run: node qa/hotel-garden-v7-qa.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
