@@ -134,7 +134,7 @@ jobs:
                 const pass=document.getElementById('songTitle').value===project.title
                   &&document.querySelector('[data-theme="friend"]').getAttribute('aria-pressed')==='true'
                   &&document.getElementById('tempo').value==='72'
-                  &&document.getElementById('gridSyllables').children.length===9;
+                  &&document.getElementById('gridSyllables').children.length===10;
                 document.documentElement.dataset.importQa=pass?'PASS':'FAIL imported values mismatch';
               }else if(status.dataset.kind==='warn'){
                 observer.disconnect();document.documentElement.dataset.importQa='FAIL '+status.textContent;
