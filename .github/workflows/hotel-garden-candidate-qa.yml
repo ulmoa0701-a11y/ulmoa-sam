@@ -32,6 +32,8 @@ jobs:
           curl --fail --silent --show-error "$HOTEL_GARDEN_URL" >/dev/null
       - name: Parse-check Babylon browser module
         run: node --input-type=module --check < lab/babylon-hotel-garden/assets/index-DxiltY-5.js
+      - name: V7 handheld torch and browser-focus fixes
+        run: node qa/hotel-garden-v7-qa.mjs
       - name: V6 user-feedback fixes and night flashlight
         run: node qa/hotel-garden-v6-qa.mjs
       - name: V5 player, collision and mansion regression
