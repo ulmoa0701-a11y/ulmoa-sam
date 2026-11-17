@@ -1,0 +1,21 @@
+{
+  "at": "2026-11-17T09:51:33.166Z",
+  "checks": {
+    "torchOffDuringDay": true,
+    "movementInputRecognized": true,
+    "lostFocusReleasesMovement": true,
+    "torchEnabledAtNight": true,
+    "torchGlowIsIndependentOfGlobalNightLights": true,
+    "beamOriginAnchoredToHand": true,
+    "beamTracksMovingHand": true,
+    "mobileCombatMessageNotAtVeryTop": true,
+    "mobileControlsAndTorchHintVisible": true,
+    "noMobileHorizontalOverflow": true,
+    "noJSConsoleErrors": true,
+    "noHTTPFailures": true
+  },
+  "errors": [],
+  "httpErrors": [],
+  "pass": true,
+  "url": "https://ulmoa0701-a11y.github.io/ulmoa-sam/lab/babylon-hotel-garden/"
+}
