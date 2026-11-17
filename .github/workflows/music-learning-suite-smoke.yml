@@ -100,7 +100,7 @@ jobs:
           }
           for name,js in cases.items():
               src=(Path(name)/'index.html').read_text(encoding='utf-8')
-              assert '<script src="app.js?v=1"></script>' in src
+              assert '<script src="app.js?v=2"></script>' in src
               (Path(name)/'__qa.html').write_text(src.replace('</body>','<script>'+js+'</script></body>'),encoding='utf-8')
           p=Path('music-play/guide.html').read_text(encoding='utf-8')
           assert all(x in p for x in ['@page','수업 진행 예시','관찰 기록','type="date"','../rhythm-garden/','../ensemble-garden/','../music-explore/'])
