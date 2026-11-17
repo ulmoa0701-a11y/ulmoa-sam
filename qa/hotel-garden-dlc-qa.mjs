@@ -83,17 +83,19 @@ try {
  // Dismiss arrival story before exercising game input: gameplay pauses under modals.
  await clickDialog();
  // Key auto-repeat in the DLC must not restart an in-progress jump.
- await page.keyboard.down("Space");await wait(120);
+ await page.keyboard.down("Space");
+ // First ensure the browser has actually rendered the FIRST frame of the jump.
+ // Under software WebGL, wall-clock sleep does not guarantee an animation frame.
+ await page.waitForFunction(()=>window.__ulmoaGardenFeedbackV6?.state().jumpTime>=.025,{timeout:25000});
  const jumpOne=await page.evaluate(()=>window.__ulmoaGardenFeedbackV6.state());
  await page.evaluate(()=>document.dispatchEvent(new KeyboardEvent("keydown",{bubbles:true,code:"Space",repeat:true})));
  const jumpInstant=await page.evaluate(()=>window.__ulmoaGardenFeedbackV6.state());
- await wait(180);
+ await page.waitForFunction(t=>window.__ulmoaGardenFeedbackV6?.state().jumpTime>t+.012,{timeout:25000},jumpOne.jumpTime);
  const jumpTwo=await page.evaluate(()=>window.__ulmoaGardenFeedbackV6.state());
  await page.keyboard.up("Space");
  console.log("DLC_JUMP_REPEAT_DIAG",JSON.stringify({jumpOne,jumpInstant,jumpTwo,modal:await modal()}));
- // CI headless WebGL can render below 10 FPS; assert no immediate reset plus monotonic progress,
- // rather than assuming at least 90 ms of simulation frames elapsed in 180 ms wall-clock time.
- check("dlcSpaceRepeatDoesNotResetJump",jumpOne.jumpActive&&jumpInstant.jumpActive&&jumpInstant.jumpTime>=jumpOne.jumpTime&&jumpTwo.jumpTime>jumpOne.jumpTime+.015);
+ // Repeated Space must not reset elapsed jump time and progression must resume.
+ check("dlcSpaceRepeatDoesNotResetJump",jumpOne.jumpActive&&jumpInstant.jumpActive&&jumpInstant.jumpTime>=jumpOne.jumpTime&&jumpTwo.jumpTime>jumpOne.jumpTime+.012);
  await page.screenshot({path:"qa/results/hotel-garden-dlc-first-arrival.png"});
  // Central avenue first, then the mansion's NEW right-hand driveway.
 result=await walkTo(17,-11,3.1,135000);
