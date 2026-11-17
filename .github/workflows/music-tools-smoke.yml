@@ -41,7 +41,7 @@ jobs:
                 let e=[],shown=()=>[...document.querySelectorAll('.tool')].filter(x=>!x.hidden);
                 if(document.querySelectorAll('.tool').length!==11)e.push('card count');
                 let s=document.getElementById('search');
-                s.value='훅패드';s.dispatchEvent(new Event('input',{bubbles:true}));
+                s.value='Hookpad';s.dispatchEvent(new Event('input',{bubbles:true}));
                 if(shown().length!==1)e.push('search');
                 if(shown()[0])shown()[0].querySelector('[data-favorite]').click();
                 s.value='';s.dispatchEvent(new Event('input',{bubbles:true}));
