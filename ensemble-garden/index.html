@@ -1,0 +1,22 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="description" content="4가지 악기를 켜고 끄며 리듬을 만들고, 개별 악기와 합주를 비교하는 울모아 자체 악기합주 활동."><title>모아의 악기합주 | 일단 해봄</title><link rel="icon" href="../assets/habom-favicon-v3-32.png"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"><link rel="stylesheet" href="../music-play/style.css?v=1"></head><body><div class="app">
+<nav class="topnav" aria-label="위치"><a class="back" href="../music-garden/">← 음악정원</a><strong class="sitename">🎵 일단 해봄</strong><div class="toplinks"><a href="../music-play/guide.html">📋 지도안</a><a href="../music-toolbox/">🔖 도구 모음</a></div></nav>
+<header class="hero"><div class="hero-copy"><span class="kicker">소리 구별 · 합주 · 역할 나누기</span><h1>🎼 모아의 악기합주</h1><p>처음엔 한 악기부터! 각 악기를 듣고, 차례로 소리를 더해 함께 연주해요.</p></div><img src="../assets/moa-music-garden-approved.webp" alt="울모아가 승인한 모아의 음악정원 그림"></header>
+<nav class="switcher" aria-label="음악놀이 바로가기"><a href="../rhythm-garden/">🥁 리듬정원</a><a href="../sound-garden/">🌈 소리정원</a><a class="current" href="../ensemble-garden/" aria-current="page">🎼 악기합주</a><a href="../music-explore/">🎧 음악탐험</a></nav>
+<main class="workspace"><section class="sheet">
+<span class="hint">① 할 활동</span><div class="pillrow" role="tablist" aria-label="악기합주 활동"><button type="button" class="pill" role="tab" data-view="compose" aria-selected="true" aria-controls="composePanel">🎵 합주 만들기</button><button type="button" class="pill" role="tab" data-view="live" aria-selected="false" aria-controls="livePanel">🙌 악기 눌러보기</button></div>
+<div class="controlrow"><strong>② 보이는 악기</strong><div class="pillrow" role="group" aria-label="악기 개수 선택"><button type="button" class="pill" data-parts="1" aria-pressed="false">1개</button><button type="button" class="pill" data-parts="2" aria-pressed="true">2개</button><button type="button" class="pill" data-parts="4" aria-pressed="false">4개</button></div></div>
+<div id="composePanel" role="tabpanel"><h2>악기별로 리듬을 놓아볼까요?</h2><p>원하는 칸을 누르고 재생해요. <b>혼자 듣기</b>로 한 악기만 들어본 다음 <b>모두 듣기</b>로 합쳐 볼 수 있어요.</p>
+<div class="controlrow"><label for="tempo">빠르기 <select id="tempo"><option value="70">천천히</option><option value="90" selected>보통</option><option value="110">빠르게</option></select></label><span class="hint">8칸 · 악기별 음량 조절 가능</span></div>
+<div id="tracks" role="group" aria-label="악기별 8박 합주 칸"></div>
+<div class="actions"><button class="action primary" id="playAll" type="button">▶ 모두 듣기</button><button class="action" id="playOnce" type="button">🔊 한 악기 듣기</button><button class="action warn" id="stop" type="button">■ 정지</button><button class="action" id="sample" type="button">✨ 예시</button><button class="action" id="clear" type="button">↺ 칸 지우기</button></div>
+<div class="status" id="mixStatus" role="status">악기별 칸을 눌러보세요. 소리가 겹쳐도 괜찮아요.</div>
+<div class="teacher"><strong style="font-size:14px">💾 내가 만든 합주</strong><div class="actions"><button class="action" id="save" type="button">이 기기에 저장</button><button class="action" id="load" type="button">불러오기</button><button class="action" id="copy" type="button">익명 관찰 기록 복사</button></div><p>현재 브라우저에만 저장되며 다른 사람에게 전송되지 않습니다. 이 활동은 악기 음색을 흉내 낸 자체 전자 합성음으로, 실제 악기 녹음은 아닙니다.</p></div>
+</div>
+<div id="livePanel" role="tabpanel" hidden><h2>하나씩 눌러 함께 소리를 내요</h2><p>원하는 악기를 눌러 즉시 소리를 들어요. 한 사람이 한 악기씩 맡아 번갈아 눌러도 좋아요. 시간제한이나 정답은 없습니다.</p>
+<div id="liveKeys" class="livegrid" role="group" aria-label="악기 소리 버튼"></div>
+<div class="status" id="liveStatus" role="status">원하는 악기 그림을 눌러 보세요.</div><div class="actions"><span id="liveCount" class="session">누른 횟수 0회</span><button class="action" id="resetCount" type="button">횟수 지우기</button></div>
+</div>
+</section></main>
+<p class="printable">안전한 사용: 스마트폰·태블릿의 소리를 낮게 설정한 뒤 시작해 주세요. <a href="../music-play/guide.html">악기 수를 조절하는 방법과 교사용 수업안 보기 →</a></p>
+<footer>일단 해봄 · 울모아쌤 | 외부 음원 샘플을 사용하지 않습니다.</footer>
+</div><script src="../music-play/common.js?v=1"></script><script src="app.js?v=1"></script></body></html>
