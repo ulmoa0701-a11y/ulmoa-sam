@@ -4,7 +4,7 @@
   "steps": [
     {
       "label": "start",
-      "time": "2026-11-16T11:09:52.894Z",
+      "time": "2026-11-17T08:36:32.434Z",
       "stage": 0,
       "player": [
         -18,
@@ -32,7 +32,7 @@
     },
     {
       "label": "gardener",
-      "time": "2026-11-16T11:09:56.503Z",
+      "time": "2026-11-17T08:36:35.624Z",
       "stage": 1,
       "player": [
         -14.86,
@@ -60,11 +60,11 @@
     },
     {
       "label": "woods encounter",
-      "time": "2026-11-16T11:10:25.479Z",
+      "time": "2026-11-17T08:37:02.010Z",
       "stage": 2,
       "player": [
-        15.38,
-        17.52
+        15.17,
+        17.24
       ],
       "woods": {
         "enabled": true,
@@ -88,11 +88,11 @@
     },
     {
       "label": "woods defeated",
-      "time": "2026-11-16T11:10:41.806Z",
+      "time": "2026-11-17T08:37:18.303Z",
       "stage": 3,
       "player": [
-        15.74,
-        14.04
+        16.1,
+        14.58
       ],
       "woods": {
         "enabled": false,
@@ -116,11 +116,11 @@
     },
     {
       "label": "woods flower",
-      "time": "2026-11-16T11:10:43.491Z",
+      "time": "2026-11-17T08:37:19.921Z",
       "stage": 3,
       "player": [
-        15.74,
-        14.04
+        16.1,
+        14.58
       ],
       "woods": {
         "enabled": false,
@@ -144,11 +144,11 @@
     },
     {
       "label": "pond keeper",
-      "time": "2026-11-16T11:11:07.686Z",
+      "time": "2026-11-17T08:37:45.797Z",
       "stage": 4,
       "player": [
-        7.63,
-        -7.64
+        7.85,
+        -7.65
       ],
       "woods": {
         "enabled": false,
@@ -172,11 +172,11 @@
     },
     {
       "label": "EYE approached by keyboard",
-      "time": "2026-11-16T11:11:14.765Z",
+      "time": "2026-11-17T08:37:51.628Z",
       "stage": 4,
       "player": [
-        19.61,
-        -15.93
+        19.38,
+        -15.6
       ],
       "woods": {
         "enabled": false,
@@ -200,11 +200,11 @@
     },
     {
       "label": "eye defeated",
-      "time": "2026-11-16T11:11:19.941Z",
+      "time": "2026-11-17T08:37:57.002Z",
       "stage": 5,
       "player": [
-        18.73,
-        -17.02
+        19.38,
+        -15.6
       ],
       "woods": {
         "enabled": false,
@@ -228,11 +228,11 @@
     },
     {
       "label": "eye flower",
-      "time": "2026-11-16T11:11:21.543Z",
+      "time": "2026-11-17T08:37:58.603Z",
       "stage": 5,
       "player": [
-        18.73,
-        -17.02
+        19.38,
+        -15.6
       ],
       "woods": {
         "enabled": false,
@@ -256,11 +256,11 @@
     },
     {
       "label": "traveler bucket",
-      "time": "2026-11-16T11:12:04.320Z",
+      "time": "2026-11-17T08:38:33.803Z",
       "stage": 6,
       "player": [
-        1.69,
-        18.35
+        1.84,
+        18.92
       ],
       "woods": {
         "enabled": false,
@@ -284,11 +284,11 @@
     },
     {
       "label": "SMOG dodge 1",
-      "time": "2026-11-16T11:12:28.377Z",
+      "time": "2026-11-17T08:39:04.813Z",
       "stage": 6,
       "player": [
-        25.11,
-        -15.69
+        29.99,
+        -16.1
       ],
       "woods": {
         "enabled": false,
@@ -312,11 +312,11 @@
     },
     {
       "label": "SMOG dodge 2",
-      "time": "2026-11-16T11:12:32.941Z",
+      "time": "2026-11-17T08:39:09.696Z",
       "stage": 6,
       "player": [
-        25.11,
-        -15.69
+        30.51,
+        -15.4
       ],
       "woods": {
         "enabled": false,
@@ -340,11 +340,11 @@
     },
     {
       "label": "SMOG dodge 3",
-      "time": "2026-11-16T11:12:37.208Z",
+      "time": "2026-11-17T08:39:14.131Z",
       "stage": 6,
       "player": [
-        30.69,
-        -14.98
+        30.24,
+        -15.76
       ],
       "woods": {
         "enabled": false,
@@ -368,11 +368,11 @@
     },
     {
       "label": "smog water",
-      "time": "2026-11-16T11:12:39.904Z",
+      "time": "2026-11-17T08:39:17.152Z",
       "stage": 7,
       "player": [
-        28.34,
-        -18.11
+        28.06,
+        -18.68
       ],
       "woods": {
         "enabled": false,
@@ -396,11 +396,11 @@
     },
     {
       "label": "stage 7 and third lotus",
-      "time": "2026-11-16T11:12:41.026Z",
+      "time": "2026-11-17T08:39:17.160Z",
       "stage": 7,
       "player": [
-        28.45,
-        -18.9
+        28.06,
+        -18.68
       ],
       "woods": {
         "enabled": false,
@@ -429,7 +429,7 @@
   "pass": true,
   "gardener": {
     "near": true,
-    "pulses": 11,
+    "pulses": 10,
     "last": {
       "stage": 0,
       "patch": "2026-10-12-child-feedback-v1",
@@ -463,13 +463,13 @@
   },
   "woodsArrival": {
     "near": false,
-    "pulses": 58,
+    "pulses": 52,
     "last": {
       "stage": 1,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        15.38,
-        17.52
+        15.17,
+        17.24
       ],
       "woods": {
         "enabled": true,
@@ -499,13 +499,13 @@
   "woodsFlower": true,
   "pondDetour": {
     "near": true,
-    "pulses": 39,
+    "pulses": 43,
     "last": {
       "stage": 3,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        16.47,
-        -8.32
+        16.33,
+        -8.44
       ],
       "woods": {
         "enabled": false,
@@ -533,13 +533,13 @@
   },
   "pondArrival": {
     "near": true,
-    "pulses": 21,
+    "pulses": 20,
     "last": {
       "stage": 3,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        7.63,
-        -7.64
+        7.85,
+        -7.65
       ],
       "woods": {
         "enabled": false,
@@ -567,13 +567,13 @@
   },
   "eyeArrival": {
     "near": true,
-    "pulses": 17,
+    "pulses": 14,
     "last": {
       "stage": 4,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        19.61,
-        -15.93
+        19.38,
+        -15.6
       ],
       "woods": {
         "enabled": false,
@@ -660,8 +660,8 @@
       ],
       "near": true,
       "last": [
-        25.22,
-        -12.09
+        25.35,
+        -12.56
       ]
     },
     {
@@ -671,8 +671,8 @@
       ],
       "near": true,
       "last": [
-        31.02,
-        7.41
+        30.29,
+        7.38
       ]
     },
     {
@@ -682,8 +682,8 @@
       ],
       "near": true,
       "last": [
-        19.99,
-        15.69
+        19.54,
+        15.45
       ]
     },
     {
@@ -693,20 +693,20 @@
       ],
       "near": true,
       "last": [
-        8.9,
-        20.5
+        8.79,
+        20.71
       ]
     }
   ],
   "travelerArrival": {
     "near": true,
-    "pulses": 38,
+    "pulses": 19,
     "last": {
       "stage": 5,
       "patch": "2026-10-12-child-feedback-v1",
       "player": [
-        1.69,
-        18.35
+        1.84,
+        18.92
       ],
       "woods": {
         "enabled": false,
@@ -734,5 +734,5 @@
   },
   "smogWon": true,
   "smogFlower": true,
-  "generatedAt": "2026-11-16T11:12:42.013Z"
+  "generatedAt": "2026-11-17T08:39:18.110Z"
 }
