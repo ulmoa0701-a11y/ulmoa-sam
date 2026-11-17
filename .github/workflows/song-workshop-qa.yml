@@ -63,8 +63,8 @@ jobs:
               check(get('noteGrid').querySelectorAll('button').length===40,'5*8 notes');
               check(get('lyricSlots').children.length===8,'8 syllable slots');
               clicked('[data-theme="animal"]');check(get('songTitle').value.includes('동물'),'change theme');
-              clicked('#wordClear');clicked('.word-card');
-              check(get('lyricInput').value.length>0,'word insertion');
+              clicked('.word-card');
+              check(get('lyricInput').value===document.querySelector('.word-card').textContent,'first tap replaces example lyrics');
               get('lyricInput').value='오늘도나는정말행복해요';
               get('lyricInput').dispatchEvent(new Event('input',{bubbles:true}));
               check([...get('lyricSlots').children].filter(x=>x.classList.contains('filled')).length===8,'8-char cap');
