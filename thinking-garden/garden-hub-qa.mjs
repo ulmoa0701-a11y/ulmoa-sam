@@ -46,7 +46,7 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  await page.goto(base+'/thinking-garden/?category=visual&view=learn',{waitUntil:'networkidle'});
  check(await page.locator('.category-tab[data-category="visual"].active').count()===1&&await page.locator('#gardenResourcePanel').isVisible(),name+': shared topic/view deep link does not restore UI');
  await page.goto(base+'/music-garden/',{waitUntil:'networkidle'});
- check(await page.locator('#gardenGamePanel .game-card').count()===3&&
+ check(await page.locator('#gardenGamePanel .game-card').count()===4&&
    await page.locator('.rhythm-card').count()===1&&
    await page.locator('.recorder-card').count()===1&&
    await page.locator('.beat-card').count()===1,
@@ -64,7 +64,7 @@ for(const [name,w,h] of [['desktop1600',1600,900],['desktop1366',1366,768],['mob
  await page.locator('[data-garden-view="games"]').click();
  check(await page.locator('.game-card:visible').count()===1&&await page.locator('.recorder-card:visible').count()===1,name+': recorder game link hidden or wrong');
  await page.locator('button[data-garden-topic="rhythm"]').click();
- check(await page.locator('.game-card:visible').count()===2&&
+ check(await page.locator('.game-card:visible').count()===3&&
    await page.locator('.rhythm-card:visible').count()===1&&
    await page.locator('.beat-card:visible').count()===1,
    name+': rhythm and beat-breath games must both remain accessible in rhythm topic');
