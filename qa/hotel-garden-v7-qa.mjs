@@ -39,7 +39,8 @@ try{
  await page.keyboard.up("ArrowUp");
  check("beamTracksMovingHand",moving.torchOn&&moving.beamStartsAtHand<.03);
  await page.screenshot({path:"qa/results/hotel-garden-v7-night-hand-torch.png"});
- await page.setViewport({width:390,height:844,isMobile:true,hasTouch:true,deviceScaleFactor:1});
+ // Keep this browser session alive: toggling Puppeteer isMobile/hasTouch reloads the page.
+ await page.setViewport({width:390,height:844});
  await wait(350);
  const ui=await page.evaluate(()=>({
   mobile:innerWidth===390,
