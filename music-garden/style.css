@@ -31,3 +31,11 @@ footer{padding:20px 5px 28px;text-align:center;color:#899c94;font-size:12px}
 
 /* Independent new music activity cards; preserve legacy game class selectors. */
 .rhythm-suite-card{background:linear-gradient(140deg,#fff,#fff5e5)}.ensemble-card{background:linear-gradient(140deg,#fff,#edf9ed)}.explore-card{background:linear-gradient(140deg,#fff,#f3f0ff)}
+
+/* 기존 음악정원 색체계/카드 수를 유지한 독립형 창작 스튜디오 배너 */
+.song-workshop-promo{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:25px clamp(17px,3.4vw,36px);margin:19px 0 10px;border-radius:24px;border:2px solid #e0d6ee;background:linear-gradient(114deg,#f1ecff 0%,#fff3ea 52%,#f3faeb 100%);box-shadow:0 7px 22px #735f7e12}
+.song-promo-art{display:flex;align-items:center;gap:2px;font-size:33px;flex:0 0 auto}.song-promo-art span:nth-child(2){font-size:39px}.song-promo-copy{flex:1 1 350px;min-width:0}
+.song-promo-tag{font-size:11px;font-weight:950;color:#8268a4;letter-spacing:.03em}.song-promo-copy h2{font-size:clamp(23px,3vw,32px);letter-spacing:-.05em;color:#4c4b6e;margin:3px 0 6px}
+.song-promo-copy p{font-size:14px;line-height:1.65;font-weight:750;color:#655e76;margin:0;word-break:keep-all}
+.song-promo-link{display:inline-flex;align-items:center;justify-content:center;min-height:53px;flex:0 0 auto;padding:12px 20px;border-radius:14px;background:#6e629b;color:white;font-size:15px;font-weight:950;white-space:nowrap;box-shadow:0 3px 0 #4d4570}
+@media(max-width:550px){.song-workshop-promo{padding:16px;gap:9px}.song-promo-art{font-size:25px}.song-promo-art span:nth-child(2){font-size:28px}.song-promo-copy{flex-basis:100%}.song-promo-link{width:100%;margin-top:3px}}

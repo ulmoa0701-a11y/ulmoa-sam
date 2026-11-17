@@ -1,0 +1,187 @@
+name: Moa Song Workshop — composing and saving browser QA
+on:
+  pull_request:
+    paths:
+      - 'song-workshop/**'
+      - 'music-garden/index.html'
+      - 'music-garden/style.css'
+      - 'assets/habom-navigation.js'
+      - 'assets/moa-garden-resources.js'
+      - '.github/workflows/song-workshop-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'song-workshop/**'
+      - 'music-garden/index.html'
+      - 'music-garden/style.css'
+      - 'assets/habom-navigation.js'
+      - 'assets/moa-garden-resources.js'
+      - '.github/workflows/song-workshop-qa.yml'
+permissions:
+  contents: read
+jobs:
+  songwriting-chrome:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify source, original artwork and legacy references
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          h=Path('song-workshop/index.html').read_text(encoding='utf-8')
+          a=Path('song-workshop/app.js').read_text(encoding='utf-8')
+          css=Path('song-workshop/style.css').read_text(encoding='utf-8')
+          garden=Path('music-garden/index.html').read_text(encoding='utf-8')
+          nav=Path('assets/habom-navigation.js').read_text(encoding='utf-8')
+          sources=Path('assets/moa-garden-resources.js').read_text(encoding='utf-8')
+          assert 'moa-music-garden-approved.webp' in h
+          assert Path('assets/moa-music-garden-approved.webp').is_file()
+          assert 'song-workshop/' in garden and 'song-workshop/' in nav and 'song-workshop/' in sources
+          assert all(x in h for x in ('songTitle','lyricInput','noteGrid','playSong','saveSong','downloadWav','downloadLyrics','downloadProject','savedSongs'))
+          assert all(x in a for x in ('synthesizeWav','localStorage','wavBuffer','speechSynthesis','normalizeLyrics','THEMES'))
+          assert '@media print' in css and '@media(max-width:480px)' in css
+          assert garden.count('class="game-card ') == 7, 'seven existing music cards must remain'
+          print('SOURCES AND ORIGINAL GARDEN VERIFIED')
+          PY
+      - name: Build interactive real-browser wrapper
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          html=Path('song-workshop/index.html').read_text(encoding='utf-8')
+          qa=r"""
+          <script>
+          window.addEventListener('load',()=>{
+            document.documentElement.dataset.songStage='on-load';document.documentElement.dataset.songQa='PENDING';
+            const errors=[],get=id=>document.getElementById(id),check=(ok,msg)=>{if(!ok)errors.push(msg)};
+            const clicked=selector=>{const el=document.querySelector(selector);if(!el){errors.push('missing '+selector);return null}el.click();return el};
+            const wait=ms=>new Promise(done=>setTimeout(done,ms));
+            async function run(){
+              document.documentElement.dataset.songStage='sync-tests';
+              check(document.querySelectorAll('[data-theme]').length===6,'6 topic choices');
+              check(document.querySelectorAll('.word-card').length>=8,'word cards');
+              check(get('noteGrid').querySelectorAll('button').length===40,'5*8 notes');
+              check(get('lyricSlots').children.length===8,'8 syllable slots');
+              clicked('[data-theme="animal"]');check(get('songTitle').value.includes('동물'),'change theme');
+              clicked('.word-card');
+              check(get('lyricInput').value===document.querySelector('.word-card').textContent,'first tap replaces example lyrics');
+              get('lyricInput').value='오늘도나는정말행복해요';
+              get('lyricInput').dispatchEvent(new Event('input',{bubbles:true}));
+              check([...get('lyricSlots').children].filter(x=>x.classList.contains('filled')).length===8,'8-char cap');
+              clicked('[data-line="1"]');check(get('gridTitle').textContent.includes('두 번째'),'second verse melody');
+              clicked('[data-line="0"]');
+              clicked('[data-level="1"]');check(get('noteGrid').querySelectorAll('button:disabled').length===16,'three notes only');
+              clicked('[data-level="2"]');check(get('noteGrid').querySelectorAll('button:disabled').length===0,'five notes');
+              clicked('[data-level="3"]');check(get('noteGrid').querySelectorAll('button').length===48,'rests available in challenge');
+              const pitch=get('noteGrid').querySelector('button[data-col="0"][data-pitch="4"]');
+              pitch.click();check(pitch.isConnected===false,'melody re-render');
+              check(get('noteGrid').querySelector('button[data-col="0"][data-pitch="4"]').getAttribute('aria-pressed')==='true','note selection');
+              clicked('#melodyIdea');check(get('noteGrid').querySelectorAll('button[aria-pressed=true]').length>=1,'idea melody');
+              const title=get('songTitle');title.value='내가 만든 재미있는 노래';title.dispatchEvent(new Event('input',{bubbles:true}));
+              clicked('#saveSong');check(get('savedSongs').options.length===1,'saved song appears');
+              clicked('[data-theme="weather"]');clicked('#loadSong');
+              check(get('songTitle').value==='내가 만든 재미있는 노래','saved song restoration');
+              const originalCreate=URL.createObjectURL,originalRevoke=URL.revokeObjectURL,originalClick=HTMLAnchorElement.prototype.click;
+              const captures=[];URL.createObjectURL=blob=>{captures.push(blob);return 'blob:fake-for-test'};
+              URL.revokeObjectURL=()=>{};HTMLAnchorElement.prototype.click=function(){};
+              clicked('#downloadLyrics');clicked('#downloadProject');
+              check(captures.length===2,'download two files');
+              document.documentElement.dataset.songStage='reading-blobs';
+              const txt=await captures[0].text(),json=JSON.parse(await captures[1].text());
+              check(txt.includes('내가 만든 재미있는 노래')&&txt.includes('첫 번째 줄'),'lyrics text content');
+              check(json.notes.length===2&&json.notes.every(x=>x.length===8),'editable JSON composition');
+              clicked('#playSong');check(get('playSong').disabled,'play toggles busy state');
+              clicked('#stopSong');check(!get('playSong').disabled,'stop restores play control');
+              document.documentElement.dataset.songStage='render-wav';
+              clicked('#downloadWav');
+              await wait(80);
+              check(captures.length>=3,'WAV created');
+              if(captures.length>=3){
+                const chunk=await captures[2].arrayBuffer();
+                check(chunk.byteLength>100000,'WAV includes rendered audio samples');
+                const bytes=new Uint8Array(chunk.slice(0,12));
+                check(String.fromCharCode(...bytes.slice(0,4))==='RIFF'&&String.fromCharCode(...bytes.slice(8,12))==='WAVE','valid WAV header');
+              }
+              document.documentElement.dataset.songStage='main-tests-done';
+              check(document.documentElement.scrollWidth<=innerWidth+3,'no page horizontal overflow');
+              const local=getComputedStyle(get('noteGrid')).gridTemplateColumns.split(' ').filter(Boolean);
+              if(innerWidth<=480){check(local.length===5,'mobile composer uses 4 columns + label');const x=get('noteGrid').querySelector('button[data-col="4"]');check(x.getBoundingClientRect().width>=44,'mobile note touch width')}
+              HTMLAnchorElement.prototype.click=originalClick;URL.createObjectURL=originalCreate;URL.revokeObjectURL=originalRevoke;
+              document.documentElement.dataset.songStage='completed';document.documentElement.dataset.songQa=errors.length?'FAIL '+errors.join('; '):'PASS';
+            }
+            run().catch(err=>{document.documentElement.dataset.songQa='FAIL JS '+err.message});
+          });
+          </script>
+          """
+          assert '</body></html>' in html
+          Path('song-workshop/__qa.html').write_text(html.replace('</body>','\n'+qa+'</body>'),encoding='utf-8')
+
+          qa_import=r"""
+          <script>
+          window.addEventListener('load',()=>{
+            document.documentElement.dataset.importQa='PENDING';
+            const input=document.getElementById('projectFile');
+            const project={version:1,theme:'friend',title:'다른기기에서 가져온 노래',
+              lyrics:['우리 함께 노래해','새 친구를 만나요'],
+              notes:[Array(8).fill(0),Array(8).fill(2)],
+              level:2,tempo:72,voice:'soft',backing:'beat'};
+            const file=new File([JSON.stringify(project)],'song.json',{type:'application/json'});
+            const dt=new DataTransfer();dt.items.add(file);input.files=dt.files;
+            const status=document.getElementById('songStatus');
+            const observer=new MutationObserver(()=>{
+              if(status.textContent.includes('곡 파일을 불러왔어요')){
+                observer.disconnect();
+                const pass=document.getElementById('songTitle').value===project.title
+                  &&document.querySelector('[data-theme="friend"]').getAttribute('aria-pressed')==='true'
+                  &&document.getElementById('tempo').value==='72'
+                  &&document.getElementById('gridSyllables').children.length===10;
+                document.documentElement.dataset.importQa=pass?'PASS':'FAIL imported values mismatch';
+              }else if(status.dataset.kind==='warn'){
+                observer.disconnect();document.documentElement.dataset.importQa='FAIL '+status.textContent;
+              }
+            });
+            observer.observe(status,{subtree:true,childList:true});
+            input.dispatchEvent(new Event('change',{bubbles:true}));
+          });
+          </script>
+          """
+          Path('song-workshop/__qa_import.html').write_text(html.replace('</body>','\n'+qa_import+'</body>'),encoding='utf-8')
+          PY
+      - name: Chrome interaction at mobile 360, mobile 390 and desktop 1200
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME"
+          python3 -m http.server 8789 --bind 127.0.0.1 >/tmp/song-server.log 2>&1 &
+          sleep 2
+          for WIDTH in 360 390 1200; do
+            "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --autoplay-policy=no-user-gesture-required --window-size="$WIDTH,950" --virtual-time-budget=13000 --dump-dom "http://127.0.0.1:8789/song-workshop/__qa.html" >"/tmp/song-$WIDTH.html" 2>"/tmp/song-$WIDTH-chrome.log"
+            if ! grep -q 'data-song-qa="PASS"' "/tmp/song-$WIDTH.html"; then
+              echo "FAIL songwriting Chrome test at $WIDTH"
+              grep -o 'data-song-qa="[^"]*"' "/tmp/song-$WIDTH.html" || true
+              grep -o 'data-song-stage="[^"]*"' "/tmp/song-$WIDTH.html" || true
+              grep -o 'id="songStatus"[^>]*>[^<]*' "/tmp/song-$WIDTH.html" || true
+              grep -o 'id="songTitle"[^>]*' "/tmp/song-$WIDTH.html" || true
+              tail -n 28 "/tmp/song-$WIDTH-chrome.log" || true
+              exit 1
+            fi
+            echo "PASS Song Workshop at $WIDTH px"
+          done
+          "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --autoplay-policy=no-user-gesture-required --window-size="390,950" --virtual-time-budget=6500 --dump-dom "http://127.0.0.1:8789/song-workshop/__qa_import.html" > /tmp/song-import.html 2>/tmp/song-import-chrome.log
+          if ! grep -q 'data-import-qa="PASS"' /tmp/song-import.html; then
+            echo "FAIL imported editable project"
+            grep -o 'data-import-qa="[^"]*"' /tmp/song-import.html || true
+            tail -n 18 /tmp/song-import-chrome.log || true
+            exit 1
+          fi
+          echo "PASS portable JSON project import (fresh browser)"
+      - name: Print one A4 lyric sheet
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          curl -fsS http://127.0.0.1:8789/song-workshop/index.html >/dev/null || { python3 -m http.server 8789 --bind 127.0.0.1 >/tmp/song-print-http.log 2>&1 & sleep 2; }
+          "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --no-pdf-header-footer --virtual-time-budget=2800 --print-to-pdf=/tmp/song-lyrics-A4.pdf http://127.0.0.1:8789/song-workshop/index.html > /tmp/song-print.log 2>&1
+          test -s /tmp/song-lyrics-A4.pdf
+          if command -v pdfinfo >/dev/null; then
+            pdfinfo /tmp/song-lyrics-A4.pdf | grep -E '^Pages:|^Page size:'
+            test "$(pdfinfo /tmp/song-lyrics-A4.pdf | awk '/^Pages:/ {print $2}')" = 1
+          fi
+          echo 'PASS one-page A4 song print'

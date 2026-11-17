@@ -1,0 +1,50 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="description" content="그림 카드로 가사를 쓰고 색깔 음표로 멜로디를 작곡하는 모아의 노래공방. 원곡·유료서비스 없이 노래를 만들고 WAV 음원과 가사를 저장하세요."><title>모아의 노래공방 | 일단 해봄</title><link rel="icon" href="../assets/habom-approved-favicon.png"><link rel="stylesheet" href="../music-play/style.css?v=2"><link rel="stylesheet" href="style.css?v=1"></head>
+<body><div class="app song-app">
+<nav class="topnav" aria-label="페이지 위치"><a class="back" href="../music-garden/">← 음악정원</a><strong class="sitename">🎵 일단 해봄</strong><div class="toplinks"><a href="../sound-garden/">🌈 소리정원</a><a href="../music-toolbox/">🔖 음악도구</a></div></nav>
+<header class="hero song-hero"><div class="hero-copy"><span class="kicker">🎤 내 말이 노래가 되는 곳</span><h1>모아의 노래공방</h1><p>낱말을 고르고, 음표를 누르면 내 노래 완성!<br>직접 부를 수 있는 세상에 하나뿐인 노래를 만들어 봐요.</p></div><img src="../assets/moa-music-garden-approved.webp" alt="기존 음악정원의 승인된 모아 캐릭터"></header>
+<nav class="step-jump" aria-label="작곡 순서"><a href="#songIdea">① 🌟 주제</a><a href="#songWords">② ✏️ 가사</a><a href="#songNotes">③ 🎹 멜로디</a><a href="#songFinish">④ 🎵 완성</a></nav>
+<main>
+<section class="sheet song-sheet" id="songIdea"><div class="section-top"><span class="mini-index">STEP 01</span><h2>무슨 노래를 만들까?</h2><p>그림을 하나 골라요. 가사와 멜로디 예시가 나와요.</p></div>
+<div class="theme-grid" role="group" aria-label="노래 주제 선택">
+<button type="button" class="theme-card" data-theme="cheer" aria-pressed="true"><span class="theme-emoji" aria-hidden="true">🌟</span><strong>응원</strong><small>나는 할 수 있어!</small></button>
+<button type="button" class="theme-card" data-theme="friend" aria-pressed="false"><span class="theme-emoji" aria-hidden="true">🤝</span><strong>친구</strong><small>우리 함께!</small></button>
+<button type="button" class="theme-card" data-theme="animal" aria-pressed="false"><span class="theme-emoji" aria-hidden="true">🐶</span><strong>동물</strong><small>동물이 춤춰요</small></button>
+<button type="button" class="theme-card" data-theme="weather" aria-pressed="false"><span class="theme-emoji" aria-hidden="true">🌈</span><strong>날씨</strong><small>비가 와도 좋아</small></button>
+<button type="button" class="theme-card" data-theme="school" aria-pressed="false"><span class="theme-emoji" aria-hidden="true">🎒</span><strong>학교</strong><small>오늘의 이야기</small></button>
+<button type="button" class="theme-card" data-theme="free" aria-pressed="false"><span class="theme-emoji" aria-hidden="true">🎨</span><strong>내 마음대로</strong><small>내가 직접!</small></button>
+</div>
+<label class="song-label" for="songTitle">🎼 내 노래 제목</label><input id="songTitle" class="song-input song-title-input" type="text" maxlength="40" autocomplete="off" placeholder="예: 반짝반짝 나의 노래" value="나는 빛나는 별"><p class="mini-note">💚 주제를 바꾸면 예시 가사와 멜로디가 바뀝니다. 직접 수정한 내용을 남기려면 먼저 저장해 주세요.</p></section>
+<section class="sheet song-sheet" id="songWords"><div class="section-top"><span class="mini-index">STEP 02</span><h2>가사를 만들어요</h2><p>낱말 카드를 누르거나 직접 써요. 두 줄로 내 이야기를 만들어 봐요.</p></div>
+<div class="verse-switch" role="group" aria-label="편집할 가사 줄">
+<button type="button" data-line="0" aria-pressed="true">💛 첫 번째 줄</button><button type="button" data-line="1" aria-pressed="false">💙 두 번째 줄</button></div>
+<div class="lyrics-preview" id="lyricSlots" role="group" aria-label="가사 여덟 칸"></div>
+<p class="count-hint" id="lyricCount" role="status">가사 8칸 중 0칸 사용</p>
+<label class="song-label" for="lyricInput">✏️ 가사 직접 쓰기</label><input type="text" id="lyricInput" class="song-input" maxlength="30" autocomplete="off" spellcheck="false" placeholder="여기에 가사를 써도 돼요">
+<div class="word-guide"><strong>🌼 낱말을 톡톡 누르기</strong><span>첫 낱말을 누르면 예시 가사를 바꾸고 새로 시작해요</span></div>
+<div id="wordCards" class="word-cards" role="group" aria-label="가사 만들기 낱말 카드"></div>
+<div class="actions lyric-actions"><button type="button" class="action" id="wordBack">↶ 마지막 글자 지우기</button><button type="button" class="action" id="wordClear">🧽 이 줄 지우기</button><button type="button" class="action" id="wordExample">🌟 예시 다시 넣기</button></div>
+<div class="lyrics-both"><strong>💬 내 노래 가사</strong><p id="verse0"></p><p id="verse1"></p></div></section>
+<section class="sheet song-sheet" id="songNotes"><div class="section-top"><span class="mini-index">STEP 03</span><h2>색깔 음표로 작곡해요</h2><p>한 칸에 음표 하나! 색깔 칸을 누르면 바로 소리가 나요.</p></div>
+<div class="melody-controls"><div class="pitch-explain" aria-hidden="true"><span class="pitch-chip" style="--note:#f3b9cf">라</span><span class="pitch-chip" style="--note:#d2c6f9">솔</span><span class="pitch-chip" style="--note:#a9d8f1">미</span><span class="pitch-chip" style="--note:#b6e3bd">레</span><span class="pitch-chip" style="--note:#ffe1a7">도</span></div><div class="level-row" role="group" aria-label="작곡 난이도">
+<button type="button" data-level="1" aria-pressed="true">① 쉬운 3음</button><button type="button" data-level="2" aria-pressed="false">② 5음</button><button type="button" data-level="3" aria-pressed="false">③ 자유 작곡</button></div></div>
+<div class="note-headline"><strong id="gridTitle">💛 첫 번째 줄의 멜로디</strong><span>왼쪽부터 한 칸씩 →</span></div>
+<div id="noteGrid" class="note-grid" aria-label="5가지 음과 8박을 선택하는 멜로디 작곡판"></div>
+<div id="gridSyllables" class="grid-syllables" aria-label="음표 칸과 대응하는 가사"></div>
+<div class="actions"><button type="button" id="demoNote" class="action primary">▶ 이 줄 듣기</button><button type="button" id="melodyIdea" class="action">🎲 멜로디 아이디어</button><button type="button" id="melodyClear" class="action">↺ 이 줄 음표 지우기</button></div>
+<p class="mini-note">빈 음표 칸은 쉬는 박이에요. 가사 한 글자에 음표 한 칸을 맞춰 보세요. 3단계에서는 원하는 음표와 쉼을 자유롭게 편집할 수 있어요.</p></section>
+<section class="sheet song-sheet" id="songFinish"><div class="section-top"><span class="mini-index">STEP 04</span><h2>내 노래 완성! 🎉</h2><p>빠르기와 반주를 고른 뒤 노래를 들어 보세요. 가사가 따라 빛나요.</p></div>
+<div class="play-settings">
+<label class="setting-field" for="tempo">🐢 빠르기 <select id="tempo"><option value="72">천천히</option><option value="96" selected>보통</option><option value="120">신나게</option></select></label>
+<label class="setting-field" for="voice">🎹 멜로디 소리 <select id="voice"><option value="piano">피아노 느낌</option><option value="bell" selected>반짝 종소리</option><option value="soft">부드러운 소리</option></select></label>
+<label class="setting-field" for="backing">🥁 반주 <select id="backing"><option value="none">없음</option><option value="beat">쿵짝</option><option value="chord">코드</option><option value="both" selected>쿵짝 + 코드</option></select></label>
+</div>
+<div class="print-song" aria-label="인쇄용 완성곡"><h2 id="printTitle">내 노래</h2><p id="printVerse0"></p><p id="printVerse1"></p><small>모아의 노래공방 · 일단 해봄 · 작사·작곡 활동 결과</small></div><div class="play-lyrics" role="group" aria-label="재생 중인 가사"><div id="playLine0" class="karaoke-line"></div><div id="playLine1" class="karaoke-line"></div></div>
+<div class="actions main-play"><button type="button" id="playSong" class="action primary big-play">▶ 내 노래 듣기</button><button type="button" id="stopSong" class="action warn">■ 정지</button><button type="button" id="readLyrics" class="action">🔈 가사 읽어주기</button></div>
+<div class="status" id="songStatus" role="status" aria-live="polite">🌟 내 노래를 들어 보고 고쳐 보세요!</div>
+<div class="storage-panel"><h3>💾 내 노래 간직하기</h3><p>저장한 뒤 다시 고칠 수 있어요. 음원 파일에는 멜로디·반주만 담기고, 목소리는 들어가지 않아요.</p>
+<label class="song-label" for="savedSongs">📚 저장한 내 노래</label><select id="savedSongs" class="song-input" aria-label="저장된 곡 목록"><option value="">저장된 곡 없음</option></select><div class="actions"><button type="button" id="saveSong" class="action">💾 이 기기에 저장</button><button type="button" id="loadSong" class="action">↺ 저장곡 불러오기</button><button type="button" id="downloadWav" class="action primary">🎧 연주 음원 WAV</button><button type="button" id="downloadLyrics" class="action">📝 가사 TXT</button><button type="button" id="downloadProject" class="action">📁 수정용 곡 파일</button><button type="button" id="importProject" class="action">📂 곡 파일 열기</button><button type="button" id="printSong" class="action">🖨️ 곡·가사 인쇄</button></div>
+<input type="file" id="projectFile" accept=".json,application/json" hidden aria-label="이전에 만든 작곡 파일 선택">
+<p class="mini-note">로그인·서버 업로드·유료 API 없이 작동합니다. 저장곡은 이 브라우저에만 보관되므로 다른 기기로 옮기려면 ‘수정용 곡 파일’을 내려받으세요. 이름이나 개인 정보를 가사에 넣어 공개하지 않도록 주의해 주세요.</p></div>
+</section>
+</main><footer>일단 해봄 · 울모아쌤 | 음악놀이·창작 보조활동 (가창·음성 녹음 기능 없음)</footer>
+</div><script src="app.js?v=1"></script></body></html>
