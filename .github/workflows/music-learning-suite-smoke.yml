@@ -1,0 +1,139 @@
+name: Music learning suite real-browser QA
+on:
+  pull_request:
+    paths:
+      - 'rhythm-garden/**'
+      - 'ensemble-garden/**'
+      - 'music-explore/**'
+      - 'music-play/**'
+      - 'sound-garden/index.html'
+      - 'music-garden/index.html'
+      - 'assets/habom-navigation.js'
+      - '.github/workflows/music-learning-suite-smoke.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'rhythm-garden/**'
+      - 'ensemble-garden/**'
+      - 'music-explore/**'
+      - 'music-play/**'
+      - 'sound-garden/index.html'
+      - 'music-garden/index.html'
+      - 'assets/habom-navigation.js'
+      - '.github/workflows/music-learning-suite-smoke.yml'
+permissions:
+  contents: read
+jobs:
+  chrome-activity-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create interactive browser QA pages
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          cases={
+           'rhythm-garden':"""
+              window.addEventListener('load',()=>{
+                let e=[],q=id=>document.getElementById(id);
+                let valid=(ok,msg)=>{if(!ok)e.push(msg)};
+                valid(q('echoMarks').children.length===2,'2-beat marks');
+                document.querySelector('[data-length="4"]').click();
+                valid(q('echoMarks').children.length===4,'4-beat change');
+                document.querySelector('[data-mode="make"]').click();
+                valid(!q('makeMode').hidden&&q('makerGrid').children.length===4,'maker tab and four beats');
+                document.querySelector('[data-maker-length="8"]').click();
+                valid(q('makerGrid').children.length===8,'8-beat switch');
+                q('makerGrid').querySelector('.cell').click();
+                valid(q('makerGrid').querySelectorAll('[aria-pressed="true"]').length>0,'maker input');
+                document.querySelector('[data-mode="turn"]').click();
+                valid(!q('turnMode').hidden&&q('turnHit').disabled===false,'turn tab');
+                q('turnHit').click();q('turnRest').click();q('turnHit').click();q('turnRest').click();
+                valid(!q('turnPlay').disabled,'completed turn pattern');
+                q('turnUndo').click();valid(q('turnPlay').disabled,'turn undo');
+                valid(document.documentElement.scrollWidth<=innerWidth+3,'mobile horizontal overflow');
+                document.documentElement.setAttribute('data-suite-qa',e.length?'FAIL '+e.join(','):'PASS');
+              });
+           """,
+           'ensemble-garden':"""
+              window.addEventListener('load',()=>{
+                let e=[],q=id=>document.getElementById(id);
+                let valid=(ok,msg)=>{if(!ok)e.push(msg)};
+                valid(q('tracks').children.length===2,'two parts default');
+                document.querySelector('[data-parts="4"]').click();
+                valid(q('tracks').children.length===4,'four part selection');
+                valid(q('tracks').querySelectorAll('.trackgrid button').length===32,'32 track steps');
+                q('tracks').querySelector('.trackgrid button').click();
+                valid(q('tracks').querySelectorAll('.trackgrid button').length===32,'step interaction');
+                document.querySelector('[data-view="live"]').click();
+                valid(!q('livePanel').hidden&&q('liveKeys').children.length===4,'four live keys');
+                q('liveKeys').querySelector('button').click();
+                valid(q('liveCount').textContent.includes('1회'),'live response');
+                q('resetCount').click();valid(q('liveCount').textContent.includes('0회'),'count reset');
+                valid(document.documentElement.scrollWidth<=innerWidth+3,'mobile horizontal overflow');
+                document.documentElement.setAttribute('data-suite-qa',e.length?'FAIL '+e.join(','):'PASS');
+              });
+           """,
+           'music-explore':"""
+              window.addEventListener('load',()=>{
+                let e=[],q=id=>document.getElementById(id);
+                let valid=(ok,msg)=>{if(!ok)e.push(msg)};
+                valid(q('questionTitle').textContent.includes('빠르게'),'tempo default');
+                document.querySelector('[data-concept="pitch"]').click();
+                valid(q('questionTitle').textContent.includes('높게'),'pitch change');
+                document.querySelector('[data-concept="dynamic"]').click();
+                valid(q('questionTitle').textContent.includes('작게'),'dynamics change');
+                document.querySelector('[data-concept="pitch"]').click();
+                q('playQuestion').click();
+                setTimeout(()=>{
+                  valid(!document.querySelector('[data-answer="0"]').disabled,'answer enabled after listening');
+                  document.querySelector('[data-answer="0"]').click();
+                  valid(q('trialCount').textContent.includes('1회'),'answer counted');
+                  q('clearLog').click();valid(q('trialCount').textContent.includes('0회'),'reset observation');
+                  valid(document.documentElement.scrollWidth<=innerWidth+3,'mobile horizontal overflow');
+                  document.documentElement.setAttribute('data-suite-qa',e.length?'FAIL '+e.join(','):'PASS');
+                },1100);
+              });
+           """
+          }
+          for name,js in cases.items():
+              src=(Path(name)/'index.html').read_text(encoding='utf-8')
+              assert '<script src="app.js?v=1"></script>' in src
+              (Path(name)/'__qa.html').write_text(src.replace('</body>','<script>'+js+'</script></body>'),encoding='utf-8')
+          p=Path('music-play/guide.html').read_text(encoding='utf-8')
+          assert all(x in p for x in ['@page','수업 진행 예시','관찰 기록','type="date"','../rhythm-garden/','../ensemble-garden/','../music-explore/'])
+          print('PRINT GUIDE VERIFIED')
+          PY
+      - name: Interact in Chrome 390px and 1200px
+        shell: bash
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME"
+          python3 -m http.server 8769 --bind 127.0.0.1 >/tmp/suite-http.log 2>&1 &
+          sleep 2
+          for WIDTH in 390 1200; do
+            for PAGE in rhythm-garden ensemble-garden music-explore; do
+              "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --autoplay-policy=no-user-gesture-required --window-size="$WIDTH,900" --virtual-time-budget=3200 --dump-dom "http://127.0.0.1:8769/$PAGE/__qa.html" > /tmp/suite-dom.html 2>/tmp/suite-chrome.log
+              if ! grep -q 'data-suite-qa="PASS"' /tmp/suite-dom.html; then
+                echo "FAIL $PAGE $WIDTH"
+                grep -o 'data-suite-qa="[^"]*"' /tmp/suite-dom.html || true
+                tail -n 12 /tmp/suite-chrome.log || true
+                exit 1
+              fi
+              echo "PASS $PAGE $WIDTH"
+            done
+          done
+      - name: Existing game and index references preserved
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          music=Path('music-garden/index.html').read_text(encoding='utf-8')
+          nav=Path('assets/habom-navigation.js').read_text(encoding='utf-8')
+          for p in ('../rhythm-garden/','../ensemble-garden/','../music-explore/','../sound-garden/','../thinking-garden/recorder/','../breath-garden/?mode=beat','../music-play/guide.html'):
+              assert p in music,p
+          for p in ('rhythm-garden/','ensemble-garden/','music-explore/','sound-garden/'):
+              assert p in nav,p
+          print('ORIGINALS AND NEW LINKS PRESENT')
+          PY
