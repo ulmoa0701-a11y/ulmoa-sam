@@ -5,7 +5,7 @@
 <main class="workspace"><section class="sheet">
 <span class="hint">① 할 활동</span><div class="pillrow" role="tablist" aria-label="악기합주 활동"><button type="button" class="pill" role="tab" data-view="compose" aria-selected="true" aria-controls="composePanel">🎵 합주 만들기</button><button type="button" class="pill" role="tab" data-view="live" aria-selected="false" aria-controls="livePanel">🙌 악기 눌러보기</button></div>
 <div class="controlrow"><strong>② 보이는 악기</strong><div class="pillrow" role="group" aria-label="악기 개수 선택"><button type="button" class="pill" data-parts="1" aria-pressed="false">1개</button><button type="button" class="pill" data-parts="2" aria-pressed="true">2개</button><button type="button" class="pill" data-parts="4" aria-pressed="false">4개</button></div></div>
-<div id="composePanel" role="tabpanel"><h2>악기별로 리듬을 놓아볼까요?</h2><p>원하는 칸을 누르고 재생해요. <b>혼자 듣기</b>로 한 악기만 들어본 다음 <b>모두 듣기</b>로 합쳐 볼 수 있어요.</p>
+<div id="composePanel" role="tabpanel"><h2>악기별로 리듬을 놓아볼까요?</h2><p>원하는 칸을 누르고 재생해요. <b>혼자 듣기</b>로 한 악기만 들어본 다음 <b>모두 듣기</b>로 합쳐 볼 수 있어요. 칸은 왼쪽부터 오른쪽으로, 다음 줄로 이어져요.</p>
 <div class="controlrow"><label for="tempo">빠르기 <select id="tempo"><option value="70">천천히</option><option value="90" selected>보통</option><option value="110">빠르게</option></select></label><span class="hint">8칸 · 악기별 음량 조절 가능</span></div>
 <div id="tracks" role="group" aria-label="악기별 8박 합주 칸"></div>
 <div class="actions"><button class="action primary" id="playAll" type="button">▶ 모두 듣기</button><button class="action" id="playOnce" type="button">🔊 한 악기 듣기</button><button class="action warn" id="stop" type="button">■ 정지</button><button class="action" id="sample" type="button">✨ 예시</button><button class="action" id="clear" type="button">↺ 칸 지우기</button></div>
