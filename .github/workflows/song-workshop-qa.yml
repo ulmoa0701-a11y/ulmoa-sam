@@ -105,8 +105,13 @@ jobs:
               document.documentElement.dataset.songStage='import-json';
               const restoreFile=new File([JSON.stringify(json)],'saved-song.json',{type:'application/json'});
               const dt=new DataTransfer();dt.items.add(restoreFile);get('projectFile').files=dt.files;
+              clicked('[data-theme="school"]');
+              const imported=new Promise(resolve=>{
+                const obs=new MutationObserver(()=>{if(get('songStatus').textContent.includes('곡 파일을 불러왔어요')){obs.disconnect();resolve()}});
+                obs.observe(get('songStatus'),{childList:true,subtree:true});
+              });
               get('projectFile').dispatchEvent(new Event('change',{bubbles:true}));
-              await wait(100);
+              await imported;
               check(get('songTitle').value==='내가 만든 재미있는 노래','import JSON working');
               check(document.documentElement.scrollWidth<=innerWidth+3,'no page horizontal overflow');
               const local=getComputedStyle(get('noteGrid')).gridTemplateColumns.split(' ').filter(Boolean);
