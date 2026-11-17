@@ -8,7 +8,7 @@ function mark(count,values,activeAt=-1,answer=false){
  const value=values[i];if(value===1){d.classList.add('done');d.textContent='👏'}else if(value===0){d.classList.add('rest');d.textContent='🤫'}else d.textContent=String(i+1);
  box.append(d)}
 }
-function chooseNew(change=true){M.halt();if(change)question++;let arr=bank[length];target=arr[question%arr.length].slice();answers=[];heard=false;mark(length,[]);mark(length,[],-1,true);
+function chooseNew(change=true){M.halt();$('listen').disabled=false;$('listenAgain').disabled=false;if(change)question++;let arr=bank[length];target=arr[question%arr.length].slice();answers=[];heard=false;mark(length,[]);mark(length,[],-1,true);
  $('hit').disabled=true;$('rest').disabled=true;$('checkEcho').disabled=true;M.putStatus('echoStatus','🔊 먼저 듣기를 눌러요.')}
 function renderHint(){if(heard&&$('showHint').checked)mark(length,target);else mark(length,[])}
 document.querySelectorAll('[data-length]').forEach(b=>b.addEventListener('click',()=>{length=Number(b.dataset.length);document.querySelectorAll('[data-length]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));question=0;chooseNew(false)}));
@@ -62,7 +62,7 @@ function addTurn(v){if(turn.length>=turnLen)return;M.halt();turn.push(v);if(v)tr
 $('turnHit').addEventListener('click',()=>addTurn(1));$('turnRest').addEventListener('click',()=>addTurn(0));
 $('turnNew').addEventListener('click',resetTurn);$('turnUndo').addEventListener('click',()=>{M.halt();turn.pop();turnDraw();M.putStatus('turnStatus','마지막 한 박을 지웠어요.')});
 $('turnPlay').addEventListener('click',()=>{if(turn.length!==turnLen)return;M.sequence(turnLen,650,i=>{const ms=[...$('turnMarks').children];ms.forEach((x,n)=>x.classList.toggle('current',n===i));if(turn[i])M.instrument('clap',.13)},err=>{[...$('turnMarks').children].forEach(x=>x.classList.remove('current'));M.putStatus('turnStatus',err?err.message:'차례로 만든 리듬을 들었어요.',err?'warn':'')})});
-function showMode(mode){M.halt();['echo','make','turn'].forEach(t=>{$(t+'Mode').hidden=mode!==t});document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.mode===mode)));
+function showMode(mode){M.halt();$('listen').disabled=false;$('listenAgain').disabled=false;['echo','make','turn'].forEach(t=>{$(t+'Mode').hidden=mode!==t});document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.mode===mode)));
  const url=new URL(location.href);url.searchParams.set('mode',mode);history.replaceState(null,'',url);
 }
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>showMode(b.dataset.mode)));

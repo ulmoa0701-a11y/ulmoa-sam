@@ -1,0 +1,139 @@
+name: Music child mode and real-instrument practice QA
+on:
+  pull_request:
+    paths: ['music-play/**','rhythm-garden/**','ensemble-garden/**','music-explore/**','.github/workflows/music-child-practice-qa.yml']
+  push:
+    branches: [main]
+    paths: ['music-play/**','rhythm-garden/**','ensemble-garden/**','music-explore/**','.github/workflows/music-child-practice-qa.yml']
+permissions:
+  contents: read
+jobs:
+  classroom-simulated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare actual browser interaction checks
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          cases={
+            'rhythm-garden':"""
+              window.addEventListener('load',()=>{
+                let errors=[],q=x=>document.getElementById(x),test=(x,t)=>{if(!x)errors.push(t)};
+                document.querySelector('[data-lesson-level="1"]').click();
+                test(q('echoMarks').children.length===2&&q('showHint').checked,'beginner rhythm');
+                q('learnerToggle').click();
+                test(document.body.classList.contains('music-child'),'child mode enabled');
+                test(!q('childGuide').hidden,'child instructions shown');
+                q('teacherToggle').click();
+                test(!document.body.classList.contains('music-child'),'teacher mode restore');
+                document.querySelector('[data-lesson-level="3"]').click();
+                test(q('echoMarks').children.length===4,'challenge rhythm');
+                document.querySelector('[data-mode="make"]').click();
+                test(q('makerGrid').children.length===8,'advanced maker');
+                document.querySelector('[data-mode="echo"]').click();
+                q('listen').click();q('newEcho').click();
+                test(!q('listen').disabled&&!q('listenAgain').disabled,'interrupt restores controls');
+                test(document.documentElement.scrollWidth<=innerWidth+4,'horizontal scroll');
+                document.documentElement.dataset.childQa=errors.length?'FAIL '+errors.join(','):'PASS';
+              });
+            """,
+            'ensemble-garden':"""
+              window.addEventListener('load',()=>{
+                let errors=[],q=x=>document.getElementById(x),test=(x,t)=>{if(!x)errors.push(t)};
+                document.querySelector('[data-lesson-level="1"]').click();
+                test(q('tracks').children.length===1,'one instrument');
+                document.querySelector('[data-lesson-level="2"]').click();
+                test(q('tracks').children.length===2,'two instruments');
+                document.querySelector('[data-lesson-level="3"]').click();
+                test(q('tracks').children.length===4,'four instruments');
+                document.querySelector('[data-view="live"]').click();
+                q('liveKeys').querySelector('button').click();
+                test(q('liveCount').textContent.includes('1회'),'real touch interaction');
+                q('learnerToggle').click();
+                test(document.body.classList.contains('music-child'),'child mode');
+                q('teacherToggle').click();
+                test(!document.body.classList.contains('music-child'),'teacher restore');
+                test(document.documentElement.scrollWidth<=innerWidth+4,'horizontal scroll');
+                document.documentElement.dataset.childQa=errors.length?'FAIL '+errors.join(','):'PASS';
+              });
+            """,
+            'music-explore':"""
+              window.addEventListener('load',()=>{
+                let errors=[],q=x=>document.getElementById(x),test=(x,t)=>{if(!x)errors.push(t)};
+                document.querySelector('[data-lesson-level="1"]').click();
+                test(document.documentElement.dataset.musicLevel==='1','large contrast');
+                document.querySelector('[data-lesson-level="3"]').click();
+                test(document.documentElement.dataset.musicLevel==='3','small contrast');
+                document.querySelector('[data-concept="pitch"]').click();
+                q('playQuestion').click();q('newQuestion').click();
+                test(!q('playQuestion').disabled&&!q('playAgain').disabled,'interrupt playback');
+                q('exampleLow').click();q('newQuestion').click();
+                test(!q('exampleLow').disabled&&!q('exampleHigh').disabled,'interrupt teacher example');
+                q('learnerToggle').click();
+                test(document.body.classList.contains('music-child'),'child mode');
+                q('teacherToggle').click();
+                test(!document.body.classList.contains('music-child'),'teacher restore');
+                test(document.documentElement.scrollWidth<=innerWidth+4,'horizontal scroll');
+                document.documentElement.dataset.childQa=errors.length?'FAIL '+errors.join(','):'PASS';
+              });
+            """,
+            'music-play':"""
+              window.addEventListener('load',()=>{
+                let errors=[],q=x=>document.getElementById(x),test=(x,t)=>{if(!x)errors.push(t)};
+                for(const name of ['guitar','piano','boom','recorder']){
+                  document.querySelector('[data-instrument="'+name+'"]').click();
+                  for(const level of [1,2,3]){
+                    document.querySelector('[data-practice-level="'+level+'"]').click();
+                    test(q('pageSteps').children.length===4,name+':'+level+' steps');
+                    test(q('pageGoal').textContent.length>15,name+':'+level+' goal');
+                    test(q('pageTarget').textContent.length>6,name+':'+level+' target');
+                    test(q('practiceLinks').querySelectorAll('a').length===2,name+':'+level+' links');
+                  }
+                }
+                test(q('pageTitle').textContent.includes('리코더'),'last instrument');
+                test(document.documentElement.scrollWidth<=innerWidth+4,'horizontal scroll');
+                document.documentElement.dataset.childQa=errors.length?'FAIL '+errors.join(','):'PASS';
+              });
+            """
+          }
+          for name,js in cases.items():
+              path=Path(name)/('practice.html' if name=='music-play' else 'index.html')
+              page=path.read_text(encoding='utf-8')
+              assert '</body></html>' in page, f'{path} has no body close'
+              (Path(name)/'__child_qa.html').write_text(page.replace('</body>','<script>'+js+'</script></body>'),encoding='utf-8')
+          script=Path('music-play/practice.js').read_text(encoding='utf-8')
+          assert all(x in script for x in ('guitar:{','piano:{','boom:{','recorder:{'))
+          assert '@page{size:A4 portrait' in Path('music-play/practice.html').read_text()
+          print('Generated 4 browser suites; A4 and twelve lesson variants present')
+          PY
+      - name: Run Chrome at 360px, 390px and desktop 1200px
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME"
+          python3 -m http.server 8773 --bind 127.0.0.1 >/tmp/music-child-http.log 2>&1 &
+          sleep 2
+          for WIDTH in 360 390 1200; do
+            for PAGE in rhythm-garden ensemble-garden music-explore music-play; do
+              "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --autoplay-policy=no-user-gesture-required --window-size="$WIDTH,850" --virtual-time-budget=3500 --dump-dom "http://127.0.0.1:8773/$PAGE/__child_qa.html" > /tmp/music-child-dom.html 2>/tmp/music-child-chrome.log
+              if ! grep -q 'data-child-qa="PASS"' /tmp/music-child-dom.html; then
+                echo "FAIL $PAGE $WIDTH"
+                grep -o 'data-child-qa="[^"]*"' /tmp/music-child-dom.html || true
+                tail -n 18 /tmp/music-child-chrome.log
+                exit 1
+              fi
+              echo "PASS $PAGE $WIDTH"
+            done
+          done
+      - name: Export real guitar worksheet to PDF
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          curl -fsS http://127.0.0.1:8773/music-play/practice.html >/dev/null || { python3 -m http.server 8773 --bind 127.0.0.1 >/tmp/music-child-pdf-http.log 2>&1 & sleep 2; }
+          "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --no-pdf-header-footer --virtual-time-budget=3500 --print-to-pdf=/tmp/ulmoa-guitar-A4.pdf "http://127.0.0.1:8773/music-play/practice.html?instrument=guitar&level=1" >/tmp/worksheet-pdf.log 2>&1
+          test -s /tmp/ulmoa-guitar-A4.pdf
+          file /tmp/ulmoa-guitar-A4.pdf
+          if command -v pdfinfo >/dev/null; then
+            pdfinfo /tmp/ulmoa-guitar-A4.pdf | grep -E '^Pages:|^Page size:'
+            test "$(pdfinfo /tmp/ulmoa-guitar-A4.pdf | awk '/^Pages:/ {print $2}')" = "1"
+          fi

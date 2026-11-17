@@ -43,7 +43,8 @@
       ['모아의 리듬정원','2·3·4박과 쉼 구별하기',U('rhythm-garden/')],
       ['모아의 악기합주','4가지 합성 악기와 합주',U('ensemble-garden/')],
       ['모아의 음악탐험','빠르기·높낮이·셈여림',U('music-explore/')],
-      ['음악놀이 수업안·관찰지','A4 인쇄·PDF 저장',U('music-play/guide.html')]]},
+      ['음악놀이 수업안·관찰지','A4 인쇄·PDF 저장',U('music-play/guide.html')],
+      ['실물 악기 이어하기','기타 피아노 붐웨커 리코더 12활동 A4',U('music-play/practice.html')]]},
     {id:'materials',name:'활동지',icon:'📂',items:[
       ['자료실 전체','인쇄·다운로드 자료',U('materials/')],
       ['인지·기초학습','차근차근 자료',U('materials/#cognitiveShelf')],

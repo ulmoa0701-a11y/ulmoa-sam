@@ -24,3 +24,39 @@ footer{text-align:center;font-size:12px;line-height:1.7;color:#8c9f92;padding:24
 @media print{body{background:white}.topnav,.switcher,.actions,.teacher,footer{display:none!important}.app{width:100%;padding:0}.sheet,.hero{box-shadow:none;border-color:#bbb;break-inside:avoid}.hero img{width:100px}}
 
 @media(max-width:700px){.pattern,.trackgrid{grid-template-columns:repeat(4,minmax(0,1fr))}.pattern .cell,.trackgrid button{min-height:58px}}
+
+/* 2026-11: 수업 단계 선택과 글을 읽기 어려운 아동용 집중 화면 */
+.learning-toolbar{margin:14px 0 16px;padding:18px 20px;background:#fff;border:1.5px solid #d9e8db;border-radius:20px;box-shadow:0 5px 18px #51775a10}
+.learning-toolbar-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.learning-toolbar-top>strong{font-size:18px;color:#335f4d;letter-spacing:-.04em}
+.learning-toggle-group{display:flex;flex-wrap:wrap;gap:7px}
+.learning-toggle{font-weight:850;min-height:47px;padding:10px 13px;border:1.5px solid #cbded1;background:#f8fcf9;border-radius:13px;color:#476e59}
+.learning-toggle.current{background:#33775b;color:#fff;border-color:#33775b}
+.learning-settings{margin:14px 0 1px}.learning-label{font-size:13px;font-weight:900;color:#5d796c}
+.learning-levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:10px 0}
+.learning-levels button{min-height:72px;border:2px solid #d7e4d8;border-radius:14px;background:#fbfdfb;color:#35644d;padding:10px 7px;font-weight:950}
+.learning-levels button b{display:block;font-size:17px}.learning-levels button small{display:block;margin-top:5px;font-size:11px;font-weight:750;color:#708578}
+.learning-levels button[aria-pressed=true]{background:#e4f4df;border-color:#70a983}.learning-levels button[aria-pressed=true] small{color:#426e53}
+.learning-explain{margin:4px 0 12px!important;font-size:13px!important;color:#557664!important;line-height:1.65!important}
+.learning-bridge-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 13px;background:#fff5e7;border:1.5px solid #ead7bb;border-radius:12px;font-size:13px;font-weight:850;text-decoration:none;color:#7f5c36}
+.child-guide{display:flex;align-items:center;gap:13px;flex-wrap:wrap;padding:17px 0 3px}
+.child-guide .guide-emojis{font-size:25px;letter-spacing:.04em}
+.child-guide strong{font-size:clamp(17px,3.3vw,24px);line-height:1.4;letter-spacing:-.04em;color:#366a52;flex:1 1 230px}
+.child-guide button{min-height:49px;background:#fff4df;border:1.5px solid #f0dfb8;color:#8b5d32;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:900}
+body.music-child .toplinks,body.music-child .switcher,body.music-child .sheet .teacher,body.music-child .printable,
+body.music-child .sheet .hint,body.music-child .sheet>p,body.music-child .sheet h2+p,body.music-child .sheet .controlrow{display:none!important}
+body.music-child .hero{min-height:115px;padding:16px 24px}body.music-child .hero h1{font-size:29px;margin:4px 0}
+body.music-child .hero img{max-height:100px}body.music-child .hero .kicker,body.music-child .hero p{display:none}
+body.music-child .learning-toolbar{border:2px solid #b4dac4;background:#f8fdf7}
+body.music-child .sheet h2{font-size:clamp(23px,4.2vw,35px);margin-bottom:18px}
+body.music-child .sheet{padding:clamp(18px,4vw,35px)}
+body.music-child .big{min-height:145px;font-size:20px}
+body.music-child .big .emoji{font-size:49px}
+body.music-child .pair-answer .answer{min-height:160px;font-size:21px}
+body.music-child .pair-answer .emoji{font-size:45px}
+body.music-child .sheet .status{font-size:17px;min-height:64px}
+body.music-child .pill{font-size:16px}
+body.music-child .action.primary{min-height:65px;font-size:18px}
+body.music-child .sheet .rule{margin:18px 0}
+@media(max-width:650px){.learning-toolbar{padding:14px}.learning-toggle-group{width:100%}.learning-toggle-group button{flex:1}.learning-levels{gap:6px}.learning-levels button{padding:8px 3px;min-height:67px}.learning-levels button b{font-size:14px}.learning-levels button small{font-size:10px}.child-guide{gap:9px}body.music-child .hero img{max-height:94px}body.music-child .sheet .actions .action{flex:1 1 125px}}
+@media print{.learning-toolbar{display:none!important}}
