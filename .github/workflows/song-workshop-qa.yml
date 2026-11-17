@@ -39,7 +39,7 @@ jobs:
           assert Path('assets/moa-music-garden-approved.webp').is_file()
           assert 'song-workshop/' in garden and 'song-workshop/' in nav and 'song-workshop/' in sources
           assert all(x in h for x in ('songTitle','lyricInput','noteGrid','playSong','saveSong','downloadWav','downloadLyrics','downloadProject','savedSongs'))
-          assert all(x in a for x in ('OfflineAudioContext','localStorage','wavBuffer','speechSynthesis','normalizeLyrics','THEMES'))
+          assert all(x in a for x in ('synthesizeWav','localStorage','wavBuffer','speechSynthesis','normalizeLyrics','THEMES'))
           assert '@media print' in css and '@media(max-width:480px)' in css
           assert garden.count('class="game-card ') == 7, 'seven existing music cards must remain'
           print('SOURCES AND ORIGINAL GARDEN VERIFIED')
@@ -94,7 +94,7 @@ jobs:
               clicked('#stopSong');check(!get('playSong').disabled,'stop restores play control');
               document.documentElement.dataset.songStage='render-wav';
               clicked('#downloadWav');
-              await wait(1400);
+              await wait(80);
               check(captures.length>=3,'WAV created');
               if(captures.length>=3){
                 const chunk=await captures[2].arrayBuffer();
