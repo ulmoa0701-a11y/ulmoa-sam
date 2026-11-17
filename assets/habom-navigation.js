@@ -21,10 +21,11 @@
         ['고장 난 간판 고치기','맞춤법 · 표현',U('thinking-garden/?game=spelling')],
         ['가방 준비 탐험','생활학습 · 준비물',U('thinking-garden/?game=slowEveryday')],
         ['모아의 화폐 가게','화폐 구별 · 금액 만들기',U('thinking-garden/games/moa-missions/?game=money')]]},
-      {name:'모아의 음악정원',icon:'🎵',desc:'리듬·리코더 · 3개',href:U('gardens/#music'),links:[
+      {name:'모아의 음악정원',icon:'🎵',desc:'리듬·리코더·소리 · 4개',href:U('gardens/#music'),links:[
         ['박자꽃 톡톡!','리듬 · 박자',U('thinking-garden/games/rhythm-touch/')],
         ['리코더 마법정원','운지 · 음악놀이',U('thinking-garden/recorder/')],
-        ['박자 바람','박자에 맞춰 불기',U('breath-garden/?mode=beat')]]},
+        ['박자 바람','박자에 맞춰 불기',U('breath-garden/?mode=beat')],
+        ['소리정원','멜로디·리듬·소리 따라하기',U('sound-garden/')]]},
       {name:'모아의 마음정원',icon:'💛',desc:'감정·호흡 · 3개',href:U('gardens/#heart'),links:[
         ['바람의 힘','바람 세기 조절',U('breath-garden/?mode=strength')],
         ['오래 후~','바람 이어가기',U('breath-garden/?mode=long')],
@@ -33,7 +34,9 @@
     {id:'music',name:'음악도구',icon:'🎼',items:[
       ['하트색깔악보 Studio','악보 직접 만들기',U('heart-score/')],
       ['붐웨커 Studio','색깔 건반·연주',U('boomwhacker/')],
-      ['완성된 색깔악보','PNG·PDF 자료',U('materials/#musicShelf')]]},
+      ['완성된 색깔악보','PNG·PDF 자료',U('materials/#musicShelf')],
+      ['소리정원','새 멜로디·리듬 놀이',U('sound-garden/')],
+      ['음악도구 모아보기','송메이커·훅패드 외부 링크',U('music-toolbox/')]]},
     {id:'materials',name:'활동지',icon:'📂',items:[
       ['자료실 전체','인쇄·다운로드 자료',U('materials/')],
       ['인지·기초학습','차근차근 자료',U('materials/#cognitiveShelf')],
@@ -151,6 +154,8 @@
     ['시각·주의 게임','조건찾기 주의 시각탐색 집중력',U('gardens/#cognitive')],
     ['기억·집행 게임','작업기억 순서기억 반응억제',U('gardens/#cognitive')],
     ['읽기·쓰기 게임','띄어쓰기 맞춤법 한글 문해',U('gardens/#learning')],
+    ['소리정원','멜로디 리듬 만들기 소리 순서 기억 게임',U('sound-garden/')],
+    ['음악도구 모아보기','훅패드 Hookpad 크롬뮤직랩 송메이커 그루브 피자 파타탭 인크레디박스 북마크 사이트',U('music-toolbox/')],
     ['하트색깔악보 Studio','악보 계이름 하트 악보 만들기 음악',U('heart-score/')],
     ['붐웨커 Studio','붐웨커 색깔 건반 음악',U('boomwhacker/')],
     ['리코더 운지','리코더 운지 손가락 음악게임',U('thinking-garden/recorder/')],
