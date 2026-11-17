@@ -86,11 +86,14 @@ try {
  await page.keyboard.down("Space");await wait(120);
  const jumpOne=await page.evaluate(()=>window.__ulmoaGardenFeedbackV6.state());
  await page.evaluate(()=>document.dispatchEvent(new KeyboardEvent("keydown",{bubbles:true,code:"Space",repeat:true})));
+ const jumpInstant=await page.evaluate(()=>window.__ulmoaGardenFeedbackV6.state());
  await wait(180);
  const jumpTwo=await page.evaluate(()=>window.__ulmoaGardenFeedbackV6.state());
  await page.keyboard.up("Space");
- console.log("DLC_JUMP_REPEAT_DIAG",JSON.stringify({jumpOne,jumpTwo,modal:await modal(),dom:await page.evaluate(()=>({activeElement:document.activeElement?.id,dialogClass:document.getElementById("dialog").className}))}));
- check("dlcSpaceRepeatDoesNotResetJump",jumpOne.jumpActive&&jumpTwo.jumpTime>jumpOne.jumpTime+.09);
+ console.log("DLC_JUMP_REPEAT_DIAG",JSON.stringify({jumpOne,jumpInstant,jumpTwo,modal:await modal()}));
+ // CI headless WebGL can render below 10 FPS; assert no immediate reset plus monotonic progress,
+ // rather than assuming at least 90 ms of simulation frames elapsed in 180 ms wall-clock time.
+ check("dlcSpaceRepeatDoesNotResetJump",jumpOne.jumpActive&&jumpInstant.jumpActive&&jumpInstant.jumpTime>=jumpOne.jumpTime&&jumpTwo.jumpTime>jumpOne.jumpTime+.015);
  await page.screenshot({path:"qa/results/hotel-garden-dlc-first-arrival.png"});
  // Central avenue first, then the mansion's NEW right-hand driveway.
 result=await walkTo(17,-11,3.1,135000);
