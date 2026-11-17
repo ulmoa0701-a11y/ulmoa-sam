@@ -47,7 +47,7 @@ for(const [label,width,height] of [
   check(state.metaRobots?.includes('noindex'),label+': index enabled before privacy gate');
   check(!!state.ogTitle&&!!state.ogDescription&&state.ogImage?.startsWith('https://'),
     label+': social preview metadata missing');
-  check(state.shortcuts.length===9 && new Set(state.shortcuts).size===9,label+': 9 distinct shortcut destinations are not preserved');
+  check(state.shortcuts.length===11 && new Set(state.shortcuts).size===11,label+': 11 distinct shortcut destinations are not preserved');
   check(state.primary.join('|')==='gardens/#cognitive|materials/|notes/',
     label+': game/material/learn first-visit order differs '+state.primary.join('|'));
   check(['music-garden/','gardens/#heart','brain-map/','parents/','support-first/','request/'].every(h=>state.shortcuts.includes(h)),
@@ -65,7 +65,7 @@ for(const [label,width,height] of [
   check((await page.locator('#resultCount').textContent()).trim()==='1개',
     label+': homepage search result count did not filter correctly');
   await page.locator('#toolSearch').fill('');
-  check((await page.locator('#resultCount').textContent()).trim()==='3개',
+  check((await page.locator('#resultCount').textContent()).trim()==='5개',
     label+': clearing search did not restore all tool cards');
   // The search button scrolls the page to #made. Reset before full-page
   // capture so a sticky header is not baked into the middle of the screenshot.
