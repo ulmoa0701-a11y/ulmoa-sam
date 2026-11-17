@@ -1,0 +1,78 @@
+name: Music pages interactive smoke
+on:
+  pull_request:
+    paths: ['sound-garden/**', 'music-toolbox/**', 'music-garden/index.html', 'assets/habom-navigation.js', '.github/workflows/music-tools-smoke.yml']
+  push:
+    branches: [main]
+    paths: ['sound-garden/**', 'music-toolbox/**', 'music-garden/index.html', 'assets/habom-navigation.js', '.github/workflows/music-tools-smoke.yml']
+permissions:
+  contents: read
+jobs:
+  chrome-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build test wrappers
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          cases = {
+            "sound-garden": """
+              window.addEventListener('load',()=>{
+                let e=[],g=id=>document.getElementById(id),check=(ok,m)=>{if(!ok)e.push(m)};
+                check(g('melodyGrid').querySelectorAll('.cell').length===40,'melody count');
+                check(g('rhythmGrid').querySelectorAll('.cell').length===24,'rhythm count');
+                check(g('slots').children.length===3,'echo slots');
+                g('melodyGrid').querySelector('.cell').click();
+                check(g('melodyGrid').querySelectorAll('.cell[aria-pressed="true"]').length>0,'melody click');
+                g('tab-rhythm').click();
+                check(!g('panel-rhythm').hidden && g('panel-melody').hidden,'rhythm tab');
+                g('rhythmSample').click();
+                check(g('rhythmGrid').querySelectorAll('.cell[aria-pressed="true"]').length>0,'rhythm sample');
+                g('tab-echo').click();
+                check(!g('panel-echo').hidden,'echo tab');
+                document.querySelector('[data-pitch]').click();
+                check(g('slots').textContent.includes('도'),'echo input');
+                document.documentElement.setAttribute('data-music-smoke',e.length?'FAIL '+e.join(','):'PASS');
+              });
+            """,
+            "music-toolbox": """
+              window.addEventListener('load',()=>{
+                let e=[],shown=()=>[...document.querySelectorAll('.tool')].filter(x=>!x.hidden);
+                if(document.querySelectorAll('.tool').length!==11)e.push('card count');
+                let s=document.getElementById('search');
+                s.value='훅패드';s.dispatchEvent(new Event('input',{bubbles:true}));
+                if(shown().length!==1)e.push('search');
+                if(shown()[0])shown()[0].querySelector('[data-favorite]').click();
+                s.value='';s.dispatchEvent(new Event('input',{bubbles:true}));
+                document.querySelector('[data-cat="⭐ 저장한 도구"]').click();
+                if(shown().length!==1)e.push('favorites');
+                if(![...document.querySelectorAll('.tool-bottom a')].every(a=>a.target==='_blank'&&a.rel.includes('noopener')))e.push('external links');
+                document.documentElement.setAttribute('data-music-smoke',e.length?'FAIL '+e.join(','):'PASS');
+              });
+            """
+          }
+          for name, test in cases.items():
+            source=Path(name)/'index.html'
+            page=source.read_text(encoding='utf-8')
+            assert '</body>' in page
+            (Path(name)/'__smoke.html').write_text(page.replace('</body>','<script>'+test+'</script></body>'),encoding='utf-8')
+          PY
+      - name: Chrome mobile and desktop
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME"
+          python3 -m http.server 8741 --bind 127.0.0.1 >/tmp/music-http.log 2>&1 &
+          sleep 2
+          for WIDTH in 390 1200; do
+            for PAGE in sound-garden music-toolbox; do
+              "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size="$WIDTH,900" --virtual-time-budget=1700 --dump-dom "http://127.0.0.1:8741/$PAGE/__smoke.html" > /tmp/music-ui.html 2>/tmp/music-browser.log
+              if ! grep -q 'data-music-smoke="PASS"' /tmp/music-ui.html; then
+                echo "FAILED $PAGE at $WIDTH"
+                grep -o 'data-music-smoke="[^"]*"' /tmp/music-ui.html || true
+                tail -n 25 /tmp/music-browser.log || true
+                exit 1
+              fi
+              echo "PASS $PAGE at $WIDTH"
+            done
+          done
