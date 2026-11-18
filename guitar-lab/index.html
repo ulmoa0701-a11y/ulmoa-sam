@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="기타를 처음 잡는 사람도 빨간 점을 따라 누르고, 원하는 코드를 찾고, 코드 전환과 연주를 연습하며 기록하는 무료 기타 학습 게임.">
+<title>모아의 기타 놀이터 | 일단 해봄</title>
+<link rel="icon" href="../assets/habom-favicon-v3-32.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+:root{font-family:"Pretendard Variable",Pretendard,"Malgun Gothic",system-ui,sans-serif;color:#263e39;background:#f8faf6;--green:#32745b;--line:#d8e6da;--cream:#fff9eb;--ink:#274438}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #d88d34;outline-offset:3px}button:disabled{opacity:.45;cursor:not-allowed}
+a{color:inherit}.wrap{max-width:1090px;padding:14px 14px 60px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:9px;margin-bottom:16px}.top a{font-size:13px;text-decoration:none;background:#fff;border:1px solid var(--line);padding:11px 14px;border-radius:12px;font-weight:800}.top strong{font-size:14px;color:var(--green)}
+.hero{padding:22px clamp(17px,4vw,35px);background:linear-gradient(105deg,#e5f5e7,#fff6e6 80%);border:1.5px solid #d6e7d4;border-radius:25px;display:flex;align-items:center;gap:16px}
+.hero h1{font-size:clamp(26px,4.5vw,39px);margin:4px 0 8px;letter-spacing:-.055em}.hero p{margin:0;line-height:1.6;color:#476659;font-size:15px}.hero small{font-weight:900;color:#428564}.mascot{width:84px;height:91px;object-fit:contain;border-radius:16px}
+.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin:14px 0}.tabs button{border:1.5px solid var(--line);border-radius:14px;background:white;min-height:56px;padding:7px 4px;font-weight:900;font-size:clamp(12px,2.2vw,15px);color:#35624d}.tabs button[aria-selected=true]{background:#31745b;color:white;border-color:#31745b}.panel{display:none}.panel.active{display:block}
+.card{padding:clamp(15px,3vw,26px);border:1px solid var(--line);background:white;border-radius:22px;margin:12px 0}.card h2{margin:0 0 8px;font-size:clamp(23px,3.2vw,31px);letter-spacing:-.04em}.muted{color:#607970;font-size:14px;line-height:1.6}.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.grow{flex:1}.btn{min-height:46px;padding:10px 16px;border-radius:12px;border:1.5px solid #bed8c6;background:#f1f8ef;color:#2f674c;font-size:14px;font-weight:850}.btn.primary{background:#31765b;color:#fff;border-color:#31765b}.btn.light{background:#fffaf0;border-color:#ead9b5;color:#74592c}.btn.red{background:#fff4ee;color:#91432c;border-color:#e3c0b1}.feedback{min-height:50px;border-radius:14px;background:#f0f7ee;color:#3e654c;padding:12px 14px;line-height:1.55;font-weight:750;margin:12px 0}
+.guitar{background:#edf5ec;border-radius:18px;padding:10px 10px 4px;margin:15px 0 8px}.guitar svg{display:block;width:100%;height:auto;max-height:390px;touch-action:manipulation}.guitar .caption{display:flex;justify-content:space-between;gap:5px;font-weight:800;color:#4c6b60;font-size:12px;padding:5px 4px 7px}.legend{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}.legend span{background:#f3f8f1;border:1px solid #d9e9d8;border-radius:100px;padding:6px 11px;font-size:13px;font-weight:800}
+.guide{font-size:17px;font-weight:850;line-height:1.6}.meta{font-size:13px;color:#547264}.bigcode{font-size:clamp(34px,7vw,62px);color:#315c47;font-weight:950;letter-spacing:-.06em;line-height:1.1}.codesearch{width:100%;padding:13px 15px;font-size:17px;min-height:53px;border:2px solid #bcd7c3;border-radius:13px;background:#fff}
+.codechips{display:flex;gap:7px;flex-wrap:wrap;margin:13px 0 9px}.codechips button{min-width:66px;min-height:48px;border:1.5px solid #cfe3d2;border-radius:11px;background:#f8fbf6;color:#345b45;font-weight:900}.codechips button[aria-pressed=true]{background:#2f7959;color:white}.codechips button:focus-visible{outline:3px solid orange}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:#f0f8ef;border:1px solid #dceadc;padding:16px;border-radius:14px}.stat b{display:block;font-size:28px;color:#347259}.stat small{font-weight:750;color:#5e7866}.records{width:100%;border-collapse:collapse;font-size:13px}.records th,.records td{border-bottom:1px solid #e4ece5;padding:11px 6px;text-align:left}.records th{color:#5e7866;font-weight:900}.records td{word-break:keep-all}.empty{color:#668076;padding:14px}.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:13px}.tempo{min-width:90px}.stepcards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:14px 0}.stepcards button{border:2px solid #d1e5d3;background:#f5fbf3;border-radius:12px;min-height:87px;padding:9px 3px;color:#385b44;font-weight:900}.stepcards button b{font-size:clamp(16px,3vw,23px);display:block}.stepcards button.current{border-color:#c8782f;background:#fff0cf}.stepcards button small{font-size:12px;display:block;font-weight:750}
+.fingers{font-size:14px;color:#506b5a;font-weight:750}.mobilehelp{font-size:13px;line-height:1.55;color:#567665}.smallprint{font-size:12px;color:#6e7f76;line-height:1.75}
+.printonly{display:none}
+@media(max-width:620px){.wrap{padding:10px 9px 36px}.tabs{gap:4px}.tabs button{font-size:11px;line-height:1.35;padding:6px 1px;min-height:61px}.card{border-radius:15px;padding:13px}.hero{padding:14px;gap:8px}.hero h1{font-size:25px}.hero p{font-size:13px}.mascot{width:56px;height:66px}.row .btn{flex:1 1 auto}.split{grid-template-columns:1fr}.stepcards button{min-height:78px}.stepcards button small{font-size:10px}.guitar{padding:5px 2px 3px}.guitar .caption{font-size:11px}.stats{gap:5px}.stat{padding:11px 7px}.stat b{font-size:23px}}
+@media print{body{background:white}.top,.hero,.tabs,.btn,.card:not(.print-target),.no-print,.guitar .caption,footer{display:none!important}.wrap{max-width:none;padding:0}.panel,.panel.active{display:block}.card.print-target{border:0;border-radius:0;margin:0;padding:0}.guitar{break-inside:avoid}.printonly{display:block}.codechips,.codesearch{display:none!important}.bigcode{font-size:48px}}
+</style>
+</head><body><div class="wrap">
+<nav class="top"><a href="../music-garden/">← 음악정원</a><strong>🎸 일단 해봄 · 울모아쌤</strong><a href="../">홈으로</a></nav>
+<header class="hero"><div><small>그림 보고, 직접 눌러 보고, 소리 내기</small><h1>🎸 모아의 기타 놀이터</h1><p>기타가 처음이어도 괜찮아요. 빨간 점을 찾고, 원하는 코드를 바로 연습해요!</p></div><img class="mascot" src="../assets/moa-music-garden-approved.webp" alt="모아 음악정원 캐릭터"></header>
+<nav class="tabs" aria-label="기타 학습 메뉴" role="tablist">
+<button data-tab="first" role="tab" aria-selected="true">👀 처음<br>배우기</button>
+<button data-tab="finder" role="tab" aria-selected="false">🔎 코드<br>찾기</button>
+<button data-tab="practice" role="tab" aria-selected="false">🎮 코드<br>연습</button>
+<button data-tab="song" role="tab" aria-selected="false">🎶 노래<br>연습</button>
+<button data-tab="record" role="tab" aria-selected="false">📝 내<br>기록</button>
+</nav>
+<section id="first" class="panel active" role="tabpanel">
+<div class="card"><h2>① 먼저, 빨간 점을 찾아봐!</h2><p class="guide">기타 머리를 오른쪽으로 놓아요. <span style="color:#cf4f61">빨간 점</span>이 있는 줄과 칸을 화면에서 톡 누르세요.</p><div class="legend"><span>⬆ 맨 위 = 굵은 줄</span><span>➡ 오른쪽 = 기타 머리</span><span>⬇ 맨 아래 = 가는 줄</span></div>
+<div id="firstBoard" class="guitar" aria-label="기타 줄 찾기 시각 게임"></div><div class="feedback" id="firstFeedback" aria-live="polite">빨간 점을 눌러 볼까요?</div>
+<div class="row"><button class="btn" id="firstHint">👀 점 보여주기/숨기기</button><button class="btn" id="firstListen">🔊 이 줄 소리</button><button class="btn primary" id="firstNext">다음 위치 →</button></div><p class="mobilehelp" id="firstLevel">첫 번째 미션 / 8개 · 실제 기타에서도 같은 위치를 눌러 보세요.</p>
+</div></section>
+<section id="finder" class="panel" role="tabpanel">
+<div class="card print-target"><h2>② 원하는 코드 바로 찾기</h2><p class="muted">영문 코드 이름이나 한글 이름으로 검색해요. 코드를 누르면 기타에 빨간 점이 나타나요.</p>
+<input id="codeSearch" class="codesearch" type="search" placeholder="예: G, Am, 씨, 도, Fmaj7, 마이너" aria-label="기타 코드 검색" autocomplete="off">
+<div class="row no-print" style="margin-top:10px"><button class="btn light" id="favFilter">☆ 저장한 코드만</button><button class="btn" id="allFilter">전체 코드 보기</button><span id="codeCount" class="muted"></span></div>
+<div id="codeChips" class="codechips" role="group" aria-label="코드 목록"></div>
+<div class="row" style="justify-content:space-between;align-items:flex-end;margin-top:13px"><div><span class="meta">선택한 코드</span><div id="finderName" class="bigcode">C</div><div id="finderAlias" class="fingers">도 메이저</div></div><span id="finderDifficulty" class="muted">⭐ 쉬움</span></div>
+<div id="finderBoard" class="guitar" aria-label="선택한 코드 운지 그림"></div>
+<div id="finderTip" class="guide">빨간 점을 손가락 끝으로 하나씩 눌러요.</div>
+<div id="finderDots" class="fingers" style="margin:6px 0"></div>
+<div class="row no-print" style="margin-top:14px"><button class="btn primary" id="finderSound">🔊 코드 소리 듣기</button><button class="btn" id="finderPractice">🎮 이 코드 연습</button><button class="btn light" id="finderFav">☆ 코드 저장</button><button class="btn" id="finderPrint">🖨️ 코드표 인쇄</button></div>
+<div class="printonly"><p>빨간 점에 손가락을 놓고, X 표시한 줄은 연주하지 않아요. 0은 줄을 누르지 않고 소리 내요.</p></div>
+</div></section>
+<section id="practice" class="panel" role="tabpanel">
+<div class="card"><h2>③ 코드 만들기 게임</h2><p class="muted">코드를 선택하고, 빨간 점을 하나씩 터치해 보세요. 실제 기타에서도 같은 모양으로 눌러 본 뒤 기록해요.</p>
+<div class="row"><label for="practiceSelect" style="font-weight:850">연습할 코드</label><select id="practiceSelect" class="btn" style="min-width:125px" aria-label="연습 코드 선택"></select><button class="btn" id="practiceRandom">🎲 다른 코드</button></div>
+<p id="practiceName" class="bigcode" style="margin:17px 0 0">C</p>
+<div id="practiceBoard" class="guitar" aria-label="코드 따라 누르기 게임"></div>
+<div id="practiceFeedback" class="feedback" aria-live="polite">빨간 점을 차례로 눌러요.</div>
+<div class="row"><button class="btn" id="practiceReset">↺ 다시 찾기</button><button class="btn" id="practiceListen">🔊 가상 기타 치기</button><button class="btn primary" id="practiceSave">✅ 실제 기타에서도 연습했어요 · 기록</button></div><p class="smallprint">화면 정답은 손가락 위치 찾기의 결과예요. 실제 기타 연주가 맞았는지 마이크로 판정하지 않습니다.</p>
+</div></section>
+<section id="song" class="panel" role="tabpanel">
+<div class="card"><h2>④ 노래에 맞춰 코드 바꾸기</h2><p class="muted">〈만찬가〉 연습에 사용하던 4개 코드로 전환을 연습해요. 원곡 음원 없이 만든 연습용 4마디 패턴이에요.</p>
+<div class="stepcards" id="songSteps" role="group" aria-label="코드 전환 순서"></div>
+<div class="row"><label class="tempo" for="tempo">속도 <b id="tempoValue">60</b> BPM</label><input type="range" id="tempo" min="45" max="120" step="5" value="60" style="flex:1;max-width:330px" aria-label="연습 속도"></div>
+<div id="songBoard" class="guitar"></div><p class="guide" id="songGuide">첫 번째 코드를 잡고 아래로 천천히 쳐 보세요.</p>
+<div class="row"><button id="songPlay" class="btn primary">▶ 자동 연주 시뮬레이션</button><button id="songStop" class="btn" disabled>■ 멈추기</button><button id="songStrum" class="btn light">🎸 지금 코드 치기</button><button id="songFinish" class="btn">✅ 한 바퀴 직접 연습했어요 · 기록</button></div>
+<div id="songFeedback" class="feedback" aria-live="polite">위 코드를 눌러 한 마디씩 미리 연습할 수 있어요.</div><p class="smallprint">자동 연주는 전자 합성음으로 코드를 순서대로 재생하는 시뮬레이션입니다. 실제 연주 자동 평가 또는 원곡 반주는 아닙니다.</p>
+</div></section>
+<section id="record" class="panel" role="tabpanel">
+<div class="card"><h2>⑤ 나의 기타 연습기록</h2><p class="muted">연습할 때마다 기록해 두면 오늘 무엇을 했는지 볼 수 있어요. 기록은 현재 사용하는 브라우저에만 저장돼요.</p><div class="stats"><div class="stat"><b id="countTotal">0</b><small>연습한 횟수</small></div><div class="stat"><b id="countCodes">0</b><small>연습한 코드 종류</small></div><div class="stat"><b id="countDays">0</b><small>연습한 날짜</small></div></div>
+<div class="row" style="margin-top:15px"><button id="exportCsv" class="btn primary">⬇️ 기록 CSV 저장</button><button id="printFav" class="btn">🖨️ 코드표로 가기</button><button id="clearRecords" class="btn red">내 기록 지우기</button></div>
+<div style="overflow-x:auto;margin-top:15px"><table class="records"><thead><tr><th>날짜</th><th>연습한 내용</th><th>방식</th></tr></thead><tbody id="recordRows"><tr><td colspan="3">아직 기록이 없어요.</td></tr></tbody></table></div>
+<p class="smallprint">개인정보·진단정보를 입력하지 않아도 이용할 수 있어요. 서버나 치료사 계정으로 자동 전송되지 않으며, 기기를 바꾸거나 브라우저 데이터를 삭제하면 기록이 사라질 수 있으니 CSV로 보관하세요.</p></div></section>
+<footer class="smallprint">일단 해봄 · 울모아쌤 | 표준 조율 E–A–D–G–B–E · 카포를 쓰면 카포 다음 칸부터 상대적으로 셉니다. ● 누르기 / 0 누르지 않고 치기 / X 치지 않기. 통증이 생기면 연습을 중단하세요. 저작권이 있는 노래 음원이나 악보는 포함하지 않습니다.</footer>
+</div>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var STORE="ulmoa-guitar-practice-v1",FAV="ulmoa-guitar-favs-v1";
+var d=[
+["C","도 메이저","x32010","032010","쉬움"],["G","솔 메이저","320033","210034","쉬움"],["D","레 메이저","xx0232","000132","쉬움"],["Em","미 마이너","022000","023000","쉬움"],
+["Am","라 마이너","x02210","002310","쉬움"],["A","라 메이저","x02220","001230","쉬움"],["E","미 메이저","022100","023100","쉬움"],["Em7","미 마이너 세븐","020033","020034","쉬움"],
+["G/B","솔 메이저 온 시","x20033","020034","쉬움"],["Cadd9","도 애드 나인","x32033","032034","쉬움"],["CM7","도 메이저 세븐","x32000","032000","쉬움"],
+["Am7","라 마이너 세븐","x02010","002010","쉬움"],["Asus2","라 서스 투","x02200","002300","쉬움"],["Dsus2","레 서스 투","xx0230","000230","쉬움"],
+["Dsus4","레 서스 포","xx0233","000134","보통"],["D7","레 세븐","xx0212","000213","보통"],["E7","미 세븐","020100","020100","쉬움"],
+["A7","라 세븐","x02020","002030","쉬움"],["G7","솔 세븐","320001","320001","보통"],["Dm","레 마이너","xx0231","000231","보통"],
+["Fmaj7","파 메이저 세븐","xx3210","004320","보통"],["B7","시 세븐","x21202","012304","보통"],["C/G","도 메이저 온 솔","332010","342010","보통"],
+["Bm7","시 마이너 세븐","x24232","012434","도전"],["Bm","시 마이너","x24432","013421","도전"],["F","파 메이저","133211","134211","도전"],
+["D/F#","레 메이저 온 파#","2x0232","100243","도전"],["Csus2","도 서스 투","x30033","030034","보통"]
+];
+var codes=d.map(function(a){return{name:a[0],alias:a[1],frets:a[2].split(""),fingers:a[3].split(""),level:a[4]}});
+var db=Object.fromEntries(codes.map(function(c){return[c.name,c]}));
+var selected=db["C"],practice=db["C"],favOnly=false,found=new Set(),firstI=0,firstHint=true,firstDone=false;
+var mission=[[5,2],[2,3],[1,3],[5,3],[4,2],[3,2],[1,2],[6,3]];
+var song=["G/B","Cadd9","D","Em7"],songI=0,timer=null,songBeat=0,audio=null;
+function read(key,fallback){try{var a=JSON.parse(localStorage.getItem(key)||"null");return a==null?fallback:a}catch(e){return fallback}}
+var records=read(STORE,[]);if(!Array.isArray(records))records=[];var fav=read(FAV,[]);if(!Array.isArray(fav))fav=[];
+function persist(){try{localStorage.setItem(STORE,JSON.stringify(records));localStorage.setItem(FAV,JSON.stringify(fav));return true}catch(e){return false}}
+function note(s,f){var bases=[0,64,59,55,50,45,40];return bases[s]+Number(f)}
+function tone(s,f,delay){try{audio=audio||new(window.AudioContext||window.webkitAudioContext)();if(audio.state==="suspended")audio.resume();var start=audio.currentTime+(delay||0),hz=440*Math.pow(2,(note(s,f)-69)/12);var gain=audio.createGain(),osc=audio.createOscillator(),t=audio.createOscillator();osc.type="triangle";osc.frequency.value=hz;t.type="sine";t.frequency.value=hz*2;gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(.12,start+.015);gain.gain.exponentialRampToValueAtTime(.0001,start+1.15);osc.connect(gain);t.connect(gain);gain.connect(audio.destination);osc.start(start);t.start(start);osc.stop(start+1.2);t.stop(start+1.2)}catch(e){message("현재 기기에서는 참고 소리를 재생할 수 없어요.")}}
+function strum(c){c.frets.forEach(function(f,i){if(f!=="x")tone(6-i,f,i*.072)})}
+function message(v){$("practiceFeedback").textContent=v;$("songFeedback").textContent=v}
+function steps(c){var out=[];c.frets.forEach(function(f,i){if(f!=="x"&&f!=="0")out.push((6-i)+"번 줄 "+f+"번째 칸")});return out.length?out.join(" · "):"누르는 곳 없음"}
+function board(target,c,options){options=options||{};var open=!!options.open;var tappable=!!options.tap;var isFirst=!!options.first;var frets=isFirst?["x","2","x","x","x","x"]:c.frets;var chosen=isFirst?[{s:mission[firstI][0],f:mission[firstI][1],n:""}]:[];
+if(!isFirst){frets.forEach(function(f,i){if(f!=="x"&&f!=="0")chosen.push({s:6-i,f:Number(f),n:c.fingers[i]})})}
+var max=Math.max(4,...chosen.map(function(z){return z.f}));if(max>5)max=5;
+var narrow=window.innerWidth<510,width=920,head=850,left=46,barRight=770,top=77,bottom=327,space=(barRight-left)/max;
+var parts=['<svg viewBox="0 0 920 377" role="img" aria-label="기타 머리가 오른쪽인 '+max+'칸 기타 지판">'];
+parts.push('<rect x="'+left+'" y="'+top+'" width="'+(barRight-left)+'" height="'+(bottom-top)+'" rx="6" fill="#a77e5c" stroke="#745a43" stroke-width="3"/>');
+parts.push('<path d="M770 77 L850 97 Q906 124 909 153 L909 256 Q898 287 850 310 L770 327Z" fill="#303d41" stroke="#475354" stroke-width="3"/>');
+for(var w=1;w<=max;w++){var fx=barRight-space*w;parts.push('<rect x="'+fx+'" y="'+top+'" width="5" height="'+(bottom-top)+'" fill="#dde2dc"/>')}
+parts.push('<rect x="'+(barRight-2)+'" y="'+(top-4)+'" width="9" height="'+(bottom-top+8)+'" rx="3" fill="#fcf7e7"/>');
+for(var f=1;f<=max;f++){var xx=barRight-space*(f-.5);parts.push('<text x="'+xx+'" y="48" font-weight="800" font-size="19" text-anchor="middle" fill="#43614f">'+f+'칸</text>')}
+parts.push('<text x="839" y="48" font-size="19" font-weight="800" text-anchor="middle" fill="#43614f">머리 →</text>');
+for(var s=6;s>=1;s--){var yy=top+(6-s)*(bottom-top)/5;parts.push('<line x1="'+left+'" y1="'+yy+'" x2="900" y2="'+yy+'" stroke="#e6d8bd" stroke-width="'+(s*.54+1.1)+'"/><circle cx="27" cy="'+yy+'" r="17" fill="#eff5f3" stroke="#b8d0c7"/><text x="27" y="'+(yy+6)+'" font-size="18" text-anchor="middle" font-weight="900" fill="#385e4c">'+s+'</text>')}
+c.frets.forEach(function(fr,i){if(isFirst)return;var yy=top+i*(bottom-top)/5;if(fr==="x"||fr==="0")parts.push('<text x="891" y="'+(yy-9)+'" font-size="19" font-weight="900" fill="'+(fr==="x"?"#bc5961":"#317858")+'" text-anchor="middle">'+(fr==="x"?"×":"○")+'</text>')});
+for(var fi=1;fi<=max;fi++){for(var st=6;st>=1;st--){var x=barRight-space*(fi-.5),y=top+(6-st)*(bottom-top)/5;
+parts.push('<rect role="button" tabindex="'+(tappable?"0":"-1")+'" aria-label="'+st+'번 줄 '+fi+'번째 칸" data-cell="'+st+'-'+fi+'" x="'+(x-space*.45)+'" y="'+(y-23)+'" width="'+(space*.9)+'" height="46" rx="8" fill="transparent" style="'+(tappable?"cursor:pointer":"pointer-events:none")+'"/>')}}
+chosen.forEach(function(z){var k=z.s+"-"+z.f,done=options.done&&options.done.has(k),visible=!isFirst||firstHint||firstDone;if(!visible&&!done)return;var x=barRight-space*(z.f-.5),y=top+(6-z.s)*(bottom-top)/5;parts.push('<circle cx="'+x+'" cy="'+y+'" r="23" fill="'+(done?"#249d71":"#dc4960")+'" stroke="#fff" stroke-width="4" pointer-events="none"/>');parts.push('<text x="'+x+'" y="'+(y+7)+'" font-size="20" font-weight="900" fill="white" text-anchor="middle" pointer-events="none">'+(done?"✓":z.n||"●")+'</text>')});
+parts.push('</svg><div class="caption"><span>⬆ 굵은 줄 (6번)</span><span>● 빨간 점 누르기 / ○ 누르지 않기 / × 치지 않기</span><span>⬇ 가는 줄 (1번)</span></div>');
+$(target).innerHTML=parts.join("");
+if(tappable){$(target).querySelectorAll("[data-cell]").forEach(function(el){var act=function(){var spl=el.getAttribute("data-cell").split("-").map(Number);tap(spl[0],spl[1])};el.addEventListener("click",act);el.addEventListener("keydown",function(e){if(e.key===" "||e.key==="Enter"){e.preventDefault();act()}})})}
+}
+function record(kind,what){var now=new Date();records.unshift({date:now.toLocaleString("ko-KR"),day:now.toLocaleDateString("sv-SE"),name:what,kind:kind});if(records.length>800)records=records.slice(0,800);var ok=persist();renderRecords();return ok}
+function tab(name){stopSong();document.querySelectorAll(".tabs button").forEach(function(b){var active=b.dataset.tab===name;b.setAttribute("aria-selected",String(active))});document.querySelectorAll(".panel").forEach(function(p){p.classList.toggle("active",p.id===name)});if(name==="record")renderRecords();window.scrollTo({top:0,behavior:"instant"})}
+function firstDraw(){board("firstBoard",db["C"],{first:true,tap:true});$("firstLevel").textContent=(firstI+1)+" / "+mission.length+" 미션 · 기타에서도 같은 곳을 누르고 소리 내보세요."}
+function tap(s,f){var k=s+"-"+f;if(document.querySelector("#first").classList.contains("active")){var m=mission[firstI];if(s===m[0]&&f===m[1]){firstDone=true;tone(s,f);$("firstFeedback").textContent="🎉 찾았어요! 실제 기타에도 똑같이 손가락을 놓아 보세요.";firstDraw()}else $("firstFeedback").textContent="조금 달라요. 빨간 점을 다시 찾아봐요.";return}
+if(document.querySelector("#practice").classList.contains("active")){var good=practice.frets.some(function(v,i){return v!=="x"&&v!=="0"&&6-i===s&&Number(v)===f});
+if(!good){$("practiceFeedback").textContent="다른 칸이에요. 빨간 점을 눌러 봐요.";return}
+found.add(k);tone(s,f);board("practiceBoard",practice,{tap:true,done:found});var total=practice.frets.filter(function(f){return f!=="x"&&f!=="0"}).length;
+$("practiceFeedback").textContent=found.size>=total?"✅ 화면에서 모두 찾았어요! 이제 실제 기타에서 연주해 보세요.":"좋아요! "+found.size+" / "+total+"곳 찾았어요."}}
+function choose(c){selected=c;$("finderName").textContent=c.name;$("finderAlias").textContent=c.alias;$("finderDifficulty").textContent=(c.level==="쉬움"?"⭐ ":c.level==="보통"?"⭐⭐ ":"⭐⭐⭐ ")+c.level;
+$("finderTip").textContent="빨간 점에 손가락을 놓고, ○ 줄은 누르지 않고 치세요. × 줄은 치지 않아요.";$("finderDots").textContent=steps(c);$("finderFav").textContent=fav.includes(c.name)?"★ 저장한 코드":"☆ 코드 저장";board("finderBoard",c);drawChips()}
+function drawChips(){var q=$("codeSearch").value.trim().toLowerCase().replace(/\s/g,"");var a=codes.filter(function(c){return(!favOnly||fav.includes(c.name))&&(!q||(c.name+" "+c.alias+" "+c.name.toLowerCase().replace("m","마이너")).toLowerCase().replace(/\s/g,"").includes(q))});
+$("codeCount").textContent=a.length+"개 코드";$("codeChips").innerHTML="";a.forEach(function(c){var b=document.createElement("button");b.type="button";b.textContent=c.name;b.setAttribute("aria-pressed",String(selected.name===c.name));b.addEventListener("click",function(){choose(c)});$("codeChips").appendChild(b)});if(!a.length)$("codeChips").textContent="찾는 코드가 없어요. 영문 코드 이름으로 다시 검색해 보세요."}
+function setPractice(c){practice=c;found.clear();$("practiceSelect").value=c.name;$("practiceName").textContent=c.name+" · "+c.alias;$("practiceFeedback").textContent="빨간 점을 하나씩 찾아 눌러요. 모두 찾은 다음 실제 기타로도 해 봐요.";board("practiceBoard",c,{tap:true,done:found})}
+function songDraw(){var c=db[song[songI]];board("songBoard",c);$("songGuide").textContent=song[songI]+" · "+steps(c);$("songSteps").innerHTML="";song.forEach(function(name,i){var b=document.createElement("button");b.type="button";b.className=i===songI?"current":"";b.innerHTML="<small>"+(i+1)+"번째</small><b>"+name+"</b><small>4박</small>";b.addEventListener("click",function(){songI=i;songBeat=0;songDraw();strum(db[name])});$("songSteps").appendChild(b)})}
+function stopSong(){if(timer!==null){clearInterval(timer);timer=null}$("songPlay").disabled=false;$("songStop").disabled=true}
+function startSong(){stopSong();songI=0;songBeat=0;songDraw();$("songPlay").disabled=true;$("songStop").disabled=false;
+var bpm=Number($("tempo").value);function beat(){if(songBeat===0){strum(db[song[songI]]);songDraw()}$("songFeedback").textContent=song[songI]+" · "+(songBeat+1)+"박 / 4박 · 직접 따라서 쳐 보세요.";songBeat++;if(songBeat>=4){songBeat=0;songI=(songI+1)%song.length}}
+beat();timer=setInterval(beat,60000/bpm)}
+function renderRecords(){$("countTotal").textContent=records.length;$("countCodes").textContent=new Set(records.filter(function(r){return r.kind==="코드"}).map(function(r){return r.name})).size;$("countDays").textContent=new Set(records.map(function(r){return r.day})).size;
+$("recordRows").innerHTML="";if(!records.length){$("recordRows").innerHTML='<tr><td colspan="3">아직 기록이 없어요. 코드 연습에서 첫 기록을 만들어 보세요.</td></tr>';return}records.slice(0,60).forEach(function(r){var tr=document.createElement("tr");[r.date,r.name,r.kind].forEach(function(v){var td=document.createElement("td");td.textContent=v;tr.appendChild(td)});$("recordRows").appendChild(tr)})}
+function csv(){var rows=[["날짜","연습내용","유형"]].concat(records.map(function(r){return[r.date,r.name,r.kind]}));var safe=function(v){var s=String(v).replace(/"/g,'""');if(/^[=+\-@\t\r]/.test(s))s="'"+s;return '"'+s+'"'};var body="\uFEFF"+rows.map(function(r){return r.map(safe).join(",")}).join("\r\n");var blob=new Blob([body],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="울모아_기타_연습기록.csv";a.click();setTimeout(function(){URL.revokeObjectURL(url)},1000)}
+document.querySelectorAll(".tabs button").forEach(function(b){b.addEventListener("click",function(){tab(b.dataset.tab)})});
+$("firstNext").onclick=function(){firstI=(firstI+1)%mission.length;firstHint=true;firstDone=false;$("firstFeedback").textContent="이번에는 새로운 빨간 점을 찾아보세요.";firstDraw()};
+$("firstHint").onclick=function(){firstHint=!firstHint;firstDraw()};
+$("firstListen").onclick=function(){var m=mission[firstI];tone(m[0],m[1])};
+$("codeSearch").addEventListener("input",drawChips);
+$("favFilter").onclick=function(){favOnly=true;drawChips();$("favFilter").textContent="★ 저장한 코드만"};
+$("allFilter").onclick=function(){favOnly=false;$("favFilter").textContent="☆ 저장한 코드만";$("codeSearch").value="";drawChips()};
+$("finderFav").onclick=function(){fav=fav.includes(selected.name)?fav.filter(function(x){return x!==selected.name}):fav.concat(selected.name);persist();choose(selected)};
+$("finderSound").onclick=function(){strum(selected)};
+$("finderPractice").onclick=function(){tab("practice");setPractice(selected)};
+$("finderPrint").onclick=function(){window.print()};
+$("practiceSelect").addEventListener("change",function(){setPractice(db[this.value])});
+$("practiceRandom").onclick=function(){setPractice(codes[(codes.indexOf(practice)+1+Math.floor(Math.random()*(codes.length-1)))%codes.length])};
+$("practiceListen").onclick=function(){strum(practice)};
+$("practiceReset").onclick=function(){setPractice(practice)};
+$("practiceSave").onclick=function(){var n=practice.frets.filter(function(x){return x!=="x"&&x!=="0"}).length;
+if(found.size<n){$("practiceFeedback").textContent="먼저 화면에서 "+n+"개의 빨간 점을 모두 찾아보세요.";return}
+var ok=record("코드",practice.name);$("practiceFeedback").textContent=ok?"📝 "+practice.name+" 연습기록을 저장했어요! 다음에도 다시 도전해 봐요.":"⚠️ 브라우저 저장이 제한되어 기록이 남지 않았어요. 다른 브라우저에서 다시 시도해 주세요."};
+$("tempo").addEventListener("input",function(){$("tempoValue").textContent=this.value;if(timer!==null)startSong()});
+$("songPlay").onclick=startSong;$("songStop").onclick=stopSong;$("songStrum").onclick=function(){strum(db[song[songI]])};
+$("songFinish").onclick=function(){var ok=record("코드전환","G/B → Cadd9 → D → Em7");$("songFeedback").textContent=ok?"📝 전환 연습을 기록했어요!":"⚠️ 저장에 실패했어요. 브라우저 저장 설정을 확인해 주세요."};
+$("exportCsv").onclick=csv;$("printFav").onclick=function(){tab("finder");$("codeSearch").value="";drawChips()};
+$("clearRecords").onclick=function(){if(confirm("이 브라우저에 저장된 기타 연습기록을 모두 지울까요? 되돌릴 수 없어요.")){records=[];persist();renderRecords()}};
+window.addEventListener("resize",function(){firstDraw();board("finderBoard",selected);board("practiceBoard",practice,{tap:true,done:found});songDraw()});
+window.addEventListener("pagehide",stopSong);
+codes.forEach(function(c){var opt=document.createElement("option");opt.value=c.name;opt.textContent=c.name+" · "+c.alias;$("practiceSelect").appendChild(opt)});
+choose(db["C"]);setPractice(db["C"]);firstDraw();songDraw();renderRecords();
+window.__guitarQA=function(){return{catalogue:codes.length,unique:new Set(codes.map(function(x){return x.name})).size,shapesValid:codes.every(function(c){return c.frets.length===6&&c.frets.every(function(f){return /^[x0-9]$/.test(f)})&&c.fingers.length===6}),songValid:song.every(function(s){return !!db[s]}),tabs:document.querySelectorAll(".tabs button").length,localRecordCount:records.length}};
+})();
+</script></body></html>
