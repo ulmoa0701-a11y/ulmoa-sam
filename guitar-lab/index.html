@@ -48,6 +48,7 @@ a{color:inherit}.wrap{max-width:1090px;padding:14px 14px 60px;margin:auto}.top{d
 <div id="finderBoard" class="guitar" aria-label="선택한 코드 운지 그림"></div>
 <div id="finderTip" class="guide">빨간 점을 손가락 끝으로 하나씩 눌러요.</div>
 <div id="finderDots" class="fingers" style="margin:6px 0"></div>
+<div class="legend"><span>손가락 ① 검지</span><span>② 중지</span><span>③ 약지</span><span>④ 새끼</span></div>
 <div class="row no-print" style="margin-top:14px"><button class="btn primary" id="finderSound">🔊 코드 소리 듣기</button><button class="btn" id="finderPractice">🎮 이 코드 연습</button><button class="btn light" id="finderFav">☆ 코드 저장</button><button class="btn" id="finderPrint">🖨️ 코드표 인쇄</button></div>
 <div class="printonly"><p>빨간 점에 손가락을 놓고, X 표시한 줄은 연주하지 않아요. 0은 줄을 누르지 않고 소리 내요.</p></div>
 </div></section>
@@ -55,7 +56,7 @@ a{color:inherit}.wrap{max-width:1090px;padding:14px 14px 60px;margin:auto}.top{d
 <div class="card"><h2>③ 코드 만들기 게임</h2><p class="muted">코드를 선택하고, 빨간 점을 하나씩 터치해 보세요. 실제 기타에서도 같은 모양으로 눌러 본 뒤 기록해요.</p>
 <div class="row"><label for="practiceSelect" style="font-weight:850">연습할 코드</label><select id="practiceSelect" class="btn" style="min-width:125px" aria-label="연습 코드 선택"></select><button class="btn" id="practiceRandom">🎲 다른 코드</button></div>
 <p id="practiceName" class="bigcode" style="margin:17px 0 0">C</p>
-<div id="practiceBoard" class="guitar" aria-label="코드 따라 누르기 게임"></div>
+<div id="practiceBoard" class="guitar" aria-label="코드 따라 누르기 게임"></div><p class="mobilehelp">● 빨간 점 안의 숫자는 손가락 번호예요. ① 검지 · ② 중지 · ③ 약지 · ④ 새끼</p>
 <div id="practiceFeedback" class="feedback" aria-live="polite">빨간 점을 차례로 눌러요.</div>
 <div class="row"><button class="btn" id="practiceReset">↺ 다시 찾기</button><button class="btn" id="practiceListen">🔊 가상 기타 치기</button><button class="btn primary" id="practiceSave">✅ 실제 기타에서도 연습했어요 · 기록</button></div><p class="smallprint">화면 정답은 손가락 위치 찾기의 결과예요. 실제 기타 연주가 맞았는지 마이크로 판정하지 않습니다.</p>
 </div></section>
