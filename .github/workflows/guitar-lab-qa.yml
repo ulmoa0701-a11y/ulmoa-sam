@@ -45,7 +45,7 @@ jobs:
               check(meta.tabs===5,'tabs count');
               check(q('#firstBoard svg')!==null,'first fretboard');
               check(q('#firstBoard [data-cell="5-2"]')!==null,'first target');
-              q('#firstBoard [data-cell="5-2"]').click();
+              q('#firstBoard [data-cell="5-2"]').dispatchEvent(new MouseEvent('click',{bubbles:true}));
               check(q('#firstFeedback').textContent.includes('찾았어요'),'first game tap');
               q('[data-tab="finder"]').click();
               var search=q('#codeSearch');
@@ -58,7 +58,7 @@ jobs:
               check(JSON.parse(localStorage.getItem('ulmoa-guitar-favs-v1')).includes('Cadd9'),'favorite saved');
               q('#finderPractice').click();
               check(q('#practiceName').textContent.includes('Cadd9'),'direct practice from search');
-              for(var cell of ['5-3','4-2','2-3','1-3'])q('#practiceBoard [data-cell="'+cell+'"]').click();
+              for(var cell of ['5-3','4-2','2-3','1-3'])q('#practiceBoard [data-cell="'+cell+'"]').dispatchEvent(new MouseEvent('click',{bubbles:true}));
               check(q('#practiceFeedback').textContent.includes('모두 찾았어요'),'all positions found');
               q('#practiceSave').click();
               var rec=JSON.parse(localStorage.getItem('ulmoa-guitar-practice-v1'));
