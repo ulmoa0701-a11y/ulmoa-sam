@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="description" content="스트로크와 핑거피킹을 6줄 시각 자료로 배우고, 원하는 기타 코드에 맞게 소리를 듣고 직접 연습해 보세요.">
+<title>오른손 기타 연주 | 모아의 기타 놀이터</title><link rel="icon" href="../assets/habom-favicon-v3-32.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+:root{font-family:"Pretendard Variable",Pretendard,"Malgun Gothic",system-ui,sans-serif;color:#264539;background:#f7faf6}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #ca8a29;outline-offset:2px}
+.wrap{width:min(820px,calc(100% - 22px));margin:12px auto 40px}.top{display:flex;justify-content:space-between;gap:9px;align-items:center}.top a{border:1px solid #d8e4d7;border-radius:11px;padding:10px 12px;text-decoration:none;background:#fff;font-size:13px;font-weight:850;color:#38674f}.top b{font-size:13px;color:#44715a}
+.header{display:flex;gap:11px;align-items:center;background:linear-gradient(115deg,#eaf8e8,#fff3dc);border:1px solid #d8e6d6;border-radius:19px;padding:19px;margin:12px 0}.header img{width:62px;height:72px;object-fit:contain}.header h1{font-size:clamp(24px,5vw,35px);margin:0 0 6px;letter-spacing:-.05em}.header p{font-size:13px;line-height:1.6;color:#577260;margin:0}
+.card{border:1px solid #dbe7dc;background:white;border-radius:19px;padding:clamp(13px,3vw,23px);margin:12px 0}.card h2{font-size:21px;margin:0 0 13px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:11px}.control label{display:block;font-weight:900;font-size:14px;margin-bottom:7px}.control select{min-height:49px;padding:10px 12px;border:1.5px solid #bed7c4;border-radius:11px;background:white;color:#2e6249;font-size:16px;font-weight:850;width:100%}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}.modes button{min-height:63px;background:#f7fcf7;border:2px solid #d0e4d5;border-radius:13px;font-size:15px;font-weight:900;color:#3d694f}.modes button[aria-pressed=true]{background:#2e7457;border-color:#2e7457;color:white}.modes button small{display:block;font-size:12px;font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}.legend span{border-radius:20px;border:1px solid #d8e4d7;background:#f2f8f2;padding:6px 9px;font-size:12px;font-weight:800;color:#4c715a}
+.now{padding:15px;border:1.5px solid #e9d09f;background:#fff6df;border-radius:16px}.now strong{display:block;color:#815126;font-size:clamp(23px,5vw,34px);line-height:1.3;letter-spacing:-.04em}.now p{font-size:14px;color:#755c3f;margin:7px 0 0;font-weight:800;line-height:1.5}
+.strings{margin:15px 0;display:grid;gap:7px}.string{width:100%;min-height:59px;display:grid;align-items:center;grid-template-columns:minmax(55px,80px) minmax(35px,1fr) minmax(90px,123px);gap:9px;text-align:left;padding:5px 9px;border-radius:12px;background:#f9fcf8;border:2px solid #d6e4d8;color:#3e6651}.string b{font-size:17px;white-space:nowrap}.string strong{font-size:13px;text-align:right;white-space:nowrap}.track{height:25px;min-width:0;display:block;position:relative}.track:before{content:"";position:absolute;top:50%;left:0;right:0;height:var(--thick);background:linear-gradient(#dbc8a5,#5c665f,#b9a68b);border-radius:4px;transform:translateY(-50%)}.track:after{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border:2px solid #c4d6c8;background:#fff;border-radius:100%;width:17px;height:17px}.string.active{border-color:#cf7d34;background:#fff1d8;color:#875525}.string.active .track:before{height:7px;background:#d8792e}.string.active .track:after{height:26px;width:26px;background:#e2792b;border:3px solid #fff;box-shadow:0 0 0 2px #c07a33}.string.mute{color:#929994;background:#f1f2f1;border-color:#e0e4e0}.string.mute .track:before{opacity:.2}.string.mute .track:after{content:"×";color:#ad6664;text-align:center;line-height:13px;border-color:#b9c2b9}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}.steps button{min-height:60px;flex:1 0 61px;padding:8px 4px;border-radius:11px;border:1.5px solid #d5e5d7;background:#f4faf2;color:#39614a;font-weight:900}.steps button small{display:block;font-size:11px;margin-bottom:4px}.steps button[aria-current=step]{border-color:#cd8435;background:#ffeccc;color:#76451f}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.btn{min-height:46px;border-radius:12px;border:1.5px solid #c9decf;padding:10px 14px;font-size:14px;font-weight:850;background:#f1f8f0;color:#30674b}.btn.primary{background:#31765a;border-color:#31765a;color:white}.btn:disabled{opacity:.45}.status{margin:14px 0 5px;background:#edf7eb;border-radius:12px;padding:12px;font-weight:800;color:#466a4d;min-height:50px;line-height:1.5}.hint{font-size:13px;line-height:1.65;color:#5b7768}.tempo{display:flex;gap:11px;align-items:center;flex-wrap:wrap}.tempo label{font-weight:850}.tempo input{flex:1;max-width:350px}
+.leftchart{background:#ecf3e9;border-radius:12px;padding:7px;margin:12px 0}.leftchart svg{width:100%;max-height:320px}.notes{font-size:12px;color:#6b7e70;line-height:1.7}footer{font-size:12px;color:#708174;line-height:1.7;margin:18px 4px}.link{color:#2b704f}
+@media(max-width:430px){.controls{grid-template-columns:1fr}.wrap{width:calc(100% - 14px);margin-top:7px}.top a{padding:9px;font-size:12px}.header{padding:14px}.header img{width:48px;height:58px}.card{padding:13px}.string{gap:5px;grid-template-columns:63px minmax(15px,1fr) 91px;padding:5px 6px}.string b{font-size:15px}.string strong{font-size:12px}.actions .btn{flex:1 1 140px}}
+</style></head><body><main class="wrap">
+<nav class="top"><a href="./">← 기타 놀이터</a><b>🎸 일단 해봄 · 울모아쌤</b><a href="../music-garden/">음악정원</a></nav>
+<header class="header"><img src="../assets/moa-music-garden-approved.webp" alt="음악정원 캐릭터"><div><h1>✋ 오른손 연주 따라 하기</h1><p>어느 줄을 쳐야 할까? 소리와 색을 보고 바로 따라 해요.</p></div></header>
+<section class="card">
+<h2>1. 어떤 코드를 칠까요?</h2>
+<div class="controls"><div class="control"><label for="code">왼손으로 잡을 코드</label><select id="code"></select></div><div class="control"><label for="pattern">연주 순서</label><select id="pattern"></select></div></div>
+<div class="modes" role="group" aria-label="오른손 연주 방법">
+<button id="strum" aria-pressed="true">🖐️ 스트로크<small>줄을 여러 개 쓸어 치기</small></button>
+<button id="pick" aria-pressed="false">👉 핑거피킹<small>손가락으로 한 줄씩</small></button></div>
+<div class="now"><strong id="headline">↓ 아래로 쓸어 치기</strong><p id="meaning">아래의 노란색 줄을 확인해요.</p></div>
+<div id="strings" class="strings" aria-label="기타 줄을 굵은 순서대로 표시한 그림"></div>
+<div class="legend"><span>⬆ 맨 위 굵은 줄 = 6번</span><span>⬇ 맨 아래 얇은 줄 = 1번</span><span>× 회색 = 치지 않기</span></div>
+<p class="hint" id="explain">한 번에 한 동작만 따라 해 보세요.</p>
+<div class="steps" id="steps" aria-label="차례대로 연주하기"></div>
+<div class="tempo"><label for="tempo">속도 <strong id="tempoText">60</strong> BPM</label><input type="range" min="40" max="100" step="5" value="60" id="tempo" aria-label="연습 속도 조절"></div>
+<div class="actions"><button class="btn primary" id="play">▶ 소리 들으며 따라 하기</button><button class="btn" id="stop" disabled>■ 멈추기</button><button class="btn" id="next">👆 다음 줄 보기</button><button class="btn" id="save">📝 직접 연습했어요 · 기록</button></div>
+<div class="status" id="status" role="status" aria-live="polite">노란색 줄을 보고 실제 기타로 소리를 내보세요.</div>
+</section>
+<section class="card"><h2>2. 왼손은 어디를 누를까요?</h2><p class="hint">위의 그림은 <strong>오른손으로 치는 줄</strong>, 아래는 <strong>왼손으로 누르는 위치</strong>예요.</p><div class="leftchart" id="fretboard" aria-label="선택한 코드의 왼손 운지"></div><p class="notes" id="fretNote"></p></section>
+<footer>처음 배우는 사람을 위한 연습 패턴입니다. 실제 곡의 연주법은 다를 수 있어요. 전자 합성음은 참고용이며 실제 기타 소리 자동 평가는 아닙니다. 연습기록은 해당 브라우저에만 저장됩니다. <a class="link" href="./">기타 놀이터에서 내 기록 확인하기</a></footer>
+</main>
+<script>
+(function(){
+"use strict";
+var shapes=[
+["C","x32010"],["G","320033"],["D","xx0232"],["Em","022000"],["Am","x02210"],["A","x02220"],["E","022100"],
+["Em7","020033"],["G/B","x20033"],["Cadd9","x32033"],["CM7","x32000"],["Am7","x02010"],
+["Asus2","x02200"],["Dsus2","xx0230"],["Dsus4","xx0233"],["D7","xx0212"],["E7","020100"],["A7","x02020"],
+["G7","320001"],["Dm","xx0231"],["Fmaj7","xx3210"],["B7","x21202"],["C/G","332010"],["Bm7","x24232"],
+["Bm","x24432"],["F","133211"],["D/F#","2x0232"],["Csus2","x30033"]];
+var $=function(id){return document.getElementById(id)},chords=Object.fromEntries(shapes.map(function(r){return[r[0],r[1].split("")]}));
+var current="C",mode="strum",pattern="easy",index=0,interval=null,ctx=null;
+function bass(){var sh=chords[current];for(var s=6;s>=1;s--)if(sh[6-s]!=="x")return s;return 4}
+function options(){return mode==="pick"?
+ [{id:"easy",label:"처음: 4번 튕기기",notes:[0,3,2,1]},{id:"round",label:"왕복: 6번 튕기기",notes:[0,3,2,1,2,3]}]:
+ [{id:"easy",label:"처음: 아래로 4번",notes:["down","down","down","down"]},{id:"rhythm",label:"리듬: ↓ ↓↑ ↑↓↑",notes:["down","down","up","up","down","up"]}]}
+function seq(){return options().find(function(p){return p.id===pattern}).notes.map(function(z){return mode==="pick"?{s:z||bass(),dir:null,hand:z===0?"엄지":z===3?"검지":z===2?"중지":"약지"}:{s:bass(),dir:z,hand:"손 전체"}})}
+function pos(s){return s===6?"맨 위":s===1?"맨 아래":"위에서 "+(7-s)+"번째"}
+function eligible(){var arr=[];for(var s=6;s>=1;s--)if(chords[current][6-s]!=="x")arr.push(s);return arr}
+function note(s){return [0,64,59,55,50,45,40][s]+Number(chords[current][6-s])}
+function sound(s,delay){if(chords[current][6-s]==="x")return;
+try{ctx=ctx||new(window.AudioContext||window.webkitAudioContext)();if(ctx.state==="suspended")ctx.resume();
+var t=ctx.currentTime+(delay||0),osc=ctx.createOscillator(),gain=ctx.createGain();
+osc.type="triangle";osc.frequency.value=440*Math.pow(2,(note(s)-69)/12);
+gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(.12,t+.015);gain.gain.exponentialRampToValueAtTime(.0001,t+.85);
+osc.connect(gain);gain.connect(ctx.destination);osc.start(t);osc.stop(t+.9)}catch(e){$("status").textContent="소리 재생이 지원되지 않는 브라우저예요. 화면만 보고 연습할 수 있어요."}}
+function listen(){var z=seq()[index];if(z.dir){var ss=eligible();if(z.dir==="up")ss.reverse();ss.forEach(function(s,i){sound(s,i*.055)})}else sound(z.s,0)}
+function drawFret(){
+var sh=chords[current],width=760,px=110,right=660,top=42,bot=280,space=(right-px)/4,out=['<svg viewBox="0 0 760 345" role="img" aria-label="기타 머리가 오른쪽인 코드 운지 그림">','<rect x="110" y="42" width="550" height="238" rx="6" fill="#b38d64"/>'];
+for(var i=1;i<=4;i++){var x=right-space*i;out.push('<rect x="'+x+'" y="'+top+'" height="'+(bot-top)+'" width="5" fill="#e3e2d8"/><text x="'+(right-space*(i-.5))+'" y="30" fill="#41614e" font-size="18" font-weight="bold" text-anchor="middle">'+i+'칸</text>')}
+out.push('<rect x="'+right+'" y="'+top+'" width="9" height="'+(bot-top)+'" fill="#fff9e8"/><path d="M669 42 H705 Q752 42 752 95 V235 Q752 280 705 280 H669 Z" fill="#334440"/>');
+for(var s=6;s>=1;s--){var y=top+(6-s)*(bot-top)/5;out.push('<line x1="110" y1="'+y+'" x2="747" y2="'+y+'" stroke="#ebe3ce" stroke-width="'+(1+s*.6)+'"/><text x="89" y="'+(y+6)+'" fill="#3e614b" font-weight="900" font-size="18" text-anchor="middle">'+s+'</text>');var f=sh[6-s];
+if(f==="x"||f==="0")out.push('<text x="718" y="'+(y-7)+'" font-size="17" text-anchor="middle" fill="'+(f==="x"?"#ff9c9f":"#a5efa7")+'">'+(f==="x"?"×":"○")+'</text>');
+else {var fx=right-space*(Number(f)-.5);out.push('<circle cx="'+fx+'" cy="'+y+'" r="19" fill="#dd5162" stroke="white" stroke-width="3"/><text x="'+fx+'" y="'+(y+7)+'" fill="white" font-size="20" text-anchor="middle">●</text>')}}out.push('</svg>');
+$("fretboard").innerHTML=out.join("");$("fretNote").textContent=current+" · 빨간 점은 왼손으로 누르는 자리예요. × 줄은 치지 않아요. ○ 줄은 누르지 않고 치면 돼요."
+}
+function render(){
+var item=seq()[index],s=item.s,active=item.dir?eligible():[s];
+$("headline").textContent=item.dir?(item.dir==="down"?"↓ "+pos(bass())+" "+bass()+"번 줄부터 아래로!":"↑ 맨 아래 1번 줄부터 위로!"):(item.hand+" → "+pos(s)+" "+s+"번 줄!");
+$("meaning").textContent=item.dir?(item.dir==="down"?"굵은 줄에서 가는 줄 방향으로 쓸어 치세요.":"가는 줄에서 굵은 줄 방향으로 쓸어 치세요."):(item.hand+"손가락으로 "+s+"번 줄 하나만 튕겨요.");
+$("explain").textContent=mode==="pick"?"엄지 = 굵은 베이스 줄 · 검지 = 3번 · 중지 = 2번 · 약지 = 1번. 이번에는 "+item.hand+"!":"아래 방향(↓)은 위쪽 굵은 줄부터, 위 방향(↑)은 아래쪽 가는 줄부터! 회색 × 줄은 피하세요.";
+$("strings").innerHTML="";
+for(var st=6;st>=1;st--){
+let n=st,mute=chords[current][6-n]==="x",b=document.createElement("button"),on=active.includes(n);
+b.type="button";b.className="string"+(mute?" mute":"")+(on?" active":"");b.style.setProperty("--thick",(1+n*.6)+"px");
+b.innerHTML="<b>"+n+"번 줄</b><span class='track' aria-hidden='true'></span><strong>"+(mute?"× 치지 않아요":on?"● 지금 연주":"○ 다른 줄")+"</strong>";
+b.setAttribute("aria-label",pos(n)+" "+n+"번 줄"+(mute?" · 치지 않기":" · 눌러서 소리 들어보기"));
+b.onclick=function(){if(mute){$("status").textContent=n+"번 줄은 "+current+" 코드에서 치지 않는 줄이에요.";return}sound(n);$("status").textContent=pos(n)+" "+n+"번 줄 소리! 실제 기타에서도 찾아 튕겨보세요."};
+$("strings").appendChild(b)
+}
+$("steps").innerHTML="";seq().forEach(function(z,i){var b=document.createElement("button");b.type="button";b.setAttribute("aria-current",i===index?"step":"false");b.innerHTML="<small>"+(i+1)+"번째</small>"+(z.dir?(z.dir==="down"?"↓ 아래":"↑ 위"):(z.hand+" "+z.s+"번"));b.onclick=function(){index=i;render();listen()};$("steps").appendChild(b)});
+}
+function stop(){if(interval!==null){clearInterval(interval);interval=null}$("play").disabled=false;$("stop").disabled=true}
+function changeCode(name){stop();current=name;index=0;$("code").value=current;render();drawFret();$("status").textContent=current+" 코드를 골랐어요. 노란색 줄을 보고 직접 쳐봐요."}
+function changeMode(value){stop();mode=value;pattern="easy";index=0;$("strum").setAttribute("aria-pressed",String(value==="strum"));$("pick").setAttribute("aria-pressed",String(value==="pick"));$("pattern").innerHTML="";options().forEach(function(o){var e=document.createElement("option");e.value=o.id;e.textContent=o.label;$("pattern").appendChild(e)});render()}
+function advance(){index=(index+1)%seq().length;render();listen()}
+$("code").onchange=function(){changeCode(this.value)};
+$("pattern").onchange=function(){stop();pattern=this.value;index=0;render()};
+$("strum").onclick=function(){changeMode("strum")};
+$("pick").onclick=function(){changeMode("pick")};
+$("play").onclick=function(){stop();index=0;render();listen();$("play").disabled=true;$("stop").disabled=false;$("status").textContent="소리를 듣고 실제 기타에서 따라 해봐요. 멈추기를 누르면 멈춰요.";interval=setInterval(advance,60000/Number($("tempo").value))};
+$("stop").onclick=stop;
+$("next").onclick=function(){stop();advance();$("status").textContent="다음 소리예요. 같은 줄을 실제 기타에서 쳐보세요."};
+$("tempo").oninput=function(){$("tempoText").textContent=this.value;if(interval!==null)$("play").click()};
+$("save").onclick=function(){var key="ulmoa-guitar-practice-v1",now=new Date(),entries=[];
+try{entries=JSON.parse(localStorage.getItem(key)||"[]");if(!Array.isArray(entries))entries=[];var kind=mode==="pick"?"핑거피킹":"스트로크";var pat=options().find(function(p){return p.id===pattern});entries.unshift({date:now.toLocaleString("ko-KR"),day:now.toLocaleDateString("sv-SE"),name:current+" · "+kind+" · "+pat.label,kind:"오른손"});localStorage.setItem(key,JSON.stringify(entries.slice(0,800)));$("status").textContent="📝 "+current+" "+kind+" 연습을 기록했어요! 기타 놀이터의 내 기록에서 확인할 수 있어요."}catch(e){$("status").textContent="⚠️ 이 브라우저에서는 기록 저장이 제한됐어요."}};
+window.addEventListener("pagehide",stop);
+shapes.forEach(function(r){var option=document.createElement("option");option.value=r[0];option.textContent=r[0];$("code").appendChild(option)});
+var target=new URLSearchParams(location.search).get("code");
+changeMode("strum");changeCode(Object.prototype.hasOwnProperty.call(chords,target)?target:"C");
+window.__rightHandQA=function(){return{codes:shapes.length,mode:mode,code:current,steps:seq().length,strings:$("strings").children.length,active:document.querySelectorAll(".string.active").length,unmuted:eligible().length,pattern:pattern}};
+})();
+</script></body></html>
