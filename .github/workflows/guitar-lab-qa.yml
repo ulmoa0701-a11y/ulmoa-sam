@@ -82,9 +82,56 @@ jobs:
           """
           assert '</body></html>' in html
           Path('guitar-lab/__qa.html').write_text(html.replace('</body></html>','<script>'+qa+'</script></body></html>'),'utf-8')
-          print('Prepared browser exercise and saved-record tests')
+          right=Path('guitar-lab/right-hand.html').read_text('utf-8')
+          assert 'right-hand.html' in html
+          assert 'fingerLink' in html
+          assert 'id="strings"' in right and 'id="pick"' in right and 'id="strum"' in right
+          rightjs=right.split('<script>')[-1].split('</script>')[0]
+          Path('/tmp/guitar-right-hand.js').write_text(rightjs,'utf-8')
+          rightqa=r"""
+          (function(){
+            var errors=[];
+            var q=function(s){return document.querySelector(s)};
+            var check=function(v,msg){if(!v)errors.push(msg)};
+            try{
+              var state=window.__rightHandQA();
+              check(state.codes===28,'all codes');
+              check(state.strings===6,'six visible strings');
+              check(state.code==='Cadd9','url chord parameter');
+              check(state.active===5,'Cadd9 5 playable strings highlighted');
+              check(q('.string.mute')!==null,'muted sixth string');
+              q('.string.mute').click();
+              check(q('#status').textContent.includes('치지 않는'),'X string feedback');
+              q('#pick').click();
+              state=window.__rightHandQA();
+              check(state.mode==='pick'&&state.steps===4,'fingerpicking beginner pattern');
+              check(state.active===1,'single selected picking string');
+              check(q('#headline').textContent.includes('엄지')&&q('#headline').textContent.includes('5번'),'thumb bass on Cadd9');
+              q('#next').click();
+              check(q('#headline').textContent.includes('검지')&&q('#headline').textContent.includes('3번'),'index 3rd string');
+              q('#pattern').value='round';q('#pattern').dispatchEvent(new Event('change'));
+              check(window.__rightHandQA().steps===6,'round six-note picking');
+              q('#code').value='D';q('#code').dispatchEvent(new Event('change'));
+              q('#strum').click();
+              check(q('#headline').textContent.includes('4번'),'D bass on 4th string');
+              check(document.querySelectorAll('.string.mute').length===2,'D skips sixth and fifth');
+              q('#play').click();
+              check(q('#stop').disabled===false,'simulator started');
+              q('#stop').click();
+              check(q('#play').disabled===false,'simulator stopped');
+              q('#save').click();
+              var rec=JSON.parse(localStorage.getItem('ulmoa-guitar-practice-v1'));
+              check(rec.length===1&&rec[0].kind==='오른손','saved in existing record key');
+              check(document.documentElement.scrollWidth<=innerWidth+5,'horizontal overflow '+(document.documentElement.scrollWidth-innerWidth));
+            }catch(e){errors.push('exception '+e.message)}
+            document.documentElement.setAttribute('data-right-hand-qa',errors.length?'FAIL '+errors.join(' | '):'PASS');
+          })();
+          """
+          Path('guitar-lab/__right_qa.html').write_text(right.replace('</body></html>','<script>'+rightqa+'</script></body></html>'),'utf-8')
+          print('Prepared browser exercise, right-hand lesson and saved-record tests')
           PY
           node --check /tmp/guitar-app.js
+          node --check /tmp/guitar-right-hand.js
       - name: Real Chrome tap/search/record/stop tests
         run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
@@ -99,5 +146,12 @@ jobs:
               tail -n 20 /tmp/guitar-chrome.log
               exit 1
             fi
-            echo "PASS guitar lesson + code search + record + song simulation at $WIDTH"
+            "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size="$WIDTH,900" --virtual-time-budget=2600 --dump-dom "http://127.0.0.1:8879/guitar-lab/__right_qa.html?code=Cadd9" > /tmp/right-hand-qa-$WIDTH.html 2> /tmp/guitar-right-chrome.log
+            if ! grep -q 'data-right-hand-qa="PASS"' /tmp/right-hand-qa-$WIDTH.html; then
+              echo "FAIL right hand at $WIDTH"
+              grep -o 'data-right-hand-qa="[^"]*"' /tmp/right-hand-qa-$WIDTH.html || true
+              tail -n 20 /tmp/guitar-right-chrome.log
+              exit 1
+            fi
+            echo "PASS guitar lesson + fingerpicking + strumming + record at $WIDTH"
           done
