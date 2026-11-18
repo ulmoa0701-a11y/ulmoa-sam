@@ -1,0 +1,103 @@
+name: Guitar Lab visual learning and record smoke QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'guitar-lab/**'
+      - 'music-garden/index.html'
+      - '.github/workflows/guitar-lab-qa.yml'
+  pull_request:
+    paths:
+      - 'guitar-lab/**'
+      - 'music-garden/index.html'
+      - '.github/workflows/guitar-lab-qa.yml'
+permissions:
+  contents: read
+jobs:
+  guitar-lab-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate guitar programme syntax and links
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('guitar-lab/index.html')
+          html=p.read_text('utf-8')
+          assert all(x in html for x in ('codeSearch','finderBoard','practiceBoard','songBoard','recordRows','exportCsv','localStorage','__guitarQA'))
+          assert '../guitar-lab/' in Path('music-garden/index.html').read_text('utf-8')
+          assert 'guitar-lab/' in Path('index.html').read_text('utf-8')
+          assert Path('assets/moa-music-garden-approved.webp').exists()
+          script=html.split('<script>')[-1].split('</script>')[0]
+          Path('/tmp/guitar-app.js').write_text(script,'utf-8')
+          qa=r"""
+          (function(){
+            var errors=[];
+            var q=function(s){return document.querySelector(s)};
+            var check=function(c,m){if(!c)errors.push(m)};
+            try {
+              var meta=window.__guitarQA();
+              check(meta.catalogue===28,'catalogue count '+meta.catalogue);
+              check(meta.unique===28,'duplicate codes');
+              check(meta.shapesValid,'invalid chord shapes');
+              check(meta.songValid,'missing song chord');
+              check(meta.tabs===5,'tabs count');
+              check(q('#firstBoard svg')!==null,'first fretboard');
+              check(q('#firstBoard [data-cell="5-2"]')!==null,'first target');
+              q('#firstBoard [data-cell="5-2"]').click();
+              check(q('#firstFeedback').textContent.includes('찾았어요'),'first game tap');
+              q('[data-tab="finder"]').click();
+              var search=q('#codeSearch');
+              search.value='Cadd9';search.dispatchEvent(new Event('input',{bubbles:true}));
+              check(q('#codeChips').querySelectorAll('button').length===1,'search filter');
+              q('#codeChips button').click();
+              check(q('#finderName').textContent==='Cadd9','code selection');
+              check(q('#finderBoard svg')!==null,'code visualization');
+              q('#finderFav').click();
+              check(JSON.parse(localStorage.getItem('ulmoa-guitar-favs-v1')).includes('Cadd9'),'favorite saved');
+              q('#finderPractice').click();
+              check(q('#practiceName').textContent.includes('Cadd9'),'direct practice from search');
+              for(var cell of ['5-3','4-2','2-3','1-3'])q('#practiceBoard [data-cell="'+cell+'"]').click();
+              check(q('#practiceFeedback').textContent.includes('모두 찾았어요'),'all positions found');
+              q('#practiceSave').click();
+              var rec=JSON.parse(localStorage.getItem('ulmoa-guitar-practice-v1'));
+              check(rec.length===1&&rec[0].name==='Cadd9','record saved');
+              q('[data-tab="record"]').click();
+              check(q('#countTotal').textContent==='1','record summary');
+              check(q('#recordRows').textContent.includes('Cadd9'),'record table');
+              q('[data-tab="song"]').click();
+              check(q('#songSteps').querySelectorAll('button').length===4,'four song chords');
+              check(q('#songSteps').textContent.includes('Em7'),'song chord progression');
+              q('#songPlay').click();
+              check(q('#songStop').disabled===false,'simulator started');
+              q('#songStop').click();
+              check(q('#songPlay').disabled===false,'simulator stopped');
+              q('#songFinish').click();
+              check(JSON.parse(localStorage.getItem('ulmoa-guitar-practice-v1')).length===2,'song practice saved');
+              check(document.documentElement.scrollWidth<=innerWidth+5,'mobile horizontal overflow '+(document.documentElement.scrollWidth-innerWidth));
+            } catch(e) { errors.push('browser execution: '+(e&&e.message||String(e))); }
+            document.documentElement.setAttribute('data-guitar-qa',errors.length?'FAIL '+errors.join(' | '):'PASS');
+          })();
+          """
+          assert '</body></html>' in html
+          Path('guitar-lab/__qa.html').write_text(html.replace('</body></html>','<script>'+qa+'</script></body></html>'),'utf-8')
+          print('Prepared browser exercise and saved-record tests')
+          PY
+          node --check /tmp/guitar-app.js
+      - name: Real Chrome tap/search/record/stop tests
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME"
+          python3 -m http.server 8879 --bind 127.0.0.1 > /tmp/guitar-server.log 2>&1 &
+          sleep 2
+          for WIDTH in 360 400 1280; do
+            "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size="$WIDTH,900" --virtual-time-budget=2600 --dump-dom "http://127.0.0.1:8879/guitar-lab/__qa.html" > /tmp/guitar-qa-$WIDTH.html 2> /tmp/guitar-chrome.log
+            if ! grep -q 'data-guitar-qa="PASS"' /tmp/guitar-qa-$WIDTH.html; then
+              echo "FAIL at $WIDTH"
+              grep -o 'data-guitar-qa="[^"]*"' /tmp/guitar-qa-$WIDTH.html || true
+              tail -n 20 /tmp/guitar-chrome.log
+              exit 1
+            fi
+            echo "PASS guitar lesson + code search + record + song simulation at $WIDTH"
+          done
