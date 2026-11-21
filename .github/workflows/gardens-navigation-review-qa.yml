@@ -1,0 +1,46 @@
+name: Five Gardens Editorial Navigation Review QA
+on:
+  pull_request:
+    paths:
+      - 'gardens/index.html'
+      - 'gardens/navigation-review.css'
+      - 'qa/gardens-navigation-review-qa.mjs'
+      - '.github/workflows/gardens-navigation-review-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  review-first-screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser driver
+        run: npm install --no-save playwright-core@1.56.1
+      - name: Find Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Start local preview
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/gardens-review-http.log 2>&1 &
+          for i in {1..50}; do
+            if curl -fsS http://127.0.0.1:8765/gardens/ > /dev/null; then exit 0; fi
+            sleep 0.25
+          done
+          cat /tmp/gardens-review-http.log
+          exit 1
+      - name: Review responsive garden directory and interactions
+        run: node qa/gardens-navigation-review-qa.mjs
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: five-gardens-editorial-review-320-360-390-768-1366
+          path: qa/gardens-navigation-review-artifacts
+          if-no-files-found: warn
+          retention-days: 30
