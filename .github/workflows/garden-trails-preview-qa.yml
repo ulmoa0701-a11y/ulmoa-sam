@@ -1,0 +1,48 @@
+name: Five Gardens Interactive Flower Trails Preview QA
+on:
+  pull_request:
+    paths:
+      - 'gardens/garden-trails.css'
+      - 'gardens/garden-trails.js'
+      - 'gardens/index.html'
+      - 'qa/garden-trails-preview-qa.cjs'
+      - '.github/workflows/garden-trails-preview-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-browser-map:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Validate JavaScript
+        run: node --check gardens/garden-trails.js && node --check qa/garden-trails-preview-qa.cjs
+      - name: Install local Playwright browser adapter
+        run: npm install --no-save --no-package-lock playwright-core@1.56.1
+      - name: Locate browser
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Korean text rendering for real screenshots
+        run: |
+          timeout 240 sudo apt-get update -qq
+          timeout 240 sudo apt-get install -y -qq fonts-noto-cjk
+          fc-list :lang=ko | grep -q .
+      - name: Serve original app without modifying other files
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/garden-trails.log 2>&1 &
+          for i in $(seq 1 50); do curl -fsS http://127.0.0.1:8765/gardens/ > /dev/null && exit 0; sleep .4; done
+          cat /tmp/garden-trails.log; exit 1
+      - name: Browser QA 360 390 768 1280, game hotspots, list fallback and real iframe
+        run: node qa/garden-trails-preview-qa.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: five-garden-interactive-trails-preview-screenshots
+          path: qa/garden-trails-preview-artifacts/
+          retention-days: 14
+          if-no-files-found: warn
