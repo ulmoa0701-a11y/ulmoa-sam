@@ -25,6 +25,8 @@ fs.mkdirSync(out,{recursive:true});
    try{
     const r=await page.goto(base+'/gardens/',{waitUntil:'load'});
     assert.equal(r.status(),200,'garden discovery route missing');
+    // Real-world map is the default; this suite explicitly audits the accessible 34-card list.
+    if(await page.locator('#worldListToggle').count())await page.locator('#worldListToggle').click();
     await page.locator('.play-card-enhanced').first().waitFor();
     const count=await page.locator('.play-card-enhanced').count();
     assert.equal(count,34,'all 34 game choices preserved');

@@ -12,6 +12,8 @@ for(const [size,w,h] of [['desktop',1366,850],['tablet',768,1024],['mobile',390,
  const page=await context.newPage();
  const jsErrors=[];page.on('pageerror',err=>jsErrors.push(err.message));
  await page.goto(base+'/gardens/',{waitUntil:'networkidle'});
+ // When the new real world is present, test the existing full catalog through its visible list control.
+ if(await page.locator('#worldListToggle').count())await page.locator('#worldListToggle').click();
  check(await page.locator('.play-card-enhanced[data-game]').count()===34,size+': total 34 cards');
  check(await page.locator('.moa-clay-card-corner').count()===34,size+': every garden card has a clay companion');
  // Exercise actual missing-screenshot state (some older game covers lack playable captures).
