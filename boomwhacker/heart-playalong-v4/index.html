@@ -192,10 +192,13 @@ const FREQUENCIES=[261.6256,293.6648,329.6276,349.2282,391.9954,440,493.8833,523
 const colorOf=note=>COLORS[NOTES.indexOf(note)]||"#a9c8bb";
 const frequencyOf=note=>FREQUENCIES[NOTES.indexOf(note)]||0;
 const heartPath=new Path2D("M50 84 C44 77 9 55 6 29 C3 9 20 0 35 5 C43 7 48 13 50 19 C52 13 57 7 65 5 C80 0 97 9 94 29 C91 55 56 77 50 84Z");
-const imageNames=["forest","night","classroom","heart-frame","moa","forest-enchanted","forest-enchanted-mobile","forest-canopy-left","forest-canopy-right","forest-canopy-left-mobile","forest-canopy-right-mobile"];
+const imageNames=["forest","night","classroom","heart-frame","moa","forest-enchanted","forest-enchanted-mobile","forest-canopy-left","forest-canopy-right","forest-canopy-left-mobile","forest-canopy-right-mobile","approved-nightforest-desktop","approved-nightforest-mobile"];
 const GRASS=window.__HEART_V4_GRASS__||{desktop:[],mobile:[]};
 const GRASS_PALETTE=["#355c49","#4e8057","#577d54","#3b6e50"];
 const images={};
+// Approved illustration is independent of music. The existing SVG stage stays as a safe fallback.
+const approvedArtName=mobile=>mobile?"approved-nightforest-mobile":"approved-nightforest-desktop";
+const approvedArtReady=mobile=>ready(approvedArtName(mobile));
 let song=SCORES[0],beat=-song.meter,playing=false,speed=1,theme="forest",motion="firefly",audio=null,startedAt=0,rafId=0,played=new Set(),reduced=matchMedia("(prefers-reduced-motion: reduce)").matches,display={width:1440,height:820,mobile:false,pixelRatio:1},ambientId=0,ambientLast=0,ambientFrames=0;
 const meter=()=>song.meter,endBeat=()=>song.bars.length*song.meter,beatSeconds=()=>60/(song.bpm*speed);
 const TEXT_FONTS={
@@ -208,7 +211,7 @@ const text=(label,x,y,size=20,color="#f7f5ef",align="left",weight=700,role="ui")
  ctx.textAlign=align;ctx.textBaseline="middle";ctx.fillStyle=color;ctx.fillText(label,x,y);ctx.restore()
 };
 function line(x1,y1,x2,y2,color,width=2){ctx.save();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore()}
-function getAssets(){for(const name of imageNames){const img=new Image();img.src=name==="moa"?"../../thinking-garden/assets/moa-default.png":"./assets/"+name+".svg";img.onload=()=>{if(!playing)render(beat)};images[name]=img}}
+function getAssets(){for(const name of imageNames){const img=new Image();img.src=name==="moa"?"../../thinking-garden/assets/moa-default.png":"./assets/"+name+(name.startsWith("approved-nightforest-")?".webp":".svg");img.onload=()=>{if(!playing)render(beat)};images[name]=img}}
 function ready(name){return images[name]&&images[name].complete&&images[name].naturalWidth>0}
 function layout(){
  const mobile=window.matchMedia("(max-width:740px)").matches;
@@ -239,7 +242,10 @@ function geometry(k,page){
  const usable=m?680:1220;
  const size=Math.min(m?190:177,(usable-(perRow-1)*gap)/perRow);
  const start=(w-(perRow*size+(perRow-1)*gap))/2;
- const y=m?(row===0?246:599):(row===0?224:484);
+ const lineBaselines=m?[515,752]:[407,638];
+ // Match the approved image's actual two stone pathways across all note counts.
+ const useApproved=theme==="forest"&&approvedArtReady(m);
+ const y=useApproved?lineBaselines[row]-size*.84:(m?(row===0?246:599):(row===0?224:484));
  return {x:start+column*(size+gap),y,w:size,h:size*.90,row,column};
 }
 function smoothUnit(v){const t=Math.max(0,Math.min(1,v));return t*t*(3-2*t)}
@@ -265,7 +271,25 @@ function beatCue(phase,contact){
  // Ease gently into and out of each guide point, without a sharp flash.
  return smoothUnit(1-distance/.16);
 }
-// Decorations deliberately stay away from the notation, and never indicate beat time.
+// An intentionally quiet overlay: nothing here changes the rhythm or note events.
+function paintApprovedAmbient(time){
+ if(reduced||document.hidden)return;
+ const {width:W,height:H,mobile:m}=display;
+ const t=time/1000;
+ ctx.save();
+ // Keep the approved artwork still. Only the lantern radiance is alive;
+ // painting fabricated grass/leaves over a photo-plate would create double imagery.
+ for(const x of [m?100:170,m?W-100:W-155]){
+   const y=m?75:71;
+   const strength=.055+.018*Math.sin(2*Math.PI*t/5+(x/W)*.8);
+   const g=ctx.createRadialGradient(x,y,0,x,y,m?73:85);
+   g.addColorStop(0,"rgba(255,224,143,"+strength.toFixed(3)+")");
+   g.addColorStop(1,"rgba(255,224,143,0)");
+   ctx.fillStyle=g;ctx.fillRect(x-90,y-90,180,180);
+ }
+ ctx.restore();
+}
+
 function sceneMotionState(time=performance.now()){
  const active=!reduced&&!document.hidden&&theme==="forest";
  const t=active?time/1000:0;
@@ -346,6 +370,13 @@ function paintGrass(time){
 }
 function paintBackdrop(time=performance.now()){
  const {width:W,height:H,mobile:m}=display;
+ if(theme==="forest"&&approvedArtReady(m)){
+   ctx.drawImage(images[approvedArtName(m)],0,0,W,H);
+   // Do NOT draw legacy grass/canopy over the approved artwork: it would look
+   // like a doubled foreground. Lamplight and score/firefly remain separate.
+   paintApprovedAmbient(time);
+   return;
+ }
  const art=theme==="forest"?(m?"forest-enchanted-mobile":"forest-enchanted"):theme;
  if(ready(art)){
    ctx.drawImage(images[art],0,0,W,H);
@@ -525,7 +556,9 @@ function render(b,time=performance.now()){
  const totalPageBars=Math.min(page.firstBar+page.pageBars,song.bars.length);
  for(let row=0;row<2;row++){
   const barFirst=page.firstBar+row*page.barsPerLine;
-  const yText=m?(row===0?206:558):(row===0?185:448);
+  const useApproved=theme==="forest"&&approvedArtReady(m);
+  const firstHeart=geometry(start+row*perRow,page);
+  const yText=useApproved?firstHeart.y-(m?45:42):(m?(row===0?206:558):(row===0?185:448));
   if(barFirst>=song.bars.length)continue;
   const label=String(barFirst+1).padStart(2,"0")+" — "+String(Math.min(song.bars.length,barFirst+page.barsPerLine)).padStart(2,"0")+" 마디";
   text(row===0?"첫 번째 길":"두 번째 길",m?50:89,yText,m?27:25,theme==="classroom"?"#345c4b":"#f2e8d1","left",400,"story");
@@ -627,7 +660,7 @@ const fontState=()=>({
  loaded:{story:[...document.fonts].some(f=>f.family==="Gamja Flower"&&f.status==="loaded"),
          score:[...document.fonts].some(f=>f.family==="Jua"&&f.status==="loaded")}
 });
-window.__HEART_V4_QA__={beatParts,geometry,crestTravel,stepPose,beatCue,guideOpacity,guideState,fireflyPose,sceneMotionState,grassPose,effectiveGuide,pageAt,fontState,sceneInfo:()=>({theme,mobile:display.mobile,scene:theme==="forest"?(display.mobile?"forest-enchanted-mobile":"forest-enchanted"):theme,loaded:ready(display.mobile?"forest-enchanted-mobile":"forest-enchanted")}),getState:()=>({beat,playing,speed,theme,motion,meter:song.meter,title:song.title,audioState:audio?.state||"none",playedCount:played.size,pixelRatio:display.pixelRatio,grassTufts:(GRASS[display.mobile?"mobile":"desktop"]||[]).length,ambientFrames,ambientActive:ambientId!==0}),render:(b,time)=>render(b,time??performance.now()),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
+window.__HEART_V4_QA__={beatParts,geometry,crestTravel,stepPose,beatCue,guideOpacity,guideState,fireflyPose,sceneMotionState,grassPose,effectiveGuide,pageAt,fontState,sceneInfo:()=>({theme,mobile:display.mobile,approved:approvedArtReady(display.mobile),scene:theme==="forest"?(approvedArtReady(display.mobile)?approvedArtName(display.mobile):(display.mobile?"forest-enchanted-mobile":"forest-enchanted")):theme,loaded:theme==="forest"?(approvedArtReady(display.mobile)||ready(display.mobile?"forest-enchanted-mobile":"forest-enchanted")):ready(theme)}),getState:()=>({beat,playing,speed,theme,motion,meter:song.meter,title:song.title,audioState:audio?.state||"none",playedCount:played.size,pixelRatio:display.pixelRatio,grassTufts:(GRASS[display.mobile?"mobile":"desktop"]||[]).length,ambientFrames,ambientActive:ambientId!==0}),render:(b,time)=>render(b,time??performance.now()),assets:()=>Object.fromEntries(imageNames.map(n=>[n,ready(n)]))};
 window.addEventListener("resize",()=>render(beat));
 document.addEventListener("visibilitychange",()=>{if(document.hidden)stopAmbient();else if(!playing)startAmbient()});
 getAssets();$("#hudTitle").textContent=song.title;reset();

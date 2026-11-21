@@ -1092,6 +1092,17 @@ async function heartV4Smoke(){
    check(data.heartWidth*data.stage.width/(cfg.name==="mobile"?820:1440)>=60,
     "V4 "+cfg.name+": notation too small");
    check(data.guideMode==="firefly","V4 "+cfg.name+": single firefly must be default");
+   const approvedScene=await page.evaluate(()=>window.__HEART_V4_QA__.sceneInfo());
+   const expectedArt=cfg.name==="mobile"?"approved-nightforest-mobile":"approved-nightforest-desktop";
+   check(approvedScene.approved&&approvedScene.scene===expectedArt&&approvedScene.loaded,
+     "V4 "+cfg.name+": approved artwork not actually loaded "+JSON.stringify(approvedScene));
+   const placement=await page.evaluate(()=>{
+     const q=window.__HEART_V4_QA__,p=q.pageAt(1),perRow=q.getState().meter*p.barsPerLine;
+     return [q.geometry(0,p),q.geometry(perRow,p)].map(g=>({row:g.row,tip:g.y+g.w*.84,w:g.w}));
+   });
+   const baselines=cfg.name==="mobile"?[515,752]:[407,638];
+   check(placement.every((v,i)=>Math.abs(v.tip-baselines[i])<1),
+     "V4 "+cfg.name+": hearts float above the approved stone paths "+JSON.stringify(placement));
    const grassCheck=await page.evaluate(()=>{
      const q=window.__HEART_V4_QA__,state=q.getState(),count=state.grassTufts;
      const roots=[0,7,17,32,48,67,82,99,125,160,183].filter(i=>i<count);
@@ -1113,9 +1124,9 @@ async function heartV4Smoke(){
      }
      return {count,samples,changed,positionsAtSameRoot:samples.every(s=>s.rootFixed)};
    });
-   check(grassCheck.count===(cfg.name==="mobile"?202:342)&&
+   check(approvedScene.approved || (grassCheck.count===(cfg.name==="mobile"?202:342)&&
      grassCheck.positionsAtSameRoot&&grassCheck.samples.every(s=>s.withinLimit)&&
-     grassCheck.samples.filter(s=>s.moved>.6).length>=5&&grassCheck.changed>30,
+     grassCheck.samples.filter(s=>s.moved>.6).length>=5&&grassCheck.changed>30),
      "V4 "+cfg.name+": grass roots must stay planted while stems visibly sway "+JSON.stringify(grassCheck));
    const motionCheck=await page.evaluate(()=>{
      const q=window.__HEART_V4_QA__,one=q.sceneMotionState(0),two=q.sceneMotionState(2500);
@@ -1175,10 +1186,10 @@ async function heartV4Smoke(){
     "V4 "+cfg.name+": two brief steps must HOLD between contacts, with small lifts");
    check(data.eventsSolid.length===1&&data.eventsSplit.length>=2,
     "V4 "+cfg.name+": original whole-heart and split-heart musical grammar changed");
-   check(["forest","night","classroom","heart-frame","moa","forest-enchanted","forest-enchanted-mobile","forest-canopy-left","forest-canopy-right","forest-canopy-left-mobile","forest-canopy-right-mobile"].every(n=>data.assets[n]),
+   check(["forest","night","classroom","heart-frame","moa","forest-enchanted","forest-enchanted-mobile","forest-canopy-left","forest-canopy-right","forest-canopy-left-mobile","forest-canopy-right-mobile","approved-nightforest-desktop","approved-nightforest-mobile"].every(n=>data.assets[n]),
     "V4 "+cfg.name+": the scene, original assets or mobile adaptation did not load");
    const stageArt=await page.evaluate(()=>window.__HEART_V4_QA__.sceneInfo());
-   check(stageArt.loaded&&stageArt.scene===(cfg.name==="mobile"?"forest-enchanted-mobile":"forest-enchanted"),
+   check(stageArt.loaded&&stageArt.approved&&stageArt.scene===(cfg.name==="mobile"?"approved-nightforest-mobile":"approved-nightforest-desktop"),
     "V4 "+cfg.name+": sample-quality night stage was not selected "+JSON.stringify(stageArt));
    const cuePixels=await page.evaluate(()=>{
      const q=window.__HEART_V4_QA__,canvas=document.querySelector("#score"),ctx=canvas.getContext("2d");
