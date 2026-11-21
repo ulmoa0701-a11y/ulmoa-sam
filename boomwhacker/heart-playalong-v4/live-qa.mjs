@@ -87,9 +87,11 @@ try {
     check(geometry.nativeW>=(config.width===390?820:1440)*1.5,config.name+": high-density score canvas missing");
     check(geometry.scrollW<=geometry.viewport+1,config.name+": no horizontal overflow");
     check([2,3,4].every(m=>geometry.musicMeter.includes(m)),config.name+": original 2/4 3/4 4/4 arrangements");
-    check(Object.values(geometry.assets).every(Boolean),config.name+": public backdrop/heart/Moa/night-forest/mobile assets");
+    check(Object.values(geometry.assets).every(Boolean),config.name+": public backdrop/heart/Moa/cinematic-background assets");
+    check(["forest-cinematic","forest-cinematic-mobile","forest-cinematic-canopy-left","forest-cinematic-canopy-right","forest-cinematic-canopy-left-mobile","forest-cinematic-canopy-right-mobile","forest-painted","forest-painted-mobile"].every(name=>geometry.assets[name]),
+      config.name+": new layered night forest asset missing");
     const scene=await page.evaluate(()=>window.__HEART_V4_QA__.sceneInfo());
-    check(scene.loaded&&scene.scene===(config.width===390?"forest-enchanted-mobile":"forest-enchanted"),
+    check(scene.loaded&&scene.scene===(config.width===390?"forest-painted-mobile":"forest-painted"),
       config.name+": public scene does not use the approved separate composition");
     const motion=await page.evaluate(()=>{
       const q=window.__HEART_V4_QA__,a=q.sceneMotionState(0),b=q.sceneMotionState(2500);
