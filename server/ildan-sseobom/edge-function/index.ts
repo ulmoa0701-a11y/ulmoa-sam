@@ -321,11 +321,11 @@ export async function handle(request:Request):Promise<Response>{
   }
   if(apiName.startsWith('push-')){
    if(!sandboxSignupAllowed())return send({error:'연습 환경 전용입니다.'},403);
-   return pushMember(apiName,request,admin,uid,member.role,send,body);
+   return await pushMember(apiName,request,admin,uid,member.role,send,body);
   }
   if(apiName.startsWith('student-reminder-')){
    if(!sandboxSignupAllowed())return send({error:'개발 검증용 알림 기능입니다.'},403);
-   return studentReminderMember(apiName,request,admin,uid,member.role,send,body);
+   return await studentReminderMember(apiName,request,admin,uid,member.role,send,body);
   }
   if(apiName==='students'&&request.method==='GET'){
    if(member.role!=='therapist')return send({error:'치료사 전용입니다.'},403);
