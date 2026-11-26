@@ -20,15 +20,26 @@ CREATE TABLE IF NOT EXISTS public.ildan_student_reminder_subscriptions (
  created_at timestamptz NOT NULL DEFAULT now(),
  updated_at timestamptz NOT NULL DEFAULT now()
 );
+CREATE TABLE IF NOT EXISTS public.ildan_student_reminder_history (
+ student_id uuid NOT NULL REFERENCES public.ildan_student_reminder_preferences(student_id) ON DELETE CASCADE,
+ day date NOT NULL,
+ attempted_at timestamptz NOT NULL DEFAULT now(),
+ provider_accepted_count smallint NOT NULL DEFAULT 0 CHECK(provider_accepted_count BETWEEN 0 AND 3),
+ PRIMARY KEY (student_id,day)
+);
 CREATE INDEX IF NOT EXISTS ildan_student_reminder_due_idx
  ON public.ildan_student_reminder_preferences(local_time) WHERE enabled;
 CREATE INDEX IF NOT EXISTS ildan_student_push_owner_idx
  ON public.ildan_student_reminder_subscriptions(student_id);
 ALTER TABLE public.ildan_student_reminder_preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ildan_student_reminder_subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ildan_student_reminder_history ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.ildan_student_reminder_preferences,
- public.ildan_student_reminder_subscriptions FROM PUBLIC,anon,authenticated;
+ public.ildan_student_reminder_subscriptions,
+ public.ildan_student_reminder_history FROM PUBLIC,anon,authenticated;
 COMMENT ON TABLE public.ildan_student_reminder_preferences IS
  'Opt-in daily generic practice reminders; no identity, text, mood, diagnosis or clinical note in notification payload.';
 COMMENT ON TABLE public.ildan_student_reminder_subscriptions IS
  'Private Web Push endpoints and encryption keys for opted-in student devices; service-role only.';
+COMMENT ON TABLE public.ildan_student_reminder_history IS
+ 'Generic daily reminder attempt log visible to owner only via authorized Edge; NOT device delivery proof. Retain max 30 days.';
