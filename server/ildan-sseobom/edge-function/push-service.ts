@@ -1,5 +1,25 @@
 // Private practice-only web push module. No minors' notes or identities in payload.
 import {generateVapidKey,vapidPublicKey,send as pushSend} from 'jsr:@daaku/webpush@0.2.0';
+
+// Hosted Edge Runtime may predate the new typed-array Base64 APIs.
+// Webpush 0.2.0 uses base64url encoding/decoding; keep native APIs when present.
+const bytesCtor=Uint8Array as any;
+if(typeof bytesCtor.fromBase64!=='function'){
+ Object.defineProperty(bytesCtor,'fromBase64',{configurable:true,writable:true,value:(input:string,opts:{alphabet?:string}={})=>{
+  const encoded=opts.alphabet==='base64url'?input.replace(/-/g,'+').replace(/_/g,'/'):input;
+  return Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));
+ }});
+}
+if(typeof (Uint8Array.prototype as any).toBase64!=='function'){
+ Object.defineProperty(Uint8Array.prototype,'toBase64',{configurable:true,writable:true,value:function(this:Uint8Array,opts:{alphabet?:string,omitPadding?:boolean}={}){
+  let binary='';
+  for(let i=0;i<this.length;i+=8192)binary+=String.fromCharCode(...this.subarray(i,i+8192));
+  let encoded=btoa(binary);
+  if(opts.alphabet==='base64url')encoded=encoded.replace(/\+/g,'-').replace(/\//g,'_');
+  return opts.omitPadding?encoded.replace(/=+$/,''):encoded;
+ }});
+}
+
 const idPattern=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 async function hash(input:string){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(input));return [...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 function validEndpoint(raw:unknown){
@@ -91,12 +111,17 @@ export async function pushCron(request:Request,db:any,send:(x:any,s?:number)=>Re
   }
  }
  let studentReminders={providerAccepted:0,attempted:0};
+ let studentRemindersOk=true;
  // Existing secure scheduled job dispatches student reminders as well.
  // Failure must not block therapist delivery and never reveal identity in logs.
  try{studentReminders=await dispatchStudentReminders(db,config);}catch{
+  studentRemindersOk=false;
   console.error('STUDENT_REMINDER_DISPATCH_FAILED');
  }
- return send({ok:true,providerAccepted:accepted,retryScheduled:retry,studentReminders});
+ const publicKey=await vapidPublicKey(config.vapid_jwk);
+ const pushConfigReady=typeof publicKey==='string'&&/^[A-Za-z0-9_-]{87}$/.test(publicKey);
+ console.log('ILDAN_PUSH_RUNTIME_CHECK',JSON.stringify({pushConfigReady,studentRemindersOk}));
+ return send({ok:pushConfigReady&&studentRemindersOk,pushConfigReady,studentRemindersOk,providerAccepted:accepted,retryScheduled:retry,studentReminders});
 }
 export async function pushMember(name:string,request:Request,db:any,uid:string,role:string,
  send:(x:any,s?:number)=>Response,body:(r:Request)=>Promise<any>){
