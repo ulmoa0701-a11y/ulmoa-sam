@@ -67,7 +67,7 @@ export async function setupStudentReminderPanel({api,toast}){
    reg=await navigator.serviceWorker.getRegistration('./');
    sub=reg?await reg.pushManager.getSubscription():null;
    linked=false;
-   if(sub)linked=(r.subscriptions||[]).some(x=>x.endpointHash===await hash(sub.endpoint));
+   if(sub){const currentHash=await hash(sub.endpoint);linked=(r.subscriptions||[]).some(x=>x.endpointHash===currentHash);}
    enable.hidden=linked&&r.enabled&&Notification.permission==='granted';
    disable.hidden=!r.enabled&&!linked;
    test.hidden=!linked||Notification.permission!=='granted';
