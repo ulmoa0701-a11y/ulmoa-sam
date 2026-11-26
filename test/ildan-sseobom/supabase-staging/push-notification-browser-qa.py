@@ -28,6 +28,7 @@ try:
      page.locator('#pushEnable').click()
      page.wait_for_function("window.__calls.some(x=>x.path==='push-subscribe')",timeout=10000)
      page.wait_for_function("!document.querySelector('#pushTest').hidden",timeout=10000)
+     assert page.evaluate("window.__permissionRequests===1")
      assert page.evaluate("window.__lastToast.includes('알림을 켰어요')")
      page.locator('#pushTest').click()
      page.wait_for_function("window.__calls.some(x=>x.path==='push-test')",timeout=10000)
@@ -41,6 +42,7 @@ try:
      page.locator('#studentReminderEnable').click()
      page.wait_for_function("window.__calls.some(x=>x.path==='student-reminder-subscribe')",timeout=10000)
      page.wait_for_function("!document.querySelector('#studentReminderTest').hidden",timeout=10000)
+     assert page.evaluate("window.__permissionRequests===1")
      assert page.evaluate("window.__state.student.enabled===true")
      assert page.evaluate("window.__lastToast.includes('알림을 켰어')")
      page.locator('#studentReminderTest').click()
@@ -51,6 +53,22 @@ try:
      results.append(f'{width}px student: enable → daily time save → test → disable PASS')
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+3'),('horizontal overflow',width,role)
     assert not issues,issues
+    page.close()
+  for width in (390,1440):
+   for role in ('therapist','student'):
+    page=browser.new_page(viewport={'width':width,'height':900})
+    page.goto(base+'?role='+role+'&permission=denied',wait_until='domcontentloaded',timeout=30000)
+    page.wait_for_function("window.__ready===true || !!window.__bootError",timeout=20000)
+    assert not page.evaluate('window.__bootError'), page.evaluate('window.__bootError')
+    if role=='therapist':
+     assert page.locator('#pushEnable').is_disabled()
+     assert '주소창' in page.locator('#pushStatus').inner_text()
+    else:
+     assert page.locator('#studentReminderEnable').is_disabled()
+     assert '주소창' in page.locator('#studentReminderStatus').inner_text()
+    assert page.evaluate('window.__permissionRequests===0')
+    assert not page.evaluate("window.__calls.some(x=>x.path==='push-subscribe'||x.path==='student-reminder-subscribe')")
+    results.append(f'{width}px {role}: blocked permission gives clear settings guidance without retry prompt PASS')
     page.close()
   browser.close()
  print(json.dumps({'result':'PASS','checks':results},ensure_ascii=False))

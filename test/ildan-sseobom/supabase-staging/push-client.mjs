@@ -5,6 +5,7 @@ const decodeKey=key=>Uint8Array.from(atob(key.replace(/-/g,'+').replace(/_/g,'/'
 const label=()=>/iPhone|iPad|iPod/.test(navigator.userAgent)?'iPhone 홈 화면':/Android/.test(navigator.userAgent)?'안드로이드':'PC 브라우저';
 const endpointHash=async endpoint=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(endpoint)))).map(x=>x.toString(16).padStart(2,'0')).join('');
 let active=false;
+const permissionHelp='이 사이트의 알림이 차단되어 있어요. 주소창 왼쪽의 사이트 정보 → 권한 → 알림을 허용한 뒤 새로고침해 주세요. 홈 화면 앱에서 요청이 멈추면 일반 브라우저 탭으로 열어 주세요.';
 export async function setupPushPanel({api,toast}){
  const slot=document.getElementById('pushSettings');
  if(!slot)return;
@@ -36,16 +37,19 @@ export async function setupPushPanel({api,toast}){
    }else if(sub&&own&&Notification.permission==='granted'){
     status.textContent='이 기기에서 알림을 받을 준비가 됐습니다. 푸시 제공자와 휴대폰 상태에 따라 전달이 지연될 수 있습니다.';
    }else if(Notification.permission==='denied'){
-    status.textContent='알림이 차단되어 있어요. 브라우저 또는 휴대폰 설정에서 권한을 변경해야 합니다.';
+    status.textContent=permissionHelp;
+    enable.textContent='브라우저 설정에서 알림 허용 후 새로고침';
+    enable.disabled=true;
    }else status.textContent='이 기기에서 알림이 꺼져 있어요.';
    enable.hidden=own&&Notification.permission==='granted';
-   disable.hidden=!sub;test.hidden=!own;
+   disable.hidden=!sub;test.hidden=!own||Notification.permission!=='granted';
   }catch(e){status.textContent='알림 상태를 확인하지 못했습니다. 연결을 확인하고 다시 시도해 주세요.';}
  };
  enable.onclick=async()=>{
   if(active)return;active=true;enable.disabled=true;
   try{
    if(!supported())throw Error('이 기기에서는 푸시를 지원하지 않아요.');
+   if(Notification.permission==='denied')throw Error(permissionHelp);
    // Immediately after a real user gesture, not on page load.
    const permission=await Notification.requestPermission();
    if(permission!=='granted')throw Error('알림 권한이 허용되지 않았어요.');
