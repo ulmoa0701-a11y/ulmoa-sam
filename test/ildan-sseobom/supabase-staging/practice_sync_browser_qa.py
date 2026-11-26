@@ -181,7 +181,7 @@ with sync_playwright() as p:
   # Old IndexedDB records in the same student's browser also support edit-in-place.
   page.evaluate("""async(uid)=>{
    const m=await import('./trial-media.mjs');
-   await m.savePracticeRecord(uid,'student',{date:'2026-10-15',note:'이전 기기 기록'});
+   await m.savePracticeRecord(uid,'student',{date:new Date().toISOString().slice(0,10),note:'이전 기기 기록'});
   }""",student)
   page.reload(wait_until='domcontentloaded')
   page.locator('[data-workspace-target="history"]').click()
