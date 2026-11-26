@@ -54,7 +54,7 @@ export async function setupStudentReminderPanel({api,toast}){
    if(!history.length){
     const empty=document.createElement('p');empty.className='muted';empty.textContent='아직 알림이 없어.';historyBox.append(empty);
    }else for(const item of history){
-    if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(item.day||''))continue;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(item.day||''))continue;
     const row=document.createElement('p');row.className='reminder-history-entry';
     row.textContent=item.day+' · '+(item.providerAccepted?'기기로 발송 요청함':'전송이 확인되지 않음');
     historyBox.append(row);
