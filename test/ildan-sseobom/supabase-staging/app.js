@@ -14,6 +14,7 @@ import {renderWritingCalendar as mountWritingCalendar} from './writing-calendar.
 import {mountDailyCheckins} from './daily-checkin.mjs';
 import {feedbackMarkup,installFeedbackActions} from './feedback-ui.mjs';
 import {setupPushPanel} from './push-client.mjs';
+import {setupStudentReminderPanel} from './student-reminders.mjs';
 const CFG=window.ILDAN_SUPABASE_CONFIG||{};
 const configured=Boolean(/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(CFG.url||'')
  && /^sb_publishable_|^eyJ/.test(CFG.publishableKey||'')
@@ -876,12 +877,13 @@ function studentHome(){
  const items=isParent?[
   ['write','✎','1분 생활 메모','필요할 때만'],['daily','☾','하루 상태 체크','횟수만'],['calendar','▦','기록 달력','월·주·일'],['history','▤','내 기록','내가 쓴 내용']
  ]:[
-  ['write','✎','기록하기','한 장이면 충분해'],['daily','☾','하루 상태 체크','횟수만'],['writingCalendar','▦','나의 기록 달력','날짜·횟수·분량'],['history','▤','내 기록','지난 기록 확인'],['coding','⌘','코딩 실험실','원하면 탐색하기']
+  ['write','✎','기록하기','한 장이면 충분해'],['daily','☾','하루 상태 체크','횟수만'],['reminders','🔔','알림 설정','시간·휴대폰'],['writingCalendar','▦','나의 기록 달력','날짜·횟수·분량'],['history','▤','내 기록','지난 기록 확인'],['coding','⌘','코딩 실험실','원하면 탐색하기']
  ];
  app.innerHTML=hero(isParent?'필요할 때만 짧게 남겨요.':'내가 남기고 싶은 한 페이지.',isParent?'모든 변화를 적을 필요는 없어요. 기억에 남은 한 가지면 충분해요.':'매일 써야 하는 숙제는 아니야. 기록한 내용은 기본적으로 나만 볼 수 있어.')+
  `<div class="workspace-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">01</span></div>${workspaceNav(items,activeView)}<div class="sidebar-note"><span class="privacy-dot" aria-hidden="true"></span>공유는 내가 선택해요.<br><small>혼자만 볼 수도 있어요.</small></div></aside><div class="workspace-content">
  <section data-workspace-view="write" class="workspace-section"><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>${isParent?'observation.note':'my-note.md'}</span><span class="editor-status">NEW NOTE</span></div><div class="editor-paper"><span class="tag">01 / WRITE</span><h2>${isParent?'간단한 생활 메모':'새 페이지'}</h2><p>${isParent?'한 가지를 짧게 적어도 충분해요. 치료사에게 전달하지 않아도 돼요.':'글이나 그림으로 남겨도 되고, 그냥 둘러봐도 돼.'}</p>${dataForm(me.role)}</div></section>
  <section data-workspace-view="daily" id="dailyCheckin" class="workspace-section" hidden></section>
+ ${isParent?'':`<section data-workspace-view="reminders" id="studentReminderPanel" class="workspace-section" hidden></section>`}
  ${isParent?`<section data-workspace-view="calendar" id="parentCalendar" class="workspace-section" hidden>${parentCalendarHTML()}</section>`:`<section data-workspace-view="writingCalendar" id="writingCalendar" class="workspace-section" hidden></section>`}
  <section data-workspace-view="history" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>my-notes.json</span></div><div class="editor-paper"><span class="tag">02 / ARCHIVE</span><h2>${isParent?'내 생활 메모':'내 서랍'}</h2><p>${isParent?'내가 남긴 메모만 보여요.':'내가 남긴 페이지들을 모아두는 곳이야.'}</p><div id="recordsHere">${recordCards()}</div>${records.some(r=>r.local&&!r.syncedTo)?`<div class="device-transfer-all"><button id="transferAllDevice" class="button">기기 임시 기록 모두 서버로 복사</button><p>원본을 지우지 않고 비공개 복사합니다. 담당 치료사에게는 따로 공유해야 보여요.</p></div>`:''}${deviceOriginals().length?`<details class="device-originals"><summary>기기에 남긴 이전 원본 ${deviceOriginals().length}건</summary><p>서버로 복사한 뒤에도 원본은 자동 삭제하지 않습니다.</p></details>`:''} </div></section>
  ${isParent?'':`<section data-workspace-view="coding" class="workspace-section" hidden><div class="editor-bar"><span class="ide-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>studio / playground</span></div><div class="editor-paper"><span class="tag">OPTIONAL / PLAY</span><h2>코딩 실험실</h2><p>조건을 바꿔 결과를 확인하는 작은 실험 공간이야. 기록하지 않고 그냥 놀아도 돼.</p>${codingMarkup()}<details class="optional-fields"><summary>간단한 선택 예시 살펴보기 <small>선택</small></summary><div class="optional-wrap">${situationMarkup()}</div></details></div></section>`}
@@ -889,7 +891,7 @@ function studentHome(){
  wireEntryForm(isParent);attachShares();bindWorkspace();
  if(editingPracticeRecord)populatePracticeEditor(isParent);
  paintSketches();if(isParent)renderParentCalendar();else renderWritingCalendar();
- if(!isParent){attachSituation();attachCoding();}
+ if(!isParent){attachSituation();attachCoding();void setupStudentReminderPanel({api,toast});}
  void refreshDailyCheckins();
 
 }
@@ -1135,8 +1137,10 @@ document.addEventListener('visibilitychange',()=>{
  if(document.visibilityState==='visible'&&me?.role==='therapist'&&notifyRefreshVisible)void notifyRefreshVisible();
 });
 if(new URLSearchParams(location.search).has('alerts')){activeView='alerts';history.replaceState(null,'',location.pathname+location.hash);}
+if(new URLSearchParams(location.search).has('reminder')){activeView='write';history.replaceState(null,'',location.pathname+location.hash);}
 navigator.serviceWorker?.addEventListener('message',event=>{
  if(event.data?.kind==='ildan-open-alerts'){activeView='alerts';if(me?.role==='therapist'){activateWorkspace('alerts');void loadNotifications(true);}}
+ if(event.data?.kind==='ildan-open-writing'&&me?.role==='student'){activeView='write';activateWorkspace('write');}
 });
 installFeedbackActions(app,{isTherapist:()=>me?.role==='therapist',api,refresh:()=>dashboard(),toast,loading});
 (async()=>{await refreshAuth()})();
