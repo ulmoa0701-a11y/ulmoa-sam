@@ -51,6 +51,7 @@ jobs:
         run: |
           python3 -m pip install --quiet playwright==1.57.0
           python3 test/ildan-sseobom/supabase-staging/student-reminder-browser-qa.py
+          python3 test/ildan-sseobom/supabase-staging/push-notification-browser-qa.py
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
