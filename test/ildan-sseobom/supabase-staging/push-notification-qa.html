@@ -28,9 +28,10 @@ Object.defineProperty(navigator,'serviceWorker',{configurable:true,value:{
  async register(path,options){window.__workerRegistration={path,options};return registration;}
 }});
 Object.defineProperty(window,'PushManager',{configurable:true,value:function PushManager(){}});
+window.__permissionRequests=0;
 Object.defineProperty(window,'Notification',{configurable:true,value:{
- permission:'default',
- async requestPermission(){window.Notification.permission='granted';return 'granted';}
+ permission:new URLSearchParams(location.search).get('permission')==='denied'?'denied':'default',
+ async requestPermission(){window.__permissionRequests++;window.Notification.permission='granted';return 'granted';}
 }});
 async function endpointHash(value){
  return [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))]
