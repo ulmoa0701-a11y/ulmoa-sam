@@ -119,6 +119,10 @@ export async function pushMember(name:string,request:Request,db:any,uid:string,r
    .select('id,therapist_id').eq('endpoint_hash',endpointHash).maybeSingle();
   if(oe)throw Error('PUSH_OWNER_LOOKUP_FAILED');
   if(other&&other.therapist_id!==uid)return send({error:'다른 계정에 연결된 기기입니다.'},409);
+  const {data:studentDevice,error:studentDeviceError}=await db.from('ildan_student_reminder_subscriptions')
+   .select('id').eq('endpoint_hash',endpointHash).maybeSingle();
+  if(studentDeviceError)throw Error('CROSS_ROLE_PUSH_OWNER_LOOKUP_FAILED');
+  if(studentDevice)return send({error:'학생 알림에 연결된 기기는 치료사 푸시에 중복 등록할 수 없습니다.'},409);
   if(!other){
    const {count,error:ce}=await db.from('ildan_push_subscriptions')
     .select('id',{head:true,count:'exact'}).eq('therapist_id',uid);
@@ -201,8 +205,14 @@ async function dispatchStudentReminders(db:any,config:any){
    .select('student_id').maybeSingle();
   if(ce||!claimed)continue;
   attempted++;
+  const {error:historyError}=await db.from('ildan_student_reminder_history').upsert({
+   student_id:pref.student_id,day:clock.day,attempted_at:new Date().toISOString(),
+   provider_accepted_count:0
+  },{onConflict:'student_id,day'});
+  if(historyError)throw Error('STUDENT_REMINDER_HISTORY_FAILED');
+  let perStudentAccepted=0;
   for(const sub of subs){
-   try{await sendOne(config,sub,'student-daily');providerAccepted++;}
+   try{await sendOne(config,sub,'student-daily');providerAccepted++;perStudentAccepted++;}
    catch(e){
     if((e as any)?.permanent===true||[404,410].includes(Number((e as any)?.statusCode))){
      await db.from('ildan_student_reminder_subscriptions').delete().eq('id',sub.id).eq('student_id',pref.student_id);
@@ -210,6 +220,16 @@ async function dispatchStudentReminders(db:any,config:any){
     // Daily reminders are best-effort; no noisy repeated retry messages.
    }
   }
+  if(perStudentAccepted){
+   await db.from('ildan_student_reminder_history')
+    .update({provider_accepted_count:perStudentAccepted})
+    .eq('student_id',pref.student_id).eq('day',clock.day);
+  }
+ }
+ // Purge anonymous/generic reminder history beyond 30 days, once daily.
+ if(clock.time==='08:00'){
+  const cutoff=new Date(Date.now()-31*86400000).toISOString().slice(0,10);
+  await db.from('ildan_student_reminder_history').delete().lt('day',cutoff);
  }
  return {attempted,providerAccepted};
 }
@@ -217,18 +237,21 @@ export async function studentReminderMember(name:string,request:Request,db:any,u
  send:(x:any,s?:number)=>Response,body:(r:Request)=>Promise<any>){
  if(role!=='student')return send({error:'학생 계정 전용입니다.'},403);
  if(name==='student-reminder-settings'&&request.method==='GET'){
-  const [{data:p,error:pe},{data:subs,error:se}]=await Promise.all([
+  const [{data:p,error:pe},{data:subs,error:se},{data:history,error:he}]=await Promise.all([
    db.from('ildan_student_reminder_preferences')
     .select('enabled,local_time,timezone,last_attempt_day').eq('student_id',uid).maybeSingle(),
    db.from('ildan_student_reminder_subscriptions')
-    .select('id,device_label,endpoint_hash').eq('student_id',uid).limit(PUBLIC_DEVICE_LIMIT)
+    .select('id,device_label,endpoint_hash').eq('student_id',uid).limit(PUBLIC_DEVICE_LIMIT),
+   db.from('ildan_student_reminder_history')
+    .select('day,provider_accepted_count').eq('student_id',uid).order('day',{ascending:false}).limit(14)
   ]);
-  if(pe||se)throw Error('STUDENT_REMINDER_READ_FAILED');
+  if(pe||se||he)throw Error('STUDENT_REMINDER_READ_FAILED');
   const cfg=await serverConfig(db,true);
   return send({enabled:p?.enabled===true,time:p?.local_time||'19:00',
    timezone:LOCAL_ZONE,deviceCount:subs?.length||0,
    subscriptions:(subs||[]).map((x:any)=>({id:x.id,deviceLabel:x.device_label,endpointHash:x.endpoint_hash})),
    publicKey:await vapidPublicKey(cfg.vapid_jwk),
+   history:(history||[]).map((x:any)=>({day:x.day,providerAccepted:x.provider_accepted_count>0})),
    note:'알림은 선택이에요. 실제 내용이나 이름은 휴대폰 알림에 표시되지 않아요.'});
  }
  if(name==='student-reminder-settings'&&request.method==='POST'){
@@ -254,6 +277,10 @@ export async function studentReminderMember(name:string,request:Request,db:any,u
    .select('id,student_id').eq('endpoint_hash',endpointHash).maybeSingle();
   if(oe)throw Error('STUDENT_PUSH_OWNER_FAILED');
   if(other&&other.student_id!==uid)return send({error:'이 기기는 다른 계정에 연결돼 있습니다.'},409);
+  const {data:therapistDevice,error:therapistDeviceError}=await db.from('ildan_push_subscriptions')
+   .select('id').eq('endpoint_hash',endpointHash).maybeSingle();
+  if(therapistDeviceError)throw Error('CROSS_ROLE_PUSH_OWNER_LOOKUP_FAILED');
+  if(therapistDevice)return send({error:'치료사 계정에서 사용하는 기기는 학생 알림에 중복 등록할 수 없습니다.'},409);
   if(!other){
    const {count,error:ce}=await db.from('ildan_student_reminder_subscriptions')
     .select('id',{head:true,count:'exact'}).eq('student_id',uid);
