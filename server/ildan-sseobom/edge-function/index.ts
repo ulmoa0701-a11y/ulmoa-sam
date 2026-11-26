@@ -4,7 +4,7 @@
 // membership checks both matter: admin client BYPASSES RLS.
 import {createClient} from 'npm:@supabase/supabase-js@2';
 import {validateEntry,sharedSelection,validateSessionEntry} from './record-contract.mjs';
-import {pushMember,pushCron} from './push-service.ts';
+import {pushMember,pushCron,studentReminderMember} from './push-service.ts';
 import {practiceExtras} from './practice-extras.ts';
 
 const encoder=new TextEncoder(),decoder=new TextDecoder();
@@ -94,7 +94,7 @@ async function openJSON(nonce:string,ciphertext:string){
 }
 const requireText=(o:Obj,key:string)=>typeof o[key]==='string'?String(o[key]):'';
 const roles=new Set(['student','parent','therapist']);
-const endpoints=new Set(['test-therapist-signup','test-therapist-delete','me','records','share','unshare','session-notes','students','accounts','invites','claim-invite','invite-preview','invite-register','delete-record','revoke-invite','drive/status','health','practice-records','practice-media-sign','practice-share','practice-unshare','practice-delete','practice-update','practice-notifications','practice-notification-read','practice-feedback','practice-feedback-delete','practice-checkins','practice-checkin-delete','push-config','push-status','push-subscribe','push-unsubscribe','push-test','push-dispatch']);
+const endpoints=new Set(['test-therapist-signup','test-therapist-delete','me','records','share','unshare','session-notes','students','accounts','invites','claim-invite','invite-preview','invite-register','delete-record','revoke-invite','drive/status','health','practice-records','practice-media-sign','practice-share','practice-unshare','practice-delete','practice-update','practice-notifications','practice-notification-read','practice-feedback','practice-feedback-delete','practice-checkins','practice-checkin-delete','push-config','push-status','push-subscribe','push-unsubscribe','push-test','push-dispatch','student-reminder-settings','student-reminder-subscribe','student-reminder-unsubscribe','student-reminder-test']);
 const getRole=async(userDb:any,id:string)=>{
  const {data,error}=await userDb.from('ildan_members').select('user_id,role,therapist_id,student_id,display_alias').eq('user_id',id).maybeSingle();
  if(error)throw Error('ROLE_LOOKUP_FAILED');
@@ -322,6 +322,10 @@ export async function handle(request:Request):Promise<Response>{
   if(apiName.startsWith('push-')){
    if(!sandboxSignupAllowed())return send({error:'연습 환경 전용입니다.'},403);
    return pushMember(apiName,request,admin,uid,member.role,send,body);
+  }
+  if(apiName.startsWith('student-reminder-')){
+   if(!sandboxSignupAllowed())return send({error:'개발 검증용 알림 기능입니다.'},403);
+   return studentReminderMember(apiName,request,admin,uid,member.role,send,body);
   }
   if(apiName==='students'&&request.method==='GET'){
    if(member.role!=='therapist')return send({error:'치료사 전용입니다.'},403);
