@@ -1,0 +1,19 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>일단써봄 학생 알림 UI 자동 테스트 - synthetic only</title>
+<link rel="stylesheet" href="./style.css"></head>
+<body><main style="max-width:800px;margin:24px auto;padding:12px;">
+<section id="studentReminderPanel" class="workspace-section"></section></main>
+<script type="module">
+import {setupStudentReminderPanel} from './student-reminders.mjs';
+let state={time:'19:00',enabled:false,subscriptions:[],
+ history:[{day:'2026-11-20',providerAccepted:true}]};
+window.__reminderCalls=[];
+window.__reminderApi=async (path,opts={})=>{
+ window.__reminderCalls.push({path,method:opts.method||'GET',body:opts.body||null});
+ if(path!=='student-reminder-settings')throw Error('Synthetic fixture blocks push/subscription network requests');
+ if(opts.method==='POST'){state={...state,...opts.body};return {ok:true};}
+ return {...state,publicKey:null,deviceCount:0};
+};
+setupStudentReminderPanel({api:window.__reminderApi,toast:m=>{window.__lastToast=m;}});
+</script></body></html>

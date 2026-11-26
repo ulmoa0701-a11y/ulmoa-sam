@@ -1,0 +1,58 @@
+name: Ildan Student Reminder Browser and Edge Safety QA
+on:
+  push:
+    branches:
+      - feature/ildan-student-reminder-webpush-20261126
+    paths:
+      - 'test/ildan-sseobom/supabase-staging/**'
+      - 'server/ildan-sseobom/**'
+      - '.github/workflows/ildan-student-reminder-qa.yml'
+  pull_request:
+    paths:
+      - 'test/ildan-sseobom/supabase-staging/**'
+      - 'server/ildan-sseobom/**'
+      - '.github/workflows/ildan-student-reminder-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  student-reminder:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - name: JavaScript syntax and minimum security checks
+        run: |
+          node --check test/ildan-sseobom/supabase-staging/app.js
+          node --check test/ildan-sseobom/supabase-staging/student-reminders.mjs
+          node --check test/ildan-sseobom/supabase-staging/push-sw.js
+          node <<'JS'
+          const fs=require('node:fs'),assert=require('node:assert/strict');
+          const root='test/ildan-sseobom/supabase-staging/';
+          const app=fs.readFileSync(root+'app.js','utf8');
+          const ui=fs.readFileSync(root+'student-reminders.mjs','utf8');
+          const worker=fs.readFileSync(root+'push-sw.js','utf8');
+          const server=fs.readFileSync('server/ildan-sseobom/edge-function/push-service.ts','utf8');
+          const sql=fs.readFileSync('server/ildan-sseobom/migrations/20261126000100_student_reminder_push.sql','utf8');
+          assert(app.includes("'reminders','🔔','알림함 · 설정'"));
+          assert(app.includes('setupStudentReminderPanel({api,toast})'));
+          assert(ui.includes('Notification.requestPermission()'));
+          assert(ui.includes("api('student-reminder-unsubscribe'"));
+          assert(ui.includes("api('student-reminder-test'"));
+          assert(server.includes("if(role!=='student')"));
+          assert(server.includes('dispatchStudentReminders(db,config)'));
+          assert(server.includes('last_attempt_day'));
+          assert(sql.includes('ENABLE ROW LEVEL SECURITY'));
+          assert(sql.includes('FROM PUBLIC,anon,authenticated'));
+          assert(!/diagnosis|studentName|recordText|studentNote/.test(worker));
+          console.log('PASS: opt-in, student authorization, RLS, generic lockscreen payload');
+          JS
+      - name: Run isolated Chrome UI QA without requesting permissions
+        run: |
+          python3 -m pip install --quiet playwright==1.57.0
+          python3 test/ildan-sseobom/supabase-staging/student-reminder-browser-qa.py
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Type-check actual deployed Edge sources and push JSR imports
+        run: deno check server/ildan-sseobom/edge-function/index.ts
