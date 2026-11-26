@@ -24,6 +24,10 @@ export async function setupStudentReminderPanel({api,toast}){
    <button id="studentReminderTest" type="button" class="button-ghost" hidden>지금 테스트 알림 보내기</button>
    <button id="studentReminderDisable" type="button" class="button-ghost" hidden>알림 끄기</button>
   </div><p id="studentReminderStatus" role="status" aria-live="polite" class="muted">알림 상태를 확인하고 있어.</p>
+  <div class="reminder-inbox"><h3>🔔 알림함</h3>
+    <p class="muted">최근 14번의 알림 발송 기록이야. 휴대폰에서 실제 수신했는지는 확인할 수 없어.</p>
+    <div id="studentReminderHistory" aria-live="polite"><p>아직 알림이 없어.</p></div>
+  </div>
   <details class="optional-fields"><summary>휴대폰에서 알림이 안 뜨면?</summary><div class="optional-wrap">
    <p>안드로이드에서는 크롬·삼성 인터넷에서 알림을 허용해 줘. 카카오톡 안에서 열었다면 기본 브라우저로 다시 열어 줘.</p>
    <p>아이폰에서는 사파리로 열고 <b>홈 화면에 추가</b>한 뒤, 추가한 일단써봄 아이콘으로 들어와서 알림을 켜야 해.</p>
@@ -37,6 +41,7 @@ export async function setupStudentReminderPanel({api,toast}){
  const disable=slot.querySelector('#studentReminderDisable');
  const test=slot.querySelector('#studentReminderTest');
  const time=slot.querySelector('#studentReminderTime');
+ const historyBox=slot.querySelector('#studentReminderHistory');
  let preference={enabled:false,time:'19:00',publicKey:null,subscriptions:[]};
  let reg=null,sub=null,linked=false;
  const validTime=()=>time.value>='08:00'&&time.value<='22:00'&&/^\d{2}:\d{2}$/.test(time.value);
@@ -44,6 +49,16 @@ export async function setupStudentReminderPanel({api,toast}){
   try{
    const r=await api('student-reminder-settings');
    preference=r;time.value=r.time||'19:00';
+   const history=Array.isArray(r.history)?r.history:[];
+   historyBox.replaceChildren();
+   if(!history.length){
+    const empty=document.createElement('p');empty.className='muted';empty.textContent='아직 알림이 없어.';historyBox.append(empty);
+   }else for(const item of history){
+    if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(item.day||''))continue;
+    const row=document.createElement('p');row.className='reminder-history-entry';
+    row.textContent=item.day+' · '+(item.providerAccepted?'기기로 발송 요청함':'전송이 확인되지 않음');
+    historyBox.append(row);
+   }
    if(!available()){
     enable.disabled=true;disable.hidden=!r.enabled;test.hidden=true;
     status.textContent='이 브라우저에서 휴대폰 알림을 쓸 수 없어. 크롬 또는 홈 화면에 추가한 앱에서 열어 줘.';
