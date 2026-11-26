@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>일단써봄 푸시 켜기 흐름 QA · synthetic only</title>
+<link rel="stylesheet" href="./style.css"></head>
+<body><main style="max-width:800px;margin:24px auto;padding:12px">
+<section id="pushSettings" class="workspace-section"></section>
+<section id="studentReminderPanel" class="workspace-section"></section>
+</main>
+<script type="module">
+const role=new URLSearchParams(location.search).get('role')||'therapist';
+const endpoint='https://fcm.googleapis.com/fcm/send/synthetic-endpoint-for-qa-only';
+const keys={p256dh:'A'.repeat(87),auth:'B'.repeat(22)};
+let currentSubscription=null;
+const syntheticSubscription={
+ endpoint,keys,
+ toJSON(){return {endpoint,keys};},
+ async unsubscribe(){currentSubscription=null;return true;}
+};
+const registration={pushManager:{
+ async getSubscription(){return currentSubscription;},
+ async subscribe(options){
+  if(!options?.userVisibleOnly)throw Error('userVisibleOnly missing');
+  currentSubscription=syntheticSubscription;return currentSubscription;
+ }
+}};
+Object.defineProperty(navigator,'serviceWorker',{configurable:true,value:{
+ async getRegistration(){return registration;},
+ async register(path,options){window.__workerRegistration={path,options};return registration;}
+}});
+Object.defineProperty(window,'PushManager',{configurable:true,value:function PushManager(){}});
+Object.defineProperty(window,'Notification',{configurable:true,value:{
+ permission:'default',
+ async requestPermission(){window.Notification.permission='granted';return 'granted';}
+}});
+async function endpointHash(value){
+ return [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))]
+  .map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+const publicKey='AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA';
+window.__calls=[];
+window.__state={teacherLinked:false,student:{enabled:false,time:'19:00',subscriptions:[],history:[]}};
+window.__api=async(path,options={})=>{
+ const method=options.method||'GET',body=options.body||null;
+ window.__calls.push({path,method,body});
+ if(role==='therapist'){
+  if(path==='push-status')return {subscriptions:window.__state.teacherLinked?[{endpointHash:await endpointHash(endpoint)}]:[]};
+  if(path==='push-config')return {publicKey};
+  if(path==='push-subscribe'){window.__state.teacherLinked=true;return {ok:true};}
+  if(path==='push-test')return {ok:true,providerAccepted:true};
+  if(path==='push-unsubscribe'){window.__state.teacherLinked=false;return {ok:true};}
+ }
+ if(role==='student'){
+  if(path==='student-reminder-settings'){
+   if(method==='POST'){
+    window.__state.student.enabled=!!body.enabled;
+    window.__state.student.time=body.time;
+    return {ok:true};
+   }
+   return {...window.__state.student,publicKey,history:[]};
+  }
+  if(path==='student-reminder-subscribe'){
+   window.__state.student.subscriptions=[{endpointHash:await endpointHash(endpoint)}];
+   return {ok:true};
+  }
+  if(path==='student-reminder-test')return {ok:true,providerAccepted:true};
+  if(path==='student-reminder-unsubscribe'){
+   window.__state.student.subscriptions=[];return {ok:true};
+  }
+ }
+ throw Error('Unexpected synthetic API request: '+path);
+};
+(async()=>{
+ if(role==='therapist'){
+  const {setupPushPanel}=await import('./push-client.mjs');
+  await setupPushPanel({api:window.__api,toast:m=>{window.__lastToast=m;}});
+ }else if(role==='student'){
+  const {setupStudentReminderPanel}=await import('./student-reminders.mjs');
+  await setupStudentReminderPanel({api:window.__api,toast:m=>{window.__lastToast=m;}});
+ }else throw Error('Unknown role');
+ window.__ready=true;
+})().catch(e=>{window.__bootError=String(e);});
+</script></body></html>
