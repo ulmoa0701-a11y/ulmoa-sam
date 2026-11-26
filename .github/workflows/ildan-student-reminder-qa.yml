@@ -57,3 +57,6 @@ jobs:
           deno-version: v2.x
       - name: Type-check actual deployed Edge sources and push JSR imports
         run: deno check server/ildan-sseobom/edge-function/index.ts
+
+      - name: Test actual Web Push crypto with missing native Base64 APIs
+        run: deno test server/ildan-sseobom/edge-function/push-runtime-test.ts
