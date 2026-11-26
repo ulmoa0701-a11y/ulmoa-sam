@@ -8,6 +8,7 @@ const hash=async text=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',n
 const deviceLabel=()=>/iPhone|iPad|iPod/.test(navigator.userAgent)?'내 아이폰':
   /Android/.test(navigator.userAgent)?'내 안드로이드':'내 컴퓨터';
 let busy=false;
+const permissionHelp='이 사이트의 알림이 차단되어 있어. 주소창 왼쪽의 사이트 정보 → 권한 → 알림을 허용한 뒤 새로고침해 줘. 홈 화면 앱에서 요청이 멈추면 일반 브라우저 탭으로 열어 줘.';
 export async function setupStudentReminderPanel({api,toast}){
  const slot=document.getElementById('studentReminderPanel');
  if(!slot)return;
@@ -68,6 +69,13 @@ export async function setupStudentReminderPanel({api,toast}){
    sub=reg?await reg.pushManager.getSubscription():null;
    linked=false;
    if(sub){const currentHash=await hash(sub.endpoint);linked=(r.subscriptions||[]).some(x=>x.endpointHash===currentHash);}
+   if(Notification.permission==='denied'){
+    enable.hidden=false;enable.disabled=true;
+    enable.textContent='브라우저 설정에서 알림 허용 후 새로고침';
+    disable.hidden=!r.enabled&&!linked;test.hidden=true;
+    status.textContent=permissionHelp;
+    return;
+   }
    enable.hidden=linked&&r.enabled&&Notification.permission==='granted';
    disable.hidden=!r.enabled&&!linked;
    test.hidden=!linked||Notification.permission!=='granted';
@@ -89,6 +97,7 @@ export async function setupStudentReminderPanel({api,toast}){
  });
  enable.onclick=()=>{
   if(busy)return;
+  if(Notification.permission==='denied'){status.textContent=permissionHelp;return;}
   // This browser permission prompt occurs immediately in a real user click.
   const request=available()?Notification.requestPermission():Promise.resolve('unsupported');
   return run(enable,async()=>{
