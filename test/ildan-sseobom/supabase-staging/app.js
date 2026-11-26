@@ -877,7 +877,7 @@ function studentHome(){
  const items=isParent?[
   ['write','✎','1분 생활 메모','필요할 때만'],['daily','☾','하루 상태 체크','횟수만'],['calendar','▦','기록 달력','월·주·일'],['history','▤','내 기록','내가 쓴 내용']
  ]:[
-  ['write','✎','기록하기','한 장이면 충분해'],['daily','☾','하루 상태 체크','횟수만'],['reminders','🔔','알림 설정','시간·휴대폰'],['writingCalendar','▦','나의 기록 달력','날짜·횟수·분량'],['history','▤','내 기록','지난 기록 확인'],['coding','⌘','코딩 실험실','원하면 탐색하기']
+  ['write','✎','기록하기','한 장이면 충분해'],['daily','☾','하루 상태 체크','횟수만'],['reminders','🔔','알림함 · 설정','시간·휴대폰'],['writingCalendar','▦','나의 기록 달력','날짜·횟수·분량'],['history','▤','내 기록','지난 기록 확인'],['coding','⌘','코딩 실험실','원하면 탐색하기']
  ];
  app.innerHTML=hero(isParent?'필요할 때만 짧게 남겨요.':'내가 남기고 싶은 한 페이지.',isParent?'모든 변화를 적을 필요는 없어요. 기억에 남은 한 가지면 충분해요.':'매일 써야 하는 숙제는 아니야. 기록한 내용은 기본적으로 나만 볼 수 있어.')+
  `<div class="workspace-shell"><aside class="workspace-sidebar"><div class="sidebar-label">EXPLORER <span class="sidebar-version">01</span></div>${workspaceNav(items,activeView)}<div class="sidebar-note"><span class="privacy-dot" aria-hidden="true"></span>공유는 내가 선택해요.<br><small>혼자만 볼 수도 있어요.</small></div></aside><div class="workspace-content">
